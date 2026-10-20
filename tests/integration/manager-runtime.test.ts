@@ -5,15 +5,16 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
-import { supportedNodeVersion } from '../../packages/cli/src/apply/executable.js'
+import { supportedNodeVersion, resolveBunExecutable } from '../../packages/cli/src/apply/executable.js'
 
-const bun = process.env.OMBELLE_BUN_EXECUTABLE ?? path.resolve('.artifacts/bun-tool/bun-windows-x64/bun.exe')
+let bun: string
 const probe = path.resolve('packages/cli/dist/runtime-probe.js')
 let root: string
 it.each([['v20.18.3',false],['v24.18.9',false],['v24.19.0',true],['v24.21.0',true],['v25.0.0',false]])('checks supported Node version %s', (version, expected) => {
   expect(supportedNodeVersion(version as string)).toBe(expected)
 })
 beforeAll(async () => {
+  bun = await resolveBunExecutable()
   root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-runtime-'))
   await build({ entryPoints: ['packages/cli/src/apply/manager.ts'], outfile: probe, bundle: true, platform: 'node', format: 'esm', packages: 'external' })
 })
