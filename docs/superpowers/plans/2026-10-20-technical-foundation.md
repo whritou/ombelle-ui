@@ -116,15 +116,15 @@ expect((await compile(input)).artifacts.every(a => !a.content.includes('\r'))).t
 
 Test helpers introduced here: `createProject(kind: 'vite' | 'next'): Promise<string>` creates a disposable minimal supported pnpm app; `snapshotTree(root: string): Promise<Record<string,string>>` reads file hashes without writes. The upstream experiment uses these helpers before later project-planner tasks exist. Keep preparation writes outside the measured operation.
 
-- [ ] Write failing tests validating generated Button and theme items against documented upstream registry schemas, with exact content matching compiler artifacts and no Ombelle-only fields added to upstream items.
-- [ ] Run `pnpm exec vitest run packages/cli/test/registry.test.ts`; expect missing builder failures.
+- [x] Write failing tests validating generated Button and theme items against documented upstream registry schemas, with exact content matching compiler artifacts and no Ombelle-only fields added to upstream items.
+- [x] Run `pnpm exec vitest run packages/cli/test/registry.test.ts`; expect missing builder failures.
 
 ```ts
 expect(registryItemSchema.safeParse(buildRegistry(result).items.button).success).toBe(true)
 ```
-- [ ] Implement registry generation. Run the pinned documented upstream API against a temporary app and local HTTP registry; record resulting alias transforms, CSS changes, package operations, and unsupported planning behavior. Bind the server to loopback. Never point the probe at the user's app.
-- [ ] Record one decision: either a documented adapter supplies a safe inspectable transformation boundary, or Ombelle handles its narrow path/alias/CSS subset itself and retains standard registry transport compatibility. In either case retain Tasks 5–7 as the source of truth for planning/conflicts. Run `pnpm exec vitest run packages/cli/test/registry.test.ts tests/integration/upstream.test.ts`; require installable source and a written adapter result.
-- [ ] Commit as `feat: generate registry items and document upstream adapter boundary`.
+- [x] Implement registry generation. Run the pinned documented upstream API against a temporary app and local HTTP registry; record resulting alias transforms, CSS changes, package operations, and unsupported planning behavior. Bind the server to loopback. Never point the probe at the user's app.
+- [x] Record one decision: either a documented adapter supplies a safe inspectable transformation boundary, or Ombelle handles its narrow path/alias/CSS subset itself and retains standard registry transport compatibility. In either case retain Tasks 5–7 as the source of truth for planning/conflicts. Run `pnpm exec vitest run packages/cli/test/registry.test.ts tests/integration/upstream.test.ts`; require installable source and a written adapter result.
+- [x] Commit as `feat: generate registry items and document upstream adapter boundary`.
 
 ## Task 5: Read-only project inspection and component plans
 
