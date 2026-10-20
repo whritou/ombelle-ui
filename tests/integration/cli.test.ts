@@ -124,12 +124,12 @@ it('reports Yarn-specific dependency failure and recovery information', async ()
   await fs.rm(root + '/pnpm-lock.yaml')
   await fs.writeFile(root + '/yarn.lock', '# yarn lockfile\n')
   const pkg = JSON.parse(await fs.readFile(root + '/package.json', 'utf8'))
-  pkg.packageManager = 'yarn@4.63.1'
+  pkg.packageManager = 'yarn@4.18.1'
   await fs.writeFile(root + '/package.json', JSON.stringify(pkg))
   const preset = path.resolve('examples/preset.example.json')
   expect((await command(['init', '--preset', preset, '--cwd', root, '--yes'])).exitCode).toBe(0)
   const fake = root + '/yarn.cjs'
-  await fs.writeFile(fake, `if (process.argv[2] === '--version') process.stdout.write('4.63.1')\nelse process.exit(1)\n`)
+  await fs.writeFile(fake, `if (process.argv[2] === '--version') process.stdout.write('4.18.1')\nelse process.exit(1)\n`)
   const failed = await command(['add', 'button', '--cwd', root, '--yes'], {
     ...process.env,
     npm_execpath: fake,
@@ -147,7 +147,7 @@ it('rejects an unsupported Yarn executable before writing consumer source', asyn
   await fs.rm(root + '/pnpm-lock.yaml')
   await fs.writeFile(root + '/yarn.lock', '# yarn lockfile\n')
   const pkg = JSON.parse(await fs.readFile(root + '/package.json', 'utf8'))
-  pkg.packageManager = 'yarn@4.63.1'
+  pkg.packageManager = 'yarn@4.18.1'
   await fs.writeFile(root + '/package.json', JSON.stringify(pkg))
   const preset = path.resolve('examples/preset.example.json')
   expect((await command(['init', '--preset', preset, '--cwd', root, '--yes'])).exitCode).toBe(0)

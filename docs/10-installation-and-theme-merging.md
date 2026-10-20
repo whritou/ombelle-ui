@@ -4,6 +4,8 @@
 
 Support npm, pnpm, Yarn and Bun from alpha. Offer two clear website paths: initialize a new setup, or add styling to a project where shadcn is already initialized. The existing-project path merges palette and token values into the configured global stylesheet without rerunning shadcn initialization or reinstalling component source.
 
+Implementation status for this foundation: npm, pnpm, Yarn Classic 1.22.22, and modern Yarn 4.18.1 are verified for component installation. Modern Yarn is verified with both `node-modules` and Plug'n'Play. Bun remains a planned alpha manager and is not currently supported by this CLI.
+
 Website copy: “If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css.”
 
 The examples below are proposed product commands. The namespace, package, preset ID and version are placeholders. Pin a tested CLI version and an immutable preset revision in generated production commands.
@@ -19,7 +21,7 @@ The examples below are proposed product commands. The namespace, package, preset
 
 The package exposes a single binary named `your-ui`. Explicit package selection in the Yarn and Bun examples avoids relying on the binary being named `cli`. Bun's `--bun` flag deliberately exercises its runtime; the CLI must be tested under both Node and Bun.
 
-Yarn Classic does not supply the modern dlx workflow. Support it through a local development dependency (`yarn add --dev @your-ui/cli@0.1.0`, then `yarn your-ui theme add ps_brand@3`) or another runner with `--package-manager yarn`. A runner choice must not switch the consumer project's dependency manager.
+Yarn Classic does not supply the modern dlx workflow. Use a local development dependency (`yarn add --dev @your-ui/cli@0.1.0`, then `yarn your-ui theme add ps_brand@3`) or another runner with `--package-manager yarn`. The current private CLI is not published, so these package names are illustrative. A runner choice must not switch the consumer project's dependency manager.
 
 ## Commands for new setup and component addition
 
@@ -34,11 +36,11 @@ Yarn Classic does not supply the modern dlx workflow. Support it through a local
 
 ## Package manager selection
 
-Use an explicit `--package-manager` selection when present. Otherwise inspect `package.json.packageManager`, then a unique recognized lockfile. Recognize package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock and legacy bun.lockb. Keep the project's existing Bun lockfile format; do not convert it as a side effect of UI installation.
+Use an explicit `--package-manager` selection when present. Otherwise inspect `package.json.packageManager`, then a unique recognized lockfile. The current CLI recognizes package-lock.json, pnpm-lock.yaml, and yarn.lock. Bun lockfiles remain a planned extension. Keep a project's manager lockfile format; do not convert it as a side effect of UI installation.
 
 Conflicting project evidence requires an explicit choice. The runner user agent is only a fallback when no project evidence exists. In a workspace, inspect the target package and governing workspace root without writing outside the explicitly selected project boundary. Retain the manager's workspace behavior and lockfile ownership.
 
-Use npm install, pnpm add, yarn add or bun add only when the planned component installation needs dependency changes. A theme-only command must not run an unnecessary dependency installation. Never create another manager's lockfile or assume node_modules exists in a Yarn Plug'n'Play project.
+Use npm install, pnpm add, or yarn add only when the planned component installation needs dependency changes. Yarn dependency installs disable lifecycle scripts and use exact versions. A theme-only command must not run an unnecessary dependency installation. Never create another manager's lockfile or assume node_modules exists in a Yarn Plug'n'Play project. The current Yarn consumer gate checks preserved CSS, a fresh-process preset reuse, lockfile ownership, and production builds in all three verified Yarn layouts.
 
 ## Theme merge contract
 

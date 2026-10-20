@@ -148,6 +148,11 @@ export async function managerEntry(manager: PackageManager): Promise<string> {
       : manager === 'pnpm'
         ? /^pnpm\.(?:cjs|mjs|js)$/
         : /^yarn\.(?:cjs|mjs|js)$/
+  const configured = manager === 'yarn' ? process.env.OMBELLE_YARN_ENTRY : undefined
+  if (configured && entryPattern.test(path.basename(configured))) {
+    await fs.access(configured)
+    return configured
+  }
   const inherited = process.env.npm_execpath
   if (inherited && entryPattern.test(path.basename(inherited))) {
     await fs.access(inherited)

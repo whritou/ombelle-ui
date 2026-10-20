@@ -41,10 +41,10 @@ async function fakeYarn(folder: string, filename: string, version: string) {
 
 it.each([
   ['yarn.js', '1.22.22'],
-  ['yarn.cjs', '4.63.1'],
+  ['yarn.cjs', '4.18.1'],
 ])('resolves an inherited Yarn JavaScript entry %s', async (filename) => {
   const folder = await root()
-  const entry = await fakeYarn(folder, filename, filename.endsWith('.js') ? '1.22.22' : '4.63.1')
+  const entry = await fakeYarn(folder, filename, filename.endsWith('.js') ? '1.22.22' : '4.18.1')
   process.env.npm_execpath = entry
   expect(await managerEntry('yarn')).toBe(entry)
 })
@@ -59,7 +59,7 @@ it('resolves Yarn from PATH without shell evaluation', async () => {
 
 it('resolves a Windows Yarn command shim only to a safe local JavaScript entry', async () => {
   const folder = await root()
-  const entry = await fakeYarn(folder, 'yarn.cjs', '4.63.1')
+  const entry = await fakeYarn(folder, 'yarn.cjs', '4.18.1')
   await fs.writeFile(path.join(folder, 'yarn.cmd'), '@echo off\r\n"%~dp0yarn.cjs" %*\r\n')
   delete process.env.npm_execpath
   process.env.PATH = folder
@@ -76,7 +76,7 @@ it('rejects a Yarn command shim containing shell operators', async () => {
 
 it.each([
   ['1.22.22', ['add', '--exact', '--ignore-scripts', 'clsx@2.1.1']],
-  ['4.63.1', ['add', '--exact', '--mode=skip-build', 'clsx@2.1.1']],
+  ['4.18.1', ['add', '--exact', '--mode=skip-build', 'clsx@2.1.1']],
 ])('runs Yarn %s with exact dependencies and script controls', async (version, expectedArgs) => {
   const folder = await root()
   const entryFolder = path.join(folder, 'directory with spaces')
@@ -92,7 +92,7 @@ it.each([
 it('reports a Yarn install failure as dependency failure', async () => {
   const folder = await root()
   const entry = path.join(folder, 'yarn.cjs')
-  await fs.writeFile(entry, `if (process.argv[2] === '--version') process.stdout.write('4.63.1')\nelse { process.stderr.write('install failed'); process.exit(1) }\n`)
+  await fs.writeFile(entry, `if (process.argv[2] === '--version') process.stdout.write('4.18.1')\nelse { process.stderr.write('install failed'); process.exit(1) }\n`)
   process.env.npm_execpath = entry
   await expect(runDependencies(folder, [{ name: 'clsx', version: '2.1.1' }], 'yarn'))
     .rejects.toMatchObject({ code: 'DEPENDENCY_FAILURE', message: expect.stringContaining('yarn') })
@@ -104,9 +104,9 @@ it('does not execute Yarn for dry-run or theme-only operations', async () => {
   await fs.rm(path.join(folder, 'pnpm-lock.yaml'))
   await fs.writeFile(path.join(folder, 'yarn.lock'), '# yarn lockfile\n')
   const pkg = JSON.parse(await fs.readFile(path.join(folder, 'package.json'), 'utf8'))
-  pkg.packageManager = 'yarn@4.63.1'
+  pkg.packageManager = 'yarn@4.18.1'
   await fs.writeFile(path.join(folder, 'package.json'), JSON.stringify(pkg))
-  const entry = await fakeYarn(folder, 'yarn.cjs', '4.63.1')
+  const entry = await fakeYarn(folder, 'yarn.cjs', '4.18.1')
   const sentinel = path.join(folder, 'yarn-ran')
   await fs.writeFile(entry, `require('node:fs').writeFileSync('${sentinel.replaceAll('\\', '/')}', 'ran')\n`)
   const run = (args: string[]) => new Promise<{ code: number | null; data: any }>((resolve, reject) => {

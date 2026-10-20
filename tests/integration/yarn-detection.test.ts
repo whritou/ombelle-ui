@@ -46,7 +46,7 @@ function command(args: string[]) {
   })
 }
 
-it.each(['yarn@1.22.22', 'yarn@4.63.1'])('detects %s from packageManager and yarn.lock', async (field) => {
+it.each(['yarn@1.22.22', 'yarn@4.18.1'])('detects %s from packageManager and yarn.lock', async (field) => {
   const root = await yarnProject(field)
   const result = await command(['init', '--preset', preset, '--cwd', root, '--dry-run'])
   expect(result.code, JSON.stringify(result.data)).toBe(0)
@@ -71,7 +71,7 @@ it('accepts an explicit Yarn choice when packageManager disagrees and yarn.lock 
 })
 
 it('rejects multiple lockfiles before writing even with explicit selection', async () => {
-  const root = await yarnProject('yarn@4.63.1')
+  const root = await yarnProject('yarn@4.18.1')
   await fs.writeFile(path.join(root, 'pnpm-lock.yaml'), 'lockfileVersion: "9.0"\n')
   const before = await snapshotTree(root)
   const result = await command([
@@ -103,7 +103,7 @@ it('rejects malformed Yarn declarations and unsupported manager choices', async 
 })
 
 it('accepts Corepack integrity suffixes for Yarn Classic and modern declarations', async () => {
-  for (const field of ['yarn@1.22.22+sha224.dGVzdA==', 'yarn@4.63.1+sha224.dGVzdA==']) {
+  for (const field of ['yarn@1.22.22+sha224.dGVzdA==', 'yarn@4.18.1+sha224.dGVzdA==']) {
     const root = await yarnProject(field)
     const result = await command(['init', '--preset', preset, '--cwd', root, '--dry-run'])
     expect(result.code, JSON.stringify(result.data)).toBe(0)
@@ -112,7 +112,7 @@ it('accepts Corepack integrity suffixes for Yarn Classic and modern declarations
 })
 
 it('persists Yarn in the new Ombelle configuration', async () => {
-  const root = await yarnProject('yarn@4.63.1')
+  const root = await yarnProject('yarn@4.18.1')
   const result = await command(['init', '--preset', preset, '--cwd', root, '--yes'])
   expect(result.code, JSON.stringify(result.data)).toBe(0)
   const config = JSON.parse(await fs.readFile(path.join(root, 'ui-library.config.json'), 'utf8'))

@@ -56,19 +56,19 @@ npx @your-ui/cli@0.1.0 diff button
 | `diff` | Compare local source with a selected pinned catalog release without writes |
 | `update` | Later explicit migration workflow; never a background automatic update |
 
-Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|yarn|bun>`, and `--yes` where applicable. `preset apply` also supports `--only theme`. `--yes` accepts an already safe plan; it never enables overwriting modified files or bypassing schema and compatibility errors. Do not provide a broad force flag in alpha.
+Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|yarn>`, and `--yes` where applicable. Bun is not implemented in this foundation slice. `preset apply` also supports `--only theme`. `--yes` accepts an already safe plan; it never enables overwriting modified files or bypassing schema and compatibility errors. Do not provide a broad force flag in alpha.
 
 The proposed dry-run is stricter than an ordinary installation: it performs no filesystem writes, even to a project cache, and never invokes the package manager. It may fetch public manifests in memory. Document network access in machine-readable output.
 
 ## Supported projects
 
-Start with Vite React TSX and Next.js App Router TSX using Tailwind v4. npm, pnpm, Yarn and Bun must all pass fixtures before alpha release. Component source uses the selected Radix-based shadcn edition. A palette-only theme merge can work with other shadcn primitive editions when their token format and CSS baseline are compatible; do not reject that operation solely because the primitive family differs. JSX conversion remains a beta gate.
+The current foundation implements Vite React TSX and Next.js App Router TSX using Tailwind v4. Its consumer gate verifies npm, pnpm, Yarn Classic 1.22.22, and modern Yarn 4.18.1 with both `node-modules` and Plug'n'Play. Bun remains an alpha requirement and is not implemented here. Component source uses the selected Radix-based shadcn edition. A palette-only theme merge can work with other shadcn primitive editions when their token format and CSS baseline are compatible; do not reject that operation solely because the primitive family differs. JSX conversion remains a beta gate.
 
 The npm package has one `your-ui` binary. The package-runner recipes are documented for npm, pnpm, modern Yarn and Bun; Yarn and Bun examples explicitly select the binary because it differs from the unscoped package name `cli`. Test Bun with its own runtime and Yarn with both node-modules and Plug'n'Play. Provide a local-install route for Yarn Classic.
 
-Determine the project manager from an explicit flag, then a valid `packageManager` field, then a unique recognized lockfile. Use the launcher's user agent only when project evidence is absent. Conflicting evidence requires an explicit selection. Never create `package-lock.json` in a pnpm, Yarn or Bun project simply because the CLI was launched with `npx`.
+Determine the project manager from an explicit flag, then a valid `packageManager` field, then a unique recognized lockfile. Use the launcher's user agent only when project evidence is absent. Conflicting evidence requires an explicit selection. Never create `package-lock.json` in a pnpm or Yarn project simply because the CLI was launched with `npx`.
 
-See [Installation and theme merging](10-installation-and-theme-merging.md) for the four-runner commands, package manager rules and CSS merge contract.
+See [Installation and theme merging](10-installation-and-theme-merging.md) for runner commands, package manager rules and the CSS merge contract.
 
 Inspect `package.json`, the package manager lockfile, TS or JS config, CSS entry, and `components.json`. If multiple lockfiles, app roots, CSS entries, or ambiguous aliases exist, request an explicit `--cwd` or config path. Never guess across workspace boundaries. Monorepo support starts with an explicitly targeted app or shared UI package.
 
@@ -138,6 +138,6 @@ For existing-project styling, publish a `registry:theme` item separately and ins
 
 ## Required CLI tests
 
-Verify clean installation, repeated no-op addition, saved preset reuse across processes, Next.js client boundaries, alias rewriting, unsupported configuration rejection, dependency deduplication, locally edited component conflict, traversal and symlink rejection, concurrent writes, network and package manager failure, dry-run non-mutation, interrupted-write recovery, and preview versus install parity. All four package managers are alpha gates.
+Verify clean installation, repeated no-op addition, saved preset reuse across processes, Next.js client boundaries, alias rewriting, unsupported configuration rejection, dependency deduplication, locally edited component conflict, traversal and symlink rejection, concurrent writes, network and package manager failure, dry-run non-mutation, interrupted-write recovery, and preview versus install parity. The current foundation gate covers npm, pnpm, and Yarn Classic/modern linkers; Bun remains an alpha gate.
 
 Also test existing-shadcn theme merging with custom CSS, custom stylesheet paths, light and dark declarations, nested layers, existing Tailwind mappings, duplicate or ambiguous token definitions, locally edited tokens, repeated application and rollback. Verify no source reinstall, no reinitialization, no unnecessary dependency command and no foreign lockfile, including cross-runner launches.
