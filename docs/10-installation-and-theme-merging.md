@@ -4,7 +4,7 @@
 
 Support npm, pnpm, Yarn and Bun from alpha. Offer two clear website paths: initialize a new setup, or add styling to a project where shadcn is already initialized. The existing-project path merges palette and token values into the configured global stylesheet without rerunning shadcn initialization or reinstalling component source.
 
-Implementation status for this foundation: npm, pnpm, Yarn Classic 1.22.22, and modern Yarn 4.18.1 are verified for component installation. Modern Yarn is verified with both `node-modules` and Plug'n'Play. Bun remains a planned alpha manager and is not currently supported by this CLI.
+Implementation status for this foundation: npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1, and Bun 1.4.3 have consumer coverage. Modern Yarn covers both linkers. Bun covers Vite/Next.js with text/binary lockfiles and the built CLI under Node/Bun; framework builds remain on Node. These are local private CLI routes; the illustrative published package commands below remain proposed.
 
 Website copy: “If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css.”
 
@@ -36,7 +36,9 @@ Yarn Classic does not supply the modern dlx workflow. Use a local development de
 
 ## Package manager selection
 
-Use an explicit `--package-manager` selection when present. Otherwise inspect `package.json.packageManager`, then a unique recognized lockfile. The current CLI recognizes package-lock.json, pnpm-lock.yaml, and yarn.lock. Bun lockfiles remain a planned extension. Keep a project's manager lockfile format; do not convert it as a side effect of UI installation.
+Use an explicit `--package-manager` selection when present. Otherwise inspect `package.json.packageManager`, then a unique recognized lockfile. Recognized lockfiles are package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, and bun.lockb. Both Bun formats together are ambiguous, just like mixed-manager locks. Keep the existing format; do not convert it as a side effect of installation. A field-only Bun project creates bun.lock only when dependency work requires it.
+
+Bun 1.4.3 runs as a native executable, with exact dependency saving and lifecycle scripts disabled for the project and trusted packages. Override discovery with an absolute `OMBELLE_BUN_EXECUTABLE` path. Incompatible inherited settings for simulated/frozen installation, lockfile saving/output, or format conversion receive preflight diagnostics. Existing development/optional/peer-only dependencies required by a component must first be moved into dependencies; this Bun release cannot safely promote their group. The CLI preserves user configuration and rejects workspace ownership. The built CLI can run under Bun while npm/pnpm/Yarn scripts use verified Node; set `OMBELLE_NODE_EXECUTABLE` if Node is not on PATH. No-op additions, dry-runs, and actual theme-only operations avoid dependency-manager invocation.
 
 Conflicting project evidence requires an explicit choice. The runner user agent is only a fallback when no project evidence exists. In a workspace, inspect the target package and governing workspace root without writing outside the explicitly selected project boundary. Retain the manager's workspace behavior and lockfile ownership.
 

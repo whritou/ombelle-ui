@@ -56,13 +56,13 @@ npx @your-ui/cli@0.1.0 diff button
 | `diff` | Compare local source with a selected pinned catalog release without writes |
 | `update` | Later explicit migration workflow; never a background automatic update |
 
-Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|yarn>`, and `--yes` where applicable. Bun is not implemented in this foundation slice. `preset apply` also supports `--only theme`. `--yes` accepts an already safe plan; it never enables overwriting modified files or bypassing schema and compatibility errors. Do not provide a broad force flag in alpha.
+Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|yarn|bun>`, and `--yes` where applicable. The Bun foundation target is exactly 1.4.3. `preset apply` also supports `--only theme`. `--yes` accepts an already safe plan; it never enables overwriting modified files or bypassing schema and compatibility errors. Do not provide a broad force flag in alpha.
 
 The proposed dry-run is stricter than an ordinary installation: it performs no filesystem writes, even to a project cache, and never invokes the package manager. It may fetch public manifests in memory. Document network access in machine-readable output.
 
 ## Supported projects
 
-The current foundation implements Vite React TSX and Next.js App Router TSX using Tailwind v4. Its consumer gate verifies npm, pnpm, Yarn Classic 1.22.22, and modern Yarn 4.18.1 with both `node-modules` and Plug'n'Play. Bun remains an alpha requirement and is not implemented here. Component source uses the selected Radix-based shadcn edition. A palette-only theme merge can work with other shadcn primitive editions when their token format and CSS baseline are compatible; do not reject that operation solely because the primitive family differs. JSX conversion remains a beta gate.
+The current foundation implements Vite React TSX and Next.js App Router TSX using Tailwind v4. Its consumer gate covers npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1 with both linkers, and Bun 1.4.3 with bun.lock/bun.lockb under Node/Bun CLI runtimes. Consumer framework builds use Node. Component source uses the selected Radix-based shadcn edition. A palette-only theme merge can work with other shadcn primitive editions when their token format and CSS baseline are compatible; do not reject that operation solely because the primitive family differs. JSX conversion remains a beta gate.
 
 The npm package has one `your-ui` binary. The package-runner recipes are documented for npm, pnpm, modern Yarn and Bun; Yarn and Bun examples explicitly select the binary because it differs from the unscoped package name `cli`. Test Bun with its own runtime and Yarn with both node-modules and Plug'n'Play. Provide a local-install route for Yarn Classic.
 
@@ -138,6 +138,6 @@ For existing-project styling, publish a `registry:theme` item separately and ins
 
 ## Required CLI tests
 
-Verify clean installation, repeated no-op addition, saved preset reuse across processes, Next.js client boundaries, alias rewriting, unsupported configuration rejection, dependency deduplication, locally edited component conflict, traversal and symlink rejection, concurrent writes, network and package manager failure, dry-run non-mutation, interrupted-write recovery, and preview versus install parity. The current foundation gate covers npm, pnpm, and Yarn Classic/modern linkers; Bun remains an alpha gate.
+Verify clean installation, repeated no-op addition, saved preset reuse across processes, Next.js client boundaries, alias rewriting, unsupported configuration rejection, dependency deduplication, locally edited component conflict, traversal and symlink rejection, concurrent writes, network and package manager failure, dry-run non-mutation, interrupted-write recovery, and preview versus install parity. The foundation gate covers npm, pnpm, Yarn Classic/modern linkers, and Bun 1.4.3. Bun checks include native executable discovery, actual CLI runtime identity, binary-byte metadata preconditions, configuration rejection, and real installed-package verification. It rejects workspace ownership and incompatible Bun settings before source writes; package-state rollback after dependency failure is not promised.
 
 Also test existing-shadcn theme merging with custom CSS, custom stylesheet paths, light and dark declarations, nested layers, existing Tailwind mappings, duplicate or ambiguous token definitions, locally edited tokens, repeated application and rollback. Verify no source reinstall, no reinitialization, no unnecessary dependency command and no foreign lockfile, including cross-runner launches.

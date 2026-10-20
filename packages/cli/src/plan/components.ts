@@ -87,6 +87,7 @@ export async function planAdd(
     )
   const plan: InstallPlan = {
     packageManager: context.manager,
+    ...(context.bunLockfile ? { bunLockfile: context.bunLockfile } : {}),
     ...(context.packageJson.packageManager &&
     context.packageJson.packageManager.split('@')[0] !== context.manager
       ? {
@@ -147,7 +148,7 @@ export async function planAdd(
         sha256: await sha256(c.afterContent),
       }
   }
-  const installed = {
+  const installed = context.manager === 'bun' ? context.packageJson.dependencies ?? {} : {
     ...context.packageJson.devDependencies,
     ...context.packageJson.dependencies,
   }

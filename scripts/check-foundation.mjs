@@ -118,6 +118,8 @@ await fs.writeFile(
       yarnMatrix: JSON.parse(
         await fs.readFile('.artifacts/yarn-matrix.json', 'utf8'),
       ),
+      bunVersion: JSON.parse(await fs.readFile('.artifacts/bun-version.json', 'utf8')),
+      bunMatrix: JSON.parse(await fs.readFile('.artifacts/bun-matrix.json', 'utf8')),
     },
     null,
     2,

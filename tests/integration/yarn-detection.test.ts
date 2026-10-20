@@ -97,7 +97,7 @@ it('rejects malformed Yarn declarations and unsupported manager choices', async 
   const malformed = await command(['init', '--preset', preset, '--cwd', root, '--dry-run'])
   expect(malformed.code).toBe(3)
   const unsupported = await command([
-    'init', '--preset', preset, '--cwd', root, '--package-manager', 'bun', '--dry-run',
+    'init', '--preset', preset, '--cwd', root, '--package-manager', 'deno', '--dry-run',
   ])
   expect(unsupported.code).toBe(2)
 })

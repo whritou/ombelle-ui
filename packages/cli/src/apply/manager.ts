@@ -5,11 +5,14 @@ import {
   FoundationError,
   type Dependency,
   type PackageManager,
+  type BunLockfile,
 } from '@ombelle/contracts'
+import { resolveBunExecutable, resolveNodeExecutable } from './executable.js'
+import { prepareBun, bunAddArgs, assertBunOwnership, assertBunInstalled } from './bun.js'
 
 export type PreparedManager = {
-  entry: string
-  prefixArgs?: string[]
+  executable: string
+  prefixArgs: string[]
   version?: string
 }
 
@@ -18,6 +21,7 @@ export async function runDependencies(
   deps: Dependency[],
   manager: PackageManager = 'pnpm',
   prepared?: PreparedManager,
+  bunLockfile?: BunLockfile,
 ): Promise<void> {
   if (!deps.length) return
   for (const d of deps)
@@ -29,10 +33,12 @@ export async function runDependencies(
         'INVALID_DATA',
         'Invalid reviewed dependency name/version',
       )
-  const resolved = prepared ?? (await prepareManager(root, manager))
-  const script = resolved.entry
+  const resolved = prepared ?? (await prepareManager(root, manager, bunLockfile, deps))
+  const script = resolved.executable
   const args =
-    manager === 'yarn'
+    manager === 'bun'
+      ? bunAddArgs(deps, bunLockfile ?? 'bun.lock')
+      : manager === 'yarn'
       ? [
           'add',
           '--exact',
@@ -64,8 +70,8 @@ export async function runDependencies(
         ]
   await new Promise<void>((resolve, reject) => {
     const child = spawn(
-      process.execPath,
-      [script, ...(resolved.prefixArgs ?? []), ...args],
+      script,
+      [...resolved.prefixArgs, ...args],
       {
         cwd: root,
         shell: false,
@@ -96,17 +102,26 @@ export async function runDependencies(
           ),
     )
   })
+  if (manager === 'bun') {
+    await assertBunOwnership(root,bunLockfile ?? 'bun.lock')
+    await assertBunInstalled(root,deps)
+  }
 }
 
 export async function prepareManager(
   root: string,
   manager: PackageManager,
+  bunLockfile?: BunLockfile,
+  deps: Dependency[] = [],
 ): Promise<PreparedManager> {
+  if (manager === 'bun') return prepareBun(root,await resolveBunExecutable(),bunLockfile ?? 'bun.lock',deps)
   const launcher = await resolveManager(manager)
-  if (manager !== 'yarn') return launcher
+  const executable = await resolveNodeExecutable()
+  const prepared = { executable, prefixArgs: [launcher.entry, ...launcher.prefixArgs] }
+  if (manager !== 'yarn') return prepared
   const result = await executeScript(
-    launcher.entry,
-    [...launcher.prefixArgs, '--version'],
+    executable,
+    [...prepared.prefixArgs, '--version'],
     root,
     15000,
   )
@@ -121,7 +136,7 @@ export async function prepareManager(
       root,
       'Install Yarn 1.x or modern Yarn 2+, or set OMBELLE_YARN_ENTRY to its JavaScript launcher.',
     )
-  return { ...launcher, version }
+  return { ...prepared, version }
 }
 
 function executeScript(
@@ -131,7 +146,7 @@ function executeScript(
   timeout: number,
 ): Promise<{ code: number | null; output: string }> {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [script, ...args], {
+    const child = spawn(script, args, {
       cwd,
       shell: false,
       windowsHide: true,
@@ -153,6 +168,7 @@ function executeScript(
 type ManagerLauncher = { entry: string; prefixArgs: string[] }
 
 export async function managerEntry(manager: PackageManager): Promise<string> {
+  if (manager === 'bun') return resolveBunExecutable()
   return (await resolveManager(manager)).entry
 }
 

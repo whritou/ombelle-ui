@@ -5,6 +5,7 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     status,
     projectRoot: plan.projectRoot,
     packageManager: plan.packageManager,
+    ...(plan.bunLockfile ? { bunLockfile: plan.bunLockfile } : {}),
     ...(plan.managerWarning ? { managerWarning: plan.managerWarning } : {}),
     presetHash: plan.preset.hash,
     ...plan.provenance,

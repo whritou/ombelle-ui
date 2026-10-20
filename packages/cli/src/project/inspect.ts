@@ -8,8 +8,11 @@ import {
   type ProjectConfig,
   type ProjectLock,
   type PackageManager,
+  type BunLockfile,
 } from '@ombelle/contracts'
 import { safePath, portable } from './paths.js'
+import { fingerprintFile } from './fingerprint.js'
+import { assertStandaloneProject } from './workspace.js'
 export async function readText(
   root: string,
   relative: string,
@@ -35,8 +38,8 @@ function declaredManager(value: unknown): PackageManager | undefined {
   if (typeof value !== 'string') return undefined
   const ordinary = /^(npm|pnpm)@\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.exec(value)
   if (ordinary) return ordinary[1] as PackageManager
-  if (/^yarn@\d+\.\d+\.\d+(?:\+sha224\.[A-Za-z0-9+/]+={0,2})?$/.test(value))
-    return 'yarn'
+  const additional = /^(yarn|bun)@\d+\.\d+\.\d+(?:\+sha224\.[A-Za-z0-9+/]+={0,2})?$/.exec(value)
+  if (additional) return additional[1] as PackageManager
   return undefined
 }
 
@@ -48,7 +51,7 @@ export async function inspectProject(
   const preconditions: Record<string, string | null> = {}
   const loadJson = async (relative: string) => {
     const text = await readText(root, relative)
-    preconditions[relative] = text === null ? null : await sha256(text)
+    preconditions[relative] = await fingerprintFile(root, relative)
     if (text === null) return undefined
     try {
       return JSON.parse(text)
@@ -61,6 +64,7 @@ export async function inspectProject(
     new FoundationError('UNSUPPORTED_PROJECT', message, root)
   if (!pkg || typeof pkg !== 'object')
     throw bad('Target an existing application with package.json')
+  await assertStandaloneProject(root)
   const lockNames = [
     'pnpm-lock.yaml',
     'package-lock.json',
@@ -71,9 +75,9 @@ export async function inspectProject(
   ]
   const present: string[] = []
   for (const name of lockNames) {
-    const text = await readText(root, name)
-    preconditions[name] = text === null ? null : await sha256(text)
-    if (text !== null) present.push(name)
+    const fingerprint = await fingerprintFile(root, name)
+    preconditions[name] = fingerprint
+    if (fingerprint !== null) present.push(name)
   }
   const declared = declaredManager(pkg.packageManager)
   const locked =
@@ -82,6 +86,8 @@ export async function inspectProject(
           'package-lock.json': 'npm',
           'pnpm-lock.yaml': 'pnpm',
           'yarn.lock': 'yarn',
+          'bun.lock': 'bun',
+          'bun.lockb': 'bun',
         } as Record<string, PackageManager>)[present[0]]
       : undefined
   if (
@@ -94,13 +100,13 @@ export async function inspectProject(
     (!explicitManager && !declared && !locked)
   )
     throw bad(
-      'Choose an unambiguous npm, pnpm, or Yarn application; align manager evidence and its single lockfile',
+      'Choose an unambiguous npm, pnpm, Yarn, or Bun application; align manager evidence and its single lockfile',
     )
   const manager = explicitManager ?? declared ?? locked
   if (!manager)
     throw bad('Choose a package manager for the target application')
-  const npmrc = await readText(root, '.npmrc')
-  preconditions['.npmrc'] = npmrc === null ? null : await sha256(npmrc)
+  preconditions['.npmrc'] = await fingerprintFile(root, '.npmrc')
+  preconditions['bunfig.toml'] = await fingerprintFile(root, 'bunfig.toml')
   const deps = { ...pkg.devDependencies, ...pkg.dependencies }
   const framework = deps.next ? 'next' : deps.vite ? 'vite' : undefined
   if (!framework || !deps.react || !/^\D*4\./.test(deps.tailwindcss ?? ''))
@@ -201,6 +207,7 @@ export async function inspectProject(
   const raw = await loadJson(config?.presetFile ?? 'ui-preset.json')
   const preset = raw ? validatePreset(raw) : undefined
   return {
+    ...(manager === 'bun' ? { bunLockfile: (present[0] ?? 'bun.lock') as BunLockfile } : {}),
     preconditions,
     root,
     framework,

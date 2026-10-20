@@ -6,10 +6,12 @@ import {
   type InstallPlan,
   type Dependency,
   type PackageManager,
+  type BunLockfile,
 } from '@ombelle/contracts'
 import { sha256 } from '@ombelle/compiler'
 import { safePath } from '../project/paths.js'
-import { readText } from '../project/inspect.js'
+import { fingerprintFile } from '../project/fingerprint.js'
+import { assertStandaloneProject } from '../project/workspace.js'
 import {
   prepareManager,
   runDependencies,
@@ -21,14 +23,12 @@ export type ApplyPorts = {
     deps: Dependency[],
     manager: PackageManager,
     prepared?: PreparedManager,
+    bunLockfile?: BunLockfile,
   ) => Promise<void>
   beforeWrite?: (file: string, index: number) => Promise<void>
 }
 export type ApplyResult = { status: 'success'; writtenPaths: string[] }
-const hashAt = async (root: string, file: string) => {
-  const text = await readText(root, file)
-  return text === null ? null : await sha256(text)
-}
+const hashAt = fingerprintFile
 export async function applyPlan(
   plan: InstallPlan,
   ports: ApplyPorts = {},
@@ -55,7 +55,7 @@ export async function applyPlan(
   }
   const prepared =
     plan.dependencyPlan.length && !ports.dependencies
-      ? await prepareManager(plan.projectRoot, plan.packageManager)
+      ? await prepareManager(plan.projectRoot, plan.packageManager, plan.bunLockfile, plan.dependencyPlan)
       : undefined
   const lockPath = await safePath(plan.projectRoot, '.ombelle-operation.lock')
   let operation: fs.FileHandle
@@ -89,6 +89,7 @@ export async function applyPlan(
           'File changed after planning',
           c.path,
         )
+    if (plan.dependencyPlan.length) await assertStandaloneProject(plan.projectRoot)
     const pending = plan.changes.filter((c) => c.action !== 'noop')
     if (!pending.length && !plan.dependencyPlan.length)
       return { status: 'success', writtenPaths: [] }
@@ -125,12 +126,14 @@ export async function applyPlan(
       })
     }
     if (plan.dependencyPlan.length) {
+      await assertStandaloneProject(plan.projectRoot)
       dependencyStarted = true
       await (ports.dependencies ?? runDependencies)(
         plan.projectRoot,
         plan.dependencyPlan,
         plan.packageManager,
         prepared,
+        plan.bunLockfile,
       )
     }
     await fs.rm(folder, { recursive: true })
@@ -182,6 +185,7 @@ export async function applyPlan(
       folder,
       'Review recovery.json and repair the project with ' +
         plan.packageManager +
+        (plan.bunLockfile ? ' (' + plan.bunLockfile + ')' : '') +
         ' before retrying.',
     )
     error.recovery = recovery
