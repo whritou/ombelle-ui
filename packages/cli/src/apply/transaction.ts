@@ -6,6 +6,7 @@ import {
   type InstallPlan,
   type Dependency,
   type PackageManager,
+  type BunLockfile,
 } from '@ombelle/contracts'
 import { sha256 } from '@ombelle/compiler'
 import { safePath } from '../project/paths.js'
@@ -21,6 +22,7 @@ export type ApplyPorts = {
     deps: Dependency[],
     manager: PackageManager,
     prepared?: PreparedManager,
+    bunLockfile?: BunLockfile,
   ) => Promise<void>
   beforeWrite?: (file: string, index: number) => Promise<void>
 }
@@ -52,7 +54,7 @@ export async function applyPlan(
   }
   const prepared =
     plan.dependencyPlan.length && !ports.dependencies
-      ? await prepareManager(plan.projectRoot, plan.packageManager)
+      ? await prepareManager(plan.projectRoot, plan.packageManager, plan.bunLockfile)
       : undefined
   const lockPath = await safePath(plan.projectRoot, '.ombelle-operation.lock')
   let operation: fs.FileHandle
@@ -128,6 +130,7 @@ export async function applyPlan(
         plan.dependencyPlan,
         plan.packageManager,
         prepared,
+        plan.bunLockfile,
       )
     }
     await fs.rm(folder, { recursive: true })

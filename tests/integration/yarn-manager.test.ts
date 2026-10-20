@@ -74,7 +74,7 @@ it('resolves a Corepack Yarn command shim to its JavaScript entry and prefix arg
   delete process.env.npm_execpath
   process.env.PATH = folder
   const prepared = await prepareManager(folder, 'yarn')
-  expect(prepared).toEqual({ entry, version: '4.18.1', prefixArgs: ['yarn'] })
+  expect(prepared).toEqual({ executable: process.execPath, version: '4.18.1', prefixArgs: [entry, 'yarn'] })
   const capture = path.join(folder, 'capture.json')
   process.env.YARN_CAPTURE = capture
   await runDependencies(folder, [{ name: 'clsx', version: '2.1.1' }], 'yarn', prepared)
