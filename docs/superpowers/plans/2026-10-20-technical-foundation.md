@@ -132,9 +132,9 @@ expect(registryItemSchema.safeParse(buildRegistry(result).items.button).success)
 
 **Interfaces:** `inspectProject(cwd: string): Promise<ProjectContext>`; `planAdd(context: ProjectContext, result: CompileResult): Promise<InstallPlan>`. Define `ProjectContext` containing root, framework (`vite` or `next`), manager (`pnpm`), aliases, CSS entry/dark selector, and optional local preset/config/installed lock before initialization. `InstallPlan` contains `projectRoot`, preset/provenance, `changes: FileChange[]`, managed CSS records, `dependencyPlan`, and `diagnostics`. `FileChange` contains relative `path`, `beforeHash: string | null`, `afterContent: string`, `kind`, and action (`create`, `update`, `noop`, `conflict`). `ProjectLock` records version 1, versions/preset hash, artifact destinations/hashes, and managed declarations. Helpers: `createProject(kind: 'vite' | 'next'): Promise<string>` makes a disposable minimal pnpm app; `snapshotTree(root: string): Promise<Record<string,string>>` captures file hashes without writes.
 
-- [ ] Add failing tests for both alias layouts, missing/ambiguous CSS entries, conflicting manager evidence, npm-only apps, unsupported upstream editions for component install, existing identical artifacts, edited artifacts, and unknown existing destination files. Assert conflict plans do not mutate the captured tree.
-- [ ] Include Windows-style `..`, rooted paths, case-insensitive duplicate destinations, and a junction pointing outside the temporary root. Require `UNSUPPORTED_PROJECT` or `FILE_CONFLICT` as appropriate, with unchanged outside files. Explicitly report a junction-test environment skip if creation is unavailable; do not call that case passed.
-- [ ] Run `pnpm exec vitest run packages/cli/test/inspect.test.ts packages/cli/test/plan.test.ts`; expect missing inspection/planner failures.
+- [x] Add failing tests for both alias layouts, missing/ambiguous CSS entries, conflicting manager evidence, npm-only apps, unsupported upstream editions for component install, existing identical artifacts, edited artifacts, and unknown existing destination files. Assert conflict plans do not mutate the captured tree.
+- [x] Include Windows-style `..`, rooted paths, case-insensitive duplicate destinations, and a junction pointing outside the temporary root. Require `UNSUPPORTED_PROJECT` or `FILE_CONFLICT` as appropriate, with unchanged outside files. Explicitly report a junction-test environment skip if creation is unavailable; do not call that case passed.
+- [x] Run `pnpm exec vitest run packages/cli/test/inspect.test.ts packages/cli/test/plan.test.ts`; expect missing inspection/planner failures.
 
 ```ts
 const before = await snapshotTree(root)
@@ -142,9 +142,9 @@ const plan = await planAdd(await inspectProject(root), result)
 expect(await snapshotTree(root)).toEqual(before)
 expect(plan.projectRoot).toBe(root)
 ```
-- [ ] Implement project detection from valid `packageManager` and a unique lockfile, alias/path transformation, conflict comparison, dependency planning, and real-path containment. Preserve upstream config. Palette-only support must not reject an otherwise compatible project solely because its primitive edition differs.
-- [ ] Run targeted tests and `pnpm typecheck`; require no package-manager subprocess and no writes during inspection/planning.
-- [ ] Commit as `feat: inspect consumers and produce safe component installation plans`.
+- [x] Implement project detection from valid `packageManager` and a unique lockfile, alias/path transformation, conflict comparison, dependency planning, and real-path containment. Preserve upstream config. Palette-only support must not reject an otherwise compatible project solely because its primitive edition differs.
+- [x] Run targeted tests and `pnpm typecheck`; require no package-manager subprocess and no writes during inspection/planning.
+- [x] Commit as `feat: inspect consumers and produce safe component installation plans`.
 
 ## Task 6: Declaration-aware theme plans
 
