@@ -1,4 +1,4 @@
-import { it, expect, afterEach } from 'vitest'
+import { it, expect, afterEach, vi } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { compile } from '@ombelle/compiler'
@@ -7,8 +7,10 @@ import { createProject } from '../../../tests/helpers/projects.js'
 import { inspectProject } from '../src/project/inspect.js'
 import { planTheme } from '../src/plan/theme.js'
 import type { InstallPlan } from '@ombelle/contracts'
+import { applyPlan } from '../src/apply/transaction.js'
 const roots: string[] = []
 afterEach(async () => {
+  vi.restoreAllMocks()
   for (const root of roots.splice(0))
     await fs.rm(root, { recursive: true, force: true })
 })
@@ -115,4 +117,66 @@ it('uses a configured dark selector and permits palette-only application to anot
     plan.changes.some((c: any) => c.path === 'src/styles/ui-style.css'),
   ).toBe(false)
   expect(plan.dependencyPlan).toEqual([])
+})
+
+it.each([false, true])(
+  'conflicts when managed priority changes from %s',
+  async (initialImportant) => {
+    const root = await createProject('vite')
+    roots.push(root)
+    if (initialImportant)
+      await fs.writeFile(
+        root + '/src/index.css',
+        ':root { --primary: #facc15 !important; }',
+      )
+    await materialize(
+      await planTheme(await inspectProject(root), await result()),
+    )
+    if (!initialImportant) {
+      const lockFile = root + '/ui-library.lock.json'
+      const lock = JSON.parse(await fs.readFile(lockFile, 'utf8'))
+      for (const record of lock.managedDeclarations) delete record.important
+      await fs.writeFile(lockFile, JSON.stringify(lock))
+    }
+    const file = root + '/src/index.css'
+    const css = await fs.readFile(file, 'utf8')
+    const edited = initialImportant
+      ? css.replace('#facc15 !important', '#facc15')
+      : css.replace('--primary: #facc15', '--primary: #facc15 !important')
+    expect(edited).not.toBe(css)
+    await fs.writeFile(file, edited)
+    const plan = await planTheme(await inspectProject(root), await result())
+    expect(plan.diagnostics).toContainEqual(
+      expect.objectContaining({ code: 'FILE_CONFLICT' }),
+    )
+    await expect(applyPlan(plan)).rejects.toMatchObject({
+      code: 'FILE_CONFLICT',
+    })
+    expect(await fs.readFile(file, 'utf8')).toBe(edited)
+  },
+)
+it('rejects an unrelated edit made during theme planning without erasing it', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const context = await inspectProject(root)
+  const compiled = await result()
+  const file = path.resolve(root, 'src/index.css')
+  const read = fs.readFile.bind(fs)
+  let edited = false
+  vi.spyOn(fs, 'readFile').mockImplementation((async (...args: any[]) => {
+    const text = await (read as any)(...args)
+    if (!edited && path.resolve(String(args[0])) === file) {
+      edited = true
+      await fs.appendFile(
+        file,
+        '\n.user-edit-during-plan { color: hotpink; }\n',
+      )
+    }
+    return text
+  }) as any)
+  const plan = await planTheme(context, compiled)
+  vi.restoreAllMocks()
+  const before = await fs.readFile(file, 'utf8')
+  await expect(applyPlan(plan)).rejects.toMatchObject({ code: 'FILE_CONFLICT' })
+  expect(await fs.readFile(file, 'utf8')).toBe(before)
 })

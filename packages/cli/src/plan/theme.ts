@@ -84,7 +84,12 @@ export async function planTheme(
         previous = context.lock?.managedDeclarations.find(
           (r) => r.selector === selector && r.property === property,
         )
-      if (previous && (!existing || existing.value !== previous.value)) {
+      if (
+        previous &&
+        (!existing ||
+          existing.value !== previous.value ||
+          Boolean(existing.important) !== (previous.important ?? false))
+      ) {
         plan.diagnostics.push({
           code: 'FILE_CONFLICT',
           message: 'Managed theme declaration was edited locally',
@@ -96,6 +101,7 @@ export async function planTheme(
         selector,
         property,
         value: values[property],
+        important: Boolean(existing?.important),
         existedBefore: previous?.existedBefore ?? Boolean(existing),
       })
       if (existing) {
@@ -159,12 +165,14 @@ export async function planTheme(
         postcss.atRule({ name: 'import', params: JSON.stringify(importPath) }),
       )
   }
-  const change = await fileChange(
-    context.root,
-    context.cssEntry,
-    css.toString(),
-    'theme',
-  )
+  const afterContent = css.toString()
+  const change: InstallPlan['changes'][number] = {
+    path: context.cssEntry,
+    beforeHash: await sha256(original),
+    afterContent,
+    kind: 'theme',
+    action: original === afterContent ? 'noop' : 'update',
+  }
   if (plan.diagnostics.length) change.action = 'conflict'
   plan.changes.unshift(change)
   plan.managedDeclarations = records

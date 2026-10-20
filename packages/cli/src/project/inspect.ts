@@ -72,6 +72,10 @@ export async function inspectProject(cwd: string): Promise<ProjectContext> {
   const framework = deps.next ? 'next' : deps.vite ? 'vite' : undefined
   if (!framework || !deps.react || !/^\D*4\./.test(deps.tailwindcss ?? ''))
     throw bad('Support is limited to React Vite/Next with Tailwind v4')
+  if (deps.react !== '19.3.1' || deps['react-dom'] !== '19.3.1')
+    throw bad(
+      'Foundation requires exact react and react-dom 19.3.1 declarations; align both versions before installing (ranges are not verified)',
+    )
   const config = (await loadJson('ui-library.config.json')) as
     ProjectConfig | undefined
   if (
@@ -115,6 +119,13 @@ export async function inspectProject(cwd: string): Promise<ProjectContext> {
   const componentsDir = config?.paths?.components ?? alias(uiAlias),
     utilsFile = alias(utilsAlias) + '.ts',
     sourceDir = portable(path.dirname(path.dirname(alias(utilsAlias))))
+  if (
+    portable(path.normalize(componentsDir)) !==
+    portable(path.normalize(alias(uiAlias)))
+  )
+    throw bad(
+      'Component destination must match components.json aliases.ui and tsconfig paths; align the alias before installing',
+    )
   let cssEntry = config?.theme.cssEntry ?? upstream?.tailwind?.css
   if (!cssEntry) {
     const candidates = []

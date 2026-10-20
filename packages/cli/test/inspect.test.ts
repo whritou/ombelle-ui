@@ -95,3 +95,48 @@ it('rejects a junction escaping the app', async () => {
     code: 'UNSUPPORTED_PROJECT',
   })
 })
+
+it.each([
+  ['19.2.0', '19.2.0'],
+  ['19.3.1', '19.2.0'],
+  ['^19.3.1', '^19.3.1'],
+  ['19.3.1', undefined],
+])(
+  'rejects unsupported React pair %s / %s without writes',
+  async (react, dom) => {
+    const root = await createProject('vite')
+    roots.push(root)
+    const file = root + '/package.json'
+    const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+    pkg.dependencies.react = react
+    pkg.dependencies['react-dom'] = dom
+    const before = JSON.stringify(pkg)
+    await fs.writeFile(file, before)
+    await expect(inspectProject(root)).rejects.toMatchObject({
+      code: 'UNSUPPORTED_PROJECT',
+    })
+    expect(await fs.readFile(file, 'utf8')).toBe(before)
+  },
+)
+it('rejects component destinations inconsistent with the import alias', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  await fs.writeFile(
+    root + '/ui-library.config.json',
+    JSON.stringify({
+      configVersion: 1,
+      platform: 'react-web',
+      language: 'tsx',
+      presetFile: './ui-preset.json',
+      lockFile: './ui-library.lock.json',
+      theme: { strategy: 'merge', cssEntry: 'src/index.css' },
+      paths: {
+        components: 'src/widgets',
+        styleOutput: 'src/styles/ui-style.css',
+      },
+    }),
+  )
+  await expect(inspectProject(root)).rejects.toMatchObject({
+    code: 'UNSUPPORTED_PROJECT',
+  })
+})

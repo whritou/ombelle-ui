@@ -29,6 +29,7 @@ export type ManagedDeclaration = {
   selector: string
   property: string
   value: string
+  important?: boolean
   existedBefore: boolean
 }
 export type InstalledArtifact = {
