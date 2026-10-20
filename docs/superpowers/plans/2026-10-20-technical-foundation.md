@@ -152,17 +152,17 @@ expect(plan.projectRoot).toBe(root)
 
 **Interfaces:** `planTheme(context: ProjectContext, result: CompileResult): Promise<InstallPlan>`. Managed CSS records identify selector, property, last-applied value, and whether the declaration existed before adoption. Plans also save the resolved local preset/config/lock. Template default-prop changes are reported as future-generation changes rather than TSX edits.
 
-- [ ] Write failing tests proving requested palette changes in `:root` and the configured dark selector, required `@theme inline` mappings, preservation of unrelated comments/imports/selectors, and byte-identical no-op repeat application after the first plan is applied to a test fixture. An edited managed token conflicts; an unrelated declaration edit does not.
-- [ ] Add explicit fixtures for duplicate declarations, multiple matching selector blocks, a custom dark selector, and existing upstream-only tokens. Require ambiguity diagnostics before writes, preservation of unrelated tokens, and no dependency operations or component changes for theme-only plans.
-- [ ] Run `pnpm exec vitest run packages/cli/test/theme.test.ts`; expect missing theme planner failures.
+- [x] Write failing tests proving requested palette changes in `:root` and the configured dark selector, required `@theme inline` mappings, preservation of unrelated comments/imports/selectors, and byte-identical no-op repeat application after the first plan is applied to a test fixture. An edited managed token conflicts; an unrelated declaration edit does not.
+- [x] Add explicit fixtures for duplicate declarations, multiple matching selector blocks, a custom dark selector, and existing upstream-only tokens. Require ambiguity diagnostics before writes, preservation of unrelated tokens, and no dependency operations or component changes for theme-only plans.
+- [x] Run `pnpm exec vitest run packages/cli/test/theme.test.ts`; expect missing theme planner failures.
 
 ```ts
 expect(repeatedPlan.changes.every(change => change.action === 'noop')).toBe(true)
 expect(themeOnlyPlan.dependencyPlan).toEqual([])
 ```
-- [ ] Implement a PostCSS patch with declaration-level provenance. Compare previous managed values before updating, preserve unowned content and existing aliases/style configuration, and emit only necessary stylesheet/import changes. Do not replace the complete stylesheet with generated CSS.
-- [ ] Run targeted tests and `pnpm typecheck`; require no-op and conflict proofs in addition to expected token values.
-- [ ] Commit as `feat: plan repeatable theme merges with declaration provenance`.
+- [x] Implement a PostCSS patch with declaration-level provenance. Compare previous managed values before updating, preserve unowned content and existing aliases/style configuration, and emit only necessary stylesheet/import changes. Do not replace the complete stylesheet with generated CSS.
+- [x] Run targeted tests and `pnpm typecheck`; require no-op and conflict proofs in addition to expected token values.
+- [x] Commit as `feat: plan repeatable theme merges with declaration provenance`.
 
 ## Task 7: Safe writes, concurrency control, and dependency failure recovery
 
