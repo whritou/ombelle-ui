@@ -45,13 +45,14 @@ export type ProjectLock = {
   artifacts: Record<string, InstalledArtifact>
   managedDeclarations: ManagedDeclaration[]
 }
+export type PackageManager = 'pnpm' | 'npm'
 export type ProjectConfig = {
   configVersion: 1
   platform: 'react-web'
   language: 'tsx'
   presetFile: string
   lockFile: string
-  packageManager: 'auto' | 'pnpm'
+  packageManager: 'auto' | PackageManager
   theme: { strategy: 'merge'; cssEntry: string; darkSelector?: string }
   paths: { components: string; styleOutput: string; recipeOutput?: string }
   registryBase?: string
@@ -60,7 +61,7 @@ export type ProjectContext = {
   preconditions: Record<string, string | null>
   root: string
   framework: 'vite' | 'next'
-  manager: 'pnpm'
+  manager: PackageManager
   cssEntry: string
   darkSelector: string
   componentsDir: string
@@ -91,6 +92,7 @@ export type FileChange = {
   action: 'create' | 'update' | 'noop' | 'conflict'
 }
 export type InstallPlan = {
+  packageManager: PackageManager
   preconditions: Record<string, string | null>
   projectRoot: string
   preset: ResolvedPreset

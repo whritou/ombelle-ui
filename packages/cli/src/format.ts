@@ -4,6 +4,7 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     command,
     status,
     projectRoot: plan.projectRoot,
+    packageManager: plan.packageManager,
     presetHash: plan.preset.hash,
     ...plan.provenance,
     changes: plan.changes,

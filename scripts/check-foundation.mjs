@@ -109,6 +109,9 @@ await fs.writeFile(
       status: 'passed',
       counts,
       browserVersion,
+      npmVersion: JSON.parse(
+        await fs.readFile('.artifacts/npm-version.json', 'utf8'),
+      ),
     },
     null,
     2,

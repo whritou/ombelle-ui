@@ -4,7 +4,7 @@ import fs from 'node:fs'
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
 for (const family of ['flat', 'neo-brutalism'])
   for (const mode of ['light', 'dark'])
-    for (const app of ['preview', 'vite', 'next'])
+    for (const app of ['preview', 'vite', 'next', 'npm-vite', 'npm-next'])
       test(
         family + ' ' + mode + ' ' + app + ' keyboard and accessibility',
         async ({ page }) => {

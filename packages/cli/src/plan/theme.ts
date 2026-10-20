@@ -33,6 +33,7 @@ export async function planTheme(
     )
   }
   const plan: InstallPlan = {
+    packageManager: context.manager,
     preconditions: context.preconditions,
     projectRoot: context.root,
     preset: result.preset,

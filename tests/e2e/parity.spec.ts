@@ -21,7 +21,7 @@ for (const family of ['flat', 'neo-brutalism'])
       family + ' ' + mode + ' visual DOM and artifact parity',
       async ({ page }) => {
         let reference: Buffer | undefined, dom: unknown, styles: unknown
-        for (const app of ['preview', 'vite', 'next']) {
+        for (const app of ['preview', 'vite', 'next', 'npm-vite', 'npm-next']) {
           const url =
             app === 'preview'
               ? 'http://127.0.0.1:4173/' + family + '/'

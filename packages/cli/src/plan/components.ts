@@ -35,7 +35,7 @@ export function projectConfig(context: ProjectContext): ProjectConfig {
       language: 'tsx',
       presetFile: './ui-preset.json',
       lockFile: './ui-library.lock.json',
-      packageManager: 'auto',
+      packageManager: context.manager,
       theme: { strategy: 'merge', cssEntry: context.cssEntry },
       paths: {
         components: context.componentsDir,
@@ -86,6 +86,7 @@ export async function planAdd(
       'components.json',
     )
   const plan: InstallPlan = {
+    packageManager: context.manager,
     preconditions: context.preconditions,
     projectRoot: context.root,
     preset: result.preset,

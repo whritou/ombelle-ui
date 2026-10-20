@@ -54,6 +54,7 @@ export async function inspectProject(cwd: string): Promise<ProjectContext> {
     'yarn.lock',
     'bun.lock',
     'bun.lockb',
+    'npm-shrinkwrap.json',
   ]
   const present: string[] = []
   for (const name of lockNames) {
@@ -61,13 +62,31 @@ export async function inspectProject(cwd: string): Promise<ProjectContext> {
     preconditions[name] = text === null ? null : await sha256(text)
     if (text !== null) present.push(name)
   }
+  const declared =
+    typeof pkg.packageManager === 'string'
+      ? /^(npm|pnpm)@\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.exec(
+          pkg.packageManager,
+        )?.[1]
+      : undefined
+  const locked =
+    present[0] === 'package-lock.json'
+      ? 'npm'
+      : present[0] === 'pnpm-lock.yaml'
+        ? 'pnpm'
+        : undefined
   if (
     present.length > 1 ||
-    present.some((p) => p !== 'pnpm-lock.yaml') ||
-    (pkg.packageManager && !/^pnpm@\d/.test(pkg.packageManager)) ||
-    (!pkg.packageManager && present.length === 0)
+    (present.length && !locked) ||
+    (pkg.packageManager !== undefined && !declared) ||
+    (declared && locked && declared !== locked) ||
+    (!declared && !locked)
   )
-    throw bad('Foundation requires an unambiguous pnpm application')
+    throw bad(
+      'Choose an unambiguous npm or pnpm application; align packageManager and its single lockfile',
+    )
+  const manager = (declared ?? locked) as 'npm' | 'pnpm'
+  const npmrc = await readText(root, '.npmrc')
+  preconditions['.npmrc'] = npmrc === null ? null : await sha256(npmrc)
   const deps = { ...pkg.devDependencies, ...pkg.dependencies }
   const framework = deps.next ? 'next' : deps.vite ? 'vite' : undefined
   if (!framework || !deps.react || !/^\D*4\./.test(deps.tailwindcss ?? ''))
@@ -88,6 +107,15 @@ export async function inspectProject(cwd: string): Promise<ProjectContext> {
       !config.lockFile)
   )
     throw bad('Unsupported Ombelle project configuration')
+  if (
+    config &&
+    config.packageManager !== undefined &&
+    config.packageManager !== 'auto' &&
+    config.packageManager !== manager
+  )
+    throw bad(
+      'Ombelle packageManager must match the target app; use auto or align its configuration',
+    )
   const upstream = await loadJson('components.json')
   const tsconfig = await loadJson('tsconfig.json')
   const paths = tsconfig?.compilerOptions?.paths
@@ -162,7 +190,7 @@ export async function inspectProject(cwd: string): Promise<ProjectContext> {
     preconditions,
     root,
     framework,
-    manager: 'pnpm',
+    manager,
     cssEntry,
     darkSelector: config?.theme.darkSelector ?? '.dark',
     componentsDir,
