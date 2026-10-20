@@ -5,6 +5,7 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     status,
     projectRoot: plan.projectRoot,
     packageManager: plan.packageManager,
+    ...(plan.managerWarning ? { managerWarning: plan.managerWarning } : {}),
     presetHash: plan.preset.hash,
     ...plan.provenance,
     changes: plan.changes,
@@ -24,6 +25,7 @@ export function formatPlan(
     status +
     '\n' +
     plan.changes.map((c) => c.action + ' ' + c.path).join('\n') +
+    (plan.managerWarning ? '\nWarning: ' + plan.managerWarning : '') +
     (plan.dependencyPlan.length
       ? '\nDependencies: ' +
         plan.dependencyPlan.map((d) => d.name + '@' + d.version).join(', ')

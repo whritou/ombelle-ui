@@ -6,13 +6,16 @@ import type { CompileResult } from '@ombelle/contracts'
 import { createProject } from '../tests/helpers/projects.js'
 import { managerEntry } from '../packages/cli/src/apply/manager.js'
 import { createNpmProject } from '../tests/helpers/npm-project.js'
+import { createYarnProject, type YarnFixtureId } from '../tests/helpers/yarn-project.js'
 import { run, pnpmEntry } from './process.js'
 type Fixture = {
   root: string
   port: number
   framework: 'vite' | 'next'
   family: 'flat' | 'neo-brutalism'
-  manager: 'pnpm' | 'npm'
+  manager: 'pnpm' | 'npm' | 'yarn'
+  version?: string
+  linker?: string
 }
 const repo = process.cwd(),
   map: Record<string, Fixture> = {},
@@ -220,7 +223,52 @@ for (const manager of ['pnpm', 'npm'] as const)
         throw new Error('Foreign manager lockfile created: ' + key)
       proof[key] = artifacts
     }
+for (const id of ['classic-vite', 'modern-next', 'pnp-vite'] as const satisfies readonly YarnFixtureId[]) {
+  const fixture = await createYarnProject(id),
+    key = 'yarn-' + id,
+    version = fixture.version
+  map[key] = { root: fixture.root, port: port++, framework: fixture.framework, family: 'flat', manager: 'yarn', version, linker: fixture.linker }
+  await fs.writeFile(fixture.root + '/.ombelle-fixture.json', JSON.stringify({ owner: repo, framework: fixture.framework, family: 'flat' }))
+  await fs.writeFile('.artifacts/consumers.json', JSON.stringify(map, null, 2))
+  console.log('Preparing yarn ' + version + ' / ' + fixture.framework + ' / ' + fixture.linker)
+  await fs.writeFile(fixture.root + '/src/index.css', await fs.readFile('fixtures/shared/base.css', 'utf8'))
+  await fs.writeFile(fixture.root + '/src/scenario.tsx', (await fs.readFile('fixtures/shared/scenario.tsx', 'utf8')).replaceAll('STYLE_FAMILY', 'flat'))
+  const cli = path.join(repo, 'packages/cli/dist/main.js'), preset = path.join(repo, 'packages/catalog/src/presets/flat.json')
+  const priorExecPath = process.env.npm_execpath
+  const priorYarnEntry = process.env.OMBELLE_YARN_ENTRY
+  process.env.npm_execpath = fixture.entry
+  process.env.OMBELLE_YARN_ENTRY = fixture.entry
+  for (const args of [['init', '--preset', preset], ['add', 'button', 'dialog'], ['add', 'input']])
+    await run(process.execPath, [cli, ...args, '--cwd', fixture.root, '--yes', '--json'], repo)
+  if (priorExecPath === undefined) delete process.env.npm_execpath
+  else process.env.npm_execpath = priorExecPath
+  if (priorYarnEntry === undefined) delete process.env.OMBELLE_YARN_ENTRY
+  else process.env.OMBELLE_YARN_ENTRY = priorYarnEntry
+  const lock = JSON.parse(await fs.readFile(fixture.root + '/ui-library.lock.json', 'utf8')),
+    canonical = JSON.parse(await fs.readFile('apps/preview/src/generated/flat/manifest.json', 'utf8')) as CompileResult,
+    artifacts = []
+  for (const [file, record] of Object.entries(lock.artifacts) as [string, { logicalPath: string; sha256: string }][]) {
+    const source = await fs.readFile(path.join(fixture.root, file), 'utf8'), reference = canonical.artifacts.find(a => a.logicalPath === record.logicalPath)
+    if (source.includes('@ombelle/') || !reference || source !== reference.content || await sha256(source) !== record.sha256)
+      throw new Error('Installed source differs from independent canonical artifacts: ' + file)
+    artifacts.push({ path: file, logicalPath: reference.logicalPath, sha256: record.sha256 })
+  }
+  const foreign = await fs.stat(fixture.root + '/package-lock.json').then(() => true, () => false) || await fs.stat(fixture.root + '/pnpm-lock.yaml').then(() => true, () => false)
+  if (foreign) throw new Error('Foreign manager lockfile created: ' + key)
+  if (fixture.linker === 'pnp' && await fs.stat(fixture.root + '/node_modules').then(() => true, () => false)) throw new Error('PnP fixture unexpectedly created node_modules')
+  const auditArgs = version.startsWith('1.') ? ['audit', '--groups', 'dependencies', '--json'] : ['npm', 'audit', '--environment', 'production', '--json']
+  const audit = await run(process.execPath, [fixture.entry, ...auditArgs], fixture.root)
+  await fs.writeFile('.artifacts/audit-' + key + '.json', audit)
+  const actualLock = await fs.readFile(fixture.root + '/yarn.lock', 'utf8')
+  if (actualLock === '' || !(await fs.readFile(fixture.root + '/package.json', 'utf8')).includes('"packageManager": "yarn@' + version + '"')) throw new Error('Yarn fixture metadata missing: ' + key)
+  proof[key] = { version, linker: fixture.linker, framework: fixture.framework, lockfile: 'yarn.lock', artifacts, audit: 'passed', immutableInstall: true, noForeignLockfiles: true }
+  await fs.writeFile('.artifacts/consumers.json', JSON.stringify(map, null, 2))
+  await fs.writeFile('.artifacts/install-provenance.json', JSON.stringify(proof, null, 2))
+}
 await fs.writeFile(
   '.artifacts/install-provenance.json',
   JSON.stringify(proof, null, 2),
 )
+const yarnRows = Object.fromEntries(Object.entries(proof).filter(([key]) => key.startsWith('yarn-')))
+await fs.writeFile('.artifacts/yarn-matrix.json', JSON.stringify(yarnRows, null, 2))
+await fs.writeFile('.artifacts/yarn-versions.json', JSON.stringify({ classic: '1.22.22', modern: '4.18.1' }, null, 2))

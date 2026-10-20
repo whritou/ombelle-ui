@@ -7,6 +7,7 @@ import {
   type ProjectContext,
   type ProjectConfig,
   type ProjectLock,
+  type PackageManager,
 } from '@ombelle/contracts'
 import { safePath, portable } from './paths.js'
 export async function readText(
@@ -30,7 +31,19 @@ export async function readJson(root: string, relative: string): Promise<any> {
     throw new FoundationError('INVALID_DATA', 'Invalid JSON', relative)
   }
 }
-export async function inspectProject(cwd: string): Promise<ProjectContext> {
+function declaredManager(value: unknown): PackageManager | undefined {
+  if (typeof value !== 'string') return undefined
+  const ordinary = /^(npm|pnpm)@\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.exec(value)
+  if (ordinary) return ordinary[1] as PackageManager
+  if (/^yarn@\d+\.\d+\.\d+(?:\+sha224\.[A-Za-z0-9+/]+={0,2})?$/.test(value))
+    return 'yarn'
+  return undefined
+}
+
+export async function inspectProject(
+  cwd: string,
+  explicitManager?: PackageManager,
+): Promise<ProjectContext> {
   const root = await fs.realpath(path.resolve(cwd))
   const preconditions: Record<string, string | null> = {}
   const loadJson = async (relative: string) => {
@@ -62,29 +75,30 @@ export async function inspectProject(cwd: string): Promise<ProjectContext> {
     preconditions[name] = text === null ? null : await sha256(text)
     if (text !== null) present.push(name)
   }
-  const declared =
-    typeof pkg.packageManager === 'string'
-      ? /^(npm|pnpm)@\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.exec(
-          pkg.packageManager,
-        )?.[1]
-      : undefined
+  const declared = declaredManager(pkg.packageManager)
   const locked =
-    present[0] === 'package-lock.json'
-      ? 'npm'
-      : present[0] === 'pnpm-lock.yaml'
-        ? 'pnpm'
-        : undefined
+    present.length === 1
+      ? ({
+          'package-lock.json': 'npm',
+          'pnpm-lock.yaml': 'pnpm',
+          'yarn.lock': 'yarn',
+        } as Record<string, PackageManager>)[present[0]]
+      : undefined
   if (
     present.length > 1 ||
     (present.length && !locked) ||
     (pkg.packageManager !== undefined && !declared) ||
-    (declared && locked && declared !== locked) ||
-    (!declared && !locked)
+    (!explicitManager && declared && locked && declared !== locked) ||
+    (explicitManager && locked && explicitManager !== locked) ||
+    (explicitManager && declared && explicitManager !== declared && locked !== explicitManager) ||
+    (!explicitManager && !declared && !locked)
   )
     throw bad(
-      'Choose an unambiguous npm or pnpm application; align packageManager and its single lockfile',
+      'Choose an unambiguous npm, pnpm, or Yarn application; align manager evidence and its single lockfile',
     )
-  const manager = (declared ?? locked) as 'npm' | 'pnpm'
+  const manager = explicitManager ?? declared ?? locked
+  if (!manager)
+    throw bad('Choose a package manager for the target application')
   const npmrc = await readText(root, '.npmrc')
   preconditions['.npmrc'] = npmrc === null ? null : await sha256(npmrc)
   const deps = { ...pkg.devDependencies, ...pkg.dependencies }

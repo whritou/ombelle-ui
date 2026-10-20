@@ -27,7 +27,7 @@ export default defineConfig({
       url: 'http://127.0.0.1:4173',
       reuseExistingServer: false,
     },
-    ...Object.entries(fixtures).map(([id, f]) => ({
+    ...Object.entries(fixtures).filter(([id]) => !id.startsWith('yarn-')).map(([id, f]) => ({
       command: 'pnpm exec tsx scripts/serve-consumer.ts ' + id,
       url: 'http://127.0.0.1:' + f.port,
       reuseExistingServer: false,

@@ -112,6 +112,12 @@ await fs.writeFile(
       npmVersion: JSON.parse(
         await fs.readFile('.artifacts/npm-version.json', 'utf8'),
       ),
+      yarnVersions: JSON.parse(
+        await fs.readFile('.artifacts/yarn-versions.json', 'utf8'),
+      ),
+      yarnMatrix: JSON.parse(
+        await fs.readFile('.artifacts/yarn-matrix.json', 'utf8'),
+      ),
     },
     null,
     2,

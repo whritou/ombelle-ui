@@ -87,6 +87,16 @@ export async function planAdd(
     )
   const plan: InstallPlan = {
     packageManager: context.manager,
+    ...(context.packageJson.packageManager &&
+    context.packageJson.packageManager.split('@')[0] !== context.manager
+      ? {
+          managerWarning:
+            'Using explicit package manager ' +
+            context.manager +
+            ' despite package.json declaring ' +
+            context.packageJson.packageManager.split('@')[0] + '.',
+        }
+      : {}),
     preconditions: context.preconditions,
     projectRoot: context.root,
     preset: result.preset,

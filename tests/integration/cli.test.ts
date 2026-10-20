@@ -118,6 +118,49 @@ it('returns dependency failure with recovery information', async () => {
   expect(failed.data.error.recovery.sourceRestored).toBe(true)
   expect(failed.data.error.recovery.packageStateMayHaveChanged).toBe(true)
 })
+it('reports Yarn-specific dependency failure and recovery information', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  await fs.rm(root + '/pnpm-lock.yaml')
+  await fs.writeFile(root + '/yarn.lock', '# yarn lockfile\n')
+  const pkg = JSON.parse(await fs.readFile(root + '/package.json', 'utf8'))
+  pkg.packageManager = 'yarn@4.18.1'
+  await fs.writeFile(root + '/package.json', JSON.stringify(pkg))
+  const preset = path.resolve('examples/preset.example.json')
+  expect((await command(['init', '--preset', preset, '--cwd', root, '--yes'])).exitCode).toBe(0)
+  const fake = root + '/yarn.cjs'
+  await fs.writeFile(fake, `if (process.argv[2] === '--version') process.stdout.write('4.18.1')\nelse process.exit(1)\n`)
+  const failed = await command(['add', 'button', '--cwd', root, '--yes'], {
+    ...process.env,
+    npm_execpath: fake,
+  })
+  expect(failed.exitCode, JSON.stringify(failed.data)).toBe(6)
+  expect(failed.data.error.message).toContain('yarn installation failed')
+  expect(failed.data.error.nextAction).toContain('with yarn')
+  expect(failed.data.error.recovery.sourceRestored).toBe(true)
+  expect(failed.data.error.recovery.packageStateMayHaveChanged).toBe(true)
+  await expect(fs.access(root + '/src/components/ui/button.tsx')).rejects.toMatchObject({ code: 'ENOENT' })
+})
+it('rejects an unsupported Yarn executable before writing consumer source', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  await fs.rm(root + '/pnpm-lock.yaml')
+  await fs.writeFile(root + '/yarn.lock', '# yarn lockfile\n')
+  const pkg = JSON.parse(await fs.readFile(root + '/package.json', 'utf8'))
+  pkg.packageManager = 'yarn@4.18.1'
+  await fs.writeFile(root + '/package.json', JSON.stringify(pkg))
+  const preset = path.resolve('examples/preset.example.json')
+  expect((await command(['init', '--preset', preset, '--cwd', root, '--yes'])).exitCode).toBe(0)
+  const fake = root + '/yarn.cjs'
+  await fs.writeFile(fake, `if (process.argv[2] === '--version') process.stdout.write('0.0.0')\nelse process.exit(1)\n`)
+  const before = await snapshotTree(root)
+  const failed = await command(['add', 'button', '--cwd', root, '--yes'], {
+    ...process.env,
+    npm_execpath: fake,
+  })
+  expect(failed.exitCode, JSON.stringify(failed.data)).toBe(3)
+  expect(await snapshotTree(root)).toEqual(before)
+})
 
 it('rejects schema-invalid JSON before selecting generator releases', async () => {
   const root = await createProject('vite')

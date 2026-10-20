@@ -20,6 +20,12 @@ jobs:
           version: 11.25.0
           run_install: false
       - run: npm install --global npm@11.19.0 --ignore-scripts
+      - run: corepack enable
+      - name: Prepare Yarn releases outside the project
+        working-directory: ${{ runner.temp }}
+        run: |
+          corepack yarn@1.22.22 --version
+          corepack yarn@4.18.1 --version
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check:foundation
@@ -32,6 +38,8 @@ jobs:
             .artifacts/logs
             .artifacts/*results.json
             .artifacts/npm-version.json
+            .artifacts/yarn-versions.json
+            .artifacts/yarn-matrix.json
             .artifacts/browser-version.json
             .artifacts/foundation-report.json
             .artifacts/install-provenance.json

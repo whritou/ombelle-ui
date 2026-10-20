@@ -45,7 +45,7 @@ export type ProjectLock = {
   artifacts: Record<string, InstalledArtifact>
   managedDeclarations: ManagedDeclaration[]
 }
-export type PackageManager = 'pnpm' | 'npm'
+export type PackageManager = 'pnpm' | 'npm' | 'yarn'
 export type ProjectConfig = {
   configVersion: 1
   platform: 'react-web'
@@ -93,6 +93,7 @@ export type FileChange = {
 }
 export type InstallPlan = {
   packageManager: PackageManager
+  managerWarning?: string
   preconditions: Record<string, string | null>
   projectRoot: string
   preset: ResolvedPreset

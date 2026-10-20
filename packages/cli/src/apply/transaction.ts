@@ -10,12 +10,17 @@ import {
 import { sha256 } from '@ombelle/compiler'
 import { safePath } from '../project/paths.js'
 import { readText } from '../project/inspect.js'
-import { runDependencies } from './manager.js'
+import {
+  prepareManager,
+  runDependencies,
+  type PreparedManager,
+} from './manager.js'
 export type ApplyPorts = {
   dependencies?: (
     root: string,
     deps: Dependency[],
     manager: PackageManager,
+    prepared?: PreparedManager,
   ) => Promise<void>
   beforeWrite?: (file: string, index: number) => Promise<void>
 }
@@ -48,6 +53,10 @@ export async function applyPlan(
     seen.add(key)
     await safePath(plan.projectRoot, c.path)
   }
+  const prepared =
+    plan.dependencyPlan.length && !ports.dependencies
+      ? await prepareManager(plan.projectRoot, plan.packageManager)
+      : undefined
   const lockPath = await safePath(plan.projectRoot, '.ombelle-operation.lock')
   let operation: fs.FileHandle
   try {
@@ -121,6 +130,7 @@ export async function applyPlan(
         plan.projectRoot,
         plan.dependencyPlan,
         plan.packageManager,
+        prepared,
       )
     }
     await fs.rm(folder, { recursive: true })
