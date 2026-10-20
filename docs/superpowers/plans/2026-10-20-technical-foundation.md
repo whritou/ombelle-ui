@@ -62,17 +62,17 @@ Each package gets its own `package.json` and `tsconfig.json` when first introduc
 
 **Interfaces:** Export schema-derived `Preset`, `ComponentId = 'button' | 'dialog' | 'input'`, and `StyleFamily = 'flat' | 'neo-brutalism'` for the supported foundation catalog. Export `validatePreset(input: unknown): Preset` and `FoundationError` with `code`, `message`, optional `path`, and `nextAction`. A schema-valid style outside the foundation catalog is rejected by catalog resolution, not by silently narrowing the original public schema.
 
-- [ ] Select compatible exact versions using official package documentation and the host runtime. Record versions and upstream edition/style identifier in `0001-toolchain.md`. Audit new dependencies before installation according to the applicable dependency skill. Create the workspace and install tooling, schema-derived typing support, and Ajv's 2020-12 validator; commit the pnpm lockfile. Do not guess the final upstream style identifier.
-- [ ] Add a failing test that `validatePreset(existingExample)` preserves the example's `styleFamily`, while an extra top-level `surprise: true` and `design.radiusRem: 3` each throw `FoundationError` with code `INVALID_DATA` and the offending JSON pointer. Add syntactically plausible but numerically invalid OKLCH values and non-finite numbers to the semantic rejection cases.
-- [ ] Run `pnpm exec vitest run packages/contracts/test/validate.test.ts`; expect missing implementation failures after the runner is configured, not an infrastructure error.
+- [x] Select compatible exact versions using official package documentation and the host runtime. Record versions and upstream edition/style identifier in `0001-toolchain.md`. Audit new dependencies before installation according to the applicable dependency skill. Create the workspace and install tooling, schema-derived typing support, and Ajv's 2020-12 validator; commit the pnpm lockfile. Do not guess the final upstream style identifier.
+- [x] Add a failing test that `validatePreset(existingExample)` preserves the example's `styleFamily`, while an extra top-level `surprise: true` and `design.radiusRem: 3` each throw `FoundationError` with code `INVALID_DATA` and the offending JSON pointer. Add syntactically plausible but numerically invalid OKLCH values and non-finite numbers to the semantic rejection cases.
+- [x] Run `pnpm exec vitest run packages/contracts/test/validate.test.ts`; expect missing implementation failures after the runner is configured, not an infrastructure error.
 
 ```ts
 expect(validatePreset(existingExample).styleFamily).toBe('neo-brutalism')
 expect(() => validatePreset({ ...existingExample, surprise: true })).toThrow(FoundationError)
 ```
-- [ ] Implement `validatePreset` using the existing schema plus semantic checks. Keep validation independent of browser/Node I/O. Derive or generate checked types from the schema. Define root `build:packages` for dependency-ordered library/CLI builds, `build`, `typecheck`, `test:unit`, and `test:integration`; use non-watch test mode. Exclude Playwright specs from Vitest discovery. The default `test` script must build packages before subprocess integration tests; register only scripts for packages/tests that exist at the current task.
-- [ ] Run `pnpm typecheck` and the targeted test; require passing results. Record that the schema permits four visual families but the foundation catalog supports two.
-- [ ] Commit the contract deliverable and tooling as `build: establish workspace and validated preset contracts` using explicit file paths.
+- [x] Implement `validatePreset` using the existing schema plus semantic checks. Keep validation independent of browser/Node I/O. Derive or generate checked types from the schema. Define root `build:packages` for dependency-ordered library/CLI builds, `build`, `typecheck`, `test:unit`, and `test:integration`; use non-watch test mode. Exclude Playwright specs from Vitest discovery. The default `test` script must build packages before subprocess integration tests; register only scripts for packages/tests that exist at the current task.
+- [x] Run `pnpm typecheck` and the targeted test; require passing results. Record that the schema permits four visual families but the foundation catalog supports two.
+- [x] Commit the contract deliverable and tooling as `build: establish workspace and validated preset contracts` using explicit file paths.
 
 ## Task 2: A reviewed three-component catalog
 

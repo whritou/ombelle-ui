@@ -1,0 +1,26 @@
+{
+  "name": "ombelle-foundation",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": "24.19.0"
+  },
+  "scripts": {
+    "build:packages": "node scripts/sync-schema.mjs && node scripts/build.mjs",
+    "build": "pnpm build:packages",
+    "typecheck": "node scripts/sync-schema.mjs && tsc --noEmit",
+    "test:unit": "vitest run packages",
+    "test:integration": "vitest run tests/integration",
+    "test": "pnpm build:packages && pnpm test:unit"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "ajv": "8.20.0",
+    "json-schema-to-ts": "3.1.1",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5",
+    "tsx": "4.23.15",
+    "esbuild": "0.28.2"
+  }
+}
