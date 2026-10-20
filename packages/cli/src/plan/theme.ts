@@ -8,7 +8,7 @@ import {appendState,baseLock,fileChange} from './components.js'
 export async function planTheme(context:ProjectContext,result:CompileResult):Promise<InstallPlan>{
  const original=await readText(context.root,context.cssEntry);if(original===null)throw new FoundationError('UNSUPPORTED_PROJECT','Missing global CSS',context.cssEntry)
  let css:postcss.Root;try{css=postcss.parse(original)}catch{throw new FoundationError('INVALID_DATA','Cannot parse global CSS',context.cssEntry)}
- const plan:InstallPlan={projectRoot:context.root,preset:result.preset,provenance:result.provenance,changes:[],managedDeclarations:[],dependencyPlan:[],diagnostics:[],networkAccess:false}
+ const plan:InstallPlan={preconditions:context.preconditions,projectRoot:context.root,preset:result.preset,provenance:result.provenance,changes:[],managedDeclarations:[],dependencyPlan:[],diagnostics:[],networkAccess:false}
  const lock=baseLock(context,result),records:ManagedDeclaration[]=[]
  for(const [selector,values]of [[":root",result.theme.light],[context.darkSelector,result.theme.dark],["@theme inline",result.theme.theme]] as const){
  const matches=css.nodes.filter(n=>selector==='@theme inline'?n.type==='atrule'&&n.name==='theme'&&n.params==='inline':n.type==='rule'&&n.selector===selector) as (Rule|AtRule)[]

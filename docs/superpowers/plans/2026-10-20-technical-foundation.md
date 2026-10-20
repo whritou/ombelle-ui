@@ -170,16 +170,16 @@ expect(themeOnlyPlan.dependencyPlan).toEqual([])
 
 **Interfaces:** `applyPlan(plan: InstallPlan, ports?: ApplyPorts): Promise<ApplyResult>`; `runDependencies(root: string, dependencies: { name: string; version: string }[]): Promise<void>`. `ApplyPorts` permits injected rename/write/dependency failure hooks for tests while the production path uses real filesystem/process adapters. `ApplyResult` includes status, written paths, and recovery details. Error codes map to the starter CLI exit-code contract: invalid data 2, unsupported project 3, conflict 4, resolution/integrity 5, dependency/recovery 6, unexpected failure 1.
 
-- [ ] Write failing tests for successful writes and recorded final hashes, edited-after-plan conflicts, escaping symlink replacement between planning and application, simultaneous processes targeting the same app, mid-write failure restoration, and simulated dependency failure. Assert explicit incomplete/recovery status and preserved transaction data on incomplete recovery.
-- [ ] Run `pnpm exec vitest run packages/cli/test/transaction.test.ts packages/cli/test/manager.test.ts`; expect missing transaction implementation failures.
+- [x] Write failing tests for successful writes and recorded final hashes, edited-after-plan conflicts, escaping symlink replacement between planning and application, simultaneous processes targeting the same app, mid-write failure restoration, and simulated dependency failure. Assert explicit incomplete/recovery status and preserved transaction data on incomplete recovery.
+- [x] Run `pnpm exec vitest run packages/cli/test/transaction.test.ts packages/cli/test/manager.test.ts`; expect missing transaction implementation failures.
 
 ```ts
 await expect(applyPlan(stalePlan)).rejects.toMatchObject({ code: 'FILE_CONFLICT' })
 expect(await snapshotTree(root)).toEqual(treeAfterUserEdit)
 ```
-- [ ] Implement exclusive project operation locking with cleanup on normal failure, precondition and real-path rechecks, staged writes/backups, and rollback only of transaction-owned changes. Do not remove an unknown existing lock automatically; report recovery guidance. Run pnpm with argument arrays and `shell: false`; handle the Windows executable shim without interpolating commands into a shell string. No operation runs when dependencies are already satisfied or the plan is theme-only.
-- [ ] Verify local source/config restoration on package failure and report package lock/cache/node_modules uncertainty separately. Check touched source preconditions again before rollback so later user edits are not overwritten. Mark tests passed only when filesystem effects match the status.
-- [ ] Run targeted tests and `pnpm typecheck`, then commit as `feat: apply installation plans with conflict checks and recovery`.
+- [x] Implement exclusive project operation locking with cleanup on normal failure, precondition and real-path rechecks, staged writes/backups, and rollback only of transaction-owned changes. Do not remove an unknown existing lock automatically; report recovery guidance. Run pnpm with argument arrays and `shell: false`; handle the Windows executable shim without interpolating commands into a shell string. No operation runs when dependencies are already satisfied or the plan is theme-only.
+- [x] Verify local source/config restoration on package failure and report package lock/cache/node_modules uncertainty separately. Check touched source preconditions again before rollback so later user edits are not overwritten. Mark tests passed only when filesystem effects match the status.
+- [x] Run targeted tests and `pnpm typecheck`, then commit as `feat: apply installation plans with conflict checks and recovery`.
 
 ## Task 8: An executable CLI with fresh-process preset reuse
 

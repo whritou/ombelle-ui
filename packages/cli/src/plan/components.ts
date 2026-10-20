@@ -9,7 +9,7 @@ export function baseLock(context:ProjectContext,result:CompileResult):ProjectLoc
 export async function appendState(plan:InstallPlan,context:ProjectContext,result:CompileResult,lock:ProjectLock):Promise<void>{const config=projectConfig(context);for(const [p,obj,kind]of [[config.presetFile,result.preset.data,'preset'],['ui-library.config.json',config,'config'],[config.lockFile,lock,'lock']] as const)plan.changes.push(await fileChange(context.root,p,canonicalize(obj)+'\n',kind))}
 export async function planAdd(context:ProjectContext,result:CompileResult):Promise<InstallPlan>{
  if(context.upstream&&!['radix-nova','new-york'].includes(context.upstream.style))throw new FoundationError('UNSUPPORTED_PROJECT','Component primitive edition is not supported','components.json')
- const plan:InstallPlan={projectRoot:context.root,preset:result.preset,provenance:result.provenance,changes:[],managedDeclarations:context.lock?.managedDeclarations??[],dependencyPlan:[],diagnostics:[],networkAccess:false};const lock=baseLock(context,result),seen=new Set<string>()
+ const plan:InstallPlan={preconditions:context.preconditions,projectRoot:context.root,preset:result.preset,provenance:result.provenance,changes:[],managedDeclarations:context.lock?.managedDeclarations??[],dependencyPlan:[],diagnostics:[],networkAccess:false};const lock=baseLock(context,result),seen=new Set<string>()
  for(const a of result.artifacts.filter(a=>a.logicalPath!=='styles/ui-tokens.css')){
  const target=transformArtifact(context,a);const lower=target.path.toLowerCase();if(seen.has(lower))throw new FoundationError('FILE_CONFLICT','Duplicate destination',target.path);seen.add(lower)
  const c=await fileChange(context.root,target.path,target.content,a.kind),record=context.lock?.artifacts[target.path]
