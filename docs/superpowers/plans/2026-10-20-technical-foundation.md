@@ -10,7 +10,7 @@
 
 **Spec:** [Approved technical foundation design](../specs/2026-10-20-technical-foundation-design.md). Read both documents before execution.
 
-**Execution method:** Native execution, selected by Codex on 20 October 2026 at the user's request to review the plan and choose a method. Use `superpowers:executing-plans` when implementation is authorized. This review updates planning documents only.
+**Execution method:** Native execution, selected by Codex on 20 October 2026 at the user's request to review the plan and choose a method. Use `superpowers:executing-plans` when implementation is authorized. The user subsequently authorized implementation by selecting native execution.
 
 ## Global Constraints
 
@@ -225,11 +225,11 @@ await expect(page.getByRole('button', { name: 'Open dialog' })).toBeFocused()
 
 **Interfaces:** `pnpm check:foundation` runs `build:packages`, `test:unit`, `test:integration`, `generate:preview`, `prepare:consumers`, `typecheck`, `build:preview`, `build:consumers`, and `test:e2e` sequentially, stopping on the first failure. Each script owns only that stage; subprocess tests consume the existing package build, and browser tests consume prepared apps without recursively invoking the foundation gate. The workflow uses pinned Node/pnpm versions and a frozen root lockfile, installs only the required Playwright browser, and uploads failure screenshots/reports. Independently prepared consumer fixtures retain their own manager lockfiles. It does not publish or deploy.
 
-- [ ] Review Task 1–9 tests against every row in the spec's exit table; add an omitted behavioral proof to its owning test rather than writing a test that checks documentation text. Ensure registry integration remains an explicit check and is not accidentally excluded as network-dependent.
-- [ ] Wire `check:foundation` and the workflow. Run `pnpm check:foundation`; require an exit code of zero with no unacknowledged skipped required cases. This is the first whole-foundation gate, not a request to repeatedly broaden already passing checks.
-- [ ] Manually review Dialog keyboard behavior in flat and neo brutalism, light and dark. Record actual runtime/browser versions, commit, commands, pass/fail results, screenshots, skipped environment-dependent cases, and remaining limitations in `docs/evidence/foundation.md`. Do not fabricate manual or screen-reader evidence.
-- [ ] Update usage docs to distinguish foundation support from alpha goals: pnpm verified first; three components/two styles; no public editor, snapshot service, or native support. Record whether the upstream adapter was reused or the narrow fallback implemented.
-- [ ] Commit as `ci: gate technical foundation with reproducible integration evidence`.
+- [x] Review Task 1–9 tests against every row in the spec's exit table; add an omitted behavioral proof to its owning test rather than writing a test that checks documentation text. Ensure registry integration remains an explicit check and is not accidentally excluded as network-dependent.
+- [x] Wire `check:foundation` and the workflow. Run `pnpm check:foundation`; require an exit code of zero with no unacknowledged skipped required cases. This is the first whole-foundation gate, not a request to repeatedly broaden already passing checks.
+- [x] Manually review Dialog keyboard behavior in flat and neo brutalism, light and dark. Record actual runtime/browser versions, commit, commands, pass/fail results, screenshots, skipped environment-dependent cases, and remaining limitations in `docs/evidence/foundation.md`. Do not fabricate manual or screen-reader evidence.
+- [x] Update usage docs to distinguish foundation support from alpha goals: pnpm verified first; three components/two styles; no public editor, snapshot service, or native support. Record whether the upstream adapter was reused or the narrow fallback implemented.
+- [x] Commit as `ci: gate technical foundation with reproducible integration evidence`.
 
 ## Completion and execution handoff
 
@@ -239,7 +239,7 @@ Planning itself runs no product tests because no application has been implemente
 
 Native execution is selected at the user's request: the tasks share contracts and are mostly sequential, so keeping one implementer reduces context transfer. Use `superpowers:executing-plans` for implementation and follow its whole-branch review requirements. Do not claim this planning review is an independent implementation review; no product code exists yet.
 
-The user's current request is to review the plan and choose an execution method before implementation. That review and choice are complete; execution has not started. The next implementation task is Task 1 in the existing project repository, following applicable execution and worktree guidance when implementation is requested.
+The user authorized native execution after reviewing the plan. Implementation tasks are tracked above; final evidence and independent branch review are recorded in docs/evidence/foundation.md.
 
 ## Plan review record — 20 October 2026
 

@@ -1,6 +1,20 @@
 import { test, expect } from '@playwright/test'
 import fs from 'node:fs'
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
+test.beforeAll(async ({ browser }) => {
+  fs.writeFileSync(
+    '.artifacts/browser-version.json',
+    JSON.stringify(
+      {
+        engine: browser.browserType().name(),
+        version: browser.version(),
+        channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled Chromium',
+      },
+      null,
+      2,
+    ),
+  )
+})
 for (const family of ['flat', 'neo-brutalism'])
   for (const mode of ['light', 'dark'])
     test(
@@ -61,10 +75,14 @@ for (const family of ['flat', 'neo-brutalism'])
             styles = computed
             await test
               .info()
-              .attach(family + '-' + mode, {
-                body: image,
+              .attach('page-' + family + '-' + mode, {
+                body: await page.screenshot({ fullPage: true }),
                 contentType: 'image/png',
               })
+            await test.info().attach(family + '-' + mode, {
+              body: image,
+              contentType: 'image/png',
+            })
             const hashes = await page.evaluate(() =>
               Promise.all((window as any).__artifactHashes),
             )

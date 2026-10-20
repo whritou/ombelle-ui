@@ -16,7 +16,11 @@ export default defineConfig({
     reducedMotion: 'reduce',
     trace: 'retain-on-failure',
   },
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['json', { outputFile: '.artifacts/browser-results.json' }],
+    ['html', { open: 'never' }],
+  ],
   webServer: [
     {
       command: 'pnpm dev:preview',

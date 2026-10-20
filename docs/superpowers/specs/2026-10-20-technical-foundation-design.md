@@ -2,7 +2,7 @@
 
 Date: 20 October 2026
 
-Status: Approved for implementation planning on 20 October 2026. Implementation requires subsequent plan review and execution-method selection.
+Status: Approved and implemented through native execution. See [foundation evidence](../../evidence/foundation.md) for the verified support scope and review status.
 
 ## 1. Intent and agreed constraints
 

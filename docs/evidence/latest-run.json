@@ -1,0 +1,89 @@
+{
+  "startedAt": "2026-10-20T09:39:20.094Z",
+  "sourceCommit": "364be8240297cda15e24feacd9309d5fe5c50c3f",
+  "platform": "win32",
+  "node": "v24.19.0",
+  "steps": [
+    {
+      "name": "build:packages",
+      "exitCode": 0,
+      "durationMs": 1155,
+      "log": ".artifacts\\logs\\build-packages.log"
+    },
+    {
+      "name": "test:unit",
+      "exitCode": 0,
+      "durationMs": 5943,
+      "log": ".artifacts\\logs\\test-unit.log"
+    },
+    {
+      "name": "test:integration",
+      "exitCode": 0,
+      "durationMs": 14173,
+      "log": ".artifacts\\logs\\test-integration.log"
+    },
+    {
+      "name": "generate:preview",
+      "exitCode": 0,
+      "durationMs": 3326,
+      "log": ".artifacts\\logs\\generate-preview.log"
+    },
+    {
+      "name": "prepare:consumers",
+      "exitCode": 0,
+      "durationMs": 66699,
+      "log": ".artifacts\\logs\\prepare-consumers.log"
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "durationMs": 3367,
+      "log": ".artifacts\\logs\\typecheck.log"
+    },
+    {
+      "name": "build:preview",
+      "exitCode": 0,
+      "durationMs": 2152,
+      "log": ".artifacts\\logs\\build-preview.log"
+    },
+    {
+      "name": "build:consumers",
+      "exitCode": 0,
+      "durationMs": 22991,
+      "log": ".artifacts\\logs\\build-consumers.log"
+    },
+    {
+      "name": "test:e2e",
+      "exitCode": 0,
+      "durationMs": 51945,
+      "log": ".artifacts\\logs\\test-e2e.log"
+    }
+  ],
+  "completedAt": "2026-10-20T09:42:11.954Z",
+  "status": "passed",
+  "counts": {
+    "unit": {
+      "passed": 53,
+      "failed": 0,
+      "skipped": 0
+    },
+    "integration": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "startTime": "2026-10-20T09:41:21.994Z",
+      "duration": 49806.865999999995,
+      "expected": 16,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "browserVersion": {
+    "engine": "chromium",
+    "version": "155.0.4283.62",
+    "channel": "msedge"
+  }
+}

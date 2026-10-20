@@ -10,15 +10,16 @@
     "build:packages": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && node scripts/build.mjs",
     "build": "pnpm build:packages",
     "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",
-    "test:unit": "vitest run packages",
-    "test:integration": "vitest run tests/integration",
-    "test": "pnpm build:packages && pnpm test:unit",
+    "test:unit": "vitest run packages --reporter=default --reporter=json --outputFile=.artifacts/unit-results.json",
+    "test:integration": "vitest run tests/integration --reporter=default --reporter=json --outputFile=.artifacts/integration-results.json",
+    "test": "pnpm build:packages && pnpm test:unit && pnpm test:integration",
     "generate:preview": "tsx scripts/generate-preview.ts",
     "prepare:consumers": "tsx scripts/prepare-consumers.ts",
     "build:consumers": "tsx scripts/build-consumers.ts",
     "build:preview": "vite build apps/preview --config apps/preview/vite.config.ts",
     "test:e2e": "playwright test",
-    "dev:preview": "vite apps/preview --config apps/preview/vite.config.ts"
+    "dev:preview": "vite apps/preview --config apps/preview/vite.config.ts",
+    "check:foundation": "node scripts/check-foundation.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
