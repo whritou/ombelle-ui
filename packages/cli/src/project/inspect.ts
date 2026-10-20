@@ -12,6 +12,7 @@ import {
 } from '@ombelle/contracts'
 import { safePath, portable } from './paths.js'
 import { fingerprintFile } from './fingerprint.js'
+import { assertStandaloneProject } from './workspace.js'
 export async function readText(
   root: string,
   relative: string,
@@ -63,22 +64,7 @@ export async function inspectProject(
     new FoundationError('UNSUPPORTED_PROJECT', message, root)
   if (!pkg || typeof pkg !== 'object')
     throw bad('Target an existing application with package.json')
-  if (pkg.workspaces) throw bad('Workspace-wide installation is not supported; target an independently owned application')
-  for (let ancestor = path.dirname(root); ; ancestor = path.dirname(ancestor)) {
-    try {
-      const parent = JSON.parse(await fs.readFile(path.join(ancestor, 'package.json'), 'utf8'))
-      if (parent.workspaces) throw bad('The application is governed by a parent workspace; installation outside the target root is not supported')
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e
-    }
-    try {
-      await fs.access(path.join(ancestor, 'pnpm-workspace.yaml'))
-      throw bad('The application is governed by a parent pnpm workspace')
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e
-    }
-    if (ancestor === path.dirname(ancestor)) break
-  }
+  await assertStandaloneProject(root)
   const lockNames = [
     'pnpm-lock.yaml',
     'package-lock.json',

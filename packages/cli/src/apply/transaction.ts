@@ -11,6 +11,7 @@ import {
 import { sha256 } from '@ombelle/compiler'
 import { safePath } from '../project/paths.js'
 import { fingerprintFile } from '../project/fingerprint.js'
+import { assertStandaloneProject } from '../project/workspace.js'
 import {
   prepareManager,
   runDependencies,
@@ -88,6 +89,7 @@ export async function applyPlan(
           'File changed after planning',
           c.path,
         )
+    if (plan.dependencyPlan.length) await assertStandaloneProject(plan.projectRoot)
     const pending = plan.changes.filter((c) => c.action !== 'noop')
     if (!pending.length && !plan.dependencyPlan.length)
       return { status: 'success', writtenPaths: [] }
@@ -124,6 +126,7 @@ export async function applyPlan(
       })
     }
     if (plan.dependencyPlan.length) {
+      await assertStandaloneProject(plan.projectRoot)
       dependencyStarted = true
       await (ports.dependencies ?? runDependencies)(
         plan.projectRoot,
