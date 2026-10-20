@@ -187,17 +187,17 @@ expect(await snapshotTree(root)).toEqual(treeAfterUserEdit)
 
 **Interfaces:** `runCli(args: string[], io: { stdout(text: string): void; stderr(text: string): void }): Promise<number>` routes `init --preset`, `add`, and `theme add` plus `--cwd`, `--dry-run`, `--json`, and `--yes`. Use a dynamic import/entry wrapper that sets the process exit code. Dry-run returns the complete plan with no call to `applyPlan`. An interactive terminal requires confirmation for mutations unless `--yes` is set; noninteractive mutation requires `--yes`. This flag never resolves conflicts.
 
-- [ ] Write subprocess tests that initialize a temporary supported app using a local neo brutalist preset, add Button/Dialog, exit, then add Input in a new process without a preset argument. Assert the saved preset hash and style remain identical, all installed files have lock records, and the app's manager/lockfile format is unchanged.
-- [ ] Add failing tests for dry-run tree equality with an instrumented dependency runner, malformed local JSON, init on an existing shadcn app routing to theme-only changes, `--yes` on an edited component still returning exit 4, and dependency failure returning exit 6 with JSON recovery details.
-- [ ] Add a minimal executable entry that reports unsupported commands, then run `pnpm build:packages` and `pnpm exec vitest run tests/integration/cli.test.ts`; expect assertions about missing command behavior to fail. A missing built executable is a setup failure, not the intended behavioral red test. Subsequent test reruns rebuild the CLI first.
-- [ ] Implement command parsing and output. Route initialization through `compile` with an empty component list and `planTheme`; allow missing Ombelle state only on init/theme application and derive its new config from the detected supported app. `add` with no saved preset fails with initialization guidance. JSON includes `command`, `status`, `projectRoot`, `presetHash`, `catalogRelease`, `compilerVersion`, `changes`, `dependencyPlan`, `warnings`, and stable diagnostic records. Local preset files are not interpreted as arbitrary remote URLs. Preserve meaningful exit codes through the entry wrapper.
+- [x] Write subprocess tests that initialize a temporary supported app using a local neo brutalist preset, add Button/Dialog, exit, then add Input in a new process without a preset argument. Assert the saved preset hash and style remain identical, all installed files have lock records, and the app's manager/lockfile format is unchanged.
+- [x] Add failing tests for dry-run tree equality with an instrumented dependency runner, malformed local JSON, init on an existing shadcn app routing to theme-only changes, `--yes` on an edited component still returning exit 4, and dependency failure returning exit 6 with JSON recovery details.
+- [x] Add a minimal executable entry that reports unsupported commands, then run `pnpm build:packages` and `pnpm exec vitest run tests/integration/cli.test.ts`; expect assertions about missing command behavior to fail. A missing built executable is a setup failure, not the intended behavioral red test. Subsequent test reruns rebuild the CLI first.
+- [x] Implement command parsing and output. Route initialization through `compile` with an empty component list and `planTheme`; allow missing Ombelle state only on init/theme application and derive its new config from the detected supported app. `add` with no saved preset fails with initialization guidance. JSON includes `command`, `status`, `projectRoot`, `presetHash`, `catalogRelease`, `compilerVersion`, `changes`, `dependencyPlan`, `warnings`, and stable diagnostic records. Local preset files are not interpreted as arbitrary remote URLs. Preserve meaningful exit codes through the entry wrapper.
 
 ```ts
 expect(freshProcessResult.presetHash).toBe(initialResult.presetHash)
 expect(editedSourceProcess.exitCode).toBe(4)
 ```
-- [ ] Build the executable and rerun tests against built JS. Document only working local invocation forms; label public registry/package commands as future work.
-- [ ] Commit as `feat: expose foundation CLI with persistent presets and dry runs`.
+- [x] Build the executable and rerun tests against built JS. Document only working local invocation forms; label public registry/package commands as future work.
+- [x] Commit as `feat: expose foundation CLI with persistent presets and dry runs`.
 
 ## Task 9: Generated preview and independent consumer parity
 
