@@ -1,0 +1,18 @@
+{
+  "configVersion": 1,
+  "platform": "react-web",
+  "language": "tsx",
+  "presetFile": "./ui-preset.json",
+  "lockFile": "./ui-library.lock.json",
+  "registryBase": "https://ui.example.com",
+  "packageManager": "auto",
+  "theme": {
+    "strategy": "merge",
+    "cssEntry": "./src/app/globals.css"
+  },
+  "paths": {
+    "components": "./src/components/ui",
+    "styleOutput": "./src/styles/ui-style.css",
+    "recipeOutput": "./src/styles/ui-recipes"
+  }
+}

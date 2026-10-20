@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rc_primary-button",
+  "revision": 2,
+  "component": "button",
+  "presetRef": {
+    "id": "builtin-neo-brutalism",
+    "revision": 1,
+    "catalogRelease": "0.1.0",
+    "compilerVersion": "0.1.0"
+  },
+  "props": {"variant": "default", "size": "lg", "type": "button", "loading": false, "disabled": false},
+  "content": "Create project",
+  "overrides": {"radiusRem": 0, "borderWidthPx": 2, "minHeightPx": 44, "shadowOffsetXPx": 6, "shadowOffsetYPx": 6}
+}

@@ -1,0 +1,5 @@
+{
+  "registries": {
+    "@your-ui": "https://ui.example.com/r/0.1.0/{name}.json"
+  }
+}
