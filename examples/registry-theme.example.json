@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "theme-neo-brutalism",
+  "type": "registry:theme",
+  "title": "Neo Brutalism Palette and Tokens",
+  "description": "Illustrative theme-only registry artifact. This does not install component source or persist the product CLI preset configuration.",
+  "cssVars": {
+    "light": {
+      "background": "#FFFFFF",
+      "foreground": "#111111",
+      "primary": "#FACC15",
+      "primary-foreground": "#111111",
+      "border": "#111111",
+      "ring": "#1D4ED8",
+      "radius": "0rem"
+    },
+    "dark": {
+      "background": "#18181B",
+      "foreground": "#FAFAFA",
+      "primary": "#FACC15",
+      "primary-foreground": "#111111",
+      "border": "#FAFAFA",
+      "ring": "#93C5FD",
+      "radius": "0rem"
+    }
+  }
+}

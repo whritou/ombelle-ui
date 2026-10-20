@@ -1,0 +1,75 @@
+# Installation and Theme Merging
+
+## Mandatory first release behavior
+
+Support npm, pnpm, Yarn and Bun from alpha. Offer two clear website paths: initialize a new setup, or add styling to a project where shadcn is already initialized. The existing-project path merges palette and token values into the configured global stylesheet without rerunning shadcn initialization or reinstalling component source.
+
+Website copy: “If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css.”
+
+The examples below are proposed product commands. The namespace, package, preset ID and version are placeholders. Pin a tested CLI version and an immutable preset revision in generated production commands.
+
+## Commands for an existing shadcn project
+
+| Package runner | Command |
+| --- | --- |
+| npm | `npx @your-ui/cli@0.1.0 theme add ps_brand@3` |
+| pnpm | `pnpm dlx @your-ui/cli@0.1.0 theme add ps_brand@3` |
+| Yarn modern | `yarn dlx --package @your-ui/cli@0.1.0 your-ui theme add ps_brand@3` |
+| Bun | `bunx --bun --package @your-ui/cli@0.1.0 your-ui theme add ps_brand@3` |
+
+The package exposes a single binary named `your-ui`. Explicit package selection in the Yarn and Bun examples avoids relying on the binary being named `cli`. Bun's `--bun` flag deliberately exercises its runtime; the CLI must be tested under both Node and Bun.
+
+Yarn Classic does not supply the modern dlx workflow. Support it through a local development dependency (`yarn add --dev @your-ui/cli@0.1.0`, then `yarn your-ui theme add ps_brand@3`) or another runner with `--package-manager yarn`. A runner choice must not switch the consumer project's dependency manager.
+
+## Commands for new setup and component addition
+
+| Runner | New setup | Add a component later |
+| --- | --- | --- |
+| npm | `npx @your-ui/cli@0.1.0 init --preset ps_brand@3` | `npx @your-ui/cli@0.1.0 add button` |
+| pnpm | `pnpm dlx @your-ui/cli@0.1.0 init --preset ps_brand@3` | `pnpm dlx @your-ui/cli@0.1.0 add button` |
+| Yarn modern | `yarn dlx -p @your-ui/cli@0.1.0 your-ui init --preset ps_brand@3` | `yarn dlx -p @your-ui/cli@0.1.0 your-ui add button` |
+| Bun | `bunx --bun -p @your-ui/cli@0.1.0 your-ui init --preset ps_brand@3` | `bunx --bun -p @your-ui/cli@0.1.0 your-ui add button` |
+
+`init` targets an existing supported app and initializes the UI setup, not a whole application. If `components.json` already exists, detect that before writes and use the theme plan instead of resetting the setup. An incompatible or incomplete configuration receives an actionable diagnostic.
+
+## Package manager selection
+
+Use an explicit `--package-manager` selection when present. Otherwise inspect `package.json.packageManager`, then a unique recognized lockfile. Recognize package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock and legacy bun.lockb. Keep the project's existing Bun lockfile format; do not convert it as a side effect of UI installation.
+
+Conflicting project evidence requires an explicit choice. The runner user agent is only a fallback when no project evidence exists. In a workspace, inspect the target package and governing workspace root without writing outside the explicitly selected project boundary. Retain the manager's workspace behavior and lockfile ownership.
+
+Use npm install, pnpm add, yarn add or bun add only when the planned component installation needs dependency changes. A theme-only command must not run an unnecessary dependency installation. Never create another manager's lockfile or assume node_modules exists in a Yarn Plug'n'Play project.
+
+## Theme merge contract
+
+1. Read `components.json` and its `tailwind.css` path. The filename can differ from globals.css. Preserve the upstream style, aliases and primitive configuration.
+2. Validate the selected preset, its exact catalog/compiler releases, and compatibility with the project's CSS and token conventions. The first supported baseline remains Tailwind v4; incompatible earlier conventions receive migration guidance rather than guessed edits.
+3. Parse the stylesheet and locate active `:root` and dark-mode token definitions, including supported nesting inside layers. Respect an explicitly configured dark selector. If multiple definitions or conditional scopes make the effective target ambiguous, request a specific target instead of appending overrides blindly.
+4. Plan additions and replacements for the incoming semantic variables. Convert contract keys such as primaryForeground into the CSS name --primary-foreground. Incoming preset values replace the same selected token keys; unrelated project tokens remain.
+5. Add missing Tailwind mappings through the correct v4 theme syntax only when required. Preserve existing custom mappings unless a reviewed change is explicitly requested. Do not create duplicate @theme blocks or token declarations unnecessarily.
+6. Show the exact CSS diff. The initial theme adoption is authorized to replace matching palette tokens after that review; previously managed tokens with conflicting local edits require explicit resolution.
+7. Apply the parsed edits atomically, preserving unrelated rules, imports, comments, layers and declarations. The initial implementation does not use regular-expression replacement of the entire stylesheet.
+8. Save the normalized ui-preset.json plus product configuration and lock provenance. Future add commands reuse the preset. Track touched selectors and declarations individually so unrelated edits to globals.css do not become false conflicts.
+9. Repeat with the same inputs and receive a no-op. Restore touched files if the merge fails. Dry-run leaves the project unchanged.
+
+Additional CSS for compatible library slot recipes may be generated in ui-style.css and imported once. This must be reviewed CSS and must not force component reinstalls. A theme-only plan changes no component TSX or JSX, no application usage and no dependency set.
+
+See the [CSS before](../examples/globals.before.css), [CSS after](../examples/globals.after.css) and [standard registry theme](../examples/registry-theme.example.json) examples. They illustrate the output contract; they are not an implemented merger.
+
+## What existing components inherit
+
+Existing shadcn components inherit palette values and other variables they already reference. Our installed components also consume our reviewed style tokens. A hardcoded class or an incompatible slot structure cannot be transformed by changing a variable it does not use.
+
+The website must distinguish Apply palette and tokens from a complete visual-family conversion requiring source changes. The theme command never silently performs that source migration. Native React Native components use a separate adapter and are outside the CSS merge operation.
+
+## Upstream shadcn route
+
+Publish a standard registry:theme artifact with cssVars.light, cssVars.dark and relevant cssVars.theme data. An existing shadcn project can add that published theme using `shadcn add <theme-url>` through the same four runners. This is a supported upstream transport described in sources S3, S5 and S17.
+
+It does not automatically create our product's preset configuration or lockfile. The branded theme add command is the recommended route when users want both styling and saved defaults for future library installations. Our preset IDs are not upstream shadcn preset codes.
+
+## Acceptance evidence
+
+Across all four managers, verify fresh setup, source installation and existing-project theme merging. Include Yarn Classic and modern Yarn with node-modules and Plug'n'Play, and execute the CLI under Bun as well as Node. Pin tested versions in CI.
+
+Check light and dark values, custom CSS paths, preservation of unrelated CSS, compatible mappings, duplicate handling, local token conflicts, idempotence, rollback, dry-run non-mutation and saved preset reuse in a fresh process. Hash component source before and after theme application to prove it was not replaced. Check that no foreign lockfile or unnecessary dependency command appears, including when a different runner launches the CLI.

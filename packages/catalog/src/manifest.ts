@@ -1,0 +1,8 @@
+export const runtimeDependencies = {
+  react: '19.3.1',
+  '@radix-ui/react-dialog': '1.3.1',
+  '@radix-ui/react-slot': '1.5.0',
+  'class-variance-authority': '0.7.1',
+  clsx: '2.1.1',
+  'tailwind-merge': '3.7.0',
+} as const

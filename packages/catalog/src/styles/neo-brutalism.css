@@ -1,0 +1,19 @@
+[data-slot="button"],[data-slot="input"],[data-slot="dialog-close"]{font-family:var(--font-family);min-height:var(--control-height);border:var(--border-width) solid var(--border);border-radius:var(--radius);padding:0.5rem 1rem;transition:background-color var(--motion-duration)}
+[data-slot="button"]{background:var(--primary);color:var(--primary-foreground);cursor:pointer}
+[data-slot="button"][data-variant="secondary"]{background:var(--secondary);color:var(--secondary-foreground)}
+[data-slot="button"][data-variant="destructive"]{background:var(--destructive);color:var(--destructive-foreground)}
+[data-slot="button"][data-variant="outline"]{background:var(--background);color:var(--foreground)}
+[data-slot="button"][data-variant="ghost"],[data-slot="button"][data-variant="link"]{background:transparent;border-color:transparent;color:var(--foreground)}
+[data-slot="button"][data-variant="link"]{text-decoration:underline}
+[data-slot="button"][data-size="sm"]{min-height:2rem;padding:0.25rem 0.75rem}
+[data-slot="button"][data-size="lg"]{min-height:3rem}
+[data-slot="button"][data-size="icon"]{width:var(--control-height);padding:0}
+[data-slot="button"]:disabled,[data-slot="input"]:disabled{opacity:0.5;cursor:not-allowed}
+[data-slot="input"]{background:var(--background);color:var(--foreground)}
+[data-slot="button"]:focus-visible,[data-slot="input"]:focus-visible,[data-slot="dialog-close"]:focus-visible{outline:3px solid var(--ring);outline-offset:3px}
+[data-slot="dialog-overlay"]{position:fixed;inset:0;z-index:40;background:rgb(0 0 0 / 0.5)}
+[data-slot="dialog-content"]{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;width:min(28rem,calc(100vw - 2rem));padding:1.5rem;border:var(--border-width) solid var(--border);border-radius:var(--radius);background:var(--popover);color:var(--popover-foreground);font-family:var(--font-family)}
+[data-slot="dialog-close"]{margin-top:1rem;background:var(--secondary);color:var(--secondary-foreground);cursor:pointer}
+@media(prefers-reduced-motion:reduce){[data-slot]{transition:none!important;animation:none!important}}
+/* neo-brutalism family */
+[data-slot="button"],[data-slot="input"],[data-slot="dialog-content"]{box-shadow:var(--shadow-x) var(--shadow-y) 0 var(--border)}

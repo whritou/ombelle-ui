@@ -1,0 +1,3 @@
+Documentation version 0.2
+19 October 2026
+Includes npm, pnpm, Yarn and Bun requirements plus existing-shadcn theme merging.

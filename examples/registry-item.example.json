@@ -1,0 +1,14 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "example-button",
+  "type": "registry:ui",
+  "title": "Example Native HTML Button",
+  "description": "Minimal registry format illustration, not the production styled component.",
+  "files": [
+    {
+      "path": "registry/example-button.tsx",
+      "type": "registry:ui",
+      "content": "import type { ComponentProps } from \"react\"\n\nexport function ExampleButton({ type = \"button\", ...props }: ComponentProps<\"button\">) {\n  return <button type={type} {...props} />\n}\n"
+    }
+  ]
+}

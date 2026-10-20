@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* Existing theme mappings are retained. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-border: var(--border);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #111111;
+  --primary: #2563EB;
+  --primary-foreground: #FFFFFF;
+  --border: #D4D4D8;
+  --radius: 0.5rem;
+  --project-spacing: 1.25rem;
+}
+
+.dark {
+  --background: #18181B;
+  --foreground: #FAFAFA;
+  --primary: #93C5FD;
+  --primary-foreground: #111111;
+  --border: #71717A;
+  --radius: 0.5rem;
+}
+
+/* Unrelated application styles remain unchanged. */
+.brand-mark {
+  letter-spacing: 0.04em;
+  padding: var(--project-spacing);
+}

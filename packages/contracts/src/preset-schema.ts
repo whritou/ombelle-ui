@@ -1,0 +1,247 @@
+// Generated from schemas/preset.schema.json; do not edit independently.
+export const presetSchema = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.example.com/schemas/preset-1.0.json",
+  "title": "Proposed UI Library Preset Version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "revision",
+    "catalogRelease",
+    "compilerVersion",
+    "platform",
+    "styleFamily",
+    "modes",
+    "design"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "id": {
+      "$ref": "#/$defs/slug"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "catalogRelease": {
+      "$ref": "#/$defs/release"
+    },
+    "compilerVersion": {
+      "$ref": "#/$defs/release"
+    },
+    "platform": {
+      "const": "react-web"
+    },
+    "styleFamily": {
+      "enum": [
+        "flat",
+        "minimalist",
+        "neo-brutalism",
+        "liquid-glass"
+      ]
+    },
+    "modes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "light",
+        "dark"
+      ],
+      "properties": {
+        "light": {
+          "$ref": "#/$defs/colors"
+        },
+        "dark": {
+          "$ref": "#/$defs/colors"
+        }
+      }
+    },
+    "design": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fontFamilyId": {
+          "enum": [
+            "system-sans",
+            "system-serif",
+            "system-mono"
+          ]
+        },
+        "radiusRem": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "density": {
+          "enum": [
+            "comfortable",
+            "compact"
+          ]
+        },
+        "borderWidthPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "shadowOffsetXPx": {
+          "type": "number",
+          "minimum": -16,
+          "maximum": 16
+        },
+        "shadowOffsetYPx": {
+          "type": "number",
+          "minimum": -16,
+          "maximum": 16
+        },
+        "motion": {
+          "enum": [
+            "full",
+            "reduced"
+          ]
+        },
+        "transparency": {
+          "enum": [
+            "auto",
+            "reduced"
+          ]
+        },
+        "glassBlurPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 24
+        },
+        "glassOpacity": {
+          "type": "number",
+          "minimum": 0.6,
+          "maximum": 1
+        }
+      }
+    },
+    "componentDefaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "button": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "variant": {
+              "enum": [
+                "default",
+                "secondary",
+                "outline",
+                "ghost",
+                "link",
+                "destructive"
+              ]
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg",
+                "icon"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,79}$"
+    },
+    "release": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "color": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Initial syntax filter only. A real color parser and semantic validation are mandatory.",
+      "anyOf": [
+        {
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        {
+          "pattern": "^oklch\\([0-9.]+%? [0-9.]+ [0-9.]+(?: / [0-9.]+%?)?\\)$"
+        }
+      ]
+    },
+    "colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "$ref": "#/$defs/color"
+        },
+        "foreground": {
+          "$ref": "#/$defs/color"
+        },
+        "card": {
+          "$ref": "#/$defs/color"
+        },
+        "cardForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "popover": {
+          "$ref": "#/$defs/color"
+        },
+        "popoverForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "primary": {
+          "$ref": "#/$defs/color"
+        },
+        "primaryForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "secondary": {
+          "$ref": "#/$defs/color"
+        },
+        "secondaryForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "muted": {
+          "$ref": "#/$defs/color"
+        },
+        "mutedForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "accent": {
+          "$ref": "#/$defs/color"
+        },
+        "accentForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "destructive": {
+          "$ref": "#/$defs/color"
+        },
+        "destructiveForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "border": {
+          "$ref": "#/$defs/color"
+        },
+        "input": {
+          "$ref": "#/$defs/color"
+        },
+        "ring": {
+          "$ref": "#/$defs/color"
+        }
+      }
+    }
+  }
+} as const

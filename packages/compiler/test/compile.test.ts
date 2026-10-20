@@ -1,0 +1,89 @@
+import { it, expect } from 'vitest'
+import example from '../../../examples/preset.example.json'
+import { compile, resolvePreset } from '../src/index.js'
+import { getCatalog } from '@ombelle/catalog'
+const input = {
+  preset: example,
+  componentIds: ['button', 'dialog', 'input'] as const,
+  catalogRelease: '0.1.0',
+  compilerVersion: '0.1.0',
+}
+it('generates identical canonical artifacts, ordered independently of requested IDs', async () => {
+  const a = await compile({ ...input, componentIds: [...input.componentIds] })
+  const b = await compile({
+    ...input,
+    componentIds: ['input', 'button', 'dialog', 'button'],
+  })
+  expect(a).toEqual(b)
+  expect(a.artifacts.every((a: any) => !a.content.includes('\r'))).toBe(true)
+  expect(
+    a.artifacts.find((a: any) => a.logicalPath === 'lib/utils.ts'),
+  ).toBeDefined()
+  expect(
+    a.artifacts.find((a: any) => a.logicalPath === 'styles/ui-style.css')!
+      .content,
+  ).toContain('neo-brutalism family')
+  expect(
+    a.artifacts.find((a: any) => a.logicalPath === 'styles/ui-style.css')!
+      .content,
+  ).not.toContain('flat family')
+})
+it('normalizes key order and colors and includes defaults', async () => {
+  const catalog = getCatalog('0.1.0')
+  const a = await resolvePreset(example, catalog)
+  const b = await resolvePreset(
+    Object.fromEntries(Object.entries(example).reverse()),
+    catalog,
+  )
+  expect(a.hash).toBe(b.hash)
+  expect(a.data.modes.light.primary).toBe('#facc15')
+  expect(a.data.design.density).toBe('comfortable')
+})
+it('generates a standalone theme without component dependencies', async () => {
+  const a = await compile({ ...input, componentIds: [] })
+  expect(a.theme.light['--primary']).toBe('#facc15')
+  expect(a.dependencies).toEqual([])
+  expect(a.artifacts.some((a: any) => a.kind === 'component')).toBe(false)
+})
+it.each([
+  { ...input, compilerVersion: '9.0.0' },
+  { ...input, catalogRelease: '9.0.0' },
+  { ...input, preset: { ...example, styleFamily: 'minimalist' } },
+  { ...input, componentIds: ['unknown'] },
+])('rejects unsupported release/style/component', async (value) => {
+  await expect(
+    compile(value as unknown as Parameters<typeof compile>[0]),
+  ).rejects.toMatchObject({ code: expect.any(String) })
+})
+it('changes CSS but preserves source when only a token changes', async () => {
+  const a = await compile(input)
+  const b = await compile({
+    ...input,
+    preset: {
+      ...example,
+      modes: {
+        ...example.modes,
+        light: { ...example.modes.light, primary: '#FF0000' },
+      },
+    },
+  })
+  expect(a.preset.hash).not.toBe(b.preset.hash)
+  expect(a.artifacts.filter((a: any) => a.kind === 'component')).toEqual(
+    b.artifacts.filter((a: any) => a.kind === 'component'),
+  )
+  expect(a.theme.light).not.toEqual(b.theme.light)
+})
+
+it.each(['constructor', 'toString', '__proto__'])(
+  'rejects inherited object property component ID %s',
+  async (id) => {
+    await expect(
+      compile({
+        ...input,
+        componentIds: [id] as unknown as Parameters<
+          typeof compile
+        >[0]['componentIds'],
+      }),
+    ).rejects.toMatchObject({ code: 'INVALID_DATA' })
+  },
+)

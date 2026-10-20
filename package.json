@@ -1,0 +1,43 @@
+{
+  "name": "ombelle-foundation",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": "24.19.0"
+  },
+  "scripts": {
+    "build:packages": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && node scripts/build.mjs",
+    "build": "pnpm build:packages",
+    "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",
+    "test:unit": "vitest run packages --reporter=default --reporter=json --outputFile=.artifacts/unit-results.json",
+    "test:integration": "vitest run tests/integration --reporter=default --reporter=json --outputFile=.artifacts/integration-results.json",
+    "test": "pnpm build:packages && pnpm test:unit && pnpm test:integration",
+    "generate:preview": "tsx scripts/generate-preview.ts",
+    "prepare:consumers": "tsx scripts/prepare-consumers.ts",
+    "build:consumers": "tsx scripts/build-consumers.ts",
+    "build:preview": "vite build apps/preview --config apps/preview/vite.config.ts",
+    "test:e2e": "playwright test",
+    "dev:preview": "vite apps/preview --config apps/preview/vite.config.ts",
+    "check:foundation": "node scripts/check-foundation.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "ajv": "8.20.0",
+    "json-schema-to-ts": "3.1.1",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5",
+    "tsx": "4.23.15",
+    "esbuild": "0.28.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "shadcn": "4.22.1",
+    "vite": "8.3.4",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/vite": "4.3.3",
+    "@playwright/test": "1.64.1",
+    "@axe-core/playwright": "4.14.0"
+  }
+}
