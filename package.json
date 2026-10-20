@@ -7,9 +7,9 @@
     "node": "24.19.0"
   },
   "scripts": {
-    "build:packages": "node scripts/sync-schema.mjs && node scripts/build.mjs",
+    "build:packages": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && node scripts/build.mjs",
     "build": "pnpm build:packages",
-    "typecheck": "node scripts/sync-schema.mjs && tsc --noEmit",
+    "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",
     "test:unit": "vitest run packages",
     "test:integration": "vitest run tests/integration",
     "test": "pnpm build:packages && pnpm test:unit"
@@ -21,6 +21,10 @@
     "typescript": "7.0.2",
     "vitest": "5.0.5",
     "tsx": "4.23.15",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
   }
 }

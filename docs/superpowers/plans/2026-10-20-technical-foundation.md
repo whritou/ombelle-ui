@@ -80,16 +80,16 @@ expect(() => validatePreset({ ...existingExample, surprise: true })).toThrow(Fou
 
 **Interfaces:** `getCatalog(release: string): Catalog` returns exact release defaults, supported styles, and `ComponentTemplate` entries containing ID, TSX content, logical path, runtime dependencies, and required style slots. `getTemplate(catalog: Catalog, id: ComponentId): ComponentTemplate`. Define/export `Catalog` and `ComponentTemplate` from this package. Foundation catalog release is `0.1.0`; unsupported releases fail with `UNSUPPORTED_RELEASE`.
 
-- [ ] Write failing catalog assertions: all three IDs resolve at `0.1.0`; both styles provide every token referenced by their templates; `getCatalog('99.0.0')` throws `UNSUPPORTED_RELEASE`. Add a dialog source assertion that the client boundary is retained, plus runtime component tests that Button defaults to `type="button"`, forwards an explicit submit type, and Input forwards label/ID and disabled state.
-- [ ] Run `pnpm exec vitest run packages/catalog/test/catalog.test.ts`; expect missing catalog failures.
-- [ ] Author the templates using the pinned Radix edition, preserving license notices. Keep one component API across styles and literal Tailwind classes/static slots. Dialog exports Root, Trigger, Content, Title, Description, and Close aliases compatible with the chosen edition. Keep its React client directive. Built-in presets include complete token values; use system fonts and normal native HTML controls. Bundle template text into static catalog modules at package build time; runtime catalog/compiler imports must not read TSX from disk or require Vite-only raw-import syntax.
+- [x] Write failing catalog assertions: all three IDs resolve at `0.1.0`; both styles provide every token referenced by their templates; `getCatalog('99.0.0')` throws `UNSUPPORTED_RELEASE`. Add a dialog source assertion that the client boundary is retained, plus runtime component tests that Button defaults to `type="button"`, forwards an explicit submit type, and Input forwards label/ID and disabled state.
+- [x] Run `pnpm exec vitest run packages/catalog/test/catalog.test.ts`; expect missing catalog failures.
+- [x] Author the templates using the pinned Radix edition, preserving license notices. Keep one component API across styles and literal Tailwind classes/static slots. Dialog exports Root, Trigger, Content, Title, Description, and Close aliases compatible with the chosen edition. Keep its React client directive. Built-in presets include complete token values; use system fonts and normal native HTML controls. Bundle template text into static catalog modules at package build time; runtime catalog/compiler imports must not read TSX from disk or require Vite-only raw-import syntax.
 
 ```ts
 expect(getTemplate(getCatalog('0.1.0'), 'dialog').id).toBe('dialog')
 expect(() => getCatalog('99.0.0')).toThrow(FoundationError)
 ```
-- [ ] Run the targeted test and `pnpm typecheck`; require both styles to satisfy all template token references. Defer full dialog browser behavior to Task 9.
-- [ ] Commit as `feat: add foundation component catalog and two style families`.
+- [x] Run the targeted test and `pnpm typecheck`; require both styles to satisfy all template token references. Defer full dialog browser behavior to Task 9.
+- [x] Commit as `feat: add foundation component catalog and two style families`.
 
 ## Task 3: Deterministic preset resolution and artifact generation
 
