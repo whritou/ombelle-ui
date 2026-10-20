@@ -1,0 +1,93 @@
+{
+  "startedAt": "2026-10-20T15:37:27.646Z",
+  "sourceCommit": "f11d0e0ea617cdb3c27523a84a03d56e4cbb9efc",
+  "workingTreeDirty": false,
+  "platform": "win32",
+  "node": "v24.19.0",
+  "steps": [
+    {
+      "name": "build:packages",
+      "exitCode": 0,
+      "durationMs": 1050,
+      "log": ".artifacts\\logs\\build-packages.log"
+    },
+    {
+      "name": "test:unit",
+      "exitCode": 0,
+      "durationMs": 4942,
+      "log": ".artifacts\\logs\\test-unit.log"
+    },
+    {
+      "name": "test:integration",
+      "exitCode": 0,
+      "durationMs": 47008,
+      "log": ".artifacts\\logs\\test-integration.log"
+    },
+    {
+      "name": "generate:preview",
+      "exitCode": 0,
+      "durationMs": 1612,
+      "log": ".artifacts\\logs\\generate-preview.log"
+    },
+    {
+      "name": "prepare:consumers",
+      "exitCode": 0,
+      "durationMs": 116185,
+      "log": ".artifacts\\logs\\prepare-consumers.log"
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "durationMs": 1790,
+      "log": ".artifacts\\logs\\typecheck.log"
+    },
+    {
+      "name": "build:preview",
+      "exitCode": 0,
+      "durationMs": 1994,
+      "log": ".artifacts\\logs\\build-preview.log"
+    },
+    {
+      "name": "build:consumers",
+      "exitCode": 0,
+      "durationMs": 38180,
+      "log": ".artifacts\\logs\\build-consumers.log"
+    },
+    {
+      "name": "test:e2e",
+      "exitCode": 0,
+      "durationMs": 68023,
+      "log": ".artifacts\\logs\\test-e2e.log"
+    }
+  ],
+  "completedAt": "2026-10-20T15:42:08.645Z",
+  "status": "passed",
+  "counts": {
+    "unit": {
+      "passed": 67,
+      "failed": 0,
+      "skipped": 0
+    },
+    "integration": {
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "startTime": "2026-10-20T15:41:02.037Z",
+      "duration": 66451.07299999999,
+      "expected": 24,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "browserVersion": {
+    "engine": "chromium",
+    "version": "155.0.4283.62",
+    "channel": "msedge"
+  },
+  "npmVersion": {
+    "version": "11.19.0"
+  }
+}

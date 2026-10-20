@@ -21,11 +21,20 @@ Tests cover package-field/lock selection, field-only and lock-only apps, manager
 
 ## Verification record
 
-The final committed-source gate will be recorded here after completion.
+The complete nine-stage gate passed on clean committed source f11d0e0ea617cdb3c27523a84a03d56e4cbb9efc using Node v24.19.0, pnpm 11.25.0, npm 11.19.0, and Edge Chromium 155.0.4283.62.
+
+- 67 unit tests passed.
+- 12 integration tests passed.
+- 24 browser tests passed.
+- Zero failures, skips or flaky cases.
+- All eight standalone consumer production builds and production dependency audits passed.
+- Exact specimen screenshots, normalized DOM, computed styles and canonical hashes matched for preview, npm Vite/Next and pnpm Vite/Next consumers in both families and modes.
+
+Command: pnpm check:foundation with OMBELLE_BROWSER_CHANNEL=msedge. [Machine-readable run](npm-consumer-run.json) records every stage, exit and duration. Later documentation-only commits preserve this result.
 
 One fresh independent review of 1ca2399..d43ebbd identified one Important configuration issue and one Minor documentation omission. Real npm reproduced two inherited settings (dry-run=true and package-lock-only=true) reporting success with no installed dependency. Explicit false overrides corrected both; both regression cases were observed RED then GREEN. A third omit=prod control already installed the explicitly requested dependency and remains covered. The README now states and installs npm 11.19.0 before the full gate. No Critical findings were raised.
 
-Review exclusions were retained as scoped limits: Yarn/Bun/shrinkwrap/overrides/workspace-wide operations and public publication are unsupported; hosted CI/Linux results and broader browser/screen-reader evidence are not claimed. Those decisions cost broader compatibility and certification coverage, and require later work rather than implied support. The reviewer did not rerun the shared gate; the final result below is the implementer’s execution evidence.
+Review exclusions were retained as scoped limits: Yarn/Bun/shrinkwrap/overrides/workspace-wide operations and public publication are unsupported; hosted CI/Linux results and broader browser/screen-reader evidence are not claimed. Those decisions cost broader compatibility and certification coverage, and require later work rather than implied support. The reviewer did not rerun the shared gate; the linked final result is the implementer’s execution evidence.
 
 ## npm behavior references
 
