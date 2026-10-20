@@ -10,23 +10,12 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": [
-      "node"
-    ],
-    "lib": [
-      "ES2023",
-      "DOM"
-    ],
+    "types": ["node"],
+    "lib": ["ES2023", "DOM"],
     "paths": {
-      "@ombelle/contracts": [
-        "./packages/contracts/src/index.ts"
-      ],
-      "@ombelle/catalog": [
-        "./packages/catalog/src/index.ts"
-      ],
-      "@ombelle/compiler": [
-        "./packages/compiler/src/index.ts"
-      ]
+      "@ombelle/contracts": ["./packages/contracts/src/index.ts"],
+      "@ombelle/catalog": ["./packages/catalog/src/index.ts"],
+      "@ombelle/compiler": ["./packages/compiler/src/index.ts"]
     }
   }
 }

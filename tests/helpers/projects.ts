@@ -1,4 +1,61 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
-export async function createProject(kind:'vite'|'next'):Promise<string>{const root=await fs.mkdtemp(path.join(os.tmpdir(),'ombelle-'));const write=async(p:string,data:string)=>{await fs.mkdir(path.dirname(path.join(root,p)),{recursive:true});await fs.writeFile(path.join(root,p),data)};await write('package.json',JSON.stringify({name:'fixture-app',version:'1.0.0',private:true,type:'module',packageManager:'pnpm@11.25.0',dependencies:{react:'19.3.1','react-dom':'19.3.1',tailwindcss:'4.3.3',[kind==='vite'?'vite':'next']:kind==='vite'?'8.3.4':'16.4.2'}}));await write('pnpm-lock.yaml','lockfileVersion: "9.0"\n');await write('tsconfig.json',JSON.stringify({compilerOptions:{baseUrl:'.',paths:{'@/*':['./src/*']}}}));await write('src/index.css','@import "tailwindcss";\n/* keep me */\n:root { --unrelated: 42; }\n.dark {}\n');await write('components.json',JSON.stringify({$schema:'https://ui.shadcn.com/schema.json',style:'radix-nova',rsc:kind==='next',tsx:true,tailwind:{config:'',css:'src/index.css',baseColor:'neutral',cssVariables:true},aliases:{components:'@/components',ui:'@/components/ui',utils:'@/lib/utils',lib:'@/lib',hooks:'@/hooks'}}));return root}
+export async function createProject(kind: 'vite' | 'next'): Promise<string> {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-'))
+  const write = async (p: string, data: string) => {
+    await fs.mkdir(path.dirname(path.join(root, p)), { recursive: true })
+    await fs.writeFile(path.join(root, p), data)
+  }
+  await write(
+    'package.json',
+    JSON.stringify({
+      name: 'fixture-app',
+      version: '1.0.0',
+      private: true,
+      type: 'module',
+      packageManager: 'pnpm@11.25.0',
+      dependencies: {
+        react: '19.3.1',
+        'react-dom': '19.3.1',
+        tailwindcss: '4.3.3',
+        [kind === 'vite' ? 'vite' : 'next']:
+          kind === 'vite' ? '8.3.4' : '16.4.2',
+      },
+    }),
+  )
+  await write('pnpm-lock.yaml', 'lockfileVersion: "9.0"\n')
+  await write(
+    'tsconfig.json',
+    JSON.stringify({
+      compilerOptions: { baseUrl: '.', paths: { '@/*': ['./src/*'] } },
+    }),
+  )
+  await write(
+    'src/index.css',
+    '@import "tailwindcss";\n/* keep me */\n:root { --unrelated: 42; }\n.dark {}\n',
+  )
+  await write(
+    'components.json',
+    JSON.stringify({
+      $schema: 'https://ui.shadcn.com/schema.json',
+      style: 'radix-nova',
+      rsc: kind === 'next',
+      tsx: true,
+      tailwind: {
+        config: '',
+        css: 'src/index.css',
+        baseColor: 'neutral',
+        cssVariables: true,
+      },
+      aliases: {
+        components: '@/components',
+        ui: '@/components/ui',
+        utils: '@/lib/utils',
+        lib: '@/lib',
+        hooks: '@/hooks',
+      },
+    }),
+  )
+  return root
+}

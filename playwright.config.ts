@@ -1,0 +1,33 @@
+import { defineConfig } from '@playwright/test'
+import fs from 'node:fs'
+const fixtures = JSON.parse(
+  fs.readFileSync('.artifacts/consumers.json', 'utf8'),
+) as Record<string, { port: number }>
+export default defineConfig({
+  testDir: 'tests/e2e',
+  timeout: 60000,
+  expect: { timeout: 10000 },
+  workers: 1,
+  use: {
+    browserName: 'chromium',
+    channel: process.env.OMBELLE_BROWSER_CHANNEL || undefined,
+    headless: true,
+    viewport: { width: 1100, height: 800 },
+    reducedMotion: 'reduce',
+    trace: 'retain-on-failure',
+  },
+  reporter: [['list'], ['html', { open: 'never' }]],
+  webServer: [
+    {
+      command: 'pnpm dev:preview',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: false,
+    },
+    ...Object.entries(fixtures).map(([id, f]) => ({
+      command: 'pnpm exec tsx scripts/serve-consumer.ts ' + id,
+      url: 'http://127.0.0.1:' + f.port,
+      reuseExistingServer: false,
+      timeout: 120000,
+    })),
+  ],
+})

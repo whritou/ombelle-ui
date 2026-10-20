@@ -12,7 +12,13 @@
     "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",
     "test:unit": "vitest run packages",
     "test:integration": "vitest run tests/integration",
-    "test": "pnpm build:packages && pnpm test:unit"
+    "test": "pnpm build:packages && pnpm test:unit",
+    "generate:preview": "tsx scripts/generate-preview.ts",
+    "prepare:consumers": "tsx scripts/prepare-consumers.ts",
+    "build:consumers": "tsx scripts/build-consumers.ts",
+    "build:preview": "vite build apps/preview --config apps/preview/vite.config.ts",
+    "test:e2e": "playwright test",
+    "dev:preview": "vite apps/preview --config apps/preview/vite.config.ts"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
@@ -26,6 +32,11 @@
     "react-dom": "19.3.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "shadcn": "4.22.1"
+    "shadcn": "4.22.1",
+    "vite": "8.3.4",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/vite": "4.3.3",
+    "@playwright/test": "1.64.1",
+    "@axe-core/playwright": "4.14.0"
   }
 }
