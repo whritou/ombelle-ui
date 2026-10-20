@@ -5,13 +5,18 @@ import {
   FoundationError,
   type InstallPlan,
   type Dependency,
+  type PackageManager,
 } from '@ombelle/contracts'
 import { sha256 } from '@ombelle/compiler'
 import { safePath } from '../project/paths.js'
 import { readText } from '../project/inspect.js'
 import { runDependencies } from './manager.js'
 export type ApplyPorts = {
-  dependencies?: (root: string, deps: Dependency[]) => Promise<void>
+  dependencies?: (
+    root: string,
+    deps: Dependency[],
+    manager: PackageManager,
+  ) => Promise<void>
   beforeWrite?: (file: string, index: number) => Promise<void>
 }
 export type ApplyResult = { status: 'success'; writtenPaths: string[] }
@@ -115,6 +120,7 @@ export async function applyPlan(
       await (ports.dependencies ?? runDependencies)(
         plan.projectRoot,
         plan.dependencyPlan,
+        plan.packageManager,
       )
     }
     await fs.rm(folder, { recursive: true })
@@ -164,7 +170,9 @@ export async function applyPlan(
           : 'INTERNAL_ERROR',
       cause instanceof Error ? cause.message : 'Installation failed',
       folder,
-      'Review recovery.json and repair the project with pnpm before retrying.',
+      'Review recovery.json and repair the project with ' +
+        plan.packageManager +
+        ' before retrying.',
     )
     error.recovery = recovery
     throw error

@@ -33,7 +33,7 @@ it.each(['package-lock.json', 'yarn.lock'])(
     })
   },
 )
-it('rejects an npm-only app rather than converting its manager', async () => {
+it('rejects an npm app missing the required ReactDOM baseline', async () => {
   const root = await createProject('vite')
   roots.push(root)
   await fs.rm(root + '/pnpm-lock.yaml')
