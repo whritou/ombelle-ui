@@ -25,7 +25,7 @@ const exits: Record<string, number> = {
   INTERNAL_ERROR: 1,
 }
 const usage =
-  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn>] [--dry-run] [--json] [--yes]'
+  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },
@@ -65,15 +65,15 @@ export async function runCli(
     const selected = flags['--package-manager']
     if (
       selected !== undefined &&
-      !['npm', 'pnpm', 'yarn'].includes(String(selected))
+      !['npm', 'pnpm', 'yarn', 'bun'].includes(String(selected))
     )
       throw new FoundationError(
         'INVALID_DATA',
-        'Choose npm, pnpm, or yarn for --package-manager',
+        'Choose npm, pnpm, yarn, or bun for --package-manager',
       )
     const context = await inspectProject(
       path.resolve(String(flags['--cwd'] ?? process.cwd())),
-      selected as 'npm' | 'pnpm' | 'yarn' | undefined,
+      selected as 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined,
     )
     let preset: Preset | unknown = context.preset
     if (command !== 'add') {

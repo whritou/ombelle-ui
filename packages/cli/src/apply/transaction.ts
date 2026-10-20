@@ -9,7 +9,7 @@ import {
 } from '@ombelle/contracts'
 import { sha256 } from '@ombelle/compiler'
 import { safePath } from '../project/paths.js'
-import { readText } from '../project/inspect.js'
+import { fingerprintFile } from '../project/fingerprint.js'
 import {
   prepareManager,
   runDependencies,
@@ -25,10 +25,7 @@ export type ApplyPorts = {
   beforeWrite?: (file: string, index: number) => Promise<void>
 }
 export type ApplyResult = { status: 'success'; writtenPaths: string[] }
-const hashAt = async (root: string, file: string) => {
-  const text = await readText(root, file)
-  return text === null ? null : await sha256(text)
-}
+const hashAt = fingerprintFile
 export async function applyPlan(
   plan: InstallPlan,
   ports: ApplyPorts = {},
@@ -182,6 +179,7 @@ export async function applyPlan(
       folder,
       'Review recovery.json and repair the project with ' +
         plan.packageManager +
+        (plan.bunLockfile ? ' (' + plan.bunLockfile + ')' : '') +
         ' before retrying.',
     )
     error.recovery = recovery

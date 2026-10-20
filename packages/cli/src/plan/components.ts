@@ -87,6 +87,7 @@ export async function planAdd(
     )
   const plan: InstallPlan = {
     packageManager: context.manager,
+    ...(context.bunLockfile ? { bunLockfile: context.bunLockfile } : {}),
     ...(context.packageJson.packageManager &&
     context.packageJson.packageManager.split('@')[0] !== context.manager
       ? {

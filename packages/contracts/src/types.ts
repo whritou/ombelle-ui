@@ -45,7 +45,8 @@ export type ProjectLock = {
   artifacts: Record<string, InstalledArtifact>
   managedDeclarations: ManagedDeclaration[]
 }
-export type PackageManager = 'pnpm' | 'npm' | 'yarn'
+export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun'
+export type BunLockfile = 'bun.lock' | 'bun.lockb'
 export type ProjectConfig = {
   configVersion: 1
   platform: 'react-web'
@@ -58,6 +59,7 @@ export type ProjectConfig = {
   registryBase?: string
 }
 export type ProjectContext = {
+  bunLockfile?: BunLockfile
   preconditions: Record<string, string | null>
   root: string
   framework: 'vite' | 'next'
@@ -92,6 +94,7 @@ export type FileChange = {
   action: 'create' | 'update' | 'noop' | 'conflict'
 }
 export type InstallPlan = {
+  bunLockfile?: BunLockfile
   packageManager: PackageManager
   managerWarning?: string
   preconditions: Record<string, string | null>
