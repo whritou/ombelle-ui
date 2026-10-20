@@ -13,9 +13,10 @@ pnpm dev:preview
 
 Open [neo brutalism](http://127.0.0.1:4173/neo-brutalism/?mode=light) or [flat](http://127.0.0.1:4173/flat/?mode=light). The demo renders generated component source; change the local preset and regenerate to update it. This is a foundation preview, not the production editor.
 
-For the complete check, install the pinned test browser and run:
+For the complete check, use npm **11.19.0** as well. Install that version and the pinned test browser, then run:
 
 ~~~powershell
+npm install --global npm@11.19.0 --ignore-scripts
 pnpm exec playwright install chromium
 pnpm check:foundation
 ~~~

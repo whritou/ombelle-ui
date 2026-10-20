@@ -33,6 +33,8 @@ export async function runDependencies(
         '--ignore-scripts',
         ...(manager === 'npm'
           ? [
+              '--dry-run=false',
+              '--package-lock-only=false',
               '--save=true',
               '--save-prod',
               '--package-lock=true',
