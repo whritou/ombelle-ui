@@ -7,7 +7,11 @@ import {
   type PackageManager,
 } from '@ombelle/contracts'
 
-export type PreparedManager = { entry: string; version?: string }
+export type PreparedManager = {
+  entry: string
+  prefixArgs?: string[]
+  version?: string
+}
 
 export async function runDependencies(
   root: string,
@@ -61,7 +65,7 @@ export async function runDependencies(
   await new Promise<void>((resolve, reject) => {
     const child = spawn(
       process.execPath,
-      [script, ...args],
+      [script, ...(resolved.prefixArgs ?? []), ...args],
       {
         cwd: root,
         shell: false,
@@ -98,9 +102,14 @@ export async function prepareManager(
   root: string,
   manager: PackageManager,
 ): Promise<PreparedManager> {
-  const entry = await managerEntry(manager)
-  if (manager !== 'yarn') return { entry }
-  const result = await executeScript(entry, ['--version'], root, 15000)
+  const launcher = await resolveManager(manager)
+  if (manager !== 'yarn') return launcher
+  const result = await executeScript(
+    launcher.entry,
+    [...launcher.prefixArgs, '--version'],
+    root,
+    15000,
+  )
   const version = result.output.trim()
   if (
     result.code !== 0 ||
@@ -110,9 +119,9 @@ export async function prepareManager(
       'UNSUPPORTED_PROJECT',
       'Cannot determine a supported Yarn Classic or modern Yarn version',
       root,
-      'Install Yarn 1.x or modern Yarn 2+ and make its JavaScript launcher available.',
+      'Install Yarn 1.x or modern Yarn 2+, or set OMBELLE_YARN_ENTRY to its JavaScript launcher.',
     )
-  return { entry, version }
+  return { ...launcher, version }
 }
 
 function executeScript(
@@ -141,7 +150,13 @@ function executeScript(
   })
 }
 
+type ManagerLauncher = { entry: string; prefixArgs: string[] }
+
 export async function managerEntry(manager: PackageManager): Promise<string> {
+  return (await resolveManager(manager)).entry
+}
+
+async function resolveManager(manager: PackageManager): Promise<ManagerLauncher> {
   const entryPattern =
     manager === 'npm'
       ? /^npm-cli\.js$/
@@ -151,12 +166,12 @@ export async function managerEntry(manager: PackageManager): Promise<string> {
   const configured = manager === 'yarn' ? process.env.OMBELLE_YARN_ENTRY : undefined
   if (configured && entryPattern.test(path.basename(configured))) {
     await fs.access(configured)
-    return configured
+    return { entry: configured, prefixArgs: [] }
   }
   const inherited = process.env.npm_execpath
   if (inherited && entryPattern.test(path.basename(inherited))) {
     await fs.access(inherited)
-    return inherited
+    return { entry: inherited, prefixArgs: [] }
   }
   for (const directory of (process.env.PATH ?? process.env.Path ?? '').split(
     path.delimiter,
@@ -170,14 +185,15 @@ export async function managerEntry(manager: PackageManager): Promise<string> {
     for (const name of names) {
       try {
         const real = await fs.realpath(path.join(directory, name))
-        if (entryPattern.test(path.basename(real))) return real
+        if (entryPattern.test(path.basename(real)))
+          return { entry: real, prefixArgs: [] }
         if (manager === 'npm' && name === 'npm.cmd') {
           const target = path.join(
             path.dirname(real),
             'node_modules/npm/bin/npm-cli.js',
           )
           await fs.access(target)
-          return target
+          return { entry: target, prefixArgs: [] }
         }
         const source = await fs.readFile(real, 'utf8')
         if (manager === 'pnpm' && name === 'pnpm.cmd') {
@@ -187,26 +203,39 @@ export async function managerEntry(manager: PackageManager): Promise<string> {
           if (match && !/[&|<>%]/.test(match[1])) {
             const target = path.resolve(path.dirname(real), match[1])
             await fs.access(target)
-            return target
+            return { entry: target, prefixArgs: [] }
           }
         } else if (manager === 'yarn' && name === 'yarn.cmd') {
           const lines = source
             .split(/\r?\n/)
             .map((line) => line.trim())
             .filter((line) => line && !/^@?echo off$/i.test(line))
-          if (lines.length === 1) {
-            const match = /^(?:node\s+)?"%~dp0([^"\r\n]+)"\s+%\*$/i.exec(
-              lines[0],
+          const corepackLine = lines.find((line) =>
+            /corepack\.(?:cjs|js)/i.test(line),
+          )
+          if (corepackLine) {
+            const match = /^(?:call\s+)?(?:(?:"%~dp0[^"\r\n]*node(?:\.exe)?"|node(?:\.exe)?)\s+)?"%~dp0([^"\r\n]*corepack\.(?:cjs|js))"\s+yarn\s+%\*$/i.exec(
+              corepackLine,
+            )
+            if (match && !/[&|<>]/.test(match[1])) {
+              const target = fromWindowsShim(path.dirname(real), match[1])
+              await fs.access(target)
+              return { entry: target, prefixArgs: ['yarn'] }
+            }
+          } else {
+            const match = /^(?:call\s+)?(?:node\s+)?"%~dp0([^"\r\n]+)"\s+%\*$/i.exec(
+              lines.join(' '),
             )
             if (match && !/[&|<>%]/.test(match[1])) {
-              const target = path.resolve(path.dirname(real), match[1])
+              const target = fromWindowsShim(path.dirname(real), match[1])
               if (entryPattern.test(path.basename(target))) {
                 await fs.access(target)
-                return target
+                return { entry: target, prefixArgs: [] }
               }
             }
           }
-        } else if (source.startsWith('#!/usr/bin/env node')) return real
+        } else if (source.startsWith('#!/usr/bin/env node'))
+          return { entry: real, prefixArgs: [] }
       } catch (e) {
         if (
           !['ENOENT', 'ENOTDIR', 'EISDIR'].includes(
@@ -223,4 +252,11 @@ export async function managerEntry(manager: PackageManager): Promise<string> {
     undefined,
     'Install ' + manager + ' and add its launcher to PATH.',
   )
+}
+
+function fromWindowsShim(directory: string, relative: string): string {
+  const portable = relative
+    .replace(/^[/\\]+/, '')
+    .replace(/[\\/]/g, path.sep)
+  return path.resolve(directory, portable)
 }

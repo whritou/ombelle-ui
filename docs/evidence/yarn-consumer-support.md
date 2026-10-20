@@ -12,7 +12,7 @@
 
 Each fixture was installed from its committed Yarn lockfile using frozen/immutable install behavior with lifecycle scripts disabled. The CLI initialized the saved flat preset, installed Button and Dialog, then added Input in a fresh process using the saved preset. Verification checked exact dependency installation, preserved unrelated CSS, lockfile ownership, no npm/pnpm lockfile, canonical installed-source hashes, production audit, and production build. The PnP build ran through Yarn. Modern Yarn uses `--mode=skip-build`; Classic uses `--ignore-scripts`.
 
-The existing foundation run passed 67 unit tests, 35 integration tests, and 24 browser tests, with no failures, skips, or flaky results. All eleven consumer production builds and audits passed. The browser visual/keyboard matrix remains the existing preview + npm + pnpm matrix; Yarn is verified by real package installation and production build in all three linker rows.
+The existing foundation run passed 67 unit tests, 36 integration tests, and 24 browser tests, with no failures, skips, or flaky results. All eleven consumer production builds and audits passed. The browser visual/keyboard matrix remains the existing preview + npm + pnpm matrix; Yarn is verified by real package installation and production build in all three linker rows.
 
 Machine-readable local run output is written to `.artifacts/foundation-report.json` when running `pnpm check:foundation`. CI now prepares both pinned Yarn generations through Corepack before running the same gate. Bun and executing the CLI under Bun remain unsupported in this slice.
 
@@ -22,4 +22,4 @@ Machine-readable local run output is written to `.artifacts/foundation-report.js
 - Classic consumers use the local CLI development-dependency route because Yarn Classic has no modern `dlx` command.
 - Exact reviewed production dependencies are installed without package lifecycle scripts; theme-only and no-op paths do not invoke Yarn.
 - The CLI preserves `yarn.lock`, does not create another manager's lockfile, and does not require `node_modules` under Plug'n'Play.
-- The `OMBELLE_YARN_ENTRY` environment option provides an explicit, shell-free Yarn JavaScript entry for launchers that do not expose a usable inherited runner or PATH entry.
+- The `OMBELLE_YARN_ENTRY` environment option provides an explicit, shell-free Yarn JavaScript entry for launchers that do not expose a usable inherited runner or PATH entry. Windows PATH lookup also recognizes direct JavaScript shims and the bounded Corepack form that targets `corepack.cjs`/`corepack.js` with the `yarn` argument; other command-script forms are not evaluated.

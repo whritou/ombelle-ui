@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
-import { managerEntry, runDependencies } from '../../packages/cli/src/apply/manager.js'
+import { managerEntry, prepareManager, runDependencies } from '../../packages/cli/src/apply/manager.js'
 import { createProject } from '../helpers/projects.js'
 
 const roots: string[] = []
@@ -64,6 +64,21 @@ it('resolves a Windows Yarn command shim only to a safe local JavaScript entry',
   delete process.env.npm_execpath
   process.env.PATH = folder
   expect(await managerEntry('yarn')).toBe(entry)
+})
+
+it('resolves a Corepack Yarn command shim to its JavaScript entry and prefix argument', async () => {
+  const folder = await root()
+  const entry = path.join(folder, 'corepack.cjs')
+  await fs.writeFile(entry, `if (process.argv[2] === 'yarn' && process.argv[3] === '--version') process.stdout.write('4.18.1')\nelse if (process.argv[2] === 'yarn' && process.env.YARN_CAPTURE) require('node:fs').writeFileSync(process.env.YARN_CAPTURE, JSON.stringify({ args: process.argv.slice(3) }))\nelse process.exit(1)\n`)
+  await fs.writeFile(path.join(folder, 'yarn.cmd'), '@echo off\r\nsetlocal\r\ncall "%~dp0corepack.cjs" yarn %*\r\nendlocal\r\n')
+  delete process.env.npm_execpath
+  process.env.PATH = folder
+  const prepared = await prepareManager(folder, 'yarn')
+  expect(prepared).toEqual({ entry, version: '4.18.1', prefixArgs: ['yarn'] })
+  const capture = path.join(folder, 'capture.json')
+  process.env.YARN_CAPTURE = capture
+  await runDependencies(folder, [{ name: 'clsx', version: '2.1.1' }], 'yarn', prepared)
+  expect(JSON.parse(await fs.readFile(capture, 'utf8'))).toEqual({ args: ['add', '--exact', '--mode=skip-build', 'clsx@2.1.1'] })
 })
 
 it('rejects a Yarn command shim containing shell operators', async () => {
@@ -128,5 +143,7 @@ it('does not execute Yarn for dry-run or theme-only operations', async () => {
   expect(dry.code, JSON.stringify(dry.data)).toBe(0)
   const applied = await run(['init', '--preset', preset, '--cwd', folder, '--yes'])
   expect(applied.code, JSON.stringify(applied.data)).toBe(0)
+  const themed = await run(['theme', 'add', preset, '--cwd', folder, '--yes'])
+  expect(themed.code, JSON.stringify(themed.data)).toBe(0)
   await expect(fs.access(sentinel)).rejects.toMatchObject({ code: 'ENOENT' })
 })
