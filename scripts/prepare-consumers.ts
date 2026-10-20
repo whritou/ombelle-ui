@@ -8,12 +8,17 @@ import { managerEntry } from '../packages/cli/src/apply/manager.js'
 import { createNpmProject } from '../tests/helpers/npm-project.js'
 import { createYarnProject, type YarnFixtureId } from '../tests/helpers/yarn-project.js'
 import { run, pnpmEntry } from './process.js'
+import { prepareBunConsumer } from './prepare-bun-consumers.js'
 type Fixture = {
   root: string
   port: number
   framework: 'vite' | 'next'
   family: 'flat' | 'neo-brutalism'
-  manager: 'pnpm' | 'npm' | 'yarn'
+  manager: 'pnpm' | 'npm' | 'yarn' | 'bun'
+  cliRuntime?: 'node' | 'bun'
+  buildRuntime?: 'node'
+  bunLockfile?: 'bun.lock' | 'bun.lockb'
+  bunVersion?: string
   version?: string
   linker?: string
 }
@@ -265,10 +270,20 @@ for (const id of ['classic-vite', 'modern-next', 'pnp-vite'] as const satisfies 
   await fs.writeFile('.artifacts/consumers.json', JSON.stringify(map, null, 2))
   await fs.writeFile('.artifacts/install-provenance.json', JSON.stringify(proof, null, 2))
 }
-await fs.writeFile(
-  '.artifacts/install-provenance.json',
-  JSON.stringify(proof, null, 2),
-)
+const bunRows:Record<string,unknown>={}
+for(const framework of ['vite','next'] as const)for(const format of ['text','binary'] as const)for(const runtime of ['node','bun'] as const){
+ const key='bun-'+format+'-'+framework+'-'+runtime
+ console.log('Preparing '+key)
+ const row=await prepareBunConsumer(framework,format,runtime)
+ map[key]={root:row.fixture.root,port:port++,framework,family:'flat',manager:'bun',cliRuntime:runtime,buildRuntime:'node',bunLockfile:row.fixture.lockfile,bunVersion:row.fixture.version}
+ proof[key]=row.artifacts
+ bunRows[key]={bunVersion:row.fixture.version,bunLockfile:row.fixture.lockfile,cliRuntime:row.cliRuntime,sourceHashes:row.sourceHashes,auditExitCode:row.audit.code,build:{status:'pending'}}
+ await fs.writeFile('.artifacts/audit-'+key+'.json',row.audit.output)
+ await fs.writeFile('.artifacts/consumers.json',JSON.stringify(map,null,2))
+ await fs.writeFile('.artifacts/bun-matrix.json',JSON.stringify(bunRows,null,2))
+}
+await fs.writeFile('.artifacts/bun-version.json',JSON.stringify({version:'1.4.3'}))
+await fs.writeFile('.artifacts/install-provenance.json',JSON.stringify(proof,null,2))
 const yarnRows = Object.fromEntries(Object.entries(proof).filter(([key]) => key.startsWith('yarn-')))
 await fs.writeFile('.artifacts/yarn-matrix.json', JSON.stringify(yarnRows, null, 2))
 await fs.writeFile('.artifacts/yarn-versions.json', JSON.stringify({ classic: '1.22.22', modern: '4.18.1' }, null, 2))

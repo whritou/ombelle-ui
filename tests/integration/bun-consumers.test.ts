@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { compile } from '@ombelle/compiler'
 import { createHash } from 'node:crypto'
-import { createBunProject, buildBunFixture } from '../helpers/bun-project.js'
+import { createBunProject, buildBunFixture, bunEvidenceRow } from '../helpers/bun-project.js'
 import { runBuiltCli, jsonRecord } from '../helpers/cli-runtime.js'
 import { snapshotTree } from '../helpers/tree.js'
 import { runNative } from '../helpers/bun-command.js'
@@ -11,6 +11,15 @@ const roots:string[]=[]
 afterEach(async()=>{for(const root of roots.splice(0))await fs.rm(root,{recursive:true,force:true})})
 const matrix=(['vite','next'] as const).flatMap(framework=>(['text','binary'] as const).flatMap(format=>(['node','bun'] as const).map(runtime=>({framework,format,runtime}))))
 const preset=path.resolve('packages/catalog/src/presets/flat.json')
+it('records measured Bun evidence and rejects failed or missing outcomes',()=>{
+ const fixture={root:'/fixture',executable:'/tools/bun',version:'1.4.3' as const,lockfile:'bun.lockb' as const}
+ const outcome={cliRuntime:{executable:'/tools/bun',name:'bun' as const,version:'1.4.3'},buildRuntime:{executable:'/tools/node',name:'node' as const,version:'24.19.0'},sourceHashes:{'src/components/ui/button.tsx':'hash'},auditExitCode:0,buildExitCode:0}
+ const row=bunEvidenceRow(fixture,outcome)
+ expect(row.bunVersion).toBe('1.4.3');expect(row.bunLockfile).toBe('bun.lockb');expect(row.cliRuntime).toEqual(outcome.cliRuntime)
+ expect(()=>bunEvidenceRow(fixture,{...outcome,auditExitCode:1})).toThrow()
+ expect(()=>bunEvidenceRow(fixture,{...outcome,buildExitCode:1})).toThrow()
+ expect(()=>bunEvidenceRow(fixture,{...outcome,auditExitCode:undefined as unknown as number})).toThrow()
+})
 it.each(matrix)('$framework / $format / $runtime preserves manager and builds',async({framework,format,runtime})=>{
  const fixture=await createBunProject(framework,format);roots.push(fixture.root)
  const originalPkg=JSON.parse(await fs.readFile(path.join(fixture.root,'package.json'),'utf8'))
