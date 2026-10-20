@@ -97,16 +97,16 @@ expect(() => getCatalog('99.0.0')).toThrow(FoundationError)
 
 **Interfaces:** `resolvePreset(input: unknown, catalog: Catalog): Promise<ResolvedPreset>`; `compile(input: { preset: unknown; componentIds: ComponentId[]; catalogRelease: string; compilerVersion: string }): Promise<CompileResult>`. Define `ResolvedPreset` with normalized `data: Preset` and `hash: string`. `Artifact` has `logicalPath`, `kind: 'component' | 'style' | 'usage' | 'utility'`, `content`, and `sha256`. `CompileResult` has `artifacts`, `dependencies: { name: string; version: string }[]`, `preset: ResolvedPreset`, and `provenance: { catalogRelease: string; compilerVersion: string }`. Compiler version starts at `0.1.0`. An empty component list still generates theme output for initialization/theme-only operations.
 
-- [ ] Add failing assertions that compiling the same input twice gives `expect(first).toEqual(second)`, reordered input object keys preserve preset/artifact hashes, source line endings are LF, and duplicate component IDs do not duplicate artifacts. Assert selected neo brutalist output excludes flat-only slot rules. Unknown catalog/compiler releases and unsupported style/component requests fail explicitly.
-- [ ] Run `pnpm exec vitest run packages/compiler/test`; expect missing implementation failures.
+- [x] Add failing assertions that compiling the same input twice gives `expect(first).toEqual(second)`, reordered input object keys preserve preset/artifact hashes, source line endings are LF, and duplicate component IDs do not duplicate artifacts. Assert selected neo brutalist output excludes flat-only slot rules. Unknown catalog/compiler releases and unsupported style/component requests fail explicitly.
+- [x] Run `pnpm exec vitest run packages/compiler/test`; expect missing implementation failures.
 
 ```ts
 expect(await compile(input)).toEqual(await compile(input))
 expect((await compile(input)).artifacts.every(a => !a.content.includes('\r'))).toBe(true)
 ```
-- [ ] Implement stable key ordering, fixed output ordering, pinned formatting, normalized six-digit hex/numeric OKLCH handling, and SHA-256 using Web Crypto without Node-only module imports. Reject unsupported syntax and non-finite values. Export only selected reviewed styles and include all required utilities/dependencies. Do not put current time, random IDs, or absolute paths into output.
-- [ ] Run compiler tests and `pnpm typecheck`. Verify a changed preset changes required CSS/hashes while unchanged source remains stable where the contract allows it.
-- [ ] Commit as `feat: compile reproducible component and theme artifacts`.
+- [x] Implement stable key ordering, fixed output ordering, pinned formatting, normalized six-digit hex/numeric OKLCH handling, and SHA-256 using Web Crypto without Node-only module imports. Reject unsupported syntax and non-finite values. Export only selected reviewed styles and include all required utilities/dependencies. Do not put current time, random IDs, or absolute paths into output.
+- [x] Run compiler tests and `pnpm typecheck`. Verify a changed preset changes required CSS/hashes while unchanged source remains stable where the contract allows it.
+- [x] Commit as `feat: compile reproducible component and theme artifacts`.
 
 ## Task 4: A standard registry item and an explicit upstream adapter decision
 
