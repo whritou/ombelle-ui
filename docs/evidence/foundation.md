@@ -10,13 +10,13 @@ Button, Dialog, and Input; flat and neo brutalism; light/dark; pnpm consumers in
 
 Command: `pnpm check:foundation`, with `OMBELLE_BROWSER_CHANNEL=msedge` locally. All nine stages passed: package build, unit tests, subprocess integration, preview generation, consumer preparation, typecheck, preview build, four consumer builds, and browser checks.
 
-- 53 unit tests passed; zero failed or skipped.
+- 61 unit tests passed; zero failed or skipped.
 - 6 integration tests passed; zero failed or skipped.
 - 16 browser tests passed; zero failed, skipped, or flaky.
 - Four independent consumer applications built and passed production dependency audits.
 - Installed component, utility, usage, and style files matched canonical compiler bytes and recorded hashes. Consumer source and manifests contained no Ombelle workspace imports/dependencies.
 
-[Machine-readable run](latest-run.json) records exact timing, source HEAD at run start, runtime/browser versions, stage exits, and counts. The initial run includes uncommitted gate/report configuration; subsequent completion checks record the committed source. Temporary raw logs, install provenance and audit reports live under `.artifacts/`; HTML/trace output lives under `playwright-report/` and `test-results/`.
+[Machine-readable run](latest-run.json) records exact timing, source HEAD at run start, runtime/browser versions, stage exits, and counts. The saved final run records clean committed source 3c4093f after all review fixes; later documentation commits only preserve this evidence. Temporary raw logs, install provenance and audit reports live under `.artifacts/`; HTML/trace output lives under `playwright-report/` and `test-results/`.
 
 | Requirement | Evidence |
 | --- | --- |
@@ -26,7 +26,7 @@ Command: `pnpm check:foundation`, with `OMBELLE_BROWSER_CHANNEL=msedge` locally.
 | Preview and installed parity | Four family/mode cases compare exact specimen PNG bytes, normalized DOM and computed styles across preview, Vite, and Next |
 | Preset persistence | Separate executable processes initialize a neo brutalist project, add Button/Dialog, then add Input without another preset flag |
 | Source ownership | Edited installed source conflicts with exit 4 even with --yes; untracked files are not silently adopted |
-| CSS preservation | Theme tests retain unrelated declarations, comments, selectors and imports; repeated application is a no-op; modified managed values conflict |
+| CSS preservation | Theme tests retain unrelated declarations, comments, selectors and imports; repeated application is a no-op; modified managed values or !important priorities conflict; an edit during planning is rejected without erasure |
 | Dry-run | Subprocess fixture-tree comparison confirms no writes; planner paths do not invoke the package manager |
 | Paths and concurrency | Real Windows junction escape, traversal/collision, stale metadata/source, and independent child-process lock-holder checks |
 | Recovery | Injected mid-write and subprocess dependency failures restore owned source/config, preserve evidence and distinguish dependency uncertainty |
@@ -56,4 +56,4 @@ The root development graph contains one acknowledged high advisory: braces 3.0.3
 
 Only the declared foundation matrix is verified. Other package managers, minimalist/glass, JSX, React Native, a production editor/site, public snapshots and package publication remain future work. No NVDA, VoiceOver, TalkBack, broader browser matrix or hosted CI evidence is claimed. Vite emits a non-blocking warning when bundling React server/client directives into browser-only output; Next.js preserves its client boundary and builds successfully.
 
-The whole-branch independent review follows completion of Task 10. Its findings and any regression-tested fixes will be recorded before the implementation handoff.
+The independent whole-branch review identified four Important findings. All were reproduced by failing tests and fixed in one pass: CSS snapshot consistency, React/ReactDOM compatibility, managed priority provenance, and component path/import consistency. Eight new regression cases passed with the full gate. No Critical findings or deferred minors remain from that review. See [review and decision record](foundation-review.md). Exact React/ReactDOM 19.3.1 declarations are the supported baseline; ranges and older or mismatched versions are rejected before writes.
