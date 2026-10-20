@@ -8,6 +8,7 @@ import {
   type BunLockfile,
 } from '@ombelle/contracts'
 import { resolveBunExecutable, resolveNodeExecutable } from './executable.js'
+import { prepareBun, bunAddArgs, assertBunOwnership, assertBunInstalled } from './bun.js'
 
 export type PreparedManager = {
   executable: string
@@ -32,10 +33,12 @@ export async function runDependencies(
         'INVALID_DATA',
         'Invalid reviewed dependency name/version',
       )
-  const resolved = prepared ?? (await prepareManager(root, manager, bunLockfile))
+  const resolved = prepared ?? (await prepareManager(root, manager, bunLockfile, deps))
   const script = resolved.executable
   const args =
-    manager === 'yarn'
+    manager === 'bun'
+      ? bunAddArgs(deps, bunLockfile ?? 'bun.lock')
+      : manager === 'yarn'
       ? [
           'add',
           '--exact',
@@ -99,14 +102,19 @@ export async function runDependencies(
           ),
     )
   })
+  if (manager === 'bun') {
+    await assertBunOwnership(root,bunLockfile ?? 'bun.lock')
+    await assertBunInstalled(root,deps)
+  }
 }
 
 export async function prepareManager(
   root: string,
   manager: PackageManager,
   bunLockfile?: BunLockfile,
+  deps: Dependency[] = [],
 ): Promise<PreparedManager> {
-  if (manager === 'bun') return { executable: await resolveBunExecutable(), prefixArgs: [], version: '1.4.3' }
+  if (manager === 'bun') return prepareBun(root,await resolveBunExecutable(),bunLockfile ?? 'bun.lock',deps)
   const launcher = await resolveManager(manager)
   const executable = await resolveNodeExecutable()
   const prepared = { executable, prefixArgs: [launcher.entry, ...launcher.prefixArgs] }

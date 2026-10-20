@@ -54,7 +54,7 @@ export async function applyPlan(
   }
   const prepared =
     plan.dependencyPlan.length && !ports.dependencies
-      ? await prepareManager(plan.projectRoot, plan.packageManager, plan.bunLockfile)
+      ? await prepareManager(plan.projectRoot, plan.packageManager, plan.bunLockfile, plan.dependencyPlan)
       : undefined
   const lockPath = await safePath(plan.projectRoot, '.ombelle-operation.lock')
   let operation: fs.FileHandle

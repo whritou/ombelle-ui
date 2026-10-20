@@ -148,7 +148,7 @@ export async function planAdd(
         sha256: await sha256(c.afterContent),
       }
   }
-  const installed = {
+  const installed = context.manager === 'bun' ? context.packageJson.dependencies ?? {} : {
     ...context.packageJson.devDependencies,
     ...context.packageJson.dependencies,
   }
