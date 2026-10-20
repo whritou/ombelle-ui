@@ -10,6 +10,8 @@
 
 **Spec:** [Approved technical foundation design](../specs/2026-10-20-technical-foundation-design.md). Read both documents before execution.
 
+**Execution method:** Native execution, selected by Codex on 20 October 2026 at the user's request to review the plan and choose a method. Use `superpowers:executing-plans` when implementation is authorized. This review updates planning documents only.
+
 ## Global Constraints
 
 - Project root: `D:/Documents/GitHub/ombelle-ui`; preserve the existing Git history and `LICENSE`. Do not initialize another repository.
@@ -68,7 +70,7 @@ Each package gets its own `package.json` and `tsconfig.json` when first introduc
 expect(validatePreset(existingExample).styleFamily).toBe('neo-brutalism')
 expect(() => validatePreset({ ...existingExample, surprise: true })).toThrow(FoundationError)
 ```
-- [ ] Implement `validatePreset` using the existing schema plus semantic checks. Keep validation independent of browser/Node I/O. Derive or generate checked types from the schema. Define root `build`, `typecheck`, and `test` scripts, with `test` using non-watch mode.
+- [ ] Implement `validatePreset` using the existing schema plus semantic checks. Keep validation independent of browser/Node I/O. Derive or generate checked types from the schema. Define root `build:packages` for dependency-ordered library/CLI builds, `build`, `typecheck`, `test:unit`, and `test:integration`; use non-watch test mode. Exclude Playwright specs from Vitest discovery. The default `test` script must build packages before subprocess integration tests; register only scripts for packages/tests that exist at the current task.
 - [ ] Run `pnpm typecheck` and the targeted test; require passing results. Record that the schema permits four visual families but the foundation catalog supports two.
 - [ ] Commit the contract deliverable and tooling as `build: establish workspace and validated preset contracts` using explicit file paths.
 
@@ -84,7 +86,7 @@ expect(() => validatePreset({ ...existingExample, surprise: true })).toThrow(Fou
 
 ```ts
 expect(getTemplate(getCatalog('0.1.0'), 'dialog').id).toBe('dialog')
-expect(() => getCatalog('99.0.0')).toThrowError(/UNSUPPORTED_RELEASE/)
+expect(() => getCatalog('99.0.0')).toThrow(FoundationError)
 ```
 - [ ] Run the targeted test and `pnpm typecheck`; require both styles to satisfy all template token references. Defer full dialog browser behavior to Task 9.
 - [ ] Commit as `feat: add foundation component catalog and two style families`.
@@ -108,9 +110,11 @@ expect((await compile(input)).artifacts.every(a => !a.content.includes('\r'))).t
 
 ## Task 4: A standard registry item and an explicit upstream adapter decision
 
-**Files:** Create `packages/cli/package.json`, `packages/cli/tsconfig.json`, `packages/cli/src/registry/{build,adapter}.ts`, `packages/cli/test/registry.test.ts`, `tests/integration/upstream.test.ts`, and `docs/decisions/0002-registry-adapter.md`.
+**Files:** Create `packages/cli/package.json`, `packages/cli/tsconfig.json`, `packages/cli/src/registry/{build,adapter}.ts`, `packages/cli/test/registry.test.ts`, `tests/helpers/{projects,tree}.ts`, `tests/integration/upstream.test.ts`, and `docs/decisions/0002-registry-adapter.md`.
 
 **Interfaces:** `buildRegistry(result: CompileResult): { index: unknown; items: Record<string, unknown> }`; `probeUpstream(input: { cwd: string; registryUrl: string }): Promise<{ files: string[]; dependencyChanges: { name: string; version: string }[] }>` is an experiment adapter used only in a disposable fixture. No production plan may call an upstream mutation API.
+
+Test helpers introduced here: `createProject(kind: 'vite' | 'next'): Promise<string>` creates a disposable minimal supported pnpm app; `snapshotTree(root: string): Promise<Record<string,string>>` reads file hashes without writes. The upstream experiment uses these helpers before later project-planner tasks exist. Keep preparation writes outside the measured operation.
 
 - [ ] Write failing tests validating generated Button and theme items against documented upstream registry schemas, with exact content matching compiler artifacts and no Ombelle-only fields added to upstream items.
 - [ ] Run `pnpm exec vitest run packages/cli/test/registry.test.ts`; expect missing builder failures.
@@ -124,7 +128,7 @@ expect(registryItemSchema.safeParse(buildRegistry(result).items.button).success)
 
 ## Task 5: Read-only project inspection and component plans
 
-**Files:** Create `packages/cli/src/project/{inspect,paths,transform}.ts`, `packages/cli/src/plan/components.ts`, `packages/cli/test/{inspect,plan}.test.ts`, `tests/helpers/{projects,tree}.ts`; extend contracts with plan and lock types.
+**Files:** Create `packages/cli/src/project/{inspect,paths,transform}.ts`, `packages/cli/src/plan/components.ts`, and `packages/cli/test/{inspect,plan}.test.ts`; reuse Task 4's test helpers and extend contracts with plan and lock types.
 
 **Interfaces:** `inspectProject(cwd: string): Promise<ProjectContext>`; `planAdd(context: ProjectContext, result: CompileResult): Promise<InstallPlan>`. Define `ProjectContext` containing root, framework (`vite` or `next`), manager (`pnpm`), aliases, CSS entry/dark selector, and optional local preset/config/installed lock before initialization. `InstallPlan` contains `projectRoot`, preset/provenance, `changes: FileChange[]`, managed CSS records, `dependencyPlan`, and `diagnostics`. `FileChange` contains relative `path`, `beforeHash: string | null`, `afterContent: string`, `kind`, and action (`create`, `update`, `noop`, `conflict`). `ProjectLock` records version 1, versions/preset hash, artifact destinations/hashes, and managed declarations. Helpers: `createProject(kind: 'vite' | 'next'): Promise<string>` makes a disposable minimal pnpm app; `snapshotTree(root: string): Promise<Record<string,string>>` captures file hashes without writes.
 
@@ -185,7 +189,7 @@ expect(await snapshotTree(root)).toEqual(treeAfterUserEdit)
 
 - [ ] Write subprocess tests that initialize a temporary supported app using a local neo brutalist preset, add Button/Dialog, exit, then add Input in a new process without a preset argument. Assert the saved preset hash and style remain identical, all installed files have lock records, and the app's manager/lockfile format is unchanged.
 - [ ] Add failing tests for dry-run tree equality with an instrumented dependency runner, malformed local JSON, init on an existing shadcn app routing to theme-only changes, `--yes` on an edited component still returning exit 4, and dependency failure returning exit 6 with JSON recovery details.
-- [ ] Run `pnpm exec vitest run tests/integration/cli.test.ts`; expect missing command-routing failures.
+- [ ] Add a minimal executable entry that reports unsupported commands, then run `pnpm build:packages` and `pnpm exec vitest run tests/integration/cli.test.ts`; expect assertions about missing command behavior to fail. A missing built executable is a setup failure, not the intended behavioral red test. Subsequent test reruns rebuild the CLI first.
 - [ ] Implement command parsing and output. Route initialization through `compile` with an empty component list and `planTheme`; allow missing Ombelle state only on init/theme application and derive its new config from the detected supported app. `add` with no saved preset fails with initialization guidance. JSON includes `command`, `status`, `projectRoot`, `presetHash`, `catalogRelease`, `compilerVersion`, `changes`, `dependencyPlan`, `warnings`, and stable diagnostic records. Local preset files are not interpreted as arbitrary remote URLs. Preserve meaningful exit codes through the entry wrapper.
 
 ```ts
@@ -203,7 +207,7 @@ expect(editedSourceProcess.exitCode).toBe(4)
 
 - [ ] Write failing browser checks using the same viewport, system font, disabled animation, style, mode, and interaction state across preview and consumers. Assert component roles, controlled computed color/border/radius values, normalized component DOM, and screenshot comparisons after excluding app-shell differences. Capture the generated manifest and confirm consumer differences are limited to declared path/alias transforms.
 - [ ] Add keyboard tests for focus entry into Dialog, Tab/Shift+Tab containment, Escape dismissal, restored trigger focus, labelled Input, and Button focus visibility. Check dark theme on portal content and Next.js client-boundary builds. Run axe scans for closed/open Dialog and form states in each style/mode.
-- [ ] Run `pnpm test:e2e`; after installing the test browser, expect missing preview/consumer behavior failures.
+- [ ] Establish startable preview and consumer shells and install the test browser, then run `pnpm test:e2e`; expect missing component/keyboard behavior assertions to fail. Missing generated imports or unreachable servers are setup failures, not the intended behavioral red test.
 
 ```ts
 await page.getByRole('button', { name: 'Open dialog' }).click()
@@ -212,14 +216,14 @@ await page.keyboard.press('Escape')
 await expect(page.getByRole('button', { name: 'Open dialog' })).toBeFocused()
 ```
 - [ ] Implement fixture UI, generation scripts, and isolated install/build verification. The preview imports generated modules through Vite. Use separate generated output directories for style fixtures to avoid shared-file races. Next uses a client scenario boundary for interactive components while exercising App Router integration. Disallow `@ombelle/*` or `workspace:` dependencies in installed source/standalone consumer manifests.
-- [ ] Run `pnpm generate:preview`, `pnpm prepare:consumers`, `pnpm build:consumers`, and `pnpm test:e2e`. Require both consumers to build without resolving workspace packages or contacting an Ombelle service. Compare artifacts with browser-generated SHA-256 in the preview and compiler hashes to verify cross-environment hashing.
+- [ ] Run `pnpm build:packages`, `pnpm generate:preview`, `pnpm prepare:consumers`, `pnpm typecheck`, `pnpm build:preview`, `pnpm build:consumers`, and `pnpm test:e2e` in that order. Define `build:preview` as the Vite production preview build. Consumer preparation must install/generated-source dependencies before full typechecking. Playwright starts all three servers from prepared output and waits for readiness. Require both consumers to build without resolving workspace packages or contacting an Ombelle service. Compare artifacts with browser-generated SHA-256 in the preview and compiler hashes to verify cross-environment hashing.
 - [ ] Commit as `feat: verify generated preview against standalone Vite and Next consumers`.
 
 ## Task 10: A reproducible foundation verification gate
 
 **Files:** Create `.github/workflows/foundation.yml`, `docs/evidence/foundation.md`; update `package.json`, `README.md`, `docs/foundation-local-usage.md`, and the approved specification's evidence links without changing its agreed scope.
 
-**Interfaces:** `pnpm check:foundation` sequences typecheck, unit/integration tests, workspace build, preview generation, consumer preparation/build, and browser checks. The workflow uses the pinned Node/pnpm versions and frozen lockfile, installs only the required Playwright browser, and uploads failure screenshots/reports. It does not publish or deploy.
+**Interfaces:** `pnpm check:foundation` runs `build:packages`, `test:unit`, `test:integration`, `generate:preview`, `prepare:consumers`, `typecheck`, `build:preview`, `build:consumers`, and `test:e2e` sequentially, stopping on the first failure. Each script owns only that stage; subprocess tests consume the existing package build, and browser tests consume prepared apps without recursively invoking the foundation gate. The workflow uses pinned Node/pnpm versions and a frozen root lockfile, installs only the required Playwright browser, and uploads failure screenshots/reports. Independently prepared consumer fixtures retain their own manager lockfiles. It does not publish or deploy.
 
 - [ ] Review Task 1–9 tests against every row in the spec's exit table; add an omitted behavioral proof to its owning test rather than writing a test that checks documentation text. Ensure registry integration remains an explicit check and is not accidentally excluded as network-dependent.
 - [ ] Wire `check:foundation` and the workflow. Run `pnpm check:foundation`; require an exit code of zero with no unacknowledged skipped required cases. This is the first whole-foundation gate, not a request to repeatedly broaden already passing checks.
@@ -233,6 +237,15 @@ Execution order is Tasks 1 through 10. Each task ends with its meaningful verifi
 
 Planning itself runs no product tests because no application has been implemented. The task commands and expected failures above are future execution instructions.
 
-The user must review this plan and select an execution method before implementation. Recommend native execution for this solo build: the tasks share contracts and are mostly sequential, so keeping one implementer reduces context transfer. Subagent-driven execution remains an alternative with per-task independent review and higher context cost. Native execution uses `superpowers:executing-plans`; subagent-driven execution uses `superpowers:subagent-driven-development`.
+Native execution is selected at the user's request: the tasks share contracts and are mostly sequential, so keeping one implementer reduces context transfer. Use `superpowers:executing-plans` for implementation and follow its whole-branch review requirements. Do not claim this planning review is an independent implementation review; no product code exists yet.
 
-Do not create a worktree, scaffold packages, install dependencies, or execute this plan while awaiting that decision. The next task after plan approval is Task 1 in the existing project repository, following applicable execution and worktree guidance.
+The user's current request is to review the plan and choose an execution method before implementation. That review and choice are complete; execution has not started. The next implementation task is Task 1 in the existing project repository, following applicable execution and worktree guidance when implementation is requested.
+
+## Plan review record — 20 October 2026
+
+- Matched the ten task deliverables against the specification's scope and exit criteria.
+- Corrected clean-checkout check order: build packages before executable integration tests; generate and prepare apps before full typechecking and browser builds.
+- Moved disposable project/snapshot helper ownership to Task 4, their first consumer.
+- Replaced a message-regex error assertion with the shared error type; retain the explicit error-code assertion required by Task 2.
+- Distinguished expected failing behavior tests from absent executable, generated-file, or server infrastructure.
+- Selected native execution; kept all product tasks unchecked. Product verification will run during implementation, not during document review.
