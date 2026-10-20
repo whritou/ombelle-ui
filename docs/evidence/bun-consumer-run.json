@@ -1,66 +1,66 @@
 {
-  "startedAt": "2026-10-20T18:18:02.924Z",
-  "sourceCommit": "3f9e35f6bdd311dad86365edb5a1e28f56b904e9",
-  "workingTreeDirty": true,
+  "startedAt": "2026-10-20T18:36:10.594Z",
+  "sourceCommit": "e1eeaa9d3ac94b3e57649a4dcb59f602cc840fd4",
+  "workingTreeDirty": false,
   "platform": "win32",
   "node": "v24.21.0",
   "steps": [
     {
       "name": "build:packages",
       "exitCode": 0,
-      "durationMs": 1329,
+      "durationMs": 1224,
       "log": ".artifacts/logs/build-packages.log"
     },
     {
       "name": "test:unit",
       "exitCode": 0,
-      "durationMs": 5489,
+      "durationMs": 5502,
       "log": ".artifacts/logs/test-unit.log"
     },
     {
       "name": "test:integration",
       "exitCode": 0,
-      "durationMs": 183213,
+      "durationMs": 187225,
       "log": ".artifacts/logs/test-integration.log"
     },
     {
       "name": "generate:preview",
       "exitCode": 0,
-      "durationMs": 1780,
+      "durationMs": 1749,
       "log": ".artifacts/logs/generate-preview.log"
     },
     {
       "name": "prepare:consumers",
       "exitCode": 0,
-      "durationMs": 240591,
+      "durationMs": 244827,
       "log": ".artifacts/logs/prepare-consumers.log"
     },
     {
       "name": "typecheck",
       "exitCode": 0,
-      "durationMs": 1811,
+      "durationMs": 1855,
       "log": ".artifacts/logs/typecheck.log"
     },
     {
       "name": "build:preview",
       "exitCode": 0,
-      "durationMs": 2610,
+      "durationMs": 1879,
       "log": ".artifacts/logs/build-preview.log"
     },
     {
       "name": "build:consumers",
       "exitCode": 0,
-      "durationMs": 81845,
+      "durationMs": 82337,
       "log": ".artifacts/logs/build-consumers.log"
     },
     {
       "name": "test:e2e",
       "exitCode": 0,
-      "durationMs": 74078,
+      "durationMs": 67177,
       "log": ".artifacts/logs/test-e2e.log"
     }
   ],
-  "completedAt": "2026-10-20T18:27:55.897Z",
+  "completedAt": "2026-10-20T18:46:04.576Z",
   "status": "passed",
   "counts": {
     "unit": {
@@ -69,13 +69,13 @@
       "skipped": 0
     },
     "integration": {
-      "passed": 96,
+      "passed": 99,
       "failed": 0,
       "skipped": 0
     },
     "browser": {
-      "startTime": "2026-10-20T18:26:43.510Z",
-      "duration": 72190.132,
+      "startTime": "2026-10-20T18:44:58.918Z",
+      "duration": 65502.531,
       "expected": 24,
       "skipped": 0,
       "unexpected": 0,
