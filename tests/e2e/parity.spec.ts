@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import fs from 'node:fs'
+import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
 test.beforeAll(async ({ browser }) => {
   fs.writeFileSync(
@@ -15,7 +16,7 @@ test.beforeAll(async ({ browser }) => {
     ),
   )
 })
-for (const family of ['flat', 'neo-brutalism'])
+for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'])
     test(
       family + ' ' + mode + ' visual DOM and artifact parity',

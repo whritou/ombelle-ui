@@ -8,7 +8,7 @@
   transition: background-color var(--motion-duration), border-color var(--motion-duration);
   box-shadow: none;
 }
-[data-slot="button"] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); cursor: pointer; }
+[data-slot="button"] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); cursor: pointer; white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
 [data-slot="button"]:not(:disabled):hover { background: color-mix(in srgb, var(--primary) 90%, black); }
 [data-slot="button"]:not(:disabled):active { background: color-mix(in srgb, var(--primary) 80%, black); }
 [data-slot="button"][data-variant="secondary"] { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--input); }
@@ -17,6 +17,7 @@
 [data-slot="button"][data-variant="secondary"]:not(:disabled):hover,
 [data-slot="button"][data-variant="outline"]:not(:disabled):hover,
 [data-slot="button"][data-variant="ghost"]:not(:disabled):hover { background: var(--accent); color: var(--accent-foreground); }
+[data-slot="button"][data-variant="secondary"]:not(:disabled):hover { background: color-mix(in srgb, var(--secondary) 95%, var(--secondary-foreground)); color: var(--secondary-foreground); }
 [data-slot="button"][data-variant="secondary"]:not(:disabled):active,
 [data-slot="button"][data-variant="outline"]:not(:disabled):active,
 [data-slot="button"][data-variant="ghost"]:not(:disabled):active { background: color-mix(in srgb, var(--accent) 90%, var(--foreground)); color: var(--accent-foreground); }
@@ -28,7 +29,7 @@
 [data-slot="button"][data-variant="destructive"]:not(:disabled):active { background: color-mix(in srgb, var(--destructive) 80%, black); }
 [data-slot="button"][data-size="sm"] { min-height: 2rem; padding: 0.25rem 0.75rem; }
 [data-slot="button"][data-size="lg"] { min-height: 3rem; padding: 0.75rem 1.25rem; }
-[data-slot="button"][data-size="icon"] { width: var(--control-height); padding: 0; }
+[data-slot="button"][data-size="icon"] { width: max(var(--control-height), 2em); min-height: max(var(--control-height), 2em); padding: 0; }
 [data-slot="input"] { width: 100%; min-width: 0; background: var(--background); color: var(--foreground); }
 [data-slot="input"][aria-invalid="true"] { border-color: var(--destructive); border-width: max(var(--border-width), 2px); }
 [data-slot="button"]:disabled, [data-slot="input"]:disabled { opacity: 0.5; cursor: not-allowed; }

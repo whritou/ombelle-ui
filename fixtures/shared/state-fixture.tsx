@@ -8,7 +8,7 @@ export function StateFixture() {
  return <section className="state-fixture" data-testid="state-fixture" aria-label="Component states">
   <h2>Component states</h2>
   <div className="state-actions">{(['default','secondary','outline','ghost','link','destructive'] as const).map(variant=><Button key={variant} variant={variant} data-testid={'variant-'+variant}>{variant} action</Button>)}</div>
-  <div className="state-actions">{(['sm','default','lg','icon'] as const).map(size=><Button key={size} size={size} data-testid={'size-'+size} aria-label={size+' action'}>{size==='icon'?'＋':size+' size'}</Button>)}</div>
+  <div className="state-actions">{(['sm','default','lg','icon'] as const).map(size=><Button key={size} size={size} data-testid={'size-'+size} aria-label={size==='icon'?'Add item':undefined}>{size==='icon'?'＋':size+' size'}</Button>)}</div>
   <Button disabled data-testid="disabled-button" onClick={()=>setActivations(v=>v+1)}>Unavailable action</Button><output data-testid="activation-count">Activations: {activations}</output>
   <label htmlFor="empty-input">Empty field</label><Input id="empty-input" data-testid="empty-input" placeholder="Enter a value" />
   <label htmlFor="filled-input">Filled field</label><Input id="filled-input" data-testid="filled-input" defaultValue="A saved value" />
