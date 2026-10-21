@@ -1,7 +1,12 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { Artifact } from '@ombelle/contracts'
-import { compileRecipe, sha256 } from '@ombelle/compiler'
+import {
+  compileRecipe,
+  sha256,
+  rewriteModuleSpecifiers,
+  recipeImportAlias,
+} from '@ombelle/compiler'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
 let bank: Promise<Map<string, Artifact>> | undefined
 export function recipeReferenceBank(): Promise<Map<string, Artifact>> {
@@ -37,12 +42,16 @@ export async function writePreviewRecipes(root: string): Promise<void> {
           .join('/')
         return p.startsWith('.') ? p : './' + p
       }
-      const content = artifact.content
-        .replaceAll('@/lib/utils', relative(path.join(root, 'lib/utils')))
-        .replaceAll(
-          '@/components/ui',
-          relative(path.join(root, 'components/ui')),
-        )
+      const content =
+        artifact.kind === 'style'
+          ? artifact.content
+          : await rewriteModuleSpecifiers(artifact.content, (specifier) =>
+              recipeImportAlias(
+                specifier,
+                relative(path.join(root, 'lib/utils')),
+                relative(path.join(root, 'components/ui')),
+              ),
+            )
       await fs.mkdir(path.dirname(target), { recursive: true })
       await fs.writeFile(target, content)
       transforms[artifact.logicalPath] = {

@@ -56,7 +56,7 @@ export async function planRecipe(
   const importPath =
     context.uiAlias + '/recipes/' + id + '/r' + revision + '/button'
   const usage = result.artifacts.find((a) => a.kind === 'usage')!
-  const examplePath = transformRecipeArtifact(context, usage).path
+  const examplePath = (await transformRecipeArtifact(context, usage)).path
   const plan: InstallPlan = {
     packageManager: context.manager,
     ...(context.bunLockfile ? { bunLockfile: context.bunLockfile } : {}),
@@ -89,7 +89,7 @@ export async function planRecipe(
   const owned: Record<string, InstalledArtifact> = {},
     seen = new Set<string>()
   for (const artifact of result.artifacts) {
-    const target = transformRecipeArtifact(context, artifact),
+    const target = await transformRecipeArtifact(context, artifact),
       normalized = target.path.replace(/^\.\//, '').toLowerCase()
     if (seen.has(normalized))
       throw new FoundationError(

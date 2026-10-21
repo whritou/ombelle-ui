@@ -37,8 +37,30 @@ export function formatPlan(
         ' (component only)\nImport: ' +
         plan.recipe.importPath +
         '\nUsage: ' +
-        plan.recipe.examplePath
+        plan.recipe.examplePath +
+        '\nRecipe hash: ' +
+        plan.recipe.recipe.hash +
+        '\nPreset hash: ' +
+        plan.recipe.preset.hash +
+        '\nCatalog release: ' +
+        plan.recipe.provenance.catalogRelease +
+        '\nCompiler version: ' +
+        plan.recipe.provenance.compilerVersion +
+        '\nScope: ' +
+        plan.recipe.scope +
+        '\nDark selector: ' +
+        plan.recipe.darkSelector
       : '') +
+    plan.diagnostics
+      .map(
+        (d) =>
+          '\n' +
+          d.code +
+          (d.path ? ' (' + d.path + ')' : '') +
+          ': ' +
+          d.message,
+      )
+      .join('') +
     (plan.managerWarning ? '\nWarning: ' + plan.managerWarning : '') +
     (plan.dependencyPlan.length
       ? '\nDependencies: ' +

@@ -5,10 +5,11 @@ import {
   type ProjectContext,
 } from '@ombelle/contracts'
 import { portable } from './paths.js'
-export function transformRecipeArtifact(
+import { rewriteModuleSpecifiers, recipeImportAlias } from '@ombelle/compiler'
+export async function transformRecipeArtifact(
   context: ProjectContext,
   artifact: Artifact,
-): { path: string; content: string } {
+): Promise<{ path: string; content: string }> {
   let target: string
   if (artifact.logicalPath === 'lib/utils.ts') target = context.utilsFile
   else if (
@@ -33,8 +34,11 @@ export function transformRecipeArtifact(
     )
   return {
     path: portable(target),
-    content: artifact.content
-      .replaceAll('@/lib/utils', context.utilsAlias)
-      .replaceAll('@/components/ui', context.uiAlias),
+    content:
+      artifact.kind === 'style'
+        ? artifact.content
+        : await rewriteModuleSpecifiers(artifact.content, (specifier) =>
+            recipeImportAlias(specifier, context.utilsAlias, context.uiAlias),
+          ),
   }
 }
