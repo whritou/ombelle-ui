@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { supportedStyleFamilies } from '../packages/contracts/src/style-families.ts'
 const base = 'packages/catalog/src/'
 const templates = Object.fromEntries(
   ['button', 'dialog', 'input'].map((id) => [
@@ -7,13 +8,13 @@ const templates = Object.fromEntries(
   ]),
 )
 const styles = Object.fromEntries(
-  ['flat', 'neo-brutalism'].map((id) => [
+  supportedStyleFamilies.map((id) => [
     id,
     fs.readFileSync(base + 'styles/' + id + '.css', 'utf8'),
   ]),
 )
 const presets = Object.fromEntries(
-  ['flat', 'neo-brutalism'].map((id) => [
+  supportedStyleFamilies.map((id) => [
     id,
     JSON.parse(fs.readFileSync(base + 'presets/' + id + '.json', 'utf8')),
   ]),

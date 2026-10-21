@@ -1,0 +1,87 @@
+{
+  "sourceCommit": "b44048f94ed0c6e0c3964e2c142800a3f460035a",
+  "families": {
+    "flat": {
+      "presetHash": "5ff15eb2735326caa531570abf3bb701cc2ad8e054ce90b2940888bed4bd6038",
+      "artifacts": [
+        {
+          "logicalPath": "components/ui/button.tsx",
+          "sha256": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69"
+        },
+        {
+          "logicalPath": "components/ui/dialog.tsx",
+          "sha256": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71"
+        },
+        {
+          "logicalPath": "components/ui/input.tsx",
+          "sha256": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4"
+        },
+        {
+          "logicalPath": "examples/button.tsx",
+          "sha256": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e"
+        },
+        {
+          "logicalPath": "examples/dialog.tsx",
+          "sha256": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d"
+        },
+        {
+          "logicalPath": "examples/input.tsx",
+          "sha256": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965"
+        },
+        {
+          "logicalPath": "lib/utils.ts",
+          "sha256": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb"
+        },
+        {
+          "logicalPath": "styles/ui-style.css",
+          "sha256": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef"
+        },
+        {
+          "logicalPath": "styles/ui-tokens.css",
+          "sha256": "f8bc2d493d0143755c1db5580ffeadeb225446d5e13ce96faaf0e6e834d334ef"
+        }
+      ]
+    },
+    "neo-brutalism": {
+      "presetHash": "d4408485d0042453f1b9ba3b2e4340fc9b23ea38f973b49603b76f1b4c9c6fac",
+      "artifacts": [
+        {
+          "logicalPath": "components/ui/button.tsx",
+          "sha256": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69"
+        },
+        {
+          "logicalPath": "components/ui/dialog.tsx",
+          "sha256": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71"
+        },
+        {
+          "logicalPath": "components/ui/input.tsx",
+          "sha256": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4"
+        },
+        {
+          "logicalPath": "examples/button.tsx",
+          "sha256": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e"
+        },
+        {
+          "logicalPath": "examples/dialog.tsx",
+          "sha256": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d"
+        },
+        {
+          "logicalPath": "examples/input.tsx",
+          "sha256": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965"
+        },
+        {
+          "logicalPath": "lib/utils.ts",
+          "sha256": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb"
+        },
+        {
+          "logicalPath": "styles/ui-style.css",
+          "sha256": "17b2401a328302e945e8a28ea4fd7e99b746b274f374987a1543acfa61cfaafc"
+        },
+        {
+          "logicalPath": "styles/ui-tokens.css",
+          "sha256": "74d62a415f3def94c2ec24001158efe6423dff557150d2295ab857dfa1c4622d"
+        }
+      ]
+    }
+  }
+}

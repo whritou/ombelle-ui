@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "id": "builtin-minimalist",
+  "name": "Minimalist",
+  "revision": 1,
+  "catalogRelease": "0.1.0",
+  "compilerVersion": "0.1.0",
+  "platform": "react-web",
+  "styleFamily": "minimalist",
+  "modes": {
+    "light": {
+      "background": "#FAFAFA",
+      "foreground": "#111827",
+      "card": "#FFFFFF",
+      "cardForeground": "#111827",
+      "popover": "#FFFFFF",
+      "popoverForeground": "#111827",
+      "primary": "#111827",
+      "primaryForeground": "#FFFFFF",
+      "secondary": "#F3F4F6",
+      "secondaryForeground": "#111827",
+      "muted": "#F3F4F6",
+      "mutedForeground": "#4B5563",
+      "accent": "#E5E7EB",
+      "accentForeground": "#111827",
+      "destructive": "#B91C1C",
+      "destructiveForeground": "#FFFFFF",
+      "border": "#D1D5DB",
+      "input": "#6B7280",
+      "ring": "#111827"
+    },
+    "dark": {
+      "background": "#111827",
+      "foreground": "#F9FAFB",
+      "card": "#1F2937",
+      "cardForeground": "#F9FAFB",
+      "popover": "#1F2937",
+      "popoverForeground": "#F9FAFB",
+      "primary": "#F9FAFB",
+      "primaryForeground": "#111827",
+      "secondary": "#374151",
+      "secondaryForeground": "#F9FAFB",
+      "muted": "#1F2937",
+      "mutedForeground": "#D1D5DB",
+      "accent": "#374151",
+      "accentForeground": "#F9FAFB",
+      "destructive": "#FCA5A5",
+      "destructiveForeground": "#111827",
+      "border": "#4B5563",
+      "input": "#9CA3AF",
+      "ring": "#F9FAFB"
+    }
+  },
+  "design": {
+    "fontFamilyId": "system-sans",
+    "radiusRem": 0.375,
+    "density": "comfortable",
+    "borderWidthPx": 1,
+    "shadowOffsetXPx": 0,
+    "shadowOffsetYPx": 0,
+    "motion": "reduced",
+    "transparency": "reduced"
+  },
+  "componentDefaults": {
+    "button": {
+      "variant": "default",
+      "size": "default"
+    }
+  }
+}

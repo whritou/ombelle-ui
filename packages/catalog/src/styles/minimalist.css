@@ -1,0 +1,44 @@
+/* minimalist family */
+[data-slot="button"], [data-slot="input"], [data-slot="dialog-close"] {
+  font-family: var(--font-family);
+  min-height: var(--control-height);
+  border: var(--border-width) solid var(--input);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  transition: background-color var(--motion-duration), border-color var(--motion-duration);
+  box-shadow: none;
+}
+[data-slot="button"] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); cursor: pointer; }
+[data-slot="button"]:not(:disabled):hover { background: color-mix(in srgb, var(--primary) 90%, black); }
+[data-slot="button"]:not(:disabled):active { background: color-mix(in srgb, var(--primary) 80%, black); }
+[data-slot="button"][data-variant="secondary"] { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--input); }
+[data-slot="button"][data-variant="outline"] { background: var(--background); color: var(--foreground); border-color: var(--input); }
+[data-slot="button"][data-variant="ghost"], [data-slot="button"][data-variant="link"] { background: transparent; color: var(--foreground); border-color: transparent; }
+[data-slot="button"][data-variant="secondary"]:not(:disabled):hover,
+[data-slot="button"][data-variant="outline"]:not(:disabled):hover,
+[data-slot="button"][data-variant="ghost"]:not(:disabled):hover { background: var(--accent); color: var(--accent-foreground); }
+[data-slot="button"][data-variant="secondary"]:not(:disabled):active,
+[data-slot="button"][data-variant="outline"]:not(:disabled):active,
+[data-slot="button"][data-variant="ghost"]:not(:disabled):active { background: color-mix(in srgb, var(--accent) 90%, var(--foreground)); color: var(--accent-foreground); }
+[data-slot="button"][data-variant="link"] { color: var(--primary); text-decoration: underline; text-underline-offset: 0.2em; }
+[data-slot="button"][data-variant="link"]:not(:disabled):hover { background: transparent; text-decoration-thickness: 2px; }
+[data-slot="button"][data-variant="link"]:not(:disabled):active { background: var(--accent); color: var(--accent-foreground); }
+[data-slot="button"][data-variant="destructive"] { background: var(--destructive); color: var(--destructive-foreground); border-color: var(--destructive); }
+[data-slot="button"][data-variant="destructive"]:not(:disabled):hover { background: color-mix(in srgb, var(--destructive) 90%, black); }
+[data-slot="button"][data-variant="destructive"]:not(:disabled):active { background: color-mix(in srgb, var(--destructive) 80%, black); }
+[data-slot="button"][data-size="sm"] { min-height: 2rem; padding: 0.25rem 0.75rem; }
+[data-slot="button"][data-size="lg"] { min-height: 3rem; padding: 0.75rem 1.25rem; }
+[data-slot="button"][data-size="icon"] { width: var(--control-height); padding: 0; }
+[data-slot="input"] { width: 100%; min-width: 0; background: var(--background); color: var(--foreground); }
+[data-slot="input"][aria-invalid="true"] { border-color: var(--destructive); border-width: max(var(--border-width), 2px); }
+[data-slot="button"]:disabled, [data-slot="input"]:disabled { opacity: 0.5; cursor: not-allowed; }
+[data-slot="button"]:focus-visible, [data-slot="input"]:focus-visible, [data-slot="dialog-close"]:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+[data-slot="dialog-overlay"] { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.5); }
+[data-slot="dialog-content"] { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; width: min(28rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 2rem; border: var(--border-width) solid var(--border); border-radius: var(--radius); background: var(--popover); color: var(--popover-foreground); font-family: var(--font-family); box-shadow: none; }
+[data-slot="dialog-close"] { margin-top: 1rem; background: var(--secondary); color: var(--secondary-foreground); cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { [data-slot] { transition: none !important; animation: none !important; } }
+@media (forced-colors: active) {
+  [data-slot="button"], [data-slot="input"], [data-slot="dialog-close"] { border-color: ButtonText; }
+  [data-slot="button"]:focus-visible, [data-slot="input"]:focus-visible, [data-slot="dialog-close"]:focus-visible { outline-color: Highlight; }
+  [data-slot="input"][aria-invalid="true"] { border-style: double; }
+}

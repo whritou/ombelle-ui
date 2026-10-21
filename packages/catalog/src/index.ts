@@ -4,6 +4,7 @@ import {
   type ComponentId,
   type Preset,
   type StyleFamily,
+  supportedStyleFamilies,
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
@@ -53,10 +54,7 @@ export function getCatalog(release: string): Catalog {
   ) as Record<ComponentId, ComponentTemplate>
   return {
     release,
-    presets: {
-      flat: validatePreset(catalogData.presets.flat),
-      'neo-brutalism': validatePreset(catalogData.presets['neo-brutalism']),
-    },
+    presets: Object.fromEntries(supportedStyleFamilies.map(family => [family, validatePreset(catalogData.presets[family])])) as Record<StyleFamily, Preset>,
     templates,
     styles: { ...catalogData.styles },
     utility: catalogData.utility,
