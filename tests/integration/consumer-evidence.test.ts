@@ -37,7 +37,7 @@ it('rejects incomplete or mislabeled consumer evidence', () => {
 })
 function measurements() {
   return ['preview', 'vite', 'next', 'npm-vite', 'npm-next'].flatMap(app => ['light', 'dark'].map(mode => ({
-    app, mode, ratios: Object.fromEntries(['error','inputBoundary','focus','muted','dialogText','dialogFocus', ...['default','secondary','outline','ghost','link','destructive'].flatMap(v => ['', 'Hover','Pressed'].flatMap(s => ['ghost','link'].includes(v) ? [v+s] : [v+s,v+s+'Boundary']))].map(key => [key, 7])),
+    app, mode, ratios: Object.fromEntries(['placeholder','placeholderFocus','error','inputBoundary','focus','muted','dialogText','dialogFocus', ...['default','secondary','outline','ghost','link','destructive'].flatMap(v => ['', 'Hover','Pressed'].flatMap(s => ['ghost','link'].includes(v) ? [v+s] : [v+s,v+s+'Boundary']))].map(key => [key, 7])),
     disabledContrast: 'exempt', textMethod: 'synthetic font enlargement (not native browser zoom)', forcedColors: 'active', motionPositiveControlMs: 150,
     textEvidence: [1100,320].flatMap(width => [false,true].map(dialogOpen => ({width, dialogOpen, samples: Array.from({length:16}, (_,i) => ({selector: i === 0 ? 'input' : dialogOpen ? '[role="dialog"] p'+i : 'p'+i, before:16, after:32}))}))),
   })))
@@ -50,6 +50,7 @@ it('requires all measured app/mode and actual text-scaling outcomes', () => {
     r => { r[0].textEvidence.pop() }, r => { r[0].textEvidence[0].samples[0].after = 16 },
     r => { r[0].textEvidence[1].samples = [{selector:'input',before:16,after:32}] },
     r => { r[0].textMethod = 'native browser zoom' }, r => { r[0].forcedColors = 'none' },
+    r => { delete r[0].ratios.placeholder }, r => { r[0].ratios.placeholderFocus = 3.3 },
   ]
   for (const mutate of mutations) { const rows = measurements(); mutate(rows); expect(() => validateMinimalistMeasurements(rows)).toThrow() }
 })

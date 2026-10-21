@@ -48,7 +48,7 @@ export function validateMinimalistMeasurements(value: unknown): unknown[] {
     const row = record(item), id = row.app + '/' + row.mode
     if (!expected.delete(id)) throw new Error('Missing or duplicate minimalist app/mode')
     const ratios = record(row.ratios)
-    const required = ['inputBoundary','focus','muted','error','dialogText','dialogFocus']
+    const required = ['inputBoundary','focus','muted','error','dialogText','dialogFocus','placeholder','placeholderFocus']
     for (const variant of ['default','secondary','outline','ghost','link','destructive']) for (const state of ['', 'Hover','Pressed']) {
       required.push(variant + state)
       if (!['ghost','link'].includes(variant)) required.push(variant + state + 'Boundary')

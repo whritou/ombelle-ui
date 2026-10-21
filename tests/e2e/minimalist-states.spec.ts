@@ -11,19 +11,20 @@ function url(app:string,mode:string){return(app==='preview'?'http://127.0.0.1:41
 async function load(page:Page,app:string,mode:string){
  await page.goto(url(app,mode));await expect(page.locator('main')).toHaveAttribute('data-ready','true');await expect(page.locator('main')).toHaveAttribute('data-style','minimalist');await expect(page.getByTestId('state-fixture')).toBeVisible();await page.evaluate(()=>document.fonts.ready)
 }
-async function colors(locator:Locator){
- return locator.evaluate(el=>{
+async function colors(locator:Locator,pseudo?:string){
+ return locator.evaluate((el,pseudo)=>{
   const canvas=document.createElement('canvas');canvas.width=canvas.height=1
   const ctx=canvas.getContext('2d')!
   const rgba=(color:string)=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=color;ctx.fillRect(0,0,1,1);return Array.from(ctx.getImageData(0,0,1,1).data)}
   const over=(a:number[],b:number[])=>[0,1,2].map(i=>a[i]*(a[3]/255)+b[i]*(1-a[3]/255)).concat(255)
   const behind=(element:Element|null):number[]=>{if(!element)return rgba('Canvas');return over(rgba(getComputedStyle(element).backgroundColor),behind(element.parentElement))}
-  const style=getComputedStyle(el),background=behind(el)
-  return {foreground:over(rgba(style.color),background).slice(0,3),background:background.slice(0,3),border:over(rgba(style.borderTopColor),background).slice(0,3),outside:behind(el.parentElement).slice(0,3),outline:over(rgba(style.outlineColor),behind(el.parentElement)).slice(0,3),outlineWidth:parseFloat(style.outlineWidth),outlineOffset:parseFloat(style.outlineOffset),bgRaw:rgba(style.backgroundColor),transform:style.transform}
- })
+  const style=getComputedStyle(el,pseudo),background=behind(el),foreground=rgba(style.color)
+  if(pseudo)foreground[3]*=Number(style.opacity)
+  return {foreground:over(foreground,background).slice(0,3),background:background.slice(0,3),border:over(rgba(style.borderTopColor),background).slice(0,3),outside:behind(el.parentElement).slice(0,3),outline:over(rgba(style.outlineColor),behind(el.parentElement)).slice(0,3),outlineWidth:parseFloat(style.outlineWidth),outlineOffset:parseFloat(style.outlineOffset),bgRaw:rgba(style.backgroundColor),transform:style.transform}
+ },pseudo??null)
 }
 const pair=(a:number[],b:number[])=>contrastRatio(a as [number,number,number],b as [number,number,number])
-async function textContrast(locator:Locator){const c=await colors(locator),ratio=pair(c.foreground,c.background);expect(ratio).toBeGreaterThanOrEqual(4.5);return ratio}
+async function textContrast(locator:Locator,pseudo?:string){const c=await colors(locator,pseudo),ratio=pair(c.foreground,c.background);expect(ratio).toBeGreaterThanOrEqual(4.5);return ratio}
 async function boundaryContrast(locator:Locator,variant:string){
  if(variant==='ghost'||variant==='link')return undefined
  const c=await colors(locator),ratio=pair(variant==='outline'||variant==='secondary'?c.border:c.background,c.outside)
@@ -79,7 +80,9 @@ for(const mode of ['light','dark']){
   await expect(page.getByTestId('disabled-input')).toBeDisabled()
   await expect(page.getByTestId('invalid-input')).toHaveAttribute('aria-describedby','invalid-input-error');await expect(page.locator('#invalid-input-error')).toBeVisible()
   ratios.error=await textContrast(page.locator('#invalid-input-error'))
-  const input=page.getByTestId('empty-input');await input.scrollIntoViewIfNeeded();await input.focus()
+  const input=page.getByTestId('empty-input');await input.scrollIntoViewIfNeeded()
+  expect(await input.evaluate(el=>el.matches(':placeholder-shown'))).toBe(true)
+  ratios.placeholder=await textContrast(input,'::placeholder');await input.focus();ratios.placeholderFocus=await textContrast(input,'::placeholder')
   const c=await colors(input);ratios.inputBoundary=Math.min(pair(c.border,c.background),pair(c.border,c.outside));ratios.focus=pair(c.outline,c.outside)
   expect(ratios.inputBoundary).toBeGreaterThanOrEqual(3);expect(ratios.focus).toBeGreaterThanOrEqual(3);expect(c.outlineWidth).toBeGreaterThanOrEqual(3);await unclipped(input)
   ratios.muted=await textContrast(page.locator('.note'))
