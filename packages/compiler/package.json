@@ -10,8 +10,10 @@
     }
   },
   "dependencies": {
-    "@ombelle/contracts": "workspace:*",
     "@ombelle/catalog": "workspace:*",
+    "@ombelle/contracts": "workspace:*",
+    "postcss": "8.5.31",
+    "postcss-selector-parser": "7.1.6",
     "prettier": "3.9.10"
   }
 }
