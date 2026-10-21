@@ -8,6 +8,7 @@ import {
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
+export { resolveRecipePreset } from './recipe-preset.js'
 export type ComponentTemplate = {
   id: ComponentId
   content: string
@@ -54,7 +55,12 @@ export function getCatalog(release: string): Catalog {
   ) as Record<ComponentId, ComponentTemplate>
   return {
     release,
-    presets: Object.fromEntries(supportedStyleFamilies.map(family => [family, validatePreset(catalogData.presets[family])])) as Record<StyleFamily, Preset>,
+    presets: Object.fromEntries(
+      supportedStyleFamilies.map((family) => [
+        family,
+        validatePreset(catalogData.presets[family]),
+      ]),
+    ) as Record<StyleFamily, Preset>,
     templates,
     styles: { ...catalogData.styles },
     utility: catalogData.utility,

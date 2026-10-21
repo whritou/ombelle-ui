@@ -2,7 +2,7 @@
 
 ## Purpose and status
 
-The product CLI persists project defaults and installs exact component or recipe artifacts. This is a proposed interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders. These commands cannot be used until the package and service are implemented and published.
+The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; published runner commands remain unavailable. The private local foundation implements `init`, ordinary `add`, `theme add` with local presets, and `add --recipe` with local Button recipes. See [local usage](foundation-local-usage.md) for executable repository commands.
 
 The upstream shadcn CLI remains a supported transport for explicitly published standard registry items. It has its own preset system. Our preset JSON and project lock behavior must not be presented as upstream capabilities.
 
@@ -49,19 +49,19 @@ npx @your-ui/cli@0.1.0 diff button
 
 ## Command semantics
 
-| Command | Behavior |
-| --- | --- |
-| `init` | Detect project, select or resolve preset, plan config and CSS integration, write on confirmation |
-| `add <items>` | Resolve exact catalog entries against saved project defaults and install required files |
-| `add <component> --preset <code-or-file>` | Install one component with an explicitly selected, isolated preset; preserve project-wide defaults |
-| `add --recipe` | Install the recipe's base component, scoped CSS, pinned token scope, and example usage |
-| `preset show` | Print the locally resolved preset and provenance |
-| `preset apply` | Resolve a new preset, report effects on existing components, update compatible generated files |
-| `theme add <preset>` | Alias of `preset apply <preset> --only theme`; merge palette and tokens into existing global CSS and persist the preset without reinstalling components |
-| `info` | Read configuration, installed artifacts and compatibility status without changes |
-| `doctor` | Diagnose versions, aliases, missing imports, modified files, dependency and hash issues |
-| `diff` | Compare local source with a selected pinned catalog release without writes |
-| `update` | Later explicit migration workflow; never a background automatic update |
+| Command                                   | Behavior                                                                                                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `init`                                    | Detect project, select or resolve preset, plan config and CSS integration, write on confirmation                                                        |
+| `add <items>`                             | Resolve exact catalog entries against saved project defaults and install required files                                                                 |
+| `add <component> --preset <code-or-file>` | Install one component with an explicitly selected, isolated preset; preserve project-wide defaults                                                      |
+| `add --recipe`                            | Install the recipe's base component, scoped CSS, pinned token scope, and example usage                                                                  |
+| `preset show`                             | Print the locally resolved preset and provenance                                                                                                        |
+| `preset apply`                            | Resolve a new preset, report effects on existing components, update compatible generated files                                                          |
+| `theme add <preset>`                      | Alias of `preset apply <preset> --only theme`; merge palette and tokens into existing global CSS and persist the preset without reinstalling components |
+| `info`                                    | Read configuration, installed artifacts and compatibility status without changes                                                                        |
+| `doctor`                                  | Diagnose versions, aliases, missing imports, modified files, dependency and hash issues                                                                 |
+| `diff`                                    | Compare local source with a selected pinned catalog release without writes                                                                              |
+| `update`                                  | Later explicit migration workflow; never a background automatic update                                                                                  |
 
 Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|yarn|bun>`, and `--yes` where applicable. The Bun foundation target is exactly 1.4.3. `preset apply` also supports `--only theme`. `--yes` accepts an already safe plan; it never enables overwriting modified files or bypassing schema and compatibility errors. Do not provide a broad force flag in alpha.
 
@@ -69,7 +69,7 @@ Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|ya
 
 Component-scoped preset selection initially targets one Button per command. Reject multiple components or simultaneous `--preset` and `--recipe`. Resolve and pin the exact preset, generate isolated light/dark styling and usage, and record scoped provenance without modifying the saved global preset or restyling existing components. Reuse compatible base source or stop with a conflict; never silently replace shared source. See [component-scoped preset selection](04-presets-and-contracts.md#component-scoped-preset-selection) for the full scope and persistence contract.
 
-Implementation status: the current foundation rejects `--preset` on `add`. Scoped preset selection, recipes, and remote code resolution are requirements for future implementation, not available commands.
+Implementation status: the current foundation rejects `--preset` on `add`. Local Button recipe files referencing exact built-in presets are implemented through `add --recipe <local.json>`. Component-scoped preset selection and remote preset/recipe code resolution remain requirements for future implementation. The recipe API creates a separate native `RecipeButton`; it preserves ordinary source and global defaults.
 
 The proposed dry-run is stricter than an ordinary installation: it performs no filesystem writes, even to a project cache, and never invokes the package manager. It may fetch public manifests in memory. Document network access in machine-readable output.
 
@@ -125,15 +125,15 @@ A package manager may modify its cache, `node_modules`, lockfile, or run depende
 
 Machine-readable output includes `command`, `status`, `projectRoot`, `presetHash`, `catalogRelease`, `compilerVersion`, `changes`, `dependencyPlan`, `warnings`, and stable error codes. Error records include code, message, affected path or JSON pointer, and suggested next action. Redact credentials and local secrets.
 
-| Exit code | Meaning |
-| --- | --- |
-| 0 | Success or valid dry-run with no blocking conflict |
-| 1 | Unexpected internal failure |
-| 2 | Invalid arguments or invalid data |
-| 3 | Unsupported or ambiguous project configuration |
-| 4 | File conflict or precondition changed |
-| 5 | Resolution, network, or integrity failure |
-| 6 | Package installation failure or recovery required |
+| Exit code | Meaning                                            |
+| --------- | -------------------------------------------------- |
+| 0         | Success or valid dry-run with no blocking conflict |
+| 1         | Unexpected internal failure                        |
+| 2         | Invalid arguments or invalid data                  |
+| 3         | Unsupported or ambiguous project configuration     |
+| 4         | File conflict or precondition changed              |
+| 5         | Resolution, network, or integrity failure          |
+| 6         | Package installation failure or recovery required  |
 
 ## Standard shadcn path
 

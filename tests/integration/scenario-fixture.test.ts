@@ -11,7 +11,7 @@ it('copies state fixtures without changing the default specimen',async()=>{
  const scenario=await fs.readFile(path.join(root,'src/scenario.tsx'),'utf8')
  expect(scenario).toContain('minimalist')
  expect(scenario).not.toContain('STYLE_FAMILY')
- expect(scenario).toContain("get('states')==='1'")
+ expect(scenario).toMatch(/get\('states'\)\s*===\s*'1'/)
  expect(scenario).toContain('{states && <StateFixture')
  expect(await fs.readFile(path.join(root,'src/state-fixture.tsx'),'utf8')).toContain('@/components/ui/button')
  expect(await fs.readFile(path.join(root,'src/state-fixture.css'),'utf8')).toContain('.state-fixture')
