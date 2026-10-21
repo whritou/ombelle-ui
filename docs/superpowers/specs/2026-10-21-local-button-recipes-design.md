@@ -1,6 +1,6 @@
 # Local Button recipe installation
 
-Date: 21 October 2026. Status: approved by the user on 21 October 2026. The user approved the separate recipe Button approach, this written design, and its implementation plan. Native implementation and verification are in progress on `codex/local-button-recipes`.
+Date: 21 October 2026. Status: approved by the user on 21 October 2026. The user approved the separate recipe Button approach, this written design, and its implementation plan. Implemented and locally verified on `codex/local-button-recipes`; see [the retained evidence](../../evidence/local-button-recipes.md).
 
 ## Intent and boundaries
 

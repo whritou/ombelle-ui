@@ -58,3 +58,5 @@ pnpm exec node packages/cli/dist/main.js add --recipe ./examples/recipe.example.
 ```
 
 A recipe installs its own `RecipeButton`, colocated CSS, and usage example. It preserves project defaults and the ordinary Button; importing the recipe component loads its styling. Only local recipes referencing exact built-in flat/minimalist/neo-brutalism presets are implemented. Remote recipe codes and `add button --preset <code-or-file>` remain planned. Read the [local recipe usage and ownership rules](docs/foundation-local-usage.md#local-button-recipes) before installing into an existing project.
+
+The [local Button recipe evidence](docs/evidence/local-button-recipes.md) records 102 installations across 34 consumers and 90 browser outcomes across host styles, recipe styles, modes, and applications.

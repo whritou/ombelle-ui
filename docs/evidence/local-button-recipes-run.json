@@ -1,0 +1,4150 @@
+{
+  "summaryFormat": "ombelle-local-recipes-summary/v1",
+  "startedAt": "2026-10-21T17:56:47.726Z",
+  "sourceCommit": "e28638b7473fc3ff69edfa5e9bdfa7099c4049f5",
+  "workingTreeDirty": false,
+  "platform": "win32",
+  "node": "v24.19.0",
+  "steps": [
+    {
+      "name": "build:packages",
+      "exitCode": 0,
+      "durationMs": 1058,
+      "log": ".artifacts\\logs\\build-packages.log"
+    },
+    {
+      "name": "test:unit",
+      "exitCode": 0,
+      "durationMs": 6457,
+      "log": ".artifacts\\logs\\test-unit.log"
+    },
+    {
+      "name": "test:integration",
+      "exitCode": 0,
+      "durationMs": 194306,
+      "log": ".artifacts\\logs\\test-integration.log"
+    },
+    {
+      "name": "generate:preview",
+      "exitCode": 0,
+      "durationMs": 2205,
+      "log": ".artifacts\\logs\\generate-preview.log"
+    },
+    {
+      "name": "prepare:consumers",
+      "exitCode": 0,
+      "durationMs": 532890,
+      "log": ".artifacts\\logs\\prepare-consumers.log"
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "durationMs": 1643,
+      "log": ".artifacts\\logs\\typecheck.log"
+    },
+    {
+      "name": "build:preview",
+      "exitCode": 0,
+      "durationMs": 2121,
+      "log": ".artifacts\\logs\\build-preview.log"
+    },
+    {
+      "name": "build:consumers",
+      "exitCode": 0,
+      "durationMs": 140635,
+      "log": ".artifacts\\logs\\build-consumers.log"
+    },
+    {
+      "name": "test:e2e",
+      "exitCode": 0,
+      "durationMs": 329048,
+      "log": ".artifacts\\logs\\test-e2e.log"
+    }
+  ],
+  "completedAt": "2026-10-21T18:16:59.005Z",
+  "status": "passed",
+  "counts": {
+    "unit": {
+      "passed": 110,
+      "failed": 0,
+      "skipped": 0
+    },
+    "integration": {
+      "passed": 130,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "startTime": "2026-10-21T18:11:30.583Z",
+      "duration": 327276.645,
+      "expected": 68,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "browserVersion": {
+    "engine": "chromium",
+    "version": "155.0.4283.62",
+    "channel": "msedge"
+  },
+  "consumerCases": [
+    {
+      "id": "vite-flat",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "pnpm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "vite-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "pnpm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "vite-neo-brutalism",
+      "family": "neo-brutalism",
+      "framework": "vite",
+      "manager": "pnpm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "next-flat",
+      "family": "flat",
+      "framework": "next",
+      "manager": "pnpm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "next-minimalist",
+      "family": "minimalist",
+      "framework": "next",
+      "manager": "pnpm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "next-neo-brutalism",
+      "family": "neo-brutalism",
+      "framework": "next",
+      "manager": "pnpm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "npm-vite-flat",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "npm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "npm-vite-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "npm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "npm-vite-neo-brutalism",
+      "family": "neo-brutalism",
+      "framework": "vite",
+      "manager": "npm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "npm-next-flat",
+      "family": "flat",
+      "framework": "next",
+      "manager": "npm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "npm-next-minimalist",
+      "family": "minimalist",
+      "framework": "next",
+      "manager": "npm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "npm-next-neo-brutalism",
+      "family": "neo-brutalism",
+      "framework": "next",
+      "manager": "npm",
+      "cliRuntime": "node"
+    },
+    {
+      "id": "yarn-classic-vite",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "yarn",
+      "cliRuntime": "node",
+      "yarnFixtureId": "classic-vite"
+    },
+    {
+      "id": "yarn-modern-next",
+      "family": "flat",
+      "framework": "next",
+      "manager": "yarn",
+      "cliRuntime": "node",
+      "yarnFixtureId": "modern-next"
+    },
+    {
+      "id": "yarn-pnp-vite",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "yarn",
+      "cliRuntime": "node",
+      "yarnFixtureId": "pnp-vite"
+    },
+    {
+      "id": "bun-text-vite-node",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-text-vite-bun",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-binary-vite-node",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "binary"
+    },
+    {
+      "id": "bun-binary-vite-bun",
+      "family": "flat",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "binary"
+    },
+    {
+      "id": "bun-text-next-node",
+      "family": "flat",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-text-next-bun",
+      "family": "flat",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-binary-next-node",
+      "family": "flat",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "binary"
+    },
+    {
+      "id": "bun-binary-next-bun",
+      "family": "flat",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "binary"
+    },
+    {
+      "id": "yarn-classic-vite-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "yarn",
+      "cliRuntime": "node",
+      "yarnFixtureId": "classic-vite"
+    },
+    {
+      "id": "yarn-modern-next-minimalist",
+      "family": "minimalist",
+      "framework": "next",
+      "manager": "yarn",
+      "cliRuntime": "node",
+      "yarnFixtureId": "modern-next"
+    },
+    {
+      "id": "yarn-pnp-vite-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "yarn",
+      "cliRuntime": "node",
+      "yarnFixtureId": "pnp-vite"
+    },
+    {
+      "id": "bun-text-vite-node-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-text-vite-bun-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-binary-vite-node-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "binary"
+    },
+    {
+      "id": "bun-binary-vite-bun-minimalist",
+      "family": "minimalist",
+      "framework": "vite",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "binary"
+    },
+    {
+      "id": "bun-text-next-node-minimalist",
+      "family": "minimalist",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-text-next-bun-minimalist",
+      "family": "minimalist",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "text"
+    },
+    {
+      "id": "bun-binary-next-node-minimalist",
+      "family": "minimalist",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "node",
+      "bunFormat": "binary"
+    },
+    {
+      "id": "bun-binary-next-bun-minimalist",
+      "family": "minimalist",
+      "framework": "next",
+      "manager": "bun",
+      "cliRuntime": "bun",
+      "bunFormat": "binary"
+    }
+  ],
+  "npmVersion": {
+    "version": "11.19.0"
+  },
+  "yarnVersions": {
+    "classic": "1.22.22",
+    "modern": "4.18.1"
+  },
+  "bunVersion": {
+    "version": "1.4.3"
+  },
+  "fullReport": {
+    "path": ".artifacts/local-button-recipes-run.full.json",
+    "sha256": "2f59aee6a21e2e0378d203d5c2a090a7ad6bdc8f30c2fdbc17ac4838510116eb",
+    "bytes": 1730162,
+    "originalReportSha256": "3ad3a52a43dfdf8741da7ea9bd0c24c83191a5a96da466418a81308a25157ce7"
+  },
+  "scope": {
+    "consumerCount": 34,
+    "recipeInstallCount": 102,
+    "browserMeasurementCount": 90,
+    "browserApps": ["preview", "vite", "next", "npm-vite", "npm-next"],
+    "modes": ["light", "dark"],
+    "hostFamilies": ["flat", "minimalist", "neo-brutalism"],
+    "screenshots": "Exact specimen PNG bytes across applications; full attachments retained in local/CI reports",
+    "textEnlargement": "Synthetic doubled font sizes at 1100 and 320 CSS pixels; native browser zoom remains pending"
+  },
+  "banks": {
+    "canonicalHashes": {
+      "e772d4a5c968f6c7": {
+        "examples/recipes/rc_flat_button/r1.tsx": "3a3243f1b62cfac32c74d9e83e33f05d61524e6889456330b7fd70f5cfc5f8bb",
+        "lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "recipes/rc_flat_button/r1/button.css": "bece50f9c3f022d871e37ccdce8468ea27c4d7cc20f9279395a8634e1d4e4e03",
+        "recipes/rc_flat_button/r1/button.tsx": "660893a5b2a384d2d45d2ebe51db115f22038d22af98f0d5e38a4c05a34e6dd1"
+      },
+      "ffb8a0ed33c40fe5": {
+        "examples/recipes/rc_minimalist_button/r1.tsx": "c86d30c352f6b9fa2eae761c0f8eb3959f77802dd9e2c0e469a104350450edd9",
+        "lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "recipes/rc_minimalist_button/r1/button.css": "4e44390e4814537f4ae96d69bf4a1c6c45405b3a6d53679fbb4cff8333803b48",
+        "recipes/rc_minimalist_button/r1/button.tsx": "ba19a91fc642b71b37542e0c5364b12861fbe53968ce3853d4ed29fab274a0a4"
+      },
+      "7731b96333062141": {
+        "examples/recipes/rc_neo_brutalism_button/r1.tsx": "1d50476c58d43bb28f63b181327422d1af47c9bb04e94781e0bfcd1ffd9543cb",
+        "lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "recipes/rc_neo_brutalism_button/r1/button.css": "0b4d71063d1d199c41d3c90b92b492468663160439e78accac05fa53bd3c658e",
+        "recipes/rc_neo_brutalism_button/r1/button.tsx": "8ce56f0fa16c096aabc4fc2aae53febaa69bce02df4676f1bada527cbe1861be"
+      }
+    },
+    "transformedHashes": {
+      "5d73231da820cfc8": {
+        "examples/recipes/rc_flat_button/r1.tsx": "a5c684c7d74194f0559ab8e1612c56888a8ad6a433c972b28256d6cf351535e6",
+        "recipes/rc_flat_button/r1/button.css": "bece50f9c3f022d871e37ccdce8468ea27c4d7cc20f9279395a8634e1d4e4e03",
+        "recipes/rc_flat_button/r1/button.tsx": "de5d2e7a661279ed81b73866e6b63d24d0b49cd0e812718f8406a4fa8cc66f99"
+      },
+      "42b536634408f098": {
+        "examples/recipes/rc_flat_button/r1.tsx": "3a3243f1b62cfac32c74d9e83e33f05d61524e6889456330b7fd70f5cfc5f8bb",
+        "recipes/rc_flat_button/r1/button.css": "bece50f9c3f022d871e37ccdce8468ea27c4d7cc20f9279395a8634e1d4e4e03",
+        "recipes/rc_flat_button/r1/button.tsx": "660893a5b2a384d2d45d2ebe51db115f22038d22af98f0d5e38a4c05a34e6dd1"
+      },
+      "025385ec166ba301": {
+        "examples/recipes/rc_minimalist_button/r1.tsx": "d8f6f54d1c34f0ee553321a8e59f4bc474a25363a071400daf37f769c5baa8d7",
+        "recipes/rc_minimalist_button/r1/button.css": "4e44390e4814537f4ae96d69bf4a1c6c45405b3a6d53679fbb4cff8333803b48",
+        "recipes/rc_minimalist_button/r1/button.tsx": "9e645c7aeab217800bf97ee2396744d6287660f77e75c898c4ce8228518c23a7"
+      },
+      "e4e59daffa13e761": {
+        "examples/recipes/rc_minimalist_button/r1.tsx": "c86d30c352f6b9fa2eae761c0f8eb3959f77802dd9e2c0e469a104350450edd9",
+        "recipes/rc_minimalist_button/r1/button.css": "4e44390e4814537f4ae96d69bf4a1c6c45405b3a6d53679fbb4cff8333803b48",
+        "recipes/rc_minimalist_button/r1/button.tsx": "ba19a91fc642b71b37542e0c5364b12861fbe53968ce3853d4ed29fab274a0a4"
+      },
+      "f4b367f852ec282e": {
+        "examples/recipes/rc_neo_brutalism_button/r1.tsx": "1ba159f934e37c3bbb88878793a08b5867a979fbae146c2c5b4eeb9898bbb53f",
+        "recipes/rc_neo_brutalism_button/r1/button.css": "0b4d71063d1d199c41d3c90b92b492468663160439e78accac05fa53bd3c658e",
+        "recipes/rc_neo_brutalism_button/r1/button.tsx": "5157a57f30e34d208bb3ef1cb7f811a8fb31459fb85348dc485fb0e1b0f63603"
+      },
+      "3d59f753cf995d26": {
+        "examples/recipes/rc_neo_brutalism_button/r1.tsx": "1d50476c58d43bb28f63b181327422d1af47c9bb04e94781e0bfcd1ffd9543cb",
+        "recipes/rc_neo_brutalism_button/r1/button.css": "0b4d71063d1d199c41d3c90b92b492468663160439e78accac05fa53bd3c658e",
+        "recipes/rc_neo_brutalism_button/r1/button.tsx": "8ce56f0fa16c096aabc4fc2aae53febaa69bce02df4676f1bada527cbe1861be"
+      }
+    },
+    "computedStyles": {
+      "5053112e65e18a95": {
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(29, 78, 216)",
+        "border": "2px solid rgb(17, 17, 17)",
+        "borderRadius": "0px",
+        "minHeight": "44px",
+        "fontFamily": "Arial, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "boxShadow": "none",
+        "padding": "8px 16px"
+      },
+      "06a8873fa0eefe54": {
+        "color": "rgb(17, 17, 17)",
+        "background": "rgb(147, 197, 253)",
+        "border": "2px solid rgb(250, 250, 250)",
+        "borderRadius": "0px",
+        "minHeight": "44px",
+        "fontFamily": "Arial, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "boxShadow": "none",
+        "padding": "8px 16px"
+      },
+      "cc5f5761d7f9e085": {
+        "color": "rgb(255, 255, 255)",
+        "background": "rgb(17, 24, 39)",
+        "border": "2px solid rgb(17, 24, 39)",
+        "borderRadius": "0px",
+        "minHeight": "44px",
+        "fontFamily": "Arial, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "boxShadow": "none",
+        "padding": "12px 20px"
+      },
+      "ed7ea283d99f2022": {
+        "color": "rgb(17, 24, 39)",
+        "background": "rgb(249, 250, 251)",
+        "border": "2px solid rgb(249, 250, 251)",
+        "borderRadius": "0px",
+        "minHeight": "44px",
+        "fontFamily": "Arial, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "boxShadow": "none",
+        "padding": "12px 20px"
+      },
+      "f904e3ca21143d1c": {
+        "color": "rgb(17, 17, 17)",
+        "background": "rgb(250, 204, 21)",
+        "border": "2px solid rgb(17, 17, 17)",
+        "borderRadius": "0px",
+        "minHeight": "44px",
+        "fontFamily": "Arial, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "boxShadow": "rgb(17, 17, 17) 6px 6px 0px 0px",
+        "padding": "8px 16px"
+      },
+      "f6f74470a2ef775c": {
+        "color": "rgb(17, 17, 17)",
+        "background": "rgb(250, 204, 21)",
+        "border": "2px solid rgb(250, 250, 250)",
+        "borderRadius": "0px",
+        "minHeight": "44px",
+        "fontFamily": "Arial, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "boxShadow": "rgb(250, 250, 250) 6px 6px 0px 0px",
+        "padding": "8px 16px"
+      }
+    },
+    "behaviorChecks": {
+      "c7e19f64fa83352f": {
+        "parity": true,
+        "isolation": true,
+        "activation": true,
+        "disabled": true,
+        "loading": true,
+        "focus": true,
+        "text": true,
+        "overrideHeight": true,
+        "reducedMotion": true,
+        "forcedColors": true,
+        "axe": true,
+        "enlargement": true
+      }
+    },
+    "recipes": {
+      "a9eba89a2b2b0e34": {
+        "rc_flat_button@1": {
+          "artifacts": {
+            "src/components/ui/recipes/rc_flat_button/r1/button.css": {
+              "kind": "style",
+              "logicalPath": "recipes/rc_flat_button/r1/button.css",
+              "sha256": "bece50f9c3f022d871e37ccdce8468ea27c4d7cc20f9279395a8634e1d4e4e03"
+            },
+            "src/components/ui/recipes/rc_flat_button/r1/button.tsx": {
+              "kind": "component",
+              "logicalPath": "recipes/rc_flat_button/r1/button.tsx",
+              "sha256": "660893a5b2a384d2d45d2ebe51db115f22038d22af98f0d5e38a4c05a34e6dd1"
+            },
+            "src/ombelle-examples/recipes/rc_flat_button/r1.tsx": {
+              "kind": "usage",
+              "logicalPath": "examples/recipes/rc_flat_button/r1.tsx",
+              "sha256": "3a3243f1b62cfac32c74d9e83e33f05d61524e6889456330b7fd70f5cfc5f8bb"
+            }
+          },
+          "darkSelector": ".dark",
+          "preset": {
+            "data": {
+              "catalogRelease": "0.1.0",
+              "compilerVersion": "0.1.0",
+              "componentDefaults": {
+                "button": {
+                  "size": "default",
+                  "variant": "default"
+                }
+              },
+              "design": {
+                "borderWidthPx": 1,
+                "density": "comfortable",
+                "fontFamilyId": "system-sans",
+                "motion": "reduced",
+                "radiusRem": 0.5,
+                "shadowOffsetXPx": 0,
+                "shadowOffsetYPx": 0,
+                "transparency": "reduced"
+              },
+              "id": "builtin-flat",
+              "modes": {
+                "dark": {
+                  "accent": "#fef08a",
+                  "accentForeground": "#111111",
+                  "background": "#18181b",
+                  "border": "#fafafa",
+                  "card": "#27272a",
+                  "cardForeground": "#fafafa",
+                  "destructive": "#fca5a5",
+                  "destructiveForeground": "#111111",
+                  "foreground": "#fafafa",
+                  "input": "#fafafa",
+                  "muted": "#27272a",
+                  "mutedForeground": "#a1a1aa",
+                  "popover": "#27272a",
+                  "popoverForeground": "#fafafa",
+                  "primary": "#93c5fd",
+                  "primaryForeground": "#111111",
+                  "ring": "#93c5fd",
+                  "secondary": "#3f3f46",
+                  "secondaryForeground": "#fafafa"
+                },
+                "light": {
+                  "accent": "#fef08a",
+                  "accentForeground": "#111111",
+                  "background": "#ffffff",
+                  "border": "#111111",
+                  "card": "#ffffff",
+                  "cardForeground": "#111111",
+                  "destructive": "#b91c1c",
+                  "destructiveForeground": "#ffffff",
+                  "foreground": "#111111",
+                  "input": "#111111",
+                  "muted": "#f4f4f5",
+                  "mutedForeground": "#52525b",
+                  "popover": "#ffffff",
+                  "popoverForeground": "#111111",
+                  "primary": "#1d4ed8",
+                  "primaryForeground": "#ffffff",
+                  "ring": "#1d4ed8",
+                  "secondary": "#f4f4f5",
+                  "secondaryForeground": "#111111"
+                }
+              },
+              "name": "Flat",
+              "platform": "react-web",
+              "revision": 1,
+              "schemaVersion": "1.0",
+              "styleFamily": "flat"
+            },
+            "hash": "5ff15eb2735326caa531570abf3bb701cc2ad8e054ce90b2940888bed4bd6038"
+          },
+          "provenance": {
+            "catalogRelease": "0.1.0",
+            "compilerVersion": "0.1.0"
+          },
+          "recipe": {
+            "data": {
+              "component": "button",
+              "content": "Recipe action",
+              "id": "rc_flat_button",
+              "overrides": {
+                "borderWidthPx": 2,
+                "minHeightPx": 44,
+                "radiusRem": 0,
+                "shadowOffsetXPx": 6,
+                "shadowOffsetYPx": 6
+              },
+              "presetRef": {
+                "catalogRelease": "0.1.0",
+                "compilerVersion": "0.1.0",
+                "id": "builtin-flat",
+                "revision": 1
+              },
+              "props": {
+                "disabled": false,
+                "loading": false,
+                "size": "lg",
+                "type": "button",
+                "variant": "default"
+              },
+              "revision": 1,
+              "schemaVersion": "1.0"
+            },
+            "hash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00"
+          },
+          "scope": "47516a837de48d22b2c0723901afdf723bdcb1003466f4827272a56bd317a669"
+        },
+        "rc_minimalist_button@1": {
+          "artifacts": {
+            "src/components/ui/recipes/rc_minimalist_button/r1/button.css": {
+              "kind": "style",
+              "logicalPath": "recipes/rc_minimalist_button/r1/button.css",
+              "sha256": "4e44390e4814537f4ae96d69bf4a1c6c45405b3a6d53679fbb4cff8333803b48"
+            },
+            "src/components/ui/recipes/rc_minimalist_button/r1/button.tsx": {
+              "kind": "component",
+              "logicalPath": "recipes/rc_minimalist_button/r1/button.tsx",
+              "sha256": "ba19a91fc642b71b37542e0c5364b12861fbe53968ce3853d4ed29fab274a0a4"
+            },
+            "src/ombelle-examples/recipes/rc_minimalist_button/r1.tsx": {
+              "kind": "usage",
+              "logicalPath": "examples/recipes/rc_minimalist_button/r1.tsx",
+              "sha256": "c86d30c352f6b9fa2eae761c0f8eb3959f77802dd9e2c0e469a104350450edd9"
+            }
+          },
+          "darkSelector": ".dark",
+          "preset": {
+            "data": {
+              "catalogRelease": "0.1.0",
+              "compilerVersion": "0.1.0",
+              "componentDefaults": {
+                "button": {
+                  "size": "default",
+                  "variant": "default"
+                }
+              },
+              "design": {
+                "borderWidthPx": 1,
+                "density": "comfortable",
+                "fontFamilyId": "system-sans",
+                "motion": "reduced",
+                "radiusRem": 0.375,
+                "shadowOffsetXPx": 0,
+                "shadowOffsetYPx": 0,
+                "transparency": "reduced"
+              },
+              "id": "builtin-minimalist",
+              "modes": {
+                "dark": {
+                  "accent": "#374151",
+                  "accentForeground": "#f9fafb",
+                  "background": "#111827",
+                  "border": "#4b5563",
+                  "card": "#1f2937",
+                  "cardForeground": "#f9fafb",
+                  "destructive": "#fca5a5",
+                  "destructiveForeground": "#111827",
+                  "foreground": "#f9fafb",
+                  "input": "#9ca3af",
+                  "muted": "#1f2937",
+                  "mutedForeground": "#d1d5db",
+                  "popover": "#1f2937",
+                  "popoverForeground": "#f9fafb",
+                  "primary": "#f9fafb",
+                  "primaryForeground": "#111827",
+                  "ring": "#f9fafb",
+                  "secondary": "#374151",
+                  "secondaryForeground": "#f9fafb"
+                },
+                "light": {
+                  "accent": "#e5e7eb",
+                  "accentForeground": "#111827",
+                  "background": "#fafafa",
+                  "border": "#d1d5db",
+                  "card": "#ffffff",
+                  "cardForeground": "#111827",
+                  "destructive": "#b91c1c",
+                  "destructiveForeground": "#ffffff",
+                  "foreground": "#111827",
+                  "input": "#6b7280",
+                  "muted": "#f3f4f6",
+                  "mutedForeground": "#4b5563",
+                  "popover": "#ffffff",
+                  "popoverForeground": "#111827",
+                  "primary": "#111827",
+                  "primaryForeground": "#ffffff",
+                  "ring": "#111827",
+                  "secondary": "#f3f4f6",
+                  "secondaryForeground": "#111827"
+                }
+              },
+              "name": "Minimalist",
+              "platform": "react-web",
+              "revision": 1,
+              "schemaVersion": "1.0",
+              "styleFamily": "minimalist"
+            },
+            "hash": "9ef9663bb0280ee37b995ac9051188c3f71f40118d5c7e34aea1e972611f864d"
+          },
+          "provenance": {
+            "catalogRelease": "0.1.0",
+            "compilerVersion": "0.1.0"
+          },
+          "recipe": {
+            "data": {
+              "component": "button",
+              "content": "Recipe action",
+              "id": "rc_minimalist_button",
+              "overrides": {
+                "borderWidthPx": 2,
+                "minHeightPx": 44,
+                "radiusRem": 0,
+                "shadowOffsetXPx": 6,
+                "shadowOffsetYPx": 6
+              },
+              "presetRef": {
+                "catalogRelease": "0.1.0",
+                "compilerVersion": "0.1.0",
+                "id": "builtin-minimalist",
+                "revision": 1
+              },
+              "props": {
+                "disabled": false,
+                "loading": false,
+                "size": "lg",
+                "type": "button",
+                "variant": "default"
+              },
+              "revision": 1,
+              "schemaVersion": "1.0"
+            },
+            "hash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef"
+          },
+          "scope": "e14a29f00c170ecc208437904100d8922ad7acbb0a31961cf5b616c85b21d4a5"
+        },
+        "rc_neo_brutalism_button@1": {
+          "artifacts": {
+            "src/components/ui/recipes/rc_neo_brutalism_button/r1/button.css": {
+              "kind": "style",
+              "logicalPath": "recipes/rc_neo_brutalism_button/r1/button.css",
+              "sha256": "0b4d71063d1d199c41d3c90b92b492468663160439e78accac05fa53bd3c658e"
+            },
+            "src/components/ui/recipes/rc_neo_brutalism_button/r1/button.tsx": {
+              "kind": "component",
+              "logicalPath": "recipes/rc_neo_brutalism_button/r1/button.tsx",
+              "sha256": "8ce56f0fa16c096aabc4fc2aae53febaa69bce02df4676f1bada527cbe1861be"
+            },
+            "src/ombelle-examples/recipes/rc_neo_brutalism_button/r1.tsx": {
+              "kind": "usage",
+              "logicalPath": "examples/recipes/rc_neo_brutalism_button/r1.tsx",
+              "sha256": "1d50476c58d43bb28f63b181327422d1af47c9bb04e94781e0bfcd1ffd9543cb"
+            }
+          },
+          "darkSelector": ".dark",
+          "preset": {
+            "data": {
+              "catalogRelease": "0.1.0",
+              "compilerVersion": "0.1.0",
+              "componentDefaults": {
+                "button": {
+                  "size": "default",
+                  "variant": "default"
+                }
+              },
+              "design": {
+                "borderWidthPx": 2,
+                "density": "comfortable",
+                "fontFamilyId": "system-sans",
+                "motion": "reduced",
+                "radiusRem": 0,
+                "shadowOffsetXPx": 4,
+                "shadowOffsetYPx": 4,
+                "transparency": "reduced"
+              },
+              "id": "builtin-neo-brutalism",
+              "modes": {
+                "dark": {
+                  "accent": "#fef08a",
+                  "accentForeground": "#111111",
+                  "background": "#18181b",
+                  "border": "#fafafa",
+                  "card": "#27272a",
+                  "cardForeground": "#fafafa",
+                  "destructive": "#fca5a5",
+                  "destructiveForeground": "#111111",
+                  "foreground": "#fafafa",
+                  "input": "#fafafa",
+                  "muted": "#27272a",
+                  "mutedForeground": "#a1a1aa",
+                  "popover": "#27272a",
+                  "popoverForeground": "#fafafa",
+                  "primary": "#facc15",
+                  "primaryForeground": "#111111",
+                  "ring": "#93c5fd",
+                  "secondary": "#3f3f46",
+                  "secondaryForeground": "#fafafa"
+                },
+                "light": {
+                  "accent": "#fef08a",
+                  "accentForeground": "#111111",
+                  "background": "#ffffff",
+                  "border": "#111111",
+                  "card": "#ffffff",
+                  "cardForeground": "#111111",
+                  "destructive": "#b91c1c",
+                  "destructiveForeground": "#ffffff",
+                  "foreground": "#111111",
+                  "input": "#111111",
+                  "muted": "#f4f4f5",
+                  "mutedForeground": "#52525b",
+                  "popover": "#ffffff",
+                  "popoverForeground": "#111111",
+                  "primary": "#facc15",
+                  "primaryForeground": "#111111",
+                  "ring": "#1d4ed8",
+                  "secondary": "#f4f4f5",
+                  "secondaryForeground": "#111111"
+                }
+              },
+              "name": "Neo Brutalism Yellow",
+              "platform": "react-web",
+              "revision": 1,
+              "schemaVersion": "1.0",
+              "styleFamily": "neo-brutalism"
+            },
+            "hash": "d4408485d0042453f1b9ba3b2e4340fc9b23ea38f973b49603b76f1b4c9c6fac"
+          },
+          "provenance": {
+            "catalogRelease": "0.1.0",
+            "compilerVersion": "0.1.0"
+          },
+          "recipe": {
+            "data": {
+              "component": "button",
+              "content": "Recipe action",
+              "id": "rc_neo_brutalism_button",
+              "overrides": {
+                "borderWidthPx": 2,
+                "minHeightPx": 44,
+                "radiusRem": 0,
+                "shadowOffsetXPx": 6,
+                "shadowOffsetYPx": 6
+              },
+              "presetRef": {
+                "catalogRelease": "0.1.0",
+                "compilerVersion": "0.1.0",
+                "id": "builtin-neo-brutalism",
+                "revision": 1
+              },
+              "props": {
+                "disabled": false,
+                "loading": false,
+                "size": "lg",
+                "type": "button",
+                "variant": "default"
+              },
+              "revision": 1,
+              "schemaVersion": "1.0"
+            },
+            "hash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6"
+          },
+          "scope": "57abacc5d09e16775fc8446610cc64ecc43da1f2528ca1e0117dcf33f218a525"
+        }
+      }
+    },
+    "protectedHashes": {
+      "74f10afc06411247": {
+        "ui-preset.json": "6a41042bcbe202944ed6bc6cde7ffdd6e336732844aac50fdf6e95c8634ff573",
+        "ui-library.config.json": "f068ba7ee067817368d8ab706666bf5addc692440c35cd308929eda56e520d30",
+        "src/index.css": "861eb86a5d6d234996791ec0ee7f4bcc5ef76b965023ffa124673fac74c43f81",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef"
+      },
+      "66808c38d13fccff": {
+        "ui-preset.json": "9d2c4c6cd0fb9b7a5dec240257b3de64031e75be9532c538d5cc48fca3491a0c",
+        "ui-library.config.json": "f068ba7ee067817368d8ab706666bf5addc692440c35cd308929eda56e520d30",
+        "src/index.css": "486587428ca27da2158a11a8025749868b9af85381853e0e66e4c3f4d90b6ae2",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
+      },
+      "8e025f73ee62766a": {
+        "ui-preset.json": "cb1adaf0b9ce3c5da1aa28ce99a614753dc25cfb6ecc86bc119ff32024839e48",
+        "ui-library.config.json": "f068ba7ee067817368d8ab706666bf5addc692440c35cd308929eda56e520d30",
+        "src/index.css": "dedf1c56e5ffdccbcfb20bb191bbabf0965b2699b2ccad206ffdac583fa50683",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "17b2401a328302e945e8a28ea4fd7e99b746b274f374987a1543acfa61cfaafc"
+      },
+      "75bd8cd09d72a488": {
+        "ui-preset.json": "6a41042bcbe202944ed6bc6cde7ffdd6e336732844aac50fdf6e95c8634ff573",
+        "ui-library.config.json": "cdfc05c8d80dfdc30e5912a0fdc5e30f695269c8a785d801d7744f0457be618c",
+        "src/index.css": "861eb86a5d6d234996791ec0ee7f4bcc5ef76b965023ffa124673fac74c43f81",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef"
+      },
+      "c2b37ef6c7a95cd0": {
+        "ui-preset.json": "9d2c4c6cd0fb9b7a5dec240257b3de64031e75be9532c538d5cc48fca3491a0c",
+        "ui-library.config.json": "cdfc05c8d80dfdc30e5912a0fdc5e30f695269c8a785d801d7744f0457be618c",
+        "src/index.css": "486587428ca27da2158a11a8025749868b9af85381853e0e66e4c3f4d90b6ae2",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
+      },
+      "2443f7eb2dde7cab": {
+        "ui-preset.json": "cb1adaf0b9ce3c5da1aa28ce99a614753dc25cfb6ecc86bc119ff32024839e48",
+        "ui-library.config.json": "cdfc05c8d80dfdc30e5912a0fdc5e30f695269c8a785d801d7744f0457be618c",
+        "src/index.css": "dedf1c56e5ffdccbcfb20bb191bbabf0965b2699b2ccad206ffdac583fa50683",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "17b2401a328302e945e8a28ea4fd7e99b746b274f374987a1543acfa61cfaafc"
+      },
+      "1829ffc473332e5d": {
+        "ui-preset.json": "6a41042bcbe202944ed6bc6cde7ffdd6e336732844aac50fdf6e95c8634ff573",
+        "ui-library.config.json": "f8ccb617132c70cf60f139cd89748df42fe0a3f428963c1a96857e6be2f3bf0e",
+        "src/index.css": "861eb86a5d6d234996791ec0ee7f4bcc5ef76b965023ffa124673fac74c43f81",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef"
+      },
+      "978ea411fe14dafd": {
+        "ui-preset.json": "6a41042bcbe202944ed6bc6cde7ffdd6e336732844aac50fdf6e95c8634ff573",
+        "ui-library.config.json": "8ebe1eb96e3eea6a9c09cafc9b1bedfc9a91a21b3747da39b41b19f9b9138623",
+        "src/index.css": "81fd21cae12526f73a5a90659bfd8979e33dcb200c2c21032af423016ccf9bf8",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef"
+      },
+      "a941f3488d530004": {
+        "ui-preset.json": "9d2c4c6cd0fb9b7a5dec240257b3de64031e75be9532c538d5cc48fca3491a0c",
+        "ui-library.config.json": "f8ccb617132c70cf60f139cd89748df42fe0a3f428963c1a96857e6be2f3bf0e",
+        "src/index.css": "486587428ca27da2158a11a8025749868b9af85381853e0e66e4c3f4d90b6ae2",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
+      },
+      "eba513c15906da85": {
+        "ui-preset.json": "9d2c4c6cd0fb9b7a5dec240257b3de64031e75be9532c538d5cc48fca3491a0c",
+        "ui-library.config.json": "8ebe1eb96e3eea6a9c09cafc9b1bedfc9a91a21b3747da39b41b19f9b9138623",
+        "src/index.css": "275204f5ffa18a2a3fa624af95db5ebc65c116ef5e3ee8022b815d3d98ae6f9e",
+        "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+        "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+        "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+        "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+        "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+        "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
+      }
+    },
+    "runtimes": {
+      "939b33a9dbe99a62": {
+        "executable": "node.exe",
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "aeab4881f6c2f2c5": {
+        "name": "node",
+        "executable": "node.exe",
+        "version": "24.19.0"
+      },
+      "5193df007a18c56d": {
+        "executable": "bun.exe",
+        "name": "bun",
+        "version": "1.4.3"
+      }
+    }
+  },
+  "consumers": {
+    "vite-flat": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "74f10afc06411247",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "vite-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "66808c38d13fccff",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "vite-neo-brutalism": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "8e025f73ee62766a",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "next-flat": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "74f10afc06411247",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "next-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "66808c38d13fccff",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "next-neo-brutalism": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "8e025f73ee62766a",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "npm-vite-flat": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "75bd8cd09d72a488",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "npm-vite-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "c2b37ef6c7a95cd0",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "npm-vite-neo-brutalism": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "2443f7eb2dde7cab",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "npm-next-flat": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "75bd8cd09d72a488",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "npm-next-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "c2b37ef6c7a95cd0",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "npm-next-neo-brutalism": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "2443f7eb2dde7cab",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "yarn-classic-vite": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "1829ffc473332e5d",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "yarn-modern-next": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "1829ffc473332e5d",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "yarn-pnp-vite": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "1829ffc473332e5d",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "bun-text-vite-node": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-text-vite-bun": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-vite-node": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-vite-bun": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-text-next-node": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-text-next-bun": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-next-node": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-next-bun": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "978ea411fe14dafd",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "yarn-classic-vite-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "a941f3488d530004",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "yarn-modern-next-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "a941f3488d530004",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "yarn-pnp-vite-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "a941f3488d530004",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "aeab4881f6c2f2c5"
+    },
+    "bun-text-vite-node-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-text-vite-bun-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-vite-node-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-vite-bun-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-text-next-node-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-text-next-bun-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-next-node-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "939b33a9dbe99a62",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    },
+    "bun-binary-next-bun-minimalist": {
+      "build": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "recipeRef": "a9eba89a2b2b0e34",
+      "protectedHashesRef": "eba513c15906da85",
+      "cliRuntimeRef": "5193df007a18c56d",
+      "buildRuntimeRef": "939b33a9dbe99a62"
+    }
+  },
+  "measurements": [
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "5d73231da820cfc8",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "5d73231da820cfc8",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "025385ec166ba301",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "025385ec166ba301",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "f4b367f852ec282e",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "f4b367f852ec282e",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "flat",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "5d73231da820cfc8",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "5d73231da820cfc8",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "025385ec166ba301",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "025385ec166ba301",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "f4b367f852ec282e",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "f4b367f852ec282e",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "minimalist",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "5d73231da820cfc8",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "5053112e65e18a95",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "5d73231da820cfc8",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_flat_button",
+      "recipeHash": "88b140eb6fb1edd7fcc5720d78e6e242c6ae87f8dbeb18cdf7223d058b04eb00",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "e772d4a5c968f6c7",
+      "transformedHashRef": "42b536634408f098",
+      "styleRef": "06a8873fa0eefe54",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "025385ec166ba301",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "cc5f5761d7f9e085",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "025385ec166ba301",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_minimalist_button",
+      "recipeHash": "5b3bd1fd5648fa9baaebe127abddf8736be8073620b04612f72afce8485e20ef",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "ffb8a0ed33c40fe5",
+      "transformedHashRef": "e4e59daffa13e761",
+      "styleRef": "ed7ea283d99f2022",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "preview",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "f4b367f852ec282e",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "vite",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "next",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-vite",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-next",
+      "mode": "light",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f904e3ca21143d1c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "preview",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "f4b367f852ec282e",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "vite",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "next",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-vite",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    },
+    {
+      "hostFamily": "neo-brutalism",
+      "recipeId": "rc_neo_brutalism_button",
+      "recipeHash": "cd3610cf515823bdf16a42dd6b5d5fc9b5648ff8efeb6b626640becb229277a6",
+      "app": "npm-next",
+      "mode": "dark",
+      "canonicalHashRef": "7731b96333062141",
+      "transformedHashRef": "3d59f753cf995d26",
+      "styleRef": "f6f74470a2ef775c",
+      "checksRef": "c7e19f64fa83352f",
+      "textEvidence": [
+        {
+          "width": 1100,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        },
+        {
+          "width": 320,
+          "sampleCount": 17,
+          "sizePairs": {
+            "14→28": 5,
+            "16→32": 12
+          }
+        }
+      ]
+    }
+  ]
+}
