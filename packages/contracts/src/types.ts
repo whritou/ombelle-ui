@@ -42,7 +42,10 @@ export type RecipeCompileResult = {
   darkSelector: string
   provenance: CompileResult['provenance']
 }
-export type InstalledRecipe = Omit<RecipeCompileResult, 'dependencies' | 'artifacts'> & {
+export type InstalledRecipe = Omit<
+  RecipeCompileResult,
+  'dependencies' | 'artifacts'
+> & {
   artifacts: Record<string, InstalledArtifact>
 }
 export type InstalledArtifact = {
@@ -108,7 +111,10 @@ export type FileChange = {
   action: 'create' | 'update' | 'noop' | 'conflict'
 }
 export type InstallPlan = {
-  recipe?: Omit<InstalledRecipe, 'artifacts'> & { importPath: string; examplePath: string }
+  recipe?: Omit<InstalledRecipe, 'artifacts'> & {
+    importPath: string
+    examplePath: string
+  }
   bunLockfile?: BunLockfile
   packageManager: PackageManager
   managerWarning?: string

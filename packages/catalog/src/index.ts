@@ -55,7 +55,12 @@ export function getCatalog(release: string): Catalog {
   ) as Record<ComponentId, ComponentTemplate>
   return {
     release,
-    presets: Object.fromEntries(supportedStyleFamilies.map(family => [family, validatePreset(catalogData.presets[family])])) as Record<StyleFamily, Preset>,
+    presets: Object.fromEntries(
+      supportedStyleFamilies.map((family) => [
+        family,
+        validatePreset(catalogData.presets[family]),
+      ]),
+    ) as Record<StyleFamily, Preset>,
     templates,
     styles: { ...catalogData.styles },
     utility: catalogData.utility,
