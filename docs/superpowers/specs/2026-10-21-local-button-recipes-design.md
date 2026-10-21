@@ -1,6 +1,6 @@
 # Local Button recipe installation
 
-Date: 21 October 2026. Status: approved by the user on 21 October 2026. The user approved the approach of installing a separate recipe Button alongside the ordinary Button and subsequently approved this written design. Implementation has not started.
+Date: 21 October 2026. Status: approved by the user on 21 October 2026. The user approved the separate recipe Button approach, this written design, and its implementation plan. Native implementation and verification are in progress on `codex/local-button-recipes`.
 
 ## Intent and boundaries
 
@@ -44,12 +44,12 @@ Use the existing pinned formatter and sorted artifact order. Equivalent recipe p
 
 Use these deterministic destinations, with `ID` and `REVISION` taken from the validated recipe:
 
-| Artifact | Destination |
-| --- | --- |
-| Separate reviewed Button source | `<componentsDir>/recipes/ID/rREVISION/button.tsx` |
-| Self-contained scoped CSS | `<componentsDir>/recipes/ID/rREVISION/button.css` |
-| Usage example | `<sourceDir>/ombelle-examples/recipes/ID/rREVISION.tsx` |
-| Shared utility, only if missing | Existing configured utility destination |
+| Artifact                        | Destination                                             |
+| ------------------------------- | ------------------------------------------------------- |
+| Separate reviewed Button source | `<componentsDir>/recipes/ID/rREVISION/button.tsx`       |
+| Self-contained scoped CSS       | `<componentsDir>/recipes/ID/rREVISION/button.css`       |
+| Usage example                   | `<sourceDir>/ombelle-examples/recipes/ID/rREVISION.tsx` |
+| Shared utility, only if missing | Existing configured utility destination                 |
 
 The component imports its colocated CSS, so importing `RecipeButton` activates its styles without editing global CSS or application entry files. Apply the configured UI/utils aliases to TSX imports, including the nested recipe path; do not flatten filenames through the ordinary artifact transform. Reject an explicitly configured `paths.recipeOutput` in this first slice with guidance to use the default layout, rather than silently ignoring a custom output setting. Custom recipe roots can follow once their alias contract is specified.
 
@@ -95,17 +95,17 @@ Use the existing operation lock and transaction backups for recipe artifacts and
 
 Add meaningful red/green regressions and run the full foundation gate after targeted checks pass. Keep existing style artifact baselines unchanged. Record actual runtime/browser versions, cases, parity results, and remaining manual-review limits.
 
-| Area | Required evidence |
-| --- | --- |
-| Contracts | Unknown fields, invalid ID/revision/props/bounds, oversized/malformed files, invalid dark selector, non-Button recipes, and exact built-in resolution |
-| Compiler | Deterministic bytes/hashes across key order/default forms; all three built-ins; safe text; override precedence; scoped media rules; no unscoped tokens/selectors |
-| CLI | Built subprocesses; valid grammar; initialized project requirement; invocation-relative paths; dry-run non-mutation; repeat no-op; coexistence of revisions/recipes |
-| Ownership | Edited/untracked generated or utility conflicts, changed immutable recipe, later ordinary add/theme preserving recipe records and ordinary files, path/symlink/case collisions, stale plans and concurrent operation lock |
-| Recovery | Injected mid-write and dependency failures restore recipe artifacts/provenance with the foundation's documented recovery record |
-| Consumers | npm/pnpm Vite and Next.js; Yarn Classic Vite and modern Next.js with node-modules plus modern PnP Vite; Bun Vite/Next.js with text/binary locks and Node/Bun CLI runtimes; audits, exact source parity, and Node production builds |
-| Browser parity | Preview and npm/pnpm Vite/Next.js for each recipe family in both modes, installed into each different host family; compare canonical hashes, normalized DOM, computed style, and screenshots with explicit tolerances if needed |
+| Area                | Required evidence                                                                                                                                                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contracts           | Unknown fields, invalid ID/revision/props/bounds, oversized/malformed files, invalid dark selector, non-Button recipes, and exact built-in resolution                                                                               |
+| Compiler            | Deterministic bytes/hashes across key order/default forms; all three built-ins; safe text; override precedence; scoped media rules; no unscoped tokens/selectors                                                                    |
+| CLI                 | Built subprocesses; valid grammar; initialized project requirement; invocation-relative paths; dry-run non-mutation; repeat no-op; coexistence of revisions/recipes                                                                 |
+| Ownership           | Edited/untracked generated or utility conflicts, changed immutable recipe, later ordinary add/theme preserving recipe records and ordinary files, path/symlink/case collisions, stale plans and concurrent operation lock           |
+| Recovery            | Injected mid-write and dependency failures restore recipe artifacts/provenance with the foundation's documented recovery record                                                                                                     |
+| Consumers           | npm/pnpm Vite and Next.js; Yarn Classic Vite and modern Next.js with node-modules plus modern PnP Vite; Bun Vite/Next.js with text/binary locks and Node/Bun CLI runtimes; audits, exact source parity, and Node production builds  |
+| Browser parity      | Preview and npm/pnpm Vite/Next.js for each recipe family in both modes, installed into each different host family; compare canonical hashes, normalized DOM, computed style, and screenshots with explicit tolerances if needed     |
 | State/accessibility | Native activation, disabled/loading, accessible text including icon-size, focus, variants/sizes, long/escaped text, override rendering, reduced motion, forced colors, axe, and synthetic enlargement/reflow using existing helpers |
-| Isolation | Ordinary Button, Input, Dialog, global CSS/preset/style files unchanged by recipe install; neighboring rendered controls unchanged; recipe retains its appearance after a compatible global theme change and with custom dark class |
+| Isolation           | Ordinary Button, Input, Dialog, global CSS/preset/style files unchanged by recipe install; neighboring rendered controls unchanged; recipe retains its appearance after a compatible global theme change and with custom dark class |
 
 Browser coverage is explicitly preview plus npm/pnpm. Yarn/Bun coverage is install/source/audit/build, matching the existing foundation boundary. Browser measurements do not claim human, NVDA, VoiceOver, native text zoom, or broader cross-browser acceptance. Existing Button state coverage may be shared, but recipe-specific loading, isolation, override precedence, and escaped-content cases must execute the actual generated recipe source.
 

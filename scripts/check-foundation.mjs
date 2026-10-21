@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
-import { finalizeConsumerEvidence, validateMinimalistMeasurements } from './consumer-evidence.ts'
+import {
+  finalizeConsumerEvidence,
+  validateMinimalistMeasurements,
+} from './consumer-evidence.ts'
 import { consumerCases } from './consumer-matrix.ts'
+import { finalizeRecipeEvidence } from './recipe-evidence.ts'
 const steps = [
   'build:packages',
   'test:unit',
@@ -32,7 +36,10 @@ const report = {
   node: process.version,
   steps: [],
 }
-await fs.writeFile('.artifacts/foundation-report.json', JSON.stringify({ ...report, status: 'running' }, null, 2))
+await fs.writeFile(
+  '.artifacts/foundation-report.json',
+  JSON.stringify({ ...report, status: 'running' }, null, 2),
+)
 for (const step of steps) {
   console.log('Checking ' + step)
   const start = Date.now(),
@@ -52,7 +59,9 @@ for (const step of steps) {
     child.on('error', (error) =>
       resolve({ exitCode: 1, output: output + '\n' + error.message }),
     )
-    child.on('close', (exitCode) => resolve({ exitCode: exitCode ?? 1, output }))
+    child.on('close', (exitCode) =>
+      resolve({ exitCode: exitCode ?? 1, output }),
+    )
   })
   await fs.writeFile(log, result.output)
   report.steps.push({
@@ -103,13 +112,47 @@ const counts = {
   },
   browser: browser.stats,
 }
-let consumerMatrix, minimalistMeasurements
+let consumerMatrix, minimalistMeasurements, recipeEvidence
 try {
-  consumerMatrix = finalizeConsumerEvidence(consumerCases(), JSON.parse(await fs.readFile('.artifacts/consumer-matrix.json','utf8')))
-  minimalistMeasurements = validateMinimalistMeasurements(JSON.parse(await fs.readFile('.artifacts/minimalist-measurements.json','utf8')))
-  if (counts.unit.failed || counts.unit.skipped || counts.integration.failed || counts.integration.skipped || counts.browser.unexpected || counts.browser.skipped || counts.browser.flaky) throw new Error('Foundation contains failed, skipped or flaky checks')
+  consumerMatrix = finalizeConsumerEvidence(
+    consumerCases(),
+    JSON.parse(await fs.readFile('.artifacts/consumer-matrix.json', 'utf8')),
+  )
+  minimalistMeasurements = validateMinimalistMeasurements(
+    JSON.parse(
+      await fs.readFile('.artifacts/minimalist-measurements.json', 'utf8'),
+    ),
+  )
+  recipeEvidence = await finalizeRecipeEvidence(
+    {
+      measurements: JSON.parse(
+        await fs.readFile('.artifacts/recipe-measurements.json', 'utf8'),
+      ),
+      consumers: JSON.parse(
+        await fs.readFile('.artifacts/recipe-consumers.json', 'utf8'),
+      ),
+    },
+    consumerMatrix,
+  )
+  if (
+    counts.unit.failed ||
+    counts.unit.skipped ||
+    counts.integration.failed ||
+    counts.integration.skipped ||
+    counts.browser.unexpected ||
+    counts.browser.skipped ||
+    counts.browser.flaky
+  )
+    throw new Error('Foundation contains failed, skipped or flaky checks')
 } catch (error) {
-  await fs.writeFile('.artifacts/foundation-report.json', JSON.stringify({ ...report, status:'failed', error:String(error) }, null, 2))
+  await fs.writeFile(
+    '.artifacts/foundation-report.json',
+    JSON.stringify(
+      { ...report, status: 'failed', error: String(error) },
+      null,
+      2,
+    ),
+  )
   throw error
 }
 await fs.writeFile(
@@ -124,6 +167,7 @@ await fs.writeFile(
       consumerCases: consumerCases(),
       consumerMatrix,
       minimalistMeasurements,
+      recipeEvidence,
       npmVersion: JSON.parse(
         await fs.readFile('.artifacts/npm-version.json', 'utf8'),
       ),
@@ -133,8 +177,12 @@ await fs.writeFile(
       yarnMatrix: JSON.parse(
         await fs.readFile('.artifacts/yarn-matrix.json', 'utf8'),
       ),
-      bunVersion: JSON.parse(await fs.readFile('.artifacts/bun-version.json', 'utf8')),
-      bunMatrix: JSON.parse(await fs.readFile('.artifacts/bun-matrix.json', 'utf8')),
+      bunVersion: JSON.parse(
+        await fs.readFile('.artifacts/bun-version.json', 'utf8'),
+      ),
+      bunMatrix: JSON.parse(
+        await fs.readFile('.artifacts/bun-matrix.json', 'utf8'),
+      ),
     },
     null,
     2,
