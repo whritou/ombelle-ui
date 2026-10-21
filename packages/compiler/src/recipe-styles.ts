@@ -61,7 +61,7 @@ export function compileRecipeStyles(input: { familyCss: string; preset: Resolved
     if (mapped) overrides[mapped[0]] = value + mapped[1]
   }
   // Complete local tokens stop the host preset from affecting this element in either mode.
-  const tokens = block(scope,light) + block(dark + ' ' + scope + ',' + dark + scope, { ...light, ...darkTokens })
+  const tokens = block(scope,light) + block(dark + ' ' + scope + ',' + dark + scope, darkTokens)
   const height = input.overrides.minHeightPx === undefined ? '' : block(scope + '[data-size]', { 'min-height': input.overrides.minHeightPx + 'px' })
   return tokens + root.toString() + block(scope, { ...overrides, 'white-space':'normal', 'overflow-wrap':'anywhere', 'max-width':'100%', 'box-sizing':'border-box' }) +
     block(scope + '[data-size="icon"]', { width:'auto', 'min-width':'var(--control-height)', 'aspect-ratio':'auto', padding:'0.5rem' }) + height
