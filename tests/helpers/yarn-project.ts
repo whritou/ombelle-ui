@@ -2,6 +2,8 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
+import type { StyleFamily } from '@ombelle/contracts'
+import { writeScenarioFixture } from './scenario-fixture.js'
 
 export type YarnFixtureId = 'classic-vite' | 'modern-next' | 'pnp-vite'
 export type YarnFixture = {
@@ -88,7 +90,7 @@ function run(entry: string, args: string[], cwd: string) {
   })
 }
 
-export async function createYarnProject(id: YarnFixtureId): Promise<YarnFixture> {
+export async function createYarnProject(id: YarnFixtureId,family:StyleFamily='flat'): Promise<YarnFixture> {
   const spec = specs[id]
   const root = await fs.mkdtemp(path.join(os.tmpdir(), `ombelle-${id}-`))
   try {
@@ -97,17 +99,7 @@ export async function createYarnProject(id: YarnFixtureId): Promise<YarnFixture>
       recursive: true,
     })
     await fs.rm(path.join(root, 'pnpm-lock.yaml'), { force: true })
-    await fs.writeFile(
-      path.join(root, 'src', 'index.css'),
-      await fs.readFile(path.join(repo, 'fixtures', 'shared', 'base.css'), 'utf8'),
-    )
-    await fs.writeFile(
-      path.join(root, 'src', 'scenario.tsx'),
-      (await fs.readFile(path.join(repo, 'fixtures', 'shared', 'scenario.tsx'), 'utf8')).replaceAll(
-        'STYLE_FAMILY',
-        'flat',
-      ),
-    )
+    await writeScenarioFixture(root,family)
     const manifestPath = path.join(root, 'package.json')
     const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'))
     manifest.packageManager = 'yarn@' + spec.version

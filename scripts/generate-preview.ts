@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { compile, sha256 } from '@ombelle/compiler'
-for (const family of ['flat', 'neo-brutalism'] as const) {
+import { supportedStyleFamilies } from '@ombelle/contracts'
+for (const family of supportedStyleFamilies) {
   const preset = JSON.parse(
     await fs.readFile(
       'packages/catalog/src/presets/' + family + '.json',
@@ -40,6 +41,8 @@ for (const family of ['flat', 'neo-brutalism'] as const) {
     .replaceAll('STYLE_FAMILY', family)
     .replaceAll('@/components/ui', './components/ui')
   await fs.writeFile(root + '/scenario.tsx', scenario)
+  await fs.writeFile(root + '/state-fixture.tsx', (await fs.readFile('fixtures/shared/state-fixture.tsx','utf8')).replaceAll('@/components/ui','./components/ui'))
+  await fs.copyFile('fixtures/shared/state-fixture.css',root+'/state-fixture.css')
   await fs.writeFile(
     root + '/preview.css',
     '@import "../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n',

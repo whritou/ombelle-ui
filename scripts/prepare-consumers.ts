@@ -9,6 +9,7 @@ import { createNpmProject } from '../tests/helpers/npm-project.js'
 import { createYarnProject, type YarnFixtureId } from '../tests/helpers/yarn-project.js'
 import { run, pnpmEntry } from './process.js'
 import { prepareBunConsumer } from './prepare-bun-consumers.js'
+import { writeScenarioFixture } from '../tests/helpers/scenario-fixture.js'
 type Fixture = {
   root: string
   port: number
@@ -103,17 +104,7 @@ for (const manager of ['pnpm', 'npm'] as const)
           JSON.stringify(pkg, null, 2) + '\n',
         )
       }
-      await fs.writeFile(
-        root + '/src/index.css',
-        await fs.readFile('fixtures/shared/base.css', 'utf8'),
-      )
-      await fs.writeFile(
-        root + '/src/scenario.tsx',
-        (await fs.readFile('fixtures/shared/scenario.tsx', 'utf8')).replaceAll(
-          'STYLE_FAMILY',
-          family,
-        ),
-      )
+      await writeScenarioFixture(root,family)
       const templateLock =
           manager === 'npm'
             ? 'fixtures/npm/' + framework + '/package-lock.json'
