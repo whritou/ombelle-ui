@@ -54,6 +54,7 @@ export function baseLock(
     presetHash: result.preset.hash,
     artifacts: { ...context.lock?.artifacts },
     managedDeclarations: context.lock?.managedDeclarations ?? [],
+    ...(context.lock?.recipes ? { recipes: structuredClone(context.lock.recipes) } : {}),
   }
 }
 export async function appendState(

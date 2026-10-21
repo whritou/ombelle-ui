@@ -13,6 +13,7 @@ import {
 import { safePath, portable } from './paths.js'
 import { fingerprintFile } from './fingerprint.js'
 import { assertStandaloneProject } from './workspace.js'
+import { validateInstalledRecipes } from './recipes.js'
 export async function readText(
   root: string,
   relative: string,
@@ -205,6 +206,7 @@ export async function inspectProject(
   )
     throw bad('Unsupported Ombelle lock version or shape')
   const raw = await loadJson(config?.presetFile ?? 'ui-preset.json')
+  if(lock?.recipes!==undefined)lock.recipes=await validateInstalledRecipes(root,lock.recipes,lock.artifacts)
   const preset = raw ? validatePreset(raw) : undefined
   return {
     ...(manager === 'bun' ? { bunLockfile: (present[0] ?? 'bun.lock') as BunLockfile } : {}),
