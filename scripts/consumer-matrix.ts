@@ -1,4 +1,4 @@
-import { supportedStyleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { supportedStyleFamilies, type StyleFamily } from '../packages/contracts/src/style-families.ts'
 import type { YarnFixtureId } from '../tests/helpers/yarn-project.js'
 export type ConsumerCase={id:string;family:StyleFamily;framework:'vite'|'next';manager:'npm'|'pnpm'|'yarn'|'bun';cliRuntime:'node'|'bun';yarnFixtureId?:YarnFixtureId;bunFormat?:'text'|'binary'}
 export function consumerCases():readonly ConsumerCase[]{

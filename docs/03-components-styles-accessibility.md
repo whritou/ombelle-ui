@@ -59,6 +59,8 @@ The MVP root theme intentionally updates shared shadcn color variables for a con
 
 ## Accessibility target
 
+The technical foundation implements Button, Dialog, and Input for flat, minimalist, and neo-brutalism. This three-component scope is separate from the twelve-component alpha roadmap and does not label the full catalog stable. Liquid glass remains unavailable. The [minimalist evidence](evidence/minimalist-style-support.md) identifies measured environments, agent-operated visual review, synthetic text enlargement, and pending native text zoom, human keyboard, NVDA, VoiceOver, and broader-browser review. Arbitrary preset overrides and consuming applications require their own checks.
+
 Target relevant WCAG 2.2 Level AA requirements for supported web experiences. Components and presets alone cannot certify an entire application. Component documentation must identify which checks were performed and what the consuming application must supply. Sources S10 and S11 explain the standards and primitive responsibilities.
 
 For normal text, validate at least 4.5 to 1 contrast; large text can use the applicable 3 to 1 threshold. Validate at least 3 to 1 for required non-text component and state indicators where the criterion applies. Test keyboard operation, visible focus, accessible names, errors, reading order, 200 percent text zoom, and reflow at 320 CSS pixels. Use 24 by 24 CSS pixels as the minimum target-size criterion subject to its defined exceptions, with 44 by 44 as our preferred touch design target.

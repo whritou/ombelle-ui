@@ -4,8 +4,10 @@ import path from 'node:path'
 import { consumerCases, assignConsumerPorts, type ConsumerCase } from './consumer-matrix.js'
 import { prepareNodeConsumer } from './prepare-node-consumer.js'
 import { prepareBunConsumer } from './prepare-bun-consumers.js'
+import type { PendingConsumerEvidence } from './consumer-evidence.js'
 type Fixture=ConsumerCase & {root:string;port:number;version?:string;linker?:string;bunVersion?:string;bunLockfile?:'bun.lock'|'bun.lockb';buildRuntime?:'node'}
 const repo=process.cwd(),map:Record<string,Fixture>={},proof:Record<string,unknown>={},bunRows:Record<string,unknown>={}
+const pending:Record<string,PendingConsumerEvidence>={}
 let previous:Record<string,Fixture>={}
 try{previous=JSON.parse(await fs.readFile('.artifacts/consumers.json','utf8'))}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e}
 const temp=await fs.realpath(os.tmpdir())
@@ -17,6 +19,9 @@ for(const item of Object.values(previous)){
  await fs.rm(real,{recursive:true,force:true})
 }
 await fs.mkdir('.artifacts',{recursive:true})
+// A failed new run must never leave a previous successful matrix in place.
+await fs.rm('.artifacts/consumer-matrix.json',{force:true})
+await fs.writeFile('.artifacts/consumer-pending.json','{}')
 const cases=consumerCases(),ports=assignConsumerPorts(cases),versions:Record<string,string>={}
 for(const spec of cases){
  console.log('Preparing '+spec.id)
@@ -35,6 +40,9 @@ for(const spec of cases){
   await fs.writeFile('.artifacts/audit-'+spec.id+'.json',row.audit.output)
   versions[spec.manager==='yarn'?(row.version.startsWith('1.')?'classic':'modern'):spec.manager]=row.version
  }
+ const observed=proof[spec.id] as {version:string;cliRuntime:PendingConsumerEvidence['cliRuntime'];artifacts:{path:string;sha256:string}[];audit:PendingConsumerEvidence['audit']}
+ pending[spec.id]={family:spec.family,manager:spec.manager,managerVersion:observed.version,cliRuntime:observed.cliRuntime,sourceHashes:Object.fromEntries(observed.artifacts.map(a=>[a.path,a.sha256])),audit:observed.audit}
+ await fs.writeFile('.artifacts/consumer-pending.json',JSON.stringify(pending,null,2))
  await fs.writeFile('.artifacts/consumers.json',JSON.stringify(map,null,2))
  await fs.writeFile('.artifacts/install-provenance.json',JSON.stringify(proof,null,2))
  await fs.writeFile('.artifacts/bun-matrix.json',JSON.stringify(bunRows,null,2))

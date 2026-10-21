@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
+import { finalizeConsumerEvidence, validateMinimalistMeasurements } from './consumer-evidence.ts'
+import { consumerCases } from './consumer-matrix.ts'
 const steps = [
   'build:packages',
   'test:unit',
@@ -30,6 +32,7 @@ const report = {
   node: process.version,
   steps: [],
 }
+await fs.writeFile('.artifacts/foundation-report.json', JSON.stringify({ ...report, status: 'running' }, null, 2))
 for (const step of steps) {
   console.log('Checking ' + step)
   const start = Date.now(),
@@ -49,7 +52,7 @@ for (const step of steps) {
     child.on('error', (error) =>
       resolve({ exitCode: 1, output: output + '\n' + error.message }),
     )
-    child.on('exit', (exitCode) => resolve({ exitCode: exitCode ?? 1, output }))
+    child.on('close', (exitCode) => resolve({ exitCode: exitCode ?? 1, output }))
   })
   await fs.writeFile(log, result.output)
   report.steps.push({
@@ -100,6 +103,15 @@ const counts = {
   },
   browser: browser.stats,
 }
+let consumerMatrix, minimalistMeasurements
+try {
+  consumerMatrix = finalizeConsumerEvidence(consumerCases(), JSON.parse(await fs.readFile('.artifacts/consumer-matrix.json','utf8')))
+  minimalistMeasurements = validateMinimalistMeasurements(JSON.parse(await fs.readFile('.artifacts/minimalist-measurements.json','utf8')))
+  if (counts.unit.failed || counts.unit.skipped || counts.integration.failed || counts.integration.skipped || counts.browser.unexpected || counts.browser.skipped || counts.browser.flaky) throw new Error('Foundation contains failed, skipped or flaky checks')
+} catch (error) {
+  await fs.writeFile('.artifacts/foundation-report.json', JSON.stringify({ ...report, status:'failed', error:String(error) }, null, 2))
+  throw error
+}
 await fs.writeFile(
   '.artifacts/foundation-report.json',
   JSON.stringify(
@@ -109,6 +121,9 @@ await fs.writeFile(
       status: 'passed',
       counts,
       browserVersion,
+      consumerCases: consumerCases(),
+      consumerMatrix,
+      minimalistMeasurements,
       npmVersion: JSON.parse(
         await fs.readFile('.artifacts/npm-version.json', 'utf8'),
       ),
