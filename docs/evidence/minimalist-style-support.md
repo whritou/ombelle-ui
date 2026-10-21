@@ -1,8 +1,8 @@
 # Minimalist foundation support evidence
 
-21 October 2026. The complete local foundation gate passed on Windows with Node **24.21.0**, pnpm **11.25.0**, npm **11.19.0**, Yarn Classic **1.22.22**, modern Yarn **4.18.1**, Bun **1.4.3**, and Microsoft Edge Chromium **155.0.4283.62**. CI retains its Node **24.19.0**, bundled Chromium, and 25-minute budget. This local run took **17 minutes 3 seconds**; it does not establish a hosted CI result or duration.
+21 October 2026. The complete local foundation gate passed on Windows with Node **24.21.0**, pnpm **11.25.0**, npm **11.19.0**, Yarn Classic **1.22.22**, modern Yarn **4.18.1**, Bun **1.4.3**, and Microsoft Edge Chromium **155.0.4283.62**. CI retains its Node **24.19.0**, bundled Chromium, and 25-minute budget. This final local run took **16 minutes 15 seconds**; it does not establish a hosted CI result or duration.
 
-The retained [machine-readable run](minimalist-style-run.json) records source revision `9f5145da08c57392dbb965b31c25e13a9cc97ab6` with `workingTreeDirty: false`. This evidence document and report were added afterward. Executable paths are reduced to filenames and relative log separators normalized; measured versions, times, hashes, statuses, and font samples are unchanged. Referenced `.artifacts` logs and browser images are local/CI outputs, not embedded files in this report.
+The retained [machine-readable run](minimalist-style-run.json) records source revision `dbd4f8867404f4100513910cc0c95d41791f02a7` with `workingTreeDirty: false`, including the final review fix. This evidence document and report were refreshed afterward. Executable paths are reduced to filenames and relative log separators normalized; measured versions, times, hashes, statuses, and font samples are unchanged. Referenced `.artifacts` logs and browser images are local/CI outputs, not embedded files in this report.
 
 All nine gate stages passed: **72 unit tests, 114 integration tests, 48 browser tests, and 34 consumer production builds and audits**, with zero failures, skips, or flaky browser outcomes. The finalized consumer matrix has exactly **15 minimalist cases** and retains all nineteen previous cases. Source hashes confirm installed artifacts match the canonical compiler output. Flat and neo-brutalism baseline artifact hashes remain unchanged.
 
@@ -22,7 +22,13 @@ Ten actual app/mode measurement rows retain enabled text/state contrast (at leas
 
 Each row includes four **synthetic 200% font-enlargement** scenarios: 1100/320 CSS pixels with Dialog closed/open. Before/after computed font sizes prove text, native inputs, and portal Dialog content actually double; assertions check wrapping, reachable controls, focus clipping, and horizontal overflow. This is not native browser text zoom.
 
-The implementation agent visually inspected default light/dark pages beside flat, both minimalist state fixtures, and the dark long Dialog. Minimalist has neutral actions, restrained borders/radius, clear surface separation, and no offset shadows. No human or screen-reader review is claimed. The approved nineteen-color palettes required no adjustment; fixes added distinct dark-secondary hover feedback, wrapping/growth for enlarged controls, and correct accessible fixture button names.
+The implementation agent visually inspected default light/dark pages beside flat, both minimalist state fixtures, the dark long Dialog, and the final light/dark state images after the placeholder fix. Minimalist has neutral actions, restrained borders/radius, clear surface separation, and no offset shadows. No human or screen-reader review is claimed. The approved nineteen-color palettes required no adjustment; fixes added distinct dark-secondary hover feedback, wrapping/growth for enlarged controls, correct accessible fixture button names, and explicit full-opacity muted placeholder text.
+
+## Final review and regression
+
+One fresh whole-branch review found no critical issues and one important default-placeholder contrast defect. Tailwind's translucent placeholder default measured about 3.37:1 in light mode. A new rendered pseudo-element regression first reproduced the failure; an evidence regression also reproduced acceptance of missing placeholder samples. The fix uses the existing `muted-foreground` token at full opacity. All ten final app/mode rows now retain normal and focused placeholder contrast: approximately **7.24:1 light** and **12.04:1 dark**, above 4.5:1. Focused regressions, types, and the complete nine-stage gate passed after the fix. There was no second reviewer pass.
+
+One minor preview convenience remains deferred: choosing the Light/Dark header link drops `states=1`, closing the expanded state fixture. Direct URLs with `&states=1` continue to work; this does not affect installed component behavior.
 
 ## Repeatable human review checklist — pending
 

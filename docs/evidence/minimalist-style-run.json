@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-10-21T11:54:06.203Z",
-  "sourceCommit": "9f5145da08c57392dbb965b31c25e13a9cc97ab6",
+  "startedAt": "2026-10-21T14:26:47.421Z",
+  "sourceCommit": "dbd4f8867404f4100513910cc0c95d41791f02a7",
   "workingTreeDirty": false,
   "platform": "win32",
   "node": "v24.21.0",
@@ -8,59 +8,59 @@
     {
       "name": "build:packages",
       "exitCode": 0,
-      "durationMs": 1165,
+      "durationMs": 1313,
       "log": ".artifacts/logs/build-packages.log"
     },
     {
       "name": "test:unit",
       "exitCode": 0,
-      "durationMs": 4992,
+      "durationMs": 5900,
       "log": ".artifacts/logs/test-unit.log"
     },
     {
       "name": "test:integration",
       "exitCode": 0,
-      "durationMs": 192810,
+      "durationMs": 201527,
       "log": ".artifacts/logs/test-integration.log"
     },
     {
       "name": "generate:preview",
       "exitCode": 0,
-      "durationMs": 2014,
+      "durationMs": 1903,
       "log": ".artifacts/logs/generate-preview.log"
     },
     {
       "name": "prepare:consumers",
       "exitCode": 0,
-      "durationMs": 505365,
+      "durationMs": 450381,
       "log": ".artifacts/logs/prepare-consumers.log"
     },
     {
       "name": "typecheck",
       "exitCode": 0,
-      "durationMs": 2007,
+      "durationMs": 2472,
       "log": ".artifacts/logs/typecheck.log"
     },
     {
       "name": "build:preview",
       "exitCode": 0,
-      "durationMs": 2044,
+      "durationMs": 2824,
       "log": ".artifacts/logs/build-preview.log"
     },
     {
       "name": "build:consumers",
       "exitCode": 0,
-      "durationMs": 160157,
+      "durationMs": 151055,
       "log": ".artifacts/logs/build-consumers.log"
     },
     {
       "name": "test:e2e",
       "exitCode": 0,
-      "durationMs": 152646,
+      "durationMs": 157950,
       "log": ".artifacts/logs/test-e2e.log"
     }
   ],
-  "completedAt": "2026-10-21T12:11:09.597Z",
+  "completedAt": "2026-10-21T14:43:03.077Z",
   "status": "passed",
   "counts": {
     "unit": {
@@ -74,8 +74,8 @@
       "skipped": 0
     },
     "browser": {
-      "startTime": "2026-10-21T12:08:38.647Z",
-      "duration": 150687.845,
+      "startTime": "2026-10-21T14:40:26.808Z",
+      "duration": 156018.20500000002,
       "expected": 48,
       "skipped": 0,
       "unexpected": 0,
@@ -399,7 +399,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -495,7 +495,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -591,7 +591,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -687,7 +687,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1103,7 +1103,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1135,7 +1135,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1167,7 +1167,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1199,7 +1199,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1231,7 +1231,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1263,7 +1263,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1295,7 +1295,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1327,7 +1327,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1359,7 +1359,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1391,7 +1391,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1423,7 +1423,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -1475,6 +1475,8 @@
         "destructivePressed": 8.803078268373124,
         "destructivePressedBoundary": 8.433963966239267,
         "error": 6.1987548353625215,
+        "placeholder": 7.240496208458075,
+        "placeholderFocus": 7.240496208458075,
         "inputBoundary": 4.6317792366294,
         "focus": 16.995888190744548,
         "muted": 7.240496208458075,
@@ -2407,6 +2409,8 @@
         "destructivePressed": 8.803078268373124,
         "destructivePressedBoundary": 8.433963966239267,
         "error": 6.1987548353625215,
+        "placeholder": 7.240496208458075,
+        "placeholderFocus": 7.240496208458075,
         "inputBoundary": 4.6317792366294,
         "focus": 16.995888190744548,
         "muted": 7.240496208458075,
@@ -3339,6 +3343,8 @@
         "destructivePressed": 8.803078268373124,
         "destructivePressedBoundary": 8.433963966239267,
         "error": 6.1987548353625215,
+        "placeholder": 7.240496208458075,
+        "placeholderFocus": 7.240496208458075,
         "inputBoundary": 4.6317792366294,
         "focus": 16.995888190744548,
         "muted": 7.240496208458075,
@@ -4271,6 +4277,8 @@
         "destructivePressed": 8.803078268373124,
         "destructivePressedBoundary": 8.433963966239267,
         "error": 6.1987548353625215,
+        "placeholder": 7.240496208458075,
+        "placeholderFocus": 7.240496208458075,
         "inputBoundary": 4.6317792366294,
         "focus": 16.995888190744548,
         "muted": 7.240496208458075,
@@ -5203,6 +5211,8 @@
         "destructivePressed": 8.803078268373124,
         "destructivePressedBoundary": 8.433963966239267,
         "error": 6.1987548353625215,
+        "placeholder": 7.240496208458075,
+        "placeholderFocus": 7.240496208458075,
         "inputBoundary": 4.6317792366294,
         "focus": 16.995888190744548,
         "muted": 7.240496208458075,
@@ -6135,6 +6145,8 @@
         "destructivePressed": 6.035732250530429,
         "destructivePressedBoundary": 6.035732250530429,
         "error": 9.346689666859199,
+        "placeholder": 12.039064392610866,
+        "placeholderFocus": 12.039064392610866,
         "inputBoundary": 6.987328296864191,
         "focus": 16.97538624440406,
         "muted": 12.039064392610866,
@@ -7067,6 +7079,8 @@
         "destructivePressed": 6.035732250530429,
         "destructivePressedBoundary": 6.035732250530429,
         "error": 9.346689666859199,
+        "placeholder": 12.039064392610866,
+        "placeholderFocus": 12.039064392610866,
         "inputBoundary": 6.987328296864191,
         "focus": 16.97538624440406,
         "muted": 12.039064392610866,
@@ -7999,6 +8013,8 @@
         "destructivePressed": 6.035732250530429,
         "destructivePressedBoundary": 6.035732250530429,
         "error": 9.346689666859199,
+        "placeholder": 12.039064392610866,
+        "placeholderFocus": 12.039064392610866,
         "inputBoundary": 6.987328296864191,
         "focus": 16.97538624440406,
         "muted": 12.039064392610866,
@@ -8931,6 +8947,8 @@
         "destructivePressed": 6.035732250530429,
         "destructivePressedBoundary": 6.035732250530429,
         "error": 9.346689666859199,
+        "placeholder": 12.039064392610866,
+        "placeholderFocus": 12.039064392610866,
         "inputBoundary": 6.987328296864191,
         "focus": 16.97538624440406,
         "muted": 12.039064392610866,
@@ -9863,6 +9881,8 @@
         "destructivePressed": 6.035732250530429,
         "destructivePressedBoundary": 6.035732250530429,
         "error": 9.346689666859199,
+        "placeholder": 12.039064392610866,
+        "placeholderFocus": 12.039064392610866,
         "inputBoundary": 6.987328296864191,
         "focus": 16.97538624440406,
         "muted": 12.039064392610866,
@@ -10999,7 +11019,7 @@
         {
           "path": "src/styles/ui-style.css",
           "logicalPath": "styles/ui-style.css",
-          "sha256": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+          "sha256": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
         }
       ],
       "audit": {
@@ -11059,7 +11079,7 @@
         {
           "path": "src/styles/ui-style.css",
           "logicalPath": "styles/ui-style.css",
-          "sha256": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+          "sha256": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
         }
       ],
       "audit": {
@@ -11119,7 +11139,7 @@
         {
           "path": "src/styles/ui-style.css",
           "logicalPath": "styles/ui-style.css",
-          "sha256": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+          "sha256": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
         }
       ],
       "audit": {
@@ -11451,7 +11471,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -11488,7 +11508,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -11525,7 +11545,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -11562,7 +11582,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -11599,7 +11619,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -11636,7 +11656,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -11673,7 +11693,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
@@ -11710,7 +11730,7 @@
         "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
         "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
         "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
-        "src/styles/ui-style.css": "a15b431ce02d24916cfc6589a4d43588d261ea8e6a4ee67902748889c27067d6"
+        "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
       },
       "audit": {
         "exitCode": 0,
