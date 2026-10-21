@@ -34,6 +34,12 @@ Yarn Classic does not supply the modern dlx workflow. Use a local development de
 
 `init` targets an existing supported app and initializes the UI setup, not a whole application. If `components.json` already exists, detect that before writes and use the theme plan instead of resetting the setup. An incompatible or incomplete configuration receives an actionable diagnostic.
 
+## Select a preset for one component
+
+Before choosing a runner, distinguish the installation scope. The proposed `add button --preset ps_brand@3` applies a preset only to that Button installation; `theme add ps_brand@3` applies the same preset globally. All four runner forms above can pass `--preset ps_brand@3` after `add button`. Codes are values, never flag names. `add button --preset ./brand.preset.json` remains the offline equivalent; `add --recipe <code-or-file>` additionally restores saved props, text, and overrides.
+
+The first component-scoped slice targets one Button per command and preserves the saved project preset, global theme, other installed components, and manager/lockfile ownership. Plans show isolated styling, usage, and scoped provenance; incompatible shared source and local edits cause conflicts. Later ordinary additions still use project defaults. See the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection). These are future requirements: the current private foundation rejects `--preset` on `add` and has no remote preset or recipe resolution.
+
 ## Package manager selection
 
 Use an explicit `--package-manager` selection when present. Otherwise inspect `package.json.packageManager`, then a unique recognized lockfile. Recognized lockfiles are package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, and bun.lockb. Both Bun formats together are ambiguous, just like mixed-manager locks. Keep the existing format; do not convert it as a side effect of installation. A field-only Bun project creates bun.lock only when dependency work requires it.

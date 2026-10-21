@@ -46,6 +46,8 @@ Catalog work includes all component APIs, slot recipes, light and dark states, d
 
 Editor work includes generated control metadata, undo and redo, draft recovery, isolated preview, stale-response handling, export bundles, recipe scoping, diagnostics, snapshot publishing, and immutable command generation.
 
+Before editor integration, implement the Button-only scoped preset path `add button --preset <code-or-file>` defined in the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection). Share its scoped compilation and provenance with recipes, preserve project defaults and other components, and verify light/dark preview/export/install parity, conflicts, dry-run, and no-op behavior across the declared frameworks and four managers. Local JSON support can be delivered before remote publishing; keep saved-code resolution explicitly pending until immutable snapshot resolution exists. The editor then exposes the same preset code for component-scoped installation or global `theme add` installation, with scope clearly labelled.
+
 Release work includes external pilot sessions, installation troubleshooting, license inventory, upgrade notes, a security reporting route, and a repeatable publishing pipeline. Avoid accounts and billing until basic adoption provides a reason to add them.
 
 ## Validation matrix

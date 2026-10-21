@@ -15,6 +15,12 @@ npx @your-ui/cli@0.1.0 init --preset ./ui-preset.json
 # Read the saved project preset automatically.
 npx @your-ui/cli@0.1.0 add button dialog
 
+# Use a saved preset for this Button only; preserve project defaults.
+npx @your-ui/cli@0.1.0 add button --preset ps_brand@3
+
+# A downloaded preset is also a supported planned input.
+npx @your-ui/cli@0.1.0 add button --preset ./brand.preset.json
+
 # Inspect changes without writing source, config, cache, or dependencies.
 npx @your-ui/cli@0.1.0 add input --dry-run
 
@@ -47,6 +53,7 @@ npx @your-ui/cli@0.1.0 diff button
 | --- | --- |
 | `init` | Detect project, select or resolve preset, plan config and CSS integration, write on confirmation |
 | `add <items>` | Resolve exact catalog entries against saved project defaults and install required files |
+| `add <component> --preset <code-or-file>` | Install one component with an explicitly selected, isolated preset; preserve project-wide defaults |
 | `add --recipe` | Install the recipe's base component, scoped CSS, pinned token scope, and example usage |
 | `preset show` | Print the locally resolved preset and provenance |
 | `preset apply` | Resolve a new preset, report effects on existing components, update compatible generated files |
@@ -57,6 +64,12 @@ npx @your-ui/cli@0.1.0 diff button
 | `update` | Later explicit migration workflow; never a background automatic update |
 
 Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|yarn|bun>`, and `--yes` where applicable. The Bun foundation target is exactly 1.4.3. `preset apply` also supports `--only theme`. `--yes` accepts an already safe plan; it never enables overwriting modified files or bypassing schema and compatibility errors. Do not provide a broad force flag in alpha.
+
+`--preset` takes a saved preset code or local JSON path as its value; codes never become flag names. On `init` it establishes project defaults; on `add` it applies only to the requested component. `theme add <code-or-file>` remains the global theme installation path. Recipe inputs use `--recipe` because they additionally carry a component identity, props, text, and overrides. Local files remain a supported product workflow alongside published identifiers.
+
+Component-scoped preset selection initially targets one Button per command. Reject multiple components or simultaneous `--preset` and `--recipe`. Resolve and pin the exact preset, generate isolated light/dark styling and usage, and record scoped provenance without modifying the saved global preset or restyling existing components. Reuse compatible base source or stop with a conflict; never silently replace shared source. See [component-scoped preset selection](04-presets-and-contracts.md#component-scoped-preset-selection) for the full scope and persistence contract.
+
+Implementation status: the current foundation rejects `--preset` on `add`. Scoped preset selection, recipes, and remote code resolution are requirements for future implementation, not available commands.
 
 The proposed dry-run is stricter than an ordinary installation: it performs no filesystem writes, even to a project cache, and never invokes the package manager. It may fetch public manifests in memory. Document network access in machine-readable output.
 
@@ -137,6 +150,8 @@ A plain registry item must include or reference all required utility, theme, and
 For existing-project styling, publish a `registry:theme` item separately and install it through `shadcn add <theme-url>`. The upstream CLI supplies the standard theme transport; persistent custom preset state and our detailed merge safeguards remain the product CLI's responsibility. Do not confuse our preset IDs with upstream shadcn preset codes.
 
 ## Required CLI tests
+
+For component-scoped presets, verify saved-code and local-file resolution, unknown revision/integrity failures before writes, strict flag validation, isolated light/dark tokens, unchanged global preset/theme and neighboring components, later ordinary additions using project defaults, repeated no-op installation, compatible source reuse, incompatible or edited source conflicts, and preview/export/install parity. Cover the declared framework and four-manager matrix; do not claim portal support without explicit scope-propagation tests.
 
 Verify clean installation, repeated no-op addition, saved preset reuse across processes, Next.js client boundaries, alias rewriting, unsupported configuration rejection, dependency deduplication, locally edited component conflict, traversal and symlink rejection, concurrent writes, network and package manager failure, dry-run non-mutation, interrupted-write recovery, and preview versus install parity. The foundation gate covers npm, pnpm, Yarn Classic/modern linkers, and Bun 1.4.3. Bun checks include native executable discovery, actual CLI runtime identity, binary-byte metadata preconditions, configuration rejection, and real installed-package verification. It rejects workspace ownership and incompatible Bun settings before source writes; package-state rollback after dependency failure is not promised.
 

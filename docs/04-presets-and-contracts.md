@@ -48,7 +48,30 @@ Global palette and token declarations are merged directly into the configured st
 
 The lockfile records a lock version, exact CLI and compiler releases, catalog release, normalized preset hash, dependency requirements, and installed artifact records. Each artifact record includes its original source identity, transformed content hash, relative destination, template version, and associated recipe when present. Dependency packages remain locked by the project's ordinary package manager lockfile.
 
-An `add` operation reads the local preset and lockfile each time. It never chooses a new upstream default because the process restarted or a new release exists. `--preset` on `add` must not silently change project state: use an explicit `preset apply` or `theme add` operation, or a scoped recipe.
+An ordinary `add` operation reads the local preset and lockfile each time. It never chooses a new upstream default because the process restarted or a new release exists. The proposed `add <component> --preset <code-or-file>` explicitly selects a preset for that component installation only. It preserves the saved project preset and the defaults used by later ordinary `add` operations. Use `preset apply` or `theme add` to change project-wide defaults.
+
+## Component-scoped preset selection
+
+A preset describes design values; the command determines its scope. The same pinned preset can initialize a project, install a global theme, or style one component:
+
+```sh
+init --preset ps_brand@3
+theme add ps_brand@3
+add button --preset ps_brand@3
+add button --preset ./brand.preset.json
+```
+
+These are proposed commands. The current private foundation accepts local preset files for `init` and `theme add`, but rejects `--preset` on `add`; remote codes and component-scoped installation are not implemented.
+
+The public interface uses the named flag `--preset <code-or-file>`. A generated opaque code is a value, never a dynamically named flag such as `--random-string`. Published commands pin an immutable preset revision; if a friendly alias is accepted, show and lock its resolved revision and hash before installation. Local JSON is a permanent offline and version-control option, not a development-only substitute.
+
+For the first component-scoped slice, support exactly one component per command, beginning with Button. Reject multiple component arguments and the combination of `--preset` with `--recipe` with actionable diagnostics. Wider component and portal support requires separate evidence.
+
+Compile the selected component with the preset's complete light/dark tokens, design values, and applicable component defaults in an isolated scope. Shared utilities or base source may be reused only when compatible; otherwise report a conflict and migration guidance. A different preset must not silently restyle an existing shared Button or other installed components. Do not overwrite locally edited source, rewrite app usages, merge scoped values into root theme declarations, or replace the project-wide style pack. The installation plan must identify component/style/usage destinations and the scope consumers need to use; exact artifact naming belongs in the implementation design.
+
+Preserve the project's `ui-preset.json` and global theme defaults. Record the component-scoped normalized preset, immutable reference when present, releases, scope identity, and artifact hashes in installation provenance so repeated installs are deterministic and identical requests are no-ops. Later `add input` still uses the saved project preset. Dry-run performs no writes or dependency operations; normal conflict, transaction, and package-manager preservation rules apply.
+
+A recipe remains a separate optional artifact: it combines a pinned preset with one component's allowed props, text content, and local overrides. `add button --preset <code>` selects design data without requiring a recipe file; `add --recipe <code-or-file>` restores a richer saved customization and already identifies its component. Both use the same scoped compilation and ownership rules.
 
 `theme add <preset>` is the existing-shadcn entry point and an alias of `preset apply <preset> --only theme`. It merges tokens and compatible reviewed CSS, commits the resolved preset, and leaves component source untouched. Source defaults inside that preset affect future generation; they do not rewrite the props or default behavior of already installed components. Report this distinction in the plan.
 
