@@ -1,0 +1,135 @@
+// Generated from schemas/recipe.schema.json; do not edit independently.
+export const recipeSchema = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.example.com/schemas/recipe-1.0.json",
+  "title": "Proposed UI Library Button Recipe Version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "revision",
+    "component",
+    "presetRef",
+    "props",
+    "content",
+    "overrides"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,79}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "component": {
+      "const": "button"
+    },
+    "presetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "catalogRelease",
+        "compilerVersion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,79}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "catalogRelease": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "compilerVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+        }
+      }
+    },
+    "props": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "enum": [
+            "default",
+            "secondary",
+            "outline",
+            "ghost",
+            "link",
+            "destructive"
+          ]
+        },
+        "size": {
+          "enum": [
+            "sm",
+            "default",
+            "lg",
+            "icon"
+          ]
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "loading": {
+          "type": "boolean"
+        },
+        "type": {
+          "enum": [
+            "button",
+            "submit",
+            "reset"
+          ]
+        }
+      }
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "overrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "radiusRem": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "borderWidthPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "minHeightPx": {
+          "type": "number",
+          "minimum": 24,
+          "maximum": 80
+        },
+        "shadowOffsetXPx": {
+          "type": "number",
+          "minimum": -16,
+          "maximum": 16
+        },
+        "shadowOffsetYPx": {
+          "type": "number",
+          "minimum": -16,
+          "maximum": 16
+        }
+      }
+    }
+  }
+} as const

@@ -8,6 +8,7 @@ import {
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
+export { resolveRecipePreset } from './recipe-preset.js'
 export type ComponentTemplate = {
   id: ComponentId
   content: string

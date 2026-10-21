@@ -1,5 +1,6 @@
 import type { FromSchema } from 'json-schema-to-ts'
 import { presetSchema } from './preset-schema.js'
+import type { NormalizedRecipe } from './recipe.js'
 export type Preset = FromSchema<typeof presetSchema>
 export type ComponentId = 'button' | 'dialog' | 'input'
 export type { StyleFamily } from './style-families.js'
@@ -32,12 +33,25 @@ export type ManagedDeclaration = {
   important?: boolean
   existedBefore: boolean
 }
+export type RecipeCompileResult = {
+  artifacts: Artifact[]
+  dependencies: Dependency[]
+  recipe: { data: NormalizedRecipe; hash: string }
+  preset: ResolvedPreset
+  scope: string
+  darkSelector: string
+  provenance: CompileResult['provenance']
+}
+export type InstalledRecipe = Omit<RecipeCompileResult, 'dependencies' | 'artifacts'> & {
+  artifacts: Record<string, InstalledArtifact>
+}
 export type InstalledArtifact = {
   logicalPath: string
   sha256: string
   kind: Artifact['kind']
 }
 export type ProjectLock = {
+  recipes?: Record<string, InstalledRecipe>
   lockVersion: 1
   catalogRelease: string
   compilerVersion: string
@@ -94,6 +108,7 @@ export type FileChange = {
   action: 'create' | 'update' | 'noop' | 'conflict'
 }
 export type InstallPlan = {
+  recipe?: Omit<InstalledRecipe, 'artifacts'> & { importPath: string; examplePath: string }
   bunLockfile?: BunLockfile
   packageManager: PackageManager
   managerWarning?: string
