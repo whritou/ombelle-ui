@@ -1,6 +1,6 @@
 # Local Button recipe installation
 
-Date: 21 October 2026. Status: proposed design awaiting written-spec approval. The user approved the approach of installing a separate recipe Button alongside the ordinary Button. Implementation has not started.
+Date: 21 October 2026. Status: approved by the user on 21 October 2026. The user approved the approach of installing a separate recipe Button alongside the ordinary Button and subsequently approved this written design. Implementation has not started.
 
 ## Intent and boundaries
 
