@@ -48,6 +48,9 @@ jobs:
             .artifacts/browser-version.json
             .artifacts/foundation-report.json
             .artifacts/install-provenance.json
+            .artifacts/consumer-pending.json
+            .artifacts/consumer-matrix.json
+            .artifacts/minimalist-measurements.json
             .artifacts/audit-*.json
             playwright-report
             test-results

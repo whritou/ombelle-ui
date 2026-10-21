@@ -16,7 +16,7 @@ async function versionAt(executable: string): Promise<string> {
   return new Promise((resolve,reject) => {
     const child=spawn(executable,['--version'], { cwd: os.tmpdir(), shell:false, windowsHide:true, timeout:15000, env:safeRuntimeEnv() })
     let output=''; child.stdout.on('data',c=>output=(output+c).slice(-2000));child.stderr.on('data',c=>output=(output+c).slice(-2000))
-    child.on('error',reject);child.on('exit',code=>code===0?resolve(output.trim()):reject(new Error(output)))
+    child.on('error',reject);child.on('close',code=>code===0?resolve(output.trim()):reject(new Error(output)))
   })
 }
 async function nativeFile(file: string): Promise<void> {

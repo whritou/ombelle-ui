@@ -48,7 +48,7 @@ it('generates a standalone theme without component dependencies', async () => {
 it.each([
   { ...input, compilerVersion: '9.0.0' },
   { ...input, catalogRelease: '9.0.0' },
-  { ...input, preset: { ...example, styleFamily: 'minimalist' } },
+  { ...input, preset: { ...example, styleFamily: 'liquid-glass' } },
   { ...input, componentIds: ['unknown'] },
 ])('rejects unsupported release/style/component', async (value) => {
   await expect(

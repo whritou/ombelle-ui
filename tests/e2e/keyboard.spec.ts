@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
+import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
-for (const family of ['flat', 'neo-brutalism'])
+for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'])
     for (const app of ['preview', 'vite', 'next', 'npm-vite', 'npm-next'])
       test(
@@ -46,7 +47,7 @@ for (const family of ['flat', 'neo-brutalism'])
             .getByRole('dialog')
             .evaluate((el) => getComputedStyle(el).backgroundColor)
           expect(background).toBe(
-            mode === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(255, 255, 255)',
+            mode === 'dark' ? (family === 'minimalist' ? 'rgb(31, 41, 55)' : 'rgb(39, 39, 42)') : 'rgb(255, 255, 255)',
           )
           expect((await new AxeBuilder({ page }).analyze()).violations).toEqual(
             [],

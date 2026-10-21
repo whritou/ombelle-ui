@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { getCatalog, getTemplate } from '../src/index.js'
+import { supportedStyleFamilies } from '@ombelle/contracts'
 import { Button } from '../src/templates/button.js'
 import { Input } from '../src/templates/input.js'
 describe('catalog contract', () => {
@@ -21,7 +22,7 @@ describe('catalog contract', () => {
   })
   it('has complete tokens for every referenced style variable', () => {
     const c = getCatalog('0.1.0')
-    for (const family of ['flat', 'neo-brutalism'] as const) {
+    for (const family of supportedStyleFamilies) {
       expect(Object.keys(c.presets[family].modes.light)).toHaveLength(19)
       for (const token of c.styles[family].matchAll(/var\(--([a-z-]+)\)/g))
         expect([

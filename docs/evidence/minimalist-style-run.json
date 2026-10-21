@@ -1,0 +1,499 @@
+{
+  "summaryFormat": "ombelle-foundation-summary/v1",
+  "startedAt": "2026-10-21T14:26:47.421Z",
+  "sourceCommit": "dbd4f8867404f4100513910cc0c95d41791f02a7",
+  "workingTreeDirty": false,
+  "platform": "win32",
+  "node": "v24.21.0",
+  "steps": [
+    {"name":"build:packages","exitCode":0,"durationMs":1313,"log":".artifacts/logs/build-packages.log"},
+    {"name":"test:unit","exitCode":0,"durationMs":5900,"log":".artifacts/logs/test-unit.log"},
+    {"name":"test:integration","exitCode":0,"durationMs":201527,"log":".artifacts/logs/test-integration.log"},
+    {"name":"generate:preview","exitCode":0,"durationMs":1903,"log":".artifacts/logs/generate-preview.log"},
+    {"name":"prepare:consumers","exitCode":0,"durationMs":450381,"log":".artifacts/logs/prepare-consumers.log"},
+    {"name":"typecheck","exitCode":0,"durationMs":2472,"log":".artifacts/logs/typecheck.log"},
+    {"name":"build:preview","exitCode":0,"durationMs":2824,"log":".artifacts/logs/build-preview.log"},
+    {"name":"build:consumers","exitCode":0,"durationMs":151055,"log":".artifacts/logs/build-consumers.log"},
+    {"name":"test:e2e","exitCode":0,"durationMs":157950,"log":".artifacts/logs/test-e2e.log"}
+  ],
+  "completedAt": "2026-10-21T14:43:03.077Z",
+  "status": "passed",
+  "counts": {
+    "unit": {
+      "passed": 72,
+      "failed": 0,
+      "skipped": 0
+    },
+    "integration": {
+      "passed": 114,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "startTime": "2026-10-21T14:40:26.808Z",
+      "duration": 156018.20500000002,
+      "expected": 48,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "browserVersion": {
+    "engine": "chromium",
+    "version": "155.0.4283.62",
+    "channel": "msedge"
+  },
+  "npmVersion": {
+    "version": "11.19.0"
+  },
+  "yarnVersions": {
+    "classic": "1.22.22",
+    "modern": "4.18.1"
+  },
+  "bunVersion": {
+    "version": "1.4.3"
+  },
+  "rawEvidence": {
+    "localSanitizedReport": {
+      "path": ".artifacts/minimalist-style-run.full.json",
+      "sha256": "8483d03159920bdd2a5a2d70b2ac440a98ec160de3ca096ae9f3c77c223d63dc",
+      "bytes": 377533
+    },
+    "ci": {
+      "workflow": "https://github.com/whritou/ombelle-ui/actions/workflows/foundation.yml",
+      "artifactName": "foundation-evidence",
+      "files": [
+        ".artifacts/foundation-report.json",
+        ".artifacts/consumer-matrix.json",
+        ".artifacts/minimalist-measurements.json"
+      ],
+      "note": "Each hosted run archives its own full reports; those runs are separate from the recorded local run."
+    }
+  },
+  "runtimeIdentities": {
+    "node-24.21.0": {
+      "executable": "node.exe",
+      "name": "node",
+      "version": "24.21.0"
+    },
+    "bun-1.4.3": {
+      "executable": "bun.exe",
+      "name": "bun",
+      "version": "1.4.3"
+    }
+  },
+  "sourceHashSets": {
+    "flat": {
+      "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+      "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+      "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+      "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+      "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+      "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+      "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+      "src/styles/ui-style.css": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef"
+    },
+    "minimalist": {
+      "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+      "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+      "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+      "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+      "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+      "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+      "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+      "src/styles/ui-style.css": "80b0300661579bc3589399d2fbb15b5fc8509dd89e26ce3c8acd30c38fd3dde1"
+    },
+    "neo-brutalism": {
+      "src/components/ui/button.tsx": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69",
+      "src/components/ui/dialog.tsx": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+      "src/components/ui/input.tsx": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4",
+      "src/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+      "src/ombelle-examples/button.tsx": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e",
+      "src/ombelle-examples/dialog.tsx": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d",
+      "src/ombelle-examples/input.tsx": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965",
+      "src/styles/ui-style.css": "17b2401a328302e945e8a28ea4fd7e99b746b274f374987a1543acfa61cfaafc"
+    }
+  },
+  "consumers": [
+    {"id":"vite-flat","family":"flat","framework":"vite","manager":"pnpm","cliRuntime":"node","managerVersion":"11.25.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"vite-minimalist","family":"minimalist","framework":"vite","manager":"pnpm","cliRuntime":"node","managerVersion":"11.25.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"vite-neo-brutalism","family":"neo-brutalism","framework":"vite","manager":"pnpm","cliRuntime":"node","managerVersion":"11.25.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"neo-brutalism","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"next-flat","family":"flat","framework":"next","manager":"pnpm","cliRuntime":"node","managerVersion":"11.25.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"next-minimalist","family":"minimalist","framework":"next","manager":"pnpm","cliRuntime":"node","managerVersion":"11.25.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"next-neo-brutalism","family":"neo-brutalism","framework":"next","manager":"pnpm","cliRuntime":"node","managerVersion":"11.25.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"neo-brutalism","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"npm-vite-flat","family":"flat","framework":"vite","manager":"npm","cliRuntime":"node","managerVersion":"11.19.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"npm-vite-minimalist","family":"minimalist","framework":"vite","manager":"npm","cliRuntime":"node","managerVersion":"11.19.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"npm-vite-neo-brutalism","family":"neo-brutalism","framework":"vite","manager":"npm","cliRuntime":"node","managerVersion":"11.19.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"neo-brutalism","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"npm-next-flat","family":"flat","framework":"next","manager":"npm","cliRuntime":"node","managerVersion":"11.19.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"npm-next-minimalist","family":"minimalist","framework":"next","manager":"npm","cliRuntime":"node","managerVersion":"11.19.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"npm-next-neo-brutalism","family":"neo-brutalism","framework":"next","manager":"npm","cliRuntime":"node","managerVersion":"11.19.0","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"neo-brutalism","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0}},
+    {"id":"yarn-classic-vite","family":"flat","framework":"vite","manager":"yarn","cliRuntime":"node","yarnFixtureId":"classic-vite","managerVersion":"1.22.22","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0},"managerDetails":{"linker":"node_modules","immutableInstall":true,"noForeignLockfiles":true}},
+    {"id":"yarn-modern-next","family":"flat","framework":"next","manager":"yarn","cliRuntime":"node","yarnFixtureId":"modern-next","managerVersion":"4.18.1","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0},"managerDetails":{"linker":"node-modules","immutableInstall":true,"noForeignLockfiles":true}},
+    {"id":"yarn-pnp-vite","family":"flat","framework":"vite","manager":"yarn","cliRuntime":"node","yarnFixtureId":"pnp-vite","managerVersion":"4.18.1","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0},"managerDetails":{"linker":"pnp","immutableInstall":true,"noForeignLockfiles":true}},
+    {"id":"bun-text-vite-node","family":"flat","framework":"vite","manager":"bun","cliRuntime":"node","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-text-vite-bun","family":"flat","framework":"vite","manager":"bun","cliRuntime":"bun","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-vite-node","family":"flat","framework":"vite","manager":"bun","cliRuntime":"node","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-vite-bun","family":"flat","framework":"vite","manager":"bun","cliRuntime":"bun","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-text-next-node","family":"flat","framework":"next","manager":"bun","cliRuntime":"node","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-text-next-bun","family":"flat","framework":"next","manager":"bun","cliRuntime":"bun","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-next-node","family":"flat","framework":"next","manager":"bun","cliRuntime":"node","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-next-bun","family":"flat","framework":"next","manager":"bun","cliRuntime":"bun","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"flat","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"yarn-classic-vite-minimalist","family":"minimalist","framework":"vite","manager":"yarn","cliRuntime":"node","yarnFixtureId":"classic-vite","managerVersion":"1.22.22","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0},"managerDetails":{"linker":"node_modules","immutableInstall":true,"noForeignLockfiles":true}},
+    {"id":"yarn-modern-next-minimalist","family":"minimalist","framework":"next","manager":"yarn","cliRuntime":"node","yarnFixtureId":"modern-next","managerVersion":"4.18.1","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0},"managerDetails":{"linker":"node-modules","immutableInstall":true,"noForeignLockfiles":true}},
+    {"id":"yarn-pnp-vite-minimalist","family":"minimalist","framework":"vite","manager":"yarn","cliRuntime":"node","yarnFixtureId":"pnp-vite","managerVersion":"4.18.1","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"production"},"build":{"exitCode":0},"managerDetails":{"linker":"pnp","immutableInstall":true,"noForeignLockfiles":true}},
+    {"id":"bun-text-vite-node-minimalist","family":"minimalist","framework":"vite","manager":"bun","cliRuntime":"node","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-text-vite-bun-minimalist","family":"minimalist","framework":"vite","manager":"bun","cliRuntime":"bun","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-vite-node-minimalist","family":"minimalist","framework":"vite","manager":"bun","cliRuntime":"node","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-vite-bun-minimalist","family":"minimalist","framework":"vite","manager":"bun","cliRuntime":"bun","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-text-next-node-minimalist","family":"minimalist","framework":"next","manager":"bun","cliRuntime":"node","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-text-next-bun-minimalist","family":"minimalist","framework":"next","manager":"bun","cliRuntime":"bun","bunFormat":"text","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lock","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-next-node-minimalist","family":"minimalist","framework":"next","manager":"bun","cliRuntime":"node","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"node-24.21.0","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}},
+    {"id":"bun-binary-next-bun-minimalist","family":"minimalist","framework":"next","manager":"bun","cliRuntime":"bun","bunFormat":"binary","managerVersion":"1.4.3","cliRuntimeRef":"bun-1.4.3","buildRuntimeRef":"node-24.21.0","sourceHashesRef":"minimalist","audit":{"exitCode":0,"scope":"all"},"build":{"exitCode":0},"managerDetails":{"bunVersion":"1.4.3","bunLockfile":"bun.lockb","foreignLockfiles":false,"auditScope":"all dependencies (includes production)","auditCommand":["bun","audit","--json"]}}
+  ],
+  "minimalistMeasurementGroups": [
+    {
+      "apps": [
+        "preview",
+        "vite",
+        "next",
+        "npm-vite",
+        "npm-next"
+      ],
+      "mode": "light",
+      "ratios": {
+        "default": 17.73971700407407,
+        "defaultBoundary": 16.995888190744548,
+        "defaultHover": 18.113672987517482,
+        "defaultHoverBoundary": 17.354164147537123,
+        "defaultPressed": 18.55767675212756,
+        "defaultPressedBoundary": 17.779550772241983,
+        "secondary": 16.119468339438853,
+        "secondaryBoundary": 4.6317792366294,
+        "secondaryHover": 14.61241789242758,
+        "secondaryHoverBoundary": 4.6317792366294,
+        "secondaryPressed": 11.726692973783317,
+        "secondaryPressedBoundary": 4.6317792366294,
+        "outline": 16.995888190744548,
+        "outlineBoundary": 4.6317792366294,
+        "outlineHover": 14.328284912339392,
+        "outlineHoverBoundary": 4.6317792366294,
+        "outlinePressed": 11.726692973783317,
+        "outlinePressedBoundary": 4.6317792366294,
+        "ghost": 16.995888190744548,
+        "ghostHover": 14.328284912339392,
+        "ghostPressed": 11.726692973783317,
+        "link": 16.995888190744548,
+        "linkHover": 16.995888190744548,
+        "linkPressed": 14.328284912339392,
+        "destructive": 6.4700447145121895,
+        "destructiveBoundary": 6.1987548353625215,
+        "destructiveHover": 7.5689642638511705,
+        "destructiveHoverBoundary": 7.251596534409884,
+        "destructivePressed": 8.803078268373124,
+        "destructivePressedBoundary": 8.433963966239267,
+        "error": 6.1987548353625215,
+        "placeholder": 7.240496208458075,
+        "placeholderFocus": 7.240496208458075,
+        "inputBoundary": 4.6317792366294,
+        "focus": 16.995888190744548,
+        "muted": 7.240496208458075,
+        "dialogText": 17.73971700407407,
+        "dialogFocus": 17.73971700407407
+      },
+      "disabledContrast": "exempt",
+      "textMethod": "synthetic font enlargement (not native browser zoom)",
+      "forcedColors": "active",
+      "motionPositiveControlMs": 150,
+      "textEvidence": [
+        {
+          "width": 1100,
+          "dialogOpen": false,
+          "sampleCount": 35,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 23
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 10
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 1
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 0
+        },
+        {
+          "width": 1100,
+          "dialogOpen": true,
+          "sampleCount": 51,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 24
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 24
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 2
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 16
+        },
+        {
+          "width": 320,
+          "dialogOpen": false,
+          "sampleCount": 35,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 23
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 10
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 1
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 0
+        },
+        {
+          "width": 320,
+          "dialogOpen": true,
+          "sampleCount": 51,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 24
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 24
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 2
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 16
+        }
+      ]
+    },
+    {
+      "apps": [
+        "preview",
+        "vite",
+        "next",
+        "npm-vite",
+        "npm-next"
+      ],
+      "mode": "dark",
+      "ratios": {
+        "default": 16.97538624440406,
+        "defaultBoundary": 16.97538624440406,
+        "defaultHover": 13.547856977405136,
+        "defaultHoverBoundary": 13.547856977405136,
+        "defaultPressed": 10.5876904437473,
+        "defaultPressedBoundary": 10.5876904437473,
+        "secondary": 9.863254791756054,
+        "secondaryBoundary": 6.987328296864191,
+        "secondaryHover": 8.556503830608076,
+        "secondaryHoverBoundary": 6.987328296864191,
+        "secondaryPressed": 7.345629660241431,
+        "secondaryPressedBoundary": 6.987328296864191,
+        "outline": 16.97538624440406,
+        "outlineBoundary": 6.987328296864191,
+        "outlineHover": 9.863254791756054,
+        "outlineHoverBoundary": 6.987328296864191,
+        "outlinePressed": 7.345629660241431,
+        "outlinePressedBoundary": 6.987328296864191,
+        "ghost": 16.97538624440406,
+        "ghostHover": 9.863254791756054,
+        "ghostPressed": 7.345629660241431,
+        "link": 16.97538624440406,
+        "linkHover": 16.97538624440406,
+        "linkPressed": 9.863254791756054,
+        "destructive": 9.346689666859199,
+        "destructiveBoundary": 9.346689666859199,
+        "destructiveHover": 7.602011362558174,
+        "destructiveHoverBoundary": 7.602011362558174,
+        "destructivePressed": 6.035732250530429,
+        "destructivePressedBoundary": 6.035732250530429,
+        "error": 9.346689666859199,
+        "placeholder": 12.039064392610866,
+        "placeholderFocus": 12.039064392610866,
+        "inputBoundary": 6.987328296864191,
+        "focus": 16.97538624440406,
+        "muted": 12.039064392610866,
+        "dialogText": 14.046656202460271,
+        "dialogFocus": 14.046656202460271
+      },
+      "disabledContrast": "exempt",
+      "textMethod": "synthetic font enlargement (not native browser zoom)",
+      "forcedColors": "active",
+      "motionPositiveControlMs": 150,
+      "textEvidence": [
+        {
+          "width": 1100,
+          "dialogOpen": false,
+          "sampleCount": 35,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 23
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 10
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 1
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 0
+        },
+        {
+          "width": 1100,
+          "dialogOpen": true,
+          "sampleCount": 51,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 24
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 24
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 2
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 16
+        },
+        {
+          "width": 320,
+          "dialogOpen": false,
+          "sampleCount": 35,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 23
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 10
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 1
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 0
+        },
+        {
+          "width": 320,
+          "dialogOpen": true,
+          "sampleCount": 51,
+          "fontSizePairs": [
+            {
+              "before": 14,
+              "after": 28,
+              "count": 24
+            },
+            {
+              "before": 16,
+              "after": 32,
+              "count": 24
+            },
+            {
+              "before": 20,
+              "after": 40,
+              "count": 2
+            },
+            {
+              "before": 28,
+              "after": 56,
+              "count": 1
+            }
+          ],
+          "inputSampleCount": 5,
+          "dialogSampleCount": 16
+        }
+      ]
+    }
+  ]
+}
