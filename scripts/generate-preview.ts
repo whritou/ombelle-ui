@@ -3,6 +3,7 @@ import path from 'node:path'
 import { compile, sha256 } from '@ombelle/compiler'
 import { supportedStyleFamilies } from '@ombelle/contracts'
 import { writePreviewRecipes } from '../tests/helpers/recipe-fixture.js'
+import { writePreviewComponentPresets } from '../tests/helpers/component-preset-fixture.js'
 for (const family of supportedStyleFamilies) {
   const preset = JSON.parse(
     await fs.readFile(
@@ -35,6 +36,7 @@ for (const family of supportedStyleFamilies) {
   }
   await fs.writeFile(root + '/manifest.json', JSON.stringify(result, null, 2))
   await writePreviewRecipes(root)
+  await writePreviewComponentPresets(root)
   await fs.writeFile(
     root + '/transforms.json',
     JSON.stringify(transforms, null, 2),

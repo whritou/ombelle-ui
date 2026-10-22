@@ -42,6 +42,14 @@ export type RecipeCompileResult = {
   darkSelector: string
   provenance: CompileResult['provenance']
 }
+export type ComponentPresetCompileResult = {
+  artifacts: Artifact[]
+  dependencies: Dependency[]
+  preset: ResolvedPreset
+  scope: string
+  darkSelector: string
+  provenance: CompileResult['provenance']
+}
 export type InstalledRecipe = Omit<
   RecipeCompileResult,
   'dependencies' | 'artifacts'
@@ -53,8 +61,15 @@ export type InstalledArtifact = {
   sha256: string
   kind: Artifact['kind']
 }
+export type InstalledComponentPreset = Omit<
+  ComponentPresetCompileResult,
+  'dependencies' | 'artifacts'
+> & {
+  artifacts: Record<string, InstalledArtifact>
+}
 export type ProjectLock = {
   recipes?: Record<string, InstalledRecipe>
+  componentPresets?: Record<string, InstalledComponentPreset>
   lockVersion: 1
   catalogRelease: string
   compilerVersion: string
@@ -112,6 +127,10 @@ export type FileChange = {
 }
 export type InstallPlan = {
   recipe?: Omit<InstalledRecipe, 'artifacts'> & {
+    importPath: string
+    examplePath: string
+  }
+  componentPreset?: Omit<InstalledComponentPreset, 'artifacts'> & {
     importPath: string
     examplePath: string
   }

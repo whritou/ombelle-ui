@@ -11,6 +11,14 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     ...(plan.recipe
       ? { recipe: { ...plan.recipe, scopeType: 'component' } }
       : {}),
+    ...(plan.componentPreset
+      ? {
+          componentPreset: {
+            ...plan.componentPreset,
+            scopeType: 'component-only',
+          },
+        }
+      : {}),
     ...plan.provenance,
     changes: plan.changes,
     dependencyPlan: plan.dependencyPlan,
@@ -50,6 +58,18 @@ export function formatPlan(
         plan.recipe.scope +
         '\nDark selector: ' +
         plan.recipe.darkSelector
+      : '') +
+    (plan.componentPreset
+      ? '\nComponent preset ' +
+        plan.componentPreset.preset.data.id +
+        '@' +
+        plan.componentPreset.preset.data.revision +
+        ' (component only)\nImport: ' +
+        plan.componentPreset.importPath +
+        '\nUsage: ' +
+        plan.componentPreset.examplePath +
+        '\nScope: ' +
+        plan.componentPreset.scope
       : '') +
     plan.diagnostics
       .map(

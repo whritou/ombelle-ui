@@ -14,6 +14,7 @@ import { safePath, portable } from './paths.js'
 import { fingerprintFile } from './fingerprint.js'
 import { assertStandaloneProject } from './workspace.js'
 import { validateInstalledRecipes } from './recipes.js'
+import { validateInstalledComponentPresets } from './component-presets.js'
 export async function readText(
   root: string,
   relative: string,
@@ -216,6 +217,13 @@ export async function inspectProject(
       root,
       lock.recipes,
       lock.artifacts,
+    )
+  if (lock?.componentPresets !== undefined)
+    lock.componentPresets = await validateInstalledComponentPresets(
+      root,
+      lock.componentPresets,
+      lock.artifacts,
+      { componentsDir, sourceDir, utilsFile, uiAlias, utilsAlias },
     )
   const preset = raw ? validatePreset(raw) : undefined
   return {

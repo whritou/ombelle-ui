@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { StyleFamily } from '@ombelle/contracts'
+import { writeConsumerComponentPresetFixture } from './component-preset-fixture.js'
 export async function writeScenarioFixture(
   root: string,
   family: StyleFamily,
   recipes = false,
+  componentPresets = false,
 ): Promise<void> {
   const src = path.join(root, 'src')
   await fs.mkdir(src, { recursive: true })
@@ -17,8 +19,15 @@ export async function writeScenarioFixture(
   ).replaceAll('STYLE_FAMILY', family)
   if (!recipes)
     scenario = scenario
-      .replace("import { RecipeFixture } from './recipe-fixture'\n", '')
-      .replace('{recipes && <RecipeFixture />}', '')
+      .replace(/import \{ RecipeFixture \} from '\.\/recipe-fixture'\r?\n/, '')
+      .replace(/\{recipes && <RecipeFixture \/>}\r?\n?/, '')
+  if (!componentPresets)
+    scenario = scenario
+      .replace(
+        /import \{ ComponentPresetFixture \} from '\.\/component-preset-fixture'\r?\n/,
+        '',
+      )
+      .replace(/\{componentPresets && <ComponentPresetFixture \/>}\r?\n?/, '')
   await fs.writeFile(path.join(src, 'scenario.tsx'), scenario)
   for (const file of [
     'state-fixture.tsx',
@@ -26,4 +35,5 @@ export async function writeScenarioFixture(
     ...(recipes ? ['recipe-fixture.tsx'] : []),
   ])
     await fs.copyFile(path.join('fixtures/shared', file), path.join(src, file))
+  if (componentPresets) await writeConsumerComponentPresetFixture(root)
 }

@@ -27,18 +27,26 @@ const block = (selector: string, values: Record<string, string>) =>
     .join('') +
   '}'
 
-export function compileRecipeStyles(input: {
+export function compileScopedStyles(input: {
   familyCss: string
   preset: ResolvedPreset
   overrides: Recipe['overrides']
   scope: string
   darkSelector: string
+  slot: string
+  scopeAttribute: string
 }): string {
   const dark = validateRecipeDarkSelector(input.darkSelector)
   if (!/^[a-f0-9]{64}$/.test(input.scope))
     throw new FoundationError('INVALID_DATA', 'Invalid recipe scope')
   const scope =
-    '[data-slot="recipe-button"][data-ombelle-recipe="' + input.scope + '"]'
+    '[data-slot="' +
+    input.slot +
+    '"][' +
+    input.scopeAttribute +
+    '="' +
+    input.scope +
+    '"]'
   const root = postcss.parse(input.familyCss)
   root.walkAtRules((rule) => {
     if (
@@ -183,4 +191,18 @@ export function compileRecipeStyles(input: {
     }) +
     height
   )
+}
+
+export function compileRecipeStyles(input: {
+  familyCss: string
+  preset: ResolvedPreset
+  overrides: Recipe['overrides']
+  scope: string
+  darkSelector: string
+}): string {
+  return compileScopedStyles({
+    ...input,
+    slot: 'recipe-button',
+    scopeAttribute: 'data-ombelle-recipe',
+  })
 }

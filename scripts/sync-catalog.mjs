@@ -1,16 +1,18 @@
 import fs from 'node:fs'
 import { supportedStyleFamilies } from '../packages/contracts/src/style-families.ts'
 const base = 'packages/catalog/src/'
+const readText = (file) =>
+  fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n')
 const templates = Object.fromEntries(
   ['button', 'dialog', 'input'].map((id) => [
     id,
-    fs.readFileSync(base + 'templates/' + id + '.tsx', 'utf8'),
+    readText(base + 'templates/' + id + '.tsx'),
   ]),
 )
 const styles = Object.fromEntries(
   supportedStyleFamilies.map((id) => [
     id,
-    fs.readFileSync(base + 'styles/' + id + '.css', 'utf8'),
+    readText(base + 'styles/' + id + '.css'),
   ]),
 )
 const presets = Object.fromEntries(
@@ -26,7 +28,7 @@ fs.writeFileSync(
       templates,
       styles,
       presets,
-      utility: fs.readFileSync(base + 'templates/utils.ts', 'utf8'),
+      utility: readText(base + 'templates/utils.ts'),
     }) +
     ' as const\n',
 )
