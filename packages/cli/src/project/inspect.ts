@@ -223,6 +223,7 @@ export async function inspectProject(
       root,
       lock.componentPresets,
       lock.artifacts,
+      { componentsDir, sourceDir, utilsFile, uiAlias, utilsAlias },
     )
   const preset = raw ? validatePreset(raw) : undefined
   return {

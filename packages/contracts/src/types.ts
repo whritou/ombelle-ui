@@ -130,6 +130,10 @@ export type InstallPlan = {
     importPath: string
     examplePath: string
   }
+  componentPreset?: Omit<InstalledComponentPreset, 'artifacts'> & {
+    importPath: string
+    examplePath: string
+  }
   bunLockfile?: BunLockfile
   packageManager: PackageManager
   managerWarning?: string

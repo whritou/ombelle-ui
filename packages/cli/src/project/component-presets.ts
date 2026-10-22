@@ -3,8 +3,12 @@ import {
   type InstalledComponentPreset,
   type ProjectLock,
 } from '@ombelle/contracts'
-import { canonicalize, compileButtonPreset } from '@ombelle/compiler'
+import { canonicalize, compileButtonPreset, sha256 } from '@ombelle/compiler'
 import { safePath } from './paths.js'
+import {
+  transformComponentPresetArtifact,
+  type ComponentPresetTransformContext,
+} from './component-preset-transform.js'
 
 const object = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value)
@@ -13,6 +17,7 @@ export async function validateInstalledComponentPresets(
   root: string,
   value: unknown,
   artifacts: ProjectLock['artifacts'],
+  context?: ComponentPresetTransformContext,
 ): Promise<Record<string, InstalledComponentPreset>> {
   if (value === undefined) return {}
   const bad = () =>
@@ -23,6 +28,14 @@ export async function validateInstalledComponentPresets(
       'Restore the committed lockfile before installing.',
     )
   if (!object(value) || !object(artifacts)) throw bad()
+
+  const transformContext: ComponentPresetTransformContext = context ?? {
+    componentsDir: 'src/components/ui',
+    sourceDir: 'src',
+    utilsFile: 'src/lib/utils.ts',
+    uiAlias: '@/components/ui',
+    utilsAlias: '@/lib/utils',
+  }
 
   const rows: Record<string, InstalledComponentPreset> = Object.create(null)
   for (const [key, item] of Object.entries(value)) {
@@ -74,10 +87,15 @@ export async function validateInstalledComponentPresets(
           artifact.logicalPath === record.logicalPath &&
           artifact.kind === record.kind,
       )
+      const transformed = source
+        ? await transformComponentPresetArtifact(transformContext, source)
+        : undefined
       if (
         !source ||
-        source.sha256 !== record.sha256 ||
         seen.has(source.logicalPath) ||
+        transformed?.path !== file ||
+        (transformed &&
+          (await sha256(transformed.content)) !== record.sha256) ||
         !Object.hasOwn(artifacts, file) ||
         canonicalize(artifacts[file]) !== canonicalize(record)
       )

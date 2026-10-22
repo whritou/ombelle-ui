@@ -1,7 +1,7 @@
 import { afterEach, expect, it } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { compile, compileButtonPreset } from '@ombelle/compiler'
+import { compile, compileButtonPreset, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import type {
   InstalledArtifact,
@@ -10,6 +10,7 @@ import type {
 import { createProject } from '../../../tests/helpers/projects.js'
 import { inspectProject } from '../src/project/inspect.js'
 import { validateInstalledComponentPresets } from '../src/project/component-presets.js'
+import { transformComponentPresetArtifact } from '../src/project/component-preset-transform.js'
 import { planTheme } from '../src/plan/theme.js'
 import { applyPlan } from '../src/apply/transaction.js'
 
@@ -43,13 +44,17 @@ async function installProvenance(root: string) {
     }),
     key = result.preset.data.id + '@' + result.preset.data.revision,
     artifacts: Record<string, InstalledArtifact> = {}
+  const context = await inspectProject(root)
   for (const artifact of result.artifacts.filter(
     (item) => item.kind !== 'utility',
   )) {
-    const file = 'src/components/ui/presets/' + artifact.logicalPath
-    artifacts[file] = {
+    const transformed = await transformComponentPresetArtifact(
+      context,
+      artifact,
+    )
+    artifacts[transformed.path] = {
       logicalPath: artifact.logicalPath,
-      sha256: artifact.sha256,
+      sha256: await sha256(transformed.content),
       kind: artifact.kind,
     }
   }
