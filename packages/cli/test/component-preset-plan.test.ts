@@ -252,6 +252,62 @@ it('rejects case-insensitive duplicate artifact destinations', async () => {
   ).rejects.toMatchObject({ code: 'FILE_CONFLICT' })
 })
 
+it('conflicts with an existing differently cased path on case-sensitive filesystems', async () => {
+  const root = await setup()
+  const result = await compileButtonPreset({ preset: flat() })
+  const component = result.artifacts.find(
+    (artifact) => artifact.kind === 'component',
+  )!
+  const target = await transformComponentPresetArtifact(
+    await inspectProject(root),
+    component,
+  )
+  const destinationDirectory = path.dirname(path.join(root, target.path))
+  await fs.mkdir(destinationDirectory, { recursive: true })
+  const readDirectory = async (directory: string): Promise<string[]> => {
+    const entries = await fs.readdir(directory, { encoding: 'utf8' })
+    if (directory !== destinationDirectory) return entries
+    return [...entries, 'Button.tsx']
+  }
+
+  const plan = await planComponentPreset(
+    await inspectProject(root),
+    result,
+    { readDirectory },
+  )
+
+  expect(
+    plan.changes.find((change) => change.path === target.path)?.action,
+  ).toBe('conflict')
+  expect(plan.diagnostics).toContainEqual(
+    expect.objectContaining({ code: 'FILE_CONFLICT', path: target.path }),
+  )
+})
+
+it('conflicts with lock ownership recorded under a differently cased key', async () => {
+  const root = await setup()
+  const context = await inspectProject(root)
+  const result = await compileButtonPreset({ preset: flat() })
+  const component = result.artifacts.find(
+    (artifact) => artifact.kind === 'component',
+  )!
+  const target = await transformComponentPresetArtifact(context, component)
+  context.lock!.artifacts[target.path.replace('button.tsx', 'Button.tsx')] = {
+    logicalPath: component.logicalPath,
+    kind: 'component',
+    sha256: 'a'.repeat(64),
+  }
+
+  const plan = await planComponentPreset(context, result)
+
+  expect(
+    plan.changes.find((change) => change.path === target.path)?.action,
+  ).toBe('conflict')
+  expect(plan.diagnostics).toContainEqual(
+    expect.objectContaining({ code: 'FILE_CONFLICT', path: target.path }),
+  )
+})
+
 it('rolls back component files and lock metadata after a write failure', async () => {
   const root = await setup()
   const before = await snapshotTree(root)

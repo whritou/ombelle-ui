@@ -10,10 +10,25 @@ import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import { fileChange } from './components.js'
 import { transformComponentPresetArtifact } from '../project/component-preset-transform.js'
+import {
+  findCaseInsensitivePathMismatch,
+  safePath,
+  type DirectoryEntryReader,
+} from '../project/paths.js'
+
+export interface ComponentPresetPlanOptions {
+  readDirectory?: DirectoryEntryReader
+}
+
+const portableIdentity = (file: string) =>
+  file.replace(/\\/g, '/').replace(/^\.\//, '')
+const caseInsensitiveIdentity = (file: string) =>
+  portableIdentity(file).toLowerCase()
 
 export async function planComponentPreset(
   context: ProjectContext,
   result: ComponentPresetCompileResult,
+  options: ComponentPresetPlanOptions = {},
 ): Promise<InstallPlan> {
   if (!context.config || !context.preset || !context.lock)
     throw new FoundationError(
@@ -98,14 +113,32 @@ export async function planComponentPreset(
         target.path,
       )
     seen.add(normalized)
+    await safePath(context.root, target.path)
+    const pathMismatch = await findCaseInsensitivePathMismatch(
+      context.root,
+      target.path,
+      options.readDirectory,
+    )
+    const matchingRecords = Object.entries(lock.artifacts).filter(
+      ([file]) =>
+        caseInsensitiveIdentity(file) ===
+        caseInsensitiveIdentity(target.path),
+    )
+    const hasMismatchedLockKey = matchingRecords.some(
+      ([file]) => portableIdentity(file) !== portableIdentity(target.path),
+    )
     const change = await fileChange(
       context.root,
       target.path,
       target.content,
       artifact.kind,
     )
-    const record = lock.artifacts[target.path]
+    const record =
+      matchingRecords.length === 1 ? matchingRecords[0]![1] : undefined
     if (
+      pathMismatch ||
+      matchingRecords.length > 1 ||
+      hasMismatchedLockKey ||
       change.beforeHash !== null &&
       (!record ||
         record.sha256 !== change.beforeHash ||
@@ -113,7 +146,11 @@ export async function planComponentPreset(
     ) {
       change.action = 'conflict'
       conflict(
-        'Component preset or shared utility source requires an explicit migration',
+        pathMismatch
+          ? `Destination collides with existing path '${pathMismatch}' using different casing`
+          : hasMismatchedLockKey || matchingRecords.length > 1
+            ? 'Component preset destination has ambiguous case-insensitive lock ownership'
+            : 'Component preset or shared utility source requires an explicit migration',
         target.path,
       )
     }

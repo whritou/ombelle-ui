@@ -49,4 +49,38 @@ export async function safePath(
   }
   return target
 }
+
+export type DirectoryEntryReader = (directory: string) => Promise<string[]>
+
+export async function findCaseInsensitivePathMismatch(
+  root: string,
+  relative: string,
+  readDirectory: DirectoryEntryReader = (directory) =>
+    fs.readdir(directory, { encoding: 'utf8' }),
+): Promise<string | undefined> {
+  const base = await fs.realpath(root)
+  let current = base
+  const segments = relative
+    .split(/[\\/]/)
+    .filter((segment) => segment && segment !== '.')
+  for (const segment of segments) {
+    let entries: string[]
+    try {
+      entries = await readDirectory(current)
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code
+      if (code === 'ENOENT' || code === 'ENOTDIR') return undefined
+      throw error
+    }
+    const matches = entries.filter(
+      (entry) => entry.toLowerCase() === segment.toLowerCase(),
+    )
+    if (matches.length === 0) return undefined
+    if (matches.length > 1 || matches[0] !== segment)
+      return path.relative(base, path.join(current, matches[0]!))
+    current = path.join(current, matches[0]!)
+  }
+  return undefined
+}
+
 export const portable = (p: string) => p.split(path.sep).join('/')
