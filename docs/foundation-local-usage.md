@@ -25,6 +25,21 @@ The verified consumer baseline requires exact react and react-dom 19.3.1 declara
 
 Consumer manager selection uses package.json.packageManager, then a unique recognized package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb. Contradictory evidence requires explicit selection; workspaces and npm-shrinkwrap remain unsupported. The launching runner does not switch the target manager. New config saves the selected manager; existing auto remains valid. Dependency additions use exact production requirements with lifecycle scripts disabled and preserve the manager's lock format. Theme-only commands never invoke a dependency manager. The repository itself continues to use pnpm. See the README and individual manager evidence for exact versions and linker/runtime boundaries.
 
+## Component-scoped Button presets
+
+Initialize APP with a saved project preset, then select a local JSON preset for one separate Button installation:
+
+```powershell
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
+```
+
+The preset path resolves relative to the invoking directory, independently of APP. The file must be regular UTF-8 JSON, at most 256 KiB, and satisfy the strict preset schema and pinned catalog/compiler releases. Import the generated usage example's Button path (for the example preset this is under `@/components/ui/presets/`); it points to a separate generated Button with colocated CSS. The ordinary Button and saved global preset stay unchanged, and later ordinary `add` operations use project defaults. Scoped styling does not merge into the global stylesheet.
+
+An identical repeat is a no-op. An unowned existing destination, edited generated file, changed preset identity/revision or dark selector, or incompatible shared utility conflicts. Review and reconcile the local file or create a new preset revision; `--yes` cannot bypass that check. The command rejects multiple components and cannot be combined with `--recipe`. It follows the project's manager and lockfile selection described above, preserving npm, pnpm, Yarn or Bun ownership. With the example preset and default aliases, the generated import path is `@/components/ui/presets/builtin-neo-brutalism/r1/button`.
+
+The current slice covers flat, minimalist, and neo-brutalism Button styles in supported Vite/Next.js React TSX apps using Tailwind v4 and Radix nova/new-york. Styles come from the typed preset schema; arbitrary CSS overrides are not accepted. Button does not use a portal. Dialog, other portal-rendered components, editor workflows, and remote/saved-code resolution are outside this implementation. See [component-scoped Button evidence](evidence/component-scoped-button-presets.md) for measured manager and browser coverage.
+
 ## Local Button recipes
 
 Initialize the project with a local preset first, then use a recipe file such as this repository's `examples/recipe.example.json`:
@@ -40,4 +55,4 @@ The example creates `<componentsDir>/recipes/rc_primary-button/r2/button.tsx` an
 
 Recipe installation preserves the saved global preset, theme, style pack, ordinary components, and existing usages. A recorded shared utility can be reused only if unchanged and byte-compatible; an untracked or edited utility causes a conflict requiring manual reconciliation. `--yes` does not override conflicts. Repeating the same recipe is a no-op when its files and dependencies still match. Changed content under the same ID/revision conflicts; use a new revision to install alongside it. Later ordinary additions and compatible global theme changes retain recipe provenance and its pinned appearance.
 
-Dark mode follows the project's configured single class, default `.dark`; `.night` and `.theme-dark` also work. Complex selectors and custom `paths.recipeOutput` roots are outside this slice. A dark-selector change affecting an existing recipe requires an explicit migration. Parent workspace ownership, paths, dependencies, and failure/recovery use the existing installer safeguards. Component-scoped `add button --preset <code-or-file>` remains a separate future command.
+Dark mode follows the project's configured single class, default `.dark`; `.night` and `.theme-dark` also work. Complex selectors and custom `paths.recipeOutput` roots are outside this slice. A dark-selector change affecting an existing recipe requires an explicit migration. Parent workspace ownership, paths, dependencies, and failure/recovery use the existing installer safeguards. Component-scoped local preset installation is documented above; remote preset/recipe codes remain pending.

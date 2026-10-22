@@ -34,11 +34,22 @@ Yarn Classic does not supply the modern dlx workflow. Use a local development de
 
 `init` targets an existing supported app and initializes the UI setup, not a whole application. If `components.json` already exists, detect that before writes and use the theme plan instead of resetting the setup. An incompatible or incomplete configuration receives an actionable diagnostic.
 
-## Select a preset for one component
+## Select a preset for one Button
 
-Before choosing a runner, distinguish the installation scope. The proposed `add button --preset ps_brand@3` applies a preset only to that Button installation; `theme add ps_brand@3` applies the same preset globally. All four runner forms above can pass `--preset ps_brand@3` after `add button`. Codes are values, never flag names. `add button --preset ./brand.preset.json` remains the offline equivalent; `add --recipe <code-or-file>` additionally restores saved props, text, and overrides.
+The private foundation implements local JSON selection for one Button in an initialized project. Run the local CLI from the repository with the local preset path relative to the invoking directory:
 
-The first component-scoped slice targets one Button per command and preserves the saved project preset, global theme, other installed components, and manager/lockfile ownership. Plans show isolated styling, usage, and scoped provenance; incompatible shared source and local edits cause conflicts. Later ordinary additions still use project defaults. See the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection). These are future requirements: the current private foundation rejects `--preset` on `add` and has no remote preset or recipe resolution.
+```powershell
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
+```
+
+This adds a separate scoped Button and usage example. It preserves the saved project preset, global theme, ordinary Button, other installed components, existing usages, and manager/lockfile ownership. Later ordinary additions continue using project defaults. `theme add` remains the global theme path; the scoped command does not merge component tokens into global CSS. `add --recipe <local.json>` remains the separate path for a Button with saved props, text, and local overrides.
+
+The input must be a regular UTF-8 JSON file no larger than 256 KiB and match the strict preset schema plus the pinned catalog/compiler release. This command accepts local files only; remote and saved preset codes are not resolved. The supported styles are flat, minimalist, and neo-brutalism. It generates scoped reviewed CSS from schema fields, not arbitrary CSS overrides. Button renders in normal DOM flow; portal-aware styling for Dialog and other portal components is outside this slice. The supported project baseline is Tailwind v4 React TSX in Vite or Next.js App Router, with the supported Radix nova/new-york component editions.
+
+The command preserves the target project's selected manager and lockfile. Manager selection follows an explicit `--package-manager`, then `package.json.packageManager`, then one recognized lockfile (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`, or `bun.lockb`); conflicting evidence requires an explicit selection. npm, pnpm, Yarn and Bun consumer installation paths are covered. The component-preset browser matrix covers preview, npm, and pnpm targets; it does not claim Yarn or Bun browser coverage. Workspaces and npm-shrinkwrap remain unsupported.
+
+Unowned existing target files, locally edited generated source, incompatible shared utilities, or a changed identity/revision/dark selector produce a conflict. Reconcile manually or use a new preset revision. `--yes` cannot override conflicts. Repeating an identical install is a no-op. See the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection) and [component-scoped Button evidence](evidence/component-scoped-button-presets.md).
 
 ## Package manager selection
 
