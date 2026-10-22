@@ -21,6 +21,9 @@ const measured: Record<string, ConsumerEvidence> = {}
 const recipeRows = JSON.parse(
   await fs.readFile('.artifacts/recipe-consumers.json', 'utf8'),
 )
+const componentPresetRows = JSON.parse(
+  await fs.readFile('.artifacts/component-preset-consumers.json', 'utf8'),
+) as Record<string, unknown>[]
 await fs.rm('.artifacts/consumer-matrix.json', { force: true })
 const map = JSON.parse(
   await fs.readFile('.artifacts/consumers.json', 'utf8'),
@@ -37,6 +40,19 @@ const map = JSON.parse(
 const bunRows = jsonRecord(
   JSON.parse(await fs.readFile('.artifacts/bun-matrix.json', 'utf8')),
 )
+async function recordComponentPresetBuild(id: string): Promise<void> {
+  for (const row of componentPresetRows) {
+    if (row.descriptorId !== id) continue
+    row.audit = pending[id]!.audit
+    row.cliRuntime = pending[id]!.cliRuntime
+    row.buildRuntime = measured[id]!.buildRuntime
+    row.build = { status: 'passed', exitCode: 0 }
+  }
+  await fs.writeFile(
+    '.artifacts/component-preset-consumers.json',
+    JSON.stringify(componentPresetRows, null, 2),
+  )
+}
 for (const [id, fixture] of Object.entries(map)) {
   console.log('Building ' + id)
   if (fixture.manager === 'bun') {
@@ -93,6 +109,7 @@ for (const [id, fixture] of Object.entries(map)) {
       '.artifacts/recipe-consumers.json',
       JSON.stringify(recipeRows, null, 2),
     )
+    await recordComponentPresetBuild(id)
     continue
   }
   await run(
@@ -127,6 +144,7 @@ for (const [id, fixture] of Object.entries(map)) {
     '.artifacts/recipe-consumers.json',
     JSON.stringify(recipeRows, null, 2),
   )
+  await recordComponentPresetBuild(id)
 }
 await fs.writeFile(
   '.artifacts/consumer-matrix.json',

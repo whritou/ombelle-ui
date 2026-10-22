@@ -11,14 +11,19 @@ import {
 } from '@/components/ui/dialog'
 import { StateFixture } from './state-fixture'
 import { RecipeFixture } from './recipe-fixture'
+import { ComponentPresetFixture } from './component-preset-fixture'
 export default function Scenario() {
   const [ready, setReady] = React.useState(false)
   const [mode, setMode] = React.useState('light')
   const [states, setStates] = React.useState(false)
   const [recipes, setRecipes] = React.useState(false)
+  const [componentPresets, setComponentPresets] = React.useState(false)
   React.useEffect(() => {
     setRecipes(
       new URLSearchParams(window.location.search).get('recipes') === '1',
+    )
+    setComponentPresets(
+      new URLSearchParams(window.location.search).get('componentPresets') === '1',
     )
   }, [])
   React.useEffect(() => {
@@ -81,6 +86,7 @@ export default function Scenario() {
       </section>
       {states && <StateFixture />}
       {recipes && <RecipeFixture />}
+      {componentPresets && <ComponentPresetFixture />}
       <p className="note">
         Three generated components · local preset · editable source
       </p>

@@ -9,6 +9,7 @@ import {
 import { runBuiltCli, jsonRecord } from '../tests/helpers/cli-runtime.js'
 import { assertBunOwnership } from '../packages/cli/src/apply/bun.js'
 import { prepareRecipeConsumer } from './prepare-recipe-consumer.js'
+import { prepareComponentPresetConsumer } from './prepare-component-preset-consumer.js'
 import { recipeReferenceBank } from '../tests/helpers/recipe-fixture.js'
 import { writeScenarioFixture } from '../tests/helpers/scenario-fixture.js'
 
@@ -25,7 +26,7 @@ export async function prepareBunConsumer(
       path.join(fixture.root, '.ombelle-fixture.json'),
       JSON.stringify({ owner: repo, framework, family }),
     )
-    await writeScenarioFixture(fixture.root, family, true)
+    await writeScenarioFixture(fixture.root, family, true, true)
     await fs.appendFile(
       path.join(fixture.root, 'src/index.css'),
       '\n.user-bun-style {color:hotpink;}\n',
@@ -64,6 +65,26 @@ export async function prepareBunConsumer(
         family,
       }),
       recipeBank = await recipeReferenceBank()
+    const audit = await auditBunFixture(fixture),
+      descriptorId =
+        'bun-' +
+        format +
+        '-' +
+        framework +
+        '-' +
+        runtime +
+        (family === 'flat' ? '' : '-' + family),
+      auditExitCode = audit.code
+    if (auditExitCode !== 0) throw new Error('Bun audit failed: ' + audit.output)
+    const componentPresetEvidence = await prepareComponentPresetConsumer({
+        root: fixture.root,
+        descriptorId,
+        hostFamily: family,
+        manager: 'bun',
+        managerVersion: fixture.version,
+        cliRuntime: init.runtime,
+        audit: { exitCode: auditExitCode, scope: 'all' },
+      })
     const canonical = JSON.parse(
       await fs.readFile(
         'apps/preview/src/generated/' + family + '/manifest.json',
@@ -80,7 +101,13 @@ export async function prepareBunConsumer(
     )
     const sourceHashes: Record<string, string> = {},
       artifacts = []
+    const componentPresetPaths = new Set(
+      componentPresetEvidence.flatMap((row) =>
+        (row.transformedArtifacts as { path: string }[]).map((artifact) => artifact.path),
+      ),
+    )
     for (const [file, record] of Object.entries(jsonRecord(lock.artifacts))) {
+      if (componentPresetPaths.has(file)) continue
       const meta = jsonRecord(record),
         source = await fs.readFile(path.join(fixture.root, file), 'utf8'),
         reference =
@@ -103,14 +130,23 @@ export async function prepareBunConsumer(
         sha256: hash,
       })
     }
+    for (const row of componentPresetEvidence)
+      for (const artifact of row.transformedArtifacts as {
+        path: string
+        logicalPath: string
+        sha256: string
+      }[]) {
+        sourceHashes[artifact.path] = artifact.sha256
+        artifacts.push(artifact)
+      }
     await assertBunOwnership(fixture.root, fixture.lockfile)
-    const audit = await auditBunFixture(fixture)
     return {
       fixture,
       cliRuntime: init.runtime,
       sourceHashes,
       artifacts,
       recipeEvidence,
+      componentPresetEvidence,
       audit,
     }
   } catch (e) {
