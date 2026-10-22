@@ -42,6 +42,14 @@ export type RecipeCompileResult = {
   darkSelector: string
   provenance: CompileResult['provenance']
 }
+export type ComponentPresetCompileResult = {
+  artifacts: Artifact[]
+  dependencies: Dependency[]
+  preset: ResolvedPreset
+  scope: string
+  darkSelector: string
+  provenance: CompileResult['provenance']
+}
 export type InstalledRecipe = Omit<
   RecipeCompileResult,
   'dependencies' | 'artifacts'
