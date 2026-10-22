@@ -298,11 +298,24 @@ export async function validateComponentPresetConsumerRows(
       throw new Error('Component preset repeat was not a no-op ' + key)
     if (tamper.status !== 'conflict' || tamper.exitCode !== 4 || tamper.treeUnchanged !== true)
       throw new Error('Same-revision tamper did not conflict safely ' + key)
-    if (preservation.defaults !== true || preservation.ordinaryComponents !== true)
-      throw new Error('Component preset changed saved defaults or ordinary components ' + key)
+    if (
+      preservation.defaults !== true ||
+      preservation.ordinaryComponents !== true ||
+      preservation.usageFiles !== true
+    )
+      throw new Error('Component preset changed protected project files ' + key)
     for (const path of ['ui-preset.json', 'src/components/ui/button.tsx'])
       if (typeof protectedHashes[path] !== 'string' || !/^[a-f0-9]{64}$/.test(protectedHashes[path] as string))
         throw new Error('Missing protected-file hash ' + key + '/' + path)
+    for (const [path, hash] of Object.entries(protectedHashes))
+      if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash))
+        throw new Error('Invalid protected-file hash ' + key + '/' + path)
+    if (
+      !Object.keys(protectedHashes).some((path) =>
+        /^src\/ombelle-examples\/(?:recipes|presets)\/.+\.tsx$/.test(path),
+      )
+    )
+      throw new Error('Missing pre-existing usage-file hash ' + key)
   }
   if (expected.size)
     throw new Error('Missing component preset consumer rows: ' + [...expected].join(', '))

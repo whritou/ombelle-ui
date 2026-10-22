@@ -38,14 +38,13 @@ export async function prepareComponentPresetConsumer(
       'bun.lock',
       'bun.lockb',
     ],
-    protectedPaths = [
+    fixedProtectedPaths = [
       'ui-preset.json',
       'ui-library.config.json',
       'src/index.css',
       'src/components/ui/button.tsx',
       'src/components/ui/input.tsx',
     ],
-    protectedHashes: Record<string, string> = {},
     packageJson = JSON.parse(
       await fs.readFile(path.join(input.root, 'package.json'), 'utf8'),
     ) as { packageManager?: string },
@@ -80,10 +79,6 @@ export async function prepareComponentPresetConsumer(
   const managerLockBytes = await fs.readFile(path.join(input.root, managerLockfile)),
     managerLockHash = createHash('sha256').update(managerLockBytes).digest('hex'),
     packageManagerDeclaration = packageJson.packageManager ?? null
-  for (const file of protectedPaths)
-    protectedHashes[file] = await sha256(
-      await fs.readFile(path.join(input.root, file), 'utf8'),
-    )
   const defaultPresetHash = jsonRecord(
     JSON.parse(await fs.readFile(path.join(input.root, 'ui-library.lock.json'), 'utf8')),
   ).presetHash
@@ -93,7 +88,20 @@ export async function prepareComponentPresetConsumer(
       inputDirectory = path.resolve('.artifacts/component-preset-inputs'),
       inputFile = path.join(inputDirectory, presetFamily + '.json'),
       key = result.preset.data.id + '@' + result.preset.data.revision,
-      args = ['add', 'button', '--preset', inputFile, '--cwd', input.root]
+      args = ['add', 'button', '--preset', inputFile, '--cwd', input.root],
+      beforeLock = jsonRecord(
+        JSON.parse(await fs.readFile(path.join(input.root, 'ui-library.lock.json'), 'utf8')),
+      ),
+      existingUsagePaths = Object.entries(jsonRecord(beforeLock.artifacts))
+        .filter(([, metadata]) => jsonRecord(metadata).kind === 'usage')
+        .map(([file]) => file),
+      protectedHashes: Record<string, string> = {}
+    if (existingUsagePaths.length === 0)
+      throw new Error('Expected pre-existing usage files in ' + input.descriptorId)
+    for (const file of new Set([...fixedProtectedPaths, ...existingUsagePaths]))
+      protectedHashes[file] = await sha256(
+        await fs.readFile(path.join(input.root, file), 'utf8'),
+      )
     await fs.mkdir(inputDirectory, { recursive: true })
     await fs.writeFile(inputFile, JSON.stringify(preset, null, 2) + '\n')
 
@@ -265,7 +273,11 @@ export async function prepareComponentPresetConsumer(
       install: { status: 'success', exitCode: install.code },
       repeat: { status: 'success', allNoop: true },
       tamper: { status: 'conflict', exitCode: conflict.code, treeUnchanged: true },
-      preservation: { defaults: true, ordinaryComponents: true },
+      preservation: {
+        defaults: true,
+        ordinaryComponents: true,
+        usageFiles: true,
+      },
       protectedHashes,
     })
   }

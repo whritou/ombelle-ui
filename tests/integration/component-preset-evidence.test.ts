@@ -155,10 +155,11 @@ async function consumerRows() {
           install: { status: 'success', exitCode: 0 },
           repeat: { status: 'success', allNoop: true },
           tamper: { status: 'conflict', exitCode: 4, treeUnchanged: true },
-          preservation: { defaults: true, ordinaryComponents: true },
+          preservation: { defaults: true, ordinaryComponents: true, usageFiles: true },
           protectedHashes: {
             'ui-preset.json': 'a'.repeat(64),
             'src/components/ui/button.tsx': 'b'.repeat(64),
+            'src/ombelle-examples/recipes/example/r1.tsx': 'd'.repeat(64),
           },
         }
       }),
@@ -243,6 +244,13 @@ it('rejects missing, duplicate, mismatched, failed, or incomplete consumer prese
     { repeat: { status: 'success', allNoop: false } },
     { tamper: { status: 'conflict', exitCode: 4, treeUnchanged: false } },
     { preservation: { defaults: false, ordinaryComponents: true } },
+    { preservation: { defaults: true, ordinaryComponents: true, usageFiles: false } },
+    { protectedHashes: { 'ui-preset.json': 'a'.repeat(64), 'src/components/ui/button.tsx': 'b'.repeat(64) } },
+    { protectedHashes: {
+      'ui-preset.json': 'a'.repeat(64),
+      'src/components/ui/button.tsx': 'b'.repeat(64),
+      'src/ombelle-examples/recipes/example/r1.tsx': 'invalid',
+    } },
     { build: { status: 'pending' } },
     { managerLockfile: 'package-lock.json' },
     { managerLockHash: 'not-a-hash' },
