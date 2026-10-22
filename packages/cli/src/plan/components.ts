@@ -57,6 +57,9 @@ export function baseLock(
     ...(context.lock?.recipes
       ? { recipes: structuredClone(context.lock.recipes) }
       : {}),
+    ...(context.lock?.componentPresets
+      ? { componentPresets: structuredClone(context.lock.componentPresets) }
+      : {}),
   }
 }
 export async function appendState(
