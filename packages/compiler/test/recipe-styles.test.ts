@@ -2,6 +2,7 @@ import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { compile } from '../src/compile.js'
 import {
+  compileScopedStyles,
   compileRecipeStyles,
   validateRecipeDarkSelector,
 } from '../src/recipe-styles.js'
@@ -36,6 +37,43 @@ it.each(['flat', 'minimalist', 'neo-brutalism'] as const)(
     )
   },
 )
+it('uses explicit slot and scope-attribute inputs for scoped style compilation', async () => {
+  const catalog = getCatalog('0.1.0')
+  const preset = (
+    await compile({
+      preset: catalog.presets.flat,
+      componentIds: [],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+  ).preset
+  const scope = 'd'.repeat(64)
+  const css = compileScopedStyles({
+    familyCss: catalog.styles.flat,
+    preset,
+    overrides: {},
+    scope,
+    darkSelector: '.night',
+    slot: 'scoped-button',
+    scopeAttribute: 'data-ombelle-scope',
+  })
+  const rules: postcss.Rule[] = []
+  postcss.parse(css).walkRules((rule) => {
+    rules.push(rule)
+  })
+
+  expect(css).toContain(
+    `[data-slot="scoped-button"][data-ombelle-scope="${scope}"]`,
+  )
+  expect(css).toContain('.night')
+  expect(css).not.toContain('data-ombelle-recipe')
+  expect(css).not.toContain('[data-slot="button"]')
+  expect(rules.length).toBeGreaterThan(0)
+  for (const rule of rules) {
+    expect(rule.selector).toContain('data-slot="scoped-button"')
+    expect(rule.selector).toContain(`data-ombelle-scope="${scope}"`)
+  }
+})
 it('validates the whole dark selector and trusted CSS selectors', () => {
   expect(validateRecipeDarkSelector('.theme-dark')).toBe('.theme-dark')
   for (const selector of [
