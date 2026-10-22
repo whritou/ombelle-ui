@@ -1,6 +1,7 @@
 import { it, expect, afterEach } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import os from 'node:os'
 import { spawn } from 'node:child_process'
 import { createProject } from '../helpers/projects.js'
 import { snapshotTree } from '../helpers/tree.js'
@@ -14,9 +15,11 @@ const cli = path.resolve('packages/cli/dist/main.js'),
 function command(
   args: string[],
   env: NodeJS.ProcessEnv = process.env,
+  cwd = process.cwd(),
 ): Promise<{ exitCode: number | null; data: any }> {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [cli, ...args, '--json'], {
+      cwd,
       shell: false,
       windowsHide: true,
       env: Object.fromEntries(Object.entries(env).map(([key,value])=>[process.platform==='win32'?key.toUpperCase():key,value])),
@@ -82,6 +85,39 @@ it('dry-run has no filesystem effects or dependency operations', async () => {
   expect(plan.exitCode).toBe(0)
   expect(plan.data.status).toBe('planned')
   expect(await snapshotTree(root)).toEqual(before)
+})
+it('resolves init preset files from the invoking directory, independently of --cwd', async () => {
+  const caller = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-cli-caller-'))
+  const root = await createProject('vite')
+  roots.push(caller, root)
+  await fs.copyFile(preset, path.join(caller, 'caller-preset.json'))
+
+  const initialized = await command(
+    [
+      'init',
+      '--preset',
+      './caller-preset.json',
+      '--cwd',
+      root,
+      '--yes',
+    ],
+    process.env,
+    caller,
+  )
+
+  expect(initialized.exitCode, JSON.stringify(initialized.data)).toBe(0)
+  expect(await fs.readFile(path.join(root, 'ui-preset.json'), 'utf8')).toContain(
+    'builtin-neo-brutalism',
+  )
+  const beforeTheme = await snapshotTree(root)
+  const theme = await command(
+    ['theme', 'add', './caller-preset.json', '--cwd', root, '--dry-run'],
+    process.env,
+    caller,
+  )
+  expect(theme.exitCode, JSON.stringify(theme.data)).toBe(0)
+  expect(theme.data.status).toBe('planned')
+  expect(await snapshotTree(root)).toEqual(beforeTheme)
 })
 it('reports malformed JSON and missing initialization clearly', async () => {
   const root = await createProject('vite')

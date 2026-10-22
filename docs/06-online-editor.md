@@ -43,6 +43,8 @@ The main export paths are download preset JSON, copy generated theme CSS, and pu
 
 For the existing-project path, show: “If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css.” Generate `theme add <immutable-preset-reference>` for that path. The new-setup path uses `init --preset <reference>`. Component pages also provide `add <component>`. Each runner executes the same pinned CLI release and immutable preset revision.
 
+Component pages offer an explicit choice between the saved project preset (`add button`) and a selected preset for this component (`add button --preset <immutable-preset-reference>`). Use the same preset reference that can be installed globally with `theme add`; the command determines scope. Explain that the component-specific command preserves project defaults and other installed components. Initially enable this export only for Button after scoped installation is implemented and verified. Saving props, text, or per-component overrides instead produces `add --recipe <immutable-recipe-reference>`. Downloaded JSON remains an offline export/install option for both presets and recipes. Never generate a flag whose name is the saved code.
+
 The existing-project export explains that token-aware components inherit matching values, while complete style changes needing extra classes or markup require a separate explicit migration. It must not imply that a palette merge rewrites every existing component into the new visual family.
 
 A public snapshot action must explain that its content is publicly readable. No account is required for local editing or downloads.

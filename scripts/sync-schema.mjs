@@ -6,3 +6,5 @@ fs.writeFileSync(
     JSON.stringify(schema, null, 2) +
     ' as const\n',
 )
+const recipe = JSON.parse(fs.readFileSync('schemas/recipe.schema.json', 'utf8'))
+fs.writeFileSync('packages/contracts/src/recipe-schema.ts', '// Generated from schemas/recipe.schema.json; do not edit independently.\nexport const recipeSchema = ' + JSON.stringify(recipe, null, 2) + ' as const\n')

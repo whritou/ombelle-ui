@@ -1,15 +1,22 @@
 #!/usr/bin/env node
-import fs from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createInterface } from 'node:readline/promises'
 import {
   FoundationError,
-  validatePreset,
   type ComponentId,
   type Preset,
+  type InstallPlan,
 } from '@ombelle/contracts'
-import { compile } from '@ombelle/compiler'
+import {
+  compile,
+  compileButtonPreset,
+  compileRecipe,
+} from '@ombelle/compiler'
+import { readRecipeFile } from './recipe-file.js'
+import { readPresetFile } from './preset-file.js'
+import { planRecipe } from './plan/recipe.js'
+import { planComponentPreset } from './plan/component-preset.js'
 import { inspectProject } from './project/inspect.js'
 import { planAdd } from './plan/components.js'
 import { planTheme } from './plan/theme.js'
@@ -25,7 +32,7 @@ const exits: Record<string, number> = {
   INTERNAL_ERROR: 1,
 }
 const usage =
-  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
+  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },
@@ -42,8 +49,12 @@ export async function runCli(
     for (let i = 0; i < args.length; i++) {
       const a = args[i]
       if (a.startsWith('--')) {
+        if (Object.hasOwn(flags, a))
+          throw new FoundationError('INVALID_DATA', 'Repeated flag', a)
         if (['--json', '--yes', '--dry-run'].includes(a)) flags[a] = true
-        else if (['--cwd', '--preset', '--package-manager'].includes(a)) {
+        else if (
+          ['--cwd', '--preset', '--package-manager', '--recipe'].includes(a)
+        ) {
           if (!args[i + 1] || args[i + 1].startsWith('--'))
             throw new FoundationError('INVALID_DATA', 'Missing flag value', a)
           flags[a] = args[++i]
@@ -57,10 +68,22 @@ export async function runCli(
       throw new FoundationError('INVALID_DATA', usage)
     if (command === 'init' && positional.length !== 1)
       throw new FoundationError('INVALID_DATA', usage)
-    if (command === 'add' && flags['--preset'])
+    if (
+      flags['--recipe'] &&
+      (command !== 'add' || positional.length !== 1 || flags['--preset'])
+    )
       throw new FoundationError(
         'INVALID_DATA',
-        'Use theme add to change project defaults',
+        'Use add --recipe <local.json> without component arguments or --preset',
+      )
+    if (
+      command === 'add' &&
+      flags['--preset'] &&
+      (positional.length !== 2 || positional[1] !== 'button')
+    )
+      throw new FoundationError(
+        'INVALID_DATA',
+        'Use add button --preset <local.json> to select a component-only preset',
       )
     const selected = flags['--package-manager']
     if (
@@ -75,50 +98,66 @@ export async function runCli(
       path.resolve(String(flags['--cwd'] ?? process.cwd())),
       selected as 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined,
     )
-    let preset: Preset | unknown = context.preset
-    if (command !== 'add') {
-      const file = command === 'init' ? flags['--preset'] : positional[2]
-      if (
-        typeof file !== 'string' ||
-        (command === 'theme' && positional.length !== 3)
+    let plan: InstallPlan
+    if (flags['--recipe']) {
+      if (!context.preset || !context.config || !context.lock)
+        throw new FoundationError(
+          'UNSUPPORTED_PROJECT',
+          'Initialize a saved project preset first',
+          context.root,
+          'Run init --preset <local.json>.',
+        )
+      const recipe = await readRecipeFile(String(flags['--recipe']))
+      plan = await planRecipe(
+        context,
+        await compileRecipe({ recipe, darkSelector: context.darkSelector }),
       )
+    } else if (command === 'add' && flags['--preset']) {
+      const preset = await readPresetFile(String(flags['--preset']))
+      plan = await planComponentPreset(
+        context,
+        await compileButtonPreset({
+          preset,
+          darkSelector: context.darkSelector,
+        }),
+      )
+    } else {
+      let preset: Preset | undefined = context.preset
+      if (command !== 'add') {
+        const file = command === 'init' ? flags['--preset'] : positional[2]
+        if (
+          typeof file !== 'string' ||
+          (command === 'theme' && positional.length !== 3)
+        )
+          throw new FoundationError(
+            'INVALID_DATA',
+            'Choose a local preset JSON file',
+          )
+        preset = await readPresetFile(file)
+      } else if (!preset || !context.config || !context.lock)
+        throw new FoundationError(
+          'UNSUPPORTED_PROJECT',
+          'Initialize a saved project preset first',
+          context.root,
+          'Run init --preset <local.json>.',
+        )
+      const ids = command === 'add' ? positional.slice(1) : []
+      if (command === 'add' && !ids.length)
         throw new FoundationError(
           'INVALID_DATA',
-          'Choose a local preset JSON file',
+          'Choose at least one component',
         )
-      const presetPath = path.resolve(file)
-      try {
-        const stat = await fs.stat(presetPath)
-        if (stat.size > 262144) throw new Error('Preset exceeds 256 KiB')
-        preset = JSON.parse(await fs.readFile(presetPath, 'utf8'))
-      } catch (e) {
-        throw new FoundationError(
-          'INVALID_DATA',
-          e instanceof Error ? e.message : 'Cannot read preset',
-          presetPath,
-        )
-      }
-    } else if (!preset || !context.config || !context.lock)
-      throw new FoundationError(
-        'UNSUPPORTED_PROJECT',
-        'Initialize a saved project preset first',
-        context.root,
-        'Run init --preset <local.json>.',
-      )
-    const ids = command === 'add' ? positional.slice(1) : []
-    if (command === 'add' && !ids.length)
-      throw new FoundationError('INVALID_DATA', 'Choose at least one component')
-    const p = validatePreset(preset)
-    const result = await compile({
-      preset: p,
-      componentIds: ids as ComponentId[],
-      catalogRelease: p.catalogRelease,
-      compilerVersion: p.compilerVersion,
-    })
-    const plan =
-      command === 'add'
-        ? await planAdd(context, result)
-        : await planTheme(context, result)
+      const result = await compile({
+        preset,
+        componentIds: ids as ComponentId[],
+        catalogRelease: preset.catalogRelease,
+        compilerVersion: preset.compilerVersion,
+      })
+      plan =
+        command === 'add'
+          ? await planAdd(context, result)
+          : await planTheme(context, result)
+    }
     const hasConflicts =
       plan.diagnostics.length > 0 ||
       plan.changes.some((c) => c.action === 'conflict')

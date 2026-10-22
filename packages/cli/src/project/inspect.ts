@@ -13,6 +13,8 @@ import {
 import { safePath, portable } from './paths.js'
 import { fingerprintFile } from './fingerprint.js'
 import { assertStandaloneProject } from './workspace.js'
+import { validateInstalledRecipes } from './recipes.js'
+import { validateInstalledComponentPresets } from './component-presets.js'
 export async function readText(
   root: string,
   relative: string,
@@ -38,7 +40,8 @@ function declaredManager(value: unknown): PackageManager | undefined {
   if (typeof value !== 'string') return undefined
   const ordinary = /^(npm|pnpm)@\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.exec(value)
   if (ordinary) return ordinary[1] as PackageManager
-  const additional = /^(yarn|bun)@\d+\.\d+\.\d+(?:\+sha224\.[A-Za-z0-9+/]+={0,2})?$/.exec(value)
+  const additional =
+    /^(yarn|bun)@\d+\.\d+\.\d+(?:\+sha224\.[A-Za-z0-9+/]+={0,2})?$/.exec(value)
   if (additional) return additional[1] as PackageManager
   return undefined
 }
@@ -82,13 +85,15 @@ export async function inspectProject(
   const declared = declaredManager(pkg.packageManager)
   const locked =
     present.length === 1
-      ? ({
-          'package-lock.json': 'npm',
-          'pnpm-lock.yaml': 'pnpm',
-          'yarn.lock': 'yarn',
-          'bun.lock': 'bun',
-          'bun.lockb': 'bun',
-        } as Record<string, PackageManager>)[present[0]]
+      ? (
+          {
+            'package-lock.json': 'npm',
+            'pnpm-lock.yaml': 'pnpm',
+            'yarn.lock': 'yarn',
+            'bun.lock': 'bun',
+            'bun.lockb': 'bun',
+          } as Record<string, PackageManager>
+        )[present[0]]
       : undefined
   if (
     present.length > 1 ||
@@ -96,15 +101,17 @@ export async function inspectProject(
     (pkg.packageManager !== undefined && !declared) ||
     (!explicitManager && declared && locked && declared !== locked) ||
     (explicitManager && locked && explicitManager !== locked) ||
-    (explicitManager && declared && explicitManager !== declared && locked !== explicitManager) ||
+    (explicitManager &&
+      declared &&
+      explicitManager !== declared &&
+      locked !== explicitManager) ||
     (!explicitManager && !declared && !locked)
   )
     throw bad(
       'Choose an unambiguous npm, pnpm, Yarn, or Bun application; align manager evidence and its single lockfile',
     )
   const manager = explicitManager ?? declared ?? locked
-  if (!manager)
-    throw bad('Choose a package manager for the target application')
+  if (!manager) throw bad('Choose a package manager for the target application')
   preconditions['.npmrc'] = await fingerprintFile(root, '.npmrc')
   preconditions['bunfig.toml'] = await fingerprintFile(root, 'bunfig.toml')
   const deps = { ...pkg.devDependencies, ...pkg.dependencies }
@@ -205,9 +212,24 @@ export async function inspectProject(
   )
     throw bad('Unsupported Ombelle lock version or shape')
   const raw = await loadJson(config?.presetFile ?? 'ui-preset.json')
+  if (lock?.recipes !== undefined)
+    lock.recipes = await validateInstalledRecipes(
+      root,
+      lock.recipes,
+      lock.artifacts,
+    )
+  if (lock?.componentPresets !== undefined)
+    lock.componentPresets = await validateInstalledComponentPresets(
+      root,
+      lock.componentPresets,
+      lock.artifacts,
+      { componentsDir, sourceDir, utilsFile, uiAlias, utilsAlias },
+    )
   const preset = raw ? validatePreset(raw) : undefined
   return {
-    ...(manager === 'bun' ? { bunLockfile: (present[0] ?? 'bun.lock') as BunLockfile } : {}),
+    ...(manager === 'bun'
+      ? { bunLockfile: (present[0] ?? 'bun.lock') as BunLockfile }
+      : {}),
     preconditions,
     root,
     framework,

@@ -54,6 +54,12 @@ export function baseLock(
     presetHash: result.preset.hash,
     artifacts: { ...context.lock?.artifacts },
     managedDeclarations: context.lock?.managedDeclarations ?? [],
+    ...(context.lock?.recipes
+      ? { recipes: structuredClone(context.lock.recipes) }
+      : {}),
+    ...(context.lock?.componentPresets
+      ? { componentPresets: structuredClone(context.lock.componentPresets) }
+      : {}),
   }
 }
 export async function appendState(
@@ -95,7 +101,8 @@ export async function planAdd(
             'Using explicit package manager ' +
             context.manager +
             ' despite package.json declaring ' +
-            context.packageJson.packageManager.split('@')[0] + '.',
+            context.packageJson.packageManager.split('@')[0] +
+            '.',
         }
       : {}),
     preconditions: context.preconditions,
@@ -148,10 +155,13 @@ export async function planAdd(
         sha256: await sha256(c.afterContent),
       }
   }
-  const installed = context.manager === 'bun' ? context.packageJson.dependencies ?? {} : {
-    ...context.packageJson.devDependencies,
-    ...context.packageJson.dependencies,
-  }
+  const installed =
+    context.manager === 'bun'
+      ? (context.packageJson.dependencies ?? {})
+      : {
+          ...context.packageJson.devDependencies,
+          ...context.packageJson.dependencies,
+        }
   plan.dependencyPlan = result.dependencies.filter(
     (d) => installed[d.name] !== d.version,
   )

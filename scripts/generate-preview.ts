@@ -2,6 +2,8 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { compile, sha256 } from '@ombelle/compiler'
 import { supportedStyleFamilies } from '@ombelle/contracts'
+import { writePreviewRecipes } from '../tests/helpers/recipe-fixture.js'
+import { writePreviewComponentPresets } from '../tests/helpers/component-preset-fixture.js'
 for (const family of supportedStyleFamilies) {
   const preset = JSON.parse(
     await fs.readFile(
@@ -33,6 +35,8 @@ for (const family of supportedStyleFamilies) {
     }
   }
   await fs.writeFile(root + '/manifest.json', JSON.stringify(result, null, 2))
+  await writePreviewRecipes(root)
+  await writePreviewComponentPresets(root)
   await fs.writeFile(
     root + '/transforms.json',
     JSON.stringify(transforms, null, 2),
@@ -41,14 +45,23 @@ for (const family of supportedStyleFamilies) {
     .replaceAll('STYLE_FAMILY', family)
     .replaceAll('@/components/ui', './components/ui')
   await fs.writeFile(root + '/scenario.tsx', scenario)
-  await fs.writeFile(root + '/state-fixture.tsx', (await fs.readFile('fixtures/shared/state-fixture.tsx','utf8')).replaceAll('@/components/ui','./components/ui'))
-  await fs.copyFile('fixtures/shared/state-fixture.css',root+'/state-fixture.css')
+  await fs.writeFile(
+    root + '/state-fixture.tsx',
+    (await fs.readFile('fixtures/shared/state-fixture.tsx', 'utf8')).replaceAll(
+      '@/components/ui',
+      './components/ui',
+    ),
+  )
+  await fs.copyFile(
+    'fixtures/shared/state-fixture.css',
+    root + '/state-fixture.css',
+  )
   await fs.writeFile(
     root + '/preview.css',
     '@import "../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n',
   )
   await fs.writeFile(
     root + '/entry.tsx',
-    "import './preview.css'\nimport manifest from './manifest.json'\n;(window as any).__artifactHashes = manifest.artifacts.map(async artifact => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(artifact.content))),byte=>byte.toString(16).padStart(2,'0')).join(''))\nexport {default} from './scenario'\n",
+    "import './preview.css'\nimport manifest from './manifest.json'\nimport recipes from './recipes-manifest.json'\nconst hash = async (content: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content))),byte=>byte.toString(16).padStart(2,'0')).join('')\n;(window as any).__artifactHashes = manifest.artifacts.map(artifact => hash(artifact.content))\n;(window as any).__recipeArtifactHashes = Object.fromEntries(Object.entries(recipes).map(([id,result])=>[id,result.artifacts.map(artifact=>hash(artifact.content))]))\nexport {default} from './scenario'\n",
   )
 }

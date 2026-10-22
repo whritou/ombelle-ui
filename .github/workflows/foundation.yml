@@ -51,6 +51,8 @@ jobs:
             .artifacts/consumer-pending.json
             .artifacts/consumer-matrix.json
             .artifacts/minimalist-measurements.json
+            .artifacts/recipe-measurements.json
+            .artifacts/recipe-consumers.json
             .artifacts/audit-*.json
             playwright-report
             test-results

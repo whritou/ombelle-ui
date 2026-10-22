@@ -48,6 +48,8 @@ The site includes a searchable catalog, component detail pages, style and state 
 
 The CLI initializes compatible projects, adds components, saves a project preset, installs a component recipe, previews changes, and reports configuration problems. npm, pnpm, Yarn and Bun support are required for the first release. It preserves the project's package manager, lockfile and source ownership.
 
+The public preset-code workflow should support two explicit scopes: `theme add <code>` installs project-wide styling, while `add button --preset <code>` installs a Button using that preset without changing project defaults or other components. Codes are values passed to a named argument, never generated flag names. Local preset JSON remains an offline alternative. The private foundation implements the Button-scoped workflow with `add button --preset <local.json>`; public code resolution and scoped installation for other components remain planned. Recipes additionally save component props, text, and overrides; selecting a preset for a component does not require creating a recipe.
+
 For an already initialized shadcn project, a dedicated `theme add <preset>` command merges the palette and design tokens into its configured global stylesheet, normally `globals.css`. This path saves project defaults without rerunning shadcn initialization or reinstalling component source.
 
 Web beta adds JSX output after the initial TSX implementation passes. All four package managers are alpha requirements. React Native, composed blocks, agent skills, custom code execution, private team libraries, and payment features follow separate milestones.
@@ -71,6 +73,8 @@ Web beta adds JSX output after the initial TSX implementation passes. All four p
 5. Apply it to a project. Later `add` commands use the locally saved preset automatically.
 
 ### Customize one component
+
+To use an existing preset without saving extra props or content, choose its immutable code and install with `add button --preset <code>`. The component receives isolated styling; later ordinary additions still use the project's saved preset. Begin with Button and expand only after scope and parity checks pass. For a richer saved customization, use the recipe journey below.
 
 1. Open a component with the selected project preset.
 2. Change allowed props and component-specific visual tokens.

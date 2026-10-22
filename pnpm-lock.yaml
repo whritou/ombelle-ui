@@ -131,6 +131,12 @@ importers:
       '@ombelle/contracts':
         specifier: workspace:*
         version: link:../contracts
+      postcss:
+        specifier: 8.5.31
+        version: 8.5.31
+      postcss-selector-parser:
+        specifier: 7.1.6
+        version: 7.1.6
       prettier:
         specifier: 3.9.10
         version: 3.9.10
