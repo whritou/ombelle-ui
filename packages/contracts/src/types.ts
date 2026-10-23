@@ -56,12 +56,19 @@ export type InstalledRecipe = Omit<
 > & {
   artifacts: Record<string, InstalledArtifact>
 }
+export type InstalledComponentPreset = Omit<
+  ComponentPresetCompileResult,
+  'artifacts' | 'dependencies'
+> & {
+  artifacts: Record<string, InstalledArtifact>
+}
 export type InstalledArtifact = {
   logicalPath: string
   sha256: string
   kind: Artifact['kind']
 }
 export type ProjectLock = {
+  componentPresets?: Record<string, InstalledComponentPreset>
   recipes?: Record<string, InstalledRecipe>
   lockVersion: 1
   catalogRelease: string
