@@ -126,6 +126,10 @@ export type FileChange = {
   action: 'create' | 'update' | 'noop' | 'conflict'
 }
 export type InstallPlan = {
+  componentPreset?: Omit<InstalledComponentPreset, 'artifacts'> & {
+    importPath: string
+    examplePath: string
+  }
   recipe?: Omit<InstalledRecipe, 'artifacts'> & {
     importPath: string
     examplePath: string
