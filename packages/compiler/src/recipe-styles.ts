@@ -16,6 +16,16 @@ export function validateRecipeDarkSelector(value: string): string {
     )
   return value
 }
+export function validateComponentPresetDarkSelector(value: string): string {
+  if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
+    throw new FoundationError(
+      'UNSUPPORTED_PROJECT',
+      'Component preset dark mode requires a single ASCII class selector',
+      value,
+      'Configure a class such as .dark or .theme-dark.',
+    )
+  return value
+}
 const variable = (key: string) =>
   '--' + key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
 const block = (selector: string, values: Record<string, string>) =>
@@ -27,18 +37,40 @@ const block = (selector: string, values: Record<string, string>) =>
     .join('') +
   '}'
 
-export function compileRecipeStyles(input: {
+export function compileScopedButtonStyles(input: {
   familyCss: string
   preset: ResolvedPreset
   overrides: Recipe['overrides']
   scope: string
   darkSelector: string
+  slot: string
+  scopeAttribute: string
+  scopeLabel?: 'recipe' | 'component-preset'
 }): string {
-  const dark = validateRecipeDarkSelector(input.darkSelector)
+  const dark =
+    input.scopeLabel === 'recipe'
+      ? validateRecipeDarkSelector(input.darkSelector)
+      : validateComponentPresetDarkSelector(input.darkSelector)
   if (!/^[a-f0-9]{64}$/.test(input.scope))
-    throw new FoundationError('INVALID_DATA', 'Invalid recipe scope')
+    throw new FoundationError(
+      'INVALID_DATA',
+      input.scopeLabel === 'recipe'
+        ? 'Invalid recipe scope'
+        : 'Invalid component preset scope',
+    )
+  if (
+    !/^[a-z][a-z0-9-]*$/.test(input.slot) ||
+    !/^data-[a-z][a-z0-9-]*$/.test(input.scopeAttribute)
+  )
+    throw new FoundationError('INVALID_DATA', 'Invalid scoped Button selector')
   const scope =
-    '[data-slot="recipe-button"][data-ombelle-recipe="' + input.scope + '"]'
+    '[data-slot="' +
+    input.slot +
+    '"][' +
+    input.scopeAttribute +
+    '="' +
+    input.scope +
+    '"]'
   const root = postcss.parse(input.familyCss)
   root.walkAtRules((rule) => {
     if (
@@ -71,8 +103,16 @@ export function compileRecipeStyles(input: {
           )
         const slot = attrs[0]
         if (slot.value && slot.value !== 'button') continue
-        if (slot.parent !== selector || selector.first !== slot || (slot.operator && slot.operator !== '='))
-          throw new FoundationError('INVALID_DATA', 'Recipe slot must start the element compound selector', rule.selector)
+        if (
+          slot.parent !== selector ||
+          selector.first !== slot ||
+          (slot.operator && slot.operator !== '=')
+        )
+          throw new FoundationError(
+            'INVALID_DATA',
+            'Recipe slot must start the element compound selector',
+            rule.selector,
+          )
         // Authored styles consist of one compound selector, with reviewed state/variant suffixes.
         selector.walk((node) => {
           if (!['selector', 'attribute', 'pseudo'].includes(node.type))
@@ -183,4 +223,19 @@ export function compileRecipeStyles(input: {
     }) +
     height
   )
+}
+
+export function compileRecipeStyles(input: {
+  familyCss: string
+  preset: ResolvedPreset
+  overrides: Recipe['overrides']
+  scope: string
+  darkSelector: string
+}): string {
+  return compileScopedButtonStyles({
+    ...input,
+    slot: 'recipe-button',
+    scopeAttribute: 'data-ombelle-recipe',
+    scopeLabel: 'recipe',
+  })
 }

@@ -2,6 +2,7 @@ import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { compile } from '../src/compile.js'
 import {
+  compileScopedButtonStyles,
   compileRecipeStyles,
   validateRecipeDarkSelector,
 } from '../src/recipe-styles.js'
@@ -47,6 +48,43 @@ it('validates the whole dark selector and trusted CSS selectors', () => {
   ])
     expect(() => validateRecipeDarkSelector(selector)).toThrow()
 })
+it('compiles button styles with explicit slot and scope attributes', async () => {
+  const catalog = getCatalog('0.1.0')
+  const preset = (
+    await compile({
+      preset: catalog.presets.flat,
+      componentIds: [],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+  ).preset
+  const scope = 'd'.repeat(64)
+  const css = compileScopedButtonStyles({
+    familyCss: catalog.styles.flat,
+    preset,
+    overrides: {},
+    scope,
+    darkSelector: '.night',
+    slot: 'scoped-button',
+    scopeAttribute: 'data-ombelle-scope',
+  })
+  const selectors: string[] = []
+  postcss.parse(css).walkRules((rule) => {
+    selectors.push(rule.selector)
+  })
+
+  expect(selectors.length).toBeGreaterThan(0)
+  expect(
+    selectors.every(
+      (selector) =>
+        selector.replace(/["']/g, '').includes('[data-slot=scoped-button]') &&
+        selector.replace(/["']/g, '').includes(`[data-ombelle-scope=${scope}]`),
+    ),
+  ).toBe(true)
+  expect(css).toContain('.night')
+  expect(css).not.toContain('data-ombelle-recipe')
+  expect(css).not.toContain('data-slot="button"')
+})
 it('does not let a more specific dark block undo saved design overrides', async () => {
   const catalog = getCatalog('0.1.0'),
     preset = (
@@ -75,8 +113,26 @@ it('does not let a more specific dark block undo saved design overrides', async 
 })
 it('rejects inverse or nested slot selectors instead of producing rules outside the recipe element', async () => {
   const catalog = getCatalog('0.1.0')
-  const preset = (await compile({preset:catalog.presets.flat, componentIds:[], catalogRelease:'0.1.0', compilerVersion:'0.1.0'})).preset
-  for (const familyCss of [':not([data-slot="button"]){color:red}', '[data-slot="button"] > span{color:red}']) {
-    expect(() => compileRecipeStyles({familyCss, preset, overrides:{}, scope:'c'.repeat(64), darkSelector:'.dark'})).toThrow()
+  const preset = (
+    await compile({
+      preset: catalog.presets.flat,
+      componentIds: [],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+  ).preset
+  for (const familyCss of [
+    ':not([data-slot="button"]){color:red}',
+    '[data-slot="button"] > span{color:red}',
+  ]) {
+    expect(() =>
+      compileRecipeStyles({
+        familyCss,
+        preset,
+        overrides: {},
+        scope: 'c'.repeat(64),
+        darkSelector: '.dark',
+      }),
+    ).toThrow()
   }
 })
