@@ -36,7 +36,6 @@ for (const family of supportedStyleFamilies) {
   }
   await fs.writeFile(root + '/manifest.json', JSON.stringify(result, null, 2))
   await writePreviewRecipes(root)
-  await writePreviewComponentPresets(root)
   await fs.writeFile(
     root + '/transforms.json',
     JSON.stringify(transforms, null, 2),
@@ -45,6 +44,7 @@ for (const family of supportedStyleFamilies) {
     .replaceAll('STYLE_FAMILY', family)
     .replaceAll('@/components/ui', './components/ui')
   await fs.writeFile(root + '/scenario.tsx', scenario)
+  await writePreviewComponentPresets(root)
   await fs.writeFile(
     root + '/state-fixture.tsx',
     (await fs.readFile('fixtures/shared/state-fixture.tsx', 'utf8')).replaceAll(

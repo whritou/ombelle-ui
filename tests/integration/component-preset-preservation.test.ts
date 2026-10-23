@@ -5,7 +5,7 @@ import { sha256 } from '@ombelle/compiler'
 import { prepareComponentPresetConsumer } from '../../scripts/prepare-component-preset-consumer.js'
 import { prepareRecipeConsumer } from '../../scripts/prepare-recipe-consumer.js'
 import { createProject } from '../helpers/projects.js'
-import { runtimeIdentity, runBuiltCli } from '../helpers/cli-runtime.js'
+import { runBuiltCli } from '../helpers/cli-runtime.js'
 import { writeScenarioFixture } from '../helpers/scenario-fixture.js'
 
 const roots: string[] = []
@@ -64,26 +64,19 @@ it('records and preserves existing usage files across successful scoped preset i
 
   const rows = await prepareComponentPresetConsumer({
     root,
-    descriptorId: 'pnpm-vite-fixture',
-    hostFamily: 'flat',
     manager: 'pnpm',
     managerVersion: '11.25.0',
-    cliRuntime: await runtimeIdentity('node'),
-    audit: { exitCode: 0, scope: 'production' },
+    cliRuntime: 'node',
   })
 
-  for (const row of rows) {
-    const protectedHashes = row.protectedHashes as Record<string, string>
-    expect(row.preservation).toMatchObject({ usageFiles: true })
-    for (const [file, hash] of expectedUsageHashes)
-      expect(protectedHashes[file]).toBe(hash)
-    const newUsage = (row.transformedArtifacts as {
-      path: string
-      kind: string
-      sha256: string
-    }[]).find((artifact) => artifact.kind === 'usage')
+  for (const [file, hash] of expectedUsageHashes)
+    expect(rows.protectedHashes[file]).toBe(hash)
+  for (const row of Object.values(rows.presets)) {
+    const record = row as { installed: { artifacts: Record<string, { kind: string; sha256: string }> }; checks: { preservation: boolean } }
+    expect(record.checks.preservation).toBe(true)
+    const newUsage = Object.entries(record.installed.artifacts).find(([, artifact]) => artifact.kind === 'usage')
     expect(newUsage).toBeDefined()
-    expectedUsageHashes.set(newUsage!.path, newUsage!.sha256)
+    expectedUsageHashes.set(newUsage![0], newUsage![1].sha256)
   }
 
   for (const [file, hash] of expectedUsageHashes)

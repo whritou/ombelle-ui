@@ -37,6 +37,26 @@ export function formatPlan(
     status +
     '\n' +
     plan.changes.map((c) => c.action + ' ' + c.path).join('\n') +
+    (plan.componentPreset
+      ? '\nComponent preset ' +
+        plan.componentPreset.preset.data.id +
+        '@' +
+        plan.componentPreset.preset.data.revision +
+        ' (component only)\nImport: ' +
+        plan.componentPreset.importPath +
+        '\nUsage: ' +
+        plan.componentPreset.examplePath +
+        '\nPreset hash: ' +
+        plan.componentPreset.preset.hash +
+        '\nCatalog release: ' +
+        plan.componentPreset.provenance.catalogRelease +
+        '\nCompiler version: ' +
+        plan.componentPreset.provenance.compilerVersion +
+        '\nScope: ' +
+        plan.componentPreset.scope +
+        '\nDark selector: ' +
+        plan.componentPreset.darkSelector
+      : '') +
     (plan.recipe
       ? '\nRecipe ' +
         plan.recipe.recipe.data.id +
@@ -58,18 +78,6 @@ export function formatPlan(
         plan.recipe.scope +
         '\nDark selector: ' +
         plan.recipe.darkSelector
-      : '') +
-    (plan.componentPreset
-      ? '\nComponent preset ' +
-        plan.componentPreset.preset.data.id +
-        '@' +
-        plan.componentPreset.preset.data.revision +
-        ' (component only)\nImport: ' +
-        plan.componentPreset.importPath +
-        '\nUsage: ' +
-        plan.componentPreset.examplePath +
-        '\nScope: ' +
-        plan.componentPreset.scope
       : '') +
     plan.diagnostics
       .map(

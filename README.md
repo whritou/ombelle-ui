@@ -70,3 +70,12 @@ pnpm exec node packages/cli/dist/main.js add --recipe ./examples/recipe.example.
 A recipe installs its own `RecipeButton`, colocated CSS, and usage example. It preserves project defaults and the ordinary Button; importing the recipe component loads its styling. Only local recipes referencing exact built-in flat/minimalist/neo-brutalism presets are implemented. Remote recipe codes remain planned. Read the [local recipe usage and ownership rules](docs/foundation-local-usage.md#local-button-recipes) before installing into an existing project.
 
 The [local Button recipe evidence](docs/evidence/local-button-recipes.md) records 102 installations across 34 consumers and 90 browser outcomes across host styles, recipe styles, modes, and applications.
+
+Local component-scoped Button presets are also available after initialization:
+
+```powershell
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
+```
+
+This installs a separate native `Button`, its scoped CSS, and an example under preset ID/revision paths. It preserves saved project defaults, global theme, ordinary components, and recipes. Import the generated preset Button to use it; later ordinary additions continue to use project defaults. The local JSON slice supports flat, minimalist, and neo brutalism with exact catalog/compiler 0.1.0. Saved remote codes, editor integration, other scoped components, portals, nested independently themed subtrees, and arbitrary consumer CSS/style overrides remain outside this slice. See [local usage and conflicts](docs/foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](docs/evidence/component-scoped-button-presets.md).

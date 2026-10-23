@@ -17,8 +17,9 @@ import { managerEntry } from '../packages/cli/src/apply/manager.js'
 import { pnpmEntry } from './process.js'
 import type { ConsumerCase } from './consumer-matrix.js'
 import { prepareRecipeConsumer } from './prepare-recipe-consumer.js'
-import { prepareComponentPresetConsumer } from './prepare-component-preset-consumer.js'
 import { recipeReferenceBank } from '../tests/helpers/recipe-fixture.js'
+import { prepareComponentPresetConsumer } from './prepare-component-preset-consumer.js'
+import { componentPresetReferenceBank } from '../tests/helpers/component-preset-fixture.js'
 export type ArtifactProof = {
   path: string
   logicalPath: string
@@ -110,7 +111,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
             ],
       )
     }
-    await writeScenarioFixture(root, spec.family, true, true)
+    await writeScenarioFixture(root, spec.family, true)
     await fs.appendFile(
       path.join(root, 'src/index.css'),
       '\n.user-consumer-style { color:hotpink; }\n',
@@ -147,25 +148,14 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         family: spec.family,
       }),
       recipeBank = await recipeReferenceBank()
-    const auditArgs =
-        spec.manager === 'npm'
-          ? ['audit', '--omit=dev', '--json']
-          : spec.manager === 'pnpm'
-            ? ['audit', '--prod', '--json']
-            : version.startsWith('1.')
-              ? ['audit', '--groups', 'dependencies', '--json']
-              : ['npm', 'audit', '--environment', 'production', '--json'],
-      output = await execute(auditArgs),
-      componentPresetEvidence = await prepareComponentPresetConsumer({
+    const componentPresetEvidence = await prepareComponentPresetConsumer({
         root,
-        descriptorId: spec.id,
-        hostFamily: spec.family,
+        cliRuntime: 'node',
         manager: spec.manager,
         managerVersion: version,
-        cliRuntime: runtime,
-        audit: { exitCode: 0, scope: 'production' },
         env,
-      })
+      }),
+      componentPresetBank = await componentPresetReferenceBank()
     const canonical = JSON.parse(
       await fs.readFile(
         'apps/preview/src/generated/' + spec.family + '/manifest.json',
@@ -178,20 +168,20 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       ),
     )
     const artifacts: ArtifactProof[] = []
-    const componentPresetPaths = new Set(
-      componentPresetEvidence.flatMap((row) =>
-        (row.transformedArtifacts as { path: string }[]).map((artifact) => artifact.path),
-      ),
-    )
-    for (const [file, record] of Object.entries(
-      jsonRecord(installed.artifacts),
-    )) {
-      if (componentPresetPaths.has(file)) continue
+    const installedArtifacts = { ...jsonRecord(installed.artifacts) }
+    for (const preset of Object.values(componentPresetEvidence.presets))
+      for (const [file, record] of Object.entries(jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts))) {
+        if (installedArtifacts[file] && JSON.stringify(installedArtifacts[file]) !== JSON.stringify(record))
+          throw Error('Conflicting scoped artifact ownership: ' + file)
+        installedArtifacts[file] = record
+      }
+    for (const [file, record] of Object.entries(installedArtifacts)) {
       const meta = jsonRecord(record),
         content = await fs.readFile(path.join(root, file), 'utf8'),
         reference =
           canonical.artifacts.find((a) => a.logicalPath === meta.logicalPath) ??
-          recipeBank.get(String(meta.logicalPath)),
+          recipeBank.get(String(meta.logicalPath)) ??
+          componentPresetBank.get(String(meta.logicalPath)),
         hash = await sha256(content)
       if (
         !reference ||
@@ -208,9 +198,6 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         sha256: hash,
       })
     }
-    for (const row of componentPresetEvidence)
-      for (const artifact of row.transformedArtifacts as ArtifactProof[])
-        artifacts.push(artifact)
     const pkg = JSON.parse(
       await fs.readFile(path.join(root, 'package.json'), 'utf8'),
     )
@@ -271,6 +258,15 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       )
     )
       throw new Error('Lost unrelated CSS')
+    const auditArgs =
+      spec.manager === 'npm'
+        ? ['audit', '--omit=dev', '--json']
+        : spec.manager === 'pnpm'
+          ? ['audit', '--prod', '--json']
+          : version.startsWith('1.')
+            ? ['audit', '--groups', 'dependencies', '--json']
+            : ['npm', 'audit', '--environment', 'production', '--json']
+    const output = await execute(auditArgs)
     return {
       root,
       version,

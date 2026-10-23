@@ -1,332 +1,372 @@
-import { compileButtonPreset, sha256 } from '@ombelle/compiler'
-import type {
-  Artifact,
-  ComponentPresetCompileResult,
-  StyleFamily,
-} from '@ombelle/contracts'
-import { supportedStyleFamilies } from '../packages/contracts/src/style-families.js'
-import { transformComponentPresetArtifact } from '../packages/cli/src/project/component-preset-transform.js'
-import type { ConsumerEvidence } from './consumer-evidence.js'
-import { consumerCases } from './consumer-matrix.js'
+import { supportedStyleFamilies } from '../packages/contracts/src/style-families.ts'
+import { consumerCases } from './consumer-matrix.ts'
 import {
-  componentPresetFixtures,
-  previewComponentPresetContent,
-  previewComponentPresetPath,
-} from '../tests/helpers/component-preset-fixture.js'
+  finalizeConsumerEvidence,
+  type ConsumerEvidence,
+} from './consumer-evidence.ts'
+import {
+  componentPresetReferences,
+  componentPresetArtifact,
+} from '../tests/helpers/component-preset-fixture.ts'
+import {
+  recipeScreenshotBlockSize,
+  type NormalizedRecipeScreenshot,
+} from '../tests/helpers/recipe-measurements.ts'
+import { canonicalize } from '../packages/compiler/src/canonicalize.ts'
+import { sha256 } from '../packages/compiler/src/hash.ts'
 
-const apps = ['preview', 'vite', 'next', 'npm-vite', 'npm-next'] as const
-const requiredChecks = [
-  'componentBehavior',
+const checks = [
+  'parity',
+  'isolation',
+  'activation',
+  'disabled',
+  'loading',
   'focus',
   'forcedColors',
   'reducedMotion',
-  'hostStyleIsolation',
 ] as const
-const context = {
-  componentsDir: 'src/components/ui',
-  sourceDir: 'src',
-  utilsFile: 'src/lib/utils.ts',
-  uiAlias: '@/components/ui',
-  utilsAlias: '@/lib/utils',
+export const componentPresetIsolationMethod =
+  'separate host page without component preset imports' as const
+export type ComponentPresetMeasurement = {
+  hostFamily: string
+  presetId: string
+  presetHash: string
+  scope: string
+  app: string
+  mode: string
+  canonicalHashes: Record<string, string>
+  transformedHashes: Record<string, string>
+  computedStyles: Record<string, string>
+  isolationMethod: typeof componentPresetIsolationMethod
+  domHash: string
+  screenshotHash: string
+  normalizedScreenshotHash: string
+  normalizedScreenshot: NormalizedRecipeScreenshot
+  focusOutlineWidth: number
+  forcedColorsOutline: string
+  motionPositiveControlMs: number
+  reducedMotionMs: number
+  checks: Record<(typeof checks)[number], boolean>
 }
-export type ComponentPresetArtifactProof = {
-  path: string
-  logicalPath: string
-  kind: Artifact['kind']
-  sha256: string
+function object(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    throw Error('Expected component preset evidence object')
+  return value as Record<string, unknown>
+}
+const equal = (a: unknown, b: unknown) => canonicalize(a) === canonicalize(b)
+const digest = (v: unknown) => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v)
+const screenshotMaxRmse = 2
+const screenshotMaxChannelDifference = 24
+
+export function normalizedScreenshotsMatch(
+  left: NormalizedRecipeScreenshot,
+  right: NormalizedRecipeScreenshot,
+): boolean {
+  if (left.width !== right.width || left.height !== right.height) return false
+  const a = Buffer.from(left.pixels, 'base64'),
+    b = Buffer.from(right.pixels, 'base64')
+  if (!a.length || a.length !== b.length || a.length % 4 !== 0) return false
+  let squaredError = 0
+  for (let pixel = 0; pixel < a.length; pixel += 4) {
+    let maxDifference = 0
+    for (let channel = 0; channel < 4; channel++) {
+      const difference = Math.abs(a[pixel + channel] - b[pixel + channel])
+      squaredError += difference * difference
+      maxDifference = Math.max(maxDifference, difference)
+    }
+    if (maxDifference > screenshotMaxChannelDifference) return false
+  }
+  return Math.sqrt(squaredError / a.length) <= screenshotMaxRmse
 }
 
-let referencesPromise:
-  | Promise<
-      Map<
-        string,
-        { family: StyleFamily; result: ComponentPresetCompileResult }
-      >
-    >
-  | undefined
-
-async function references() {
-  return (referencesPromise ??= Promise.all(
-    componentPresetFixtures().map(async ({ family, preset }) => ({
-      family,
-      result: await compileButtonPreset({ preset }),
-    })),
-  ).then((items) => new Map(items.map((item) => [item.family, item]))))
+function isNormalizedScreenshot(value: unknown): value is NormalizedRecipeScreenshot {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const image = value as Record<string, unknown>
+  if (
+    !Number.isInteger(image.width) ||
+    !Number.isInteger(image.height) ||
+    Number(image.width) <= 0 ||
+    Number(image.height) <= 0 ||
+    typeof image.pixels !== 'string' ||
+    !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+      image.pixels,
+    )
+  )
+    return false
+  const pixels = Buffer.from(image.pixels, 'base64'),
+    expectedWidth = Math.ceil(Number(image.width) / recipeScreenshotBlockSize),
+    expectedHeight = Math.ceil(Number(image.height) / recipeScreenshotBlockSize)
+  return (
+    pixels.toString('base64') === image.pixels &&
+    pixels.length === expectedWidth * expectedHeight * 4
+  )
 }
 
 export function componentPresetMeasurementKeys(): readonly string[] {
-  return supportedStyleFamilies.flatMap((hostFamily) =>
-    componentPresetFixtures().flatMap(({ family }) =>
+  return supportedStyleFamilies.flatMap((host) =>
+    supportedStyleFamilies.flatMap((selected) =>
       ['light', 'dark'].flatMap((mode) =>
-        apps.map((app) =>
-          [hostFamily, family, mode, app].join('/'),
+        ['preview', 'vite', 'next', 'npm-vite', 'npm-next'].map((app) =>
+          [host, 'builtin-' + selected, mode, app].join('/'),
         ),
       ),
     ),
   )
 }
-
-export async function componentPresetTransformedArtifacts(
-  result: ComponentPresetCompileResult,
-  app: string,
-): Promise<ComponentPresetArtifactProof[]> {
-  if (!apps.includes(app as (typeof apps)[number]))
-    throw new Error('Unknown component preset application ' + app)
-  const proofs: ComponentPresetArtifactProof[] = []
-  for (const artifact of result.artifacts.filter((item) => item.kind !== 'utility')) {
-    if (app === 'preview') {
-      const file = previewComponentPresetPath(artifact.logicalPath, artifact.kind),
-        content = await previewComponentPresetContent(
-          artifact.content,
-          artifact.logicalPath,
-          artifact.kind,
-        )
-      proofs.push({
-        path: file,
-        logicalPath: artifact.logicalPath,
-        kind: artifact.kind,
-        sha256: await sha256(content),
-      })
-    } else {
-      const transformed = await transformComponentPresetArtifact(context, artifact)
-      proofs.push({
-        path: transformed.path,
-        logicalPath: artifact.logicalPath,
-        kind: artifact.kind,
-        sha256: await sha256(transformed.content),
-      })
-    }
-  }
-  return proofs
-}
-
-function object(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value))
-    throw new Error('Expected component preset evidence object')
-  return value as Record<string, unknown>
-}
-
-function equal(a: unknown, b: unknown): boolean {
-  return JSON.stringify(sort(a)) === JSON.stringify(sort(b))
-}
-
-function sort(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(sort)
-  if (value && typeof value === 'object')
-    return Object.fromEntries(
-      Object.entries(value)
-        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-        .map(([key, entry]) => [key, sort(entry)]),
-    )
-  return value
-}
-
-function canonicalHashes(result: ComponentPresetCompileResult) {
-  return Object.fromEntries(
-    result.artifacts
-      .filter((artifact) => artifact.kind !== 'utility')
-      .map((artifact) => [artifact.logicalPath, artifact.sha256]),
-  )
-}
-
 export async function validateComponentPresetMeasurements(
   value: unknown,
-): Promise<unknown[]> {
+): Promise<ComponentPresetMeasurement[]> {
   const expected = new Set(componentPresetMeasurementKeys()),
-    refs = await references(),
-    styles = new Map<string, unknown>()
+    refs = await componentPresetReferences(),
+    rendered = new Map<string, unknown>()
   if (!Array.isArray(value) || value.length !== expected.size)
-    throw new Error('Expected all 90 component preset measurements')
-  for (const item of value) {
-    const row = object(item),
-      key = [row.hostFamily, row.presetFamily, row.mode, row.app].join('/')
+    throw Error('Expected all 90 component preset measurements')
+  for (const input of value) {
+    const row = object(input),
+      key = [row.hostFamily, row.presetId, row.mode, row.app].join('/')
     if (!expected.delete(key))
-      throw new Error('Duplicate or unexpected component preset measurement ' + key)
-    const reference = refs.get(String(row.presetFamily))?.result
+      throw Error('Duplicate or unexpected component preset measurement ' + key)
+    const ref = refs.find((r) => r.preset.data.id === row.presetId)
     if (
-      !reference ||
-      row.presetId !== reference.preset.data.id ||
-      row.presetHash !== reference.preset.hash ||
-      row.scope !== reference.scope ||
-      !equal(row.canonicalHashes, canonicalHashes(reference))
+      !ref ||
+      row.presetHash !== ref.preset.hash ||
+      row.scope !== ref.scope ||
+      !equal(
+        row.canonicalHashes,
+        Object.fromEntries(ref.artifacts.map((a) => [a.logicalPath, a.sha256])),
+      )
     )
-      throw new Error('Component preset canonical identity mismatch ' + key)
-    const expectedArtifacts = await componentPresetTransformedArtifacts(
-      reference,
-      String(row.app),
-    )
-    if (!equal(row.transformedArtifacts, expectedArtifacts))
-      throw new Error('Missing or incorrect transformed component preset hashes ' + key)
-    const checks = object(row.checks)
-    if (requiredChecks.some((check) => checks[check] !== true))
-      throw new Error('Missing or failed component preset browser check ' + key)
-    const measuredStyles = object(row.computedStyles),
-      before = object(row.ordinaryButtonBefore),
-      after = object(row.ordinaryButtonAfter),
-      styleKey = String(row.presetFamily) + '/' + String(row.mode)
+      throw Error('Component preset canonical provenance mismatch ' + key)
+    const transformed: Record<string, string> = {}
+    for (const a of ref.artifacts.filter((a) => a.kind !== 'utility'))
+      transformed[a.logicalPath] = await sha256(
+        (
+          await componentPresetArtifact(
+            a,
+            row.app === 'preview' ? 'preview' : 'consumer',
+          )
+        ).content,
+      )
+    if (!equal(row.transformedHashes, transformed))
+      throw Error('Component preset transformed hash mismatch ' + key)
+    const result = object(row.checks),
+      styles = object(row.computedStyles)
     if (
-      !Object.keys(measuredStyles).length ||
-      Object.values(measuredStyles).some((entry) => typeof entry !== 'string')
+      row.isolationMethod !== componentPresetIsolationMethod ||
+      checks.some((k) => result[k] !== true) ||
+      [
+        'color',
+        'background',
+        'border',
+        'borderRadius',
+        'minHeight',
+        'fontFamily',
+        'fontSize',
+        'lineHeight',
+        'boxShadow',
+        'padding',
+      ].some(
+        (k) => typeof styles[k] !== 'string' || !String(styles[k]).trim(),
+      ) ||
+      Object.values(styles).some((v) => typeof v !== 'string') ||
+      !digest(row.domHash) ||
+      !digest(row.screenshotHash) ||
+      !digest(row.normalizedScreenshotHash) ||
+      !isNormalizedScreenshot(row.normalizedScreenshot) ||
+      (await sha256(row.normalizedScreenshot.pixels)) !==
+        row.normalizedScreenshotHash
     )
-      throw new Error('Missing rendered component preset styles ' + key)
-    if (!equal(before, after))
-      throw new Error('Component preset changed the ordinary host Button ' + key)
-    if (styles.has(styleKey) && !equal(styles.get(styleKey), measuredStyles))
-      throw new Error('Component preset appearance differs across hosts/apps ' + key)
-    styles.set(styleKey, measuredStyles)
+      throw Error('Missing rendered component preset results ' + key)
+    if (
+      typeof row.focusOutlineWidth !== 'number' ||
+      !Number.isFinite(row.focusOutlineWidth) ||
+      row.focusOutlineWidth < 3 ||
+      ![
+        'solid',
+        'dashed',
+        'dotted',
+        'double',
+        'groove',
+        'ridge',
+        'inset',
+        'outset',
+      ].includes(String(row.forcedColorsOutline)) ||
+      row.motionPositiveControlMs !== 150 ||
+      row.reducedMotionMs !== 0
+    )
+      throw Error('Failed component preset accessibility state ' + key)
+    const identity = row.presetId + '/' + row.mode,
+      evidence = {
+        styles,
+        domHash: row.domHash,
+        normalizedScreenshot: row.normalizedScreenshot,
+      }
+    if (rendered.has(identity)) {
+      const previous = object(rendered.get(identity)),
+        differences = []
+      if (!equal(previous.styles, styles)) differences.push('computed styles')
+      if (previous.domHash !== row.domHash) differences.push('DOM')
+      if (
+        !normalizedScreenshotsMatch(
+          previous.normalizedScreenshot as NormalizedRecipeScreenshot,
+          row.normalizedScreenshot as NormalizedRecipeScreenshot,
+        )
+      )
+        differences.push('normalized screenshot')
+      if (differences.length)
+        throw Error(
+          'Component preset differs across hosts/apps ' +
+            key +
+            ' (' +
+            differences.join(', ') +
+            ')',
+        )
+    } else {
+      rendered.set(identity, evidence)
+    }
   }
-  if (expected.size)
-    throw new Error('Missing component preset browser rows: ' + [...expected].join(', '))
-  return value
+  return value as ComponentPresetMeasurement[]
 }
 
-function expectedManagerVersion(
-  manager: string,
-  yarnFixtureId: string | undefined,
-): string {
-  return manager === 'npm'
-    ? '11.19.0'
-    : manager === 'pnpm'
-      ? '11.25.0'
-      : manager === 'bun'
-        ? '1.4.3'
-        : yarnFixtureId === 'classic-vite'
-          ? '1.22.22'
-          : '4.18.1'
-}
-
-export async function validateComponentPresetConsumerRows(
+export async function validateComponentPresetConsumers(
   value: unknown,
   matrix: Record<string, ConsumerEvidence>,
-): Promise<unknown[]> {
-  const descriptors = consumerCases(),
-    expected = new Set(
-      descriptors.flatMap((descriptor) =>
-        componentPresetFixtures().map(({ family }) => descriptor.id + '/' + family),
-      ),
-    ),
-    refs = await references(),
-    lockProvenance = new Map<string, { file: string; hash: string; declaration: unknown }>()
-  if (!Array.isArray(value) || value.length !== expected.size)
-    throw new Error('Expected all 102 component preset consumer installations')
-  if (
-    Object.keys(matrix).length !== descriptors.length ||
-    descriptors.some((descriptor) => !Object.hasOwn(matrix, descriptor.id))
-  )
-    throw new Error('Component preset consumer descriptor set mismatch')
-
-  for (const item of value) {
-    const row = object(item),
-      id = String(row.descriptorId),
-      presetFamily = String(row.presetFamily),
-      key = id + '/' + presetFamily,
-      descriptor = descriptors.find((candidate) => candidate.id === id),
-      global = matrix[id]
-    if (!descriptor || !global || !expected.delete(key))
-      throw new Error('Duplicate or unexpected component preset consumer row ' + key)
+): Promise<void> {
+  const cases = consumerCases(),
+    rows = object(value),
+    refs = await componentPresetReferences()
+  finalizeConsumerEvidence(cases, matrix)
+  if (!equal(Object.keys(rows).sort(), cases.map((c) => c.id).sort()))
+    throw Error('Component preset consumer descriptor set mismatch')
+  for (const c of cases) {
+    const row = object(rows[c.id]),
+      global = matrix[c.id],
+      build = object(row.build),
+      presets = object(row.presets)
     if (
-      row.hostFamily !== descriptor.family ||
-      row.manager !== descriptor.manager ||
-      row.managerVersion !== expectedManagerVersion(descriptor.manager, descriptor.yarnFixtureId) ||
+      row.family !== c.family ||
+      row.framework !== c.framework ||
+      row.manager !== c.manager ||
+      row.managerVersion !== global.managerVersion ||
       !equal(row.cliRuntime, global.cliRuntime) ||
       !equal(row.buildRuntime, global.buildRuntime) ||
       !equal(row.audit, global.audit) ||
-      !equal(row.build, { status: 'passed', exitCode: 0 }) ||
-      global.build.exitCode !== 0
+      build.status !== 'passed' ||
+      build.exitCode !== 0
     )
-      throw new Error('Wrong or unsuccessful consumer provenance ' + key)
-
-    const expectedLockfile =
-        descriptor.manager === 'npm'
+      throw Error(
+        'Component preset requires measured manager/runtime/audit/build ' +
+          c.id,
+      )
+    const host = refs.find((r) => r.preset.data.styleFamily === c.family)!
+    if (
+      row.globalPresetHashBefore !== host.preset.hash ||
+      row.globalPresetHashAfter !== host.preset.hash
+    )
+      throw Error('Component preset changed global defaults ' + c.id)
+    const before = object(row.protectedHashes),
+      after = object(row.protectedAfterHashes)
+    const managerLock =
+      c.manager === 'bun'
+        ? c.bunFormat === 'binary'
+          ? 'bun.lockb'
+          : 'bun.lock'
+        : c.manager === 'npm'
           ? 'package-lock.json'
-          : descriptor.manager === 'pnpm'
-            ? 'pnpm-lock.yaml'
-            : descriptor.manager === 'yarn'
-              ? 'yarn.lock'
-              : descriptor.bunFormat === 'binary'
-                ? 'bun.lockb'
-                : 'bun.lock',
-      lockHash = row.managerLockHash,
-      declaration = row.packageManagerDeclaration
+          : c.manager === 'yarn'
+            ? 'yarn.lock'
+            : 'pnpm-lock.yaml'
     if (
-      row.managerLockfile !== expectedLockfile ||
-      typeof lockHash !== 'string' ||
-      !/^[a-f0-9]{64}$/.test(lockHash) ||
-      typeof declaration !== 'string'
+      row.packageManagerDeclaration !== c.manager + '@' + row.managerVersion ||
+      row.managerLockfile !== managerLock ||
+      !equal(row.managerLockfiles, [managerLock]) ||
+      row.managerLockHash !== before[managerLock]
+    ) throw Error('Missing or incorrect manager lock provenance ' + c.id)
+    if (!Object.keys(before).some(file => /^src\/ombelle-examples\/(?:recipes|presets)\/.+\.tsx$/.test(file)))
+      throw Error('Missing pre-existing usage-file hash ' + c.id)
+    if (
+      [
+        'ui-preset.json',
+        'ui-library.config.json',
+        'src/index.css',
+        'src/components/ui/button.tsx',
+        'package.json',
+        managerLock,
+      ].some((p) => !digest(before[p])) ||
+      Object.values(before).some((h) => !digest(h)) ||
+      !equal(before, after) ||
+      global.sourceHashes['src/components/ui/button.tsx'] !==
+        before['src/components/ui/button.tsx']
     )
-      throw new Error('Missing or incorrect manager lock provenance ' + key)
-    if (declaration !== descriptor.manager + '@' + row.managerVersion)
-      throw new Error('Consumer package manager declaration mismatch ' + key)
-    const previousLock = lockProvenance.get(id),
-      currentLock = { file: expectedLockfile, hash: lockHash, declaration }
-    if (previousLock && !equal(previousLock, currentLock))
-      throw new Error('Manager lock changed between preset installs ' + id)
-    lockProvenance.set(id, currentLock)
-
-    const result = refs.get(presetFamily)?.result
+      throw Error(
+        'Missing or changed protected defaults/ordinary component/manager lock ' +
+          c.id,
+      )
     if (
-      !result ||
-      row.presetId !== result.preset.data.id ||
-      row.presetRevision !== result.preset.data.revision ||
-      row.presetHash !== result.preset.hash ||
-      row.scope !== result.scope ||
-      row.darkSelector !== result.darkSelector ||
-      !equal(row.provenance, result.provenance) ||
-      !equal(row.canonicalHashes, canonicalHashes(result))
-    )
-      throw new Error('Component preset consumer identity mismatch ' + key)
-
-    const expectedArtifacts = await componentPresetTransformedArtifacts(result, 'vite')
-    if (!equal(row.transformedArtifacts, expectedArtifacts))
-      throw new Error('Missing or incorrect consumer source hashes ' + key)
-    for (const artifact of expectedArtifacts) {
-      if (global.sourceHashes[artifact.path] !== artifact.sha256)
-        throw new Error('Consumer matrix source hash mismatch ' + key + '/' + artifact.path)
-    }
-
-    const dryRun = object(row.dryRun),
-      install = object(row.install),
-      repeat = object(row.repeat),
-      tamper = object(row.tamper),
-      preservation = object(row.preservation),
-      protectedHashes = object(row.protectedHashes)
-    if (dryRun.status !== 'planned' || dryRun.treeUnchanged !== true)
-      throw new Error('Component preset dry-run mutated consumer ' + key)
-    if (install.status !== 'success' || install.exitCode !== 0)
-      throw new Error('Component preset install failed ' + key)
-    if (repeat.status !== 'success' || repeat.allNoop !== true)
-      throw new Error('Component preset repeat was not a no-op ' + key)
-    if (tamper.status !== 'conflict' || tamper.exitCode !== 4 || tamper.treeUnchanged !== true)
-      throw new Error('Same-revision tamper did not conflict safely ' + key)
-    if (
-      preservation.defaults !== true ||
-      preservation.ordinaryComponents !== true ||
-      preservation.usageFiles !== true
-    )
-      throw new Error('Component preset changed protected project files ' + key)
-    for (const path of ['ui-preset.json', 'src/components/ui/button.tsx'])
-      if (typeof protectedHashes[path] !== 'string' || !/^[a-f0-9]{64}$/.test(protectedHashes[path] as string))
-        throw new Error('Missing protected-file hash ' + key + '/' + path)
-    for (const [path, hash] of Object.entries(protectedHashes))
-      if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash))
-        throw new Error('Invalid protected-file hash ' + key + '/' + path)
-    if (
-      !Object.keys(protectedHashes).some((path) =>
-        /^src\/ombelle-examples\/(?:recipes|presets)\/.+\.tsx$/.test(path),
+      !equal(
+        Object.keys(presets).sort(),
+        refs.map((r) => r.preset.data.id + '@' + r.preset.data.revision).sort(),
       )
     )
-      throw new Error('Missing pre-existing usage-file hash ' + key)
+      throw Error('Missing or duplicate component preset install ' + c.id)
+    for (const ref of refs) {
+      const entry = object(
+          presets[ref.preset.data.id + '@' + ref.preset.data.revision],
+        ),
+        installed = object(entry.installed),
+        { artifacts, ...meta } = installed
+      const { artifacts: unused, dependencies: ignored, ...identity } = ref
+      if (
+        !equal(meta, identity) ||
+        !equal(
+          entry.canonicalHashes,
+          Object.fromEntries(
+            ref.artifacts.map((a) => [a.logicalPath, a.sha256]),
+          ),
+        )
+      )
+        throw Error('Installed component preset provenance mismatch ' + c.id)
+      const expectedFiles: Record<string, unknown> = {},
+        hashes: Record<string, string> = {}
+      for (const a of ref.artifacts.filter((a) => a.kind !== 'utility')) {
+        const transformed = await componentPresetArtifact(a, 'consumer'),
+          hash = await sha256(transformed.content)
+        expectedFiles[transformed.path] = {
+          logicalPath: a.logicalPath,
+          kind: a.kind,
+          sha256: hash,
+        }
+        hashes[transformed.path] = hash
+        if (global.sourceHashes[transformed.path] !== hash)
+          throw Error(
+            'Component preset differs from measured built source ' + c.id,
+          )
+      }
+      if (
+        !equal(artifacts, expectedFiles) ||
+        !equal(entry.transformedHashes, hashes) ||
+        [
+          'dryRun',
+          'install',
+          'repeatNoop',
+          'tamperConflict',
+          'preservation',
+        ].some((k) => object(entry.checks)[k] !== true)
+      )
+        throw Error(
+          'Incomplete component preset install/source/safety outcomes ' + c.id,
+        )
+    }
   }
-  if (expected.size)
-    throw new Error('Missing component preset consumer rows: ' + [...expected].join(', '))
-  return value
 }
 
 export async function finalizeComponentPresetEvidence(
   input: { measurements: unknown; consumers: unknown },
   matrix: Record<string, ConsumerEvidence>,
-): Promise<{ measurements: unknown[]; consumers: unknown[] }> {
-  const measurements = await validateComponentPresetMeasurements(input.measurements),
-    consumers = await validateComponentPresetConsumerRows(input.consumers, matrix)
-  return { measurements, consumers }
+) {
+  const measurements = await validateComponentPresetMeasurements(
+    input.measurements,
+  )
+  await validateComponentPresetConsumers(input.consumers, matrix)
+  return { measurements, consumers: input.consumers }
 }

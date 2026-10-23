@@ -30,6 +30,7 @@ export async function validateInstalledComponentPresets(
   if (!object(value) || !object(artifacts)) throw bad()
 
   const transformContext: ComponentPresetTransformContext = context ?? {
+    root,
     componentsDir: 'src/components/ui',
     sourceDir: 'src',
     utilsFile: 'src/lib/utils.ts',

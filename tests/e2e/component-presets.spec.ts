@@ -1,186 +1,265 @@
 import { test, expect } from '@playwright/test'
-import fs from 'node:fs/promises'
+import fs from 'node:fs'
 import path from 'node:path'
-import { compileButtonPreset, sha256 } from '@ombelle/compiler'
+import { sha256 } from '@ombelle/compiler'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
-import { componentPresetFixtures } from '../helpers/component-preset-fixture.js'
 import {
-  componentPresetTransformedArtifacts,
+  componentPresetReferences,
+  componentPresetArtifact,
+} from '../helpers/component-preset-fixture.js'
+import {
+  recipeStyles,
+  recipeDom,
+  recipeScreenshotEvidence,
+} from '../helpers/recipe-measurements.js'
+import {
+  componentPresetIsolationBaseline,
+  assertComponentPresetHostIsolation,
+} from '../helpers/component-preset-isolation.js'
+import {
   validateComponentPresetMeasurements,
-} from '../../scripts/component-preset-evidence.ts'
+  componentPresetIsolationMethod,
+  type ComponentPresetMeasurement,
+} from '../../scripts/component-preset-evidence.js'
 
-const map = JSON.parse(await fs.readFile('.artifacts/consumers.json', 'utf8'))
-const rows: Record<string, unknown>[] = []
-const apps = ['preview', 'vite', 'next', 'npm-vite', 'npm-next'] as const
-const checks = [
-  'componentBehavior',
-  'focus',
-  'forcedColors',
-  'reducedMotion',
-  'hostStyleIsolation',
-] as const
-
-test.beforeAll(async () => {
-  await fs.rm('.artifacts/component-preset-measurements.json', { force: true })
+const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
+const rows: ComponentPresetMeasurement[] = []
+const previewOnly = process.env.OMBELLE_COMPONENT_PRESET_PREVIEW_ONLY === '1'
+test.beforeAll(({ browser }, info) => {
+  fs.rmSync('.artifacts/component-preset-measurements.json', { force: true })
+  fs.writeFileSync(
+    '.artifacts/component-preset-browser-version.json',
+    JSON.stringify(
+      {
+        engine: browser.browserType().name(),
+        version: browser.version(),
+        channel: info.project.use.channel ?? 'bundled',
+      },
+      null,
+      2,
+    ),
+  )
 })
-
 test.afterAll(async () => {
-  if (rows.length === 90) {
+  if (!previewOnly) {
     await validateComponentPresetMeasurements(rows)
-    await fs.writeFile(
+    fs.writeFileSync(
       '.artifacts/component-preset-measurements.json',
       JSON.stringify(rows, null, 2),
     )
   }
 })
-
-async function visualStyles(locator: import('@playwright/test').Locator) {
-  return locator.evaluate((element) => {
-    const style = getComputedStyle(element)
-    return {
-      color: style.color,
-      background: style.backgroundColor,
-      border: style.border,
-      borderRadius: style.borderRadius,
-      minHeight: style.minHeight,
-      fontFamily: style.fontFamily,
-      fontSize: style.fontSize,
-      lineHeight: style.lineHeight,
-      boxShadow: style.boxShadow,
-      padding: style.padding,
-    }
-  })
-}
-
-function pageUrl(hostFamily: string, app: string): string {
-  if (app === 'preview') return `http://127.0.0.1:4173/${hostFamily}/`
-  const id = app.startsWith('npm-')
-    ? `${app}-${hostFamily}`
-    : `${app}-${hostFamily}`
-  return `http://127.0.0.1:${map[id].port}/`
-}
-
 for (const hostFamily of supportedStyleFamilies)
-  for (const { family: presetFamily, preset } of componentPresetFixtures())
+  for (const selectedFamily of supportedStyleFamilies)
     for (const mode of ['light', 'dark']) {
-      test(`${hostFamily} host / ${presetFamily} Button preset / ${mode}: rendered parity and states`, async ({ page }) => {
+      test(`${hostFamily} hosts ${selectedFamily} component preset ${mode}: parity and states`, async ({
+        page,
+      }) => {
         test.setTimeout(180000)
-        const result = await compileButtonPreset({ preset }),
-          measurementKey = [hostFamily, presetFamily, mode].join('/')
-        let expectedStyles: Record<string, string> | undefined
-
-        for (const app of apps) {
-          const base = pageUrl(hostFamily, app)
-          await page.setViewportSize({ width: 1100, height: 800 })
-          await page.emulateMedia({ reducedMotion: 'reduce', forcedColors: 'none' })
+        const ref = (await componentPresetReferences()).find(
+          (r) => r.preset.data.styleFamily === selectedFamily,
+        )!
+        let referenceStyles: unknown,
+          referenceDom: unknown,
+          referenceImage: Buffer | undefined
+        for (const app of previewOnly
+          ? ['preview']
+          : ['preview', 'vite', 'next', 'npm-vite', 'npm-next']) {
+          const base =
+            app === 'preview'
+              ? `http://127.0.0.1:4173/${hostFamily}/`
+              : `http://127.0.0.1:${map[app + '-' + hostFamily].port}/`
+          await page.emulateMedia({
+            reducedMotion: 'reduce',
+            forcedColors: 'none',
+          })
           await page.goto(base + '?mode=' + mode)
-          await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
-          const ordinary = page.getByRole('button', { name: 'Save changes', exact: true }),
-            ordinaryButtonBefore = await visualStyles(ordinary)
-
+          await expect(page.locator('main')).toHaveAttribute(
+            'data-ready',
+            'true',
+          )
+          const neighbors = await componentPresetIsolationBaseline(
+            page,
+            hostFamily,
+            mode,
+          )
           await page.goto(
-            base +
-              '?mode=' +
-              mode +
-              '&componentPresets=1&componentPreset=' +
-              result.preset.data.id +
-              '&tamper=1',
+            base + '?mode=' + mode + '&componentPresets=1&componentPreset=' + ref.preset.data.id,
           )
-          await expect(page.getByTestId('component-preset-fixture')).toBeVisible()
-          await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
-          const button = page.getByTestId('component-preset-default')
+          const button = page.getByTestId('component-preset-default'),
+            specimen = page.getByTestId('component-preset-specimen')
           await expect(button).toBeVisible()
-          await expect(button).toHaveAttribute('data-slot', 'scoped-button')
-          await expect(button).toHaveAttribute('data-ombelle-scope', result.scope)
-          await expect(button).toHaveAttribute('data-variant', 'default')
-          await expect(button).toHaveAttribute('data-size', 'default')
-
-          const ordinaryButtonAfter = await visualStyles(ordinary)
-          expect(ordinaryButtonAfter).toEqual(ordinaryButtonBefore)
-          const styles = await visualStyles(button)
-          expect(styles.minHeight).toBe('40px')
-          expect(styles.fontFamily).toContain('Arial')
-          const radiusRem = preset.design.radiusRem ?? 0
-          expect(styles.borderRadius).toBe(
-            radiusRem === 0 ? '0px' : `${radiusRem * 16}px`,
+          await expect(page.locator('main')).toHaveAttribute(
+            'data-ready',
+            'true',
           )
-          if (expectedStyles) expect(styles).toEqual(expectedStyles)
-          else expectedStyles = styles
-
+          await assertComponentPresetHostIsolation(page, neighbors)
+          await expect(button).toHaveAttribute('data-slot', 'scoped-button')
+          await expect(button).toHaveAttribute('data-ombelle-scope', ref.scope)
+          await expect(button).toHaveAccessibleName('Preset action')
+          await page.evaluate(() => document.fonts.ready)
+          await page.mouse.move(0, 0)
+          const computedStyles = await recipeStyles(button),
+            dom = await recipeDom(specimen),
+            image = await specimen.screenshot({ animations: 'disabled' }),
+            normalizedScreenshot = await recipeScreenshotEvidence(page, image)
+          if (referenceImage) {
+            expect(computedStyles).toEqual(referenceStyles)
+            expect(dom).toEqual(referenceDom)
+            expect(image.equals(referenceImage)).toBe(true)
+          } else {
+            referenceStyles = computedStyles
+            referenceDom = dom
+            referenceImage = image
+            await test
+              .info()
+              .attach(
+                `component-preset-${selectedFamily}-${hostFamily}-${mode}`,
+                { body: image, contentType: 'image/png' },
+              )
+          }
+          const transformedHashes: Record<string, string> = {}
+          for (const a of ref.artifacts.filter((a) => a.kind !== 'utility')) {
+            const expected = await componentPresetArtifact(
+              a,
+              app === 'preview' ? 'preview' : 'consumer',
+            )
+            const root =
+              app === 'preview'
+                ? path.join('apps/preview/src/generated', hostFamily)
+                : map[app + '-' + hostFamily].root
+            const content = fs.readFileSync(
+              path.join(root, expected.path),
+              'utf8',
+            )
+            expect(content).toBe(expected.content)
+            transformedHashes[a.logicalPath] = await sha256(content)
+          }
           await button.focus()
           await expect(button).toBeFocused()
-          expect(
-            await button.evaluate((element) => getComputedStyle(element).outlineStyle),
-          ).not.toBe('none')
+          const focusOutlineWidth = await button.evaluate((el) =>
+            parseFloat(getComputedStyle(el).outlineWidth),
+          )
+          expect(focusOutlineWidth).toBeGreaterThanOrEqual(3)
           await page.keyboard.press('Enter')
           await page.keyboard.press('Space')
-          await expect(page.getByTestId('component-preset-clicks')).toHaveText('2')
-
+          await button.click()
+          await expect(page.getByTestId('component-preset-clicks')).toHaveText(
+            '3',
+          )
+          await page
+            .getByRole('button', { name: 'Toggle preset loading' })
+            .click()
+          await expect(button).toBeDisabled()
+          await expect(button).toHaveAttribute('aria-busy', 'true')
+          await expect(button).toHaveAccessibleName('Preset action')
+          await button.evaluate((el) => (el as HTMLButtonElement).click())
+          await expect(page.getByTestId('component-preset-clicks')).toHaveText(
+            '3',
+          )
+          await page
+            .getByRole('button', { name: 'Toggle preset loading' })
+            .click()
+          await page
+            .getByRole('button', { name: 'Toggle preset disabled' })
+            .click()
+          await expect(button).toBeDisabled()
+          await button.evaluate((el) => (el as HTMLButtonElement).click())
+          await expect(page.getByTestId('component-preset-clicks')).toHaveText(
+            '3',
+          )
+          await page
+            .getByRole('button', { name: 'Toggle preset disabled' })
+            .click()
           await page.emulateMedia({ reducedMotion: 'no-preference' })
-          await button.evaluate((element) =>
-            (element as HTMLElement).style.setProperty('--motion-duration', '150ms'),
+          await button.evaluate((el) =>
+            el.style.setProperty('--motion-duration', '150ms'),
           )
-          expect(
-            await button.evaluate((element) =>
-              getComputedStyle(element).transitionDuration
-                .split(',')
-                .every((value) => parseFloat(value) > 0),
-            ),
-          ).toBe(true)
+          const duration = () =>
+            button.evaluate((el) =>
+              Math.max(
+                ...getComputedStyle(el)
+                  .transitionDuration.split(',')
+                  .map(
+                    (v) => parseFloat(v) * (v.trim().endsWith('ms') ? 1 : 1000),
+                  ),
+              ),
+            )
+          const motionPositiveControlMs = await duration()
+          expect(motionPositiveControlMs).toBe(150)
           await page.emulateMedia({ reducedMotion: 'reduce' })
-          expect(
-            await button.evaluate((element) =>
-              getComputedStyle(element).transitionDuration
-                .split(',')
-                .every((value) => parseFloat(value) === 0),
-            ),
-          ).toBe(true)
-
+          const reducedMotionMs = await duration()
+          expect(reducedMotionMs).toBe(0)
           await page.emulateMedia({ forcedColors: 'active' })
-          expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true)
-          expect(
-            await button.evaluate((element) => getComputedStyle(element).outlineStyle),
-          ).not.toBe('none')
-          await page.emulateMedia({ forcedColors: 'none' })
-
-          const transformedArtifacts = await componentPresetTransformedArtifacts(
-            result,
-            app,
+          await page.keyboard.press('Tab')
+          await button.focus()
+          const forcedColorsOutline = await button.evaluate(
+            (el) => getComputedStyle(el).outlineStyle,
           )
-          for (const artifact of transformedArtifacts) {
-            const file =
-              app === 'preview'
-                ? path.join(
-                    'apps/preview/src/generated',
-                    hostFamily,
-                    artifact.path.startsWith('src/ombelle-examples/')
-                      ? artifact.path.slice('src/'.length)
-                      : artifact.path.slice('src/'.length),
-                  )
-                : path.join(map[`${app}-${hostFamily}`].root, artifact.path)
-            expect(await sha256(await fs.readFile(file, 'utf8'))).toBe(artifact.sha256)
-          }
-
+          expect(forcedColorsOutline).not.toBe('none')
           rows.push({
             hostFamily,
-            presetFamily,
-            presetId: result.preset.data.id,
-            presetHash: result.preset.hash,
-            scope: result.scope,
-            mode,
+            presetId: ref.preset.data.id,
+            presetHash: ref.preset.hash,
+            scope: ref.scope,
             app,
+            mode,
             canonicalHashes: Object.fromEntries(
-              result.artifacts
-                .filter((artifact) => artifact.kind !== 'utility')
-                .map((artifact) => [artifact.logicalPath, artifact.sha256]),
+              ref.artifacts.map((a) => [a.logicalPath, a.sha256]),
             ),
-            transformedArtifacts,
-            computedStyles: styles,
-            ordinaryButtonBefore,
-            ordinaryButtonAfter,
-            checks: Object.fromEntries(checks.map((check) => [check, true])),
+            transformedHashes,
+            computedStyles,
+            domHash: await sha256(JSON.stringify(dom)),
+            screenshotHash: await sha256(image.toString('base64')),
+            normalizedScreenshotHash: await sha256(
+              normalizedScreenshot.pixels,
+            ),
+            normalizedScreenshot,
+            focusOutlineWidth,
+            forcedColorsOutline,
+            motionPositiveControlMs,
+            reducedMotionMs,
+            checks: {
+              parity: true,
+              isolation: true,
+              activation: true,
+              disabled: true,
+              loading: true,
+              focus: true,
+              forcedColors: true,
+              reducedMotion: true,
+            },
+            isolationMethod: componentPresetIsolationMethod,
           })
         }
-        expect(rows.filter((row) => [row.hostFamily, row.presetFamily, row.mode].join('/') === measurementKey)).toHaveLength(5)
       })
     }
+
+test('an unscoped preset rule affecting an ordinary Button fails the isolation check', async ({
+  page,
+}) => {
+  const base = 'http://127.0.0.1:4173/flat/'
+  const leak = '[data-slot="button"] { border-radius: 123px !important; }'
+  await page.goto(base + '?mode=light')
+  await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+  await page.addStyleTag({ content: leak })
+  const baseline = await componentPresetIsolationBaseline(page, 'flat', 'light')
+  await page.goto(base + '?mode=light&componentPresets=1&componentPreset=builtin-flat')
+  await expect(page.getByTestId('component-preset-default')).toBeVisible()
+  await page.addStyleTag({ content: leak })
+  await expect(
+    page.getByRole('button', { name: 'Save changes', exact: true }),
+  ).toHaveCSS('border-radius', '123px')
+  await expect(
+    assertComponentPresetHostIsolation(page, baseline),
+  ).rejects.toThrow('Component preset changed ordinary host styles')
+})
+
+ test('compiler-owned scoped attributes override caller tampering', async ({ page }) => {
+   const ref = (await componentPresetReferences()).find(r => r.preset.data.id === 'builtin-flat')!
+   await page.goto('http://127.0.0.1:4173/flat/?mode=light&componentPresets=1&componentPreset=builtin-flat&tamper=1')
+   const button = page.getByTestId('component-preset-default')
+   await expect(button).toBeVisible()
+   await expect(button).toHaveAttribute('data-slot', 'scoped-button')
+   await expect(button).toHaveAttribute('data-ombelle-scope', ref.scope)
+ })

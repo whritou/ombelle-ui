@@ -1,266 +1,460 @@
 import { expect, it } from 'vitest'
-import { spawnSync } from 'node:child_process'
-import { compileButtonPreset } from '@ombelle/compiler'
 import { consumerCases } from '../../scripts/consumer-matrix.js'
 import type { ConsumerEvidence } from '../../scripts/consumer-evidence.js'
-import type { RuntimeIdentity } from '../helpers/cli-runtime.js'
 import {
   componentPresetMeasurementKeys,
-  componentPresetTransformedArtifacts,
+  finalizeComponentPresetEvidence,
+  normalizedScreenshotsMatch,
+  validateComponentPresetConsumers,
   validateComponentPresetMeasurements,
-  validateComponentPresetConsumerRows,
-} from '../../scripts/component-preset-evidence.ts'
-import { componentPresetFixtures } from '../helpers/component-preset-fixture.js'
+} from '../../scripts/component-preset-evidence.js'
+import {
+  componentPresetReferences,
+  componentPresetArtifact,
+} from '../helpers/component-preset-fixture.js'
+import { normalizeRecipeScreenshotPixels } from '../helpers/recipe-measurements.js'
+import { sha256 } from '@ombelle/compiler'
+import { runNative } from '../helpers/bun-command.js'
 
-const checks = [
-  'componentBehavior',
-  'focus',
-  'forcedColors',
-  'reducedMotion',
-  'hostStyleIsolation',
-] as const
-
-it('loads in the native Node foundation-gate bootstrap', () => {
-  const result = spawnSync(
+it('loads the foundation evidence validator through native Node without loader aliases', async () => {
+  const result = await runNative(
     process.execPath,
     [
-      '--import',
-      'tsx',
       '--input-type=module',
-      '-e',
-      "await import('./scripts/component-preset-evidence.ts')",
+      '--eval',
+      "const {finalizeComponentPresetEvidence}=await import('./scripts/component-preset-evidence.ts'); await finalizeComponentPresetEvidence({measurements:[],consumers:{}},{}).then(()=>{throw Error('Accepted incomplete evidence')},error=>process.stdout.write(error.message))",
     ],
-    { cwd: process.cwd(), encoding: 'utf8' },
+    process.cwd(),
   )
-  expect(result.status, result.stderr).toBe(0)
+  expect(result.code, result.output).toBe(0)
+  expect(result.output).toContain(
+    'Expected all 90 component preset measurements',
+  )
 })
 
+// Structural fixtures only; synthetic success records never enter retained run evidence.
+async function fixtures() {
+  const refs = await componentPresetReferences()
+  const matrix: Record<string, ConsumerEvidence> = {}
+  const consumers: Record<string, any> = {}
+  for (const c of consumerCases()) {
+    const cliRuntime = {
+      name: c.cliRuntime,
+      executable: '/fixture/' + c.cliRuntime,
+      version: c.cliRuntime === 'bun' ? '1.4.3' : '24.19.0',
+    }
+    const buildRuntime = {
+      name: 'node' as const,
+      executable: '/fixture/node',
+      version: '24.19.0',
+    }
+    const sourceHashes: Record<string, string> = {
+      'src/components/ui/button.tsx': 'a'.repeat(64),
+    }
+    const presets: Record<string, any> = {}
+    for (const ref of refs) {
+      const artifacts: Record<string, any> = {},
+        transformedHashes: Record<string, string> = {}
+      for (const a of ref.artifacts.filter((a) => a.kind !== 'utility')) {
+        const transformed = await componentPresetArtifact(a, 'consumer')
+        const hash = await sha256(transformed.content)
+        artifacts[transformed.path] = {
+          logicalPath: a.logicalPath,
+          kind: a.kind,
+          sha256: hash,
+        }
+        transformedHashes[transformed.path] = hash
+        sourceHashes[transformed.path] = hash
+      }
+      const { artifacts: unused, dependencies: ignored, ...identity } = ref
+      presets[ref.preset.data.id + '@1'] = {
+        installed: { ...identity, artifacts },
+        canonicalHashes: Object.fromEntries(
+          ref.artifacts.map((a) => [a.logicalPath, a.sha256]),
+        ),
+        transformedHashes,
+        checks: {
+          dryRun: true,
+          install: true,
+          repeatNoop: true,
+          tamperConflict: true,
+          preservation: true,
+        },
+      }
+    }
+    const protectedHashes = Object.fromEntries(
+      [
+        'ui-preset.json',
+        'ui-library.config.json',
+        'src/index.css',
+        'src/components/ui/button.tsx',
+        'package.json',
+        'src/ombelle-examples/recipes/example/r1.tsx',
+        c.manager === 'bun'
+          ? c.bunFormat === 'binary'
+            ? 'bun.lockb'
+            : 'bun.lock'
+          : c.manager === 'npm'
+            ? 'package-lock.json'
+            : c.manager === 'yarn'
+              ? 'yarn.lock'
+              : 'pnpm-lock.yaml',
+      ].map((p) => [p, 'a'.repeat(64)]),
+    )
+    matrix[c.id] = {
+      family: c.family,
+      manager: c.manager,
+      managerVersion:
+        c.manager === 'npm'
+          ? '11.19.0'
+          : c.manager === 'pnpm'
+            ? '11.25.0'
+            : c.manager === 'bun'
+              ? '1.4.3'
+              : c.yarnFixtureId === 'classic-vite'
+                ? '1.22.22'
+                : '4.18.1',
+      cliRuntime,
+      buildRuntime,
+      sourceHashes,
+      audit: { exitCode: 0, scope: c.manager === 'bun' ? 'all' : 'production' },
+      build: { exitCode: 0 },
+    }
+    consumers[c.id] = {
+      family: c.family,
+      framework: c.framework,
+      manager: c.manager,
+      managerVersion: matrix[c.id].managerVersion,
+      cliRuntime,
+      buildRuntime,
+      audit: matrix[c.id].audit,
+      build: { status: 'passed', exitCode: 0 },
+      presets,
+      globalPresetHashBefore: refs.find(
+        (r) => r.preset.data.styleFamily === c.family,
+      )!.preset.hash,
+      globalPresetHashAfter: refs.find(
+        (r) => r.preset.data.styleFamily === c.family,
+      )!.preset.hash,
+      packageManagerDeclaration: c.manager + '@' + matrix[c.id].managerVersion,
+      managerLockfile: Object.keys(protectedHashes).find(p => ['bun.lock','bun.lockb','package-lock.json','yarn.lock','pnpm-lock.yaml'].includes(p))!,
+      managerLockfiles: Object.keys(protectedHashes).filter(p => ['bun.lock','bun.lockb','package-lock.json','yarn.lock','pnpm-lock.yaml'].includes(p)),
+      managerLockHash: 'a'.repeat(64),
+      protectedHashes,
+      protectedAfterHashes: { ...protectedHashes },
+    }
+  }
+  return { refs, matrix, consumers }
+}
 async function measurements() {
-  const refs = await Promise.all(
-    componentPresetFixtures().map(async ({ family, preset }) => ({
-      family,
-      result: await compileButtonPreset({ preset }),
-    })),
-  )
+  const refs = await componentPresetReferences()
   return Promise.all(
     componentPresetMeasurementKeys().map(async (key) => {
-      const [hostFamily, presetFamily, mode, app] = key.split('/')
-      const { result } = refs.find((entry) => entry.family === presetFamily)!
+      const [hostFamily, presetId, mode, app] = key.split('/'),
+        ref = refs.find((r) => r.preset.data.id === presetId)!
+      const transformedHashes: Record<string, string> = {}
+      for (const a of ref.artifacts.filter((a) => a.kind !== 'utility'))
+        transformedHashes[a.logicalPath] = await sha256(
+          (
+            await componentPresetArtifact(
+              a,
+              app === 'preview' ? 'preview' : 'consumer',
+            )
+          ).content,
+        )
+      const normalizedScreenshotPixels = Buffer.alloc(16 * 16 * 4)
+      for (let i = 0; i < normalizedScreenshotPixels.length; i += 4) {
+        normalizedScreenshotPixels[i] = 80
+        normalizedScreenshotPixels[i + 1] = 90
+        normalizedScreenshotPixels[i + 2] = 100
+        normalizedScreenshotPixels[i + 3] = 255
+      }
+      const normalizedScreenshot = {
+        width: 64,
+        height: 64,
+        pixels: normalizedScreenshotPixels.toString('base64'),
+      }
       return {
         hostFamily,
-        presetFamily,
-        presetId: result.preset.data.id,
-        presetHash: result.preset.hash,
-        scope: result.scope,
+        presetId,
         mode,
         app,
+        presetHash: ref.preset.hash,
+        scope: ref.scope,
         canonicalHashes: Object.fromEntries(
-          result.artifacts
-            .filter((artifact) => artifact.kind !== 'utility')
-            .map((artifact) => [artifact.logicalPath, artifact.sha256]),
+          ref.artifacts.map((a) => [a.logicalPath, a.sha256]),
         ),
-        transformedArtifacts: await componentPresetTransformedArtifacts(
-          result,
-          app,
-        ),
+        transformedHashes,
+        isolationMethod: 'separate host page without component preset imports',
         computedStyles: {
           color: 'rgb(1, 2, 3)',
           background: 'rgb(4, 5, 6)',
-          borderRadius: '0px',
-          minHeight: '40px',
-          fontFamily: 'Arial, sans-serif',
+          border: '1px solid rgb(1, 2, 3)',
+          borderRadius: '4px',
+          minHeight: '36px',
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          lineHeight: '20px',
+          boxShadow: 'none',
+          padding: '8px',
         },
-        ordinaryButtonBefore: { background: 'rgb(1, 2, 3)' },
-        ordinaryButtonAfter: { background: 'rgb(1, 2, 3)' },
-        checks: Object.fromEntries(checks.map((check) => [check, true])),
+        domHash: 'b'.repeat(64),
+        screenshotHash: 'c'.repeat(64),
+        normalizedScreenshotHash: await sha256(normalizedScreenshot.pixels),
+        normalizedScreenshot,
+        focusOutlineWidth: 3,
+        forcedColorsOutline: 'solid',
+        motionPositiveControlMs: 150,
+        reducedMotionMs: 0,
+        checks: Object.fromEntries(
+          [
+            'parity',
+            'isolation',
+            'activation',
+            'disabled',
+            'loading',
+            'focus',
+            'forcedColors',
+            'reducedMotion',
+          ].map((k) => [k, true]),
+        ),
       }
     }),
   )
 }
-
-function runtime(name: 'node' | 'bun'): RuntimeIdentity {
-  return {
-    name,
-    executable: '/fixture/' + name,
-    version: name === 'bun' ? '1.4.3' : '24.19.0',
-  }
-}
-
-async function consumerRows() {
-  const presets = await Promise.all(
-    componentPresetFixtures().map(async ({ family, preset }) => {
-      const result = await compileButtonPreset({ preset }),
-        transformedArtifacts = await componentPresetTransformedArtifacts(
-          result,
-          'vite',
-        )
-      return {
-        family,
-        result,
-        transformedArtifacts,
-      }
-    }),
-  )
-  return Promise.all(
-    consumerCases().flatMap((descriptor) =>
-      presets.map(async ({ family, result, transformedArtifacts }) => {
-        const managerVersion =
-          descriptor.manager === 'npm'
-            ? '11.19.0'
-            : descriptor.manager === 'pnpm'
-              ? '11.25.0'
-              : descriptor.manager === 'bun'
-                ? '1.4.3'
-                : descriptor.yarnFixtureId === 'classic-vite'
-                  ? '1.22.22'
-                  : '4.18.1'
-        return {
-          descriptorId: descriptor.id,
-          hostFamily: descriptor.family,
-          manager: descriptor.manager,
-          managerVersion,
-          managerLockfile:
-            descriptor.manager === 'npm'
-              ? 'package-lock.json'
-              : descriptor.manager === 'pnpm'
-                ? 'pnpm-lock.yaml'
-                : descriptor.manager === 'yarn'
-                  ? 'yarn.lock'
-                  : descriptor.bunFormat === 'binary'
-                    ? 'bun.lockb'
-                    : 'bun.lock',
-          managerLockHash: 'c'.repeat(64),
-          packageManagerDeclaration: descriptor.manager + '@' + managerVersion,
-          cliRuntime: runtime(descriptor.cliRuntime),
-          buildRuntime: runtime('node'),
-          audit: {
-            exitCode: 0,
-            scope: descriptor.manager === 'bun' ? 'all' as const : 'production' as const,
-          },
-          build: { status: 'passed', exitCode: 0 },
-          presetFamily: family,
-          presetId: result.preset.data.id,
-          presetRevision: result.preset.data.revision,
-          presetHash: result.preset.hash,
-          scope: result.scope,
-          darkSelector: result.darkSelector,
-          provenance: result.provenance,
-          canonicalHashes: Object.fromEntries(
-            result.artifacts
-              .filter((artifact) => artifact.kind !== 'utility')
-              .map((artifact) => [artifact.logicalPath, artifact.sha256]),
-          ),
-          transformedArtifacts,
-          dryRun: { status: 'planned', treeUnchanged: true },
-          install: { status: 'success', exitCode: 0 },
-          repeat: { status: 'success', allNoop: true },
-          tamper: { status: 'conflict', exitCode: 4, treeUnchanged: true },
-          preservation: { defaults: true, ordinaryComponents: true, usageFiles: true },
-          protectedHashes: {
-            'ui-preset.json': 'a'.repeat(64),
-            'src/components/ui/button.tsx': 'b'.repeat(64),
-            'src/ombelle-examples/recipes/example/r1.tsx': 'd'.repeat(64),
-          },
-        }
-      }),
+it('requires all 102 descriptor/preset installs and 90 app/host/preset/mode measurements', async () => {
+  const { matrix, consumers } = await fixtures()
+  await expect(
+    validateComponentPresetConsumers(consumers, matrix),
+  ).resolves.toBeUndefined()
+  await expect(
+    validateComponentPresetMeasurements(await measurements()),
+  ).resolves.toHaveLength(90)
+  await expect(
+    finalizeComponentPresetEvidence(
+      { measurements: await measurements(), consumers },
+      matrix,
     ),
-  )
-}
-
-function consumerMatrix(
-  rows: Awaited<ReturnType<typeof consumerRows>>,
-): Record<string, ConsumerEvidence> {
-  return Object.fromEntries(
-    consumerCases().map((descriptor) => {
-      const records = rows.filter((row) => row.descriptorId === descriptor.id),
-        first = records[0]!
-      return [
-        descriptor.id,
-        {
-          family: descriptor.family,
-          manager: descriptor.manager,
-          managerVersion: first.managerVersion,
-          cliRuntime: first.cliRuntime,
-          buildRuntime: first.buildRuntime,
-          audit: first.audit,
-          build: { exitCode: 0 },
-          sourceHashes: Object.fromEntries(
-            records.flatMap((record) =>
-              record.transformedArtifacts.map((artifact) => [
-                artifact.path,
-                artifact.sha256,
-              ]),
-            ),
-          ),
-        },
-      ]
-    }),
-  )
-}
-
-it('requires all 90 attributable app, host, selected-preset, and mode outcomes', async () => {
-  const data = await measurements()
-  expect(data).toHaveLength(90)
-  await expect(validateComponentPresetMeasurements(data)).resolves.toHaveLength(90)
+  ).resolves.toMatchObject({ consumers })
+  expect(
+    Object.values(consumers).reduce(
+      (sum, row) => sum + Object.keys(row.presets).length,
+      0,
+    ),
+  ).toBe(102)
 })
-
-it('rejects missing, duplicate, mismatched, failed, or incomplete browser outcomes', async () => {
-  const data = await measurements()
-  await expect(validateComponentPresetMeasurements(data.slice(1))).rejects.toThrow()
-  for (const patch of [
-    { app: 'fake' },
-    { presetHash: '0'.repeat(64) },
-    { checks: {} },
-    { canonicalHashes: {} },
-    { transformedArtifacts: [] },
-    { ordinaryButtonAfter: { background: 'rgb(9, 9, 9)' } },
-  ])
+it('rejects missing, duplicate, failed, stale, transformed or incomplete consumer records', async () => {
+  const base = await fixtures(),
+    id = 'vite-flat',
+    preset = 'builtin-flat@1'
+  const mutations: ((r: Record<string, any>) => void)[] = [
+    (r) => { delete r[id].protectedHashes['src/ombelle-examples/recipes/example/r1.tsx'] },
+    (r) => { r[id].protectedHashes['src/ombelle-examples/recipes/example/r1.tsx'] = 'invalid' },
+    (r) => { r[id].managerLockfile = 'package-lock.json' },
+    (r) => { r[id].managerLockHash = 'not-a-hash' },
+    (r) => { r[id].packageManagerDeclaration = 'npm@0.0.0' },
+    (r) => {
+      delete r[id]
+    },
+    (r) => {
+      r.extra = r[id]
+    },
+    (r) => {
+      delete r[id].presets[preset]
+    },
+    (r) => {
+      r[id].presets.extra = r[id].presets[preset]
+    },
+    (r) => {
+      r[id].presets[preset].installed.scope = 'f'.repeat(64)
+    },
+    (r) => {
+      r[id].presets[preset].installed.provenance.compilerVersion = '9.0.0'
+    },
+    (r) => {
+      r[id].presets[preset].transformedHashes = {}
+    },
+    (r) => {
+      r[id].presets[preset].checks.tamperConflict = false
+    },
+    (r) => {
+      r[id].presets[preset].checks.repeatNoop = false
+    },
+    (r) => {
+      r[id].presets[preset].checks.dryRun = false
+    },
+    (r) => {
+      r[id].globalPresetHashAfter = 'f'.repeat(64)
+    },
+    (r) => {
+      r[id].protectedAfterHashes['src/components/ui/button.tsx'] = 'f'.repeat(
+        64,
+      )
+    },
+    (r) => {
+      delete r[id].protectedHashes['ui-library.config.json']
+    },
+    (r) => {
+      r[id].build.status = 'pending'
+    },
+    (r) => {
+      r[id].audit.exitCode = 1
+    },
+    (r) => {
+      r[id].manager = 'npm'
+    },
+    (r) => {
+      r[id].cliRuntime.name = 'bun'
+    },
+    (r) => {
+      r[id].managerVersion = '0.0.0'
+    },
+    (r) => {
+      r[id].framework = 'next'
+    },
+    (r) => {
+      const a = Object.values(
+        r[id].presets[preset].installed.artifacts,
+      )[0] as any
+      a.sha256 = 'f'.repeat(64)
+    },
+  ]
+  for (const mutate of mutations) {
+    const data = structuredClone(base.consumers)
+    mutate(data)
     await expect(
-      validateComponentPresetMeasurements([{ ...data[0]!, ...patch }, ...data.slice(1)]),
+      validateComponentPresetConsumers(data, base.matrix),
     ).rejects.toThrow()
+  }
+  const matrix = structuredClone(base.matrix)
+  matrix[id].sourceHashes = {}
   await expect(
-    validateComponentPresetMeasurements([data[0], data[0], ...data.slice(2)]),
+    validateComponentPresetConsumers(base.consumers, matrix),
   ).rejects.toThrow()
-  const wrongParity = await measurements()
-  wrongParity[1]!.computedStyles.background = 'rgb(9, 9, 9)'
-  await expect(validateComponentPresetMeasurements(wrongParity)).rejects.toThrow()
+})
+it('rejects missing, duplicate, failed and cross-host browser parity evidence', async () => {
+  const base = await measurements()
+  const mutations: ((r: any[]) => void)[] = [
+    (r) => {
+      r.pop()
+    },
+    (r) => {
+      r[1] = r[0]
+    },
+    (r) => {
+      r[0].presetHash = 'f'.repeat(64)
+    },
+    (r) => {
+      r[0].scope = 'f'.repeat(64)
+    },
+    (r) => {
+      r[0].checks.isolation = false
+    },
+    (r) => {
+      delete r[0].isolationMethod
+    },
+    (r) => {
+      r[0].transformedHashes[Object.keys(r[0].transformedHashes)[0]] =
+        'f'.repeat(64)
+    },
+    (r) => {
+      r[0].computedStyles.color = 'pink'
+    },
+    (r) => {
+      for (const row of r) delete row.computedStyles.fontSize
+    },
+    (r) => {
+      r[0].normalizedScreenshotHash = 'e'.repeat(64)
+    },
+    (r) => {
+      r[0].focusOutlineWidth = 0
+    },
+    (r) => {
+      r[0].forcedColorsOutline = 'none'
+    },
+    (r) => {
+      r[0].reducedMotionMs = 150
+    },
+  ]
+  for (const mutate of mutations) {
+    const data = structuredClone(base)
+    mutate(data)
+    await expect(validateComponentPresetMeasurements(data)).rejects.toThrow()
+  }
 })
 
-it('requires 102 successful preset installs with preservation and manager provenance', async () => {
-  const rows = await consumerRows(), matrix = consumerMatrix(rows)
-  expect(rows).toHaveLength(102)
-  await expect(validateComponentPresetConsumerRows(rows, matrix)).resolves.toHaveLength(102)
+it('compares normalized screenshot pixels while retaining exact PNG hashes', async () => {
+  const rows = await measurements()
+  rows[30].screenshotHash = 'e'.repeat(64)
+  await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(
+    90,
+  )
+
+  const pixels = Buffer.from(rows[30].normalizedScreenshot.pixels, 'base64')
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = 180
+    pixels[i + 1] = 190
+    pixels[i + 2] = 200
+  }
+  rows[30].normalizedScreenshot.pixels = pixels.toString('base64')
+  rows[30].normalizedScreenshotHash = await sha256(
+    rows[30].normalizedScreenshot.pixels,
+  )
+  await expect(validateComponentPresetMeasurements(rows)).rejects.toThrow(
+    'Component preset differs across hosts/apps',
+  )
 })
 
-it('rejects missing, duplicate, mismatched, failed, or incomplete consumer preset rows', async () => {
-  const rows = await consumerRows(), matrix = consumerMatrix(rows)
-  await expect(validateComponentPresetConsumerRows(rows.slice(1), matrix)).rejects.toThrow()
-  for (const patch of [
-    { presetHash: '0'.repeat(64) },
-    { scope: 'not-a-hash' },
-    { transformedArtifacts: [] },
-    { dryRun: { status: 'planned', treeUnchanged: false } },
-    { install: { status: 'failed', exitCode: 1 } },
-    { repeat: { status: 'success', allNoop: false } },
-    { tamper: { status: 'conflict', exitCode: 4, treeUnchanged: false } },
-    { preservation: { defaults: false, ordinaryComponents: true } },
-    { preservation: { defaults: true, ordinaryComponents: true, usageFiles: false } },
-    { protectedHashes: { 'ui-preset.json': 'a'.repeat(64), 'src/components/ui/button.tsx': 'b'.repeat(64) } },
-    { protectedHashes: {
-      'ui-preset.json': 'a'.repeat(64),
-      'src/components/ui/button.tsx': 'b'.repeat(64),
-      'src/ombelle-examples/recipes/example/r1.tsx': 'invalid',
-    } },
-    { build: { status: 'pending' } },
-    { managerLockfile: 'package-lock.json' },
-    { managerLockHash: 'not-a-hash' },
-    { packageManagerDeclaration: 'npm@0.0.0' },
+it('ignores sparse pixel antialiasing changes but retains visible screenshot changes', () => {
+  const makePixels = (color: number) =>
+    new Uint8ClampedArray(
+      Array.from({ length: 64 * 64 * 4 }, (_, index) =>
+        index % 4 === 3 ? 255 : color,
+      ),
+    )
+  const reference = makePixels(80)
+  const antialiased = makePixels(80)
+  for (const pixel of [
+    1 * 64 + 1,
+    3 * 64 + 5,
+    6 * 64 + 9,
+    21 * 64 + 13,
+    39 * 64 + 17,
+    50 * 64 + 21,
+    27 * 64 + 25,
+    32 * 64 + 29,
+    45 * 64 + 33,
+    52 * 64 + 37,
+    61 * 64 + 41,
   ])
-    await expect(
-      validateComponentPresetConsumerRows([{ ...rows[0]!, ...patch }, ...rows.slice(1)], matrix),
-    ).rejects.toThrow()
-  await expect(
-    validateComponentPresetConsumerRows([rows[0], rows[0], ...rows.slice(2)], matrix),
-  ).rejects.toThrow()
-  await expect(validateComponentPresetConsumerRows(rows, {})).rejects.toThrow()
+    antialiased[4 * pixel] = 88
+
+  const evidence = (pixels: Uint8ClampedArray) => {
+    const normalized = normalizeRecipeScreenshotPixels(pixels, 64, 64)
+    return {
+      width: 64,
+      height: 64,
+      pixels: Buffer.from(normalized.pixels).toString('base64'),
+    }
+  }
+  expect(normalizedScreenshotsMatch(evidence(reference), evidence(antialiased))).toBe(
+    true,
+  )
+
+  const localizedChange = makePixels(80)
+  for (let y = 0; y < 4; y++)
+    for (let x = 0; x < 4; x++) {
+      const offset = 4 * (y * 64 + x)
+      localizedChange[offset] += 25
+      localizedChange[offset + 1] += 25
+      localizedChange[offset + 2] += 25
+    }
+  expect(
+    normalizedScreenshotsMatch(evidence(reference), evidence(localizedChange)),
+  ).toBe(false)
+
+  const changed = makePixels(128)
+  expect(normalizedScreenshotsMatch(evidence(reference), evidence(changed))).toBe(
+    false,
+  )
 })
