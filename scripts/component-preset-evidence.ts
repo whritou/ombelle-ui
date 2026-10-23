@@ -36,6 +36,7 @@ export type ComponentPresetMeasurement = {
   isolationMethod: typeof componentPresetIsolationMethod
   domHash: string
   screenshotHash: string
+  normalizedScreenshotHash: string
   focusOutlineWidth: number
   forcedColorsOutline: string
   motionPositiveControlMs: number
@@ -117,7 +118,8 @@ export async function validateComponentPresetMeasurements(
       ) ||
       Object.values(styles).some((v) => typeof v !== 'string') ||
       !digest(row.domHash) ||
-      !digest(row.screenshotHash)
+      !digest(row.screenshotHash) ||
+      !digest(row.normalizedScreenshotHash)
     )
       throw Error('Missing rendered component preset results ' + key)
     if (
@@ -142,10 +144,25 @@ export async function validateComponentPresetMeasurements(
       evidence = {
         styles,
         domHash: row.domHash,
-        screenshotHash: row.screenshotHash,
+        normalizedScreenshotHash: row.normalizedScreenshotHash,
       }
-    if (rendered.has(identity) && !equal(rendered.get(identity), evidence))
-      throw Error('Component preset differs across hosts/apps ' + key)
+    if (rendered.has(identity) && !equal(rendered.get(identity), evidence)) {
+      const previous = object(rendered.get(identity)),
+        differences = []
+      if (!equal(previous.styles, styles)) differences.push('computed styles')
+      if (previous.domHash !== row.domHash) differences.push('DOM')
+      if (
+        previous.normalizedScreenshotHash !== row.normalizedScreenshotHash
+      )
+        differences.push('normalized screenshot')
+      throw Error(
+        'Component preset differs across hosts/apps ' +
+          key +
+          ' (' +
+          differences.join(', ') +
+          ')',
+      )
+    }
     rendered.set(identity, evidence)
   }
   return value as ComponentPresetMeasurement[]

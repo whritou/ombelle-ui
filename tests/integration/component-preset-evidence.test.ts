@@ -186,6 +186,7 @@ async function measurements() {
         },
         domHash: 'b'.repeat(64),
         screenshotHash: 'c'.repeat(64),
+        normalizedScreenshotHash: 'd'.repeat(64),
         focusOutlineWidth: 3,
         forcedColorsOutline: 'solid',
         motionPositiveControlMs: 150,
@@ -348,7 +349,7 @@ it('rejects missing, duplicate, failed and cross-host browser parity evidence', 
       for (const row of r) delete row.computedStyles.fontSize
     },
     (r) => {
-      r[0].screenshotHash = 'e'.repeat(64)
+      r[0].normalizedScreenshotHash = 'e'.repeat(64)
     },
     (r) => {
       r[0].focusOutlineWidth = 0
@@ -365,4 +366,18 @@ it('rejects missing, duplicate, failed and cross-host browser parity evidence', 
     mutate(data)
     await expect(validateComponentPresetMeasurements(data)).rejects.toThrow()
   }
+})
+
+it('compares normalized screenshot pixels while retaining exact PNG hashes', async () => {
+  const rows = await measurements()
+  rows[30].screenshotHash = 'e'.repeat(64)
+  rows[30].normalizedScreenshotHash = rows[0].normalizedScreenshotHash
+  await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(
+    90,
+  )
+
+  rows[30].normalizedScreenshotHash = 'f'.repeat(64)
+  await expect(validateComponentPresetMeasurements(rows)).rejects.toThrow(
+    'Component preset differs across hosts/apps',
+  )
 })

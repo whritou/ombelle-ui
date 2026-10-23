@@ -7,7 +7,11 @@ import {
   componentPresetReferences,
   componentPresetArtifact,
 } from '../helpers/component-preset-fixture.js'
-import { recipeStyles, recipeDom } from '../helpers/recipe-measurements.js'
+import {
+  recipeStyles,
+  recipeDom,
+  recipeScreenshotFingerprint,
+} from '../helpers/recipe-measurements.js'
 import {
   componentPresetIsolationBaseline,
   assertComponentPresetHostIsolation,
@@ -206,6 +210,10 @@ for (const hostFamily of supportedStyleFamilies)
             computedStyles,
             domHash: await sha256(JSON.stringify(dom)),
             screenshotHash: await sha256(image.toString('base64')),
+            normalizedScreenshotHash: await recipeScreenshotFingerprint(
+              page,
+              image,
+            ),
             focusOutlineWidth,
             forcedColorsOutline,
             motionPositiveControlMs,
