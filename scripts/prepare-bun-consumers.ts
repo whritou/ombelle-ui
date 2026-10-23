@@ -11,6 +11,8 @@ import { assertBunOwnership } from '../packages/cli/src/apply/bun.js'
 import { prepareRecipeConsumer } from './prepare-recipe-consumer.js'
 import { recipeReferenceBank } from '../tests/helpers/recipe-fixture.js'
 import { writeScenarioFixture } from '../tests/helpers/scenario-fixture.js'
+import { prepareComponentPresetConsumer } from './prepare-component-preset-consumer.js'
+import { componentPresetReferenceBank } from '../tests/helpers/component-preset-fixture.js'
 
 export async function prepareBunConsumer(
   framework: 'vite' | 'next',
@@ -64,6 +66,11 @@ export async function prepareBunConsumer(
         family,
       }),
       recipeBank = await recipeReferenceBank()
+    const componentPresetEvidence = await prepareComponentPresetConsumer({
+        root: fixture.root,
+        cliRuntime: runtime,
+      }),
+      componentPresetBank = await componentPresetReferenceBank()
     const canonical = JSON.parse(
       await fs.readFile(
         'apps/preview/src/generated/' + family + '/manifest.json',
@@ -85,7 +92,8 @@ export async function prepareBunConsumer(
         source = await fs.readFile(path.join(fixture.root, file), 'utf8'),
         reference =
           canonical.artifacts.find((a) => a.logicalPath === meta.logicalPath) ??
-          recipeBank.get(String(meta.logicalPath))
+          recipeBank.get(String(meta.logicalPath)) ??
+          componentPresetBank.get(String(meta.logicalPath))
       const hash = await sha256(source)
       if (
         !reference ||
@@ -111,6 +119,7 @@ export async function prepareBunConsumer(
       sourceHashes,
       artifacts,
       recipeEvidence,
+      componentPresetEvidence,
       audit,
     }
   } catch (e) {

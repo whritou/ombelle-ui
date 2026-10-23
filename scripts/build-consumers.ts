@@ -1,4 +1,6 @@
 import fs from 'node:fs/promises'
+import path from 'node:path'
+import { sha256 } from '@ombelle/compiler'
 import { managerEntry } from '../packages/cli/src/apply/manager.js'
 import { run, pnpmEntry } from './process.js'
 import { yarnEntry } from '../tests/helpers/yarn-project.js'
@@ -14,6 +16,7 @@ import {
   type ConsumerEvidence,
   type PendingConsumerEvidence,
 } from './consumer-evidence.js'
+import { validateComponentPresetConsumers } from './component-preset-evidence.js'
 const pending = JSON.parse(
   await fs.readFile('.artifacts/consumer-pending.json', 'utf8'),
 ) as Record<string, PendingConsumerEvidence>
@@ -21,6 +24,27 @@ const measured: Record<string, ConsumerEvidence> = {}
 const recipeRows = JSON.parse(
   await fs.readFile('.artifacts/recipe-consumers.json', 'utf8'),
 )
+const componentPresetRows = JSON.parse(
+  await fs.readFile('.artifacts/component-preset-consumers.json', 'utf8'),
+)
+for (const row of Object.values(componentPresetRows) as Record<
+  string,
+  unknown
+>[])
+  row.build = { status: 'pending' }
+await fs.writeFile(
+  '.artifacts/component-preset-consumers.json',
+  JSON.stringify(componentPresetRows, null, 2),
+)
+async function verifyBuiltSources(id: string, root: string) {
+  for (const [file, hash] of Object.entries(pending[id].sourceHashes))
+    if (
+      (await sha256(await fs.readFile(path.join(root, file), 'utf8'))) !== hash
+    )
+      throw Error(
+        'Built consumer source changed after preparation: ' + id + '/' + file,
+      )
+}
 await fs.rm('.artifacts/consumer-matrix.json', { force: true })
 const map = JSON.parse(
   await fs.readFile('.artifacts/consumers.json', 'utf8'),
@@ -42,6 +66,7 @@ for (const [id, fixture] of Object.entries(map)) {
   if (fixture.manager === 'bun') {
     const built = await buildBunFixture(fixture.root, fixture.framework)
     if (built.code !== 0) throw new Error(built.output)
+    await verifyBuiltSources(id, fixture.root)
     const prepared = jsonRecord(bunRows[id]),
       identity = jsonRecord(prepared.cliRuntime)
     if (
@@ -89,6 +114,16 @@ for (const [id, fixture] of Object.entries(map)) {
       buildRuntime: built.runtime,
       build: { status: 'passed', exitCode: built.code },
     }
+    componentPresetRows[id] = {
+      ...componentPresetRows[id],
+      audit: pending[id].audit,
+      buildRuntime: measured[id].buildRuntime,
+      build: { status: 'passed', exitCode: built.code },
+    }
+    await fs.writeFile(
+      '.artifacts/component-preset-consumers.json',
+      JSON.stringify(componentPresetRows, null, 2),
+    )
     await fs.writeFile(
       '.artifacts/recipe-consumers.json',
       JSON.stringify(recipeRows, null, 2),
@@ -117,18 +152,31 @@ for (const [id, fixture] of Object.entries(map)) {
     },
     build: { exitCode: 0 },
   }
+  await verifyBuiltSources(id, fixture.root)
   recipeRows[id] = {
     ...recipeRows[id],
     audit: pending[id].audit,
     buildRuntime: measured[id].buildRuntime,
     build: { status: 'passed', exitCode: 0 },
   }
+  componentPresetRows[id] = {
+    ...componentPresetRows[id],
+    audit: pending[id].audit,
+    buildRuntime: measured[id].buildRuntime,
+    build: { status: 'passed', exitCode: 0 },
+  }
+  await fs.writeFile(
+    '.artifacts/component-preset-consumers.json',
+    JSON.stringify(componentPresetRows, null, 2),
+  )
   await fs.writeFile(
     '.artifacts/recipe-consumers.json',
     JSON.stringify(recipeRows, null, 2),
   )
 }
+const finalized = finalizeConsumerEvidence(consumerCases(), measured)
+await validateComponentPresetConsumers(componentPresetRows, finalized)
 await fs.writeFile(
   '.artifacts/consumer-matrix.json',
-  JSON.stringify(finalizeConsumerEvidence(consumerCases(), measured), null, 2),
+  JSON.stringify(finalized, null, 2),
 )

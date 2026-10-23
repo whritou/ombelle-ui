@@ -7,6 +7,7 @@ import {
 } from './consumer-evidence.ts'
 import { consumerCases } from './consumer-matrix.ts'
 import { finalizeRecipeEvidence } from './recipe-evidence.ts'
+import { finalizeComponentPresetEvidence } from './component-preset-evidence.ts'
 const steps = [
   'build:packages',
   'test:unit',
@@ -112,7 +113,10 @@ const counts = {
   },
   browser: browser.stats,
 }
-let consumerMatrix, minimalistMeasurements, recipeEvidence
+let consumerMatrix,
+  minimalistMeasurements,
+  recipeEvidence,
+  componentPresetEvidence
 try {
   consumerMatrix = finalizeConsumerEvidence(
     consumerCases(),
@@ -130,6 +134,20 @@ try {
       ),
       consumers: JSON.parse(
         await fs.readFile('.artifacts/recipe-consumers.json', 'utf8'),
+      ),
+    },
+    consumerMatrix,
+  )
+  componentPresetEvidence = await finalizeComponentPresetEvidence(
+    {
+      measurements: JSON.parse(
+        await fs.readFile(
+          '.artifacts/component-preset-measurements.json',
+          'utf8',
+        ),
+      ),
+      consumers: JSON.parse(
+        await fs.readFile('.artifacts/component-preset-consumers.json', 'utf8'),
       ),
     },
     consumerMatrix,
@@ -168,6 +186,7 @@ await fs.writeFile(
       consumerMatrix,
       minimalistMeasurements,
       recipeEvidence,
+      componentPresetEvidence,
       npmVersion: JSON.parse(
         await fs.readFile('.artifacts/npm-version.json', 'utf8'),
       ),

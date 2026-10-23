@@ -18,6 +18,8 @@ import { pnpmEntry } from './process.js'
 import type { ConsumerCase } from './consumer-matrix.js'
 import { prepareRecipeConsumer } from './prepare-recipe-consumer.js'
 import { recipeReferenceBank } from '../tests/helpers/recipe-fixture.js'
+import { prepareComponentPresetConsumer } from './prepare-component-preset-consumer.js'
+import { componentPresetReferenceBank } from '../tests/helpers/component-preset-fixture.js'
 export type ArtifactProof = {
   path: string
   logicalPath: string
@@ -146,6 +148,12 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         family: spec.family,
       }),
       recipeBank = await recipeReferenceBank()
+    const componentPresetEvidence = await prepareComponentPresetConsumer({
+        root,
+        cliRuntime: 'node',
+        env,
+      }),
+      componentPresetBank = await componentPresetReferenceBank()
     const canonical = JSON.parse(
       await fs.readFile(
         'apps/preview/src/generated/' + spec.family + '/manifest.json',
@@ -165,7 +173,8 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         content = await fs.readFile(path.join(root, file), 'utf8'),
         reference =
           canonical.artifacts.find((a) => a.logicalPath === meta.logicalPath) ??
-          recipeBank.get(String(meta.logicalPath)),
+          recipeBank.get(String(meta.logicalPath)) ??
+          componentPresetBank.get(String(meta.logicalPath)),
         hash = await sha256(content)
       if (
         !reference ||
@@ -258,6 +267,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       cliRuntime: runtime,
       artifacts,
       recipeEvidence,
+      componentPresetEvidence,
       audit: { code: 0, output, scope: 'production' as const },
     }
   } catch (e) {

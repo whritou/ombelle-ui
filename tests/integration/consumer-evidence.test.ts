@@ -19,6 +19,27 @@ it('finalizes exactly thirty-four rows including fifteen minimalist consumers', 
   expect(Object.keys(result)).toHaveLength(34)
   expect(Object.values(result).filter(r => r.family === 'minimalist')).toHaveLength(15)
 })
+it('retains ordinary and component preset source identities separately', () => {
+  const rows = validRows()
+  rows['vite-flat'].sourceHashes['src/components/ui/button.tsx'] = 'b'.repeat(
+    64,
+  )
+  rows['vite-flat'].sourceHashes[
+    'src/components/ui/presets/builtin-minimalist/r1/button.tsx'
+  ] = 'c'.repeat(64)
+  expect(
+    finalizeConsumerEvidence(cases, rows)['vite-flat'].sourceHashes,
+  ).toMatchObject({
+    'src/components/ui/button.tsx': 'b'.repeat(64),
+    'src/components/ui/presets/builtin-minimalist/r1/button.tsx': 'c'.repeat(
+      64,
+    ),
+  })
+  rows['vite-flat'].sourceHashes[
+    'src/components/ui/presets/builtin-minimalist/r1/button.tsx'
+  ] = 'tampered'
+  expect(() => finalizeConsumerEvidence(cases, rows)).toThrow()
+})
 it('rejects incomplete or mislabeled consumer evidence', () => {
   const id = 'vite-minimalist', bun = 'bun-text-vite-bun-minimalist'
   const mutations: ((rows: Record<string, any>) => void)[] = [
