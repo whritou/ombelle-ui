@@ -1,0 +1,3600 @@
+{
+  "summaryFormat": "ombelle-badge/v1",
+  "sourceCommit": "0eb525d756f18847dffc0fa6f4ee30ac1c98eaa8",
+  "workingTreeDirty": false,
+  "platform": "win32",
+  "node": "v24.19.0",
+  "pnpm": "11.25.0",
+  "npmVersion": {
+    "version": "11.19.0"
+  },
+  "yarnVersions": {
+    "classic": "1.22.22",
+    "modern": "4.18.1"
+  },
+  "bunVersion": {
+    "version": "1.4.3"
+  },
+  "localExecution": {
+    "vitestMaxWorkers": 4,
+    "certificateSource": "Windows public trusted certificate store via NODE_EXTRA_CA_CERTS",
+    "certificateBundleSha256": "d2f7da068a0d59df1ea2ea24299950f5a8ae9dae3f2852ba6a147f67661aeaf9",
+    "tlsValidationEnabled": true,
+    "npmSelection": "Local npm 11.19.0 bin directory prepended to PATH"
+  },
+  "browserVersion": {
+    "engine": "chromium",
+    "version": "155.0.4283.62",
+    "channel": "msedge"
+  },
+  "startedAt": "2026-10-23T19:29:51.046Z",
+  "completedAt": "2026-10-23T20:20:11.261Z",
+  "status": "passed",
+  "steps": [
+    {
+      "name": "build:packages",
+      "exitCode": 0,
+      "durationMs": 1965,
+      "log": ".artifacts/logs/build-packages.log"
+    },
+    {
+      "name": "test:unit",
+      "exitCode": 0,
+      "durationMs": 15996,
+      "log": ".artifacts/logs/test-unit.log"
+    },
+    {
+      "name": "test:integration",
+      "exitCode": 0,
+      "durationMs": 232503,
+      "log": ".artifacts/logs/test-integration.log"
+    },
+    {
+      "name": "generate:preview",
+      "exitCode": 0,
+      "durationMs": 3233,
+      "log": ".artifacts/logs/generate-preview.log"
+    },
+    {
+      "name": "prepare:consumers",
+      "exitCode": 0,
+      "durationMs": 1430441,
+      "log": ".artifacts/logs/prepare-consumers.log"
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "durationMs": 2846,
+      "log": ".artifacts/logs/typecheck.log"
+    },
+    {
+      "name": "build:preview",
+      "exitCode": 0,
+      "durationMs": 3942,
+      "log": ".artifacts/logs/build-preview.log"
+    },
+    {
+      "name": "build:consumers",
+      "exitCode": 0,
+      "durationMs": 190374,
+      "log": ".artifacts/logs/build-consumers.log"
+    },
+    {
+      "name": "test:e2e",
+      "exitCode": 0,
+      "durationMs": 1133656,
+      "log": ".artifacts/logs/test-e2e.log"
+    }
+  ],
+  "counts": {
+    "unit": {
+      "passed": 179,
+      "failed": 0,
+      "skipped": 0
+    },
+    "integration": {
+      "passed": 170,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "startTime": "2026-10-23T20:01:14.408Z",
+      "duration": 1130530.033,
+      "expected": 118,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "foundationReportSha256": "cae327553541353c60d57c3728a8c7503aefea3996ebed63d97214f194f69da3",
+  "installations": {
+    "vite-flat": {
+      "family": "flat",
+      "manager": "pnpm",
+      "managerVersion": "11.25.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "vite-minimalist": {
+      "family": "minimalist",
+      "manager": "pnpm",
+      "managerVersion": "11.25.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "vite-neo-brutalism": {
+      "family": "neo-brutalism",
+      "manager": "pnpm",
+      "managerVersion": "11.25.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "d1ddff3512ea21db9d50bf90ceb2d15fa29a24772c3521d1056ac8d11fb69d28"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "next-flat": {
+      "family": "flat",
+      "manager": "pnpm",
+      "managerVersion": "11.25.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "next-minimalist": {
+      "family": "minimalist",
+      "manager": "pnpm",
+      "managerVersion": "11.25.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "next-neo-brutalism": {
+      "family": "neo-brutalism",
+      "manager": "pnpm",
+      "managerVersion": "11.25.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "d1ddff3512ea21db9d50bf90ceb2d15fa29a24772c3521d1056ac8d11fb69d28"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "npm-vite-flat": {
+      "family": "flat",
+      "manager": "npm",
+      "managerVersion": "11.19.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "npm-vite-minimalist": {
+      "family": "minimalist",
+      "manager": "npm",
+      "managerVersion": "11.19.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "npm-vite-neo-brutalism": {
+      "family": "neo-brutalism",
+      "manager": "npm",
+      "managerVersion": "11.19.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "d1ddff3512ea21db9d50bf90ceb2d15fa29a24772c3521d1056ac8d11fb69d28"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "npm-next-flat": {
+      "family": "flat",
+      "manager": "npm",
+      "managerVersion": "11.19.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "npm-next-minimalist": {
+      "family": "minimalist",
+      "manager": "npm",
+      "managerVersion": "11.19.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "npm-next-neo-brutalism": {
+      "family": "neo-brutalism",
+      "manager": "npm",
+      "managerVersion": "11.19.0",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "d1ddff3512ea21db9d50bf90ceb2d15fa29a24772c3521d1056ac8d11fb69d28"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "yarn-classic-vite": {
+      "family": "flat",
+      "manager": "yarn",
+      "managerVersion": "1.22.22",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "yarn-modern-next": {
+      "family": "flat",
+      "manager": "yarn",
+      "managerVersion": "4.18.1",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "yarn-pnp-vite": {
+      "family": "flat",
+      "manager": "yarn",
+      "managerVersion": "4.18.1",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-vite-node": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-vite-bun": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-vite-node": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-vite-bun": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-next-node": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-next-bun": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-next-node": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-next-bun": {
+      "family": "flat",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "58ecf055729cc0c5fa60c77bd05bef647697666ac2664092daa76067ec08f749"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "yarn-classic-vite-minimalist": {
+      "family": "minimalist",
+      "manager": "yarn",
+      "managerVersion": "1.22.22",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "yarn-modern-next-minimalist": {
+      "family": "minimalist",
+      "manager": "yarn",
+      "managerVersion": "4.18.1",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "yarn-pnp-vite-minimalist": {
+      "family": "minimalist",
+      "manager": "yarn",
+      "managerVersion": "4.18.1",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "production"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-vite-node-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-vite-bun-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-vite-node-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-vite-bun-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-next-node-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-text-next-bun-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-next-node-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    },
+    "bun-binary-next-bun-minimalist": {
+      "family": "minimalist",
+      "manager": "bun",
+      "managerVersion": "1.4.3",
+      "cliRuntime": {
+        "name": "bun",
+        "version": "1.4.3"
+      },
+      "buildRuntime": {
+        "name": "node",
+        "version": "24.19.0"
+      },
+      "artifacts": [
+        {
+          "path": "src/components/ui/badge.css",
+          "logicalPath": "components/ui/badge.css",
+          "sha256": "2918acb714fcf982722d8002e6806a794f5ca5b987eefc874d608dafd038b380"
+        },
+        {
+          "path": "src/components/ui/badge.tsx",
+          "logicalPath": "components/ui/badge.tsx",
+          "sha256": "de83b0fe8e9550649b5ff8c2f2cfe3c29e9875160065f43d21728c9f69121777"
+        },
+        {
+          "path": "src/ombelle-examples/badge.tsx",
+          "logicalPath": "examples/badge.tsx",
+          "sha256": "14f9094d1e1036bf8d1865a3368a81cee617f7b249ff03eca3d2751edf4952ea"
+        }
+      ],
+      "audit": {
+        "exitCode": 0,
+        "scope": "all"
+      },
+      "build": {
+        "exitCode": 0
+      }
+    }
+  },
+  "measurements": [
+    {
+      "family": "flat",
+      "mode": "light",
+      "app": "preview",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "light",
+      "app": "vite",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "light",
+      "app": "next",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "light",
+      "app": "npm-vite",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "light",
+      "app": "npm-next",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "dark",
+      "app": "preview",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "dark",
+      "app": "vite",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "dark",
+      "app": "next",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "dark",
+      "app": "npm-vite",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "flat",
+      "mode": "dark",
+      "app": "npm-next",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "1px",
+          "radius": "8px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "light",
+      "app": "preview",
+      "styles": [
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        16.119468339438853,
+        6.4700447145121895,
+        16.119468339438853,
+        16.119468339438853
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "light",
+      "app": "vite",
+      "styles": [
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        16.119468339438853,
+        6.4700447145121895,
+        16.119468339438853,
+        16.119468339438853
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "light",
+      "app": "next",
+      "styles": [
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        16.119468339438853,
+        6.4700447145121895,
+        16.119468339438853,
+        16.119468339438853
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "light",
+      "app": "npm-vite",
+      "styles": [
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        16.119468339438853,
+        6.4700447145121895,
+        16.119468339438853,
+        16.119468339438853
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "light",
+      "app": "npm-next",
+      "styles": [
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(243, 244, 246)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        16.119468339438853,
+        6.4700447145121895,
+        16.119468339438853,
+        16.119468339438853
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "dark",
+      "app": "preview",
+      "styles": [
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        9.863254791756054,
+        9.346689666859199,
+        9.863254791756054,
+        9.863254791756054
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "dark",
+      "app": "vite",
+      "styles": [
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        9.863254791756054,
+        9.346689666859199,
+        9.863254791756054,
+        9.863254791756054
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "dark",
+      "app": "next",
+      "styles": [
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        9.863254791756054,
+        9.346689666859199,
+        9.863254791756054,
+        9.863254791756054
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "dark",
+      "app": "npm-vite",
+      "styles": [
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        9.863254791756054,
+        9.346689666859199,
+        9.863254791756054,
+        9.863254791756054
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "minimalist",
+      "mode": "dark",
+      "app": "npm-next",
+      "styles": [
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(17, 24, 39)",
+          "background": "rgb(252, 165, 165)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        },
+        {
+          "color": "rgb(249, 250, 251)",
+          "background": "rgb(55, 65, 81)",
+          "border": "1px",
+          "radius": "6px",
+          "shadow": "none"
+        }
+      ],
+      "contrastRatios": [
+        9.863254791756054,
+        9.346689666859199,
+        9.863254791756054,
+        9.863254791756054
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "light",
+      "app": "preview",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "light",
+      "app": "vite",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "light",
+      "app": "next",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "light",
+      "app": "npm-vite",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "light",
+      "app": "npm-next",
+      "styles": [
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(185, 28, 28)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(244, 244, 245)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(17, 17, 17) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        17.179455667097645,
+        6.4700447145121895,
+        17.179455667097645,
+        17.179455667097645
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "dark",
+      "app": "preview",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "dark",
+      "app": "vite",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "dark",
+      "app": "next",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "dark",
+      "app": "npm-vite",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "dark",
+      "app": "npm-next",
+      "styles": [
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(17, 17, 17)",
+          "background": "rgb(252, 165, 165)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        },
+        {
+          "color": "rgb(250, 250, 250)",
+          "background": "rgb(63, 63, 70)",
+          "border": "2px",
+          "radius": "0px",
+          "shadow": "rgb(250, 250, 250) 4px 4px 0px 0px"
+        }
+      ],
+      "contrastRatios": [
+        10.005730898298847,
+        9.949093931764471,
+        10.005730898298847,
+        10.005730898298847
+      ],
+      "enlargedText": [
+        {
+          "selector": "span[data-text-sample=\"sample-11\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-12\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-13\"]",
+          "before": 12,
+          "after": 24
+        },
+        {
+          "selector": "span[data-text-sample=\"sample-14\"]",
+          "before": 12,
+          "after": 24
+        }
+      ],
+      "checks": {
+        "parity": true,
+        "semantics": true,
+        "attributesAndRef": true,
+        "escapedText": true,
+        "contrast": true,
+        "axe": true,
+        "forcedColors": true,
+        "enlargementAndReflow": true
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "family": "flat",
+      "mode": "light",
+      "path": "docs/evidence/images/badge-flat-light.png",
+      "sha256": "67744dfe33d5f85d01384b46335194d388b42d509ced90c47e2cd9cb6ee16d1f"
+    },
+    {
+      "family": "flat",
+      "mode": "dark",
+      "path": "docs/evidence/images/badge-flat-dark.png",
+      "sha256": "8001a04d5b435c8b0d12a11541f68ca6626b6fa134407a13680640810742270c"
+    },
+    {
+      "family": "minimalist",
+      "mode": "light",
+      "path": "docs/evidence/images/badge-minimalist-light.png",
+      "sha256": "5aa625e25a942865513d23162593584bc5506bad1a913b223b674bdc819277cf"
+    },
+    {
+      "family": "minimalist",
+      "mode": "dark",
+      "path": "docs/evidence/images/badge-minimalist-dark.png",
+      "sha256": "5e8294271f804f5e1dcae060fc6be0564a1bb67ac3e0c3dd982d8f85cce5be9d"
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "light",
+      "path": "docs/evidence/images/badge-neo-brutalism-light.png",
+      "sha256": "2e054c538099150ceca63720c019ed3e8a6fcc67f1533628c91361cf8ed3b118"
+    },
+    {
+      "family": "neo-brutalism",
+      "mode": "dark",
+      "path": "docs/evidence/images/badge-neo-brutalism-dark.png",
+      "sha256": "8d8afa39216619031b0b160b18fd46410211f77b45e1356be042c4cceadd3070"
+    }
+  ]
+}

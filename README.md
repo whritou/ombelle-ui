@@ -41,6 +41,7 @@ Minimalist checks also measure rendered contrast, focus, disabled/invalid states
 - [Component-scoped Button preset evidence](docs/evidence/component-scoped-button-presets.md)
 - [Local CLI usage](docs/foundation-local-usage.md)
 - [Badge API and installation](docs/components/badge.md)
+- [Badge verification evidence](docs/evidence/badge.md)
 - [Local Button recipe design](docs/superpowers/specs/2026-10-21-local-button-recipes-design.md)
 - [Foundation design](docs/superpowers/specs/2026-10-20-technical-foundation-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-20-technical-foundation.md)
