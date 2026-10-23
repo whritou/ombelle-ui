@@ -216,3 +216,18 @@ it('rejects schema-invalid JSON before selecting generator releases', async () =
   expect(result.exitCode).toBe(2)
   expect(result.data.error.code).toBe('INVALID_DATA')
 })
+
+it('keeps the init preset size limit and rejects non-regular files without writes', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const oversized = path.join(root, 'oversized.json')
+  await fs.writeFile(oversized, ' '.repeat(262145))
+  const before = await snapshotTree(root)
+  for (const file of [oversized, root]) {
+    const result = await command(['init', '--preset', file, '--cwd', root, '--yes'])
+    expect(result.exitCode).toBe(2)
+    expect(result.data.error.code).toBe('INVALID_DATA')
+    expect(result.data.error.path).toBe(file)
+    expect(await snapshotTree(root)).toEqual(before)
+  }
+})

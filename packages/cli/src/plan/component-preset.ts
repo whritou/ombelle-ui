@@ -79,8 +79,11 @@ export async function planComponentPreset(
     ...(context.bunLockfile ? { bunLockfile: context.bunLockfile } : {}),
     preconditions: { ...context.preconditions },
     projectRoot: context.root,
-    preset: result.preset,
-    provenance: result.provenance,
+    preset: savedPreset,
+    provenance: {
+      catalogRelease: context.lock.catalogRelease,
+      compilerVersion: context.lock.compilerVersion,
+    },
     changes: [],
     managedDeclarations: structuredClone(context.lock.managedDeclarations),
     dependencyPlan: [],
@@ -96,7 +99,7 @@ export async function planComponentPreset(
     const { artifacts: priorFiles, ...priorIdentity } = previous
     if (canonicalize(priorIdentity) !== canonicalize(identity))
       conflict(
-        'Component preset identity/revision or dark context changed; install a new revision or migrate explicitly',
+        'Component preset content under the same ID/revision or dark context changed; install a new revision or migrate explicitly',
         key,
       )
   }

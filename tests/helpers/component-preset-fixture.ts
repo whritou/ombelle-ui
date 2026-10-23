@@ -1,150 +1,175 @@
-import fs from 'node:fs'
-import fsPromises from 'node:fs/promises'
+import fs from 'node:fs/promises'
 import path from 'node:path'
-import type { Preset, StyleFamily } from '@ombelle/contracts'
-import {
-  compileButtonPreset,
-  rewriteModuleSpecifiers,
-  sha256,
-} from '@ombelle/compiler'
-import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
+import type { Artifact, ComponentPresetCompileResult } from '@ombelle/contracts'
+import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.ts'
 
-export type ComponentPresetFixture = {
-  family: StyleFamily
-  preset: Preset
+function compiler(): Promise<typeof import('@ombelle/compiler')> {
+  // Foundation runs directly under Node, without the tsx/Vitest path aliases.
+  return import(
+    new URL('../../packages/compiler/dist/index.js', import.meta.url).href
+  )
 }
 
-export function componentPresetFixtures(): readonly ComponentPresetFixture[] {
-  return supportedStyleFamilies.map((family) => ({
-    family,
-    preset: JSON.parse(
-      fs.readFileSync(
-        path.resolve('packages/catalog/src/presets', family + '.json'),
-        'utf8',
+let references: Promise<ComponentPresetCompileResult[]> | undefined
+export function componentPresetReferences(): Promise<
+  ComponentPresetCompileResult[]
+> {
+  return (references ??= (async () => {
+    const { compileButtonPreset } = await compiler()
+    const { getCatalog } = await import(
+      new URL('../../packages/catalog/dist/index.js', import.meta.url).href
+    )
+    return Promise.all(
+      supportedStyleFamilies.map((family) =>
+        compileButtonPreset({ preset: getCatalog('0.1.0').presets[family] }),
       ),
-    ) as Preset,
-  }))
+    )
+  })())
 }
 
-export function componentPresetFixtureSource(
-  uiAlias = '@/components/ui',
-): string {
-  return `'use client'
+/** Independent expected aliases for these fixture projects, including preview relative imports. */
+export async function componentPresetArtifact(
+  artifact: Artifact,
+  target: 'consumer' | 'preview',
+): Promise<{ path: string; content: string }> {
+  const logical = artifact.logicalPath
+  const local =
+    artifact.kind === 'utility'
+      ? 'lib/utils.ts'
+      : artifact.kind === 'usage'
+        ? 'ombelle-examples/presets/' +
+          logical.slice('examples/scoped-presets/'.length)
+        : 'components/ui/presets/' + logical.slice('scoped-presets/'.length)
+  const dest = target === 'consumer' ? 'src/' + local : local
+  const relative = (to: string) => {
+    const rel = path.posix.relative(path.posix.dirname(dest), to)
+    return rel.startsWith('.') ? rel : './' + rel
+  }
+  const { rewriteModuleSpecifiers } = await compiler()
+  const content =
+    artifact.kind === 'style'
+      ? artifact.content
+      : await rewriteModuleSpecifiers(artifact.content, (specifier) => {
+          if (specifier === '@/lib/utils')
+            return target === 'preview' ? relative('lib/utils') : specifier
+          const prefix = '@/components/ui/scoped-presets/'
+          if (specifier.startsWith(prefix)) {
+            const suffix = 'presets/' + specifier.slice(prefix.length)
+            return target === 'preview'
+              ? relative('components/ui/' + suffix)
+              : '@/components/ui/' + suffix
+          }
+          return specifier
+        })
+  return { path: dest, content }
+}
+
+export async function componentPresetReferenceBank(): Promise<
+  Map<string, Artifact>
+> {
+  const refs = await componentPresetReferences(),
+    entries: [string, Artifact][] = []
+  for (const ref of refs)
+    for (const a of ref.artifacts) {
+      const { content } = await componentPresetArtifact(a, 'consumer')
+      const { sha256 } = await compiler()
+      entries.push([
+        a.logicalPath,
+        { ...a, content, sha256: await sha256(content) },
+      ])
+    }
+  return new Map(entries)
+}
+
+const fixtureSource = `'use client'
 import * as React from 'react'
-import { Button as Flat } from '${uiAlias}/presets/builtin-flat/r1/button'
-import { Button as Minimalist } from '${uiAlias}/presets/builtin-minimalist/r1/button'
-import { Button as Brutalist } from '${uiAlias}/presets/builtin-neo-brutalism/r1/button'
-
-const entries: Record<string, typeof Flat> = {
-  'builtin-flat': Flat,
-  'builtin-minimalist': Minimalist,
-  'builtin-neo-brutalism': Brutalist,
-}
-
+import { Button as Flat } from '@/components/ui/presets/builtin-flat/r1/button'
+import { Button as Minimalist } from '@/components/ui/presets/builtin-minimalist/r1/button'
+import { Button as Brutalist } from '@/components/ui/presets/builtin-neo-brutalism/r1/button'
+const entries = { 'builtin-flat': Flat, 'builtin-minimalist': Minimalist, 'builtin-neo-brutalism': Brutalist }
 export function ComponentPresetFixture() {
   const query = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search)
-  const Component = entries[query.get('componentPreset') ?? 'builtin-flat'] ?? Flat
+  const selected = query.get('componentPreset')
+  const Component = entries[selected as keyof typeof entries] ?? Flat
+  const [loading,setLoading] = React.useState(false), [disabled,setDisabled] = React.useState(false), [clicks,setClicks] = React.useState(0)
   const tamper = query.get('tamper') === '1'
-  const [clicks, setClicks] = React.useState(0)
-
-  return (
-    <section data-testid="component-preset-fixture" aria-label="Component preset fixture">
-      <div data-testid="component-preset-specimen" style={{ width: 360, maxWidth: '100%', padding: 32, background: '#808080', boxSizing: 'border-box' }}>
-        <Component
-          data-testid="component-preset-default"
-          {...(tamper ? { 'data-ombelle-scope': 'tampered', 'data-slot': 'button' } : {})}
-          onClick={() => setClicks((count) => count + 1)}
-        >
-          Scoped action
-        </Component>
-      </div>
-      <output data-testid="component-preset-clicks" aria-label="Component preset activations">{clicks}</output>
-    </section>
-  )
+  if (query.get('componentPresets') !== '1' || !selected || !(selected in entries)) return null
+  return <section data-testid="component-preset-fixture" aria-label="Component preset fixture">
+    <div data-testid="component-preset-specimen" style={{width:360,maxWidth:'100%',padding:32,background:'#808080',boxSizing:'border-box',display:'grid',gap:16}}>
+      <Component data-testid="component-preset-default" {...(tamper ? { 'data-ombelle-scope': 'tampered', 'data-slot': 'button' } : {})} disabled={disabled || loading} aria-busy={loading || undefined} onClick={() => setClicks(n => n + 1)}>Preset action</Component>
+      {(['secondary','outline','ghost','link','destructive'] as const).map(variant => <Component key={variant} variant={variant}>{variant} action</Component>)}
+      {(['sm','lg','icon'] as const).map(size => <Component key={size} size={size} aria-label={size === 'icon' ? 'Icon action' : undefined}>{size === 'icon' ? '+' : size + ' action'}</Component>)}
+    </div>
+    <div style={{display:'flex',gap:16,flexWrap:'wrap',marginTop:24}}>
+      <button type="button" onClick={() => setLoading(v => !v)}>Toggle preset loading</button>
+      <button type="button" onClick={() => setDisabled(v => !v)}>Toggle preset disabled</button>
+      <output data-testid="component-preset-clicks" aria-label="Preset activations">{clicks}</output>
+    </div>
+  </section>
 }
 `
+
+export async function writeComponentPresetScenario(
+  root: string,
+  preview = false,
+): Promise<void> {
+  const fixture = preview
+    ? fixtureSource.replaceAll('@/components/ui', './components/ui')
+    : fixtureSource
+  await fs.writeFile(path.join(root, 'component-preset-fixture.tsx'), fixture)
+  const scenarioPath = path.join(root, 'scenario.tsx')
+  const scenario = await fs.readFile(scenarioPath, 'utf8')
+  if (scenario.includes("from './component-preset-fixture'")) return
+  await fs.writeFile(
+    scenarioPath,
+    scenario
+      .replace(
+        'import { StateFixture }',
+        "import { ComponentPresetFixture } from './component-preset-fixture'\nimport { StateFixture }",
+      )
+      .replace(
+        '{states && <StateFixture />}',
+        '{states && <StateFixture />}\n      {componentPresets && <ComponentPresetFixture />}',
+      ),
+  )
 }
 
-export async function writeConsumerComponentPresetFixture(
+export async function writePreviewComponentPresets(
   root: string,
 ): Promise<void> {
-  await fsPromises.writeFile(
-    path.join(root, 'src', 'component-preset-fixture.tsx'),
-    componentPresetFixtureSource(),
+  const hostScenario = (
+    await fs.readFile(path.join(root, 'scenario.tsx'), 'utf8')
   )
-}
-
-export function previewComponentPresetPath(
-  logicalPath: string,
-  kind: string,
-): string {
-  if (kind === 'usage') {
-    const match = /^examples\/scoped-presets\/([^/]+)\/r(\d+)\.tsx$/.exec(
-      logicalPath,
+    .replace(/import \{ RecipeFixture \} from '\.\/recipe-fixture'\r?\n/, '')
+    .replace(/import \{ ComponentPresetFixture \} from '\.\/component-preset-fixture'\r?\n/, '')
+    .replace(/\{componentPresets && <ComponentPresetFixture \/>}\r?\n?/, '')
+    .replace('{recipes && <RecipeFixture />}', '')
+  if (hostScenario.includes('ComponentPresetFixture'))
+    throw Error(
+      'Generate the isolated host before adding component preset imports',
     )
-    if (!match) throw new Error('Unexpected component preset usage artifact')
-    return 'src/ombelle-examples/presets/' + match[1] + '/r' + match[2] + '.tsx'
-  }
-  const match = /^scoped-presets\/(.+)$/.exec(logicalPath)
-  if (!match) throw new Error('Unexpected component preset artifact')
-  return 'src/components/ui/presets/' + match[1]
-}
-
-export async function previewComponentPresetContent(
-  content: string,
-  logicalPath: string,
-  kind: string,
-): Promise<string> {
-  if (kind === 'style') return content
-  const dest = previewComponentPresetPath(logicalPath, kind).slice('src/'.length)
-  const directory = path.posix.dirname(dest)
-  const relative = (target: string) => {
-    const value = path.posix.relative(directory, target)
-    return value.startsWith('.') ? value : './' + value
-  }
-  return rewriteModuleSpecifiers(content, (specifier) => {
-    if (specifier === '@/lib/utils') return relative('lib/utils')
-    const prefix = '@/components/ui/scoped-presets/'
-    if (specifier.startsWith(prefix))
-      return relative('components/ui/presets/' + specifier.slice(prefix.length))
-    return specifier
-  })
-}
-
-export async function writePreviewComponentPresets(root: string): Promise<void> {
-  const manifest: Record<string, unknown> = {},
-    transforms: Record<string, unknown> = {}
-  for (const { family, preset } of componentPresetFixtures()) {
-    const result = await compileButtonPreset({ preset })
-    manifest[family] = result
-    for (const artifact of result.artifacts) {
-      if (artifact.kind === 'utility') continue
-      const relative = previewComponentPresetPath(artifact.logicalPath, artifact.kind),
-        content = await previewComponentPresetContent(
-          artifact.content,
-          artifact.logicalPath,
-          artifact.kind,
-        ),
-        target = path.join(root, relative.slice('src/'.length))
-      await fsPromises.mkdir(path.dirname(target), { recursive: true })
-      await fsPromises.writeFile(target, content)
-      transforms[artifact.logicalPath] = {
-        path: relative,
-        canonicalHash: artifact.sha256,
-        previewHash: await sha256(content),
-      }
+  await fs.writeFile(
+    path.join(root, 'isolation-baseline-scenario.tsx'),
+    hostScenario,
+  )
+  await fs.writeFile(
+    path.join(root, 'isolation-baseline-entry.tsx'),
+    "import * as React from 'react'\nimport {createRoot} from 'react-dom/client'\nimport './preview.css'\nimport Scenario from './isolation-baseline-scenario'\ncreateRoot(document.getElementById('root')!).render(<Scenario/>)\n",
+  )
+  await fs.writeFile(
+    path.join(root, 'isolation-baseline.html'),
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ordinary host baseline</title></head><body><div id="root"></div><script type="module" src="./isolation-baseline-entry.tsx"></script></body></html>',
+  )
+  for (const ref of await componentPresetReferences())
+    for (const a of ref.artifacts.filter((a) => a.kind !== 'utility')) {
+      const transformed = await componentPresetArtifact(a, 'preview'),
+        file = path.join(root, transformed.path)
+      await fs.mkdir(path.dirname(file), { recursive: true })
+      await fs.writeFile(file, transformed.content)
     }
-  }
-  await fsPromises.writeFile(
-    path.join(root, 'component-presets-manifest.json'),
-    JSON.stringify(manifest, null, 2),
-  )
-  await fsPromises.writeFile(
-    path.join(root, 'component-presets-transforms.json'),
-    JSON.stringify(transforms, null, 2),
-  )
-  await fsPromises.writeFile(
-    path.join(root, 'component-preset-fixture.tsx'),
-    componentPresetFixtureSource('./components/ui'),
-  )
+  await writeComponentPresetScenario(root, true)
+}
+
+export async function writeConsumerComponentPresetFixture(root: string): Promise<void> {
+  await writeComponentPresetScenario(path.join(root, 'src'))
 }

@@ -1,285 +1,231 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { createHash } from 'node:crypto'
-import type { ComponentPresetCompileResult, StyleFamily, PackageManager } from '@ombelle/contracts'
-import { compileButtonPreset, sha256 } from '@ombelle/compiler'
-import { transformComponentPresetArtifact } from '../packages/cli/src/project/component-preset-transform.js'
-import { jsonRecord, runBuiltCli, type RuntimeIdentity } from '../tests/helpers/cli-runtime.js'
+import type { InstalledComponentPreset, PackageManager } from '@ombelle/contracts'
+import { canonicalize, sha256 } from '@ombelle/compiler'
+import {
+  componentPresetReferences,
+  componentPresetArtifact,
+  writeComponentPresetScenario,
+} from '../tests/helpers/component-preset-fixture.js'
+import { runBuiltCli, jsonRecord } from '../tests/helpers/cli-runtime.js'
 import { snapshotTree } from '../tests/helpers/tree.js'
-import { componentPresetFixtures } from '../tests/helpers/component-preset-fixture.js'
 
-type ComponentPresetConsumerInput = {
+export async function prepareComponentPresetConsumer(input: {
   root: string
-  descriptorId: string
-  hostFamily: StyleFamily
+  cliRuntime: 'node' | 'bun'
   manager: PackageManager
   managerVersion: string
-  cliRuntime: RuntimeIdentity
-  audit: { exitCode: number; scope: 'production' | 'all' }
+  bunFormat?: 'text' | 'binary'
   env?: NodeJS.ProcessEnv
-}
-
-const transformContext = {
-  componentsDir: 'src/components/ui',
-  sourceDir: 'src',
-  utilsFile: 'src/lib/utils.ts',
-  uiAlias: '@/components/ui',
-  utilsAlias: '@/lib/utils',
-}
-
-export async function prepareComponentPresetConsumer(
-  input: ComponentPresetConsumerInput,
-): Promise<Record<string, unknown>[]> {
-  const records: Record<string, unknown>[] = [],
-    lockfileNames = [
-      'package-lock.json',
-      'pnpm-lock.yaml',
-      'yarn.lock',
-      'bun.lock',
-      'bun.lockb',
-    ],
-    fixedProtectedPaths = [
-      'ui-preset.json',
-      'ui-library.config.json',
-      'src/index.css',
-      'src/components/ui/button.tsx',
-      'src/components/ui/input.tsx',
-    ],
-    packageJson = JSON.parse(
-      await fs.readFile(path.join(input.root, 'package.json'), 'utf8'),
-    ) as { packageManager?: string },
-    lockfiles = (
-      await Promise.all(
-        lockfileNames.map(async (file) =>
-          (await fs.stat(path.join(input.root, file)).then(
-            () => true,
-            (error: NodeJS.ErrnoException) => {
-              if (error.code === 'ENOENT') return false
-              throw error
-            },
-          ))
-            ? file
-            : undefined,
-        ),
-      )
-    ).filter((file): file is string => Boolean(file))
-  if (lockfiles.length !== 1)
-    throw new Error('Expected exactly one consumer lockfile in ' + input.descriptorId)
-  const expectedLockfile =
-      input.manager === 'npm'
-        ? 'package-lock.json'
-        : input.manager === 'pnpm'
-          ? 'pnpm-lock.yaml'
-          : input.manager === 'yarn'
-            ? 'yarn.lock'
-            : lockfiles[0]!,
-    managerLockfile = lockfiles[0]!
-  if (managerLockfile !== expectedLockfile)
-    throw new Error('Consumer manager lockfile changed before preset preparation')
-  const managerLockBytes = await fs.readFile(path.join(input.root, managerLockfile)),
-    managerLockHash = createHash('sha256').update(managerLockBytes).digest('hex'),
-    packageManagerDeclaration = packageJson.packageManager ?? null
-  const defaultPresetHash = jsonRecord(
-    JSON.parse(await fs.readFile(path.join(input.root, 'ui-library.lock.json'), 'utf8')),
-  ).presetHash
-
-  for (const { family: presetFamily, preset } of componentPresetFixtures()) {
-    const result: ComponentPresetCompileResult = await compileButtonPreset({ preset }),
-      inputDirectory = path.resolve('.artifacts/component-preset-inputs'),
-      inputFile = path.join(inputDirectory, presetFamily + '.json'),
-      key = result.preset.data.id + '@' + result.preset.data.revision,
-      args = ['add', 'button', '--preset', inputFile, '--cwd', input.root],
-      beforeLock = jsonRecord(
-        JSON.parse(await fs.readFile(path.join(input.root, 'ui-library.lock.json'), 'utf8')),
-      ),
-      existingUsagePaths = Object.entries(jsonRecord(beforeLock.artifacts))
-        .filter(([, metadata]) => jsonRecord(metadata).kind === 'usage')
-        .map(([file]) => file),
-      protectedHashes: Record<string, string> = {}
-    if (existingUsagePaths.length === 0)
-      throw new Error('Expected pre-existing usage files in ' + input.descriptorId)
-    for (const file of new Set([...fixedProtectedPaths, ...existingUsagePaths]))
+}) {
+  const { root } = input
+  // These fixture imports are part of the project before any safety snapshot.
+  await writeComponentPresetScenario(path.join(root, 'src'))
+  const before = JSON.parse(
+    await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'),
+  )
+  const config = JSON.parse(
+    await fs.readFile(path.join(root, 'ui-library.config.json'), 'utf8'),
+  )
+  const packageJson = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'))
+  const packageManagerDeclaration = packageJson.packageManager
+  if (packageManagerDeclaration !== input.manager + '@' + input.managerVersion)
+    throw Error('Consumer package manager declaration mismatch')
+  const existingUsagePaths = Object.entries(before.artifacts as Record<string, {kind: string}>)
+    .filter(([file, record]) => record.kind === 'usage' && /^src\/ombelle-examples\/(?:recipes|presets)\/.+\.tsx$/.test(file))
+    .map(([file]) => file)
+  if (!existingUsagePaths.length) throw Error('Expected pre-existing consumer usage files')
+  const lockfileNames = ['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb', 'npm-shrinkwrap.json']
+  const lockfiles = (await Promise.all(lockfileNames.map(async file =>
+    await fs.stat(path.join(root, file)).then(() => file, (error: NodeJS.ErrnoException) => {
+      if (error.code === 'ENOENT') return undefined
+      throw error
+    })
+  ))).filter((file): file is string => Boolean(file))
+  const expectedLockfile = input.manager === 'npm' ? 'package-lock.json'
+    : input.manager === 'pnpm' ? 'pnpm-lock.yaml'
+    : input.manager === 'yarn' ? 'yarn.lock'
+    : input.bunFormat === 'binary' ? 'bun.lockb' : 'bun.lock'
+  if (lockfiles.length !== 1 || lockfiles[0] !== expectedLockfile)
+    throw Error('Expected exactly one consumer manager lockfile')
+  const protectedHashes: Record<string, string> = {}
+  for (const file of [
+    'ui-preset.json',
+    'ui-library.config.json',
+    config.theme.cssEntry,
+    'package.json',
+    ...Object.keys(before.artifacts),
+  ]) {
+    protectedHashes[file] = await sha256(
+      await fs.readFile(path.join(root, file), 'utf8'),
+    )
+  }
+  for (const file of [
+    'package-lock.json',
+    'pnpm-lock.yaml',
+    'yarn.lock',
+    'bun.lock',
+    'bun.lockb',
+  ]) {
+    try {
       protectedHashes[file] = await sha256(
-        await fs.readFile(path.join(input.root, file), 'utf8'),
+        (await fs.readFile(path.join(root, file))).toString('base64'),
       )
-    await fs.mkdir(inputDirectory, { recursive: true })
-    await fs.writeFile(inputFile, JSON.stringify(preset, null, 2) + '\n')
-
-    const unchanged = async () => {
-      for (const [file, expected] of Object.entries(protectedHashes))
-        if ((await sha256(await fs.readFile(path.join(input.root, file), 'utf8'))) !== expected)
-          return false
-      const currentManagerDeclaration =
-        JSON.parse(await fs.readFile(path.join(input.root, 'package.json'), 'utf8'))
-          .packageManager ?? null
-      if (currentManagerDeclaration !== packageManagerDeclaration)
-        return false
-      if (
-        !(await fs.readFile(path.join(input.root, managerLockfile))).equals(
-          managerLockBytes,
-        )
-      )
-        return false
-      return true
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e
     }
-
-    const beforeDryRun = await snapshotTree(input.root),
-      dry = await runBuiltCli(
-        input.cliRuntime.name,
-        [...args, '--dry-run', '--json'],
-        input.root,
-        input.env,
-      )
+  }
+  const presets: Record<string, unknown> = {}
+  const execute = (args: string[]) =>
+    runBuiltCli(input.cliRuntime, args, root, input.env)
+  for (const ref of await componentPresetReferences()) {
+    const key = ref.preset.data.id + '@' + ref.preset.data.revision
+    const file = path.resolve(
+      '.artifacts/component-preset-inputs',
+      key + '.json',
+    )
+    await fs.mkdir(path.dirname(file), { recursive: true })
+    await fs.writeFile(file, JSON.stringify(ref.preset.data))
+    const args = ['add', 'button', '--preset', file, '--json']
+    const initial = await snapshotTree(root),
+      dry = await execute([...args, '--dry-run'])
     if (
       dry.code !== 0 ||
       jsonRecord(dry.data).status !== 'planned' ||
       !Array.isArray(jsonRecord(dry.data).dependencyPlan) ||
       (jsonRecord(dry.data).dependencyPlan as unknown[]).length !== 0 ||
-      JSON.stringify(await snapshotTree(input.root)) !== JSON.stringify(beforeDryRun) ||
-      !(await unchanged())
+      canonicalize(await snapshotTree(root)) !== canonicalize(initial)
     )
-      throw new Error('Component preset dry-run mutated or failed in ' + input.descriptorId)
-
-    const install = await runBuiltCli(
-      input.cliRuntime.name,
-      [...args, '--yes', '--json'],
-      input.root,
-      input.env,
-    )
-    if (
-      install.code !== 0 ||
-      jsonRecord(install.data).status !== 'success' ||
-      !Array.isArray(jsonRecord(install.data).dependencyPlan) ||
-      (jsonRecord(install.data).dependencyPlan as unknown[]).length !== 0 ||
-      !(await unchanged())
-    )
-      throw new Error('Component preset install failed in ' + input.descriptorId + ': ' + install.output)
-
-    const installedLock = jsonRecord(
-      JSON.parse(await fs.readFile(path.join(input.root, 'ui-library.lock.json'), 'utf8')),
-    ),
-      installedRecords = jsonRecord(installedLock.componentPresets),
-      installed = jsonRecord(installedRecords[key]),
-      installedPreset = jsonRecord(installed.preset),
-      installedArtifactMap = jsonRecord(installed.artifacts),
-      expectedArtifacts = [] as {
-        path: string
-        logicalPath: string
-        kind: string
-        sha256: string
-      }[]
-    if (
-      installedLock.presetHash !== defaultPresetHash ||
-      installed.scope !== result.scope ||
-      installedPreset.hash !== result.preset.hash ||
-      installed.darkSelector !== result.darkSelector
-    )
-      throw new Error('Component preset provenance mismatch in ' + input.descriptorId)
-
-    for (const artifact of result.artifacts.filter((candidate) => candidate.kind !== 'utility')) {
-      const transformed = await transformComponentPresetArtifact(transformContext, artifact),
-        content = await fs.readFile(path.join(input.root, transformed.path), 'utf8'),
-        digest = await sha256(content),
-        metadata = jsonRecord(installedArtifactMap[transformed.path])
-      if (
-        content !== transformed.content ||
-        metadata.logicalPath !== artifact.logicalPath ||
-        metadata.kind !== artifact.kind ||
-        metadata.sha256 !== digest
+      throw Error(
+        'Component preset dry-run mutated consumer ' + key + ': ' + dry.output,
       )
-        throw new Error('Component preset output differs from compiled source: ' + transformed.path)
-      expectedArtifacts.push({
-        path: transformed.path,
-        logicalPath: artifact.logicalPath,
-        kind: artifact.kind,
-        sha256: digest,
-      })
-    }
-    if (Object.keys(installedArtifactMap).length !== expectedArtifacts.length)
-      throw new Error('Unexpected component preset artifact ownership in ' + input.descriptorId)
-
-    const repeat = await runBuiltCli(
-      input.cliRuntime.name,
-      [...args, '--yes', '--json'],
-      input.root,
-      input.env,
-    ),
-      repeatData = jsonRecord(repeat.data),
-      repeatChanges = repeatData.changes
+    const done = await execute([...args, '--yes'])
+    if (done.code !== 0 || jsonRecord(done.data).status !== 'success' ||
+        !Array.isArray(jsonRecord(done.data).dependencyPlan) ||
+        (jsonRecord(done.data).dependencyPlan as unknown[]).length !== 0) throw Error(done.output)
+    const installedTree = await snapshotTree(root)
+    for (const [file, hash] of Object.entries(initial))
+      if (file !== 'ui-library.lock.json' && installedTree[file] !== hash)
+        throw Error('Component preset changed existing project file ' + file)
+    const repeat = await execute([...args, '--yes'])
+    const changes = jsonRecord(repeat.data).changes
     if (
       repeat.code !== 0 ||
-      repeatData.status !== 'success' ||
-      !Array.isArray(repeatChanges) ||
-      repeatChanges.length === 0 ||
-      !repeatChanges.every((change) => jsonRecord(change).action === 'noop') ||
-      !(await unchanged())
+      jsonRecord(repeat.data).status !== 'success' ||
+      !Array.isArray(changes) ||
+      changes.length === 0 ||
+      changes.some((c) => jsonRecord(c).action !== 'noop') ||
+      canonicalize(await snapshotTree(root)) !== canonicalize(installedTree)
     )
-      throw new Error('Component preset repeat was not a no-op in ' + input.descriptorId)
-
-    const tamperedPreset = structuredClone(preset) as typeof preset
-    tamperedPreset.modes.light.primary =
-      tamperedPreset.modes.light.primary === '#010101' ? '#010102' : '#010101'
-    const tamperedFile = path.join(inputDirectory, input.descriptorId + '-' + presetFamily + '-tampered.json'),
-      beforeConflict = await snapshotTree(input.root)
-    await fs.writeFile(tamperedFile, JSON.stringify(tamperedPreset, null, 2) + '\n')
-    const conflict = await runBuiltCli(
-      input.cliRuntime.name,
-      [
-        'add',
-        'button',
-        '--preset',
-        tamperedFile,
-        '--cwd',
-        input.root,
-        '--yes',
-        '--json',
-      ],
-      input.root,
-      input.env,
+      throw Error('Repeated component preset was not a no-op ' + key)
+    // Same ID/revision with different valid preset data must conflict without writes.
+    await fs.writeFile(
+      file,
+      JSON.stringify({
+        ...ref.preset.data,
+        name: ref.preset.data.name + ' changed',
+      }),
     )
+    const changedPreset = await execute([...args, '--yes'])
+    await fs.writeFile(file, JSON.stringify(ref.preset.data))
     if (
-      conflict.code !== 4 ||
-      jsonRecord(conflict.data).status !== 'conflict' ||
-      JSON.stringify(await snapshotTree(input.root)) !== JSON.stringify(beforeConflict) ||
-      !(await unchanged())
+      changedPreset.code !== 4 ||
+      jsonRecord(changedPreset.data).status !== 'conflict' ||
+      canonicalize(await snapshotTree(root)) !== canonicalize(installedTree)
     )
-      throw new Error('Same-revision component preset tamper did not safely conflict in ' + input.descriptorId)
-
-    records.push({
-      descriptorId: input.descriptorId,
-      hostFamily: input.hostFamily,
-      manager: input.manager,
-      managerVersion: input.managerVersion,
-      managerLockfile,
-      managerLockHash,
-      packageManagerDeclaration,
-      cliRuntime: input.cliRuntime,
-      audit: input.audit,
-      build: { status: 'pending' },
-      presetFamily,
-      presetId: result.preset.data.id,
-      presetRevision: result.preset.data.revision,
-      presetHash: result.preset.hash,
-      scope: result.scope,
-      darkSelector: result.darkSelector,
-      provenance: result.provenance,
+      throw Error(
+        'Changed same-revision component preset did not safely conflict ' + key,
+      )
+    const first = await componentPresetArtifact(
+      ref.artifacts.find((a) => a.kind === 'component')!,
+      'consumer',
+    )
+    const installedFile = path.join(root, first.path),
+      original = await fs.readFile(installedFile)
+    try {
+      await fs.appendFile(installedFile, '\n// consumer edit\n')
+      const edited = await snapshotTree(root),
+        tamper = await execute([...args, '--yes'])
+      if (
+        tamper.code !== 4 ||
+        jsonRecord(tamper.data).status !== 'conflict' ||
+        canonicalize(await snapshotTree(root)) !== canonicalize(edited)
+      )
+        throw Error('Edited component preset did not safely conflict ' + key)
+    } finally {
+      await fs.writeFile(installedFile, original)
+    }
+    const lock = JSON.parse(
+      await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'),
+    )
+    const installed = lock.componentPresets[key] as InstalledComponentPreset
+    const transformedHashes: Record<string, string> = {}
+    for (const artifact of ref.artifacts.filter((a) => a.kind !== 'utility')) {
+      const expected = await componentPresetArtifact(artifact, 'consumer'),
+        content = await fs.readFile(path.join(root, expected.path), 'utf8'),
+        hash = await sha256(content)
+      if (
+        content !== expected.content ||
+        installed.artifacts[expected.path]?.sha256 !== hash ||
+        content.includes('@ombelle/')
+      )
+        throw Error(
+          'Component preset transformed source mismatch ' + expected.path,
+        )
+      transformedHashes[expected.path] = hash
+    }
+    if (
+      lock.presetHash !== before.presetHash ||
+      canonicalize(lock.managedDeclarations) !==
+        canonicalize(before.managedDeclarations)
+    )
+      throw Error('Component preset changed saved global defaults')
+    presets[key] = {
+      installed,
       canonicalHashes: Object.fromEntries(
-        result.artifacts
-          .filter((artifact) => artifact.kind !== 'utility')
-          .map((artifact) => [artifact.logicalPath, artifact.sha256]),
+        ref.artifacts.map((a) => [a.logicalPath, a.sha256]),
       ),
-      transformedArtifacts: expectedArtifacts,
-      dryRun: { status: 'planned', treeUnchanged: true },
-      install: { status: 'success', exitCode: install.code },
-      repeat: { status: 'success', allNoop: true },
-      tamper: { status: 'conflict', exitCode: conflict.code, treeUnchanged: true },
-      preservation: {
-        defaults: true,
-        ordinaryComponents: true,
-        usageFiles: true,
+      transformedHashes,
+      checks: {
+        dryRun: true,
+        install: true,
+        repeatNoop: true,
+        tamperConflict: true,
+        preservation: true,
       },
-      protectedHashes,
-    })
+    }
   }
-  return records
+  const protectedAfterHashes: Record<string, string> = {}
+  for (const file of Object.keys(protectedHashes)) {
+    const binary = [
+      'package-lock.json',
+      'pnpm-lock.yaml',
+      'yarn.lock',
+      'bun.lock',
+      'bun.lockb',
+    ].includes(file)
+    protectedAfterHashes[file] = await sha256(
+      binary
+        ? (await fs.readFile(path.join(root, file))).toString('base64')
+        : await fs.readFile(path.join(root, file), 'utf8'),
+    )
+  }
+  if (canonicalize(protectedHashes) !== canonicalize(protectedAfterHashes))
+    throw Error(
+      'Component preset changed defaults, ordinary components or manager lockfile',
+    )
+  const after = JSON.parse(
+    await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'),
+  )
+  return {
+    presets,
+    packageManagerDeclaration,
+    managerLockfile: expectedLockfile,
+    managerLockfiles: lockfiles,
+    managerLockHash: protectedHashes[expectedLockfile],
+    protectedHashes,
+    protectedAfterHashes,
+    globalPresetHashBefore: before.presetHash,
+    globalPresetHashAfter: after.presetHash,
+  }
 }

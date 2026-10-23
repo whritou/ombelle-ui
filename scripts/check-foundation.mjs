@@ -113,7 +113,10 @@ const counts = {
   },
   browser: browser.stats,
 }
-let consumerMatrix, minimalistMeasurements, recipeEvidence, componentPresetEvidence
+let consumerMatrix,
+  minimalistMeasurements,
+  recipeEvidence,
+  componentPresetEvidence
 try {
   consumerMatrix = finalizeConsumerEvidence(
     consumerCases(),
@@ -138,7 +141,10 @@ try {
   componentPresetEvidence = await finalizeComponentPresetEvidence(
     {
       measurements: JSON.parse(
-        await fs.readFile('.artifacts/component-preset-measurements.json', 'utf8'),
+        await fs.readFile(
+          '.artifacts/component-preset-measurements.json',
+          'utf8',
+        ),
       ),
       consumers: JSON.parse(
         await fs.readFile('.artifacts/component-preset-consumers.json', 'utf8'),

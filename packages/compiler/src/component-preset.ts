@@ -14,8 +14,8 @@ import { canonicalize } from './canonicalize.js'
 import { sha256 } from './hash.js'
 import { resolvePreset } from './resolve.js'
 import {
-  compileScopedStyles,
-  validateRecipeDarkSelector,
+  compileScopedButtonStyles,
+  validateComponentPresetDarkSelector,
 } from './recipe-styles.js'
 import { renderScopedButton } from './recipe-source.js'
 
@@ -23,19 +23,18 @@ export async function compileButtonPreset(input: {
   preset: unknown
   darkSelector?: string
 }): Promise<ComponentPresetCompileResult> {
-  const validated = validatePreset(input.preset)
-  const catalog = getCatalog(validated.catalogRelease)
-  const preset = await resolvePreset(validated, catalog)
+  const raw = validatePreset(input.preset)
+  const catalog = getCatalog(raw.catalogRelease)
+  const preset = await resolvePreset(raw, catalog)
+  const darkSelector = validateComponentPresetDarkSelector(
+    input.darkSelector ?? '.dark',
+  )
   const provenance = {
-    catalogRelease: validated.catalogRelease,
-    compilerVersion: validated.compilerVersion,
+    catalogRelease: catalog.release,
+    compilerVersion: raw.compilerVersion,
   }
-  const darkSelector = validateRecipeDarkSelector(input.darkSelector ?? '.dark')
   const scope = await sha256(
-    canonicalize({
-      presetHash: preset.hash,
-      ...provenance,
-    }),
+    canonicalize({ presetHash: preset.hash, ...provenance }),
   )
   const template = getTemplate(catalog, 'button')
   if (!isStyleFamily(preset.data.styleFamily))
@@ -44,44 +43,50 @@ export async function compileButtonPreset(input: {
       'Style family is not available in the foundation',
       '/styleFamily',
     )
-  const familyCss = catalog.styles[preset.data.styleFamily]
-  const base =
-    'scoped-presets/' + preset.data.id + '/r' + preset.data.revision
+  const base = 'scoped-presets/' + preset.data.id + '/r' + preset.data.revision
+  const examplePath =
+    'examples/scoped-presets/' +
+    preset.data.id +
+    '/r' +
+    preset.data.revision +
+    '.tsx'
   const drafts: Omit<Artifact, 'sha256'>[] = [
     {
       logicalPath: base + '/button.tsx',
       kind: 'component',
       content: renderScopedButton({
         template: template.content,
+        componentName: 'Button',
+        propsTypeName: 'ButtonProps',
         scope,
         slot: 'scoped-button',
         scopeAttribute: 'data-ombelle-scope',
-        variant: preset.data.componentDefaults?.button?.variant ?? 'default',
-        size: preset.data.componentDefaults?.button?.size ?? 'default',
+        defaultVariant:
+          preset.data.componentDefaults?.button?.variant ?? 'default',
+        defaultSize: preset.data.componentDefaults?.button?.size ?? 'default',
       }),
     },
     {
       logicalPath: base + '/button.css',
       kind: 'style',
-      content: compileScopedStyles({
-        familyCss,
+      content: compileScopedButtonStyles({
+        familyCss:
+          catalog.styles[
+            preset.data.styleFamily as keyof typeof catalog.styles
+          ],
         preset,
         overrides: {},
         scope,
         darkSelector,
         slot: 'scoped-button',
         scopeAttribute: 'data-ombelle-scope',
+        scopeLabel: 'component-preset',
       }),
     },
     {
-      logicalPath:
-        'examples/scoped-presets/' +
-        preset.data.id +
-        '/r' +
-        preset.data.revision +
-        '.tsx',
+      logicalPath: examplePath,
       kind: 'usage',
-      content: `import {Button} from '@/components/ui/${base}/button'\nexport function Example(){return <Button>Save</Button>}`,
+      content: `import { Button } from '@/components/ui/${base}/button'\nexport function Example(){return <Button>Save</Button>}`,
     },
     { logicalPath: 'lib/utils.ts', kind: 'utility', content: catalog.utility },
   ]
@@ -98,12 +103,11 @@ export async function compileButtonPreset(input: {
     })
     artifacts.push({ ...draft, content, sha256: await sha256(content) })
   }
-  const dependencies = template.dependencies
-    .filter((dependency) => dependency.name !== '@radix-ui/react-slot')
-    .sort((a, b) => (a.name < b.name ? -1 : 1))
   return {
     artifacts,
-    dependencies,
+    dependencies: template.dependencies.filter(
+      (dependency) => dependency.name !== '@radix-ui/react-slot',
+    ).sort((a, b) => (a.name < b.name ? -1 : 1)),
     preset,
     scope,
     darkSelector,

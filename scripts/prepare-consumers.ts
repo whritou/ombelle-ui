@@ -24,7 +24,7 @@ const repo = process.cwd(),
   bunRows: Record<string, unknown> = {}
 const pending: Record<string, PendingConsumerEvidence> = {}
 const recipeRows: Record<string, unknown> = {}
-const componentPresetRows: Record<string, unknown>[] = []
+const componentPresetRows: Record<string, unknown> = {}
 let previous: Record<string, Fixture> = {}
 try {
   previous = JSON.parse(await fs.readFile('.artifacts/consumers.json', 'utf8'))
@@ -57,8 +57,8 @@ await fs.mkdir('.artifacts', { recursive: true })
 await fs.rm('.artifacts/consumer-matrix.json', { force: true })
 await fs.writeFile('.artifacts/consumer-pending.json', '{}')
 await fs.writeFile('.artifacts/recipe-consumers.json', '{}')
-await fs.rm('.artifacts/component-preset-consumers.json', { force: true })
-await fs.writeFile('.artifacts/component-preset-consumers.json', '[]')
+await fs.writeFile('.artifacts/component-preset-consumers.json', '{}')
+await fs.rm('.artifacts/component-preset-measurements.json', { force: true })
 const cases = consumerCases(),
   ports = assignConsumerPorts(cases),
   versions: Record<string, string> = {}
@@ -108,7 +108,13 @@ for (const spec of cases) {
       cliRuntime: row.cliRuntime,
       build: { status: 'pending' },
     }
-    componentPresetRows.push(...row.componentPresetEvidence)
+    componentPresetRows[spec.id] = {
+      ...row.componentPresetEvidence,
+      ...spec,
+      managerVersion: row.fixture.version,
+      cliRuntime: row.cliRuntime,
+      build: { status: 'pending' },
+    }
   } else {
     const row = await prepareNodeConsumer(spec)
     map[spec.id] = {
@@ -146,7 +152,13 @@ for (const spec of cases) {
       cliRuntime: row.cliRuntime,
       build: { status: 'pending' },
     }
-    componentPresetRows.push(...row.componentPresetEvidence)
+    componentPresetRows[spec.id] = {
+      ...row.componentPresetEvidence,
+      ...spec,
+      managerVersion: row.version,
+      cliRuntime: row.cliRuntime,
+      build: { status: 'pending' },
+    }
   }
   const observed = proof[spec.id] as {
     version: string
@@ -172,11 +184,11 @@ for (const spec of cases) {
     '.artifacts/recipe-consumers.json',
     JSON.stringify(recipeRows, null, 2),
   )
-  await fs.writeFile('.artifacts/consumers.json', JSON.stringify(map, null, 2))
   await fs.writeFile(
     '.artifacts/component-preset-consumers.json',
     JSON.stringify(componentPresetRows, null, 2),
   )
+  await fs.writeFile('.artifacts/consumers.json', JSON.stringify(map, null, 2))
   await fs.writeFile(
     '.artifacts/install-provenance.json',
     JSON.stringify(proof, null, 2),
