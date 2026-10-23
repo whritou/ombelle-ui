@@ -21,3 +21,20 @@ it('exports schema-valid source and themes with exact compiler bytes', async () 
   expect(registry.items.theme.cssVars.light.primary).toBe('#facc15')
   expect(registry.items.button).not.toHaveProperty('presetHash')
 })
+
+it('includes the Badge stylesheet alongside the exact component source', async () => {
+  const result = await compile({
+    preset: example,
+    componentIds: ['badge' as import('@ombelle/contracts').ComponentId],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  const item = buildRegistry(result).items.badge
+  expect(registryItemSchema.safeParse(item).success).toBe(true)
+  for (const file of ['components/ui/badge.tsx', 'components/ui/badge.css'])
+    expect(
+      item.files.find((entry: { path: string }) => entry.path === file)
+        ?.content,
+    ).toBe(result.artifacts.find((a) => a.logicalPath === file)?.content)
+  expect(item.dependencies).toEqual(['clsx@2.1.1', 'tailwind-merge@3.7.0'])
+})

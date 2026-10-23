@@ -5,6 +5,7 @@ import {
   type Preset,
   type StyleFamily,
   supportedStyleFamilies,
+  supportedComponentIds,
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
@@ -15,6 +16,7 @@ export type ComponentTemplate = {
   logicalPath: string
   dependencies: { name: string; version: string }[]
   slots: string[]
+  styles?: Record<StyleFamily, string>
 }
 export type Catalog = {
   release: string
@@ -31,7 +33,7 @@ export function getCatalog(release: string): Catalog {
       '/catalogRelease',
     )
   const templates = Object.fromEntries(
-    (['button', 'dialog', 'input'] as const).map((id) => [
+    supportedComponentIds.map((id) => [
       id,
       {
         id,
@@ -50,6 +52,9 @@ export function getCatalog(release: string): Catalog {
           )
           .map(([name, version]) => ({ name, version })),
         slots: [id],
+        ...(id === 'badge'
+          ? { styles: catalogData.componentStyles.badge }
+          : {}),
       },
     ]),
   ) as Record<ComponentId, ComponentTemplate>

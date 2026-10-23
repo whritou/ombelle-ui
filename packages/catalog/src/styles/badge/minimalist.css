@@ -1,0 +1,36 @@
+/* minimalist Badge */
+[data-slot='badge'] {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.125rem 0.5rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-shadow: none;
+}
+[data-slot='badge'][data-variant='destructive'] {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  border-color: var(--destructive);
+}
+@media (forced-colors: active) {
+  [data-slot='badge'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='badge'][data-variant='destructive'] {
+    border-style: double;
+    border-width: max(var(--border-width), 3px);
+  }
+}

@@ -1,7 +1,10 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { compile, sha256 } from '@ombelle/compiler'
-import { supportedStyleFamilies } from '@ombelle/contracts'
+import {
+  supportedStyleFamilies,
+  supportedComponentIds,
+} from '@ombelle/contracts'
 import { writePreviewRecipes } from '../tests/helpers/recipe-fixture.js'
 import { writePreviewComponentPresets } from '../tests/helpers/component-preset-fixture.js'
 for (const family of supportedStyleFamilies) {
@@ -13,7 +16,7 @@ for (const family of supportedStyleFamilies) {
   )
   const result = await compile({
     preset,
-    componentIds: ['button', 'dialog', 'input'],
+    componentIds: supportedComponentIds,
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
   })
@@ -44,6 +47,13 @@ for (const family of supportedStyleFamilies) {
     .replaceAll('STYLE_FAMILY', family)
     .replaceAll('@/components/ui', './components/ui')
   await fs.writeFile(root + '/scenario.tsx', scenario)
+  await fs.writeFile(
+    root + '/badge-fixture.tsx',
+    (await fs.readFile('fixtures/shared/badge-fixture.tsx', 'utf8')).replaceAll(
+      '@/components/ui',
+      './components/ui',
+    ),
+  )
   await writePreviewComponentPresets(root)
   await fs.writeFile(
     root + '/state-fixture.tsx',

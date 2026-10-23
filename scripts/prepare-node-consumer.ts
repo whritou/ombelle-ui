@@ -111,7 +111,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
             ],
       )
     }
-    await writeScenarioFixture(root, spec.family, true)
+    await writeScenarioFixture(root, spec.family, true, false, true)
     await fs.appendFile(
       path.join(root, 'src/index.css'),
       '\n.user-consumer-style { color:hotpink; }\n',
@@ -125,6 +125,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       ['init', '--preset', preset],
       ['add', 'button', 'dialog'],
       ['add', 'input'],
+      ['add', 'badge'],
     ]) {
       const result = await runBuiltCli(
         'node',
@@ -170,8 +171,13 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
     const artifacts: ArtifactProof[] = []
     const installedArtifacts = { ...jsonRecord(installed.artifacts) }
     for (const preset of Object.values(componentPresetEvidence.presets))
-      for (const [file, record] of Object.entries(jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts))) {
-        if (installedArtifacts[file] && JSON.stringify(installedArtifacts[file]) !== JSON.stringify(record))
+      for (const [file, record] of Object.entries(
+        jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts),
+      )) {
+        if (
+          installedArtifacts[file] &&
+          JSON.stringify(installedArtifacts[file]) !== JSON.stringify(record)
+        )
           throw Error('Conflicting scoped artifact ownership: ' + file)
         installedArtifacts[file] = record
       }

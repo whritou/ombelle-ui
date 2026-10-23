@@ -6,7 +6,9 @@ export function transformArtifact(
   artifact: Artifact,
 ): { path: string; content: string } {
   const target =
-    artifact.kind === 'component'
+    artifact.kind === 'component' ||
+    (artifact.kind === 'style' &&
+      artifact.logicalPath.startsWith('components/ui/'))
       ? path.join(context.componentsDir, path.basename(artifact.logicalPath))
       : artifact.kind === 'utility'
         ? context.utilsFile

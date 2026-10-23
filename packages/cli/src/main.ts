@@ -4,15 +4,12 @@ import { pathToFileURL } from 'node:url'
 import { createInterface } from 'node:readline/promises'
 import {
   FoundationError,
+  supportedComponentIds,
   type ComponentId,
   type Preset,
   type InstallPlan,
 } from '@ombelle/contracts'
-import {
-  compile,
-  compileButtonPreset,
-  compileRecipe,
-} from '@ombelle/compiler'
+import { compile, compileButtonPreset, compileRecipe } from '@ombelle/compiler'
 import { readRecipeFile } from './recipe-file.js'
 import { readPresetFile } from './preset-file.js'
 import { planRecipe } from './plan/recipe.js'
@@ -32,7 +29,9 @@ const exits: Record<string, number> = {
   INTERNAL_ERROR: 1,
 }
 const usage =
-  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
+  'Ombelle foundation: init --preset <local.json> | add <' +
+  supportedComponentIds.join('|') +
+  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },

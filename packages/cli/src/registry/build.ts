@@ -1,5 +1,5 @@
 import postcss from 'postcss'
-import type { CompileResult } from '@ombelle/contracts'
+import type { CompileResult, ComponentId } from '@ombelle/contracts'
 import { getCatalog, getTemplate } from '@ombelle/catalog'
 function cssObject(css: string): Record<string, any> {
   const result: Record<string, any> = {}
@@ -39,8 +39,10 @@ export function buildRegistry(result: CompileResult): {
   for (const artifact of result.artifacts.filter(
     (a) => a.kind === 'component',
   )) {
-    const id = artifact.logicalPath.split('/').at(-1)!.replace('.tsx', '') as
-      'button' | 'dialog' | 'input'
+    const id = artifact.logicalPath
+      .split('/')
+      .at(-1)!
+      .replace('.tsx', '') as ComponentId
     const utility = result.artifacts.find((a) => a.kind === 'utility')!
     items[id] = {
       $schema: 'https://ui.shadcn.com/schema/registry-item.json',
@@ -60,6 +62,17 @@ export function buildRegistry(result: CompileResult): {
           type: 'registry:lib',
           content: utility.content,
         },
+        ...result.artifacts
+          .filter(
+            (a) =>
+              a.kind === 'style' &&
+              a.logicalPath === artifact.logicalPath.replace(/\.tsx$/, '.css'),
+          )
+          .map((a) => ({
+            path: a.logicalPath,
+            type: 'registry:ui',
+            content: a.content,
+          })),
       ],
       cssVars: vars,
       css: cssObject(style.content),
