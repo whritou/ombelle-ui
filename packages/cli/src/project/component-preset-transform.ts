@@ -5,11 +5,16 @@ import {
   type ProjectContext,
 } from '@ombelle/contracts'
 import { rewriteModuleSpecifiers } from '@ombelle/compiler'
-import { portable } from './paths.js'
+import { portable, safePath } from './paths.js'
 
 export type ComponentPresetTransformContext = Pick<
   ProjectContext,
-  'componentsDir' | 'sourceDir' | 'utilsFile' | 'uiAlias' | 'utilsAlias'
+  | 'root'
+  | 'componentsDir'
+  | 'sourceDir'
+  | 'utilsFile'
+  | 'uiAlias'
+  | 'utilsAlias'
 >
 
 const componentArtifact =
@@ -32,6 +37,7 @@ export async function transformComponentPresetArtifact(
   context: ComponentPresetTransformContext,
   artifact: Artifact,
 ): Promise<{ path: string; content: string }> {
+  await safePath(context.root, artifact.logicalPath)
   let target: string
   if (artifact.logicalPath === 'lib/utils.ts' && artifact.kind === 'utility') {
     target = context.utilsFile

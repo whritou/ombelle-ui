@@ -637,7 +637,7 @@ it('transforms only component-preset artifacts into scoped destinations', async 
       ...style,
       logicalPath: '../escape.css',
     }),
-  ).rejects.toMatchObject({ code: 'INVALID_DATA' })
+  ).rejects.toMatchObject({ code: 'UNSUPPORTED_PROJECT' })
 })
 
 })
