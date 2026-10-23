@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import fs from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createInterface } from 'node:readline/promises'
@@ -10,7 +9,9 @@ import {
   type Preset,
   type InstallPlan,
 } from '@ombelle/contracts'
-import { compile, compileRecipe } from '@ombelle/compiler'
+import { compile, compileRecipe, compileButtonPreset } from '@ombelle/compiler'
+import { readPresetFile } from './preset-file.js'
+import { planComponentPreset } from './plan/component-preset.js'
 import { readRecipeFile } from './recipe-file.js'
 import { planRecipe } from './plan/recipe.js'
 import { inspectProject } from './project/inspect.js'
@@ -28,7 +29,7 @@ const exits: Record<string, number> = {
   INTERNAL_ERROR: 1,
 }
 const usage =
-  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
+  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | add button --preset <local.json> (component only) | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },
@@ -72,10 +73,14 @@ export async function runCli(
         'INVALID_DATA',
         'Use add --recipe <local.json> without component arguments or --preset',
       )
-    if (command === 'add' && flags['--preset'])
+    if (
+      command === 'add' &&
+      flags['--preset'] &&
+      (positional.length !== 2 || positional[1] !== 'button')
+    )
       throw new FoundationError(
         'INVALID_DATA',
-        'Use theme add to change project defaults',
+        'Use add button --preset <local.json> for a component-only preset',
       )
     const selected = flags['--package-manager']
     if (
@@ -104,6 +109,15 @@ export async function runCli(
         context,
         await compileRecipe({ recipe, darkSelector: context.darkSelector }),
       )
+    } else if (command === 'add' && flags['--preset']) {
+      const preset = await readPresetFile(String(flags['--preset']))
+      plan = await planComponentPreset(
+        context,
+        await compileButtonPreset({
+          preset,
+          darkSelector: context.darkSelector,
+        }),
+      )
     } else {
       let preset: Preset | unknown = context.preset
       if (command !== 'add') {
@@ -116,18 +130,7 @@ export async function runCli(
             'INVALID_DATA',
             'Choose a local preset JSON file',
           )
-        const presetPath = path.resolve(file)
-        try {
-          const stat = await fs.stat(presetPath)
-          if (stat.size > 262144) throw new Error('Preset exceeds 256 KiB')
-          preset = JSON.parse(await fs.readFile(presetPath, 'utf8'))
-        } catch (e) {
-          throw new FoundationError(
-            'INVALID_DATA',
-            e instanceof Error ? e.message : 'Cannot read preset',
-            presetPath,
-          )
-        }
+        preset = await readPresetFile(file)
       } else if (!preset || !context.config || !context.lock)
         throw new FoundationError(
           'UNSUPPORTED_PROJECT',
