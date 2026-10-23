@@ -1,15 +1,71 @@
 import type { Locator, Page } from '@playwright/test'
 
+export const recipeScreenshotBlockSize = 4
+
+export type NormalizedRecipeScreenshot = {
+  width: number
+  height: number
+  pixels: string
+}
+
+export function normalizeRecipeScreenshotPixels(
+  pixels: ArrayLike<number>,
+  width: number,
+  height: number,
+): { width: number; height: number; pixels: Uint8Array } {
+  if (
+    !Number.isInteger(width) ||
+    !Number.isInteger(height) ||
+    width <= 0 ||
+    height <= 0 ||
+    pixels.length !== width * height * 4
+  )
+    throw Error('Invalid screenshot pixel dimensions')
+
+  const normalizedWidth = Math.ceil(width / recipeScreenshotBlockSize)
+  const normalizedHeight = Math.ceil(height / recipeScreenshotBlockSize)
+  const normalized = new Uint8Array(normalizedWidth * normalizedHeight * 4)
+  for (let blockY = 0; blockY < normalizedHeight; blockY++) {
+    for (let blockX = 0; blockX < normalizedWidth; blockX++) {
+      const target = (blockY * normalizedWidth + blockX) * 4
+      let count = 0
+      const totals = [0, 0, 0, 0]
+      for (
+        let y = blockY * recipeScreenshotBlockSize;
+        y < Math.min(height, (blockY + 1) * recipeScreenshotBlockSize);
+        y++
+      ) {
+        for (
+          let x = blockX * recipeScreenshotBlockSize;
+          x < Math.min(width, (blockX + 1) * recipeScreenshotBlockSize);
+          x++
+        ) {
+          const source = (y * width + x) * 4
+          for (let channel = 0; channel < 4; channel++)
+            totals[channel] += pixels[source + channel]
+          count++
+        }
+      }
+      for (let channel = 0; channel < 4; channel++)
+        normalized[target + channel] = Math.round(totals[channel] / count)
+    }
+  }
+  return {
+    width: normalizedWidth,
+    height: normalizedHeight,
+    pixels: normalized,
+  }
+}
+
 /**
- * Hash screenshot pixels after dropping the three least-significant RGB bits.
- * This keeps cross-host browser comparisons stable when edge antialiasing
- * differs by a few channel values while preserving the exact PNG hash too.
+ * Capture a compact 4x4 averaged image for tolerant cross-host comparison.
+ * The exact PNG hash remains separate as run evidence.
  */
-export async function recipeScreenshotFingerprint(
+export async function recipeScreenshotEvidence(
   page: Page,
   image: Buffer,
-): Promise<string> {
-  return page.evaluate(async (base64) => {
+): Promise<NormalizedRecipeScreenshot> {
+  const source = await page.evaluate(async (base64) => {
     const bitmap = new Image()
     bitmap.src = 'data:image/png;base64,' + base64
     await bitmap.decode()
@@ -20,18 +76,22 @@ export async function recipeScreenshotFingerprint(
     if (!context) throw Error('Unable to read screenshot pixels')
     context.drawImage(bitmap, 0, 0)
     const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data
-    const normalized = new Uint8Array(pixels.length)
-    for (let i = 0; i < pixels.length; i += 4) {
-      normalized[i] = pixels[i] & 0xf8
-      normalized[i + 1] = pixels[i + 1] & 0xf8
-      normalized[i + 2] = pixels[i + 2] & 0xf8
-      normalized[i + 3] = pixels[i + 3]
+    return {
+      width: canvas.width,
+      height: canvas.height,
+      pixels: Array.from(pixels),
     }
-    const digest = await crypto.subtle.digest('SHA-256', normalized)
-    return Array.from(new Uint8Array(digest), (byte) =>
-      byte.toString(16).padStart(2, '0'),
-    ).join('')
   }, image.toString('base64'))
+  const normalized = normalizeRecipeScreenshotPixels(
+    source.pixels,
+    source.width,
+    source.height,
+  )
+  return {
+    width: source.width,
+    height: source.height,
+    pixels: Buffer.from(normalized.pixels).toString('base64'),
+  }
 }
 
 export async function recipeStyles(

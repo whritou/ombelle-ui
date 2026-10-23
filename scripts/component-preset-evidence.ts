@@ -8,6 +8,10 @@ import {
   componentPresetReferences,
   componentPresetArtifact,
 } from '../tests/helpers/component-preset-fixture.ts'
+import {
+  recipeScreenshotBlockSize,
+  type NormalizedRecipeScreenshot,
+} from '../tests/helpers/recipe-measurements.ts'
 import { canonicalize } from '../packages/compiler/src/canonicalize.ts'
 import { sha256 } from '../packages/compiler/src/hash.ts'
 
@@ -37,6 +41,7 @@ export type ComponentPresetMeasurement = {
   domHash: string
   screenshotHash: string
   normalizedScreenshotHash: string
+  normalizedScreenshot: NormalizedRecipeScreenshot
   focusOutlineWidth: number
   forcedColorsOutline: string
   motionPositiveControlMs: number
@@ -50,6 +55,53 @@ function object(value: unknown): Record<string, unknown> {
 }
 const equal = (a: unknown, b: unknown) => canonicalize(a) === canonicalize(b)
 const digest = (v: unknown) => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v)
+const screenshotMaxRmse = 2
+const screenshotMaxChannelDifference = 24
+
+export function normalizedScreenshotsMatch(
+  left: NormalizedRecipeScreenshot,
+  right: NormalizedRecipeScreenshot,
+): boolean {
+  if (left.width !== right.width || left.height !== right.height) return false
+  const a = Buffer.from(left.pixels, 'base64'),
+    b = Buffer.from(right.pixels, 'base64')
+  if (!a.length || a.length !== b.length || a.length % 4 !== 0) return false
+  let squaredError = 0
+  for (let pixel = 0; pixel < a.length; pixel += 4) {
+    let maxDifference = 0
+    for (let channel = 0; channel < 4; channel++) {
+      const difference = Math.abs(a[pixel + channel] - b[pixel + channel])
+      squaredError += difference * difference
+      maxDifference = Math.max(maxDifference, difference)
+    }
+    if (maxDifference > screenshotMaxChannelDifference) return false
+  }
+  return Math.sqrt(squaredError / a.length) <= screenshotMaxRmse
+}
+
+function isNormalizedScreenshot(value: unknown): value is NormalizedRecipeScreenshot {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const image = value as Record<string, unknown>
+  if (
+    !Number.isInteger(image.width) ||
+    !Number.isInteger(image.height) ||
+    Number(image.width) <= 0 ||
+    Number(image.height) <= 0 ||
+    typeof image.pixels !== 'string' ||
+    !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+      image.pixels,
+    )
+  )
+    return false
+  const pixels = Buffer.from(image.pixels, 'base64'),
+    expectedWidth = Math.ceil(Number(image.width) / recipeScreenshotBlockSize),
+    expectedHeight = Math.ceil(Number(image.height) / recipeScreenshotBlockSize)
+  return (
+    pixels.toString('base64') === image.pixels &&
+    pixels.length === expectedWidth * expectedHeight * 4
+  )
+}
+
 export function componentPresetMeasurementKeys(): readonly string[] {
   return supportedStyleFamilies.flatMap((host) =>
     supportedStyleFamilies.flatMap((selected) =>
@@ -119,7 +171,10 @@ export async function validateComponentPresetMeasurements(
       Object.values(styles).some((v) => typeof v !== 'string') ||
       !digest(row.domHash) ||
       !digest(row.screenshotHash) ||
-      !digest(row.normalizedScreenshotHash)
+      !digest(row.normalizedScreenshotHash) ||
+      !isNormalizedScreenshot(row.normalizedScreenshot) ||
+      (await sha256(row.normalizedScreenshot.pixels)) !==
+        row.normalizedScreenshotHash
     )
       throw Error('Missing rendered component preset results ' + key)
     if (
@@ -144,26 +199,31 @@ export async function validateComponentPresetMeasurements(
       evidence = {
         styles,
         domHash: row.domHash,
-        normalizedScreenshotHash: row.normalizedScreenshotHash,
+        normalizedScreenshot: row.normalizedScreenshot,
       }
-    if (rendered.has(identity) && !equal(rendered.get(identity), evidence)) {
+    if (rendered.has(identity)) {
       const previous = object(rendered.get(identity)),
         differences = []
       if (!equal(previous.styles, styles)) differences.push('computed styles')
       if (previous.domHash !== row.domHash) differences.push('DOM')
       if (
-        previous.normalizedScreenshotHash !== row.normalizedScreenshotHash
+        !normalizedScreenshotsMatch(
+          previous.normalizedScreenshot as NormalizedRecipeScreenshot,
+          row.normalizedScreenshot as NormalizedRecipeScreenshot,
+        )
       )
         differences.push('normalized screenshot')
-      throw Error(
-        'Component preset differs across hosts/apps ' +
-          key +
-          ' (' +
-          differences.join(', ') +
-          ')',
-      )
+      if (differences.length)
+        throw Error(
+          'Component preset differs across hosts/apps ' +
+            key +
+            ' (' +
+            differences.join(', ') +
+            ')',
+        )
+    } else {
+      rendered.set(identity, evidence)
     }
-    rendered.set(identity, evidence)
   }
   return value as ComponentPresetMeasurement[]
 }

@@ -4,6 +4,7 @@ import type { ConsumerEvidence } from '../../scripts/consumer-evidence.js'
 import {
   componentPresetMeasurementKeys,
   finalizeComponentPresetEvidence,
+  normalizedScreenshotsMatch,
   validateComponentPresetConsumers,
   validateComponentPresetMeasurements,
 } from '../../scripts/component-preset-evidence.js'
@@ -11,6 +12,7 @@ import {
   componentPresetReferences,
   componentPresetArtifact,
 } from '../helpers/component-preset-fixture.js'
+import { normalizeRecipeScreenshotPixels } from '../helpers/recipe-measurements.js'
 import { sha256 } from '@ombelle/compiler'
 import { runNative } from '../helpers/bun-command.js'
 
@@ -160,6 +162,18 @@ async function measurements() {
             )
           ).content,
         )
+      const normalizedScreenshotPixels = Buffer.alloc(16 * 16 * 4)
+      for (let i = 0; i < normalizedScreenshotPixels.length; i += 4) {
+        normalizedScreenshotPixels[i] = 80
+        normalizedScreenshotPixels[i + 1] = 90
+        normalizedScreenshotPixels[i + 2] = 100
+        normalizedScreenshotPixels[i + 3] = 255
+      }
+      const normalizedScreenshot = {
+        width: 64,
+        height: 64,
+        pixels: normalizedScreenshotPixels.toString('base64'),
+      }
       return {
         hostFamily,
         presetId,
@@ -186,7 +200,8 @@ async function measurements() {
         },
         domHash: 'b'.repeat(64),
         screenshotHash: 'c'.repeat(64),
-        normalizedScreenshotHash: 'd'.repeat(64),
+        normalizedScreenshotHash: await sha256(normalizedScreenshot.pixels),
+        normalizedScreenshot,
         focusOutlineWidth: 3,
         forcedColorsOutline: 'solid',
         motionPositiveControlMs: 150,
@@ -371,13 +386,75 @@ it('rejects missing, duplicate, failed and cross-host browser parity evidence', 
 it('compares normalized screenshot pixels while retaining exact PNG hashes', async () => {
   const rows = await measurements()
   rows[30].screenshotHash = 'e'.repeat(64)
-  rows[30].normalizedScreenshotHash = rows[0].normalizedScreenshotHash
   await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(
     90,
   )
 
-  rows[30].normalizedScreenshotHash = 'f'.repeat(64)
+  const pixels = Buffer.from(rows[30].normalizedScreenshot.pixels, 'base64')
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = 180
+    pixels[i + 1] = 190
+    pixels[i + 2] = 200
+  }
+  rows[30].normalizedScreenshot.pixels = pixels.toString('base64')
+  rows[30].normalizedScreenshotHash = await sha256(
+    rows[30].normalizedScreenshot.pixels,
+  )
   await expect(validateComponentPresetMeasurements(rows)).rejects.toThrow(
     'Component preset differs across hosts/apps',
+  )
+})
+
+it('ignores sparse pixel antialiasing changes but retains visible screenshot changes', () => {
+  const makePixels = (color: number) =>
+    new Uint8ClampedArray(
+      Array.from({ length: 64 * 64 * 4 }, (_, index) =>
+        index % 4 === 3 ? 255 : color,
+      ),
+    )
+  const reference = makePixels(80)
+  const antialiased = makePixels(80)
+  for (const pixel of [
+    1 * 64 + 1,
+    3 * 64 + 5,
+    6 * 64 + 9,
+    21 * 64 + 13,
+    39 * 64 + 17,
+    50 * 64 + 21,
+    27 * 64 + 25,
+    32 * 64 + 29,
+    45 * 64 + 33,
+    52 * 64 + 37,
+    61 * 64 + 41,
+  ])
+    antialiased[4 * pixel] = 88
+
+  const evidence = (pixels: Uint8ClampedArray) => {
+    const normalized = normalizeRecipeScreenshotPixels(pixels, 64, 64)
+    return {
+      width: 64,
+      height: 64,
+      pixels: Buffer.from(normalized.pixels).toString('base64'),
+    }
+  }
+  expect(normalizedScreenshotsMatch(evidence(reference), evidence(antialiased))).toBe(
+    true,
+  )
+
+  const localizedChange = makePixels(80)
+  for (let y = 0; y < 4; y++)
+    for (let x = 0; x < 4; x++) {
+      const offset = 4 * (y * 64 + x)
+      localizedChange[offset] += 25
+      localizedChange[offset + 1] += 25
+      localizedChange[offset + 2] += 25
+    }
+  expect(
+    normalizedScreenshotsMatch(evidence(reference), evidence(localizedChange)),
+  ).toBe(false)
+
+  const changed = makePixels(128)
+  expect(normalizedScreenshotsMatch(evidence(reference), evidence(changed))).toBe(
+    false,
   )
 })

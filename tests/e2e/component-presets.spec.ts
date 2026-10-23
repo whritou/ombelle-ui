@@ -10,7 +10,7 @@ import {
 import {
   recipeStyles,
   recipeDom,
-  recipeScreenshotFingerprint,
+  recipeScreenshotEvidence,
 } from '../helpers/recipe-measurements.js'
 import {
   componentPresetIsolationBaseline,
@@ -101,7 +101,8 @@ for (const hostFamily of supportedStyleFamilies)
           await page.mouse.move(0, 0)
           const computedStyles = await recipeStyles(button),
             dom = await recipeDom(specimen),
-            image = await specimen.screenshot({ animations: 'disabled' })
+            image = await specimen.screenshot({ animations: 'disabled' }),
+            normalizedScreenshot = await recipeScreenshotEvidence(page, image)
           if (referenceImage) {
             expect(computedStyles).toEqual(referenceStyles)
             expect(dom).toEqual(referenceDom)
@@ -210,10 +211,10 @@ for (const hostFamily of supportedStyleFamilies)
             computedStyles,
             domHash: await sha256(JSON.stringify(dom)),
             screenshotHash: await sha256(image.toString('base64')),
-            normalizedScreenshotHash: await recipeScreenshotFingerprint(
-              page,
-              image,
+            normalizedScreenshotHash: await sha256(
+              normalizedScreenshot.pixels,
             ),
+            normalizedScreenshot,
             focusOutlineWidth,
             forcedColorsOutline,
             motionPositiveControlMs,
