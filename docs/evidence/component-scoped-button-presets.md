@@ -1,0 +1,43 @@
+# Component-scoped Button preset evidence
+
+23 October 2026. The complete local foundation gate passed on Windows at source revision `c1d7a64ed0e501ea9099df0805d7c26648bad63b`. The gate recorded **workingTreeDirty: true**: implementation through c1d7a64 was committed, and the five user-facing documentation edits were present. This evidence document and [retained JSON summary](component-scoped-button-presets-run.json) were generated afterward. The gate took **38 minutes 7 seconds**. This is a local result; hosted CI was not run as part of this task.
+
+Measured tools: Node **v24.19.0**, pnpm **11.25.0**, npm **11.19.0**, Yarn Classic **1.22.22**, modern Yarn **4.18.1**, Bun **1.4.3**, and Chromium **155.0.4283.62** through Microsoft Edge (`msedge`). Registry access used `NODE_OPTIONS=--use-system-ca` and `NODE_USE_SYSTEM_CA=1`; certificate validation remained enabled. Native commands ran outside the Windows sandbox because its user-information lookup prevents tsx startup.
+
+All nine stages passed: **148 unit tests, 150 integration tests, and 87 browser tests**, with **34 standalone production builds and audits**, **102 scoped preset installations**, and **90 component preset browser measurements**. Failed/skipped unit and integration counts and unexpected/skipped/flaky browser counts are zero. The preliminary build, typecheck, unit, and integration commands also passed; their exact timestamps, statuses, and logs are in the summary.
+
+| Stage | Result | Duration | Retained log |
+| --- | --- | --- | --- |
+| `pnpm build:packages` | Passed (exit 0) | 2s | `.artifacts\logs\build-packages.log` |
+| `pnpm test:unit` | Passed (exit 0) | 14s | `.artifacts\logs\test-unit.log` |
+| `pnpm test:integration` | Passed (exit 0) | 199s | `.artifacts\logs\test-integration.log` |
+| `pnpm generate:preview` | Passed (exit 0) | 3s | `.artifacts\logs\generate-preview.log` |
+| `pnpm prepare:consumers` | Passed (exit 0) | 1288s | `.artifacts\logs\prepare-consumers.log` |
+| `pnpm typecheck` | Passed (exit 0) | 3s | `.artifacts\logs\typecheck.log` |
+| `pnpm build:preview` | Passed (exit 0) | 3s | `.artifacts\logs\build-preview.log` |
+| `pnpm build:consumers` | Passed (exit 0) | 213s | `.artifacts\logs\build-consumers.log` |
+| `pnpm test:e2e` | Passed (exit 0) | 561s | `.artifacts\logs\test-e2e.log` |
+
+## Verified local workflow
+
+After initialization, `add button --preset <local.json>` accepts strict local UTF-8 preset JSON at most 256 KiB with exact catalog/compiler 0.1.0. Flat, minimalist, and neo brutalism are implemented. It creates a separate native `Button`, colocated scoped CSS, and usage under preset ID/revision paths. Importing that component loads its styling. See [commands, imports, ownership, and conflict rules](../foundation-local-usage.md#component-scoped-button-presets).
+
+The 34 descriptors cover npm 6, pnpm 6, Yarn 6, and Bun 16 consumers. Each installs the three actual built-in preset identities: **34 × 3 = 102**. All framework builds use Node. Actual CLI runtimes are retained per descriptor, including the eight Bun-runtime cases; the other 26 use Node. Yarn Classic 1.22.22 and modern Yarn 4.18.1 cover the declared node-modules and Plug'n'Play layouts. Bun 1.4.3 covers text/binary locks and both CLI runtimes. Bun audits the whole graph; other managers audit production dependencies. These consumer audits do not establish a clean full development dependency audit; the existing upstream-registry development advisory remains documented in the [adapter decision](../decisions/0002-registry-adapter.md).
+
+Each installation retains canonical compiler hashes, actual transformed source hashes, lock provenance, dry-run non-mutation, successful installation, repeat/no-op, changed-content and edited-source conflicts, and protected before/after hashes. Preset/configuration, global CSS/style pack, ordinary components/usages, recipes, package manifest, and manager lock stay preserved during scoped installation. The project lock adds scoped provenance. Shared utilities require matching recorded ownership and bytes. Identical repeats are no-ops; immutable identity/revision changes, changed dark context, edited/untracked destinations, incompatible utility source, and invalid global provenance conflict even with `--yes`. Existing manager selection, script suppression, workspace rejection, and transaction/recovery boundaries apply.
+
+## Browser measurement boundary
+
+The **90** measured rows are **three host families × three selected preset families × two modes × five applications**: preview, pnpm Vite/Next.js, and npm Vite/Next.js. Actual source bytes, canonical/transformed hashes, normalized DOM, all ten computed-style fields, and exact specimen PNG bytes agree across the measured hosts/apps. Variants and sizes are included in the specimen. Keyboard Enter/Space/click activation, disabled and busy native props, accessible naming, focus outline, forced-color focus, and a 150ms motion positive control followed by zero reduced-motion duration are measured. The fixture's loading toggle supplies native `disabled`/`aria-busy`; the preset Button has no recipe `loading` prop or `asChild` API.
+
+Host isolation uses **a separate host page without component preset imports** for the reference module graph. It asserts that no component preset source/CSS requests occur there, then compares ordinary host styles in each real measured app. A separate regression proves an injected unscoped 123px Button radius is active and causes rejection. The validator requires the isolation method on every row and rejects incomplete, stale, duplicate, failed, or mismatched evidence. Old selector-filtered measurements cannot satisfy this gate.
+
+Yarn/Bun have installation, source parity, audit, and Node production-build evidence only. Their browser behavior is outside this run. This component preset matrix does not establish native browser text zoom, screen-reader acceptance, human visual/accessibility review, or other browser engines. Existing ordinary/minimalist/recipe checks retained by the full gate have their own documented scope.
+
+## Retention and remaining scope
+
+The JSON summary preserves all 34 consumer records and all 90 measurements using SHA-256 content-keyed banks for repeated values; generation reconstructs and compares every record with the actual final report. It includes the exact source revision, dirty state, timestamps, runtime identities, nine stage statuses/counts, per-artifact SHA-256/byte size, canonical/transformed/protected hashes, and evidence paths. The full sanitized report is retained locally at `.artifacts/component-scoped-button-presets-run.full.json`; original evidence remains in `.artifacts/foundation-report.json`, `.artifacts/component-preset-consumers.json`, `.artifacts/component-preset-measurements.json`, `.artifacts/consumer-matrix.json`, the test JSON reports, logs, and browser screenshot attachments. Summary hashes bind those exact files. No hosted CI outcome is inferred from local files.
+
+The earlier Task 5 broad integration attempt had 147 passes and two Yarn cache/contention failures; six tests passed when the two files were rerun sequentially after cache warmup. That attempt remains a failed initial run followed by successful retries. The fresh preliminary integration and complete foundation results above are independent completed runs; no interrupted or partial attempt is relabeled as clean.
+
+Only the local Button slice is implemented. Saved remote preset/recipe codes, snapshot publishing, production editor integration, other scoped components, and portal propagation remain pending. Complex dark selectors, nested independently themed subtrees, and arbitrary consumer CSS/style overrides remain outside the guarantee. Single dark classes work on the element or ancestor; the browser matrix uses .dark and compiler checks cover custom .night. Changing an installed dark context requires explicit migration. Workspaces, public distribution, wider alpha catalog stability, human/screen-reader review, and broader browser coverage are not established by this evidence.

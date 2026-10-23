@@ -2,7 +2,7 @@
 
 ## Purpose and status
 
-The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; published runner commands remain unavailable. The private local foundation implements `init`, ordinary `add`, `theme add` with local presets, and `add --recipe` with local Button recipes. See [local usage](foundation-local-usage.md) for executable repository commands.
+The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; published runner commands remain unavailable. The private local foundation implements `init`, ordinary `add`, `theme add` with local presets, `add button --preset <local.json>`, and `add --recipe` with local Button recipes. See [local usage](foundation-local-usage.md) for executable repository commands.
 
 The upstream shadcn CLI remains a supported transport for explicitly published standard registry items. It has its own preset system. Our preset JSON and project lock behavior must not be presented as upstream capabilities.
 
@@ -18,7 +18,7 @@ npx @your-ui/cli@0.1.0 add button dialog
 # Use a saved preset for this Button only; preserve project defaults.
 npx @your-ui/cli@0.1.0 add button --preset ps_brand@3
 
-# A downloaded preset is also a supported planned input.
+# Local JSON input is implemented in the private built CLI.
 npx @your-ui/cli@0.1.0 add button --preset ./brand.preset.json
 
 # Inspect changes without writing source, config, cache, or dependencies.
@@ -69,7 +69,9 @@ Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|ya
 
 Component-scoped preset selection initially targets one Button per command. Reject multiple components or simultaneous `--preset` and `--recipe`. Resolve and pin the exact preset, generate isolated light/dark styling and usage, and record scoped provenance without modifying the saved global preset or restyling existing components. Reuse compatible base source or stop with a conflict; never silently replace shared source. See [component-scoped preset selection](04-presets-and-contracts.md#component-scoped-preset-selection) for the full scope and persistence contract.
 
-Implementation status: the current foundation rejects `--preset` on `add`. Local Button recipe files referencing exact built-in presets are implemented through `add --recipe <local.json>`. Component-scoped preset selection and remote preset/recipe code resolution remain requirements for future implementation. The recipe API creates a separate native `RecipeButton`; it preserves ordinary source and global defaults.
+Implementation status: the private built CLI implements `add button --preset <local.json>` after initialization. It reads a strict regular UTF-8 preset file up to 256 KiB, supports flat/minimalist/neo-brutalism with exact catalog/compiler 0.1.0, and emits a separate native `Button`, scoped CSS, and usage under preset ID/revision paths. Saved global defaults, global CSS, ordinary components, and recipes are preserved. Identical repeats are no-ops; changed immutable content, edited/untracked output, incompatible shared utilities, and changed dark context conflict. `--yes` accepts only safe plans. See [the executable workflow and boundaries](foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](evidence/component-scoped-button-presets.md).
+
+Local Button recipes referencing exact built-in presets remain available through `add --recipe <local.json>`, creating a separate native `RecipeButton`. Saved remote preset/recipe codes, editor integration, other scoped components, portal propagation, nested independently themed subtrees, and arbitrary CSS/style overrides remain pending or outside the guarantee. Single dark classes are supported; complex selectors require migration. Manager selection, lifecycle-script suppression, dry-run, ownership, and recovery safeguards apply to the local preset path.
 
 The proposed dry-run is stricter than an ordinary installation: it performs no filesystem writes, even to a project cache, and never invokes the package manager. It may fetch public manifests in memory. Document network access in machine-readable output.
 
