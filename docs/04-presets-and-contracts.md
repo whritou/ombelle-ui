@@ -61,7 +61,7 @@ add button --preset ps_brand@3
 add button --preset ./brand.preset.json
 ```
 
-These are proposed commands. The current private foundation accepts local preset files for `init` and `theme add`, but rejects `--preset` on `add`; remote codes and component-scoped installation are not implemented.
+The current private foundation supports the local Button command `add button --preset <local.json>`. It installs a separate scoped Button and preserves the saved project preset and defaults for later ordinary additions. The `ps_brand@3` examples above show proposed future remote behavior: remote preset codes and snapshot publishing remain pending. Component-scoped support beyond Button also remains pending. See [local usage](foundation-local-usage.md#component-scoped-button-presets) for the supported command and boundaries.
 
 The public interface uses the named flag `--preset <code-or-file>`. A generated opaque code is a value, never a dynamically named flag such as `--random-string`. Published commands pin an immutable preset revision; if a friendly alias is accepted, show and lock its resolved revision and hash before installation. Local JSON is a permanent offline and version-control option, not a development-only substitute.
 
