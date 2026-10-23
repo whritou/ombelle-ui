@@ -106,35 +106,35 @@
       "command": "pnpm build:packages",
       "startedAt": "2026-10-23T10:17:19.6667085Z",
       "exitCode": 0,
-      "log": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-build-packages.log"
+      "log": ".artifacts/component-scoped-button-presets/verification/task-6-build-packages.log"
     },
     {
       "completedAt": "2026-10-23T10:17:24.5787200Z",
       "command": "pnpm typecheck",
       "startedAt": "2026-10-23T10:17:21.7452578Z",
       "exitCode": 0,
-      "log": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-typecheck.log"
+      "log": ".artifacts/component-scoped-button-presets/verification/task-6-typecheck.log"
     },
     {
       "completedAt": "2026-10-23T10:17:37.0964881Z",
       "command": "pnpm test:unit",
       "startedAt": "2026-10-23T10:17:24.5814532Z",
       "exitCode": 0,
-      "log": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-test-unit.log"
+      "log": ".artifacts/component-scoped-button-presets/verification/task-6-test-unit.log"
     },
     {
       "completedAt": "2026-10-23T10:20:55.4623905Z",
       "command": "pnpm test:integration",
       "startedAt": "2026-10-23T10:17:37.0988262Z",
       "exitCode": 0,
-      "log": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-test-integration.log"
+      "log": ".artifacts/component-scoped-button-presets/verification/task-6-test-integration.log"
     },
     {
       "completedAt": "2026-10-23T10:59:03.4415512Z",
       "command": "pnpm check:foundation",
       "startedAt": "2026-10-23T10:20:55.4652164Z",
       "exitCode": 0,
-      "log": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-check-foundation.log"
+      "log": ".artifacts/component-scoped-button-presets/verification/task-6-check-foundation.log"
     }
   ],
   "scope": {
@@ -288,27 +288,27 @@
       "bytes": 9878
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-build-packages.log",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-build-packages.log",
       "sha256": "3fd23558c7018f6534d7de03049615bf2e0dcafa88d80da6a6e9441242eedade",
       "bytes": 91
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-typecheck.log",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-typecheck.log",
       "sha256": "3f6de1fe173e91b823aa85e13fb66dec7395adb7b89b0d3c8d6dadbec7b9b09a",
       "bytes": 81
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-test-unit.log",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-test-unit.log",
       "sha256": "7c787df7f818226c74d60235b8df065f167101ccec0fb567cd5ae6af2c088b58",
       "bytes": 4487
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-test-integration.log",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-test-integration.log",
       "sha256": "4ead884a3ef06a46acdcf7655179c6872845d82a5313a2f1084c79c81fd2e553",
       "bytes": 10892
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-check-foundation.log",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-check-foundation.log",
       "sha256": "aae3e11e0253d7ea85a16ace5848497c7460f014f8db26d46706bf758668d96b",
       "bytes": 562
     },
@@ -328,37 +328,37 @@
       "bytes": 66218
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-runtime.json",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-runtime.json",
       "sha256": "233e3004fd5f66c717f5700754e6b1752b1b116bf8cd6ec8f8661de86691bce4",
       "bytes": 178
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-gates.json",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-gates.json",
       "sha256": "0c5deb951481b1359f68b7278dedf31de96fbd72da3d4b7df7f8b89258b32639",
       "bytes": 1543
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-source-state.txt",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-source-state.txt",
       "sha256": "8ac45f5297c67d1f7ad49373ba9fc93de6b36a688eb4c9cb49c5126636ef944e",
       "bytes": 157
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-6-documentation.patch",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-6-documentation.patch",
       "sha256": "eb44f4862627d2ebcb7ff63066ca0c65037df1db7f073fe8a16b477716521773",
       "bytes": 18718
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-5-report.md",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-5-report.md",
       "sha256": "65b566540ec70f4be1754d1ff8ab285c3c2df92fce54d9618abaa9a6eb15175b",
       "bytes": 18364
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-5-tests.log",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-5-tests.log",
       "sha256": "374b6f2cf15b8bfbeb319afe4c3e8389598085a872b24b5310f71e70caa21c01",
       "bytes": 20176
     },
     {
-      "path": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-5-yarn-retry.log",
+      "path": ".artifacts/component-scoped-button-presets/verification/task-5-yarn-retry.log",
       "sha256": "d920659ce08cccb0f256b81cada74e4e35789306e3f878283cd61c012d61a24f",
       "bytes": 163
     }
