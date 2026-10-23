@@ -136,6 +136,27 @@ export async function writeComponentPresetScenario(
 export async function writePreviewComponentPresets(
   root: string,
 ): Promise<void> {
+  const hostScenario = (
+    await fs.readFile(path.join(root, 'scenario.tsx'), 'utf8')
+  )
+    .replace("import { RecipeFixture } from './recipe-fixture'\n", '')
+    .replace('{recipes && <RecipeFixture />}', '')
+  if (hostScenario.includes('ComponentPresetFixture'))
+    throw Error(
+      'Generate the isolated host before adding component preset imports',
+    )
+  await fs.writeFile(
+    path.join(root, 'isolation-baseline-scenario.tsx'),
+    hostScenario,
+  )
+  await fs.writeFile(
+    path.join(root, 'isolation-baseline-entry.tsx'),
+    "import * as React from 'react'\nimport {createRoot} from 'react-dom/client'\nimport './preview.css'\nimport Scenario from './isolation-baseline-scenario'\ncreateRoot(document.getElementById('root')!).render(<Scenario/>)\n",
+  )
+  await fs.writeFile(
+    path.join(root, 'isolation-baseline.html'),
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ordinary host baseline</title></head><body><div id="root"></div><script type="module" src="./isolation-baseline-entry.tsx"></script></body></html>',
+  )
   for (const ref of await componentPresetReferences())
     for (const a of ref.artifacts.filter((a) => a.kind !== 'utility')) {
       const transformed = await componentPresetArtifact(a, 'preview'),

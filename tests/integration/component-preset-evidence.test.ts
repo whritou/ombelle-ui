@@ -166,6 +166,7 @@ async function measurements() {
           ref.artifacts.map((a) => [a.logicalPath, a.sha256]),
         ),
         transformedHashes,
+        isolationMethod: 'separate host page without component preset imports',
         computedStyles: {
           color: 'rgb(1, 2, 3)',
           background: 'rgb(4, 5, 6)',
@@ -322,6 +323,9 @@ it('rejects missing, duplicate, failed and cross-host browser parity evidence', 
     },
     (r) => {
       r[0].checks.isolation = false
+    },
+    (r) => {
+      delete r[0].isolationMethod
     },
     (r) => {
       r[0].transformedHashes[Object.keys(r[0].transformedHashes)[0]] =

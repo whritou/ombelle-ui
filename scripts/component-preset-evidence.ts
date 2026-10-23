@@ -21,6 +21,8 @@ const checks = [
   'forcedColors',
   'reducedMotion',
 ] as const
+export const componentPresetIsolationMethod =
+  'separate host page without component preset imports' as const
 export type ComponentPresetMeasurement = {
   hostFamily: string
   presetId: string
@@ -31,6 +33,7 @@ export type ComponentPresetMeasurement = {
   canonicalHashes: Record<string, string>
   transformedHashes: Record<string, string>
   computedStyles: Record<string, string>
+  isolationMethod: typeof componentPresetIsolationMethod
   domHash: string
   screenshotHash: string
   focusOutlineWidth: number
@@ -96,6 +99,7 @@ export async function validateComponentPresetMeasurements(
     const result = object(row.checks),
       styles = object(row.computedStyles)
     if (
+      row.isolationMethod !== componentPresetIsolationMethod ||
       checks.some((k) => result[k] !== true) ||
       [
         'color',

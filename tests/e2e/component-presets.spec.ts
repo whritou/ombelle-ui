@@ -9,7 +9,12 @@ import {
 } from '../helpers/component-preset-fixture.js'
 import { recipeStyles, recipeDom } from '../helpers/recipe-measurements.js'
 import {
+  componentPresetIsolationBaseline,
+  assertComponentPresetHostIsolation,
+} from '../helpers/component-preset-isolation.js'
+import {
   validateComponentPresetMeasurements,
+  componentPresetIsolationMethod,
   type ComponentPresetMeasurement,
 } from '../../scripts/component-preset-evidence.js'
 
@@ -69,42 +74,11 @@ for (const hostFamily of supportedStyleFamilies)
             'data-ready',
             'true',
           )
-          // Measure ordinary components with scoped preset rules removed, then reload
-          // the real bundle below. This catches CSS leaking into the host itself.
-          const removedRules = await page.evaluate(() => {
-            let removed = 0
-            function prune(sheet: CSSStyleSheet | CSSGroupingRule) {
-              for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
-                const rule = sheet.cssRules[i]
-                if (
-                  'selectorText' in rule &&
-                  String(rule.selectorText).includes('data-ombelle-scope')
-                ) {
-                  sheet.deleteRule(i)
-                  removed++
-                } else if ('cssRules' in rule) prune(rule as CSSGroupingRule)
-              }
-            }
-            for (const sheet of document.styleSheets) prune(sheet)
-            return removed
-          })
-          expect(removedRules).toBeGreaterThan(0)
-          const neighborStyles = () =>
-            page.getByTestId('specimen').evaluate((el) =>
-              Array.from(el.querySelectorAll('[data-slot]')).map((n) => {
-                const s = getComputedStyle(n)
-                return [
-                  s.color,
-                  s.backgroundColor,
-                  s.border,
-                  s.borderRadius,
-                  s.height,
-                  s.boxShadow,
-                  s.fontSize,
-                ]
-              }),
-            )
-          const neighbors = await neighborStyles()
+          const neighbors = await componentPresetIsolationBaseline(
+            page,
+            hostFamily,
+            mode,
+          )
           await page.goto(
             base + '?mode=' + mode + '&componentPreset=' + selectedFamily,
           )
@@ -115,7 +89,7 @@ for (const hostFamily of supportedStyleFamilies)
             'data-ready',
             'true',
           )
-          expect(await neighborStyles()).toEqual(neighbors)
+          await assertComponentPresetHostIsolation(page, neighbors)
           await expect(button).toHaveAttribute('data-slot', 'scoped-button')
           await expect(button).toHaveAttribute('data-ombelle-scope', ref.scope)
           await expect(button).toHaveAccessibleName('Preset action')
@@ -246,7 +220,28 @@ for (const hostFamily of supportedStyleFamilies)
               forcedColors: true,
               reducedMotion: true,
             },
+            isolationMethod: componentPresetIsolationMethod,
           })
         }
       })
     }
+
+test('an unscoped preset rule affecting an ordinary Button fails the isolation check', async ({
+  page,
+}) => {
+  const base = 'http://127.0.0.1:4173/flat/'
+  const leak = '[data-slot="button"] { border-radius: 123px !important; }'
+  await page.goto(base + '?mode=light')
+  await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+  await page.addStyleTag({ content: leak })
+  const baseline = await componentPresetIsolationBaseline(page, 'flat', 'light')
+  await page.goto(base + '?mode=light&componentPreset=flat')
+  await expect(page.getByTestId('component-preset-default')).toBeVisible()
+  await page.addStyleTag({ content: leak })
+  await expect(
+    page.getByRole('button', { name: 'Save changes', exact: true }),
+  ).toHaveCSS('border-radius', '123px')
+  await expect(
+    assertComponentPresetHostIsolation(page, baseline),
+  ).rejects.toThrow('Component preset changed ordinary host styles')
+})
