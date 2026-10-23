@@ -34,20 +34,22 @@ Yarn Classic does not supply the modern dlx workflow. Use a local development de
 
 `init` targets an existing supported app and initializes the UI setup, not a whole application. If `components.json` already exists, detect that before writes and use the theme plan instead of resetting the setup. An incompatible or incomplete configuration receives an actionable diagnostic.
 
-## Select a preset for one component
+## Select a preset for one Button
 
-Before choosing a runner, distinguish the installation scope. The proposed `add button --preset ps_brand@3` applies a preset only to that Button installation; `theme add ps_brand@3` applies the same preset globally. All four runner forms above can pass `--preset ps_brand@3` after `add button`. Codes are values, never flag names. `add button --preset ./brand.preset.json` remains the offline equivalent; `add --recipe <code-or-file>` additionally restores saved props, text, and overrides.
-
-The private built CLI implements the local JSON Button slice after initialization:
+The private foundation implements local JSON selection for one Button in an initialized project. Run the local CLI from the repository with the local preset path relative to the invoking directory:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
 pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
 ```
 
-This creates a separate native `Button`, colocated scoped CSS, and usage example under preset ID/revision paths. It preserves the saved project preset, global theme, ordinary components, recipes, and manager/lockfile ownership. Plans show scoped provenance; incompatible shared source, edited/untracked output, changed content under the same ID/revision, or changed dark context conflict even with `--yes`. Identical repeats are no-ops; new revisions coexist. Later ordinary additions still use project defaults. Input is strict local UTF-8 JSON at most 256 KiB, with flat/minimalist/neo-brutalism and exact catalog/compiler 0.1.0. Existing manager, script suppression, workspace rejection, and recovery boundaries apply.
+This adds a separate scoped Button and usage example. It preserves the saved project preset, global theme, ordinary Button, other installed components, existing usages, and manager/lockfile ownership. Later ordinary additions continue using project defaults. `theme add` remains the global theme path; the scoped command does not merge component tokens into global CSS. `add --recipe <local.json>` remains the separate path for a Button with saved props, text, and local overrides.
 
-Only one Button is accepted per command, without `--recipe`. Single dark classes work on the Button or an ancestor; complex selectors, nested independently themed subtrees, arbitrary consumer CSS/style overrides, and portal propagation are outside this guarantee. Saved preset/recipe codes, remote resolution, other scoped components, and editor integration remain pending. See [local imports and ownership rules](foundation-local-usage.md#component-scoped-button-presets), [measured coverage](evidence/component-scoped-button-presets.md), and the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection).
+The input must be a regular UTF-8 JSON file no larger than 256 KiB and match the strict preset schema plus the pinned catalog/compiler release. This command accepts local files only; remote and saved preset codes are not resolved. The supported styles are flat, minimalist, and neo-brutalism. It generates scoped reviewed CSS from schema fields, not arbitrary CSS overrides. Button renders in normal DOM flow; portal-aware styling for Dialog and other portal components is outside this slice. The supported project baseline is Tailwind v4 React TSX in Vite or Next.js App Router, with the supported Radix nova/new-york component editions.
+
+The command preserves the target project's selected manager and lockfile. Manager selection follows an explicit `--package-manager`, then `package.json.packageManager`, then one recognized lockfile (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`, or `bun.lockb`); conflicting evidence requires an explicit selection. npm, pnpm, Yarn and Bun consumer installation paths are covered. The component-preset browser matrix covers preview, npm, and pnpm targets; it does not claim Yarn or Bun browser coverage. Workspaces and npm-shrinkwrap remain unsupported.
+
+Unowned existing target files, locally edited generated source, incompatible shared utilities, or changed content under the same ID/revision or a changed dark selector produce a conflict. Reconcile manually or use a new preset revision. `--yes` cannot override conflicts. Repeating an identical install is a no-op; new revisions coexist. See the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection) and [component-scoped Button evidence](evidence/component-scoped-button-presets.md).
 
 ## Package manager selection
 
@@ -92,3 +94,5 @@ It does not automatically create our product's preset configuration or lockfile.
 Across all four managers, verify fresh setup, source installation and existing-project theme merging. Include Yarn Classic and modern Yarn with node-modules and Plug'n'Play, and execute the CLI under Bun as well as Node. Pin tested versions in CI.
 
 Check light and dark values, custom CSS paths, preservation of unrelated CSS, compatible mappings, duplicate handling, local token conflicts, idempotence, rollback, dry-run non-mutation and saved preset reuse in a fresh process. Hash component source before and after theme application to prove it was not replaced. Check that no foreign lockfile or unnecessary dependency command appears, including when a different runner launches the CLI.
+
+Dark mode follows the configured single class on the Button or an ancestor. Complex selectors and nested independently themed subtrees require migration or remain outside this local guarantee. Scoped provenance records the selected preset separately from saved global preset provenance; canonical and transformed artifact hashes remain distinct. Existing transaction/recovery safeguards and lifecycle-script suppression apply. See [local imports, ownership, and recovery](foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](evidence/component-scoped-button-presets.md).

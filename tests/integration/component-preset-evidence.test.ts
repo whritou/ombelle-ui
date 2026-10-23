@@ -87,6 +87,7 @@ async function fixtures() {
         'src/index.css',
         'src/components/ui/button.tsx',
         'package.json',
+        'src/ombelle-examples/recipes/example/r1.tsx',
         c.manager === 'bun'
           ? c.bunFormat === 'binary'
             ? 'bun.lockb'
@@ -133,6 +134,10 @@ async function fixtures() {
       globalPresetHashAfter: refs.find(
         (r) => r.preset.data.styleFamily === c.family,
       )!.preset.hash,
+      packageManagerDeclaration: c.manager + '@' + matrix[c.id].managerVersion,
+      managerLockfile: Object.keys(protectedHashes).find(p => ['bun.lock','bun.lockb','package-lock.json','yarn.lock','pnpm-lock.yaml'].includes(p))!,
+      managerLockfiles: Object.keys(protectedHashes).filter(p => ['bun.lock','bun.lockb','package-lock.json','yarn.lock','pnpm-lock.yaml'].includes(p)),
+      managerLockHash: 'a'.repeat(64),
       protectedHashes,
       protectedAfterHashes: { ...protectedHashes },
     }
@@ -227,6 +232,11 @@ it('rejects missing, duplicate, failed, stale, transformed or incomplete consume
     id = 'vite-flat',
     preset = 'builtin-flat@1'
   const mutations: ((r: Record<string, any>) => void)[] = [
+    (r) => { delete r[id].protectedHashes['src/ombelle-examples/recipes/example/r1.tsx'] },
+    (r) => { r[id].protectedHashes['src/ombelle-examples/recipes/example/r1.tsx'] = 'invalid' },
+    (r) => { r[id].managerLockfile = 'package-lock.json' },
+    (r) => { r[id].managerLockHash = 'not-a-hash' },
+    (r) => { r[id].packageManagerDeclaration = 'npm@0.0.0' },
     (r) => {
       delete r[id]
     },

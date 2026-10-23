@@ -1,18 +1,34 @@
 import {
   FoundationError,
-  type ProjectContext,
   type ComponentPresetCompileResult,
-  type InstallPlan,
   type InstalledArtifact,
   type InstalledComponentPreset,
+  type InstallPlan,
+  type ProjectContext,
 } from '@ombelle/contracts'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import { fileChange } from './components.js'
 import { transformComponentPresetArtifact } from '../project/component-preset-transform.js'
+import {
+  findCaseInsensitivePathMismatch,
+  safePath,
+  type DirectoryEntryReader,
+} from '../project/paths.js'
+
+export interface ComponentPresetPlanOptions {
+  readDirectory?: DirectoryEntryReader
+}
+
+const portableIdentity = (file: string) =>
+  file.replace(/\\/g, '/').replace(/^\.\//, '')
+const caseInsensitiveIdentity = (file: string) =>
+  portableIdentity(file).toLowerCase()
+
 export async function planComponentPreset(
   context: ProjectContext,
   result: ComponentPresetCompileResult,
+  options: ComponentPresetPlanOptions = {},
 ): Promise<InstallPlan> {
   if (!context.config || !context.preset || !context.lock)
     throw new FoundationError(
@@ -30,25 +46,32 @@ export async function planComponentPreset(
       'Component primitive edition is not supported',
       'components.json',
     )
-  const preset = await resolvePreset(
+  const savedPreset = await resolvePreset(
     context.preset,
     getCatalog(context.lock.catalogRelease),
   )
   if (
-    preset.hash !== context.lock.presetHash ||
-    context.lock.compilerVersion !== preset.data.compilerVersion
+    savedPreset.hash !== context.lock.presetHash ||
+    context.lock.compilerVersion !== savedPreset.data.compilerVersion
   )
     throw new FoundationError(
       'FILE_CONFLICT',
       'Saved global preset does not match its lock provenance',
     )
+
   const { artifacts: unused, dependencies: ignored, ...identity } = result
-  const id = result.preset.data.id,
-    revision = result.preset.data.revision,
-    key = id + '@' + revision
+  const id = result.preset.data.id
+  const revision = result.preset.data.revision
+  const key = id + '@' + revision
   const importPath =
     context.uiAlias + '/presets/' + id + '/r' + revision + '/button'
-  const usage = result.artifacts.find((a) => a.kind === 'usage')!
+  const usage = result.artifacts.find((artifact) => artifact.kind === 'usage')
+  if (!usage)
+    throw new FoundationError(
+      'INVALID_DATA',
+      'Component preset is missing its usage artifact',
+      key,
+    )
   const examplePath = (await transformComponentPresetArtifact(context, usage))
     .path
   const plan: InstallPlan = {
@@ -56,7 +79,7 @@ export async function planComponentPreset(
     ...(context.bunLockfile ? { bunLockfile: context.bunLockfile } : {}),
     preconditions: { ...context.preconditions },
     projectRoot: context.root,
-    preset,
+    preset: savedPreset,
     provenance: {
       catalogRelease: context.lock.catalogRelease,
       compilerVersion: context.lock.compilerVersion,
@@ -68,23 +91,24 @@ export async function planComponentPreset(
     networkAccess: false,
     componentPreset: { ...identity, importPath, examplePath },
   }
-  const lock = structuredClone(context.lock),
-    previous = lock.componentPresets?.[key]
+  const lock = structuredClone(context.lock)
+  const previous = lock.componentPresets?.[key]
   const conflict = (message: string, file?: string) =>
     plan.diagnostics.push({ code: 'FILE_CONFLICT', message, path: file })
   if (previous) {
     const { artifacts: priorFiles, ...priorIdentity } = previous
     if (canonicalize(priorIdentity) !== canonicalize(identity))
       conflict(
-        'Component preset identity/revision or dark context changed; install a new revision or migrate explicitly',
+        'Component preset content under the same ID/revision or dark context changed; install a new revision or migrate explicitly',
         key,
       )
   }
-  const owned: Record<string, InstalledArtifact> = {},
-    seen = new Set<string>()
+
+  const owned: Record<string, InstalledArtifact> = {}
+  const seen = new Set<string>()
   for (const artifact of result.artifacts) {
-    const target = await transformComponentPresetArtifact(context, artifact),
-      normalized = target.path.replace(/^\.\//, '').toLowerCase()
+    const target = await transformComponentPresetArtifact(context, artifact)
+    const normalized = target.path.replace(/^\.\//, '').toLowerCase()
     if (seen.has(normalized))
       throw new FoundationError(
         'FILE_CONFLICT',
@@ -92,14 +116,32 @@ export async function planComponentPreset(
         target.path,
       )
     seen.add(normalized)
+    await safePath(context.root, target.path)
+    const pathMismatch = await findCaseInsensitivePathMismatch(
+      context.root,
+      target.path,
+      options.readDirectory,
+    )
+    const matchingRecords = Object.entries(lock.artifacts).filter(
+      ([file]) =>
+        caseInsensitiveIdentity(file) ===
+        caseInsensitiveIdentity(target.path),
+    )
+    const hasMismatchedLockKey = matchingRecords.some(
+      ([file]) => portableIdentity(file) !== portableIdentity(target.path),
+    )
     const change = await fileChange(
-        context.root,
-        target.path,
-        target.content,
-        artifact.kind,
-      ),
-      record = lock.artifacts[target.path]
+      context.root,
+      target.path,
+      target.content,
+      artifact.kind,
+    )
+    const record =
+      matchingRecords.length === 1 ? matchingRecords[0]![1] : undefined
     if (
+      pathMismatch ||
+      matchingRecords.length > 1 ||
+      hasMismatchedLockKey ||
       change.beforeHash !== null &&
       (!record ||
         record.sha256 !== change.beforeHash ||
@@ -107,12 +149,16 @@ export async function planComponentPreset(
     ) {
       change.action = 'conflict'
       conflict(
-        'Component preset or shared utility source requires an explicit migration',
+        pathMismatch
+          ? `Destination collides with existing path '${pathMismatch}' using different casing`
+          : hasMismatchedLockKey || matchingRecords.length > 1
+            ? 'Component preset destination has ambiguous case-insensitive lock ownership'
+            : 'Component preset or shared utility source requires an explicit migration',
         target.path,
       )
     }
     plan.changes.push(change)
-    const entry = {
+    const entry: InstalledArtifact = {
       logicalPath: artifact.logicalPath,
       kind: artifact.kind,
       sha256: await sha256(target.content),
@@ -120,6 +166,7 @@ export async function planComponentPreset(
     if (change.action !== 'conflict') lock.artifacts[target.path] = entry
     if (artifact.kind !== 'utility') owned[target.path] = entry
   }
+
   lock.componentPresets = {
     ...lock.componentPresets,
     [key]: { ...identity, artifacts: owned } satisfies InstalledComponentPreset,
@@ -137,7 +184,7 @@ export async function planComponentPreset(
       state.path,
     )
   plan.changes.push(state)
-  // Preserve the adapters' production-group rules, especially Bun's explicit group promotion requirement.
+
   const installed =
     context.manager === 'bun'
       ? (context.packageJson.dependencies ?? {})
@@ -146,7 +193,7 @@ export async function planComponentPreset(
           ...context.packageJson.dependencies,
         }
   plan.dependencyPlan = result.dependencies.filter(
-    (d) => installed[d.name] !== d.version,
+    (dependency) => installed[dependency.name] !== dependency.version,
   )
   return plan
 }

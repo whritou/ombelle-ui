@@ -25,6 +25,33 @@ The verified consumer baseline requires exact react and react-dom 19.3.1 declara
 
 Consumer manager selection uses package.json.packageManager, then a unique recognized package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb. Contradictory evidence requires explicit selection; workspaces and npm-shrinkwrap remain unsupported. The launching runner does not switch the target manager. New config saves the selected manager; existing auto remains valid. Dependency additions use exact production requirements with lifecycle scripts disabled and preserve the manager's lock format. Theme-only commands never invoke a dependency manager. The repository itself continues to use pnpm. See the README and individual manager evidence for exact versions and linker/runtime boundaries.
 
+## Component-scoped Button presets
+
+The supported project baseline is Vite React TSX or Next.js App Router TSX using Tailwind v4 and the supported Radix nova/new-york component editions. Initialize the project first, then install one Button from a local preset JSON:
+
+```powershell
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
+```
+
+The path resolves relative to the invoking directory, independently of APP. Input must be a regular UTF-8 JSON file at most 256 KiB and pass the strict preset schema. Flat, minimalist, and neo brutalism are available with exact catalog/compiler 0.1.0; valid local preset design, light/dark token, and Button variant/size defaults are compiled. Saved codes, URLs, remote resolution, unsupported releases/families, multiple components, `add input --preset`, repeated flags, and simultaneous `--recipe` are rejected.
+
+For the example preset, `id: "builtin-neo-brutalism"` and `revision: 1`, installation creates `<componentsDir>/presets/builtin-neo-brutalism/r1/button.tsx` and `button.css`, plus `<sourceDir>/ombelle-examples/presets/builtin-neo-brutalism/r1.tsx`. Follow the generated example's import path:
+
+```tsx
+import { Button as BrandButton } from '@/components/ui/presets/builtin-neo-brutalism/r1/button'
+
+export function SaveAction() {
+  return <BrandButton>Save</BrandButton>
+}
+```
+
+The exported `Button` is a separate native button with variant/size props and native `disabled`/`aria-busy` props. It has no recipe `loading` prop or `asChild` API. Its import loads colocated scoped CSS; installing it does not edit the global stylesheet or existing usages. Scope attributes and slot identity are emitted after caller props. Project preset/configuration, global tokens/style pack, ordinary Button/Input/Dialog, and existing recipes retain their defaults and source. The project lock adds `componentPresets` provenance; canonical compiler hashes and alias-transformed installed hashes are distinct. Later ordinary additions and compatible global theme changes retain the scoped preset's pinned appearance.
+
+An identical repeat is a no-op when installed source and dependencies match. Changed content under the same ID/revision, changed dark context, modified or untracked destination files, incompatible shared utility bytes, and invalid saved global provenance cause conflicts; `--yes` cannot bypass them. Use a new preset revision for coexistence or reconcile/migrate explicitly. Shared utilities are reused only with matching recorded ownership and bytes. Dry-run performs no file or dependency operations. Actual dependency changes use the target manager with lifecycle scripts disabled and existing transaction/recovery safeguards; the command does not change manager or lockfile format. Workspaces remain unsupported. Bun retains its documented dependency-group and configuration restrictions.
+
+Dark mode uses the configured single class (`.dark` by default; classes such as `.night` and `.theme-dark` are supported) on the element or an ancestor. The full browser matrix uses `.dark`; compiler checks cover custom `.night`. Complex selectors, nested independently themed subtrees, arbitrary consumer CSS/style overrides, portal propagation, other component types, remote preset codes, and the production editor remain outside this local Button guarantee. Measured browser coverage is preview plus npm/pnpm Vite/Next.js; Yarn/Bun have installation, source, audit, and production-build evidence. See [the retained run](evidence/component-scoped-button-presets.md).
+
 ## Local Button recipes
 
 Initialize the project with a local preset first, then use a recipe file such as this repository's `examples/recipe.example.json`:
@@ -40,31 +67,4 @@ The example creates `<componentsDir>/recipes/rc_primary-button/r2/button.tsx` an
 
 Recipe installation preserves the saved global preset, theme, style pack, ordinary components, and existing usages. A recorded shared utility can be reused only if unchanged and byte-compatible; an untracked or edited utility causes a conflict requiring manual reconciliation. `--yes` does not override conflicts. Repeating the same recipe is a no-op when its files and dependencies still match. Changed content under the same ID/revision conflicts; use a new revision to install alongside it. Later ordinary additions and compatible global theme changes retain recipe provenance and its pinned appearance.
 
-Dark mode follows the project's configured single class, default `.dark`; `.night` and `.theme-dark` also work. Complex selectors and custom `paths.recipeOutput` roots are outside this slice. A dark-selector change affecting an existing recipe requires an explicit migration. Parent workspace ownership, paths, dependencies, and failure/recovery use the existing installer safeguards.
-
-## Component-scoped Button presets
-
-Initialize the project first, then install one Button from a local preset JSON:
-
-```powershell
-pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
-pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
-```
-
-The path resolves relative to the invoking directory, independently of APP. Input must be a regular UTF-8 JSON file at most 256 KiB and pass the strict preset schema. Flat, minimalist, and neo brutalism are available with exact catalog/compiler 0.1.0; valid local preset design, light/dark token, and Button variant/size defaults are compiled. Saved codes, URLs, remote resolution, unsupported releases/families, multiple components, `add input --preset`, repeated flags, and simultaneous `--recipe` are rejected.
-
-For `id: "ps_brand"` and `revision: 3`, installation creates `<componentsDir>/presets/ps_brand/r3/button.tsx` and `button.css`, plus `<sourceDir>/ombelle-examples/presets/ps_brand/r3.tsx`. Follow the generated example's import path:
-
-```tsx
-import { Button as BrandButton } from '@/components/ui/presets/ps_brand/r3/button'
-
-export function SaveAction() {
-  return <BrandButton>Save</BrandButton>
-}
-```
-
-The exported `Button` is a separate native button with variant/size props and native `disabled`/`aria-busy` props. It has no recipe `loading` prop or `asChild` API. Its import loads colocated scoped CSS; installing it does not edit the global stylesheet or existing usages. Scope attributes and slot identity are emitted after caller props. Project preset/configuration, global tokens/style pack, ordinary Button/Input/Dialog, and existing recipes retain their defaults and source. The project lock adds `componentPresets` provenance; canonical compiler hashes and alias-transformed installed hashes are distinct. Later ordinary additions and compatible global theme changes retain the scoped preset's pinned appearance.
-
-An identical repeat is a no-op when installed source and dependencies match. Changed content under the same ID/revision, changed dark context, modified or untracked destination files, incompatible shared utility bytes, and invalid saved global provenance cause conflicts; `--yes` cannot bypass them. Use a new preset revision for coexistence or reconcile/migrate explicitly. Shared utilities are reused only with matching recorded ownership and bytes. Dry-run performs no file or dependency operations. Actual dependency changes use the target manager with lifecycle scripts disabled and existing transaction/recovery safeguards; the command does not change manager or lockfile format. Workspaces remain unsupported. Bun retains its documented dependency-group and configuration restrictions.
-
-Dark mode uses the configured single class (`.dark` by default; classes such as `.night` and `.theme-dark` are supported) on the element or an ancestor. The full browser matrix uses `.dark`; compiler checks cover custom `.night`. Complex selectors, nested independently themed subtrees, arbitrary consumer CSS/style overrides, portal propagation, other component types, remote preset codes, and the production editor remain outside this local Button guarantee. Measured browser coverage is preview plus npm/pnpm Vite/Next.js; Yarn/Bun have installation, source, audit, and production-build evidence. See [the retained run](evidence/component-scoped-button-presets.md).
+Dark mode follows the project's configured single class, default `.dark`; `.night` and `.theme-dark` also work. Complex selectors and custom `paths.recipeOutput` roots are outside this slice. A dark-selector change affecting an existing recipe requires an explicit migration. Parent workspace ownership, paths, dependencies, and failure/recovery use the existing installer safeguards. Component-scoped local preset installation is documented above; remote preset/recipe codes remain pending.

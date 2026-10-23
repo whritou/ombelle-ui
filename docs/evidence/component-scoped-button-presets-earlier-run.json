@@ -1,0 +1,149 @@
+{
+  "format": "ombelle-component-scoped-button-presets-run/v1",
+  "task5Baseline": {
+    "sourceCommit": "e6929ee8b0670871b5b1f67ad63a8287b26b74f1",
+    "workingTreeDirty": true,
+    "startedAt": "2026-10-22T17:52:19.044Z",
+    "completedAt": "2026-10-22T18:20:41.79Z",
+    "status": "passed",
+    "platform": "win32",
+    "toolchain": {
+      "node": "24.19.0",
+      "pnpm": "11.25.0",
+      "npm": "11.19.0",
+      "yarnClassic": "1.22.22",
+      "yarnModern": "4.18.1",
+      "bun": "1.4.3",
+      "playwright": "1.64.1",
+      "browser": "Chromium 156.0.8078.4 (bundled)"
+    },
+    "counts": {
+      "unitTests": { "passed": 141, "failed": 0, "skipped": 0 },
+      "integrationTests": { "passed": 146, "failed": 0, "skipped": 0 },
+      "browserTests": { "passed": 86, "failed": 0, "skipped": 0, "flaky": 0 },
+      "consumerDescriptors": 34,
+      "componentPresetInstallations": 102,
+      "componentPresetPlaywrightCases": 18,
+      "componentPresetBrowserMeasurements": 90
+    },
+    "reportReference": ".superpowers/sdd/2026-10-22-component-scoped-button-presets/task-5-report.md"
+  },
+  "task6Run": {
+    "status": "passed",
+    "sourceCommit": "b0c16f94b17c0f6f51cc5bc80f82cf2b256a58c2",
+    "workingTreeDirtyAtMeasurement": true,
+    "branch": "feat/component-scoped-button-presets-implementation",
+    "startedAt": "2026-10-22T18:53:45.868Z",
+    "completedAt": "2026-10-22T19:21:59.873Z",
+    "platform": {
+      "name": "Windows",
+      "nodePlatform": "win32",
+      "version": "10.0.26100.0"
+    },
+    "toolchain": {
+      "node": "24.19.0",
+      "nodeExecutable": "C:\\Users\\whrit\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "pnpm": "11.25.0",
+      "npm": "11.19.0",
+      "npmExecutable": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-ui-component-presets-npm-11.19.0\\node_modules\\npm\\bin\\npm-cli.js",
+      "yarn": {
+        "classic": "1.22.22",
+        "modern": "4.18.1"
+      },
+      "bun": "1.4.3",
+      "bunExecutable": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-ui-component-presets-bun-1.4.3\\bun-windows-x64\\bun.exe",
+      "playwright": "1.64.1",
+      "browser": {
+        "engine": "chromium",
+        "version": "156.0.8078.4",
+        "channel": "bundled Chromium"
+      }
+    },
+    "counts": {
+      "unitTests": { "passed": 141, "failed": 0, "skipped": 0 },
+      "integrationTests": { "passed": 147, "failed": 0, "skipped": 0 },
+      "browserTests": { "passed": 86, "failed": 0, "skipped": 0, "flaky": 0 },
+      "consumerDescriptors": 34,
+      "componentPresetInstallations": 102,
+      "componentPresetInstallationsByManager": {
+        "pnpm": 18,
+        "npm": 18,
+        "yarn": 18,
+        "bun": 48
+      },
+      "componentPresetPlaywrightCases": 18,
+      "componentPresetBrowserMeasurements": 90,
+      "componentPresetBrowserTargets": {
+        "preview": 18,
+        "vite": 18,
+        "next": 18,
+        "npm-vite": 18,
+        "npm-next": 18
+      }
+    },
+    "stages": [
+      { "name": "build:packages", "status": "passed", "exitCode": 0, "durationMs": 1040, "log": ".artifacts/logs/build-packages.log" },
+      { "name": "test:unit", "status": "passed", "exitCode": 0, "durationMs": 8007, "log": ".artifacts/logs/test-unit.log" },
+      { "name": "test:integration", "status": "passed", "exitCode": 0, "durationMs": 208767, "log": ".artifacts/logs/test-integration.log" },
+      { "name": "generate:preview", "status": "passed", "exitCode": 0, "durationMs": 2528, "log": ".artifacts/logs/generate-preview.log" },
+      { "name": "prepare:consumers", "status": "passed", "exitCode": 0, "durationMs": 931844, "log": ".artifacts/logs/prepare-consumers.log" },
+      { "name": "typecheck", "status": "passed", "exitCode": 0, "durationMs": 2084, "log": ".artifacts/logs/typecheck.log" },
+      { "name": "build:preview", "status": "passed", "exitCode": 0, "durationMs": 1871, "log": ".artifacts/logs/build-preview.log" },
+      { "name": "build:consumers", "status": "passed", "exitCode": 0, "durationMs": 154701, "log": ".artifacts/logs/build-consumers.log" },
+      { "name": "test:e2e", "status": "passed", "exitCode": 0, "durationMs": 381900, "log": ".artifacts/logs/test-e2e.log" }
+    ],
+    "browserResult": {
+      "expected": 86,
+      "unexpected": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "componentPresetCases": 18,
+      "componentPresetMeasurements": 90,
+      "measurementClarification": "The 86 count is all Playwright test cases. Each of the 18 component-preset cases measures five app targets, yielding 90 component-preset rows."
+    },
+    "failedInitialAttempt": {
+      "startedAt": "2026-10-22T18:44:51.286Z",
+      "sourceCommit": "b0c16f94b17c0f6f51cc5bc80f82cf2b256a58c2",
+      "workingTreeDirty": true,
+      "status": "failed",
+      "failedStage": "prepare:consumers",
+      "exitCode": 1,
+      "durationMs": 207915,
+      "completedStages": [
+        { "name": "build:packages", "exitCode": 0, "durationMs": 997 },
+        { "name": "test:unit", "exitCode": 0, "durationMs": 7433 },
+        { "name": "test:integration", "exitCode": 0, "durationMs": 207587 },
+        { "name": "generate:preview", "exitCode": 0, "durationMs": 2804 }
+      ],
+      "consumerProgressAtFailure": { "pnpmRowsPassed": 18, "npmRowsPassed": 0, "yarnRowsPassed": 0, "bunRowsPassed": 0 },
+      "reason": "The runner selected npm 11.4.1 from the system PATH instead of the required isolated npm 11.19.0. The corrected rerun placed the isolated npm package bin directory first on PATH; it passed all nine stages and all 102 installations. Global npm was not changed.",
+      "reportPath": ".artifacts/foundation-report-attempt-1.json",
+      "logPath": ".artifacts/logs/prepare-consumers-attempt-1.log"
+    },
+    "artifacts": [
+      { "path": ".artifacts/foundation-report.json", "sha256": "8551efcd30ef57bea7887b3d6dd46c1870cd73aad2e97ebf3a5c2c704d372614", "bytes": 2589618 },
+      { "path": ".artifacts/unit-results.json", "sha256": "4d75b6aa12cc8002634ddb15954308d2289b3089ec228a2434fdd5e73ba5dc7e", "bytes": 42463 },
+      { "path": ".artifacts/integration-results.json", "sha256": "fb58cb66f303fcc6e2f9fb6886ebaa35be7373ccad05a555b004ad96ace6137b", "bytes": 46664 },
+      { "path": ".artifacts/browser-results.json", "sha256": "53841a0ddeb5b89d675b8d2583d661b0eb49f3c2d1637d1179d74a1cfad52293", "bytes": 558536 },
+      { "path": ".artifacts/component-preset-consumers.json", "sha256": "2b2570a5b728c04fc8c30ebb68f8fb75df625625f9002e556a7ebb3e3eae9dc5", "bytes": 440273 },
+      { "path": ".artifacts/component-preset-measurements.json", "sha256": "3156baf19418f59723f5a4ff2fdaa3adcce350c3bd0f88d6dce64542ebce2288", "bytes": 258860 },
+      { "path": ".artifacts/consumer-matrix.json", "sha256": "4cf318800376dbcdc01a2fda0c84ed7996ee103ec596580e7fe3bf516b459039", "bytes": 132977 },
+      { "path": ".artifacts/recipe-consumers.json", "sha256": "b42dbe660f90e3c322b3f1cb29b7d89029819db96fc4b3762b96e5240042043b", "bytes": 539685 },
+      { "path": ".artifacts/npm-version.json", "sha256": "00d0bda01584c686d4b27d9975c75e28822a5ada880d6c3dc90f5c52b6476979", "bytes": 21 },
+      { "path": ".artifacts/yarn-versions.json", "sha256": "7a6ac71a4ee34fbe51f9636efe22976e39865632f0dfbdace0bd1db369a6faed", "bytes": 48 },
+      { "path": ".artifacts/bun-version.json", "sha256": "b9c10ef1fd5c36cc78012e1c5ecf567e45c7b5e7adab12ee3368f107479580b2", "bytes": 19 },
+      { "path": ".artifacts/browser-version.json", "sha256": "e8269ee637af7f1423fba448ff00e46b13a636e19bc862b25980084cfd2cfb79", "bytes": 88 },
+      { "path": ".artifacts/logs/build-packages.log", "sha256": "7e359549b39ea22bf7258770445e4b01fcd38ff63127c2c007df1384f8450087", "bytes": 90 },
+      { "path": ".artifacts/logs/test-unit.log", "sha256": "e277b20a7787b1f9a6b4025bd6da156bd2d25e1b073497932212f82f02820c03", "bytes": 4659 },
+      { "path": ".artifacts/logs/test-integration.log", "sha256": "835eb19d4da067f694137c9d7328ac51b43d155928db83dac08828849af3cb91", "bytes": 11003 },
+      { "path": ".artifacts/logs/generate-preview.log", "sha256": "8308c7c9b1c0e30f4d888d1864695ff3496c1c4a62e3a6595e0112a5195c16c4", "bytes": 34 },
+      { "path": ".artifacts/logs/prepare-consumers.log", "sha256": "f54e941be2686263ea65024f87c1b2559fbfe354b3950c5e7f9af66e869c4dd6", "bytes": 1110 },
+      { "path": ".artifacts/logs/typecheck.log", "sha256": "fa08481b134ca196e6a70d29c8991e9e9a450f1bf05de0dacc50a8e58f1ed318", "bytes": 80 },
+      { "path": ".artifacts/logs/build-preview.log", "sha256": "39c8684cca7e2e5b80801151bf0485c67d9dd085c1cb035e0a3a9ce024e9af6e", "bytes": 32785 },
+      { "path": ".artifacts/logs/build-consumers.log", "sha256": "4ef2f6bb39c11c0716aa8bbae322f6f1daf2bb9409fac0e340438984a77c590f", "bytes": 1074 },
+      { "path": ".artifacts/logs/test-e2e.log", "sha256": "5cd5f001a6f6f214a969453894d9f5e3167d2bd79d4cb86a46172937ef0cd599", "bytes": 9896 },
+      { "path": ".artifacts/foundation-report-attempt-1.json", "sha256": "4d95c2dae4ebe4b080211bde53b4a68d2f43f6a57058e4638691d9ccccccb0fd", "bytes": 946 },
+      { "path": ".artifacts/logs/prepare-consumers-attempt-1.log", "sha256": "d41018d5ca2af7582bf61d82058745b32dab902a13ca6454f009d766542c2241", "bytes": 817 }
+    ]
+  }
+}

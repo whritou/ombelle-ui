@@ -86,16 +86,17 @@ import * as React from 'react'
 import { Button as Flat } from '@/components/ui/presets/builtin-flat/r1/button'
 import { Button as Minimalist } from '@/components/ui/presets/builtin-minimalist/r1/button'
 import { Button as Brutalist } from '@/components/ui/presets/builtin-neo-brutalism/r1/button'
-const entries = { flat: Flat, minimalist: Minimalist, 'neo-brutalism': Brutalist }
+const entries = { 'builtin-flat': Flat, 'builtin-minimalist': Minimalist, 'builtin-neo-brutalism': Brutalist }
 export function ComponentPresetFixture() {
   const query = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search)
   const selected = query.get('componentPreset')
   const Component = entries[selected as keyof typeof entries] ?? Flat
   const [loading,setLoading] = React.useState(false), [disabled,setDisabled] = React.useState(false), [clicks,setClicks] = React.useState(0)
-  if (!selected) return null
+  const tamper = query.get('tamper') === '1'
+  if (query.get('componentPresets') !== '1' || !selected || !(selected in entries)) return null
   return <section data-testid="component-preset-fixture" aria-label="Component preset fixture">
     <div data-testid="component-preset-specimen" style={{width:360,maxWidth:'100%',padding:32,background:'#808080',boxSizing:'border-box',display:'grid',gap:16}}>
-      <Component data-testid="component-preset-default" disabled={disabled || loading} aria-busy={loading || undefined} onClick={() => setClicks(n => n + 1)}>Preset action</Component>
+      <Component data-testid="component-preset-default" {...(tamper ? { 'data-ombelle-scope': 'tampered', 'data-slot': 'button' } : {})} disabled={disabled || loading} aria-busy={loading || undefined} onClick={() => setClicks(n => n + 1)}>Preset action</Component>
       {(['secondary','outline','ghost','link','destructive'] as const).map(variant => <Component key={variant} variant={variant}>{variant} action</Component>)}
       {(['sm','lg','icon'] as const).map(size => <Component key={size} size={size} aria-label={size === 'icon' ? 'Icon action' : undefined}>{size === 'icon' ? '+' : size + ' action'}</Component>)}
     </div>
@@ -128,7 +129,7 @@ export async function writeComponentPresetScenario(
       )
       .replace(
         '{states && <StateFixture />}',
-        '{states && <StateFixture />}\n      {ready && <ComponentPresetFixture />}',
+        '{states && <StateFixture />}\n      {componentPresets && <ComponentPresetFixture />}',
       ),
   )
 }
@@ -139,7 +140,9 @@ export async function writePreviewComponentPresets(
   const hostScenario = (
     await fs.readFile(path.join(root, 'scenario.tsx'), 'utf8')
   )
-    .replace("import { RecipeFixture } from './recipe-fixture'\n", '')
+    .replace(/import \{ RecipeFixture \} from '\.\/recipe-fixture'\r?\n/, '')
+    .replace(/import \{ ComponentPresetFixture \} from '\.\/component-preset-fixture'\r?\n/, '')
+    .replace(/\{componentPresets && <ComponentPresetFixture \/>}\r?\n?/, '')
     .replace('{recipes && <RecipeFixture />}', '')
   if (hostScenario.includes('ComponentPresetFixture'))
     throw Error(
@@ -165,4 +168,8 @@ export async function writePreviewComponentPresets(
       await fs.writeFile(file, transformed.content)
     }
   await writeComponentPresetScenario(root, true)
+}
+
+export async function writeConsumerComponentPresetFixture(root: string): Promise<void> {
+  await writeComponentPresetScenario(path.join(root, 'src'))
 }

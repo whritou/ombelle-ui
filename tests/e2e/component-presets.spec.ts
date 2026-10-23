@@ -80,7 +80,7 @@ for (const hostFamily of supportedStyleFamilies)
             mode,
           )
           await page.goto(
-            base + '?mode=' + mode + '&componentPreset=' + selectedFamily,
+            base + '?mode=' + mode + '&componentPresets=1&componentPreset=' + ref.preset.data.id,
           )
           const button = page.getByTestId('component-preset-default'),
             specimen = page.getByTestId('component-preset-specimen')
@@ -235,7 +235,7 @@ test('an unscoped preset rule affecting an ordinary Button fails the isolation c
   await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
   await page.addStyleTag({ content: leak })
   const baseline = await componentPresetIsolationBaseline(page, 'flat', 'light')
-  await page.goto(base + '?mode=light&componentPreset=flat')
+  await page.goto(base + '?mode=light&componentPresets=1&componentPreset=builtin-flat')
   await expect(page.getByTestId('component-preset-default')).toBeVisible()
   await page.addStyleTag({ content: leak })
   await expect(
@@ -245,3 +245,12 @@ test('an unscoped preset rule affecting an ordinary Button fails the isolation c
     assertComponentPresetHostIsolation(page, baseline),
   ).rejects.toThrow('Component preset changed ordinary host styles')
 })
+
+ test('compiler-owned scoped attributes override caller tampering', async ({ page }) => {
+   const ref = (await componentPresetReferences()).find(r => r.preset.data.id === 'builtin-flat')!
+   await page.goto('http://127.0.0.1:4173/flat/?mode=light&componentPresets=1&componentPreset=builtin-flat&tamper=1')
+   const button = page.getByTestId('component-preset-default')
+   await expect(button).toBeVisible()
+   await expect(button).toHaveAttribute('data-slot', 'scoped-button')
+   await expect(button).toHaveAttribute('data-ombelle-scope', ref.scope)
+ })

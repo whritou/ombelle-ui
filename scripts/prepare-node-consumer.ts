@@ -151,6 +151,8 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
     const componentPresetEvidence = await prepareComponentPresetConsumer({
         root,
         cliRuntime: 'node',
+        manager: spec.manager,
+        managerVersion: version,
         env,
       }),
       componentPresetBank = await componentPresetReferenceBank()
@@ -166,9 +168,14 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       ),
     )
     const artifacts: ArtifactProof[] = []
-    for (const [file, record] of Object.entries(
-      jsonRecord(installed.artifacts),
-    )) {
+    const installedArtifacts = { ...jsonRecord(installed.artifacts) }
+    for (const preset of Object.values(componentPresetEvidence.presets))
+      for (const [file, record] of Object.entries(jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts))) {
+        if (installedArtifacts[file] && JSON.stringify(installedArtifacts[file]) !== JSON.stringify(record))
+          throw Error('Conflicting scoped artifact ownership: ' + file)
+        installedArtifacts[file] = record
+      }
+    for (const [file, record] of Object.entries(installedArtifacts)) {
       const meta = jsonRecord(record),
         content = await fs.readFile(path.join(root, file), 'utf8'),
         reference =

@@ -8,11 +8,16 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     ...(plan.bunLockfile ? { bunLockfile: plan.bunLockfile } : {}),
     ...(plan.managerWarning ? { managerWarning: plan.managerWarning } : {}),
     presetHash: plan.preset.hash,
-    ...(plan.componentPreset
-      ? { componentPreset: { ...plan.componentPreset, scopeType: 'component' } }
-      : {}),
     ...(plan.recipe
       ? { recipe: { ...plan.recipe, scopeType: 'component' } }
+      : {}),
+    ...(plan.componentPreset
+      ? {
+          componentPreset: {
+            ...plan.componentPreset,
+            scopeType: 'component-only',
+          },
+        }
       : {}),
     ...plan.provenance,
     changes: plan.changes,
@@ -33,7 +38,7 @@ export function formatPlan(
     '\n' +
     plan.changes.map((c) => c.action + ' ' + c.path).join('\n') +
     (plan.componentPreset
-      ? '\nPreset ' +
+      ? '\nComponent preset ' +
         plan.componentPreset.preset.data.id +
         '@' +
         plan.componentPreset.preset.data.revision +

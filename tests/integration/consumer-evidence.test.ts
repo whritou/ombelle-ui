@@ -40,6 +40,19 @@ it('retains ordinary and component preset source identities separately', () => {
   ] = 'tampered'
   expect(() => finalizeConsumerEvidence(cases, rows)).toThrow()
 })
+it('retains every manager, framework, Yarn linker, and Bun lockfile descriptor', () => {
+  const counts = cases.reduce<Record<string, number>>((result, row) => {
+    result[row.manager] = (result[row.manager] ?? 0) + 1
+    return result
+  }, {})
+  expect(counts).toEqual({ pnpm: 6, npm: 6, yarn: 6, bun: 16 })
+  expect(cases.filter(row => row.manager === 'yarn').map(row => row.yarnFixtureId)).toEqual([
+    'classic-vite', 'modern-next', 'pnp-vite',
+    'classic-vite', 'modern-next', 'pnp-vite',
+  ])
+  expect(cases.filter(row => row.manager === 'bun').filter(row => row.bunFormat === 'text')).toHaveLength(8)
+  expect(cases.filter(row => row.manager === 'bun').filter(row => row.bunFormat === 'binary')).toHaveLength(8)
+})
 it('rejects incomplete or mislabeled consumer evidence', () => {
   const id = 'vite-minimalist', bun = 'bun-text-vite-bun-minimalist'
   const mutations: ((rows: Record<string, any>) => void)[] = [

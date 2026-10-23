@@ -69,6 +69,9 @@ export async function prepareBunConsumer(
     const componentPresetEvidence = await prepareComponentPresetConsumer({
         root: fixture.root,
         cliRuntime: runtime,
+        manager: 'bun',
+        managerVersion: fixture.version,
+        bunFormat: format,
       }),
       componentPresetBank = await componentPresetReferenceBank()
     const canonical = JSON.parse(
@@ -87,7 +90,14 @@ export async function prepareBunConsumer(
     )
     const sourceHashes: Record<string, string> = {},
       artifacts = []
-    for (const [file, record] of Object.entries(jsonRecord(lock.artifacts))) {
+    const installedArtifacts = { ...jsonRecord(lock.artifacts) }
+    for (const preset of Object.values(componentPresetEvidence.presets))
+      for (const [file, record] of Object.entries(jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts))) {
+        if (installedArtifacts[file] && JSON.stringify(installedArtifacts[file]) !== JSON.stringify(record))
+          throw Error('Conflicting scoped artifact ownership: ' + file)
+        installedArtifacts[file] = record
+      }
+    for (const [file, record] of Object.entries(installedArtifacts)) {
       const meta = jsonRecord(record),
         source = await fs.readFile(path.join(fixture.root, file), 'utf8'),
         reference =
@@ -113,6 +123,7 @@ export async function prepareBunConsumer(
     }
     await assertBunOwnership(fixture.root, fixture.lockfile)
     const audit = await auditBunFixture(fixture)
+    if (audit.code !== 0) throw Error('Bun audit failed: ' + audit.output)
     return {
       fixture,
       cliRuntime: init.runtime,

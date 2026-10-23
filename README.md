@@ -30,16 +30,16 @@ pnpm exec playwright install chromium
 pnpm check:foundation
 ```
 
-On a machine with Microsoft Edge already installed, set OMBELLE_BROWSER_CHANNEL to msedge for a local run. CI uses Playwright's bundled Chromium. The gate builds packages, runs unit/subprocess checks, prepares **34** standalone consumers using frozen fixture locks, checks types, audits, and builds all apps. It retains the previous nineteen cases and adds fifteen minimalist cases: two npm, two pnpm, three Yarn (Classic and modern `node-modules`/Plug'n'Play), and eight Bun framework/lockfile/CLI-runtime combinations. All framework builds use Node. Browser coverage compares pixels, normalized DOM, computed styles, hashes, keyboard behavior, and axe results for preview/npm/pnpm in all three families and both modes. Yarn/Bun coverage is installation, source parity, audit, and production builds. Bun's audit checks its whole dependency graph; other managers audit production dependencies. The gate needs registry access; installed components need no Ombelle service.
+On a machine with Microsoft Edge already installed, set OMBELLE_BROWSER_CHANNEL to msedge for a local run; otherwise the gate uses Playwright's bundled Chromium. The gate builds packages, runs unit/subprocess checks, prepares **34** standalone consumers using frozen fixture locks, checks types, audits, and builds all apps. It retains the previous nineteen cases and adds fifteen minimalist cases: two npm, two pnpm, three Yarn (Classic and modern `node-modules`/Plug'n'Play), and eight Bun framework/lockfile/CLI-runtime combinations. All framework builds use Node. Browser coverage compares pixels, normalized DOM, computed styles, hashes, keyboard behavior, and axe results for preview/npm/pnpm in all three families and both modes. Yarn/Bun coverage is installation, source parity, audit, and production builds. Bun's audit checks its whole dependency graph; other managers audit production dependencies. The gate needs registry access; installed components need no Ombelle service.
 
-Minimalist checks also measure rendered contrast, focus, disabled/invalid states, reduced motion, forced colors, and synthetic 200% font enlargement at 1100 and 320 CSS pixels. Synthetic enlargement is separate from pending native browser text zoom and human/screen-reader review. `.artifacts/consumer-matrix.json` records finalized per-consumer outcomes; `.artifacts/minimalist-measurements.json` retains the measured app/mode samples. The foundation report includes both, and CI archives them with browser screenshots and traces.
+Minimalist checks also measure rendered contrast, focus, disabled/invalid states, reduced motion, forced colors, and synthetic 200% font enlargement at 1100 and 320 CSS pixels. Synthetic enlargement is separate from pending native browser text zoom and human/screen-reader review. `.artifacts/consumer-matrix.json` records finalized per-consumer outcomes; `.artifacts/minimalist-measurements.json` retains the measured app/mode samples. The foundation report includes both, with local logs, screenshots, and traces under `.artifacts/`.
 
 - [npm consumer support](docs/evidence/npm-consumer-support.md)
 - [Yarn consumer support](docs/evidence/yarn-consumer-support.md)
 - [Bun consumer and runtime support](docs/evidence/bun-consumer-support.md)
 - [Minimalist scope and verification](docs/evidence/minimalist-style-support.md)
-- [Local CLI usage](docs/foundation-local-usage.md)
 - [Component-scoped Button preset evidence](docs/evidence/component-scoped-button-presets.md)
+- [Local CLI usage](docs/foundation-local-usage.md)
 - [Local Button recipe design](docs/superpowers/specs/2026-10-21-local-button-recipes-design.md)
 - [Foundation design](docs/superpowers/specs/2026-10-20-technical-foundation-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-20-technical-foundation.md)
@@ -51,7 +51,16 @@ The CLI is local and private; its npm namespace and public registry domain are n
 
 The development-only upstream shadcn probe has an acknowledged unpatched braces advisory. Ombelle's production installer uses a narrow independent application path, preserving upstream registry format compatibility. Read the adapter decision before treating a full dependency audit as clean.
 
-Local Button recipe installation is available through the private built CLI after project initialization:
+Local component-scoped Button preset installation is available through the private built CLI after project initialization:
+
+```powershell
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
+```
+
+The preset path is local JSON, resolved from the invoking directory. This installs a separate scoped Button and usage example while preserving the saved project preset, global theme, ordinary Button, and other components. It does not apply a global style pack. The implemented scope is one Button using flat, minimalist, or neo-brutalism tokens in the supported Tailwind v4 React TSX projects. Remote and saved preset codes, arbitrary CSS overrides, and portal components remain pending. See [local usage](docs/foundation-local-usage.md#component-scoped-button-presets) and [component-scoped Button evidence](docs/evidence/component-scoped-button-presets.md).
+
+Local Button recipe installation is also available through the private built CLI after project initialization:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add --recipe ./examples/recipe.example.json --cwd APP --dry-run --json

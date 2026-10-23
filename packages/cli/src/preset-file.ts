@@ -9,8 +9,9 @@ export async function readPresetFile(file: string): Promise<Preset> {
   const target = path.resolve(file)
   try {
     // Check before opening so a non-regular input (such as a FIFO) cannot block.
-    if (!(await fs.stat(target)).isFile())
-      throw Error('Preset must be a regular file')
+    const initial = await fs.stat(target)
+    if (!initial.isFile()) throw Error('Preset must be a regular file')
+    if (initial.size > 262144) throw Error('Preset exceeds 256 KiB')
     const handle = await fs.open(target, 'r')
     try {
       const stat = await handle.stat()

@@ -200,6 +200,14 @@ export async function validateComponentPresetConsumers(
             ? 'yarn.lock'
             : 'pnpm-lock.yaml'
     if (
+      row.packageManagerDeclaration !== c.manager + '@' + row.managerVersion ||
+      row.managerLockfile !== managerLock ||
+      !equal(row.managerLockfiles, [managerLock]) ||
+      row.managerLockHash !== before[managerLock]
+    ) throw Error('Missing or incorrect manager lock provenance ' + c.id)
+    if (!Object.keys(before).some(file => /^src\/ombelle-examples\/(?:recipes|presets)\/.+\.tsx$/.test(file)))
+      throw Error('Missing pre-existing usage-file hash ' + c.id)
+    if (
       [
         'ui-preset.json',
         'ui-library.config.json',

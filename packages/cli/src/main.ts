@@ -4,16 +4,19 @@ import { pathToFileURL } from 'node:url'
 import { createInterface } from 'node:readline/promises'
 import {
   FoundationError,
-  validatePreset,
   type ComponentId,
   type Preset,
   type InstallPlan,
 } from '@ombelle/contracts'
-import { compile, compileRecipe, compileButtonPreset } from '@ombelle/compiler'
-import { readPresetFile } from './preset-file.js'
-import { planComponentPreset } from './plan/component-preset.js'
+import {
+  compile,
+  compileButtonPreset,
+  compileRecipe,
+} from '@ombelle/compiler'
 import { readRecipeFile } from './recipe-file.js'
+import { readPresetFile } from './preset-file.js'
 import { planRecipe } from './plan/recipe.js'
+import { planComponentPreset } from './plan/component-preset.js'
 import { inspectProject } from './project/inspect.js'
 import { planAdd } from './plan/components.js'
 import { planTheme } from './plan/theme.js'
@@ -29,7 +32,7 @@ const exits: Record<string, number> = {
   INTERNAL_ERROR: 1,
 }
 const usage =
-  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | add button --preset <local.json> (component only) | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
+  'Ombelle foundation: init --preset <local.json> | add <button|dialog|input> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },
@@ -80,7 +83,7 @@ export async function runCli(
     )
       throw new FoundationError(
         'INVALID_DATA',
-        'Use add button --preset <local.json> for a component-only preset',
+        'Use add button --preset <local.json> to select a component-only preset',
       )
     const selected = flags['--package-manager']
     if (
@@ -119,7 +122,7 @@ export async function runCli(
         }),
       )
     } else {
-      let preset: Preset | unknown = context.preset
+      let preset: Preset | undefined = context.preset
       if (command !== 'add') {
         const file = command === 'init' ? flags['--preset'] : positional[2]
         if (
@@ -144,12 +147,11 @@ export async function runCli(
           'INVALID_DATA',
           'Choose at least one component',
         )
-      const p = validatePreset(preset)
       const result = await compile({
-        preset: p,
+        preset,
         componentIds: ids as ComponentId[],
-        catalogRelease: p.catalogRelease,
-        compilerVersion: p.compilerVersion,
+        catalogRelease: preset.catalogRelease,
+        compilerVersion: preset.compilerVersion,
       })
       plan =
         command === 'add'

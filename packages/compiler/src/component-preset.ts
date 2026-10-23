@@ -1,4 +1,6 @@
 import {
+  FoundationError,
+  isStyleFamily,
   validatePreset,
   type Artifact,
   type ComponentPresetCompileResult,
@@ -35,6 +37,12 @@ export async function compileButtonPreset(input: {
     canonicalize({ presetHash: preset.hash, ...provenance }),
   )
   const template = getTemplate(catalog, 'button')
+  if (!isStyleFamily(preset.data.styleFamily))
+    throw new FoundationError(
+      'INVALID_DATA',
+      'Style family is not available in the foundation',
+      '/styleFamily',
+    )
   const base = 'scoped-presets/' + preset.data.id + '/r' + preset.data.revision
   const examplePath =
     'examples/scoped-presets/' +
@@ -99,7 +107,7 @@ export async function compileButtonPreset(input: {
     artifacts,
     dependencies: template.dependencies.filter(
       (dependency) => dependency.name !== '@radix-ui/react-slot',
-    ),
+    ).sort((a, b) => (a.name < b.name ? -1 : 1)),
     preset,
     scope,
     darkSelector,

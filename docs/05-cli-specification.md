@@ -2,7 +2,7 @@
 
 ## Purpose and status
 
-The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; published runner commands remain unavailable. The private local foundation implements `init`, ordinary `add`, `theme add` with local presets, `add button --preset <local.json>`, and `add --recipe` with local Button recipes. See [local usage](foundation-local-usage.md) for executable repository commands.
+The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; published runner commands remain unavailable. The private local foundation implements `init`, ordinary `add`, `theme add` with local presets, and `add --recipe` with local Button recipes. See [local usage](foundation-local-usage.md) for executable repository commands.
 
 The upstream shadcn CLI remains a supported transport for explicitly published standard registry items. It has its own preset system. Our preset JSON and project lock behavior must not be presented as upstream capabilities.
 
@@ -18,7 +18,7 @@ npx @your-ui/cli@0.1.0 add button dialog
 # Use a saved preset for this Button only; preserve project defaults.
 npx @your-ui/cli@0.1.0 add button --preset ps_brand@3
 
-# Local JSON input is implemented in the private built CLI.
+# A downloaded preset is also a supported planned input.
 npx @your-ui/cli@0.1.0 add button --preset ./brand.preset.json
 
 # Inspect changes without writing source, config, cache, or dependencies.
@@ -67,11 +67,22 @@ Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|ya
 
 `--preset` takes a saved preset code or local JSON path as its value; codes never become flag names. On `init` it establishes project defaults; on `add` it applies only to the requested component. `theme add <code-or-file>` remains the global theme installation path. Recipe inputs use `--recipe` because they additionally carry a component identity, props, text, and overrides. Local files remain a supported product workflow alongside published identifiers.
 
-Component-scoped preset selection initially targets one Button per command. Reject multiple components or simultaneous `--preset` and `--recipe`. Resolve and pin the exact preset, generate isolated light/dark styling and usage, and record scoped provenance without modifying the saved global preset or restyling existing components. Reuse compatible base source or stop with a conflict; never silently replace shared source. See [component-scoped preset selection](04-presets-and-contracts.md#component-scoped-preset-selection) for the full scope and persistence contract.
+Component-scoped preset selection targets one Button per command. Reject multiple components or simultaneous `--preset` and `--recipe`. Resolve and pin the exact preset, generate isolated light/dark styling and usage, and record scoped provenance without modifying the saved global preset or restyling existing components. Reuse compatible base source or stop with a conflict; never silently replace shared source. See [component-scoped preset selection](04-presets-and-contracts.md#component-scoped-preset-selection) for the full scope and persistence contract.
 
-Implementation status: the private built CLI implements `add button --preset <local.json>` after initialization. It reads a strict regular UTF-8 preset file up to 256 KiB, supports flat/minimalist/neo-brutalism with exact catalog/compiler 0.1.0, and emits a separate native `Button`, scoped CSS, and usage under preset ID/revision paths. Saved global defaults, global CSS, ordinary components, and recipes are preserved. Identical repeats are no-ops; changed immutable content, edited/untracked output, incompatible shared utilities, and changed dark context conflict. `--yes` accepts only safe plans. See [the executable workflow and boundaries](foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](evidence/component-scoped-button-presets.md).
+### Implemented local Button preset command
 
-Local Button recipes referencing exact built-in presets remain available through `add --recipe <local.json>`, creating a separate native `RecipeButton`. Saved remote preset/recipe codes, editor integration, other scoped components, portal propagation, nested independently themed subtrees, and arbitrary CSS/style overrides remain pending or outside the guarantee. Single dark classes are supported; complex selectors require migration. Manager selection, lifecycle-script suppression, dry-run, ownership, and recovery safeguards apply to the local preset path.
+The private foundation implements local JSON input for a single Button after the target project has been initialized:
+
+```powershell
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
+```
+
+The preset file is a regular UTF-8 JSON file, at most 256 KiB, validated against the strict preset schema and pinned catalog/compiler releases. The path resolves from the invoking directory. The planner writes a separate Button source, colocated CSS, a usage example, and component-scoped lock provenance. Import the generated example's Button path to use it; the ordinary Button remains unchanged. The saved project preset and global CSS remain the defaults for later ordinary additions. An identical repeat is a no-op; new revisions coexist.
+
+An existing unowned target file, edited managed source, changed content under the same preset ID/revision or changed dark selector, or incompatible shared utility produces a conflict. Choose a new revision or reconcile the files manually; `--yes` accepts only a safe plan and cannot override these conflicts. The selected package manager follows the project's explicit option, `package.json.packageManager`, or one unambiguous recognized lockfile; it preserves npm, pnpm, Yarn, or Bun lockfile ownership. Contradictory manager evidence requires an explicit choice. Workspaces and npm-shrinkwrap are outside this foundation.
+
+This slice covers one Button in supported Vite React TSX and Next.js App Router TSX projects using Tailwind v4 and the supported Radix nova/new-york component editions. The preset can select flat, minimalist, or neo-brutalism styles. It generates scoped reviewed styles; arbitrary CSS overrides and global style-pack changes are not supported. Button does not render through a portal; portal-aware scoping for Dialog or other components is not implemented. Remote preset/recipe codes, saved-code resolution, and editor workflows remain pending. The recipe API separately creates a native `RecipeButton` from local recipe JSON.
 
 The proposed dry-run is stricter than an ordinary installation: it performs no filesystem writes, even to a project cache, and never invokes the package manager. It may fetch public manifests in memory. Document network access in machine-readable output.
 
@@ -153,8 +164,10 @@ For existing-project styling, publish a `registry:theme` item separately and ins
 
 ## Required CLI tests
 
-For component-scoped presets, verify saved-code and local-file resolution, unknown revision/integrity failures before writes, strict flag validation, isolated light/dark tokens, unchanged global preset/theme and neighboring components, later ordinary additions using project defaults, repeated no-op installation, compatible source reuse, incompatible or edited source conflicts, and preview/export/install parity. Cover the declared framework and four-manager matrix; do not claim portal support without explicit scope-propagation tests.
+For component-scoped presets, remote/saved-code resolution and export parity remain pending. The implemented local JSON Button path has strict schema validation, isolated light/dark tokens, unchanged global preset/theme and neighboring components, later ordinary additions using project defaults, repeated no-op installation, compatible source reuse, incompatible or edited source conflicts, and preview/install evidence. Its consumer installation matrix covers the declared frameworks and four managers; browser measurements cover preview, npm, and pnpm targets. Do not claim portal support without explicit scope-propagation tests.
 
 Verify clean installation, repeated no-op addition, saved preset reuse across processes, Next.js client boundaries, alias rewriting, unsupported configuration rejection, dependency deduplication, locally edited component conflict, traversal and symlink rejection, concurrent writes, network and package manager failure, dry-run non-mutation, interrupted-write recovery, and preview versus install parity. The foundation gate covers npm, pnpm, Yarn Classic/modern linkers, and Bun 1.4.3. Bun checks include native executable discovery, actual CLI runtime identity, binary-byte metadata preconditions, configuration rejection, and real installed-package verification. It rejects workspace ownership and incompatible Bun settings before source writes; package-state rollback after dependency failure is not promised.
 
 Also test existing-shadcn theme merging with custom CSS, custom stylesheet paths, light and dark declarations, nested layers, existing Tailwind mappings, duplicate or ambiguous token definitions, locally edited tokens, repeated application and rollback. Verify no source reinstall, no reinitialization, no unnecessary dependency command and no foreign lockfile, including cross-runner launches.
+
+Dark mode follows the configured single class on the Button or an ancestor. Complex selectors and nested independently themed subtrees require migration or remain outside this local guarantee. Scoped provenance records the selected preset separately from saved global preset provenance; canonical and transformed artifact hashes remain distinct. Existing transaction/recovery safeguards and lifecycle-script suppression apply. See [local imports, ownership, and recovery](foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](evidence/component-scoped-button-presets.md).

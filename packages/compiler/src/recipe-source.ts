@@ -34,7 +34,11 @@ function scopeAttributes(input: {
 }
 
 export function renderScopedButton(input: ScopedButtonRenderInput): string {
-  const prefix = buttonTemplatePrefix(input.template)
+  const originalPrefix = buttonTemplatePrefix(input.template)
+  const prefix = input.recipe ? originalPrefix : originalPrefix.replace(
+    "defaultVariants: { variant: 'default', size: 'default' }",
+    `defaultVariants: { variant: ${JSON.stringify(input.defaultVariant)}, size: ${JSON.stringify(input.defaultSize)} }`,
+  )
   const recipe = input.recipe
   const variant = recipe?.props.variant ?? input.defaultVariant
   const size = recipe?.props.size ?? input.defaultSize
