@@ -161,6 +161,7 @@
       "separate host page without component preset imports"
     ],
     "browserBoundary": "Preview and npm/pnpm Vite/Next.js only; Yarn/Bun installation, source parity, audits, Node builds only.",
+    "hashParity": "For equivalent measured artifacts, canonical compiler hashes align across the five measured applications. Each application's transformed source bytes are verified against its expected output; preview and consumer transformed hashes legitimately differ because their builds transform the canonical artifact differently. Rendered normalized DOM, computed styles, and specimen PNG bytes agree across measured applications.",
     "pending": [
       "Hosted CI execution",
       "Human and screen-reader review",
