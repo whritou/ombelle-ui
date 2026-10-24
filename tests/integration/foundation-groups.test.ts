@@ -15,12 +15,28 @@ const stages = {
   consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'build:consumers', 'test:e2e'],
 }
 let base: Promise<Record<string, Record<string, any>>> | undefined
+let collectedDefinitions: { name: string; file: string }[] | undefined
 async function testResults(prefix: string) {
-  const testResults = []
-  for await (const name of fs.glob(prefix + '**/*.test.ts')) {
-    testResults.push({ name: '/different-checkout/' + name.replaceAll('\\', '/'), status: 'passed', assertionResults: [{ fullName: name, status: 'passed', failureMessages: [] }] })
+  // Collect from source independently of the aggregate implementation. This is
+  // structural reporter data only; no test bodies execute during collection.
+  if (!collectedDefinitions) {
+    // One bounded discovery for fixture construction; production independently
+    // collects the unit and integration selections with their respective configs.
+    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', '--config', 'vitest.integration.config.ts', '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 60000, maxBuffer: 8 * 1024 * 1024 })
+    if (collected.status !== 0) throw new Error(collected.stderr)
+    collectedDefinitions = JSON.parse(collected.stdout)
   }
-  return { success: true, numTotalTests: testResults.length, numPassedTests: testResults.length, numFailedTests: 0, numPendingTests: 0, numTodoTests: 0, numFailedTestSuites: 0, numPendingTestSuites: 0, testResults }
+  const byFile = new Map<string, any[]>()
+  for (const row of collectedDefinitions!) {
+    const name = path.relative(process.cwd(), row.file).replaceAll('\\', '/')
+    if (!name.startsWith(prefix)) continue
+    const assertions = byFile.get(name) ?? []
+    assertions.push({ fullName: row.name, ancestorTitles: [], title: row.name, status: 'passed', failureMessages: [] })
+    byFile.set(name, assertions)
+  }
+  const testResults = [...byFile].map(([name, assertionResults]) => ({ name: '/different-checkout/' + name, status: 'passed', assertionResults }))
+  const count = testResults.reduce((sum, suite) => sum + suite.assertionResults.length, 0)
+  return { success: true, numTotalTests: count, numPassedTests: count, numFailedTests: 0, numPendingTests: 0, numTodoTests: 0, numFailedTestSuites: 0, numPendingTestSuites: 0, testResults }
 }
 async function data() {
   const { matrix, consumers, recipes } = await consumerFixture()
@@ -69,21 +85,28 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
 test('accepts complete portable structural evidence without any consumer root descriptors', async () => {
-  const result = await aggregateFoundationEvidence(await fixture(), commit)
+  const root = await fixture()
+  const unit = JSON.parse(await fs.readFile(path.join(root, 'quality/unit-results.json'), 'utf8'))
+  // Vitest 5 defaults to static listing, which leaves test.each templates unexpanded.
+  expect(unit.testResults.find((suite: any) => suite.name.endsWith('catalog/test/recipe-preset.test.ts')).assertionResults.map((assertion: any) => assertion.title)).toContain('resolves exact built-in flat')
+  const integration = JSON.parse(await fs.readFile(path.join(root, 'quality/integration-results.json'), 'utf8'))
+  const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
+  expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
+  const result = await aggregateFoundationEvidence(root, commit)
   expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 118 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)
-})
+}, 180000) // Fixture discovery plus two independently bounded runtime inventories.
 test('rejects an absent group rather than accepting a passed status', async () => {
   const root = await fixture()
   await fs.rm(path.join(root, 'consumers'), { recursive: true })
-  await expect(aggregateFoundationEvidence(root, commit)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
 })
 test('rejects an extra artifact', async () => {
   const root = await fixture()
   await fs.cp(path.join(root, 'quality'), path.join(root, 'duplicate'), { recursive: true })
-  await expect(aggregateFoundationEvidence(root, commit)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
 })
 test.each([
   ['failed group', (r: any) => { r.status = 'failed' }],
@@ -95,12 +118,12 @@ test.each([
 ])('rejects %s', async (_label, mutate) => {
   const root = await fixture()
   await patch(root, 'consumers', 'foundation-report.json', mutate)
-  await expect(aggregateFoundationEvidence(root, commit)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
 })
 test('rejects passed reports without their measured evidence files', async () => {
   const root = await fixture()
   await fs.rm(path.join(root, 'consumers/recipe-measurements.json'))
-  await expect(aggregateFoundationEvidence(root, commit)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
 })
 test.each([
   ['incomplete matrix', 'consumer-matrix.json', (r: any) => { delete r['vite-flat'] }],
@@ -115,9 +138,17 @@ test.each([
 ])('rejects %s even with passed group status', async (_label, file, mutate) => {
   const root = await fixture()
   await patch(root, 'consumers', file, mutate)
-  await expect(aggregateFoundationEvidence(root, commit)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
 })
 test.each([
+  ['duplicate assertion replacement', (r: any) => {
+    const suite = r.testResults.find((s: any) => s.name.endsWith('catalog/test/catalog.test.ts'))
+    suite.assertionResults[1] = structuredClone(suite.assertionResults[0])
+  }],
+  ['truncated assertion sets with adjusted totals', (r: any) => {
+    for (const suite of r.testResults) suite.assertionResults = suite.assertionResults.slice(0, 1)
+    r.numTotalTests = r.numPassedTests = r.testResults.length
+  }],
   ['missing test file', (r: any) => { r.testResults.pop(); r.numTotalTests--; r.numPassedTests-- }],
   ['duplicate test file', (r: any) => { r.testResults[1] = r.testResults[0] }],
   ['skipped assertion', (r: any) => { r.testResults[0].assertionResults[0].status = 'pending' }],
@@ -126,7 +157,7 @@ test.each([
 ])('rejects %s even with successful summary counts', async (_label, mutate) => {
   const root = await fixture()
   await patch(root, 'quality', 'unit-results.json', mutate)
-  await expect(aggregateFoundationEvidence(root, commit)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
 })
 
 test.each(['quality', 'consumers'])('executes %s stages independently and clears stale owned evidence', async group => {

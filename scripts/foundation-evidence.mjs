@@ -1,5 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { finalizeConsumerEvidence, validateMinimalistMeasurements } from './consumer-evidence.ts'
 import { consumerCases } from './consumer-matrix.ts'
@@ -19,20 +21,69 @@ const repo = fileURLToPath(new URL('../', import.meta.url))
 const read = async (directory, file) => JSON.parse(await fs.readFile(path.join(directory, file), 'utf8'))
 const fail = (message) => { throw new Error(message) }
 
+const execute = promisify(execFile)
+const testInventories = new Map()
+
+async function expectedTestInventory(kind) {
+  if (!['unit', 'integration'].includes(kind)) fail('Unknown foundation test selection')
+  if (!testInventories.has(kind)) {
+    const selection = kind === 'unit'
+      ? ['packages']
+      : ['--config', 'vitest.integration.config.ts', 'tests/integration']
+    const cli = path.join(path.dirname(fileURLToPath(import.meta.resolve('vitest/package.json'))), 'vitest.mjs')
+    // Collect current-checkout definitions using the same config/selection as the
+    // measured run. No test bodies execute, and downloaded reports cannot define
+    // their own expected identities or reduce their expected assertion counts.
+    const inventory = execute(process.execPath, [cli, 'list', ...selection, '--staticParse=false', '--json'], {
+      cwd: repo, windowsHide: true, timeout: 60000, maxBuffer: 8 * 1024 * 1024,
+    }).then(({ stdout }) => {
+      const rows = JSON.parse(stdout)
+      if (!Array.isArray(rows) || !rows.length) fail('Empty expected ' + kind + ' assertion inventory')
+      return rows
+    }).catch(error => {
+      testInventories.delete(kind)
+      throw error
+    })
+    testInventories.set(kind, inventory)
+  }
+  return testInventories.get(kind)
+}
+
 export async function validateTestResults(result, kind) {
   const prefix = kind === 'unit' ? 'packages/' : 'tests/integration/'
-  const expected = new Set()
-  for await (const file of fs.glob(prefix + '**/*.test.ts', { cwd: repo })) expected.add(file.replaceAll('\\', '/'))
+  const relativeFile = name => {
+    const normalized = String(name).replaceAll('\\', '/')
+    return normalized.slice(normalized.lastIndexOf('/' + prefix) + 1)
+  }
+  const expected = new Map()
+  const pattern = prefix + (kind === 'unit' ? '**/*.test.{ts,tsx}' : '**/*.test.ts')
+  for await (const file of fs.glob(pattern, { cwd: repo })) expected.set(file.replaceAll('\\', '/'), new Map())
   if (!expected.size || !Array.isArray(result.testResults)) fail('Missing ' + kind + ' test files')
+  for (const test of await expectedTestInventory(kind)) {
+    const names = expected.get(relativeFile(test.file))
+    if (!names || typeof test.name !== 'string' || !test.name) fail('Unexpected collected ' + kind + ' assertion')
+    names.set(test.name, (names.get(test.name) ?? 0) + 1)
+  }
+  if ([...expected.values()].some(names => !names.size)) fail('Missing collected ' + kind + ' test file')
   let assertions = 0
   for (const suite of result.testResults) {
-    const name = String(suite.name).replaceAll('\\', '/')
-    const relative = name.slice(name.lastIndexOf('/' + prefix) + 1)
-    if (!expected.delete(relative) || suite.status !== 'passed' || !suite.assertionResults?.length) fail('Missing, duplicate or failed ' + kind + ' suite: ' + name)
+    const relative = relativeFile(suite.name)
+    const names = expected.get(relative)
+    if (!names || suite.status !== 'passed' || !suite.assertionResults?.length) fail('Missing, duplicate or failed ' + kind + ' suite: ' + suite.name)
+    expected.delete(relative)
     for (const assertion of suite.assertionResults) {
       if (assertion.status !== 'passed' || assertion.failureMessages?.length || assertion.meta?.retryCount > 0) fail('Failed, skipped or retried ' + kind + ' assertion')
+      if (!Array.isArray(assertion.ancestorTitles) || assertion.ancestorTitles.some(title => typeof title !== 'string') || typeof assertion.title !== 'string') fail('Missing assertion identity: ' + relative)
+      const titles = [...assertion.ancestorTitles, assertion.title]
+      const identity = titles.join(' > ')
+      const remaining = names.get(identity) ?? 0
+      if (remaining === 0 || assertion.fullName !== titles.join(' ')) fail('Duplicate or unexpected assertion: ' + relative + ' > ' + identity)
+      // Parameterized cases may intentionally share a rendered title. Require
+      // exactly the occurrence count independently collected from source.
+      names.set(identity, remaining - 1)
       assertions++
     }
+    if ([...names.values()].some(count => count !== 0)) fail('Incomplete assertion evidence: ' + relative)
   }
   if (expected.size || result.success !== true || !assertions || result.numTotalTests !== assertions || result.numPassedTests !== assertions || result.numFailedTests !== 0 || result.numPendingTests !== 0 || result.numTodoTests !== 0 || result.numFailedTestSuites !== 0 || result.numPendingTestSuites !== 0) fail('Incomplete or failed ' + kind + ' results')
   return { passed: assertions, failed: 0, skipped: 0 }
