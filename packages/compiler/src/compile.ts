@@ -30,7 +30,12 @@ export async function compile(input: {
   const catalog = getCatalog(input.catalogRelease),
     preset = await resolvePreset(input.preset, catalog)
   const family = preset.data.styleFamily
-  if (!isStyleFamily(family)) throw new FoundationError('INVALID_DATA', 'Style family is not available in the foundation', '/styleFamily')
+  if (!isStyleFamily(family))
+    throw new FoundationError(
+      'INVALID_DATA',
+      'Style family is not available in the foundation',
+      '/styleFamily',
+    )
   const theme: ThemeData = { light: {}, dark: {}, theme: {} }
   for (const mode of ['light', 'dark'] as const)
     for (const [key, value] of Object.entries(preset.data.modes[mode]))
@@ -100,12 +105,20 @@ export async function compile(input: {
       kind: 'component',
       content,
     })
+    if (template.styles)
+      drafts.push({
+        logicalPath: template.logicalPath.replace(/\.tsx$/, '.css'),
+        kind: 'style',
+        content: template.styles[family],
+      })
     const usage =
       id === 'dialog'
         ? "import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'\nexport function Example(){return <Dialog><DialogTrigger>Open dialog</DialogTrigger><DialogContent><DialogTitle>Example dialog</DialogTitle><DialogDescription>Review this example.</DialogDescription></DialogContent></Dialog>}"
         : id === 'button'
           ? "import { Button } from '@/components/ui/button'\nexport function Example(){return <Button>Save</Button>}"
-          : 'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
+          : id === 'badge'
+            ? 'import { Badge } from \'@/components/ui/badge\'\nexport function Example(){return <><Badge>Synced</Badge><Badge variant="destructive">Needs attention</Badge></>}'
+            : 'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
     drafts.push({
       logicalPath: 'examples/' + id + '.tsx',
       kind: 'usage',

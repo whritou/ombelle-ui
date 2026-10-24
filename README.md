@@ -1,6 +1,6 @@
 # Ombelle UI foundation
 
-A local technical foundation for source-distributed React components with persistent presets. It includes Button, Dialog, and Input in flat, minimalist, and neo brutalist styles, generated previews, a local installer, and independent Vite/Next.js consumer checks.
+A local technical foundation for source-distributed React components with persistent presets. It includes Button, Badge, Dialog, and Input in flat, minimalist, and neo brutalist styles, generated previews, a local installer, and independent Vite/Next.js consumer checks.
 
 Use Node **24.19.0** and pnpm **11.25.0**.
 
@@ -40,6 +40,8 @@ Minimalist checks also measure rendered contrast, focus, disabled/invalid states
 - [Minimalist scope and verification](docs/evidence/minimalist-style-support.md)
 - [Component-scoped Button preset evidence](docs/evidence/component-scoped-button-presets.md)
 - [Local CLI usage](docs/foundation-local-usage.md)
+- [Badge API and installation](docs/components/badge.md)
+- [Badge verification evidence](docs/evidence/badge.md)
 - [Local Button recipe design](docs/superpowers/specs/2026-10-21-local-button-recipes-design.md)
 - [Foundation design](docs/superpowers/specs/2026-10-20-technical-foundation-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-20-technical-foundation.md)
@@ -47,7 +49,7 @@ Minimalist checks also measure rendered contrast, focus, disabled/invalid states
 - [Registry adapter decision and development advisory](docs/decisions/0002-registry-adapter.md)
 - [Product requirements and alpha roadmap](docs/01-product-requirements.md)
 
-The CLI is local and private; its npm namespace and public registry domain are not published. npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1, and Bun 1.4.3 are verified consumer managers. Modern Yarn supports the verified `node-modules` and Plug'n'Play layouts. The built CLI runs under Node or Bun; existing npm/pnpm/Yarn manager scripts still require Node 24.19.0 or newer Node 24. Use `OMBELLE_NODE_EXECUTABLE` for an explicit absolute Node path. Bun retains text or binary lockfiles and rejects incompatible settings or dependencies that first need moving from a development-only group into production. Workspaces remain unsupported. Three-component foundation support is distinct from the twelve-component alpha matrix; wider catalog and broader browser/screen-reader review remain alpha work. Liquid glass remains unavailable. React Native, accounts, snapshots, and the production editor are separate milestones.
+The CLI is local and private; its npm namespace and public registry domain are not published. npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1, and Bun 1.4.3 are verified consumer managers. Modern Yarn supports the verified `node-modules` and Plug'n'Play layouts. The built CLI runs under Node or Bun; existing npm/pnpm/Yarn manager scripts still require Node 24.19.0 or newer Node 24. Use `OMBELLE_NODE_EXECUTABLE` for an explicit absolute Node path. Bun retains text or binary lockfiles and rejects incompatible settings or dependencies that first need moving from a development-only group into production. Workspaces remain unsupported. Four-component foundation support is distinct from the twelve-component alpha matrix; wider catalog and broader browser/screen-reader review remain alpha work. Liquid glass remains unavailable. React Native, accounts, snapshots, and the production editor are separate milestones.
 
 The development-only upstream shadcn probe has an acknowledged unpatched braces advisory. Ombelle's production installer uses a narrow independent application path, preserving upstream registry format compatibility. Read the adapter decision before treating a full dependency audit as clean.
 

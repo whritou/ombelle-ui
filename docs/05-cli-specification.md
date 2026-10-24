@@ -6,6 +6,8 @@ The product CLI persists project defaults and installs exact component or recipe
 
 The upstream shadcn CLI remains a supported transport for explicitly published standard registry items. It has its own preset system. Our preset JSON and project lock behavior must not be presented as upstream capabilities.
 
+Ordinary local additions support Button, Badge, Dialog, and Input. Badge emits independently owned colocated CSS and a usage example; `add badge` reads the saved global preset. Component-specific `--preset` and recipes remain Button-only. See the [Badge API](components/badge.md) for its two variants and non-interactive semantics.
+
 ## Proposed commands
 
 ```bash

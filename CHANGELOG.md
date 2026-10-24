@@ -1,5 +1,11 @@
 # Documentation Changes
 
+## Unreleased — 23 October 2026
+
+- Add Badge with native span props/ref, default/destructive variants, and flat/minimalist/neo brutalist styling.
+- Generate and install independently owned colocated Badge CSS, retaining the existing shared style pack and component bytes.
+- Add Badge examples to the generated preview and consumer flow, with API and installation documentation.
+
 ## Unreleased — 21 October 2026
 
 - Add local Button recipe installation with separate source, scoped light/dark CSS, saved props/content, and accessible loading behavior.

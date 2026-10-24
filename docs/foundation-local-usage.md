@@ -10,6 +10,7 @@ pnpm exec node packages/cli/dist/main.js init --preset PRESET --cwd APP --yes
 pnpm exec node packages/cli/dist/main.js add button dialog --cwd APP --yes
 pnpm exec node packages/cli/dist/main.js add input --cwd APP --dry-run
 pnpm exec node packages/cli/dist/main.js add input --cwd APP --yes
+pnpm exec node packages/cli/dist/main.js add badge --cwd APP --yes
 pnpm exec node packages/cli/dist/main.js theme add PRESET --cwd APP --dry-run
 ```
 
@@ -17,7 +18,7 @@ A theme operation updates managed CSS and saved project defaults; it never rewri
 
 Do not use --yes to resolve a conflict: it cannot bypass source or managed-token ownership checks. Review local changes and manually reconcile them. On failure, read the reported transaction recovery.json. Source restoration and package-manager dependency/cache state are reported separately; retain backups until the project is repaired. Dependency additions run with lifecycle scripts disabled.
 
-Scope: three components; flat/minimalist/neo brutalism; the documented npm/pnpm/Yarn/Bun foundation matrix. No public package, registry endpoint, interactive editor, snapshot service, or native support is provided by this foundation. The full twelve-component stable matrix remains alpha work. The development-only upstream registry probe has an acknowledged unpatched braces advisory documented in decisions/0002-registry-adapter.md.
+Scope: Button, Badge, Dialog, and Input; flat/minimalist/neo brutalism; the documented npm/pnpm/Yarn/Bun foundation matrix. Badge uses a colocated stylesheet and supports default/destructive variants; see its [API and ownership rules](components/badge.md). Add `&badges=1` to a light/dark preview URL to inspect its generated examples. No public package, registry endpoint, interactive editor, snapshot service, or native support is provided by this foundation. The full twelve-component stable matrix remains alpha work. The development-only upstream registry probe has an acknowledged unpatched braces advisory documented in decisions/0002-registry-adapter.md.
 
 The complete verified support matrix and test evidence are in [foundation evidence](evidence/foundation.md). Planning networkAccess refers to local artifact resolution; dependencyPlan lists package operations that may contact the npm registry. No dry-run runs those operations.
 

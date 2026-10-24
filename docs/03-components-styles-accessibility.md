@@ -59,7 +59,7 @@ The MVP root theme intentionally updates shared shadcn color variables for a con
 
 ## Accessibility target
 
-The technical foundation implements Button, Dialog, and Input for flat, minimalist, and neo-brutalism. This three-component scope is separate from the twelve-component alpha roadmap and does not label the full catalog stable. Liquid glass remains unavailable. The [minimalist evidence](evidence/minimalist-style-support.md) identifies measured environments, agent-operated visual review, synthetic text enlargement, and pending native text zoom, human keyboard, NVDA, VoiceOver, and broader-browser review. Arbitrary preset overrides and consuming applications require their own checks.
+The technical foundation implements Button, Badge, Dialog, and Input for flat, minimalist, and neo-brutalism. This four-component scope is separate from the twelve-component alpha roadmap and does not label the full catalog stable. Badge begins M2 catalog expansion; its [API](components/badge.md) and [evidence](evidence/badge.md) describe the supported slice. Liquid glass remains unavailable. The [minimalist evidence](evidence/minimalist-style-support.md) identifies measured environments, agent-operated visual review, synthetic text enlargement, and pending native text zoom, human keyboard, NVDA, VoiceOver, and broader-browser review. Arbitrary preset overrides and consuming applications require their own checks.
 
 Target relevant WCAG 2.2 Level AA requirements for supported web experiences. Components and presets alone cannot certify an entire application. Component documentation must identify which checks were performed and what the consuming application must supply. Sources S10 and S11 explain the standards and primitive responsibilities.
 

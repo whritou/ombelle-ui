@@ -1,4 +1,5 @@
 export * from './types.js'
+export { supportedComponentIds } from './component-ids.js'
 export * from './diagnostics.js'
 export * from './validate.js'
 export * from './recipe.js'

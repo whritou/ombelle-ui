@@ -27,7 +27,7 @@ export async function prepareBunConsumer(
       path.join(fixture.root, '.ombelle-fixture.json'),
       JSON.stringify({ owner: repo, framework, family }),
     )
-    await writeScenarioFixture(fixture.root, family, true)
+    await writeScenarioFixture(fixture.root, family, true, false, true)
     await fs.appendFile(
       path.join(fixture.root, 'src/index.css'),
       '\n.user-bun-style {color:hotpink;}\n',
@@ -46,6 +46,7 @@ export async function prepareBunConsumer(
     for (const args of [
       ['add', 'button', 'dialog', '--yes', '--json'],
       ['add', 'input', '--yes', '--json'],
+      ['add', 'badge', '--yes', '--json'],
     ]) {
       const result = await runBuiltCli(runtime, args, fixture.root)
       if (
@@ -92,8 +93,13 @@ export async function prepareBunConsumer(
       artifacts = []
     const installedArtifacts = { ...jsonRecord(lock.artifacts) }
     for (const preset of Object.values(componentPresetEvidence.presets))
-      for (const [file, record] of Object.entries(jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts))) {
-        if (installedArtifacts[file] && JSON.stringify(installedArtifacts[file]) !== JSON.stringify(record))
+      for (const [file, record] of Object.entries(
+        jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts),
+      )) {
+        if (
+          installedArtifacts[file] &&
+          JSON.stringify(installedArtifacts[file]) !== JSON.stringify(record)
+        )
           throw Error('Conflicting scoped artifact ownership: ' + file)
         installedArtifacts[file] = record
       }

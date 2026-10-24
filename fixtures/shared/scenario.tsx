@@ -12,18 +12,22 @@ import {
 import { StateFixture } from './state-fixture'
 import { RecipeFixture } from './recipe-fixture'
 import { ComponentPresetFixture } from './component-preset-fixture'
+import { BadgeFixture } from './badge-fixture'
 export default function Scenario() {
   const [ready, setReady] = React.useState(false)
   const [mode, setMode] = React.useState('light')
   const [states, setStates] = React.useState(false)
   const [recipes, setRecipes] = React.useState(false)
   const [componentPresets, setComponentPresets] = React.useState(false)
+  const [badges, setBadges] = React.useState(false)
   React.useEffect(() => {
+    setBadges(new URLSearchParams(window.location.search).get('badges') === '1')
     setRecipes(
       new URLSearchParams(window.location.search).get('recipes') === '1',
     )
     setComponentPresets(
-      new URLSearchParams(window.location.search).get('componentPresets') === '1',
+      new URLSearchParams(window.location.search).get('componentPresets') ===
+        '1',
     )
   }, [])
   React.useEffect(() => {
@@ -87,8 +91,9 @@ export default function Scenario() {
       {states && <StateFixture />}
       {recipes && <RecipeFixture />}
       {componentPresets && <ComponentPresetFixture />}
+      {badges && <BadgeFixture />}
       <p className="note">
-        Three generated components · local preset · editable source
+        Generated components · local preset · editable source
       </p>
     </main>
   )

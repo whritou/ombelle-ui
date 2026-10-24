@@ -2,7 +2,7 @@ import type { FromSchema } from 'json-schema-to-ts'
 import { presetSchema } from './preset-schema.js'
 import type { NormalizedRecipe } from './recipe.js'
 export type Preset = FromSchema<typeof presetSchema>
-export type ComponentId = 'button' | 'dialog' | 'input'
+export type { ComponentId } from './component-ids.js'
 export type { StyleFamily } from './style-families.js'
 
 export type ResolvedPreset = { data: Preset; hash: string }
