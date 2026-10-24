@@ -1,0 +1,91 @@
+name: Set up foundation
+description: Install pinned tools and restore download stores before a fresh frozen workspace install.
+inputs:
+  cache-scope:
+    description: Isolate jobs that populate different subsets of the package stores.
+    default: foundation
+outputs:
+  node-version:
+    description: Installed Node version.
+    value: ${{ steps.node.outputs.node-version }}
+  playwright-version:
+    description: Playwright version pinned in the workspace manifest.
+    value: ${{ steps.stores.outputs.playwright-version }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      id: node
+      with:
+        node-version-file: .node-version
+    - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      with:
+        version: 11.25.0
+        run_install: false
+    - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      with:
+        bun-version: 1.4.3
+    - name: Locate download stores
+      id: stores
+      shell: bash
+      env:
+        LOCK_HASH: ${{ hashFiles('pnpm-lock.yaml', 'package-lock.json', 'yarn.lock', 'bun.lock', 'bun.lockb', 'fixtures/**/pnpm-lock.yaml', 'fixtures/**/package-lock.json', 'fixtures/**/yarn.lock', 'fixtures/**/bun.lock', 'fixtures/**/bun.lockb') }}
+      run: |
+        pnpm_store=$(pnpm store path --silent)
+        npm_cache=$(npm config get cache)
+        corepack_version=$(corepack --version)
+        playwright_version=$(node -p "require('./package.json').devDependencies['@playwright/test']")
+        echo "pnpm=$pnpm_store" >> "$GITHUB_OUTPUT"
+        echo "npm=$npm_cache" >> "$GITHUB_OUTPUT"
+        echo "corepack-version=$corepack_version" >> "$GITHUB_OUTPUT"
+        echo "playwright-version=$playwright_version" >> "$GITHUB_OUTPUT"
+        echo "locks=$LOCK_HASH" >> "$GITHUB_OUTPUT"
+        echo "COREPACK_HOME=$RUNNER_TEMP/ombelle-downloads/corepack" >> "$GITHUB_ENV"
+        echo "YARN_CACHE_FOLDER=$RUNNER_TEMP/ombelle-downloads/yarn-classic" >> "$GITHUB_ENV"
+        echo "YARN_GLOBAL_FOLDER=$RUNNER_TEMP/ombelle-downloads/yarn-modern" >> "$GITHUB_ENV"
+        echo "YARN_ENABLE_GLOBAL_CACHE=true" >> "$GITHUB_ENV"
+    - name: Cache pnpm store
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.stores.outputs.pnpm }}
+        key: stores-v1-${{ inputs.cache-scope }}-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-pnpm-11.25.0-${{ steps.stores.outputs.locks }}
+    - name: Cache npm downloads
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.stores.outputs.npm }}/_cacache
+        key: stores-v1-${{ inputs.cache-scope }}-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-npm-11.19.0-${{ steps.stores.outputs.locks }}
+    - name: Cache Yarn Classic downloads
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ runner.temp }}/ombelle-downloads/yarn-classic
+        key: stores-v1-${{ inputs.cache-scope }}-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-yarn-1.22.22-${{ steps.stores.outputs.locks }}
+    - name: Cache modern Yarn downloads
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ runner.temp }}/ombelle-downloads/yarn-modern/cache
+        key: stores-v1-${{ inputs.cache-scope }}-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-yarn-4.18.1-${{ steps.stores.outputs.locks }}
+    - name: Cache Bun downloads
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.bun/install/cache
+        key: stores-v1-${{ inputs.cache-scope }}-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-bun-1.4.3-${{ steps.stores.outputs.locks }}
+    - name: Cache Corepack releases
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ runner.temp }}/ombelle-downloads/corepack
+        key: stores-v1-${{ inputs.cache-scope }}-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-corepack-${{ steps.stores.outputs.corepack-version }}-yarn-1.22.22-4.18.1-${{ steps.stores.outputs.locks }}
+    - name: Install pinned npm
+      shell: bash
+      run: npm install --global npm@11.19.0 --ignore-scripts
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+    - name: Prepare Yarn releases outside the project
+      shell: bash
+      working-directory: ${{ runner.temp }}
+      run: |
+        corepack yarn@1.22.22 --version
+        corepack yarn@4.18.1 --version
+    - name: Install workspace dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile --ignore-scripts
