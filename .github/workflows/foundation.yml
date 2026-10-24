@@ -32,27 +32,19 @@ jobs:
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check:foundation
+      - name: Stage finalized evidence after process teardown
+        if: always()
+        run: node scripts/stage-foundation-evidence.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: foundation-evidence
           include-hidden-files: true
-          path: |
-            .artifacts/logs
-            .artifacts/*results.json
-            .artifacts/npm-version.json
-            .artifacts/yarn-versions.json
-            .artifacts/yarn-matrix.json
-            .artifacts/bun-version.json
-            .artifacts/bun-matrix.json
-            .artifacts/browser-version.json
-            .artifacts/foundation-report.json
-            .artifacts/install-provenance.json
-            .artifacts/consumer-pending.json
-            .artifacts/consumer-matrix.json
-            .artifacts/minimalist-measurements.json
-            .artifacts/recipe-measurements.json
-            .artifacts/recipe-consumers.json
-            .artifacts/audit-*.json
-            playwright-report
-            test-results
+          path: .artifacts/upload/core
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: foundation-browser-evidence
+          include-hidden-files: true
+          if-no-files-found: ignore
+          path: .artifacts/upload/browser

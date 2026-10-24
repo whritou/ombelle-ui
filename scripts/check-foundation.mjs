@@ -1,6 +1,9 @@
 import fs from 'node:fs/promises'
-import path from 'node:path'
-import { spawn, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
+import {
+  runFoundationStages,
+  persistFoundationReport,
+} from './foundation-runner.mjs'
 import {
   finalizeConsumerEvidence,
   validateMinimalistMeasurements,
@@ -21,103 +24,86 @@ const steps = [
 ]
 const script = process.env.npm_execpath
 if (!script) throw new Error('Run this gate through pnpm check:foundation')
-await fs.mkdir('.artifacts/logs', { recursive: true })
-const report = {
-  startedAt: new Date().toISOString(),
+const reportPath = '.artifacts/foundation-report.json'
+const controller = new AbortController()
+const onInterrupt = () => controller.abort('SIGINT')
+const onTerminate = () => controller.abort('SIGTERM')
+process.on('SIGINT', onInterrupt)
+process.on('SIGTERM', onTerminate)
+let report = {
   sourceCommit: spawnSync('git', ['rev-parse', 'HEAD'], {
     encoding: 'utf8',
     windowsHide: true,
   }).stdout.trim(),
-  workingTreeDirty:
-    spawnSync('git', ['status', '--porcelain'], {
-      encoding: 'utf8',
-      windowsHide: true,
-    }).stdout.trim().length > 0,
+  workingTreeDirty: spawnSync('git', ['status', '--porcelain'], {
+    encoding: 'utf8',
+    windowsHide: true,
+  }).stdout.trim().length > 0,
   platform: process.platform,
   node: process.version,
-  steps: [],
 }
-await fs.writeFile(
-  '.artifacts/foundation-report.json',
-  JSON.stringify({ ...report, status: 'running' }, null, 2),
-)
-for (const step of steps) {
-  console.log('Checking ' + step)
-  const start = Date.now(),
-    log = path.join('.artifacts/logs', step.replaceAll(':', '-') + '.log')
-  const result = await new Promise((resolve) => {
-    const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1' }
-    delete env.NO_COLOR
-    const child = spawn(process.execPath, [script, 'run', step], {
-      cwd: process.cwd(),
-      shell: false,
-      windowsHide: true,
-      env,
-    })
-    let output = ''
-    child.stdout.on('data', (x) => (output += x))
-    child.stderr.on('data', (x) => (output += x))
-    child.on('error', (error) =>
-      resolve({ exitCode: 1, output: output + '\n' + error.message }),
-    )
-    child.on('close', (exitCode) =>
-      resolve({ exitCode: exitCode ?? 1, output }),
-    )
-  })
-  await fs.writeFile(log, result.output)
-  report.steps.push({
-    name: step,
-    exitCode: result.exitCode,
-    durationMs: Date.now() - start,
-    log,
-  })
-  console.log(
-    step +
-      ': ' +
-      (result.exitCode === 0 ? 'PASS' : 'FAIL') +
-      ' (' +
-      Math.round((Date.now() - start) / 1000) +
-      's)',
-  )
-  if (result.exitCode !== 0) {
-    console.error(result.output.split(/\r?\n/).slice(-45).join('\n'))
-    await fs.writeFile(
-      '.artifacts/foundation-report.json',
-      JSON.stringify({ ...report, status: 'failed' }, null, 2),
-    )
-    process.exit(result.exitCode)
-  }
-}
-const unit = JSON.parse(
-    await fs.readFile('.artifacts/unit-results.json', 'utf8'),
-  ),
-  integration = JSON.parse(
-    await fs.readFile('.artifacts/integration-results.json', 'utf8'),
-  ),
-  browser = JSON.parse(
-    await fs.readFile('.artifacts/browser-results.json', 'utf8'),
-  ),
-  browserVersion = JSON.parse(
-    await fs.readFile('.artifacts/browser-version.json', 'utf8'),
-  )
-const counts = {
-  unit: {
-    passed: unit.numPassedTests,
-    failed: unit.numFailedTests,
-    skipped: unit.numPendingTests,
-  },
-  integration: {
-    passed: integration.numPassedTests,
-    failed: integration.numFailedTests,
-    skipped: integration.numPendingTests,
-  },
-  browser: browser.stats,
-}
-let consumerMatrix,
-  minimalistMeasurements,
-  recipeEvidence,
-  componentPresetEvidence
 try {
+  const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1' }
+  delete env.NO_COLOR
+  const result = await runFoundationStages({
+    stages: steps.map((name) => ({
+      name, command: process.execPath, args: [script, 'run', name], env,
+    })),
+    reportPath,
+    logsDirectory: '.artifacts/logs',
+    metadata: report,
+    signal: controller.signal,
+  })
+  report = result.report
+  if (result.exitCode !== 0) process.exitCode = result.exitCode
+  else await validateEvidence()
+} catch (error) {
+  const canceled = controller.signal.aborted
+  process.exitCode = canceled ? controller.signal.reason === 'SIGINT' ? 130 : 143 : 1
+  persistFoundationReport(reportPath, {
+    ...report,
+    status: canceled ? 'canceled' : 'failed',
+    exitCode: process.exitCode,
+    completedAt: new Date().toISOString(),
+    durationMs: report.startedAt ? Date.now() - Date.parse(report.startedAt) : 0,
+    error: String(error),
+  })
+  console.error(error)
+} finally {
+  process.removeListener('SIGINT', onInterrupt)
+  process.removeListener('SIGTERM', onTerminate)
+}
+
+async function validateEvidence() {
+  const unit = JSON.parse(
+      await fs.readFile('.artifacts/unit-results.json', 'utf8'),
+    ),
+    integration = JSON.parse(
+      await fs.readFile('.artifacts/integration-results.json', 'utf8'),
+    ),
+    browser = JSON.parse(
+      await fs.readFile('.artifacts/browser-results.json', 'utf8'),
+    ),
+    browserVersion = JSON.parse(
+      await fs.readFile('.artifacts/browser-version.json', 'utf8'),
+    )
+  const counts = {
+    unit: {
+      passed: unit.numPassedTests,
+      failed: unit.numFailedTests,
+      skipped: unit.numPendingTests,
+    },
+    integration: {
+      passed: integration.numPassedTests,
+      failed: integration.numFailedTests,
+      skipped: integration.numPendingTests,
+    },
+    browser: browser.stats,
+  }
+  let consumerMatrix,
+    minimalistMeasurements,
+    recipeEvidence,
+    componentPresetEvidence
   consumerMatrix = finalizeConsumerEvidence(
     consumerCases(),
     JSON.parse(await fs.readFile('.artifacts/consumer-matrix.json', 'utf8')),
@@ -162,57 +148,44 @@ try {
     counts.browser.flaky
   )
     throw new Error('Foundation contains failed, skipped or flaky checks')
-} catch (error) {
-  await fs.writeFile(
-    '.artifacts/foundation-report.json',
-    JSON.stringify(
-      { ...report, status: 'failed', error: String(error) },
-      null,
-      2,
+  const finalizedReport = {
+    ...report,
+    status: 'passed',
+    exitCode: 0,
+    counts,
+    browserVersion,
+    consumerCases: consumerCases(),
+    consumerMatrix,
+    minimalistMeasurements,
+    recipeEvidence,
+    componentPresetEvidence,
+    npmVersion: JSON.parse(
+      await fs.readFile('.artifacts/npm-version.json', 'utf8'),
     ),
+    yarnVersions: JSON.parse(
+      await fs.readFile('.artifacts/yarn-versions.json', 'utf8'),
+    ),
+    yarnMatrix: JSON.parse(
+      await fs.readFile('.artifacts/yarn-matrix.json', 'utf8'),
+    ),
+    bunVersion: JSON.parse(
+      await fs.readFile('.artifacts/bun-version.json', 'utf8'),
+    ),
+    bunMatrix: JSON.parse(
+      await fs.readFile('.artifacts/bun-matrix.json', 'utf8'),
+    ),
+  }
+  if (controller.signal.aborted) throw new Error('Foundation canceled during evidence validation')
+  finalizedReport.completedAt = new Date().toISOString()
+  finalizedReport.durationMs = Date.now() - Date.parse(report.startedAt)
+  persistFoundationReport(reportPath, finalizedReport)
+  console.log(
+    'Foundation passed: ' +
+      counts.unit.passed +
+      ' unit, ' +
+      counts.integration.passed +
+      ' integration, ' +
+      counts.browser.expected +
+      ' browser tests.',
   )
-  throw error
 }
-await fs.writeFile(
-  '.artifacts/foundation-report.json',
-  JSON.stringify(
-    {
-      ...report,
-      completedAt: new Date().toISOString(),
-      status: 'passed',
-      counts,
-      browserVersion,
-      consumerCases: consumerCases(),
-      consumerMatrix,
-      minimalistMeasurements,
-      recipeEvidence,
-      componentPresetEvidence,
-      npmVersion: JSON.parse(
-        await fs.readFile('.artifacts/npm-version.json', 'utf8'),
-      ),
-      yarnVersions: JSON.parse(
-        await fs.readFile('.artifacts/yarn-versions.json', 'utf8'),
-      ),
-      yarnMatrix: JSON.parse(
-        await fs.readFile('.artifacts/yarn-matrix.json', 'utf8'),
-      ),
-      bunVersion: JSON.parse(
-        await fs.readFile('.artifacts/bun-version.json', 'utf8'),
-      ),
-      bunMatrix: JSON.parse(
-        await fs.readFile('.artifacts/bun-matrix.json', 'utf8'),
-      ),
-    },
-    null,
-    2,
-  ),
-)
-console.log(
-  'Foundation passed: ' +
-    counts.unit.passed +
-    ' unit, ' +
-    counts.integration.passed +
-    ' integration, ' +
-    counts.browser.expected +
-    ' browser tests.',
-)
