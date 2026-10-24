@@ -3,6 +3,10 @@ import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { enlargeFixtureText } from '../helpers/text-enlargement.js'
+import {
+  browserReferenceKey,
+  createBrowserReferenceCache,
+} from '../helpers/browser-references.js'
 
 const consumers = JSON.parse(
   fs.readFileSync('.artifacts/consumers.json', 'utf8'),
@@ -34,6 +38,12 @@ async function specimen(page: Page) {
     image: await fixture.screenshot({ animations: 'disabled' }),
   }
 }
+// Module state belongs to this file's worker; only serialized measurements survive.
+const badgeReferences = createBrowserReferenceCache<{
+  styles: Awaited<ReturnType<typeof specimen>>['styles']
+  html: string
+  image: string
+}>()
 function luminance(color: string) {
   const channels = color
     .match(/[\d.]+/g)!
@@ -51,19 +61,42 @@ for (const family of supportedStyleFamilies)
         page,
       }) => {
         const query = '?badges=1&mode=' + mode
-        await page.goto('http://127.0.0.1:4173/' + family + '/' + query)
-        const reference = await specimen(page)
-        if (app !== 'preview')
+        const previewUrl = 'http://127.0.0.1:4173/' + family + '/' + query
+        await page.emulateMedia({ reducedMotion: 'reduce', forcedColors: 'none' })
+        const colorScheme = await page.evaluate(() =>
+          matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+        )
+        const key = browserReferenceKey({
+          family,
+          mode,
+          viewport: page.viewportSize() ?? { width: 1100, height: 800 },
+          reducedMotion: 'reduce',
+          forcedColors: 'none',
+          colorScheme,
+        })
+        let captured: Awaited<ReturnType<typeof specimen>> | undefined
+        const reference = await badgeReferences(key, async () => {
+          await page.goto(previewUrl)
+          captured = await specimen(page)
+          return {
+            styles: captured.styles,
+            html: captured.html,
+            image: captured.image.toString('base64'),
+          }
+        })
+        if (app !== 'preview' || !captured)
           await page.goto(
-            'http://127.0.0.1:' +
-              consumers[app + '-' + family].port +
-              '/' +
-              query,
+            app === 'preview'
+              ? previewUrl
+              : 'http://127.0.0.1:' + consumers[app + '-' + family].port + '/' + query,
           )
-        const actual = app === 'preview' ? reference : await specimen(page)
+        const actual =
+          app === 'preview' && captured ? captured : await specimen(page)
         expect(actual.styles).toEqual(reference.styles)
         expect(actual.html).toBe(reference.html)
-        expect(actual.image.equals(reference.image)).toBe(true)
+        expect(actual.image.equals(Buffer.from(reference.image, 'base64'))).toBe(
+          true,
+        )
         const badges = actual.fixture.locator('[data-slot="badge"]')
         await expect(badges).toHaveCount(4)
         expect(

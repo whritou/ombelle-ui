@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test'
 import fs from 'node:fs'
+import { workerBudget } from './scripts/worker-budget.js'
 const fixtures = JSON.parse(
   fs.readFileSync('.artifacts/consumers.json', 'utf8'),
 ) as Record<string, { port: number }>
@@ -7,7 +8,9 @@ export default defineConfig({
   testDir: 'tests/e2e',
   timeout: 60000,
   expect: { timeout: 10000 },
-  workers: 1,
+  workers: workerBudget('OMBELLE_E2E_WORKERS', process.env.OMBELLE_E2E_WORKERS, 2),
+  fullyParallel: false,
+  retries: 0,
   use: {
     browserName: 'chromium',
     channel: process.env.OMBELLE_BROWSER_CHANNEL || undefined,
