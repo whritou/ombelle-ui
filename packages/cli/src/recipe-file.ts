@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import { constants } from 'node:fs'
 import path from 'node:path'
 import {
   FoundationError,
@@ -8,7 +9,13 @@ import {
 export async function readRecipeFile(file: string): Promise<Recipe> {
   const target = path.resolve(file)
   try {
-    const handle = await fs.open(target, 'r')
+    if (!(await fs.stat(target)).isFile())
+      throw Error('Recipe must be a regular file')
+    // A FIFO can replace the checked path before open; never wait for its writer.
+    const handle = await fs.open(
+      target,
+      constants.O_RDONLY | constants.O_NONBLOCK,
+    )
     try {
       if (!(await handle.stat()).isFile())
         throw Error('Recipe must be a regular file')

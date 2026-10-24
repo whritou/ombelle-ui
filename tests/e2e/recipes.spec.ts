@@ -1,13 +1,16 @@
 import { test, expect } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
-import path from 'node:path'
-import { compile, compileRecipe, sha256 } from '@ombelle/compiler'
+import { compile, compileRecipe } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { recipeStyles, recipeDom } from '../helpers/recipe-measurements.js'
-import { enlargeFixtureText } from '../helpers/text-enlargement.js'
+import {
+  assertRecipeIsolation,
+  assertRecipeStates,
+  measureRecipeTextLayouts,
+} from '../helpers/recipe-browser.js'
+import { verifyRecipeSourceEvidence } from '../helpers/recipe-source-evidence.js'
 import {
   validateRecipeMeasurements,
   type RecipeMeasurement,
@@ -54,45 +57,7 @@ for (const hostFamily of supportedStyleFamilies)
             'data-ready',
             'true',
           )
-          const neighbors = await page
-            .locator('[data-testid="specimen"]')
-            .evaluate((el) =>
-              Array.from(el.querySelectorAll('[data-slot]')).map((n) => {
-                const s = getComputedStyle(n)
-                return {
-                  s: s.cssText,
-                  color: s.color,
-                  background: s.backgroundColor,
-                  border: s.border,
-                  radius: s.borderRadius,
-                  height: s.height,
-                }
-              }),
-            )
-          await page.goto(
-            base + '?mode=' + mode + '&recipes=1&recipe=' + recipe.id,
-          )
-          await expect(page.getByTestId('recipe-fixture')).toBeVisible()
-          await expect(page.locator('main')).toHaveAttribute(
-            'data-ready',
-            'true',
-          )
-          const after = await page
-            .locator('[data-testid="specimen"]')
-            .evaluate((el) =>
-              Array.from(el.querySelectorAll('[data-slot]')).map((n) => {
-                const s = getComputedStyle(n)
-                return {
-                  s: s.cssText,
-                  color: s.color,
-                  background: s.backgroundColor,
-                  border: s.border,
-                  radius: s.borderRadius,
-                  height: s.height,
-                }
-              }),
-            )
-          expect(after).toEqual(neighbors)
+          await assertRecipeIsolation(page, base, mode, recipe.id)
           const button = page.getByTestId('recipe-default'),
             specimen = page.getByTestId('recipe-specimen')
           await page.evaluate(() => document.fonts.ready)
@@ -118,203 +83,20 @@ for (const hostFamily of supportedStyleFamilies)
                 contentType: 'image/png',
               })
           }
-          const transformedHashes: Record<string, string> = {}
-          const transforms =
-            app === 'preview'
-              ? JSON.parse(
-                  fs.readFileSync(
-                    'apps/preview/src/generated/' +
-                      hostFamily +
-                      '/recipes-transforms.json',
-                    'utf8',
-                  ),
-                )
-              : undefined
-          for (const artifact of compiled.artifacts.filter(
-            (a) => a.kind !== 'utility',
-          )) {
-            const dest =
-              artifact.kind === 'usage'
-                ? 'src/ombelle-examples/' +
-                  artifact.logicalPath.slice('examples/'.length)
-                : 'src/components/ui/' + artifact.logicalPath
-            if (app === 'preview') {
-              const file = path.join(
-                'apps/preview/src/generated',
-                hostFamily,
-                artifact.kind === 'usage'
-                  ? artifact.logicalPath
-                  : 'components/ui/' + artifact.logicalPath,
-              )
-              const actualHash = await sha256(fs.readFileSync(file, 'utf8'))
-              expect(actualHash).toBe(
-                transforms[artifact.logicalPath].previewHash,
-              )
-              transformedHashes[artifact.logicalPath] = actualHash
-            } else {
-              const content = fs.readFileSync(
-                path.join(map[app + '-' + hostFamily].root, dest),
-                'utf8',
-              )
-              expect(await sha256(content)).toBe(artifact.sha256)
-              transformedHashes[artifact.logicalPath] = await sha256(content)
-            }
-          }
-          if (app === 'preview') {
-            const browserHashes = await page.evaluate(
-              async (id) =>
-                Promise.all((window as any).__recipeArtifactHashes[id]),
-              recipe.id,
-            )
-            expect(browserHashes).toEqual(
-              compiled.artifacts.map((a) => a.sha256),
-            )
-          }
-          await button.focus()
-          await expect(button).toBeFocused()
-          expect(
-            await button.evaluate((el) =>
-              parseFloat(getComputedStyle(el).outlineWidth),
-            ),
-          ).toBeGreaterThanOrEqual(3)
-          await page.keyboard.press('Enter')
-          await page.keyboard.press('Space')
-          await button.click()
-          await expect(page.getByTestId('recipe-clicks')).toHaveText('3')
-          await page
-            .getByRole('button', { name: 'Toggle recipe loading' })
-            .click()
-          await expect(button).toBeDisabled()
-          await expect(button).toHaveAttribute('aria-busy', 'true')
-          await expect(button).toHaveAccessibleName('Recipe action')
-          await button.evaluate((el) => (el as HTMLButtonElement).click())
-          await expect(page.getByTestId('recipe-clicks')).toHaveText('3')
-          await page
-            .getByRole('button', { name: 'Toggle recipe loading' })
-            .click()
-          await page
-            .getByRole('button', { name: 'Toggle recipe disabled' })
-            .click()
-          await expect(button).toBeDisabled()
-          await button.evaluate((el) => (el as HTMLButtonElement).click())
-          await expect(page.getByTestId('recipe-clicks')).toHaveText('3')
-          await page
-            .getByRole('button', { name: 'Toggle recipe disabled' })
-            .click()
-          await page.emulateMedia({ reducedMotion: 'no-preference' })
-          await button.evaluate((el) =>
-            el.style.setProperty('--motion-duration', '150ms'),
-          )
-          expect(
-            await button.evaluate((el) =>
-              getComputedStyle(el)
-                .transitionDuration.split(',')
-                .every((v) => parseFloat(v) > 0),
-            ),
-          ).toBe(true)
-          await page.emulateMedia({ reducedMotion: 'reduce' })
-          expect(
-            await button.evaluate((el) =>
-              getComputedStyle(el)
-                .transitionDuration.split(',')
-                .every((v) => parseFloat(v) === 0),
-            ),
-          ).toBe(true)
-          await page.emulateMedia({ forcedColors: 'active' })
-          await page.keyboard.press('Tab')
-          await button.focus()
-          expect(
-            await button.evaluate((el) => getComputedStyle(el).outlineStyle),
-          ).not.toBe('none')
-          await page.emulateMedia({ forcedColors: 'none' })
-          expect(
-            (
-              await new AxeBuilder({ page })
-                .include('[data-testid="recipe-fixture"]')
-                .analyze()
-            ).violations,
-          ).toEqual([])
-          const textEvidence: RecipeMeasurement['textEvidence'] = []
-          for (const width of [1100, 320]) {
-            await page.setViewportSize({ width, height: 800 })
-            await page.goto(
-              base +
-                '?mode=' +
-                mode +
-                '&recipes=1&recipe=' +
-                recipe.id +
-                '&recipeStates=1&tamper=1',
-            )
-            await expect(page.getByTestId('recipe-states')).toBeVisible()
-            await expect(button).toHaveAttribute('data-slot', 'recipe-button')
-            await expect(button).toHaveAttribute(
-              'data-ombelle-recipe',
-              compiled.scope,
-            )
-            for (const size of ['sm', 'default', 'lg', 'icon'])
-              await expect(
-                page.getByTestId('recipe-size-' + size),
-              ).toHaveAccessibleName('Visible ' + size + ' text')
-            if (width === 1100) {
-              for (const variant of [
-                'default',
-                'secondary',
-                'outline',
-                'ghost',
-                'link',
-                'destructive',
-              ])
-                await expect(
-                  page.getByTestId('recipe-variant-' + variant),
-                ).toHaveAccessibleName(variant + ' action')
-              expect(
-                (
-                  await new AxeBuilder({ page })
-                    .include('[data-testid="recipe-fixture"]')
-                    .analyze()
-                ).violations,
-              ).toEqual([])
-            }
-            const samples = (await enlargeFixtureText(page, 2)).filter((s) =>
-              s.selector.includes('button'),
-            )
-            expect(samples.length).toBeGreaterThan(10)
-            for (const s of samples)
-              expect(s.after / s.before).toBeCloseTo(2, 1)
-            expect(
-              await page
-                .getByTestId('recipe-fixture')
-                .evaluate((el) =>
-                  Array.from(
-                    el.querySelectorAll('[data-slot="recipe-button"]'),
-                  ).every(
-                    (n) =>
-                      n.scrollWidth <= n.clientWidth + 1 &&
-                      n.scrollHeight <= n.clientHeight + 1,
-                  ),
-                ),
-            ).toBe(true)
-            const overflow = await page.evaluate(() => ({
-              width: window.innerWidth,
-              actual: document.documentElement.scrollWidth,
-              offenders: Array.from(document.querySelectorAll('body *'))
-                .filter(
-                  (el) =>
-                    el.getBoundingClientRect().right > window.innerWidth + 1,
-                )
-                .slice(0, 8)
-                .map((el) => ({
-                  tag: el.tagName,
-                  text: el.textContent?.slice(0, 45),
-                  right: el.getBoundingClientRect().right,
-                })),
-            }))
-            expect(
-              overflow.actual,
-              JSON.stringify(overflow),
-            ).toBeLessThanOrEqual(overflow.width)
-            textEvidence.push({ width, samples })
-          }
+          const transformedHashes = await verifyRecipeSourceEvidence(page, {
+            app,
+            hostFamily,
+            recipeId: recipe.id,
+            compiled,
+            consumers: map,
+          })
+          await assertRecipeStates(page, button)
+          const textEvidence = await measureRecipeTextLayouts(page, button, {
+            base,
+            mode,
+            recipeId: recipe.id,
+            scope: compiled.scope,
+          })
           rows.push({
             hostFamily,
             recipeId: recipe.id,
