@@ -7,6 +7,7 @@
     "node": "24.19.0"
   },
   "scripts": {
+    "audit:workspace": "pnpm audit",
     "build:packages": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && node scripts/build.mjs",
     "build": "pnpm build:packages",
     "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",

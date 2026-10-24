@@ -30,6 +30,8 @@ jobs:
           corepack yarn@1.22.22 --version
           corepack yarn@4.18.1 --version
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Audit workspace dependencies
+        run: pnpm audit:workspace
       - name: Install Chromium and system dependencies
         timeout-minutes: 15
         run: pnpm exec playwright install --with-deps chromium
