@@ -43,3 +43,40 @@ Consumers were not prepared for Task 6. Under the approved execution order, the 
 
 2. At final verification, run the complete 118-test browser suite through the complete foundation gate with the default two workers. Record its actual duration, browser version, environment and counts, and ensure the aggregate recipe/preset evidence is complete. Avoid a redundant additional full gate solely for Task 6.
 3. Fill this document with the observed comparison and full-suite results. Recipe and component-preset files validate complete row arrays in `afterAll`; do not benchmark grep subsets of those aggregate-owning files. Preserve all assertions and reject missing, duplicate, failed, skipped or flaky final evidence.
+
+## Final complete local verification — 2026-10-25
+
+Environment: Windows 10.0.26100, AMD Ryzen 7 2700X, 16 logical CPUs, 32 GiB RAM; Node 24.19.0; pnpm 11.25.0; Playwright 1.64.1 using Chromium 156.0.4314.42 through the `msedge` channel. The worktree was at `67506947365f48e3770a7ac390cecb9882ee649e`; three generated files had status-only LF/CRLF noise and no content diffs.
+
+The complete `pnpm check:foundation` gate passed with `OMBELLE_INTEGRATION_WORKERS=2`; consumer and browser workers used their documented defaults of two. It retained all checks and timeouts:
+
+| Stage | Duration |
+| --- | ---: |
+| Package build | 2.086 s |
+| Unit tests — 192 passed | 16.296 s |
+| Integration — 232 passed | 417.442 s |
+| Preview generation | 3.460 s |
+| Prepare 34 consumers | 831.995 s |
+| Typecheck | 2.733 s |
+| Preview build | 2.830 s |
+| Consumer builds | 137.366 s |
+| Browser suite — 118 passed | 605.032 s |
+| Fresh workspace audit — no known vulnerabilities | 2.561 s |
+| Complete gate wall time | 2,051.082 s |
+
+The stage durations sum to 2,021.801 s, about 29.281 s less than the outer wall measurement. The outer stopwatch also covers gate process startup/shutdown and final evidence collection/validation; those activities are outside the child-stage durations.
+
+The browser reporter recorded 118 expected and passed tests, with zero unexpected, skipped or flaky tests; Playwright's browser duration was 602.433 s. Consumer and browser evidence passed the recipe, scoped-preset, minimalist and final aggregate validators. Raw reports were retained in the ignored plan ledger before the focused comparison.
+
+The first full-gate attempt used four integration workers. Its preservation integration test reached its unchanged 60 s timeout and then reported an `EBUSY` fixture-cleanup error while the Bun consumer integration file took 267.130 s. That same preservation test passed in isolation at one worker in 37.749 s. The final full gate used the supported two-worker override: all 232 integration tests passed, the preservation case passed in 40.154 s, and the Bun consumer file completed in 221.242 s. Earlier full integration runs at four workers passed, so these observations show variability and do not by themselves establish contention as the cause. No test timeout or assertion was changed.
+
+### Badge and keyboard worker comparison
+
+Both runs used the same prepared consumers and the complete `badge.spec.ts` plus `keyboard.spec.ts` files (60 tests), the same Node/browser/machine, and `--reporter=list` so the full-gate JSON evidence remained intact. Playwright started and stopped the same configured web servers for each run.
+
+| Workers | Result | Command wall time |
+| ---: | --- | ---: |
+| 1 | 60 passed; 0 failed/skipped | 145.887 s |
+| 2 | 60 passed; 0 failed/skipped | 115.754 s |
+
+The one-worker run came first. These are single observations in a fixed order, and wall time includes web-server startup and shutdown. The measured comparison is specific to this Windows/Edge host; it is not a Linux or hosted-CI benchmark and does not establish a repeatable speedup distribution. No other browser files were subsetted, so their complete evidence owners and aggregate hooks were not disturbed.
