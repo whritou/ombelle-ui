@@ -21,6 +21,12 @@ export function validatePreset(input: unknown): Preset {
     )
   }
   const preset = input as Preset
+  if (!Number.isSafeInteger(preset.revision))
+    throw new FoundationError(
+      'INVALID_DATA',
+      'Revision must be a safe integer',
+      '/revision',
+    )
   for (const [mode, colors] of Object.entries(preset.modes))
     for (const [key, color] of Object.entries(colors)) {
       if (color.startsWith('#')) continue

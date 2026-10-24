@@ -7,7 +7,8 @@ import {
   type ProjectLock,
   type ProjectConfig,
 } from '@ombelle/contracts'
-import { sha256, canonicalize } from '@ombelle/compiler'
+import { sha256, canonicalize, resolvePreset } from '@ombelle/compiler'
+import { getCatalog } from '@ombelle/catalog'
 import { safePath } from '../project/paths.js'
 import { readText } from '../project/inspect.js'
 import { transformArtifact } from '../project/transform.js'
@@ -91,6 +92,22 @@ export async function planAdd(
       'Component primitive edition is not supported',
       'components.json',
     )
+  if (context.preset && context.lock) {
+    const savedPreset = await resolvePreset(
+      context.preset,
+      getCatalog(context.lock.catalogRelease),
+    )
+    if (
+      savedPreset.hash !== context.lock.presetHash ||
+      context.lock.compilerVersion !== savedPreset.data.compilerVersion
+    )
+      throw new FoundationError(
+        'FILE_CONFLICT',
+        'Saved global preset does not match its lock provenance',
+        context.config?.presetFile,
+        'Use theme add <local.json> to update the global preset explicitly.',
+      )
+  }
   const plan: InstallPlan = {
     packageManager: context.manager,
     ...(context.bunLockfile ? { bunLockfile: context.bunLockfile } : {}),
