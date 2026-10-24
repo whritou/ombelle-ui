@@ -26,6 +26,14 @@ The verified consumer baseline requires exact react and react-dom 19.3.1 declara
 
 Consumer manager selection uses package.json.packageManager, then a unique recognized package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb. Contradictory evidence requires explicit selection; workspaces and npm-shrinkwrap remain unsupported. The launching runner does not switch the target manager. New config saves the selected manager; existing auto remains valid. Dependency additions use exact production requirements with lifecycle scripts disabled and preserve the manager's lock format. Theme-only commands never invoke a dependency manager. The repository itself continues to use pnpm. See the README and individual manager evidence for exact versions and linker/runtime boundaries.
 
+## CI time budgets
+
+The Foundation workflow has a temporary 60-minute job ceiling. Job time includes checkout, toolchain and dependency setup, browser installation, foundation verification, evidence staging, uploads, and action cleanup. Chromium and system dependency installation has a 15-minute step limit; `pnpm check:foundation` has a separate 40-minute limit. Finalized evidence staging has a 3-minute limit, and the independent core and browser artifact uploads each have a 5-minute limit.
+
+These step limits are ceilings, not reserved time: 15 + 40 + 3 + 5 + 5 already exceeds 60 minutes before the other setup work. The job ceiling takes precedence, so slow setup reduces the time available for verification and evidence handling. The `always()` staging and upload steps attempt to retain finalized diagnostics after failure or cancellation, but cannot guarantee completion once the job is forcibly stopped. Validation failures and cancellations remain visible; validation does not use `continue-on-error`. These limits are operational safeguards, not measured Linux/CI runtime claims.
+
+The pnpm setup and artifact upload actions are pinned to Node-24-native releases (`pnpm/action-setup` v6.1.0 and `actions/upload-artifact` v7.0.2). Their existing inputs remain supported: pnpm stays at 11.25.0 with automatic dependency installation disabled, while uploads retain separate artifact names, hidden evidence files, and the optional browser artifact. Node 24 actions require runner v2.327.1 or newer; the workflow uses GitHub-hosted `ubuntu-latest`. Repository and consumer toolchain versions remain pinned, and dependency installs disable lifecycle scripts.
+
 ## Component-scoped Button presets
 
 The supported project baseline is Vite React TSX or Next.js App Router TSX using Tailwind v4 and the supported Radix nova/new-york component editions. Initialize the project first, then install one Button from a local preset JSON:

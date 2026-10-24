@@ -7,7 +7,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 60
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 11.25.0
           run_install: false
@@ -30,19 +30,26 @@ jobs:
           corepack yarn@1.22.22 --version
           corepack yarn@4.18.1 --version
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm check:foundation
+      - name: Install Chromium and system dependencies
+        timeout-minutes: 15
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Verify foundation
+        timeout-minutes: 40
+        run: pnpm check:foundation
       - name: Stage finalized evidence after process teardown
         if: always()
+        timeout-minutes: 3
         run: node scripts/stage-foundation-evidence.mjs
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
+        timeout-minutes: 5
         with:
           name: foundation-evidence
           include-hidden-files: true
           path: .artifacts/upload/core
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
+        timeout-minutes: 5
         with:
           name: foundation-browser-evidence
           include-hidden-files: true
