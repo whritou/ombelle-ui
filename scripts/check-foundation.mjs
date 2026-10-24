@@ -1,27 +1,11 @@
 import fs from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
-import {
-  runFoundationStages,
-  persistFoundationReport,
-} from './foundation-runner.mjs'
-import {
-  finalizeConsumerEvidence,
-  validateMinimalistMeasurements,
-} from './consumer-evidence.ts'
-import { consumerCases } from './consumer-matrix.ts'
-import { finalizeRecipeEvidence } from './recipe-evidence.ts'
-import { finalizeComponentPresetEvidence } from './component-preset-evidence.ts'
-const steps = [
-  'build:packages',
-  'test:unit',
-  'test:integration',
-  'generate:preview',
-  'prepare:consumers',
-  'typecheck',
-  'build:preview',
-  'build:consumers',
-  'test:e2e',
-]
+import { runFoundationStages, persistFoundationReport } from './foundation-runner.mjs'
+import { foundationSteps, evidenceFiles, validateGroupEvidence, combineEvidence, aggregateFoundationEvidence } from './foundation-evidence.mjs'
+
+const args = process.argv.slice(2)
+const group = args.length === 0 ? 'all' : args[0] === '--group' && args.length === 2 && ['quality', 'consumers'].includes(args[1]) ? args[1] : args[0] === '--aggregate' && args.length === 2 ? 'aggregate' : undefined
+if (!group) throw new Error('Use no arguments, --group quality|consumers, or --aggregate DIRECTORY')
 const script = process.env.npm_execpath
 if (!script) throw new Error('Run this gate through pnpm check:foundation')
 const reportPath = '.artifacts/foundation-report.json'
@@ -31,161 +15,41 @@ const onTerminate = () => controller.abort('SIGTERM')
 process.on('SIGINT', onInterrupt)
 process.on('SIGTERM', onTerminate)
 let report = {
-  sourceCommit: spawnSync('git', ['rev-parse', 'HEAD'], {
-    encoding: 'utf8',
-    windowsHide: true,
-  }).stdout.trim(),
-  workingTreeDirty: spawnSync('git', ['status', '--porcelain'], {
-    encoding: 'utf8',
-    windowsHide: true,
-  }).stdout.trim().length > 0,
+  group,
+  sourceCommit: spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', windowsHide: true }).stdout.trim(),
+  workingTreeDirty: spawnSync('git', ['status', '--porcelain'], { encoding: 'utf8', windowsHide: true }).stdout.trim().length > 0,
   platform: process.platform,
   node: process.version,
 }
 try {
   const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1' }
   delete env.NO_COLOR
+  // Only clear owned result files. Consumer roots remain owned by their preparation
+  // lifecycle. A successful group must produce fresh evidence during this run.
+  const files = group === 'all' ? [...evidenceFiles.quality, ...evidenceFiles.consumers] : evidenceFiles[group] ?? []
+  for (const file of files) await fs.rm('.artifacts/' + file, { force: true })
   const result = await runFoundationStages({
-    stages: steps.map((name) => ({
-      name, command: process.execPath, args: [script, 'run', name], env,
-    })),
-    reportPath,
-    logsDirectory: '.artifacts/logs',
-    metadata: report,
-    signal: controller.signal,
+    stages: (group === 'aggregate' ? ['build:packages'] : foundationSteps[group]).map((name) => ({ name, command: process.execPath, args: [script, 'run', name], env })),
+    reportPath, logsDirectory: '.artifacts/logs', metadata: report, signal: controller.signal,
   })
   report = result.report
   if (result.exitCode !== 0) process.exitCode = result.exitCode
-  else await validateEvidence()
+  else {
+    const evidence = group === 'aggregate'
+      ? await aggregateFoundationEvidence(args[1], report.sourceCommit)
+      : group === 'all'
+        ? combineEvidence(await validateGroupEvidence('.artifacts', 'quality'), await validateGroupEvidence('.artifacts', 'consumers'))
+        : await validateGroupEvidence('.artifacts', group)
+    if (controller.signal.aborted) throw new Error('Foundation canceled during evidence validation')
+    persistFoundationReport(reportPath, { ...report, ...evidence, status: 'passed', exitCode: 0, completedAt: new Date().toISOString(), durationMs: Date.now() - Date.parse(report.startedAt) })
+    console.log('Foundation ' + group + ' passed: ' + JSON.stringify(evidence.counts))
+  }
 } catch (error) {
   const canceled = controller.signal.aborted
   process.exitCode = canceled ? controller.signal.reason === 'SIGINT' ? 130 : 143 : 1
-  persistFoundationReport(reportPath, {
-    ...report,
-    status: canceled ? 'canceled' : 'failed',
-    exitCode: process.exitCode,
-    completedAt: new Date().toISOString(),
-    durationMs: report.startedAt ? Date.now() - Date.parse(report.startedAt) : 0,
-    error: String(error),
-  })
+  persistFoundationReport(reportPath, { ...report, status: canceled ? 'canceled' : 'failed', exitCode: process.exitCode, completedAt: new Date().toISOString(), durationMs: report.startedAt ? Date.now() - Date.parse(report.startedAt) : 0, error: String(error) })
   console.error(error)
 } finally {
   process.removeListener('SIGINT', onInterrupt)
   process.removeListener('SIGTERM', onTerminate)
-}
-
-async function validateEvidence() {
-  const unit = JSON.parse(
-      await fs.readFile('.artifacts/unit-results.json', 'utf8'),
-    ),
-    integration = JSON.parse(
-      await fs.readFile('.artifacts/integration-results.json', 'utf8'),
-    ),
-    browser = JSON.parse(
-      await fs.readFile('.artifacts/browser-results.json', 'utf8'),
-    ),
-    browserVersion = JSON.parse(
-      await fs.readFile('.artifacts/browser-version.json', 'utf8'),
-    )
-  const counts = {
-    unit: {
-      passed: unit.numPassedTests,
-      failed: unit.numFailedTests,
-      skipped: unit.numPendingTests,
-    },
-    integration: {
-      passed: integration.numPassedTests,
-      failed: integration.numFailedTests,
-      skipped: integration.numPendingTests,
-    },
-    browser: browser.stats,
-  }
-  let consumerMatrix,
-    minimalistMeasurements,
-    recipeEvidence,
-    componentPresetEvidence
-  consumerMatrix = finalizeConsumerEvidence(
-    consumerCases(),
-    JSON.parse(await fs.readFile('.artifacts/consumer-matrix.json', 'utf8')),
-  )
-  minimalistMeasurements = validateMinimalistMeasurements(
-    JSON.parse(
-      await fs.readFile('.artifacts/minimalist-measurements.json', 'utf8'),
-    ),
-  )
-  recipeEvidence = await finalizeRecipeEvidence(
-    {
-      measurements: JSON.parse(
-        await fs.readFile('.artifacts/recipe-measurements.json', 'utf8'),
-      ),
-      consumers: JSON.parse(
-        await fs.readFile('.artifacts/recipe-consumers.json', 'utf8'),
-      ),
-    },
-    consumerMatrix,
-  )
-  componentPresetEvidence = await finalizeComponentPresetEvidence(
-    {
-      measurements: JSON.parse(
-        await fs.readFile(
-          '.artifacts/component-preset-measurements.json',
-          'utf8',
-        ),
-      ),
-      consumers: JSON.parse(
-        await fs.readFile('.artifacts/component-preset-consumers.json', 'utf8'),
-      ),
-    },
-    consumerMatrix,
-  )
-  if (
-    counts.unit.failed ||
-    counts.unit.skipped ||
-    counts.integration.failed ||
-    counts.integration.skipped ||
-    counts.browser.unexpected ||
-    counts.browser.skipped ||
-    counts.browser.flaky
-  )
-    throw new Error('Foundation contains failed, skipped or flaky checks')
-  const finalizedReport = {
-    ...report,
-    status: 'passed',
-    exitCode: 0,
-    counts,
-    browserVersion,
-    consumerCases: consumerCases(),
-    consumerMatrix,
-    minimalistMeasurements,
-    recipeEvidence,
-    componentPresetEvidence,
-    npmVersion: JSON.parse(
-      await fs.readFile('.artifacts/npm-version.json', 'utf8'),
-    ),
-    yarnVersions: JSON.parse(
-      await fs.readFile('.artifacts/yarn-versions.json', 'utf8'),
-    ),
-    yarnMatrix: JSON.parse(
-      await fs.readFile('.artifacts/yarn-matrix.json', 'utf8'),
-    ),
-    bunVersion: JSON.parse(
-      await fs.readFile('.artifacts/bun-version.json', 'utf8'),
-    ),
-    bunMatrix: JSON.parse(
-      await fs.readFile('.artifacts/bun-matrix.json', 'utf8'),
-    ),
-  }
-  if (controller.signal.aborted) throw new Error('Foundation canceled during evidence validation')
-  finalizedReport.completedAt = new Date().toISOString()
-  finalizedReport.durationMs = Date.now() - Date.parse(report.startedAt)
-  persistFoundationReport(reportPath, finalizedReport)
-  console.log(
-    'Foundation passed: ' +
-      counts.unit.passed +
-      ' unit, ' +
-      counts.integration.passed +
-      ' integration, ' +
-      counts.browser.expected +
-      ' browser tests.',
-  )
 }

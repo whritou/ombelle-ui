@@ -20,7 +20,10 @@
     "build:preview": "vite build apps/preview --config apps/preview/vite.config.ts",
     "test:e2e": "playwright test",
     "dev:preview": "vite apps/preview --config apps/preview/vite.config.ts",
-    "check:foundation": "node --import tsx scripts/check-foundation.mjs"
+    "check:foundation": "node --import tsx scripts/check-foundation.mjs",
+    "check:foundation:quality": "node --import tsx scripts/check-foundation.mjs --group quality",
+    "check:foundation:consumers": "node --import tsx scripts/check-foundation.mjs --group consumers",
+    "check:foundation:aggregate": "node --import tsx scripts/check-foundation.mjs --aggregate"
   },
   "devDependencies": {
     "@types/node": "24.19.2",

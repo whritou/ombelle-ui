@@ -1,3 +1,4 @@
+import { minimalistMeasurements as measurements } from '../helpers/foundation-evidence-fixture.js'
 import { expect, it } from 'vitest'
 import { consumerCases } from '../../scripts/consumer-matrix.js'
 import { finalizeConsumerEvidence, validateMinimalistMeasurements, type ConsumerEvidence } from '../../scripts/consumer-evidence.js'
@@ -69,13 +70,6 @@ it('rejects incomplete or mislabeled consumer evidence', () => {
   for (const mutate of mutations) { const rows = validRows(); mutate(rows); expect(() => finalizeConsumerEvidence(cases, rows)).toThrow() }
   expect(() => finalizeConsumerEvidence([...cases, cases[0]], validRows())).toThrow()
 })
-function measurements() {
-  return ['preview', 'vite', 'next', 'npm-vite', 'npm-next'].flatMap(app => ['light', 'dark'].map(mode => ({
-    app, mode, ratios: Object.fromEntries(['placeholder','placeholderFocus','error','inputBoundary','focus','muted','dialogText','dialogFocus', ...['default','secondary','outline','ghost','link','destructive'].flatMap(v => ['', 'Hover','Pressed'].flatMap(s => ['ghost','link'].includes(v) ? [v+s] : [v+s,v+s+'Boundary']))].map(key => [key, 7])),
-    disabledContrast: 'exempt', textMethod: 'synthetic font enlargement (not native browser zoom)', forcedColors: 'active', motionPositiveControlMs: 150,
-    textEvidence: [1100,320].flatMap(width => [false,true].map(dialogOpen => ({width, dialogOpen, samples: Array.from({length:16}, (_,i) => ({selector: i === 0 ? 'input' : dialogOpen ? '[role="dialog"] p'+i : 'p'+i, before:16, after:32}))}))),
-  })))
-}
 it('requires all measured app/mode and actual text-scaling outcomes', () => {
   expect(validateMinimalistMeasurements(measurements())).toHaveLength(10)
   const mutations: ((rows: any[]) => void)[] = [
