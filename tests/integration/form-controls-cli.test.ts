@@ -134,7 +134,7 @@ for (const framework of ['vite', 'next'] as const)
       },
     )
 
-it('names theme add when the shared stylesheet is stale but unedited', async () => {
+async function staleStylesheetProject() {
   const p = await project('vite')
   const { read, write, command } = p
   await seedDependencies(p, ['input', 'textarea'])
@@ -154,6 +154,13 @@ it('names theme add when the shared stylesheet is stale but unedited', async () 
   const lock: ProjectLock = JSON.parse(await read('ui-library.lock.json'))
   lock.artifacts[styleFile] = { ...lock.artifacts[styleFile], sha256: sha(stale) }
   await write('ui-library.lock.json', JSON.stringify(lock))
+  return { p, styleFile, compiled, stale }
+}
+
+it('names theme add when the shared stylesheet is stale but unedited', async () => {
+  const { p, styleFile, compiled, stale } = await staleStylesheetProject()
+  const { root, read, command } = p
+  const presetPath = path.resolve(root, './ui-preset.json')
 
   const blocked = await command(['add', 'textarea', '--yes'])
   expect(blocked.code, blocked.output).toBe(4)
@@ -163,7 +170,10 @@ it('names theme add when the shared stylesheet is stale but unedited', async () 
       expect.objectContaining({
         code: 'FILE_CONFLICT',
         path: styleFile,
-        message: expect.stringContaining('run theme add ./ui-preset.json'),
+        message:
+          'Shared style rules changed in this catalog; run theme add ' +
+          presetPath +
+          ' to refresh them',
       }),
     ]),
   })
@@ -173,6 +183,29 @@ it('names theme add when the shared stylesheet is stale but unedited', async () 
   expect(themed.code, themed.output).toBe(0)
   expect(await read(styleFile)).toBe(compiled)
   const retry = await command(['add', 'textarea', '--yes'])
+  expect(retry.code, retry.output).toBe(0)
+})
+
+it('prints a stale-stylesheet command that works from outside the project', async () => {
+  const { p, styleFile, compiled } = await staleStylesheetProject()
+  const { root, read } = p
+  const outside = path.resolve('.')
+  expect(path.resolve(root).startsWith(outside + path.sep)).toBe(false)
+  expect(outside).not.toBe(path.resolve(root))
+  const run = (args: string[]) =>
+    runBuiltCli('node', [...args, '--cwd', root, '--json'], outside)
+
+  const blocked = await run(['add', 'textarea', '--yes'])
+  expect(blocked.code, blocked.output).toBe(4)
+  const warning = (jsonRecord(blocked.data).warnings as { path: string; message: string }[])
+    .find((w) => w.path === styleFile)!
+  const printed = warning.message.match(/run theme add (.+) to refresh them$/)![1]
+  expect(printed).toBe(path.resolve(root, './ui-preset.json'))
+
+  const themed = await run(['theme', 'add', printed, '--yes'])
+  expect(themed.code, themed.output).toBe(0)
+  expect(await read(styleFile)).toBe(compiled)
+  const retry = await run(['add', 'textarea', '--yes'])
   expect(retry.code, retry.output).toBe(0)
 })
 

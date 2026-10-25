@@ -9,6 +9,7 @@ import {
 } from '@ombelle/contracts'
 import { sha256, canonicalize, resolvePreset } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
+import path from 'node:path'
 import { safePath } from '../project/paths.js'
 import { readText } from '../project/inspect.js'
 import { transformArtifact } from '../project/transform.js'
@@ -168,7 +169,7 @@ export async function planAdd(
         code: 'FILE_CONFLICT',
         message: staleSharedStyle
           ? 'Shared style rules changed in this catalog; run theme add ' +
-            (context.config?.presetFile ?? './ui-preset.json') +
+            path.resolve(context.root, context.config?.presetFile ?? './ui-preset.json') +
             ' to refresh them'
           : 'Existing source requires an explicit migration',
         path: target.path,
