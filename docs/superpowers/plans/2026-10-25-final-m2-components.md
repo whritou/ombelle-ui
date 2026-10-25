@@ -49,7 +49,7 @@
 - Consumes: current `ComponentTemplate`, `runtimeDependencies`, and generated catalog conventions.
 - Produces: `ComponentId` `checkbox`; `Checkbox` and `CheckboxProps`; Radix checked state `boolean | 'indeterminate'`; native form props, `onCheckedChange`, and the `checkbox` and `checkbox-indicator` slots.
 
-- [ ] **Step 1: Write failing catalog and compiler tests.** Assert Checkbox is supported; its dependency list includes only its exact Radix primitive plus shared runtime dependencies; all three styles expose checked, mixed, focus-visible, invalid, disabled, forced-colors, and reduced-motion rules; compilation emits deterministic component, CSS, usage, utility, and theme artifacts with the selected style and dependencies.
+- [ ] **Step 1: Write failing catalog and compiler tests.** Assert Checkbox is supported; its dependency list includes its exact Radix primitive and `lucide-react` plus shared runtime dependencies; all three styles expose checked, mixed, focus-visible, invalid, disabled, forced-colors, and reduced-motion rules; compilation emits deterministic component, CSS, usage, utility, and theme artifacts with the selected style and dependencies.
 - [ ] **Step 2: Run the focused tests and confirm they fail** because the ID, template, styles, and compiler usage example are absent.
 
 Run: `pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/checkbox.test.ts`
