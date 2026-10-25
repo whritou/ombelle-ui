@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest'
-import { transform } from 'esbuild'
-import { compileRecipe, sha256 } from '../src/index.js'
+import { build, transform } from 'esbuild'
+import { compile, compileRecipe, sha256 } from '../src/index.js'
+import { getCatalog } from '@ombelle/catalog'
 import example from '../../../examples/recipe.example.json'
 const scopedArtifactHashes: Record<string, readonly string[]> = {
   flat: [
@@ -76,7 +77,10 @@ it('keeps existing recipe CSS and source output byte-for-byte stable', async () 
   const result = await compileRecipe({ recipe: example })
   expect(
     result.artifacts
-      .filter((artifact) => artifact.kind === 'style' || artifact.kind === 'component')
+      .filter(
+        (artifact) =>
+          artifact.kind === 'style' || artifact.kind === 'component',
+      )
       .map(({ logicalPath, sha256 }) => [logicalPath, sha256]),
   ).toEqual([
     [
@@ -88,4 +92,59 @@ it('keeps existing recipe CSS and source output byte-for-byte stable', async () 
       '38afc8b8846dd7932570a9979ef7554de570b1055a8abf76648e2b7a76c00dad',
     ],
   ])
+})
+
+it('omits the unused Slot dependency only for native recipe Buttons and resolves their imports', async () => {
+  const recipe = await compileRecipe({ recipe: example })
+  const ordinary = await compile({
+    preset: getCatalog('0.1.0').presets.flat,
+    componentIds: ['button'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  expect(recipe.dependencies.map(({ name }) => name)).toEqual([
+    'react',
+    'class-variance-authority',
+    'clsx',
+    'tailwind-merge',
+  ])
+  expect(ordinary.dependencies).toContainEqual({
+    name: '@radix-ui/react-slot',
+    version: '1.5.0',
+  })
+  const source = recipe.artifacts.find(
+    ({ kind }) => kind === 'component',
+  )!.content
+  const utility = recipe.artifacts.find(
+    ({ kind }) => kind === 'utility',
+  )!.content
+  await expect(
+    build({
+      stdin: { contents: source, loader: 'tsx', resolveDir: process.cwd() },
+      bundle: true,
+      write: false,
+      // Consumer packages are supplied by the returned manifest; local imports must resolve.
+      external: recipe.dependencies.map(({ name }) => name),
+      plugins: [
+        {
+          name: 'generated-recipe-artifacts',
+          setup(builder) {
+            builder.onResolve({ filter: /^@\/lib\/utils$/ }, () => ({
+              path: 'utils',
+              namespace: 'recipe',
+            }))
+            builder.onLoad({ filter: /.*/, namespace: 'recipe' }, () => ({
+              contents: utility,
+              loader: 'ts',
+              resolveDir: process.cwd(),
+            }))
+            builder.onResolve({ filter: /^\.\/button\.css$/ }, () => ({
+              path: 'button.css',
+              external: true,
+            }))
+          },
+        },
+      ],
+    }),
+  ).resolves.toMatchObject({ errors: [] })
 })

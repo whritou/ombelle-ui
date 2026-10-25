@@ -27,15 +27,6 @@ export async function readText(
     throw e
   }
 }
-export async function readJson(root: string, relative: string): Promise<any> {
-  const text = await readText(root, relative)
-  if (text === null) return undefined
-  try {
-    return JSON.parse(text)
-  } catch {
-    throw new FoundationError('INVALID_DATA', 'Invalid JSON', relative)
-  }
-}
 function declaredManager(value: unknown): PackageManager | undefined {
   if (typeof value !== 'string') return undefined
   const ordinary = /^(npm|pnpm)@\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.exec(value)

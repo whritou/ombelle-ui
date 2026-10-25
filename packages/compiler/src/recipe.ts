@@ -96,7 +96,9 @@ export async function compileRecipe(input: {
   }
   return {
     artifacts,
-    dependencies: template.dependencies,
+    dependencies: template.dependencies.filter(
+      ({ name }) => name !== '@radix-ui/react-slot',
+    ),
     recipe,
     preset,
     scope,

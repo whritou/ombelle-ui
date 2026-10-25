@@ -1,4 +1,10 @@
 import { expect, type Page } from '@playwright/test'
+import {
+  browserReferenceKey,
+  createBrowserReferenceCache,
+} from './browser-references.js'
+
+const hostReferences = createBrowserReferenceCache<string[][]>()
 
 export async function componentPresetHostStyles(page: Page) {
   return page.getByTestId('specimen').evaluate((el) =>
@@ -22,35 +28,48 @@ export async function componentPresetIsolationBaseline(
   hostFamily: string,
   mode: string,
 ) {
-  // This separate module graph imports ordinary components and host CSS only.
-  // No filtering by selectors: even accidentally unscoped preset rules stay out.
-  const baseline = await page.context().newPage()
-  const presetRequests: string[] = []
-  baseline.on('request', (request) => {
-    if (/\/(?:scoped-)?presets\//.test(new URL(request.url()).pathname))
-      presetRequests.push(request.url())
+  const viewport = page.viewportSize() ?? { width: 1100, height: 800 }
+  const colorScheme = await page.evaluate(() =>
+    matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+  )
+  const key = browserReferenceKey({
+    family: hostFamily,
+    mode,
+    viewport,
+    reducedMotion: 'reduce',
+    forcedColors: 'none',
+    colorScheme,
   })
-  try {
-    await baseline.setViewportSize(
-      page.viewportSize() ?? { width: 1100, height: 800 },
-    )
-    await baseline.emulateMedia({
-      reducedMotion: 'reduce',
-      forcedColors: 'none',
+  return hostReferences(key, async () => {
+    // This separate module graph imports ordinary components and host CSS only.
+    // No filtering by selectors: even accidentally unscoped preset rules stay out.
+    const baseline = await page.context().newPage()
+    const presetRequests: string[] = []
+    baseline.on('request', (request) => {
+      if (/\/(?:scoped-)?presets\//.test(new URL(request.url()).pathname))
+        presetRequests.push(request.url())
     })
-    await baseline.goto(
-      `http://127.0.0.1:4173/src/generated/${hostFamily}/isolation-baseline.html?mode=${mode}`,
-    )
-    await expect(baseline.locator('main')).toHaveAttribute('data-ready', 'true')
-    await baseline.evaluate(() => document.fonts.ready)
-    expect(
-      presetRequests,
-      'Isolation baseline imported component preset source or CSS',
-    ).toEqual([])
-    return await componentPresetHostStyles(baseline)
-  } finally {
-    await baseline.close()
-  }
+    try {
+      await baseline.setViewportSize(viewport)
+      await baseline.emulateMedia({
+        reducedMotion: 'reduce',
+        forcedColors: 'none',
+        colorScheme,
+      })
+      await baseline.goto(
+        `http://127.0.0.1:4173/src/generated/${hostFamily}/isolation-baseline.html?mode=${mode}`,
+      )
+      await expect(baseline.locator('main')).toHaveAttribute('data-ready', 'true')
+      await baseline.evaluate(() => document.fonts.ready)
+      expect(
+        presetRequests,
+        'Isolation baseline imported component preset source or CSS',
+      ).toEqual([])
+      return await componentPresetHostStyles(baseline)
+    } finally {
+      await baseline.close()
+    }
+  })
 }
 
 export async function assertComponentPresetHostIsolation(
