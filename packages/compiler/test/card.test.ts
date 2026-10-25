@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict'
 import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedStyleFamilies } from '@ombelle/contracts'
@@ -53,11 +54,12 @@ it.each(supportedStyleFamilies)(
         : 'box-shadow: none',
     )
     for (const mode of ['light', 'dark'] as const) {
-      expect(result.theme[mode]['--card']).toBe(
-        preset.modes[mode].card.toLowerCase(),
-      )
+      const { card, cardForeground } = preset.modes[mode]
+      assert(typeof card === 'string')
+      assert(typeof cardForeground === 'string')
+      expect(result.theme[mode]['--card']).toBe(card.toLowerCase())
       expect(result.theme[mode]['--card-foreground']).toBe(
-        preset.modes[mode].cardForeground.toLowerCase(),
+        cardForeground.toLowerCase(),
       )
     }
     expect(result.dependencies).toEqual([
