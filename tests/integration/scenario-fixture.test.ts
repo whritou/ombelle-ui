@@ -31,3 +31,16 @@ it.each([false, true])('writes an optional Card fixture without dangling imports
   expect(fixture).toContain('density="dense"')
  }
 })
+it.each([false, true])('writes an optional forms fixture without dangling imports (forms=%s)', async (forms) => {
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'ombelle-forms-scenario-'));roots.push(root)
+ await writeScenarioFixture(root,'flat',false,false,false,false,forms)
+ const scenario=await fs.readFile(path.join(root,'src/scenario.tsx'),'utf8')
+ expect(scenario.includes("import { FormsFixture } from './forms-fixture'")).toBe(forms)
+ expect(scenario.includes('{forms && <FormsFixture />}')).toBe(forms)
+ expect(await fs.stat(path.join(root,'src/forms-fixture.tsx')).then(()=>true,()=>false)).toBe(forms)
+ if(forms) {
+  expect(scenario).toMatch(/get\('forms'\)\s*===\s*'1'/)
+  const fixture=await fs.readFile(path.join(root,'src/forms-fixture.tsx'),'utf8')
+  for (const id of ['label','textarea','native-select']) expect(fixture).toContain(`from '@/components/ui/${id}'`)
+ }
+})
