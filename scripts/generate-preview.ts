@@ -56,6 +56,13 @@ for (const family of supportedStyleFamilies) {
   )
   await writePreviewComponentPresets(root)
   await fs.writeFile(
+    root + '/card-fixture.tsx',
+    (await fs.readFile('fixtures/shared/card-fixture.tsx', 'utf8')).replaceAll(
+      '@/components/ui',
+      './components/ui',
+    ),
+  )
+  await fs.writeFile(
     root + '/state-fixture.tsx',
     (await fs.readFile('fixtures/shared/state-fixture.tsx', 'utf8')).replaceAll(
       '@/components/ui',
