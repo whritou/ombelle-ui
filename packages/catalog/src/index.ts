@@ -34,12 +34,14 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   button: ['@radix-ui/react-slot', 'class-variance-authority'],
   checkbox: ['@radix-ui/react-checkbox', 'lucide-react'],
   switch: ['@radix-ui/react-switch'],
+  tabs: ['@radix-ui/react-tabs'],
   dialog: ['@radix-ui/react-dialog', 'lucide-react'],
   'native-select': ['lucide-react'],
 }
 const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   checkbox: ['checkbox', 'checkbox-indicator'],
   switch: ['switch', 'switch-thumb'],
+  tabs: ['tabs', 'tabs-list', 'tabs-trigger', 'tabs-content'],
   card: [
     'card',
     'card-header',

@@ -16,7 +16,117 @@ import {
 import { runtimeDependencies } from '../src/manifest.js'
 import { Checkbox } from '../src/templates/checkbox.js'
 import { Switch, SwitchThumb } from '../src/templates/switch.js'
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from '../src/templates/tabs.js'
 describe('catalog contract', () => {
+  it.each(['controlled', 'uncontrolled'] as const)(
+    'renders %s Tabs selection and forwards primitive/presentation props',
+    (mode) => {
+      const html = renderToStaticMarkup(
+        createElement(
+          Tabs,
+          {
+            ...(mode === 'controlled'
+              ? { value: 'activity', onValueChange: () => {} }
+              : { defaultValue: 'activity' }),
+            orientation: 'vertical',
+            dir: 'rtl',
+            className: 'custom-root',
+            style: { gap: 8 },
+          },
+          createElement(
+            TabsList,
+            { 'aria-label': 'Project sections', className: 'custom-list' },
+            createElement(TabsTrigger, { value: 'overview' }, 'Overview'),
+            createElement(
+              TabsTrigger,
+              { value: 'activity', className: 'custom-trigger' },
+              'Activity',
+            ),
+            createElement(
+              TabsTrigger,
+              { value: 'settings', disabled: true },
+              'Settings',
+            ),
+          ),
+          createElement(
+            TabsContent,
+            {
+              value: 'activity',
+              className: 'custom-content',
+              style: { paddingInline: 4 },
+            },
+            'Recent activity.',
+          ),
+        ),
+      )
+      for (const text of [
+        'data-slot="tabs"',
+        'data-slot="tabs-list"',
+        'data-slot="tabs-trigger"',
+        'data-slot="tabs-content"',
+        'dir="rtl"',
+        'data-orientation="vertical"',
+        'role="tablist"',
+        'aria-label="Project sections"',
+        'aria-selected="true"',
+        'aria-selected="false"',
+        'role="tabpanel"',
+        'Recent activity.',
+        'disabled=""',
+        'class="custom-root"',
+        'class="custom-list"',
+        'class="custom-trigger"',
+        'class="custom-content"',
+        'gap:8px',
+        'padding-inline:4px',
+      ])
+        expect(html).toContain(text)
+    },
+  )
+  it('provides Tabs parts, scoped dependencies and orientation/state styles', () => {
+    expect(supportedComponentIds).toContain('tabs')
+    const tabs = getTemplate(getCatalog('0.1.0'), 'tabs' as ComponentId)
+    expect(tabs.slots).toEqual([
+      'tabs',
+      'tabs-list',
+      'tabs-trigger',
+      'tabs-content',
+    ])
+    expect(tabs.dependencies).toEqual([
+      { name: 'react', version: '19.3.1' },
+      { name: '@radix-ui/react-tabs', version: '1.2.1' },
+      { name: 'clsx', version: '2.1.1' },
+      { name: 'tailwind-merge', version: '3.7.0' },
+    ])
+    expect(tabs.content).toMatch(/^['"]use client['"]/)
+    for (const part of ['Tabs', 'TabsList', 'TabsTrigger', 'TabsContent'])
+      expect(tabs.content).toContain(`export function ${part}(`)
+    for (const family of supportedStyleFamilies) {
+      const css = tabs.styles?.[family] ?? ''
+      for (const rule of [
+        "[data-slot='tabs']",
+        "[data-slot='tabs-list']",
+        "[data-slot='tabs-trigger']",
+        "[data-slot='tabs-content']",
+        "[data-state='active']",
+        "[data-state='inactive']",
+        "[data-orientation='horizontal']",
+        "[data-orientation='vertical']",
+        ':focus-visible',
+        ':disabled',
+        '[data-disabled]',
+        '@media (forced-colors: active)',
+        '@media (prefers-reduced-motion: reduce)',
+      ])
+        expect(css).toContain(rule)
+      expect(css).not.toMatch(/(?:left|right):/)
+    }
+  })
   it('provides Switch parts, scoped dependencies and accessible state styles', () => {
     expect(supportedComponentIds).toContain('switch')
     const control = getTemplate(getCatalog('0.1.0'), 'switch' as ComponentId)
