@@ -1,6 +1,7 @@
 export const supportedComponentIds = [
   'button',
   'badge',
+  'card',
   'dialog',
   'input',
 ] as const
