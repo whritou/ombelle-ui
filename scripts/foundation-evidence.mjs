@@ -89,9 +89,9 @@ export async function validateTestResults(result, kind) {
   return { passed: assertions, failed: 0, skipped: 0 }
 }
 
-// Existing six evidence-owning specs, without importing Playwright configuration
+// Existing seven evidence-owning specs, without importing Playwright configuration
 // (which needs this runner's consumer roots). Update this contract with added specs.
-const browserSpecCounts = { 'badge.spec.ts': 30, 'component-presets.spec.ts': 20, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20 }
+const browserSpecCounts = { 'badge.spec.ts': 30, 'card.spec.ts': 30, 'component-presets.spec.ts': 20, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20 }
 export function validateBrowserResults(result) {
   const remaining = { ...browserSpecCounts }, ids = new Set(), titles = new Set()
   let count = 0

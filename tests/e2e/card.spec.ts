@@ -2,6 +2,10 @@ import { expect, test, type Page } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
+import {
+  browserReferenceKey,
+  createBrowserReferenceCache,
+} from '../helpers/browser-references.js'
 
 const consumers = JSON.parse(
   fs.readFileSync('.artifacts/consumers.json', 'utf8'),
@@ -31,6 +35,11 @@ async function specimen(page: Page) {
   )
   return { fixture, styles, html: await fixture.innerHTML() }
 }
+// Only serialized measurements survive between tests in this file's worker.
+const cardReferences = createBrowserReferenceCache<{
+  styles: Awaited<ReturnType<typeof specimen>>['styles']
+  html: string
+}>()
 
 for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'])
@@ -39,8 +48,25 @@ for (const family of supportedStyleFamilies)
         page,
       }) => {
         const query = '?cards=1&mode=' + mode
-        await page.goto('http://127.0.0.1:4173/' + family + '/' + query)
-        const reference = await specimen(page)
+        const previewUrl = 'http://127.0.0.1:4173/' + family + '/' + query
+        await page.emulateMedia({ reducedMotion: 'reduce', forcedColors: 'none' })
+        const colorScheme = await page.evaluate(() =>
+          matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+        )
+        const key = browserReferenceKey({
+          family,
+          mode,
+          viewport: page.viewportSize() ?? { width: 1100, height: 800 },
+          reducedMotion: 'reduce',
+          forcedColors: 'none',
+          colorScheme,
+        })
+        let captured: Awaited<ReturnType<typeof specimen>> | undefined
+        const reference = await cardReferences(key, async () => {
+          await page.goto(previewUrl)
+          captured = await specimen(page)
+          return { styles: captured.styles, html: captured.html }
+        })
         const generated = 'apps/preview/src/generated/' + family
         const manifest = JSON.parse(
           fs.readFileSync(generated + '/manifest.json', 'utf8'),
@@ -75,14 +101,13 @@ for (const family of supportedStyleFamilies)
               ),
             ).toBe(artifact.content)
         }
-        if (app !== 'preview')
+        if (app !== 'preview' || !captured)
           await page.goto(
-            'http://127.0.0.1:' +
-              consumers[app + '-' + family].port +
-              '/' +
-              query,
+            app === 'preview'
+              ? previewUrl
+              : 'http://127.0.0.1:' + consumers[app + '-' + family].port + '/' + query,
           )
-        const actual = app === 'preview' ? reference : await specimen(page)
+        const actual = app === 'preview' && captured ? captured : await specimen(page)
         expect(
           await page
             .locator('html')
