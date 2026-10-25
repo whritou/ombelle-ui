@@ -1,6 +1,6 @@
 # Ombelle UI foundation
 
-A local technical foundation for source-distributed React components with persistent presets. It includes Button, Badge, Dialog, and Input in flat, minimalist, and neo brutalist styles, generated previews, a local installer, and independent Vite/Next.js consumer checks.
+A local technical foundation for source-distributed React components with persistent presets. It includes Button, Badge, Card, Dialog, Input, Label, Native Select, and Textarea in flat, minimalist, and neo brutalist styles, generated previews, a local installer, and independent Vite/Next.js consumer checks.
 
 Use Node **24.19.0** and pnpm **11.25.0**.
 
@@ -42,6 +42,10 @@ Minimalist checks also measure rendered contrast, focus, disabled/invalid states
 - [Local CLI usage](docs/foundation-local-usage.md)
 - [Badge API and installation](docs/components/badge.md)
 - [Badge verification evidence](docs/evidence/badge.md)
+- [Card API and installation](docs/components/card.md)
+- [Label API and installation](docs/components/label.md)
+- [Textarea API and installation](docs/components/textarea.md)
+- [Native Select API and installation](docs/components/native-select.md)
 - [Local Button recipe design](docs/superpowers/specs/2026-10-21-local-button-recipes-design.md)
 - [Foundation design](docs/superpowers/specs/2026-10-20-technical-foundation-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-20-technical-foundation.md)

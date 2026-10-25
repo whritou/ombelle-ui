@@ -1,6 +1,6 @@
 # Native form controls verification
 
-The native form controls work adds Label, Textarea, and Native Select, styles invalid Input in every implemented family, and gives Dialog an icon close control. It was verified on branch `feat/native-form-controls` at `619414ad96aadc5ee0890491abde74270db72523` with a clean working tree. The run used Windows, Node 24.19.0, pnpm 11.25.0, npm 11.19.0, Yarn 1.22.22 and 4.18.1, Bun 1.4.3, and Playwright 1.64.1.
+The native form controls work adds Label, Textarea, and Native Select, styles invalid Input in every implemented family, and gives Dialog an icon close control. It was verified on branch `feat/native-form-controls` at `619414ad96aadc5ee0890491abde74270db72523` with a clean working tree. The run used Windows, Node 24.19.0, pnpm 11.25.0, npm 11.19.0, Yarn 1.22.22 and 4.18.1, Bun 1.4.3, and Playwright 1.64.1. The commit that follows `619414a` changed only the stale-stylesheet message text, its tests, and docs. It was verified by focused runs (`tests/integration/form-controls-cli.test.ts`, `packages/cli/test`, and `pnpm typecheck`), not by a new full `pnpm check:foundation` run.
 
 ## Foundation verification
 
@@ -56,13 +56,13 @@ The integration suite adds 21 real-CLI cases (`tests/integration/form-controls-c
 - `lucide-react@1.55.0` appears in the dependency plan only for Native Select;
 - applying writes the compiled bytes with ownership hashes;
 - an identical repeat is a no-op;
-- a custom alias works;
+- a custom UI alias works (exercised by the 9 Next.js cases only);
 - TSX and CSS edits each conflict, even with `--yes`;
 - `package.json` and the lockfile are unchanged.
 
 Three cases cover migration:
 
-- When `ui-style.css` is stale but unedited, `add textarea` exits 4 with a message naming `theme add ./ui-preset.json`. That command restores the exact compiled stylesheet, and `add textarea` then succeeds.
+- When `ui-style.css` is stale but unedited, `add textarea` exits 4 with a message naming `theme add` with the absolute path of the project's `ui-preset.json`. That printed path works as pasted, including from outside the project with `--cwd`. That command restores the exact compiled stylesheet, and `add textarea` then succeeds.
 - An edited stylesheet remains a plain conflict.
 - A legacy text-close `dialog.tsx` conflicts, and deleting it before `add dialog` installs the `XIcon` version.
 
@@ -84,7 +84,7 @@ Catalog release `0.1.0` was changed in place, and `packages/compiler/test/fixtur
   - neo-brutalism gained the same two changes, changing from `17b2401a…` to `c1fb3f65…`;
   - minimalist gained only the icon close control. It is now `9947e718…`, and its earlier hash is not in the baseline fixture.
 
-Compiler tests confirm that the other existing artifacts keep their bytes. That covers Button, Badge, Card, and Input TSX, their colocated CSS, the utility, examples, and Button preset and recipe artifacts. Full hashes for the changed and new artifacts are in `form-controls-run.json`. Existing installations migrate as described in [local usage](../foundation-local-usage.md#migrating-installs-created-before-native-form-controls).
+Byte hashes are pinned for the flat and neo-brutalism baseline artifacts and for recipe output. Badge and Card TSX and CSS, and the minimalist and component-preset artifacts, are shown unaffected by compiling the new components alongside them and by their sources being unchanged. Full hashes for the changed and new artifacts are in `form-controls-run.json`. Existing installations migrate as described in [local usage](../foundation-local-usage.md#migrating-installs-created-before-native-form-controls).
 
 ## Limits
 

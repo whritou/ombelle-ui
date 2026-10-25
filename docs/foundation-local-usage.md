@@ -32,17 +32,17 @@ Consumer manager selection uses package.json.packageManager, then a unique recog
 
 The native form controls slice changed existing artifact bytes in place under catalog release `0.1.0`. Each family's shared `ui-style.css` gained Input invalid styling (in flat and neo-brutalism) and a top-corner icon style for Dialog's close control. `dialog.tsx` now renders lucide-react's `XIcon` with a visually hidden "Close" label instead of a text button. `add` never replaces a stale managed file automatically, so a project initialized before this change migrates explicitly.
 
-1. **Refresh the shared stylesheet.** The next `add` of any component reports `FILE_CONFLICT` on `ui-style.css` and writes nothing, even with `--yes`. When the installed stylesheet still matches its lock record, the message is `Shared style rules changed in this catalog; run theme add <presetFile> to refresh them`, where `<presetFile>` is the project's saved preset file, normally `./ui-preset.json`. That path is relative to the project root, but `theme add` resolves its file argument from the directory you invoke it in. Run it from the project root, or keep `--cwd APP` and pass the path relative to your current directory:
+1. **Refresh the shared stylesheet.** The next `add` of any component reports `FILE_CONFLICT` on `ui-style.css` and writes nothing, even with `--yes`. When the installed stylesheet still matches its lock record, the message is `Shared style rules changed in this catalog; run theme add <presetFile> to refresh them`, where `<presetFile>` is the absolute path of the project's saved preset file (normally `<project root>/ui-preset.json`). Paste the printed path as the `theme add` argument exactly as printed; it works from any directory. Add `--cwd APP` when you are not in the project root:
 
    ```powershell
-   pnpm exec node packages/cli/dist/main.js theme add APP/ui-preset.json --cwd APP --dry-run
-   pnpm exec node packages/cli/dist/main.js theme add APP/ui-preset.json --cwd APP --yes
+   pnpm exec node packages/cli/dist/main.js theme add <printed path> --cwd APP --dry-run
+   pnpm exec node packages/cli/dist/main.js theme add <printed path> --cwd APP --yes
    ```
 
    Re-applying the saved preset leaves its tokens unchanged and replaces the unedited, hash-matched stylesheet with the current catalog bytes. Then repeat the `add` command.
 2. **Edited stylesheets.** If you edited `ui-style.css`, `add` reports the plain `Existing source requires an explicit migration` conflict, and `theme add` reports `Style rules were edited or have no provenance` instead of overwriting your edits. Reconcile the file manually against the current catalog output; `--yes` cannot bypass the conflict.
 3. **Dialog close control.** An installed `dialog.tsx` keeps its text close control, and `add dialog` reports a conflict for it. After refreshing the stylesheet, delete `<componentsDir>/dialog.tsx` and run `add dialog`. A missing file is planned as a new file, so the lock record needs no manual edit. Reapply any local changes you had made to the old file. Dialog now declares `lucide-react` 1.55.0; if the project does not have it, the dependency plan adds it with lifecycle scripts disabled. The close label uses Tailwind's `sr-only` utility, like the `fixed` and `inset-0` utilities Dialog already used, so it depends on the supported Tailwind v4 setup.
-4. **Mixed state.** A refreshed stylesheet with a legacy `dialog.tsx` still works: the text "Close" renders as a small top-corner control, because the new rules set minimum rather than fixed dimensions. Replace `dialog.tsx` to get the icon control.
+4. **Mixed state.** A refreshed stylesheet with a legacy `dialog.tsx` renders the text "Close" as a top-corner text control, and long titles may run beneath it. Replacing `dialog.tsx` (delete it and run `add dialog`) is the supported fix.
 
 The new components (Label, Textarea, Native Select) are installed only after the stylesheet is current. Other installed component source, including Button, Badge, Card, and Input, did not change and needs no migration.
 

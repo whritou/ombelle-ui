@@ -156,7 +156,7 @@ All rules use existing semantic tokens. Each new component has flat, minimalist,
 
 1. **Stale shared stylesheet.** A project initialized before this change receives `FILE_CONFLICT` on `ui-style.css` at its next `add` of any component. When the installed file's hash matches its lock record but differs from the catalog output, the conflict's suggested action names `theme add <saved preset file>`. That command already replaces an unedited, hash-matched stylesheet while leaving tokens unchanged. An edited stylesheet still conflicts and requires manual reconciliation.
 2. **Dialog close control.** An existing Dialog keeps its text control; `add dialog` reports a conflict. To migrate, delete `dialog.tsx` and run `add dialog`. A missing file plans as a create, so the lock entry needs no manual edit.
-3. **Mixed state.** A refreshed stylesheet with a legacy `dialog.tsx` renders the text "Close" as a small corner control, because the new rules set minimum rather than fixed dimensions.
+3. **Mixed state.** A refreshed stylesheet with a legacy `dialog.tsx` renders the text "Close" as a small corner control, because the new rules set minimum rather than fixed dimensions. The browser suite does not cover this state, and long titles may run beneath the legacy text control.
 
 ### Fixtures and consumers
 
