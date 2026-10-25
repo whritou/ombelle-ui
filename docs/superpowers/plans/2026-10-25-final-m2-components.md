@@ -49,21 +49,21 @@
 - Consumes: current `ComponentTemplate`, `runtimeDependencies`, and generated catalog conventions.
 - Produces: `ComponentId` `checkbox`; `Checkbox` and `CheckboxProps`; Radix checked state `boolean | 'indeterminate'`; native form props, `onCheckedChange`, and the `checkbox` and `checkbox-indicator` slots.
 
-- [ ] **Step 1: Write failing catalog and compiler tests.** Assert Checkbox is supported; its dependency list includes its exact Radix primitive and `lucide-react` plus shared runtime dependencies; all three styles expose checked, mixed, focus-visible, invalid, disabled, forced-colors, and reduced-motion rules; compilation emits deterministic component, CSS, usage, utility, and theme artifacts with the selected style and dependencies.
-- [ ] **Step 2: Run the focused tests and confirm they fail** because the ID, template, styles, and compiler usage example are absent.
+- [x] **Step 1: Write failing catalog and compiler tests.** Assert Checkbox is supported; its dependency list includes its exact Radix primitive and `lucide-react` plus shared runtime dependencies; all three styles expose checked, mixed, focus-visible, invalid, disabled, forced-colors, and reduced-motion rules; compilation emits deterministic component, CSS, usage, utility, and theme artifacts with the selected style and dependencies.
+- [x] **Step 2: Run the focused tests and confirm they fail** because the ID, template, styles, and compiler usage example are absent.
 
 Run: `pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/checkbox.test.ts`
 
 Expected: Checkbox-specific assertions fail; existing component assertions remain passing.
 
-- [ ] **Step 3: Add Checkbox source, exact dependency, and docs.** Use `@radix-ui/react-checkbox`; put an indicator inside the root and use the existing icon dependency for checked and mixed marks. Forward primitive props and refs. Verify the primitive's form value, indeterminate, disabled-fieldset, and reset behavior. Add three semantic-token styles with visible focus and forced-colors treatment. Document labelling, error association, composition, form behavior, support status, and install command.
-- [ ] **Step 4: Regenerate and run focused checks.**
+- [x] **Step 3: Add Checkbox source, exact dependency, and docs.** Use `@radix-ui/react-checkbox`; put an indicator inside the root and use the existing icon dependency for checked and mixed marks. Forward primitive props and refs. Verify the primitive's form value, indeterminate, disabled-fieldset, and reset behavior. Add three semantic-token styles with visible focus and forced-colors treatment. Document labelling, error association, composition, form behavior, support status, and install command.
+- [x] **Step 4: Regenerate and run focused checks.**
 
 Run: `pnpm build:packages; pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/checkbox.test.ts`
 
 Expected: package build succeeds and focused catalog/compiler tests pass.
 
-- [ ] **Step 5: Commit** as `feat(checkbox): add reviewed catalog component`.
+- [x] **Step 5: Commit** as `feat(checkbox): add reviewed catalog component`.
 
 ### Task 2: Add Switch
 
