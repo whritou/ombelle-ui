@@ -1,5 +1,6 @@
 export const runtimeDependencies = {
   react: '19.3.1',
+  '@radix-ui/react-checkbox': '1.4.1',
   '@radix-ui/react-dialog': '1.3.1',
   '@radix-ui/react-slot': '1.5.0',
   'class-variance-authority': '0.7.1',

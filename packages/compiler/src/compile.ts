@@ -112,21 +112,23 @@ export async function compile(input: {
         content: template.styles[family],
       })
     const usage =
-      id === 'dialog'
-        ? "import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'\nexport function Example(){return <Dialog><DialogTrigger>Open dialog</DialogTrigger><DialogContent><DialogTitle>Example dialog</DialogTitle><DialogDescription>Review this example.</DialogDescription></DialogContent></Dialog>}"
-        : id === 'button'
-          ? "import { Button } from '@/components/ui/button'\nexport function Example(){return <Button>Save</Button>}"
-          : id === 'badge'
-            ? 'import { Badge } from \'@/components/ui/badge\'\nexport function Example(){return <><Badge>Synced</Badge><Badge variant="destructive">Needs attention</Badge></>}'
-            : id === 'card'
-              ? 'import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from \'@/components/ui/card\'\nexport function Example(){return <><Card><CardHeader><CardTitle>Project overview</CardTitle><CardDescription>A summary of your current work.</CardDescription></CardHeader><CardContent><p>Your project is ready to review.</p></CardContent><CardFooter>Updated today</CardFooter></Card><Card density="dense"><CardHeader><CardTitle>Recent activity</CardTitle><CardDescription>A compact summary.</CardDescription></CardHeader><CardContent><p>No new updates.</p></CardContent><CardFooter>All caught up</CardFooter></Card></>}'
-              : id === 'label'
-                ? 'import { Label } from \'@/components/ui/label\'\nexport function Example(){return <><Label htmlFor="project-name">Project name <span aria-hidden="true">*</span></Label><input id="project-name" required /></>}'
-                : id === 'textarea'
-                  ? 'import { Textarea } from \'@/components/ui/textarea\'\nexport function Example(){return <><label htmlFor="notes">Notes</label><Textarea id="notes" /><label htmlFor="summary">Summary</label><Textarea id="summary" aria-invalid="true" aria-describedby="summary-error" /><p id="summary-error">Enter a summary.</p></>}'
-                  : id === 'native-select'
-                    ? 'import { NativeSelect, NativeSelectOption } from \'@/components/ui/native-select\'\nexport function Example(){return <><label htmlFor="region">Region</label><NativeSelect id="region" defaultValue="eu"><NativeSelectOption value="eu">Europe</NativeSelectOption><NativeSelectOption value="us">United States</NativeSelectOption></NativeSelect><label htmlFor="size">Size</label><NativeSelect id="size" size="sm" aria-invalid="true" aria-describedby="region-error"><NativeSelectOption value="">Choose a size</NativeSelectOption></NativeSelect><p id="region-error">Choose a size.</p></>}'
-                    : 'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
+      id === 'checkbox'
+        ? 'import { Checkbox } from \'@/components/ui/checkbox\'\nexport function Example(){return <><label htmlFor="terms">Accept terms</label><Checkbox id="terms" name="terms" value="accepted" required aria-invalid="true" aria-describedby="terms-error" /><p id="terms-error">Accept the terms to continue.</p><label htmlFor="selection">Select all items</label><Checkbox id="selection" defaultChecked="indeterminate" /></>}'
+        : id === 'dialog'
+          ? "import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'\nexport function Example(){return <Dialog><DialogTrigger>Open dialog</DialogTrigger><DialogContent><DialogTitle>Example dialog</DialogTitle><DialogDescription>Review this example.</DialogDescription></DialogContent></Dialog>}"
+          : id === 'button'
+            ? "import { Button } from '@/components/ui/button'\nexport function Example(){return <Button>Save</Button>}"
+            : id === 'badge'
+              ? 'import { Badge } from \'@/components/ui/badge\'\nexport function Example(){return <><Badge>Synced</Badge><Badge variant="destructive">Needs attention</Badge></>}'
+              : id === 'card'
+                ? 'import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from \'@/components/ui/card\'\nexport function Example(){return <><Card><CardHeader><CardTitle>Project overview</CardTitle><CardDescription>A summary of your current work.</CardDescription></CardHeader><CardContent><p>Your project is ready to review.</p></CardContent><CardFooter>Updated today</CardFooter></Card><Card density="dense"><CardHeader><CardTitle>Recent activity</CardTitle><CardDescription>A compact summary.</CardDescription></CardHeader><CardContent><p>No new updates.</p></CardContent><CardFooter>All caught up</CardFooter></Card></>}'
+                : id === 'label'
+                  ? 'import { Label } from \'@/components/ui/label\'\nexport function Example(){return <><Label htmlFor="project-name">Project name <span aria-hidden="true">*</span></Label><input id="project-name" required /></>}'
+                  : id === 'textarea'
+                    ? 'import { Textarea } from \'@/components/ui/textarea\'\nexport function Example(){return <><label htmlFor="notes">Notes</label><Textarea id="notes" /><label htmlFor="summary">Summary</label><Textarea id="summary" aria-invalid="true" aria-describedby="summary-error" /><p id="summary-error">Enter a summary.</p></>}'
+                    : id === 'native-select'
+                      ? 'import { NativeSelect, NativeSelectOption } from \'@/components/ui/native-select\'\nexport function Example(){return <><label htmlFor="region">Region</label><NativeSelect id="region" defaultValue="eu"><NativeSelectOption value="eu">Europe</NativeSelectOption><NativeSelectOption value="us">United States</NativeSelectOption></NativeSelect><label htmlFor="size">Size</label><NativeSelect id="size" size="sm" aria-invalid="true" aria-describedby="region-error"><NativeSelectOption value="">Choose a size</NativeSelectOption></NativeSelect><p id="region-error">Choose a size.</p></>}'
+                      : 'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
     drafts.push({
       logicalPath: 'examples/' + id + '.tsx',
       kind: 'usage',

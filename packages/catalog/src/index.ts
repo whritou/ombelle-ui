@@ -32,10 +32,12 @@ const baseDependencies: readonly string[] = [
 ]
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   button: ['@radix-ui/react-slot', 'class-variance-authority'],
+  checkbox: ['@radix-ui/react-checkbox', 'lucide-react'],
   dialog: ['@radix-ui/react-dialog', 'lucide-react'],
   'native-select': ['lucide-react'],
 }
 const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
+  checkbox: ['checkbox', 'checkbox-indicator'],
   card: [
     'card',
     'card-header',

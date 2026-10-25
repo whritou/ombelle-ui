@@ -2,6 +2,7 @@ export const supportedComponentIds = [
   'button',
   'badge',
   'card',
+  'checkbox',
   'dialog',
   'input',
   'label',

@@ -9,12 +9,85 @@ import {
 } from '@ombelle/contracts'
 import { Button } from '../src/templates/button.js'
 import { Input } from '../src/templates/input.js'
-import { NativeSelect, NativeSelectOption } from '../src/templates/native-select.js'
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '../src/templates/native-select.js'
 import { runtimeDependencies } from '../src/manifest.js'
+import { Checkbox } from '../src/templates/checkbox.js'
 describe('catalog contract', () => {
+  it('provides Checkbox with scoped dependencies, slots and all accessible state styles', () => {
+    expect(supportedComponentIds).toContain('checkbox')
+    const checkbox = getTemplate(getCatalog('0.1.0'), 'checkbox' as ComponentId)
+    expect(checkbox.slots).toEqual(['checkbox', 'checkbox-indicator'])
+    expect(checkbox.dependencies).toEqual([
+      { name: 'react', version: '19.3.1' },
+      { name: '@radix-ui/react-checkbox', version: '1.4.1' },
+      { name: 'clsx', version: '2.1.1' },
+      { name: 'tailwind-merge', version: '3.7.0' },
+      { name: 'lucide-react', version: '1.55.0' },
+    ])
+    expect(checkbox.content).toMatch(/^['"]use client['"]/)
+    expect(checkbox.content).toContain("import './checkbox.css'")
+    expect(checkbox.content).toContain('export type CheckboxProps')
+    expect(checkbox.content).toContain('export function Checkbox(')
+    for (const family of supportedStyleFamilies) {
+      const css = checkbox.styles?.[family] ?? ''
+      for (const rule of [
+        "[data-slot='checkbox']",
+        "[data-slot='checkbox-indicator']",
+        "[data-state='checked']",
+        "[data-state='indeterminate']",
+        ':focus-visible',
+        "[aria-invalid='true']",
+        ':disabled',
+        '@media (forced-colors: active)',
+        '@media (prefers-reduced-motion: reduce)',
+      ])
+        expect(css).toContain(rule)
+      expect(css).not.toMatch(/(?:left|right):/)
+    }
+  })
   it('pins lucide-react exactly', () => {
     expect(runtimeDependencies['lucide-react']).toBe('1.55.0')
     expect(Object.keys(runtimeDependencies).at(-1)).toBe('lucide-react')
+  })
+  it('forwards Checkbox state, association, form and presentation props', () => {
+    const html = renderToStaticMarkup(
+      createElement(Checkbox, {
+        id: 'terms',
+        name: 'terms',
+        value: 'accepted',
+        required: true,
+        disabled: true,
+        checked: 'indeterminate',
+        className: 'custom',
+        style: { marginInline: 4 },
+        'aria-label': 'Accept terms',
+        'aria-invalid': 'true',
+        'aria-describedby': 'error',
+      }),
+    )
+    for (const text of [
+      'role="checkbox"',
+      'aria-checked="mixed"',
+      'data-state="indeterminate"',
+      'id="terms"',
+      'name="terms"',
+      'value="accepted"',
+      'required=""',
+      'disabled=""',
+      'class="custom"',
+      'margin-inline:4px',
+      'aria-label="Accept terms"',
+      'aria-invalid="true"',
+      'aria-describedby="error"',
+      'data-slot="checkbox-indicator"',
+      'data-checkbox-mark="checked"',
+      'data-checkbox-mark="indeterminate"',
+      'aria-hidden="true"',
+    ])
+      expect(html).toContain(text)
   })
   it('provides Card with all six parts and three separate family styles', () => {
     expect(supportedComponentIds).toContain('card')
@@ -29,13 +102,20 @@ describe('catalog contract', () => {
       'card-footer',
     ])
     for (const part of [
-      'Card', 'CardHeader', 'CardTitle', 'CardDescription', 'CardContent', 'CardFooter',
+      'Card',
+      'CardHeader',
+      'CardTitle',
+      'CardDescription',
+      'CardContent',
+      'CardFooter',
     ])
       expect(card.content).toContain(`export function ${part}(`)
     expect(card.content).toContain("import './card.css'")
     expect(card.content).not.toMatch(/['"]use client['"]/)
     expect(Object.keys(card.styles ?? {})).toEqual([
-      'flat', 'minimalist', 'neo-brutalism',
+      'flat',
+      'minimalist',
+      'neo-brutalism',
     ])
     for (const family of supportedStyleFamilies) {
       expect(card.styles?.[family]).toContain("[data-slot='card']")
@@ -54,10 +134,14 @@ describe('catalog contract', () => {
       expect(template.content).toContain("import './" + id + ".css'")
       expect(template.content).not.toMatch(/['"]use client['"]/)
       expect(Object.keys(template.styles ?? {})).toEqual([
-        'flat', 'minimalist', 'neo-brutalism',
+        'flat',
+        'minimalist',
+        'neo-brutalism',
       ])
       for (const family of supportedStyleFamilies)
-        expect(template.styles?.[family]).toContain('@media (forced-colors: active)')
+        expect(template.styles?.[family]).toContain(
+          '@media (forced-colors: active)',
+        )
     }
   })
   it('declares per-component dependencies and slots', () => {
@@ -65,15 +149,26 @@ describe('catalog contract', () => {
     const names = (id: ComponentId) =>
       c.templates[id].dependencies.map((d) => d.name)
     expect(names('native-select')).toEqual([
-      'react', 'clsx', 'tailwind-merge', 'lucide-react',
+      'react',
+      'clsx',
+      'tailwind-merge',
+      'lucide-react',
     ])
     expect(names('dialog')).toEqual([
-      'react', '@radix-ui/react-dialog', 'clsx', 'tailwind-merge', 'lucide-react',
+      'react',
+      '@radix-ui/react-dialog',
+      'clsx',
+      'tailwind-merge',
+      'lucide-react',
     ])
     expect(names('label')).toEqual(['react', 'clsx', 'tailwind-merge'])
     expect(names('textarea')).toEqual(['react', 'clsx', 'tailwind-merge'])
     expect(names('button')).toEqual([
-      'react', '@radix-ui/react-slot', 'class-variance-authority', 'clsx', 'tailwind-merge',
+      'react',
+      '@radix-ui/react-slot',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge',
     ])
     expect(c.templates['native-select'].slots).toEqual([
       'native-select-wrapper',
@@ -133,7 +228,9 @@ describe('catalog contract', () => {
         createElement(NativeSelectOption, { value: 'a' }, 'A'),
       ),
     )
-    expect(html).toMatch(/^<div data-slot="native-select-wrapper"><select[^>]*>/)
+    expect(html).toMatch(
+      /^<div data-slot="native-select-wrapper"><select[^>]*>/,
+    )
     const open = html.match(/<select[^>]*>/)?.[0] ?? ''
     for (const attr of [
       'id="s"',
