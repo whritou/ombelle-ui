@@ -38,3 +38,27 @@ it('includes the Badge stylesheet alongside the exact component source', async (
     ).toBe(result.artifacts.find((a) => a.logicalPath === file)?.content)
   expect(item.dependencies).toEqual(['clsx@2.1.1', 'tailwind-merge@3.7.0'])
 })
+
+it('registers Card component, utility, and colocated CSS with exact compiler bytes', async () => {
+  const result = await compile({
+    preset: example,
+    componentIds: ['card'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  const registry = buildRegistry(result)
+  expect(registrySchema.safeParse(registry.index).success).toBe(true)
+  const item = registry.items.card
+  expect(registryItemSchema.safeParse(item).success).toBe(true)
+  expect(item.files.map((file: { path: string }) => file.path)).toEqual([
+    'components/ui/card.tsx',
+    'lib/utils.ts',
+    'components/ui/card.css',
+  ])
+  for (const file of item.files)
+    expect(file.content).toBe(
+      result.artifacts.find((artifact) => artifact.logicalPath === file.path)!
+        .content,
+    )
+  expect(item.dependencies).toEqual(['clsx@2.1.1', 'tailwind-merge@3.7.0'])
+})

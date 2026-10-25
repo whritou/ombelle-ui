@@ -118,7 +118,9 @@ export async function compile(input: {
           ? "import { Button } from '@/components/ui/button'\nexport function Example(){return <Button>Save</Button>}"
           : id === 'badge'
             ? 'import { Badge } from \'@/components/ui/badge\'\nexport function Example(){return <><Badge>Synced</Badge><Badge variant="destructive">Needs attention</Badge></>}'
-            : 'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
+            : id === 'card'
+              ? 'import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from \'@/components/ui/card\'\nexport function Example(){return <><Card><CardHeader><CardTitle>Project overview</CardTitle><CardDescription>A summary of your current work.</CardDescription></CardHeader><CardContent><p>Your project is ready to review.</p></CardContent><CardFooter>Updated today</CardFooter></Card><Card density="dense"><CardHeader><CardTitle>Recent activity</CardTitle><CardDescription>A compact summary.</CardDescription></CardHeader><CardContent><p>No new updates.</p></CardContent><CardFooter>All caught up</CardFooter></Card></>}'
+              : 'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
     drafts.push({
       logicalPath: 'examples/' + id + '.tsx',
       kind: 'usage',
