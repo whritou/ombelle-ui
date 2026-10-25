@@ -1,5 +1,25 @@
 import { defineConfig } from 'vitest/config'
+// Catalog templates import a colocated stylesheet that only exists once the
+// component is installed, so tests that render them get an empty module.
+const stubId = '\0ombelle-template-stylesheet-stub'
+const templateStylesheetStub = {
+  name: 'ombelle-template-stylesheet-stub',
+  enforce: 'pre' as const,
+  resolveId(id: string, importer?: string) {
+    if (
+      id.endsWith('.css') &&
+      importer
+        ?.replace(/\\/g, '/')
+        .includes('/packages/catalog/src/templates/')
+    )
+      return stubId
+  },
+  load(id: string) {
+    if (id === stubId) return 'export default {}'
+  },
+}
 export default defineConfig({
+  plugins: [templateStylesheetStub],
   test: {
     include: [
       'packages/**/*.test.ts',

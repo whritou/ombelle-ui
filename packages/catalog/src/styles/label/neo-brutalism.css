@@ -1,0 +1,22 @@
+/* neo-brutalism Label */
+[data-slot='label'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+[data-slot='label'] > [aria-hidden='true'] {
+  color: var(--destructive);
+}
+@media (forced-colors: active) {
+  [data-slot='label'] {
+    color: CanvasText;
+  }
+  [data-slot='label'] > [aria-hidden='true'] {
+    color: CanvasText;
+  }
+}

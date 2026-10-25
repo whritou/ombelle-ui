@@ -25,6 +25,33 @@ export type Catalog = {
   styles: Record<StyleFamily, string>
   utility: string
 }
+const baseDependencies: readonly string[] = [
+  'react',
+  'clsx',
+  'tailwind-merge',
+]
+const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
+  button: ['@radix-ui/react-slot', 'class-variance-authority'],
+  dialog: ['@radix-ui/react-dialog', 'lucide-react'],
+  'native-select': ['lucide-react'],
+}
+const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
+  card: [
+    'card',
+    'card-header',
+    'card-title',
+    'card-description',
+    'card-content',
+    'card-footer',
+  ],
+  'native-select': [
+    'native-select-wrapper',
+    'native-select',
+    'native-select-icon',
+    'native-select-option',
+    'native-select-optgroup',
+  ],
+}
 export function getCatalog(release: string): Catalog {
   if (release !== '0.1.0')
     throw new FoundationError(
@@ -42,26 +69,11 @@ export function getCatalog(release: string): Catalog {
         dependencies: Object.entries(runtimeDependencies)
           .filter(
             ([name]) =>
-              name === 'react' ||
-              name === 'clsx' ||
-              name === 'tailwind-merge' ||
-              (id === 'button' &&
-                (name === '@radix-ui/react-slot' ||
-                  name === 'class-variance-authority')) ||
-              (id === 'dialog' && name === '@radix-ui/react-dialog'),
+              baseDependencies.includes(name) ||
+              extraDependencies[id]?.includes(name),
           )
           .map(([name, version]) => ({ name, version })),
-        slots:
-          id === 'card'
-            ? [
-                'card',
-                'card-header',
-                'card-title',
-                'card-description',
-                'card-content',
-                'card-footer',
-              ]
-            : [id],
+        slots: [...(componentSlots[id] ?? [id])],
         ...(Object.hasOwn(catalogData.componentStyles, id)
           ? {
               styles:
