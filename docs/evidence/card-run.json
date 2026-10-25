@@ -1,0 +1,38 @@
+{
+  "summaryFormat": "ombelle-card/v1",
+  "scope": "focused-card-browser",
+  "command": "$env:OMBELLE_BROWSER_CHANNEL='msedge'; pnpm exec playwright test card.spec.ts --config D:\\Documents\\GitHub\\ombelle-ui\\.artifacts\\card-task4-fix-round1-20261025T104030Z/playwright.config.ts",
+  "startedAt": "2026-10-25T10:40:45.379Z",
+  "durationMs": 97849.497,
+  "node": "v24.21.0",
+  "browserVersion": {
+    "engine": "chromium",
+    "channel": "msedge",
+    "version": "156.0.4314.42"
+  },
+  "runner": {
+    "status": "passed",
+    "exitCode": 0,
+    "expected": 30,
+    "unexpected": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "errors": [],
+    "manualServerTeardown": true
+  },
+  "rawResult": {
+    "path": ".artifacts/card-task4-fix-round1-20261025T104030Z/playwright-result.preserved.json",
+    "sha256": "ac9528a13e71934444cfdf7bb5992a06d00febdb77a9acc69511bb599cbbdb3a"
+  },
+  "measurements": {
+    "count": 30,
+    "path": ".artifacts/card-task4-fix-round1-20261025T104030Z/measurements.json",
+    "sha256": "922f48333ba9e87ef1ad7c693cb917c81f6b326e59c3d263da1fab066b86f2cc",
+    "serialization": "Decoded card-measurements attachments in runner suite/spec/test/result order; UTF-8 JSON.stringify array plus trailing LF."
+  },
+  "testSourceSha256": "bedef92fcc79e123ea4abdc87fe5f4e7d17bfcbca406e5c00ecf5bb02c39b09a",
+  "executionNotes": [
+    "Used the ignored esbuild loader workaround for tsx os.userInfo ENOMEM.",
+    "Stopped run-owned server listeners after all assertions passed to release Windows teardown; final runner exit was 0."
+  ]
+}
