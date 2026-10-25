@@ -148,21 +148,21 @@ Expected: package build succeeds and focused checks pass.
 - Consumes: catalog and package patterns from Tasks 1–3.
 - Produces: `ComponentId` `tooltip`; `TooltipProvider`, `Tooltip`, `TooltipTrigger`, `TooltipContent`, and `TooltipArrow` exports and provider/root/trigger/content/arrow slots.
 
-- [ ] **Step 1: Write failing catalog/compiler assertions.** Cover exports and slots, exact scoped dependency, tooltip content/arrow style and forced-colors/reduced-motion behavior in each family, client boundary, generated usage, and dependency ordering.
-- [ ] **Step 2: Run the focused tests and confirm Tooltip assertions fail.**
+- [x] **Step 1: Write failing catalog/compiler assertions.** Cover exports and slots, exact scoped dependency, tooltip content/arrow style and forced-colors/reduced-motion behavior in each family, client boundary, generated usage, and dependency ordering.
+- [x] **Step 2: Run the focused tests and confirm Tooltip assertions fail.**
 
 Run: `pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/tooltip.test.ts`
 
 Expected: Tooltip-specific assertions fail because the component is not registered.
 
-- [ ] **Step 3: Implement Tooltip with `@radix-ui/react-tooltip`.** Forward primitive props and refs. Preserve provider delay configuration, controlled/uncontrolled open state, hover/focus entry, and Escape dismissal. Use a portal for content as required by the primitive and keep content descriptive and non-interactive. Style all three families, add the labelled compiler example, and document accessible use and the glass deferral.
-- [ ] **Step 4: Regenerate and run focused catalog/compiler checks.**
+- [x] **Step 3: Implement Tooltip with `@radix-ui/react-tooltip`.** Forward primitive props and refs. Preserve provider delay configuration, controlled/uncontrolled open state, hover/focus entry, and Escape dismissal. Use a portal for content as required by the primitive and keep content descriptive and non-interactive. Style all three families, add the labelled compiler example, and document accessible use and the glass deferral.
+- [x] **Step 4: Regenerate and run focused catalog/compiler checks.**
 
 Run: `pnpm build:packages; pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/tooltip.test.ts`
 
 Expected: package build succeeds and focused checks pass.
 
-- [ ] **Step 5: Commit** as `feat(tooltip): add reviewed catalog component`.
+- [x] **Step 5: Commit** as `feat(tooltip): add reviewed catalog component`.
 
 ### Task 5: Add shared preview and generated-consumer coverage
 
