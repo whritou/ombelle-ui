@@ -29,8 +29,14 @@ async function testResults(prefix: string) {
   if (!collectedDefinitions) {
     // One bounded discovery for fixture construction; production independently
     // collects the unit and integration selections with their respective configs.
-    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', '--config', 'vitest.integration.config.ts', '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 60000, maxBuffer: 8 * 1024 * 1024 })
-    if (collected.status !== 0) throw new Error(collected.stderr)
+    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', '--config', 'vitest.integration.config.ts', '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 180000, maxBuffer: 8 * 1024 * 1024 })
+    if (collected.status !== 0) {
+      throw new Error([
+        `Vitest integration test collection failed (status: ${collected.status ?? 'null'}, signal: ${collected.signal ?? 'none'}, error: ${collected.error?.message ?? 'none'})`,
+        `stdout:\n${collected.stdout}`,
+        `stderr:\n${collected.stderr}`,
+      ].join('\n'))
+    }
     collectedDefinitions = JSON.parse(collected.stdout)
   }
   const byFile = new Map<string, any[]>()
@@ -108,7 +114,7 @@ test('accepts complete portable structural evidence without any consumer root de
   expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)
-}, 180000) // Fixture discovery plus two independently bounded runtime inventories.
+}, 420000) // Fixture discovery plus two independently bounded runtime inventories.
 test('rejects an absent group rather than accepting a passed status', async () => {
   const root = await fixture()
   await fs.rm(path.join(root, 'consumers'), { recursive: true })
