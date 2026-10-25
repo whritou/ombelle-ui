@@ -5,7 +5,12 @@ import { getCatalog, getTemplate } from '../src/index.js'
 import { supportedComponentIds, supportedStyleFamilies } from '@ombelle/contracts'
 import { Button } from '../src/templates/button.js'
 import { Input } from '../src/templates/input.js'
+import { runtimeDependencies } from '../src/manifest.js'
 describe('catalog contract', () => {
+  it('pins lucide-react exactly', () => {
+    expect(runtimeDependencies['lucide-react']).toBe('1.55.0')
+    expect(Object.keys(runtimeDependencies).at(-1)).toBe('lucide-react')
+  })
   it('provides Card with all six parts and three separate family styles', () => {
     expect(supportedComponentIds).toContain('card')
     const card = getTemplate(getCatalog('0.1.0'), 'card')

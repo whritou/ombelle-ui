@@ -5,4 +5,5 @@ export const runtimeDependencies = {
   'class-variance-authority': '0.7.1',
   clsx: '2.1.1',
   'tailwind-merge': '3.7.0',
+  'lucide-react': '1.55.0',
 } as const
