@@ -2,11 +2,11 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
 import { afterEach, expect, test } from 'vitest'
 
 const repo = fileURLToPath(new URL('../../', import.meta.url))
-const runner = pathToFileURL(path.join(repo, 'scripts/foundation-runner.mjs')).href
+const runner = new URL('../../scripts/foundation-runner.mjs', import.meta.url).href
 const staging = path.join(repo, 'scripts/stage-foundation-evidence.mjs')
 const roots: string[] = []
 const children: ChildProcess[] = []
@@ -120,7 +120,7 @@ if (process.platform !== 'win32') test('handles a real POSIX termination signal 
   const root = await temp()
   const gate = path.join(repo, 'scripts/check-foundation.mjs')
   await fs.writeFile(path.join(root, 'fake-pnpm.mjs'), "if(process.argv[3] !== 'build:packages') { console.log('waiting'); setInterval(()=>{},1000) }")
-  const child = spawn(process.execPath, ['--import', pathToFileURL(path.join(repo, 'node_modules/tsx/dist/loader.mjs')).href, gate], {
+  const child = spawn(process.execPath, [gate], {
     cwd: root, env: gateEnvironment(path.join(root, 'fake-pnpm.mjs')), stdio: 'pipe',
   })
   children.push(child)
@@ -205,7 +205,7 @@ test('the default gate preserves child failure and durable stage details', async
   const root = await temp()
   await fs.writeFile(path.join(root, 'fake-pnpm.mjs'), "console.error('gate child failed'); process.exitCode=7")
   const gate = path.join(repo, 'scripts/check-foundation.mjs')
-  const child = spawn(process.execPath, ['--import', pathToFileURL(path.join(repo, 'node_modules/tsx/dist/loader.mjs')).href, gate], {
+  const child = spawn(process.execPath, [gate], {
     cwd: root, env: gateEnvironment(path.join(root, 'fake-pnpm.mjs')), stdio: 'pipe', windowsHide: true,
   })
   children.push(child)

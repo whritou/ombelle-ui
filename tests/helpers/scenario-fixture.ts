@@ -8,6 +8,7 @@ export async function writeScenarioFixture(
   recipes = false,
   componentPresets = false,
   badges = false,
+  cards = false,
 ): Promise<void> {
   const src = path.join(root, 'src')
   await fs.mkdir(src, { recursive: true })
@@ -33,12 +34,17 @@ export async function writeScenarioFixture(
     scenario = scenario
       .replace(/import \{ BadgeFixture \} from '\.\/badge-fixture'\r?\n/, '')
       .replace(/\{badges && <BadgeFixture \/>}\r?\n?/, '')
+  if (!cards)
+    scenario = scenario
+      .replace(/import \{ CardFixture \} from '\.\/card-fixture'\r?\n/, '')
+      .replace(/\{cards && <CardFixture \/>}\r?\n?/, '')
   await fs.writeFile(path.join(src, 'scenario.tsx'), scenario)
   for (const file of [
     'state-fixture.tsx',
     'state-fixture.css',
     ...(recipes ? ['recipe-fixture.tsx'] : []),
     ...(badges ? ['badge-fixture.tsx'] : []),
+    ...(cards ? ['card-fixture.tsx'] : []),
   ])
     await fs.copyFile(path.join('fixtures/shared', file), path.join(src, file))
   if (componentPresets) await writeConsumerComponentPresetFixture(root)

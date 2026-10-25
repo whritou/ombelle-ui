@@ -2,10 +2,9 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { pathToFileURL } from 'node:url'
 import { afterEach, expect, test } from 'vitest'
 // @ts-expect-error JavaScript gate entry point
-import { aggregateFoundationEvidence } from '../../scripts/foundation-evidence.mjs'
+import { aggregateFoundationEvidence, validateBrowserResults } from '../../scripts/foundation-evidence.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
 
 const roots: string[] = []
@@ -16,14 +15,28 @@ const stages = {
 }
 let base: Promise<Record<string, Record<string, any>>> | undefined
 let collectedDefinitions: { name: string; file: string }[] | undefined
+function browserResults() {
+  return {
+    stats: { expected: 148, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
+    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'component-presets.spec.ts': 20, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20 }).map(([file, count]) => ({
+      file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
+    })),
+  }
+}
 async function testResults(prefix: string) {
   // Collect from source independently of the aggregate implementation. This is
   // structural reporter data only; no test bodies execute during collection.
   if (!collectedDefinitions) {
     // One bounded discovery for fixture construction; production independently
     // collects the unit and integration selections with their respective configs.
-    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', '--config', 'vitest.integration.config.ts', '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 60000, maxBuffer: 8 * 1024 * 1024 })
-    if (collected.status !== 0) throw new Error(collected.stderr)
+    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', '--config', 'vitest.integration.config.ts', '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 180000, maxBuffer: 8 * 1024 * 1024 })
+    if (collected.status !== 0) {
+      throw new Error([
+        `Vitest integration test collection failed (status: ${collected.status ?? 'null'}, signal: ${collected.signal ?? 'none'}, error: ${collected.error?.message ?? 'none'})`,
+        `stdout:\n${collected.stdout}`,
+        `stderr:\n${collected.stderr}`,
+      ].join('\n'))
+    }
     collectedDefinitions = JSON.parse(collected.stdout)
   }
   const byFile = new Map<string, any[]>()
@@ -51,12 +64,7 @@ async function data() {
       'minimalist-measurements.json': minimalistMeasurements(),
       'browser-version.json': { engine: 'chromium', version: '155.0.0.0', channel: 'bundled Chromium' },
       'npm-version.json': '11.19.0', 'yarn-versions.json': {}, 'yarn-matrix.json': {}, 'bun-version.json': '1.4.3', 'bun-matrix.json': {},
-      'browser-results.json': {
-        stats: { expected: 118, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
-        suites: Object.entries({ 'badge.spec.ts': 30, 'component-presets.spec.ts': 20, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20 }).map(([file, count]) => ({
-          file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
-        })),
-      },
+      'browser-results.json': browserResults(),
     },
   }
 }
@@ -84,6 +92,15 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 }
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
+test('accepts complete browser evidence including all 30 Card cases', () => {
+  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 148 })
+})
+test('rejects omitted Card browser cases even when reporter totals are adjusted', () => {
+  const result = browserResults()
+  result.suites = result.suites.filter(suite => suite.file !== 'card.spec.ts')
+  result.stats.expected = 118
+  expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
+})
 test('accepts complete portable structural evidence without any consumer root descriptors', async () => {
   const root = await fixture()
   const unit = JSON.parse(await fs.readFile(path.join(root, 'quality/unit-results.json'), 'utf8'))
@@ -93,11 +110,11 @@ test('accepts complete portable structural evidence without any consumer root de
   const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
-  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 118 } } })
+  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 148 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)
-}, 180000) // Fixture discovery plus two independently bounded runtime inventories.
+}, 420000) // Fixture discovery plus two independently bounded runtime inventories.
 test('rejects an absent group rather than accepting a passed status', async () => {
   const root = await fixture()
   await fs.rm(path.join(root, 'consumers'), { recursive: true })
@@ -169,7 +186,7 @@ test.each(['quality', 'consumers'])('executes %s stages independently and clears
   const runner = path.join(root, 'pnpm.mjs')
   await fs.writeFile(runner, "import fs from 'node:fs'; fs.appendFileSync('calls.jsonl', JSON.stringify(process.argv.slice(2))+'\\n')")
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => key.toLowerCase() !== 'npm_execpath'))
-  const result = spawnSync(process.execPath, ['--import', pathToFileURL(path.resolve('node_modules/tsx/dist/loader.mjs')).href, path.resolve('scripts/check-foundation.mjs'), '--group', group], { cwd: root, env: { ...env, npm_execpath: runner }, encoding: 'utf8', windowsHide: true })
+  const result = spawnSync(process.execPath, [path.resolve('scripts/check-foundation.mjs'), '--group', group], { cwd: root, env: { ...env, npm_execpath: runner }, encoding: 'utf8', windowsHide: true })
   expect(result.status).toBe(1) // Successful commands without produced evidence must fail.
   const calls = (await fs.readFile(path.join(root, 'calls.jsonl'), 'utf8')).trim().split('\n').map(line => JSON.parse(line))
   expect(calls).toEqual(stages[group as keyof typeof stages].map(name => ['run', name]))

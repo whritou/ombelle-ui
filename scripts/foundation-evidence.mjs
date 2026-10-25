@@ -35,7 +35,7 @@ async function expectedTestInventory(kind) {
     // measured run. No test bodies execute, and downloaded reports cannot define
     // their own expected identities or reduce their expected assertion counts.
     const inventory = execute(process.execPath, [cli, 'list', ...selection, '--staticParse=false', '--json'], {
-      cwd: repo, windowsHide: true, timeout: 60000, maxBuffer: 8 * 1024 * 1024,
+      cwd: repo, windowsHide: true, timeout: 180000, maxBuffer: 8 * 1024 * 1024,
     }).then(({ stdout }) => {
       const rows = JSON.parse(stdout)
       if (!Array.isArray(rows) || !rows.length) fail('Empty expected ' + kind + ' assertion inventory')
@@ -89,9 +89,9 @@ export async function validateTestResults(result, kind) {
   return { passed: assertions, failed: 0, skipped: 0 }
 }
 
-// Existing six evidence-owning specs, without importing Playwright configuration
+// Existing seven evidence-owning specs, without importing Playwright configuration
 // (which needs this runner's consumer roots). Update this contract with added specs.
-const browserSpecCounts = { 'badge.spec.ts': 30, 'component-presets.spec.ts': 20, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20 }
+const browserSpecCounts = { 'badge.spec.ts': 30, 'card.spec.ts': 30, 'component-presets.spec.ts': 20, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20 }
 export function validateBrowserResults(result) {
   const remaining = { ...browserSpecCounts }, ids = new Set(), titles = new Set()
   let count = 0

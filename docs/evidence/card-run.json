@@ -1,0 +1,139 @@
+{
+  "summaryFormat": "ombelle-card/v2",
+  "scope": "rebased-card-and-foundation-verification",
+  "approvedBase": {
+    "branch": "main",
+    "commit": "295d048ec3a2eb1eda8f185e3f4ad3a62e8afe02"
+  },
+  "foundationStageRun": {
+    "sourceCommit": "205096a7b58d95c3cd67fc5f972cb86f827681ca",
+    "runtime": {
+      "platform": "win32",
+      "node": "v24.19.0",
+      "pnpm": "11.25.0",
+      "browser": "Chromium 156.0.4314.42 via msedge"
+    },
+    "startedAt": "2026-10-25T12:07:07.191Z",
+    "durationMs": 4167029,
+    "runner": {
+      "status": "all-stages-passed-final-validation-timed-out",
+      "exitCode": 1,
+      "normalPnpmEntry": "failed before stages: tsx preload os.userInfo returned ENOMEM",
+      "workaround": "Ran the unchanged scripts/check-foundation.mjs with the local esbuild loader and temporary ignored tsx shims; original shim hashes were restored.",
+      "initialFinalizationError": "Vitest unit-inventory collection exceeded its original 60000 ms subprocess timeout after all ten stages had passed."
+    },
+    "stages": {
+      "passed": 10,
+      "failed": 0,
+      "names": [
+        "build:packages",
+        "test:unit",
+        "test:integration",
+        "generate:preview",
+        "prepare:consumers",
+        "typecheck",
+        "build:preview",
+        "build:consumers",
+        "test:e2e",
+        "audit:workspace"
+      ]
+    },
+    "counts": {
+      "unit": {
+        "passed": 201,
+        "failed": 0,
+        "skipped": 0
+      },
+      "integration": {
+        "passed": 242,
+        "failed": 0,
+        "skipped": 0
+      },
+      "consumerProjects": {
+        "prepared": 34,
+        "built": 34
+      },
+      "browser": {
+        "expected": 148,
+        "passed": 148,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0
+      },
+      "workspaceAudit": "passed"
+    },
+    "browserTeardown": "All assertions passed; stopped the 13 identified run-owned web server listeners so Playwright could exit cleanly.",
+    "execution": {
+      "integrationWorkers": 1,
+      "consumerWorkers": 2,
+      "e2eWorkers": 2,
+      "pnpmStore": ".artifacts/pnpm-store-clean",
+      "npmCache": ".artifacts/card-task5-foundation/cache/npm",
+      "bunCache": ".artifacts/card-task5-foundation/cache/bun",
+      "certificateVerification": "enabled"
+    }
+  },
+  "postRunEvidenceRevalidation": {
+    "sourceCommit": "31f046614bd710456e7bcaae84b7958af0b141f8",
+    "status": "passed",
+    "method": "Re-ran validateGroupEvidence for quality and consumers against the saved outputs from the full stage run after raising the bounded inventory subprocess timeout to 180000 ms.",
+    "counts": {
+      "unit": {
+        "passed": 201,
+        "failed": 0,
+        "skipped": 0
+      },
+      "integration": {
+        "passed": 242,
+        "failed": 0,
+        "skipped": 0
+      },
+      "browser": {
+        "expected": 148,
+        "unexpected": 0,
+        "skipped": 0,
+        "flaky": 0
+      },
+      "consumerProjects": 34
+    },
+    "stageRerun": false,
+    "limitations": "The full stages were not repeated after this timeout-only validator change; their saved outputs were revalidated successfully. The normal pnpm launcher remains blocked by this machine's tsx/os.userInfo ENOMEM error."
+  },
+  "rawEvidence": {
+    "attemptReport": {
+      "path": ".artifacts/card-task5-foundation/attempt-4-foundation-report.json",
+      "sha256": "325e7a8032b4b7d7357f65baf7592ec1ffbe78c3a376fa57d515ff8b493d2221"
+    },
+    "unitResultsSha256": "c867bc53b8c6a05f2e8805bfb2773ed24c7c3514bcc5a2a1206fe8479522da4a",
+    "integrationResultsSha256": "31e00c6866c41386f6420d0e1d27ebc338f51166b743af8707a29b35c121c12c",
+    "browserResultsSha256": "f8a8d290b58a1160c0d6e5cbbc48490af51c876dc4a150f4e216f40b9ffcbba2",
+    "consumerMatrixSha256": "158695cbd4871d51ccec4df7f73c916e7c782673e58161f49af62f29920bd4c7"
+  },
+  "cardBrowserCases": {
+    "count": 30,
+    "shape": "3 families × 2 modes × preview/pnpm Vite/pnpm Next/npm Vite/npm Next",
+    "checks": [
+      "compiled source and artifact parity",
+      "preview and installed consumer DOM/style parity",
+      "default and dense spacing",
+      "forced colors",
+      "escaped text",
+      "query gate and 320 CSS pixel reflow"
+    ]
+  },
+  "suppliedAssets": [
+    {
+      "path": "assets/Ombelle_UI _ dark_logo.png",
+      "sha256": "8ef33546125b4d48f27055ed0db98eb1bf443255d0a49284459d7722402164e2"
+    },
+    {
+      "path": "assets/Ombelle_UI_simple_logo.png",
+      "sha256": "3ca34215a9a6baed50e288bdc44f7f2bb460cd9e531427022a030b8e2319521b"
+    },
+    {
+      "path": "assets/Ombelle_UI_white_logo.png",
+      "sha256": "db428d2d94058b17bf41a019e1f3aa338f6f9592079c3086e5adf19305b15184"
+    }
+  ],
+  "assetBoundary": "Logos are repository assets only; Card source and generated consumers do not reference or copy them."
+}

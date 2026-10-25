@@ -15,14 +15,19 @@ const styles = Object.fromEntries(
     readText(base + 'styles/' + id + '.css'),
   ]),
 )
-const componentStyles = {
-  badge: Object.fromEntries(
-    supportedStyleFamilies.map((family) => [
-      family,
-      readText(base + 'styles/badge/' + family + '.css'),
+const componentStyles = Object.fromEntries(
+  supportedComponentIds
+    .filter((id) => fs.existsSync(base + 'styles/' + id))
+    .map((id) => [
+      id,
+      Object.fromEntries(
+        supportedStyleFamilies.map((family) => [
+          family,
+          readText(base + 'styles/' + id + '/' + family + '.css'),
+        ]),
+      ),
     ]),
-  ),
-}
+)
 const presets = Object.fromEntries(
   supportedStyleFamilies.map((id) => [
     id,

@@ -51,9 +51,24 @@ export function getCatalog(release: string): Catalog {
               (id === 'dialog' && name === '@radix-ui/react-dialog'),
           )
           .map(([name, version]) => ({ name, version })),
-        slots: [id],
-        ...(id === 'badge'
-          ? { styles: catalogData.componentStyles.badge }
+        slots:
+          id === 'card'
+            ? [
+                'card',
+                'card-header',
+                'card-title',
+                'card-description',
+                'card-content',
+                'card-footer',
+              ]
+            : [id],
+        ...(Object.hasOwn(catalogData.componentStyles, id)
+          ? {
+              styles:
+                catalogData.componentStyles[
+                  id as keyof typeof catalogData.componentStyles
+                ],
+            }
           : {}),
       },
     ]),
