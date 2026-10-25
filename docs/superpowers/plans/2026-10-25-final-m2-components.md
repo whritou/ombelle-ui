@@ -115,21 +115,21 @@ Expected: package build succeeds and focused checks pass.
 - Consumes: catalog and package patterns from Tasks 1–2.
 - Produces: `ComponentId` `tabs`; `Tabs`, `TabsList`, `TabsTrigger`, and `TabsContent` exports and corresponding root/list/trigger/content slots; automatic activation by default.
 
-- [ ] **Step 1: Write failing catalog/compiler assertions.** Cover every exported part and slot, exact scoped dependency, style states and orientation selectors in each family, compiled artifact names/imports/example, controlled and uncontrolled values, and deduplication/order determinism.
-- [ ] **Step 2: Run the focused tests and confirm Tabs assertions fail.**
+- [x] **Step 1: Write failing catalog/compiler assertions.** Cover every exported part and slot, exact scoped dependency, style states and orientation selectors in each family, compiled artifact names/imports/example, controlled and uncontrolled values, and deduplication/order determinism.
+- [x] **Step 2: Run the focused tests and confirm Tabs assertions fail.**
 
 Run: `pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/tabs.test.ts`
 
 Expected: Tabs-specific assertions fail because the component is not registered.
 
-- [ ] **Step 3: Implement Tabs with `@radix-ui/react-tabs`.** Forward primitive props and refs. Preserve controlled/uncontrolled selection, disabled triggers, orientation, direction, automatic activation, and arrow-key behavior. Add family CSS for active, inactive, focused, disabled, and content states; add a labelled compiler example and document activation and keyboard behavior.
-- [ ] **Step 4: Regenerate and run focused catalog/compiler checks.**
+- [x] **Step 3: Implement Tabs with `@radix-ui/react-tabs`.** Forward primitive props and refs. Preserve controlled/uncontrolled selection, disabled triggers, orientation, direction, automatic activation, and arrow-key behavior. Add family CSS for active, inactive, focused, disabled, and content states; add a labelled compiler example and document activation and keyboard behavior.
+- [x] **Step 4: Regenerate and run focused catalog/compiler checks.**
 
 Run: `pnpm build:packages; pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/tabs.test.ts`
 
 Expected: package build succeeds and focused checks pass.
 
-- [ ] **Step 5: Commit** as `feat(tabs): add reviewed catalog component`.
+- [x] **Step 5: Commit** as `feat(tabs): add reviewed catalog component`.
 
 ### Task 4: Add Tooltip
 
