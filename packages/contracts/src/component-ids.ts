@@ -7,6 +7,7 @@ export const supportedComponentIds = [
   'input',
   'label',
   'native-select',
+  'switch',
   'textarea',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

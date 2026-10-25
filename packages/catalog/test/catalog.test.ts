@@ -15,7 +15,43 @@ import {
 } from '../src/templates/native-select.js'
 import { runtimeDependencies } from '../src/manifest.js'
 import { Checkbox } from '../src/templates/checkbox.js'
+import { Switch, SwitchThumb } from '../src/templates/switch.js'
 describe('catalog contract', () => {
+  it('provides Switch parts, scoped dependencies and accessible state styles', () => {
+    expect(supportedComponentIds).toContain('switch')
+    const control = getTemplate(getCatalog('0.1.0'), 'switch' as ComponentId)
+    expect(control.slots).toEqual(['switch', 'switch-thumb'])
+    expect(control.dependencies).toEqual([
+      { name: 'react', version: '19.3.1' },
+      { name: '@radix-ui/react-switch', version: '1.4.1' },
+      { name: 'clsx', version: '2.1.1' },
+      { name: 'tailwind-merge', version: '3.7.0' },
+    ])
+    expect(control.content).toMatch(/^['"]use client['"]/)
+    expect(control.content).toContain("import './switch.css'")
+    for (const part of [
+      'export type SwitchProps',
+      'export function Switch(',
+      'export function SwitchThumb(',
+    ])
+      expect(control.content).toContain(part)
+    for (const family of supportedStyleFamilies) {
+      const css = control.styles?.[family] ?? ''
+      for (const rule of [
+        "[data-slot='switch']",
+        "[data-slot='switch-thumb']",
+        "[data-state='checked']",
+        "[data-state='unchecked']",
+        ':focus-visible',
+        ':disabled',
+        '@media (forced-colors: active)',
+        '@media (prefers-reduced-motion: reduce)',
+        'inset-inline-start',
+      ])
+        expect(css).toContain(rule)
+      expect(css).not.toMatch(/(?:left|right):/)
+    }
+  })
   it('provides Checkbox with scoped dependencies, slots and all accessible state styles', () => {
     expect(supportedComponentIds).toContain('checkbox')
     const checkbox = getTemplate(getCatalog('0.1.0'), 'checkbox' as ComponentId)
@@ -47,6 +83,54 @@ describe('catalog contract', () => {
         expect(css).toContain(rule)
       expect(css).not.toMatch(/(?:left|right):/)
     }
+  })
+  it('forwards Switch state, form and presentation props and composes its thumb', () => {
+    const html = renderToStaticMarkup(
+      createElement(Switch, {
+        id: 'notifications',
+        name: 'notifications',
+        value: 'enabled',
+        required: true,
+        disabled: true,
+        checked: true,
+        className: 'custom',
+        style: { marginInline: 4 },
+        'aria-label': 'Enable notifications',
+        'aria-describedby': 'help',
+      }),
+    )
+    for (const text of [
+      'role="switch"',
+      'aria-checked="true"',
+      'data-state="checked"',
+      'id="notifications"',
+      'name="notifications"',
+      'value="enabled"',
+      'required=""',
+      'disabled=""',
+      'class="custom"',
+      'margin-inline:4px',
+      'aria-label="Enable notifications"',
+      'aria-describedby="help"',
+      'data-slot="switch-thumb"',
+    ])
+      expect(html).toContain(text)
+    expect(
+      renderToStaticMarkup(createElement(Switch, { defaultChecked: false })),
+    ).toContain('aria-checked="false"')
+    const composed = renderToStaticMarkup(
+      createElement(
+        Switch,
+        { defaultChecked: true },
+        createElement(SwitchThumb, {
+          className: 'custom-thumb',
+          style: { opacity: 0.8 },
+        }),
+      ),
+    )
+    expect(composed.match(/data-slot="switch-thumb"/g)).toHaveLength(1)
+    expect(composed).toContain('class="custom-thumb"')
+    expect(composed).toContain('opacity:0.8')
   })
   it('pins lucide-react exactly', () => {
     expect(runtimeDependencies['lucide-react']).toBe('1.55.0')
