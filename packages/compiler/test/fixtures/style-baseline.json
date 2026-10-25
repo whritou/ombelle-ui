@@ -10,7 +10,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71"
+          "sha256": "0bc4bfc0a3ce2dcc97a43182c5e21d553ee51758ec2646d3e53395283913a93e"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -34,7 +34,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef"
+          "sha256": "a7572bd722c691f43657efcc27910a88b21712f90b35e177629225ba8687bad3"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -51,7 +51,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71"
+          "sha256": "0bc4bfc0a3ce2dcc97a43182c5e21d553ee51758ec2646d3e53395283913a93e"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -75,7 +75,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "17b2401a328302e945e8a28ea4fd7e99b746b274f374987a1543acfa61cfaafc"
+          "sha256": "c1fb3f6505968e0720a80a3209412079f2d03740f151c32d24bbdb0d6ffb3f95"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -83,5 +83,15 @@
         }
       ]
     }
-  }
+  },
+  "intentionalChanges": [
+    {
+      "logicalPaths": [
+        "components/ui/dialog.tsx",
+        "styles/ui-style.css"
+      ],
+      "spec": "docs/superpowers/specs/2026-10-25-native-form-controls-design.md",
+      "reason": "Input invalid styling and lucide XIcon Dialog close control"
+    }
+  ]
 }

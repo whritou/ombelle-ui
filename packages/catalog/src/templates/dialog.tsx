@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { XIcon } from 'lucide-react'
 import { cn } from './utils.js'
 export const Dialog = DialogPrimitive.Root
 export const DialogTrigger = DialogPrimitive.Trigger
@@ -25,7 +26,8 @@ export function DialogContent({
       >
         {children}
         <DialogPrimitive.Close data-slot="dialog-close" type="button">
-          Close
+          <XIcon aria-hidden="true" />
+          <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>

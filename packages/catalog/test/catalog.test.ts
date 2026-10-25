@@ -184,6 +184,35 @@ describe('catalog contract', () => {
         ]).toContain(token[1])
     }
   })
+  it('uses an icon close control and logical placement', () => {
+    const c = getCatalog('0.1.0')
+    const dialog = c.templates.dialog.content
+    expect(dialog).toContain("import { XIcon } from 'lucide-react'")
+    expect(dialog).toContain('<XIcon aria-hidden="true" />')
+    expect(dialog).toContain('<span className="sr-only">Close</span>')
+    const norm = (css: string) => css.replace(/\s+/g, ' ')
+    for (const family of supportedStyleFamilies) {
+      const css = norm(c.styles[family])
+      expect(css).toContain('[data-slot="dialog-close"]')
+      const closeBlocks = [
+        ...css.matchAll(/\[data-slot="dialog-close"\]\s*\{[^}]*\}/g),
+      ].map((m) => m[0].replace(/\s+/g, ''))
+      const closeRule = closeBlocks.join('')
+      expect(closeRule).toContain('position:absolute')
+      expect(closeRule).toContain('inset-inline-end')
+      expect(closeRule).toContain('min-width:var(--control-height)')
+      expect(closeRule).toContain('min-height:var(--control-height)')
+      expect(closeRule).not.toMatch(/(^|[;{])width:var\(--control-height\)/)
+      expect(closeRule).not.toContain('margin-top:1rem')
+    }
+    for (const family of ['flat', 'neo-brutalism'] as const) {
+      const css = norm(c.styles[family]).replace(/\s+/g, '')
+      const m = css.match(
+        /\[data-slot="input"\]\[aria-invalid="true"\]\{[^}]*\}/,
+      )
+      expect(m?.[0]).toContain('var(--destructive)')
+    }
+  })
   it('defaults to a non-submitting button and forwards explicit submit', () => {
     expect(renderToStaticMarkup(createElement(Button, null, 'Save'))).toContain(
       'type="button"',
