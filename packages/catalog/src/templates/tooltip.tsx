@@ -31,15 +31,17 @@ export function TooltipTrigger({
 
 export function TooltipContent({
   className,
+  forceMount,
   sideOffset = 6,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
   return (
-    <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Portal forceMount={forceMount}>
       <TooltipPrimitive.Content
         data-slot="tooltip-content"
         className={cn(className)}
         sideOffset={sideOffset}
+        forceMount={forceMount}
         {...props}
       />
     </TooltipPrimitive.Portal>

@@ -39,6 +39,12 @@ it.each(supportedStyleFamilies)(
       "import './tooltip.css'",
     )
     expect(find('components/ui/tooltip.tsx')).toContain("from '@/lib/utils'")
+    expect(find('components/ui/tooltip.tsx')).toContain(
+      '<TooltipPrimitive.Portal forceMount={forceMount}>',
+    )
+    expect(find('components/ui/tooltip.tsx')).toMatch(
+      /<TooltipPrimitive.Content[\s\S]*?forceMount=\{forceMount\}/,
+    )
     for (const text of [
       "from '@/components/ui/tooltip'",
       'TooltipProvider',

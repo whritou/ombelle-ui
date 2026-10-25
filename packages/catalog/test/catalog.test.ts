@@ -13,6 +13,7 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from '../src/templates/native-select.js'
+import { TooltipContent } from '../src/templates/tooltip.js'
 import { runtimeDependencies } from '../src/manifest.js'
 import { Checkbox } from '../src/templates/checkbox.js'
 import { Switch, SwitchThumb } from '../src/templates/switch.js'
@@ -23,6 +24,14 @@ import {
   TabsContent,
 } from '../src/templates/tabs.js'
 describe('catalog contract', () => {
+  it.each([true, undefined] as const)(
+    'preserves forceMount=%s across Tooltip portal and content',
+    (forceMount) => {
+      const portal = TooltipContent({ forceMount, children: 'Description' })
+      expect(portal.props.forceMount).toBe(forceMount)
+      expect(portal.props.children.props.forceMount).toBe(forceMount)
+    },
+  )
   it('provides Tooltip parts, scoped dependencies and accessible popup styles', () => {
     expect(supportedComponentIds).toContain('tooltip')
     const tooltip = getTemplate(getCatalog('0.1.0'), 'tooltip' as ComponentId)
@@ -49,7 +58,9 @@ describe('catalog contract', () => {
       'TooltipArrow',
     ])
       expect(tooltip.content).toContain(`export function ${part}(`)
-    expect(tooltip.content).toContain('<TooltipPrimitive.Portal>')
+    expect(tooltip.content).toContain(
+      '<TooltipPrimitive.Portal forceMount={forceMount}>',
+    )
     for (const family of supportedStyleFamilies) {
       const css = tooltip.styles?.[family] ?? ''
       for (const rule of [
