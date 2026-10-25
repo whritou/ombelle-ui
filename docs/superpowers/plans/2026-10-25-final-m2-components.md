@@ -82,21 +82,21 @@ Expected: package build succeeds and focused catalog/compiler tests pass.
 - Consumes: catalog and package patterns from Task 1.
 - Produces: `ComponentId` `switch`; `Switch` and `SwitchProps`; `SwitchThumb`; controlled/uncontrolled checked state and the `switch` and `switch-thumb` slots.
 
-- [ ] **Step 1: Write failing catalog/compiler assertions.** Cover exported parts and slots, exact scoped dependency, off/on/focus-visible/disabled and forced-colors/reduced-motion styles in every family, compiled CSS import and deterministic `examples/switch.tsx`, and form value behavior.
-- [ ] **Step 2: Run the focused tests and confirm the new assertions fail.**
+- [x] **Step 1: Write failing catalog/compiler assertions.** Cover exported parts and slots, exact scoped dependency, off/on/focus-visible/disabled and forced-colors/reduced-motion styles in every family, compiled CSS import and deterministic `examples/switch.tsx`, and form value behavior.
+- [x] **Step 2: Run the focused tests and confirm the new assertions fail.**
 
 Run: `pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/switch.test.ts`
 
 Expected: Switch-specific assertions fail because the component is not registered.
 
-- [ ] **Step 3: Implement Switch with `@radix-ui/react-switch`.** Forward root primitive props, refs, `checked`, `defaultChecked`, `onCheckedChange`, and form props. Style the thumb position from primitive state, preserve target size, and honor disabled fieldsets. Add light/dark-compatible three-family CSS, the compiler usage example, and API/install documentation that requires an accessible label.
-- [ ] **Step 4: Regenerate and run focused catalog/compiler checks.**
+- [x] **Step 3: Implement Switch with `@radix-ui/react-switch`.** Forward root primitive props, refs, `checked`, `defaultChecked`, `onCheckedChange`, and form props. Style the thumb position from primitive state, preserve target size, and honor disabled fieldsets. Add light/dark-compatible three-family CSS, the compiler usage example, and API/install documentation that requires an accessible label.
+- [x] **Step 4: Regenerate and run focused catalog/compiler checks.**
 
 Run: `pnpm build:packages; pnpm exec vitest run packages/catalog/test/catalog.test.ts packages/compiler/test/switch.test.ts`
 
 Expected: package build succeeds and focused checks pass.
 
-- [ ] **Step 5: Commit** as `feat(switch): add reviewed catalog component`.
+- [x] **Step 5: Commit** as `feat(switch): add reviewed catalog component`.
 
 ### Task 3: Add Tabs
 
