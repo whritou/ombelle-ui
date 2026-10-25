@@ -169,9 +169,11 @@ Expected: package build succeeds and focused checks pass.
 **Files:**
 - Create: `fixtures/shared/m2-components-fixture.tsx`
 - Modify: `fixtures/shared/scenario.tsx`
+- Modify: `scripts/prepare-node-consumer.ts` and `scripts/prepare-bun-consumers.ts`
 - Modify: `scripts/generate-preview.ts`
 - Create: `tests/e2e/m2-components.spec.ts`
 - Create: `tests/integration/m2-components-cli.test.ts`
+- Modify: `scripts/foundation-evidence.mjs` and `tests/integration/foundation-groups.test.ts`
 - Modify: `docs/07-delivery-plan.md`
 - Create: `docs/evidence/m2-components.md`
 
@@ -186,12 +188,12 @@ Run: `pnpm build:packages; pnpm exec vitest run --config vitest.integration.conf
 
 Expected: the new matrix fails because the shared fixture and generated component artifacts are not yet covered by it.
 
-- [ ] **Step 3: Add the shared fixture and browser checks.** Label each form control, expose checkbox mixed/disabled/invalid cases and switch off/on/disabled cases, provide horizontal and vertical Tabs examples with a disabled tab, and use Tooltip only for brief descriptive help. The browser suite asserts checkbox form submission/reset, switch state/form values, Tabs roles/selection/automatic keyboard activation/orientation, Tooltip focus and hover entry/Escape dismissal, axe violations, visible focus, 24px minimum targets where applicable, dark mode, RTL, reduced motion, and stable family styles.
+- [ ] **Step 3: Add the shared fixture and browser checks.** Include all four new IDs in Node-manager and Bun-manager consumer preparation after base fixture installs so generated consumer builds and lockfiles contain their declared dependencies. Label each form control, expose checkbox mixed/disabled/invalid cases and switch off/on/disabled cases, provide horizontal and vertical Tabs examples with a disabled tab, and use Tooltip only for brief descriptive help. The browser suite asserts checkbox form submission/reset, switch state/form values, Tabs roles/selection/automatic keyboard activation/orientation, Tooltip focus and hover entry/Escape dismissal, `forceMount` content remaining mounted after close, axe violations, visible focus, 24px minimum targets where applicable, dark mode, RTL, reduced motion, and stable family styles.
 - [ ] **Step 4: Run the M2 browser suite against preview and generated consumers.**
 
 Run: `pnpm generate:preview; pnpm prepare:consumers; pnpm build:preview; pnpm build:consumers; pnpm exec playwright test tests/e2e/m2-components.spec.ts`
 
-Expected: each app/family/mode case passes; installed DOM and computed component styles match the preview; no axe violations are reported.
+Expected: 30 app/family/mode cases pass across preview, Vite, Next.js, npm Vite, and npm Next.js; installed DOM and computed component styles match the preview; no axe violations are reported. Add the exact `m2-components.spec.ts: 30` identity to the strict foundation browser inventory and omission regression test.
 
 - [ ] **Step 5: Run package, integration, type, and foundation verification.**
 
