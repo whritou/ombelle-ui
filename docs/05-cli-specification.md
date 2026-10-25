@@ -6,7 +6,9 @@ The product CLI persists project defaults and installs exact component or recipe
 
 The upstream shadcn CLI remains a supported transport for explicitly published standard registry items. It has its own preset system. Our preset JSON and project lock behavior must not be presented as upstream capabilities.
 
-Ordinary local additions support Button, Badge, Dialog, and Input. Badge emits independently owned colocated CSS and a usage example; `add badge` reads the saved global preset. Component-specific `--preset` and recipes remain Button-only. See the [Badge API](components/badge.md) for its two variants and non-interactive semantics.
+Ordinary local additions support Button, Badge, Card, Dialog, Input, Label, Native Select, and Textarea. Badge, Card, Label, Native Select, and Textarea each emit independently owned colocated CSS and a usage example; their `add` commands read the saved global preset. CLI and registry item names match shadcn, for example `add native-select`. Native Select and Dialog declare the exactly pinned `lucide-react` 1.55.0, which the dependency plan adds when it is missing. Component-specific `--preset` and recipes remain Button-only. See the [Badge](components/badge.md), [Card](components/card.md), [Label](components/label.md), [Textarea](components/textarea.md), and [Native Select](components/native-select.md) documents for their APIs.
+
+A project initialized before the native form controls has a stale shared `ui-style.css`. Its next `add` reports `FILE_CONFLICT` and writes nothing. When the stylesheet still matches its lock record, the message is `Shared style rules changed in this catalog; run theme add <presetFile> to refresh them`, naming the saved preset file relative to the project root; an edited stylesheet keeps the general explicit-migration conflict. `add` never refreshes the file itself. See [the migration route](foundation-local-usage.md#migrating-installs-created-before-native-form-controls), including the Dialog delete-and-re-add step.
 
 ## Proposed commands
 
