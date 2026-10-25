@@ -2,6 +2,7 @@ import { it, expect } from 'vitest'
 import example from '../../../examples/preset.example.json'
 import { compile, resolvePreset } from '../src/index.js'
 import { getCatalog } from '@ombelle/catalog'
+import baseline from './fixtures/style-baseline.json'
 const input = {
   preset: example,
   componentIds: ['button', 'dialog', 'input'] as const,
@@ -87,3 +88,29 @@ it.each(['constructor', 'toString', '__proto__'])(
     ).rejects.toMatchObject({ code: 'INVALID_DATA' })
   },
 )
+
+it('changes only ui-style.css and dialog.tsx among pre-existing artifacts', async () => {
+  expect(baseline.intentionalChanges[0].logicalPaths).toEqual([
+    'components/ui/dialog.tsx',
+    'styles/ui-style.css',
+  ])
+  for (const family of ['flat', 'neo-brutalism'] as const) {
+    const result = await compile({
+      preset: getCatalog('0.1.0').presets[family],
+      componentIds: ['button', 'dialog', 'input'],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+    const expected = baseline.families[family].artifacts
+    expect(result.artifacts.map((a) => a.logicalPath)).toEqual(
+      expected.map((a) => a.logicalPath),
+    )
+    for (const artifact of result.artifacts) {
+      const entry = expected.find((e) => e.logicalPath === artifact.logicalPath)
+      expect(entry, artifact.logicalPath).toBeDefined()
+      expect(artifact.sha256, `${family} ${artifact.logicalPath}`).toBe(
+        entry!.sha256,
+      )
+    }
+  }
+})

@@ -27,7 +27,7 @@ export async function prepareBunConsumer(
       path.join(fixture.root, '.ombelle-fixture.json'),
       JSON.stringify({ owner: repo, framework, family }),
     )
-    await writeScenarioFixture(fixture.root, family, true, false, true, true)
+    await writeScenarioFixture(fixture.root, family, true, false, true, true, true)
     await fs.appendFile(
       path.join(fixture.root, 'src/index.css'),
       '\n.user-bun-style {color:hotpink;}\n',
@@ -48,6 +48,7 @@ export async function prepareBunConsumer(
       ['add', 'input', '--yes', '--json'],
       ['add', 'badge', '--yes', '--json'],
       ['add', 'card', '--yes', '--json'],
+      ['add', 'label', 'textarea', 'native-select', '--yes', '--json'],
     ]) {
       const result = await runBuiltCli(runtime, args, fixture.root)
       if (

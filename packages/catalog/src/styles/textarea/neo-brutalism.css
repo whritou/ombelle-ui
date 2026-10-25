@@ -1,0 +1,47 @@
+/* neo-brutalism Textarea */
+[data-slot='textarea'] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-height: calc(var(--control-height) * 2);
+  field-sizing: content;
+  resize: vertical;
+  font-family: var(--font-family);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  background: var(--background);
+  color: var(--foreground);
+  transition: background-color var(--motion-duration);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
+}
+[data-slot='textarea']::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+[data-slot='textarea']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+[data-slot='textarea'][aria-invalid='true'] {
+  border-color: var(--destructive);
+  border-width: max(var(--border-width), 2px);
+}
+[data-slot='textarea']:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (forced-colors: active) {
+  [data-slot='textarea'] {
+    background: Field;
+    color: FieldText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='textarea']::placeholder {
+    color: GrayText;
+  }
+  [data-slot='textarea'][aria-invalid='true'] {
+    border-style: double;
+  }
+}

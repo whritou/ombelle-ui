@@ -1,0 +1,231 @@
+{
+  "summaryFormat": "ombelle-form-controls/v1",
+  "scope": "native-form-controls-and-foundation-verification",
+  "branch": "feat/native-form-controls",
+  "foundationStageRun": {
+    "sourceCommit": "619414ad96aadc5ee0890491abde74270db72523",
+    "workingTreeDirty": false,
+    "command": "pnpm check:foundation",
+    "runtime": {
+      "platform": "win32",
+      "node": "v24.19.0",
+      "pnpm": "11.25.0",
+      "npm": "11.19.0",
+      "yarn": {
+        "classic": "1.22.22",
+        "modern": "4.18.1"
+      },
+      "bun": "1.4.3",
+      "playwright": "1.64.1",
+      "browser": "Chromium 156.0.4314.42 via msedge"
+    },
+    "browserChannelNote": "OMBELLE_BROWSER_CHANNEL=msedge because Playwright's bundled Chromium headless shell is not installed on this machine; CI uses bundled Chromium, which this run did not exercise.",
+    "startedAt": "2026-10-25T16:27:38.507Z",
+    "completedAt": "2026-10-25T17:17:45.035Z",
+    "durationMs": 3006528,
+    "runner": {
+      "status": "passed",
+      "exitCode": 0,
+      "normalPnpmEntry": "worked; no tsx/os.userInfo ENOMEM and no loader workaround"
+    },
+    "stages": {
+      "passed": 10,
+      "failed": 0,
+      "names": [
+        "build:packages",
+        "test:unit",
+        "test:integration",
+        "generate:preview",
+        "prepare:consumers",
+        "typecheck",
+        "build:preview",
+        "build:consumers",
+        "test:e2e",
+        "audit:workspace"
+      ],
+      "durationsMs": {
+        "build:packages": 1034,
+        "test:unit": 13933,
+        "test:integration": 975425,
+        "generate:preview": 3413,
+        "prepare:consumers": 1012754,
+        "typecheck": 7867,
+        "build:preview": 16619,
+        "build:consumers": 155342,
+        "test:e2e": 769312,
+        "audit:workspace": 2043
+      }
+    },
+    "counts": {
+      "unit": {
+        "files": 31,
+        "passed": 233,
+        "failed": 0,
+        "skipped": 0
+      },
+      "integration": {
+        "files": 38,
+        "passed": 266,
+        "failed": 0,
+        "skipped": 0
+      },
+      "consumerProjects": {
+        "prepared": 34,
+        "built": 34,
+        "audited": 34
+      },
+      "browser": {
+        "expected": 178,
+        "passed": 178,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "byFile": {
+          "badge.spec.ts": 30,
+          "card.spec.ts": 30,
+          "component-presets.spec.ts": 20,
+          "forms.spec.ts": 30,
+          "keyboard.spec.ts": 30,
+          "minimalist-states.spec.ts": 12,
+          "parity.spec.ts": 6,
+          "recipes.spec.ts": 20
+        }
+      },
+      "workspaceAudit": "passed"
+    },
+    "browserTeardown": "Playwright exited on its own; no listeners remained on ports 4173-4207 afterwards and none had to be stopped.",
+    "execution": {
+      "integrationWorkers": 1,
+      "consumerWorkers": 2,
+      "e2eWorkers": 2,
+      "certificateVerification": "enabled"
+    }
+  },
+  "earlierAttempt": {
+    "sourceCommit": "619414ad96aadc5ee0890491abde74270db72523",
+    "status": "failed",
+    "exitCode": 1,
+    "integrationWorkers": 4,
+    "result": "build:packages and test:unit (233 passed) passed; test:integration had 265 passed and 1 failed: yarn-consumers.test.ts 'modern-next installs with Yarn 4.18.1 and builds with node-modules' exceeded its 60000 ms test timeout under the default four-worker load, followed by EBUSY removing its temporary directory. The gate stopped at that stage.",
+    "followUp": "The complete gate was re-run unchanged on the same commit with OMBELLE_INTEGRATION_WORKERS=1, the setting the Card evidence also used; every stage passed."
+  },
+  "rawEvidence": {
+    "foundationReport": {
+      "path": ".artifacts/form-controls-foundation/foundation-report.json",
+      "sha256": "008fa01c413e2d0df67da8860e4cbf87b51dd72e36fa93abb0044f9a25bd8e6d"
+    },
+    "unitResultsSha256": "ba1c36248e891e844bfa08eb8d513c97a2f31053982bb67962c3549f67dac1ec",
+    "integrationResultsSha256": "1c94c9603967910426f2e3fd7a11ebf4b0a3f95641fbd3e58a0f059e8919dc68",
+    "browserResultsSha256": "3e13e50513080ef70fcbec31656631174017625fa6fec8f59fe68cdb3f81f5e1",
+    "consumerMatrixSha256": "6906f20adc23f0a45e37d48bc924f275f7b4e10f834aa3a86a49f23477a92b75"
+  },
+  "dependency": {
+    "name": "lucide-react",
+    "version": "1.55.0",
+    "license": "ISC",
+    "peerDependencies": {
+      "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+      "@types/react": "* (optional)"
+    },
+    "declaredBy": ["dialog", "native-select"],
+    "pinnedIn": [
+      "packages/catalog/package.json",
+      "apps/preview/package.json",
+      "fixtures/vite/package.json",
+      "fixtures/next/package.json"
+    ],
+    "fixtureLockfilesUpdated": 11,
+    "lockfileNotes": "Every text lockfile diff adds only lucide-react 1.55.0. npm 11.19.0 also writes six node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/* entries even when regenerating from unchanged inputs; those were removed so the npm locks differ only by lucide-react, and npm ci passes with them. The two bun.lockb files changed in binary form."
+  },
+  "intentionalByteChanges": {
+    "catalogRelease": "0.1.0",
+    "baseline": "packages/compiler/test/fixtures/style-baseline.json",
+    "reason": "Input invalid styling in flat and neo-brutalism and a top-corner lucide XIcon Dialog close control in all families",
+    "artifacts": {
+      "components/ui/dialog.tsx": {
+        "before": "a0de99033e9d875ec6f1487b1c5e65e89f2b07ead046b5a8ab2519f2f54e9d71",
+        "after": "0bc4bfc0a3ce2dcc97a43182c5e21d553ee51758ec2646d3e53395283913a93e",
+        "families": "identical in all three"
+      },
+      "styles/ui-style.css": {
+        "flat": {
+          "before": "74b995d95097674b70d00d2026ebab6de5dbe0d658bf975cc7180e9bcfd539ef",
+          "after": "a7572bd722c691f43657efcc27910a88b21712f90b35e177629225ba8687bad3"
+        },
+        "neo-brutalism": {
+          "before": "17b2401a328302e945e8a28ea4fd7e99b746b274f374987a1543acfa61cfaafc",
+          "after": "c1fb3f6505968e0720a80a3209412079f2d03740f151c32d24bbdb0d6ffb3f95"
+        },
+        "minimalist": {
+          "before": "not recorded in the baseline fixture",
+          "after": "9947e71835ddfa6d7cd84f35e178775c344f87d5f026b37b905c0a463c595af9"
+        }
+      }
+    },
+    "unchanged": "Button, Badge, Card, and Input TSX, their colocated CSS, the shared utility, examples, and Button component-scoped preset and recipe artifacts keep their bytes (compiler unit tests)."
+  },
+  "newArtifactHashes": {
+    "components/ui/label.tsx": "28443b2d8022abefd30dae336b6a221fc6011bb8662f4695751d1b73c5b8766c",
+    "components/ui/textarea.tsx": "bd525fc888657893e1167bcace4d687743f3612c67067f6b90c62dca89233329",
+    "components/ui/native-select.tsx": "e8f8ae9392c16716a6be5191f6a215f49bfc0a7ec842a07fd873aa36795cb600",
+    "examples/label.tsx": "88be3d8a5a5fe7a16c19e28c2d0bbe2295584c77c912e78338dfe739e9cf3626",
+    "examples/textarea.tsx": "8702c00a407bf71921f36fa86102fd0658cdf4ff86c9b739d6d931fb27c6fa3a",
+    "examples/native-select.tsx": "df6e1fe77743e92a972e0e5ed00f3007548690302ea412b090667ee240d0f4a3",
+    "css": {
+      "flat": {
+        "components/ui/label.css": "0c64c17da0720cc0e0512fed413e574deb3b7643215fab020f516759954dfdf1",
+        "components/ui/textarea.css": "1665bfd59e447712e3c9723752f9eff9ff83c085ff8c533a6b3d63392fbde830",
+        "components/ui/native-select.css": "141fccc5edabe5584c57fd1add8d019202535443dbcd24eeec38ba9a0a0a477e"
+      },
+      "minimalist": {
+        "components/ui/label.css": "7f045d7566f8c70214d021f85a48ffede6b355cbdcbff42be1a578085a35ad47",
+        "components/ui/textarea.css": "89c3d9453132d088a8e4ec09e4580a676abcdc249f499e9cbfb45ce7a99264ee",
+        "components/ui/native-select.css": "2d8db1f49424f9baea6412a2954085f26683870e8178a08130eb1c0aa76d7afa"
+      },
+      "neo-brutalism": {
+        "components/ui/label.css": "ff126ae9395b2947c3cbc75abf7f25bfd676b2719bc3509d0d20e488dbb5968e",
+        "components/ui/textarea.css": "32f15f9add61b846bc1e9b5b04c85cdce317fb72f913824123513dce0e50ca04",
+        "components/ui/native-select.css": "c2088274bceaad6ee2698ece21258db5492bedb4b6e128186ae39e0781804102"
+      }
+    }
+  },
+  "formsBrowserCases": {
+    "count": 30,
+    "shape": "3 families × 2 modes × preview/pnpm Vite/pnpm Next/npm Vite/npm Next",
+    "checks": [
+      "source parity with the compiled manifest",
+      "preview and installed consumer DOM/computed-style parity",
+      "label association, required marker, label click focuses control",
+      "Textarea and Native Select border, radius, and focus ring match Input",
+      "invalid borders use --destructive at least 2px, including Input in every family",
+      "Native Select value changes by keyboard; icon aria-hidden and does not intercept pointer input",
+      "disabled and fieldset-disabled dimming; multiple hides the icon; RTL icon placement",
+      "required marker and error text contrast at least 4.5:1",
+      "forced colors: double invalid borders and no shadows",
+      "query gate and 320 CSS pixel reflow"
+    ]
+  },
+  "dialogBrowserChecks": {
+    "spec": "keyboard.spec.ts (30 cases, existing count)",
+    "checks": [
+      "close control has accessible name Close and one aria-hidden svg",
+      "sr-only Close span is visually hidden in preview and all consumers",
+      "close target at least 24×24 CSS pixels, including at 320 CSS pixels",
+      "title does not overlap the close control at 320 CSS pixels",
+      "focus entry, containment, Escape, and focus return unchanged"
+    ]
+  },
+  "migrationIntegration": [
+    "stale but unedited ui-style.css: add textarea conflicts (exit 4) naming theme add ./ui-preset.json; theme add refreshes the exact compiled bytes; add textarea then succeeds",
+    "edited ui-style.css remains a plain conflict and the project tree is unchanged",
+    "legacy text-close dialog.tsx conflicts; deleting it and running add dialog installs the XIcon version"
+  ],
+  "limits": [
+    "No manual assistive-technology review (NVDA, VoiceOver, human keyboard review) was performed.",
+    "No application-level accessibility certification; components and presets cannot certify consuming applications.",
+    "The Native Select option popup is browser-rendered and was not styled or measured.",
+    "Liquid glass is unavailable for Label, Textarea, and Native Select.",
+    "Browser coverage is one Chromium build (156 via the msedge channel) on Windows; bundled Chromium, Firefox, and Safari were not run.",
+    "Dialog's visually hidden Close label relies on Tailwind v4's sr-only utility in supported projects."
+  ]
+}

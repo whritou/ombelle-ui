@@ -49,6 +49,44 @@ for (const family of supportedStyleFamilies)
           expect(background).toBe(
             mode === 'dark' ? (family === 'minimalist' ? 'rgb(31, 41, 55)' : 'rgb(39, 39, 42)') : 'rgb(255, 255, 255)',
           )
+          const close = page.getByRole('button', { name: 'Close', exact: true })
+          await expect(close.locator('svg[aria-hidden="true"]')).toHaveCount(1)
+          const closeLabel = await close
+            .locator('span', { hasText: 'Close' })
+            .evaluate((el) => {
+              const r = el.getBoundingClientRect(),
+                s = getComputedStyle(el)
+              return {
+                width: r.width,
+                height: r.height,
+                position: s.position,
+                overflow: s.overflow,
+                clip: s.clip,
+              }
+            })
+          expect(closeLabel.width).toBeLessThanOrEqual(1)
+          expect(closeLabel.height).toBeLessThanOrEqual(1)
+          expect(closeLabel.position).toBe('absolute')
+          expect(closeLabel.overflow).toBe('hidden')
+          const closeBox = await close.boundingBox()
+          expect(closeBox!.width).toBeGreaterThanOrEqual(24)
+          expect(closeBox!.height).toBeGreaterThanOrEqual(24)
+          const viewport = page.viewportSize()!
+          await page.setViewportSize({ width: 320, height: 800 })
+          const narrowClose = (await close.boundingBox())!
+          const heading = (await page
+            .getByRole('dialog')
+            .getByRole('heading', { name: 'Confirm changes' })
+            .boundingBox())!
+          expect(narrowClose.width).toBeGreaterThanOrEqual(24)
+          expect(narrowClose.height).toBeGreaterThanOrEqual(24)
+          expect(
+            heading.x + heading.width <= narrowClose.x ||
+              narrowClose.x + narrowClose.width <= heading.x ||
+              heading.y + heading.height <= narrowClose.y ||
+              narrowClose.y + narrowClose.height <= heading.y,
+          ).toBe(true)
+          await page.setViewportSize(viewport)
           expect((await new AxeBuilder({ page }).analyze()).violations).toEqual(
             [],
           )

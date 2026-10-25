@@ -62,3 +62,50 @@ it('registers Card component, utility, and colocated CSS with exact compiler byt
     )
   expect(item.dependencies).toEqual(['clsx@2.1.1', 'tailwind-merge@3.7.0'])
 })
+
+it.each([
+  ['label', ['clsx@2.1.1', 'tailwind-merge@3.7.0']],
+  ['textarea', ['clsx@2.1.1', 'tailwind-merge@3.7.0']],
+  [
+    'native-select',
+    ['clsx@2.1.1', 'tailwind-merge@3.7.0', 'lucide-react@1.55.0'],
+  ],
+  [
+    'dialog',
+    [
+      '@radix-ui/react-dialog@1.3.1',
+      'clsx@2.1.1',
+      'tailwind-merge@3.7.0',
+      'lucide-react@1.55.0',
+    ],
+  ],
+] as const)(
+  'registers %s component, utility, and colocated CSS with exact compiler bytes',
+  async (id, dependencies) => {
+    const result = await compile({
+      preset: example,
+      componentIds: [id],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+    const registry = buildRegistry(result)
+    expect(registrySchema.safeParse(registry.index).success).toBe(true)
+    const item = registry.items[id]
+    expect(registryItemSchema.safeParse(item).success).toBe(true)
+    expect(item.files.map((file: { path: string }) => file.path)).toEqual(
+      id === 'dialog'
+        ? ['components/ui/dialog.tsx', 'lib/utils.ts']
+        : [
+            `components/ui/${id}.tsx`,
+            'lib/utils.ts',
+            `components/ui/${id}.css`,
+          ],
+    )
+    for (const file of item.files)
+      expect(file.content).toBe(
+        result.artifacts.find((artifact) => artifact.logicalPath === file.path)!
+          .content,
+      )
+    expect(item.dependencies).toEqual(dependencies)
+  },
+)

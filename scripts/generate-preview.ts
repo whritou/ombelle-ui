@@ -63,6 +63,13 @@ for (const family of supportedStyleFamilies) {
     ),
   )
   await fs.writeFile(
+    root + '/forms-fixture.tsx',
+    (await fs.readFile('fixtures/shared/forms-fixture.tsx', 'utf8')).replaceAll(
+      '@/components/ui',
+      './components/ui',
+    ),
+  )
+  await fs.writeFile(
     root + '/state-fixture.tsx',
     (await fs.readFile('fixtures/shared/state-fixture.tsx', 'utf8')).replaceAll(
       '@/components/ui',

@@ -14,6 +14,7 @@ import { RecipeFixture } from './recipe-fixture'
 import { ComponentPresetFixture } from './component-preset-fixture'
 import { BadgeFixture } from './badge-fixture'
 import { CardFixture } from './card-fixture'
+import { FormsFixture } from './forms-fixture'
 export default function Scenario() {
   const [ready, setReady] = React.useState(false)
   const [mode, setMode] = React.useState('light')
@@ -22,9 +23,11 @@ export default function Scenario() {
   const [componentPresets, setComponentPresets] = React.useState(false)
   const [badges, setBadges] = React.useState(false)
   const [cards, setCards] = React.useState(false)
+  const [forms, setForms] = React.useState(false)
   React.useEffect(() => {
     setBadges(new URLSearchParams(window.location.search).get('badges') === '1')
     setCards(new URLSearchParams(window.location.search).get('cards') === '1')
+    setForms(new URLSearchParams(window.location.search).get('forms') === '1')
     setRecipes(
       new URLSearchParams(window.location.search).get('recipes') === '1',
     )
@@ -96,6 +99,7 @@ export default function Scenario() {
       {componentPresets && <ComponentPresetFixture />}
       {badges && <BadgeFixture />}
       {cards && <CardFixture />}
+      {forms && <FormsFixture />}
       <p className="note">
         Generated components · local preset · editable source
       </p>
