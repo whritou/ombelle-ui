@@ -27,7 +27,7 @@ export function NotificationSetting() {
 }
 ```
 
-Every Switch requires an accessible name, normally a visible label whose htmlFor matches its id. The root uses role="switch" and announces off/on through aria-checked="false"/"true". Tab focuses an enabled control; Space toggles it. Enter is prevented from toggling or submitting the primitive button. Applications provide descriptions with aria-describedby as needed.
+Every Switch requires an accessible name, normally a visible label whose htmlFor matches its id. The root uses role="switch" and announces off/on through aria-checked="false"/"true". Tab focuses an enabled control; Space and Enter toggle it. The primitive renders a type="button" control, so activation does not submit its form. Applications provide descriptions with aria-describedby as needed.
 
 ## API and forms
 
