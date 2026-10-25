@@ -23,6 +23,48 @@ import {
   TabsContent,
 } from '../src/templates/tabs.js'
 describe('catalog contract', () => {
+  it('provides Tooltip parts, scoped dependencies and accessible popup styles', () => {
+    expect(supportedComponentIds).toContain('tooltip')
+    const tooltip = getTemplate(getCatalog('0.1.0'), 'tooltip' as ComponentId)
+    expect(tooltip.slots).toEqual([
+      'tooltip-provider',
+      'tooltip',
+      'tooltip-trigger',
+      'tooltip-content',
+      'tooltip-arrow',
+    ])
+    expect(tooltip.dependencies).toEqual([
+      { name: 'react', version: '19.3.1' },
+      { name: '@radix-ui/react-tooltip', version: '1.4.1' },
+      { name: 'clsx', version: '2.1.1' },
+      { name: 'tailwind-merge', version: '3.7.0' },
+    ])
+    expect(tooltip.content).toMatch(/^['"]use client['"]/)
+    expect(tooltip.content).toContain("import './tooltip.css'")
+    for (const part of [
+      'TooltipProvider',
+      'Tooltip',
+      'TooltipTrigger',
+      'TooltipContent',
+      'TooltipArrow',
+    ])
+      expect(tooltip.content).toContain(`export function ${part}(`)
+    expect(tooltip.content).toContain('<TooltipPrimitive.Portal>')
+    for (const family of supportedStyleFamilies) {
+      const css = tooltip.styles?.[family] ?? ''
+      for (const rule of [
+        "[data-slot='tooltip-content']",
+        "[data-slot='tooltip-arrow']",
+        "[data-slot='tooltip-trigger']:focus-visible",
+        'var(--popover)',
+        'var(--popover-foreground)',
+        '@media (forced-colors: active)',
+        '@media (prefers-reduced-motion: reduce)',
+      ])
+        expect(css).toContain(rule)
+      expect(css).not.toMatch(/(?:left|right):/)
+    }
+  })
   it.each(['controlled', 'uncontrolled'] as const)(
     'renders %s Tabs selection and forwards primitive/presentation props',
     (mode) => {

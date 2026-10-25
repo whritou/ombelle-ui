@@ -10,5 +10,6 @@ export const supportedComponentIds = [
   'switch',
   'tabs',
   'textarea',
+  'tooltip',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]
