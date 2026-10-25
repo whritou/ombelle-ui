@@ -157,10 +157,20 @@ export async function planAdd(
       c.beforeHash !== null &&
       (!record || record.sha256 !== c.beforeHash || c.action === 'update')
     ) {
+      // An unedited shared stylesheet that merely lags the catalog is refreshed
+      // by theme add; any other conflict still needs an explicit migration.
+      const staleSharedStyle =
+        a.logicalPath === 'styles/ui-style.css' &&
+        record?.sha256 === c.beforeHash &&
+        c.action === 'update'
       c.action = 'conflict'
       plan.diagnostics.push({
         code: 'FILE_CONFLICT',
-        message: 'Existing source requires an explicit migration',
+        message: staleSharedStyle
+          ? 'Shared style rules changed in this catalog; run theme add ' +
+            (context.config?.presetFile ?? './ui-preset.json') +
+            ' to refresh them'
+          : 'Existing source requires an explicit migration',
         path: target.path,
       })
     }
