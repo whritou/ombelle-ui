@@ -15,6 +15,10 @@ import { ComponentPresetFixture } from './component-preset-fixture'
 import { BadgeFixture } from './badge-fixture'
 import { CardFixture } from './card-fixture'
 import { FormsFixture } from './forms-fixture'
+import { CheckboxFixture } from './checkbox-fixture'
+import { SwitchFixture } from './switch-fixture'
+import { TabsFixture } from './tabs-fixture'
+import { TooltipFixture } from './tooltip-fixture'
 export default function Scenario() {
   const [ready, setReady] = React.useState(false)
   const [mode, setMode] = React.useState('light')
@@ -24,7 +28,15 @@ export default function Scenario() {
   const [badges, setBadges] = React.useState(false)
   const [cards, setCards] = React.useState(false)
   const [forms, setForms] = React.useState(false)
+  const [checkboxes, setCheckboxes] = React.useState(false)
+  const [switches, setSwitches] = React.useState(false)
+  const [tabs, setTabs] = React.useState(false)
+  const [tooltips, setTooltips] = React.useState(false)
   React.useEffect(() => {
+    setCheckboxes(new URLSearchParams(window.location.search).get('checkboxes') === '1')
+    setSwitches(new URLSearchParams(window.location.search).get('switches') === '1')
+    setTabs(new URLSearchParams(window.location.search).get('tabs') === '1')
+    setTooltips(new URLSearchParams(window.location.search).get('tooltips') === '1')
     setBadges(new URLSearchParams(window.location.search).get('badges') === '1')
     setCards(new URLSearchParams(window.location.search).get('cards') === '1')
     setForms(new URLSearchParams(window.location.search).get('forms') === '1')
@@ -100,6 +112,10 @@ export default function Scenario() {
       {badges && <BadgeFixture />}
       {cards && <CardFixture />}
       {forms && <FormsFixture />}
+      {checkboxes && <CheckboxFixture />}
+      {switches && <SwitchFixture />}
+      {tabs && <TabsFixture />}
+      {tooltips && <TooltipFixture />}
       <p className="note">
         Generated components · local preset · editable source
       </p>

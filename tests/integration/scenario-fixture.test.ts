@@ -2,7 +2,7 @@ import { afterEach, expect, it } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
-import { writeScenarioFixture } from '../helpers/scenario-fixture.js'
+import { writeScenarioFixture, type ScenarioFixtures } from '../helpers/scenario-fixture.js'
 const roots:string[]=[]
 afterEach(async()=>{for(const root of roots.splice(0))await fs.rm(root,{recursive:true,force:true})})
 it('copies state fixtures without changing the default specimen',async()=>{
@@ -19,7 +19,7 @@ it('copies state fixtures without changing the default specimen',async()=>{
 })
 it.each([false, true])('writes an optional Card fixture without dangling imports (cards=%s)', async (cards) => {
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'ombelle-card-scenario-'));roots.push(root)
- await writeScenarioFixture(root,'flat',false,false,false,cards)
+ await writeScenarioFixture(root,'flat',{cards})
  const scenario=await fs.readFile(path.join(root,'src/scenario.tsx'),'utf8')
  expect(scenario.includes("import { CardFixture } from './card-fixture'")).toBe(cards)
  expect(scenario.includes('{cards && <CardFixture />}')).toBe(cards)
@@ -33,7 +33,7 @@ it.each([false, true])('writes an optional Card fixture without dangling imports
 })
 it.each([false, true])('writes an optional forms fixture without dangling imports (forms=%s)', async (forms) => {
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'ombelle-forms-scenario-'));roots.push(root)
- await writeScenarioFixture(root,'flat',false,false,false,false,forms)
+ await writeScenarioFixture(root,'flat',{forms})
  const scenario=await fs.readFile(path.join(root,'src/scenario.tsx'),'utf8')
  expect(scenario.includes("import { FormsFixture } from './forms-fixture'")).toBe(forms)
  expect(scenario.includes('{forms && <FormsFixture />}')).toBe(forms)
@@ -44,3 +44,35 @@ it.each([false, true])('writes an optional forms fixture without dangling import
   for (const id of ['label','textarea','native-select']) expect(fixture).toContain(`from '@/components/ui/${id}'`)
  }
 })
+
+const componentFixtures = [
+ { option: 'checkboxes', component: 'CheckboxFixture', id: 'checkbox' },
+ { option: 'switches', component: 'SwitchFixture', id: 'switch' },
+ { option: 'tabs', component: 'TabsFixture', id: 'tabs' },
+ { option: 'tooltips', component: 'TooltipFixture', id: 'tooltip' },
+] as const
+
+for (const { option, component, id } of componentFixtures)
+ it.each([false, true])(`writes an independent ${id} fixture without dangling imports (enabled=%s)`, async (enabled) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-' + id + '-scenario-'))
+  roots.push(root)
+  const options: ScenarioFixtures = { [option]: enabled }
+  await writeScenarioFixture(root, 'flat', options)
+  const scenario = await fs.readFile(path.join(root, 'src/scenario.tsx'), 'utf8')
+  for (const fixture of componentFixtures) {
+   const selected = enabled && fixture.id === id
+   const file = fixture.id + '-fixture.tsx'
+   expect(scenario.includes(`import { ${fixture.component} } from './${fixture.id}-fixture'`)).toBe(selected)
+   expect(scenario.includes(`{${fixture.option} && <${fixture.component} />}`)).toBe(selected)
+   expect(await fs.stat(path.join(root, 'src', file)).then(() => true, () => false)).toBe(selected)
+  }
+  if (enabled) {
+   expect(scenario).toContain(`get('${option}') === '1'`)
+   const fixture = await fs.readFile(path.join(root, 'src', id + '-fixture.tsx'), 'utf8')
+   expect(fixture).toBe(await fs.readFile('fixtures/shared/' + id + '-fixture.tsx', 'utf8'))
+   expect(fixture).toContain(`from '@/components/ui/${id}'`)
+   expect(fixture).toContain(`export function ${component}()`)
+   for (const other of componentFixtures.filter((fixture) => fixture.id !== id))
+    expect(fixture).not.toContain(`from '@/components/ui/${other.id}'`)
+  }
+ })

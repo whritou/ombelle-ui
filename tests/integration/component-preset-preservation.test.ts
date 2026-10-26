@@ -18,7 +18,7 @@ afterEach(async () => {
 it('records and preserves existing usage files across successful scoped preset installs', async () => {
   const root = await createProject('vite')
   roots.push(root)
-  await writeScenarioFixture(root, 'flat', true, true)
+  await writeScenarioFixture(root, 'flat', { recipes: true, componentPresets: true })
 
   const initialized = await runBuiltCli(
     'node',

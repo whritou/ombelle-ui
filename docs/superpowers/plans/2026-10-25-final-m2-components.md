@@ -164,36 +164,40 @@ Expected: package build succeeds and focused checks pass.
 
 - [x] **Step 5: Commit** as `feat(tooltip): add reviewed catalog component`.
 
-### Task 5: Add shared preview and generated-consumer coverage
+### Task 5: Add component-specific preview and generated-consumer coverage
+
+User correction on 26 October 2026: keep Checkbox, Switch, Tabs, and Tooltip in separate fixture, CLI, and browser files, matching existing component-specific coverage. The previous combined layout has historical passing focused results. The revised layout below has not been run because the user explicitly instructed no test reruns; verification steps remain unchecked. The single full foundation run was stopped at the user's request during integration after package build and 255 unit tests passed.
 
 **Files:**
-- Create: `fixtures/shared/m2-components-fixture.tsx`
+- Create: `fixtures/shared/checkbox-fixture.tsx`, `switch-fixture.tsx`, `tabs-fixture.tsx`, and `tooltip-fixture.tsx`
 - Modify: `fixtures/shared/scenario.tsx`
 - Modify: `scripts/prepare-node-consumer.ts` and `scripts/prepare-bun-consumers.ts`
 - Modify: `scripts/generate-preview.ts`
-- Create: `tests/e2e/m2-components.spec.ts`
-- Create: `tests/integration/m2-components-cli.test.ts`
+- Create: `tests/e2e/checkbox.spec.ts`, `switch.spec.ts`, `tabs.spec.ts`, and `tooltip.spec.ts`
+- Create: `tests/integration/checkbox-cli.test.ts`, `switch-cli.test.ts`, `tabs-cli.test.ts`, and `tooltip-cli.test.ts`
+- Modify: `tests/helpers/scenario-fixture.ts` and its callers to use named fixture options
+- Modify: `tests/integration/scenario-fixture.test.ts` for independent fixture propagation
 - Modify: `scripts/foundation-evidence.mjs` and `tests/integration/foundation-groups.test.ts`
 - Modify: `docs/07-delivery-plan.md`
 - Create: `docs/evidence/m2-components.md`
 
 **Interfaces:**
 - Consumes: all four compiled APIs and generated artifacts from Tasks 1–4.
-- Produces: one opt-in `?m2=1` fixture for Checkbox, Switch, Tabs, and Tooltip; end-to-end matrix evidence over `supportedStyleFamilies`, light/dark, and `preview`, `vite`, `next`, `npm-vite`, and `npm-next`.
+- Produces: independent `?checkboxes=1`, `?switches=1`, `?tabs=1`, and `?tooltips=1` fixtures; each component owns a matrix over `supportedStyleFamilies`, light/dark, and `preview`, `vite`, `next`, `npm-vite`, and `npm-next`.
 
-- [ ] **Step 1: Add integration coverage for CLI ownership and parity.** For Vite and Next fixtures and each family, initialize once, add all four IDs, and assert dry-run is non-mutating; the plan includes each component TSX, CSS, usage example, and exact dependencies; apply records artifact ownership and preserves existing component source, theme, manager, and saved preset; repeat is a no-op; edits to a new component's TSX or CSS return `FILE_CONFLICT` even with `--yes`.
-- [ ] **Step 2: Run the focused CLI integration test and confirm it fails** for missing components/artifacts.
+- [x] **Step 1: Add integration coverage for CLI ownership and parity.** Each component has its own Vite/Next × family matrix, adds only its own ID, and asserts a non-mutating dry-run, three exact artifacts and component-scoped dependencies, ownership, preservation, no-op repeat, and TSX/CSS `FILE_CONFLICT` despite `--yes`. Next cases exercise a custom UI alias.
+- [ ] **Step 2: Run the focused component CLI and fixture integration checks after the split.**
 
-Run: `pnpm build:packages; pnpm exec vitest run --config vitest.integration.config.ts tests/integration/m2-components-cli.test.ts`
+Run: `pnpm build:packages; pnpm exec vitest run --config vitest.integration.config.ts tests/integration/checkbox-cli.test.ts tests/integration/switch-cli.test.ts tests/integration/tabs-cli.test.ts tests/integration/tooltip-cli.test.ts tests/integration/scenario-fixture.test.ts`
 
-Expected: the new matrix fails because the shared fixture and generated component artifacts are not yet covered by it.
+Expected: the 24 component ownership cases and independent fixture propagation cases pass, including exact dependency scopes and custom aliases. This step is deferred by the user's instruction not to rerun tests.
 
-- [ ] **Step 3: Add the shared fixture and browser checks.** Include all four new IDs in Node-manager and Bun-manager consumer preparation after base fixture installs so generated consumer builds and lockfiles contain their declared dependencies. Label each form control, expose checkbox mixed/disabled/invalid cases and switch off/on/disabled cases, provide horizontal and vertical Tabs examples with a disabled tab, and use Tooltip only for brief descriptive help. The browser suite asserts checkbox form submission/reset, switch state/form values, Tabs roles/selection/automatic keyboard activation/orientation, Tooltip focus and hover entry/Escape dismissal, `forceMount` content remaining mounted after close, axe violations, visible focus, 24px minimum targets where applicable, dark mode, RTL, reduced motion, and stable family styles.
+- [x] **Step 3: Add separate fixtures and browser checks.** Include all four new IDs in Node-manager and Bun-manager consumer preparation after base fixture installs so generated consumer builds and lockfiles contain their declared dependencies. Give each component an isolated fixture, scenario gate, and browser spec. Preserve checkbox mixed/disabled/invalid and form submission/reset, switch off/on/disabled and form submission/reset, Tabs roles/selection/automatic keyboard activation/orientation, Tooltip descriptive help/focus/hover/Escape/closed `forceMount`, axe, visible focus, 24px minimum targets, dark mode, RTL, reduced motion, and stable family styles. No fixture imports the other three new components.
 - [ ] **Step 4: Run the M2 browser suite against preview and generated consumers.**
 
-Run: `pnpm generate:preview; pnpm prepare:consumers; pnpm build:preview; pnpm build:consumers; pnpm exec playwright test tests/e2e/m2-components.spec.ts`
+Run: `pnpm generate:preview; pnpm prepare:consumers; pnpm build:preview; pnpm build:consumers; pnpm exec playwright test tests/e2e/checkbox.spec.ts tests/e2e/switch.spec.ts tests/e2e/tabs.spec.ts tests/e2e/tooltip.spec.ts`
 
-Expected: 30 app/family/mode cases pass across preview, Vite, Next.js, npm Vite, and npm Next.js; installed DOM and computed component styles match the preview; no axe violations are reported. Add the exact `m2-components.spec.ts: 30` identity to the strict foundation browser inventory and omission regression test.
+Expected: each spec's 30 app/family/mode cases pass, for 120 new component cases across preview, Vite, Next.js, npm Vite, and npm Next.js; installed DOM and computed component styles match preview; no axe violations. The strict inventory requires all four exact spec identities at 30 each, for 298 total browser cases, with one omission regression per component. This expectation has not been rerun after the split.
 
 - [ ] **Step 5: Run package, integration, type, and foundation verification.**
 
@@ -201,5 +205,5 @@ Run: `pnpm build:packages; pnpm typecheck; pnpm test:unit; pnpm test:integration
 
 Expected: every stage passes with no failed, skipped, flaky, or incomplete component matrix evidence. If a documented toolchain/environment limitation prevents a stage, capture the exact command and failure in the evidence doc and do not claim the stage passed.
 
-- [ ] **Step 6: Record evidence and close M2.** Add actual environment, component/browser counts, package versions, tested consumer matrix, accessibility findings, and human-review limitations to `docs/evidence/m2-components.md`. Update the delivery plan to state that all twelve catalog rows now have stable support for the three standard families, while glass remains experimental or unavailable by the existing matrix.
-- [ ] **Step 7: Commit** as `feat(catalog): complete final M2 components`.
+- [x] **Step 6: Record evidence and delivery status.** Record the historical combined-layout results separately from the untested component-specific split, the interrupted full gate, environment, package versions, consumer matrix, accessibility findings, and human-review limits in `docs/evidence/m2-components.md`. All twelve catalog rows declare stable support for the three standard families; glass retains the existing experimental/unavailable matrix.
+- [x] **Step 7: Commit** as `feat(catalog): complete final M2 components`.

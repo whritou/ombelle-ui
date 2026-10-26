@@ -111,7 +111,16 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
             ],
       )
     }
-    await writeScenarioFixture(root, spec.family, true, false, true, true, true)
+    await writeScenarioFixture(root, spec.family, {
+      recipes: true,
+      badges: true,
+      cards: true,
+      forms: true,
+      checkboxes: true,
+      switches: true,
+      tabs: true,
+      tooltips: true,
+    })
     await fs.appendFile(
       path.join(root, 'src/index.css'),
       '\n.user-consumer-style { color:hotpink; }\n',
@@ -128,6 +137,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       ['add', 'badge'],
       ['add', 'card'],
       ['add', 'label', 'textarea', 'native-select'],
+      ['add', 'checkbox', 'switch', 'tabs', 'tooltip'],
     ]) {
       const result = await runBuiltCli(
         'node',
