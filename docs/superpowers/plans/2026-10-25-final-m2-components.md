@@ -4,7 +4,7 @@
 
 **Goal:** Add Checkbox, Switch, Tabs, and Tooltip as the final M2 catalog components, with stable flat, minimalist, and neo-brutalism support in light and dark modes.
 
-**Architecture:** Implement all four with the existing Radix/shadcn composition approach. Each component owns its TSX template, three family CSS files, compiler example, public API documentation, and focused unit/compiler coverage. A shared generated fixture and browser suite then verify form behavior, keyboard interactions, accessibility, and preview/consumer parity across the declared matrix.
+**Architecture:** Implement all four with the existing Radix/shadcn composition approach. Each component owns its TSX template, three family CSS files, compiler example, public API documentation, and focused unit/compiler coverage. Component-specific generated fixtures and browser suites verify form behavior, keyboard interactions, accessibility, and preview/consumer parity across the declared matrix.
 
 **Tech Stack:** TypeScript/React 19, Radix UI, CSS custom properties, Vitest, Playwright, axe-core, pnpm.
 
