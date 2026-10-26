@@ -63,6 +63,48 @@ test('invalid stored draft offers accessible recovery download before replacemen
   expect(await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))).toBe('{broken draft')
   await page.getByRole('button', { name: 'Start new draft' }).click()
   await expect(page.getByLabel('Button text')).toHaveValue('Create project')
+  const archived = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.recoveries'))
+  expect(JSON.parse(archived!).texts).toContain('{broken draft')
+  await expect(page.getByRole('button', { name: 'Download preserved draft' })).toBeVisible()
+})
+
+test('starting a new draft without downloading preserves the invalid bytes across reload', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem('seeded-invalid-draft')) {
+      localStorage.setItem('ombelle.button-editor.draft', '{skipped recovery')
+      sessionStorage.setItem('seeded-invalid-draft', '1')
+    }
+  })
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByRole('button', { name: 'Start new draft' }).click()
+  await expect(page.getByLabel('Button text')).toHaveValue('Create project')
+  await page.reload()
+  const archived = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.recoveries'))
+  expect(JSON.parse(archived!).texts).toContain('{skipped recovery')
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download preserved draft' }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toMatch(/recovery/)
+  const { readFile } = await import('node:fs/promises')
+  expect(await readFile((await download.path())!, 'utf8')).toBe('{skipped recovery')
+})
+
+test('failed recovery download cannot lose invalid bytes when replacement storage also fails', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('ombelle.button-editor.draft', '{failed recovery')
+    URL.createObjectURL = () => { throw new Error('download blocked') }
+    const original = Storage.prototype.setItem
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'ombelle.button-editor.recoveries') throw new Error('archive blocked')
+      return original.call(this, key, value)
+    }
+  })
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByRole('button', { name: 'Download recovery copy' }).click()
+  await expect(page.getByRole('status')).toContainText('Recovery download failed')
+  await page.getByRole('button', { name: 'Start new draft' }).click()
+  await expect(page.getByRole('alert', { name: 'Your saved draft needs recovery' })).toBeVisible()
+  expect(await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))).toBe('{failed recovery')
 })
 
 test('artifact tabs support copy and validated recipe JSON download', async ({ page, context }) => {
@@ -84,6 +126,31 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
   const recipe = validateRecipe(JSON.parse(await readFile(file!, 'utf8')))
   expect(recipe.component).toBe('button')
   await expect(page.getByRole('status')).toContainText('downloaded')
+  await page.getByRole('tab', { name: 'CLI' }).click()
+  const command = await page.getByRole('tabpanel').textContent()
+  expect(command).toContain(download.suggestedFilename())
+  expect(command).toContain('packages/cli/dist/main.js add --recipe')
+  await expect(page.getByText('Run from the Ombelle repository root')).toBeVisible()
+})
+
+test('undoing a sparse-props edit waits for the exact recipe result before export', async ({ page }) => {
+  await page.addInitScript(() => {
+    const recipe = {
+      schemaVersion: '1.0', id: 'button_recipe', revision: 1, component: 'button',
+      presetRef: { id: 'builtin-flat', revision: 1, catalogRelease: '0.1.0', compilerVersion: '0.1.0' },
+      props: {}, content: 'Sparse draft', overrides: {},
+    }
+    localStorage.setItem('ombelle.button-editor.draft', JSON.stringify({ storageVersion: 1, recipe }))
+  })
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
+  await page.getByLabel('Loading').check()
+  await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(page.getByLabel('Loading')).not.toBeChecked()
+  await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
+  const raw = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
+  expect(JSON.parse(raw!).recipe.props).toEqual({})
 })
 
 test('mobile workspace tabs retain the draft and preview mode', async ({ page }) => {

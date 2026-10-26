@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createEditorDraft } from './model.js'
-import { DRAFT_STORAGE_KEY, restoreDraft, serializeDraft, serializeRecipe } from './storage.js'
+import { DRAFT_STORAGE_KEY, RECOVERY_STORAGE_KEY, preserveRecovery, readRecoveries, restoreDraft, serializeDraft, serializeRecipe } from './storage.js'
 
 describe('Button editor draft storage', () => {
   it('uses the editor draft storage key', () => {
@@ -47,5 +47,25 @@ describe('Button editor draft storage', () => {
     const draft = createEditorDraft('neo-brutalism')
     expect(JSON.parse(serializeRecipe(draft))).toEqual(draft.recipe)
     expect(JSON.parse(serializeRecipe(draft))).not.toHaveProperty('storageVersion')
+  })
+
+  it('preserves raw invalid drafts in a separate verified recovery archive', () => {
+    const values = new Map<string, string>()
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value) },
+    }
+    preserveRecovery(storage, '{broken draft')
+    preserveRecovery(storage, '{broken draft')
+    preserveRecovery(storage, '{other draft')
+    expect(readRecoveries(storage)).toEqual(['{broken draft', '{other draft'])
+    expect(values.get(RECOVERY_STORAGE_KEY)).toContain('{broken draft')
+  })
+
+  it('does not claim recovery when storage fails to retain the bytes', () => {
+    const storage = { getItem: () => null, setItem: () => { throw new Error('quota') } }
+    expect(() => preserveRecovery(storage, '{broken draft')).toThrow('quota')
+    const ignoredWrite = { getItem: () => null, setItem: () => {} }
+    expect(() => preserveRecovery(ignoredWrite, '{broken draft')).toThrow('could not be verified')
   })
 })

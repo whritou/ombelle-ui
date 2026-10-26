@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { FoundationError, validateRecipe, type Recipe, type RecipeCompileResult, type StyleFamily } from '@ombelle/contracts'
+import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
 import { changeDraftFamily, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
-import { DRAFT_STORAGE_KEY, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
+import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
+import { resultMatchesDraft } from '../result-match'
 import { useCompiler } from '../use-compiler'
 import type { CompileDiagnostic } from '../compile-protocol'
 import { PreviewFrame } from './preview-frame'
@@ -24,21 +25,13 @@ function download(name: string, text: string, type: string) {
   const link = document.createElement('a')
   link.href = url
   link.download = name
-  document.body.append(link)
-  link.click()
-  link.remove()
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
-
-function resultMatchesDraft(result: RecipeCompileResult | null, recipe: Recipe): boolean {
-  if (!result) return false
-  const compiled = result.recipe.data
-  return compiled.schemaVersion === recipe.schemaVersion && compiled.id === recipe.id &&
-    compiled.revision === recipe.revision && compiled.component === recipe.component &&
-    compiled.content === recipe.content &&
-    JSON.stringify(compiled.presetRef) === JSON.stringify(recipe.presetRef) &&
-    JSON.stringify(compiled.overrides) === JSON.stringify(recipe.overrides) &&
-    Object.entries(recipe.props).every(([key, value]) => compiled.props[key as keyof Recipe['props']] === value)
+  try {
+    document.body.append(link)
+    link.click()
+  } finally {
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
 }
 
 export function ButtonEditor() {
@@ -46,6 +39,7 @@ export function ButtonEditor() {
   const [view, setView] = useState<EditorView>(initialView)
   const [hydrated, setHydrated] = useState(false)
   const [recovery, setRecovery] = useState<string | null>(null)
+  const [preservedRecoveries, setPreservedRecoveries] = useState<string[]>([])
   const [diagnostic, setDiagnostic] = useState<CompileDiagnostic | null>(null)
   const [status, setStatus] = useState('Loading local draft…')
   const draft = history.present
@@ -61,10 +55,12 @@ export function ButtonEditor() {
         setRecovery(restored.recoveryText)
         setStatus('Stored draft needs recovery.')
       } else setStatus('New local draft ready.')
+      setHydrated(true)
     } catch {
       setStatus('Local storage is unavailable. Changes will stay in this tab.')
     }
-    setHydrated(true)
+    try { setPreservedRecoveries(readRecoveries(window.localStorage)) }
+    catch { setStatus('The local recovery archive could not be read. Its bytes were left unchanged.') }
   }, [])
 
   useEffect(() => {
@@ -111,11 +107,31 @@ export function ButtonEditor() {
     try {
       const text = serializeRecipe(draft)
       if (!exportReady || !recipeJson) throw new Error('Wait for the current recipe to compile.')
-      download(`${draft.recipe.id}-r${draft.recipe.revision}.json`, text + '\n', 'application/json;charset=utf-8')
+      download(recipeFilename(draft.recipe), text + '\n', 'application/json;charset=utf-8')
       setStatus('Recipe JSON downloaded.')
     } catch (error) {
       setStatus(error instanceof Error ? `Recipe download failed: ${error.message}` : 'Recipe download failed.')
     }
+  }
+
+  function startNewDraft() {
+    if (recovery === null) return
+    try {
+      const preserved = preserveRecovery(window.localStorage, recovery)
+      setPreservedRecoveries(preserved)
+      setHistory(initialHistory)
+      setRecovery(null)
+      setStatus('New local draft ready. The original draft is preserved for recovery.')
+    } catch {
+      setStatus('Could not preserve the stored draft. Free local storage before starting a new draft; the original draft remains available to download.')
+    }
+  }
+
+  function downloadPreserved(index: number) {
+    const raw = preservedRecoveries[index]
+    if (raw === undefined) return
+    try { download(`button-draft-recovery-${index + 1}.txt`, raw, 'text/plain;charset=utf-8'); setStatus('Preserved draft downloaded.') }
+    catch { setStatus('Preserved draft download failed. The local recovery copy remains available.') }
   }
 
   return <main className={styles.root}>
@@ -131,15 +147,21 @@ export function ButtonEditor() {
 
     {recovery !== null ? <section className={styles.recovery} role="alert" aria-labelledby="recovery-title">
       <h2 id="recovery-title">Your saved draft needs recovery</h2>
-      <p>The stored draft could not be validated. Download its original bytes before starting a new draft.</p>
+      <p>The stored draft could not be validated. Download its original bytes, or start a new draft to keep them in a separate local recovery copy.</p>
       <div className={styles.recoveryActions}>
         <button type="button" onClick={() => {
           try { download('button-draft-recovery.txt', recovery, 'text/plain;charset=utf-8'); setStatus('Recovery copy downloaded.') }
           catch { setStatus('Recovery download failed. The stored draft is still available.') }
         }}>Download recovery copy</button>
-        <button type="button" onClick={() => { setHistory(initialHistory); setRecovery(null); setStatus('New local draft ready.') }}>Start new draft</button>
+        <button type="button" onClick={startNewDraft}>Start new draft</button>
       </div>
     </section> : <>
+      {preservedRecoveries.length > 0 && <div className={styles.preservedRecovery}>
+        <p>{preservedRecoveries.length} previous invalid draft{preservedRecoveries.length === 1 ? ' is' : 's are'} preserved on this device.</p>
+        {preservedRecoveries.map((_, index) => <button key={index} type="button" onClick={() => downloadPreserved(index)}>
+          Download preserved draft{preservedRecoveries.length === 1 ? '' : ` ${index + 1}`}
+        </button>)}
+      </div>}
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
