@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedStyleFamilies, validateRecipe } from '@ombelle/contracts'
 import { changeDraftFamily, createEditorDraft, updateDraftRecipe, type EditorView } from './model.js'
+import { serializeRecipe } from './storage.js'
 
 describe('Button editor model', () => {
   it.each(supportedStyleFamilies)('creates a valid %s draft with the exact built-in preset', (family) => {
@@ -41,6 +42,17 @@ describe('Button editor model', () => {
       ...draft.recipe,
       presetRef: { ...draft.recipe.presetRef, id: 'unknown' },
     })).toThrow()
+  })
+
+  it('preserves the existing recipe ID and revision through updates and export', () => {
+    const initial = createEditorDraft('flat')
+    const draft = { ...initial, recipe: { ...initial.recipe, id: 'saved_recipe', revision: 3 } }
+    const updated = updateDraftRecipe(draft, {
+      ...draft.recipe, id: 'replacement_recipe', revision: 4, content: 'Updated label',
+    })
+    expect(updated.recipe).toMatchObject({ id: 'saved_recipe', revision: 3, content: 'Updated label' })
+    expect(JSON.parse(serializeRecipe(updated))).toMatchObject({ id: 'saved_recipe', revision: 3 })
+    expect(draft.recipe).toMatchObject({ id: 'saved_recipe', revision: 3, content: 'Save changes' })
   })
 
   it('keeps presentation state outside recipe data', () => {

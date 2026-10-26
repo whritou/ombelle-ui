@@ -38,6 +38,8 @@ export function createEditorDraft(family: StyleFamily): EditorDraft {
 
 export function updateDraftRecipe(draft: EditorDraft, recipe: unknown): EditorDraft {
   const validated = validateRecipe(recipe)
+  validated.id = draft.recipe.id
+  validated.revision = draft.recipe.revision
   resolveRecipePreset(validated.presetRef)
   return { storageVersion: draft.storageVersion, recipe: validated }
 }
