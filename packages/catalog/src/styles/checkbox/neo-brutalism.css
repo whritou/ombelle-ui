@@ -1,0 +1,81 @@
+/* neo-brutalism Checkbox */
+[data-slot='checkbox'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
+  cursor: pointer;
+  transition: background-color var(--motion-duration), color var(--motion-duration);
+}
+[data-slot='checkbox'][data-state='checked'],
+[data-slot='checkbox'][data-state='indeterminate'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='checkbox-indicator'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+[data-slot='checkbox-indicator'] svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+[data-slot='checkbox-indicator'][data-state='checked'] [data-checkbox-mark='indeterminate'],
+[data-slot='checkbox-indicator'][data-state='indeterminate'] [data-checkbox-mark='checked'] {
+  display: none;
+}
+[data-slot='checkbox']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+[data-slot='checkbox'][aria-invalid='true'] {
+  border-color: var(--destructive);
+  border-width: max(var(--border-width), 2px);
+}
+[data-slot='checkbox']:disabled,
+[data-slot='checkbox'][data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (forced-colors: active) {
+  [data-slot='checkbox'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+  [data-slot='checkbox'][data-state='checked'],
+  [data-slot='checkbox'][data-state='indeterminate'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='checkbox']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='checkbox'][aria-invalid='true'] {
+    border-style: double;
+    border-width: max(var(--border-width), 3px);
+  }
+  [data-slot='checkbox']:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='checkbox'] {
+    transition: none;
+  }
+}

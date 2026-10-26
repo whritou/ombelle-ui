@@ -31,7 +31,7 @@ it('keeps ordinary consumer fixtures independent of uninstalled recipe modules',
     expect(
       await fs.readFile(path.join(root, 'src/scenario.tsx'), 'utf8'),
     ).not.toContain('./recipe-fixture')
-    await writeScenarioFixture(root, 'flat', true)
+    await writeScenarioFixture(root, 'flat', { recipes: true })
     expect(
       await fs.readFile(path.join(root, 'src/scenario.tsx'), 'utf8'),
     ).toContain('./recipe-fixture')

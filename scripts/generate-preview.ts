@@ -80,6 +80,12 @@ for (const family of supportedStyleFamilies) {
     'fixtures/shared/state-fixture.css',
     root + '/state-fixture.css',
   )
+  for (const id of ['checkbox', 'switch', 'tabs', 'tooltip'])
+    await fs.writeFile(
+      root + '/' + id + '-fixture.tsx',
+      (await fs.readFile('fixtures/shared/' + id + '-fixture.tsx', 'utf8'))
+        .replaceAll('@/components/ui', './components/ui'),
+    )
   await fs.writeFile(
     root + '/preview.css',
     '@import "../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n',

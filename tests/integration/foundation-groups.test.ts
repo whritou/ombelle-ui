@@ -17,8 +17,8 @@ let base: Promise<Record<string, Record<string, any>>> | undefined
 let collectedDefinitions: { name: string; file: string }[] | undefined
 function browserResults() {
   return {
-    stats: { expected: 178, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
-    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'component-presets.spec.ts': 20, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20 }).map(([file, count]) => ({
+    stats: { expected: 298, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
+    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }).map(([file, count]) => ({
       file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
     })),
   }
@@ -93,18 +93,18 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
 test('accepts complete browser evidence including all 30 Card cases', () => {
-  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 178 })
+  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 298 })
 })
 test('rejects omitted Card browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'card.spec.ts')
-  result.stats.expected = 148
+  result.stats.expected = 268
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted Forms browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'forms.spec.ts')
-  result.stats.expected = 148
+  result.stats.expected = 268
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('accepts complete portable structural evidence without any consumer root descriptors', async () => {
@@ -116,7 +116,7 @@ test('accepts complete portable structural evidence without any consumer root de
   const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
-  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 178 } } })
+  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 298 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)
@@ -199,4 +199,11 @@ test.each(['quality', 'consumers'])('executes %s stages independently and clears
   await expect(fs.stat(path.join(root, '.artifacts', evidence))).rejects.toThrow()
   const report = JSON.parse(await fs.readFile(path.join(root, '.artifacts/foundation-report.json'), 'utf8'))
   expect(report).toMatchObject({ group, status: 'failed', exitCode: 1 })
+})
+
+test.each(['checkbox', 'switch', 'tabs', 'tooltip'])('rejects omitted %s browser cases even when reporter totals are adjusted', (id) => {
+  const result = browserResults()
+  result.suites = result.suites.filter(suite => suite.file !== id + '.spec.ts')
+  result.stats.expected = 268
+  expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
