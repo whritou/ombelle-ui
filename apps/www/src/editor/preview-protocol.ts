@@ -1,5 +1,6 @@
 import { resolveRecipePreset } from '@ombelle/catalog'
 import { validatePreset, validateRecipe, type Recipe, type RecipeCompileResult } from '@ombelle/contracts'
+import { canonicalize, compileRecipe } from '@ombelle/compiler'
 
 export type PreviewFrameState = {
   recipe: Recipe
@@ -11,6 +12,7 @@ export type PreviewFrameState = {
 }
 
 export type PreviewRender = { type: 'render'; requestId: number; scope: string; state: PreviewFrameState }
+export type PreviewAck = { type: 'render-ack'; requestId: number; status: 'applied' | 'rejected' }
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -36,6 +38,12 @@ export function isPreviewReady(input: unknown): boolean {
 export function isPreviewInit(input: unknown): boolean {
   return record(input) && exactKeys(input, ['type', 'version']) &&
     input.type === 'ombelle-preview-init' && input.version === 1
+}
+
+export function isPreviewAck(input: unknown): input is PreviewAck {
+  return record(input) && exactKeys(input, ['type', 'requestId', 'status']) &&
+    input.type === 'render-ack' && requestId(input.requestId) &&
+    ['applied', 'rejected'].includes(input.status as string)
 }
 
 export function acceptPreviewRender(input: unknown, previousRequestId: number): PreviewRender | null {
@@ -87,4 +95,28 @@ export function validatePreviewCompileResult(input: unknown): RecipeCompileResul
     return null
   }
   return input as RecipeCompileResult
+}
+
+export async function verifyPreviewCompileResult(input: unknown): Promise<RecipeCompileResult | null> {
+  const result = validatePreviewCompileResult(input)
+  if (!result) return null
+  try {
+    const expected = await compileRecipe({ recipe: result.recipe.data, darkSelector: result.darkSelector })
+    return canonicalize(expected) === canonicalize(result) ? result : null
+  } catch {
+    return null
+  }
+}
+
+export async function verifyPreviewRender(input: unknown, previousRequestId: number): Promise<PreviewRender | null> {
+  const message = acceptPreviewRender(input, previousRequestId)
+  if (!message) return null
+  try {
+    const expected = await compileRecipe({ recipe: message.state.recipe })
+    const css = expected.artifacts.find((artifact) => artifact.kind === 'style')?.content
+    return message.scope === expected.scope && message.state.css === css &&
+      canonicalize(message.state.recipe) === canonicalize(expected.recipe.data) ? message : null
+  } catch {
+    return null
+  }
 }

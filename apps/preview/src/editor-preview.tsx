@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
-import { acceptPreviewRender, isPreviewInit, type PreviewRender } from '../../www/src/editor/preview-protocol'
+import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
 import { editorButtons } from './generated/editor-buttons'
 import './editor-preview.css'
 
@@ -14,22 +14,39 @@ function EditorPreview() {
   React.useEffect(() => {
     const parentOrigin = document.referrer ? new URL(document.referrer).origin : null
     let port: MessagePort | null = null
+    const announce = () => {
+      if (!port) window.parent.postMessage({ type: 'ombelle-preview-ready', version: 1 }, '*')
+    }
+    const retry = window.setInterval(announce, 150)
     function initialize(event: MessageEvent<unknown>) {
       if (event.source !== window.parent || event.origin !== parentOrigin || !isPreviewInit(event.data) ||
-        port || event.ports.length !== 1) return
-      port = event.ports[0]
-      port.onmessage = (update: MessageEvent<unknown>) => {
-        const accepted = acceptPreviewRender(update.data, lastRequestId.current)
-        if (!accepted) return
+        event.ports.length !== 1) return
+      port?.close()
+      const attachedPort = event.ports[0]
+      port = attachedPort
+      window.clearInterval(retry)
+      attachedPort.onmessage = async (update: MessageEvent<unknown>) => {
+        const data = update.data
+        const id = typeof data === 'object' && data !== null && 'requestId' in data &&
+          typeof data.requestId === 'number' && Number.isSafeInteger(data.requestId) && data.requestId > 0
+            ? data.requestId : null
+        const accepted = await verifyPreviewRender(data, lastRequestId.current)
+        if (attachedPort !== port) return
+        if (!accepted || accepted.requestId <= lastRequestId.current) {
+          if (id !== null) attachedPort.postMessage({ type: 'render-ack', requestId: id, status: 'rejected' })
+          return
+        }
         lastRequestId.current = accepted.requestId
         setMessage(accepted)
+        attachedPort.postMessage({ type: 'render-ack', requestId: accepted.requestId, status: 'applied' })
       }
-      port.start()
+      attachedPort.start()
     }
     window.addEventListener('message', initialize)
-    window.parent.postMessage({ type: 'ombelle-preview-ready', version: 1 }, '*')
+    announce()
     return () => {
       window.removeEventListener('message', initialize)
+      window.clearInterval(retry)
       port?.close()
     }
   }, [])

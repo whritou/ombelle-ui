@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     resolveAlias: {
       '@ombelle/contracts': '../../packages/contracts/dist/index.js',
       '@ombelle/catalog': '../../packages/catalog/dist/index.js',
+      '@ombelle/compiler': '../../packages/compiler/dist/index.js',
     },
   },
 }

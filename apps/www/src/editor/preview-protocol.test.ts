@@ -6,6 +6,9 @@ import {
   isPreviewReady,
   isPreviewInit,
   validatePreviewCompileResult,
+  verifyPreviewCompileResult,
+  verifyPreviewRender,
+  isPreviewAck,
 } from './preview-protocol.js'
 
 async function renderMessage() {
@@ -54,6 +57,8 @@ it('rejects malformed ready and init messages', () => {
   expect(isPreviewReady({ type: 'ombelle-preview-ready', version: 1, port: true })).toBe(false)
   expect(isPreviewInit({ type: 'ombelle-preview-init', version: 1 })).toBe(true)
   expect(isPreviewInit({ type: 'ombelle-preview-init', version: 2 })).toBe(false)
+  expect(isPreviewAck({ type: 'render-ack', requestId: 3, status: 'rejected' })).toBe(true)
+  expect(isPreviewAck({ type: 'render-ack', requestId: 3, status: 'unknown' })).toBe(false)
 })
 
 it('rejects an incomplete nested compiler result before preview use', async () => {
@@ -65,4 +70,19 @@ it('rejects an incomplete nested compiler result before preview use', async () =
   expect(validatePreviewCompileResult({ ...result, artifacts: result.artifacts.map((artifact) =>
     artifact.kind === 'component' ? { ...artifact, kind: 'usage' } : artifact,
   ) })).toBeNull()
+})
+
+it('rejects CSS content and cross-result tampering even when hashes retain valid shape', async () => {
+  const recipe = createEditorDraft('flat').recipe
+  const result = await compileRecipe({ recipe })
+  expect(await verifyPreviewCompileResult(result)).toEqual(result)
+  const injected = { ...result, artifacts: result.artifacts.map((artifact) => artifact.kind === 'style'
+    ? { ...artifact, content: artifact.content + '\nbody { display: none; }' }
+    : artifact) }
+  expect(await verifyPreviewCompileResult(injected)).toBeNull()
+  const different = await compileRecipe({ recipe: createEditorDraft('minimalist').recipe })
+  expect(await verifyPreviewCompileResult({ ...result, scope: different.scope })).toBeNull()
+  const message = await renderMessage()
+  expect(await verifyPreviewRender(message, 0)).toEqual(message)
+  expect(await verifyPreviewRender({ ...message, state: { ...message.state, css: message.state.css + '\nbody { display: none; }' } }, 0)).toBeNull()
 })
