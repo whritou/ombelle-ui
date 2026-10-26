@@ -9,6 +9,7 @@
   "scripts": {
     "audit:workspace": "pnpm audit",
     "build:packages": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && node scripts/build.mjs",
+    "build:editor-worker": "node scripts/build-editor-worker.mjs",
     "build": "pnpm build:packages",
     "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",
     "test:unit": "vitest run packages --reporter=default --reporter=json --outputFile=.artifacts/unit-results.json",

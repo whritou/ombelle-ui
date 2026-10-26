@@ -6,3 +6,4 @@ playwright-report/
 test-results/
 apps/preview/src/generated/
 .artifacts/
+apps/www/public/editor-compiler.worker.js
