@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import type { CompileDiagnostic, CompileRequest, CompileResponse } from './compile-protocol'
+import { validatePreviewCompileResult } from './preview-protocol'
 
 export type CompilerState = {
   status: 'idle' | 'compiling' | 'compiled' | 'invalid'
@@ -32,21 +33,7 @@ export function isCompileResponse(input: unknown): input is CompileResponse {
       (diagnostic.path === undefined || typeof diagnostic.path === 'string') &&
       (diagnostic.nextAction === undefined || typeof diagnostic.nextAction === 'string')
   }
-  if (input.type !== 'compiled' || !isRecord(input.result)) return false
-  const result = input.result
-  return Array.isArray(result.artifacts) && result.artifacts.every((artifact: unknown) =>
-    isRecord(artifact) && typeof artifact.logicalPath === 'string' &&
-    ['component', 'style', 'usage', 'utility'].includes(artifact.kind as string) &&
-    typeof artifact.content === 'string' && typeof artifact.sha256 === 'string'
-  ) && Array.isArray(result.dependencies) &&
-    result.dependencies.every((dependency: unknown) =>
-      isRecord(dependency) && typeof dependency.name === 'string' && typeof dependency.version === 'string'
-    ) && isRecord(result.recipe) && isRecord(result.recipe.data) &&
-    typeof result.recipe.hash === 'string' && isRecord(result.preset) &&
-    typeof result.scope === 'string' && typeof result.darkSelector === 'string' &&
-    isRecord(result.provenance) &&
-    typeof result.provenance.catalogRelease === 'string' &&
-    typeof result.provenance.compilerVersion === 'string'
+  return input.type === 'compiled' && validatePreviewCompileResult(input.result) !== null
 }
 
 export function acceptCompileResponse(

@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@source "./generated/*/components/ui/button.tsx";
+
+html, body, #root { width: 100%; min-height: 100%; margin: 0; }
+body { font-family: Arial, sans-serif; }
+.editor-preview { box-sizing: border-box; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; background: #fff; }
+.editor-preview.dark { background: #18181b; }
+.editor-preview[data-viewport="narrow"] { max-width: 360px; margin: auto; }
+.editor-force-focus { outline: 2px solid var(--ring); outline-offset: 2px; }
+.editor-force-hover { filter: brightness(.92); }
