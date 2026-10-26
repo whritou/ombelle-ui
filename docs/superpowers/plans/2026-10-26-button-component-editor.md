@@ -66,7 +66,7 @@
 - [ ] **Step 1: Write the failing route render test.** Add `renders Button editor heading in the main landmark` to `tests/integration/www-route.test.ts`; render the default export of `apps/www/src/app/editor/component/button/page.tsx` with `renderToStaticMarkup` and assert a `main` element contains the `Button editor` heading.
 - [ ] **Step 2: Run the focused route test and confirm it fails because the route module is missing.** Run: `pnpm exec vitest run tests/integration/www-route.test.ts`. Expected: FAIL because the Next.js app route does not exist.
 - [ ] **Step 3: Scaffold the App Router workspace.** Add exact pinned Next.js, React, and React DOM dependencies compatible with the repository's Node/React pins; add `@ombelle/contracts`, `@ombelle/catalog`, and `@ombelle/compiler` workspace dependencies. Add `dev` and `build` app scripts, root `dev:www` and `build:www` scripts, Next config, global CSS, layout, landing page, and the Button route shell. Add `apps/www/src/**/*.ts(x)` to root typecheck coverage; add the Next dev server to Playwright on port 3000; update `pnpm-lock.yaml` with `pnpm install --lockfile-only`.
-- [ ] **Step 4: Run app build and route test.** Run: `pnpm build:packages`; `pnpm build:www`; `pnpm exec vitest run tests/integration/www-route.test.ts`. Expected: build succeeds and the route render test passes.
+- [ ] **Step 4: Install, build, and run the route test.** Run: `pnpm install --frozen-lockfile --ignore-scripts`; `pnpm build:packages`; `pnpm build:www`; `pnpm exec vitest run tests/integration/www-route.test.ts`. Expected: install/build succeed and the route render test passes.
 - [ ] **Step 5: Commit the scaffold.** Commit as `feat(www): scaffold editor app and Button route`.
 
 ## Task 2: Implement recipe draft, history, and recovery storage
@@ -147,7 +147,7 @@
 - [ ] **Step 3: Implement the preview protocol and host.** Establish a `MessageChannel` only from the expected iframe window; serialize recipe/view state and the exact compiled CSS artifact; keep output artifacts out of HTML/source evaluation.
 - [ ] **Step 4: Add the preview frame entry.** Route `/editor-preview/` in `apps/preview/src/main.tsx`; extend preview generation so the frame can dynamically load the generated Button module for flat, minimalist, or neo-brutalism. Apply the scoped recipe CSS in the iframe document, use a `.dark` ancestor for dark mode, and set only recipe-derived DOM attributes/props.
 - [ ] **Step 5: Add the preview browser case.** In `tests/e2e/editor.spec.ts`, assert the frame source is the expected preview app, recipe payload reaches the frame only over its established port, invalid/replayed messages do not update its rendered button, and valid data renders the scoped recipe.
-- [ ] **Step 6: Run preview and protocol checks.** Run: `pnpm exec vitest run apps/www/src/editor/preview-protocol.test.ts`; `pnpm build:packages`; `pnpm generate:preview`; `pnpm build:preview`; `pnpm exec playwright test tests/e2e/editor.spec.ts --grep "sandboxed preview"`. Expected: protocol passes and the editor frame bundle builds/renders for all three families.
+- [ ] **Step 6: Run preview and protocol checks.** Run: `pnpm exec vitest run apps/www/src/editor/preview-protocol.test.ts`; `pnpm build:packages`; `pnpm generate:preview`; `pnpm build:preview`; `pnpm prepare:consumers`; `pnpm exec playwright test tests/e2e/editor.spec.ts --grep "sandboxed preview"`. Expected: protocol passes and the editor frame bundle builds/renders for all three families.
 - [ ] **Step 7: Commit the frame.** Commit as `feat(preview): add isolated Button recipe frame`.
 
 ## Task 5: Implement the Button editor UI and local export
@@ -174,14 +174,13 @@
 - [ ] **Step 4: Implement responsive editor layout and view controls.** Use a desktop preview/output center and properties panel; use semantic Preview/Customize/Code tabs on narrow screens. Keep mode, viewport, and forced focus/hover controls in view state only.
 - [ ] **Step 5: Implement persistence and accessible recovery.** Restore after hydration, validate before writing, preserve invalid raw storage, show recovery action before starting/saving a new draft, and announce save/recovery status. Add `copy` and download result announcements.
 - [ ] **Step 6: Implement artifact export.** Render all artifact tabs from the same successful compiler response. Copy each selected artifact/command; download the validated recipe JSON. Show the initialized-project requirement and `add --recipe <local.json>` command; show ID/revision immutability guidance.
-- [ ] **Step 7: Run editor browser tests and commit.** Run: `pnpm exec playwright test tests/e2e/editor.spec.ts`; `pnpm build:www`. Expected: all editor interaction tests pass and production build succeeds. Commit as `feat(editor): add Button recipe editor and export`.
+- [ ] **Step 7: Run editor browser tests and commit.** Run: `pnpm prepare:consumers`; `pnpm exec playwright test tests/e2e/editor.spec.ts`; `pnpm build:www`. Expected: all editor interaction tests pass and production build succeeds. Commit as `feat(editor): add Button recipe editor and export`.
 
 ## Task 6: Verify CLI-installed parity and include the editor in the foundation gate
 
 **Files:**
 - Modify: `tests/e2e/editor.spec.ts`
 - Create: `tests/integration/editor-recipe-cli.test.ts`
-- Modify: `playwright.config.ts`
 - Modify: `scripts/foundation-evidence.mjs`
 - Modify: `README.md`
 - Modify: `docs/07-delivery-plan.md`
