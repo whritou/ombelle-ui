@@ -3,6 +3,113 @@ import { compileRecipe } from '@ombelle/compiler'
 import { createEditorDraft } from '../../apps/www/src/editor/model.js'
 import exampleRecipe from '../../examples/recipe.example.json' with { type: 'json' }
 
+test('edits Button family, props, and bounded overrides', async ({ page }) => {
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByLabel('Style family').selectOption('flat')
+  await page.getByLabel('Variant').selectOption('outline')
+  await page.getByLabel('Size').selectOption('sm')
+  await page.getByLabel('Button type').selectOption('submit')
+  await page.getByLabel('Button text').fill('Ship release')
+  await page.getByLabel('Disabled').check()
+  await page.getByLabel('Loading').check()
+  await page.getByLabel('Corner radius value').fill('1.5')
+  await page.getByLabel('Border width value').fill('3')
+  await page.getByLabel('Minimum height value').fill('52')
+  await page.getByLabel('Shadow X offset value').fill('-4')
+  await page.getByLabel('Shadow Y offset value').fill('8')
+  await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]')).toHaveText('Ship release', { timeout: 20000 })
+  await page.getByRole('button', { name: 'Download recipe JSON' }).click()
+  const raw = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
+  expect(JSON.parse(raw!).recipe).toMatchObject({
+    presetRef: { id: 'builtin-flat' }, content: 'Ship release',
+    props: { variant: 'outline', size: 'sm', type: 'submit', disabled: true, loading: true },
+    overrides: { radiusRem: 1.5, borderWidthPx: 3, minHeightPx: 52, shadowOffsetXPx: -4, shadowOffsetYPx: 8 },
+  })
+})
+
+test('view mode does not change recipe hash and a draft restores after reload', async ({ page }) => {
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByLabel('Button text').fill('Saved draft')
+  await expect(page.getByRole('status')).toContainText('saved')
+  await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending')
+  const before = await page.getByTestId('recipe-hash').textContent()
+  await page.getByLabel('Preview mode').selectOption('dark')
+  await page.getByLabel('Preview width').selectOption('narrow')
+  await page.getByLabel('Demonstrate state').selectOption('focus')
+  await expect(page.getByTestId('recipe-hash')).toHaveText(before!)
+  await page.reload()
+  await expect(page.getByLabel('Button text')).toHaveValue('Saved draft')
+})
+
+test('undo and redo preserve meaningful text edits', async ({ page }) => {
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByLabel('Button text').fill('First edit')
+  await page.getByLabel('Variant').selectOption('secondary')
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(page.getByLabel('Variant')).toHaveValue('default')
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(page.getByLabel('Button text')).toHaveValue('Create project')
+  await page.getByRole('button', { name: 'Redo' }).click()
+  await expect(page.getByLabel('Button text')).toHaveValue('First edit')
+})
+
+test('invalid stored draft offers accessible recovery download before replacement', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('ombelle.button-editor.draft', '{broken draft'))
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await expect(page.getByRole('alert', { name: 'Your saved draft needs recovery' })).toContainText('recovery')
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download recovery copy' }).click()
+  expect((await downloadPromise).suggestedFilename()).toMatch(/recovery/)
+  expect(await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))).toBe('{broken draft')
+  await page.getByRole('button', { name: 'Start new draft' }).click()
+  await expect(page.getByLabel('Button text')).toHaveValue('Create project')
+})
+
+test('artifact tabs support copy and validated recipe JSON download', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  for (const name of ['Usage', 'Component', 'CSS', 'Dependencies', 'CLI']) {
+    await page.getByRole('tab', { name }).click()
+    await expect(page.getByRole('tabpanel')).not.toBeEmpty()
+    await page.getByRole('button', { name: `Copy ${name}` }).click()
+    await expect(page.getByRole('status')).toContainText('copied')
+  }
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download recipe JSON' }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toMatch(/\.json$/)
+  const file = await download.path()
+  const { readFile } = await import('node:fs/promises')
+  const { validateRecipe } = await import('@ombelle/contracts')
+  const recipe = validateRecipe(JSON.parse(await readFile(file!, 'utf8')))
+  expect(recipe.component).toBe('button')
+  await expect(page.getByRole('status')).toContainText('downloaded')
+})
+
+test('mobile workspace tabs retain the draft and preview mode', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByRole('button', { name: 'Customize' }).click()
+  await page.getByLabel('Button text').fill('Mobile draft')
+  await page.getByRole('button', { name: 'Preview', exact: true }).click()
+  await page.getByLabel('Preview mode').selectOption('dark')
+  await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]')).toHaveText('Mobile draft', { timeout: 20000 })
+  await page.getByRole('button', { name: 'Code' }).click()
+  await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
+  await page.getByRole('button', { name: 'Customize' }).click()
+  await expect(page.getByLabel('Button text')).toHaveValue('Mobile draft')
+  await page.getByRole('button', { name: 'Preview', exact: true }).click()
+  await expect(page.getByLabel('Preview mode')).toHaveValue('dark')
+})
+
+test('invalid bounded value reports a field error without changing the recipe', async ({ page }) => {
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByLabel('Corner radius value').fill('3')
+  await expect(page.getByRole('alert').filter({ hasText: 'Enter a value from 0 to 2 rem.' })).toBeVisible()
+  const raw = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
+  expect(JSON.parse(raw!).recipe.overrides.radiusRem).toBe(0)
+})
+
 test('sandboxed preview receives validated recipe updates only over its port', async ({ page }) => {
   await page.addInitScript(() => {
     if (window === window.top) {

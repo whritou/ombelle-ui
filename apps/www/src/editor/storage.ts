@@ -1,6 +1,6 @@
 import { resolveRecipePreset } from '@ombelle/catalog'
 import { validateRecipe } from '@ombelle/contracts'
-import type { EditorDraft } from './model.js'
+import type { EditorDraft } from './model'
 
 export const DRAFT_STORAGE_KEY = 'ombelle.button-editor.draft'
 

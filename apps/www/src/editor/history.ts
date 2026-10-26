@@ -1,5 +1,5 @@
 import type { Recipe } from '@ombelle/contracts'
-import { updateDraftRecipe, type EditorDraft } from './model.js'
+import { updateDraftRecipe, type EditorDraft } from './model'
 
 export const HISTORY_LIMIT = 100
 const GROUP_WINDOW_MS = 500
