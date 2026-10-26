@@ -26,6 +26,12 @@ export default defineConfig({
   ],
   webServer: [
     {
+      command: 'pnpm dev:www',
+      url: 'http://127.0.0.1:3000/editor/component/button',
+      reuseExistingServer: false,
+      timeout: 120000,
+    },
+    {
       command: 'pnpm dev:preview',
       url: 'http://127.0.0.1:4173',
       reuseExistingServer: false,

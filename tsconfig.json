@@ -7,6 +7,8 @@
     "tests/**/*.ts",
     "apps/preview/src/**/*.ts",
     "apps/preview/src/**/*.tsx",
+    "apps/www/src/**/*.ts",
+    "apps/www/src/**/*.tsx",
     "playwright.config.ts"
   ],
   "exclude": ["**/dist", "**/node_modules", "fixtures", ".artifacts"]
