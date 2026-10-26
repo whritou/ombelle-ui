@@ -1,10 +1,48 @@
 import { expect, test } from '@playwright/test'
 import { compileRecipe } from '@ombelle/compiler'
 import { createEditorDraft } from '../../apps/www/src/editor/model.js'
+import { recipeFixtures } from '../../fixtures/shared/recipes.js'
+import { recipeStyles } from '../helpers/recipe-measurements.js'
 import exampleRecipe from '../../examples/recipe.example.json' with { type: 'json' }
+import fs from 'node:fs'
+
+const consumerPorts = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8')) as Record<string, { port: number }>
+
+async function buttonSnapshot(button: import('@playwright/test').Locator) {
+  return {
+    dom: await button.evaluate((element) => {
+      const node = element as HTMLButtonElement
+      return {
+        tag: node.tagName.toLowerCase(),
+        text: node.textContent,
+        className: node.className,
+        type: node.type,
+        disabled: node.disabled,
+        ariaBusy: node.getAttribute('aria-busy'),
+        slot: node.getAttribute('data-slot'),
+        variant: node.getAttribute('data-variant'),
+        size: node.getAttribute('data-size'),
+        scope: node.getAttribute('data-ombelle-recipe'),
+      }
+    }),
+    styles: await recipeStyles(button),
+    interaction: await button.evaluate((element) => {
+      const css = getComputedStyle(element)
+      return { opacity: css.opacity, pointerEvents: css.pointerEvents, cursor: css.cursor }
+    }),
+    dimensions: await button.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      return { width: rect.width, height: rect.height }
+    }),
+  }
+}
 
 test('edits Button family, props, and bounded overrides', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.getByLabel('Corner radius value').fill('3')
+  await expect(page.getByRole('alert').filter({ hasText: 'Enter a value from 0 to 2 rem.' })).toBeVisible()
+  const before = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
+  expect(JSON.parse(before!).recipe.overrides.radiusRem).toBe(0)
   await page.getByLabel('Style family').selectOption('flat')
   await page.getByLabel('Variant').selectOption('outline')
   await page.getByLabel('Size').selectOption('sm')
@@ -54,7 +92,12 @@ test('undo and redo preserve meaningful text edits', async ({ page }) => {
 })
 
 test('invalid stored draft offers accessible recovery download before replacement', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('ombelle.button-editor.draft', '{broken draft'))
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem('seeded-invalid-draft')) {
+      localStorage.setItem('ombelle.button-editor.draft', '{broken draft')
+      sessionStorage.setItem('seeded-invalid-draft', '1')
+    }
+  })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await expect(page.getByRole('alert', { name: 'Your saved draft needs recovery' })).toContainText('recovery')
   const downloadPromise = page.waitForEvent('download')
@@ -66,24 +109,16 @@ test('invalid stored draft offers accessible recovery download before replacemen
   const archived = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.recoveries'))
   expect(JSON.parse(archived!).texts).toContain('{broken draft')
   await expect(page.getByRole('button', { name: 'Download preserved draft' })).toBeVisible()
-})
-
-test('starting a new draft without downloading preserves the invalid bytes across reload', async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!sessionStorage.getItem('seeded-invalid-draft')) {
-      localStorage.setItem('ombelle.button-editor.draft', '{skipped recovery')
-      sessionStorage.setItem('seeded-invalid-draft', '1')
-    }
-  })
-  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.evaluate(() => localStorage.setItem('ombelle.button-editor.draft', '{skipped recovery'))
+  await page.reload()
   await page.getByRole('button', { name: 'Start new draft' }).click()
   await expect(page.getByLabel('Button text')).toHaveValue('Create project')
   await page.reload()
-  const archived = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.recoveries'))
-  expect(JSON.parse(archived!).texts).toContain('{skipped recovery')
-  const downloadPromise = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Download preserved draft' }).click()
-  const download = await downloadPromise
+  const archivedAfter = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.recoveries'))
+  expect(JSON.parse(archivedAfter!).texts).toContain('{skipped recovery')
+  const preservedDownloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download preserved draft 2' }).click()
+  const download = await preservedDownloadPromise
   expect(download.suggestedFilename()).toMatch(/recovery/)
   const { readFile } = await import('node:fs/promises')
   expect(await readFile((await download.path())!, 'utf8')).toBe('{skipped recovery')
@@ -131,10 +166,7 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
   expect(command).toContain(download.suggestedFilename())
   expect(command).toContain('packages/cli/dist/main.js add --recipe')
   await expect(page.getByText('Run from the Ombelle repository root')).toBeVisible()
-})
-
-test('undoing a sparse-props edit waits for the exact recipe result before export', async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.evaluate(() => {
     const recipe = {
       schemaVersion: '1.0', id: 'button_recipe', revision: 1, component: 'button',
       presetRef: { id: 'builtin-flat', revision: 1, catalogRelease: '0.1.0', compilerVersion: '0.1.0' },
@@ -142,7 +174,7 @@ test('undoing a sparse-props edit waits for the exact recipe result before expor
     }
     localStorage.setItem('ombelle.button-editor.draft', JSON.stringify({ storageVersion: 1, recipe }))
   })
-  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await page.reload()
   await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
   await page.getByLabel('Loading').check()
   await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
@@ -169,12 +201,95 @@ test('mobile workspace tabs retain the draft and preview mode', async ({ page })
   await expect(page.getByLabel('Preview mode')).toHaveValue('dark')
 })
 
-test('invalid bounded value reports a field error without changing the recipe', async ({ page }) => {
-  await page.goto('http://127.0.0.1:3000/editor/component/button')
-  await page.getByLabel('Corner radius value').fill('3')
-  await expect(page.getByRole('alert').filter({ hasText: 'Enter a value from 0 to 2 rem.' })).toBeVisible()
-  const raw = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
-  expect(JSON.parse(raw!).recipe.overrides.radiusRem).toBe(0)
+test('editor and CLI-installed Button recipe have matching DOM and computed styles', async ({ context }) => {
+  test.setTimeout(240000)
+  for (const recipe of recipeFixtures()) {
+    const family = recipe.presetRef.id.replace('builtin-', '')
+    const compiled = await compileRecipe({ recipe })
+    const usage = compiled.artifacts.find((artifact) => artifact.kind === 'usage')!
+    const component = compiled.artifacts.find((artifact) => artifact.kind === 'component')!
+    const style = compiled.artifacts.find((artifact) => artifact.kind === 'style')!
+    for (const mode of ['light', 'dark'] as const) {
+      const editor = await context.newPage()
+      const consumer = await context.newPage()
+      try {
+        await editor.addInitScript((seed) => {
+          localStorage.setItem('ombelle.button-editor.draft', JSON.stringify({ storageVersion: 1, recipe: seed }))
+        }, recipe)
+        await editor.goto('http://127.0.0.1:3000/editor/component/button')
+        await editor.getByLabel('Preview mode').selectOption(mode)
+        await expect(editor.getByTestId('recipe-hash')).toHaveText(compiled.recipe.hash)
+        const frame = editor.locator('iframe[title="Button recipe preview"]').contentFrame()
+        const editorButton = frame.locator('[data-slot="recipe-button"]')
+        await expect(editorButton).toHaveText(recipe.content)
+        await expect(editorButton).toHaveAttribute('data-ombelle-recipe', compiled.scope)
+        await expect(frame.locator('.editor-preview')).toHaveClass(mode === 'dark' ? /dark/ : /editor-preview/)
+        expect(await frame.locator('style').last().textContent()).toBe(style.content)
+
+        for (const [tab, artifact] of [['Usage', usage], ['Component', component], ['CSS', style]] as const) {
+          await editor.getByRole('tab', { name: tab }).click()
+          const bytes = await editor.getByRole('tabpanel').textContent()
+          expect(bytes).toBe(artifact.content)
+          const digest = await editor.evaluate(async (source) => {
+            const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(source))
+            return Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('')
+          }, bytes!)
+          expect(digest).toBe(artifact.sha256)
+        }
+
+        const installedPort = consumerPorts[`npm-vite-${family}`]?.port
+        expect(installedPort, `Missing prepared npm ${family} fixture`).toBeDefined()
+        await consumer.goto(`http://127.0.0.1:${installedPort}/?mode=${mode}&recipes=1&recipe=${recipe.id}&recipeStates=1`)
+        await expect(consumer.locator('main')).toHaveAttribute('data-ready', 'true')
+        const installedButton = consumer.getByTestId('recipe-default')
+        await expect(installedButton).toHaveText(recipe.content)
+        const editorSnapshot = await buttonSnapshot(editorButton)
+        const installedSnapshot = await buttonSnapshot(installedButton)
+        expect(editorSnapshot.dom).toEqual(installedSnapshot.dom)
+        expect(editorSnapshot.styles).toEqual(installedSnapshot.styles)
+        expect(editorSnapshot.interaction).toEqual(installedSnapshot.interaction)
+        expect(editorSnapshot.dimensions).toEqual(installedSnapshot.dimensions)
+        expect(editorSnapshot.styles.minHeight).toBe('44px')
+        expect(editorSnapshot.styles.border).toContain('2px')
+
+        const focusStyle = async (button: import('@playwright/test').Locator) => {
+          await button.focus()
+          return button.evaluate((element) => {
+            const css = getComputedStyle(element)
+            return { outline: css.outline, outlineOffset: css.outlineOffset }
+          })
+        }
+        expect(await focusStyle(editorButton)).toEqual(await focusStyle(installedButton))
+
+        if (family === 'flat' && mode === 'light') {
+          for (const state of ['disabled', 'loading'] as const) {
+            await editor.getByLabel(state === 'disabled' ? 'Disabled' : 'Loading').check()
+            await expect(editor.getByTestId('recipe-hash')).not.toHaveText(compiled.recipe.hash)
+            await consumer.getByRole('button', { name: state === 'disabled' ? 'Toggle recipe disabled' : 'Toggle recipe loading' }).click()
+            await expect(editorButton).toBeDisabled()
+            await expect(installedButton).toBeDisabled()
+            const expected = await buttonSnapshot(installedButton)
+            const actual = await buttonSnapshot(editorButton)
+            expect(actual.dom.disabled).toBe(expected.dom.disabled)
+            expect(actual.dom.ariaBusy).toBe(expected.dom.ariaBusy)
+            expect(actual.styles).toEqual(expected.styles)
+            expect(actual.interaction).toEqual(expected.interaction)
+            await editor.getByLabel(state === 'disabled' ? 'Disabled' : 'Loading').uncheck()
+            await consumer.getByRole('button', { name: state === 'disabled' ? 'Toggle recipe disabled' : 'Toggle recipe loading' }).click()
+          }
+          const longText = 'Long escaped text " } <script> & \\ '.repeat(4)
+          await editor.getByLabel('Button text').fill(longText)
+          await expect(editorButton).toHaveText(longText)
+          await expect(consumer.getByTestId('recipe-long')).toHaveText(longText)
+          expect(await editorButton.locator('script').count()).toBe(0)
+          expect((await buttonSnapshot(editorButton)).styles).toEqual((await buttonSnapshot(consumer.getByTestId('recipe-long'))).styles)
+        }
+      } finally {
+        await editor.close()
+        await consumer.close()
+      }
+    }
+  }
 })
 
 test('sandboxed preview receives validated recipe updates only over its port', async ({ page }) => {
