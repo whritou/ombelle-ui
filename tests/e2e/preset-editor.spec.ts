@@ -16,6 +16,26 @@ import {
   setPresetEdit,
 } from '../../apps/www/src/preset-editor/model.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
+import {
+  presetRuntimeStyles,
+  type PresetRender,
+} from '../../apps/www/src/preset-editor/preview-protocol.js'
+
+type FrameProbe = {
+  hold: boolean
+  blocked: boolean
+  release: () => void
+  completed: number
+  acks: Array<{
+    requestId: number
+    status: string
+    presetHash: string
+    domHash?: string
+    domRequest?: string
+    css: string | null
+    gallery: boolean
+  }>
+}
 
 const url = 'http://127.0.0.1:3000/editor/preset'
 const frame = (page: Page) =>
@@ -470,7 +490,69 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
   page,
 }) => {
   await page.addInitScript(() => {
-    if (window !== window.top) return
+    if (window !== window.top) {
+      const probe: FrameProbe = {
+        hold: false,
+        blocked: false,
+        release: () => {},
+        completed: 0,
+        acks: [],
+      }
+      ;(window as typeof window & { __frameProbe: FrameProbe }).__frameProbe =
+        probe
+      const digest = crypto.subtle.digest.bind(crypto.subtle)
+      crypto.subtle.digest = async (...args) => {
+        if (probe.hold) {
+          probe.hold = false
+          probe.blocked = true
+          await new Promise<void>((resolve) => {
+            probe.release = resolve
+          })
+        }
+        return digest(...args)
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(
+        MessagePort.prototype,
+        'onmessage',
+      )!
+      Object.defineProperty(MessagePort.prototype, 'onmessage', {
+        ...descriptor,
+        set(listener) {
+          descriptor.set!.call(
+            this,
+            listener &&
+              async function (this: MessagePort, event: MessageEvent) {
+                try {
+                  await listener.call(this, event)
+                } finally {
+                  if (event.data?.type === 'preset-render') probe.completed++
+                }
+              },
+          )
+        },
+      })
+      const send = MessagePort.prototype.postMessage
+      MessagePort.prototype.postMessage = function (
+        this: MessagePort,
+        data,
+        ...rest
+      ) {
+        if (data?.type === 'preset-render-ack')
+          probe.acks.push({
+            ...data,
+            domHash: document.documentElement.dataset.presetHash,
+            domRequest: document.documentElement.dataset.presetRequest,
+            css:
+              document.querySelector('style[data-preset-styles]')
+                ?.textContent ?? null,
+            gallery: Boolean(
+              document.querySelector('[data-testid="preset-gallery"]'),
+            ),
+          })
+        return Reflect.apply(send, this, [data, ...rest])
+      } as MessagePort['postMessage']
+      return
+    }
     const Native = window.MessageChannel
     window.MessageChannel = class extends Native {
       constructor() {
@@ -490,6 +572,27 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
   })
   await page.goto(url)
   await ready(page)
+  const original = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __presetRender: PresetRender
+        }
+      ).__presetRender,
+  )
+  await page.getByLabel('Corner radius', { exact: true }).fill('1.1')
+  await expect(page.getByTestId('preset-hash')).not.toHaveText(
+    original.result.preset.hash,
+  )
+  await ready(page)
+  const current = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __presetRender: PresetRender
+        }
+      ).__presetRender,
+  )
   const hash = await page.getByTestId('preset-hash').textContent()
   await page.evaluate(() => {
     const probe = window as typeof window & {
@@ -508,6 +611,118 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
     'data-preset-hash',
     hash!,
   )
+  await expect
+    .poll(() =>
+      frame(page)
+        .locator('html')
+        .evaluate(() =>
+          (
+            window as typeof window & { __frameProbe: FrameProbe }
+          ).__frameProbe.acks.some((a) => a.status === 'rejected'),
+        ),
+    )
+    .toBe(true)
+
+  const inspect = () =>
+    frame(page)
+      .locator('html')
+      .evaluate(() => {
+        const probe = (window as typeof window & { __frameProbe: FrameProbe })
+          .__frameProbe
+        return {
+          completed: probe.completed,
+          blocked: probe.blocked,
+          acks: probe.acks,
+        }
+      })
+  const hold = () =>
+    frame(page)
+      .locator('html')
+      .evaluate(() => {
+        const probe = (window as typeof window & { __frameProbe: FrameProbe })
+          .__frameProbe
+        probe.hold = true
+        probe.blocked = false
+      })
+  const release = () =>
+    frame(page)
+      .locator('html')
+      .evaluate(() =>
+        (
+          window as typeof window & { __frameProbe: FrameProbe }
+        ).__frameProbe.release(),
+      )
+  const send = (message: PresetRender) =>
+    page.evaluate(
+      (message) =>
+        (
+          window as typeof window & { __presetPort: MessagePort }
+        ).__presetPort.postMessage(message),
+      message,
+    )
+  const oldId = current.requestId + 200
+  await hold()
+  await send({ ...original, requestId: oldId })
+  await expect.poll(async () => (await inspect()).blocked).toBe(true)
+  await send({ ...current, requestId: oldId + 1 })
+  await expect
+    .poll(async () =>
+      (await inspect()).acks.some(
+        (a) => a.requestId === oldId + 1 && a.status === 'applied',
+      ),
+    )
+    .toBe(true)
+  await release()
+  await expect
+    .poll(async () =>
+      (await inspect()).acks.some(
+        (a) => a.requestId === oldId && a.status === 'rejected',
+      ),
+    )
+    .toBe(true)
+  expect(
+    (await inspect()).acks.some(
+      (a) => a.requestId === oldId && a.status === 'applied',
+    ),
+  ).toBe(false)
+
+  // Replace the port while an older render is still compiling in this document.
+  await hold()
+  const before = (await inspect()).completed
+  await send({ ...original, requestId: oldId + 2 })
+  await expect.poll(async () => (await inspect()).blocked).toBe(true)
+  await frame(page)
+    .locator('html')
+    .evaluate(() =>
+      window.parent.postMessage(
+        {
+          type: 'ombelle-preset-preview-ready',
+          version: 1,
+        },
+        '*',
+      ),
+    )
+  await expect.poll(async () => (await inspect()).completed).toBe(before + 1)
+  await release()
+  await expect.poll(async () => (await inspect()).completed).toBe(before + 2)
+  expect((await inspect()).acks.some((a) => a.requestId === oldId + 2)).toBe(
+    false,
+  )
+  await expect(
+    frame(page).locator('style[data-preset-styles]'),
+  ).toHaveJSProperty('textContent', presetRuntimeStyles(current.result))
+  for (const ack of (await inspect()).acks.filter(
+    (a) => a.status === 'applied',
+  )) {
+    expect(ack.domHash).toBe(ack.presetHash)
+    expect(ack.domRequest).toBe(String(ack.requestId))
+    expect(ack.gallery).toBe(true)
+    const result =
+      ack.presetHash === original.result.preset.hash
+        ? original.result
+        : current.result
+    expect(ack.css).toBe(presetRuntimeStyles(result))
+  }
   await page
     .locator('iframe[title="Global preset gallery"]')
     .evaluate((frame) => {
