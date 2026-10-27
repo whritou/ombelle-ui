@@ -269,6 +269,7 @@ test('editor and CLI-installed Button recipe have matching DOM and computed styl
             await expect(editorButton).toBeDisabled()
             await expect(installedButton).toBeDisabled()
             const expected = await buttonSnapshot(installedButton)
+            await expect.poll(() => editorButton.getAttribute('aria-busy')).toBe(expected.dom.ariaBusy)
             const actual = await buttonSnapshot(editorButton)
             expect(actual.dom.disabled).toBe(expected.dom.disabled)
             expect(actual.dom.ariaBusy).toBe(expected.dom.ariaBusy)
