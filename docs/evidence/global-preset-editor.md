@@ -1,6 +1,6 @@
 # Local global preset editor evidence
 
-Date: 2026-10-27. Implementation source: `852cb7d` on `feat/global-preset-editor`, based on `403685d`.
+Date: 2026-10-27. Final verification source: `89be4c3` on `feat/global-preset-editor`, based on `403685d`.
 
 The local editor at `/editor/preset` customizes global project presets, renders reviewed generated components in an isolated gallery, and exports normalized JSON and compiled CSS. Installation uses the existing private CLI. This is the local editor increment of M4; immutable publishing and remote resolution remain pending.
 
@@ -8,11 +8,12 @@ The local editor at `/editor/preset` customizes global project presets, renders 
 
 | Check | Observed outcome |
 | --- | --- |
-| Expanded unit selection, `pnpm test:unit` | 335 passed across 50 files before the final failure-path refinements; the additional compiler-response regression and existing controller test then passed 2/2. The complete gate will remeasure the final unit inventory. |
-| `pnpm test:integration` | 320 passed across 46 files, using one integration worker. Includes eight editor-export CLI cases and all 39 strict evidence-gate regressions. |
+| Expanded unit selection, `pnpm test:unit` | 336 passed across 50 files in the final combined-gate attempt, including app units and the malformed-response regression. |
+| `pnpm test:integration` | 320 passed across 46 files in the final combined-gate attempt, using two integration workers. Includes eight editor-export CLI cases and all 39 strict evidence-gate regressions. An earlier one-worker run also passed. |
 | `playwright test tests/e2e/preset-editor.spec.ts` | 26 passed using one worker, in 12.7 minutes. Subsequent focused regressions passed for blocked Worker construction/retry, recovery-reset notices, and unavailable-preview guidance. |
 | Existing `playwright test tests/e2e/editor.spec.ts` | All nine Button editor cases passed after the preset implementation and refinements. |
 | TypeScript and production product build | Passed; the build contains `/`, `/editor/component/button`, and `/editor/preset`. Both compiler workers bundle for the browser. |
+| `pnpm audit:workspace` | Passed after the combined attempt; no known vulnerabilities found. |
 
 The focused measurements used Windows 10.0.26200, Node 24.19.0, pnpm 11.25.0, npm 11.19.0, and Microsoft Edge 156.0.4314.42 through Playwright's `msedge` channel. The integration toolchain also included Yarn 1.22.22/4.18.1 and Bun 1.4.3. Dependency lifecycle scripts stayed disabled.
 
@@ -28,11 +29,23 @@ Eight further cases cover refresh/history, explicit family-switch intent, corrup
 
 The focused fixtures were six separately prepared npm applications, recorded in `.artifacts/editor-preset-prepared.json`. Private comparison copies install from frozen npm locks with `npm ci --offline --ignore-scripts`; preparation and the broader integration suite can use registry access. The original prepared applications and manager metadata are preserved. These six fixtures do not constitute the complete 34-consumer matrix.
 
-The first complete focused outputs are retained locally under `.artifacts/global-preset-editor/first-26-pass/`. Additional command logs remain in the plan execution workspace until final evidence is collected. These are measured outputs, distinct from the structural fake reports in `foundation-groups.test.ts`.
+The first complete focused outputs are retained locally under `.artifacts/global-preset-editor/first-26-pass/`. Final reports and logs are retained under `.artifacts/global-preset-editor/consumer-gate/` and `full-gate-attempt-1/`. These are measured outputs, distinct from the structural fake reports in `foundation-groups.test.ts`. An agent inspected the editor overview at 1440 × 1000; the capture is `.artifacts/global-preset-editor/editor-overview.png`. This is not human visual review.
 
 ## Complete foundation gate
 
-The complete foundation run is pending. Its final outcome must include fresh results for the final unit inventory, all integration assertions, all 34 consumer rows, and the 333-case browser inventory. The focused results above do not imply a complete foundation pass. The strict validator now independently requires `apps/www/src` unit files/assertions and all 26 preset-editor browser cases.
+`pnpm check:foundation` on clean `89be4c3` exited 1. Package build, all 336 unit tests, all 320 integration tests, and preview generation passed. Consumer preparation then failed with Windows `ERR_PNPM_EPERM` while creating a React directory in an owned temporary pnpm virtual store. The original failed report and logs remain in `full-gate-attempt-1/`; this is not a successful combined-gate run.
+
+The affected official `pnpm check:foundation:consumers` group was retried on the same clean commit with one consumer worker. It passed in 42.7 minutes: package build, generation, all 34 consumer preparations, preview build, all 34 consumer builds/audits, and all 333 browser cases across fourteen specs. Browser execution used two workers and took 19.3 minutes, with zero skips, retries, unexpected results, or flakes. The strict browser and consumer evidence validators passed, including all 26 preset-editor cases. The unit inventory separately includes apps/www/src. Its report records Node 24.19.0 and source commit `89be4c3`; frozen locks and assertions were unchanged. TypeScript and workspace audit also passed separately after the combined attempt.
+
+These measurements establish the final quality checks and consumer group separately. No successful combined or CI aggregate run is claimed. The full-matrix retry includes the twelve downloaded-preset npm Vite/Next.js comparisons in addition to the 34 prepared baseline consumers.
+
+## Fresh branch review
+
+A fresh read-only review of `403685d..89be4c3` found no confirmed product defect and one Important verification gap: the original frame browser case did not force asynchronous verification races or observe acknowledgement timing. The requested Astra reviewer hit its usage limit before beginning; the available GPT-6.1 Sol reviewer performed the review.
+
+The existing case now suspends one real digest, completes a newer request first, replaces the port while old verification remains outstanding, and captures DOM hash/request, gallery presence, and exact runtime CSS synchronously when each acknowledgement is sent. Mutation checks observed RED for removal of the post-await request fence, removal of the session fence (old radius CSS replaced current CSS), and premature acknowledgement (DOM hash absent). Restoring the original runtime produced GREEN for the strengthened case. The whole 26-case feature suite then passed in 8.4 minutes, including all twelve installed-app comparisons; TypeScript also passed. The strengthened regression is committed as de47a02. Product implementation bytes are unchanged by this review fix. Logs, mutation failures, and the fresh browser JSON are retained in `.artifacts/global-preset-editor/review-fix/`.
+
+The reviewer declined to judge native delivery of retired Worker error callbacks because no post-termination user effect was established. That optional hardening was left out; a hypothetical late callback could invalidate a newer compile. Remote publishing/deployment and broader browser/assistive-technology behavior remain explicitly outside the measured scope. The review's pending consumer-gate judgment is resolved by the separate passing group result above, without converting the failed combined run into a pass. No minor findings were deferred.
 
 ## Implementation decisions and limits
 
@@ -42,5 +55,7 @@ The complete foundation run is pending. Its final outcome must include fresh res
 - Focused npm comparison fixtures have their own map. This isolates focused measurements from claims about the complete consumer matrix.
 - Unit and integration fixture discovery run separately. The source-inventory regression uses a bounded 180-second discovery allowance; it retains exact file, assertion-name, and occurrence-count checks.
 - Pixel capture uses the page rectangle for the sandboxed specimen, with measured iframe border offsets and a 20-second capture limit. This avoids the stalled direct iframe capture and preserves exact image comparison.
+- After the Windows directory-creation failure, only the affected consumer group was rerun, serializing consumer preparation. The cost is separate quality/consumer evidence rather than a successful combined-gate record.
+- The fresh read-only branch review overlaps the final verification work without source edits. Its input initially includes pending gate metadata; the author reconciles final documentation against actual outputs.
 
 Human visual/assistive-technology review, native browser text zoom, other browser engines, public publishing, and remote install references are not established by these measurements. Global presets and scoped Button recipes retain their separate ownership and identity rules. The [usage guide](../foundation-local-usage.md#local-global-preset-editor) documents the implemented local flow.

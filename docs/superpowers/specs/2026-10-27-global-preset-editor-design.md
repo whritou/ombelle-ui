@@ -1,6 +1,6 @@
 # Local Global Preset Editor Design
 
-**Status:** Approved for implementation through the user's continuation on 2026-10-27; verification is in progress.
+**Status:** Implemented local increment; measured verification and limits are recorded in [editor evidence](../../evidence/global-preset-editor.md).
 **Date:** 2026-10-27
 **Baseline:** `403685d`, the M3 Button editor merge on `main`.
 
