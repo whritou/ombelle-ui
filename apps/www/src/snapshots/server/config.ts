@@ -9,7 +9,7 @@ export type SnapshotConfig = {
   clientIdentity: { mode: 'development' } | { mode: 'trusted-header'; header: string }
 }
 
-export function readSnapshotConfig(env: NodeJS.ProcessEnv): SnapshotConfig {
+export function readSnapshotConfig(env: Record<string, string | undefined>): SnapshotConfig {
   try {
     const dbPath = env.OMBELLE_SNAPSHOT_DB_PATH
     const origin = env.OMBELLE_PUBLIC_ORIGIN

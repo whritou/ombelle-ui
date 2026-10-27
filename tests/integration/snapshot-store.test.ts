@@ -55,7 +55,7 @@ function totals(db: DatabaseSync) {
     capacity: db.prepare('SELECT * FROM capacity').get(),
   }
 }
-function processPublication(path: string, key: string) {
+function processPublication(path: string, key: string, executable = process.execPath) {
   const script = `
     import { openSnapshotStore } from ${JSON.stringify(pathToFileURL(resolve('apps/www/src/snapshots/server/sqlite-store.ts')).href)};
     const store = openSnapshotStore(process.argv[1]);
@@ -64,33 +64,53 @@ function processPublication(path: string, key: string) {
       try { console.log(JSON.stringify(store.publish(JSON.parse(process.argv[2])))); store.close(); process.exit(0) }
       catch (e) { console.error(e.code); store.close(); process.exit(1) }
     });`
-  const child = spawn(process.execPath, ['--import', 'tsx', '--input-type=module', '-e', script, path,
+  const child = spawn(executable, ['--import', 'tsx', '--input-type=module', '-e', script, path,
     JSON.stringify({ preset, idempotencyKey: key, clientKey: 'client-a', now })], { windowsHide: true })
   let output = '', error = ''
-  let readyResolve: () => void
-  const ready = new Promise<void>((resolve) => { readyResolve = resolve })
-  child.stdout.on('data', (data) => { output += data; if (output.includes('ready\n')) readyResolve() })
+  let readyResolve: () => void, readyReject: (error: Error) => void, isReady = false
+  const ready = new Promise<void>((resolve, reject) => { readyResolve = resolve; readyReject = reject })
+  child.stdout.on('data', (data) => { output += data; if (output.includes('ready\n')) { isReady = true; readyResolve() } })
   child.stderr.on('data', (data) => { error += data })
   const result = new Promise<ReturnType<SnapshotStore['publish']>>((resolve, reject) => {
-    child.on('error', reject)
+    child.on('error', (error) => { readyReject(error); reject(error) })
     child.on('exit', (code) => {
+      if (!isReady) readyReject(new Error('Publication child exited before readiness: ' + error))
       if (code !== 0) reject(new Error(error))
       else resolve(JSON.parse(output.trim().split('\n').at(-1)!))
     })
   })
-  return { ready, result, start: () => child.stdin.end('publish') }
+  return { ready, result, start: () => child.stdin.end('publish'), stop: () => child.kill() }
 }
+
+it.each(['early exit', 'spawn error'])('rejects child readiness on %s', async (kind) => {
+  const path = await fixture()
+  const child = processPublication(join(resolve(path, '..'), 'missing.sqlite'), randomUUID(), kind === 'spawn error' ? join(resolve(path, '..'), 'missing-node.exe') : process.execPath)
+  try {
+    await expect(Promise.race([
+      child.ready,
+      child.result.catch(() => 'exited before readiness'),
+    ])).rejects.toThrow()
+  } finally { child.stop(); await child.result.catch(() => {}) }
+})
 
 it('one intent commits once across independent connections and survives process restart', async () => {
   const path = await fixture(), key = randomUUID()
   const a = processPublication(path, key), b = processPublication(path, key)
-  await Promise.all([a.ready, b.ready])
-  a.start(); b.start()
-  const [first, second] = await Promise.all([a.result, b.result])
-  expect(second.snapshot).toEqual(first.snapshot)
-  expect([first.replayed, second.replayed].sort()).toEqual([false, true])
-  expect(open(path).lookup(reference(first.snapshot))).toEqual(first.snapshot)
-  expect(totals(raw(path))).toMatchObject({ records: 1, keys: 1 })
+  // Attach result rejection handlers while waiting for readiness too.
+  const results = Promise.all([a.result, b.result])
+  void results.catch(() => {})
+  try {
+    await Promise.all([a.ready, b.ready])
+    a.start(); b.start()
+    const [first, second] = await results
+    expect(second.snapshot).toEqual(first.snapshot)
+    expect([first.replayed, second.replayed].sort()).toEqual([false, true])
+    expect(open(path).lookup(reference(first.snapshot))).toEqual(first.snapshot)
+    expect(totals(raw(path))).toMatchObject({ records: 1, keys: 1 })
+  } finally {
+    a.stop(); b.stop()
+    await Promise.allSettled([a.result, b.result])
+  }
 })
 
 it('binds retry keys globally to content, expires at 24 hours, and preserves previous records', async () => {

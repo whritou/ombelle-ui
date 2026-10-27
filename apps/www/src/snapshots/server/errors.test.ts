@@ -3,7 +3,7 @@ import { SnapshotServiceError, snapshotErrorResponse } from './errors'
 
 it.each([
   [400, 'INVALID_DATA'], [400, 'INVALID_REFERENCE'], [400, 'INVALID_IDEMPOTENCY_KEY'],
-  [403, 'ORIGIN_NOT_ALLOWED'], [404, 'SNAPSHOT_NOT_FOUND'], [409, 'IDEMPOTENCY_CONFLICT'],
+  [403, 'ORIGIN_NOT_ALLOWED'], [404, 'SNAPSHOT_NOT_FOUND'], [405, 'METHOD_NOT_ALLOWED'], [409, 'IDEMPOTENCY_CONFLICT'],
   [410, 'SNAPSHOT_WITHDRAWN'], [413, 'PAYLOAD_TOO_LARGE'], [415, 'UNSUPPORTED_MEDIA_TYPE'],
   [422, 'UNSUPPORTED_RELEASE'], [429, 'RATE_LIMITED'], [503, 'SNAPSHOT_SERVICE_UNAVAILABLE'],
   [503, 'SNAPSHOT_CAPACITY_REACHED'],
@@ -38,3 +38,9 @@ it('hides unexpected exception internals and returns an empty HEAD error', async
   expect(head.headers.get('Cache-Control')).toBe('no-store')
   expect(await head.text()).toBe('')
 })
+
+it.each([[1.1, '2'], [Number.MAX_VALUE, String(Number.MAX_SAFE_INTEGER)], [-1, null], [Infinity, null], [NaN, null]] as const)(
+  'bounds Retry-After %s as %s', (retryAfter, expected) => {
+    expect(snapshotErrorResponse(new SnapshotServiceError({ status: 429, code: 'RATE_LIMITED', retryAfter }), 'request-123').headers.get('Retry-After')).toBe(expected)
+  },
+)

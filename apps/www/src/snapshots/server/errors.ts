@@ -4,6 +4,7 @@ const messages = {
   INVALID_IDEMPOTENCY_KEY: 'A valid UUID-v4 idempotency key is required.',
   ORIGIN_NOT_ALLOWED: 'Publication from this origin is not allowed.',
   SNAPSHOT_NOT_FOUND: 'The snapshot was not found.',
+  METHOD_NOT_ALLOWED: 'This method is not supported for this endpoint.',
   IDEMPOTENCY_CONFLICT: 'The idempotency key was already used for different content.',
   SNAPSHOT_WITHDRAWN: 'The snapshot is no longer publicly available.',
   PAYLOAD_TOO_LARGE: 'The preset exceeds the supported size limit.',
@@ -51,7 +52,7 @@ export function snapshotErrorResponse(error: unknown, requestId: string, head = 
     'X-Request-ID': requestId,
   })
   if (failure.retryAfter !== undefined && Number.isFinite(failure.retryAfter) && failure.retryAfter >= 0)
-    headers.set('Retry-After', String(Math.ceil(failure.retryAfter)))
+    headers.set('Retry-After', String(Math.ceil(Math.min(failure.retryAfter, Number.MAX_SAFE_INTEGER))))
   return new Response(head ? null : JSON.stringify({
     code: failure.code,
     message: messages[failure.code],
