@@ -1,6 +1,6 @@
 # Immutable Preset Snapshots Design
 
-**Status:** Proposed design; awaiting user approval before implementation planning.
+**Status:** Approved by the user on 2026-10-27; implementation planning authorized.
 **Date:** 2026-10-27
 **Baseline:** `6fbce75` on `main`; work branch `feat/immutable-preset-snapshots`.
 
@@ -8,7 +8,7 @@
 
 Complete the next M4 journey: explicitly publish a preset from the existing editor, share an immutable reference, install it globally or for one Button, and add another ordinary component later without depending on the service. Preserve the exact normalized preset and generated artifacts already produced by local export.
 
-The user selected extending the existing Next.js app after considering a separate snapshot service. The storage implementation, limits, identity policy, and CLI details below are author proposals for approval, not earlier user decisions.
+The user selected extending the existing Next.js app after considering a separate snapshot service, then approved this complete document. The storage implementation, limits, identity policy, and CLI details originated as author proposals and are included in that approval.
 
 ### Approaches considered
 
@@ -182,4 +182,4 @@ The Superpowers builder check reviewed this document against the repository on 2
 
 The builder may choose internal filenames, small port interfaces, SQL table/index details, fixture layout, and accessible confirmation mechanics within these contracts. The builder must check the installed Next.js guides before route/page implementation and use the pinned repository toolchain. Do not add a general backend framework, new infrastructure provider, or new npm dependency without updating the design rationale.
 
-Approval of this document authorizes implementation planning for the proposed behavior and SQLite deployment constraint. It does not authorize public publication of user presets, package release, infrastructure provisioning, deployment, or claims that M4's public service is already live. Approval is still pending.
+The user's approval authorizes implementation planning for the proposed behavior and SQLite deployment constraint. It does not authorize public publication of user presets, package release, infrastructure provisioning, deployment, or claims that M4's public service is already live.
