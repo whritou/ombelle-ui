@@ -1,33 +1,185 @@
-.editor { max-width: 1440px; margin: 0 auto; padding: 40px 32px 80px; color: #292524; background: #faf9f6; font-family: Arial, sans-serif; }
-.editor header { border-bottom: 1px solid #d6d3d1; padding-bottom: 24px; margin-bottom: 20px; }
-.editor h1 { font-size: clamp(28px, 4vw, 44px); line-height: 1.15; letter-spacing: -.04em; margin: 12px 0; }
-.editor h2 { font-size: 22px; margin: 24px 0 12px; }
-.editor h3 { font-size: 18px; margin-top: 24px; }
-.editor p { margin: 10px 0; line-height: 1.6; }
-.editor a { color: #344e41; text-decoration: underline; }
-.editor button, .editor input, .editor select, .editor textarea { font: inherit; border: 1px solid #a8a29e; border-radius: 5px; padding: 9px 10px; background: #fff; color: #292524; min-height: 44px; }
-.editor button { cursor: pointer; }
-.editor button:disabled { opacity: .5; cursor: default; }
-.editor :focus-visible { outline: 3px solid #42634c; outline-offset: 3px; }
-.editor [aria-invalid="true"] { border-color: #b91c1c; }
-.editor [role="alert"] { border-left: 3px solid #b45309; padding: 8px 14px; background: #fffbeb; }
-.editor fieldset { border: 1px solid #d6d3d1; padding: 16px; border-radius: 8px; }
-.editor details { margin: 20px 0; border-bottom: 1px solid #d6d3d1; padding-bottom: 20px; }
-.editor summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
-.editor label { display: block; font-size: 14px; font-weight: 600; }
-.editor :global(.preset-control) { margin-top: 12px; display: grid; gap: 6px; }
-.editor :global(.preset-input-row) { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-.editor :global(.preset-input-row) input, .editor :global(.preset-input-row) select { flex: 1; min-width: 80px; width: 0; }
-.editor :global(.preset-swatch) { width: 24px; height: 24px; border: 1px solid #a8a29e; border-radius: 50%; flex-shrink: 0; }
-.editor input, .editor textarea { width: 100%; min-width: 0; box-sizing: border-box; }
-.editor textarea { margin: 12px 0; font-family: monospace; font-size: 13px; }
-.editor pre { padding: 16px; background: #e7e5e4; white-space: pre-wrap; overflow-wrap: anywhere; }
-.editor code { overflow-wrap: anywhere; font-size: 13px; }
-.editor dialog { max-width: min(600px, calc(100vw - 32px)); max-height: 80vh; overflow: auto; padding: 24px; background: #faf9f6; color: #292524; border: 1px solid #a8a29e; border-radius: 10px; }
-.editor dialog::backdrop { background: #29252480; }
-.editor dialog li { overflow-wrap: anywhere; padding: 4px 0; }
-.toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.workbench { display: grid; grid-template-columns: minmax(280px, 400px) minmax(0, 1fr); gap: 32px; align-items: start; }
-.preview { position: sticky; top: 16px; min-width: 0; }
-.contrast { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); font-size: 13px; }
-@media (max-width: 800px) { .editor { padding: 24px 16px 48px; } .workbench { grid-template-columns: minmax(0, 1fr); } .preview { position: static; } .contrast { grid-template-columns: minmax(0, 1fr); } }
+.editor {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+  color: #292524;
+  background: #faf9f6;
+  font-family: Arial, sans-serif;
+}
+.editor header {
+  border-bottom: 1px solid #d6d3d1;
+  padding-bottom: 24px;
+  margin-bottom: 20px;
+}
+.editor h1 {
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  margin: 12px 0;
+}
+.editor h2 {
+  font-size: 22px;
+  margin: 24px 0 12px;
+}
+.editor h3 {
+  font-size: 18px;
+  margin-top: 24px;
+}
+.editor p {
+  margin: 10px 0;
+  line-height: 1.6;
+}
+.editor a {
+  color: #344e41;
+  text-decoration: underline;
+}
+.editor button,
+.editor input,
+.editor select,
+.editor textarea {
+  font: inherit;
+  border: 1px solid #a8a29e;
+  border-radius: 5px;
+  padding: 9px 10px;
+  background: #fff;
+  color: #292524;
+  min-height: 44px;
+}
+.editor button {
+  cursor: pointer;
+}
+.editor button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.editor :focus-visible {
+  outline: 3px solid #42634c;
+  outline-offset: 3px;
+}
+.editor [aria-invalid='true'] {
+  border-color: #b91c1c;
+}
+.editor [role='alert'] {
+  border-left: 3px solid #b45309;
+  padding: 8px 14px;
+  background: #fffbeb;
+}
+.editor fieldset {
+  border: 1px solid #d6d3d1;
+  padding: 16px;
+  border-radius: 8px;
+}
+.editor details {
+  margin: 20px 0;
+  border-bottom: 1px solid #d6d3d1;
+  padding-bottom: 20px;
+}
+.editor summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 8px 0;
+}
+.editor label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+.editor :global(.preset-control) {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+.editor :global(.preset-input-row) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+.editor :global(.preset-input-row) input,
+.editor :global(.preset-input-row) select {
+  flex: 1;
+  min-width: 80px;
+  width: 0;
+}
+.editor :global(.preset-swatch) {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #a8a29e;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.editor input,
+.editor textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.editor textarea {
+  margin: 12px 0;
+  font-family: monospace;
+  font-size: 13px;
+}
+.editor pre {
+  padding: 16px;
+  background: #e7e5e4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.editor code {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+.editor dialog {
+  max-width: min(600px, calc(100vw - 32px));
+  max-height: 80vh;
+  overflow: auto;
+  padding: 24px;
+  background: #faf9f6;
+  color: #292524;
+  border: 1px solid #a8a29e;
+  border-radius: 10px;
+}
+.editor dialog::backdrop {
+  background: #29252480;
+}
+.editor dialog li {
+  overflow-wrap: anywhere;
+  padding: 4px 0;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.workbench {
+  display: grid;
+  grid-template-columns: minmax(280px, 400px) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+.preview {
+  position: sticky;
+  top: 16px;
+  min-width: 0;
+}
+.contrast {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  font-size: 13px;
+}
+@media (max-width: 800px) {
+  .editor {
+    padding: 24px 16px 48px;
+  }
+  .workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .preview {
+    position: static;
+  }
+  .contrast {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
