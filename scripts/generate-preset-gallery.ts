@@ -31,6 +31,7 @@ export async function writePresetGallery(root: string): Promise<void> {
   const mappings = Object.entries(result.theme.theme).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `${key}:${value};`).join('')
   await fs.writeFile(path.join(root, 'tailwind.css'), `@import "tailwindcss";\n@custom-variant dark (&:where(.dark, .dark *));\n@source "./components";\n@source "./gallery.tsx";\n@theme inline {${mappings}}\n`)
   await fs.writeFile(path.join(root, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
+  await fs.writeFile(path.join(root, 'manifest.ts'), 'export default ' + JSON.stringify(manifest, null, 2) + ' as const\n')
   // Vite reads these exact transformed bytes at build time. The runtime hashes
   // the same raw files before acknowledging a preview, rather than trusting a
   // manifest containing unverified transformed hashes.
