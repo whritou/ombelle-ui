@@ -17,6 +17,8 @@ The local Button editor runs in the product app and uses the preview server for 
 
 The [minimalist preview](http://127.0.0.1:4173/minimalist/?mode=light) supports both `?mode=light` and `?mode=dark`. Add `&states=1` to inspect Button variants/sizes, Input states, and a long Dialog. Theme-only installation updates shared tokens and saved defaults; existing upstream component source retains its own styling.
 
+The local [global preset editor](http://127.0.0.1:3000/editor/preset) runs with the same two servers. Edit both palettes and project design tokens, inspect the twelve-component gallery, and download `project-preset.json`. Apply it with the private local CLI's `init --preset` or `theme add`; later component additions inherit the saved preset. Draft recovery and undo/redo are local to this editor. JSON and CSS exports require a successful compile of the current draft; valid exports remain available if the preview server is unavailable. See [preset editor usage](docs/foundation-local-usage.md#local-global-preset-editor) for the commands and ownership rules. Immutable snapshot publishing and saved-code resolution remain later M4 work.
+
 For the complete check, also install [Bun **1.4.3**](https://github.com/oven-sh/bun/releases/tag/bun-v1.4.3), npm **11.19.0**, both pinned Yarn versions, and the test browser. Bun must be on PATH, or set `OMBELLE_BUN_EXECUTABLE` to its absolute native executable path. Prime Yarn outside this pnpm project:
 
 ```powershell

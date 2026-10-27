@@ -1,6 +1,6 @@
 # Local Global Preset Editor Design
 
-**Status:** Proposed for review; implementation has not started.
+**Status:** Approved for implementation through the user's continuation on 2026-10-27; verification is in progress.
 **Date:** 2026-10-27
 **Baseline:** `403685d`, the M3 Button editor merge on `main`.
 
@@ -8,7 +8,7 @@
 
 Give a developer a reusable project theme they can edit in the browser, inspect across the catalog, download, and apply through the existing local CLI. A later ordinary `add` in a new process must inherit that exact saved preset. This is the first increment of M4 in [the delivery plan](../../07-delivery-plan.md), building on the local Button editor rather than expanding component recipe editing.
 
-The user's request is to prepare the spec and plan. The scope and implementation choices below are author proposals based on the preceding recommendation and existing product requirements. They are not a claim that a new design has already been approved.
+The spec and plan were prepared from the preceding recommendation and existing product requirements. The user subsequently authorized continuing with implementation. The scope below covers the local editor increment described in that recommendation.
 
 The complete M4 milestone also needs anonymous immutable snapshot publishing and saved-code resolution. This increment ends at local export and installation. It introduces no public API, storage service, deployment, account, publication action, or remote install command. A subsequent spec must define snapshot identity, revision allocation, retention, rate limits, idempotency, CLI caching, hash verification, and public-read semantics before adding that workflow.
 

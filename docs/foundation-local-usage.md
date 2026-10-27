@@ -121,3 +121,26 @@ The example creates `<componentsDir>/recipes/rc_primary-button/r2/button.tsx` an
 Recipe installation preserves the saved global preset, theme, style pack, ordinary components, and existing usages. A recorded shared utility can be reused only if unchanged and byte-compatible; an untracked or edited utility causes a conflict requiring manual reconciliation. `--yes` does not override conflicts. Repeating the same recipe is a no-op when its files and dependencies still match. Changed content under the same ID/revision conflicts; use a new revision to install alongside it. Later ordinary additions and compatible global theme changes retain recipe provenance and its pinned appearance.
 
 Dark mode follows the project's configured single class, default `.dark`; `.night` and `.theme-dark` also work. Complex selectors and custom `paths.recipeOutput` roots are outside this slice. A dark-selector change affecting an existing recipe requires an explicit migration. Parent workspace ownership, paths, dependencies, and failure/recovery use the existing installer safeguards. Component-scoped local preset installation is documented above; remote preset/recipe codes remain pending.
+
+## Local global preset editor
+
+Run `pnpm build:packages` and `pnpm generate:preview`, then run `pnpm dev:preview` and `pnpm dev:www` in separate terminals. Open [the global preset editor](http://127.0.0.1:3000/editor/preset). The preview server supplies its sandboxed gallery; valid JSON/CSS export also works when that server is unavailable.
+
+Choose flat, minimalist, or neo brutalism and customize the light/dark colors, system font, radius, density, border width, shadow offsets, and motion. The gallery includes all twelve catalog components and an interactive Dialog. The editor uses preset schema 1.0 and catalog/compiler 0.1.0. Colors use the existing hex/OKLCH contract. Contrast warnings evaluate eight text pairs in both modes; the draft status describes that limited automated check.
+
+Explicit token edits survive a family change, including values equal to the previous base. The confirmation lists untouched values that will change to the new base. Cancel, undo/redo, field reset, and confirmed full reset preserve the preset's editable identity. Incomplete input stays in the draft and produces a field-linked validation error. Export actions become available only after that exact current draft compiles.
+
+Download `project-preset.json` into the Ombelle repository. With `APP` replaced by the target project directory, review a new setup or an existing-shadcn theme plan:
+
+```powershell
+pnpm exec node packages/cli/dist/main.js init --preset ./project-preset.json --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js theme add ./project-preset.json --cwd APP --dry-run --json
+```
+
+Apply the selected operation by replacing `--dry-run --json` with `--yes`. The CLI preserves the target's manager and lockfile ownership. Its parsed theme merge preserves unrelated CSS and existing component source; edited owned styles still produce a conflict. Later commands such as `add input` use the saved project preset in a new process without another preset argument. The CLI installs each component's required colocated CSS alongside its source.
+
+The export panel shows normalized preset JSON, its hash and exact versions, **Tailwind v4 token CSS**, family CSS, and dependency versions. Token CSS includes Tailwind directives for the supported build pipeline. Use the CLI theme path to perform the managed merge; applying palette variables to existing shadcn components retains their own markup and styling behavior.
+
+Drafts and bounded undo history use separate versioned local storage keys from the Button recipe editor. Refresh restores even incomplete fields. Malformed drafts or unknown storage versions offer the original data as a recovery download before an explicit reset. Invalid history is discarded with a visible notice while the valid draft remains. Storage and clipboard failures offer in-memory editing and selectable export text.
+
+This is local M4 editing and export. The private CLI commands above are the implemented install path. Snapshot publishing, saved-code resolution, public package commands, and using a custom project preset inside the Button recipe editor need subsequent implementations.
