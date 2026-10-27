@@ -12,7 +12,7 @@
     "build:editor-worker": "node scripts/build-editor-worker.mjs",
     "build": "pnpm build:packages",
     "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",
-    "test:unit": "vitest run packages --reporter=default --reporter=json --outputFile=.artifacts/unit-results.json",
+    "test:unit": "vitest run packages apps/www/src --reporter=default --reporter=json --outputFile=.artifacts/unit-results.json",
     "test:integration": "vitest run --config vitest.integration.config.ts tests/integration --reporter=default --reporter=json --outputFile=.artifacts/integration-results.json",
     "test": "pnpm build:packages && pnpm test:unit && pnpm test:integration",
     "generate:preview": "tsx scripts/generate-preview.ts",

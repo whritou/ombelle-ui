@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import { selectFamily } from './scenarios'
-if (window.location.pathname === '/editor-preview/' || window.location.pathname === '/editor-preview') {
+if (window.location.pathname === '/preset-preview/' || window.location.pathname === '/preset-preview') {
+  const { mountPresetPreview } = await import('./preset-preview')
+  mountPresetPreview(document.getElementById('root')!)
+} else if (window.location.pathname === '/editor-preview/' || window.location.pathname === '/editor-preview') {
   const { mountEditorPreview } = await import('./editor-preview')
   mountEditorPreview(document.getElementById('root')!)
 } else {

@@ -28,7 +28,7 @@ async function expectedTestInventory(kind) {
   if (!['unit', 'integration'].includes(kind)) fail('Unknown foundation test selection')
   if (!testInventories.has(kind)) {
     const selection = kind === 'unit'
-      ? ['packages']
+      ? ['packages', 'apps/www/src']
       : ['--config', 'vitest.integration.config.ts', 'tests/integration']
     const cli = path.join(path.dirname(fileURLToPath(import.meta.resolve('vitest/package.json'))), 'vitest.mjs')
     // Collect current-checkout definitions using the same config/selection as the
@@ -50,14 +50,21 @@ async function expectedTestInventory(kind) {
 }
 
 export async function validateTestResults(result, kind) {
-  const prefix = kind === 'unit' ? 'packages/' : 'tests/integration/'
+  const prefixes = kind === 'unit' ? ['packages/', 'apps/www/src/'] : ['tests/integration/']
   const relativeFile = name => {
     const normalized = String(name).replaceAll('\\', '/')
-    return normalized.slice(normalized.lastIndexOf('/' + prefix) + 1)
+    for (const prefix of prefixes) {
+      if (normalized.startsWith(prefix)) return normalized
+      const index = normalized.lastIndexOf('/' + prefix)
+      if (index !== -1) return normalized.slice(index + 1)
+    }
+    return normalized
   }
   const expected = new Map()
-  const pattern = prefix + (kind === 'unit' ? '**/*.test.{ts,tsx}' : '**/*.test.ts')
-  for await (const file of fs.glob(pattern, { cwd: repo })) expected.set(file.replaceAll('\\', '/'), new Map())
+  for (const prefix of prefixes) {
+    const pattern = prefix + (kind === 'unit' ? '**/*.test.{ts,tsx}' : '**/*.test.ts')
+    for await (const file of fs.glob(pattern, { cwd: repo })) expected.set(file.replaceAll('\\', '/'), new Map())
+  }
   if (!expected.size || !Array.isArray(result.testResults)) fail('Missing ' + kind + ' test files')
   for (const test of await expectedTestInventory(kind)) {
     const names = expected.get(relativeFile(test.file))
@@ -89,9 +96,9 @@ export async function validateTestResults(result, kind) {
   return { passed: assertions, failed: 0, skipped: 0 }
 }
 
-// Thirteen evidence-owning specs, without importing Playwright configuration
+// Fourteen evidence-owning specs, without importing Playwright configuration
 // (which needs this runner's consumer roots). Update this contract with added specs.
-const browserSpecCounts = { 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }
+const browserSpecCounts = { 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'preset-editor.spec.ts': 26, 'recipes.spec.ts': 20, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }
 export function validateBrowserResults(result) {
   const remaining = { ...browserSpecCounts }, ids = new Set(), titles = new Set()
   let count = 0

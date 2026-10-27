@@ -13,3 +13,14 @@ await build({
   target: 'es2023',
   minify: true,
 })
+
+await build({
+  entryPoints: [fileURLToPath(new URL('../apps/www/src/preset-editor/compile.worker.ts', import.meta.url))],
+  outfile: fileURLToPath(new URL('../apps/www/public/preset-compiler.worker.js', import.meta.url)),
+  absWorkingDir: root,
+  bundle: true,
+  platform: 'browser',
+  format: 'esm',
+  target: 'es2023',
+  minify: true,
+})

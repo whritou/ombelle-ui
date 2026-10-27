@@ -4,7 +4,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { afterEach, expect, test } from 'vitest'
 // @ts-expect-error JavaScript gate entry point
-import { aggregateFoundationEvidence, validateBrowserResults } from '../../scripts/foundation-evidence.mjs'
+import { aggregateFoundationEvidence, validateBrowserResults, validateTestResults } from '../../scripts/foundation-evidence.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
 
 const roots: string[] = []
@@ -14,22 +14,25 @@ const stages = {
   consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'build:consumers', 'test:e2e'],
 }
 let base: Promise<Record<string, Record<string, any>>> | undefined
-let collectedDefinitions: { name: string; file: string }[] | undefined
+const collectedDefinitions = new Map<string, { name: string; file: string }[]>()
 function browserResults() {
   return {
-    stats: { expected: 307, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
-    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'recipes.spec.ts': 20, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }).map(([file, count]) => ({
+    stats: { expected: 333, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
+    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'preset-editor.spec.ts': 26, 'recipes.spec.ts': 20, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }).map(([file, count]) => ({
       file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
     })),
   }
 }
-async function testResults(prefix: string) {
+async function testResults(prefix: string | string[]) {
   // Collect from source independently of the aggregate implementation. This is
   // structural reporter data only; no test bodies execute during collection.
-  if (!collectedDefinitions) {
-    // One bounded discovery for fixture construction; production independently
-    // collects the unit and integration selections with their respective configs.
-    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', '--config', 'vitest.integration.config.ts', '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 180000, maxBuffer: 8 * 1024 * 1024 })
+  const prefixes = Array.isArray(prefix) ? prefix : [prefix]
+  const kind = prefixes.includes('tests/integration/') ? 'integration' : 'unit'
+  if (!collectedDefinitions.has(kind)) {
+    // Discover only the requested test class, independently of the production
+    // collector. Listing the entire workspace for unit fixtures is unnecessary.
+    const selection = kind === 'unit' ? ['packages', 'apps/www/src'] : ['--config', 'vitest.integration.config.ts', 'tests/integration']
+    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', ...selection, '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 180000, maxBuffer: 8 * 1024 * 1024 })
     if (collected.status !== 0) {
       throw new Error([
         `Vitest integration test collection failed (status: ${collected.status ?? 'null'}, signal: ${collected.signal ?? 'none'}, error: ${collected.error?.message ?? 'none'})`,
@@ -37,12 +40,12 @@ async function testResults(prefix: string) {
         `stderr:\n${collected.stderr}`,
       ].join('\n'))
     }
-    collectedDefinitions = JSON.parse(collected.stdout)
+    collectedDefinitions.set(kind, JSON.parse(collected.stdout))
   }
   const byFile = new Map<string, any[]>()
-  for (const row of collectedDefinitions!) {
+  for (const row of collectedDefinitions.get(kind)!) {
     const name = path.relative(process.cwd(), row.file).replaceAll('\\', '/')
-    if (!name.startsWith(prefix)) continue
+    if (!prefixes.some((prefix) => name.startsWith(prefix))) continue
     const assertions = byFile.get(name) ?? []
     assertions.push({ fullName: row.name, ancestorTitles: [], title: row.name, status: 'passed', failureMessages: [] })
     byFile.set(name, assertions)
@@ -54,7 +57,7 @@ async function testResults(prefix: string) {
 async function data() {
   const { matrix, consumers, recipes } = await consumerFixture()
   return {
-    quality: { 'unit-results.json': await testResults('packages/'), 'integration-results.json': await testResults('tests/integration/') },
+    quality: { 'unit-results.json': await testResults(['packages/', 'apps/www/src/']), 'integration-results.json': await testResults('tests/integration/') },
     consumers: {
       'consumer-matrix.json': matrix,
       'recipe-consumers.json': recipes,
@@ -93,24 +96,46 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
 test('accepts complete browser evidence including all 30 Card cases', () => {
-  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 307 })
+  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 333 })
+})
+test('rejects omitted preset editor cases even when reporter totals are adjusted', () => {
+  const result = browserResults()
+  result.suites = result.suites.filter((suite) => suite.file !== 'preset-editor.spec.ts')
+  result.stats.expected = 307
+  expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
+})
+test('accepts app unit evidence from Windows and Unix source paths', async () => {
+  const result = await testResults(['packages/', 'apps/www/src/'])
+  expect(result.testResults.some((suite) => suite.name.includes('/apps/www/src/preset-editor/'))).toBe(true)
+  await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
+  for (const suite of result.testResults) suite.name = 'Z:\\portable-checkout\\' + suite.name.replace('/different-checkout/', '').replaceAll('/', '\\')
+  await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
+}, 180000)
+test('rejects missing app unit files and assertions after headline counts are adjusted', async () => {
+  for (const mode of ['file', 'assertion']) {
+    const result = await testResults(['packages/', 'apps/www/src/'])
+    const index = result.testResults.findIndex((suite) => suite.name.endsWith('preset-editor/model.test.ts'))
+    const removed = mode === 'file' ? result.testResults.splice(index, 1)[0].assertionResults.length : (result.testResults[index].assertionResults.pop(), 1)
+    result.numTotalTests -= removed; result.numPassedTests -= removed
+    await expect(validateTestResults(result, 'unit')).rejects.toThrow()
+  }
 })
 test('rejects omitted Card browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'card.spec.ts')
-  result.stats.expected = 268
+  result.stats.expected = 303
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted Forms browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'forms.spec.ts')
-  result.stats.expected = 268
+  result.stats.expected = 303
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted editor browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'editor.spec.ts')
-  result.stats.expected = 298
+  result.stats.expected = 324
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('accepts complete portable structural evidence without any consumer root descriptors', async () => {
@@ -122,7 +147,7 @@ test('accepts complete portable structural evidence without any consumer root de
   const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
-  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 307 } } })
+  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 333 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)
@@ -210,6 +235,6 @@ test.each(['quality', 'consumers'])('executes %s stages independently and clears
 test.each(['checkbox', 'switch', 'tabs', 'tooltip'])('rejects omitted %s browser cases even when reporter totals are adjusted', (id) => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== id + '.spec.ts')
-  result.stats.expected = 268
+  result.stats.expected = 303
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })

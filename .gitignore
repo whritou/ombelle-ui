@@ -7,3 +7,4 @@ test-results/
 apps/preview/src/generated/
 .artifacts/
 apps/www/public/editor-compiler.worker.js
+apps/www/public/preset-compiler.worker.js
