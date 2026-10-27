@@ -1,6 +1,6 @@
 import { canonicalize } from '@ombelle/compiler'
-import type { PresetEditorDraft } from './model.js'
-import type { PresetCompilerState } from './use-preset-compiler.js'
+import type { PresetEditorDraft } from './model'
+import type { PresetCompilerState } from './use-preset-compiler'
 export function canExportPreset(state: PresetCompilerState, draft: PresetEditorDraft): boolean { return state.status === 'compiled' && !state.stale && state.result !== null && state.draftKey === canonicalize(draft) }
 function result(state: PresetCompilerState, draft: PresetEditorDraft) { if (!canExportPreset(state, draft)) throw new Error('Wait for the current draft to compile.'); return state.result! }
 export function serializePresetExport(state: PresetCompilerState, draft: PresetEditorDraft): string { return canonicalize(result(state, draft).preset.data) + '\n' }

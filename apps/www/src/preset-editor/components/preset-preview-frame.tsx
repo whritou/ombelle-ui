@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import type { CompileResult } from '@ombelle/contracts'
-import { isPresetAck, isPresetHandshake, type PresetRender, type PresetView } from '../preview-protocol.js'
+import { isPresetAck, isPresetHandshake, type PresetRender, type PresetView } from '../preview-protocol'
 
 export function PresetPreviewFrame({ result, view, stale, onStatus }: { result: CompileResult | null; view: PresetView; stale: boolean; onStatus: (status: 'connecting' | 'ready' | 'failed') => void }) {
   const frame = useRef<HTMLIFrameElement>(null), port = useRef<MessagePort | null>(null)

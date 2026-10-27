@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest'
 import { compile } from '@ombelle/compiler'
 import { supportedComponentIds } from '@ombelle/contracts'
-import { createPresetDraft, materializePreset, setPresetEdit } from './model.js'
-import { handlePresetCompileMessage } from './compile-protocol.js'
+import { createPresetDraft, materializePreset, setPresetEdit } from './model'
+import { handlePresetCompileMessage } from './compile-protocol'
 
 it('compiles the exact twelve-component edited preset', async () => {
   let draft = setPresetEdit(createPresetDraft('minimalist'), '/modes/light/primary', '#123456')

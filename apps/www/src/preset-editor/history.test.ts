@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
-import { createPresetDraft, setPresetEdit } from './model.js'
-import { createPresetHistory, recordPresetDraft, undoPreset, redoPreset } from './history.js'
+import { createPresetDraft, setPresetEdit } from './model'
+import { createPresetHistory, recordPresetDraft, undoPreset, redoPreset } from './history'
 
 it('coalesces only same-field edits within 500 ms and ignores no-ops', () => {
   const start = createPresetHistory(createPresetDraft('flat'))

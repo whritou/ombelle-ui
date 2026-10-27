@@ -1,5 +1,5 @@
 import { canonicalize } from '@ombelle/compiler'
-import { validateDraftEnvelope, type PresetEditorDraft } from './model.js'
+import { validateDraftEnvelope, type PresetEditorDraft } from './model'
 
 export type PresetHistory = { past: PresetEditorDraft[]; present: PresetEditorDraft; future: PresetEditorDraft[]; lastEdit: { key: string; at: number } | null }
 export function createPresetHistory(draft: PresetEditorDraft): PresetHistory { return { past: [], present: validateDraftEnvelope(draft), future: [], lastEdit: null } }

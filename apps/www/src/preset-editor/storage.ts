@@ -1,6 +1,6 @@
 import { canonicalize } from '@ombelle/compiler'
-import { createPresetDraft, validateDraftEnvelope } from './model.js'
-import { createPresetHistory, type PresetHistory } from './history.js'
+import { createPresetDraft, validateDraftEnvelope } from './model'
+import { createPresetHistory, type PresetHistory } from './history'
 
 export const draftStorageKey = 'ombelle:preset-editor:draft:v1'
 export const historyStorageKey = 'ombelle:preset-editor:history:v1'

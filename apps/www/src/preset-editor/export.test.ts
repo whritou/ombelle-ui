@@ -1,9 +1,9 @@
 import { expect, it } from 'vitest'
 import { canonicalize } from '@ombelle/compiler'
-import { createPresetDraft, setPresetEdit } from './model.js'
-import { handlePresetCompileMessage } from './compile-protocol.js'
-import { canExportPreset, serializePresetExport, presetCssExport } from './export.js'
-import type { PresetCompilerState } from './use-preset-compiler.js'
+import { createPresetDraft, setPresetEdit } from './model'
+import { handlePresetCompileMessage } from './compile-protocol'
+import { canExportPreset, serializePresetExport, presetCssExport } from './export'
+import type { PresetCompilerState } from './use-preset-compiler'
 
 it('exports only the current normalized result and exact CSS artifacts', async () => {
   const draft = createPresetDraft('flat')

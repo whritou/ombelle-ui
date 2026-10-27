@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { canonicalize } from '@ombelle/compiler'
 import type { CompileResult } from '@ombelle/contracts'
-import type { PresetEditorDraft } from './model.js'
-import type { PresetCompileRequest, PresetCompileResponse, PresetDiagnostic } from './compile-protocol.js'
+import type { PresetEditorDraft } from './model'
+import type { PresetCompileRequest, PresetCompileResponse, PresetDiagnostic } from './compile-protocol'
 
 export type PresetCompilerState = { status: 'idle' | 'compiling' | 'compiled' | 'invalid'; result: CompileResult | null; draftKey: string | null; diagnostic: PresetDiagnostic | null; stale: boolean }
 const initial = (): PresetCompilerState => ({ status: 'idle', result: null, draftKey: null, diagnostic: null, stale: false })

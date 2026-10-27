@@ -1,6 +1,6 @@
 import { canonicalize, compile, sha256 } from '@ombelle/compiler'
 import { supportedComponentIds, isStyleFamily, type CompileResult } from '@ombelle/contracts'
-import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery.js'
+import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 export type PresetView = { mode: 'light' | 'dark'; viewport: 'wide' | 'narrow' }
 export type PresetRender = { type: 'preset-render'; requestId: number; result: CompileResult; view: PresetView }
 export type PresetAck = { type: 'preset-render-ack'; requestId: number; presetHash: string; status: 'applied' | 'rejected' }

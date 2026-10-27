@@ -1,6 +1,6 @@
 import { compile } from '@ombelle/compiler'
 import { FoundationError, supportedComponentIds, type CompileResult } from '@ombelle/contracts'
-import { materializePreset, validateDraftEnvelope, type PresetEditorDraft } from './model.js'
+import { materializePreset, validateDraftEnvelope, type PresetEditorDraft } from './model'
 
 export type PresetDiagnostic = { code: string; message: string; path?: string; nextAction?: string }
 export type PresetCompileRequest = { type: 'compile-preset'; requestId: number; draft: PresetEditorDraft }

@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
-import { createPresetDraft, editablePaths, setPresetEdit } from './model.js'
-import { createPresetHistory, recordPresetDraft } from './history.js'
-import { loadPresetSession, savePresetSession, draftStorageKey, historyStorageKey, type PresetStorage } from './storage.js'
+import { createPresetDraft, editablePaths, setPresetEdit } from './model'
+import { createPresetHistory, recordPresetDraft } from './history'
+import { loadPresetSession, savePresetSession, draftStorageKey, historyStorageKey, type PresetStorage } from './storage'
 
 function memory() {
   const values = new Map<string, string>([['ombelle.button-editor.draft', 'untouched']])

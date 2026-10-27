@@ -2,8 +2,8 @@ import { beforeAll, expect, it } from 'vitest'
 import { compile, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedComponentIds, type CompileResult } from '@ombelle/contracts'
-import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery.js'
-import { verifyPresetRender, verifyGallerySources, presetRuntimeStyles, isPresetHandshake, isPresetAck } from './preview-protocol.js'
+import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
+import { verifyPresetRender, verifyGallerySources, presetRuntimeStyles, isPresetHandshake, isPresetAck } from './preview-protocol'
 
 let result: CompileResult, manifest: PresetSourceManifest
 beforeAll(async () => {

@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { createPresetDraft, setPresetEdit } from './model.js'
-import { createPresetCompiler } from './use-preset-compiler.js'
-import { handlePresetCompileMessage } from './compile-protocol.js'
+import { createPresetDraft, setPresetEdit } from './model'
+import { createPresetCompiler } from './use-preset-compiler'
+import { handlePresetCompileMessage } from './compile-protocol'
 
 afterEach(() => vi.useRealTimers())
 it('debounces by 150ms and rejects old responses even before the next dispatch', async () => {

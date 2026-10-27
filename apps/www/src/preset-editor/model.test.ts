@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedStyleFamilies } from '@ombelle/contracts'
-import { createPresetDraft, materializePreset, validateDraftEnvelope, setPresetEdit, setPresetIdentity, resetPresetField, resetPresetTokens, planPresetFamilyChange, colorKeys, designControls } from './model.js'
+import { createPresetDraft, materializePreset, validateDraftEnvelope, setPresetEdit, setPresetIdentity, resetPresetField, resetPresetTokens, planPresetFamilyChange, colorKeys, designControls } from './model'
 
 it.each(supportedStyleFamilies)('materializes %s without mutating catalog input', (family) => {
   const base = structuredClone(getCatalog('0.1.0').presets[family])
