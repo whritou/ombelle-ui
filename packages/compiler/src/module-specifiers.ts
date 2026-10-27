@@ -1,5 +1,18 @@
 import { parsers } from 'prettier/plugins/typescript'
 
+/** Remove only reviewed side-effect CSS imports for an isolated preview. */
+export async function stripStylesheetImports(content: string, allowed: readonly string[]): Promise<string> {
+  const ast = await parsers.typescript.parse(content, { filepath: 'artifact.tsx' } as Parameters<typeof parsers.typescript.parse>[1])
+  const removals: Array<{ start: number; end: number }> = []
+  for (const node of ast.body) {
+    if (node.type !== 'ImportDeclaration' || !node.source?.value.endsWith('.css')) continue
+    if (!allowed.includes(node.source.value) || node.specifiers.length !== 0) throw new Error('Unknown gallery stylesheet: ' + node.source.value)
+    removals.push({ start: node.range[0], end: node.range[1] })
+  }
+  for (const { start, end } of removals.reverse()) content = content.slice(0, start) + content.slice(end)
+  return content
+}
+
 /** Rewrite module imports without changing user-authored string literals. */
 export async function rewriteModuleSpecifiers(
   content: string,
