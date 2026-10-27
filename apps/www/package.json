@@ -1,0 +1,24 @@
+{
+  "name": "@ombelle/www",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "node ../../scripts/build-editor-worker.mjs",
+    "dev": "next dev --hostname 127.0.0.1 --port 3000",
+    "prebuild": "node ../../scripts/build-editor-worker.mjs",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@ombelle/contracts": "workspace:*",
+    "@ombelle/catalog": "workspace:*",
+    "@ombelle/compiler": "workspace:*",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  }
+}

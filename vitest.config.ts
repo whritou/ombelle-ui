@@ -24,6 +24,8 @@ export default defineConfig({
     include: [
       'packages/**/*.test.ts',
       'packages/**/*.test.tsx',
+      'apps/www/src/**/*.test.ts',
+      'apps/www/src/**/*.test.tsx',
       'tests/integration/**/*.test.ts',
     ],
     testTimeout: 60000,
