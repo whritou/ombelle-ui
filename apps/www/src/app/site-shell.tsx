@@ -7,7 +7,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false)
   return (
     <header className="site-header">
-      <Link href="/" className="brand" aria-label="Ombelle home"><img src="/ombelle-symbol.png" alt="" /><img className="wordmark" src="/ombelle-wordmark.png" alt="Ombelle" /></Link>
+      <Link href="/" className="brand" aria-label="Ombelle home"><img className="brand-symbol" src="/ombelle-symbol.png" alt="" /><img className="wordmark" src="/ombelle-wordmark.png" alt="Ombelle UI" /></Link>
       <button className="mobile-menu" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle navigation">Menu</button>
       <nav className={open ? 'nav-links open' : 'nav-links'}>
         <Link href="/docs">Documentation</Link><Link href="/components">Components</Link><Link href="/presets">Presets</Link><a href="https://github.com/whritou/ombelle-ui">GitHub</a>
