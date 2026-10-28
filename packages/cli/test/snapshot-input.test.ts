@@ -3,6 +3,8 @@ import path from 'node:path'
 import os from 'node:os'
 import { createServer, type ServerResponse } from 'node:http'
 import { createServer as createHttpsServer } from 'node:https'
+import { spawn } from 'node:child_process'
+import { pathToFileURL } from 'node:url'
 import { afterEach, beforeAll, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { normalizePublishedPreset } from '@ombelle/compiler'
@@ -81,14 +83,24 @@ it('keeps TLS certificate verification enabled even when the caller disables the
   const server = createHttpsServer({ key: await fs.readFile('tests/fixtures/snapshot-tls/key.pem'), cert: await fs.readFile('tests/fixtures/snapshot-tls/cert.pem') }, (_, response) => { response.setHeader('Content-Type', 'application/json'); response.end(JSON.stringify(snapshot)) })
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
   cleanup.push(async () => { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())) })
-  const previous = process.env.NODE_TLS_REJECT_UNAUTHORIZED
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-  try {
-    await expect(resolvePresetInput(reference, { ...options, origin: `https://127.0.0.1:${(server.address() as { port: number }).port}` })).rejects.toMatchObject({ code: 'RESOLUTION_FAILURE', message: expect.stringMatching(/self-signed|certificate/i) })
-  } finally {
-    if (previous === undefined) delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
-    else process.env.NODE_TLS_REJECT_UNAUTHORIZED = previous
-  }
+  const inputModule = pathToFileURL(path.resolve('packages/cli/src/snapshots/input.ts')).href
+  const result = await new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve, reject) => {
+    const child = spawn(process.execPath, ['--import', import.meta.resolve('tsx'), '--input-type=module', '-e', `
+      import { resolvePresetInput } from ${JSON.stringify(inputModule)};
+      try {
+        await resolvePresetInput(process.argv[1], JSON.parse(process.argv[2]));
+        process.exitCode = 1;
+      } catch (error) {
+        console.log(JSON.stringify({ code: error.code, message: error.message }));
+      }
+    `, reference, JSON.stringify({ ...options, origin: `https://127.0.0.1:${(server.address() as { port: number }).port}` })], { windowsHide: true, env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED: '0' } })
+    let stdout = '', stderr = ''
+    child.stdout.on('data', bytes => { stdout += bytes }); child.stderr.on('data', bytes => { stderr += bytes })
+    child.on('error', reject); child.on('close', code => resolve({ code, stdout, stderr }))
+  })
+  expect(result.code, result.stderr).toBe(0)
+  expect(result.stderr).toMatch(/NODE_TLS_REJECT_UNAUTHORIZED.*0/)
+  expect(JSON.parse(result.stdout)).toMatchObject({ code: 'RESOLUTION_FAILURE', message: expect.stringMatching(/self-signed|certificate/i) })
 })
 it.each(['http://example.com', 'http://127.1', 'https://example.com/path', 'https://a:b@example.com', 'https://example.com?x=1', 'https://example.com/#x'])('rejects unsafe origin %s before fetching', async origin => {
   const { options, requests } = await setup()

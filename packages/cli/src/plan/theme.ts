@@ -57,6 +57,9 @@ export async function planTheme(
   }
   const lock = baseLock(context, result),
     records: ManagedDeclaration[] = []
+  // An explicit global selection replaces its source independently of bytes.
+  // Remote provenance is attached to the completed plan by the input boundary.
+  delete lock.presetSource
   for (const [selector, values] of [
     [':root', result.theme.light],
     [context.darkSelector, result.theme.dark],

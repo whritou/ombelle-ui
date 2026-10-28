@@ -12,7 +12,8 @@ import {
 import { compile, compileButtonPreset, compileRecipe } from '@ombelle/compiler'
 import { readRecipeFile } from './recipe-file.js'
 import { resolvePresetInput, type ResolvedPresetInput } from './snapshots/input.js'
-import { snapshotCacheDirectory } from './snapshots/cache.js'
+import { snapshotCacheDirectory, writeSnapshotCache } from './snapshots/cache.js'
+import { applyPresetSourceToPlan } from './snapshots/source.js'
 import { planRecipe } from './plan/recipe.js'
 import { planComponentPreset } from './plan/component-preset.js'
 import { inspectProject } from './project/inspect.js'
@@ -182,6 +183,10 @@ export async function runCli(
           ? await planAdd(context, result)
           : await planTheme(context, result)
     }
+    if (presetInput)
+      await applyPresetSourceToPlan(
+        plan, context, presetInput, command === 'add' ? 'component' : 'global',
+      )
     if (presetInput?.source && presetInput.resolution !== 'local') {
       plan.presetResolution = {
         source: presetInput.source, via: presetInput.resolution,
@@ -228,6 +233,16 @@ export async function runCli(
       }
     }
     await applyPlan(plan)
+    if (presetInput?.source && presetInput.snapshot) {
+      try {
+        await writeSnapshotCache(
+          snapshotCacheDirectory(process.env), presetInput.source, presetInput.snapshot,
+        )
+      } catch (error) {
+        io.stderr('Warning: snapshot cache was not saved after successful apply: ' +
+          (error instanceof Error ? error.message : 'cache write failed'))
+      }
+    }
     emit('success')
     return 0
   } catch (cause) {

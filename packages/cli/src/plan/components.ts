@@ -56,6 +56,12 @@ export function baseLock(
     presetHash: result.preset.hash,
     artifacts: { ...context.lock?.artifacts },
     managedDeclarations: context.lock?.managedDeclarations ?? [],
+    ...(context.lock?.presetSource
+      ? { presetSource: structuredClone(context.lock.presetSource) }
+      : {}),
+    ...(context.lock?.componentPresetSources
+      ? { componentPresetSources: structuredClone(context.lock.componentPresetSources) }
+      : {}),
     ...(context.lock?.recipes
       ? { recipes: structuredClone(context.lock.recipes) }
       : {}),

@@ -69,6 +69,8 @@ export type InstalledArtifact = {
   kind: Artifact['kind']
 }
 export type ProjectLock = {
+  presetSource?: SnapshotSource
+  componentPresetSources?: Record<string, SnapshotSource>
   componentPresets?: Record<string, InstalledComponentPreset>
   recipes?: Record<string, InstalledRecipe>
   lockVersion: 1

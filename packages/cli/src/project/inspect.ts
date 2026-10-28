@@ -15,6 +15,7 @@ import { fingerprintFile } from './fingerprint.js'
 import { assertStandaloneProject } from './workspace.js'
 import { validateInstalledRecipes } from './recipes.js'
 import { validateInstalledComponentPresets } from './component-presets.js'
+import { validateSnapshotSources } from '../snapshots/source.js'
 export async function readText(
   root: string,
   relative: string,
@@ -217,6 +218,7 @@ export async function inspectProject(
       { root, componentsDir, sourceDir, utilsFile, uiAlias, utilsAlias },
     )
   const preset = raw ? validatePreset(raw) : undefined
+  if (lock) await validateSnapshotSources(lock, preset)
   return {
     ...(manager === 'bun'
       ? { bunLockfile: (present[0] ?? 'bun.lock') as BunLockfile }
