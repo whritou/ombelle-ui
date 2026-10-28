@@ -17,8 +17,8 @@ let base: Promise<Record<string, Record<string, any>>> | undefined
 const collectedDefinitions = new Map<string, { name: string; file: string }[]>()
 function browserResults() {
   return {
-    stats: { expected: 333, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
-    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'preset-editor.spec.ts': 26, 'recipes.spec.ts': 20, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }).map(([file, count]) => ({
+    stats: { expected: 355, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
+    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'preset-editor.spec.ts': 26, 'recipes.spec.ts': 20, 'snapshot-presets.spec.ts': 22, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }).map(([file, count]) => ({
       file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
     })),
   }
@@ -96,7 +96,18 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
 test('accepts complete browser evidence including all 30 Card cases', () => {
-  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 333 })
+  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 355 })
+})
+test('rejects omitted snapshot browser suite and assertions when totals are adjusted', () => {
+  const missingFile = browserResults()
+  missingFile.suites = missingFile.suites.filter((suite) => suite.file !== 'snapshot-presets.spec.ts')
+  missingFile.stats.expected = 333
+  expect(() => validateBrowserResults(missingFile)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
+  const missingAssertion = browserResults()
+  const suite = missingAssertion.suites.find((row) => row.file === 'snapshot-presets.spec.ts')!
+  suite.specs.pop()
+  missingAssertion.stats.expected = 354
+  expect(() => validateBrowserResults(missingAssertion)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted preset editor cases even when reporter totals are adjusted', () => {
   const result = browserResults()
@@ -147,7 +158,7 @@ test('accepts complete portable structural evidence without any consumer root de
   const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
-  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 333 } } })
+  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 355 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)

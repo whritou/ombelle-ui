@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Locator } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -16,6 +16,7 @@ import {
   setPresetEdit,
 } from '../../apps/www/src/preset-editor/model.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
+import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
 import {
   presetRuntimeStyles,
   type PresetRender,
@@ -78,40 +79,6 @@ async function seed(
   )
   await page.goto(url)
   await ready(page)
-}
-async function snapshot(locator: Locator) {
-  return locator.evaluate((root) => {
-    const nodes = [root, ...root.querySelectorAll('*')]
-    return nodes.map((node) => {
-      const css = getComputedStyle(node)
-      return {
-        tag: node.tagName,
-        text: node.children.length ? null : node.textContent,
-        slot: node.getAttribute('data-slot'),
-        state: node.getAttribute('data-state'),
-        invalid: node.getAttribute('aria-invalid'),
-        disabled: node.hasAttribute('disabled'),
-        styles: Object.fromEntries(
-          [
-            'color',
-            'background-color',
-            'font-family',
-            'font-size',
-            'font-weight',
-            'border-radius',
-            'border-width',
-            'border-color',
-            'box-shadow',
-            'min-height',
-            'height',
-            'padding',
-            'transition-duration',
-            'opacity',
-          ].map((key) => [key, css.getPropertyValue(key)]),
-        ),
-      }
-    })
-  })
 }
 
 for (const family of supportedStyleFamilies)
@@ -205,8 +172,8 @@ for (const family of supportedStyleFamilies)
               const specimen = consumer.getByTestId('preset-gallery')
               await expect(specimen).toBeVisible()
               expect(
-                await snapshot(frame(page).getByTestId('preset-gallery')),
-              ).toEqual(await snapshot(specimen))
+                await snapshotPresetDom(frame(page).getByTestId('preset-gallery')),
+              ).toEqual(await snapshotPresetDom(specimen))
               for (const artifact of result.artifacts.filter(
                 (a) => a.kind === 'component' || a.kind === 'utility',
               )) {
@@ -221,66 +188,13 @@ for (const family of supportedStyleFamilies)
                 )
               }
               await test.step('Compare rendered Button pixels', async () => {
-                await page
-                  .locator('iframe[title="Global preset gallery"]')
-                  .scrollIntoViewIfNeeded()
-                // Match the standalone document's raster origin before comparing
-                // pixels. A fractional host layout offset changes text antialiasing.
-                await page
-                  .locator('iframe[title="Global preset gallery"]')
-                  .evaluate((element) => {
-                    const box = element.getBoundingClientRect()
-                    element.style.transform = `translate(${Math.floor(box.x) - box.x}px, ${Math.floor(box.y) - box.y}px)`
-                  })
-                const inner = await frame(page)
-                  .getByTestId('preset-button')
-                  .evaluate((element) => {
-                    const box = element.getBoundingClientRect()
-                    return {
-                      x: box.x,
-                      y: box.y,
-                      width: box.width,
-                      height: box.height,
-                    }
-                  })
-                const host = await page
-                  .locator('iframe[title="Global preset gallery"]')
-                  .evaluate((element) => {
-                    const box = element.getBoundingClientRect()
-                    return {
-                      x: box.x + element.clientLeft,
-                      y: box.y + element.clientTop,
-                    }
-                  })
-                const box = {
-                  x: host.x + inner.x,
-                  y: host.y + inner.y,
-                  width: inner.width,
-                  height: inner.height,
-                }
-                const clip = {
-                  x: Math.floor(box.x),
-                  y: Math.floor(box.y),
-                  width: Math.ceil(box.x + box.width) - Math.floor(box.x),
-                  height: Math.ceil(box.y + box.height) - Math.floor(box.y),
-                }
-                const reference = await page.screenshot({
-                  clip,
-                  animations: 'disabled',
-                  timeout: 20000,
+                await assertPresetGalleryButtonPixels({
+                  page,
+                  iframe: page.locator('iframe[title="Global preset gallery"]'),
+                  previewButton: frame(page).getByTestId('preset-button'),
+                  installedButton: consumer.getByTestId('preset-button'),
+                  label: 'preset',
                 })
-                const installed = await consumer
-                  .getByTestId('preset-button')
-                  .screenshot({ animations: 'disabled', timeout: 20000 })
-                await test.info().attach('preset-preview-button', {
-                  body: reference,
-                  contentType: 'image/png',
-                })
-                await test.info().attach('preset-installed-button', {
-                  body: installed,
-                  contentType: 'image/png',
-                })
-                expect(reference.equals(installed)).toBe(true)
               })
               await frame(page)
                 .getByRole('button', { name: 'Open dialog', exact: true })
@@ -288,8 +202,8 @@ for (const family of supportedStyleFamilies)
               await consumer
                 .getByRole('button', { name: 'Open dialog', exact: true })
                 .click()
-              expect(await snapshot(frame(page).getByRole('dialog'))).toEqual(
-                await snapshot(consumer.getByRole('dialog')),
+              expect(await snapshotPresetDom(frame(page).getByRole('dialog'))).toEqual(
+                await snapshotPresetDom(consumer.getByRole('dialog')),
               )
               await frame(page)
                 .getByRole('button', { name: 'Close', exact: true })

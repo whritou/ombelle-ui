@@ -5,7 +5,9 @@ import { spawn } from 'node:child_process'
 import { resolveBunExecutable, safeRuntimeEnv } from '../../packages/cli/src/apply/executable.js'
 export async function runNative(file: string, args: string[], cwd: string, extra: NodeJS.ProcessEnv = {}) {
   return new Promise<{ code: number | null; output: string }>((resolve,reject)=>{
-    const child=spawn(file,args,{cwd,shell:false,windowsHide:true,timeout:180000,env:safeRuntimeEnv({...process.env,...extra})})
+    const env=safeRuntimeEnv({...process.env,...extra})
+    for (const [key,value] of Object.entries(extra)) if (value === undefined) delete env[process.platform === 'win32' ? key.toUpperCase() : key]
+    const child=spawn(file,args,{cwd,shell:false,windowsHide:true,timeout:180000,env})
     let output='';child.stdout.on('data',c=>output+=c);child.stderr.on('data',c=>output+=c);child.on('error',reject);child.on('close',code=>resolve({code,output}))
   })
 }
