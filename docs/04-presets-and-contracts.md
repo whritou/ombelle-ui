@@ -61,7 +61,7 @@ add button --preset ps_brand@3
 add button --preset ./brand.preset.json
 ```
 
-The current private foundation supports the local Button command `add button --preset <local.json>`. It installs a separate scoped Button and preserves the saved project preset and defaults for later ordinary additions. The `ps_brand@3` examples above show proposed future remote behavior: remote preset codes and snapshot publishing remain pending. Component-scoped support beyond Button also remains pending. See [local usage](foundation-local-usage.md#component-scoped-button-presets) for the supported command and boundaries.
+The current private foundation supports the local Button command `add button --preset <local.json>` and exact immutable snapshot references in the supported global and Button-scoped paths. It installs a separate scoped Button and preserves the saved project preset and defaults for later ordinary additions. The `ps_brand@3` examples above are illustrative proposed identifiers, not valid references in the current implementation. Component-scoped support beyond Button remains pending. See [local usage](foundation-local-usage.md#component-scoped-button-presets) and [snapshot operations](snapshot-service-operations.md) for the supported commands and boundaries.
 
 The public interface uses the named flag `--preset <code-or-file>`. A generated opaque code is a value, never a dynamically named flag such as `--random-string`. Published commands pin an immutable preset revision; if a friendly alias is accepted, show and lock its resolved revision and hash before installation. Local JSON is a permanent offline and version-control option, not a development-only substitute.
 
@@ -101,11 +101,11 @@ The local foundation implements the built-in-only Button path described in the [
 
 ## Snapshot model
 
-The server stores immutable preset snapshots and recipe snapshots. Store exact payload bytes or canonical normalized bytes, content hash, revision, catalog release, compiler version, creation time, and validation status separately. A status record includes test scope; a schema-valid user snapshot is a draft until verified through the relevant quality workflow.
+The private local snapshot service stores immutable preset snapshots. It stores the canonical normalized preset, content hash, revision, catalog release, compiler version, creation time, and validation status. The implemented identifier is `ps_` plus 32 lowercase hexadecimal characters with revision `1`; embedded preset identity remains unchanged. Every new intent creates a new identifier; only a matching idempotent retry within 24 hours reuses one. A schema-valid user snapshot remains a `draft`, not a verified or quality-reviewed preset. Recipe snapshots are not implemented.
 
-Publishing returns a revisioned reference. Human-friendly aliases may point to the latest revision, but exported install commands pin the immutable revision. An alias resolution is displayed and locked before installation.
+Publishing returns an exact immutable reference. Reads and installer resolution require the reference and expected hash. Human-friendly aliases and revision updates are not implemented.
 
-Proposed naming syntax is `presetId@revision` and `recipeId@revision`; this is our CLI contract, not a shadcn feature. A snapshot ID uses a conservative slug format and carries no secrets. Unlisted links are publicly readable to anyone holding the link and must not be labelled private.
+The private CLI syntax is `ps_<32 lowercase hex>@1`; it is not a shadcn feature. Exact references are publicly readable to anyone who has them and must not be labelled private. See [snapshot service operations](snapshot-service-operations.md) for the implemented API, operator controls, and limits, and [measured snapshot evidence](evidence/immutable-preset-snapshots.md) for verification status.
 
 ## Compatibility and migration
 
