@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
+import { PublishPreset } from '../../snapshots/components/publish-preset'
 import {
   canExportPreset,
   serializePresetExport,
@@ -149,6 +150,11 @@ export function PresetExportPanel({
         <code>--yes</code> to apply. A theme merge preserves existing component
         source; changing markup requires an explicit migration.
       </p>
+      <PublishPreset
+        preset={state.result?.preset ?? null}
+        current={enabled}
+        announce={announce}
+      />
     </section>
   )
 }
