@@ -199,3 +199,19 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.published {
+  overflow-wrap: anywhere;
+}
+.published textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .published {
+    padding: 24px 16px 48px;
+  }
+}
