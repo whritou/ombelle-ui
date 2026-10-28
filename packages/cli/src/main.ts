@@ -11,7 +11,8 @@ import {
 } from '@ombelle/contracts'
 import { compile, compileButtonPreset, compileRecipe } from '@ombelle/compiler'
 import { readRecipeFile } from './recipe-file.js'
-import { readPresetFile } from './preset-file.js'
+import { resolvePresetInput, type ResolvedPresetInput } from './snapshots/input.js'
+import { snapshotCacheDirectory } from './snapshots/cache.js'
 import { planRecipe } from './plan/recipe.js'
 import { planComponentPreset } from './plan/component-preset.js'
 import { inspectProject } from './project/inspect.js'
@@ -31,7 +32,7 @@ const exits: Record<string, number> = {
 const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
-  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]'
+  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1 with --snapshot-origin <origin> --preset-hash <64 lowercase hex>. Use --offline only with an explicit snapshot and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },
@@ -50,9 +51,13 @@ export async function runCli(
       if (a.startsWith('--')) {
         if (Object.hasOwn(flags, a))
           throw new FoundationError('INVALID_DATA', 'Repeated flag', a)
-        if (['--json', '--yes', '--dry-run'].includes(a)) flags[a] = true
+        if (['--json', '--yes', '--dry-run', '--offline'].includes(a))
+          flags[a] = true
         else if (
-          ['--cwd', '--preset', '--package-manager', '--recipe'].includes(a)
+          [
+            '--cwd', '--preset', '--package-manager', '--recipe',
+            '--snapshot-origin', '--preset-hash',
+          ].includes(a)
         ) {
           if (!args[i + 1] || args[i + 1].startsWith('--'))
             throw new FoundationError('INVALID_DATA', 'Missing flag value', a)
@@ -84,6 +89,22 @@ export async function runCli(
         'INVALID_DATA',
         'Use add button --preset <local.json> to select a component-only preset',
       )
+    const presetValue = command === 'theme' ? positional[2] : flags['--preset']
+    if (
+      (command === 'init' || command === 'theme') &&
+      (typeof presetValue !== 'string' ||
+        (command === 'theme' && positional.length !== 3))
+    )
+      throw new FoundationError(
+        'INVALID_DATA', 'Choose a local preset JSON file or exact snapshot reference',
+      )
+    const remoteFlags = flags['--snapshot-origin'] !== undefined ||
+      flags['--preset-hash'] !== undefined || flags['--offline']
+    if (remoteFlags && (flags['--recipe'] || typeof presetValue !== 'string'))
+      throw new FoundationError(
+        'INVALID_DATA',
+        'Remote snapshot flags require init --preset, theme add, or add button --preset with an exact snapshot reference',
+      )
     const selected = flags['--package-manager']
     if (
       selected !== undefined &&
@@ -93,6 +114,19 @@ export async function runCli(
         'INVALID_DATA',
         'Choose npm, pnpm, yarn, or bun for --package-manager',
       )
+    let presetInput: ResolvedPresetInput | undefined
+    if (typeof presetValue === 'string') {
+      presetInput = await resolvePresetInput(presetValue, {
+        origin: flags['--snapshot-origin'] as string | undefined,
+        expectedHash: flags['--preset-hash'] as string | undefined,
+        offline: flags['--offline'] === true,
+        // Resolve cache configuration only after input/flag validation selects
+        // an offline snapshot. Local files never inspect cache settings.
+        get cacheRoot() {
+          return snapshotCacheDirectory(process.env)
+        },
+      })
+    }
     const context = await inspectProject(
       path.resolve(String(flags['--cwd'] ?? process.cwd())),
       selected as 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined,
@@ -112,7 +146,7 @@ export async function runCli(
         await compileRecipe({ recipe, darkSelector: context.darkSelector }),
       )
     } else if (command === 'add' && flags['--preset']) {
-      const preset = await readPresetFile(String(flags['--preset']))
+      const preset = presetInput!.preset
       plan = await planComponentPreset(
         context,
         await compileButtonPreset({
@@ -123,16 +157,7 @@ export async function runCli(
     } else {
       let preset: Preset | undefined = context.preset
       if (command !== 'add') {
-        const file = command === 'init' ? flags['--preset'] : positional[2]
-        if (
-          typeof file !== 'string' ||
-          (command === 'theme' && positional.length !== 3)
-        )
-          throw new FoundationError(
-            'INVALID_DATA',
-            'Choose a local preset JSON file',
-          )
-        preset = await readPresetFile(file)
+        preset = presetInput!.preset
       } else if (!preset || !context.config || !context.lock)
         throw new FoundationError(
           'UNSUPPORTED_PROJECT',
@@ -156,6 +181,12 @@ export async function runCli(
         command === 'add'
           ? await planAdd(context, result)
           : await planTheme(context, result)
+    }
+    if (presetInput?.source && presetInput.resolution !== 'local') {
+      plan.presetResolution = {
+        source: presetInput.source, via: presetInput.resolution,
+      }
+      plan.networkAccess = presetInput.networkAccess
     }
     const hasConflicts =
       plan.diagnostics.length > 0 ||
@@ -220,7 +251,10 @@ export async function runCli(
     }
     if (json) io.stdout(JSON.stringify(record))
     else
-      io.stderr(e.code + ': ' + e.message + (e.path ? ' (' + e.path + ')' : ''))
+      io.stderr(
+        e.code + ': ' + e.message + (e.path ? ' (' + e.path + ')' : '') +
+        (e.code === 'RESOLUTION_FAILURE' ? '\nNext: ' + e.nextAction : ''),
+      )
     return exits[e.code] ?? 1
   }
 }
