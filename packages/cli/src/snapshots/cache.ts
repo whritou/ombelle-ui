@@ -24,6 +24,49 @@ const unsafe = () =>
   new Error('Snapshot cache requires a private owned directory without substituted paths')
 const identical = (a: Stats, b: Stats) => a.dev === b.dev && a.ino === b.ino
 
+type DirectoryPolicy =
+  | { platform: 'posix'; uid: number; currentUid: number; mode: number; root: boolean }
+  | { platform: 'win32'; owner: string; currentUser: string; root: boolean; withinUserProfile: boolean; rules: { sid: string; rights: number; allow: boolean; inheritOnly: boolean }[] }
+
+const trustedWindowsSystemOwners = [
+  'S-1-5-18', // SYSTEM
+  'S-1-5-32-544', // Administrators
+  'S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464', // TrustedInstaller
+]
+const windowsRights = {
+  writeData: 0x2,
+  appendData: 0x4,
+  writeExtendedAttributes: 0x10,
+  deleteChild: 0x40,
+  writeAttributes: 0x100,
+  delete: 0x10000,
+  changePermissions: 0x40000,
+  takeOwnership: 0x80000,
+}
+const windowsAncestorControl = windowsRights.deleteChild | windowsRights.delete |
+  windowsRights.changePermissions | windowsRights.takeOwnership
+const windowsRootControl = windowsAncestorControl | windowsRights.writeData |
+  windowsRights.appendData | windowsRights.writeExtendedAttributes | windowsRights.writeAttributes
+
+// Pure policy is shared by live filesystem inspection and cross-platform
+// regressions; fixtures can exercise foreign ownership without privileged chown.
+export function assertCacheDirectoryPolicy(policy: DirectoryPolicy): void {
+  if (policy.platform === 'posix') {
+    if (policy.uid !== policy.currentUid && policy.uid !== 0) throw unsafe()
+    if ((policy.mode & 0o022) !== 0 && (policy.mode & 0o1000) === 0) throw unsafe()
+    if (policy.root && (policy.uid !== policy.currentUid || (policy.mode & 0o077) !== 0)) throw unsafe()
+    return
+  }
+  if (policy.owner !== policy.currentUser && !trustedWindowsSystemOwners.includes(policy.owner)) throw unsafe()
+  if (policy.root && policy.owner !== policy.currentUser) throw unsafe()
+  const allowed = [policy.currentUser, ...trustedWindowsSystemOwners, 'S-1-3-0']
+  const mask = policy.root ? windowsRootControl : windowsAncestorControl
+  for (const rule of policy.rules) {
+    if (rule.inheritOnly || !rule.allow || (rule.rights & mask) === 0 || allowed.includes(rule.sid)) continue
+    if (!(policy.withinUserProfile && /^S-1-15-[23]-/.test(rule.sid))) throw unsafe()
+  }
+}
+
 function absolute(value: string): string {
   if (!path.isAbsolute(value))
     throw new Error('Snapshot cache directory must be absolute')
@@ -57,8 +100,12 @@ function filename(key: SnapshotCacheKey): string {
 async function components(root: string, create: boolean): Promise<Stats> {
   const parsed = path.parse(root)
   let current = parsed.root
+  const directories = [current]
   for (const segment of root.slice(parsed.root.length).split(path.sep).filter(Boolean)) {
     current = path.join(current, segment)
+    directories.push(current)
+  }
+  for (current of directories) {
     let stat: Stats
     try {
       stat = await fs.lstat(current)
@@ -72,21 +119,16 @@ async function components(root: string, create: boolean): Promise<Stats> {
       stat = await fs.lstat(current)
     }
     if (!stat.isDirectory() || stat.isSymbolicLink()) throw unsafe()
-    // A shared parent without sticky-bit protection can let another user move
-    // even a private child directory out from under this operation.
-    if (
-      process.platform !== 'win32' &&
-      (stat.mode & 0o022) !== 0 && (stat.mode & 0o1000) === 0
-    ) throw unsafe()
+    if (process.platform !== 'win32') assertCacheDirectoryPolicy({
+      platform: 'posix', uid: stat.uid, currentUid: process.getuid?.() ?? -1,
+      mode: stat.mode, root: current === root,
+    })
   }
   return fs.lstat(root)
 }
 async function owned(root: string, create = false): Promise<Stats> {
   const stat = await components(root, create)
-  if (process.platform !== 'win32') {
-    if (stat.uid !== process.getuid?.() || (stat.mode & 0o077) !== 0)
-      throw unsafe()
-  } else {
+  if (process.platform === 'win32') {
     // Windows mode bits do not establish ACL ownership. Fail closed if the
     // platform ACL cannot be inspected. Cache this owner-bound proof by identity;
     // ACL mutation by the owner/admin is outside the boundary described above.
@@ -98,26 +140,21 @@ async function owned(root: string, create = false): Promise<Stats> {
 $ErrorActionPreference='Stop'
 $root=$env:OMBELLE_CACHE_ACL_PATH
 $u=[System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-$allowed=@($u,'S-1-5-18','S-1-5-32-544','S-1-3-0')
+$directories=@()
 $p=$root
 while ($p) {
   $a=[System.IO.Directory]::GetAccessControl($p)
-  if ($p -eq $root -and $a.GetOwner([System.Security.Principal.SecurityIdentifier]).Value -ne $u) { throw 'Cache owner differs' }
-  # Root: writes, deletion, ACL/owner changes. Ancestors: child deletion or ACL/owner changes.
-  $mask=786496
-  if ($p -eq $root) { $mask=852310 }
+  $rules=@()
   foreach ($r in $a.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier])) {
-    if (($r.PropagationFlags -band [System.Security.AccessControl.PropagationFlags]::InheritOnly) -ne 0) { continue }
-    if ($r.AccessControlType -eq 'Allow' -and ([int]$r.FileSystemRights -band $mask) -ne 0 -and $r.IdentityReference.Value -notin $allowed) {
-      # App-container ACEs beneath this user's private profile share the same-user boundary.
-      if (-not ($p.StartsWith($env:USERPROFILE + '\\',[System.StringComparison]::OrdinalIgnoreCase) -and ($r.IdentityReference.Value.StartsWith('S-1-15-2-') -or $r.IdentityReference.Value.StartsWith('S-1-15-3-')))) { throw 'Cache permits another principal to write' }
-    }
+    $rules+=@{sid=$r.IdentityReference.Value; rights=[int]$r.FileSystemRights; allow=($r.AccessControlType -eq 'Allow'); inheritOnly=(($r.PropagationFlags -band [System.Security.AccessControl.PropagationFlags]::InheritOnly) -ne 0)}
   }
+  $directories+=@{owner=$a.GetOwner([System.Security.Principal.SecurityIdentifier]).Value; root=($p -eq $root); withinUserProfile=$p.StartsWith($env:USERPROFILE + '\\',[System.StringComparison]::OrdinalIgnoreCase); rules=@($rules)}
   $parent=[System.IO.Directory]::GetParent($p)
   if ($null -eq $parent) { break }
   $p=$parent.FullName
-}`
-        await run(
+}
+@{currentUser=$u; directories=@($directories)} | ConvertTo-Json -Depth 5 -Compress`
+        const { stdout } = await run(
           path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe'),
           ['-NoProfile', '-NonInteractive', '-Command', script],
           {
@@ -125,6 +162,14 @@ while ($p) {
             timeout: 10_000, maxBuffer: 16_384, windowsHide: true,
           },
         )
+        const inspected = JSON.parse(stdout) as {
+          currentUser: string
+          directories: Omit<Extract<DirectoryPolicy, { platform: 'win32' }>, 'platform' | 'currentUser'>[]
+        }
+        if (!inspected.directories.length) throw unsafe()
+        for (const directory of inspected.directories) assertCacheDirectoryPolicy({
+          ...directory, platform: 'win32', currentUser: inspected.currentUser,
+        })
       })()
       windowsOwnership.set(token, proof)
     }
@@ -202,16 +247,21 @@ async function unlinkOwned(
     throw unsafe()
   await fs.unlink(file)
 }
-async function evict(root: string, identity: Stats, keep: string): Promise<void> {
-  const entries: { name: string; stat: Stats }[] = []
+async function boundedNames(root: string, identity: Stats): Promise<string[]> {
   await unchanged(root, identity)
   const names: string[] = []
-  // Bound work even if unrelated/corrupt files accumulated. Leave such files
-  // alone and abandon this best-effort eviction rather than traverse forever.
+  // Refuse admission if bounded accounting cannot establish capacity. Unknown
+  // files remain untouched, but cannot disable the usable-entry limit.
   for await (const entry of await fs.opendir(root)) {
-    if (names.length === maxEntries * 4) return
+    if (names.length === maxEntries * 4)
+      throw new Error('Snapshot cache capacity cannot be established within the bounded scan')
     names.push(entry.name)
   }
+  return names
+}
+async function evict(root: string, identity: Stats, keep: string): Promise<void> {
+  const entries: { name: string; stat: Stats }[] = []
+  const names = await boundedNames(root, identity)
   for (const name of names) {
     if (!/^[a-f0-9]{64}\.json$/.test(name)) continue
     const entry = await readEntry(root, name, identity)
@@ -248,9 +298,11 @@ export async function writeSnapshotCache(
   } catch (error) {
     if (!missing(error)) throw error
   }
+  await boundedNames(root, identity)
   const temporary = '.' + randomUUID() + '.tmp'
   let handle: FileHandle | undefined
   let temporaryIdentity: Stats | undefined
+  let published = false
   try {
     await unchanged(root, identity)
     handle = await fs.open(
@@ -273,6 +325,7 @@ export async function writeSnapshotCache(
     // overwrite on both POSIX and Windows. Never fall back to overwriting rename.
     try {
       await fs.link(path.join(root, temporary), path.join(root, name))
+      published = true
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
       await checkExisting()
@@ -281,8 +334,15 @@ export async function writeSnapshotCache(
     await handle?.close()
     if (temporaryIdentity) await unlinkOwned(root, temporary, identity, temporaryIdentity)
   }
-  // Best effort only: never continue deleting if identity/ownership changes.
+  // Failure must not leave an admission that bypasses bounded accounting. Only
+  // roll back the entry this writer actually published; never another writer's.
   try {
     await evict(root, identity, name)
-  } catch { /* abandon eviction */ }
+  } catch (error) {
+    if (published && temporaryIdentity) {
+      try { await unlinkOwned(root, name, identity, temporaryIdentity) }
+      catch (cleanupError) { if (!missing(cleanupError)) throw cleanupError }
+    }
+    throw error
+  }
 }

@@ -75,6 +75,32 @@ it('refuses cache locations writable by other users', async () => {
   await expect(writeSnapshotCache(root, key, snapshot)).rejects.toThrow()
   expect(await fs.readdir(root)).toEqual([])
 })
+it('refuses foreign DELETE authority on an ancestor before admitting cache bytes', async () => {
+  const { base, root } = await setup()
+  if (process.platform === 'win32') {
+    await promisify(execFile)(path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32/icacls.exe'), [base, '/grant', '*S-1-1-0:(D)'], { windowsHide: true, timeout: 10_000 })
+  } else await fs.chmod(base, 0o777)
+  expect(await readSnapshotCache(root, key)).toBeNull()
+  await expect(writeSnapshotCache(root, key, snapshot)).rejects.toThrow()
+  // Creation of empty cache directories is allowed on writes; admission is not.
+  const entries = await fs.readdir(root).catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== 'ENOENT') throw error
+    return []
+  })
+  expect(entries).toEqual([])
+})
+it('rolls back its own new entry when bounded accounting becomes impossible during publication', async () => {
+  const { root } = await setup()
+  const link = fs.link.bind(fs)
+  vi.spyOn(fs, 'link').mockImplementationOnce(async (from, to) => {
+    await link(from, to)
+    for (let i = 0; i < 401; i++) await fs.writeFile(path.join(root, `unknown-${i}`), 'untouched sentinel')
+  })
+  await expect(writeSnapshotCache(root, key, snapshot)).rejects.toThrow(/capacity/i)
+  expect(await readSnapshotCache(root, key)).toBeNull()
+  expect(await fs.readdir(root)).toHaveLength(401)
+  expect(await fs.readFile(path.join(root, 'unknown-400'), 'utf8')).toBe('untouched sentinel')
+})
 it('hard linked entries cannot change or remove external files', async () => {
   const { outside, root } = await setup()
   await writeSnapshotCache(root, key, snapshot)
