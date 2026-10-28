@@ -1,32 +1,33 @@
-import fs from 'node:fs/promises'
-import os from 'node:os'
 import path from 'node:path'
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
-import { initializeSnapshotStore } from '../apps/www/src/snapshots/server/sqlite-store.js'
+import { prepareSnapshotBrowserResources } from './snapshot-www-resources.js'
 
 const repo = process.cwd()
-const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-snapshot-www-'))
-const dbPath = path.join(root, 'snapshots.sqlite')
-const marker = path.join(repo, '.artifacts/snapshot-browser.json')
-await fs.mkdir(path.dirname(marker), { recursive: true })
-initializeSnapshotStore(dbPath)
-await fs.writeFile(marker, JSON.stringify({ dbPath, root }))
-const predev = spawnSync(process.execPath, [path.join(repo, 'scripts/build-editor-worker.mjs')], { cwd: repo, windowsHide: true, stdio: 'inherit' })
-if (predev.status !== 0) throw new Error('The www predev worker build failed.')
-const next = path.join(repo, 'apps/www/node_modules/next/dist/bin/next')
-const child: ChildProcess = spawn(process.execPath, [next, 'dev', '--hostname', '127.0.0.1', '--port', '3000'], {
-  cwd: path.join(repo, 'apps/www'),
-  windowsHide: true,
-  stdio: 'inherit',
-  env: {
-    ...process.env,
-    OMBELLE_SNAPSHOT_DB_PATH: dbPath,
-    OMBELLE_PUBLIC_ORIGIN: 'http://127.0.0.1:3000',
-    OMBELLE_SNAPSHOT_RATE_SECRET: 'snapshot-browser-development-secret-32-bytes-minimum',
-    OMBELLE_SNAPSHOT_CLIENT_IP_HEADER: undefined,
-    NEXT_TELEMETRY_DISABLED: '1',
-  },
+const resources = await prepareSnapshotBrowserResources(repo, () => {
+  const predev = spawnSync(process.execPath, [path.join(repo, 'scripts/build-editor-worker.mjs')], { cwd: repo, windowsHide: true, stdio: 'inherit' })
+  if (predev.status !== 0) throw new Error('The www predev worker build failed.')
 })
+const { dbPath } = resources
+const next = path.join(repo, 'apps/www/node_modules/next/dist/bin/next')
+let child: ChildProcess
+try {
+  child = spawn(process.execPath, [next, 'dev', '--hostname', '127.0.0.1', '--port', '3000'], {
+    cwd: path.join(repo, 'apps/www'),
+    windowsHide: true,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      OMBELLE_SNAPSHOT_DB_PATH: dbPath,
+      OMBELLE_PUBLIC_ORIGIN: 'http://127.0.0.1:3000',
+      OMBELLE_SNAPSHOT_RATE_SECRET: 'snapshot-browser-development-secret-32-bytes-minimum',
+      OMBELLE_SNAPSHOT_CLIENT_IP_HEADER: undefined,
+      NEXT_TELEMETRY_DISABLED: '1',
+    },
+  })
+} catch (error) {
+  await resources.cleanup()
+  throw error
+}
 let stopping = false
 async function stop(signal?: NodeJS.Signals) {
   if (stopping) return
@@ -37,8 +38,7 @@ async function stop(signal?: NodeJS.Signals) {
       await new Promise<void>((resolve) => killer.once('close', () => resolve()))
     } else child.kill(signal ?? 'SIGTERM')
   }
-  await fs.rm(marker, { force: true })
-  await fs.rm(root, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })
+  await resources.cleanup()
 }
 process.once('SIGINT', () => void stop('SIGINT').then(() => process.exit(130)))
 process.once('SIGTERM', () => void stop('SIGTERM').then(() => process.exit(143)))

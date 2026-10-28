@@ -31,6 +31,8 @@ type PublicationOptions = {
   verify?: typeof verifyPresetSnapshot
 }
 
+class WithdrawnPublicationError extends Error {}
+
 async function readResponse(response: Response): Promise<unknown> {
   if (response.status !== 200 && response.status !== 201) {
     void response.body?.cancel().catch(() => {})
@@ -39,7 +41,9 @@ async function readResponse(response: Response): Promise<unknown> {
         'Publication limit reached. Wait before retrying the same attempt.',
       )
     if (response.status === 410)
-      throw new Error('This publication was withdrawn. It cannot be retried.')
+      throw new WithdrawnPublicationError(
+        'This publication was withdrawn. Cancel to start a new publication.',
+      )
     throw new Error(
       'Publication is unavailable. Your local exports still work; retry this attempt within 24 hours.',
     )
@@ -205,6 +209,15 @@ export function createPublicationController(options: PublicationOptions = {}) {
     } catch (error) {
       // A timeout aborts transport but is still an error for the same intent.
       if (!ownsOperation()) return
+      if (error instanceof WithdrawnPublicationError) {
+        dispatch({
+          type: 'withdrawn',
+          operationId,
+          draftHash,
+          error: error.message,
+        })
+        return
+      }
       const message =
         error instanceof Error &&
         !['SyntaxError', 'TypeError', 'FoundationError', 'AbortError'].includes(

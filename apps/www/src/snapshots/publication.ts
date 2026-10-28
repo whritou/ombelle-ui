@@ -30,6 +30,7 @@ export type PublicationState = PublicationBase &
       }
     | { status: 'published'; attempt: null; error: null }
     | { status: 'failed'; attempt: PublishAttempt | null; error: string }
+    | { status: 'withdrawn'; attempt: PublishAttempt; error: string }
   )
 export type PublicationAction =
   | { type: 'draft'; draftHash: string | null }
@@ -44,6 +45,7 @@ export type PublicationAction =
       snapshot: PresetSnapshot
     }
   | { type: 'failed'; operationId: number; draftHash: string; error: string }
+  | { type: 'withdrawn'; operationId: number; draftHash: string; error: string }
 
 export function initialPublication(): PublicationState {
   return {
@@ -132,6 +134,13 @@ export function reducePublication(
       error: null,
     }
   if (state.status !== 'publishing') return state
+  if (action.type === 'withdrawn')
+    return {
+      ...state,
+      status: 'withdrawn',
+      attempt: state.attempt,
+      error: action.error,
+    }
   if (action.type === 'published') {
     if (action.snapshot.presetHash !== action.draftHash) return state
     return {

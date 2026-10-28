@@ -298,6 +298,22 @@ it('storage denial keeps retry in memory and unavailable service leaves captured
   expect(keys[1]).toBe(keys[0])
   expect(c.state.attempt?.preset).toEqual(p.data)
 })
+it('withdrawn publication is terminal, keeps Cancel available, and cannot be retried', async () => {
+  const p = await preset(),
+    fetcher = vi.fn(async () => new Response(null, { status: 410 }))
+  const c = createPublicationController({ fetch: fetcher })
+  c.update(p, true)
+  c.confirm()
+  await c.publish()
+  expect(c.state.status).toBe('withdrawn')
+  expect(c.state.attempt?.presetHash).toBe(p.hash)
+  await c.retry()
+  expect(fetcher).toHaveBeenCalledTimes(1)
+  c.cancel()
+  expect(c.state.status).toBe('idle')
+  c.confirm()
+  expect(c.state.status).toBe('validating')
+})
 it('rejects a valid server snapshot of different content, malformed and over-budget responses', async () => {
   const p = await preset(),
     q = await preset('minimalist')

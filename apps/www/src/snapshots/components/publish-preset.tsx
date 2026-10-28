@@ -8,6 +8,7 @@ function PublicationConsent({
   attempt,
   pending,
   retry,
+  canSubmit,
   enabled,
   focusConsent,
   onSubmit,
@@ -16,6 +17,7 @@ function PublicationConsent({
   attempt: PublishAttempt
   pending: boolean
   retry: boolean
+  canSubmit: boolean
   enabled: boolean
   focusConsent: boolean
   onSubmit: () => Promise<void>
@@ -57,20 +59,22 @@ function PublicationConsent({
         I understand this preset will be public and retained as described above.
       </label>
       <div className="preset-input-row">
-        <button
-          type="button"
-          disabled={!enabled || !accepted || pending}
-          onClick={() => {
-            setAccepted(false)
-            void onSubmit()
-          }}
-        >
-          {pending
-            ? 'Publishing…'
-            : retry
-              ? 'Retry publication'
-              : 'Publish public snapshot'}
-        </button>
+        {canSubmit && (
+          <button
+            type="button"
+            disabled={!enabled || !accepted || pending}
+            onClick={() => {
+              setAccepted(false)
+              void onSubmit()
+            }}
+          >
+            {pending
+              ? 'Publishing…'
+              : retry
+                ? 'Retry publication'
+                : 'Publish public snapshot'}
+          </button>
+        )}
         <button type="button" onClick={onCancel}>
           Cancel publication
         </button>
@@ -94,7 +98,10 @@ export function PublishPreset({
   const returnFocus = useRef(false)
   const pending = state.status === 'publishing'
   const captured =
-    state.status === 'validating' || pending || state.status === 'failed'
+    state.status === 'validating' ||
+    pending ||
+    state.status === 'failed' ||
+    state.status === 'withdrawn'
   useEffect(() => {
     if (!captured && returnFocus.current) {
       returnFocus.current = false
@@ -130,12 +137,15 @@ export function PublishPreset({
           Published preset hash: <code>{state.lastPublished.presetHash}</code>
         </p>
       )}
-      {state.status === 'failed' && <p role="alert">{state.error}</p>}
+      {(state.status === 'failed' || state.status === 'withdrawn') && (
+        <p role="alert">{state.error}</p>
+      )}
       {captured && state.attempt ? (
         <PublicationConsent
           key={state.attempt.key}
           attempt={state.attempt}
           retry={state.status === 'failed'}
+          canSubmit={state.status !== 'withdrawn'}
           pending={pending}
           focusConsent={state.status === 'validating'}
           enabled={current && preset?.hash === state.attempt.presetHash}
