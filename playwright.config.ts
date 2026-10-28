@@ -26,7 +26,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'pnpm dev:www',
+      command: 'pnpm exec tsx scripts/serve-snapshot-www.ts',
       url: 'http://127.0.0.1:3000/editor/component/button',
       reuseExistingServer: false,
       timeout: 120000,

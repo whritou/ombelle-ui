@@ -73,6 +73,12 @@ Scope previews through an isolated iframe with the same generated CSS and fonts 
 
 Portals must mount inside the preview document and inherit the intended tokens. A dialog that opens into the site's document can hide both style and accessibility defects and must fail parity tests.
 
+## Implemented snapshot subset and remaining proposal
+
+The local private implementation provides `POST /api/v1/presets`, exact `GET` and `HEAD` reads at `/api/v1/presets/{id}/{revision}`, explicit withdrawal and unwithdrawal operator commands, and immutable preset resolution by the private CLI. It uses SQLite under Node with explicit initialization and persistent-volume requirements. The public page is read-only; publication requires an explicit confirmation. Payloads are publicly readable by exact reference and remain drafts. No hosted endpoint, account, alias, public listing, recipe snapshot, or public CLI distribution is configured. See [snapshot service operations](snapshot-service-operations.md) for exact request, environment, and operational contracts and [measured evidence](evidence/immutable-preset-snapshots.md) for verification limits.
+
+The remaining public release, hosting, and account/alias proposals below are not implemented interfaces.
+
 ## Proposed snapshot API
 
 | Endpoint | Input | Result |

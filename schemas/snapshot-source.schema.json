@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.example.com/schemas/snapshot-source-1.0.json",
+  "title": "Preset Snapshot Source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["origin", "reference", "presetHash"],
+  "properties": {
+    "origin": {"type": "string", "minLength": 1, "maxLength": 2048},
+    "reference": {"type": "string", "minLength": 37, "maxLength": 37, "pattern": "^ps_[0-9a-f]{32}@1$"},
+    "presetHash": {"type": "string", "minLength": 64, "maxLength": 64, "pattern": "^[0-9a-f]{64}$"}
+  }
+}

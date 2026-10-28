@@ -9,6 +9,7 @@ import {
   type StyleFamily,
   type CompileResult,
 } from '@ombelle/contracts'
+import type { SnapshotSource } from '@ombelle/contracts'
 import { managerEntry } from '../../packages/cli/src/apply/manager.js'
 import { runBuiltCli } from './cli-runtime.js'
 
@@ -71,7 +72,7 @@ export async function withEditorPresetConsumer<T>(
     framework: 'vite' | 'next'
     family: StyleFamily
     presetJson: string
-  },
+  } | { framework: 'vite' | 'next'; family: StyleFamily; kind: 'snapshot'; source: SnapshotSource; scope?: 'theme' | 'button' },
   work: (consumer: {
     url: string
     root: string
@@ -109,32 +110,67 @@ export async function withEditorPresetConsumer<T>(
       ['ci', '--offline', '--ignore-scripts', '--no-audit', '--no-fund'],
       root,
     )
+    const snapshot = 'kind' in input && input.kind === 'snapshot'
     const file = path.join(root, 'downloaded-preset.json')
-    await fs.writeFile(file, input.presetJson)
-    for (const args of [
-      ['theme', 'add', file],
-      ['add', ...supportedComponentIds],
-    ]) {
+    if ('presetJson' in input) await fs.writeFile(file, input.presetJson)
+    const source = snapshot ? input.source : null
+    const selectedPreset = 'presetJson' in input ? JSON.parse(input.presetJson) : null
+    const prefix = source
+      ? ['--snapshot-origin', source.origin, '--preset-hash', source.presetHash]
+      : []
+    const scope = snapshot ? input.scope ?? 'theme' : 'theme'
+    const applyArgs = source
+      ? scope === 'button'
+        ? ['add', 'button', '--preset', source.reference, ...prefix]
+        : ['theme', 'add', source.reference, ...prefix]
+      : ['theme', 'add', file]
+    const ordinaryAdditions = scope === 'button'
+      ? supportedComponentIds.filter((id) => id !== 'button')
+      : supportedComponentIds
+    const cliEnv = { ...process.env }
+    cliEnv.NO_COLOR = undefined
+    cliEnv.FORCE_COLOR = undefined
+    for (const args of [applyArgs, ['add', ...ordinaryAdditions]]) {
       const applied = await runBuiltCli(
         'node',
         [...args, '--yes', '--json'],
         root,
+        cliEnv,
       )
       if (applied.code !== 0) throw new Error(applied.output)
     }
+    const installedPreset = source
+      ? JSON.parse(await fs.readFile(path.join(root, 'ui-preset.json'), 'utf8'))
+      : selectedPreset
     const result = await compile({
-      preset: JSON.parse(input.presetJson),
+      preset: installedPreset,
       componentIds: supportedComponentIds,
       catalogRelease: '0.1.0',
       compilerVersion: '0.1.0',
     })
+    if (source && scope === 'theme' && result.preset.hash !== source.presetHash)
+      throw new Error('Installed snapshot hash does not match the published preset.')
+    if (source && scope === 'button') {
+      const lock = JSON.parse(await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'))
+      const installedEntry = Object.entries(lock.componentPresetSources ?? {}).find(([, entry]) => (entry as SnapshotSource).presetHash === source.presetHash)
+      if (!installedEntry)
+        throw new Error('Installed scoped snapshot hash does not match the published preset.')
+      const [identity] = installedEntry
+      const beforeButton = await fs.readFile(path.join(prepared.root, 'src/components/ui/button.tsx'), 'utf8')
+      const [presetId, revision] = identity.split('@')
+      const fixture = `import {Button as HostButton} from '@/components/ui/button'\nimport {Button as ScopedButton} from '@/components/ui/presets/${presetId}/r${revision}/button'\nexport default function SnapshotScope(){return <main><HostButton data-testid="global-host-button">Host action</HostButton><ScopedButton data-testid="published-scope-button">Published action</ScopedButton></main>}`
+      if (input.framework === 'vite') await fs.writeFile(path.join(root, 'src/main.tsx'), `import * as React from 'react'\nimport {createRoot} from 'react-dom/client'\nimport SnapshotScope from './snapshot-scope'\nimport './index.css'\ncreateRoot(document.getElementById('root')!).render(<SnapshotScope/>)\n`)
+      else await fs.writeFile(path.join(root, 'src/app/page.tsx'), `import SnapshotScope from '../snapshot-scope'\nexport default function Page(){return <SnapshotScope/>}`)
+      await fs.writeFile(path.join(root, 'src/snapshot-scope.tsx'), fixture)
+      if (await fs.readFile(path.join(root, 'src/components/ui/button.tsx'), 'utf8') !== beforeButton)
+        throw new Error('Scoped snapshot changed the differently themed host Button.')
+    }
+    const gallery = !(snapshot && scope === 'button')
     const fixture = await fs.readFile(
-      new URL('../../fixtures/shared/preset-gallery.tsx', import.meta.url),
-      'utf8',
+      new URL('../../fixtures/shared/preset-gallery.tsx', import.meta.url), 'utf8',
     )
-    await fs.writeFile(
-      path.join(root, 'src/preset-gallery.tsx'),
-      await rewriteModuleSpecifiers(fixture, (s) => s),
+    if (gallery) await fs.writeFile(
+      path.join(root, 'src/preset-gallery.tsx'), await rewriteModuleSpecifiers(fixture, (s) => s),
     )
     await fs.appendFile(
       path.join(root, 'src/index.css'),
@@ -144,12 +180,12 @@ export async function withEditorPresetConsumer<T>(
           'utf8',
         )),
     )
-    if (input.framework === 'vite')
+    if (gallery && input.framework === 'vite')
       await fs.writeFile(
         path.join(root, 'src/main.tsx'),
         "import * as React from 'react'\nimport {createRoot} from 'react-dom/client'\nimport {PresetGallery} from './preset-gallery'\nimport './index.css'\ncreateRoot(document.getElementById('root')!).render(<PresetGallery/>)\n",
       )
-    else
+    else if (gallery)
       await fs.writeFile(
         path.join(root, 'src/app/page.tsx'),
         "import {PresetGallery} from '../preset-gallery'\nexport default function Page(){return <PresetGallery/>}\n",

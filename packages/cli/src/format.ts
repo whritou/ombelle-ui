@@ -8,6 +8,7 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     ...(plan.bunLockfile ? { bunLockfile: plan.bunLockfile } : {}),
     ...(plan.managerWarning ? { managerWarning: plan.managerWarning } : {}),
     presetHash: plan.preset.hash,
+    ...(plan.presetResolution ? { presetResolution: plan.presetResolution } : {}),
     ...(plan.recipe
       ? { recipe: { ...plan.recipe, scopeType: 'component' } }
       : {}),
@@ -37,6 +38,16 @@ export function formatPlan(
     status +
     '\n' +
     plan.changes.map((c) => c.action + ' ' + c.path).join('\n') +
+    (plan.presetResolution
+      ? '\nSnapshot origin: ' +
+        plan.presetResolution.source.origin +
+        '\nSnapshot reference: ' +
+        plan.presetResolution.source.reference +
+        '\nExpected/actual snapshot preset hash: ' +
+        plan.presetResolution.source.presetHash +
+        '\nPreset resolved via: ' +
+        plan.presetResolution.via
+      : '') +
     (plan.componentPreset
       ? '\nComponent preset ' +
         plan.componentPreset.preset.data.id +
