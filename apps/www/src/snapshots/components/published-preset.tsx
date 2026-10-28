@@ -1,16 +1,17 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { canonicalize, compile } from '@ombelle/compiler'
-import {
-  supportedComponentIds,
-  type CompileResult,
-  type PresetSnapshot,
-} from '@ombelle/contracts'
+import { canonicalize } from '@ombelle/compiler'
+import type { PresetSnapshot } from '@ombelle/contracts'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
 import { snapshotInstallCommand } from '../install-command'
+import {
+  createSnapshotPreviewSession,
+  selectSnapshotPreview,
+  type SnapshotPreviewState,
+} from '../preview-session'
 
 const choices = [
   {
@@ -40,10 +41,12 @@ export function PublishedPreset({
   snapshot: PresetSnapshot
   origin: string
 }) {
-  const [result, setResult] = useState<CompileResult | null>(null)
-  const [previewStatus, setPreviewStatus] = useState(
-    'Compiling snapshot preview…',
+  const [previewState, setPreviewState] = useState<SnapshotPreviewState | null>(
+    null,
   )
+  const latestSnapshot = useRef(snapshot)
+  latestSnapshot.current = snapshot
+  const preview = selectSnapshotPreview(snapshot, previewState)
   const [announcement, setAnnouncement] = useState('')
   const [view, setView] = useState<PresetView>({
     mode: 'light',
@@ -57,30 +60,12 @@ export function PublishedPreset({
     presetHash: snapshot.presetHash,
   }
   useEffect(() => {
-    let active = true
-    setResult(null)
-    setPreviewStatus('Compiling snapshot preview…')
-    void compile({
-      preset: snapshot.preset,
-      componentIds: supportedComponentIds,
-      catalogRelease: snapshot.catalogRelease,
-      compilerVersion: snapshot.compilerVersion,
+    const session = createSnapshotPreviewSession(snapshot, {
+      notify: setPreviewState,
+      isCurrent: () => latestSnapshot.current === snapshot,
     })
-      .then((compiled) => {
-        if (!active) return
-        if (compiled.preset.hash !== snapshot.presetHash)
-          throw new Error('Snapshot hash mismatch')
-        setResult(compiled)
-      })
-      .catch(() => {
-        if (active)
-          setPreviewStatus(
-            'Preview compilation unavailable. Preset JSON remains available.',
-          )
-      })
-    return () => {
-      active = false
-    }
+    void session.start()
+    return () => session.dispose()
   }, [snapshot])
   async function copyJson() {
     try {
@@ -163,19 +148,16 @@ export function PublishedPreset({
             <option value="narrow">Narrow</option>
           </select>
         </div>
-        <p role="status">{previewStatus}</p>
-        <PresetPreviewFrame
-          result={result}
-          view={view}
-          stale={false}
-          onStatus={(status) => {
-            if (status === 'ready') setPreviewStatus('Snapshot gallery ready.')
-            else if (status === 'failed')
-              setPreviewStatus(
-                'Gallery unavailable. Preset JSON remains available.',
-              )
-          }}
-        />
+        <p role="status">{preview.message}</p>
+        {preview.frame && (
+          <PresetPreviewFrame
+            key={preview.frame.key}
+            result={preview.frame.result}
+            view={view}
+            stale={false}
+            onStatus={preview.frame.onStatus}
+          />
+        )}
       </section>
       <section aria-labelledby="snapshot-json-heading">
         <h2 id="snapshot-json-heading">Preset JSON</h2>

@@ -67,7 +67,10 @@ it('renders escaped read-only draft metadata, canonical JSON and precise scope i
   expect(html).toContain('pnpm 11.25.0')
   expect(html).toContain('Existing shadcn theme')
   expect(html).toContain('component source')
-  expect(html).toContain('Global preset gallery')
+  // Effects have not compiled this snapshot during SSR. No previous gallery
+  // may remain mounted while the current snapshot is pending.
+  expect(html).not.toContain('<iframe')
+  expect(html).toContain('Compiling snapshot preview…')
   expect(html).toContain('readOnly=""')
   const escaped = canonicalize(snapshot.preset)
     .replaceAll('&', '&amp;')
