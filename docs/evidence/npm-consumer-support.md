@@ -19,6 +19,20 @@ An additional assertion reproduced incorrect pnpm recovery guidance for an npm f
 
 Tests cover package-field/lock selection, field-only and lock-only apps, manager propagation and saved configuration, stale-lock rejection, runner independence, exact dependencies and npm lockfiles even with save=false/package-lock=false, disabled lifecycle scripts, preset reuse in a fresh process, repeated no-op addition, theme-only application without a working package manager, local edit preservation, and failure recovery.
 
+## Integration fixture locks
+
+29 October 2026. `createNpmProject` (tests/helpers/npm-project.ts) used to write a root-only `package-lock.json`, so each CLI `npm install` resolved the whole transitive tree live. A foundation gate run that day failed when the npm row of `bun-cross-runner.test.ts` resolved `rolldown@1.2.16`, published 61 seconds earlier, and its tarball returned 404.
+
+The helper now copies a committed, fully resolved lock from `fixtures/npm/minimal-vite/` or `fixtures/npm/minimal-next/` and refuses to start when that lock's root entry no longer matches the fixture manifest in `tests/helpers/projects.ts`. Lifecycle scripts stay disabled and the `preinstall` marker check is unchanged. `tests/integration/npm.test.ts` also asserts that every package pinned in the fixture lock keeps its version after the CLI adds dependencies. Dependencies the CLI adds are exact, but their own transitive dependencies are still resolved from the registry at test time.
+
+After changing the fixture manifest, regenerate both locks with Node 24.19.0 and npm 11.19.0 on PATH:
+
+```bash
+pnpm exec tsx scripts/generate-npm-test-locks.ts
+```
+
+The script runs `npm install --package-lock-only --ignore-scripts` with a fixed `--before` cutoff, so repeated runs produce byte-identical locks. Move the cutoff forward deliberately when the fixture's dependencies change, and commit the regenerated locks with the manifest change. The standalone npm consumers keep using their own committed locks in `fixtures/npm/vite/` and `fixtures/npm/next/`.
+
 ## Verification record
 
 The complete nine-stage gate passed on clean committed source f11d0e0ea617cdb3c27523a84a03d56e4cbb9efc using Node v24.19.0, pnpm 11.25.0, npm 11.19.0, and Edge Chromium 155.0.4283.62.
