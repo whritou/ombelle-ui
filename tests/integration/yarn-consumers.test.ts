@@ -12,6 +12,9 @@ afterEach(async () => {
 
 const cli = path.resolve('packages/cli/dist/main.js')
 const preset = path.resolve('examples/preset.example.json')
+// Four Yarn installs plus a production build measured 38-62 s alone on Windows,
+// so the shared 60 s default fails without load; keep roughly 3x headroom.
+const rowTimeout = 180_000
 const rows: { id: YarnFixtureId; version: string; linker: string }[] = [
   { id: 'classic-vite', version: '1.22.22', linker: 'node_modules' },
   { id: 'modern-next', version: '4.18.1', linker: 'node-modules' },
@@ -73,4 +76,4 @@ it.each(rows)('$id installs with Yarn $version and builds with $linker', async (
 
   const built = await execute(process.execPath, [fixture.entry, 'run', 'build'], fixture.root, env)
   expect(built.code, built.output).toBe(0)
-})
+}, rowTimeout)
