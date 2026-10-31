@@ -2,7 +2,10 @@ import { expect, it } from 'vitest'
 import fs from 'node:fs/promises'
 // Audit exceptions are recorded in docs/decisions/0002-registry-adapter.md.
 // Each one expires so the upstream fix is re-checked instead of silently kept.
-const exceptions = [{ ghsa: 'GHSA-gcqx-w48m-w2h4', reviewBy: '2026-11-30' }]
+const exceptions = [
+  { ghsa: 'GHSA-gcqx-w48m-w2h4', reviewBy: '2026-11-30' },
+  { ghsa: 'GHSA-g3hv-75wg-m249', reviewBy: '2026-11-30' },
+]
 const ignoredGhsas = async () => {
   const workspace = (await fs.readFile('pnpm-workspace.yaml', 'utf8')).replace(/\r\n/g, '\n')
   const block = /^auditConfig:\n {2}ignoreGhsas:\n((?: {4}- .+\n?)*)/m.exec(workspace)
