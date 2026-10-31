@@ -2,7 +2,7 @@ import { it, expect, afterEach } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
-import { createNpmProject } from '../helpers/npm-project.js'
+import { createNpmProject, npmFixtureLock } from '../helpers/npm-project.js'
 import { snapshotTree } from '../helpers/tree.js'
 const roots: string[] = []
 afterEach(async () => {
@@ -85,6 +85,9 @@ it.each(['vite', 'next'] as const)(
     expect(lock.packages['node_modules/@radix-ui/react-dialog'].version).toBe(
       '1.3.1',
     )
+    const pinned = JSON.parse(await fs.readFile(npmFixtureLock(framework), 'utf8'))
+    for (const [key, entry] of Object.entries<any>(pinned.packages))
+      if (key) expect(lock.packages[key]?.version, key).toBe(entry.version)
     await expect(fs.access(root + '/pnpm-lock.yaml')).rejects.toMatchObject({
       code: 'ENOENT',
     })
