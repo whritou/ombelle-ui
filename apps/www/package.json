@@ -10,10 +10,12 @@
     "build": "next build"
   },
   "dependencies": {
-    "@ombelle/contracts": "workspace:*",
     "@ombelle/catalog": "workspace:*",
     "@ombelle/compiler": "workspace:*",
+    "@ombelle/contracts": "workspace:*",
+    "@vercel/functions": "3.10.5",
     "next": "16.4.3",
+    "pg": "8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

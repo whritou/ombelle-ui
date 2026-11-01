@@ -1,14 +1,25 @@
 import { FoundationError, type RecipeSnapshot, type SnapshotReference } from '@ombelle/contracts'
 import { normalizePublishedRecipe, verifyRecipeSnapshot } from '@ombelle/compiler'
-import { assertPublishOrigin, type SnapshotConfig } from './config'
+import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
 import { clientRateKey } from './client-key'
 import { SnapshotServiceError } from './errors'
 import type { SnapshotStore } from './store'
+import { openConfiguredSnapshotStore } from './store-factory'
 
 export interface RecipeSnapshotService {
   publish(request: Request): Promise<{ snapshot: RecipeSnapshot; replayed: boolean }>
   read(ref: SnapshotReference): Promise<RecipeSnapshot>
+}
+
+export function createRequestRecipeSnapshotService(): RecipeSnapshotService {
+  async function use<T>(operation: (service: RecipeSnapshotService) => Promise<T>): Promise<T> {
+    const config = readSnapshotConfig(process.env)
+    const store = await openConfiguredSnapshotStore(config)
+    try { return await operation(createRecipeSnapshotService(config, store)) }
+    finally { await store.close() }
+  }
+  return { publish: request => use(service => service.publish(request)), read: ref => use(service => service.read(ref)) }
 }
 async function verified(snapshot: RecipeSnapshot): Promise<RecipeSnapshot> {
   try { return await verifyRecipeSnapshot(snapshot) }

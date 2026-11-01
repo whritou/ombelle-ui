@@ -87,11 +87,11 @@ it('shares the daily publication quota across presets and recipes', async () => 
 
 ### Task 3: Neon Postgres Adapter and Explicit Operators
 
-**Files:** Create `apps/www/src/snapshots/server/postgres-store.ts`, `postgres-migrations.ts`, `store-factory.ts`, `tests/integration/postgres-snapshot-store.test.ts`, and a Postgres operator test. Modify app dependencies, config/service/operator code, `.gitignore`, and environment template.
+**Files:** Create `apps/www/src/snapshots/server/postgres-store.ts`, `postgres-migrations.ts`, `postgres-pool.ts`, `store-factory.ts`, `tests/hosted/postgres-snapshot-store.test.ts`, `tests/hosted/postgres-snapshot-operator.test.ts`, and `vitest.postgres.config.ts`. Modify app dependencies, config/service/operator code, `.gitignore`, and environment template. Real-Neon tests have a dedicated command so ordinary integration does not require cloud secrets; the hosted evidence run remains mandatory.
 
 **Interfaces:** Produce `openPostgresSnapshotStore(connectionString: string): Promise<SnapshotStore>`, `initializePostgresSnapshotStore(directConnectionString: string): Promise<void>`, and `openConfiguredSnapshotStore(config: SnapshotConfig): Promise<SnapshotStore>`. Backend config is a discriminated union selected by `OMBELLE_SNAPSHOT_BACKEND=sqlite|postgres`; unselected existing local `OMBELLE_SNAPSHOT_DB_PATH` keeps documented SQLite behavior. Postgres uses server-only `DATABASE_URL`, explicit migrations use `DATABASE_URL_UNPOOLED`. Never silently switch backend. Keep one bounded pool per connection configuration and attach its Vercel lifecycle once.
 
-- [ ] **Step 1: Add failing tests.** Run Task 2's shared contract against an isolated Neon branch. Add missing/invalid backend settings, lazy imports, import/build without a database, no request-time DDL, pooled/direct distinction, timeout/rollback, transaction concurrency and preview isolation.
+- [x] **Step 1: Add failing tests.** Run Task 2's shared contract against an isolated Neon branch. Add missing/invalid backend settings, lazy imports, import/build without a database, no request-time DDL, pooled/direct distinction, timeout/rollback, transaction concurrency and preview isolation.
 
 ```ts
 it('does not fall back to SQLite when postgres configuration is incomplete', () => {
@@ -99,10 +99,10 @@ it('does not fall back to SQLite when postgres configuration is incomplete', () 
 })
 ```
 
-- [ ] **Step 2: Run RED.** `pnpm exec vitest run tests/integration/postgres-snapshot-store.test.ts apps/www/src/snapshots/server/config.test.ts`; require evidence of missing adapter/config behavior before implementation.
-- [ ] **Step 3: Implement.** After inspecting package metadata/scripts and the exact lock delta, add `pg@8.23.1`, `@vercel/functions@3.10.5`, and a registry-verified pinned `@types/pg` version. Use parameterized SQL, transaction-scoped locks with consistent ordering, atomic quotas, immutable-row triggers, size/hash verification, bounded statements and cleanup. Versioned initialization is operator-only. Extend existing operator commands to both kinds and backends; document direct `pg_dump`/restore instead of pretending SQLite backup applies to Postgres.
-- [ ] **Step 4: Run GREEN.** Run shared storage/config/operator tests against real isolated storage. Apply migrations there twice and show idempotence; unknown/future schema fails. Inspect schema and prove production was not touched. Run typecheck and app build without DB credentials.
-- [ ] **Step 5: Commit.** `feat(snapshots): add Neon Postgres persistence`.
+- [x] **Step 2: Run RED.** `pnpm test:hosted-storage` and focused `apps/www/src/snapshots/server/config.test.ts`; require evidence of missing adapter/config behavior before implementation.
+- [x] **Step 3: Implement.** After inspecting package metadata/scripts and the exact lock delta, add `pg@8.23.1`, `@vercel/functions@3.10.5`, and a registry-verified pinned `@types/pg` version. Use parameterized SQL, transaction-scoped locks with consistent ordering, atomic quotas, immutable-row triggers, size/hash verification, bounded statements and cleanup. Versioned initialization is operator-only. Extend existing operator commands to both kinds and backends; document direct `pg_dump`/restore instead of pretending SQLite backup applies to Postgres.
+- [x] **Step 4: Run GREEN.** Run shared storage/config/operator tests against real isolated storage. Apply migrations there twice and show idempotence; unknown/future schema fails. Inspect schema and prove production was not touched. Run typecheck and app build without DB credentials.
+- [x] **Step 5: Commit.** `feat(snapshots): add Neon Postgres persistence`.
 
 ### Task 4: Recipe HTTP API and Read Page Boundary
 
@@ -229,4 +229,4 @@ The plan maps the approved spec to Tasks 1–9: strict schemas and compiler pari
 
 ## Execution Review
 
-Awaiting the user's plan review and execution-method choice as required by `superpowers:writing-plans`. Native execution is recommended because storage, API and CLI tasks share evolving interfaces, and one implementer can keep those changes consistent before a fresh whole-branch review.
+The user approved this plan and selected native execution on 2026-11-01. Execute all tasks continuously, retain the progress ledger across compaction, and obtain the required fresh whole-branch review at the end.

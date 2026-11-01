@@ -2,8 +2,7 @@ import { isAbsolute } from 'node:path'
 import { normalizeSnapshotOrigin } from '@ombelle/contracts'
 import { SnapshotServiceError } from './errors'
 
-export type SnapshotConfig = {
-  dbPath: string
+export type SnapshotConfig = ({ backend?: 'sqlite'; dbPath: string } | { backend: 'postgres'; databaseUrl: string }) & {
   publicOrigin: string
   rateSecret: string
   clientIdentity: { mode: 'development' } | { mode: 'trusted-header'; header: string }
@@ -11,16 +10,21 @@ export type SnapshotConfig = {
 
 export function readSnapshotConfig(env: Record<string, string | undefined>): SnapshotConfig {
   try {
+    const backend = env.OMBELLE_SNAPSHOT_BACKEND ?? 'sqlite'
+    if (!['sqlite', 'postgres'].includes(backend) || (env.VERCEL === '1' && backend !== 'postgres'))
+      throw new Error('Invalid snapshot backend')
     const dbPath = env.OMBELLE_SNAPSHOT_DB_PATH
-    const origin = env.OMBELLE_PUBLIC_ORIGIN
+    const preview = env.VERCEL === '1' && env.VERCEL_ENV === 'preview'
+    if (preview && !/^[a-z0-9-]+\.vercel\.app$/.test(env.VERCEL_URL ?? ''))
+      throw new Error('Invalid preview deployment origin')
+    const origin = preview ? 'https://' + env.VERCEL_URL : env.OMBELLE_PUBLIC_ORIGIN
     const rateSecret = env.OMBELLE_SNAPSHOT_RATE_SECRET
     if (
-      !dbPath || !isAbsolute(dbPath) || dbPath.includes('\0') ||
       !origin || !rateSecret || Buffer.byteLength(rateSecret, 'utf8') < 32
     )
       throw new Error('Invalid snapshot configuration')
     const publicOrigin = normalizeSnapshotOrigin(origin)
-    const header = env.OMBELLE_SNAPSHOT_CLIENT_IP_HEADER
+    const header = env.VERCEL === '1' ? 'x-vercel-forwarded-for' : env.OMBELLE_SNAPSHOT_CLIENT_IP_HEADER
     let clientIdentity: SnapshotConfig['clientIdentity']
     if (header !== undefined) {
       if (!/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(header))
@@ -34,7 +38,21 @@ export function readSnapshotConfig(env: Record<string, string | undefined>): Sna
       clientIdentity = { mode: 'development' }
     }
     // Parsing configuration never touches disk; initialization is explicit.
-    return { dbPath, publicOrigin, rateSecret, clientIdentity }
+    const shared = { publicOrigin, rateSecret, clientIdentity }
+    if (backend === 'postgres') {
+      const databaseUrl = env.DATABASE_URL
+      if (!databaseUrl || /[\s\0]/.test(databaseUrl)) throw new Error('Missing Postgres connection')
+      const url = new URL(databaseUrl)
+      if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.username || !url.password || !url.hostname || url.pathname.length < 2 || url.hash)
+        throw new Error('Invalid Postgres connection')
+      const productionHost = env.OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST
+      const hostIdentity = (host: string) => host.toLowerCase().replace('-pooler.', '.')
+      if (preview && (!productionHost || hostIdentity(url.hostname) === hostIdentity(productionHost)))
+        throw new Error('Preview storage is not isolated')
+      return { ...shared, backend: 'postgres', databaseUrl }
+    }
+    if (!dbPath || !isAbsolute(dbPath) || dbPath.includes('\0')) throw new Error('Invalid SQLite path')
+    return { dbPath, ...shared, ...(env.OMBELLE_SNAPSHOT_BACKEND ? { backend: 'sqlite' as const } : {}) }
   } catch {
     throw new SnapshotServiceError({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' })
   }

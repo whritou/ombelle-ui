@@ -36,7 +36,19 @@ The SQLite service allows five POST attempts per client per minute, twenty new s
 
 ## Runtime and environment
 
-The request handlers require the Node runtime with built-in `node:sqlite`; Edge and ephemeral-only hosts are unsupported. Use a persistent local volume for `OMBELLE_SNAPSHOT_DB_PATH`. Keep the SQLite database on a single writable service instance unless a deployment design supplies a supported shared-database strategy. These deployment assumptions have not been exercised against a hosted platform.
+### Neon Postgres adapter
+
+The hosted adapter uses `OMBELLE_SNAPSHOT_BACKEND=postgres` and the integration's pooled `DATABASE_URL`; operator initialization uses `DATABASE_URL_UNPOOLED`. Set the common public-origin/rate-secret settings below. On Vercel, client identity uses its trusted `x-vercel-forwarded-for` header. Preview origins come only from Vercel's deployment environment; `OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST` is required on previews and prevents accidentally using the production endpoint (pooled/direct hostnames are normalized). There is no fallback to SQLite when hosted configuration is incomplete.
+
+Run the existing `snapshots:init`, `snapshots:withdraw` and `snapshots:unwithdraw` commands with the selected backend. Withdrawal accepts exact preset or recipe references. Database initialization is explicit and idempotent; requests and builds do not run migrations. Both publication kinds share quotas and a 100,000-record/256 MiB canonical-response budget. The payload limit leaves database-overhead headroom and does not guarantee a precise physical database size.
+
+Postgres backups use `pg_dump` with the direct connection and a verified restore on an isolated branch; the SQLite `snapshots:backup` file command is not a Postgres backup. Supply credentials through a protected environment or passfile, never command arguments or logs. Use the Neon provider's recovery window according to the actual plan and retain independent backups appropriate to the release's retention policy. No backup/restore drill or public deployment is claimed by the adapter implementation alone.
+
+`pnpm test:hosted-storage` is a separate, real-Neon test command. It requires explicitly configured `dev-hosted-install-codes` branch credentials and fails if they are absent; default unit/integration tests remain cloud-independent. The development branch is disposable and tests use separately named owned schemas. Never use the production URL as its test connection.
+
+### Local SQLite adapter
+
+The SQLite request handlers require the Node runtime with built-in `node:sqlite`; Edge and ephemeral-only filesystems are unsupported by this adapter. Use a persistent local volume for `OMBELLE_SNAPSHOT_DB_PATH`. Keep the SQLite database on a single writable service instance. Use the Postgres adapter for Vercel rather than a temporary SQLite file.
 
 Configure the service process with:
 

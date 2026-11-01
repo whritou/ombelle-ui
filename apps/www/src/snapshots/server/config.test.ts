@@ -83,3 +83,25 @@ it('rejects ambiguous Fetch Metadata values instead of accepting a cross-site ch
     }), config)).not.toThrow()
   }
 })
+
+const postgresUrl = 'postgresql://test:test@ep-test-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+it('selects postgres explicitly without requiring or falling back to a SQLite path', () => {
+  expect(readSnapshotConfig({ ...env, OMBELLE_SNAPSHOT_BACKEND: 'postgres', OMBELLE_SNAPSHOT_DB_PATH: undefined, DATABASE_URL: postgresUrl }))
+    .toMatchObject({ backend: 'postgres', databaseUrl: postgresUrl })
+  expect(() => readSnapshotConfig({ ...env, OMBELLE_SNAPSHOT_BACKEND: 'postgres', DATABASE_URL: undefined })).toThrow()
+  expect(() => readSnapshotConfig({ ...env, OMBELLE_SNAPSHOT_BACKEND: 'unknown' })).toThrow()
+})
+it('fails closed when a preview deployment points to the production endpoint', () => {
+  const preview = { ...env, OMBELLE_SNAPSHOT_BACKEND: 'postgres', DATABASE_URL: postgresUrl,
+    VERCEL: '1', VERCEL_ENV: 'preview', VERCEL_URL: 'ombelle-ui-test-team.vercel.app',
+    OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST: 'ep-test.eu-central-1.aws.neon.tech' }
+  expect(() => readSnapshotConfig(preview)).toThrow()
+  expect(() => readSnapshotConfig({ ...preview, OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST: undefined })).toThrow()
+  expect(readSnapshotConfig({ ...preview, DATABASE_URL: postgresUrl.replace('ep-test-pooler', 'ep-preview-pooler') }))
+    .toMatchObject({ publicOrigin: 'https://ombelle-ui-test-team.vercel.app', clientIdentity: { mode: 'trusted-header', header: 'x-vercel-forwarded-for' } })
+})
+it('does not derive a hosted preview origin from malformed deployment environment values', () => {
+  for (const VERCEL_URL of ['evil.test', 'https://evil.test', 'x.vercel.app/path', 'x.vercel.app@evil.test'])
+    expect(() => readSnapshotConfig({ ...env, OMBELLE_SNAPSHOT_BACKEND: 'postgres', DATABASE_URL: postgresUrl,
+      VERCEL: '1', VERCEL_ENV: 'preview', VERCEL_URL, OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST: 'ep-production.neon.tech' })).toThrow()
+})

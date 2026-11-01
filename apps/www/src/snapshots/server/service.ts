@@ -4,7 +4,7 @@ import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './
 import { readPublishBody } from './body'
 import { clientRateKey } from './client-key'
 import { SnapshotServiceError } from './errors'
-import { openSnapshotStore } from './sqlite-store'
+import { openConfiguredSnapshotStore } from './store-factory'
 import type { SnapshotStore } from './store'
 
 export interface SnapshotService {
@@ -67,7 +67,7 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
 export function createRequestSnapshotService(): SnapshotService {
   async function use<T>(operation: (service: SnapshotService) => Promise<T>): Promise<T> {
     const config = readSnapshotConfig(process.env)
-    const store = openSnapshotStore(config.dbPath)
+    const store = await openConfiguredSnapshotStore(config)
     try { return await operation(createSnapshotService(config, store)) }
     finally { await store.close() }
   }
