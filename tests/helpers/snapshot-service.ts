@@ -5,6 +5,8 @@ import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { createSnapshotService } from '../../apps/www/src/snapshots/server/service.js'
 import { handleSnapshotPublish, handleSnapshotRead, handleSnapshotUnsupportedMethod } from '../../apps/www/src/snapshots/server/http.js'
+import { createRecipeSnapshotService } from '../../apps/www/src/snapshots/server/recipe-service.js'
+import { handleRecipeSnapshotPublish, handleRecipeSnapshotRead } from '../../apps/www/src/snapshots/server/recipe-http.js'
 import { initializeSnapshotStore, openSnapshotStore } from '../../apps/www/src/snapshots/server/sqlite-store.js'
 
 // The bridge uses the production handlers and a real initialized private DB.
@@ -26,13 +28,20 @@ export async function startSnapshotService() {
           body: Readable.toWeb(incoming) as ReadableStream<Uint8Array>, duplex: 'half',
         }),
       })
-      const service = createSnapshotService({ dbPath, publicOrigin: origin, rateSecret: 'test-secret-'.repeat(4), clientIdentity: { mode: 'development' } }, store)
+      const config = { dbPath, publicOrigin: origin, rateSecret: 'test-secret-'.repeat(4), clientIdentity: { mode: 'development' as const } }
+      const service = createSnapshotService(config, store)
+      const recipeService = createRecipeSnapshotService(config, store)
       const match = /^\/api\/v1\/presets\/([^/]+)\/([^/]+)$/.exec(url.pathname)
-      const response = url.pathname === '/api/v1/presets' && request.method === 'POST'
+      const recipeMatch = /^\/api\/v1\/recipes\/([^/]+)\/([^/]+)$/.exec(url.pathname)
+      const response = url.pathname === '/api/v1/recipes' && request.method === 'POST'
+        ? await handleRecipeSnapshotPublish(request, recipeService)
+        : recipeMatch && ['GET', 'HEAD'].includes(request.method)
+          ? await handleRecipeSnapshotRead(request, { id: recipeMatch[1], revision: recipeMatch[2] }, recipeService)
+        : url.pathname === '/api/v1/presets' && request.method === 'POST'
         ? await handleSnapshotPublish(request, service)
         : match && ['GET', 'HEAD'].includes(request.method)
           ? await handleSnapshotRead(request, { id: match[1], revision: match[2] }, service)
-          : await handleSnapshotUnsupportedMethod(request, match ? 'GET, HEAD, OPTIONS' : 'POST, OPTIONS')
+          : await handleSnapshotUnsupportedMethod(request, match || recipeMatch ? 'GET, HEAD, OPTIONS' : 'POST, OPTIONS')
       outgoing.writeHead(response.status, Object.fromEntries(response.headers))
       outgoing.end(Buffer.from(await response.arrayBuffer()))
     } catch { outgoing.writeHead(500); outgoing.end() }

@@ -37,8 +37,21 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
         throw new SnapshotServiceError({ status: 400, code: 'INVALID_IDEMPOTENCY_KEY' })
       if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1 || !Object.hasOwn(body, 'recipe'))
         throw new SnapshotServiceError({ status: 400, code: 'INVALID_DATA' })
+      const input = (body as { recipe: unknown }).recipe
+      if (input && typeof input === 'object' && !Array.isArray(input)) {
+        const value = input as Record<string, unknown>
+        if (typeof value.schemaVersion === 'string' && value.schemaVersion !== '1.0')
+          throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
+        const ref = value.presetRef
+        if (ref && typeof ref === 'object' && !Array.isArray(ref))
+          for (const field of ['catalogRelease', 'compilerVersion']) {
+            const release = (ref as Record<string, unknown>)[field]
+            if (typeof release === 'string' && release !== '0.1.0')
+              throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
+          }
+      }
       let compiled
-      try { compiled = await normalizePublishedRecipe((body as { recipe: unknown }).recipe) }
+      try { compiled = await normalizePublishedRecipe(input) }
       catch (error) {
         if (error instanceof FoundationError && error.code === 'UNSUPPORTED_RELEASE')
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })

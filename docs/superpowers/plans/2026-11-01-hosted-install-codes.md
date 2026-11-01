@@ -108,9 +108,9 @@ it('does not fall back to SQLite when postgres configuration is incomplete', () 
 
 **Files:** Create `apps/www/src/snapshots/server/recipe-http.ts`, `apps/www/src/app/api/v1/recipes/route.ts`, `apps/www/src/app/api/v1/recipes/[id]/[revision]/route.ts`, and `tests/integration/recipe-snapshot-api.test.ts`. Modify shared errors/body/request-service helpers only where needed.
 
-**Interfaces:** Produce `handleRecipeSnapshotPublish(request: Request, service: RecipeSnapshotService): Promise<Response>` and `handleRecipeSnapshotRead(request: Request, ref: { id: string; revision: 1 }, service: RecipeSnapshotService): Promise<Response>`. POST takes exactly `{ recipe }`, matching Origin and UUID-v4 Idempotency-Key. GET/HEAD use exact recipe references and canonical envelope bytes.
+**Interfaces:** Produce `handleRecipeSnapshotPublish(request: Request, service: RecipeSnapshotService): Promise<Response>` and `handleRecipeSnapshotRead(request: Request, params: { id: string; revision: string }, service: RecipeSnapshotService): Promise<Response>`. Raw path strings are validated before any storage access. POST takes exactly `{ recipe }`, matching Origin and UUID-v4 Idempotency-Key. GET/HEAD use exact recipe references and canonical envelope bytes.
 
-- [ ] **Step 1: Add failing tests.** Actual handler requests cover 201/200 retries, 409 content/kind conflicts, 403 origin, 413 size, 415 media/encoding, 422 releases, malformed references before I/O, unsupported methods/OPTIONS, 404/410, canonical ETags/304/HEAD, corrupt storage, and body deadline/depth. Share existing controlled error shape and never leak SQL, secrets, or payload on withdrawal.
+- [x] **Step 1: Add failing tests.** Actual handler requests cover 201/200 retries, 409 content/kind conflicts, 403 origin, 413 size, 415 media/encoding, 422 releases, malformed references before I/O, unsupported methods/OPTIONS, 404/410, canonical ETags/304/HEAD, corrupt storage, and body deadline/depth. Share existing controlled error shape and never leak SQL, secrets, or payload on withdrawal.
 
 ```ts
 it('checks withdrawal before conditional recipe reads', async () => {
@@ -120,10 +120,10 @@ it('checks withdrawal before conditional recipe reads', async () => {
 })
 ```
 
-- [ ] **Step 2: Run RED.** `pnpm exec vitest run tests/integration/recipe-snapshot-api.test.ts`; expect absent handlers/service behavior to fail.
-- [ ] **Step 3: Implement.** Use Task 2's service and existing bounded body/identity policy; introduce no CORS/account API. Read and write share a controlled error boundary and verified canonical bytes.
-- [ ] **Step 4: Run GREEN.** Run new API tests plus existing preset API/body/client-key tests and typecheck.
-- [ ] **Step 5: Commit.** `feat(api): publish and resolve immutable recipe codes`.
+- [x] **Step 2: Run RED.** `pnpm exec vitest run tests/integration/recipe-snapshot-api.test.ts`; expect absent handlers/service behavior to fail.
+- [x] **Step 3: Implement.** Use Task 2's service and existing bounded body/identity policy; introduce no CORS/account API. Read and write share a controlled error boundary and verified canonical bytes.
+- [x] **Step 4: Run GREEN.** Run new API tests plus existing preset API/body/client-key tests and typecheck.
+- [x] **Step 5: Commit.** `feat(api): publish and resolve immutable recipe codes`.
 
 ### Task 5: Code-only CLI Resolution, Provenance and Cache
 
