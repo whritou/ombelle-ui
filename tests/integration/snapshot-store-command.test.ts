@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os'
 import { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
-import { normalizePublishedPreset } from '@ombelle/compiler'
-import { parseSnapshotReference } from '@ombelle/contracts'
+import { normalizePublishedPreset, normalizePublishedRecipe } from '@ombelle/compiler'
+import { parseSnapshotReference, parseRecipeSnapshotReference } from '@ombelle/contracts'
 import { openSnapshotStore } from '../../apps/www/src/snapshots/server/sqlite-store.js'
 
 const roots: string[] = []
@@ -80,4 +80,23 @@ it('refuses invalid arguments, missing initialization and future schemas without
   expect((await command(['init'], path)).code).not.toBe(0)
   expect((await command(['backup', backup], path)).code).not.toBe(0)
   await expect(stat(backup)).rejects.toMatchObject({ code: 'ENOENT' })
+})
+
+it('withdraws and restores a recipe code through the explicit operator command', async () => {
+  const { path } = await fixture()
+  expect((await command(['init'], path)).code).toBe(0)
+  const store = openSnapshotStore(path)
+  const compiled = await normalizePublishedRecipe(JSON.parse(await readFile('examples/recipe.example.json', 'utf8')))
+  let snapshot
+  try { snapshot = store.publishRecipe({ compiled, idempotencyKey: randomUUID(), clientKey: 'recipe-client', now: Date.now() }).snapshot }
+  finally { store.close() }
+  const reference = snapshot.id + '@1'
+  expect((await command(['withdraw', reference, '--reason', 'security'], path)).code).toBe(0)
+  const withdrawn = openSnapshotStore(path)
+  try { expect(() => withdrawn.lookupRecipe(parseRecipeSnapshotReference(reference))).toThrow(expect.objectContaining({ status: 410 })) }
+  finally { withdrawn.close() }
+  expect((await command(['unwithdraw', reference], path)).code).toBe(0)
+  const reopened = openSnapshotStore(path)
+  try { expect(reopened.lookupRecipe(parseRecipeSnapshotReference(reference))).toEqual(snapshot) }
+  finally { reopened.close() }
 })

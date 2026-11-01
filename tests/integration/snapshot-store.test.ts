@@ -11,7 +11,7 @@ import { parseSnapshotReference, type ResolvedPreset } from '@ombelle/contracts'
 import {
   backupSnapshotStore, initializeSnapshotStore, openSnapshotStore, SqliteSnapshotStore,
 } from '../../apps/www/src/snapshots/server/sqlite-store.js'
-import type { SnapshotStore } from '../../apps/www/src/snapshots/server/store.js'
+import type { SqliteSnapshotStore as SnapshotStore } from '../../apps/www/src/snapshots/server/sqlite-store.js'
 
 const roots: string[] = []
 const stores: SnapshotStore[] = []
@@ -197,7 +197,7 @@ it.each(['records', 'bytes'])('refuses %s capacity with unchanged counters and p
   const first = publish(store, { idempotencyKey: key })
   db.exec(dimension === 'records'
     ? 'UPDATE capacity SET records = 99999'
-    : 'UPDATE capacity SET bytes = 536870912 - (SELECT bytes FROM snapshots LIMIT 1)')
+    : 'UPDATE capacity SET bytes = 268435456 - (SELECT bytes FROM snapshots LIMIT 1)')
   publish(store)
   const before = totals(db)
   expect(() => publish(store)).toThrow(expect.objectContaining({ status: 503, code: 'SNAPSHOT_CAPACITY_REACHED' }))
@@ -252,10 +252,10 @@ it('opens only explicitly initialized schemas and rejects unknown/future schema 
   raw(empty)
   expect(() => openSnapshotStore(empty)).toThrow(expect.objectContaining({ code: 'SNAPSHOT_SERVICE_UNAVAILABLE' }))
   const db = raw(path)
-  db.exec('PRAGMA user_version = 2')
+  db.exec('PRAGMA user_version = 999')
   expect(() => openSnapshotStore(path)).toThrow(expect.objectContaining({ code: 'SNAPSHOT_SERVICE_UNAVAILABLE' }))
   expect(() => initializeSnapshotStore(path)).toThrow(expect.objectContaining({ code: 'SNAPSHOT_SERVICE_UNAVAILABLE' }))
-  expect(db.prepare('PRAGMA user_version').get()!.user_version).toBe(2)
+  expect(db.prepare('PRAGMA user_version').get()!.user_version).toBe(999)
 })
 
 it('rejects SQL UPDATE, DELETE, and replacement of immutable records', async () => {

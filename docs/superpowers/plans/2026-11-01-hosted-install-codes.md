@@ -70,7 +70,7 @@ it('rejects a recipe envelope whose resolved preset differs from its builtin ref
 
 **Interfaces:** Preserve preset methods and accept `Awaitable<T> = T | Promise<T>` on the `SnapshotStore` port. Add `publishRecipe(input: { compiled: RecipeCompileResult; idempotencyKey: string; clientKey: string; now: number }): Awaitable<{ snapshot: RecipeSnapshot; replayed: boolean }>`, `lookupRecipe(ref: { id: string; revision: 1 }): Awaitable<RecipeSnapshot>`, `withdrawRecipe(ref, reason: WithdrawalReason, now: number): Awaitable<void>`, and `unwithdrawRecipe(ref): Awaitable<void>`. Produce `createRecipeSnapshotService(config: SnapshotConfig, store: SnapshotStore): RecipeSnapshotService`, where `RecipeSnapshotService` has `publish(request: Request): Promise<{ snapshot: RecipeSnapshot; replayed: boolean }>` and `read(ref: { id: string; revision: 1 }): Promise<RecipeSnapshot>`.
 
-- [ ] **Step 1: Add failing store contract tests.** Reuse the contract for both adapters in Task 3. Cover five shared attempts/minute, twenty combined daily publications/client, cross-kind same-key conflict, retry without double daily consumption, immutable rows, bounded cleanup, 256 MiB/100,000-record capacity, three ID collisions, schema-version failure, withdrawal/replay, and concurrent connections.
+- [x] **Step 1: Add failing store contract tests.** Reuse the contract for both adapters in Task 3. Cover five shared attempts/minute, twenty combined daily publications/client, cross-kind same-key conflict, retry without double daily consumption, immutable rows, bounded cleanup, 256 MiB/100,000-record capacity, three ID collisions, schema-version failure, withdrawal/replay, and concurrent connections.
 
 ```ts
 it('shares the daily publication quota across presets and recipes', async () => {
@@ -80,10 +80,10 @@ it('shares the daily publication quota across presets and recipes', async () => 
 })
 ```
 
-- [ ] **Step 2: Run RED.** `pnpm exec vitest run tests/integration/recipe-snapshot-store.test.ts tests/integration/snapshot-store.test.ts`; expect new recipe/shared-budget cases to fail.
-- [ ] **Step 3: Implement.** Await the port from service/operator code. Add an explicit SQLite v1-to-v2 migration for recipe records, kind-aware retry/withdrawal state, and shared capacity/quota bookkeeping. Migration preserves old snapshots and rejects an over-cap existing store without deleting data. Runtime opens verify schema only. Return controlled errors after rollback; immutable response content never changes.
-- [ ] **Step 4: Run GREEN.** Run both store suites and the existing snapshot API/operator tests. Require legacy preset semantics and atomic retry/rollback assertions to pass.
-- [ ] **Step 5: Commit.** `feat(snapshots): persist recipe snapshots with shared quotas`.
+- [x] **Step 2: Run RED.** `pnpm exec vitest run tests/integration/recipe-snapshot-store.test.ts tests/integration/snapshot-store.test.ts`; expect new recipe/shared-budget cases to fail.
+- [x] **Step 3: Implement.** Await the port from service/operator code. Add an explicit SQLite v1-to-v2 migration for recipe records, kind-aware retry/withdrawal state, and shared capacity/quota bookkeeping. Migration preserves old snapshots and rejects an over-cap existing store without deleting data. Runtime opens verify schema only. Return controlled errors after rollback; immutable response content never changes.
+- [x] **Step 4: Run GREEN.** Run both store suites and the existing snapshot API/operator tests. Require legacy preset semantics and atomic retry/rollback assertions to pass.
+- [x] **Step 5: Commit.** `feat(snapshots): persist recipe snapshots with shared quotas`.
 
 ### Task 3: Neon Postgres Adapter and Explicit Operators
 
