@@ -1,6 +1,6 @@
 # Hosted install codes on Vercel
 
-**Status:** Proposed; implementation requires user approval of this document.
+**Status:** Approved by the user on 2026-11-01; implementation planning authorized.
 **Date:** 2026-11-01
 **Baseline:** `acd7873` on `origin/main`.
 **Branch:** `feat/hosted-install-codes`.
