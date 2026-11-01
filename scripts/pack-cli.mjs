@@ -16,6 +16,7 @@ function run(executable, args, cwd = repo) {
 }
 for (const script of ['sync-schema.mjs', 'sync-catalog.mjs', 'build.mjs'])
   run(process.execPath, ['scripts/' + script])
+const { publicCliPackageName } = await import('../packages/contracts/dist/index.js')
 const releaseRoot = path.resolve(repo, '.artifacts/cli-release')
 const staging = path.resolve(releaseRoot, 'package')
 if (path.dirname(staging) !== releaseRoot || path.basename(staging) !== 'package') throw new Error('Invalid owned release staging directory')
@@ -71,7 +72,7 @@ await fs.copyFile(path.join(repo, 'LICENSE'), path.join(staging, 'LICENSE'))
 await fs.writeFile(path.join(staging, 'THIRD_PARTY_NOTICES.txt'), notices.join('\n'))
 const workspaceManifest = JSON.parse(await fs.readFile(path.join(repo, 'packages/cli/package.json'), 'utf8'))
 const manifest = {
-  name: workspaceManifest.name, version: workspaceManifest.version,
+  name: publicCliPackageName, version: workspaceManifest.version,
   description: 'Guarded source installer for Ombelle presets and Button recipes',
   type: 'module', license: 'MIT', bin: { ombelle: './dist/main.js' },
   engines: { node: '>=24.19.0 <25' },

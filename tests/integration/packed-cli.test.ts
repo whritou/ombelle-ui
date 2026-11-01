@@ -31,7 +31,7 @@ beforeAll(async () => {
   await fs.writeFile(path.join(install, 'package.json'), JSON.stringify({ name: 'independent-installer-consumer', private: true, type: 'module' }))
   const installed = await command(process.execPath, [await managerEntry('npm'), 'install', release.tarball, '--offline', '--ignore-scripts', '--no-audit', '--no-fund'], install)
   expect(installed.code, installed.stdout + installed.stderr).toBe(0)
-  binary = path.join(install, 'node_modules/@ombelle/cli/dist/main.js')
+  binary = path.join(install, 'node_modules', release.packageName, 'dist/main.js')
   service = await startSnapshotService()
   for (const [kind, value] of [['preset', getCatalog('0.1.0').presets.flat], ['recipe', exampleRecipe]] as const) {
     const response = await fetch(`${service.origin}/api/v1/${kind}s`, { method: 'POST', headers: { Origin: service.origin, 'Content-Type': 'application/json', 'Idempotency-Key': randomUUID() }, body: JSON.stringify({ [kind]: value }) })
@@ -54,7 +54,7 @@ it('runs the installed npm bin through npm exec without registry resolution', as
   expect(result.stdout).toContain('add --recipe')
 })
 it('packs only standalone installer files, complete license notices and no install scripts or workspace references', async () => {
-  expect(release).toMatchObject({ packageName: '@ombelle/cli', version: '0.1.0', integrity: expect.stringMatching(/^sha512-/) })
+  expect(release).toMatchObject({ packageName: '@ombelle-ui/cli', version: '0.1.0', integrity: expect.stringMatching(/^sha512-/) })
   const root = path.dirname(path.dirname(binary)), manifest = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'))
   expect(manifest.private).not.toBe(true)
   expect(manifest.dependencies ?? {}).toEqual({})
@@ -129,7 +129,7 @@ it.each(['pnpm', 'yarn-classic', 'yarn-modern', 'bun'] as const)('installs the e
   expect(probe.stdout.trim()).toBe(version.split('@')[1])
   const args = manager === 'pnpm' || manager === 'bun'
     ? ['add', '--offline', '--ignore-scripts', release.tarball]
-    : manager === 'yarn-classic' ? ['add', '--offline', '--ignore-scripts', release.tarball] : ['add', '--mode=skip-build', '@ombelle/cli@file:./candidate.tgz']
+    : manager === 'yarn-classic' ? ['add', '--offline', '--ignore-scripts', release.tarball] : ['add', '--mode=skip-build', `${release.packageName}@file:./candidate.tgz`]
   const installed = await command(executable, [...prefix, ...args], root, env)
   expect(installed.code, installed.stdout + installed.stderr).toBe(0)
   const help = await command(executable, [...prefix, manager === 'pnpm' ? 'exec' : 'run', 'ombelle', '--help'], root, env)

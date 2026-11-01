@@ -1,8 +1,8 @@
-import { officialSnapshotOrigin, validateSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, validateSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
 
 export function installerRunner(release?: { packageName: string; version: string }): string {
   if (!release) return 'pnpm exec node packages/cli/dist/main.js'
-  if (release.packageName !== '@ombelle/cli' || !/^\d+\.\d+\.\d+$/.test(release.version))
+  if (release.packageName !== publicCliPackageName || !/^\d+\.\d+\.\d+$/.test(release.version))
     throw new Error('Unsupported published installer release.')
   return `npx ${release.packageName}@${release.version}`
 }

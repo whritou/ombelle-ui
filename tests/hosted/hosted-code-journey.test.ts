@@ -49,12 +49,14 @@ it('publishes both codes on real Neon, installs the independent package, persist
   packageRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-hosted-package-'))
   await fs.writeFile(path.join(packageRoot, 'package.json'), JSON.stringify({ name: 'independent-hosted-installer', private: true, type: 'module' }))
   const npm = await managerEntry('npm')
+  const release = JSON.parse(await fs.readFile('.artifacts/cli-release/release.json', 'utf8'))
+  expect(release).toMatchObject({ packageName: '@ombelle-ui/cli', version: '0.1.0' })
   const installation = await new Promise<{ code: number | null; text: string }>((resolve, reject) => {
-    const child = spawn(process.execPath, [npm, 'install', path.resolve('.artifacts/cli-release/ombelle-cli-0.1.0.tgz'), '--offline', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: packageRoot, windowsHide: true, env: { ...process.env, NODE_OPTIONS: '', NODE_PATH: '' } })
+    const child = spawn(process.execPath, [npm, 'install', release.tarball, '--offline', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: packageRoot, windowsHide: true, env: { ...process.env, NODE_OPTIONS: '', NODE_PATH: '' } })
     let text = ''; child.stdout.on('data', value => { text += value }); child.stderr.on('data', value => { text += value }); child.on('error', reject); child.on('close', code => resolve({ code, text }))
   })
   expect(installation.code, installation.text).toBe(0)
-  const cli = path.join(packageRoot, 'node_modules/@ombelle/cli/dist/main.js')
+  const cli = path.join(packageRoot, 'node_modules', release.packageName, 'dist/main.js')
   await fs.access(cli)
   const run = (args: string[]) => new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve, reject) => {
     const child = spawn(process.execPath, ['--import', pathToFileURL(path.resolve('tests/helpers/official-snapshot-transport.mjs')).href, cli, ...args, '--cwd', root!, '--yes', '--json'], { cwd: packageRoot, windowsHide: true, env: { ...process.env, NODE_PATH: '', NODE_OPTIONS: '', OMBELLE_TEST_SNAPSHOT_ORIGIN: bridge!.origin, OMBELLE_SNAPSHOT_CACHE_DIR: 'unused-relative-cache' } })

@@ -194,7 +194,7 @@ it('ignores a successful recipe response after the draft changes', async () => {
 
 **Files:** Create `scripts/pack-cli.mjs`, `tests/integration/packed-cli.test.ts`, release metadata/third-party notice generation, and a release usage guide. Modify only the CLI manifest/build pipeline and website command helpers needed for the verified release.
 
-**Interfaces:** `pnpm pack:cli` builds a standalone tarball and manifest under `.artifacts/cli-release/`; default candidate package is `@ombelle/cli@0.1.0` with `ombelle` bin. The packed manifest has no `workspace:*`, repository-only exports or install lifecycle scripts. Produce runner commands for npm/pnpm/Yarn/Bun referencing the same verified immutable version.
+**Interfaces:** `pnpm pack:cli` builds a standalone tarball and manifest under `.artifacts/cli-release/`; candidate package is `@ombelle-ui/cli@0.1.0` with `ombelle` bin. The user reserved npm organization `ombelle-ui` after finding `ombelle` taken; this supersedes the original public-name candidate. The private workspace identity remains `@ombelle/cli`. The packed manifest has no `workspace:*`, repository-only exports or install lifecycle scripts. Produce runner commands for npm/pnpm/Yarn/Bun referencing the same verified immutable version.
 
 - [x] **Step 1: Add failing tests.** Inspect tarball contents and install it in a clean temporary project with scripts disabled and no monorepo resolution. Exercise help, code/local resolution, plan/apply and later offline additions. Check required license/notice contents and absence of secrets, `.env`, SQLite files, generated test consumers and source paths.
 
