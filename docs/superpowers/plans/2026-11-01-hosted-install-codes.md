@@ -196,7 +196,7 @@ it('ignores a successful recipe response after the draft changes', async () => {
 
 **Interfaces:** `pnpm pack:cli` builds a standalone tarball and manifest under `.artifacts/cli-release/`; default candidate package is `@ombelle/cli@0.1.0` with `ombelle` bin. The packed manifest has no `workspace:*`, repository-only exports or install lifecycle scripts. Produce runner commands for npm/pnpm/Yarn/Bun referencing the same verified immutable version.
 
-- [ ] **Step 1: Add failing tests.** Inspect tarball contents and install it in a clean temporary project with scripts disabled and no monorepo resolution. Exercise help, code/local resolution, plan/apply and later offline additions. Check required license/notice contents and absence of secrets, `.env`, SQLite files, generated test consumers and source paths.
+- [x] **Step 1: Add failing tests.** Inspect tarball contents and install it in a clean temporary project with scripts disabled and no monorepo resolution. Exercise help, code/local resolution, plan/apply and later offline additions. Check required license/notice contents and absence of secrets, `.env`, SQLite files, generated test consumers and source paths.
 
 ```ts
 it('runs the packed ombelle bin without unpublished workspace packages', async () => {
@@ -206,10 +206,12 @@ it('runs the packed ombelle bin without unpublished workspace packages', async (
 })
 ```
 
-- [ ] **Step 2: Run RED.** `pnpm exec vitest run tests/integration/packed-cli.test.ts`; expect the current private/workspace package to fail isolation assertions.
+- [x] **Step 2: Run RED.** `pnpm exec vitest run tests/integration/packed-cli.test.ts`; expect the current private/workspace package to fail isolation assertions.
 - [ ] **Step 3: Implement.** Bundle internal code/data while preserving Node built-ins and tested third-party behavior, emit licenses, and pack the exact candidate. Verify npm namespace ownership and the authenticated publishing identity after the tarball is ready. Publish only under the existing approved namespace with verified access. If account action is required, finish all other authorized work and present the concrete artifact/account step. Until publication is confirmed, keep truthful private/local commands; do not silently mark a release available.
 - [ ] **Step 4: Run GREEN.** Install the exact tarball independently under the supported runners, test Node/Bun entry behavior as applicable, and check bytes/provenance. After any real release, fetch the pinned registry version in a fresh project and compare its integrity to the prepared artifact before enabling public website commands.
-- [ ] **Step 5: Commit.** `build(cli): package a standalone public installer`.
+- [x] **Step 5: Commit.** `build(cli): package a standalone public installer`.
+
+**Account gate:** Standalone candidate and all ten local package/runner assertions pass. npm reports ENEEDAUTH; registry lookup is 404, which does not prove namespace access. Actual publication and post-publication integrity checks in Steps 3–4 remain pending. Continue Task 9's independent verification before requesting account action, as this task instructs.
 
 ### Task 9: Integrated Verification, Deployment and Measured Evidence
 
