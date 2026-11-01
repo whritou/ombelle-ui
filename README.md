@@ -2,6 +2,8 @@
 
 A local technical foundation for source-distributed React components with persistent presets. It includes Button, Badge, Card, Checkbox, Dialog, Input, Label, Native Select, Switch, Tabs, Textarea, and Tooltip in flat, minimalist, and neo brutalist styles, generated previews, a local installer, and independent Vite/Next.js consumer checks.
 
+The six workspace packages are version **0.2.0**, currently unreleased. The standalone public installer candidate is `@ombelle-ui/cli@0.2.0`. Catalog/compiler compatibility remains **0.1.0**, and JSON formats remain **1.0**; these identifiers are independent of package versions so existing saved presets, recipes and snapshots continue to work.
+
 Use Node **24.19.0** and pnpm **11.25.0**.
 
 ```powershell

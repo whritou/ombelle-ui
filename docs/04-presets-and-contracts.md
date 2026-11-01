@@ -111,6 +111,8 @@ The private CLI syntax is `ps_<32 lowercase hex>@1`; it is not a shadcn feature.
 
 Schema version, catalog release, compiler version, artifact hashes, and verification status are separate concerns. Increment the JSON schema version when data meaning or allowed structure breaks. Use semantic versioning for published packages and catalog contracts, with extra caution during `0.x` releases.
 
+Workspace packages and the public installer candidate are version 0.2.0. This package release retains schema 1.0 and catalog/compiler compatibility 0.1.0: hosted distribution adds a transport and publication workflow without changing the selected generator release or reinterpreting existing saved data. A package version bump alone does not rewrite preset, recipe, snapshot or lockfile compatibility identifiers.
+
 Provide explicit migrations with before and after previews. Unknown major versions fail with a clear upgrade instruction. A migration cannot silently drop unsupported tokens, convert web effects into native code, or change a user's selected primitive implementation.
 
 Preserve immutable old snapshot payloads. If a release is withdrawn for a serious defect, return a clear advisory for new resolutions and provide a corrected release; do not replace the old bytes under an existing hash.

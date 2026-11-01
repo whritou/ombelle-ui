@@ -1,4 +1,12 @@
-# Documentation Changes
+# Changelog
+
+## 0.2.0 — Unreleased
+
+- Align all six workspace packages at 0.2.0 and prepare the standalone installer as `@ombelle-ui/cli@0.2.0` under the project's reserved npm organization.
+- Add immutable hosted preset and Button recipe codes, shared Postgres/SQLite publication quotas, and guarded code installation with saved provenance.
+- Add explicit editor publication, recovery, share pages and isolated production previews for Vercel.
+- Preserve schema 1.0 and catalog/compiler compatibility 0.1.0, existing generated output, project defaults and installer transaction safeguards.
+- Public npm publication and Vercel launch remain pending their measured acceptance checks. Earlier entries below describe documentation revisions, not published package versions.
 
 ## Unreleased — 23 October 2026
 
