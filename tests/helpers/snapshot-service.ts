@@ -8,6 +8,7 @@ import { handleSnapshotPublish, handleSnapshotRead, handleSnapshotUnsupportedMet
 import { createRecipeSnapshotService } from '../../apps/www/src/snapshots/server/recipe-service.js'
 import { handleRecipeSnapshotPublish, handleRecipeSnapshotRead } from '../../apps/www/src/snapshots/server/recipe-http.js'
 import { initializeSnapshotStore, openSnapshotStore } from '../../apps/www/src/snapshots/server/sqlite-store.js'
+import type { SnapshotStore } from '../../apps/www/src/snapshots/server/store.js'
 
 // The bridge uses the production handlers and a real initialized private DB.
 export async function startSnapshotService() {
@@ -15,6 +16,29 @@ export async function startSnapshotService() {
   const dbPath = join(root, 'snapshots.sqlite')
   initializeSnapshotStore(dbPath)
   const store = openSnapshotStore(dbPath)
+  try {
+    const bridge = await startPublicationHttpBridge(store, { dbPath })
+    let closed = false
+    return { ...bridge, dbPath, close: async () => {
+      if (closed) return
+      closed = true
+      try { await bridge.close() } finally {
+        await store.close()
+        await rm(root, { recursive: true, force: true })
+      }
+    } }
+  } catch (error) {
+    await store.close()
+    await rm(root, { recursive: true, force: true })
+    throw error
+  }
+}
+
+/** Actual production HTTP handlers with a caller-owned SQLite or Postgres port. */
+export async function startPublicationHttpBridge(
+  store: SnapshotStore,
+  storage: { dbPath: string } | { backend: 'postgres'; databaseUrl: string },
+) {
   let origin: string
   const server = createServer(async (incoming, outgoing) => {
     try {
@@ -28,7 +52,7 @@ export async function startSnapshotService() {
           body: Readable.toWeb(incoming) as ReadableStream<Uint8Array>, duplex: 'half',
         }),
       })
-      const config = { dbPath, publicOrigin: origin, rateSecret: 'test-secret-'.repeat(4), clientIdentity: { mode: 'development' as const } }
+      const config = { ...storage, publicOrigin: origin, rateSecret: 'test-secret-'.repeat(4), clientIdentity: { mode: 'development' as const } }
       const service = createSnapshotService(config, store)
       const recipeService = createRecipeSnapshotService(config, store)
       const match = /^\/api\/v1\/presets\/([^/]+)\/([^/]+)$/.exec(url.pathname)
@@ -54,15 +78,14 @@ export async function startSnapshotService() {
     const address = server.address()
     if (!address || typeof address === 'string') throw new Error('Missing bridge address')
     origin = `http://127.0.0.1:${address.port}`
-    return { origin, dbPath, close: async () => {
+    let closed = false
+    return { origin, close: async () => {
+      if (closed) return
+      closed = true
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()))
-      store.close()
-      await rm(root, { recursive: true, force: true })
     } }
   } catch (error) {
-    server.close()
-    store.close()
-    await rm(root, { recursive: true, force: true })
+    if (server.listening) server.close()
     throw error
   }
 }

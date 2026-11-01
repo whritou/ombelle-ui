@@ -1,6 +1,6 @@
 # Immutable preset snapshot service operations
 
-This document describes the private repository implementation. It is not a deployment guide for a live public service. No public endpoint, hosted persistent volume, support contact, or published CLI package is configured.
+This document describes the implementation and operator contract. The selected hosted target is the existing Ombelle Vercel project with Neon Free; public launch and npm distribution remain pending their deployment/account gates. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for those explicit gates. The local SQLite adapter remains available for development.
 
 ## Implemented contract
 
