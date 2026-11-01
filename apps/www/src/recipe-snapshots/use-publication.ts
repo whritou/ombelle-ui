@@ -103,7 +103,8 @@ export function createRecipePublicationController(options: PublicationOptions = 
   const save = () => {
     try {
       if (!options.storage) return
-      if (state.attempt) writePublishAttempt(options.storage(), state.attempt)
+      if (state.attempt && state.status !== 'withdrawn')
+        writePublishAttempt(options.storage(), state.attempt)
       else options.storage().removeItem(publicationStorageKey)
     } catch {
       /* Memory retries remain available if storage is denied. */
@@ -217,6 +218,9 @@ export function createRecipePublicationController(options: PublicationOptions = 
           draftHash,
           error: error.message,
         })
+        // Terminal attempts must never restore as retryable after a refresh.
+        // A later publication requires a newly confirmed intent and key.
+        save()
         return
       }
       const message =

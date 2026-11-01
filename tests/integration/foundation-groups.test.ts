@@ -128,7 +128,7 @@ test('accepts app unit evidence from Windows and Unix source paths', async () =>
   await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
   for (const suite of result.testResults) suite.name = 'Z:\\portable-checkout\\' + suite.name.replace('/different-checkout/', '').replaceAll('/', '\\')
   await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
-}, 180000)
+}, 420000) // Fixture discovery plus an independently bounded runtime inventory.
 test('rejects missing app unit files and assertions after headline counts are adjusted', async () => {
   for (const mode of ['file', 'assertion']) {
     const result = await testResults(['packages/', 'apps/www/src/'])

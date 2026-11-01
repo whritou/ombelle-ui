@@ -64,6 +64,31 @@ const response = (p: ResolvedRecipe) =>
   Response.json(envelope(p), { status: 201 })
 afterEach(() => vi.useRealTimers())
 
+it('does not recover a withdrawn attempt as retryable after refresh', async () => {
+  const p = await recipe(), session = storage()
+  const fetcher = vi.fn(async () => new Response(null, { status: 410 }))
+  const options = { fetch: fetcher, storage: () => session }
+  const first = createRecipePublicationController(options)
+  first.update(p, true)
+  first.confirm()
+  const withdrawnKey = first.state.attempt!.key
+  await first.publish()
+  expect(first.state.status).toBe('withdrawn')
+  first.dispose()
+
+  const recovered = createRecipePublicationController(options)
+  recovered.update(p, true)
+  await recovered.retry()
+  expect(fetcher).toHaveBeenCalledTimes(1)
+  expect(recovered.state.status).toBe('idle')
+  expect(session.getItem(publicationStorageKey)).toBeNull()
+  recovered.confirm()
+  expect(recovered.state.status).toBe('validating')
+  expect(recovered.state.attempt!.key).not.toBe(withdrawnKey)
+  expect(fetcher).toHaveBeenCalledTimes(1)
+  recovered.dispose()
+})
+
 it('only explicit confirmed publication posts captured content; cancel and restore never submit', async () => {
   const p = await recipe(),
     session = storage(),
