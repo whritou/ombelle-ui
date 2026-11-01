@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import type { EditorView } from '../model'
 import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type PreviewRender } from '../preview-protocol'
-
-const previewUrl = 'http://127.0.0.1:4173/editor-preview/'
+import { previewFrameUrl } from '../preview-url'
 
 export function PreviewFrame({ result, view }: { result: RecipeCompileResult | null; view: EditorView }) {
   const iframe = useRef<HTMLIFrameElement>(null)
@@ -62,5 +61,5 @@ export function PreviewFrame({ result, view }: { result: RecipeCompileResult | n
     if (port.current) void sendCurrent(port.current)
   }, [result, view])
 
-  return <iframe ref={iframe} title="Button recipe preview" src={previewUrl} sandbox="allow-scripts" />
+  return <iframe ref={iframe} title="Button recipe preview" src={previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)} sandbox="allow-scripts" />
 }

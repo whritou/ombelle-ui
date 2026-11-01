@@ -22,6 +22,7 @@ try {
       OMBELLE_SNAPSHOT_RATE_SECRET: 'snapshot-browser-development-secret-32-bytes-minimum',
       OMBELLE_SNAPSHOT_CLIENT_IP_HEADER: undefined,
       NEXT_TELEMETRY_DISABLED: '1',
+      NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN: 'http://127.0.0.1:4173',
     },
   })
 } catch (error) {

@@ -153,7 +153,7 @@ it('plans a recipe code without changing global defaults', async () => {
 
 **Interfaces:** `previewFrameUrl(kind: 'editor' | 'preset', override?: string): string` defaults to static paths under `/ombelle-preview/` in production; validated explicit loopback override preserves fixture/dev behavior. The build script builds generated Vite preview output with that base into an owned staging directory and copies only its owned subtree to `apps/www/public/ombelle-preview`. It never removes other public assets or touches the database.
 
-- [ ] **Step 1: Add failing tests.** Production URLs contain no loopback or absolute local path; override validation rejects unsupported schemes/credentials; nested runtime asset URLs and compiler workers return usable JS. Force older iframe ACK/session messages to confirm the hosted path keeps existing fences.
+- [x] **Step 1: Add failing tests.** Production URLs contain no loopback or absolute local path; override validation rejects unsupported schemes/credentials; nested runtime asset URLs and compiler workers return usable JS. Force older iframe ACK/session messages to confirm the hosted path keeps existing fences.
 
 ```ts
 it('uses hosted preview paths without weakening the iframe sandbox', () => {
@@ -162,10 +162,10 @@ it('uses hosted preview paths without weakening the iframe sandbox', () => {
 })
 ```
 
-- [ ] **Step 2: Run RED.** `pnpm exec vitest run apps/www/src/editor/preview-url.test.ts tests/integration/hosted-preview-build.test.ts`.
-- [ ] **Step 3: Implement.** Read bundled Next static/public and deployment guidance. Build packages, generate exact preview sources, build Vite assets/worker bundles, then Next. Explicitly map the two existing runtime entry routes to generated static files if Vite's single entry output needs separate HTML wrappers. Keep protocol checks and generated modules intact. Configure Vercel's monorepo root/build commands and Node 24 runtime; install scripts remain disabled. Use documented Vercel ingress and validated deployment URLs for production/preview origin config, never request Host. Test protected preview access with Vercel tooling rather than disabling project protections.
-- [ ] **Step 4: Run GREEN.** Build preview and product with no database credentials, serve the production build, and run focused browser checks against both nested runtime URLs plus existing editor suites with explicit local override. Require ready acknowledgements, correct compiled output and asset MIME types, and no local-dev dependency.
-- [ ] **Step 5: Commit.** `feat(web): host isolated editor previews on Vercel`.
+- [x] **Step 2: Run RED.** `pnpm exec vitest run apps/www/src/editor/preview-url.test.ts tests/integration/hosted-preview-build.test.ts`.
+- [x] **Step 3: Implement.** Read bundled Next static/public and deployment guidance. Build packages, generate exact preview sources, build Vite assets/worker bundles, then Next. Explicitly map the two existing runtime entry routes to generated static files if Vite's single entry output needs separate HTML wrappers. Keep protocol checks and generated modules intact. Configure Vercel's monorepo root/build commands and Node 24 runtime; install scripts remain disabled. Use documented Vercel ingress and validated deployment URLs for production/preview origin config, never request Host. Test protected preview access with Vercel tooling rather than disabling project protections.
+- [x] **Step 4: Run GREEN.** Build preview and product with no database credentials, serve the production build, and run focused browser checks against both nested runtime URLs plus existing editor suites with explicit local override. Require ready acknowledgements, correct compiled output and asset MIME types, and no local-dev dependency.
+- [x] **Step 5: Commit.** `feat(web): host isolated editor previews on Vercel`.
 
 ### Task 7: Recipe Publication, Recovery and Share UI
 
