@@ -51,7 +51,7 @@
 
 **Interfaces:** `RecipeSnapshot` contains exact keys `{ snapshotVersion: '1.0', id, revision: 1, recipe, recipeHash, preset, presetHash, catalogRelease: '0.1.0', compilerVersion: '0.1.0', createdAt, validationStatus: 'draft' }`. `RecipeSnapshotSource = { origin, reference, recipeHash }`. Produce `parseRecipeSnapshotReference(value: string): { id: string; revision: 1 }`, `validateRecipeSnapshot(input: unknown): RecipeSnapshot`, `validateRecipeSnapshotSource(input: unknown): RecipeSnapshotSource`, `normalizePublishedRecipe(input: unknown): Promise<RecipeCompileResult>`, and `verifyRecipeSnapshot(input: unknown, expected?: { reference: string; recipeHash: string }): Promise<RecipeSnapshot>`. Add optional `ProjectLock.recipeSources?: Record<string, RecipeSnapshotSource>` and `InstallPlan.recipeResolution?: { source: RecipeSnapshotSource; via: 'network' | 'cache' }`.
 
-- [ ] **Step 1: Add failing tests.** For the following core test, also cover wrong IDs/kinds, unknown keys, noncanonical recipes, wrong preset identity/content, unsupported releases, unsafe dates, wrong hashes, and both payload/envelope limits.
+- [x] **Step 1: Add failing tests.** For the following core test, also cover wrong IDs/kinds, unknown keys, noncanonical recipes, wrong preset identity/content, unsupported releases, unsafe dates, wrong hashes, and both payload/envelope limits.
 
 ```ts
 it('rejects a recipe envelope whose resolved preset differs from its builtin reference', async () => {
@@ -59,10 +59,10 @@ it('rejects a recipe envelope whose resolved preset differs from its builtin ref
 })
 ```
 
-- [ ] **Step 2: Run RED.** `pnpm exec vitest run packages/contracts/test/recipe-snapshot.test.ts packages/compiler/test/recipe-snapshot.test.ts`; expect the new contract/verification assertions to fail.
-- [ ] **Step 3: Implement.** Resolve through existing `compileRecipe`; store its normalized recipe/preset and hashes. Verify against recompilation and canonical payload equality, without changing existing artifact generation. Register external schema references correctly with Ajv.
-- [ ] **Step 4: Run GREEN.** Build packages, rerun these tests and existing snapshot/recipe compiler tests, then typecheck. Require all assertions to pass and inspect generated bindings alongside schemas.
-- [ ] **Step 5: Commit.** `feat(contracts): validate immutable recipe snapshots`.
+- [x] **Step 2: Run RED.** `pnpm exec vitest run packages/contracts/test/recipe-snapshot.test.ts packages/compiler/test/recipe-snapshot.test.ts`; expect the new contract/verification assertions to fail.
+- [x] **Step 3: Implement.** Resolve through existing `compileRecipe`; store its normalized recipe/preset and hashes. Verify against recompilation and canonical payload equality, without changing existing artifact generation. Register external schema references correctly with Ajv.
+- [x] **Step 4: Run GREEN.** Build packages, rerun these tests and existing snapshot/recipe compiler tests, then typecheck. Require all assertions to pass and inspect generated bindings alongside schemas.
+- [x] **Step 5: Commit.** `feat(contracts): validate immutable recipe snapshots`.
 
 ### Task 2: Awaitable Local Store and Shared Publication Budgets
 
