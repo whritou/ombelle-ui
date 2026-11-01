@@ -144,3 +144,18 @@ The export panel shows normalized preset JSON, its hash and exact versions, **Ta
 Drafts and bounded undo history use separate versioned local storage keys from the Button recipe editor. Refresh restores even incomplete fields. Malformed drafts or unknown storage versions offer the original data as a recovery download before an explicit reset. Invalid history is discarded with a visible notice while the valid draft remains. Storage and clipboard failures offer in-memory editing and selectable export text.
 
 This is local M4 editing, export, explicit snapshot publishing, read-only sharing, and exact-reference resolution through the private CLI. Public package commands and using a custom project preset inside the Button recipe editor need subsequent implementations. See [snapshot service operations](snapshot-service-operations.md) for database setup and operator procedures.
+
+## Hosted install-code inputs
+
+The built private CLI accepts preset codes `ps_<32 lowercase hexadecimal digits>@1` for `init --preset`, `theme add`, and `add button --preset`. It accepts recipe codes `rc_<32 lowercase hexadecimal digits>@1` for `add --recipe`. Bare codes resolve only at `https://ombelle-ui.vercel.app`; the hosted launch and public npm runner remain pending deployment/release verification. Use the local checkout command until a release is recorded:
+
+```powershell
+pnpm exec node packages/cli/dist/main.js init --preset PRESET_CODE --cwd APP --dry-run --json
+pnpm exec node packages/cli/dist/main.js add --recipe RECIPE_CODE --cwd APP --dry-run --json
+```
+
+Review the plan, then replace `--dry-run --json` with `--yes`. Codes identify immutable publications; they are not cryptographic commitments or proof of publisher identity. The CLI trusts the official HTTPS code-to-content association, validates the exact requested identity and supported releases, recompiles normalized payloads, and records their actual hashes. It never silently uses cached content after an online availability failure.
+
+Custom services require both `--snapshot-origin ORIGIN` and the exact `--preset-hash HASH` or `--recipe-hash HASH`. HTTPS is required except literal loopback HTTP. Explicit `--offline` requires those same pins and a previously verified cache entry; it cannot detect later withdrawals. Bare-code offline requests give syntax guidance. Prefix local filenames beginning with `ps_` or `rc_` with `./` to select file input.
+
+Recipe publications install isolated Button artifacts and leave saved global defaults unchanged. `recipeSources` in the project lock records each embedded recipe identity's publication origin/reference/hash separately from compiler identity. Identical local or other-code installs preserve the first source. A different payload under the same embedded identity remains a conflict. Every lock writer retains validated recipe sources; later ordinary additions validate saved bytes without fetching publications. Cache writes happen only after successful apply or no-op; failed cache writes warn after the installation succeeds.

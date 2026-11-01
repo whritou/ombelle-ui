@@ -10,6 +10,7 @@ import { getCatalog } from '@ombelle/catalog'
 import { canonicalize, resolvePreset } from '@ombelle/compiler'
 import { fileChange } from '../plan/components.js'
 import type { ResolvedPresetInput } from './input.js'
+import { validateRecipeSnapshotSources } from './recipe-source.js'
 
 /** Validate installed provenance using saved bytes only; never resolve remotely. */
 export async function validateSnapshotSources(
@@ -45,6 +46,7 @@ export async function validateSnapshotSources(
   } catch {
     throw bad()
   }
+  await validateRecipeSnapshotSources(lock)
 }
 
 /** Attach source metadata to the guarded lock change, outside compiler identities. */

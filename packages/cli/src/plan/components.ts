@@ -65,6 +65,9 @@ export function baseLock(
     ...(context.lock?.recipes
       ? { recipes: structuredClone(context.lock.recipes) }
       : {}),
+    ...(context.lock?.recipeSources
+      ? { recipeSources: structuredClone(context.lock.recipeSources) }
+      : {}),
     ...(context.lock?.componentPresets
       ? { componentPresets: structuredClone(context.lock.componentPresets) }
       : {}),

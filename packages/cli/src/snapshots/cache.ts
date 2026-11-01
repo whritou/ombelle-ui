@@ -5,14 +5,28 @@ import os from 'node:os'
 import { createHash, randomUUID } from 'node:crypto'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { canonicalize, verifyPresetSnapshot } from '@ombelle/compiler'
+import { canonicalize, verifyPresetSnapshot, verifyRecipeSnapshot } from '@ombelle/compiler'
 import {
   validateSnapshotSource,
+  validateRecipeSnapshotSource,
+  type RecipeSnapshotSource,
+  type RecipeSnapshot,
   type PresetSnapshot,
   type SnapshotSource,
 } from '@ombelle/contracts'
 
 export type SnapshotCacheKey = SnapshotSource
+type PublicationCacheKey = SnapshotSource | RecipeSnapshotSource
+type PublicationSnapshot = PresetSnapshot | RecipeSnapshot
+function validateKey(key: PublicationCacheKey): PublicationCacheKey {
+  return 'recipeHash' in key ? validateRecipeSnapshotSource(key) : validateSnapshotSource(key)
+}
+async function verifyEnvelope(input: unknown, key?: PublicationCacheKey): Promise<PublicationSnapshot> {
+  const recipe = key ? 'recipeHash' in key : !!input && typeof input === 'object' && 'id' in input && typeof input.id === 'string' && input.id.startsWith('rc_')
+  return recipe
+    ? verifyRecipeSnapshot(input, key as RecipeSnapshotSource | undefined)
+    : verifyPresetSnapshot(input, key as SnapshotSource | undefined)
+}
 const maxBytes = 128 * 1024
 const maxEntries = 100
 const maxTotalBytes = 16 * 1024 * 1024
@@ -88,9 +102,9 @@ export function snapshotCacheDirectory(env: NodeJS.ProcessEnv): string {
     : path.join(absolute(home), '.cache')
   return path.join(base, 'ombelle/snapshots')
 }
-function filename(key: SnapshotCacheKey): string {
+function filename(key: PublicationCacheKey): string {
   return createHash('sha256')
-    .update(canonicalize(validateSnapshotSource(key)))
+    .update(canonicalize(validateKey(key)))
     .digest('hex') + '.json'
 }
 
@@ -189,8 +203,8 @@ function regular(stat: Stats, allowPublishLink = false): boolean {
       (stat.uid === process.getuid?.() && (stat.mode & 0o022) === 0))
 }
 async function readEntry(
-  root: string, name: string, identity: Stats, key?: SnapshotCacheKey,
-): Promise<{ snapshot: PresetSnapshot; stat: Stats } | null> {
+  root: string, name: string, identity: Stats, key?: PublicationCacheKey,
+): Promise<{ snapshot: PublicationSnapshot; stat: Stats } | null> {
   let handle: FileHandle | undefined
   try {
     await unchanged(root, identity)
@@ -215,7 +229,7 @@ async function readEntry(
       after.mtimeMs !== opened.mtimeMs || !identical(after, await fs.lstat(file))
     ) return null
     await unchanged(root, identity)
-    const snapshot = await verifyPresetSnapshot(
+    const snapshot = await verifyEnvelope(
       JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buffer.subarray(0, length))), key,
     )
     return { snapshot, stat: after }
@@ -225,9 +239,9 @@ async function readEntry(
     await handle?.close()
   }
 }
-export async function readSnapshotCache(
-  root: string, key: SnapshotCacheKey,
-): Promise<PresetSnapshot | null> {
+export async function readPublicationCache(
+  root: string, key: PublicationCacheKey,
+): Promise<PublicationSnapshot | null> {
   root = absolute(root)
   const name = filename(key)
   try {
@@ -278,12 +292,12 @@ async function evict(root: string, identity: Stats, keep: string): Promise<void>
     bytes -= entry.stat.size
   }
 }
-export async function writeSnapshotCache(
-  root: string, key: SnapshotCacheKey, snapshot: PresetSnapshot,
+export async function writePublicationCache(
+  root: string, key: PublicationCacheKey, snapshot: PublicationSnapshot,
 ): Promise<void> {
   root = absolute(root)
   const name = filename(key)
-  const bytes = Buffer.from(canonicalize(await verifyPresetSnapshot(snapshot, key)))
+  const bytes = Buffer.from(canonicalize(await verifyEnvelope(snapshot, key)))
   if (bytes.length > maxBytes) throw new Error('Snapshot cache envelope exceeds 128 KiB')
   const identity = await owned(root, true)
   const checkExisting = async () => {
@@ -345,4 +359,11 @@ export async function writeSnapshotCache(
     }
     throw error
   }
+}
+
+export async function readSnapshotCache(root: string, key: SnapshotSource): Promise<PresetSnapshot | null> {
+  return readPublicationCache(root, key) as Promise<PresetSnapshot | null>
+}
+export async function writeSnapshotCache(root: string, key: SnapshotSource, snapshot: PresetSnapshot): Promise<void> {
+  return writePublicationCache(root, key, snapshot)
 }

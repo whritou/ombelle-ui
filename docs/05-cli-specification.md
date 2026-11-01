@@ -2,7 +2,7 @@
 
 ## Purpose and status
 
-The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; published runner commands remain unavailable. The private local foundation implements `init`, ordinary `add`, `theme add` with local presets, and `add --recipe` with local Button recipes. See [local usage](foundation-local-usage.md) for executable repository commands.
+The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; published runner commands remain unavailable. The private local foundation implements `init`, ordinary `add`, `theme add`, Button-only `add button --preset` and `add --recipe`, with local files or exact hosted publication codes. See [local usage](foundation-local-usage.md) for executable repository commands and hosted-service availability.
 
 The upstream shadcn CLI remains a supported transport for explicitly published standard registry items. It has its own preset system. Our preset JSON and project lock behavior must not be presented as upstream capabilities.
 

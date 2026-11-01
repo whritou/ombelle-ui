@@ -131,7 +131,7 @@ it('checks withdrawal before conditional recipe reads', async () => {
 
 **Interfaces:** Export shared `officialSnapshotOrigin = 'https://ombelle-ui.vercel.app'`. Preset inputs with no remote flags resolve only there; alternate origin still requires `--preset-hash`. Produce `resolveRecipeInput(value: string, options: { origin?: string; expectedHash?: string; offline?: boolean; cacheRoot: string }): Promise<{ recipe: Recipe; snapshot?: RecipeSnapshot; source?: RecipeSnapshotSource; resolution: 'local' | 'network' | 'cache'; networkAccess: boolean }>` and `applyRecipeSourceToPlan(plan, context, input): Promise<void>`. Introduce `--recipe-hash` only for explicitly pinned remote recipe inputs. Reuse existing safe-cache helpers without treating recipe envelopes as preset envelopes.
 
-- [ ] **Step 1: Add failing tests.** Code-only official requests, local paths beginning with similar prefixes, malformed IDs/kind swaps, required custom-origin pins, unavailable service without stale fallback, no body over 128 KiB, no redirects/TLS bypass, wrong hashes/releases/identity, code-only offline guidance, preserved explicit preset offline behavior, and resolution once per command.
+- [x] **Step 1: Add failing tests.** Code-only official requests, local paths beginning with similar prefixes, malformed IDs/kind swaps, required custom-origin pins, unavailable service without stale fallback, no body over 128 KiB, no redirects/TLS bypass, wrong hashes/releases/identity, code-only offline guidance, preserved explicit preset offline behavior, and resolution once per command.
 
 ```ts
 it('plans a recipe code without changing global defaults', async () => {
@@ -142,10 +142,10 @@ it('plans a recipe code without changing global defaults', async () => {
 })
 ```
 
-- [ ] **Step 2: Run RED.** Build current packages first, then `pnpm exec vitest run tests/integration/hosted-code-cli.test.ts tests/integration/recipe-snapshot-provenance.test.ts`.
-- [ ] **Step 3: Implement.** Separate local/official/pinned-custom resolution before planning. Official mode verifies envelope identity and recomputed hashes, then records actual origin/reference/hash. Preserve existing explicit pinning tests and update only assertions intentionally adding official mode. Recipe sources are keyed by embedded `id@revision`, validated against installed normalized bytes without fetching, and copied by every unrelated lock writer. Identical installs preserve prior provenance; different content under the same identity conflicts. Cache only after successful apply/no-op; failed cache writes warn after success. No cache writes during dry-run/conflict/cancel/failure.
-- [ ] **Step 4: Run GREEN.** Build packages, run new and existing snapshot/recipe CLI, cache, provenance and editor-export integration suites, then typecheck. Verify later ordinary adds work with all network disabled and all supported manager metadata remains preserved.
-- [ ] **Step 5: Commit.** `feat(cli): install hosted presets and recipes by code`.
+- [x] **Step 2: Run RED.** Build current packages first, then `pnpm exec vitest run tests/integration/hosted-code-cli.test.ts tests/integration/recipe-snapshot-provenance.test.ts`.
+- [x] **Step 3: Implement.** Separate local/official/pinned-custom resolution before planning. Official mode verifies envelope identity and recomputed hashes, then records actual origin/reference/hash. Preserve existing explicit pinning tests and update only assertions intentionally adding official mode. Recipe sources are keyed by embedded `id@revision`, validated against installed normalized bytes without fetching, and copied by every unrelated lock writer. Identical installs preserve prior provenance; different content under the same identity conflicts. Cache only after successful apply/no-op; failed cache writes warn after success. No cache writes during dry-run/conflict/cancel/failure.
+- [x] **Step 4: Run GREEN.** Build packages, run new and existing snapshot/recipe CLI, cache, provenance and editor-export integration suites, then typecheck. Verify later ordinary adds work with all network disabled and all supported manager metadata remains preserved.
+- [x] **Step 5: Commit.** `feat(cli): install hosted presets and recipes by code`.
 
 ### Task 6: Hosted Preview Runtime and Vercel Build
 
