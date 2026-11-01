@@ -173,7 +173,7 @@ it('uses hosted preview paths without weakening the iframe sandbox', () => {
 
 **Interfaces:** Recipe attempts capture normalized recipe/hash, UUID-v4 key and timestamp with 24-hour/128 KiB recovery bounds. `createRecipePublicationController` and `useRecipePublication` mirror existing preset semantics with independent storage keys. `recipeSnapshotInstallCommand(source: RecipeSnapshotSource, release?: { packageName: string; version: string }): string` generates exact code-only official commands or explicitly pinned private/custom-origin commands. Preset `snapshotInstallCommand` gains the equivalent official-origin mode without dropping custom-origin pins. `PublishedRecipe({ snapshot, origin })` displays exact verified generated recipe artifacts using the existing isolated Button preview.
 
-- [ ] **Step 1: Add failing tests.** No background publication; consent before POST; successful publication/code; duplicate suppression; lost-response retry; explicit recovery after refresh; storage/clipboard denial; edits/cancel/reset retire stale results; a retired digest/ACK cannot update output; 410 terminal; unavailable API leaves local exports usable; share page does not overwrite saved drafts.
+- [x] **Step 1: Add failing tests.** No background publication; consent before POST; successful publication/code; duplicate suppression; lost-response retry; explicit recovery after refresh; storage/clipboard denial; edits/cancel/reset retire stale results; a retired digest/ACK cannot update output; 410 terminal; unavailable API leaves local exports usable; share page does not overwrite saved drafts.
 
 ```ts
 it('ignores a successful recipe response after the draft changes', async () => {
@@ -185,10 +185,10 @@ it('ignores a successful recipe response after the draft changes', async () => {
 })
 ```
 
-- [ ] **Step 2: Run RED.** Run new unit/controller tests and the authored feature browser cases; missing publication/share UI must fail meaningfully.
-- [ ] **Step 3: Implement.** Reuse existing patterns rather than rewriting preset publication. Expose publication only for a fresh successful compile, capture exact normalized input, and preserve ID/revision immutability guidance. The read-only share page verifies current availability and shows exact reference, hashes, releases, draft status, public retention/withdrawal limits, artifacts and install scope. Keyboard, narrow viewport, status announcements and copy/download fallback remain usable. Do not generate a public package runner until Task 8's release is real.
-- [ ] **Step 4: Run GREEN.** Run new unit/browser suites, existing preset publication regressions and typecheck. Compare installed recipe bytes, DOM and computed styles against published preview for flat/minimalist/neo-brutalism in light/dark. Exercise Vite/Next consumers and differently themed hosts without altering their defaults.
-- [ ] **Step 5: Commit.** `feat(editor): publish and share installable recipe codes`.
+- [x] **Step 2: Run RED.** Run new unit/controller tests and the authored feature browser cases; missing publication/share UI must fail meaningfully.
+- [x] **Step 3: Implement.** Reuse existing patterns rather than rewriting preset publication. Expose publication only for a fresh successful compile, capture exact normalized input, and preserve ID/revision immutability guidance. The read-only share page verifies current availability and shows exact reference, hashes, releases, draft status, public retention/withdrawal limits, artifacts and install scope. Keyboard, narrow viewport, status announcements and copy/download fallback remain usable. Do not generate a public package runner until Task 8's release is real.
+- [x] **Step 4: Run GREEN.** Run new unit/browser suites, existing preset publication regressions and typecheck. Compare installed recipe bytes, DOM and computed styles against published preview for flat/minimalist/neo-brutalism in light/dark. Exercise Vite/Next consumers and differently themed hosts without altering their defaults.
+- [x] **Step 5: Commit.** `feat(editor): publish and share installable recipe codes`.
 
 ### Task 8: Self-contained CLI Distribution and Real Runner Commands
 

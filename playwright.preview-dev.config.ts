@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test'
 export default defineConfig({
-  testDir: 'tests/e2e', testMatch: ['editor.spec.ts', 'preset-editor.spec.ts'],
+  testDir: 'tests/e2e', testMatch: ['editor.spec.ts', 'preset-editor.spec.ts', 'recipe-snapshots.spec.ts'],
   timeout: 60_000, expect: { timeout: 10_000 }, workers: 1, retries: 0,
   use: { browserName: 'chromium', channel: process.env.OMBELLE_BROWSER_CHANNEL || undefined, headless: true, viewport: { width: 1100, height: 800 }, reducedMotion: 'reduce', trace: 'retain-on-failure' },
   reporter: [['list'], ['json', { outputFile: '.artifacts/preview-dev-browser-results.json' }]],

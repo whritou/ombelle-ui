@@ -14,6 +14,7 @@ import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
 import { EditorTabs } from './editor-tabs'
 import { StatusAnnouncer } from './status-announcer'
+import { PublishRecipe } from '../../recipe-snapshots/components/publish-recipe'
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = { storageVersion: 1, recipe: validateRecipe(exampleRecipe) }
@@ -180,6 +181,7 @@ export function ButtonEditor() {
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus} />
+            <PublishRecipe recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus} />
             <p className={styles.hashLine}>Recipe hash: <span data-testid="recipe-hash">{compilation.result?.recipe.hash ?? 'Pending'}</span></p>
           </div>
         </div>
