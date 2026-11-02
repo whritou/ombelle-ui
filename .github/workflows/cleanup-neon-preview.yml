@@ -1,0 +1,27 @@
+name: Clean up Neon preview branch
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Git branch whose preview database branch (preview/<branch>) to delete
+        required: true
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    # Pull requests from forks get no secrets and no Neon preview branch.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          sparse-checkout: scripts/cleanup-neon-preview.sh
+          sparse-checkout-cone-mode: false
+      - name: Delete the preview database branch
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          GIT_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.head_ref }}
+        run: bash scripts/cleanup-neon-preview.sh "$GIT_BRANCH"

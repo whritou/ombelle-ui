@@ -119,6 +119,14 @@ A mismatch caused by a publication made between the summary and the dump only me
 | 2026-11-02 | `ombelle-20261102T205920Z` (13,404 bytes; 3 publications, 0 withdrawals, fingerprint `f22ee39b…dcbb2659`) | passed on branch `restore-drill-20261102` (`ep-calm-thunder-b9jk3k8m`), database `restore_drill` |
 | 2026-11-02 | `ombelle-20261102T220435Z` from automated run 41534024137 (artifact `ombelle-backup-41534024137`, decrypted with the operator key; fingerprint `f22ee39b…dcbb2659`) | passed on branch `restore-drill-20261102`, database `restore_drill_auto` |
 
+## Preview database branches
+
+The Vercel Neon integration creates a Neon branch `preview/<git branch>` for each git branch that gets a preview deployment and never deletes it. Neon Free allows 10 branches per project; when the limit is reached, preview deployments fail at "Create database branch for deployment".
+
+`.github/workflows/cleanup-neon-preview.yml` runs `scripts/cleanup-neon-preview.sh` when a pull request closes, merged or not, and deletes `preview/<head branch>` through the Neon API. It refuses names outside `preview/`, default or protected branches and unexpected git branch names, and does nothing when the branch is absent. Run it manually (Actions → Clean up Neon preview branch → Run workflow) with a git branch name to remove a leftover. GitHub deletes merged head branches automatically.
+
+It needs the repository secret `NEON_API_KEY`: a project-scoped API key for `neon-carmine-cable`, created in the Neon console under the organization's API keys. Keep `main` and any branch you created by hand out of the `preview/` prefix.
+
 ## Contacts and policy pages
 
 Support goes through GitHub issues and vulnerability reports through GitHub private vulnerability reporting, which is enabled on the repository. The site publishes `/privacy`, `/security` and `/.well-known/security.txt`. Renew the `Expires` date in `apps/www/public/.well-known/security.txt` before it comes within 30 days; the monitor fails otherwise. Withdraw a reported publication with `snapshots:withdraw` (see the snapshot service operations).
