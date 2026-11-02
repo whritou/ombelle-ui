@@ -44,15 +44,57 @@ Neon Free also provides, inside the same Neon project:
 
 Scheduled snapshots need a paid Neon plan. These protect against recent mistakes but are not an independent copy, so they complement the `pg_dump` backups below rather than replace them.
 
-Back up monthly, before any schema migration and before rotating database secrets. Backups stay on the operator's machine; never upload them to GitHub Actions artifacts (the repository is public) or commit them. They contain everything in the `ombelle` schema, including withdrawn publications, retry keys and HMAC rate keys.
+### Automated monthly backup
+
+`.github/workflows/backup-production.yml` runs on the 1st of each month at 03:23 UTC and on demand (Actions → Back up production → Run workflow). It installs the PostgreSQL 18 client from apt.postgresql.org, runs `scripts/backup-production.sh` with the `BACKUP_DATABASE_URL` secret, encrypts the dump with [age](https://age-encryption.org) for the public keys in `.github/backup-recipients.txt`, deletes the plaintext and uploads an artifact `ombelle-backup-<run id>` kept for 90 days. The artifact holds `ombelle-<stamp>.dump.age`, the `.summary` (row counts and fingerprint) and the `.sha256` of the plaintext dump. The repository is public and signed-in GitHub users can download artifacts, which is why only the encrypted dump leaves the runner. The monitor fails when no backup run has succeeded in the last 35 days.
+
+Keep a copy of at least one backup per quarter outside GitHub, because artifacts expire after 90 days. Back up manually as well before any schema migration and before rotating database secrets.
+
+**Encryption key.** Generate the key pair once on your machine, in WSL (install with `sudo apt install age` if needed):
+
+```bash
+age-keygen -o ~/.config/ombelle/backup-key.txt
+```
+
+The command prints the public key (`age1…`); it goes in `.github/backup-recipients.txt`, one key per line. The file `backup-key.txt` holds the private key: keep it out of the repository and keep an offline copy, for example in a password manager. Without it, the encrypted backups cannot be read.
+
+**Backup role.** Create a read-only role on branch `main` (Neon SQL Editor, database `neondb`), with a password generated locally (`openssl rand -hex 24`):
+
+```sql
+CREATE ROLE ombelle_backup WITH LOGIN PASSWORD 'GENERATED_PASSWORD';
+GRANT CONNECT ON DATABASE neondb TO ombelle_backup;
+GRANT USAGE ON SCHEMA ombelle TO ombelle_backup;
+GRANT SELECT ON ALL TABLES IN SCHEMA ombelle TO ombelle_backup;
+ALTER DEFAULT PRIVILEGES FOR ROLE neondb_owner IN SCHEMA ombelle GRANT SELECT ON TABLES TO ombelle_backup;
+ALTER ROLE ombelle_backup SET default_transaction_read_only = on;
+```
+
+Store the **direct** URL (no `-pooler`; `pg_dump` needs a session connection) as the repository secret `BACKUP_DATABASE_URL`:
+
+```
+postgresql://ombelle_backup:GENERATED_PASSWORD@ep-bitter-meadow-b9plx52i.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=require
+```
+
+**Restoring an automated backup.** Download and decrypt it, then use the restore drill below:
+
+```bash
+gh run download RUN_ID -R whritou/ombelle-ui -n ombelle-backup-RUN_ID -D /absolute/path/to/backups
+cd /absolute/path/to/backups
+age --decrypt -i ~/.config/ombelle/backup-key.txt -o ombelle-STAMP.dump ombelle-STAMP.dump.age
+```
+
+### Manual backup
 
 Take the direct (unpooled) URL of branch `main` from the Neon console (Connect, connection pooling off; the host has no `-pooler`), then from the repository root in WSL:
 
 ```bash
-OMBELLE_BACKUP_DATABASE_URL='postgresql://…' bash scripts/backup-production.sh /absolute/path/to/backups
+read -rs OMBELLE_BACKUP_DATABASE_URL && export OMBELLE_BACKUP_DATABASE_URL
+bash scripts/backup-production.sh /absolute/path/to/backups
 ```
 
-The script writes `ombelle-<UTC stamp>.dump` (custom format, `ombelle` schema only, no owner or privileges), a `.summary` with row counts and a publications fingerprint, and a `.sha256`. It refuses pooled hosts and never overwrites files. Keep at least the last three monthly backups.
+Type the `read` line alone, then paste the URL at the blank prompt so it stays out of shell history. Keep manual backups on private storage; never commit them or upload them unencrypted.
+
+The script writes `ombelle-<UTC stamp>.dump` (custom format, `ombelle` schema only, no owner or privileges), a `.summary` with row counts and a publications fingerprint, and a `.sha256`. It refuses pooled hosts and never overwrites files. Backups contain everything in the `ombelle` schema, including withdrawn publications, retry keys and HMAC rate keys.
 
 ## Restore drill
 

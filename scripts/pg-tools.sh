@@ -8,6 +8,11 @@ pg_tools_version=18.6-3.pgdg22.04+1
 pg_tools_root="${XDG_CACHE_HOME:-$HOME/.cache}/ombelle-pg18/$pg_tools_version"
 
 ensure_pg_tools() {
+  # Use an installed client when it is new enough (CI installs one from PGDG).
+  if command -v pg_dump >/dev/null && command -v psql >/dev/null &&
+    [ "$(pg_dump --version | awk '{print $3}' | cut -d. -f1)" -ge 18 ] 2>/dev/null; then
+    return 0
+  fi
   local bin="$pg_tools_root/usr/lib/postgresql/18/bin"
   if [ ! -x "$bin/pg_dump" ]; then
     local pool=https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-18

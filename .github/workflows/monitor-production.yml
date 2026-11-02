@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: monitor-production
   cancel-in-progress: false
@@ -20,4 +21,5 @@ jobs:
       - name: Check site, snapshot API and quotas
         env:
           MONITOR_DATABASE_URL: ${{ secrets.MONITOR_DATABASE_URL }}
+          GH_TOKEN: ${{ github.token }}
         run: bash scripts/monitor-production.sh
