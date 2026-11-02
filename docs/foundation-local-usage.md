@@ -120,7 +120,7 @@ The example creates `<componentsDir>/recipes/rc_primary-button/r2/button.tsx` an
 
 Recipe installation preserves the saved global preset, theme, style pack, ordinary components, and existing usages. A recorded shared utility can be reused only if unchanged and byte-compatible; an untracked or edited utility causes a conflict requiring manual reconciliation. `--yes` does not override conflicts. Repeating the same recipe is a no-op when its files and dependencies still match. Changed content under the same ID/revision conflicts; use a new revision to install alongside it. Later ordinary additions and compatible global theme changes retain recipe provenance and its pinned appearance.
 
-Dark mode follows the project's configured single class, default `.dark`; `.night` and `.theme-dark` also work. Complex selectors and custom `paths.recipeOutput` roots are outside this slice. A dark-selector change affecting an existing recipe requires an explicit migration. Parent workspace ownership, paths, dependencies, and failure/recovery use the existing installer safeguards. Component-scoped local preset installation is documented above; exact immutable preset snapshot references are supported by the private CLI when origin and expected hash are provided. Remote recipe codes remain pending.
+Dark mode follows the project's configured single class, default `.dark`; `.night` and `.theme-dark` also work. Complex selectors and custom `paths.recipeOutput` roots are outside this slice. A dark-selector change affecting an existing recipe requires an explicit migration. Parent workspace ownership, paths, dependencies, and failure/recovery use the existing installer safeguards. Component-scoped local preset installation is documented above; hosted preset and recipe codes are described under "Hosted install-code inputs" below.
 
 ## Local global preset editor
 
@@ -147,7 +147,7 @@ This is local M4 editing, export, explicit snapshot publishing, read-only sharin
 
 ## Hosted install-code inputs
 
-The built private CLI accepts preset codes `ps_<32 lowercase hexadecimal digits>@1` for `init --preset`, `theme add`, and `add button --preset`. It accepts recipe codes `rc_<32 lowercase hexadecimal digits>@1` for `add --recipe`. Bare codes resolve only at `https://ombelle-ui.vercel.app`; the hosted launch and public npm runner remain pending deployment/release verification. Use the local checkout command until a release is recorded:
+The built private CLI accepts preset codes `ps_<32 lowercase hexadecimal digits>@1` for `init --preset`, `theme add`, and `add button --preset`. It accepts recipe codes `rc_<32 lowercase hexadecimal digits>@1` for `add --recipe`. Bare codes resolve only at `https://ombelle-ui.vercel.app`. The published installer runs the same commands as `npx @ombelle-ui/cli@0.2.1 …` (see the [CLI release](cli-release.md) for verified runners); from a checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js init --preset PRESET_CODE --cwd APP --dry-run --json
@@ -166,4 +166,4 @@ The Button editor offers **Publish recipe…** only after the current draft comp
 
 Successful publication links to `/recipes/rc_<32 lowercase hexadecimal digits>/1`. This read-only page checks current availability, displays both hashes and pinned releases, previews the verified recipe, and offers selectable code commands and recipe JSON. It does not replace local drafts. Clipboard failures leave selectable text; downloads contain validated normalized recipe bytes. Published snapshots remain drafts with no automatic expiry while the service operates, no anonymous edit/delete action, and operator withdrawal that cannot recall downloaded copies or installed source.
 
-Use the displayed private checkout command until a public installer release is verified. The official origin uses code-only inputs; alternate origins retain explicit hash pins. A recipe installs one isolated Button and preserves saved project defaults. Changing the embedded recipe's content requires a new revision before installing it under an existing identity.
+The page shows the published `npx @ombelle-ui/cli@0.2.1` command. The official origin uses code-only inputs; alternate origins retain explicit hash pins. A recipe installs one isolated Button and preserves saved project defaults. Changing the embedded recipe's content requires a new revision before installing it under an existing identity.
