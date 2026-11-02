@@ -6,7 +6,7 @@ import { PresetPreviewFrame } from '../../preset-editor/components/preset-previe
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
-import { snapshotInstallCommand } from '../install-command'
+import { publishedInstaller, snapshotInstallCommand } from '../install-command'
 import {
   createSnapshotPreviewSession,
   selectSnapshotPreview,
@@ -201,18 +201,18 @@ export function PublishedPreset({
       </section>
       <section aria-labelledby="snapshot-install-heading">
         <h2 id="snapshot-install-heading">
-          Install from the private repository
+          Install with the Ombelle CLI
         </h2>
         <p>
-          These commands require access to the private repository, Node 24.19.0
-          and pnpm 11.25.0. From the repository root, run{' '}
-          <code>pnpm install --frozen-lockfile --ignore-scripts</code>, then{' '}
-          <code>pnpm build:packages</code>.
+          These commands run the published{' '}
+          <code>
+            {publishedInstaller.packageName}@{publishedInstaller.version}
+          </code>{' '}
+          installer through npx and require Node 24.19.0 or newer Node 24.
         </p>
         <p>
           Replace <code>APP</code> with your app path (quote paths containing
-          spaces). Run the selected command from the repository root and review
-          the JSON dry-run plan. To apply that plan, remove{' '}
+          spaces). Run the selected command and review the JSON dry-run plan. To apply that plan, remove{' '}
           <code>--dry-run</code> and add <code>--yes</code>. Validation,
           compatibility and modified-file conflicts still apply; dependency
           lifecycle scripts stay disabled.
@@ -233,7 +233,7 @@ export function PublishedPreset({
               id={`snapshot-command-${scope}`}
               readOnly
               rows={5}
-              value={snapshotInstallCommand(source, scope)}
+              value={snapshotInstallCommand(source, scope, publishedInstaller)}
               spellCheck={false}
             />
           </section>

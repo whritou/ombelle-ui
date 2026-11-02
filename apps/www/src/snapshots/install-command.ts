@@ -1,5 +1,8 @@
 import { officialSnapshotOrigin, publicCliPackageName, validateSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
 
+/** Verified public npm release shown on code pages. */
+export const publishedInstaller = { packageName: publicCliPackageName, version: '0.2.1' } as const
+
 export function installerRunner(release?: { packageName: string; version: string }): string {
   if (!release) return 'pnpm exec node packages/cli/dist/main.js'
   if (release.packageName !== publicCliPackageName || !/^\d+\.\d+\.\d+$/.test(release.version))

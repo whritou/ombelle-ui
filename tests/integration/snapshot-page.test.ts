@@ -62,9 +62,9 @@ it('renders escaped read-only draft metadata, canonical JSON and precise scope i
   expect(html).toContain('Draft — automated token contrast only')
   expect(html).toContain(snapshot.presetHash)
   expect(html).toContain(`${snapshot.id}@1`)
-  expect(html).toContain('pnpm build:packages')
+  expect(html).toContain('npx @ombelle-ui/cli@0.2.1 init --preset')
   expect(html).toContain('Node 24.19.0')
-  expect(html).toContain('pnpm 11.25.0')
+  expect(html).not.toContain('packages/cli/dist/main.js')
   expect(html).toContain('Existing shadcn theme')
   expect(html).toContain('component source')
   // Effects have not compiled this snapshot during SSR. No previous gallery
