@@ -5,6 +5,7 @@
 - Fix the standalone installer doing nothing when run through a package-manager bin symlink. On Linux and macOS, `npx`, `npm exec` and Bun exited 0 without output with `@ombelle-ui/cli@0.2.0`; Windows shims and direct `node dist/main.js` were unaffected.
 - Align all six workspace packages at 0.2.1. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged.
 - Show `npx @ombelle-ui/cli@0.2.1` commands on published preset and recipe pages after verifying real production codes.
+- Show the same npx runner in the editor export panels for downloaded preset and recipe JSON files.
 
 ## 0.2.0 — 2 November 2026
 

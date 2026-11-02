@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
 import { PublishPreset } from '../../snapshots/components/publish-preset'
+import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
 import {
   canExportPreset,
   serializePresetExport,
@@ -135,13 +136,13 @@ export function PresetExportPanel({
         </p>
       )}
       <p>
-        From your Ombelle repository, run <code>pnpm build:packages</code>, then
-        save the download there as <code>project-preset.json</code>. Replace{' '}
-        <code>APP</code> with your target project directory. The CLI uses its
-        existing package manager.
+        Run this from the folder containing the downloaded{' '}
+        <code>project-preset.json</code>, with Node 24.19.0 or newer Node 24.
+        Replace <code>APP</code> with your target project directory. The CLI
+        uses its existing package manager.
       </p>
       <pre data-testid="preset-install-command">
-        pnpm exec node packages/cli/dist/main.js{' '}
+        {installerRunner(publishedInstaller)}{' '}
         {install === 'new' ? 'init --preset' : 'theme add'}{' '}
         ./project-preset.json --cwd APP --dry-run --json
       </pre>

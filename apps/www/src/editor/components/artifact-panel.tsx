@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import { recipeFilename } from '../storage'
+import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
 
 type Tab = 'Usage' | 'Component' | 'CSS' | 'Dependencies' | 'Recipe JSON' | 'Details' | 'CLI'
 const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Dependencies', 'Recipe JSON', 'Details', 'CLI']
@@ -15,7 +16,7 @@ function tabContent(tab: Tab, result: RecipeCompileResult, json: string): string
     `Catalog release: ${result.provenance.catalogRelease}`,
     `Compiler version: ${result.provenance.compilerVersion}`,
   ].join('\n')
-  if (tab === 'CLI') return `pnpm exec node packages/cli/dist/main.js add --recipe ./${recipeFilename(result.recipe.data)} --cwd APP --yes`
+  if (tab === 'CLI') return `${installerRunner(publishedInstaller)} add --recipe ./${recipeFilename(result.recipe.data)} --cwd APP --yes`
   const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
   return result.artifacts.find((artifact) => artifact.kind === kind)?.content ?? ''
 }
@@ -57,7 +58,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus }: {
         <div className="artifactToolbar"><span>{tab === 'CLI' ? 'Local installation' : tab}</span>
           <button type="button" onClick={() => void copy()} disabled={stale || (tab === 'Recipe JSON' && !recipeJson)} aria-label={`Copy ${tab}`}>Copy</button></div>
         <pre role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} tabIndex={0}><code>{content}</code></pre>
-        {tab === 'CLI' && <p className="artifactNote">Run from the Ombelle repository root after moving the downloaded {recipeFilename(result.recipe.data)} there. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
+        {tab === 'CLI' && <p className="artifactNote">Run from the folder containing the downloaded {recipeFilename(result.recipe.data)} with Node 24.19.0 or newer Node 24. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
         {tab === 'Recipe JSON' && <p className="artifactNote">ID: {result.recipe.data.id} · Revision: {result.recipe.data.revision}. Changed content at an installed ID and revision needs a new revision.</p>}
       </> : <p>Compiling generated output…</p>}
     </section>
