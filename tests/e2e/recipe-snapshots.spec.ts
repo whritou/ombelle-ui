@@ -7,7 +7,11 @@ import { supportedStyleFamilies, type RecipeSnapshot } from '@ombelle/contracts'
 import { createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
+import { resetSnapshotBrowserQuota } from '../helpers/snapshot-browser.js'
 const url = 'http://127.0.0.1:3000/editor/component/button'
+// The local service shares one development rate bucket (5 publications per
+// minute) across every test and worker.
+test.beforeEach(async () => resetSnapshotBrowserQuota())
 test('publishes a recipe only after consent and opens a read-only share page without changing the draft', async ({ page }) => {
   let posts = 0
   page.on('request', request => { if (request.method() === 'POST' && request.url().endsWith('/api/v1/recipes')) posts++ })

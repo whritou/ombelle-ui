@@ -96,8 +96,20 @@ it.each(['early exit', 'spawn error'])('rejects child readiness on %s', async (k
 it('one intent commits once across independent connections and survives process restart', async () => {
   const path = await fixture(), key = randomUUID()
   const a = processPublication(path, key), b = processPublication(path, key)
+  // A writer that cannot take the SQLite lock within its 250 ms wait answers
+  // SNAPSHOT_SERVICE_UNAVAILABLE; clients retry with the same key, so do that
+  // once instead of depending on scheduling on a loaded machine.
+  const settle = (child: ReturnType<typeof processPublication>) => child.result.catch(async (error: Error) => {
+    if (!error.message.includes('SNAPSHOT_SERVICE_UNAVAILABLE')) throw error
+    const retry = processPublication(path, key)
+    retried.push(retry)
+    await retry.ready
+    retry.start()
+    return retry.result
+  })
+  const retried: ReturnType<typeof processPublication>[] = []
   // Attach result rejection handlers while waiting for readiness too.
-  const results = Promise.all([a.result, b.result])
+  const results = Promise.all([settle(a), settle(b)])
   void results.catch(() => {})
   try {
     await Promise.all([a.ready, b.ready])
@@ -108,8 +120,8 @@ it('one intent commits once across independent connections and survives process 
     expect(open(path).lookup(reference(first.snapshot))).toEqual(first.snapshot)
     expect(totals(raw(path))).toMatchObject({ records: 1, keys: 1 })
   } finally {
-    a.stop(); b.stop()
-    await Promise.allSettled([a.result, b.result])
+    for (const child of [a, b, ...retried]) child.stop()
+    await Promise.allSettled([a.result, b.result, ...retried.map(child => child.result)])
   }
 })
 
