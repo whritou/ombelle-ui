@@ -86,7 +86,8 @@ await fs.chmod(path.join(staging, 'dist/main.js'), 0o755)
 const npmCandidates = [
   process.env.OMBELLE_RELEASE_NPM_ENTRY,
   ...(path.basename(process.env.npm_execpath ?? '') === 'npm-cli.js' ? [process.env.npm_execpath] : []),
-  ...(process.env.PATH ?? process.env.Path ?? '').split(path.delimiter).filter(Boolean).flatMap(directory => [path.join(directory, 'npm-cli.js'), path.join(directory, 'node_modules/npm/bin/npm-cli.js')]),
+  // Windows installs npm beside node.exe; POSIX prefixes put it in lib/ next to bin/.
+  ...(process.env.PATH ?? process.env.Path ?? '').split(path.delimiter).filter(Boolean).flatMap(directory => [path.join(directory, 'npm-cli.js'), path.join(directory, 'node_modules/npm/bin/npm-cli.js'), path.join(directory, '../lib/node_modules/npm/bin/npm-cli.js')]),
 ].filter(Boolean)
 let npm
 for (const file of npmCandidates) {

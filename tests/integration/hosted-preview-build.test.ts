@@ -5,6 +5,8 @@ import { expect, it } from 'vitest'
 
 it('builds nested static runtime HTML/assets and workers without touching unrelated public files or a database', async () => {
   const sentinel = path.resolve('apps/www/public/.hosted-preview-test-sentinel')
+  // A clean checkout has no tracked public files, so the directory may not exist yet.
+  await fs.mkdir(path.dirname(sentinel), { recursive: true })
   await fs.writeFile(sentinel, 'unrelated public asset')
   try {
     const output = await new Promise<{ code: number | null; text: string }>((resolve, reject) => {
