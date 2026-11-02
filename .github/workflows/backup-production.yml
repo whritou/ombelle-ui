@@ -1,0 +1,54 @@
+name: Back up production
+on:
+  schedule:
+    - cron: '23 3 1 * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: backup-production
+  cancel-in-progress: false
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          sparse-checkout: |
+            scripts/pg-tools.sh
+            scripts/backup-production.sh
+            .github/backup-recipients.txt
+          sparse-checkout-cone-mode: false
+      - name: Install the PostgreSQL 18 client and age
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common age
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-18
+      - name: Dump the production snapshot store
+        env:
+          OMBELLE_BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          if [ -z "$OMBELLE_BACKUP_DATABASE_URL" ]; then echo "::error::BACKUP_DATABASE_URL is not set"; exit 1; fi
+          export PATH="/usr/lib/postgresql/18/bin:$PATH"
+          bash scripts/backup-production.sh "$RUNNER_TEMP/backup"
+      # The repository is public and anyone signed in to GitHub can download its
+      # artifacts, so only the encrypted dump leaves the runner. The summary
+      # holds row counts and a fingerprint; the checksum covers the plaintext.
+      - name: Encrypt the dump for the operator
+        working-directory: ${{ runner.temp }}/backup
+        run: |
+          mkdir upload
+          for dump in *.dump; do
+            age --encrypt --recipients-file "$GITHUB_WORKSPACE/.github/backup-recipients.txt" --output "upload/$dump.age" "$dump"
+            shred -u "$dump"
+          done
+          mv ./*.summary ./*.sha256 upload/
+          ls -l upload
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ombelle-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/backup/upload
+          retention-days: 90
+          if-no-files-found: error

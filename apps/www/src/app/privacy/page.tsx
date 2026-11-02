@@ -72,8 +72,10 @@ export default function PrivacyPage() {
         <li>GitHub hosts the source code, issues and security reports.</li>
       </ul>
       <p>
-        The operator keeps database backups on private storage. Backups contain
-        the same data as the database, including withdrawn publications.
+        The operator keeps database backups on private storage and, encrypted
+        with a key only the operator holds, as GitHub Actions artifacts for up
+        to 90 days. Backups contain the same data as the database, including
+        withdrawn publications.
       </p>
 
       <h2>Your rights</h2>

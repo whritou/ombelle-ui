@@ -1,0 +1,3 @@
+# age public keys allowed to decrypt production backups (one per line).
+# Operator key, added 2026-11-02. The private key is held offline by the operator.
+age1h3kq2qgau6250u5e9whrkmz0m8fcc96hhjrvgzv88tfzaxt8v3qs8vedzm

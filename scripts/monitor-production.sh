@@ -66,6 +66,22 @@ else
   fi
 fi
 
+# The monthly "Back up production" workflow must have succeeded recently.
+if [ -z "${GH_TOKEN:-}" ] || [ -z "${GITHUB_REPOSITORY:-}" ]; then
+  echo "::warning::GH_TOKEN or GITHUB_REPOSITORY is not set; backup freshness check skipped"
+else
+  last=$(curl -sS --max-time 20 -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+    "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/workflows/backup-production.yml/runs?status=success&per_page=1" |
+    sed -n 's/.*"created_at": *"\([^"]*\)".*/\1/p' | head -1)
+  if [ -z "$last" ]; then
+    fail "no successful production backup found"
+  elif [ "$(date -u -d "$last" +%s)" -lt "$(date -u -d '-35 days' +%s)" ]; then
+    fail "last successful production backup ran at $last, more than 35 days ago"
+  else
+    ok "last successful production backup at $last"
+  fi
+fi
+
 if [ "$failures" -gt 0 ]; then
   echo "$failures check(s) need attention"
   exit 1
