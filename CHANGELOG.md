@@ -1,7 +1,13 @@
 # Changelog
 
-## 0.2.0 — Unreleased
+## 0.2.1 — Unreleased
 
+- Fix the standalone installer doing nothing when run through a package-manager bin symlink. On Linux and macOS, `npx`, `npm exec` and Bun exited 0 without output with `@ombelle-ui/cli@0.2.0`; Windows shims and direct `node dist/main.js` were unaffected.
+- Align all six workspace packages at 0.2.1. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged.
+
+## 0.2.0 — 2 November 2026
+
+- `@ombelle-ui/cli@0.2.0` was published to npm on 2 November 2026. Use 0.2.1 or later: 0.2.0 does not run through POSIX bin symlinks.
 - Align all six workspace packages at 0.2.0 and prepare the standalone installer as `@ombelle-ui/cli@0.2.0` under the project's reserved npm organization.
 - Add immutable hosted preset and Button recipe codes, shared Postgres/SQLite publication quotas, and guarded code installation with saved provenance.
 - Add explicit editor publication, recovery, share pages and isolated production previews for Vercel.

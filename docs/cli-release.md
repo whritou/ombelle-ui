@@ -1,6 +1,6 @@
 # Standalone CLI candidate
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.2.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.2.1.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
 Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
 
@@ -18,8 +18,10 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 ## Publication gate
 
-The current artifact is an **unpublished candidate**. The user reserved the `ombelle-ui` organization after finding `ombelle` taken and selected `@ombelle-ui/cli` for the public installer. npm CLI identity `ombelle` and its owner role in `ombelle-ui` were verified on 2026-11-01 through the ordinary login flow. Publication and registry-integrity checks are still pending. Verify the active publishing identity, finish the release checks, then publish the exact tested 0.2.0 tarball under the approved name. Do not substitute another namespace or version without a decision.
+`@ombelle-ui/cli@0.2.0` was published on 2026-11-02 by npm identity `ombelle`, owner of the user-reserved `ombelle-ui` organization. Its registry tarball matched the tested candidate byte for byte (integrity `sha512-ikzam7qN…8uUVs4OSXlfhQ==`), but it exits 0 without output when run through a POSIX bin symlink (`npx`, `npm exec`, Bun on Linux and macOS). Windows shims and direct `node dist/main.js` were unaffected. Do not advertise 0.2.0.
 
-All six workspace packages use software version 0.2.0. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
+The current artifact is the **unpublished 0.2.1 candidate**, which resolves its entry path through symlinks. Verify the active publishing identity, finish the release checks, then publish the exact tested 0.2.1 tarball under the approved name. Do not substitute another namespace or version without a decision.
 
-After publication, independently fetch `@ombelle-ui/cli@0.2.0`, compare its registry integrity and installed bytes to the candidate, and exercise real hosted codes before enabling website commands. Only then are `npx @ombelle-ui/cli@0.2.0`, `pnpm dlx @ombelle-ui/cli@0.2.0`, `yarn dlx @ombelle-ui/cli@0.2.0`, and `bunx @ombelle-ui/cli@0.2.0` verified public runners. Until that gate passes, the website retains truthful private checkout commands. A local candidate and mocked official-origin test transport do not establish a live service or public release.
+All six workspace packages use software version 0.2.1. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
+
+After publication, independently fetch `@ombelle-ui/cli@0.2.1`, compare its registry integrity and installed bytes to the candidate, run its bin through `npx` on Linux or macOS, and exercise real hosted codes before enabling website commands. Only then are `npx @ombelle-ui/cli@0.2.1`, `pnpm dlx @ombelle-ui/cli@0.2.1`, `yarn dlx @ombelle-ui/cli@0.2.1`, and `bunx @ombelle-ui/cli@0.2.1` verified public runners. Until that gate passes, the website retains truthful private checkout commands. A local candidate and mocked official-origin test transport do not establish a live service or public release.

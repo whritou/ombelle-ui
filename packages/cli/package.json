@@ -1,1 +1,1 @@
-{"name":"@ombelle/cli","version":"0.2.0","private":true,"type":"module","bin":{"ombelle":"./dist/main.js"},"dependencies":{"@ombelle/contracts":"workspace:*","@ombelle/compiler":"workspace:*","@ombelle/catalog":"workspace:*","postcss":"8.5.31"}}
+{"name":"@ombelle/cli","version": "0.2.1","private":true,"type":"module","bin":{"ombelle":"./dist/main.js"},"dependencies":{"@ombelle/contracts":"workspace:*","@ombelle/compiler":"workspace:*","@ombelle/catalog":"workspace:*","postcss":"8.5.31"}}
