@@ -11,7 +11,7 @@ export type SnapshotReference = { id: string; revision: 1 }
 // json-schema-to-ts keeps the outer root when resolving external schemas.
 // Qualify the referenced preset's local pointers for type inference only;
 // AJV resolves the original registered schema's pointers itself.
-type AbsolutePresetReferences<T> = {
+export type AbsolutePresetReferences<T> = {
   [K in keyof T]: K extends '$ref'
     ? T[K] extends `#${string}`
       ? `${typeof presetSchema.$id}${T[K]}`

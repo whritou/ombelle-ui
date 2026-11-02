@@ -72,7 +72,7 @@ it('explicit offline hit can use reviewed bytes after withdrawal; fresh online 4
 it('built CLI rejects flag misuse and required hash omission as syntax errors', async () => {
   const { reference, run } = await setup()
   for (const args of [
-    ['init', '--preset', reference],
+    ['init', '--preset', reference, '--preset-hash', 'a'.repeat(64)],
     ['add', 'button', '--offline'],
     ['init', '--preset', path.resolve('examples/preset.example.json'), '--preset-hash', 'a'.repeat(64)],
     ['add', '--recipe', 'recipe.json', '--snapshot-origin', 'https://example.com'],

@@ -1,0 +1,15 @@
+# Hosted build and deployment
+
+The reviewed target is `whritearthur-9467s-projects/ombelle-ui`, with `https://ombelle-ui.vercel.app` as the official publication origin. Deployment is pending the measured launch checks; a successful local build does not establish a live service or published npm package.
+
+Set Vercel's Root Directory to `apps/www`, enable access to source outside that directory, select Node 24, and keep the existing Hobby project and Neon Free integration. The project configuration is `apps/www/vercel.json`; invoke the Vercel CLI from the monorepo root after linking the named existing project. [Vercel monorepo guidance](https://vercel.com/docs/monorepos) documents this separation between application root and CLI working directory. Vercel manages Node 24 patch versions; local verification retains Node 24.19.0 and pnpm 11.25.0.
+
+The install command is `pnpm install --frozen-lockfile --ignore-scripts`. The app's build script explicitly generates schemas/catalog, builds packages, generates the existing preview sources, builds Vite with `/ombelle-preview/` as its base, builds both compiler workers, and runs Next's production build. It performs no database initialization or migration. Run `pnpm build:www` locally to exercise the same pipeline.
+
+Set the project build environment variable `ENABLE_EXPERIMENTAL_COREPACK=1` so Vercel honors the repository's `packageManager: pnpm@11.25.0`. The lockfile format alone does not pin pnpm, and a plain overridden `pnpm install` can select an older image version without Corepack. Verify the actual manager version in deployment logs. See [Vercel's Corepack setup](https://vercel.com/docs/builds/configure-a-build#corepack).
+
+Only the generated `apps/www/public/ombelle-preview` subtree is replaced. Next serves HTML wrappers for the editor and gallery at their nested runtime URLs, with same-directory absolute asset URLs. CORS is enabled only for these public static files because sandboxed module requests have opaque origins. Both iframes retain `sandbox="allow-scripts"`; source-window, opaque-origin, session, hash and request checks remain in place. Compiler workers remain at `/editor-compiler.worker.js` and `/preset-compiler.worker.js`.
+
+Hosted deployments must leave `NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN` unset. Local fixtures explicitly set it to `http://127.0.0.1:4173`; the URL helper accepts only literal loopback HTTP(S) origins and rejects credentials, paths, fragments and numeric aliases. The dedicated development browser config tests the original two-server arrangement; the hosted config starts the production Next server without a Vite server.
+
+Configure server-only Postgres, public-origin and rate-secret variables as described in [snapshot operations](snapshot-service-operations.md). Preview deployments require isolated Neon storage and the production-host guard. Migrate the isolated database explicitly before publishing test data. Verify the preview before initializing production and releasing the public domain. Do not disable deployment protection to run checks, enable Auth/Realtime, or upgrade either plan as part of this implementation.

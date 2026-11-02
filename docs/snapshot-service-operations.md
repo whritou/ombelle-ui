@@ -1,6 +1,6 @@
 # Immutable preset snapshot service operations
 
-This document describes the private repository implementation. It is not a deployment guide for a live public service. No public endpoint, hosted persistent volume, support contact, or published CLI package is configured.
+This document describes the implementation and operator contract. The selected hosted target is the existing Ombelle Vercel project with Neon Free; public launch and npm distribution remain pending their deployment/account gates. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for those explicit gates. The local SQLite adapter remains available for development.
 
 ## Implemented contract
 
@@ -24,7 +24,7 @@ The example is illustrative. The embedded preset ID and revision are retained an
 
 - `POST /api/v1/presets` takes exactly `{ "preset": <preset> }`, JSON UTF-8 without compression, a matching `Origin`, and a UUID-v4 `Idempotency-Key`. A new intent returns `201`; an identical retry with the same key during its 24-hour window returns the same snapshot with `200`. Reusing the key for different content conflicts.
 - `GET /api/v1/presets/{id}/{revision}` resolves only an exact immutable revision. Responses are canonical JSON with an ETag and `Cache-Control: public, max-age=0, must-revalidate`; matching validators may return `304` after a fresh availability and integrity check. `HEAD` returns no body. `OPTIONS` has `Allow` and `no-store`; it does not enable CORS.
-- Errors use a controlled JSON body with `code`, `message`, `issues`, and `requestId`, `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, and `X-Request-ID`. There is no public listing, alias, recipe publication, account, or revision ownership API.
+- Errors use a controlled JSON body with `code`, `message`, `issues`, and `requestId`, `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, and `X-Request-ID`. There is no public listing, alias, account, or revision ownership API.
 - IDs use `ps_` plus 32 lowercase hexadecimal characters and revision `1`. Every new publication intent gets a new ID. Only a 24-hour idempotent retry reuses one.
 - Public snapshots have no automatic expiration. Withdrawal prevents fresh reads and idempotent replays from returning the payload; it cannot recall downloaded cache files or installed source.
 
@@ -32,11 +32,25 @@ The example is illustrative. The embedded preset ID and revision are retained an
 
 The implementation enforces 65,536 UTF-8 bytes for both the incoming and normalized preset, JSON nesting depth 16, a ten-second request-body deadline, and a 128 KiB response/cache/session envelope maximum. Pending editor publication state expires after 24 hours.
 
-The SQLite service allows five POST attempts per client per minute, twenty new snapshots per client per UTC day, and 1,000 new snapshots globally per UTC day. Store capacity is 100,000 snapshot records and 512 MiB of canonical response bytes. SQLite lock wait is 250 ms. Retry attempts count toward the minute attempt quota; idempotent replay does not consume a new-publication daily quota.
+Both adapters share five POST attempts per client per minute, twenty new publications per client per UTC day, and 1,000 new publications globally per UTC day across presets and recipes. Combined store capacity is 100,000 records and 256 MiB of canonical response bytes. SQLite lock wait is 250 ms. Retry attempts count toward the minute attempt quota; idempotent replay does not consume a new-publication daily quota.
+
+Recipe publication uses `POST /api/v1/recipes` with exactly `{ "recipe": <recipe> }` and the same request policy. Reads use `/api/v1/recipes/{id}/{revision}` with `rc_<32 lowercase hexadecimal digits>@1` references. The verified envelope contains the normalized recipe and resolved built-in preset, both canonical hashes, and pinned releases. Recipe and preset idempotency keys occupy one shared namespace; reusing a key across kinds conflicts. Withdrawal and conditional-read availability rules apply to both kinds.
 
 ## Runtime and environment
 
-The request handlers require the Node runtime with built-in `node:sqlite`; Edge and ephemeral-only hosts are unsupported. Use a persistent local volume for `OMBELLE_SNAPSHOT_DB_PATH`. Keep the SQLite database on a single writable service instance unless a deployment design supplies a supported shared-database strategy. These deployment assumptions have not been exercised against a hosted platform.
+### Neon Postgres adapter
+
+The hosted adapter uses `OMBELLE_SNAPSHOT_BACKEND=postgres` and the integration's pooled `DATABASE_URL`; operator initialization uses `DATABASE_URL_UNPOOLED`. Set the common public-origin/rate-secret settings below. On Vercel, client identity uses its trusted `x-vercel-forwarded-for` header. Preview origins come only from Vercel's deployment environment; `OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST` is required on previews and prevents accidentally using the production endpoint (pooled/direct hostnames are normalized). There is no fallback to SQLite when hosted configuration is incomplete.
+
+Run the existing `snapshots:init`, `snapshots:withdraw` and `snapshots:unwithdraw` commands with the selected backend. Withdrawal accepts exact preset or recipe references. Database initialization is explicit and idempotent; requests and builds do not run migrations. Both publication kinds share quotas and a 100,000-record/256 MiB canonical-response budget. The payload limit leaves database-overhead headroom and does not guarantee a precise physical database size.
+
+Postgres backups use `pg_dump` with the direct connection and a verified restore on an isolated branch; the SQLite `snapshots:backup` file command is not a Postgres backup. Supply credentials through a protected environment or passfile, never command arguments or logs. Use the Neon provider's recovery window according to the actual plan and retain independent backups appropriate to the release's retention policy. No backup/restore drill or public deployment is claimed by the adapter implementation alone.
+
+`pnpm test:hosted-storage` is a separate, real-Neon test command. It requires explicitly configured `dev-hosted-install-codes` branch credentials and fails if they are absent; default unit/integration tests remain cloud-independent. The development branch is disposable and tests use separately named owned schemas. Never use the production URL as its test connection.
+
+### Local SQLite adapter
+
+The SQLite request handlers require the Node runtime with built-in `node:sqlite`; Edge and ephemeral-only filesystems are unsupported by this adapter. Use a persistent local volume for `OMBELLE_SNAPSHOT_DB_PATH`. Keep the SQLite database on a single writable service instance. Use the Postgres adapter for Vercel rather than a temporary SQLite file.
 
 Configure the service process with:
 

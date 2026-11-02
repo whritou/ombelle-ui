@@ -687,8 +687,8 @@ test('exports the current preset while preview is unavailable', async ({
     'Preview failed',
     { timeout: 15000 },
   )
-  await expect(
-    page.getByRole('alert').filter({ hasText: 'Preview unavailable' }),
-  ).toContainText('pnpm generate:preview')
+  const alert = page.getByRole('alert').filter({ hasText: 'Preview unavailable' })
+  await expect(alert).toContainText('You can still export a valid preset')
+  await expect(alert.getByRole('button', { name: 'Retry preview' })).toBeVisible()
   expect(JSON.parse(await download(page)).design.radiusRem).toBe(1.3)
 })

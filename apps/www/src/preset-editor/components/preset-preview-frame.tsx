@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import type { CompileResult } from '@ombelle/contracts'
+import { previewFrameUrl } from '../../editor/preview-url'
 import {
   isPresetAck,
   isPresetHandshake,
@@ -106,9 +107,7 @@ export function PresetPreviewFrame({
       <p>{stale ? 'Previous valid preview' : 'Current preset preview'}</p>
       {failed && (
         <p role="alert">
-          Preview unavailable. You can still export a valid preset. Check the
-          preview server and run <code>pnpm generate:preview</code> after
-          changing gallery inputs, then retry.{' '}
+          Preview unavailable. You can still export a valid preset.{' '}
           <button
             type="button"
             onClick={() => setAttempt((value) => value + 1)}
@@ -121,7 +120,7 @@ export function PresetPreviewFrame({
         key={attempt}
         ref={frame}
         title="Global preset gallery"
-        src="http://127.0.0.1:4173/preset-preview/"
+        src={previewFrameUrl('preset', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)}
         sandbox="allow-scripts"
         style={{
           width: view.viewport === 'narrow' ? '320px' : '100%',

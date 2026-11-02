@@ -1,0 +1,32 @@
+// Generated from schemas/recipe-snapshot-source.schema.json; do not edit independently.
+export const recipeSnapshotSourceSchema = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.example.com/schemas/recipe-snapshot-source-1.0.json",
+  "title": "Recipe Snapshot Source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "origin",
+    "reference",
+    "recipeHash"
+  ],
+  "properties": {
+    "origin": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 37,
+      "maxLength": 37,
+      "pattern": "^rc_[0-9a-f]{32}@1$"
+    },
+    "recipeHash": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+} as const

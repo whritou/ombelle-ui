@@ -2,6 +2,7 @@ import type { FromSchema } from 'json-schema-to-ts'
 import { presetSchema } from './preset-schema.js'
 import type { NormalizedRecipe } from './recipe.js'
 import type { SnapshotSource } from './snapshot.js'
+import type { RecipeSnapshotSource } from './recipe-snapshot.js'
 export type Preset = FromSchema<typeof presetSchema>
 export type { ComponentId } from './component-ids.js'
 export type { StyleFamily } from './style-families.js'
@@ -69,6 +70,7 @@ export type InstalledArtifact = {
   kind: Artifact['kind']
 }
 export type ProjectLock = {
+  recipeSources?: Record<string, RecipeSnapshotSource>
   presetSource?: SnapshotSource
   componentPresetSources?: Record<string, SnapshotSource>
   componentPresets?: Record<string, InstalledComponentPreset>
@@ -129,6 +131,7 @@ export type FileChange = {
   action: 'create' | 'update' | 'noop' | 'conflict'
 }
 export type InstallPlan = {
+  recipeResolution?: { source: RecipeSnapshotSource; via: 'network' | 'cache' }
   presetResolution?: { source: SnapshotSource; via: 'network' | 'cache' }
   componentPreset?: Omit<InstalledComponentPreset, 'artifacts'> & {
     importPath: string

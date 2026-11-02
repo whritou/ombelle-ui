@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import { selectFamily } from './scenarios'
-if (window.location.pathname === '/preset-preview/' || window.location.pathname === '/preset-preview') {
+const previewPath = window.location.pathname.replace(/^\/ombelle-preview(?=\/)/, '')
+if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
   const { mountPresetPreview } = await import('./preset-preview')
   mountPresetPreview(document.getElementById('root')!)
-} else if (window.location.pathname === '/editor-preview/' || window.location.pathname === '/editor-preview') {
+} else if (previewPath === '/editor-preview/' || previewPath === '/editor-preview') {
   const { mountEditorPreview } = await import('./editor-preview')
   mountEditorPreview(document.getElementById('root')!)
 } else {

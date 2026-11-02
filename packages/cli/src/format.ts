@@ -9,6 +9,7 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     ...(plan.managerWarning ? { managerWarning: plan.managerWarning } : {}),
     presetHash: plan.preset.hash,
     ...(plan.presetResolution ? { presetResolution: plan.presetResolution } : {}),
+    ...(plan.recipeResolution ? { recipeResolution: plan.recipeResolution } : {}),
     ...(plan.recipe
       ? { recipe: { ...plan.recipe, scopeType: 'component' } }
       : {}),
@@ -47,6 +48,12 @@ export function formatPlan(
         plan.presetResolution.source.presetHash +
         '\nPreset resolved via: ' +
         plan.presetResolution.via
+      : '') +
+    (plan.recipeResolution
+      ? '\nRecipe snapshot origin: ' + plan.recipeResolution.source.origin +
+        '\nRecipe snapshot reference: ' + plan.recipeResolution.source.reference +
+        '\nExpected/actual snapshot recipe hash: ' + plan.recipeResolution.source.recipeHash +
+        '\nRecipe resolved via: ' + plan.recipeResolution.via
       : '') +
     (plan.componentPreset
       ? '\nComponent preset ' +

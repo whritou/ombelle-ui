@@ -11,6 +11,8 @@ fs.writeFileSync('packages/contracts/src/recipe-schema.ts', '// Generated from s
 for (const [name, binding] of [
   ['preset-snapshot', 'presetSnapshotSchema'],
   ['snapshot-source', 'snapshotSourceSchema'],
+  ['recipe-snapshot', 'recipeSnapshotSchema'],
+  ['recipe-snapshot-source', 'recipeSnapshotSourceSchema'],
 ]) {
   const input = JSON.parse(fs.readFileSync(`schemas/${name}.schema.json`, 'utf8'))
   fs.writeFileSync(

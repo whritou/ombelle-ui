@@ -17,8 +17,8 @@ let base: Promise<Record<string, Record<string, any>>> | undefined
 const collectedDefinitions = new Map<string, { name: string; file: string }[]>()
 function browserResults() {
   return {
-    stats: { expected: 355, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
-    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'preset-editor.spec.ts': 26, 'recipes.spec.ts': 20, 'snapshot-presets.spec.ts': 22, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }).map(([file, count]) => ({
+    stats: { expected: 362, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
+    suites: Object.entries({ 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 9, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'preset-editor.spec.ts': 26, 'recipes.spec.ts': 20, 'snapshot-presets.spec.ts': 22, 'recipe-snapshots.spec.ts': 7, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30 }).map(([file, count]) => ({
       file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
     })),
   }
@@ -96,23 +96,30 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
 test('accepts complete browser evidence including all 30 Card cases', () => {
-  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 355 })
+  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 362 })
+})
+
+test('rejects omitted recipe publication browser cases even when totals match the old inventory', () => {
+  const result = browserResults()
+  result.suites = result.suites.filter(suite => suite.file !== 'recipe-snapshots.spec.ts')
+  result.stats.expected = 355
+  expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted snapshot browser suite and assertions when totals are adjusted', () => {
   const missingFile = browserResults()
   missingFile.suites = missingFile.suites.filter((suite) => suite.file !== 'snapshot-presets.spec.ts')
-  missingFile.stats.expected = 333
+  missingFile.stats.expected = 340
   expect(() => validateBrowserResults(missingFile)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
   const missingAssertion = browserResults()
   const suite = missingAssertion.suites.find((row) => row.file === 'snapshot-presets.spec.ts')!
   suite.specs.pop()
-  missingAssertion.stats.expected = 354
+  missingAssertion.stats.expected = 361
   expect(() => validateBrowserResults(missingAssertion)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted preset editor cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter((suite) => suite.file !== 'preset-editor.spec.ts')
-  result.stats.expected = 307
+  result.stats.expected = 336
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('accepts app unit evidence from Windows and Unix source paths', async () => {
@@ -121,7 +128,7 @@ test('accepts app unit evidence from Windows and Unix source paths', async () =>
   await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
   for (const suite of result.testResults) suite.name = 'Z:\\portable-checkout\\' + suite.name.replace('/different-checkout/', '').replaceAll('/', '\\')
   await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
-}, 180000)
+}, 420000) // Fixture discovery plus an independently bounded runtime inventory.
 test('rejects missing app unit files and assertions after headline counts are adjusted', async () => {
   for (const mode of ['file', 'assertion']) {
     const result = await testResults(['packages/', 'apps/www/src/'])
@@ -134,19 +141,19 @@ test('rejects missing app unit files and assertions after headline counts are ad
 test('rejects omitted Card browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'card.spec.ts')
-  result.stats.expected = 303
+  result.stats.expected = 332
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted Forms browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'forms.spec.ts')
-  result.stats.expected = 303
+  result.stats.expected = 332
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('rejects omitted editor browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'editor.spec.ts')
-  result.stats.expected = 324
+  result.stats.expected = 353
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })
 test('accepts complete portable structural evidence without any consumer root descriptors', async () => {
@@ -158,7 +165,7 @@ test('accepts complete portable structural evidence without any consumer root de
   const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
-  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 355 } } })
+  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 362 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)
@@ -246,6 +253,6 @@ test.each(['quality', 'consumers'])('executes %s stages independently and clears
 test.each(['checkbox', 'switch', 'tabs', 'tooltip'])('rejects omitted %s browser cases even when reporter totals are adjusted', (id) => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== id + '.spec.ts')
-  result.stats.expected = 303
+  result.stats.expected = 332
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
 })

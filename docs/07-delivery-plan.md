@@ -62,6 +62,8 @@ The private local Button slice `add button --preset <local.json>` is implemented
 
 Release work includes external pilot sessions, installation troubleshooting, license inventory, upgrade notes, a security reporting route, and a repeatable publishing pipeline. Avoid accounts and billing until basic adoption provides a reason to add them.
 
+The hosted install-code increment adds immutable recipe publication, code-only official-origin preset/recipe resolution, preserved recipe provenance, shared Postgres quotas, static isolated previews, and a standalone installer candidate. Focused browser checks cover publication consent/recovery, read-only sharing, exact installed bytes and Vite/Next DOM/style parity across three families and both modes. Real isolated-Neon tests cover storage concurrency and a packaged-CLI journey through service restart and withdrawal. The public domain and npm runner remain gated on deployment and account verification; a tested candidate does not complete the web-alpha release milestone. See the [approved design](superpowers/specs/2026-11-01-hosted-install-codes-design.md), [execution plan](superpowers/plans/2026-11-01-hosted-install-codes.md), [deployment guide](hosted-deployment.md), and [release guide](cli-release.md).
+
 ## Validation matrix
 
 | Area | Automated coverage | Manual or review coverage |

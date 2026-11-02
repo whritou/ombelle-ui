@@ -1,9 +1,17 @@
-import { validateSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, validateSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
+
+export function installerRunner(release?: { packageName: string; version: string }): string {
+  if (!release) return 'pnpm exec node packages/cli/dist/main.js'
+  if (release.packageName !== publicCliPackageName || !/^\d+\.\d+\.\d+$/.test(release.version))
+    throw new Error('Unsupported published installer release.')
+  return `npx ${release.packageName}@${release.version}`
+}
 
 /** Display-only invocation for the private repository CLI. */
 export function snapshotInstallCommand(
   source: SnapshotSource,
   scope: 'new' | 'theme' | 'button',
+  release?: { packageName: string; version: string },
 ): string {
   const { origin, reference, presetHash } = validateSnapshotSource(source)
   // URL permits punctuation in hostnames which shells interpret. Limit the
@@ -19,5 +27,6 @@ export function snapshotInstallCommand(
     button: `add button --preset ${reference}`,
   }[scope]
   if (!operation) throw new Error('Unknown installation scope.')
-  return `pnpm exec node packages/cli/dist/main.js ${operation} --snapshot-origin '${origin}' --preset-hash ${presetHash} --cwd APP --dry-run --json`
+  const pins = origin === officialSnapshotOrigin ? '' : ` --snapshot-origin '${origin}' --preset-hash ${presetHash}`
+  return `${installerRunner(release)} ${operation}${pins} --cwd APP --dry-run --json`
 }

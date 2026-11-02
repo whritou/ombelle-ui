@@ -4,7 +4,7 @@ import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './
 import { readPublishBody } from './body'
 import { clientRateKey } from './client-key'
 import { SnapshotServiceError } from './errors'
-import { openSnapshotStore } from './sqlite-store'
+import { openConfiguredSnapshotStore } from './store-factory'
 import type { SnapshotStore } from './store'
 
 export interface SnapshotService {
@@ -29,7 +29,7 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
       // The minute budget includes retries and validation failures. Body/media/
       // origin checks run first; normalization never runs after quota exhaustion.
       const now = Date.now()
-      store.consumeAttempt(clientKey, now)
+      await store.consumeAttempt(clientKey, now)
       const idempotencyKey = request.headers.get('Idempotency-Key')
       if (!idempotencyKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey))
         throw new SnapshotServiceError({ status: 400, code: 'INVALID_IDEMPOTENCY_KEY' })
@@ -55,10 +55,10 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
         }
         throw error
       }
-      const result = store.publish({ preset, idempotencyKey: idempotencyKey.toLowerCase(), clientKey, now })
+      const result = await store.publish({ preset, idempotencyKey: idempotencyKey.toLowerCase(), clientKey, now })
       return { snapshot: await verified(result.snapshot), replayed: result.replayed }
     },
-    async read(ref) { return verified(store.lookup(ref)) },
+    async read(ref) { return verified(await store.lookup(ref)) },
   }
 }
 
@@ -67,9 +67,9 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
 export function createRequestSnapshotService(): SnapshotService {
   async function use<T>(operation: (service: SnapshotService) => Promise<T>): Promise<T> {
     const config = readSnapshotConfig(process.env)
-    const store = openSnapshotStore(config.dbPath)
+    const store = await openConfiguredSnapshotStore(config)
     try { return await operation(createSnapshotService(config, store)) }
-    finally { store.close() }
+    finally { await store.close() }
   }
   return { publish: (request) => use((service) => service.publish(request)), read: (ref) => use((service) => service.read(ref)) }
 }

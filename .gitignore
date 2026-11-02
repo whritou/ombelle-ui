@@ -6,5 +6,9 @@ playwright-report/
 test-results/
 apps/preview/src/generated/
 .artifacts/
+.env*
+!.env.example
+.vercel/
 apps/www/public/editor-compiler.worker.js
 apps/www/public/preset-compiler.worker.js
+apps/www/public/ombelle-preview/

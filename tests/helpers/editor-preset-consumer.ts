@@ -3,13 +3,14 @@ import path from 'node:path'
 import os from 'node:os'
 import net from 'node:net'
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
-import { compile, rewriteModuleSpecifiers } from '@ombelle/compiler'
+import { canonicalize, compile, compileRecipe, recipeImportAlias, rewriteModuleSpecifiers, verifyRecipeSnapshot } from '@ombelle/compiler'
 import {
   supportedComponentIds,
   type StyleFamily,
   type CompileResult,
 } from '@ombelle/contracts'
 import type { SnapshotSource } from '@ombelle/contracts'
+import type { RecipeSnapshot } from '@ombelle/contracts'
 import { managerEntry } from '../../packages/cli/src/apply/manager.js'
 import { runBuiltCli } from './cli-runtime.js'
 
@@ -68,11 +69,11 @@ async function availablePort(): Promise<number> {
   })
 }
 export async function withEditorPresetConsumer<T>(
-  input: {
+  input: ({
     framework: 'vite' | 'next'
     family: StyleFamily
     presetJson: string
-  } | { framework: 'vite' | 'next'; family: StyleFamily; kind: 'snapshot'; source: SnapshotSource; scope?: 'theme' | 'button' },
+  } | { framework: 'vite' | 'next'; family: StyleFamily; kind: 'snapshot'; source: SnapshotSource; scope?: 'theme' | 'button' }) & { recipeSnapshot?: { snapshot: RecipeSnapshot; origin: string } },
   work: (consumer: {
     url: string
     root: string
@@ -130,7 +131,18 @@ export async function withEditorPresetConsumer<T>(
     const cliEnv = { ...process.env }
     cliEnv.NO_COLOR = undefined
     cliEnv.FORCE_COLOR = undefined
-    for (const args of [applyArgs, ['add', ...ordinaryAdditions]]) {
+    const recipeInput = input.recipeSnapshot
+    if (recipeInput) await verifyRecipeSnapshot(recipeInput.snapshot)
+    const actions = [applyArgs, ...(recipeInput ? [[
+      'add', '--recipe', recipeInput.snapshot.id + '@1', '--snapshot-origin', recipeInput.origin,
+      '--recipe-hash', recipeInput.snapshot.recipeHash,
+    ]] : []), ['add', ...ordinaryAdditions]]
+    let savedDefaults: string | undefined, hostSource: string | undefined
+    for (const [index, args] of actions.entries()) {
+      if (recipeInput && index === 1) {
+        savedDefaults = await fs.readFile(path.join(root, 'ui-preset.json'), 'utf8')
+        hostSource = await fs.readFile(path.join(root, 'src/components/ui/button.tsx'), 'utf8')
+      }
       const applied = await runBuiltCli(
         'node',
         [...args, '--yes', '--json'],
@@ -138,6 +150,24 @@ export async function withEditorPresetConsumer<T>(
         cliEnv,
       )
       if (applied.code !== 0) throw new Error(applied.output)
+    }
+    if (recipeInput && (savedDefaults !== await fs.readFile(path.join(root, 'ui-preset.json'), 'utf8') ||
+      hostSource !== await fs.readFile(path.join(root, 'src/components/ui/button.tsx'), 'utf8')))
+      throw new Error('Published recipe changed saved defaults or the host Button.')
+    if (recipeInput) {
+      const snapshot = recipeInput.snapshot
+      const compiled = await compileRecipe({ recipe: snapshot.recipe })
+      const lock = JSON.parse(await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'))
+      const key = snapshot.recipe.id + '@' + snapshot.recipe.revision
+      if (lock.recipeSources?.[key]?.recipeHash !== snapshot.recipeHash ||
+        lock.recipeSources[key].reference !== snapshot.id + '@1' ||
+        canonicalize(lock.recipes?.[key]?.recipe.data) !== canonicalize(snapshot.recipe))
+        throw new Error('Installed recipe bytes/provenance differ from the publication.')
+      for (const artifact of compiled.artifacts.filter(item => ['component', 'style'].includes(item.kind))) {
+        const expected = artifact.kind === 'style' ? artifact.content : await rewriteModuleSpecifiers(artifact.content, specifier => recipeImportAlias(specifier, '@/lib/utils', '@/components/ui'))
+        const actual = await fs.readFile(path.join(root, 'src/components/ui', artifact.logicalPath), 'utf8')
+        if (actual !== expected) throw new Error('Installed recipe artifact differs from compiler bytes: ' + artifact.logicalPath)
+      }
     }
     const installedPreset = source
       ? JSON.parse(await fs.readFile(path.join(root, 'ui-preset.json'), 'utf8'))
@@ -165,7 +195,14 @@ export async function withEditorPresetConsumer<T>(
       if (await fs.readFile(path.join(root, 'src/components/ui/button.tsx'), 'utf8') !== beforeButton)
         throw new Error('Scoped snapshot changed the differently themed host Button.')
     }
-    const gallery = !(snapshot && scope === 'button')
+    if (recipeInput) {
+      const item = recipeInput.snapshot.recipe
+      const fixture = `import {Button as HostButton} from '@/components/ui/button'\nimport {RecipeButton} from '@/components/ui/recipes/${item.id}/r${item.revision}/button'\nexport default function RecipeScope(){return <main><HostButton data-testid="global-host-button">Host action</HostButton><RecipeButton data-testid="published-recipe-button" {...${JSON.stringify(item.props)}}>${'{' + JSON.stringify(item.content) + '}'}</RecipeButton></main>}`
+      await fs.writeFile(path.join(root, 'src/recipe-scope.tsx'), fixture)
+      if (input.framework === 'vite') await fs.writeFile(path.join(root, 'src/main.tsx'), "import * as React from 'react'\nimport {createRoot} from 'react-dom/client'\nimport RecipeScope from './recipe-scope'\nimport './index.css'\ncreateRoot(document.getElementById('root')!).render(<RecipeScope/>)\n")
+      else await fs.writeFile(path.join(root, 'src/app/page.tsx'), "import RecipeScope from '../recipe-scope'\nexport default function Page(){return <RecipeScope/>}")
+    }
+    const gallery = !recipeInput && !(snapshot && scope === 'button')
     const fixture = await fs.readFile(
       new URL('../../fixtures/shared/preset-gallery.tsx', import.meta.url), 'utf8',
     )

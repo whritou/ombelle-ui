@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createInterface } from 'node:readline/promises'
@@ -10,7 +11,9 @@ import {
   type InstallPlan,
 } from '@ombelle/contracts'
 import { compile, compileButtonPreset, compileRecipe } from '@ombelle/compiler'
-import { readRecipeFile } from './recipe-file.js'
+import { resolveRecipeInput, type ResolvedRecipeInput } from './snapshots/recipe-input.js'
+import { applyRecipeSourceToPlan } from './snapshots/recipe-source.js'
+import { writeRecipeSnapshotCache } from './snapshots/recipe-cache.js'
 import { resolvePresetInput, type ResolvedPresetInput } from './snapshots/input.js'
 import { snapshotCacheDirectory, writeSnapshotCache } from './snapshots/cache.js'
 import { applyPresetSourceToPlan } from './snapshots/source.js'
@@ -33,7 +36,7 @@ const exits: Record<string, number> = {
 const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
-  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1 with --snapshot-origin <origin> --preset-hash <64 lowercase hex>. Use --offline only with an explicit snapshot and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
+  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },
@@ -57,7 +60,7 @@ export async function runCli(
         else if (
           [
             '--cwd', '--preset', '--package-manager', '--recipe',
-            '--snapshot-origin', '--preset-hash',
+            '--snapshot-origin', '--preset-hash', '--recipe-hash',
           ].includes(a)
         ) {
           if (!args[i + 1] || args[i + 1].startsWith('--'))
@@ -100,11 +103,13 @@ export async function runCli(
         'INVALID_DATA', 'Choose a local preset JSON file or exact snapshot reference',
       )
     const remoteFlags = flags['--snapshot-origin'] !== undefined ||
-      flags['--preset-hash'] !== undefined || flags['--offline']
-    if (remoteFlags && (flags['--recipe'] || typeof presetValue !== 'string'))
+      flags['--preset-hash'] !== undefined || flags['--recipe-hash'] !== undefined || flags['--offline']
+    if ((remoteFlags && !flags['--recipe'] && typeof presetValue !== 'string') ||
+      (flags['--recipe-hash'] !== undefined && !flags['--recipe']) ||
+      (flags['--preset-hash'] !== undefined && flags['--recipe']))
       throw new FoundationError(
         'INVALID_DATA',
-        'Remote snapshot flags require init --preset, theme add, or add button --preset with an exact snapshot reference',
+        'Remote snapshot flags require an explicit preset or recipe code; use --preset-hash for presets and --recipe-hash for recipes',
       )
     const selected = flags['--package-manager']
     if (
@@ -116,6 +121,15 @@ export async function runCli(
         'Choose npm, pnpm, yarn, or bun for --package-manager',
       )
     let presetInput: ResolvedPresetInput | undefined
+    let recipeInput: ResolvedRecipeInput | undefined
+    if (typeof flags['--recipe'] === 'string') {
+      recipeInput = await resolveRecipeInput(flags['--recipe'], {
+        origin: flags['--snapshot-origin'] as string | undefined,
+        expectedHash: flags['--recipe-hash'] as string | undefined,
+        offline: flags['--offline'] === true,
+        get cacheRoot() { return snapshotCacheDirectory(process.env) },
+      })
+    }
     if (typeof presetValue === 'string') {
       presetInput = await resolvePresetInput(presetValue, {
         origin: flags['--snapshot-origin'] as string | undefined,
@@ -141,7 +155,7 @@ export async function runCli(
           context.root,
           'Run init --preset <local.json>.',
         )
-      const recipe = await readRecipeFile(String(flags['--recipe']))
+      const recipe = recipeInput!.recipe
       plan = await planRecipe(
         context,
         await compileRecipe({ recipe, darkSelector: context.darkSelector }),
@@ -193,6 +207,11 @@ export async function runCli(
       }
       plan.networkAccess = presetInput.networkAccess
     }
+    if (recipeInput) await applyRecipeSourceToPlan(plan, context, recipeInput)
+    if (recipeInput?.source && recipeInput.resolution !== 'local') {
+      plan.recipeResolution = { source: recipeInput.source, via: recipeInput.resolution }
+      plan.networkAccess = recipeInput.networkAccess
+    }
     const hasConflicts =
       plan.diagnostics.length > 0 ||
       plan.changes.some((c) => c.action === 'conflict')
@@ -233,6 +252,14 @@ export async function runCli(
       }
     }
     await applyPlan(plan)
+    if (recipeInput?.source && recipeInput.snapshot) {
+      try {
+        await writeRecipeSnapshotCache(snapshotCacheDirectory(process.env), recipeInput.source, recipeInput.snapshot)
+      } catch (error) {
+        io.stderr('Warning: recipe snapshot cache was not saved after successful apply: ' +
+          (error instanceof Error ? error.message : 'cache write failed'))
+      }
+    }
     if (presetInput?.source && presetInput.snapshot) {
       try {
         await writeSnapshotCache(
@@ -273,7 +300,13 @@ export async function runCli(
     return exits[e.code] ?? 1
   }
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
+// POSIX package managers expose bins as symlinks; Node resolves the module URL
+// but keeps argv[1] as invoked, so compare against the resolved entry path.
+function invokedAsEntry(): boolean {
+  if (!process.argv[1]) return false
+  try { return import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href } catch { return false }
+}
+if (invokedAsEntry())
   process.exitCode = await runCli(process.argv.slice(2), {
     stdout: (text) => process.stdout.write(text + '\n'),
     stderr: (text) => process.stderr.write(text + '\n'),

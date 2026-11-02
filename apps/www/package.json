@@ -1,19 +1,22 @@
 {
   "name": "@ombelle/www",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "node ../../scripts/build-editor-worker.mjs",
+    "predev": "node ../../scripts/build-hosted-preview.mjs",
     "dev": "next dev --hostname 127.0.0.1 --port 3000",
-    "prebuild": "node ../../scripts/build-editor-worker.mjs",
-    "build": "next build"
+    "build": "node ../../scripts/build-hosted-www.mjs",
+    "start": "next start"
   },
+  "engines": { "node": "24.x" },
   "dependencies": {
-    "@ombelle/contracts": "workspace:*",
     "@ombelle/catalog": "workspace:*",
     "@ombelle/compiler": "workspace:*",
+    "@ombelle/contracts": "workspace:*",
+    "@vercel/functions": "3.10.5",
     "next": "16.4.3",
+    "pg": "8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
