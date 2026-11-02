@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest'
 import type { SnapshotSource } from '@ombelle/contracts'
-import { snapshotInstallCommand } from './install-command'
+import { officialSnapshotOrigin } from '@ombelle/contracts'
+import { publishedInstaller, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
@@ -61,4 +62,11 @@ it('validates immutable reference and hash before displaying a command', () => {
   expect(() =>
     snapshotInstallCommand({ ...source, presetHash: 'x;whoami' }, 'new'),
   ).toThrow()
+})
+it('code pages show the verified public npx release with bare official codes', () => {
+  expect(publishedInstaller).toEqual({ packageName: '@ombelle-ui/cli', version: '0.2.1' })
+  const official = { ...source, origin: officialSnapshotOrigin }
+  expect(snapshotInstallCommand(official, 'new', publishedInstaller)).toBe(
+    `npx @ombelle-ui/cli@0.2.1 init --preset ${source.reference} --cwd APP --dry-run --json`,
+  )
 })

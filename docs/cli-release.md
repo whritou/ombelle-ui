@@ -20,8 +20,15 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.0` was published on 2026-11-02 by npm identity `ombelle`, owner of the user-reserved `ombelle-ui` organization. Its registry tarball matched the tested candidate byte for byte (integrity `sha512-ikzam7qN…8uUVs4OSXlfhQ==`), but it exits 0 without output when run through a POSIX bin symlink (`npx`, `npm exec`, Bun on Linux and macOS). Windows shims and direct `node dist/main.js` were unaffected. Do not advertise 0.2.0.
 
-The current artifact is the **unpublished 0.2.1 candidate**, which resolves its entry path through symlinks. Verify the active publishing identity, finish the release checks, then publish the exact tested 0.2.1 tarball under the approved name. Do not substitute another namespace or version without a decision.
+`@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
 All six workspace packages use software version 0.2.1. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
 
-After publication, independently fetch `@ombelle-ui/cli@0.2.1`, compare its registry integrity and installed bytes to the candidate, run its bin through `npx` on Linux or macOS, and exercise real hosted codes before enabling website commands. Only then are `npx @ombelle-ui/cli@0.2.1`, `pnpm dlx @ombelle-ui/cli@0.2.1`, `yarn dlx @ombelle-ui/cli@0.2.1`, and `bunx @ombelle-ui/cli@0.2.1` verified public runners. Until that gate passes, the website retains truthful private checkout commands. A local candidate and mocked official-origin test transport do not establish a live service or public release.
+Post-publication checks on 2026-11-02:
+
+- The registry tarball is byte-for-byte identical to the candidate (integrity `sha512-TAkxY7UE…BDJFxJQ==`).
+- On Linux (WSL Ubuntu, Node 24.19.0), `npx @ombelle-ui/cli@0.2.1 --help` prints help, while 0.2.0 exits 0 with no output.
+- On production (`https://ombelle-ui.vercel.app`, Neon `main` branch initialized explicitly), a labelled smoke-test preset `ps_7cca4bd460bbbd996abcf47cb07aa643@1` and recipe `rc_b511c3b46cf3293bf58491e0839ddf48@1` were published. In a fresh npm Vite-shaped project on Linux, `npx @ombelle-ui/cli@0.2.1` planned `init` without writes, applied `init` and `add --recipe` by code, and a later ordinary `add input` kept `ui-preset.json` unchanged; the lock records the official origin, both codes and their hashes.
+- After a production redeploy of the same commit, both codes returned byte-identical responses.
+
+Code pages therefore show `npx @ombelle-ui/cli@0.2.1` commands. Only the npx runner was exercised; `pnpm dlx`, `yarn dlx` and `bunx` are expected to work but were not run against the published package. Editor export panels for local JSON files still show the repository-checkout command.
