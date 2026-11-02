@@ -75,7 +75,7 @@ Store the **direct** URL (no `-pooler`; `pg_dump` needs a session connection) as
 postgresql://ombelle_backup:GENERATED_PASSWORD@ep-bitter-meadow-b9plx52i.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
 
-**Restoring an automated backup.** Download and decrypt it, then use the restore drill below:
+**Restoring an automated backup.** Download and decrypt it, then use the restore drill below. From WSL with the Windows GitHub CLI (`/mnt/c/Program Files/GitHub CLI/gh.exe`), give `-D` a Windows path such as `'D:\ombelle-backups\auto'`: Windows reads a `/mnt/d/…` path as `D:\mnt\d\…`.
 
 ```bash
 gh run download RUN_ID -R whritou/ombelle-ui -n ombelle-backup-RUN_ID -D /absolute/path/to/backups
@@ -117,6 +117,7 @@ A mismatch caused by a publication made between the summary and the dump only me
 | Date | Backup | Result |
 | --- | --- | --- |
 | 2026-11-02 | `ombelle-20261102T205920Z` (13,404 bytes; 3 publications, 0 withdrawals, fingerprint `f22ee39b…dcbb2659`) | passed on branch `restore-drill-20261102` (`ep-calm-thunder-b9jk3k8m`), database `restore_drill` |
+| 2026-11-02 | `ombelle-20261102T220435Z` from automated run 41534024137 (artifact `ombelle-backup-41534024137`, decrypted with the operator key; fingerprint `f22ee39b…dcbb2659`) | passed on branch `restore-drill-20261102`, database `restore_drill_auto` |
 
 ## Contacts and policy pages
 
