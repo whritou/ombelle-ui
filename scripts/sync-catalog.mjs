@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { writeFileAtomicSync } from './write-atomic.ts'
 import { supportedStyleFamilies } from '../packages/contracts/src/style-families.ts'
 import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
 const base = 'packages/catalog/src/'
@@ -34,7 +35,7 @@ const presets = Object.fromEntries(
     JSON.parse(fs.readFileSync(base + 'presets/' + id + '.json', 'utf8')),
   ]),
 )
-fs.writeFileSync(
+writeFileAtomicSync(
   base + 'generated.ts',
   '// Generated from reviewed catalog files.\nexport const catalogData = ' +
     JSON.stringify({
