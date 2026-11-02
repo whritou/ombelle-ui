@@ -47,7 +47,10 @@ export function readSnapshotConfig(env: Record<string, string | undefined>): Sna
         throw new Error('Invalid Postgres connection')
       const productionHost = env.OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST
       const hostIdentity = (host: string) => host.toLowerCase().replace('-pooler.', '.')
-      if (preview && (!productionHost || hostIdentity(url.hostname) === hostIdentity(productionHost)))
+      // A URL, port or trailing dot could never equal the parsed hostname and
+      // would silently disable the guard, so accept only a bare DNS name.
+      if (preview && (!productionHost || !/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i.test(productionHost) ||
+        hostIdentity(url.hostname) === hostIdentity(productionHost)))
         throw new Error('Preview storage is not isolated')
       return { ...shared, backend: 'postgres', databaseUrl }
     }

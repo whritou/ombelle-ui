@@ -28,6 +28,15 @@ it('normalizes equivalent IPv6 spellings and IPv4-mapped addresses', () => {
   expect(key('::ffff:192.0.2.1')).toBe(key('192.0.2.1'))
 })
 
+it('keys IPv6 clients on their /64 so rotating interface addresses share one budget', () => {
+  const key = (ip: string) => clientRateKey(new Headers({ 'x-trusted-ip': ip }), config)
+  expect(key('2001:db8:1:2:aaaa::1')).toBe(key('2001:db8:1:2:bbbb:cccc:dddd:eeee'))
+  expect(key('2001:db8:1:2::')).toBe(key('2001:0db8:0001:0002:ffff:ffff:ffff:ffff'))
+  expect(key('2001:db8:1:3::1')).not.toBe(key('2001:db8:1:2::1'))
+  expect(key('::1')).toBe(key('::2'))
+  expect(key('2001:db8:1:2::1')).not.toBe(key('192.0.2.1'))
+})
+
 it('shares one development bucket independent of all headers', () => {
   const development: SnapshotConfig = { ...config, publicOrigin: 'http://127.0.0.1:3000', clientIdentity: { mode: 'development' } }
   expect(clientRateKey(new Headers(), development)).toBe(clientRateKey(new Headers({ 'x-trusted-ip': '192.0.2.1' }), development))

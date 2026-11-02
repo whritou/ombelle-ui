@@ -31,4 +31,17 @@ Post-publication checks on 2026-11-02:
 - On production (`https://ombelle-ui.vercel.app`, Neon `main` branch initialized explicitly), a labelled smoke-test preset `ps_7cca4bd460bbbd996abcf47cb07aa643@1` and recipe `rc_b511c3b46cf3293bf58491e0839ddf48@1` were published. In a fresh npm Vite-shaped project on Linux, `npx @ombelle-ui/cli@0.2.1` planned `init` without writes, applied `init` and `add --recipe` by code, and a later ordinary `add input` kept `ui-preset.json` unchanged; the lock records the official origin, both codes and their hashes.
 - After a production redeploy of the same commit, both codes returned byte-identical responses.
 
-Code pages therefore show `npx @ombelle-ui/cli@0.2.1` commands. Only the npx runner was exercised; `pnpm dlx`, `yarn dlx` and `bunx` are expected to work but were not run against the published package. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
+Code pages therefore show `npx @ombelle-ui/cli@0.2.1` commands. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
+
+## Verified public runners
+
+Measured on 2026-11-02 on Linux (WSL Ubuntu, Node 24.19.0) against the public registry, from an empty directory, with `--help` and a dry-run `init --preset ps_7cca4bd460bbbd996abcf47cb07aa643@1 --cwd APP --dry-run --json` against production. Every dry run returned `status: planned` and wrote nothing.
+
+| Runner | Version | Command |
+| --- | --- | --- |
+| npx | npm 11.17.0 | `npx @ombelle-ui/cli@0.2.1` |
+| pnpm | 11.25.0 | `pnpm dlx @ombelle-ui/cli@0.2.1` |
+| Bun | 1.4.3 | `bunx @ombelle-ui/cli@0.2.1` (measured as the equivalent `bun x`) |
+| Yarn | 4.18.1 | `yarn dlx --quiet @ombelle-ui/cli@0.2.1` |
+
+Yarn 4 refuses package versions younger than its `npmMinimalAgeGate` (1440 minutes by default) with `YN0016 … are quarantined`, so `yarn dlx` works from 24 hours after each publication (from 2026-11-03T17:19Z for 0.2.1). The Yarn row was measured with `YARN_NPM_PREAPPROVED_PACKAGES=@ombelle-ui/cli`. Without `--quiet`, `yarn dlx` prints its own resolution lines on stdout before the CLI output, which breaks `--json` parsing. Yarn Classic has no `dlx`.
