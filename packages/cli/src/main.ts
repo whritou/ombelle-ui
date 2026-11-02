@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createInterface } from 'node:readline/promises'
@@ -299,7 +300,13 @@ export async function runCli(
     return exits[e.code] ?? 1
   }
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
+// POSIX package managers expose bins as symlinks; Node resolves the module URL
+// but keeps argv[1] as invoked, so compare against the resolved entry path.
+function invokedAsEntry(): boolean {
+  if (!process.argv[1]) return false
+  try { return import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href } catch { return false }
+}
+if (invokedAsEntry())
   process.exitCode = await runCli(process.argv.slice(2), {
     stdout: (text) => process.stdout.write(text + '\n'),
     stderr: (text) => process.stderr.write(text + '\n'),

@@ -116,7 +116,7 @@ it.each(['pnpm', 'yarn-classic', 'yarn-modern', 'bun'] as const)('installs the e
   if (manager === 'bun') { executable = await resolveBunExecutable(); prefix = [] }
   else if (manager === 'pnpm') prefix = [process.env.OMBELLE_TEST_PNPM_ENTRY ?? await managerEntry('pnpm')]
   else {
-    const candidates = [process.env.OMBELLE_TEST_COREPACK_ENTRY, ...(process.env.PATH ?? process.env.Path ?? '').split(path.delimiter).filter(Boolean).map(directory => path.join(directory, 'node_modules/corepack/dist/corepack.js'))].filter((item): item is string => !!item)
+    const candidates = [process.env.OMBELLE_TEST_COREPACK_ENTRY, ...(process.env.PATH ?? process.env.Path ?? '').split(path.delimiter).filter(Boolean).flatMap(directory => [path.join(directory, 'node_modules/corepack/dist/corepack.js'), path.join(directory, '../lib/node_modules/corepack/dist/corepack.js')])].filter((item): item is string => !!item)
     let entry: string | undefined
     for (const candidate of candidates) { try { if ((await fs.stat(candidate)).isFile()) { entry = candidate; break } } catch { /* try next installed tool */ } }
     if (!entry) throw new Error('Corepack is required for pinned Yarn release checks')
