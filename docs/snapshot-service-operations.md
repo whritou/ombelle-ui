@@ -1,6 +1,6 @@
 # Immutable preset snapshot service operations
 
-This document describes the implementation and operator contract. The selected hosted target is the existing Ombelle Vercel project with Neon Free; public launch and npm distribution remain pending their deployment/account gates. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for those explicit gates. The local SQLite adapter remains available for development.
+This document describes the implementation and operator contract. The hosted service runs on the existing Ombelle Vercel project with Neon Free at `https://ombelle-ui.vercel.app`, and the installer is published as `@ombelle-ui/cli`. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for the deployment and release record. The operations listed at the end of this document remain open. The local SQLite adapter remains available for development.
 
 ## Implemented contract
 
@@ -94,10 +94,12 @@ pnpm exec node packages/cli/dist/main.js init --preset ps_aaaaaaaaaaaaaaaaaaaaaa
 
 For an existing project use `theme add`; for the supported component-only path use `add button --preset`. The private CLI resolves snapshots only when an exact reference, `--snapshot-origin`, and `--preset-hash` are all supplied. It verifies the canonical hash and supported catalog/compiler releases before planning. `--yes` does not bypass conflicts or validation. Dry-run, cancellation, conflict, and failed apply do not write cache entries. A successful apply may cache the verified envelope; cache write failure warns after the install succeeds.
 
-Later ordinary adds use the saved local project preset and do not fetch snapshots. `--offline` is explicit and requires a verified cached copy. An offline read cannot learn that an operator withdrew the remote snapshot. Remote resolution and publishing are private repository implementation details; no public CLI package or public distribution is available.
+Later ordinary adds use the saved local project preset and do not fetch snapshots. `--offline` is explicit and requires a verified cached copy. An offline read cannot learn that an operator withdrew the remote snapshot. This section covers the repository checkout. The published installer accepts the same inputs: `npx @ombelle-ui/cli@0.2.1` resolves bare codes against the official origin without `--snapshot-origin` or a hash.
 
 The CLI cache defaults to `%LOCALAPPDATA%\ombelle\cache\snapshots` on Windows, `~/Library/Caches/ombelle/snapshots` on macOS, and `$XDG_CACHE_HOME/ombelle/snapshots` (or `~/.cache/ombelle/snapshots`) on Unix. `OMBELLE_SNAPSHOT_CACHE_DIR` overrides the location and must be absolute. Reads do not create the directory. Cache writes require a private owned directory, validate entries before use, admit at most 100 entries/16 MiB, and read at most 128 KiB per envelope. Unknown or corrupt entries are left untouched. Unsupported hard-link filesystems cause a cache warning after a successful install; they do not undo it. Windows ACL inspection is read-only and fails closed if unavailable.
 
 ## Operations still required before public launch
 
-A real launch requires a selected domain and HTTPS certificate, persistent-disk hosting and backup/restore drills, trusted-proxy client identity configuration, service monitoring and quota/capacity alerting, a public support/security contact, privacy/retention policy, operational withdrawal process, and a publicly distributed CLI workflow. None is claimed complete by this repository implementation or its local verification.
+Done as of 2026-11-02: an HTTPS origin on the Vercel domain, managed Neon Postgres storage instead of a persistent disk, client identity from Vercel's trusted `x-vercel-forwarded-for` header, an explicit operator withdrawal command, and a publicly distributed CLI (`@ombelle-ui/cli`).
+
+Still open: a Postgres backup with a verified restore drill on an isolated Neon branch, service monitoring with quota and capacity alerting, a public support and security contact, and a published privacy and retention policy. Do not describe the service as production-ready for the public until these are in place.

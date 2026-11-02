@@ -21,7 +21,7 @@ The examples below are proposed product commands. The namespace, package, preset
 
 The package exposes a single binary named `your-ui`. Explicit package selection in the Yarn and Bun examples avoids relying on the binary being named `cli`. Bun's `--bun` flag deliberately exercises its runtime; the CLI must be tested under both Node and Bun.
 
-Yarn Classic does not supply the modern dlx workflow. Use a local development dependency (`yarn add --dev @your-ui/cli@0.1.0`, then `yarn your-ui theme add ps_brand@3`) or another runner with `--package-manager yarn`. The current private CLI is not published, so these package names are illustrative. A runner choice must not switch the consumer project's dependency manager.
+Yarn Classic does not supply the modern dlx workflow. Use a local development dependency (`yarn add --dev @your-ui/cli@0.1.0`, then `yarn your-ui theme add ps_brand@3`) or another runner with `--package-manager yarn`. These package names are illustrative; the published installer is `@ombelle-ui/cli` with the `ombelle` binary (see [CLI release](cli-release.md) for verified runner commands). A runner choice must not switch the consumer project's dependency manager.
 
 ## Commands for new setup and component addition
 
