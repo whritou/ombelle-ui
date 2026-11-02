@@ -3,6 +3,17 @@ import { isIP } from 'node:net'
 import type { SnapshotConfig } from './config'
 import { SnapshotServiceError } from './errors'
 
+// A single IPv6 subscriber usually holds a whole /64 and can rotate interface
+// addresses freely, so per-client limits key on the network prefix. Input is
+// the URL-normalized form: lowercase hex groups with at most one "::".
+function ipv6Prefix64(address: string): string {
+  const [head, tail] = address.split('::')
+  const left = head ? head.split(':') : []
+  const right = tail ? tail.split(':') : []
+  const groups = tail === undefined ? left : [...left, ...Array(8 - left.length - right.length).fill('0'), ...right]
+  return groups.slice(0, 4).join(':') + '::/64'
+}
+
 export function clientRateKey(headers: Headers, config: SnapshotConfig): string {
   let identity = 'ombelle-snapshot-development'
   if (config.clientIdentity.mode === 'trusted-header') {
@@ -19,7 +30,7 @@ export function clientRateKey(headers: Headers, config: SnapshotConfig): string 
         const high = parseInt(mapped[1], 16)
         const low = parseInt(mapped[2], 16)
         identity = `${high >>> 8}.${high & 255}.${low >>> 8}.${low & 255}`
-      }
+      } else identity = ipv6Prefix64(identity)
     }
   }
   return createHmac('sha256', config.rateSecret).update(identity).digest('hex')

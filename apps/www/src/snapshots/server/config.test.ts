@@ -100,6 +100,15 @@ it('fails closed when a preview deployment points to the production endpoint', (
   expect(readSnapshotConfig({ ...preview, DATABASE_URL: postgresUrl.replace('ep-test-pooler', 'ep-preview-pooler') }))
     .toMatchObject({ publicOrigin: 'https://ombelle-ui-test-team.vercel.app', clientIdentity: { mode: 'trusted-header', header: 'x-vercel-forwarded-for' } })
 })
+it('fails closed on previews when the production host is not a bare hostname', () => {
+  const preview = { ...env, OMBELLE_SNAPSHOT_BACKEND: 'postgres', DATABASE_URL: postgresUrl.replace('ep-test-pooler', 'ep-preview-pooler'),
+    VERCEL: '1', VERCEL_ENV: 'preview', VERCEL_URL: 'ombelle-ui-test-team.vercel.app' }
+  for (const host of [`postgres://u:p@ep-test.eu-central-1.aws.neon.tech/db`, 'ep-test.eu-central-1.aws.neon.tech:5432',
+    'ep-test.eu-central-1.aws.neon.tech.', ' ep-test.eu-central-1.aws.neon.tech', 'ep-test.eu-central-1.aws.neon.tech/neondb'])
+    expect(() => readSnapshotConfig({ ...preview, OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST: host })).toThrow()
+  expect(readSnapshotConfig({ ...preview, OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST: 'EP-TEST-pooler.eu-central-1.aws.neon.tech' }))
+    .toMatchObject({ backend: 'postgres' })
+})
 it('does not derive a hosted preview origin from malformed deployment environment values', () => {
   for (const VERCEL_URL of ['evil.test', 'https://evil.test', 'x.vercel.app/path', 'x.vercel.app@evil.test'])
     expect(() => readSnapshotConfig({ ...env, OMBELLE_SNAPSHOT_BACKEND: 'postgres', DATABASE_URL: postgresUrl,
