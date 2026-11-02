@@ -164,8 +164,9 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
   await page.getByRole('tab', { name: 'CLI' }).click()
   const command = await page.getByRole('tabpanel').textContent()
   expect(command).toContain(download.suggestedFilename())
-  expect(command).toContain('packages/cli/dist/main.js add --recipe')
-  await expect(page.getByText('Run from the Ombelle repository root')).toBeVisible()
+  expect(command).toContain('npx @ombelle-ui/cli@0.2.1 add --recipe ./')
+  expect(command).not.toContain('packages/cli/dist/main.js')
+  await expect(page.getByText('Run from the folder containing the downloaded')).toBeVisible()
   await page.evaluate(() => {
     const recipe = {
       schemaVersion: '1.0', id: 'button_recipe', revision: 1, component: 'button',
