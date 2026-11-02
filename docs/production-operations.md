@@ -37,6 +37,13 @@ Run the workflow manually once and confirm the four quota lines appear. Without 
 
 ## Backups
 
+Neon Free also provides, inside the same Neon project:
+
+- restore of a branch to any point in the last 6 hours (Backup & Restore, "Restore from history");
+- manual snapshots that restore instantly.
+
+Scheduled snapshots need a paid Neon plan. These protect against recent mistakes but are not an independent copy, so they complement the `pg_dump` backups below rather than replace them.
+
 Back up monthly, before any schema migration and before rotating database secrets. Backups stay on the operator's machine; never upload them to GitHub Actions artifacts (the repository is public) or commit them. They contain everything in the `ombelle` schema, including withdrawn publications, retry keys and HMAC rate keys.
 
 Take the direct (unpooled) URL of branch `main` from the Neon console (Connect, connection pooling off; the host has no `-pooler`), then from the repository root in WSL:
@@ -67,6 +74,7 @@ A mismatch caused by a publication made between the summary and the dump only me
 
 | Date | Backup | Result |
 | --- | --- | --- |
+| 2026-11-02 | `ombelle-20261102T205920Z` (13,404 bytes; 3 publications, 0 withdrawals, fingerprint `f22ee39b…dcbb2659`) | passed on branch `restore-drill-20261102` (`ep-calm-thunder-b9jk3k8m`), database `restore_drill` |
 
 ## Contacts and policy pages
 

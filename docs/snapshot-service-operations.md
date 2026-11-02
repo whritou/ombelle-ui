@@ -98,8 +98,17 @@ Later ordinary adds use the saved local project preset and do not fetch snapshot
 
 The CLI cache defaults to `%LOCALAPPDATA%\ombelle\cache\snapshots` on Windows, `~/Library/Caches/ombelle/snapshots` on macOS, and `$XDG_CACHE_HOME/ombelle/snapshots` (or `~/.cache/ombelle/snapshots`) on Unix. `OMBELLE_SNAPSHOT_CACHE_DIR` overrides the location and must be absolute. Reads do not create the directory. Cache writes require a private owned directory, validate entries before use, admit at most 100 entries/16 MiB, and read at most 128 KiB per envelope. Unknown or corrupt entries are left untouched. Unsupported hard-link filesystems cause a cache warning after a successful install; they do not undo it. Windows ACL inspection is read-only and fails closed if unavailable.
 
-## Operations still required before public launch
+## Operations before public launch
 
-Done as of 2026-11-02: an HTTPS origin on the Vercel domain, managed Neon Postgres storage instead of a persistent disk, client identity from Vercel's trusted `x-vercel-forwarded-for` header, an explicit operator withdrawal command, and a publicly distributed CLI (`@ombelle-ui/cli`).
+In place as of 2026-11-02:
 
-Still open: a Postgres backup with a verified restore drill on an isolated Neon branch, service monitoring with quota and capacity alerting, a public support and security contact, and a published privacy and retention policy. Do not describe the service as production-ready for the public until these are in place.
+- an HTTPS origin on the Vercel domain;
+- managed Neon Postgres storage instead of a persistent disk;
+- client identity from Vercel's trusted `x-vercel-forwarded-for` header;
+- an explicit operator withdrawal command;
+- a publicly distributed CLI (`@ombelle-ui/cli`);
+- `/privacy` and `/security` pages, `security.txt`, and GitHub private vulnerability reporting;
+- hourly monitoring of the site, the API and quotas through a read-only database role;
+- a verified Postgres backup and restore drill (first run 2026-11-02).
+
+See [production operations](production-operations.md) for the runbook, backup cadence and drill log. Privacy requests have no dedicated email address: requesters open a GitHub issue asking for a private channel.
