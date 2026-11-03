@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
-import { PublishPreset } from '../../snapshots/components/publish-preset'
 import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
 import {
   canExportPreset,
@@ -56,8 +55,15 @@ export function PresetExportPanel({
     }
   }
   return (
-    <section aria-labelledby="preset-export-heading">
-      <h2 id="preset-export-heading">Export your preset</h2>
+    <details className="preset-export">
+      <summary>
+        <h2 id="preset-export-heading">Preset JSON and local export</h2>
+      </summary>
+      <section aria-labelledby="preset-export-heading">
+      <p>
+        Prefer <strong>Get code</strong> for a one-line install. Download the
+        JSON to keep a local copy or install offline.
+      </p>
       <p>Catalog 0.1.0 · Compiler 0.1.0 · Preset schema 1.0</p>
       <p>
         Preset hash:{' '}
@@ -163,12 +169,7 @@ export function PresetExportPanel({
         <code>--yes</code> to apply. A theme merge preserves existing component
         source; changing markup requires an explicit migration.
       </p>
-      <PublishPreset
-        preset={state.result?.preset ?? null}
-        current={enabled}
-        announce={announce}
-        describedBy={describedBy}
-      />
-    </section>
+      </section>
+    </details>
   )
 }

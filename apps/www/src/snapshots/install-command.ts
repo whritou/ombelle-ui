@@ -1,4 +1,4 @@
-import { officialSnapshotOrigin, publicCliPackageName, validateSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type RecipeSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
 export const publishedInstaller = { packageName: publicCliPackageName, version: '0.2.1' } as const
@@ -32,4 +32,42 @@ export function snapshotInstallCommand(
   if (!operation) throw new Error('Unknown installation scope.')
   const pins = origin === officialSnapshotOrigin ? '' : ` --snapshot-origin '${origin}' --preset-hash ${presetHash}`
   return `${installerRunner(release)} ${operation}${pins} --cwd APP --dry-run --json`
+}
+
+export const packageManagers = ['pnpm', 'npm', 'yarn', 'bun'] as const
+export type PackageManager = (typeof packageManagers)[number]
+
+/** Runs the published installer once through the chosen package manager. */
+export function managerRunner(manager: PackageManager, release = publishedInstaller): string {
+  installerRunner(release)
+  const target = `${release.packageName}@${release.version}`
+  return { pnpm: `pnpm dlx ${target}`, npm: `npx ${target}`, yarn: `yarn dlx ${target}`, bun: `bunx ${target}` }[manager]
+}
+
+/**
+ * The short command shown by "Get code". It runs in the current folder; without
+ * `--yes` the CLI prints its plan and asks before writing anything.
+ */
+export function codeInstallCommand(
+  code: { kind: 'preset'; source: SnapshotSource } | { kind: 'recipe'; source: RecipeSnapshotSource },
+  scope: 'new' | 'theme' | 'button' | 'recipe',
+  manager: PackageManager,
+  release = publishedInstaller,
+): string {
+  const source = code.kind === 'preset' ? validateSnapshotSource(code.source) : validateRecipeSnapshotSource(code.source)
+  if (!/^https?:\/\/(?:[a-z0-9.-]+|\[[a-f0-9:]+\])(?::[0-9]+)?$/.test(source.origin))
+    throw new Error('Snapshot origin cannot be represented safely in a command.')
+  if ((code.kind === 'recipe') !== (scope === 'recipe')) throw new Error('Unknown installation scope.')
+  const operation = {
+    new: `init --preset ${source.reference}`,
+    theme: `theme add ${source.reference}`,
+    button: `add button --preset ${source.reference}`,
+    recipe: `add --recipe ${source.reference}`,
+  }[scope]
+  const pins = source.origin === officialSnapshotOrigin
+    ? ''
+    : code.kind === 'preset'
+      ? ` --snapshot-origin '${source.origin}' --preset-hash ${code.source.presetHash}`
+      : ` --snapshot-origin '${source.origin}' --recipe-hash ${code.source.recipeHash}`
+  return `${managerRunner(manager, release)} ${operation}${pins}`
 }

@@ -14,7 +14,7 @@ import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
 import { EditorTabs } from './editor-tabs'
 import { StatusAnnouncer } from './status-announcer'
-import { PublishRecipe } from '../../recipe-snapshots/components/publish-recipe'
+import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = { storageVersion: 1, recipe: validateRecipe(exampleRecipe) }
@@ -158,7 +158,9 @@ export function ButtonEditor() {
           setHistory(redo)
         }}>Redo</button>
         <a href="#artifacts-title" className={styles.viewCode}>View code</a>
-        <button type="button" className={styles.download} onClick={saveDownload} disabled={!recipeJson || recovery !== null}>Download recipe JSON</button>
+        <button type="button" onClick={saveDownload} disabled={!recipeJson || recovery !== null}>Download recipe JSON</button>
+        <RecipeGetCode className={styles.download} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
+          secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />
       </div>
     </header>
 
@@ -202,7 +204,6 @@ export function ButtonEditor() {
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
               notice={experimentalNotice(draftFamily(draft.recipe))} />
-            <PublishRecipe recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus} />
             <p className={styles.hashLine}>Recipe hash: <span data-testid="recipe-hash">{compilation.result?.recipe.hash ?? 'Pending'}</span></p>
           </div>
         </div>

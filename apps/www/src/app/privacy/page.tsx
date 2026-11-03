@@ -19,7 +19,8 @@ export default function PrivacyPage() {
 
       <h2>What you publish</h2>
       <p>
-        When you publish a preset or a Button recipe, the service stores the
+        Opening Get code in the preset or Button editor publishes that preset or
+        recipe. When you publish a preset or a Button recipe, the service stores the
         normalized JSON you submitted, its content hash and the publication
         time. It does not store your name, account, email address or IP address
         with the publication. Ombelle has no accounts.

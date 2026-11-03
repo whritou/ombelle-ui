@@ -93,7 +93,7 @@ it('disables otherwise-ready export and publish with a description while blocked
         describedBy={glassReadoutId}
       />,
     )
-  const names = ['Download preset JSON', 'Copy export', 'Publish preset…']
+  const names = ['Download preset JSON', 'Copy export']
   const button = (name: string, disabled: boolean) =>
     new RegExp(
       `<button type="button"${disabled ? ' disabled=""' : ''} aria-describedby="${glassReadoutId}"[^>]*>${name}</button>`,

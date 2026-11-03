@@ -330,5 +330,19 @@ export function useRecipePublication(input: {
     retry: async () => {
       await controller.current?.retry()
     },
+    /**
+     * Opening "Get code" is the publication intent: capture the current draft
+     * and publish it in one step, or retry a failed capture of the same draft.
+     */
+    generate: async () => {
+      const handle = controller.current
+      if (!handle) return
+      const { status, attempt } = handle.state
+      if (status === 'publishing') return
+      if (status === 'withdrawn') handle.cancel()
+      if (status === 'failed' && attempt) return handle.retry()
+      if (status !== 'validating') handle.confirm()
+      await handle.publish()
+    },
   }
 }

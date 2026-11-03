@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import fs from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { getCatalog } from '@ombelle/catalog'
@@ -9,21 +9,26 @@ import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
 import { resetSnapshotBrowserQuota } from '../helpers/snapshot-browser.js'
 const url = 'http://127.0.0.1:3000/editor/component/button'
-// The local service shares one development rate bucket (5 publications per
-// minute) across every test and worker.
+// The local service shares one development rate bucket across every test and
+// worker.
 test.beforeEach(async () => resetSnapshotBrowserQuota())
-test('publishes a recipe only after consent and opens a read-only share page without changing the draft', async ({ page }) => {
+const getCode = (page: Page) => page.getByRole('button', { name: 'Get code', exact: true })
+const codeDialog = (page: Page) => page.getByRole('dialog', { name: 'Get code' })
+
+test('publishes a recipe when Get code opens and opens a read-only share page without changing the draft', async ({ page }) => {
   let posts = 0
   page.on('request', request => { if (request.method() === 'POST' && request.url().endsWith('/api/v1/recipes')) posts++ })
   await page.goto(url)
   await expect(page.getByRole('button', { name: 'Download recipe JSON', exact: true })).toBeEnabled()
+  await expect(getCode(page)).toBeEnabled()
   expect(posts).toBe(0)
-  await page.getByRole('button', { name: 'Publish recipe…', exact: true }).click()
-  const submit = page.getByRole('button', { name: 'Publish public snapshot', exact: true })
-  await expect(submit).toBeDisabled()
-  await page.getByLabel('I understand this recipe will be public and retained as described above.').check()
-  await submit.click()
-  const link = page.locator('a[href^="/recipes/rc_"]')
+  await getCode(page).click()
+  const link = codeDialog(page).getByTestId('get-code-reference')
+  await expect(link).toHaveText(/^rc_[a-f0-9]{32}@1$/)
+  await expect(codeDialog(page).getByTestId('get-code-command')).toContainText(/add --recipe rc_[a-f0-9]{32}@1/)
+  expect(posts).toBe(1)
+  await page.keyboard.press('Escape')
+  await getCode(page).click()
   await expect(link).toHaveText(/^rc_[a-f0-9]{32}@1$/)
   expect(posts).toBe(1)
   const before = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
@@ -47,15 +52,15 @@ test('publishes a recipe only after consent and opens a read-only share page wit
 test('keeps local exports usable when recipe publication is unavailable', async ({ page }) => {
   await page.route('**/api/v1/recipes', route => route.fulfill({ status: 503, body: '{}' }))
   await page.goto(url)
-  await expect(page.getByRole('button', { name: 'Publish recipe…', exact: true })).toBeEnabled()
-  await page.getByRole('button', { name: 'Publish recipe…', exact: true }).click()
-  await page.getByLabel('I understand this recipe will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
-  await expect(page.getByRole('alert').filter({ hasText: /unavailable|could not/i })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Download recipe JSON', exact: true })).toBeEnabled()
+  await expect(getCode(page)).toBeEnabled()
+  await getCode(page).click()
+  await expect(codeDialog(page).getByRole('alert').filter({ hasText: /unavailable|could not/i })).toBeVisible()
+  const downloading = page.waitForEvent('download')
+  await codeDialog(page).getByRole('button', { name: 'Download JSON instead', exact: true }).click()
+  expect((await downloading).suggestedFilename()).toMatch(/.json$/)
 })
 
-test('recovers a lost recipe publication after refresh and explicitly retries the original intent', async ({ page }) => {
+test('recovers a lost recipe publication after refresh and retries the original intent on Get code', async ({ page }) => {
   const keys: string[] = []
   let firstCode = ''
   await page.route('**/api/v1/recipes', async route => {
@@ -68,39 +73,15 @@ test('recovers a lost recipe publication after refresh and explicitly retries th
     } else await route.continue()
   })
   await page.goto(url)
-  await expect(page.getByRole('button', { name: 'Publish recipe…', exact: true })).toBeEnabled()
-  await page.getByRole('button', { name: 'Publish recipe…', exact: true }).click()
-  await page.getByLabel('I understand this recipe will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
-  await expect(page.getByRole('alert').filter({ hasText: /could not|unavailable/i })).toBeVisible()
+  await expect(getCode(page)).toBeEnabled()
+  await getCode(page).click()
+  await expect(codeDialog(page).getByRole('alert').filter({ hasText: /could not|unavailable/i })).toBeVisible()
   await page.reload()
-  await expect(page.getByRole('alert').filter({ hasText: /recovered/i })).toBeVisible()
+  await expect(getCode(page)).toBeEnabled()
   expect(keys).toHaveLength(1)
-  await page.getByLabel('I understand this recipe will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Retry publication', exact: true }).click()
-  await expect(page.locator('a[href^="/recipes/rc_"]')).toHaveText(firstCode)
+  await getCode(page).click()
+  await expect(codeDialog(page).getByTestId('get-code-reference')).toHaveText(firstCode)
   expect(keys).toHaveLength(2); expect(keys[1]).toBe(keys[0])
-})
-
-test('can cancel a pending recipe publication without accepting its delayed result', async ({ page }) => {
-  let release!: () => void
-  const gate = new Promise<void>(resolve => { release = resolve })
-  await page.route('**/api/v1/recipes', async route => {
-    await gate
-    try { await route.fulfill({ status: 503, body: '{}' }) } catch { /* Cancelled transport is expected. */ }
-  })
-  try {
-    await page.goto(url)
-    await expect(page.getByRole('button', { name: 'Publish recipe…', exact: true })).toBeEnabled()
-    await page.getByRole('button', { name: 'Publish recipe…', exact: true }).click()
-    await page.getByLabel('I understand this recipe will be public and retained as described above.').check()
-    await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
-    const cancel = page.getByRole('button', { name: 'Cancel publication', exact: true })
-    await expect(cancel).toBeEnabled({ timeout: 3000 })
-    await cancel.click(); release()
-    await expect(page.getByRole('button', { name: 'Publish recipe…', exact: true })).toBeEnabled()
-    expect(await page.locator('a[href^="/recipes/rc_"]').count()).toBe(0)
-  } finally { release() }
 })
 
 for (const family of supportedStyleFamilies) test(`published ${family} recipe matches installed Vite and Next Buttons in both modes without changing host defaults`, async ({ page, context }) => {

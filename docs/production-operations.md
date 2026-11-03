@@ -13,7 +13,7 @@ Each run checks:
 - the home, privacy and security pages, an editor preview and the compiler worker return 200;
 - an unknown preset code returns `SNAPSHOT_NOT_FOUND`, which proves the API reaches an initialized database (a 503 means missing configuration or schema);
 - `/.well-known/security.txt` expires in more than 30 days;
-- with `MONITOR_DATABASE_URL` set: stored publications (limit 100,000), stored response bytes (256 MiB), publications today in UTC (global limit 1,000) and database size (Neon Free 1 GiB), each failing at 80%.
+- with `MONITOR_DATABASE_URL` set: stored publications (limit 100,000), stored response bytes (256 MiB), publications today in UTC (global limit 5,000) and database size (Neon Free 1 GiB), each failing at 80%.
 
 ### Read-only monitoring role
 

@@ -130,7 +130,9 @@ Choose flat, minimalist, or neo brutalism and customize the light/dark colors, s
 
 Explicit token edits survive a family change, including values equal to the previous base. The confirmation lists untouched values that will change to the new base. Cancel, undo/redo, field reset, and confirmed full reset preserve the preset's editable identity. Incomplete input stays in the draft and produces a field-linked validation error. Export actions become available only after that exact current draft compiles.
 
-Download `project-preset.json` into the Ombelle repository. With `APP` replaced by the target project directory, review a new setup or an existing-shadcn theme plan:
+**Get code** is the main install path. Opening it publishes the current draft as an immutable public snapshot and shows its code with a one-line command for New project (`init --preset`), Existing project (`theme add`) or Button only (`add button --preset`), runnable with pnpm, npm, Yarn or Bun. The command runs in the current folder; without `--yes` the CLI prints its plan and asks before writing. Reopening Get code for an unchanged draft reuses the code; an edit publishes a new one. The dialog states that codes are public and links to the privacy page. A failed publication shows **Try again**, which reuses the captured bytes and key, and a recovered attempt after refresh is retried only when Get code is opened again.
+
+The JSON export is secondary: the dialog offers **Download JSON instead**, and the collapsed **Preset JSON and local export** section holds the download, copy and CSS outputs. Download `project-preset.json` into the Ombelle repository. With `APP` replaced by the target project directory, review a new setup or an existing-shadcn theme plan:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js init --preset ./project-preset.json --cwd APP --dry-run --json
@@ -143,7 +145,7 @@ The export panel shows normalized preset JSON, its hash and exact versions, **Ta
 
 Drafts and bounded undo history use separate versioned local storage keys from the Button recipe editor. Refresh restores even incomplete fields. Malformed drafts or unknown storage versions offer the original data as a recovery download before an explicit reset. Invalid history is discarded with a visible notice while the valid draft remains. Storage and clipboard failures offer in-memory editing and selectable export text.
 
-This is local M4 editing, export, explicit snapshot publishing, read-only sharing, and exact-reference resolution through the private CLI. Public package commands and using a custom project preset inside the Button recipe editor need subsequent implementations. See [snapshot service operations](snapshot-service-operations.md) for database setup and operator procedures.
+This is local M4 editing, export, snapshot publishing through Get code, read-only sharing, and exact-reference resolution through the private CLI. Public package commands and using a custom project preset inside the Button recipe editor need subsequent implementations. See [snapshot service operations](snapshot-service-operations.md) for database setup and operator procedures.
 
 ## Hosted install-code inputs
 
@@ -162,7 +164,7 @@ Recipe publications install isolated Button artifacts and leave saved global def
 
 ## Publish and share a Button recipe
 
-The Button editor offers **Publish recipe…** only after the current draft compiles. Publication requires explicit consent to public retention; no background publication occurs. A captured attempt contains the normalized recipe/hash, a UUID key and its creation time. Session recovery lasts at most 24 hours and requires an explicit retry after refresh. Retrying keeps the same captured bytes and key. Editing or cancelling retires pending results. Local JSON downloads remain usable when publication is unavailable.
+The Button editor's **Get code** button is enabled only after the current draft compiles. Opening it publishes the recipe as a public snapshot and shows its `add --recipe` command for the chosen package manager; nothing is published in the background or while editing. Reopening it for an unchanged recipe reuses the code. A captured attempt contains the normalized recipe/hash, a UUID key and its creation time. Session recovery lasts at most 24 hours; after a refresh the attempt is retried only when Get code is opened again. Retrying keeps the same captured bytes and key. Editing retires pending results. **Download recipe JSON** in the header and **Download JSON instead** in the dialog remain usable when publication is unavailable.
 
 Successful publication links to `/recipes/rc_<32 lowercase hexadecimal digits>/1`. This read-only page checks current availability, displays both hashes and pinned releases, previews the verified recipe, and offers selectable code commands and recipe JSON. It does not replace local drafts. Clipboard failures leave selectable text; downloads contain validated normalized recipe bytes. Published snapshots remain drafts with no automatic expiry while the service operates, no anonymous edit/delete action, and operator withdrawal that cannot recall downloaded copies or installed source.
 

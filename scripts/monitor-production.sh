@@ -61,7 +61,7 @@ else
     read -r records bytes today size <<<"$row"
     check_ratio "stored publications" "$records" 100000
     check_ratio "stored response bytes" "$bytes" 268435456
-    check_ratio "publications today (UTC)" "$today" 1000
+    check_ratio "publications today (UTC)" "$today" 5000
     check_ratio "database size" "$size" 1073741824
   fi
 fi

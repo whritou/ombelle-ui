@@ -12,6 +12,7 @@ import {
   backupSnapshotStore, initializeSnapshotStore, openSnapshotStore, SqliteSnapshotStore,
 } from '../../apps/www/src/snapshots/server/sqlite-store.js'
 import type { SqliteSnapshotStore as SnapshotStore } from '../../apps/www/src/snapshots/server/sqlite-store.js'
+import { publicationQuotas as Q } from '../../apps/www/src/snapshots/server/quotas.js'
 
 const roots: string[] = []
 const stores: SnapshotStore[] = []
@@ -65,7 +66,7 @@ function processPublication(path: string, key: string, executable = process.exec
       catch (e) { console.error(e.code); store.close(); process.exit(1) }
     });`
   const child = spawn(executable, ['--import', 'tsx', '--input-type=module', '-e', script, path,
-    JSON.stringify({ preset, idempotencyKey: key, clientKey: 'client-a', now })], { windowsHide: true })
+    JSON.stringify({ preset, idempotencyKey: key, clientKey: 'client-a', now, attempts: Q.attemptsPerMinute })], { windowsHide: true })
   let output = '', error = ''
   let readyResolve: () => void, readyReject: (error: Error) => void, isReady = false
   const ready = new Promise<void>((resolve, reject) => { readyResolve = resolve; readyReject = reject })
@@ -143,11 +144,11 @@ it('recovers committed intent and rate state after a process is killed before se
     import { openSnapshotStore } from ${JSON.stringify(pathToFileURL(resolve('apps/www/src/snapshots/server/sqlite-store.ts')).href)};
     const store = openSnapshotStore(process.argv[1]);
     const input = JSON.parse(process.argv[2]);
-    for (let i = 0; i < 5; i++) store.consumeAttempt(input.clientKey, input.now);
+    for (let i = 0; i < input.attempts; i++) store.consumeAttempt(input.clientKey, input.now);
     store.publish(input);
     process.kill(process.pid, 'SIGKILL');`
   const child = spawn(process.execPath, ['--import', 'tsx', '--input-type=module', '-e', script, path,
-    JSON.stringify({ preset, idempotencyKey: key, clientKey: 'client-a', now })], { windowsHide: true })
+    JSON.stringify({ preset, idempotencyKey: key, clientKey: 'client-a', now, attempts: Q.attemptsPerMinute })], { windowsHide: true })
   let output = ''
   child.stdout.on('data', (data) => { output += data })
   const exitCode = await new Promise((resolveExit, reject) => {
@@ -174,20 +175,20 @@ it('fails closed when a retry mapping points to valid bytes for different conten
   expect(() => publish(store, { idempotencyKey: key })).toThrow(expect.objectContaining({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' }))
 })
 
-it('persists five attempts per fixed minute across connections and returns boundary Retry-After', async () => {
+it('persists the attempt budget per fixed minute across connections and returns boundary Retry-After', async () => {
   const path = await fixture()
   const first = open(path), second = open(path)
-  for (let i = 0; i < 5; i++) (i % 2 ? first : second).consumeAttempt('client', now + 30_001)
+  for (let i = 0; i < Q.attemptsPerMinute; i++) (i % 2 ? first : second).consumeAttempt('client', now + 30_001)
   expect(() => open(path).consumeAttempt('client', now + 30_001)).toThrow(expect.objectContaining({ status: 429, code: 'RATE_LIMITED', retryAfter: 30 }))
   expect(() => second.consumeAttempt('client', now + 59_999)).toThrow(expect.objectContaining({ status: 429, retryAfter: 1 }))
   expect(() => first.consumeAttempt('other', now + 30_001)).not.toThrow()
   expect(() => second.consumeAttempt('client', now + 60_000)).not.toThrow()
 })
 
-it('limits new client publications to twenty per UTC day while replay remains available', async () => {
+it('limits new client publications per UTC day while replay remains available', async () => {
   const store = open(await fixture()), key = randomUUID()
   const first = publish(store, { idempotencyKey: key })
-  for (let i = 1; i < 20; i++) publish(store)
+  for (let i = 1; i < Q.clientPerDay; i++) publish(store)
   expect(() => publish(store)).toThrow(expect.objectContaining({ status: 429, retryAfter: 43_200 }))
   expect(() => publish(store, { now: now + 43_199_999 })).toThrow(expect.objectContaining({ status: 429, retryAfter: 1 }))
   expect(publish(store, { idempotencyKey: key }).snapshot).toEqual(first.snapshot)
@@ -195,10 +196,10 @@ it('limits new client publications to twenty per UTC day while replay remains av
   expect(() => publish(store, { now: now + 43_200_000 })).not.toThrow()
 })
 
-it('limits global publications to one thousand even after a client identity changes', async () => {
+it('limits global publications even after a client identity changes', async () => {
   const path = await fixture(), store = open(path), db = raw(path)
   db.prepare('INSERT INTO rate_buckets(kind, client_key, window, count) VALUES (?, ?, ?, ?)')
-    .run('global', '', Math.floor(now / 86_400_000), 999)
+    .run('global', '', Math.floor(now / 86_400_000), Q.globalPerDay - 1)
   publish(store)
   expect(() => publish(store, { clientKey: 'other' })).toThrow(expect.objectContaining({ status: 429, retryAfter: 43_200 }))
   expect(() => publish(store, { now: now + 43_200_000 })).not.toThrow()

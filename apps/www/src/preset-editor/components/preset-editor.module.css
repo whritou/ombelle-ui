@@ -66,22 +66,6 @@
   color: var(--foreground);
   min-height: 44px;
 }
-.editor :global(.preset-publication-consent) {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  line-height: 1.6;
-  margin: 16px 0;
-  cursor: pointer;
-}
-.editor :global(.preset-publication-consent) input {
-  flex: 0 0 20px;
-  width: 20px;
-  min-height: 20px;
-  height: 20px;
-  margin: 2px 0 0;
-  padding: 0;
-}
 .editor button {
   cursor: pointer;
   border-radius: 999px;
@@ -175,7 +159,7 @@
   overflow-wrap: anywhere;
   font-size: 13px;
 }
-.editor dialog {
+.editor .confirmDialog {
   max-width: min(600px, calc(100vw - 32px));
   max-height: 80vh;
   overflow: auto;
@@ -186,10 +170,10 @@
   border-radius: 16px;
   box-shadow: var(--shadow-soft);
 }
-.editor dialog::backdrop {
+.editor .confirmDialog::backdrop {
   background: color-mix(in oklab, var(--ink) 50%, transparent);
 }
-.editor dialog li {
+.editor .confirmDialog li {
   overflow-wrap: anywhere;
   padding: 4px 0;
 }
@@ -651,4 +635,37 @@
   .published {
     padding: 24px 16px 48px;
   }
+}
+
+/* JSON and CSS exports stay available but secondary to Get code. */
+.exportCard :global(.preset-export) > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--muted-foreground);
+}
+.exportCard :global(.preset-export) > summary::-webkit-details-marker {
+  display: none;
+}
+.exportCard :global(.preset-export) > summary::before {
+  content: '▸';
+  font-size: 12px;
+}
+.exportCard :global(.preset-export[open]) > summary::before {
+  content: '▾';
+}
+.exportCard :global(.preset-export) > summary h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.editor .getCode {
+  border: 0;
+  cursor: pointer;
+}
+.editor .getCode:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

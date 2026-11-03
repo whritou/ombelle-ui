@@ -11,6 +11,7 @@ import { openSnapshotStore } from '../../apps/www/src/snapshots/server/sqlite-st
 import { handleSnapshotPublish, handleSnapshotRead } from '../../apps/www/src/snapshots/server/http.js'
 import { createSnapshotService } from '../../apps/www/src/snapshots/server/service.js'
 import type { SnapshotStore } from '../../apps/www/src/snapshots/server/store.js'
+import { publicationQuotas as Q } from '../../apps/www/src/snapshots/server/quotas.js'
 
 let preset: Record<string, unknown>
 const cleanups: (() => Promise<void>)[] = []
@@ -170,7 +171,8 @@ it('maps conflict, payload, minute quota and storage capacity to bounded safe re
   const db = new DatabaseSync(dbPath)
   try { db.exec('UPDATE capacity SET records = 100000') } finally { db.close() }
   await failure(await post(origin), 503, 'SNAPSHOT_CAPACITY_REACHED')
-  await post(origin); await post(origin)
+  // The keyed post, conflict and capacity failure used three attempts.
+  for (let n = 3; n < Q.attemptsPerMinute; n++) await post(origin)
   const limited = await post(origin)
   expect(Number(limited.headers.get('retry-after'))).toBeGreaterThan(0)
   expect(Number(limited.headers.get('retry-after'))).toBeLessThanOrEqual(60)
