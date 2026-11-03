@@ -2,10 +2,16 @@ import postcss from 'postcss'
 import selectorParser from 'postcss-selector-parser'
 import {
   FoundationError,
+  recipeColorModes,
+  recipeColorRoles,
+  recipeColorTokens,
   type Recipe,
+  type RecipeButtonVariant,
+  type RecipeColorRole,
   type ResolvedPreset,
 } from '@ombelle/contracts'
 import { assertGlassContrast, glassTokens } from './glass.js'
+import { normalizeColor } from './resolve.js'
 
 export function validateRecipeDarkSelector(value: string): string {
   if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
@@ -71,6 +77,8 @@ export function compileScopedButtonStyles(input: {
   slot: string
   scopeAttribute: string
   scopeLabel?: 'recipe' | 'component-preset'
+  /** Variant whose tokens `overrides.colors` replaces; defaults to 'default'. */
+  variant?: RecipeButtonVariant
 }): string {
   const dark =
     input.scopeLabel === 'recipe'
@@ -222,6 +230,31 @@ export function compileScopedButtonStyles(input: {
     const mapped = mapping[key]
     if (mapped) overrides[mapped[0]] = value + mapped[1]
   }
+  // Color overrides replace the tokens the selected variant reads, per mode.
+  const variant = input.variant ?? 'default'
+  const colorTokens = recipeColorTokens[variant]
+  const paint: Record<string, string> = {}
+  const colors = input.overrides.colors
+  if (colors) {
+    for (const mode of recipeColorModes) {
+      const target = mode === 'light' ? light : darkTokens
+      for (const role of recipeColorRoles) {
+        const value = colors[mode]?.[role]
+        if (value !== undefined)
+          target[variable(colorTokens[role])] = normalizeColor(value)
+      }
+    }
+    const set = (role: RecipeColorRole) =>
+      colors.light?.[role] !== undefined || colors.dark?.[role] !== undefined
+    // Families paint ghost/link transparent, link text from --primary in some families,
+    // and borders from different tokens; paint the overridden roles from the mapped token.
+    if (set('background') && (variant === 'ghost' || variant === 'link'))
+      paint.background = 'var(' + variable(colorTokens.background) + ')'
+    if (set('foreground') && variant === 'link')
+      paint.color = 'var(' + variable(colorTokens.foreground) + ')'
+    if (set('border'))
+      paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
+  }
   // Complete local tokens stop the host preset from affecting this element in either mode.
   const tokens =
     block(scope, light) +
@@ -232,9 +265,15 @@ export function compileScopedButtonStyles(input: {
       : block(scope + '[data-size]', {
           'min-height': input.overrides.minHeightPx + 'px',
         })
+  // Same specificity as the family's variant rules and emitted after them, so it wins
+  // there while the family's :hover/:active rules (higher specificity) still apply.
+  const painted = Object.keys(paint).length
+    ? block(scope + '[data-variant="' + variant + '"]', paint)
+    : ''
   return (
     tokens +
     root.toString() +
+    painted +
     block(scope, {
       ...overrides,
       'white-space': 'normal',
@@ -258,6 +297,7 @@ export function compileRecipeStyles(input: {
   overrides: Recipe['overrides']
   scope: string
   darkSelector: string
+  variant?: RecipeButtonVariant
 }): string {
   return compileScopedButtonStyles({
     ...input,

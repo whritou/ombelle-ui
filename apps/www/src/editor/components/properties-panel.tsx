@@ -1,6 +1,8 @@
-import type { Recipe, StyleFamily } from '@ombelle/contracts'
+import { useState } from 'react'
+import { RotateCcw } from 'lucide-react'
+import type { Recipe, RecipeColorMode, RecipeColorRole, StyleFamily } from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
-import { draftFamily } from '../model'
+import { draftFamily, RECIPE_COLOR_PATTERN, recipeColor, withRecipeColor } from '../model'
 
 type Props = {
   recipe: Recipe
@@ -20,6 +22,93 @@ const numericFields = [
 
 function FieldError({ diagnostic, path }: { diagnostic: CompileDiagnostic | null; path: string }) {
   return diagnostic?.path === path ? <span className="fieldError" role="alert">{diagnostic.message}</span> : null
+}
+
+const colorRoles: readonly { role: RecipeColorRole; label: string }[] = [
+  { role: 'background', label: 'Background' },
+  { role: 'foreground', label: 'Text' },
+  { role: 'border', label: 'Border' },
+]
+const colorModes: readonly { mode: RecipeColorMode; label: string }[] = [
+  { mode: 'light', label: 'Light' },
+  { mode: 'dark', label: 'Dark' },
+]
+const hexByte = (n: number) => n.toString(16).padStart(2, '0')
+/** Native color inputs only take #rrggbb, so OKLCH values are converted through a canvas for display. */
+function pickerValue(value: string): string {
+  if (/^#[0-9a-f]{6}$/i.test(value)) return value.toLowerCase()
+  if (typeof document === 'undefined' || typeof CSS === 'undefined' || !CSS.supports('color', value)) return '#000000'
+  const context = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
+  if (!context) return '#000000'
+  context.fillStyle = value
+  context.fillRect(0, 0, 1, 1)
+  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
+  return '#' + [r, g, b].map(hexByte).join('')
+}
+
+type ColorProps = Pick<Props, 'recipe' | 'diagnostic' | 'onChange' | 'onDiagnostic'>
+
+function ColorFields({ recipe, diagnostic, onChange, onDiagnostic }: ColorProps) {
+  // Text being typed stays local until it is a complete color, then it becomes a recipe edit.
+  const [typing, setTyping] = useState<Record<string, string>>({})
+  const commit = (mode: RecipeColorMode, role: RecipeColorRole, value: string | undefined) =>
+    onChange(withRecipeColor(recipe, mode, role, value), `overrides.colors.${mode}.${role}`)
+
+  return (
+    <div className="fieldGroup">
+      <h3>Colors</h3>
+      <p className="colorHint">Hex such as #1d4ed8 or OKLCH such as oklch(55% 0.2 260). Empty fields use the preset.</p>
+      {colorRoles.map(({ role, label }) => (
+        <fieldset className="colorRole" key={role}>
+          <legend>{label}</legend>
+          {colorModes.map(({ mode, label: modeLabel }) => {
+            const key = `${mode}-${role}`, path = `/overrides/colors/${mode}/${role}`
+            const { value, overridden } = recipeColor(recipe, mode, role)
+            const text = typing[key] ?? value
+            const name = `${modeLabel} ${label.toLowerCase()}`
+            const invalid = diagnostic?.path === path
+            return (
+              <div className="colorRow" key={mode}>
+                <label htmlFor={`color-${key}`}>{modeLabel}</label>
+                <span className="colorSwatch" style={{ backgroundColor: value }}>
+                  <input type="color" aria-label={`${name} picker`} value={pickerValue(value)}
+                    onChange={(event) => commit(mode, role, event.target.value)} />
+                </span>
+                <input id={`color-${key}`} type="text" className="colorText" aria-label={name} value={text} maxLength={80} spellCheck={false}
+                  data-overridden={overridden || undefined} aria-invalid={invalid || undefined}
+                  aria-describedby={invalid ? `color-${key}-error` : undefined}
+                  onChange={(event) => {
+                    const next = event.target.value.trim()
+                    setTyping({ ...typing, [key]: event.target.value })
+                    if (next === '') commit(mode, role, undefined)
+                    else if (RECIPE_COLOR_PATTERN.test(next)) commit(mode, role, next)
+                    else onDiagnostic(path, 'Enter a hex color such as #1d4ed8 or an OKLCH color such as oklch(55% 0.2 260).')
+                  }}
+                  onBlur={() => {
+                    const rest = { ...typing }
+                    delete rest[key]
+                    setTyping(rest)
+                  }} />
+                <button type="button" className="colorReset" aria-label={`Reset ${name} to preset`} title={`Reset ${name} to preset`}
+                  disabled={!overridden}
+                  onClick={() => {
+                    const rest = { ...typing }
+                    delete rest[key]
+                    setTyping(rest)
+                    commit(mode, role, undefined)
+                    // The button disables itself, so keep focus on the field it reset.
+                    document.getElementById(`color-${key}`)?.focus()
+                  }}>
+                  <RotateCcw aria-hidden="true" size={14} />
+                </button>
+                {invalid && <span id={`color-${key}-error`} className="fieldError colorError" role="alert">{diagnostic.message}</span>}
+              </div>
+            )
+          })}
+        </fieldset>
+      ))}
+    </div>
+  )
 }
 
 export function PropertiesPanel({ recipe, diagnostic, onChange, onFamily, onDiagnostic }: Props) {
@@ -66,6 +155,7 @@ export function PropertiesPanel({ recipe, diagnostic, onChange, onFamily, onDiag
         <div className="checkRow"><label htmlFor="disabled">Disabled</label><input id="disabled" type="checkbox" checked={recipe.props.disabled ?? false} onChange={(event) => changeProp('disabled', event.target.checked)} /></div>
         <div className="checkRow"><label htmlFor="loading">Loading</label><input id="loading" type="checkbox" checked={recipe.props.loading ?? false} onChange={(event) => changeProp('loading', event.target.checked)} /></div>
       </div>
+      <ColorFields recipe={recipe} diagnostic={diagnostic} onChange={onChange} onDiagnostic={onDiagnostic} />
       <div className="fieldGroup">
         <h3>Shape and depth</h3>
         {numericFields.map(({ key, label, min, max, step, unit }) => {
