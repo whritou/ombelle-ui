@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — 3 November 2026
+
+- Fix `theme add`, `init` and `add` rejecting projects created by `shadcn init` with pnpm. The settings-only `pnpm-workspace.yaml` it writes (`packages: []`) in the app root is no longer treated as a workspace. Workspaces that declare packages, and any `pnpm-workspace.yaml` in a parent directory, are still rejected.
+- Fix Tailwind v4 detection for bare major ranges such as `tailwindcss: "^4"`, which shadcn templates declare.
+- Add genuine `shadcn init` Vite and Next.js fixtures and an integration test of the theme-only merge on them.
+
 ## 0.2.1 — 2 November 2026
 
 - Fix the standalone installer doing nothing when run through a package-manager bin symlink. On Linux and macOS, `npx`, `npm exec` and Bun exited 0 without output with `@ombelle-ui/cli@0.2.0`; Windows shims and direct `node dist/main.js` were unaffected.
