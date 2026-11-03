@@ -1,6 +1,22 @@
 @import './generated/preset-gallery/tailwind.css';
 @import './generated/preset-gallery/layout.css';
 
+/* Liquid glass previews over a photo, so the translucency shows. Gallery text
+   outside the glass surfaces gets a halo in the page colour; text on glass is
+   covered by the compiler's contrast bound. */
+html[data-backdrop='photo'] {
+  background: var(--background) url('../../www/public/glass-backdrop.webp') center / cover fixed;
+}
+html[data-backdrop='photo'] body {
+  background: transparent;
+}
+html[data-backdrop='photo'] .preset-gallery :is(h1, h2, header p) {
+  text-shadow:
+    0 0 2px var(--background),
+    0 0 6px var(--background),
+    0 0 14px var(--background);
+}
+
 /* Component pages focus one gallery section; centre it like a docs preview. */
 html[data-focus] .preset-gallery {
   min-height: 100vh;
