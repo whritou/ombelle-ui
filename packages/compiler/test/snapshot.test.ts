@@ -115,7 +115,7 @@ it('accepts the experimental liquid-glass family for publication', async () => {
 })
 it('rejects a liquid-glass preset below the contrast bound like compile does', async () => {
   const glass = structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
-  glass.design = { ...glass.design, glassOpacity: 0.6 }
+  glass.design = { ...glass.design, glassOpacity: 0.3 }
   await expect(normalizePublishedPreset(glass)).rejects.toThrow(
     expect.objectContaining({
       code: 'INVALID_DATA',

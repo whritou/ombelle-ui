@@ -103,8 +103,39 @@ type Sample = {
   textColor: string
   surfaceComputed: string
   surfacePixel: Rgb
-  expectedPixel: Rgb | null
+  /** Per-channel bounds: the surface over the filtered backdrop, without and with the full sheen. */
+  expectedRange: [Rgb, Rgb] | null
   ratio: number
+}
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
+/**
+ * Predicts a glass surface pixel over a uniform backdrop. The computed backdrop-filter gives the
+ * contrast() and brightness() amounts that map the backdrop (saturate() keeps greys), and the
+ * first stop of the sheen gradient gives its strongest white; the sample point sits somewhere
+ * inside the gradient, so the pixel lies between the unsheened and fully sheened composites.
+ */
+async function expectedRange(surface: Locator, backdropRgb: Rgb): Promise<[Rgb, Rgb]> {
+  const { filter, background, image } = await surface.evaluate((el) => {
+    const s = getComputedStyle(el)
+    return { filter: s.backdropFilter, background: s.backgroundColor, image: s.backgroundImage }
+  })
+  const amount = (name: string) => {
+    const m = new RegExp(name + String.raw`\(([\d.]+)(%?)\)`).exec(filter)
+    return m ? Number(m[1]) / (m[2] ? 100 : 1) : 1
+  }
+  const c = amount('contrast'), k = amount('brightness')
+  // The first colour stop, after an optional `to …` or angle direction.
+  const sheenStop = /linear-gradient\((?:(?:to [a-z ]+|[\d.]+deg), )?(rgba?\([^)]*\)|color\(srgb[^)]*\))/.exec(image)
+  const sheen = sheenStop ? parseColor(sheenStop[1]).alpha : 0
+  const bg = parseColor(background)
+  const at = (amountOfSheen: number) =>
+    backdropRgb.map((b, i) => {
+      const filtered = 255 * clamp01(clamp01((c * b) / 255 + (1 - c) / 2) * k)
+      const glass = bg.rgb[i] * bg.alpha + filtered * (1 - bg.alpha)
+      return Math.round(255 * amountOfSheen + glass * (1 - amountOfSheen))
+    }) as Rgb
+  return [at(0), at(sheen)]
 }
 
 async function sampleSlot(
@@ -123,10 +154,7 @@ async function sampleSlot(
   const surfaceComputed = await surface.evaluate((el) => getComputedStyle(el).backgroundColor)
   const fg = parseColor(textColor)
   expect(fg.alpha, `${slot} text colour is opaque`).toBe(1)
-  const bg = parseColor(surfaceComputed)
-  const expectedPixel = backdropRgb
-    ? (bg.rgb.map((c, i) => Math.round(c * bg.alpha + backdropRgb[i] * (1 - bg.alpha))) as Rgb)
-    : null
+  const range = backdropRgb ? await expectedRange(surface, backdropRgb) : null
   return {
     slot,
     backdrop,
@@ -134,7 +162,7 @@ async function sampleSlot(
     textColor,
     surfaceComputed,
     surfacePixel,
-    expectedPixel,
+    expectedRange: range,
     ratio: contrastRatio(fg.rgb, surfacePixel),
   }
 }
@@ -218,10 +246,7 @@ async function sampleSlots(page: Page, id: Backdrop, color: string | null): Prom
   const list = sec.locator('[data-slot="tabs-list"]')
   const tab = await sampleSlot(page, 'tabs trigger (inactive)', label, inactive, inactive, startPadding, null)
   tab.surfaceComputed = await list.evaluate((el) => getComputedStyle(el).backgroundColor)
-  const listBg = parseColor(tab.surfaceComputed)
-  tab.expectedPixel = backdropRgb
-    ? (listBg.rgb.map((c, i) => Math.round(c * listBg.alpha + backdropRgb[i] * (1 - listBg.alpha))) as Rgb)
-    : null
+  tab.expectedRange = backdropRgb ? await expectedRange(list, backdropRgb) : null
   samples.push(tab)
   await restoreIsolation(page)
 
@@ -347,13 +372,15 @@ async function boundedContrast(page: Page, mode: Mode, base: string, target = 'p
   expect(samples).toHaveLength(2 * 9)
   for (const s of samples) {
     expect.soft(s.ratio, `${s.slot} over ${s.backdrop}: ${s.textColor} on pixel ${s.surfacePixel}`).toBeGreaterThanOrEqual(4.5)
-    // Cross-check: the sampled pixel matches computed background alpha-composited over the
-    // painted backdrop, which shows the pixel is the glass surface rather than text or border.
-    if (s.expectedPixel)
-      for (let i = 0; i < 3; i++)
-        expect
-          .soft(Math.abs(s.surfacePixel[i] - s.expectedPixel[i]), `${s.slot} over ${s.backdrop}: pixel ${s.surfacePixel} vs composite ${s.expectedPixel}`)
-          .toBeLessThanOrEqual(3)
+    // Cross-check: the sampled pixel matches the computed background alpha-composited over the
+    // filtered backdrop, which shows the pixel is the glass surface rather than text or border.
+    if (s.expectedRange)
+      for (let i = 0; i < 3; i++) {
+        const [low, high] = [s.expectedRange[0][i], s.expectedRange[1][i]].sort((a, b) => a - b)
+        const label = `${s.slot} over ${s.backdrop}: pixel ${s.surfacePixel} vs composite ${s.expectedRange[0]}..${s.expectedRange[1]}`
+        expect.soft(s.surfacePixel[i], label).toBeGreaterThanOrEqual(low - 3)
+        expect.soft(s.surfacePixel[i], label).toBeLessThanOrEqual(high + 3)
+      }
   }
 }
 
@@ -377,7 +404,7 @@ for (const mode of modes) {
       const nestedButton = nested.getByRole('button', { name: 'Nested action' })
       await expect(nested).toHaveAttribute('data-slot', 'card')
       const card = await nested.evaluate((el) => getComputedStyle(el).backdropFilter)
-      expect(card).toMatch(/blur\(12px\)/)
+      expect(card).toMatch(/blur\(8px\)/)
       expect(await nestedButton.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe('none')
       // The scenario's nested Button is the primary variant, which never filters. Re-tag it with
       // each translucent variant and compare against the same variant outside any card.
@@ -396,7 +423,7 @@ for (const mode of modes) {
           }, variant)
         measured.push({ id, variant, inside, outside })
         expect(inside, `${id} nested ${variant}`).toBe('none')
-        expect(outside, `${id} top-level ${variant}`).toMatch(/blur\(12px\)/)
+        expect(outside, `${id} top-level ${variant}`).toMatch(/blur\(8px\)/)
       }
       await nestedButton.evaluate((el) => (el.dataset.variant = 'default'))
     }
@@ -633,19 +660,19 @@ for (const mode of modes) {
     const readout = page.locator('#glass-contrast-readout')
     await expect(readout).toHaveAttribute('role', 'status')
     for (const action of actions) await expect(action).toBeEnabled()
-    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.87')
+    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.5')
 
-    await page.getByLabel('Glass opacity', { exact: true }).fill('0.6')
-    await expect(readout).toContainText('Contrast bound fails at glass opacity 0.6')
+    await page.getByLabel('Glass opacity', { exact: true }).fill('0.3')
+    await expect(readout).toContainText('Contrast bound fails at glass opacity 0.3')
     for (const action of actions) await expect(action).toBeDisabled()
     await expect(readout.locator('li')).toHaveCount(0)
     const failing = await page.locator('#glass-contrast-pairs li').allInnerTexts()
     expect(failing.length).toBeGreaterThan(0)
     for (const pair of failing)
-      expect(pair).toMatch(/^(light|dark): \S+ on \S+, \d+\.\d{2}:1 over a (black|white) backdrop$/)
+      expect(pair).toMatch(/^(light|dark): \S+ on \S+, \d+\.\d{2}:1 (over the (darkest|brightest) filtered backdrop|on the opaque fallback surface)$/)
 
     await page.getByRole('button', { name: 'Reset glass opacity' }).click()
-    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.87')
+    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.5')
     await ready()
     for (const action of actions) await expect(action).toBeEnabled()
 

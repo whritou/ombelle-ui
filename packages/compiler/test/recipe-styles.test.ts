@@ -206,12 +206,20 @@ it('scoped glass tokens', async () => {
   })
   const light = `[data-slot="recipe-button"][data-ombelle-recipe="${glassScope}"]`
   expect(tokens[light]).toEqual({
-    '--glass-blur': '12px',
-    '--glass-highlight': 'color-mix(in srgb, white 35%, transparent)',
-    '--glass-opacity': '0.87',
+    '--glass-blur': '8px',
+    '--glass-brightness': '1.4',
+    '--glass-contrast': '0.45',
+    '--glass-highlight': 'color-mix(in srgb, white 60%, transparent)',
+    '--glass-nested-opacity': '0.7',
+    '--glass-opacity': '0.5',
+    '--glass-saturation': '2',
+    '--glass-sheen': '0.25',
   })
   expect(tokens[`.night ${light},.night${light}`]).toEqual({
-    '--glass-highlight': 'color-mix(in srgb, white 12%, transparent)',
+    '--glass-brightness': '0.6',
+    '--glass-highlight': 'color-mix(in srgb, white 20%, transparent)',
+    '--glass-nested-opacity': '0.79',
+    '--glass-sheen': '0.0625',
   })
 })
 it('scoped glass tokens go opaque when transparency is reduced', async () => {
@@ -287,7 +295,7 @@ it('accepts the exact glass @supports condition across whitespace', async () => 
 it('rejects glass presets that fail the contrast bound', async () => {
   const { catalog, preset } = await glassPreset()
   const failing = structuredClone(preset)
-  failing.data.design.glassOpacity = 0.6
+  failing.data.design.glassOpacity = 0.3
   expect(() =>
     compileRecipeStyles({
       familyCss: catalog.styles['liquid-glass'],
@@ -318,6 +326,6 @@ it('builtin-liquid-glass recipe compiles', async () => {
   const style = result.artifacts.find((a) => a.kind === 'style')!.content
   expect(result.preset.data.styleFamily).toBe('liquid-glass')
   expect(style).toContain('@supports')
-  expect(style).toContain('--glass-opacity: 0.87')
+  expect(style).toContain('--glass-opacity: 0.5')
   expect(style).not.toContain('data-slot="button"')
 })

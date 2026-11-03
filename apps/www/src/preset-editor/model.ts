@@ -46,8 +46,13 @@ export const designControls = {
 // Liquid glass only: these render, validate and materialize for glass drafts.
 export const glassDesignControls = {
   transparency: { label: 'Transparency', options: ['auto', 'reduced'] },
-  glassBlurPx: { label: 'Glass blur', min: 0, max: 24, step: 1, unit: ' px' },
-  glassOpacity: { label: 'Glass opacity', min: 0.6, max: 1, step: 0.01, unit: '' },
+  glassBlurPx: { label: 'Glass blur', min: 0, max: 40, step: 1, unit: ' px' },
+  glassOpacity: { label: 'Glass opacity', min: 0.25, max: 1, step: 0.01, unit: '' },
+  glassSaturation: { label: 'Glass saturation', min: 1, max: 2, step: 0.05, unit: '' },
+  glassBackdropContrast: { label: 'Backdrop contrast', min: 0.3, max: 1, step: 0.01, unit: '' },
+  glassBackdropTone: { label: 'Backdrop tone', min: 0, max: 0.6, step: 0.01, unit: '' },
+  glassSheen: { label: 'Specular sheen', min: 0, max: 0.5, step: 0.01, unit: '' },
+  glassRim: { label: 'Rim light', min: 0, max: 1, step: 0.01, unit: '' },
 } as const
 export type PresetEditablePath =
   | `/modes/${'light' | 'dark'}/${(typeof colorKeys)[number]}`

@@ -8,7 +8,7 @@
   transition: background-color var(--motion-duration), border-color var(--motion-duration), color var(--motion-duration);
   box-shadow: none;
 }
-[data-slot="button"] { background: var(--primary); color: var(--primary-foreground); border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); box-shadow: inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)); font-weight: 500; cursor: pointer; white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
+[data-slot="button"] { background: var(--primary); color: var(--primary-foreground); border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); box-shadow: inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), inset 0 -1px 2px rgb(0 0 0 / 0.08); font-weight: 500; cursor: pointer; white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
 [data-slot="button"]:not(:disabled):hover { background: color-mix(in srgb, var(--primary) 90%, black); }
 [data-slot="button"]:not(:disabled):active { background: color-mix(in srgb, var(--primary) 80%, black); }
 [data-slot="button"][data-variant="secondary"] { background: var(--secondary); color: var(--secondary-foreground); }
@@ -35,7 +35,8 @@
 [data-slot="button"]:disabled, [data-slot="input"]:disabled { opacity: 0.5; cursor: not-allowed; }
 [data-slot="button"]:focus-visible, [data-slot="input"]:focus-visible, [data-slot="dialog-close"]:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
 [data-slot="dialog-overlay"] { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.45); }
-[data-slot="dialog-content"] { --glass-inner-filter: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; width: min(28rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 2rem; padding-inline-end: calc(var(--control-height) + 1.5rem); border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); border-radius: calc(var(--radius) * 1.5); background: var(--popover); color: var(--popover-foreground); font-family: var(--font-family); box-shadow: inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), 0 1.5rem 3rem -1rem rgb(0 0 0 / 0.35); }
+[data-slot="dialog-content"] { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; width: min(28rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 2rem; padding-inline-end: calc(var(--control-height) + 1.5rem); border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); border-radius: calc(var(--radius) * 1.5); background: var(--popover); color: var(--popover-foreground); font-family: var(--font-family); box-shadow: inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), inset -1px -1px 0 color-mix(in srgb, var(--glass-highlight, white) 60%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--glass-highlight, white) 40%, transparent), inset 0 -1px 2px rgb(0 0 0 / 0.08), 0 1.5rem 3rem -1rem rgb(0 0 0 / 0.35); }
+[data-slot="dialog-content"] * { --glass-inner-filter: none; --glass-inner-opacity: var(--glass-nested-opacity); }
 [data-slot="dialog-close"] {
   position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem;
   display: inline-flex; align-items: center; justify-content: center;
@@ -47,19 +48,19 @@
 [data-slot="dialog-close"] svg { inline-size: 1rem; block-size: 1rem; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot="button"][data-variant="secondary"] {
-    background: color-mix(in srgb, var(--secondary) calc(var(--glass-opacity) * 100%), transparent);
-    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(140%));
-    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(140%));
+    background: linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, var(--secondary) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   [data-slot="button"][data-variant="outline"], [data-slot="button"][data-variant="ghost"] {
-    background: color-mix(in srgb, var(--background) calc(var(--glass-opacity) * 100%), transparent);
-    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(140%));
-    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(140%));
+    background: linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   [data-slot="dialog-content"] {
-    background: color-mix(in srgb, var(--popover) calc(var(--glass-opacity) * 100%), transparent);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    background: linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, var(--popover) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   @media (prefers-reduced-transparency: reduce) {
     [data-slot="button"][data-variant="secondary"] { background: var(--secondary); -webkit-backdrop-filter: none; backdrop-filter: none; }

@@ -118,11 +118,36 @@ export const presetSchema = {
         "glassBlurPx": {
           "type": "number",
           "minimum": 0,
-          "maximum": 24
+          "maximum": 40
         },
         "glassOpacity": {
           "type": "number",
-          "minimum": 0.6,
+          "minimum": 0.25,
+          "maximum": 1
+        },
+        "glassSaturation": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 2
+        },
+        "glassBackdropContrast": {
+          "type": "number",
+          "minimum": 0.3,
+          "maximum": 1
+        },
+        "glassBackdropTone": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.6
+        },
+        "glassSheen": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "glassRim": {
+          "type": "number",
+          "minimum": 0,
           "maximum": 1
         }
       }
