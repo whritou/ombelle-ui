@@ -5,5 +5,13 @@ export * from './validate.js'
 export * from './recipe.js'
 export * from './snapshot.js'
 export * from './recipe-snapshot.js'
-export { supportedStyleFamilies, isStyleFamily } from './style-families.js'
+export {
+  supportedStyleFamilies,
+  styleFamilies,
+  isStyleFamily,
+  isStableStyleFamily,
+  styleSupport,
+} from './style-families.js'
+export { componentsWithStyleSupport, assertStyleAvailable } from './style-support.js'
+export type { StableStyleFamily, StyleSupport } from './style-families.js'
 export * from './distribution.js'

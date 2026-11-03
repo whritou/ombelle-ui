@@ -1,7 +1,7 @@
 import { canonicalize, compile, sha256 } from '@ombelle/compiler'
 import {
   supportedComponentIds,
-  isStyleFamily,
+  isStableStyleFamily,
   type CompileResult,
 } from '@ombelle/contracts'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
@@ -76,7 +76,7 @@ export async function verifyPresetRender(
       !record(result) ||
       !record(result.preset) ||
       !record(result.preset.data) ||
-      !isStyleFamily(result.preset.data.styleFamily) ||
+      !isStableStyleFamily(result.preset.data.styleFamily) ||
       result.preset.data.catalogRelease !== '0.1.0' ||
       result.preset.data.compilerVersion !== '0.1.0' ||
       !Array.isArray(result.artifacts)

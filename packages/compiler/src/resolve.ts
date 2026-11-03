@@ -1,6 +1,7 @@
 import {
   validatePreset,
   FoundationError,
+  type Preset,
   type StyleFamily,
   type ResolvedPreset,
 } from '@ombelle/contracts'
@@ -34,7 +35,7 @@ export async function resolvePreset(
       'Preset release mismatch',
       '/catalogRelease',
     )
-  const base = catalog.presets[p.styleFamily as StyleFamily]
+  const base = (catalog.presets as Partial<Record<StyleFamily, Preset>>)[p.styleFamily]
   if (!base)
     throw new FoundationError(
       'INVALID_DATA',

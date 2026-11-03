@@ -3,7 +3,7 @@ import {
   validatePreset,
   type ComponentId,
   type Preset,
-  type StyleFamily,
+  type StableStyleFamily,
   supportedStyleFamilies,
   supportedComponentIds,
 } from '@ombelle/contracts'
@@ -16,13 +16,13 @@ export type ComponentTemplate = {
   logicalPath: string
   dependencies: { name: string; version: string }[]
   slots: string[]
-  styles?: Record<StyleFamily, string>
+  styles?: Record<StableStyleFamily, string>
 }
 export type Catalog = {
   release: string
-  presets: Record<StyleFamily, Preset>
+  presets: Record<StableStyleFamily, Preset>
   templates: Record<ComponentId, ComponentTemplate>
-  styles: Record<StyleFamily, string>
+  styles: Record<StableStyleFamily, string>
   utility: string
 }
 const baseDependencies: readonly string[] = [
@@ -106,7 +106,7 @@ export function getCatalog(release: string): Catalog {
         family,
         validatePreset(catalogData.presets[family]),
       ]),
-    ) as Record<StyleFamily, Preset>,
+    ) as Record<StableStyleFamily, Preset>,
     templates,
     styles: { ...catalogData.styles },
     utility: catalogData.utility,

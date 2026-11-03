@@ -4,7 +4,7 @@ import {
   type CompileResult,
   type Artifact,
   type ThemeData,
-  isStyleFamily,
+  supportedStyleFamilies,
 } from '@ombelle/contracts'
 import { getCatalog, getTemplate } from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
@@ -29,8 +29,8 @@ export async function compile(input: {
     )
   const catalog = getCatalog(input.catalogRelease),
     preset = await resolvePreset(input.preset, catalog)
-  const family = preset.data.styleFamily
-  if (!isStyleFamily(family))
+  const family = supportedStyleFamilies.find(f => f === preset.data.styleFamily)
+  if (!family)
     throw new FoundationError(
       'INVALID_DATA',
       'Style family is not available in the foundation',

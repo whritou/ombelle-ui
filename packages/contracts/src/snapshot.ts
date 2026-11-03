@@ -4,7 +4,7 @@ import { FoundationError } from './diagnostics.js'
 import { presetSchema } from './preset-schema.js'
 import { presetSnapshotSchema } from './preset-snapshot-schema.js'
 import { snapshotSourceSchema } from './snapshot-source-schema.js'
-import { isStyleFamily } from './style-families.js'
+import { isStableStyleFamily } from './style-families.js'
 import { validatePreset } from './validate.js'
 
 export type SnapshotReference = { id: string; revision: 1 }
@@ -72,7 +72,7 @@ export function validatePresetSnapshot(input: unknown): PresetSnapshot {
         'Snapshot and preset releases must match',
         '/preset/' + field,
       )
-  if (!isStyleFamily(snapshot.preset.styleFamily))
+  if (!isStableStyleFamily(snapshot.preset.styleFamily))
     throw new FoundationError(
       'INVALID_DATA',
       'Style family is not available in the foundation',

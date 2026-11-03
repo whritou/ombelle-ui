@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { supportedStyleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { supportedStyleFamilies, type StableStyleFamily } from '@ombelle/contracts'
 import {
   createPresetDraft,
   setPresetEdit,
@@ -102,7 +102,7 @@ export default function PresetEditor() {
     returnFocus.current = document.activeElement as HTMLElement
     setConfirmation({ ...change, label })
   }
-  function family(family: StyleFamily) {
+  function family(family: StableStyleFamily) {
     const change = planPresetFamilyChange(draft, family)
     if (change.changes.length) confirm(change, 'Change style family?')
     else commit(change.draft, 'family')
@@ -122,7 +122,7 @@ export default function PresetEditor() {
         <select
           id="preset-family"
           value={draft.family}
-          onChange={(e) => family(e.target.value as StyleFamily)}
+          onChange={(e) => family(e.target.value as StableStyleFamily)}
         >
           {supportedStyleFamilies.map((family) => (
             <option key={family} value={family}>

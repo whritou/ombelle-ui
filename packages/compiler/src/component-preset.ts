@@ -1,6 +1,6 @@
 import {
   FoundationError,
-  isStyleFamily,
+  isStableStyleFamily,
   validatePreset,
   type Artifact,
   type ComponentPresetCompileResult,
@@ -37,7 +37,7 @@ export async function compileButtonPreset(input: {
     canonicalize({ presetHash: preset.hash, ...provenance }),
   )
   const template = getTemplate(catalog, 'button')
-  if (!isStyleFamily(preset.data.styleFamily))
+  if (!isStableStyleFamily(preset.data.styleFamily))
     throw new FoundationError(
       'INVALID_DATA',
       'Style family is not available in the foundation',

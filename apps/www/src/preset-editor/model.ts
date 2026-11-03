@@ -1,10 +1,10 @@
 import { getCatalog } from '@ombelle/catalog'
 import {
   FoundationError,
-  isStyleFamily,
+  isStableStyleFamily,
   validatePreset,
   type Preset,
-  type StyleFamily,
+  type StableStyleFamily,
 } from '@ombelle/contracts'
 
 export const colorKeys = [
@@ -53,7 +53,7 @@ export const editablePaths: PresetEditablePath[] = [
 ]
 export type PresetEditorDraft = {
   storageVersion: 1
-  family: StyleFamily
+  family: StableStyleFamily
   identity: { id: string; name: string; revision: string }
   edits: Partial<Record<PresetEditablePath, string>>
 }
@@ -80,7 +80,7 @@ export function validateDraftEnvelope(input: unknown): PresetEditorDraft {
     !record(input) ||
     !exact(input, ['storageVersion', 'family', 'identity', 'edits']) ||
     input.storageVersion !== 1 ||
-    !isStyleFamily(input.family)
+    !isStableStyleFamily(input.family)
   )
     fail('/')
   if (
@@ -108,7 +108,7 @@ export function validateDraftEnvelope(input: unknown): PresetEditorDraft {
   return structuredClone(input) as PresetEditorDraft
 }
 
-export function createPresetDraft(family: StyleFamily): PresetEditorDraft {
+export function createPresetDraft(family: StableStyleFamily): PresetEditorDraft {
   return validateDraftEnvelope({
     storageVersion: 1,
     family,
@@ -203,7 +203,7 @@ export function resetPresetTokens(draft: PresetEditorDraft): PresetEditorDraft {
 }
 export function planPresetFamilyChange(
   input: PresetEditorDraft,
-  family: StyleFamily,
+  family: StableStyleFamily,
 ): FamilyChange {
   const before = validateDraftEnvelope(input),
     draft = validateDraftEnvelope({ ...before, family })

@@ -1,11 +1,11 @@
-import type { Recipe, StyleFamily } from '@ombelle/contracts'
+import type { Recipe, StableStyleFamily } from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
 
 type Props = {
   recipe: Recipe
   diagnostic: CompileDiagnostic | null
   onChange: (recipe: Recipe, key: string) => void
-  onFamily: (family: StyleFamily) => void
+  onFamily: (family: StableStyleFamily) => void
   onDiagnostic: (path: string, message: string) => void
 }
 
@@ -22,7 +22,7 @@ function FieldError({ diagnostic, path }: { diagnostic: CompileDiagnostic | null
 }
 
 export function PropertiesPanel({ recipe, diagnostic, onChange, onFamily, onDiagnostic }: Props) {
-  const family = recipe.presetRef.id.replace(/^builtin-/, '') as StyleFamily
+  const family = recipe.presetRef.id.replace(/^builtin-/, '') as StableStyleFamily
   const changeProp = (key: keyof Recipe['props'], value: string | boolean) =>
     onChange({ ...recipe, props: { ...recipe.props, [key]: value } }, `props.${key}`)
   const changeOverride = (key: keyof Recipe['overrides'], value: number) =>
@@ -34,7 +34,7 @@ export function PropertiesPanel({ recipe, diagnostic, onChange, onFamily, onDiag
       <div className="fieldGroup">
         <h3>Foundation</h3>
         <label htmlFor="family">Style family</label>
-        <select id="family" value={family} onChange={(event) => onFamily(event.target.value as StyleFamily)}>
+        <select id="family" value={family} onChange={(event) => onFamily(event.target.value as StableStyleFamily)}>
           <option value="flat">Flat</option><option value="minimalist">Minimalist</option>
           <option value="neo-brutalism">Neo brutalism</option>
         </select>

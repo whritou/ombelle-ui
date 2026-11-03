@@ -8,8 +8,12 @@ const build=(preset:unknown,componentIds:('button'|'dialog'|'input')[]=['button'
 it('registers the exact implemented families',()=>{
  expect(supportedStyleFamilies).toEqual(['flat','minimalist','neo-brutalism'])
  expect(isStyleFamily('minimalist')).toBe(true)
- for(const id of ['liquid-glass','constructor','__proto__'])expect(isStyleFamily(id)).toBe(false)
+ expect(isStyleFamily('liquid-glass')).toBe(true)
+ for(const id of ['constructor','__proto__'])expect(isStyleFamily(id)).toBe(false)
  expect(getCatalog('0.1.0').presets.minimalist).toMatchObject({id:'builtin-minimalist',revision:1,styleFamily:'minimalist',design:{radiusRem:0.375,borderWidthPx:1}})
+})
+it('refuses a liquid-glass preset until glass catalog data exists',async()=>{
+ await expect(build({...getCatalog('0.1.0').presets.flat,styleFamily:'liquid-glass'})).rejects.toMatchObject({code:'INVALID_DATA',path:'/styleFamily',message:'Style family is not available in the foundation'})
 })
 it('compiles minimalist deterministically',async()=>{
  const preset=getCatalog('0.1.0').presets.minimalist

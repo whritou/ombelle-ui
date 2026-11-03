@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
+import { FoundationError, validateRecipe, type Recipe, type StableStyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
 import { changeDraftFamily, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
@@ -99,7 +99,7 @@ export function ButtonEditor() {
     }
   }
 
-  function chooseFamily(family: StyleFamily) {
+  function chooseFamily(family: StableStyleFamily) {
     try { edit(changeDraftFamily(draft, family).recipe, 'family') }
     catch (error) { setDiagnostic({ code: 'INVALID_PRESET', message: error instanceof Error ? error.message : 'Unsupported preset.', path: '/presetRef' }) }
   }

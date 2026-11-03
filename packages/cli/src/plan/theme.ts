@@ -53,6 +53,7 @@ export async function planTheme(
     managedDeclarations: [],
     dependencyPlan: [],
     diagnostics: [],
+    notices: [],
     networkAccess: false,
   }
   const lock = baseLock(context, result),

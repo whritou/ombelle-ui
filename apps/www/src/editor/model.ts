@@ -1,5 +1,5 @@
 import { getCatalog, resolveRecipePreset } from '@ombelle/catalog'
-import { validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
+import { validateRecipe, type Recipe, type StableStyleFamily } from '@ombelle/contracts'
 
 export type EditorDraft = { storageVersion: 1; recipe: Recipe }
 
@@ -10,7 +10,7 @@ export type EditorView = {
   forcedState: 'none' | 'focus' | 'hover'
 }
 
-function presetRefFor(family: StyleFamily): Recipe['presetRef'] {
+function presetRefFor(family: StableStyleFamily): Recipe['presetRef'] {
   const preset = getCatalog('0.1.0').presets[family]
   return {
     id: preset.id,
@@ -20,7 +20,7 @@ function presetRefFor(family: StyleFamily): Recipe['presetRef'] {
   }
 }
 
-export function createEditorDraft(family: StyleFamily): EditorDraft {
+export function createEditorDraft(family: StableStyleFamily): EditorDraft {
   return {
     storageVersion: 1,
     recipe: validateRecipe({
@@ -44,6 +44,6 @@ export function updateDraftRecipe(draft: EditorDraft, recipe: unknown): EditorDr
   return { storageVersion: draft.storageVersion, recipe: validated }
 }
 
-export function changeDraftFamily(draft: EditorDraft, family: StyleFamily): EditorDraft {
+export function changeDraftFamily(draft: EditorDraft, family: StableStyleFamily): EditorDraft {
   return updateDraftRecipe(draft, { ...draft.recipe, presetRef: presetRefFor(family) })
 }
