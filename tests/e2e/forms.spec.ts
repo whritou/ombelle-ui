@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import path from 'node:path'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
@@ -90,7 +91,7 @@ async function textContrast(locator: Locator) {
 for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'])
     for (const app of ['preview', 'vite', 'next', 'npm-vite', 'npm-next'])
-      test(`Forms ${family}/${mode}/${app}: source and DOM parity, control states, forced colors and reflow`, async ({
+      test(`Forms ${family}/${mode}/${app}: source and DOM parity, control states, accessibility, forced colors and reflow`, async ({
         page,
       }) => {
         const query = '?forms=1&mode=' + mode
@@ -341,6 +342,10 @@ for (const family of supportedStyleFamilies)
         for (const sample of Object.values(contrast))
           expect(sample.ratio).toBeGreaterThanOrEqual(4.5)
 
+        // Every Label, Input state, Textarea and Native Select passes axe.
+        const axe = await new AxeBuilder({ page }).analyze()
+        expect(axe.violations).toEqual([])
+
         // Forced colors: invalid borders become double and shadows are removed.
         await page.emulateMedia({ forcedColors: 'active' })
         for (const id of invalid)
@@ -386,6 +391,7 @@ for (const family of supportedStyleFamilies)
                 focusRing: inputRing,
                 destructive,
                 contrast,
+                axeViolations: axe.violations,
                 iconPosition: { ltr, rtl },
                 checks: {
                   sourceParity: true,
@@ -400,6 +406,7 @@ for (const family of supportedStyleFamilies)
                   forcedColors: true,
                   reflow320: true,
                   contrast: true,
+                  axe: true,
                   queryGate: true,
                 },
               },
