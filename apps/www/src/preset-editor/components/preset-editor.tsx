@@ -53,6 +53,9 @@ export default function PresetEditor() {
   >(null)
   const dialog = useRef<HTMLDialogElement>(null),
     returnFocus = useRef<HTMLElement | null>(null)
+  const undoButton = useRef<HTMLButtonElement>(null),
+    redoButton = useRef<HTMLButtonElement>(null),
+    focusAfterHistory = useRef<HTMLButtonElement | null>(null)
   const [contrast, setContrast] = useState<TokenContrast[]>([])
   const draft = history.present,
     compiled = usePresetCompiler(draft)
@@ -83,6 +86,10 @@ export default function PresetEditor() {
         measurePresetContrast(compiled.result.preset.data, browserColor),
       )
   }, [compiled.result])
+  useEffect(() => {
+    focusAfterHistory.current?.focus()
+    focusAfterHistory.current = null
+  }, [history])
   useEffect(() => {
     if (confirmation) dialog.current?.showModal()
     else if (dialog.current?.open) dialog.current.close()
@@ -131,16 +138,27 @@ export default function PresetEditor() {
           ))}
         </select>
         <button
+          ref={undoButton}
           type="button"
           disabled={!history.past.length}
-          onClick={() => setHistory(undoPreset)}
+          onClick={() => {
+            // The last undo disables this button; move focus to Redo instead of the page.
+            if (history.past.length === 1)
+              focusAfterHistory.current = redoButton.current
+            setHistory(undoPreset)
+          }}
         >
           Undo
         </button>
         <button
+          ref={redoButton}
           type="button"
           disabled={!history.future.length}
-          onClick={() => setHistory(redoPreset)}
+          onClick={() => {
+            if (history.future.length === 1)
+              focusAfterHistory.current = undoButton.current
+            setHistory(redoPreset)
+          }}
         >
           Redo
         </button>
