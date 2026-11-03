@@ -329,3 +329,117 @@ it('builtin-liquid-glass recipe compiles', async () => {
   expect(style).toContain('--glass-opacity: 0.5')
   expect(style).not.toContain('data-slot="button"')
 })
+const colorScope = 'c'.repeat(64)
+const colorSelector = `[data-slot="recipe-button"][data-ombelle-recipe="${colorScope}"]`
+async function colorCss(
+  family: 'flat' | 'minimalist' | 'neo-brutalism' | 'liquid-glass',
+  variant: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive',
+  colors: NonNullable<Parameters<typeof compileRecipeStyles>[0]['overrides']['colors']>,
+) {
+  const catalog = getCatalog('0.1.0')
+  const preset = (
+    await compile({
+      preset: catalog.presets[family],
+      componentIds: [],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+  ).preset
+  const css = compileRecipeStyles({
+    familyCss: catalog.styles[family],
+    preset,
+    overrides: { colors },
+    scope: colorScope,
+    darkSelector: '.dark',
+    variant,
+  })
+  // Declarations of the first (token block) or last top-level rule with this exact selector.
+  const decls = (selector: string, which: 'first' | 'last' = 'first') => {
+    let out: Record<string, string> | undefined
+    postcss.parse(css).walkRules((rule) => {
+      if (rule.selector !== selector || rule.parent?.type !== 'root') return
+      if (out && which === 'first') return
+      out = {}
+      rule.walkDecls((d) => {
+        out![d.prop] = d.value
+      })
+    })
+    return out ?? {}
+  }
+  return {
+    css,
+    light: decls(colorSelector),
+    dark: decls(`.dark ${colorSelector},.dark${colorSelector}`),
+    paint: decls(`${colorSelector}[data-variant="${variant}"]`, 'last'),
+  }
+}
+it.each([
+  ['default', '--primary', '--primary-foreground'],
+  ['secondary', '--secondary', '--secondary-foreground'],
+  ['destructive', '--destructive', '--destructive-foreground'],
+  ['outline', '--background', '--foreground'],
+  ['ghost', '--background', '--foreground'],
+  ['link', '--background', '--foreground'],
+] as const)(
+  'maps %s color overrides to %s and %s in both modes',
+  async (variant, background, foreground) => {
+    const { light, dark } = await colorCss('flat', variant, {
+      light: { background: '#AABBCC', foreground: '#112233', border: '#445566' },
+      dark: { background: 'oklch(40% 0.1 200)', foreground: '#ddeeff' },
+    })
+    expect(light[background]).toBe('#aabbcc')
+    expect(light[foreground]).toBe('#112233')
+    expect(light['--border']).toBe('#445566')
+    expect(dark[background]).toBe('oklch(0.4 0.1 200)')
+    expect(dark[foreground]).toBe('#ddeeff')
+    // An omitted dark border keeps the preset token.
+    expect(dark['--border']).toBe(getCatalog('0.1.0').presets.flat.modes.dark.border!.toLowerCase())
+  },
+)
+it('paints only the overridden roles that families do not read from the mapped token', async () => {
+  const def = await colorCss('minimalist', 'default', { light: { background: '#ff0000' } })
+  expect(def.paint).toEqual({})
+  expect(def.css).not.toContain('[data-variant="default"]{')
+  const border = await colorCss('minimalist', 'default', { dark: { border: '#00ff00' } })
+  expect(border.paint).toEqual({ 'border-color': 'var(--border)' })
+  const ghost = await colorCss('flat', 'ghost', { light: { background: '#ff0000' } })
+  expect(ghost.paint).toEqual({ background: 'var(--background)' })
+  const link = await colorCss('liquid-glass', 'link', {
+    dark: { background: '#ff0000', foreground: '#00ff00' },
+  })
+  expect(link.paint).toEqual({ background: 'var(--background)', color: 'var(--foreground)' })
+  // The paint rule follows the family rules so it wins at equal specificity.
+  expect(link.css.indexOf(`${colorSelector}[data-variant="link"]{background:var`)).toBe(
+    link.css.lastIndexOf(`${colorSelector}[data-variant="link"]{`),
+  )
+})
+it('keeps color override output deterministic and unchanged without colors', async () => {
+  const a = await colorCss('neo-brutalism', 'secondary', {
+    dark: { foreground: '#ABCDEF', background: '#123456' },
+    light: { border: 'oklch(0.5 0.1 20)' },
+  })
+  const b = await colorCss('neo-brutalism', 'secondary', {
+    light: { border: 'oklch(50% 0.1 20)' },
+    dark: { background: '#123456', foreground: '#abcdef' },
+  })
+  expect(a.css).toBe(b.css)
+  const none = await colorCss('neo-brutalism', 'secondary', {})
+  const catalog = getCatalog('0.1.0')
+  const preset = (
+    await compile({
+      preset: catalog.presets['neo-brutalism'],
+      componentIds: [],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+  ).preset
+  expect(none.css).toBe(
+    compileRecipeStyles({
+      familyCss: catalog.styles['neo-brutalism'],
+      preset,
+      overrides: {},
+      scope: colorScope,
+      darkSelector: '.dark',
+    }),
+  )
+})

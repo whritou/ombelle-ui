@@ -9,6 +9,7 @@ import { startSnapshotService } from '../helpers/snapshot-service.js'
 import { openSnapshotStore } from '../../apps/www/src/snapshots/server/sqlite-store.js'
 import { handleRecipeSnapshotRead } from '../../apps/www/src/snapshots/server/recipe-http.js'
 import type { RecipeSnapshotService } from '../../apps/www/src/snapshots/server/recipe-service.js'
+import { publicationQuotas as Q } from '../../apps/www/src/snapshots/server/quotas.js'
 
 const cleanups: Array<() => Promise<void>> = []
 afterEach(async () => { vi.useRealTimers(); vi.unstubAllEnvs(); for (const close of cleanups.splice(0)) await close() })
@@ -101,7 +102,7 @@ it('enforces bounded bodies, depth, and the shared minute attempt budget', async
   let deep: unknown = {}
   for (let n = 0; n < 17; n++) deep = { child: deep }
   await failure(await post(origin, deep), 400, 'INVALID_DATA')
-  for (let n = 0; n < 5; n++) await post(origin)
+  for (let n = 0; n < Q.attemptsPerMinute; n++) await post(origin)
   const limited = await post(origin)
   expect(Number(limited.headers.get('retry-after'))).toBeGreaterThan(0)
   await failure(limited, 429, 'RATE_LIMITED')

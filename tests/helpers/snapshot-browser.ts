@@ -26,14 +26,11 @@ export async function publishEditorPreset(page: Page, family: StableStyleFamily 
   }, draft)
   await page.goto(editorUrl)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', { timeout: 30000 })
-  await page.getByRole('button', { name: 'Publish preset…', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'Publish public snapshot', exact: true })).toBeDisabled()
-  await page.getByLabel('I understand this preset will be public and retained as described above.').check()
   const response = page.waitForResponse((r) => r.url().endsWith('/api/v1/presets') && r.request().method() === 'POST')
-  await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
+  await page.getByRole('button', { name: 'Get code', exact: true }).click()
   const published = await response
   expect(published.status()).toBe(201)
-  const snapshotLink = page.getByRole('link', { name: /ps_[a-f0-9]{32}@1/ }).first()
+  const snapshotLink = page.getByRole('dialog', { name: 'Get code' }).getByRole('link', { name: /ps_[a-f0-9]{32}@1/ })
   const href = await snapshotLink.getAttribute('href')
   const match = href && /^\/presets\/(ps_[a-f0-9]{32})\/1$/.exec(href)
   expect(match).not.toBeNull()
@@ -42,6 +39,8 @@ export async function publishEditorPreset(page: Page, family: StableStyleFamily 
   const snapshot = await lookup.json() as PresetSnapshot
   const idempotencyKey = published.request().headers()['idempotency-key']
   await expect(snapshotLink).toHaveText(`${snapshot.id}@1`)
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Get code' })).toHaveCount(0)
   return { snapshot, source: { origin: 'http://127.0.0.1:3000', reference: `${snapshot.id}@1`, presetHash: snapshot.presetHash }, idempotencyKey }
 }
 

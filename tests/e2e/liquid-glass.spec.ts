@@ -654,7 +654,9 @@ for (const mode of modes) {
     await page.getByLabel('Preview mode', { exact: true }).selectOption(mode)
     await ready()
 
-    const actions = ['Download preset JSON', 'Copy export', 'Publish preset…'].map((name) =>
+    const exportPanel = page.locator('details.preset-export')
+    if ((await exportPanel.getAttribute('open')) === null) await exportPanel.locator(':scope > summary').click()
+    const actions = ['Download preset JSON', 'Copy export', 'Get code'].map((name) =>
       page.getByRole('button', { name, exact: true }),
     )
     const readout = page.locator('#glass-contrast-readout')

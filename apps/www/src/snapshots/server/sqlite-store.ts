@@ -10,6 +10,7 @@ import {
 } from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
 import { SnapshotServiceError } from './errors'
+import { publicationQuotas } from './quotas'
 import type { PublishSnapshotInput, PublishRecipeSnapshotInput, SnapshotStore, WithdrawalReason } from './store'
 
 const schemaVersion = 2
@@ -243,7 +244,7 @@ export class SqliteSnapshotStore implements SnapshotStore {
   consumeAttempt(clientKey: string, now: number): void {
     this.transaction(() => {
       this.cleanup(now)
-      this.assertQuota('attempt', clientKey, now, minuteMs, 5)
+      this.assertQuota('attempt', clientKey, now, minuteMs, publicationQuotas.attemptsPerMinute)
       this.increment('attempt', clientKey, now, minuteMs)
     })
   }
@@ -273,8 +274,8 @@ export class SqliteSnapshotStore implements SnapshotStore {
         return { snapshot, replayed: true }
       }
       this.cleanup(input.now)
-      this.assertQuota('client', input.clientKey, input.now, dayMs, 20)
-      this.assertQuota('global', '', input.now, dayMs, 1000)
+      this.assertQuota('client', input.clientKey, input.now, dayMs, publicationQuotas.clientPerDay)
+      this.assertQuota('global', '', input.now, dayMs, publicationQuotas.globalPerDay)
       for (let attempt = 0; attempt < 3; attempt++) {
         const id = this.randomId()
         if (this.db.prepare('SELECT 1 FROM snapshots WHERE id = ?').get(id)) continue
@@ -345,8 +346,8 @@ export class SqliteSnapshotStore implements SnapshotStore {
         return { snapshot, replayed: true }
       }
       this.cleanup(input.now)
-      this.assertQuota('client', input.clientKey, input.now, dayMs, 20)
-      this.assertQuota('global', '', input.now, dayMs, 1000)
+      this.assertQuota('client', input.clientKey, input.now, dayMs, publicationQuotas.clientPerDay)
+      this.assertQuota('global', '', input.now, dayMs, publicationQuotas.globalPerDay)
       for (let attempt = 0; attempt < 3; attempt++) {
         const id = this.randomRecipeId()
         if (this.db.prepare('SELECT 1 FROM recipe_snapshots WHERE id = ?').get(id)) continue

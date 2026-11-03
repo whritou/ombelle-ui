@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -78,90 +78,103 @@ test('installs a scoped published Button into a differently themed host', async 
   })
 })
 
-test('requires explicit publication confirmation and makes no background requests', async ({ page }) => {
+const getCode = (page: Page) => page.getByRole('button', { name: 'Get code', exact: true })
+const codeDialog = (page: Page) => page.getByRole('dialog', { name: 'Get code' })
+async function openExport(page: Page) {
+  const panel = page.locator('details.preset-export')
+  if ((await panel.getAttribute('open')) === null) await panel.locator(':scope > summary').click()
+}
+
+test('publishes only when Get code opens and reuses the code for an unchanged draft', async ({ page }) => {
   const requests: string[] = []
-  page.on('request', (request) => { if (request.url().includes('/api/v1/presets')) requests.push(request.url()) })
+  page.on('request', (request) => { if (request.url().endsWith('/api/v1/presets') && request.method() === 'POST') requests.push(request.url()) })
   await page.goto('http://127.0.0.1:3000/editor/preset')
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
+  await expect(getCode(page)).toBeEnabled()
   expect(requests).toEqual([])
-  await page.getByRole('button', { name: 'Publish preset…', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'Publish public snapshot', exact: true })).toBeDisabled()
-  expect(requests).toEqual([])
-  await page.getByRole('button', { name: 'Cancel publication', exact: true }).click()
-  expect(requests).toEqual([])
+  await getCode(page).click()
+  const reference = codeDialog(page).getByTestId('get-code-reference')
+  await expect(reference).toHaveText(/^ps_[a-f0-9]{32}@1$/)
+  await expect(codeDialog(page)).toContainText('Codes are public and permanent')
+  expect(requests).toHaveLength(1)
+  const code = await reference.textContent()
+  await page.keyboard.press('Escape')
+  await getCode(page).click()
+  await expect(reference).toHaveText(code!)
+  expect(requests).toHaveLength(1)
 })
 
 test('retries after the server commits and the response is lost', async ({ page }) => {
-  let interrupted = false
+  const keys: string[] = []
   await page.route('**/api/v1/presets', async (route) => {
-    if (!interrupted && route.request().method() === 'POST') {
-      interrupted = true
+    if (route.request().method() !== 'POST') return route.continue()
+    keys.push(route.request().headers()['idempotency-key']!)
+    if (keys.length === 1) {
       await route.fetch()
       await route.abort()
     } else await route.continue()
   })
   await page.goto('http://127.0.0.1:3000/editor/preset')
-  await page.getByRole('button', { name: 'Publish preset…', exact: true }).click()
-  await page.getByLabel('I understand this preset will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
-  await expect(page.getByRole('region', { name: 'Export your preset' }).getByRole('alert')).toBeVisible()
-  await page.getByLabel('I understand this preset will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Retry publication', exact: true }).click()
-  await expect(page.getByText('The current preset matches the last published hash.')).toBeVisible()
+  await getCode(page).click()
+  await expect(codeDialog(page).getByRole('alert')).toBeVisible()
+  await codeDialog(page).getByRole('button', { name: 'Try again', exact: true }).click()
+  await expect(codeDialog(page).getByTestId('get-code-reference')).toHaveText(/^ps_[a-f0-9]{32}@1$/)
+  expect(keys).toHaveLength(2)
+  expect(keys[1]).toBe(keys[0])
 })
 
 test('recovers a pending publication after refresh without submitting it', async ({ page }) => {
-  let interrupted = false
+  const keys: string[] = []
   await page.route('**/api/v1/presets', async (route) => {
-    if (!interrupted && route.request().method() === 'POST') { interrupted = true; await route.fetch(); await route.abort() }
+    if (route.request().method() !== 'POST') return route.continue()
+    keys.push(route.request().headers()['idempotency-key']!)
+    if (keys.length === 1) { await route.fetch(); await route.abort() }
     else await route.continue()
   })
   await page.goto('http://127.0.0.1:3000/editor/preset')
-  await page.getByRole('button', { name: 'Publish preset…', exact: true }).click()
-  await page.getByLabel('I understand this preset will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
-  await expect(page.getByRole('region', { name: 'Export your preset' }).getByRole('alert')).toBeVisible()
+  await getCode(page).click()
+  await expect(codeDialog(page).getByRole('alert')).toBeVisible()
   await page.reload()
-  await expect(page.getByRole('region', { name: 'Export your preset' }).getByRole('alert')).toContainText('recovered')
-  expect(interrupted).toBe(true)
+  await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
+  expect(keys).toHaveLength(1)
+  await getCode(page).click()
+  await expect(codeDialog(page).getByTestId('get-code-reference')).toHaveText(/^ps_[a-f0-9]{32}@1$/)
+  expect(keys).toHaveLength(2)
+  expect(keys[1]).toBe(keys[0])
 })
 
 test('ignores a stale publication response after editing and reset', async ({ page }) => {
   let release!: () => void
-  let held!: Promise<void>
-  held = new Promise<void>((resolve) => { release = resolve })
+  const held = new Promise<void>((resolve) => { release = resolve })
   await page.route('**/api/v1/presets', async (route) => {
     const response = await route.fetch()
     await held
-    await route.fulfill({ response })
+    try { await route.fulfill({ response }) } catch { /* The edit aborted this request. */ }
   })
   await page.goto('http://127.0.0.1:3000/editor/preset')
-  await page.getByRole('button', { name: 'Publish preset…', exact: true }).click()
-  await page.getByLabel('I understand this preset will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
+  await getCode(page).click()
+  await expect(codeDialog(page)).toContainText('Generating')
+  await page.keyboard.press('Escape')
   await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
   await page.getByRole('button', { name: 'Reset corner radius', exact: true }).click()
-  await expect(page.getByText('Current edits are unpublished.')).toBeVisible()
   release()
-  await expect(page.getByText('Current edits are unpublished.')).toBeVisible()
-  await expect(page.getByRole('link', { name: /ps_[a-f0-9]{32}@1/ })).toHaveCount(0)
+  await page.waitForTimeout(500)
+  await expect(page.getByTestId('get-code-reference')).toHaveCount(0)
 })
 
 test('keeps local exports available when publication service is unavailable', async ({ page }) => {
   await page.route('**/api/v1/presets', (route) => route.abort())
   await page.goto('http://127.0.0.1:3000/editor/preset')
-  await expect(page.getByRole('button', { name: 'Download preset JSON', exact: true })).toBeEnabled()
-  await page.getByRole('button', { name: 'Publish preset…', exact: true }).click()
-  await page.getByLabel('I understand this preset will be public and retained as described above.').check()
-  await page.getByRole('button', { name: 'Publish public snapshot', exact: true }).click()
-  await expect(page.getByRole('region', { name: 'Export your preset' }).getByRole('alert')).toBeVisible()
+  await getCode(page).click()
+  await expect(codeDialog(page).getByRole('alert')).toBeVisible()
   const pending = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Download preset JSON', exact: true }).click()
+  await codeDialog(page).getByRole('button', { name: 'Download JSON instead', exact: true }).click()
   expect(JSON.parse(await fs.readFile(await (await pending).path()!, 'utf8')).schemaVersion).toBe('1.0')
 })
 
 test('handles clipboard and storage denial while preserving draft exports', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/preset')
+  await openExport(page)
   await page.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { throw new Error('denied') } } }) })
   await page.getByRole('button', { name: 'Copy export', exact: true }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Clipboard unavailable' })).toBeVisible()

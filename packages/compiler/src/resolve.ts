@@ -6,7 +6,8 @@ import {
 import type { Catalog } from '@ombelle/catalog'
 import { canonicalize } from './canonicalize.js'
 import { sha256 } from './hash.js'
-function normalizeColor(color: string): string {
+/** Canonical spelling of a schema-valid color (lowercase hex, plain OKLCH numbers). */
+export function normalizeColor(color: string): string {
   if (color.startsWith('#')) return color.toLowerCase()
   const [l, c, h, , a] = color.slice(6, -1).split(' ')
   const n = (s: string) =>

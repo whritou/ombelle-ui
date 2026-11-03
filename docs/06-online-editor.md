@@ -39,7 +39,7 @@ The preview gallery should include a form, buttons, cards, tabs, and an open dia
 
 Switching a style family preserves explicitly customized values only when compatible. Show which values will reset and permit undo. Changing families does not silently discard design data or remove an error indicator.
 
-The main export paths are download preset JSON, copy generated theme CSS, and publish an immutable snapshot to obtain an install command. The command panel offers npm, pnpm, Yarn and Bun tabs, plus New setup and Already initialized shadcn paths. Persist the user's selected runner in website preferences without adding it to the portable preset hash.
+The main export path is **Get code**: opening it publishes an immutable snapshot of the current draft and shows its install command at once. Downloading preset JSON and copying generated theme CSS are secondary paths. The command panel offers npm, pnpm, Yarn and Bun tabs, plus New setup and Already initialized shadcn paths. Persist the user's selected runner in website preferences without adding it to the portable preset hash.
 
 For the existing-project path, show: “If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css.” Generate `theme add <immutable-preset-reference>` for that path. The new-setup path uses `init --preset <reference>`. Component pages also provide `add <component>`. Each runner executes the same pinned CLI release and immutable preset revision.
 

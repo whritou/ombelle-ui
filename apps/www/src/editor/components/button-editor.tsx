@@ -14,7 +14,7 @@ import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
 import { EditorTabs } from './editor-tabs'
 import { StatusAnnouncer } from './status-announcer'
-import { PublishRecipe } from '../../recipe-snapshots/components/publish-recipe'
+import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = { storageVersion: 1, recipe: validateRecipe(exampleRecipe) }
@@ -158,7 +158,9 @@ export function ButtonEditor() {
           setHistory(redo)
         }}>Redo</button>
         <a href="#artifacts-title" className={styles.viewCode}>View code</a>
-        <button type="button" className={styles.download} onClick={saveDownload} disabled={!recipeJson || recovery !== null}>Download recipe JSON</button>
+        <button type="button" onClick={saveDownload} disabled={!recipeJson || recovery !== null}>Download recipe JSON</button>
+        <RecipeGetCode className={styles.download} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
+          secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />
       </div>
     </header>
 
@@ -192,7 +194,6 @@ export function ButtonEditor() {
             <div className={styles.viewControls}>
               <label>Preview mode <select value={view.mode} onChange={(event) => setView({ ...view, mode: event.target.value as EditorView['mode'] })}><option value="light">Light</option><option value="dark">Dark</option></select></label>
               <label>Preview width <select value={view.viewport} onChange={(event) => setView({ ...view, viewport: event.target.value as EditorView['viewport'] })}><option value="wide">Wide</option><option value="narrow">Narrow</option></select></label>
-              <label>Demonstrate state <select value={view.forcedState} onChange={(event) => setView({ ...view, forcedState: event.target.value as EditorView['forcedState'] })}><option value="none">Default</option><option value="focus">Focus</option><option value="hover">Hover</option></select></label>
             </div>
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} /></div>
             <p className={styles.previewStatus}>{compilation.stale || diagnostic || !resultMatchesDraft(compilation.result, draft.recipe)
@@ -202,7 +203,6 @@ export function ButtonEditor() {
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
               notice={experimentalNotice(draftFamily(draft.recipe))} />
-            <PublishRecipe recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus} />
             <p className={styles.hashLine}>Recipe hash: <span data-testid="recipe-hash">{compilation.result?.recipe.hash ?? 'Pending'}</span></p>
           </div>
         </div>

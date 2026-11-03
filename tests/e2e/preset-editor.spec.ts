@@ -51,7 +51,13 @@ async function ready(page: Page) {
     { timeout: 30000 },
   )
 }
+async function openExport(page: Page) {
+  const panel = page.locator('details.preset-export')
+  if ((await panel.getAttribute('open')) === null)
+    await panel.locator(':scope > summary').click()
+}
 async function download(page: Page) {
+  await openExport(page)
   const pending = page.waitForEvent('download')
   await page
     .getByRole('button', { name: 'Download preset JSON', exact: true })
@@ -271,7 +277,9 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
   await ready(page)
   await page.getByLabel('Corner radius', { exact: true }).fill('0.6')
   await page.getByLabel('Corner radius', { exact: true }).fill('0.5')
-  // Colour tokens are edited in a popover opened from their row.
+  // Colour tokens are edited in a popover opened from their row, inside the
+  // collapsed full colour list.
+  await page.locator('summary', { hasText: 'Customize all colors' }).click()
   await page.getByRole('button', { name: /^Primary colors/ }).click()
   await page.getByLabel('Dark primary', { exact: true }).fill('invalid')
   await page.keyboard.press('Escape')
@@ -355,6 +363,7 @@ test('keeps in-memory edits after storage and clipboard denial', async ({
   await expect(
     page.getByRole('alert').filter({ hasText: 'could not be saved' }),
   ).toBeVisible()
+  await openExport(page)
   await page.getByRole('button', { name: 'Copy export' }).click()
   await expect(page.getByRole('status')).toContainText('Clipboard unavailable')
   expect(JSON.parse(await download(page)).design.radiusRem).toBe(1.2)
@@ -381,6 +390,7 @@ test('blocks stale exports during invalid edits and delayed compilation', async 
   await expect(
     page.getByRole('button', { name: 'Retry compilation', exact: true }),
   ).toBeVisible()
+  await openExport(page)
   await expect(
     page.getByRole('button', { name: 'Download preset JSON' }),
   ).toBeDisabled()
@@ -715,6 +725,8 @@ test('supports keyboard editing and 320 pixel reflow', async ({
 
   const lightPrimary = page.getByLabel('Light primary', { exact: true })
   const lightDefault = await lightPrimary.inputValue()
+  await tabTo(page, page.locator('summary', { hasText: 'Customize all colors' }))
+  await page.keyboard.press('Enter')
   await tabTo(page, page.getByRole('button', { name: /^Primary colors/ }))
   await page.keyboard.press('Enter')
   await expect(lightPrimary).toBeVisible()
@@ -733,7 +745,14 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await page.keyboard.type('#22c55e')
   await expect(darkPrimary).toHaveValue('#22c55e')
   await ready(page)
+  // Close the colour popover the way a keyboard user would.
+  await page.keyboard.press('Escape')
 
+  const exportSummary = page.locator('summary', {
+    hasText: 'Preset JSON and local export',
+  })
+  await tabTo(page, exportSummary, { max: 300 })
+  await page.keyboard.press('Enter')
   const downloadButton = page.getByRole('button', {
     name: 'Download preset JSON',
     exact: true,
@@ -768,32 +787,25 @@ test('supports keyboard editing and 320 pixel reflow', async ({
     'theme add ./project-preset.json',
   )
 
-  const publish = page.getByRole('button', { name: 'Publish preset…' })
-  await tabTo(page, publish)
-  await page.keyboard.press('Enter')
-  const consent = page.getByLabel(
-    'I understand this preset will be public and retained as described above.',
+  const getCode = page.getByRole('button', { name: 'Get code', exact: true })
+  await tabTo(page, getCode, { backward: true, max: 600 })
+  const published = page.waitForResponse(
+    (r) => r.url().endsWith('/api/v1/presets') && r.request().method() === 'POST',
   )
-  await expect(consent).toBeFocused()
-  await expectVisibleFocus(page)
-  await page.keyboard.press('Space')
-  await expect(consent).toBeChecked()
-  await page.keyboard.press('Tab')
-  await expect(
-    page.getByRole('button', { name: 'Publish public snapshot' }),
-  ).toBeFocused()
-  await expect(
-    page.getByRole('button', { name: 'Publish public snapshot' }),
-  ).toBeEnabled()
+  await page.keyboard.press('Enter')
+  expect((await published).status()).toBe(201)
+  const dialog = page.getByRole('dialog', { name: 'Get code' })
+  const command = dialog.getByTestId('get-code-command')
+  await expect(command).toContainText(/init --preset ps_[a-f0-9]{32}@1/)
+  await dialog.getByRole('tab', { name: 'New project' }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(dialog.getByRole('tab', { name: 'Existing project' })).toBeFocused()
+  await expect(command).toContainText(/theme add ps_[a-f0-9]{32}@1/)
   await expectVisibleFocus(page)
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-  await page.keyboard.press('Tab')
-  await expect(
-    page.getByRole('button', { name: 'Cancel publication' }),
-  ).toBeFocused()
-  await page.keyboard.press('Enter')
-  await expect(consent).toHaveCount(0)
-  await expect(publish).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(getCode).toBeFocused()
   await expectVisibleFocus(page)
   expect(
     await page.evaluate(
@@ -816,6 +828,7 @@ test('exports the current preset while preview is unavailable', async ({
 }) => {
   await page.route('http://127.0.0.1:4173/**', (route) => route.abort())
   await page.goto(url)
+  await openExport(page)
   await expect(
     page.getByRole('button', { name: 'Download preset JSON' }),
   ).toBeEnabled({ timeout: 30000 })
@@ -828,4 +841,35 @@ test('exports the current preset while preview is unavailable', async ({
   await expect(alert).toContainText('You can still export a valid preset')
   await expect(alert.getByRole('button', { name: 'Retry preview' })).toBeVisible()
   expect(JSON.parse(await download(page)).design.radiusRem).toBe(1.3)
+})
+test('applies accent and base color schemes in one step and returns to the style default', async ({
+  page,
+}) => {
+  await page.goto(url)
+  await ready(page)
+  const rose = page.getByRole('button', { name: 'Rose accent', exact: true })
+  await rose.click()
+  await expect(rose).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: 'Stone base', exact: true }).click()
+  await ready(page)
+  const preset = JSON.parse(await download(page))
+  expect(preset.modes.light.primary.toLowerCase()).toBe('#e11d48')
+  expect(preset.modes.dark.background.toLowerCase()).toBe('#1c1917')
+  await page.getByRole('button', { name: 'Style default base', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Stone base', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  await expect(rose).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Stone base', exact: true })).toHaveAttribute('aria-pressed', 'true')
+})
+test('edits numeric design values with a slider and keeps the exact field in sync', async ({
+  page,
+}) => {
+  await page.goto(url)
+  await ready(page)
+  const slider = page.getByLabel('Corner radius slider', { exact: true })
+  await slider.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue('0.55')
+  await page.getByLabel('Corner radius', { exact: true }).fill('1.25')
+  await expect(slider).toHaveValue('1.25')
 })

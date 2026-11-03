@@ -7,6 +7,7 @@ import {
 } from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
 import { SnapshotServiceError } from './errors'
+import { publicationQuotas } from './quotas'
 import { createPostgresPool, quotedSchema, storageFailure } from './postgres-pool'
 import { verifyPostgresSnapshotSchema } from './postgres-migrations'
 import type { SnapshotStore, PublishSnapshotInput, PublishRecipeSnapshotInput, WithdrawalReason } from './store'
@@ -90,7 +91,7 @@ class PostgresSnapshotStore implements SnapshotStore {
   async consumeAttempt(clientKey: string, now: number): Promise<void> {
     await this.transaction(async client => {
       await this.cleanup(client, now)
-      await this.assertQuota(client, 'attempt', clientKey, now, minuteMs, 5)
+      await this.assertQuota(client, 'attempt', clientKey, now, minuteMs, publicationQuotas.attemptsPerMinute)
       await this.increment(client, 'attempt', clientKey, now, minuteMs)
     })
   }
@@ -133,8 +134,8 @@ class PostgresSnapshotStore implements SnapshotStore {
         return { snapshot, replayed: true }
       }
       await this.cleanup(client, input.now)
-      await this.assertQuota(client, 'client', input.clientKey, input.now, dayMs, 20)
-      await this.assertQuota(client, 'global', '', input.now, dayMs, 1000)
+      await this.assertQuota(client, 'client', input.clientKey, input.now, dayMs, publicationQuotas.clientPerDay)
+      await this.assertQuota(client, 'global', '', input.now, dayMs, publicationQuotas.globalPerDay)
       for (let attempt = 0; attempt < 3; attempt++) {
         const id = (kind === 'preset' ? this.randomId : this.randomRecipeId)()
         if ((await client.query(`SELECT 1 FROM ${this.s}.publications WHERE id=$1`, [id])).rowCount) continue

@@ -71,6 +71,7 @@ export async function compileRecipe(input: {
         overrides: data.overrides,
         scope,
         darkSelector,
+        variant: data.props.variant,
       }),
     },
     {

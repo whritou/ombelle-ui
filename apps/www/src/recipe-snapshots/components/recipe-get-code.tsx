@@ -1,0 +1,98 @@
+'use client'
+import { useEffect, useState, type ReactNode } from 'react'
+import type { RecipeCompileResult } from '@ombelle/contracts'
+import { useRecipePublication } from '../use-publication'
+import { codeInstallCommand } from '../../snapshots/install-command'
+import {
+  GetCodeDialog,
+  type CodeStatus,
+} from '../../snapshots/components/get-code-dialog'
+
+type ResolvedRecipe = RecipeCompileResult['recipe']
+
+const scopes = [
+  {
+    id: 'recipe',
+    label: 'Button',
+    description:
+      'Run in an initialized app folder to add this Button recipe. The CLI shows its plan and asks before writing.',
+  },
+] as const
+
+/**
+ * "Get code" for the Button editor: opening it publishes the current recipe and
+ * shows its install command. Unchanged recipes reuse the code already generated.
+ */
+export function RecipeGetCode({
+  recipe,
+  current,
+  announce,
+  className,
+  secondary,
+}: {
+  recipe: ResolvedRecipe | null
+  current: boolean
+  announce: (text: string) => void
+  className?: string
+  /** Secondary exports shown under the command, such as the JSON download. */
+  secondary?: ReactNode
+}) {
+  const publication = useRecipePublication({ recipe, current, announce })
+  const { state } = publication
+  const [open, setOpen] = useState(false)
+  const last = state.lastPublished
+  const matches =
+    current && recipe !== null && last?.recipeHash === recipe.hash
+  useEffect(() => {
+    // Only opening the dialog expresses the intent to publish.
+    if (open && !matches) void publication.generate()
+  }, [open])
+  const code: CodeStatus =
+    matches && last
+      ? {
+          status: 'ready',
+          reference: `${last.id}@${last.revision}`,
+          href: `/recipes/${last.id}/${last.revision}`,
+        }
+      : state.status === 'failed' || state.status === 'withdrawn'
+        ? { status: 'failed', error: state.error, retryable: current }
+        : { status: 'publishing' }
+  return (
+    <>
+      <button
+        type="button"
+        className={className}
+        disabled={!current || !recipe}
+        aria-haspopup="dialog"
+        onClick={() => setOpen(true)}
+      >
+        Get code
+      </button>
+      <GetCodeDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        subject="recipe"
+        code={code}
+        scopes={scopes}
+        announce={announce}
+        onRetry={() => void publication.generate()}
+        commandFor={(_scope, manager) =>
+          codeInstallCommand(
+            {
+              kind: 'recipe',
+              source: {
+                origin: window.location.origin,
+                reference: `${last!.id}@${last!.revision}`,
+                recipeHash: last!.recipeHash,
+              },
+            },
+            'recipe',
+            manager,
+          )
+        }
+      >
+        {secondary}
+      </GetCodeDialog>
+    </>
+  )
+}

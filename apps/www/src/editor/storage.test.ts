@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createEditorDraft } from './model.js'
+import { createEditorDraft, withRecipeColor } from './model.js'
 import { DRAFT_STORAGE_KEY, RECOVERY_STORAGE_KEY, preserveRecovery, readRecoveries, restoreDraft, serializeDraft, serializeRecipe } from './storage.js'
 
 describe('Button editor draft storage', () => {
@@ -14,6 +14,16 @@ describe('Button editor draft storage', () => {
   it('restores a valid v1 envelope', () => {
     const draft = createEditorDraft('minimalist')
     expect(restoreDraft(serializeDraft(draft))).toEqual({ status: 'restored', draft })
+  })
+
+  it('round-trips color overrides through the stored draft and recipe JSON', () => {
+    const initial = createEditorDraft('minimalist')
+    const recipe = withRecipeColor(withRecipeColor(initial.recipe, 'light', 'foreground', '#ABCDEF'), 'dark', 'background', 'oklch(40% 0.1 200)')
+    const draft = { ...initial, recipe }
+    expect(restoreDraft(serializeDraft(draft))).toEqual({ status: 'restored', draft })
+    expect(JSON.parse(serializeRecipe(draft)).overrides.colors).toEqual(recipe.overrides.colors)
+    const broken = JSON.stringify({ ...draft, recipe: { ...recipe, overrides: { colors: { light: { foreground: 'blue' } } } } })
+    expect(restoreDraft(broken)).toEqual({ status: 'recovery-required', recoveryText: broken })
   })
 
   it('preserves malformed JSON exactly for recovery', () => {

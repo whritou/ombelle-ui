@@ -7,6 +7,7 @@ import { publicationNow, publicationStoreContract } from '../helpers/publication
 import { openPostgresSnapshotStore, closePostgresPools } from '../../apps/www/src/snapshots/server/postgres-store.js'
 import { initializePostgresSnapshotStore } from '../../apps/www/src/snapshots/server/postgres-migrations.js'
 import { createPostgresPool } from '../../apps/www/src/snapshots/server/postgres-pool.js'
+import { publicationQuotas as Q } from '../../apps/www/src/snapshots/server/quotas.js'
 
 const connection = process.env.OMBELLE_POSTGRES_TEST_DATABASE_URL
 const direct = process.env.OMBELLE_POSTGRES_TEST_DIRECT_URL
@@ -97,7 +98,7 @@ it('bounds collision retries and rejects unsafe schema identifiers', async () =>
 it('shares global publication and record-capacity limits across both kinds', async () => {
   const context = await fixture()
   const day = Math.floor(publicationNow / 86_400_000)
-  await raw.query(`INSERT INTO "${context.schema}".rate_buckets VALUES('global','',$1,999)`, [day])
+  await raw.query(`INSERT INTO "${context.schema}".rate_buckets VALUES('global','',$1,$2)`, [day, Q.globalPerDay - 1])
   const outcomes = await Promise.allSettled([
     context.store.publishRecipe({ compiled: await normalizePublishedRecipe(recipe), clientKey: 'global-a', idempotencyKey: randomUUID(), now: publicationNow }),
     context.store.publish({ preset: await normalizePublishedPreset(preset), clientKey: 'global-b', idempotencyKey: randomUUID(), now: publicationNow }),

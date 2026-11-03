@@ -5,6 +5,7 @@ import { parseRecipeSnapshotReference, parseSnapshotReference, type RecipeCompil
 import presetExample from '../../examples/preset.example.json'
 import recipeExample from '../../examples/recipe.example.json'
 import type { SnapshotStore } from '../../apps/www/src/snapshots/server/store.js'
+import { publicationQuotas as Q } from '../../apps/www/src/snapshots/server/quotas.js'
 
 export const publicationNow = Date.UTC(2026, 10, 1, 12)
 export function publicationStoreContract(name: string, fixture: () => Promise<{
@@ -32,7 +33,7 @@ export function publicationStoreContract(name: string, fixture: () => Promise<{
     it('shares the daily publication quota across presets and recipes', async () => {
       const context = await fixture()
       try {
-        for (let n = 0; n < 19; n++) await context.store.publish(presetInput())
+        for (let n = 0; n < Q.clientPerDay - 1; n++) await context.store.publish(presetInput())
         await context.store.publishRecipe(recipeInput())
         await expect(async () => context.store.publish(presetInput())).rejects.toMatchObject({ status: 429 })
         await expect(async () => context.store.publishRecipe(recipeInput())).rejects.toMatchObject({ status: 429 })
@@ -43,7 +44,7 @@ export function publicationStoreContract(name: string, fixture: () => Promise<{
       const context = await fixture(), input = recipeInput()
       try {
         const first = await context.store.publishRecipe(input)
-        for (let n = 0; n < 19; n++) await context.store.publish(presetInput())
+        for (let n = 0; n < Q.clientPerDay - 1; n++) await context.store.publish(presetInput())
         expect(await context.store.publishRecipe({ ...input, clientKey: 'other' })).toEqual({ ...first, replayed: true })
         const changed = await normalizePublishedRecipe({ ...recipeExample, content: 'Different' })
         await expect(async () => context.store.publishRecipe({ ...input, compiled: changed })).rejects.toMatchObject({ status: 409 })
@@ -75,7 +76,7 @@ export function publicationStoreContract(name: string, fixture: () => Promise<{
       const context = await fixture()
       try {
         const other = await context.reopen()
-        for (let n = 0; n < 5; n++) await (n % 2 ? other : context.store).consumeAttempt('client', publicationNow)
+        for (let n = 0; n < Q.attemptsPerMinute; n++) await (n % 2 ? other : context.store).consumeAttempt('client', publicationNow)
         await expect(async () => other.consumeAttempt('client', publicationNow)).rejects.toMatchObject({ status: 429 })
         await other.consumeAttempt('client', publicationNow + 60_000)
       } finally { await context.close() }

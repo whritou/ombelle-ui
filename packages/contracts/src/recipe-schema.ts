@@ -128,6 +128,49 @@ export const recipeSchema = {
           "type": "number",
           "minimum": -16,
           "maximum": 16
+        },
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Per-mode Button colors. Omitted values fall back to the preset tokens the selected variant reads.",
+          "properties": {
+            "light": {
+              "$ref": "#/$defs/buttonColors"
+            },
+            "dark": {
+              "$ref": "#/$defs/buttonColors"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "color": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Initial syntax filter only. A real color parser and semantic validation are mandatory.",
+      "anyOf": [
+        {
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        {
+          "pattern": "^oklch\\([0-9.]+%? [0-9.]+ [0-9.]+(?: / [0-9.]+%?)?\\)$"
+        }
+      ]
+    },
+    "buttonColors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "$ref": "#/$defs/color"
+        },
+        "foreground": {
+          "$ref": "#/$defs/color"
+        },
+        "border": {
+          "$ref": "#/$defs/color"
         }
       }
     }

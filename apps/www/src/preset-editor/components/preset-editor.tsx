@@ -34,10 +34,19 @@ import { PresetPreviewFrame } from './preset-preview-frame'
 import {
   ColorControls,
   DesignControls,
+  ThemeControls,
   fieldId,
   revealPresetField,
 } from './preset-controls'
+import {
+  accentSchemes,
+  applyColorScheme,
+  baseSchemes,
+  resetColorScheme,
+} from '../schemes'
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
+import { PresetGetCode } from '../../snapshots/components/preset-get-code'
+import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import styles from './preset-editor.module.css'
 import { useSiteDark } from '../../site/theme'
@@ -219,9 +228,31 @@ export default function PresetEditor() {
           >
             Reset all tokens
           </button>
-          <a href="#preset-export-heading" className={styles.getCode}>
-            Get code
-          </a>
+          <PresetGetCode
+            className={styles.getCode}
+            preset={compiled.result?.preset ?? null}
+            current={canExportPreset(compiled, draft) && !glassBlocked}
+            announce={setNotice}
+            describedBy={glass ? glassReadoutId : undefined}
+            secondary={
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    downloadPresetText(
+                      serializePresetExport(compiled, draft),
+                      'project-preset.json',
+                    )
+                    setNotice('Preset JSON downloaded.')
+                  } catch {
+                    setNotice('Download failed. Your draft is intact.')
+                  }
+                }}
+              >
+                Download JSON instead
+              </button>
+            }
+          />
         </div>
       </div>
       <p role="status" aria-live="polite" className={styles.notice}>
@@ -307,17 +338,37 @@ export default function PresetEditor() {
         <section aria-labelledby="preset-controls-heading" className={styles.panel}>
           <h2 id="preset-controls-heading">Customize</h2>
           <div className={styles.group}>
-            <h3>Identity</h3>
-            {identity}
-          </div>
-          <div className={styles.group}>
-            <h3>Colors</h3>
-            <p className={styles.groupHint}>Light and dark values. Select a token to edit it.</p>
-            <ColorControls {...controlProps} />
+            <h3>Theme</h3>
+            <ThemeControls
+              draft={draft}
+              onApply={(scheme, group) =>
+                commit(applyColorScheme(draft, scheme), 'scheme:' + group)
+              }
+              onResetGroup={(group) =>
+                commit(
+                  resetColorScheme(
+                    draft,
+                    group === 'accent' ? accentSchemes : baseSchemes,
+                  ),
+                  'scheme:' + group,
+                )
+              }
+            />
+            <details className={styles.disclosure}>
+              <summary>Customize all colors</summary>
+              <p className={styles.groupHint}>
+                Light and dark values. Select a token to edit it.
+              </p>
+              <ColorControls {...controlProps} />
+            </details>
           </div>
           <div className={styles.group}>
             <h3>Design</h3>
             <DesignControls {...controlProps} />
+          </div>
+          <div className={styles.group}>
+            <h3>Identity</h3>
+            {identity}
           </div>
         </section>
         <div className={styles.canvas}>
@@ -405,6 +456,7 @@ export default function PresetEditor() {
       </div>
       <dialog
         ref={dialog}
+        className={styles.confirmDialog}
         aria-labelledby="preset-confirm-heading"
         onCancel={(event) => {
           event.preventDefault()

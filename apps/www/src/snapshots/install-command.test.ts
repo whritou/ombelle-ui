@@ -1,7 +1,7 @@
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
-import { publishedInstaller, snapshotInstallCommand } from './install-command'
+import { codeInstallCommand, packageManagers, publishedInstaller, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
@@ -69,4 +69,26 @@ it('code pages show the verified public npx release with bare official codes', (
   expect(snapshotInstallCommand(official, 'new', publishedInstaller)).toBe(
     `npx @ombelle-ui/cli@0.2.1 init --preset ${source.reference} --cwd APP --dry-run --json`,
   )
+})
+
+describe('Get code commands', () => {
+  const official = { ...source, origin: officialSnapshotOrigin }
+  it('runs the published installer through each package manager in the current folder', () => {
+    const runners = { pnpm: 'pnpm dlx', npm: 'npx', yarn: 'yarn dlx', bun: 'bunx' } as const
+    for (const manager of packageManagers) {
+      const command = codeInstallCommand({ kind: 'preset', source: official }, 'new', manager)
+      expect(command).toBe(`${runners[manager]} ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ${source.reference}`)
+      expect(command).not.toMatch(/--cwd|--dry-run|--yes/)
+    }
+    expect(codeInstallCommand({ kind: 'preset', source: official }, 'theme', 'npm')).toContain('theme add ' + source.reference)
+    expect(codeInstallCommand({ kind: 'preset', source: official }, 'button', 'npm')).toContain('add button --preset ' + source.reference)
+  })
+  it('pins non-official origins and keeps recipe scope separate', () => {
+    expect(codeInstallCommand({ kind: 'preset', source }, 'new', 'npm')).toContain(`--snapshot-origin '${source.origin}' --preset-hash ${source.presetHash}`)
+    const recipe = { origin: 'http://127.0.0.1:3000', reference: 'rc_' + 'c'.repeat(32) + '@1', recipeHash: 'd'.repeat(64) }
+    expect(codeInstallCommand({ kind: 'recipe', source: recipe }, 'recipe', 'bun')).toBe(
+      `bunx ${publishedInstaller.packageName}@${publishedInstaller.version} add --recipe ${recipe.reference} --snapshot-origin '${recipe.origin}' --recipe-hash ${recipe.recipeHash}`)
+    expect(() => codeInstallCommand({ kind: 'recipe', source: recipe }, 'new', 'npm')).toThrow()
+    expect(() => codeInstallCommand({ kind: 'preset', source }, 'recipe', 'npm')).toThrow()
+  })
 })
