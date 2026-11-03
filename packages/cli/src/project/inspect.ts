@@ -108,7 +108,7 @@ export async function inspectProject(
   preconditions['bunfig.toml'] = await fingerprintFile(root, 'bunfig.toml')
   const deps = { ...pkg.devDependencies, ...pkg.dependencies }
   const framework = deps.next ? 'next' : deps.vite ? 'vite' : undefined
-  if (!framework || !deps.react || !/^\D*4\./.test(deps.tailwindcss ?? ''))
+  if (!framework || !deps.react || !/^\D*4(?:\.|$)/.test(deps.tailwindcss ?? ''))
     throw bad('Support is limited to React Vite/Next with Tailwind v4')
   if (deps.react !== '19.3.1' || deps['react-dom'] !== '19.3.1')
     throw bad(

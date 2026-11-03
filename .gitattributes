@@ -1,2 +1,5 @@
 # Shell scripts run from WSL and Linux CI; keep LF even on Windows checkouts.
 *.sh text eol=lf
+
+# Byte-exact output of the pinned shadcn init; theme-merge tests compare it.
+fixtures/shadcn/** -text
