@@ -255,7 +255,11 @@ export default function PresetEditor() {
           )}
         </div>
       )}
-      {glass && <GlassPanel report={glassReport} />}
+      {glass && (
+        <div className={styles.glass}>
+          <GlassPanel report={glassReport} />
+        </div>
+      )}
       <div className={styles.workbench}>
         <section aria-labelledby="preset-controls-heading" className={styles.controls}>
           <h2 id="preset-controls-heading">Customize</h2>

@@ -496,6 +496,37 @@
   }
 }
 
+/* Liquid glass limitations and contrast bound, shown only for glass drafts. */
+.glass {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 16px;
+  margin: 8px 0 20px;
+}
+.glass > section {
+  border: 1px solid var(--warning);
+  border-radius: 16px;
+  background: var(--warning-soft);
+  padding: 4px 18px 14px;
+}
+.editor .glass h2 {
+  margin: 12px 0 6px;
+  font-size: 16px;
+}
+.editor .glass p,
+.editor .glass li {
+  font-size: 14px;
+}
+.editor .glass ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+@media (max-width: 800px) {
+  .glass {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .published {
   overflow-wrap: anywhere;
 }
