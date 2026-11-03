@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased — 3 November 2026
+## 0.3.0 — unreleased
+
+- Align all six workspace packages at 0.3.0. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged; recipe schema 1.0 gains an optional field.
+- Add optional Button recipe color overrides: `overrides.colors.{light,dark}.{background,foreground,border}`, mapped onto the tokens the chosen variant reads, with the preset color syntax and bounds. CLI 0.2.1 rejects recipes that use them; install those with 0.3.0.
+- Add hover and pressed states to flat and neo-brutalism Buttons, and hover to inactive Tabs triggers in the three stable families. Catalog 0.1.0 bytes change in place for those families' `ui-style.css`, `tabs.css` and scoped Button CSS; see `intentionalChanges` in the compiler style baseline.
+- Website: Get code publishes the current draft and shows a one-line command for pnpm, npm, Yarn or Bun; publication quotas rise to 30 attempts per minute, 200 per client and 5,000 globally per UTC day.
+- Website: full-width preset editor with one-click accent and base color schemes, sliders for numeric design values, a compact liquid-glass strip, and Button editor color controls. The Button editor no longer has a forced-state selector because previews respond to the pointer directly.
 
 - Fix `theme add`, `init` and `add` rejecting projects created by `shadcn init` with pnpm. The settings-only `pnpm-workspace.yaml` it writes (`packages: []`) in the app root is no longer treated as a workspace. Workspaces that declare packages, and any `pnpm-workspace.yaml` in a parent directory, are still rejected.
 - Fix Tailwind v4 detection for bare major ranges such as `tailwindcss: "^4"`, which shadcn templates declare.
