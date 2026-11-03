@@ -9,7 +9,7 @@ import {
   setPresetEdit,
 } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
-import { GlassPanel, glassLimitations, glassReadoutId } from './glass-panel'
+import { GlassPanel, glassLimitations, glassPairsId, glassReadoutId } from './glass-panel'
 import { PresetControls } from './preset-controls'
 import { PresetExportPanel } from './preset-export-panel'
 
@@ -35,6 +35,23 @@ it('names failing pairs and the minimum opacity when the bound fails', () => {
   expect(html).toContain('Contrast bound fails at glass opacity 0.6')
   expect(html).toMatch(/light: mutedForeground on card, \d\.\d\d:1 over a black backdrop/)
   expect(html).toContain(`Minimum passing glass opacity: ${report.minimumOpacity}.`)
+})
+
+it('announces a one-line summary and keeps the pair list outside the live region', () => {
+  const report = presetGlassReport(
+    setPresetEdit(createPresetDraft('liquid-glass'), '/design/glassOpacity', '0.6'),
+  )!
+  const failing = report.pairs.filter((pair) => !pair.passes).length
+  const html = renderToStaticMarkup(<GlassPanel report={report} />)
+  const live = new RegExp(`<p role="status" id="${glassReadoutId}">([^<]*)</p>`).exec(html)
+  expect(live?.[1]).toBe(
+    `Contrast bound fails at glass opacity 0.6: ${failing} pairs are below 4.5:1. ` +
+      `Minimum passing glass opacity: ${report.minimumOpacity}. ` +
+      'Export and publication are disabled until every pair passes.',
+  )
+  expect(html).toContain(`<ul id="${glassPairsId}" aria-label="Failing contrast pairs">`)
+  expect(html.match(/<li>light: |<li>dark: /g)).toHaveLength(failing)
+  expect(html.match(/role="status"/g)).toHaveLength(1)
 })
 
 it('renders transparency, blur and opacity controls only for glass drafts', () => {

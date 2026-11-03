@@ -10,8 +10,23 @@ export const glassLimitations = [
   'the hosted snapshot service must be redeployed before glass codes resolve publicly',
 ] as const
 export const glassReadoutId = 'glass-contrast-readout'
+export const glassPairsId = 'glass-contrast-pairs'
 // Truncated like the compiler's contrast error, so a shown 4.49 never rounds up.
 const ratio = (value: number) => (Math.floor(value * 100) / 100).toFixed(2)
+
+/** One-line summary: the live region announces only this, not every pair. */
+export function glassReadoutSummary(report: GlassContrastReport | null): string {
+  if (report === null)
+    return 'Contrast bound not evaluated. Fix the draft errors to check it.'
+  if (report.passes)
+    return `Contrast bound passes at glass opacity ${report.opacity}: every declared text pair reaches 4.5:1 over black and white backdrops.`
+  const count = report.pairs.filter((pair) => !pair.passes).length
+  const minimum =
+    report.minimumOpacity === null
+      ? 'No glass opacity passes; raise the contrast of the failing colors.'
+      : `Minimum passing glass opacity: ${report.minimumOpacity}.`
+  return `Contrast bound fails at glass opacity ${report.opacity}: ${count} ${count === 1 ? 'pair is' : 'pairs are'} below 4.5:1. ${minimum} Export and publication are disabled until every pair passes.`
+}
 
 export function GlassContrastReadout({
   report,
@@ -20,40 +35,25 @@ export function GlassContrastReadout({
 }) {
   const failing = report?.pairs.filter((pair) => !pair.passes) ?? []
   return (
-    <div role="status" id={glassReadoutId}>
-      {report === null ? (
-        <p>Contrast bound not evaluated. Fix the draft errors to check it.</p>
-      ) : report.passes ? (
-        <p>
-          Contrast bound passes at glass opacity {report.opacity}: every
-          declared text pair reaches 4.5:1 over black and white backdrops.
-        </p>
-      ) : (
-        <>
-          <p>
-            Contrast bound fails at glass opacity {report.opacity}. Export and
-            publication are disabled until every pair passes.
-          </p>
-          <ul>
-            {failing.map((pair) => {
-              const overBlack = pair.ratioOverBlack <= pair.ratioOverWhite
-              return (
-                <li key={pair.mode + pair.surface + pair.text}>
-                  {pair.mode}: {pair.text} on {pair.surface},{' '}
-                  {ratio(overBlack ? pair.ratioOverBlack : pair.ratioOverWhite)}
-                  :1 over a {overBlack ? 'black' : 'white'} backdrop
-                </li>
-              )
-            })}
-          </ul>
-          <p>
-            {report.minimumOpacity === null
-              ? 'No glass opacity passes; raise the contrast of the failing colors.'
-              : `Minimum passing glass opacity: ${report.minimumOpacity}.`}
-          </p>
-        </>
+    <>
+      <p role="status" id={glassReadoutId}>
+        {glassReadoutSummary(report)}
+      </p>
+      {failing.length > 0 && (
+        <ul id={glassPairsId} aria-label="Failing contrast pairs">
+          {failing.map((pair) => {
+            const overBlack = pair.ratioOverBlack <= pair.ratioOverWhite
+            return (
+              <li key={pair.mode + pair.surface + pair.text}>
+                {pair.mode}: {pair.text} on {pair.surface},{' '}
+                {ratio(overBlack ? pair.ratioOverBlack : pair.ratioOverWhite)}
+                :1 over a {overBlack ? 'black' : 'white'} backdrop
+              </li>
+            )
+          })}
+        </ul>
       )}
-    </div>
+    </>
   )
 }
 
