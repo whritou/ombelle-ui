@@ -1,6 +1,7 @@
 import { getCatalog } from '@ombelle/catalog'
 import {
   FoundationError,
+  isStableStyleFamily,
   parseSnapshotReference,
   validatePresetSnapshot,
   type PresetSnapshot,
@@ -27,6 +28,13 @@ export async function normalizePublishedPreset(
   // Schema validation runs before canonicalization so malformed non-JSON inputs
   // cannot reach the recursive canonical serializer.
   const normalized = await resolvePreset(input, getCatalog('0.1.0'))
+  // liquid-glass: Task 8 opens publication to the shared support table.
+  if (!isStableStyleFamily(normalized.data.styleFamily))
+    throw new FoundationError(
+      'INVALID_DATA',
+      'Style family is not available in the foundation',
+      '/styleFamily',
+    )
   assertPresetSize(input)
   assertPresetSize(normalized.data)
   return normalized

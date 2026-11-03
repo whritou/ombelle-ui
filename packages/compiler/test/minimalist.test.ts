@@ -12,9 +12,6 @@ it('registers the exact implemented families',()=>{
  for(const id of ['constructor','__proto__'])expect(isStyleFamily(id)).toBe(false)
  expect(getCatalog('0.1.0').presets.minimalist).toMatchObject({id:'builtin-minimalist',revision:1,styleFamily:'minimalist',design:{radiusRem:0.375,borderWidthPx:1}})
 })
-it('refuses a liquid-glass preset until glass catalog data exists',async()=>{
- await expect(build({...getCatalog('0.1.0').presets.flat,styleFamily:'liquid-glass'})).rejects.toMatchObject({code:'INVALID_DATA',path:'/styleFamily',message:'Style family is not available in the foundation'})
-})
 it('compiles minimalist deterministically',async()=>{
  const preset=getCatalog('0.1.0').presets.minimalist
  const first=await build(preset),second=await build(preset,['input','button','dialog','button'])
@@ -22,7 +19,6 @@ it('compiles minimalist deterministically',async()=>{
  expect(first.artifacts.find(a=>a.logicalPath==='styles/ui-style.css')?.content).toContain('minimalist family')
  expect(first.theme.light['--primary']).toBe('#111827')
  expect(first.theme.dark['--primary']).toBe('#f9fafb')
- await expect(build({...preset,styleFamily:'liquid-glass'})).rejects.toMatchObject({code:'INVALID_DATA',path:'/styleFamily'})
 })
 it('preserves legacy artifact hashes',async()=>{
  for(const family of ['flat','neo-brutalism'] as const){

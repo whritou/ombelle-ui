@@ -1,6 +1,9 @@
 import fs from 'node:fs'
 import { writeFileAtomicSync } from './write-atomic.ts'
-import { supportedStyleFamilies } from '../packages/contracts/src/style-families.ts'
+import {
+  styleFamilies,
+  styleSupport,
+} from '../packages/contracts/src/style-families.ts'
 import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
 const base = 'packages/catalog/src/'
 const readText = (file) => fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n')
@@ -11,7 +14,7 @@ const templates = Object.fromEntries(
   ]),
 )
 const styles = Object.fromEntries(
-  supportedStyleFamilies.map((id) => [
+  styleFamilies.map((id) => [
     id,
     readText(base + 'styles/' + id + '.css'),
   ]),
@@ -22,17 +25,19 @@ const componentStyles = Object.fromEntries(
     .map((id) => [
       id,
       Object.fromEntries(
-        supportedStyleFamilies.map((family) => [
-          family,
-          readText(base + 'styles/' + id + '/' + family + '.css'),
-        ]),
+        styleFamilies
+          .filter((family) => styleSupport(id, family) !== 'unavailable')
+          .map((family) => [
+            family,
+            readText(base + 'styles/' + id + '/' + family + '.css'),
+          ]),
       ),
     ]),
 )
 const presets = Object.fromEntries(
-  supportedStyleFamilies.map((id) => [
+  styleFamilies.map((id) => [
     id,
-    JSON.parse(fs.readFileSync(base + 'presets/' + id + '.json', 'utf8')),
+    JSON.parse(readText(base + 'presets/' + id + '.json')),
   ]),
 )
 writeFileAtomicSync(

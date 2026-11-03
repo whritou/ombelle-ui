@@ -3,8 +3,8 @@ import {
   validatePreset,
   type ComponentId,
   type Preset,
-  type StableStyleFamily,
-  supportedStyleFamilies,
+  type StyleFamily,
+  styleFamilies,
   supportedComponentIds,
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
@@ -16,13 +16,13 @@ export type ComponentTemplate = {
   logicalPath: string
   dependencies: { name: string; version: string }[]
   slots: string[]
-  styles?: Record<StableStyleFamily, string>
+  styles?: Partial<Record<StyleFamily, string>>
 }
 export type Catalog = {
   release: string
-  presets: Record<StableStyleFamily, Preset>
+  presets: Record<StyleFamily, Preset>
   templates: Record<ComponentId, ComponentTemplate>
-  styles: Record<StableStyleFamily, string>
+  styles: Record<StyleFamily, string>
   utility: string
 }
 const baseDependencies: readonly string[] = [
@@ -102,11 +102,11 @@ export function getCatalog(release: string): Catalog {
   return {
     release,
     presets: Object.fromEntries(
-      supportedStyleFamilies.map((family) => [
+      styleFamilies.map((family) => [
         family,
         validatePreset(catalogData.presets[family]),
       ]),
-    ) as Record<StableStyleFamily, Preset>,
+    ) as Record<StyleFamily, Preset>,
     templates,
     styles: { ...catalogData.styles },
     utility: catalogData.utility,
