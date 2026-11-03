@@ -53,6 +53,9 @@ it('generates deterministic reviewed source, fixture and Tailwind mappings', asy
   for (const id of supportedComponentIds)
     expect(fixture).toContain(`data-component="${id}"`)
   expect(fixture).toContain('Open dialog')
+  // One family-independent fixture: placeholders are chosen at runtime.
+  expect(fixture).toContain('aria-disabled="true"')
+  expect(fixture).toContain('Unavailable in {familyLabel}')
   const css = await fs.readFile(path.join(root, 'tailwind.css'), 'utf8')
   expect(css).toContain('--color-primary:var(--primary)')
   expect(css).not.toContain('#FFFFFF')

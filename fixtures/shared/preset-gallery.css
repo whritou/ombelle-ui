@@ -76,6 +76,19 @@ body {
   margin: 16px 0 0;
   line-height: 1.6;
 }
+.preset-unavailable {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+.preset-unavailable strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
 @media (max-width: 400px) {
   .preset-gallery {
     padding: 16px;

@@ -1,10 +1,13 @@
 import { getCatalog } from '@ombelle/catalog'
+import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler'
 import {
   FoundationError,
-  isStableStyleFamily,
+  componentsWithStyleSupport,
+  isStyleFamily,
   validatePreset,
+  type ComponentId,
   type Preset,
-  type StableStyleFamily,
+  type StyleFamily,
 } from '@ombelle/contracts'
 
 export const colorKeys = [
@@ -40,9 +43,16 @@ export const designControls = {
   shadowOffsetYPx: { label: 'Shadow Y offset', min: -16, max: 16 },
   motion: { label: 'Motion', options: ['full', 'reduced'] },
 } as const
+// Liquid glass only: these render, validate and materialize for glass drafts.
+export const glassDesignControls = {
+  transparency: { label: 'Transparency', options: ['auto', 'reduced'] },
+  glassBlurPx: { label: 'Glass blur', min: 0, max: 24, step: 1, unit: ' px' },
+  glassOpacity: { label: 'Glass opacity', min: 0.6, max: 1, step: 0.01, unit: '' },
+} as const
 export type PresetEditablePath =
   | `/modes/${'light' | 'dark'}/${(typeof colorKeys)[number]}`
   | `/design/${keyof typeof designControls}`
+  | `/design/${keyof typeof glassDesignControls}`
 export const editablePaths: PresetEditablePath[] = [
   ...(['light', 'dark'] as const).flatMap((mode) =>
     colorKeys.map((key) => `/modes/${mode}/${key}` as const),
@@ -51,9 +61,21 @@ export const editablePaths: PresetEditablePath[] = [
     (key) => `/design/${key}` as PresetEditablePath,
   ),
 ]
+export const glassEditablePaths: PresetEditablePath[] = Object.keys(
+  glassDesignControls,
+).map((key) => `/design/${key}` as PresetEditablePath)
+export function editablePathsFor(family: StyleFamily): PresetEditablePath[] {
+  return family === 'liquid-glass'
+    ? [...editablePaths, ...glassEditablePaths]
+    : editablePaths
+}
+/** Component ids the editor compiles and previews for a family. */
+export function previewComponentIds(family: StyleFamily): ComponentId[] {
+  return componentsWithStyleSupport(family, ['stable', 'experimental'])
+}
 export type PresetEditorDraft = {
   storageVersion: 1
-  family: StableStyleFamily
+  family: StyleFamily
   identity: { id: string; name: string; revision: string }
   edits: Partial<Record<PresetEditablePath, string>>
 }
@@ -80,9 +102,10 @@ export function validateDraftEnvelope(input: unknown): PresetEditorDraft {
     !record(input) ||
     !exact(input, ['storageVersion', 'family', 'identity', 'edits']) ||
     input.storageVersion !== 1 ||
-    !isStableStyleFamily(input.family)
+    !isStyleFamily(input.family)
   )
     fail('/')
+  const allowed = editablePathsFor(input.family)
   if (
     !record(input.identity) ||
     !exact(input.identity, ['id', 'name', 'revision'])
@@ -99,7 +122,7 @@ export function validateDraftEnvelope(input: unknown): PresetEditorDraft {
   if (!record(input.edits)) fail('/edits')
   for (const [path, value] of Object.entries(input.edits)) {
     if (
-      !editablePaths.includes(path as PresetEditablePath) ||
+      !allowed.includes(path as PresetEditablePath) ||
       typeof value !== 'string' ||
       value.length > 80
     )
@@ -108,7 +131,7 @@ export function validateDraftEnvelope(input: unknown): PresetEditorDraft {
   return structuredClone(input) as PresetEditorDraft
 }
 
-export function createPresetDraft(family: StableStyleFamily): PresetEditorDraft {
+export function createPresetDraft(family: StyleFamily): PresetEditorDraft {
   return validateDraftEnvelope({
     storageVersion: 1,
     family,
@@ -157,7 +180,10 @@ export function materializePreset(input: PresetEditorDraft): Preset {
         token as (typeof colorKeys)[number]
       ] = raw!
     else {
-      const control = designControls[key as keyof typeof designControls]
+      const control =
+        key in glassDesignControls
+          ? glassDesignControls[key as keyof typeof glassDesignControls]
+          : designControls[key as keyof typeof designControls]
       let value: string | number = raw!
       if ('min' in control) {
         if (!raw!.trim() || !Number.isFinite(Number(raw)))
@@ -168,6 +194,21 @@ export function materializePreset(input: PresetEditorDraft): Preset {
     }
   }
   return validatePreset(preset)
+}
+
+/**
+ * The live contrast bound for a glass draft, or null for other families and
+ * drafts that do not materialize yet (the compile diagnostic covers those).
+ */
+export function presetGlassReport(
+  draft: PresetEditorDraft,
+): GlassContrastReport | null {
+  if (draft.family !== 'liquid-glass') return null
+  try {
+    return glassContrastReport(materializePreset(draft))
+  } catch {
+    return null
+  }
 }
 
 export function setPresetEdit(
@@ -203,11 +244,21 @@ export function resetPresetTokens(draft: PresetEditorDraft): PresetEditorDraft {
 }
 export function planPresetFamilyChange(
   input: PresetEditorDraft,
-  family: StableStyleFamily,
+  family: StyleFamily,
 ): FamilyChange {
-  const before = validateDraftEnvelope(input),
-    draft = validateDraftEnvelope({ ...before, family })
-  const changes = editablePaths
+  const before = validateDraftEnvelope(input)
+  // Glass-only edits cannot follow the draft into a stable family.
+  const allowed = editablePathsFor(family)
+  const edits = Object.fromEntries(
+    Object.entries(before.edits).filter(([path]) =>
+      allowed.includes(path as PresetEditablePath),
+    ),
+  )
+  const draft = validateDraftEnvelope({ ...before, family, edits })
+  const shared = editablePathsFor(before.family).filter((path) =>
+    allowed.includes(path),
+  )
+  const changes = shared
     .filter((path) => !Object.hasOwn(before.edits, path))
     .map((path) => ({
       path,

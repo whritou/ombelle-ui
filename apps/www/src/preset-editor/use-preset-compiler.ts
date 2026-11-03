@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { canonicalize } from '@ombelle/compiler'
 import {
   validatePreset,
-  isStableStyleFamily,
+  isStyleFamily,
   type CompileResult,
 } from '@ombelle/contracts'
 import type { PresetEditorDraft } from './model'
@@ -48,7 +48,7 @@ function response(input: unknown): input is PresetCompileResponse {
   try {
     const preset = validatePreset(r.preset.data)
     if (
-      !isStableStyleFamily(preset.styleFamily) ||
+      !isStyleFamily(preset.styleFamily) ||
       preset.catalogRelease !== '0.1.0' ||
       preset.compilerVersion !== '0.1.0'
     )

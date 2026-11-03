@@ -11,8 +11,8 @@ import {
   isPreviewAck,
 } from './preview-protocol.js'
 
-async function renderMessage() {
-  const recipe = createEditorDraft('flat').recipe
+async function renderMessage(family: 'flat' | 'liquid-glass' = 'flat') {
+  const recipe = createEditorDraft(family).recipe
   const result = await compileRecipe({ recipe })
   return {
     type: 'render' as const,
@@ -34,6 +34,11 @@ it('accepts a valid render payload and its next request', async () => {
   expect(acceptPreviewRender(first, 0)).toEqual(first)
   expect(acceptPreviewRender({ ...first, requestId: 2, state: { ...first.state, requestId: 2 } }, 1)?.requestId).toBe(2)
   expect(acceptPreviewRender({ ...first, requestId: 2, state: { ...first.state, mode: 'dark', viewport: 'narrow', forcedState: 'focus', requestId: 2 } }, 1)?.requestId).toBe(2)
+})
+
+it('accepts a liquid-glass Button render', async () => {
+  const message = await renderMessage('liquid-glass')
+  expect(acceptPreviewRender(message, 0)).toEqual(message)
 })
 
 it('rejects malformed recipe, mode, forced state, and scope', async () => {

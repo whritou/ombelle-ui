@@ -1,11 +1,8 @@
 import { compile } from '@ombelle/compiler'
-import {
-  FoundationError,
-  supportedComponentIds,
-  type CompileResult,
-} from '@ombelle/contracts'
+import { FoundationError, type CompileResult } from '@ombelle/contracts'
 import {
   materializePreset,
+  previewComponentIds,
   validateDraftEnvelope,
   type PresetEditorDraft,
 } from './model'
@@ -50,7 +47,7 @@ export async function handlePresetCompileMessage(
       requestId,
       result: await compile({
         preset,
-        componentIds: supportedComponentIds,
+        componentIds: previewComponentIds(preset.styleFamily),
         catalogRelease: '0.1.0',
         compilerVersion: '0.1.0',
       }),

@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { FoundationError, validateRecipe, type Recipe, type StableStyleFamily } from '@ombelle/contracts'
+import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
-import { changeDraftFamily, type EditorDraft, type EditorView } from '../model'
+import { changeDraftFamily, draftFamily, experimentalNotice, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
 import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
 import { resultMatchesDraft } from '../result-match'
@@ -99,7 +99,7 @@ export function ButtonEditor() {
     }
   }
 
-  function chooseFamily(family: StableStyleFamily) {
+  function chooseFamily(family: StyleFamily) {
     try { edit(changeDraftFamily(draft, family).recipe, 'family') }
     catch (error) { setDiagnostic({ code: 'INVALID_PRESET', message: error instanceof Error ? error.message : 'Unsupported preset.', path: '/presetRef' }) }
   }
@@ -180,7 +180,8 @@ export function ButtonEditor() {
               : 'Preview matches the current recipe.'}</p>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
-            <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus} />
+            <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
+              notice={experimentalNotice(draftFamily(draft.recipe))} />
             <PublishRecipe recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus} />
             <p className={styles.hashLine}>Recipe hash: <span data-testid="recipe-hash">{compilation.result?.recipe.hash ?? 'Pending'}</span></p>
           </div>
