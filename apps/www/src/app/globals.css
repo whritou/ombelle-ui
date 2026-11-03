@@ -13,3 +13,7 @@ main {
   margin-inline: auto;
   padding: 2rem;
 }
+
+pre {
+  overflow-x: auto;
+}

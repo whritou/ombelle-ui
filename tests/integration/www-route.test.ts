@@ -6,6 +6,7 @@ import PresetEditorPage from '../../apps/www/src/app/editor/preset/page.js'
 import PrivacyPage from '../../apps/www/src/app/privacy/page.js'
 import SecurityPage from '../../apps/www/src/app/security/page.js'
 import HomePage from '../../apps/www/src/app/page.js'
+import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 describe('Button editor route', () => {
   it('renders the Button workbench heading and editor context in the main landmark', () => {
@@ -33,4 +34,19 @@ it('publishes privacy, support and security pages without exposing an email addr
   const home = renderToStaticMarkup(createElement(HomePage))
   expect(home).toContain('href="/privacy"')
   expect(home).toContain('href="/security"')
+})
+
+it('renders the public landing page with editor links and the published installer', () => {
+  const html = renderToStaticMarkup(createElement(HomePage))
+  expect(html).toMatch(/<main\b[^>]*>[\s\S]*<h1\b[^>]*>Ombelle<\/h1>/)
+  expect(html).toContain('href="/editor/component/button"')
+  expect(html).toContain('href="/editor/preset"')
+  const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
+  expect(html).toContain(`npx ${runner} init --preset PRESET --cwd APP --dry-run --json`)
+  expect(html).toContain(`npx ${runner} init --preset PRESET --cwd APP --yes`)
+  expect(html).toContain(`npx ${runner} add button --cwd APP --yes`)
+  expect(html).toContain(`npx ${runner} theme add PRESET --cwd APP --dry-run --json`)
+  for (const prefix of ['pnpm dlx', 'bunx', 'yarn dlx --quiet']) expect(html).toContain(`${prefix} ${runner}`)
+  expect(html).toContain('24 hours')
+  expect(html.match(/<h1\b/g)).toHaveLength(1)
 })
