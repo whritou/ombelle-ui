@@ -3,9 +3,15 @@ import {
   supportedComponentIds,
   isStyleFamily,
   type CompileResult,
+  type ComponentId,
 } from '@ombelle/contracts'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
-export type PresetView = { mode: 'light' | 'dark'; viewport: 'wide' | 'narrow' }
+/** `focus` shows only that component's section of the gallery. */
+export type PresetView = {
+  mode: 'light' | 'dark'
+  viewport: 'wide' | 'narrow'
+  focus?: ComponentId
+}
 export type PresetRender = {
   type: 'preset-render'
   requestId: number
@@ -66,7 +72,11 @@ export async function verifyPresetRender(
       !positiveId(input.requestId) ||
       input.requestId <= previousRequestId ||
       !record(input.view) ||
-      !exact(input.view, ['mode', 'viewport']) ||
+      !(
+        exact(input.view, ['mode', 'viewport']) ||
+        (exact(input.view, ['mode', 'viewport', 'focus']) &&
+          (supportedComponentIds as readonly unknown[]).includes(input.view.focus))
+      ) ||
       !['light', 'dark'].includes(input.view.mode as string) ||
       !['wide', 'narrow'].includes(input.view.viewport as string)
     )

@@ -9,7 +9,8 @@ import { ThemeToggle } from './theme'
 
 export function SiteHeader() {
   const pathname = usePathname()
-  const current = (href: string) => (href === pathname ? 'page' : undefined)
+  const current = (href: string) =>
+    href === pathname || (href === '/components' && pathname.startsWith('/components/')) ? 'page' : undefined
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">

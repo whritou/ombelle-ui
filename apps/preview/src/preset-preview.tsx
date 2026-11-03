@@ -95,6 +95,20 @@ function PresetPreview() {
       'dark',
       current.message.view.mode === 'dark',
     )
+    // The gallery is shared with consumer parity fixtures, so focus hides the
+    // other sections instead of rendering a different tree.
+    const focus = current.message.view.focus
+    const gallery = document.querySelector<HTMLElement>('[data-testid="preset-gallery"]')
+    for (const child of Array.from(gallery?.children ?? []) as HTMLElement[]) {
+      const own = child.dataset.component
+      child.hidden = Boolean(focus) && own !== focus && !child.querySelector(`[data-component="${focus}"]`)
+      if (!own)
+        for (const part of Array.from(child.querySelectorAll<HTMLElement>(':scope > [data-component]')))
+          // Labels stay so focused form controls keep their accessible names.
+          part.hidden = Boolean(focus) && part.dataset.component !== focus && part.dataset.component !== 'label'
+    }
+    if (focus) document.documentElement.dataset.focus = focus
+    else delete document.documentElement.dataset.focus
     document.documentElement.dataset.presetHash =
       current.message.result.preset.hash
     document.documentElement.dataset.presetRequest = String(

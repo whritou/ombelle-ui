@@ -14,11 +14,17 @@ export function PresetPreviewFrame({
   view,
   stale,
   onStatus,
+  title = 'Global preset gallery',
+  height = 760,
+  caption = true,
 }: {
   result: CompileResult | null
   view: PresetView
   stale: boolean
   onStatus: (status: 'connecting' | 'ready' | 'failed') => void
+  title?: string
+  height?: number
+  caption?: boolean
 }) {
   const frame = useRef<HTMLIFrameElement>(null),
     port = useRef<MessagePort | null>(null)
@@ -43,7 +49,11 @@ export function PresetPreviewFrame({
       type: 'preset-render',
       requestId: ++sequence.current,
       result: latest.current.result,
-      view: latest.current.view,
+      // Omit an unset focus: the sandbox accepts only exact view shapes.
+      view: (({ mode, viewport, focus }) =>
+        focus ? { mode, viewport, focus } : { mode, viewport })(
+        latest.current.view,
+      ),
     }
     latestSent.current = message
     arm()
@@ -101,10 +111,12 @@ export function PresetPreviewFrame({
   }, [attempt])
   useEffect(() => {
     send()
-  }, [result, view.mode, view.viewport])
+  }, [result, view.mode, view.viewport, view.focus])
   return (
     <section aria-label="Preset preview">
-      <p>{stale ? 'Previous valid preview' : 'Current preset preview'}</p>
+      {caption && (
+        <p>{stale ? 'Previous valid preview' : 'Current preset preview'}</p>
+      )}
       {failed && (
         <p role="alert">
           Preview unavailable. You can still export a valid preset.{' '}
@@ -119,13 +131,13 @@ export function PresetPreviewFrame({
       <iframe
         key={attempt}
         ref={frame}
-        title="Global preset gallery"
+        title={title}
         src={previewFrameUrl('preset', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)}
         sandbox="allow-scripts"
         style={{
           width: view.viewport === 'narrow' ? '320px' : '100%',
           maxWidth: '100%',
-          height: '760px',
+          height: height + 'px',
           border: '1px solid var(--border)',
           borderRadius: '8px',
         }}
