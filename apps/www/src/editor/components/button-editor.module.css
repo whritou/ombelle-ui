@@ -57,15 +57,17 @@
 .headerActions button:not(:disabled):hover, .recoveryActions button:hover { border-color: var(--moss); }
 .headerActions .download:not(:disabled):hover { filter: brightness(1.08); }
 
-.workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18.5rem, 23rem); min-height: 50rem; }
-.primary { min-width: 0; padding: 1.75rem clamp(1rem, 2.5vw, 2.5rem) 0 0; }
-.rail { border-left: 1px solid var(--line); padding: 1.75rem 0 2rem clamp(1rem, 2vw, 2rem); }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(19rem, 24rem); gap: clamp(1rem, 2vw, 2rem); align-items: start; padding-top: 1.5rem; }
+.primary { min-width: 0; display: grid; gap: 1.25rem; }
+/* Preview and output read as cards; the rail stays beside them while scrolling. */
+.previewSection, .codeSection { border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: 1.25rem; box-shadow: var(--shadow-soft); }
+.rail { position: sticky; top: 5rem; max-height: calc(100dvh - 6rem); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: 1.25rem 1.25rem 1.5rem; }
 .sectionTitle { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
 .sectionTitle h2, .root :global(.sectionTitle) h2, .root :global(.railHeading) h2 { font-size: 1.22rem; line-height: 1.2; letter-spacing: -.02em; margin-bottom: .3rem; }
 .sectionTitle p, .root :global(.sectionTitle) p, .root :global(.railHeading) p { color: var(--slate); font-size: .9rem; margin-bottom: 1.25rem; }
 .recipeMeta { color: var(--slate); font-size: .8rem; white-space: nowrap; }
-.viewControls { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
-.viewControls label { display: flex; align-items: center; gap: .55rem; font-size: .87rem; font-weight: 600; }
+.viewControls { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-bottom: .75rem; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--white); }
+.viewControls label { display: flex; align-items: center; gap: .5rem; font-size: .8rem; font-weight: 600; color: var(--slate); }
 .viewControls select, .root :global(.properties) select, .root :global(.properties) input[type="text"] {
   border: 1px solid var(--control); border-radius: .4rem; background: var(--surface); color: var(--ink); padding: .48rem .65rem;
 }
@@ -76,11 +78,12 @@
   border-radius: 1rem;
   overflow: hidden;
   background: var(--paper);
-  box-shadow: var(--shadow-soft);
+  background-image: radial-gradient(var(--grid-line) 1px, transparent 1px);
+  background-size: 16px 16px;
 }
-.specimen iframe { display: block; width: 100%; min-height: 18rem; border: 0; }
-.previewStatus { margin: .65rem 0 1.7rem; color: var(--slate); font-size: .84rem; }
-.codeSection { border-top: 1px solid var(--line); padding-top: 1.5rem; }
+.specimen iframe { display: block; width: 100%; min-height: 20rem; border: 0; }
+.previewStatus { margin: .65rem 0 0; color: var(--slate); font-size: .84rem; }
+.codeSection { min-width: 0; }
 .hashLine { color: var(--slate); font-size: .79rem; overflow-wrap: anywhere; margin-top: .8rem; }
 .hashLine span { font-family: var(--font-mono); }
 
@@ -123,9 +126,10 @@
 @media (max-width: 800px) {
   .header { display: block; }
   .headerActions { margin-top: 1.3rem; }
-  .workspace { display: block; min-height: 0; }
-  .primary { padding: 1.2rem 0; }
-  .rail { border-left: 0; padding: 1.2rem 0; }
+  .workspace { display: block; min-height: 0; padding-top: 1rem; }
+  .primary { padding: 0; }
+  .previewSection, .codeSection { padding: 1rem; }
+  .rail { position: static; max-height: none; overflow: visible; padding: 1rem; }
   .root :global(.mobileTabs) { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
   .root :global(.mobileTabs) button { border: 0; border-bottom: 3px solid transparent; background: none; padding: .8rem .4rem; color: var(--slate); font-weight: 600; }
   .root :global(.mobileTabs) button[aria-current="page"] { border-bottom-color: var(--moss); color: var(--ink); }

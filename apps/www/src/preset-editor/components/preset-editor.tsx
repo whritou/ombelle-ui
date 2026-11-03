@@ -117,14 +117,17 @@ export default function PresetEditor() {
   const diagnostic = compiled.diagnostic
   return (
     <main className={styles.editor} aria-label="Global preset editor">
+      <div className={styles.top}>
       <header>
-        <a href="/">Ombelle</a>
-        <p>Project preset</p>
+        <p className={styles.crumb}>
+          <a href="/">Ombelle</a> <span aria-hidden="true">/</span> Project
+          preset
+        </p>
         <h1>Global preset editor</h1>
         <p>Make a theme that follows your next component into your project.</p>
-        <p>Draft — automated token contrast only</p>
+        <p className={styles.badge}>Draft — automated token contrast only</p>
       </header>
-      <div className={styles.toolbar}>
+      <div className={`${styles.toolbar} ${styles.actions}`}>
         <label htmlFor="preset-family">Style family</label>
         <select
           id="preset-family"
@@ -174,7 +177,8 @@ export default function PresetEditor() {
           Reset all tokens
         </button>
       </div>
-      <p role="status" aria-live="polite">
+      </div>
+      <p role="status" aria-live="polite" className={styles.notice}>
         {notice}
       </p>
       {warning && <p role="alert">{warning}</p>}
@@ -243,9 +247,9 @@ export default function PresetEditor() {
         </div>
       )}
       <div className={styles.workbench}>
-        <section aria-labelledby="preset-controls-heading">
+        <section aria-labelledby="preset-controls-heading" className={styles.controls}>
           <h2 id="preset-controls-heading">Customize</h2>
-          <fieldset>
+          <fieldset className={styles.identity}>
             <legend>Preset identity</legend>
             {(['id', 'name', 'revision'] as const).map((key) => (
               <div className="preset-control" key={key}>
@@ -275,7 +279,7 @@ export default function PresetEditor() {
           />
         </section>
         <div className={styles.preview}>
-          <div className={styles.toolbar}>
+          <div className={`${styles.toolbar} ${styles.previewBar}`}>
             <label htmlFor="preset-mode">Preview mode</label>
             <select
               id="preset-mode"
@@ -294,34 +298,34 @@ export default function PresetEditor() {
               <option value="wide">Wide</option>
               <option value="narrow">320 pixels</option>
             </select>
+            <p data-testid="preset-preview-status" className={styles.previewStatus} data-status={previewStatus}>Preview {previewStatus}</p>
           </div>
-          <p data-testid="preset-preview-status">Preview {previewStatus}</p>
           <PresetPreviewFrame
             result={compiled.result}
             view={{ mode, viewport }}
             stale={compiled.stale}
             onStatus={setPreviewStatus}
           />
+          <section aria-label="Token contrast" className={styles.contrastPanel}>
+            <h2>Token contrast</h2>
+            <p>
+              Eight text pairs in both modes, using a 4.5:1 threshold. Warnings
+              do not prevent export. This does not evaluate every component
+              state or non-text contrast.
+            </p>
+            <div className={styles.contrast}>
+              {contrast.map((pair) => (
+                <p key={pair.mode + pair.foreground} data-status={pair.status}>
+                  {pair.mode} {pair.foreground}/{pair.background}:{' '}
+                  {pair.status === 'not-evaluated'
+                    ? 'Not evaluated'
+                    : `${pair.ratio!.toFixed(2)}:1 — ${pair.status === 'pass' ? 'Pass' : 'Warning'}`}
+                </p>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
-      <section aria-label="Token contrast">
-        <h2>Token contrast</h2>
-        <p>
-          Eight text pairs in both modes, using a 4.5:1 threshold. Warnings do
-          not prevent export. This does not evaluate every component state or
-          non-text contrast.
-        </p>
-        <div className={styles.contrast}>
-          {contrast.map((pair) => (
-            <p key={pair.mode + pair.foreground}>
-              {pair.mode} {pair.foreground}/{pair.background}:{' '}
-              {pair.status === 'not-evaluated'
-                ? 'Not evaluated'
-                : `${pair.ratio!.toFixed(2)}:1 — ${pair.status === 'pass' ? 'Pass' : 'Warning'}`}
-            </p>
-          ))}
-        </div>
-      </section>
       <PresetExportPanel draft={draft} state={compiled} announce={setNotice} />
       <dialog
         ref={dialog}

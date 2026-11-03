@@ -126,7 +126,7 @@ export function PresetPreviewFrame({
           width: view.viewport === 'narrow' ? '320px' : '100%',
           maxWidth: '100%',
           height: '760px',
-          border: '1px solid #d6d3d1',
+          border: '1px solid var(--border)',
           borderRadius: '8px',
         }}
       />

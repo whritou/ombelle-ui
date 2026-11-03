@@ -1,8 +1,22 @@
+import { RotateCcw } from 'lucide-react'
 import type { PresetEditorDraft, PresetEditablePath } from '../model'
 import { colorKeys, designControls, presetFieldValue } from '../model'
+import { browserColor } from '../contrast'
 export const fieldId = (path: string) => 'preset' + path.replaceAll('/', '-')
 const human = (key: string) =>
   key.replace(/[A-Z]/g, (c) => ' ' + c.toLowerCase())
+const title = (key: string) => {
+  const words = human(key)
+  return words[0]!.toUpperCase() + words.slice(1)
+}
+const hex = (n: number) => n.toString(16).padStart(2, '0')
+/** Native color pickers only take #rrggbb; OKLCH values are converted for display. */
+function pickerValue(value: string) {
+  if (/^#[0-9a-f]{6}$/i.test(value)) return value.toLowerCase()
+  if (typeof CSS === 'undefined') return '#000000'
+  const rgb = browserColor(value)
+  return rgb ? '#' + rgb.slice(0, 3).map(hex).join('') : '#000000'
+}
 export function PresetControls({
   draft,
   errorPath,
@@ -19,53 +33,81 @@ export function PresetControls({
     onReset(path)
     document.getElementById(fieldId(path))?.focus()
   }
+  const resetButton = (path: PresetEditablePath, label: string) => (
+    <button
+      type="button"
+      className="preset-reset"
+      aria-label={label}
+      title={label}
+      onClick={() => reset(path)}
+      disabled={!Object.hasOwn(draft.edits, path)}
+    >
+      <RotateCcw aria-hidden="true" size={14} />
+    </button>
+  )
   return (
     <>
-      {(['light', 'dark'] as const).map((mode) => (
-        <details key={mode} open>
-          <summary>{mode === 'light' ? 'Light colors' : 'Dark colors'}</summary>
-          <div className="preset-control-grid">
-            {colorKeys.map((key) => {
-              const path: PresetEditablePath = `/modes/${mode}/${key}`,
-                value = presetFieldValue(draft, path)
-              return (
-                <div className="preset-control" key={key}>
-                  <label htmlFor={fieldId(path)}>
-                    {mode === 'light' ? 'Light' : 'Dark'} {human(key)}
-                  </label>
-                  <div className="preset-input-row">
-                    <span
-                      className="preset-swatch"
-                      aria-hidden="true"
-                      style={{ backgroundColor: value }}
-                    />
-                    <input
-                      id={fieldId(path)}
-                      value={value}
-                      maxLength={80}
-                      aria-invalid={errorPath === path || undefined}
-                      aria-describedby={
-                        errorPath === path ? 'preset-error' : undefined
-                      }
-                      onChange={(e) => onEdit(path, e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      aria-label={`Reset ${mode} ${human(key)}`}
-                      onClick={() => reset(path)}
-                      disabled={!Object.hasOwn(draft.edits, path)}
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
+      <section className="preset-card" aria-labelledby="preset-colors-heading">
+        <div className="preset-card-head">
+          <h3 id="preset-colors-heading">Colors</h3>
+          <p>Hex or OKLCH. Every token has a light and a dark value.</p>
+        </div>
+        <div className="preset-color-table">
+          <div className="preset-color-columns" aria-hidden="true">
+            <span>Token</span>
+            <span>Light</span>
+            <span>Dark</span>
           </div>
-        </details>
-      ))}
-      <details open>
-        <summary>Design tokens</summary>
+          {colorKeys.map((key) => (
+            <div className="preset-color-row" key={key}>
+              <span className="preset-color-name" aria-hidden="true">
+                {title(key)}
+              </span>
+              {(['light', 'dark'] as const).map((mode) => {
+                const path: PresetEditablePath = `/modes/${mode}/${key}`,
+                  value = presetFieldValue(draft, path),
+                  label = `${mode === 'light' ? 'Light' : 'Dark'} ${human(key)}`
+                return (
+                  <div className="preset-color-field" key={mode}>
+                    <label htmlFor={fieldId(path)}>{label}</label>
+                    <div className="preset-input-row">
+                      <span
+                        className="preset-swatch"
+                        style={{ backgroundColor: value }}
+                      >
+                        <input
+                          type="color"
+                          tabIndex={-1}
+                          aria-hidden="true"
+                          value={pickerValue(value)}
+                          onChange={(e) => onEdit(path, e.target.value)}
+                        />
+                      </span>
+                      <input
+                        id={fieldId(path)}
+                        value={value}
+                        maxLength={80}
+                        spellCheck={false}
+                        aria-invalid={errorPath === path || undefined}
+                        aria-describedby={
+                          errorPath === path ? 'preset-error' : undefined
+                        }
+                        onChange={(e) => onEdit(path, e.target.value)}
+                      />
+                      {resetButton(path, `Reset ${mode} ${human(key)}`)}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="preset-card" aria-labelledby="preset-design-heading">
+        <div className="preset-card-head">
+          <h3 id="preset-design-heading">Design tokens</h3>
+          <p>Shape, spacing, depth and motion shared by every component.</p>
+        </div>
         <div className="preset-control-grid">
           {Object.entries(designControls).map(([key, control]) => {
             const path = `/design/${key}` as PresetEditablePath,
@@ -100,14 +142,7 @@ export function PresetControls({
                       onChange={(e) => onEdit(path, e.target.value)}
                     />
                   )}
-                  <button
-                    type="button"
-                    aria-label={`Reset ${control.label.toLowerCase()}`}
-                    onClick={() => reset(path)}
-                    disabled={!Object.hasOwn(draft.edits, path)}
-                  >
-                    Reset
-                  </button>
+                  {resetButton(path, `Reset ${control.label.toLowerCase()}`)}
                 </div>
                 {'min' in control && (
                   <small>
@@ -119,7 +154,7 @@ export function PresetControls({
             )
           })}
         </div>
-      </details>
+      </section>
     </>
   )
 }
