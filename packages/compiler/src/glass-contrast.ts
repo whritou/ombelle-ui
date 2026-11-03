@@ -7,17 +7,55 @@ export type GlassContrastPair = {
   mode: 'light' | 'dark'
   surface: ColorKey
   text: ColorKey
+  /** Over the darkest backdrop the glass filter can produce, without sheen. */
   ratioOverBlack: number
+  /** Over the brightest filtered backdrop, under the full sheen. */
   ratioOverWhite: number
+  /** The opaque fallback surface, with and without its sheen. */
+  ratioOpaque: number
   passes: boolean
+}
+export type GlassBackdrop = {
+  /** CSS saturate(), contrast() and brightness() amounts, in filter order. */
+  saturation: number
+  contrast: number
+  brightness: number
+  /** Opacity of the white specular gradient laid over the surface. */
+  sheen: number
+  /** Gamma-encoded channel range every backdrop pixel lands in after the filter. */
+  low: number
+  high: number
 }
 export type GlassContrastReport = {
   opacity: number
   transparency: 'auto' | 'reduced'
+  backdrop: Record<'light' | 'dark', GlassBackdrop>
+  /** Coverage nested glass uses: it drops its own filter, so it sees raw 0..1 backdrops. */
+  nestedOpacity: Record<'light' | 'dark', number> | null
   pairs: GlassContrastPair[]
   passes: boolean
+  /** Lowest passing glassOpacity in 0.01 steps: the larger of the two modes. */
   minimumOpacity: number | null
+  minimumOpacityByMode: Record<'light' | 'dark', number | null>
 }
+
+/**
+ * Values used when a preset leaves a glass field out. Filter and sheen
+ * defaults are neutral, so presets written before these fields compile to the
+ * same bound as before; the built-in preset sets every field explicitly.
+ */
+export const glassDesignDefaults = {
+  glassBlurPx: 12,
+  glassOpacity: 1,
+  glassSaturation: 1.4,
+  glassBackdropContrast: 1,
+  glassBackdropTone: 0,
+  glassSheen: 0,
+  glassRim: 0.35,
+} as const
+/** Dark mode scales the white sheen down; a bright sheen on dark glass would wash out light text. */
+export const glassDarkSheenScale = 0.25
+export const glassMinimumOpacity = 0.25
 
 export const glassContrastPairs: readonly [surface: ColorKey, text: ColorKey][] =
   [
@@ -86,85 +124,195 @@ export function relativeLuminance(color: string): number {
 const ratio = (a: number, b: number) =>
   (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
 
-// color-mix(in srgb, surface alpha, transparent) over backdrop b in {0, 1}
-const over = (s: number, alpha: number, b: 0 | 1) => alpha * s + (1 - alpha) * b
-const composite = (rgb: Rgb, alpha: number, b: 0 | 1): Rgb => [
-  over(rgb[0], alpha, b),
-  over(rgb[1], alpha, b),
-  over(rgb[2], alpha, b),
-]
+const round = (v: number) => Math.round(v * 10000) / 10000
 
 /**
- * Contrast against the text is V-shaped in the surface luminance: it falls to
- * 1:1 where the surface matches the text and rises on either side. Passing at
- * both composite ends therefore only proves safety when the text luminance lies
- * outside the [over-black, over-white] interval; inside it, some backdrop makes
- * the surface match the text. With an effective coverage of 0.6..1 (an opaque
- * surface token and the schema's glassOpacity range) both ends cannot pass with
- * the text inside the interval: that needs (Yw + 0.05) / (Yb + 0.05) >=
- * 4.5 * 4.5 = 20.25, while at coverage >= 0.6 the ratio is at most about 3.7.
- * The explicit check keeps the guarantee if the range widens or a translucent
- * surface token lowers the coverage.
+ * The backdrop filter each mode emits, and the channel range it confines the
+ * backdrop to. Filter functions work per channel on gamma-encoded sRGB and clamp
+ * after every primitive (Filter Effects 1, sections 5 and 13). blur() averages
+ * and saturate() is clamped to 0..1, so whatever the backdrop's colour, each
+ * channel enters contrast() inside 0..1. contrast(c) maps v to c * v + (1 - c) / 2
+ * and brightness(k) maps v to k * v, both increasing, so every channel leaves the
+ * chain inside [low, high], the images of 0 and 1. Saturation cannot widen that
+ * range; it only moves colours within it.
  */
-function textBetween(
-  textLum: number,
-  lumOverBlack: number,
-  lumOverWhite: number,
-): boolean {
-  return textLum > lumOverBlack && textLum < lumOverWhite
+export function glassBackdrop(
+  design: Preset['design'] | undefined,
+  mode: 'light' | 'dark',
+): GlassBackdrop {
+  const d = { ...glassDesignDefaults, ...design }
+  if (d.transparency === 'reduced')
+    return { saturation: 1, contrast: 1, brightness: 1, sheen: 0, low: 0, high: 1 }
+  const contrast = d.glassBackdropContrast
+  // Tone pushes the backdrop toward the mode's surfaces: lighter in light
+  // mode, darker in dark mode.
+  const brightness = round(
+    mode === 'light' ? 1 + d.glassBackdropTone : 1 - d.glassBackdropTone,
+  )
+  const sheen = round(
+    mode === 'light' ? d.glassSheen : d.glassSheen * glassDarkSheenScale,
+  )
+  const transfer = (v: number) =>
+    clamp01(clamp01(contrast * v + (1 - contrast) / 2) * brightness)
+  return {
+    saturation: d.glassSaturation,
+    contrast,
+    brightness,
+    sheen,
+    low: transfer(0),
+    high: transfer(1),
+  }
 }
 
-function evaluate(data: Preset, opacity: number): GlassContrastPair[] {
-  const pairs: GlassContrastPair[] = []
+// color-mix(in srgb, surface alpha, transparent) over backdrop channel b, then
+// the sheen gradient (white at alpha sheen) on top, as the browser paints them.
+const paint = (rgb: Rgb, alpha: number, b: number, sheen: number): Rgb =>
+  rgb.map((s) => sheen + (1 - sheen) * (alpha * s + (1 - alpha) * b)) as unknown as Rgb
+
+/**
+ * Painted luminance increases with every backdrop channel and with the sheen,
+ * so over a backdrop whose channels lie in [low, high] it is smallest over grey
+ * low without sheen and largest over grey high under the full sheen.
+ *
+ * Contrast against the text is V-shaped in the surface luminance: it falls to
+ * 1:1 where the surface matches the text and rises on either side. Passing at
+ * both ends therefore only proves safety when the text luminance lies outside
+ * the [darkest, brightest] interval; inside it, some backdrop makes the surface
+ * match the text, so the pair fails.
+ */
+function bound(
+  surface: Color,
+  textLum: number,
+  alpha: number,
+  low: number,
+  high: number,
+  sheen: number,
+) {
+  const darkest = luminanceOf(paint(surface.rgb, alpha, low, 0))
+  const brightest = luminanceOf(paint(surface.rgb, alpha, high, sheen))
+  const overDarkest = ratio(darkest, textLum)
+  const overBrightest = ratio(brightest, textLum)
+  return {
+    overDarkest,
+    overBrightest,
+    passes:
+      overDarkest >= 4.5 &&
+      overBrightest >= 4.5 &&
+      !(textLum > darkest && textLum < brightest),
+  }
+}
+
+type Resolved = {
+  mode: 'light' | 'dark'
+  surface: ColorKey
+  text: ColorKey
+  surfaceColor: Color
+  textColor: Color
+  textLum: number
+  backdrop: GlassBackdrop
+}
+
+function resolve(data: Preset): Resolved[] {
+  const out: Resolved[] = []
   for (const mode of ['light', 'dark'] as const) {
     const colors = data.modes[mode] as Record<string, string>
+    const backdrop = glassBackdrop(data.design, mode)
     for (const [surface, text] of glassContrastPairs) {
-      const surfaceColor = parseColor(colors[surface])
       const textColor = parseColor(colors[text])
-      // A translucent surface token stacks with glassOpacity: color-mix keeps
-      // the token's own alpha, so the effective coverage is opacity * alpha.
-      const effective = opacity * surfaceColor.alpha
-      const textLum = luminanceOf(textColor.rgb)
-      const lumOverBlack = luminanceOf(composite(surfaceColor.rgb, effective, 0))
-      const lumOverWhite = luminanceOf(composite(surfaceColor.rgb, effective, 1))
-      const ratioOverBlack = ratio(lumOverBlack, textLum)
-      const ratioOverWhite = ratio(lumOverWhite, textLum)
-      pairs.push({
+      out.push({
         mode,
         surface,
         text,
-        ratioOverBlack,
-        ratioOverWhite,
-        passes:
-          // Translucent text takes on the backdrop too; it is never bounded.
-          textColor.alpha >= 1 &&
-          ratioOverBlack >= 4.5 &&
-          ratioOverWhite >= 4.5 &&
-          !textBetween(textLum, lumOverBlack, lumOverWhite),
+        surfaceColor: parseColor(colors[surface]),
+        textColor,
+        textLum: luminanceOf(textColor.rgb),
+        backdrop,
       })
     }
   }
-  return pairs
+  return out
+}
+
+// A translucent surface token stacks with the glass opacity: color-mix keeps
+// the token's own alpha, so the effective coverage is opacity * alpha.
+const filtered = (r: Resolved, opacity: number) =>
+  bound(
+    r.surfaceColor,
+    r.textLum,
+    opacity * r.surfaceColor.alpha,
+    r.backdrop.low,
+    r.backdrop.high,
+    r.backdrop.sheen,
+  )
+// Nested glass drops its own filter and sees the raw backdrop: any 0..1 pixel.
+// Passing here at some coverage also passes the opaque fallback, whose painted
+// luminance lies inside the same interval.
+const raw = (r: Resolved, opacity: number) =>
+  bound(r.surfaceColor, r.textLum, opacity * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
+// Translucent text takes on the backdrop too; it is never bounded.
+const opaqueText = (r: Resolved) => r.textColor.alpha >= 1
+
+const steps = (from: number) => {
+  const out: number[] = []
+  for (let step = Math.round(from * 100); step <= 100; step++) out.push(step / 100)
+  return out
+}
+
+function nested(resolved: Resolved[], opacity: number) {
+  const result = { light: 1, dark: 1 }
+  for (const mode of ['light', 'dark'] as const) {
+    const pairs = resolved.filter((r) => r.mode === mode)
+    const found = steps(0).find((o) => pairs.every((r) => raw(r, o).passes))
+    if (found === undefined) return null
+    result[mode] = Math.max(opacity, found)
+  }
+  return result
 }
 
 export function glassContrastReport(data: Preset): GlassContrastReport {
   const transparency = data.design?.transparency ?? 'auto'
-  const configured = data.design?.glassOpacity ?? 1
+  const configured = data.design?.glassOpacity ?? glassDesignDefaults.glassOpacity
   const opacity = transparency === 'reduced' ? 1 : configured
-  const pairs = evaluate(data, opacity)
-  let minimumOpacity: number | null = null
-  for (let step = 60; step <= 100; step++) {
-    const candidate = step / 100
-    if (evaluate(data, candidate).every((p) => p.passes)) {
-      minimumOpacity = candidate
-      break
+  const resolved = resolve(data)
+  const nestedOpacity = nested(resolved, opacity)
+  const pairs = resolved.map((r): GlassContrastPair => {
+    const glass = filtered(r, opacity)
+    const opaque = raw(r, 1)
+    return {
+      mode: r.mode,
+      surface: r.surface,
+      text: r.text,
+      ratioOverBlack: glass.overDarkest,
+      ratioOverWhite: glass.overBrightest,
+      ratioOpaque: Math.min(opaque.overDarkest, opaque.overBrightest),
+      passes: opaqueText(r) && glass.passes && opaque.passes,
     }
+  })
+  const lowest = (mode: 'light' | 'dark') => {
+    const pairs = resolved.filter((r) => r.mode === mode)
+    if (nestedOpacity === null || !pairs.every(opaqueText)) return null
+    return (
+      steps(glassMinimumOpacity).find((o) =>
+        pairs.every((r) => filtered(r, o).passes),
+      ) ?? null
+    )
   }
+  const minimumOpacityByMode = { light: lowest('light'), dark: lowest('dark') }
+  const minimumOpacity =
+    minimumOpacityByMode.light === null || minimumOpacityByMode.dark === null
+      ? null
+      : Math.max(minimumOpacityByMode.light, minimumOpacityByMode.dark)
   return {
     opacity,
     transparency,
+    backdrop: {
+      light: glassBackdrop(data.design, 'light'),
+      dark: glassBackdrop(data.design, 'dark'),
+    },
+    nestedOpacity,
     pairs,
     passes: pairs.every((p) => p.passes),
     minimumOpacity,
+    minimumOpacityByMode,
   }
 }

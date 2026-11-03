@@ -133,7 +133,7 @@ export function ColorControls({ draft, errorPath, onEdit, onReset }: ControlProp
   )
 }
 export function DesignControls({ draft, errorPath, onEdit, onReset }: ControlProps) {
-  // Transparency, blur and opacity exist only for liquid glass drafts.
+  // Transparency and the glass material settings exist only for liquid glass drafts.
   const designEntries: [
     string,
     (typeof designControls)[keyof typeof designControls] | (typeof glassDesignControls)[keyof typeof glassDesignControls],

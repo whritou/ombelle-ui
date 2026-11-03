@@ -12,7 +12,7 @@ import type { RecipeSnapshotService } from '../../apps/www/src/snapshots/server/
 import { publicationQuotas as Q } from '../../apps/www/src/snapshots/server/quotas.js'
 
 const cleanups: Array<() => Promise<void>> = []
-afterEach(async () => { vi.unstubAllEnvs(); for (const close of cleanups.splice(0)) await close() })
+afterEach(async () => { vi.useRealTimers(); vi.unstubAllEnvs(); for (const close of cleanups.splice(0)) await close() })
 async function fixture() { const service = await startSnapshotService(); cleanups.push(service.close); return service }
 function post(origin: string, body: unknown = { recipe: example }, key = randomUUID(), headers: Record<string, string> = {}) {
   return fetch(origin + '/api/v1/recipes', { method: 'POST', body: JSON.stringify(body), headers: { Origin: origin, 'Content-Type': 'application/json', 'Idempotency-Key': key, ...headers } })
@@ -95,6 +95,8 @@ it.each(['schemaVersion', 'catalogRelease', 'compilerVersion'])('reports unsuppo
   await failure(await post(origin, { recipe }), 422, 'UNSUPPORTED_RELEASE')
 })
 it('enforces bounded bodies, depth, and the shared minute attempt budget', async () => {
+  // Start at a minute boundary so the attempt burst cannot straddle two windows.
+  vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(Math.ceil(Date.now() / 60_000) * 60_000)
   const { origin } = await fixture()
   await failure(await post(origin, { recipe: example, padding: 'x'.repeat(65_536) }), 413, 'PAYLOAD_TOO_LARGE')
   let deep: unknown = {}

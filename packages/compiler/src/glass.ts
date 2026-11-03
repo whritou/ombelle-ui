@@ -1,5 +1,9 @@
 import { FoundationError, type Preset } from '@ombelle/contracts'
-import { glassContrastReport } from './glass-contrast.js'
+import {
+  glassBackdrop,
+  glassContrastReport,
+  glassDesignDefaults,
+} from './glass-contrast.js'
 
 // Internal liquid-glass helpers shared by full-theme and scoped Button compiles.
 export function assertGlassContrast(
@@ -8,8 +12,11 @@ export function assertGlassContrast(
   const report = glassContrastReport(data)
   const failing = report.pairs.find((pair) => !pair.passes)
   if (!failing) return
-  const overBlack = failing.ratioOverBlack <= failing.ratioOverWhite
-  const worst = overBlack ? failing.ratioOverBlack : failing.ratioOverWhite
+  const [worst, where] = [
+    [failing.ratioOverBlack, 'over the darkest filtered backdrop'],
+    [failing.ratioOverWhite, 'over the brightest filtered backdrop'],
+    [failing.ratioOpaque, 'on the opaque fallback surface'],
+  ].sort((a, b) => (a[0] as number) - (b[0] as number))[0] as [number, string]
   throw new FoundationError(
     'INVALID_DATA',
     'Liquid glass text contrast fails in ' +
@@ -20,9 +27,9 @@ export function assertGlassContrast(
       failing.surface +
       ': ' +
       (Math.floor(worst * 100) / 100).toFixed(2) +
-      ':1 over a ' +
-      (overBlack ? 'black' : 'white') +
-      ' backdrop. ' +
+      ':1 ' +
+      where +
+      '. ' +
       (report.minimumOpacity === null
         ? 'Raise contrast between ' +
           failing.text +
@@ -34,19 +41,36 @@ export function assertGlassContrast(
   )
 }
 
-export function glassTokens(design: Preset['design']): {
+export function glassTokens(data: Preset): {
   light: Record<string, string>
   dark: Record<string, string>
 } {
+  const design = data.design
+  const d = { ...glassDesignDefaults, ...design }
   const opaque = design.transparency === 'reduced'
+  // Nested glass gets the coverage that holds over a raw backdrop. A preset
+  // without one fails assertGlassContrast before tokens are written.
+  const nested = glassContrastReport(data).nestedOpacity ?? { light: 1, dark: 1 }
+  const mode = (m: 'light' | 'dark') => {
+    const backdrop = glassBackdrop(design, m)
+    return {
+      '--glass-brightness': String(backdrop.brightness),
+      '--glass-sheen': String(backdrop.sheen),
+      '--glass-nested-opacity': String(nested[m]),
+    }
+  }
   return {
     light: {
-      '--glass-blur': opaque ? '0px' : (design.glassBlurPx ?? 12) + 'px',
-      '--glass-opacity': opaque ? '1' : String(design.glassOpacity ?? 1),
-      '--glass-highlight': 'color-mix(in srgb, white 35%, transparent)',
+      '--glass-blur': opaque ? '0px' : d.glassBlurPx + 'px',
+      '--glass-opacity': opaque ? '1' : String(d.glassOpacity),
+      '--glass-saturation': opaque ? '1' : String(d.glassSaturation),
+      '--glass-contrast': opaque ? '1' : String(d.glassBackdropContrast),
+      '--glass-highlight': 'color-mix(in srgb, white ' + Math.round(d.glassRim * 100) + '%, transparent)',
+      ...mode('light'),
     },
     dark: {
-      '--glass-highlight': 'color-mix(in srgb, white 12%, transparent)',
+      '--glass-highlight': 'color-mix(in srgb, white ' + Math.round(d.glassRim * 34) + '%, transparent)',
+      ...mode('dark'),
     },
   }
 }

@@ -24,28 +24,28 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
   )
   for (const item of glassLimitations) expect(html).toContain(`<li>${item}</li>`)
   expect(html).toContain(`role="status" id="${glassReadoutId}"`)
-  expect(html).toContain('Contrast bound passes at glass opacity 0.87')
+  expect(html).toContain('Contrast bound passes at glass opacity 0.5')
 })
 
 it('names failing pairs and the minimum opacity when the bound fails', () => {
   const report = presetGlassReport(
-    setPresetEdit(createPresetDraft('liquid-glass'), '/design/glassOpacity', '0.6'),
+    setPresetEdit(createPresetDraft('liquid-glass'), '/design/glassOpacity', '0.3'),
   )!
   const html = renderToStaticMarkup(<GlassPanel report={report} />)
-  expect(html).toContain('Contrast bound fails at glass opacity 0.6')
-  expect(html).toMatch(/light: mutedForeground on card, \d\.\d\d:1 over a black backdrop/)
+  expect(html).toContain('Contrast bound fails at glass opacity 0.3')
+  expect(html).toMatch(/light: mutedForeground on card, \d\.\d\d:1 over the darkest filtered backdrop/)
   expect(html).toContain(`Minimum passing glass opacity: ${report.minimumOpacity}.`)
 })
 
 it('announces a one-line summary and keeps the pair list outside the live region', () => {
   const report = presetGlassReport(
-    setPresetEdit(createPresetDraft('liquid-glass'), '/design/glassOpacity', '0.6'),
+    setPresetEdit(createPresetDraft('liquid-glass'), '/design/glassOpacity', '0.3'),
   )!
   const failing = report.pairs.filter((pair) => !pair.passes).length
   const html = renderToStaticMarkup(<GlassPanel report={report} />)
   const live = new RegExp(`<p role="status" id="${glassReadoutId}">([^<]*)</p>`).exec(html)
   expect(live?.[1]).toBe(
-    `Contrast bound fails at glass opacity 0.6: ${failing} pairs are below 4.5:1. ` +
+    `Contrast bound fails at glass opacity 0.3: ${failing} pairs are below 4.5:1. ` +
       `Minimum passing glass opacity: ${report.minimumOpacity}. ` +
       'Export and publication are disabled until every pair passes.',
   )
@@ -54,14 +54,23 @@ it('announces a one-line summary and keeps the pair list outside the live region
   expect(html.match(/role="status"/g)).toHaveLength(1)
 })
 
-it('renders transparency, blur and opacity controls only for glass drafts', () => {
+it('renders the glass material controls only for glass drafts', () => {
   const glass = renderToStaticMarkup(
     <DesignControls draft={createPresetDraft('liquid-glass')} onEdit={noop} onReset={noop} />,
   )
-  for (const label of ['Transparency', 'Glass blur', 'Glass opacity'])
+  for (const label of [
+    'Transparency',
+    'Glass blur',
+    'Glass opacity',
+    'Glass saturation',
+    'Backdrop contrast',
+    'Backdrop tone',
+    'Specular sheen',
+    'Rim light',
+  ])
     expect(glass).toContain(`>${label}</label>`)
-  expect(glass).toContain('0.6 to 1, in steps of 0.01')
-  expect(glass).toContain('0 to 24 px')
+  expect(glass).toContain('0.25 to 1, in steps of 0.01')
+  expect(glass).toContain('0 to 40 px')
   const flat = renderToStaticMarkup(
     <DesignControls draft={createPresetDraft('flat')} onEdit={noop} onReset={noop} />,
   )

@@ -31,7 +31,7 @@ async function writePresets() {
   const glass = path.join(dir, 'liquid-glass.json')
   await fs.copyFile(presetPath, glass)
   const low = JSON.parse(await fs.readFile(presetPath, 'utf8'))
-  low.design.glassOpacity = 0.6
+  low.design.glassOpacity = 0.3
   const lowFile = path.join(dir, 'low-opacity.json')
   await fs.writeFile(lowFile, JSON.stringify(low))
   const high = JSON.parse(await fs.readFile(presetPath, 'utf8'))

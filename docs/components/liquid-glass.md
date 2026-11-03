@@ -10,7 +10,7 @@ Experimental means the family compiles, installs, and renders through the same p
 | --- | --- | --- |
 | Button | Experimental | Secondary, outline, and ghost variants are translucent; default and destructive stay solid |
 | Badge | Experimental | Solid fill with the glass highlight border and inner highlight; no translucency |
-| Card | Experimental | Translucent root surface |
+| Card | Experimental | Translucent root surface with specular sheen and edge light |
 | Dialog | Experimental | Translucent content; the overlay is a plain dim with no blur |
 | Tabs | Experimental | Translucent list; the active trigger is an opaque inner surface |
 | Tooltip | Experimental | Translucent content |
@@ -22,19 +22,28 @@ The glass family stylesheet `ui-style.css` contains Input selectors only as an o
 
 ## Preset fields
 
-A glass preset sets `styleFamily: "liquid-glass"` and three design fields, which other families ignore:
+A glass preset sets `styleFamily: "liquid-glass"` and these design fields, which other families ignore. The preset editor shows a control for each one:
 
 | Field | Range | Built-in value | Effect |
 | --- | --- | --- | --- |
-| `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur |
-| `design.glassBlurPx` | 0–24 | 12 | Backdrop blur radius |
-| `design.glassOpacity` | 0.6–1 | 0.87 | Surface opacity: the share of the surface colour in the mix with the backdrop |
+| `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur, filter, or sheen |
+| `design.glassBlurPx` | 0–40 | 8 | Backdrop blur radius |
+| `design.glassOpacity` | 0.25–1 | 0.5 | Surface opacity: the share of the surface colour in the mix with the filtered backdrop |
+| `design.glassSaturation` | 1–2 | 2 | Backdrop `saturate()`; keeps the colour of what is behind the glass |
+| `design.glassBackdropContrast` | 0.3–1 | 0.45 | Backdrop `contrast()`; compresses the backdrop's light range |
+| `design.glassBackdropTone` | 0–0.6 | 0.4 | Backdrop `brightness()` of `1 + tone` in light mode and `1 − tone` in dark mode |
+| `design.glassSheen` | 0–0.5 | 0.25 | White specular gradient over the top of each surface; a quarter as strong in dark mode |
+| `design.glassRim` | 0–1 | 0.6 | Edge light: a bright top-left and softer bottom-right inner rim |
 
-For glass presets only, the compiler adds `--glass-blur` and `--glass-opacity` to `:root` in `ui-tokens.css`. With `transparency: "reduced"` they are `0px` and `1`. See [preset fields](../04-presets-and-contracts.md#liquid-glass-design-fields) for the contract.
+Backdrop contrast, tone, and sheen enter the contrast bound, so changing them changes the smallest passing opacity. Blur, saturation, and rim cannot affect it. See [preset fields](../04-presets-and-contracts.md#liquid-glass-design-fields) for the tokens and the contract.
 
 ## Contrast bound
 
-A translucent surface shows its backdrop through it. Text on it cannot be checked against one fixed colour, so the compiler checks the two extremes instead. It mixes the surface colour with pure black and with pure white at the preset's opacity. Any real backdrop, blurred or not, produces a surface whose brightness lies between those two mixes. The compiler requires 4.5:1 against both mixes, and requires the text to be either lighter or darker than both. Together these keep 4.5:1 over any backdrop.
+A translucent surface shows its backdrop through it. Text on it cannot be checked against one fixed colour, so the compiler checks the two extremes instead. Before the surface is mixed in, the glass filter compresses the backdrop: `contrast()` and `brightness()` map every channel of every backdrop pixel into a range `[low, high]`, whatever its colour or saturation. The compiler mixes the surface colour with grey `low`, and with grey `high` under the full specular sheen, at the preset's opacity. Any real backdrop, blurred or not, produces a surface whose brightness lies between those two. The compiler requires 4.5:1 against both, and requires the text to be either lighter or darker than both. Together these keep 4.5:1 over any backdrop. Compressing the backdrop is what lets the glass be thin: the built-in palette needs opacity 0.5 instead of about 0.9 over raw black and white.
+
+The compiler also requires each pair to pass on its opaque surface, which every fallback uses, and computes `--glass-nested-opacity` for glass nested in a glass Card, Dialog, or Tooltip. Nested glass drops its own filter, so its coverage is bounded against raw black and white.
+
+The bound assumes that the glass element filters the page itself. A glass surface inside an ancestor with `filter`, `opacity` below 1, `mask`, `clip-path`, `mix-blend-mode`, or its own `backdrop-filter` filters only that ancestor's content, and translucent parts of that ancestor then show the page unfiltered. The family's own nesting is handled as above; other such ancestors are outside the guarantee.
 
 The bound is checked in light and dark mode for these pairs:
 
@@ -48,7 +57,7 @@ The bound is checked in light and dark mode for these pairs:
 
 A failing pair stops compilation with `INVALID_DATA` at `/design/glassOpacity`. The message names the pair, the mode, and the smallest passing opacity, rounded up to 0.01. With `transparency: "reduced"` the surfaces are opaque, and the ordinary palette contrast rules apply to them at 4.5:1.
 
-The built-in glass preset uses opacity 0.87, the smallest value at which both built-in palettes pass. Its limiting pair is light `muted` with `mutedForeground`: 4.59:1 at 0.87, and 4.48:1 at 0.86.
+The built-in glass preset uses opacity 0.5, the smallest value at which both built-in palettes pass. Light mode needs 0.5 and dark mode 0.28; nested glass uses 0.7 in light and 0.79 in dark. To reach these, the built-in palette darkens light `mutedForeground` to `#334155` and lightens dark `mutedForeground` to `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
 
 Solid fills keep their existing contrast pairs: the default and destructive Button, both Badge variants, and the active Tabs trigger.
 
@@ -64,6 +73,10 @@ The preview gallery renders each glass component over three declared backdrops, 
 
 The six unavailable components appear in the gallery as labelled placeholders.
 
+## Glass cues
+
+Inside the feature query, each translucent surface paints a white specular gradient over its top 60 percent at `glassSheen`, which the contrast bound includes. Every glass surface also has a bright top-left inner rim, a softer bottom-right rim, a faint inner ring, and a 2px inner shadow along the bottom edge. These stay within 3px of the border, inside the smallest text inset, so they never sit behind text and do not enter the bound. There is no SVG displacement or refraction: a `url()` backdrop filter is Chromium-only, and a browser that rejects it would drop the whole filter, compressing nothing.
+
 ## Fallbacks
 
 1. **Opaque base.** Glass surfaces are opaque outside any feature query, using the relevant surface token.
@@ -72,7 +85,7 @@ The six unavailable components appear in the gallery as labelled placeholders.
 4. **Forced colours.** `@media (forced-colors: active)` uses system colours with no filter and no translucency.
 5. **Glass identity in every fallback.** A 1px highlight border, an inner top highlight, and the preset radius remain.
 
-Blur is never transitioned or animated. Transitions touch only colour and opacity and are disabled by `prefers-reduced-motion`. Buttons and Tabs lists nested inside a glass Card or Dialog drop their own filter.
+Blur is never transitioned or animated. Transitions touch only colour and opacity and are disabled by `prefers-reduced-motion`. Everything nested inside a glass Card, Dialog, or Tooltip, including another Card, drops its own filter and uses `--glass-nested-opacity`.
 
 ## CLI behaviour
 
@@ -95,7 +108,7 @@ Re-applying another glass preset to a glass project is not a family switch. It s
 
 ## Editors
 
-- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency, blur, and opacity controls appear only for glass. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails, and the readout states the minimum passing opacity. The gallery shows the six unavailable components greyed out as "Unavailable in liquid glass".
+- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency and the seven glass material controls appear only for glass, and the glass preview renders over a photo of a bluebell wood so the translucency shows. The preview follows the site's light or dark theme for every family; the Preview mode select still overrides it until the theme toggles again. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails. The readout states the minimum passing opacity, and the lowest passing opacity for each mode when the bound passes. The gallery shows the six unavailable components greyed out as "Unavailable in liquid glass".
 - **Button editor** (`/editor/component/button`): accepts glass, and shows the experimental notice beside the export and CLI command.
 
 ## Limitations
@@ -109,11 +122,10 @@ Re-applying another glass preset to a glass project is not a family switch. It s
 
 Further known limitations:
 
-- Nested glass Cards each apply their own blur. The design intended only the outermost surface to filter.
 - The Tooltip arrow stays opaque while the content is translucent, so a seam is visible between them.
 - With `transparency: "reduced"`, glass presets must still reach 4.5:1 on their opaque surfaces. This is stricter than the stable families.
 - A Tooltip trigger that wraps a Button through `asChild` takes `data-slot="tooltip-trigger"`, so Button family styles do not reach it. This applies to every family, not only glass.
-- The inactive Tabs trigger has a thin contrast margin: 4.60:1 to 4.73:1 measured in the recorded run.
+- The contrast bound assumes the glass element filters the page itself; see [contrast bound](#contrast-bound) for the ancestors it does not cover.
 - There is no public catalog page that shows the stable, experimental, and unavailable matrix yet.
 
 Component-scoped presets and recipes remain Button-only. See the [design](../superpowers/specs/2026-11-03-liquid-glass-design.md) for the full decisions.

@@ -19,7 +19,7 @@ export function glassReadoutSummary(report: GlassContrastReport | null): string 
   if (report === null)
     return 'Contrast bound not evaluated. Fix the draft errors to check it.'
   if (report.passes)
-    return `Contrast bound passes at glass opacity ${report.opacity}: every declared text pair reaches 4.5:1 over black and white backdrops.`
+    return `Contrast bound passes at glass opacity ${report.opacity}: every declared text pair reaches 4.5:1 over any backdrop the glass filter can produce.${minimums(report)}`
   const count = report.pairs.filter((pair) => !pair.passes).length
   const minimum =
     report.minimumOpacity === null
@@ -27,6 +27,18 @@ export function glassReadoutSummary(report: GlassContrastReport | null): string 
       : `Minimum passing glass opacity: ${report.minimumOpacity}.`
   return `Contrast bound fails at glass opacity ${report.opacity}: ${count} ${count === 1 ? 'pair is' : 'pairs are'} below 4.5:1. ${minimum} Export and publication are disabled until every pair passes.`
 }
+const minimums = ({ minimumOpacityByMode: m, transparency }: GlassContrastReport) =>
+  transparency === 'reduced' || m.light === null || m.dark === null
+    ? ''
+    : ` Lowest passing opacity: ${m.light} light, ${m.dark} dark.`
+const worst = (pair: GlassContrastReport['pairs'][number]) =>
+  (
+    [
+      [pair.ratioOverBlack, 'over the darkest filtered backdrop'],
+      [pair.ratioOverWhite, 'over the brightest filtered backdrop'],
+      [pair.ratioOpaque, 'on the opaque fallback surface'],
+    ] as const
+  ).reduce((a, b) => (b[0] < a[0] ? b : a))
 
 export function GlassContrastReadout({
   report,
@@ -42,12 +54,11 @@ export function GlassContrastReadout({
       {failing.length > 0 && (
         <ul id={glassPairsId} aria-label="Failing contrast pairs">
           {failing.map((pair) => {
-            const overBlack = pair.ratioOverBlack <= pair.ratioOverWhite
+            const [value, where] = worst(pair)
             return (
               <li key={pair.mode + pair.surface + pair.text}>
-                {pair.mode}: {pair.text} on {pair.surface},{' '}
-                {ratio(overBlack ? pair.ratioOverBlack : pair.ratioOverWhite)}
-                :1 over a {overBlack ? 'black' : 'white'} backdrop
+                {pair.mode}: {pair.text} on {pair.surface}, {ratio(value)}:1{' '}
+                {where}
               </li>
             )
           })}
