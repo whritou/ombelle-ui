@@ -205,23 +205,27 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px 24px;
   flex-wrap: wrap;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 24px;
+  padding-bottom: 20px;
 }
 .top header {
   border: 0;
   padding: 0;
   margin: 0;
-  max-width: 44rem;
+  max-width: 40rem;
 }
 .top header p {
-  margin: 6px 0;
+  margin: 4px 0;
   color: var(--muted-foreground);
 }
+.editor .top h1 {
+  margin: 4px 0;
+  font-size: clamp(28px, 3.2vw, 40px);
+}
 .top .crumb {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.16em;
@@ -233,12 +237,11 @@
 }
 .top .badge {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 8px;
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 2px 12px;
   font-size: 13px;
-  color: var(--muted-foreground);
 }
 .actions {
   gap: 8px;
@@ -247,6 +250,17 @@
   font-size: 13px;
   color: var(--muted-foreground);
 }
+.editor .getCode {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 999px;
+  background: var(--primary);
+  padding: 0 18px;
+  color: var(--primary-foreground);
+  font-weight: 600;
+  text-decoration: none;
+}
 .notice {
   min-height: 1.6em;
   margin: 8px 0;
@@ -254,105 +268,127 @@
   color: var(--muted-foreground);
 }
 
-/* Workbench: compact controls on the left, the live preview stays in view. */
+/* Workbench: a compact control panel beside a large canvas, like shadcn/create. */
 .workbench {
   display: grid;
-  grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
-  gap: 32px;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
-  margin-top: 8px;
 }
-.controls > h2 {
-  margin-top: 8px;
-}
-.identity {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 6.5rem;
-  gap: 0 12px;
-  margin: 0 0 16px;
-}
-.identity legend {
-  padding: 0 6px;
-  font-weight: 700;
-}
-.identity :global(.preset-control) {
-  margin-top: 4px;
-}
-.editor :global(.preset-card) {
-  margin: 0 0 16px;
+.panel {
+  /* The site header scrolls away on editor pages. */
+  position: sticky;
+  top: 16px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--card);
-  padding: 16px;
+  padding: 4px 14px 14px;
 }
-.editor :global(.preset-card-head) h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 800;
+.editor .panel > h2 {
+  margin: 12px 0 4px;
+  font-size: 15px;
 }
-.editor :global(.preset-card-head) p {
-  margin: 2px 0 12px;
-  font-size: 13px;
-  color: var(--muted-foreground);
+.group {
+  border-top: 1px solid var(--border);
+  padding: 12px 0 4px;
 }
-.editor :global(.preset-color-columns),
-.editor :global(.preset-color-row) {
-  display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr) minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
+.panel > h2 + .group {
+  border-top: 0;
 }
-.editor :global(.preset-color-columns) {
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
+.editor .group h3 {
+  margin: 0 0 8px;
   font-family: var(--font-mono);
   font-size: 11px;
+  font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
-.editor :global(.preset-color-row) {
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
+.editor .groupHint {
+  margin: -4px 0 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
 }
-.editor :global(.preset-color-row):last-child {
-  border-bottom: 0;
+.field {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.editor .field label,
+.editor :global(.preset-design-row) > label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-transform: capitalize;
+}
+.editor .field input,
+.editor :global(.preset-design-row) :is(input, select) {
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.editor :global(.preset-color-list) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.editor :global(.preset-color-row) {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  padding: 4px 8px;
+  font-weight: 500;
+  text-align: left;
+}
+.editor :global(.preset-color-row):hover,
+.editor :global(.preset-color-row)[aria-expanded='true'] {
+  background: var(--muted);
+}
+.editor :global(.preset-color-row)[data-invalid] {
+  border-color: var(--destructive);
 }
 .editor :global(.preset-color-name) {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
 }
-/* The row and column headers name each field visually; the label stays for
-   assistive technology and returns on narrow screens. */
-.editor :global(.preset-color-field) label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+.editor :global(.preset-edited) {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
 }
-.editor :global(.preset-color-field) :global(.preset-input-row) {
-  margin: 0;
-  gap: 4px;
-  flex-wrap: nowrap;
-}
-.editor :global(.preset-color-field) input:not([type="color"]) {
-  min-width: 0;
-  min-height: 36px;
-  padding: 6px 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
+.editor :global(.preset-color-alert) {
+  color: var(--destructive);
 }
 .editor :global(.preset-swatch) {
   position: relative;
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
   overflow: hidden;
+  border: 1px solid var(--control);
+  border-radius: 6px;
+}
+.editor :global(.preset-picker) {
+  width: 32px;
+  height: 32px;
   cursor: pointer;
 }
-.editor :global(.preset-swatch) input[type="color"] {
+.editor :global(.preset-picker) input[type='color'] {
   position: absolute;
   inset: -8px;
   width: calc(100% + 16px);
@@ -363,38 +399,101 @@
   opacity: 0;
   cursor: pointer;
 }
+
+/* Popovers: anchored beside their row where supported, centred otherwise. */
+.editor :global(.preset-popover) {
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(34rem, calc(100dvh - 2rem));
+  overflow: auto;
+  margin: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--popover);
+  padding: 14px;
+  color: var(--popover-foreground);
+  box-shadow: var(--shadow-soft);
+}
+@supports (position-area: right) {
+  .editor :global(.preset-popover) {
+    margin: 0 8px;
+    position-area: right span-bottom;
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+}
+.editor :global(.preset-popover-title) {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+.editor :global(.preset-popover-hint) {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.editor :global(.preset-control) {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+}
+.editor :global(.preset-control) label {
+  font-size: 13px;
+}
+.editor :global(.preset-input-row) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+.editor :global(.preset-input-row) input:not([type='color']),
+.editor :global(.preset-input-row) select {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+}
+.editor :global(.preset-popover) input:not([type='color']) {
+  min-height: 38px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.editor :global(.preset-design-row) {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 8px;
+  margin-bottom: 6px;
+}
+.editor :global(.preset-design-row) small {
+  grid-column: 2;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
 .editor :global(.preset-reset) {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  min-height: 36px;
+  width: 32px;
+  min-height: 32px;
   padding: 0;
 }
-.editor :global(.preset-control-grid) {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 16px;
-}
-.editor :global(.preset-control-grid) :global(.preset-input-row) {
-  flex-wrap: nowrap;
-  margin: 4px 0 0;
-}
-.editor :global(.preset-control) small {
-  color: var(--muted-foreground);
-  font-size: 12px;
-}
 
-/* Not sticky: a composited sticky layer can shift the sandboxed preview by
-   a device pixel, which breaks exact preview/installed pixel parity. */
-.preview {
+.canvas {
+  display: grid;
+  min-width: 0;
+  gap: 20px;
+}
+.preview,
+.exportCard {
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--card);
-  padding: 16px;
-  box-shadow: var(--shadow-soft);
+  padding: 14px 16px 16px;
+}
+.exportCard {
+  scroll-margin-top: 16px;
+}
+.exportCard :global(section) > h2:first-child {
+  margin-top: 4px;
 }
 .previewBar {
   gap: 8px;
@@ -404,6 +503,21 @@
   font-size: 13px;
   color: var(--muted-foreground);
 }
+.previewBar select {
+  min-height: 36px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.editor .contrastChip {
+  min-height: 36px;
+  border-color: var(--border);
+  background: var(--background);
+  font-size: 13px;
+}
+.editor .contrastChip[data-warnings] {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
 .editor .previewStatus {
   margin: 0 0 0 auto;
   border-radius: 999px;
@@ -411,8 +525,8 @@
   padding: 2px 12px;
   font-size: 13px;
 }
-.previewStatus[data-status="ready"]::before {
-  content: "";
+.previewStatus[data-status='ready']::before {
+  content: '';
   display: inline-block;
   width: 8px;
   height: 8px;
@@ -420,16 +534,25 @@
   border-radius: 50%;
   background: oklch(0.62 0.17 150);
 }
-.preview section[aria-label="Preset preview"] > p {
+.preview section[aria-label='Preset preview'] > p {
   margin: 0 0 8px;
   font-size: 13px;
   color: var(--muted-foreground);
 }
-.contrastPanel h2 {
-  margin: 20px 0 4px;
+.editor .contrastPanel {
+  width: min(34rem, calc(100vw - 2rem));
+}
+@supports (position-area: bottom) {
+  .editor .contrastPanel {
+    margin: 8px 0;
+    position-area: bottom span-left;
+  }
+}
+.editor .contrastPanel h2 {
+  margin: 0 0 4px;
   font-size: 16px;
 }
-.contrastPanel > p {
+.editor .contrastPanel > p {
   margin: 0 0 10px;
   font-size: 13px;
   color: var(--muted-foreground);
@@ -449,49 +572,37 @@
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
-.editor .contrast p[data-status="warning"] {
+.editor .contrast p[data-status='warning'] {
   border-color: var(--warning);
   background: var(--warning-soft);
 }
-@media (max-width: 1100px) {
+@media (max-width: 960px) {
   .workbench {
     grid-template-columns: minmax(0, 1fr);
   }
-  .preview {
+  .panel {
     position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  .editor :global(.preset-color-list) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 2px 8px;
   }
 }
 @media (max-width: 800px) {
   .editor {
     padding: 24px 16px 48px;
   }
-  .identity {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .contrast,
-  .editor :global(.preset-control-grid) {
+  .contrast {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 560px) {
-  .editor :global(.preset-color-columns) {
-    display: none;
-  }
-  .editor :global(.preset-color-row) {
+  .field {
     grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
-  }
-  .editor :global(.preset-color-field) label {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip-path: none;
-    margin-bottom: 4px;
-    font-size: 12px;
-  }
-  .editor :global(.preset-color-name) {
-    display: none;
+    gap: 2px;
   }
 }
 

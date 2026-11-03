@@ -9,7 +9,8 @@ import { ThemeToggle } from './theme'
 
 export function SiteHeader() {
   const pathname = usePathname()
-  const current = (href: string) => (href === pathname ? 'page' : undefined)
+  const current = (href: string) =>
+    href === pathname || (href === '/components' && pathname.startsWith('/components/')) ? 'page' : undefined
   // Pages that embed preview iframes scroll the header away: a pinned header
   // would cover iframe content and intercept clicks inside it.
   const pinned = !/^\/(editor|presets|recipes)\//.test(pathname)

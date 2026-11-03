@@ -1,2 +1,10 @@
 @import './generated/preset-gallery/tailwind.css';
 @import './generated/preset-gallery/layout.css';
+
+/* Component pages focus one gallery section; centre it like a docs preview. */
+html[data-focus] .preset-gallery {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+}

@@ -65,6 +65,14 @@ it('accepts only a complete current compiler result with matching reviewed sourc
   ).toBe(true)
   expect(await verifyGallerySources(manifest, {})).toBe(false)
 })
+it('accepts a focused view only for a catalog component', async () => {
+  const focused = { ...message(), view: { mode: 'dark', viewport: 'wide', focus: 'tabs' } }
+  expect(await verifyPresetRender(focused, 0, manifest)).toEqual(focused)
+  for (const focus of ['unknown', '', 1, null, '__proto__'])
+    expect(
+      await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', focus } }, 0, manifest),
+    ).toBeNull()
+})
 it.each([
   'css',
   'hash',

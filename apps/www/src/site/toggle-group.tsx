@@ -15,7 +15,7 @@ export function ToggleGroup<T extends string>({
 }: {
   label: string
   value: T
-  options: readonly { value: T; label: string }[]
+  options: readonly { value: T; label: string; disabled?: boolean; title?: string }[]
   onValueChange: (value: T) => void
   className?: string
   itemClassName?: string
@@ -30,6 +30,8 @@ export function ToggleGroup<T extends string>({
             key={option.value}
             type="button"
             aria-pressed={pressed}
+            disabled={option.disabled}
+            title={option.title}
             data-state={pressed ? activeState : 'off'}
             onClick={() => onValueChange(option.value)}
             className={itemClassName}
