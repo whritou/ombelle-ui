@@ -41,9 +41,10 @@
   display: inline-flex; align-items: center; justify-content: center;
   min-width: var(--control-height); min-height: var(--control-height);
   padding: 0 0.5rem; margin: 0;
-  background: transparent; border-color: transparent; color: var(--foreground); cursor: pointer;
+  background: transparent; border-color: transparent; color: var(--popover-foreground); cursor: pointer;
 }
 [data-slot="dialog-close"]:hover { background: var(--accent); color: var(--accent-foreground); }
+[data-slot="dialog-close"] svg { inline-size: 1rem; block-size: 1rem; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot="button"][data-variant="secondary"] {
     background: color-mix(in srgb, var(--secondary) calc(var(--glass-opacity) * 100%), transparent);
