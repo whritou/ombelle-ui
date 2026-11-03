@@ -9,7 +9,6 @@ export {
   supportedStyleFamilies,
   styleFamilies,
   isStyleFamily,
-  isStableStyleFamily,
   styleSupport,
 } from './style-families.js'
 export { componentsWithStyleSupport, assertStyleAvailable } from './style-support.js'

@@ -24,7 +24,3 @@ export function styleSupport(id: ComponentId, family: StyleFamily): StyleSupport
   if (family !== 'liquid-glass') return 'stable'
   return glassExperimental.has(id) ? 'experimental' : 'unavailable'
 }
-
-export function isStableStyleFamily(value: unknown): value is StableStyleFamily {
-  return typeof value === 'string' && supportedStyleFamilies.some(family => family === value)
-}
