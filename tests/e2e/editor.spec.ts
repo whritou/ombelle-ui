@@ -75,7 +75,6 @@ test('view mode does not change recipe hash and a draft restores after reload', 
   const before = await page.getByTestId('recipe-hash').textContent()
   await page.getByLabel('Preview mode').selectOption('dark')
   await page.getByLabel('Preview width').selectOption('narrow')
-  await page.getByLabel('Demonstrate state').selectOption('focus')
   await expect(page.getByTestId('recipe-hash')).toHaveText(before!)
   await page.reload()
   await expect(page.getByLabel('Button text')).toHaveValue('Saved draft')
@@ -447,7 +446,7 @@ test('operates every Button editor control, artifact tab, download and publish d
     await tabTo(page, page.getByLabel(`${label} value`))
     await page.keyboard.press('ArrowUp')
   }
-  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow'], ['Demonstrate state', 'focus']] as const) {
+  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow']] as const) {
     await tabTo(page, page.getByLabel(label))
     await page.keyboard.press('ArrowDown')
     await expect(page.getByLabel(label)).toHaveValue(value)

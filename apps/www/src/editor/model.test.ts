@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { styleFamilies, validateRecipe } from '@ombelle/contracts'
-import { changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, updateDraftRecipe, type EditorView } from './model.js'
+import {
+  changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, updateDraftRecipe, withRecipeColor,
+  type EditorView,
+} from './model.js'
 import { serializeRecipe } from './storage.js'
 
 describe('Button editor model', () => {
@@ -75,5 +78,28 @@ describe('Button editor model', () => {
     expect(darkNarrowFocus).toMatchObject({ mode: 'dark', viewport: 'narrow', forcedState: 'focus' })
     expect(JSON.stringify(draft.recipe)).toBe(before)
     expect(Object.keys(draft)).toEqual(['storageVersion', 'recipe'])
+  })
+  it('reads color overrides with the variant preset token as fallback', () => {
+    const draft = createEditorDraft('flat')
+    const preset = getCatalog('0.1.0').presets.flat
+    expect(recipeColor(draft.recipe, 'light', 'background')).toEqual({ value: preset.modes.light.primary, overridden: false })
+    const outline = { ...draft.recipe, props: { ...draft.recipe.props, variant: 'outline' as const } }
+    expect(recipeColor(outline, 'dark', 'foreground')).toEqual({ value: preset.modes.dark.foreground, overridden: false })
+    expect(recipeColor(outline, 'dark', 'border')).toEqual({ value: preset.modes.dark.border, overridden: false })
+    const colored = withRecipeColor(outline, 'dark', 'foreground', '#123456')
+    expect(recipeColor(colored, 'dark', 'foreground')).toEqual({ value: '#123456', overridden: true })
+    expect(recipeColor(colored, 'light', 'foreground').overridden).toBe(false)
+  })
+
+  it('sets and clears color overrides without leaving empty groups', () => {
+    const draft = createEditorDraft('neo-brutalism')
+    const set = withRecipeColor(withRecipeColor(draft.recipe, 'light', 'background', '#ff0000'), 'dark', 'border', 'oklch(0.5 0.1 20)')
+    expect(set.overrides).toEqual({ colors: { light: { background: '#ff0000' }, dark: { border: 'oklch(0.5 0.1 20)' } } })
+    expect(updateDraftRecipe(draft, set).recipe.overrides).toEqual(set.overrides)
+    const cleared = withRecipeColor(withRecipeColor(set, 'light', 'background', undefined), 'dark', 'border', undefined)
+    expect(cleared.overrides).toEqual({})
+    expect(draft.recipe.overrides).toEqual({})
+    expect(() => updateDraftRecipe(draft, withRecipeColor(draft.recipe, 'light', 'border', 'oklch(0.5 0.9 20)')))
+      .toThrow(expect.objectContaining({ path: '/overrides/colors/light/border' }))
   })
 })

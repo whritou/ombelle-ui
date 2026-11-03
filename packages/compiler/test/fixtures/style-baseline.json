@@ -34,7 +34,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "a7572bd722c691f43657efcc27910a88b21712f90b35e177629225ba8687bad3"
+          "sha256": "c3ecbc2cad02de499c1c46707d38ce2f3ba333ffcdfded5d44b925efcb370f22"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -75,7 +75,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "c1fb3f6505968e0720a80a3209412079f2d03740f151c32d24bbdb0d6ffb3f95"
+          "sha256": "77f61473299549a3ec932755ff95fd0b305c27ff300e8dfd6f834e211cfb9c89"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -92,6 +92,15 @@
       ],
       "spec": "docs/superpowers/specs/2026-10-25-native-form-controls-design.md",
       "reason": "Input invalid styling and lucide XIcon Dialog close control"
+    },
+    {
+      "logicalPaths": [
+        "styles/ui-style.css",
+        "components/ui/tabs.css",
+        "scoped Button preset and recipe button.css"
+      ],
+      "spec": "feat/editor-ux-colors",
+      "reason": "Hover and pressed states for flat and neo-brutalism Buttons and inactive Tabs triggers, so previews and installed components are interactive"
     }
   ]
 }

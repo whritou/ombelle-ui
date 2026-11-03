@@ -669,3 +669,162 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Full-width workbench, like shadcn/create: compact header, controls rail
+   and a canvas that uses the rest of the viewport. */
+.editor {
+  max-width: none;
+  padding: 20px clamp(16px, 2vw, 32px) 48px;
+}
+.top {
+  align-items: center;
+  padding-bottom: 14px;
+}
+.editor .top h1 {
+  margin: 2px 0;
+  font-size: clamp(24px, 2.2vw, 30px);
+}
+.top header p {
+  font-size: 14px;
+}
+.top .crumb {
+  margin-bottom: 2px;
+}
+@media (min-width: 961px) {
+  .workbench {
+    grid-template-columns: 21rem minmax(0, 1fr);
+  }
+}
+.glass {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  margin: 4px 0 14px;
+}
+.glass > section {
+  padding: 2px 14px 10px;
+  border-radius: 12px;
+}
+.editor .glass h2 {
+  margin: 8px 0 2px;
+  font-size: 14px;
+}
+.editor .glass p,
+.editor .glass li,
+.editor .glass summary {
+  margin: 4px 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.editor .glass summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Collapsible full colour list under the scheme picker. */
+.disclosure {
+  margin-top: 10px;
+}
+.disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+}
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.disclosure > summary::before {
+  content: '▸';
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.disclosure[open] > summary::before {
+  content: '▾';
+}
+
+/* Theme scheme picker. */
+.editor :global(.preset-schemes) {
+  display: grid;
+  gap: 10px;
+}
+.editor :global(.preset-scheme-label) {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.editor :global(.preset-scheme-current) {
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+.editor :global(.preset-scheme-options) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.editor :global(.preset-scheme) {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+}
+.editor :global(.preset-scheme)[aria-pressed='true'] {
+  border-color: var(--foreground);
+}
+.editor :global(.preset-scheme):hover {
+  border-color: var(--border);
+}
+.editor :global(.preset-scheme-dot) {
+  width: 24px;
+  height: 24px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
+  border-radius: 999px;
+}
+.editor :global(.preset-scheme-default) {
+  background: conic-gradient(var(--primary) 0 50%, var(--muted) 0);
+}
+
+/* Numeric design values: slider plus an exact number field. */
+.editor :global(.preset-design-row) :global(.preset-input-row) {
+  gap: 8px;
+}
+.editor :global(.preset-design-row) input:global(.preset-slider) {
+  flex: 1;
+  min-width: 0;
+  min-height: 24px;
+  padding: 0;
+  background: transparent;
+  accent-color: var(--primary);
+}
+.editor :global(.preset-design-row) input:global(.preset-number) {
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
+  text-align: right;
+}
+.editor :global(.preset-design-row) small {
+  display: none;
+}
+@media (max-width: 960px) {
+  .glass {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.editor .glass details,
+.editor .disclosure {
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+}
+.editor .glass summary,
+.editor .disclosure > summary {
+  padding: 4px 0;
+}

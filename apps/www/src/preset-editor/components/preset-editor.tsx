@@ -34,9 +34,16 @@ import { PresetPreviewFrame } from './preset-preview-frame'
 import {
   ColorControls,
   DesignControls,
+  ThemeControls,
   fieldId,
   revealPresetField,
 } from './preset-controls'
+import {
+  accentSchemes,
+  applyColorScheme,
+  baseSchemes,
+  resetColorScheme,
+} from '../schemes'
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { PresetGetCode } from '../../snapshots/components/preset-get-code'
 import { canExportPreset, serializePresetExport } from '../export'
@@ -326,17 +333,37 @@ export default function PresetEditor() {
         <section aria-labelledby="preset-controls-heading" className={styles.panel}>
           <h2 id="preset-controls-heading">Customize</h2>
           <div className={styles.group}>
-            <h3>Identity</h3>
-            {identity}
-          </div>
-          <div className={styles.group}>
-            <h3>Colors</h3>
-            <p className={styles.groupHint}>Light and dark values. Select a token to edit it.</p>
-            <ColorControls {...controlProps} />
+            <h3>Theme</h3>
+            <ThemeControls
+              draft={draft}
+              onApply={(scheme, group) =>
+                commit(applyColorScheme(draft, scheme), 'scheme:' + group)
+              }
+              onResetGroup={(group) =>
+                commit(
+                  resetColorScheme(
+                    draft,
+                    group === 'accent' ? accentSchemes : baseSchemes,
+                  ),
+                  'scheme:' + group,
+                )
+              }
+            />
+            <details className={styles.disclosure}>
+              <summary>Customize all colors</summary>
+              <p className={styles.groupHint}>
+                Light and dark values. Select a token to edit it.
+              </p>
+              <ColorControls {...controlProps} />
+            </details>
           </div>
           <div className={styles.group}>
             <h3>Design</h3>
             <DesignControls {...controlProps} />
+          </div>
+          <div className={styles.group}>
+            <h3>Identity</h3>
+            {identity}
           </div>
         </section>
         <div className={styles.canvas}>

@@ -28,32 +28,38 @@ export function validatePreset(input: unknown): Preset {
       '/revision',
     )
   for (const [mode, colors] of Object.entries(preset.modes))
-    for (const [key, color] of Object.entries(colors)) {
-      if (color.startsWith('#')) continue
-      const numbers = color.slice(6, -1).split(/ +/)
-      const [l, c, h, slash, a] = numbers
-      const light = Number(l.replace('%', '')) / (l.endsWith('%') ? 100 : 1)
-      const alpha =
-        a === undefined
-          ? 1
-          : Number(a.replace('%', '')) / (a.endsWith('%') ? 100 : 1)
-      if (
-        ![light, Number(c), Number(h), alpha].every(Number.isFinite) ||
-        light < 0 ||
-        light > 1 ||
-        Number(c) < 0 ||
-        Number(c) > 0.4 ||
-        Number(h) < 0 ||
-        Number(h) > 360 ||
-        alpha < 0 ||
-        alpha > 1 ||
-        (slash !== undefined && slash !== '/')
-      )
-        throw new FoundationError(
-          'INVALID_DATA',
-          'OKLCH values exceed the supported numeric bounds',
-          '/modes/' + mode + '/' + key,
-        )
-    }
+    for (const [key, color] of Object.entries(colors))
+      assertColorValue(color, '/modes/' + mode + '/' + key)
   return structuredClone(preset)
+}
+/**
+ * Semantic check for a color that already passed the schema syntax filter
+ * (`#rrggbb` or `oklch(L C H[ / A])`). Shared by presets and recipe color overrides.
+ */
+export function assertColorValue(color: string, pointer: string): void {
+  if (color.startsWith('#')) return
+  const numbers = color.slice(6, -1).split(/ +/)
+  const [l, c, h, slash, a] = numbers
+  const light = Number(l.replace('%', '')) / (l.endsWith('%') ? 100 : 1)
+  const alpha =
+    a === undefined
+      ? 1
+      : Number(a.replace('%', '')) / (a.endsWith('%') ? 100 : 1)
+  if (
+    ![light, Number(c), Number(h), alpha].every(Number.isFinite) ||
+    light < 0 ||
+    light > 1 ||
+    Number(c) < 0 ||
+    Number(c) > 0.4 ||
+    Number(h) < 0 ||
+    Number(h) > 360 ||
+    alpha < 0 ||
+    alpha > 1 ||
+    (slash !== undefined && slash !== '/')
+  )
+    throw new FoundationError(
+      'INVALID_DATA',
+      'OKLCH values exceed the supported numeric bounds',
+      pointer,
+    )
 }

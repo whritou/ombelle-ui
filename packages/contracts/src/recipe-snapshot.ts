@@ -9,8 +9,14 @@ import { normalizeSnapshotOrigin, type AbsolutePresetReferences, type SnapshotRe
 import { validatePreset } from './validate.js'
 import { validateRecipe } from './recipe.js'
 
+// Qualify the referenced recipe's local pointers for type inference, as for presets.
+type AbsoluteRecipeReferences<T> = {
+  [K in keyof T]: K extends '$ref'
+    ? T[K] extends `#${string}` ? `${typeof recipeSchema.$id}${T[K]}` : T[K]
+    : T[K] extends object ? AbsoluteRecipeReferences<T[K]> : T[K]
+}
 export type RecipeSnapshot = FromSchema<typeof recipeSnapshotSchema, {
-  references: [AbsolutePresetReferences<typeof presetSchema>, typeof recipeSchema]
+  references: [AbsolutePresetReferences<typeof presetSchema>, AbsoluteRecipeReferences<typeof recipeSchema>]
 }>
 export type RecipeSnapshotSource = FromSchema<typeof recipeSnapshotSourceSchema>
 const ajv = new Ajv2020({ allErrors: true, strict: true }).addSchema(presetSchema).addSchema(recipeSchema)

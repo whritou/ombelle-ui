@@ -1,6 +1,6 @@
 # Standalone CLI candidate
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.2.1.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.3.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
 Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
 
@@ -22,7 +22,7 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.2.1. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
+All six workspace packages use software version 0.3.0, which is not yet published; website commands keep `0.2.1` until it is. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
 
 Post-publication checks on 2026-11-02:
 
