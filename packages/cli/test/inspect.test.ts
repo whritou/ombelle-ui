@@ -140,3 +140,26 @@ it('rejects component destinations inconsistent with the import alias', async ()
     code: 'UNSUPPORTED_PROJECT',
   })
 })
+// shadcn init templates declare the bare major range "^4".
+it.each([
+  ['^4', true],
+  ['~4.3', true],
+  ['4', true],
+  ['^3', false],
+  ['^3.4.17', false],
+  ['^40', false],
+])('reads tailwindcss %s as Tailwind v4: %s', async (range, supported) => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const file = root + '/package.json'
+  const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+  pkg.dependencies.tailwindcss = range
+  await fs.writeFile(file, JSON.stringify(pkg))
+  const result = inspectProject(root)
+  if (supported) await expect(result).resolves.toMatchObject({ framework: 'vite' })
+  else
+    await expect(result).rejects.toMatchObject({
+      code: 'UNSUPPORTED_PROJECT',
+      message: 'Support is limited to React Vite/Next with Tailwind v4',
+    })
+})
