@@ -32,7 +32,45 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 
-export function PresetGallery() {
+// Family-independent: callers pass the component ids their family cannot
+// style (from the shared support table) and the family's display name.
+export type PresetGalleryProps = {
+  unavailable?: readonly string[]
+  familyLabel?: string
+}
+
+function Unavailable({
+  id,
+  name,
+  familyLabel,
+}: {
+  id: string
+  name: string
+  familyLabel: string
+}) {
+  return (
+    <div
+      className="preset-unavailable"
+      data-component={id}
+      data-unavailable=""
+      aria-disabled="true"
+    >
+      <strong>{name}</strong>
+      <span>Unavailable in {familyLabel}</span>
+    </div>
+  )
+}
+
+export function PresetGallery({
+  unavailable = [],
+  familyLabel = '',
+}: PresetGalleryProps = {}) {
+  const gate = (id: string, name: string, node: React.ReactNode) =>
+    unavailable.includes(id) ? (
+      <Unavailable id={id} name={name} familyLabel={familyLabel} />
+    ) : (
+      node
+    )
   return (
     <main
       className="preset-gallery"
@@ -82,45 +120,69 @@ export function PresetGallery() {
         aria-label="Project settings"
       >
         <h2>Project settings</h2>
-        <div data-component="label">
-          <Label htmlFor="preset-project-name">Project name</Label>
-        </div>
-        <div data-component="input">
-          <Input id="preset-project-name" defaultValue="Ombelle workspace" />
-          <Label htmlFor="preset-email">Email</Label>
-          <Input
-            id="preset-email"
-            type="email"
-            defaultValue="invalid"
-            aria-invalid="true"
-            aria-describedby="preset-email-error"
-          />
-          <p id="preset-email-error">Enter a valid email address.</p>
-        </div>
-        <div data-component="textarea">
-          <Label htmlFor="preset-description">Description</Label>
-          <Textarea
-            id="preset-description"
-            defaultValue="A small idea, ready to grow."
-          />
-        </div>
-        <div data-component="native-select">
-          <Label htmlFor="preset-region">Region</Label>
-          <NativeSelect id="preset-region" defaultValue="eu">
-            <NativeSelectOption value="eu">Europe</NativeSelectOption>
-            <NativeSelectOption value="us">United States</NativeSelectOption>
-          </NativeSelect>
-        </div>
-        <div className="preset-row" data-component="checkbox">
-          <Checkbox id="preset-terms" defaultChecked />
-          <Label htmlFor="preset-terms">Accept project guidelines</Label>
-        </div>
-        <div className="preset-row" data-component="switch">
-          <Switch id="preset-notifications" defaultChecked>
-            <SwitchThumb />
-          </Switch>
-          <Label htmlFor="preset-notifications">Enable notifications</Label>
-        </div>
+        {gate(
+          'label',
+          'Label',
+          <div data-component="label">
+            <Label htmlFor="preset-project-name">Project name</Label>
+          </div>,
+        )}
+        {gate(
+          'input',
+          'Input',
+          <div data-component="input">
+            <Input id="preset-project-name" defaultValue="Ombelle workspace" />
+            <Label htmlFor="preset-email">Email</Label>
+            <Input
+              id="preset-email"
+              type="email"
+              defaultValue="invalid"
+              aria-invalid="true"
+              aria-describedby="preset-email-error"
+            />
+            <p id="preset-email-error">Enter a valid email address.</p>
+          </div>,
+        )}
+        {gate(
+          'textarea',
+          'Textarea',
+          <div data-component="textarea">
+            <Label htmlFor="preset-description">Description</Label>
+            <Textarea
+              id="preset-description"
+              defaultValue="A small idea, ready to grow."
+            />
+          </div>,
+        )}
+        {gate(
+          'native-select',
+          'Native Select',
+          <div data-component="native-select">
+            <Label htmlFor="preset-region">Region</Label>
+            <NativeSelect id="preset-region" defaultValue="eu">
+              <NativeSelectOption value="eu">Europe</NativeSelectOption>
+              <NativeSelectOption value="us">United States</NativeSelectOption>
+            </NativeSelect>
+          </div>,
+        )}
+        {gate(
+          'checkbox',
+          'Checkbox',
+          <div className="preset-row" data-component="checkbox">
+            <Checkbox id="preset-terms" defaultChecked />
+            <Label htmlFor="preset-terms">Accept project guidelines</Label>
+          </div>,
+        )}
+        {gate(
+          'switch',
+          'Switch',
+          <div className="preset-row" data-component="switch">
+            <Switch id="preset-notifications" defaultChecked>
+              <SwitchThumb />
+            </Switch>
+            <Label htmlFor="preset-notifications">Enable notifications</Label>
+          </div>,
+        )}
       </form>
       <section aria-label="Project sections" data-component="tabs">
         <h2>Project sections</h2>

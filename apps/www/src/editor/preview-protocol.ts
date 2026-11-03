@@ -1,5 +1,5 @@
 import { resolveRecipePreset } from '@ombelle/catalog'
-import { validatePreset, validateRecipe, type Recipe, type RecipeCompileResult } from '@ombelle/contracts'
+import { styleSupport, validatePreset, validateRecipe, type Recipe, type RecipeCompileResult } from '@ombelle/contracts'
 import { canonicalize, compileRecipe } from '@ombelle/compiler'
 
 export type PreviewFrameState = {
@@ -61,7 +61,7 @@ export function acceptPreviewRender(input: unknown, previousRequestId: number): 
   try {
     const recipe = validateRecipe(state.recipe)
     const preset = resolveRecipePreset(recipe.presetRef)
-    if (!['flat', 'minimalist', 'neo-brutalism'].includes(preset.styleFamily)) return null
+    if (styleSupport('button', preset.styleFamily) === 'unavailable') return null
   } catch {
     return null
   }

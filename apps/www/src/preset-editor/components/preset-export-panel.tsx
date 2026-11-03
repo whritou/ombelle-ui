@@ -25,14 +25,20 @@ export function PresetExportPanel({
   draft,
   state,
   announce,
+  blocked = false,
+  describedBy,
 }: {
   draft: PresetEditorDraft
   state: PresetCompilerState
   announce: (message: string) => void
+  /** True while the liquid-glass contrast bound fails. */
+  blocked?: boolean
+  /** Id of the contrast readout explaining why export is disabled. */
+  describedBy?: string
 }) {
   const [output, setOutput] = useState<'json' | 'tokens' | 'family'>('json'),
     [install, setInstall] = useState<'new' | 'existing'>('new')
-  const enabled = canExportPreset(state, draft)
+  const enabled = canExportPreset(state, draft) && !blocked
   const text = enabled
     ? output === 'json'
       ? serializePresetExport(state, draft)
@@ -62,6 +68,7 @@ export function PresetExportPanel({
       <button
         type="button"
         disabled={!enabled}
+        aria-describedby={describedBy}
         onClick={() => {
           try {
             downloadPresetText(
@@ -89,7 +96,12 @@ export function PresetExportPanel({
           <option value="tokens">Tailwind v4 token CSS</option>
           <option value="family">Family CSS</option>
         </select>
-        <button type="button" disabled={!enabled} onClick={() => void copy()}>
+        <button
+          type="button"
+          disabled={!enabled}
+          aria-describedby={describedBy}
+          onClick={() => void copy()}
+        >
           Copy export
         </button>
       </div>
@@ -155,6 +167,7 @@ export function PresetExportPanel({
         preset={state.result?.preset ?? null}
         current={enabled}
         announce={announce}
+        describedBy={describedBy}
       />
     </section>
   )

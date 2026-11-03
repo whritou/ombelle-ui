@@ -152,5 +152,6 @@ export type InstallPlan = {
   managedDeclarations: ManagedDeclaration[]
   dependencyPlan: Dependency[]
   diagnostics: { code: string; message: string; path?: string }[]
+  notices: string[]
   networkAccess: boolean
 }

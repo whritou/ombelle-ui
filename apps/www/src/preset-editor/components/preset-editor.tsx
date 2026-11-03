@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { supportedStyleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
 import {
   createPresetDraft,
+  presetGlassReport,
   setPresetEdit,
   setPresetIdentity,
   resetPresetField,
@@ -32,7 +33,11 @@ import {
 import { PresetPreviewFrame } from './preset-preview-frame'
 import { PresetControls, fieldId } from './preset-controls'
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
+import { GlassPanel, glassReadoutId } from './glass-panel'
 import styles from './preset-editor.module.css'
+
+const familyLabel = (family: StyleFamily) =>
+  family === 'liquid-glass' ? 'Liquid glass (Experimental)' : family
 
 export default function PresetEditor() {
   const [history, setHistory] = useState(() =>
@@ -115,6 +120,10 @@ export default function PresetEditor() {
     else commit(change.draft, 'family')
   }
   const diagnostic = compiled.diagnostic
+  const glass = draft.family === 'liquid-glass'
+  const glassReport = glass ? presetGlassReport(draft) : null
+  // A glass draft below the contrast bound cannot be exported or published.
+  const glassBlocked = glassReport !== null && !glassReport.passes
   return (
     <main className={styles.editor} aria-label="Global preset editor">
       <header>
@@ -131,9 +140,9 @@ export default function PresetEditor() {
           value={draft.family}
           onChange={(e) => family(e.target.value as StyleFamily)}
         >
-          {supportedStyleFamilies.map((family) => (
+          {styleFamilies.map((family) => (
             <option key={family} value={family}>
-              {family}
+              {familyLabel(family)}
             </option>
           ))}
         </select>
@@ -242,6 +251,7 @@ export default function PresetEditor() {
           )}
         </div>
       )}
+      {glass && <GlassPanel report={glassReport} />}
       <div className={styles.workbench}>
         <section aria-labelledby="preset-controls-heading">
           <h2 id="preset-controls-heading">Customize</h2>
@@ -322,7 +332,13 @@ export default function PresetEditor() {
           ))}
         </div>
       </section>
-      <PresetExportPanel draft={draft} state={compiled} announce={setNotice} />
+      <PresetExportPanel
+        draft={draft}
+        state={compiled}
+        announce={setNotice}
+        blocked={glassBlocked}
+        describedBy={glass ? glassReadoutId : undefined}
+      />
       <dialog
         ref={dialog}
         aria-labelledby="preset-confirm-heading"

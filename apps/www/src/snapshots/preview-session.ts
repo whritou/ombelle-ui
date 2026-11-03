@@ -1,6 +1,6 @@
 import { compile } from '@ombelle/compiler'
 import {
-  supportedComponentIds,
+  componentsWithStyleSupport,
   type CompileResult,
   type PresetSnapshot,
 } from '@ombelle/contracts'
@@ -51,7 +51,12 @@ export function createSnapshotPreviewSession(
         const result = await (options.compile?.() ??
           compile({
             preset: snapshot.preset,
-            componentIds: supportedComponentIds,
+            // Glass previews only the components the family supports; stable
+            // families still compile all twelve in catalog order.
+            componentIds: componentsWithStyleSupport(
+              snapshot.preset.styleFamily,
+              ['stable', 'experimental'],
+            ),
             catalogRelease: snapshot.catalogRelease,
             compilerVersion: snapshot.compilerVersion,
           }))

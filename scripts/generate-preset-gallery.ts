@@ -7,10 +7,7 @@ import {
   stripStylesheetImports,
 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
-import {
-  supportedComponentIds,
-  supportedStyleFamilies,
-} from '@ombelle/contracts'
+import { componentsWithStyleSupport, styleFamilies } from '@ombelle/contracts'
 
 export type PresetSourceManifest = {
   catalogRelease: '0.1.0'
@@ -33,11 +30,16 @@ export async function transformGallerySource(
 }
 export async function writePresetGallery(root: string): Promise<void> {
   const catalog = getCatalog('0.1.0')
+  // Every family, liquid glass included, compiles the components it supports.
+  // The first (flat) result covers all twelve and supplies the gallery source.
   const results = await Promise.all(
-    supportedStyleFamilies.map((family) =>
+    styleFamilies.map((family) =>
       compile({
         preset: catalog.presets[family],
-        componentIds: supportedComponentIds,
+        componentIds: componentsWithStyleSupport(family, [
+          'stable',
+          'experimental',
+        ]),
         catalogRelease: '0.1.0',
         compilerVersion: '0.1.0',
       }),
@@ -57,13 +59,26 @@ export async function writePresetGallery(root: string): Promise<void> {
     compilerVersion: '0.1.0',
     sources: {},
   }
-  for (const artifact of sources) {
-    if (
-      !results.every(
-        (r) =>
-          r.artifacts.find((a) => a.logicalPath === artifact.logicalPath)
-            ?.sha256 === artifact.sha256,
+  for (const family of results)
+    for (const artifact of family.artifacts)
+      if (
+        (artifact.kind === 'component' || artifact.kind === 'utility') &&
+        !sources.some((source) => source.logicalPath === artifact.logicalPath)
       )
+        throw new Error('Gallery source is missing: ' + artifact.logicalPath)
+  for (const artifact of sources) {
+    // A family that cannot style a component omits its source; any family
+    // that includes it must ship the same reviewed bytes.
+    if (
+      !results.every((r, index) => {
+        const match = r.artifacts.find(
+          (a) => a.logicalPath === artifact.logicalPath,
+        )
+        return match
+          ? match.sha256 === artifact.sha256
+          : componentsWithStyleSupport(styleFamilies[index], ['unavailable'])
+              .length > 0
+      })
     )
       throw new Error(
         'Gallery source differs between families: ' + artifact.logicalPath,

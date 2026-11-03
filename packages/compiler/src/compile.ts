@@ -4,6 +4,7 @@ import {
   type CompileResult,
   type Artifact,
   type ThemeData,
+  assertStyleAvailable,
   isStyleFamily,
 } from '@ombelle/contracts'
 import { getCatalog, getTemplate } from '@ombelle/catalog'
@@ -13,6 +14,7 @@ import estree from 'prettier/plugins/estree'
 import postcss from 'prettier/plugins/postcss'
 import { resolvePreset } from './resolve.js'
 import { sha256 } from './hash.js'
+import { assertGlassContrast, glassTokens } from './glass.js'
 const variable = (key: string) =>
   '--' + key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
 export async function compile(input: {
@@ -36,6 +38,9 @@ export async function compile(input: {
       'Style family is not available in the foundation',
       '/styleFamily',
     )
+  const ids = [...new Set(input.componentIds)].sort()
+  assertStyleAvailable(ids, family)
+  if (family === 'liquid-glass') assertGlassContrast(preset.data)
   const theme: ThemeData = { light: {}, dark: {}, theme: {} }
   for (const mode of ['light', 'dark'] as const)
     for (const [key, value] of Object.entries(preset.data.modes[mode]))
@@ -55,6 +60,11 @@ export async function compile(input: {
           : 'Arial, sans-serif',
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
+  if (family === 'liquid-glass') {
+    const glass = glassTokens(d)
+    Object.assign(theme.light, glass.light)
+    Object.assign(theme.dark, glass.dark)
+  }
   for (const key of Object.keys(preset.data.modes.light))
     theme.theme['--color-' + variable(key).slice(2)] =
       'var(' + variable(key) + ')'
@@ -86,7 +96,6 @@ export async function compile(input: {
     },
   ]
   const dependencies = new Map<string, string>()
-  const ids = [...new Set(input.componentIds)].sort()
   for (const id of ids) {
     const template = getTemplate(catalog, id)
     let content = template.content.replaceAll("'./utils.js'", "'@/lib/utils'")
@@ -109,7 +118,7 @@ export async function compile(input: {
       drafts.push({
         logicalPath: template.logicalPath.replace(/\.tsx$/, '.css'),
         kind: 'style',
-        content: template.styles[family],
+        content: template.styles[family]!,
       })
     const usage =
       id === 'tooltip'

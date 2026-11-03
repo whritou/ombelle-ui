@@ -25,7 +25,23 @@ export type ArtifactProof = {
   logicalPath: string
   sha256: string
 }
+// Experimental glass consumers install exactly these components and nothing else.
+export const glassConsumerComponents = [
+  'badge',
+  'button',
+  'card',
+  'dialog',
+  'tabs',
+  'tooltip',
+] as const
+const glassAddBatches = [
+  ['add', 'button', 'dialog'],
+  ['add', 'badge'],
+  ['add', 'card'],
+  ['add', 'tabs', 'tooltip'],
+]
 export async function prepareNodeConsumer(spec: ConsumerCase) {
+  const glass = spec.family === 'liquid-glass'
   if (
     spec.manager === 'bun' ||
     spec.cliRuntime !== 'node' ||
@@ -111,16 +127,22 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
             ],
       )
     }
-    await writeScenarioFixture(root, spec.family, {
-      recipes: true,
-      badges: true,
-      cards: true,
-      forms: true,
-      checkboxes: true,
-      switches: true,
-      tabs: true,
-      tooltips: true,
-    })
+    await writeScenarioFixture(
+      root,
+      spec.family,
+      glass
+        ? {}
+        : {
+            recipes: true,
+            badges: true,
+            cards: true,
+            forms: true,
+            checkboxes: true,
+            switches: true,
+            tabs: true,
+            tooltips: true,
+          },
+    )
     await fs.appendFile(
       path.join(root, 'src/index.css'),
       '\n.user-consumer-style { color:hotpink; }\n',
@@ -132,12 +154,16 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
     let presetHash: unknown
     for (const args of [
       ['init', '--preset', preset],
-      ['add', 'button', 'dialog'],
-      ['add', 'input'],
-      ['add', 'badge'],
-      ['add', 'card'],
-      ['add', 'label', 'textarea', 'native-select'],
-      ['add', 'checkbox', 'switch', 'tabs', 'tooltip'],
+      ...(glass
+        ? glassAddBatches
+        : [
+            ['add', 'button', 'dialog'],
+            ['add', 'input'],
+            ['add', 'badge'],
+            ['add', 'card'],
+            ['add', 'label', 'textarea', 'native-select'],
+            ['add', 'checkbox', 'switch', 'tabs', 'tooltip'],
+          ]),
     ]) {
       const result = await runBuiltCli(
         'node',
@@ -154,21 +180,28 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       )
         throw new Error('Consumer preset/manager changed')
     }
-    const recipeEvidence = await prepareRecipeConsumer({
-        root,
-        cliRuntime: 'node',
-        env,
-        family: spec.family,
-      }),
-      recipeBank = await recipeReferenceBank()
-    const componentPresetEvidence = await prepareComponentPresetConsumer({
-        root,
-        cliRuntime: 'node',
-        manager: spec.manager,
-        managerVersion: version,
-        env,
-      }),
-      componentPresetBank = await componentPresetReferenceBank()
+    // Recipes and component presets are stable-family evidence; glass consumers carry none.
+    const recipeEvidence = glass
+        ? undefined
+        : await prepareRecipeConsumer({
+            root,
+            cliRuntime: 'node',
+            env,
+            family: spec.family,
+          }),
+      recipeBank = glass ? undefined : await recipeReferenceBank()
+    const componentPresetEvidence = glass
+        ? undefined
+        : await prepareComponentPresetConsumer({
+            root,
+            cliRuntime: 'node',
+            manager: spec.manager,
+            managerVersion: version,
+            env,
+          }),
+      componentPresetBank = glass
+        ? undefined
+        : await componentPresetReferenceBank()
     const canonical = JSON.parse(
       await fs.readFile(
         'apps/preview/src/generated/' + spec.family + '/manifest.json',
@@ -182,7 +215,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
     )
     const artifacts: ArtifactProof[] = []
     const installedArtifacts = { ...jsonRecord(installed.artifacts) }
-    for (const preset of Object.values(componentPresetEvidence.presets))
+    for (const preset of Object.values(componentPresetEvidence?.presets ?? {}))
       for (const [file, record] of Object.entries(
         jsonRecord(jsonRecord(jsonRecord(preset).installed).artifacts),
       )) {
@@ -198,8 +231,8 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         content = await fs.readFile(path.join(root, file), 'utf8'),
         reference =
           canonical.artifacts.find((a) => a.logicalPath === meta.logicalPath) ??
-          recipeBank.get(String(meta.logicalPath)) ??
-          componentPresetBank.get(String(meta.logicalPath)),
+          recipeBank?.get(String(meta.logicalPath)) ??
+          componentPresetBank?.get(String(meta.logicalPath)),
         hash = await sha256(content)
       if (
         !reference ||
@@ -215,6 +248,20 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         logicalPath: reference.logicalPath,
         sha256: hash,
       })
+    }
+    if (glass) {
+      const installedComponents = Object.values(installedArtifacts)
+        .map((record) => jsonRecord(record))
+        .filter((meta) => meta.kind === 'component')
+        .map((meta) => path.basename(String(meta.logicalPath), '.tsx'))
+        .sort()
+      if (
+        JSON.stringify(installedComponents) !==
+        JSON.stringify([...glassConsumerComponents])
+      )
+        throw new Error(
+          'Glass consumer installed ' + installedComponents.join(', '),
+        )
     }
     const pkg = JSON.parse(
       await fs.readFile(path.join(root, 'package.json'), 'utf8'),

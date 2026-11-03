@@ -84,8 +84,11 @@ await boundedMap(
   workers,
   async ([id, fixture]) => {
     const measured: Record<string, ConsumerEvidence> = {},
-      recipeRows = { [id]: preparedRecipes[id] },
-      componentPresetRows = { [id]: preparedPresets[id] },
+      // Glass consumers have no recipe or component-preset rows.
+      recipeRows = preparedRecipes[id] ? { [id]: preparedRecipes[id] } : {},
+      componentPresetRows = preparedPresets[id]
+        ? { [id]: preparedPresets[id] }
+        : {},
       bunRows = { [id]: preparedBun[id] }
     console.log('Building ' + id)
     if (fixture.manager === 'bun') {
@@ -166,18 +169,20 @@ await boundedMap(
       build: { exitCode: 0 },
     }
     await verifyBuiltSources(id, fixture.root)
-    recipeRows[id] = {
-      ...recipeRows[id],
-      audit: pending[id].audit,
-      buildRuntime: measured[id].buildRuntime,
-      build: { status: 'passed', exitCode: 0 },
-    }
-    componentPresetRows[id] = {
-      ...componentPresetRows[id],
-      audit: pending[id].audit,
-      buildRuntime: measured[id].buildRuntime,
-      build: { status: 'passed', exitCode: 0 },
-    }
+    if (recipeRows[id])
+      recipeRows[id] = {
+        ...recipeRows[id],
+        audit: pending[id].audit,
+        buildRuntime: measured[id].buildRuntime,
+        build: { status: 'passed', exitCode: 0 },
+      }
+    if (componentPresetRows[id])
+      componentPresetRows[id] = {
+        ...componentPresetRows[id],
+        audit: pending[id].audit,
+        buildRuntime: measured[id].buildRuntime,
+        build: { status: 'passed', exitCode: 0 },
+      }
     return { measured, recipeRows, componentPresetRows, bunRows: {} }
   },
   async (outcomes) => {
@@ -189,8 +194,9 @@ await boundedMap(
         Object.assign(componentPresetRows, outcome.value.componentPresetRows)
         Object.assign(bunRows, outcome.value.bunRows)
       } else if (outcome?.status === 'rejected') {
-        recipeRows[id].build = { status: 'failed' }
-        componentPresetRows[id].build = { status: 'failed' }
+        if (recipeRows[id]) recipeRows[id].build = { status: 'failed' }
+        if (componentPresetRows[id])
+          componentPresetRows[id].build = { status: 'failed' }
         if (bunRows[id]) jsonRecord(bunRows[id]).build = { status: 'failed' }
       }
     }

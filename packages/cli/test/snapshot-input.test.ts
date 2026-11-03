@@ -197,7 +197,7 @@ it('describes guarded snapshot inputs and offline withdrawal limitations in help
 })
 it('shows source and network/cache resolution without changing the compiler hash in either output format', async () => {
   const result = await compile({ preset: getCatalog('0.1.0').presets['neo-brutalism'], componentIds: [], catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
-  const plan: InstallPlan = { projectRoot: '/app', packageManager: 'pnpm', preconditions: {}, preset: result.preset, provenance: result.provenance, changes: [], managedDeclarations: [], dependencyPlan: [], diagnostics: [], networkAccess: true, presetResolution: { source: { origin: 'https://example.com', reference, presetHash: snapshot.presetHash }, via: 'network' } }
+  const plan: InstallPlan = { projectRoot: '/app', packageManager: 'pnpm', preconditions: {}, preset: result.preset, provenance: result.provenance, changes: [], managedDeclarations: [], dependencyPlan: [], diagnostics: [], notices: [], networkAccess: true, presetResolution: { source: { origin: 'https://example.com', reference, presetHash: snapshot.presetHash }, via: 'network' } }
   const data = planOutput('add', 'planned', plan)
   expect(data.presetHash).toBe(result.preset.hash)
   expect(data.presetResolution?.source.presetHash).toBe(snapshot.presetHash)

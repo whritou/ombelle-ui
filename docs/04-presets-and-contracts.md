@@ -27,6 +27,20 @@ Sparse preset inputs inherit the exact defaults from `catalogRelease`. For proje
 
 The initial schema includes Button defaults only. Adding controls for another component requires corresponding schema, compiler, documentation, and test changes. A generic JSON bag is not an acceptable shortcut.
 
+### Liquid glass design fields
+
+Three `design` fields apply only when `styleFamily` is `liquid-glass`; the other families ignore them and their output does not change:
+
+| Field | Contract |
+| --- | --- |
+| `transparency` | `auto` (default) renders translucent surfaces; `reduced` renders every glass surface opaque with no blur |
+| `glassBlurPx` | Backdrop blur radius from 0 to 24 pixels; default 12 |
+| `glassOpacity` | Surface opacity from 0.6 to 1: the share of the surface colour in an sRGB mix with the backdrop. The built-in glass preset uses 0.87 |
+
+The compiler emits `--glass-blur` and `--glass-opacity` on `:root` in `ui-tokens.css` for glass presets only: the preset values with `auto`, and `0px` and `1` with `reduced`. Absent fields take the built-in glass preset's values.
+
+With `auto`, the compiler also enforces a worst-case contrast bound. Each declared surface and text pair, in light and dark mode, must reach 4.5:1 against the surface mixed with pure black and with pure white at `glassOpacity`, and the text luminance must not lie between those two mixes. Because the mix and relative luminance are monotone in each backdrop channel, the pair then reaches 4.5:1 over any backdrop. A failing pair is rejected with `INVALID_DATA` at `/design/glassOpacity`, naming the pair, the mode, and the smallest passing opacity. With `reduced`, the compiler evaluates the same pairs at opacity 1, so each opaque surface must reach 4.5:1 against its declared text colours. This is stricter than the stable families. The bound covers only the declared pairs, not other content placed on glass. [Liquid glass](components/liquid-glass.md#contrast-bound) lists the pairs.
+
 ## Resolution algorithm
 
 1. Validate the JSON shape, byte limits, and supported schema version.

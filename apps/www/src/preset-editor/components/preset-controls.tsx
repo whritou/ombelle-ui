@@ -1,5 +1,10 @@
 import type { PresetEditorDraft, PresetEditablePath } from '../model'
-import { colorKeys, designControls, presetFieldValue } from '../model'
+import {
+  colorKeys,
+  designControls,
+  glassDesignControls,
+  presetFieldValue,
+} from '../model'
 export const fieldId = (path: string) => 'preset' + path.replaceAll('/', '-')
 const human = (key: string) =>
   key.replace(/[A-Z]/g, (c) => ' ' + c.toLowerCase())
@@ -14,6 +19,14 @@ export function PresetControls({
   onEdit: (path: PresetEditablePath, value: string) => void
   onReset: (path: PresetEditablePath) => void
 }) {
+  // Transparency, blur and opacity exist only for liquid glass drafts.
+  const designEntries: [
+    string,
+    (typeof designControls)[keyof typeof designControls] | (typeof glassDesignControls)[keyof typeof glassDesignControls],
+  ][] = [
+    ...Object.entries(designControls),
+    ...(draft.family === 'liquid-glass' ? Object.entries(glassDesignControls) : []),
+  ]
   // Reset disables its own button, so keep keyboard focus on the field it restored.
   function reset(path: PresetEditablePath) {
     onReset(path)
@@ -67,7 +80,7 @@ export function PresetControls({
       <details open>
         <summary>Design tokens</summary>
         <div className="preset-control-grid">
-          {Object.entries(designControls).map(([key, control]) => {
+          {designEntries.map(([key, control]) => {
             const path = `/design/${key}` as PresetEditablePath,
               value = presetFieldValue(draft, path)
             const props = {
@@ -112,7 +125,14 @@ export function PresetControls({
                 {'min' in control && (
                   <small>
                     {control.min} to {control.max}
-                    {key === 'radiusRem' ? ' rem' : ' px'}
+                    {'unit' in control
+                      ? control.unit
+                      : key === 'radiusRem'
+                        ? ' rem'
+                        : ' px'}
+                    {'step' in control && control.step < 1
+                      ? `, in steps of ${control.step}`
+                      : ''}
                   </small>
                 )}
               </div>

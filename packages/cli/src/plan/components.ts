@@ -140,6 +140,7 @@ export async function planAdd(
     managedDeclarations: context.lock?.managedDeclarations ?? [],
     dependencyPlan: [],
     diagnostics: [],
+    notices: [],
     networkAccess: false,
   }
   const lock = baseLock(context, result),

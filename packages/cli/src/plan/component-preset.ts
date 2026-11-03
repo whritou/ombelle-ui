@@ -88,6 +88,7 @@ export async function planComponentPreset(
     managedDeclarations: structuredClone(context.lock.managedDeclarations),
     dependencyPlan: [],
     diagnostics: [],
+    notices: [],
     networkAccess: false,
     componentPreset: { ...identity, importPath, examplePath },
   }

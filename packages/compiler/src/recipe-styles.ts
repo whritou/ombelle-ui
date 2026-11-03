@@ -5,6 +5,7 @@ import {
   type Recipe,
   type ResolvedPreset,
 } from '@ombelle/contracts'
+import { assertGlassContrast, glassTokens } from './glass.js'
 
 export function validateRecipeDarkSelector(value: string): string {
   if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
@@ -36,6 +37,30 @@ const block = (selector: string, values: Record<string, string>) =>
     .map((k) => k + ':' + values[k] + ';')
     .join('') +
   '}'
+
+const allowedMediaConditions = [
+  '(prefers-reduced-motion:reduce)',
+  '(prefers-reduced-motion: reduce)',
+  '(forced-colors: active)',
+  '(prefers-reduced-transparency: reduce)',
+]
+// The single reviewed liquid-glass feature query; compared whitespace-normalized.
+const glassSupportsCondition =
+  '((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))'
+const normalizeConditionParams = (params: string) =>
+  params
+    .replace(/\s+/g, ' ')
+    .replace(/\(\s/g, '(')
+    .replace(/\s\)/g, ')')
+    .trim()
+// Post-order, so a feature query whose nested media blocks all empty out is removed too.
+function pruneEmptyAtRules(container: postcss.Container) {
+  for (const node of [...(container.nodes ?? [])]) {
+    if (node.type !== 'atrule') continue
+    if (node.nodes) pruneEmptyAtRules(node)
+    if (!node.nodes?.length) node.remove()
+  }
+}
 
 export function compileScopedButtonStyles(input: {
   familyCss: string
@@ -71,15 +96,14 @@ export function compileScopedButtonStyles(input: {
     '="' +
     input.scope +
     '"]'
+  if (input.preset.data.styleFamily === 'liquid-glass')
+    assertGlassContrast(input.preset.data)
   const root = postcss.parse(input.familyCss)
   root.walkAtRules((rule) => {
+    const params = normalizeConditionParams(rule.params)
     if (
-      rule.name !== 'media' ||
-      ![
-        '(prefers-reduced-motion:reduce)',
-        '(prefers-reduced-motion: reduce)',
-        '(forced-colors: active)',
-      ].includes(rule.params)
+      !(rule.name === 'media' && allowedMediaConditions.includes(params)) &&
+      !(rule.name === 'supports' && params === glassSupportsCondition)
     )
       throw new FoundationError(
         'INVALID_DATA',
@@ -157,9 +181,7 @@ export function compileScopedButtonStyles(input: {
     if (output.length) rule.selector = output.join(',')
     else rule.remove()
   })
-  root.walkAtRules((rule) => {
-    if (!rule.nodes?.length) rule.remove()
-  })
+  pruneEmptyAtRules(root)
   root.walkComments((comment) => {
     comment.remove()
   })
@@ -184,6 +206,11 @@ export function compileScopedButtonStyles(input: {
           : 'Arial, sans-serif',
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
+  if (data.styleFamily === 'liquid-glass') {
+    const glass = glassTokens(d)
+    Object.assign(light, glass.light)
+    Object.assign(darkTokens, glass.dark)
+  }
   const overrides: Record<string, string> = {}
   for (const [key, value] of Object.entries(input.overrides)) {
     const mapping: Record<string, [string, string]> = {

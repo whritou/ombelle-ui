@@ -42,7 +42,7 @@ Keep these distinctions visible in the editor. A style family should not occupy 
 
 ## First release scope
 
-The web alpha contains Button, Badge, Card, Input, Textarea, Label, Checkbox, Switch, Native Select, Dialog, Tabs, and Tooltip. Flat, minimalist, and neo brutalism receive stable support for all 12. Liquid glass starts with Button, Badge, Card, Dialog, Tabs, and Tooltip as experimental; other glass entries remain unavailable until reviewed.
+The web alpha contains Button, Badge, Card, Input, Textarea, Label, Checkbox, Switch, Native Select, Dialog, Tabs, and Tooltip. Flat, minimalist, and neo brutalism receive stable support for all 12. Liquid glass is implemented as experimental for Button, Badge, Card, Dialog, Tabs, and Tooltip; other glass entries remain unavailable until reviewed. See [liquid glass](components/liquid-glass.md) for its limitations and [its evidence](evidence/liquid-glass.md) for what was measured.
 
 The site includes a searchable catalog, component detail pages, style and state previews, a component editor, a global preset editor, and code plus CLI export. Users can download preset JSON and work without an account. Public immutable snapshots enable share links and install commands; publishing requires an explicit action.
 

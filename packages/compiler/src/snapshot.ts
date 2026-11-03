@@ -1,12 +1,14 @@
 import { getCatalog } from '@ombelle/catalog'
 import {
   FoundationError,
+  isStyleFamily,
   parseSnapshotReference,
   validatePresetSnapshot,
   type PresetSnapshot,
   type ResolvedPreset,
 } from '@ombelle/contracts'
 import { canonicalize } from './canonicalize.js'
+import { assertGlassContrast } from './glass.js'
 import { resolvePreset } from './resolve.js'
 
 const maxPresetBytes = 65_536
@@ -27,6 +29,16 @@ export async function normalizePublishedPreset(
   // Schema validation runs before canonicalization so malformed non-JSON inputs
   // cannot reach the recursive canonical serializer.
   const normalized = await resolvePreset(input, getCatalog('0.1.0'))
+  if (!isStyleFamily(normalized.data.styleFamily))
+    throw new FoundationError(
+      'INVALID_DATA',
+      'Style family is not available in the foundation',
+      '/styleFamily',
+    )
+  // A glass preset below the contrast bound could never compile; refuse it
+  // with the same INVALID_DATA error compile raises.
+  if (normalized.data.styleFamily === 'liquid-glass')
+    assertGlassContrast(normalized.data)
   assertPresetSize(input)
   assertPresetSize(normalized.data)
   return normalized
