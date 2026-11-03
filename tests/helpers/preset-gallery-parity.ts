@@ -30,19 +30,10 @@ export async function assertPresetGalleryButtonPixels(input: {
   const { page, iframe, previewButton, installedButton, label } = input
   await iframe.scrollIntoViewIfNeeded()
   // Match the standalone document's raster origin before comparing pixels.
-  // A fractional host layout offset changes text antialiasing. Move the
-  // iframe onto whole pixels through layout: a fractional transform leaves
-  // the compositor free to round the layer either way, a 1px shift.
+  // A fractional host layout offset changes text antialiasing.
   await iframe.evaluate((element) => {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const box = element.getBoundingClientRect()
-      const dx = Math.ceil(box.x) - box.x
-      const dy = Math.ceil(box.y) - box.y
-      if (!dx && !dy) return
-      const style = getComputedStyle(element)
-      element.style.marginLeft = `${parseFloat(style.marginLeft) + dx}px`
-      element.style.marginTop = `${parseFloat(style.marginTop) + dy}px`
-    }
+    const box = element.getBoundingClientRect()
+    element.style.transform = `translate(${Math.floor(box.x) - box.x}px, ${Math.floor(box.y) - box.y}px)`
   })
   const inner = await previewButton.evaluate((element) => {
     const box = element.getBoundingClientRect()

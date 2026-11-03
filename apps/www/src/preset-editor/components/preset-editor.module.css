@@ -386,10 +386,9 @@
   font-size: 12px;
 }
 
+/* Not sticky: a composited sticky layer can shift the sandboxed preview by
+   a device pixel, which breaks exact preview/installed pixel parity. */
 .preview {
-  position: sticky;
-  /* Below the 65px sticky site header. */
-  top: 80px;
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: 16px;
