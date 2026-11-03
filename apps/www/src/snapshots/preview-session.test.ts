@@ -128,3 +128,39 @@ it('rejects a compiled result for a different preset hash without exposing a fra
   expect(selectSnapshotPreview(b.snapshot, session.state).status).toBe('failed')
   session.dispose()
 })
+it.each([
+  ['liquid-glass', ['button', 'badge', 'card', 'dialog', 'tabs', 'tooltip']],
+  ['flat', supportedComponentIds],
+] as const)(
+  'compiles the components a %s snapshot supports for its preview',
+  async (family, ids) => {
+    const resolved = await normalizePublishedPreset(
+      getCatalog('0.1.0').presets[family],
+    )
+    const snapshot: PresetSnapshot = {
+      snapshotVersion: '1.0',
+      id: 'ps_' + 'c'.repeat(32),
+      revision: 1,
+      preset: resolved.data,
+      presetHash: resolved.hash,
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+      createdAt: '2026-10-27T12:34:56.000Z',
+      validationStatus: 'draft',
+    }
+    let state: SnapshotPreviewState | null = null
+    const session = createSnapshotPreviewSession(snapshot, {
+      notify: (next) => (state = next),
+    })
+    await session.start()
+    expect(state!.status).toBe('connecting')
+    expect(state!.result).toEqual(
+      await compile({
+        preset: snapshot.preset,
+        componentIds: [...ids],
+        catalogRelease: '0.1.0',
+        compilerVersion: '0.1.0',
+      }),
+    )
+  },
+)
