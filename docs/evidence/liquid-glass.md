@@ -89,5 +89,6 @@ Glass stays experimental. The measured checks are automated, in one Chromium bui
 - The site redesign in PR #37 is not merged into this branch. It shows glass as "soon" or "not yet" in `apps/www/src/site/home/showcase.tsx` and `apps/www/src/site/home/sections.tsx`. Whichever of the two PRs merges second must change those to experimental for the six components.
 - Run the glass consumer browser cases and a full `pnpm check:foundation` on a machine with the complete toolchain.
 - Redeploy the hosted snapshot service.
+- Switching between stable families with `theme add` leaves previously installed colocated component CSS from the old family in place. This is pre-existing and not specific to glass.
 
 See the [liquid glass documentation](../components/liquid-glass.md) and the [approved design](../superpowers/specs/2026-11-03-liquid-glass-design.md).

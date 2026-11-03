@@ -86,6 +86,13 @@ JSON output always includes a `notices` array. It is empty for stable families.
 
 Planning an unavailable component, such as `add input` in a glass project, fails with `STYLE_UNAVAILABLE` and exit code 2 before any write. The message names the component and lists the experimental glass components. An `init` whose component list includes an unavailable component fails as a whole. `--yes` does not bypass the refusal.
 
+`init` and `theme add` rewrite the tokens and `ui-style.css` only, so they check the managed components recorded in the project lock before any write. `--yes` bypasses neither refusal:
+
+- **Into glass.** If any installed component is unavailable for liquid glass, such as Input in a flat project, switching to a glass preset fails with `STYLE_UNAVAILABLE` at `/componentIds`. The message names the installed unavailable components and lists the experimental glass components. Keep a stable family, or remove those components first.
+- **Out of glass.** Badge, Card, Tabs, and Tooltip install colocated glass CSS, such as `components/ui/card.css`, that depends on the `--glass-*` tokens and the contrast bound. If any of them is installed in a glass project, switching to a stable preset fails with `STYLE_UNAVAILABLE` at `/styleFamily`, naming the components and their CSS files. Remove them, switch the theme, then add them again. Button and Dialog keep their glass rules in `ui-style.css`, which the switch rewrites, so they do not block it.
+
+Re-applying another glass preset to a glass project is not a family switch. It still runs the contrast bound.
+
 ## Editors
 
 - **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency, blur, and opacity controls appear only for glass. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails, and the readout states the minimum passing opacity. The gallery shows the six unavailable components greyed out as "Unavailable in liquid glass".
