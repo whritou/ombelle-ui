@@ -42,8 +42,9 @@ export default function HomePage() {
       <p>
         The web alpha covers Button, Badge, Card, Input, Textarea, Label,
         Checkbox, Switch, Native Select, Dialog, Tabs and Tooltip. Liquid glass
-        is not available yet, and React Native is not supported. Ombelle has no
-        accounts.
+        is experimental for Button, Badge, Card, Dialog, Tabs and Tooltip; form
+        controls are not available in glass yet. React Native is not supported.
+        Ombelle has no accounts.
       </p>
 
       <nav aria-label="Editors">
