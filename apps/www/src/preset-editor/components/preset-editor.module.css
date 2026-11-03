@@ -388,6 +388,7 @@
 
 .preview {
   position: sticky;
+  /* Below the 65px sticky site header. */
   top: 80px;
   min-width: 0;
   border: 1px solid var(--border);
