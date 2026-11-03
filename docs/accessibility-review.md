@@ -1,0 +1,155 @@
+# Accessibility review protocol
+
+This is the manual review that acceptance criterion PR5 in the [product requirements](01-product-requirements.md#acceptance-criteria) requires alongside automated checks. It covers the twelve stable components in flat, minimalist and neo-brutalism: 36 entries. The [components doc](03-components-styles-accessibility.md#accessibility-target) lists the behaviors it must establish.
+
+**No manual review has been performed.** The results tables below are empty. Until a human reviewer fills them in for a recorded environment, PR5 is not met, whatever the automated suites report. The automated half (axe with no rule exclusions, plus scripted keyboard, focus, target-size, contrast, forced-colors and reduced-motion checks) is summarized in the [web alpha readiness audit](web-alpha-readiness.md) and its linked evidence; this protocol does not repeat those checks, and passing them does not count as a manual result.
+
+## Who and what
+
+The reviewer is a person operating a real keyboard and screen reader, not an agent or a script. Record one row per pass: reviewer, date, commit, operating system and version, browser and version, screen reader and version, and any non-default settings (speech rate, verbosity, browse/focus mode defaults, keyboard layout). A pass that changes any of these is a separate row.
+
+Three passes are required for each entry:
+
+| Pass | Environment | Mode |
+| --- | --- | --- |
+| K | Any supported desktop browser, no assistive technology | Keyboard only. Unplug or ignore the pointer |
+| N | Windows, current NVDA, current Chrome | NVDA browse mode and focus mode, keyboard only |
+| V | macOS, current VoiceOver, current Safari | VoiceOver keyboard commands (VO keys), keyboard only. Enable "Press Tab to highlight each item on a webpage" in Safari settings |
+
+## Setup
+
+Run the preview from the repository checkout under review:
+
+1. `pnpm install --frozen-lockfile --ignore-scripts`
+2. `pnpm build:packages`
+3. `pnpm generate:preview`
+4. `pnpm dev:preview`
+
+Open `http://127.0.0.1:4173/<family>/?mode=<mode>` with `<family>` one of `flat`, `minimalist`, `neo-brutalism` and `<mode>` one of `light`, `dark`. Add the fixture query from the table below. Review each component in all three families. Do the full K, N and V passes in light mode for each family, then repeat the visual focus checks (steps marked *visual*) in dark mode.
+
+| Component | Preview query | Notes |
+| --- | --- | --- |
+| Button | `&states=1` | Variants, sizes, disabled and loading |
+| Badge | `&badges=1` | |
+| Card | `&cards=1` | Default and dense |
+| Input | `&states=1` and `&forms=1` | Empty, filled, invalid, disabled |
+| Textarea | `&forms=1` | |
+| Label | `&forms=1` | Required indication |
+| Checkbox | `&checkboxes=1` | Includes form submit/reset and a right-to-left toggle |
+| Switch | `&switches=1` | |
+| Native Select | `&forms=1` | Includes optgroup, multiple, disabled and fieldset-disabled |
+| Dialog | default scenario, or `&states=1` for the long Dialog | |
+| Tabs | `&tabs=1` | |
+| Tooltip | `&tooltips=1` | |
+
+Also run each component once with the operating system's reduced-motion setting on, once in Windows forced colors (High Contrast) mode with NVDA, and once at 200 percent browser text zoom. Record these as notes on the K row of the affected component.
+
+## Checks for every component
+
+Apply these in every pass, then the component-specific checks.
+
+1. **Tab order** follows the visual reading order and skips nothing interactive. Non-interactive elements (Badge, Card, Label, Tooltip content) take no tab stop.
+2. **Focus visible** (*visual*): every focused control shows an indicator that is not clipped by overflow, is distinguishable from the unfocused state, and remains visible in dark mode and forced colors.
+3. **Name, role, state** (N, V): the screen reader announces a meaningful name, the correct role, and the current state (checked, selected, expanded, disabled, invalid, required) on focus. No icon is announced in place of text.
+4. **Disabled** controls are announced as disabled or unavailable and cannot be operated.
+5. **Errors** (where present): the error text is announced with the field, not only shown in colour.
+6. **Reading order** (N browse mode, V with VO+Right): content is read in the visual order, with no duplicated or orphaned text.
+7. **Right-to-left** (where the fixture offers it): arrow-key direction and visual order mirror correctly.
+
+## Component-specific checks
+
+**Button**
+- Enter and Space both activate. Activation fires once per press.
+- Loading buttons announce a busy or loading state and cannot be activated twice; the label stays meaningful.
+- Icon-only buttons have an accessible name.
+- Disabled buttons do not look active (*visual*).
+
+**Badge**
+- Read as inline text in context; it is not announced as a button or link and takes no tab stop.
+- The destructive variant's meaning is carried by its text, not colour alone.
+
+**Card**
+- The title is announced as a heading at the documented level and appears in the screen reader's heading list (NVDA H / Insert+F7, VoiceOver rotor Headings).
+- Header, description, content and footer are read in order. The card itself is not focusable and has no landmark or role announced.
+- The dense variant reads identically to the default.
+
+**Input**
+- The associated Label is announced as the name on focus.
+- Required, invalid and disabled states are announced. The error message is announced via its description.
+- Typing, selection and deletion are echoed normally (NVDA focus mode switches automatically).
+
+**Textarea**
+- As Input, plus multi-line entry with Enter works and the screen reader stays in focus mode while editing.
+
+**Label**
+- Activating the label (VO+Space on the label, or clicking with the pointer re-enabled for this one check) moves focus to its control.
+- The required marker is not read as a stray "star"; the control itself is announced as required.
+- The 120-character label is read in full.
+
+**Checkbox**
+- Space toggles; Enter does not submit unexpectedly.
+- The mixed checkbox is announced as "half checked" (NVDA) or "mixed" (VoiceOver), and toggling it announces the new state.
+- Invalid state is announced. Submitting and resetting the fixture form reflect the state that was announced.
+
+**Switch**
+- Announced as a switch (or toggle button) with on/off state. Space toggles and the new state is announced immediately.
+
+**Native Select**
+- Opening, arrow-key navigation and selection work as the platform's native select; the selected option is announced.
+- Option groups are announced. The 90-character option is read in full.
+- The multiple select announces multi-selection and supports the platform's selection keys.
+- The decorative chevron is never announced. Fieldset-disabled selects are announced as disabled.
+
+**Dialog**
+- Opening moves focus into the dialog; the title is announced as its name and the description is read.
+- Tab and Shift+Tab stay inside the dialog. Escape closes it. The icon close button has an accessible name.
+- Closing returns focus to the trigger. Content behind the dialog is not reachable in browse mode while it is open.
+- The long dialog scrolls with the keyboard and focused elements are not clipped (*visual*).
+
+**Tabs**
+- Tab enters the list at the selected trigger and moves on to the active panel.
+- Arrow keys move between triggers in the documented direction (Left/Right, mirrored in RTL; Up/Down when vertical); Home and End reach the ends; disabled triggers are skipped.
+- Automatic activation selects the panel on focus; the selected state and "n of m" position are announced.
+- The panel is announced as a tab panel named by its trigger.
+
+**Tooltip**
+- Focusing the trigger opens the tooltip immediately and the screen reader reads its text as the trigger's description.
+- Escape dismisses it while focus stays on the trigger. Blur closes it.
+- The tooltip holds no essential or interactive content and never receives focus.
+
+## Results
+
+Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
+
+### Environments
+
+| Pass | Reviewer | Date | Commit | OS and version | Browser and version | Screen reader and version | Settings |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| K | | | | | | n/a | |
+| N | | | | | | | |
+| V | | | | | | | |
+
+### Results by entry
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Button | | | | | | | | | | |
+| Badge | | | | | | | | | | |
+| Card | | | | | | | | | | |
+| Input | | | | | | | | | | |
+| Textarea | | | | | | | | | | |
+| Label | | | | | | | | | | |
+| Checkbox | | | | | | | | | | |
+| Switch | | | | | | | | | | |
+| Native Select | | | | | | | | | | |
+| Dialog | | | | | | | | | | |
+| Tabs | | | | | | | | | | |
+| Tooltip | | | | | | | | | | |
+
+### Findings
+
+| ID | Component | Family | Pass | Description | Severity | Issue | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| | | | | | | | |
+
+When the tables are complete, update the PR5 row in the [web alpha readiness audit](web-alpha-readiness.md) with the environments and outcome. Any entry with a failing or missing pass stays out of the stable claim.

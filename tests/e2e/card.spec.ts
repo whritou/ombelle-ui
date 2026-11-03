@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import path from 'node:path'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
@@ -44,7 +45,7 @@ const cardReferences = createBrowserReferenceCache<{
 for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'])
     for (const app of ['preview', 'vite', 'next', 'npm-vite', 'npm-next'])
-      test(`Card ${family}/${mode}/${app}: source and DOM parity, density, forced colors and reflow`, async ({
+      test(`Card ${family}/${mode}/${app}: source and DOM parity, density, accessibility, forced colors and reflow`, async ({
         page,
       }) => {
         const query = '?cards=1&mode=' + mode
@@ -157,6 +158,8 @@ for (const family of supportedStyleFamilies)
           expect(s.shadow === 'none').toBe(family !== 'neo-brutalism')
           expect(s.color).not.toBe(s.background)
         }
+        const axe = await new AxeBuilder({ page }).analyze()
+        expect(axe.violations).toEqual([])
         await page.emulateMedia({ forcedColors: 'active' })
         for (const card of [cards.nth(0), cards.nth(1)]) {
           await expect(card).toHaveCSS('box-shadow', 'none')
@@ -208,12 +211,14 @@ for (const family of supportedStyleFamilies)
                 node: process.version,
                 browserVersion: page.context().browser()?.version(),
                 styles: actual.styles,
+                axeViolations: axe.violations,
                 checks: {
                   sourceParity: true,
                   domParity: true,
                   density: true,
                   forcedColors: true,
                   wrapping320: true,
+                  axe: true,
                   queryGate: true,
                 },
               },
