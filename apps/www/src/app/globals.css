@@ -122,6 +122,10 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+  /* Unsized preview iframes default to 300px; never let them widen a phone layout. */
+  iframe {
+    max-width: 100%;
+  }
   /* Keep scrolled-to content (anchors, scrollIntoView) clear of the sticky header. */
   html {
     scroll-padding-top: 5rem;
