@@ -303,3 +303,50 @@ it('rejects unsupported preset releases and unsafe dark selectors', async () => 
 })
 
 })
+
+describe('liquid-glass component presets', () => {
+  const catalog = getCatalog('0.1.0')
+
+  it('compiles the experimental glass Button preset under its scope', async () => {
+    const result = await compileButtonPreset({
+      preset: catalog.presets['liquid-glass'],
+    })
+    const style = result.artifacts.find((artifact) => artifact.kind === 'style')!
+    const scope = `[data-slot=scoped-button][data-ombelle-scope=${result.scope}]`
+    expect(result.preset.data.styleFamily).toBe('liquid-glass')
+    expect(result.artifacts.map(({ logicalPath }) => logicalPath)).toEqual([
+      'examples/scoped-presets/builtin-liquid-glass/r1.tsx',
+      'lib/utils.ts',
+      'scoped-presets/builtin-liquid-glass/r1/button.css',
+      'scoped-presets/builtin-liquid-glass/r1/button.tsx',
+    ])
+    const root = postcss.parse(style.content)
+    const selectors: string[] = []
+    root.walkRules((rule) => {
+      selectors.push(rule.selector)
+    })
+    for (const selector of selectors)
+      for (const part of selector.split(','))
+        expect(
+          part
+            .trim()
+            .replace(/["']/g, '')
+            .replace(/^\.dark\s*/, '')
+            .startsWith(scope),
+        ).toBe(true)
+    expect(style.content).toContain('@supports')
+    expect(style.content).toContain('prefers-reduced-transparency: reduce')
+    expect(style.content).toContain('--glass-opacity: 0.87')
+    expect(style.content).not.toMatch(/:root|@theme|data-slot=["'](?:button|input|dialog)/)
+  })
+
+  it('rejects a glass Button preset that fails the contrast bound', async () => {
+    const preset = structuredClone(catalog.presets['liquid-glass'])
+    preset.design.glassOpacity = 0.6
+    await expect(compileButtonPreset({ preset })).rejects.toMatchObject({
+      code: 'INVALID_DATA',
+      path: '/design/glassOpacity',
+      message: expect.stringMatching(/^Liquid glass text contrast fails in /),
+    })
+  })
+})

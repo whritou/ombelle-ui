@@ -14,38 +14,9 @@ import estree from 'prettier/plugins/estree'
 import postcss from 'prettier/plugins/postcss'
 import { resolvePreset } from './resolve.js'
 import { sha256 } from './hash.js'
-import { glassContrastReport } from './glass-contrast.js'
+import { assertGlassContrast, glassTokens } from './glass.js'
 const variable = (key: string) =>
   '--' + key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
-function assertGlassContrast(data: Parameters<typeof glassContrastReport>[0]) {
-  const report = glassContrastReport(data)
-  const failing = report.pairs.find((pair) => !pair.passes)
-  if (!failing) return
-  const overBlack = failing.ratioOverBlack <= failing.ratioOverWhite
-  const worst = overBlack ? failing.ratioOverBlack : failing.ratioOverWhite
-  throw new FoundationError(
-    'INVALID_DATA',
-    'Liquid glass text contrast fails in ' +
-      failing.mode +
-      ' for ' +
-      failing.text +
-      ' on ' +
-      failing.surface +
-      ': ' +
-      (Math.floor(worst * 100) / 100).toFixed(2) +
-      ':1 over a ' +
-      (overBlack ? 'black' : 'white') +
-      ' backdrop. ' +
-      (report.minimumOpacity === null
-        ? 'Raise contrast between ' +
-          failing.text +
-          ' and ' +
-          failing.surface +
-          '; no glassOpacity passes.'
-        : 'Minimum passing glassOpacity is ' + report.minimumOpacity + '.'),
-    '/design/glassOpacity',
-  )
-}
 export async function compile(input: {
   preset: unknown
   componentIds: readonly ComponentId[]
@@ -90,14 +61,9 @@ export async function compile(input: {
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
   if (family === 'liquid-glass') {
-    const opaque = d.transparency === 'reduced'
-    Object.assign(theme.light, {
-      '--glass-blur': opaque ? '0px' : (d.glassBlurPx ?? 12) + 'px',
-      '--glass-opacity': opaque ? '1' : String(d.glassOpacity ?? 1),
-      '--glass-highlight': 'color-mix(in srgb, white 35%, transparent)',
-    })
-    theme.dark['--glass-highlight'] =
-      'color-mix(in srgb, white 12%, transparent)'
+    const glass = glassTokens(d)
+    Object.assign(theme.light, glass.light)
+    Object.assign(theme.dark, glass.dark)
   }
   for (const key of Object.keys(preset.data.modes.light))
     theme.theme['--color-' + variable(key).slice(2)] =
