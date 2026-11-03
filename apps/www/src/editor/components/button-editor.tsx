@@ -194,7 +194,6 @@ export function ButtonEditor() {
             <div className={styles.viewControls}>
               <label>Preview mode <select value={view.mode} onChange={(event) => setView({ ...view, mode: event.target.value as EditorView['mode'] })}><option value="light">Light</option><option value="dark">Dark</option></select></label>
               <label>Preview width <select value={view.viewport} onChange={(event) => setView({ ...view, viewport: event.target.value as EditorView['viewport'] })}><option value="wide">Wide</option><option value="narrow">Narrow</option></select></label>
-              <label>Demonstrate state <select value={view.forcedState} onChange={(event) => setView({ ...view, forcedState: event.target.value as EditorView['forcedState'] })}><option value="none">Default</option><option value="focus">Focus</option><option value="hover">Hover</option></select></label>
             </div>
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} /></div>
             <p className={styles.previewStatus}>{compilation.stale || diagnostic || !resultMatchesDraft(compilation.result, draft.recipe)

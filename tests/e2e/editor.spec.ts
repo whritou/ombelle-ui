@@ -75,7 +75,6 @@ test('view mode does not change recipe hash and a draft restores after reload', 
   const before = await page.getByTestId('recipe-hash').textContent()
   await page.getByLabel('Preview mode').selectOption('dark')
   await page.getByLabel('Preview width').selectOption('narrow')
-  await page.getByLabel('Demonstrate state').selectOption('focus')
   await expect(page.getByTestId('recipe-hash')).toHaveText(before!)
   await page.reload()
   await expect(page.getByLabel('Button text')).toHaveValue('Saved draft')
@@ -191,14 +190,14 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
 test('mobile workspace tabs retain the draft and preview mode', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
-  await page.getByRole('button', { name: 'Customize' }).click()
+  await page.getByRole('button', { name: 'Customize', exact: true }).click()
   await page.getByLabel('Button text').fill('Mobile draft')
   await page.getByRole('button', { name: 'Preview', exact: true }).click()
   await page.getByLabel('Preview mode').selectOption('dark')
   await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]')).toHaveText('Mobile draft', { timeout: 20000 })
-  await page.getByRole('button', { name: 'Code' }).click()
+  await page.getByRole('button', { name: 'Code', exact: true }).click()
   await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
-  await page.getByRole('button', { name: 'Customize' }).click()
+  await page.getByRole('button', { name: 'Customize', exact: true }).click()
   await expect(page.getByLabel('Button text')).toHaveValue('Mobile draft')
   await page.getByRole('button', { name: 'Preview', exact: true }).click()
   await expect(page.getByLabel('Preview mode')).toHaveValue('dark')
@@ -447,7 +446,7 @@ test('operates every Button editor control, artifact tab, download and publish d
     await tabTo(page, page.getByLabel(`${label} value`))
     await page.keyboard.press('ArrowUp')
   }
-  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow'], ['Demonstrate state', 'focus']] as const) {
+  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow']] as const) {
     await tabTo(page, page.getByLabel(label))
     await page.keyboard.press('ArrowDown')
     await expect(page.getByLabel(label)).toHaveValue(value)
