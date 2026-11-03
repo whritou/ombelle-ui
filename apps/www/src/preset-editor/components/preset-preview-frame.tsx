@@ -135,6 +135,9 @@ export function PresetPreviewFrame({
         src={previewFrameUrl('preset', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)}
         sandbox="allow-scripts"
         style={{
+          // Block layout keeps the frame off the text baseline, whose font
+          // metrics would put it at a fractional offset.
+          display: 'block',
           width: view.viewport === 'narrow' ? '320px' : '100%',
           maxWidth: '100%',
           height: height + 'px',
