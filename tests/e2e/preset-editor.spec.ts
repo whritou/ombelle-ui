@@ -15,6 +15,7 @@ import {
   createPresetDraft,
   setPresetEdit,
 } from '../../apps/www/src/preset-editor/model.js'
+import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
 import {
@@ -648,16 +649,143 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
     hash!,
   )
 })
-test('supports keyboard editing and 320 pixel reflow', async ({ page }) => {
+test('supports keyboard editing and 320 pixel reflow', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.setViewportSize({ width: 320, height: 800 })
   await page.goto(url)
   await ready(page)
-  await page.getByLabel('Preset name', { exact: true }).focus()
+  const name = page.getByLabel('Preset name', { exact: true })
+  const defaultName = await name.inputValue()
+  await name.focus()
   await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('Keyboard theme')
-  await expect(page.getByLabel('Preset name', { exact: true })).toHaveValue(
-    'Keyboard theme',
+  await expect(name).toHaveValue('Keyboard theme')
+
+  const undo = page.getByRole('button', { name: 'Undo', exact: true })
+  const redo = page.getByRole('button', { name: 'Redo', exact: true })
+  for (const [from, to, value] of [
+    [undo, redo, defaultName],
+    [redo, undo, 'Keyboard theme'],
+  ] as const) {
+    await tabTo(page, from, { backward: true })
+    for (let presses = 0; presses < 40 && (await from.isEnabled()); presses++) {
+      await expect(from).toBeFocused()
+      await page.keyboard.press('Enter')
+    }
+    await expect(name).toHaveValue(value)
+    await expect(to).toBeFocused()
+    await expectVisibleFocus(page)
+  }
+
+  const family = page.getByLabel('Style family', { exact: true })
+  const confirmDialog = page.getByRole('dialog', {
+    name: 'Change style family?',
+  })
+  await tabTo(page, family, { backward: true })
+  await page.keyboard.press('ArrowDown')
+  await expect(confirmDialog).toBeVisible()
+  await expect(
+    confirmDialog.getByRole('button', { name: 'Cancel', exact: true }),
+  ).toBeFocused()
+  await expectVisibleFocus(page)
+  await page.keyboard.press('Escape')
+  await expect(confirmDialog).toBeHidden()
+  await expect(family).toHaveValue('flat')
+  await expect(family).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(confirmDialog).toBeVisible()
+  await page.keyboard.press('Tab')
+  await expect(
+    confirmDialog.getByRole('button', { name: 'Confirm change', exact: true }),
+  ).toBeFocused()
+  await expectVisibleFocus(page)
+  await page.keyboard.press('Enter')
+  await expect(confirmDialog).toBeHidden()
+  await expect(family).toHaveValue('minimalist')
+  await expect(family).toBeFocused()
+
+  const lightPrimary = page.getByLabel('Light primary', { exact: true })
+  const lightDefault = await lightPrimary.inputValue()
+  await tabTo(page, lightPrimary)
+  await page.keyboard.press('ControlOrMeta+A')
+  await page.keyboard.type('#1d4ed8')
+  await expect(lightPrimary).toHaveValue('#1d4ed8')
+  await tabTo(page, page.getByRole('button', { name: 'Reset light primary', exact: true }))
+  await page.keyboard.press('Enter')
+  await expect(lightPrimary).toHaveValue(lightDefault)
+  await expect(lightPrimary).toBeFocused()
+  await expectVisibleFocus(page)
+  const darkPrimary = page.getByLabel('Dark primary', { exact: true })
+  await tabTo(page, darkPrimary)
+  await page.keyboard.press('ControlOrMeta+A')
+  await page.keyboard.type('#22c55e')
+  await expect(darkPrimary).toHaveValue('#22c55e')
+  await ready(page)
+
+  const downloadButton = page.getByRole('button', {
+    name: 'Download preset JSON',
+    exact: true,
+  })
+  await expect(downloadButton).toBeEnabled()
+  await tabTo(page, downloadButton, { max: 300 })
+  const pending = page.waitForEvent('download')
+  await page.keyboard.press('Enter')
+  const item = await pending
+  expect(item.suggestedFilename()).toBe('project-preset.json')
+  expect(JSON.parse(await fs.readFile((await item.path())!, 'utf8'))).toMatchObject({
+    name: 'Keyboard theme',
+    modes: { dark: { primary: '#22c55e' } },
+  })
+  const output = page.getByLabel('Output', { exact: true })
+  await tabTo(page, output)
+  await page.keyboard.press('ArrowDown')
+  await expect(output).toHaveValue('tokens')
+  await expect(page.getByLabel('Export text')).toHaveValue(/--/)
+  await tabTo(page, page.getByRole('button', { name: 'Copy export' }))
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('status')).toHaveText('Export copied.')
+  await tabTo(page, page.getByLabel('Export text'))
+  const dependencies = page.locator('summary', { hasText: 'Dependencies' })
+  await tabTo(page, dependencies)
+  await page.keyboard.press('Enter')
+  await expect(dependencies.locator('..')).toHaveAttribute('open', '')
+  const install = page.getByLabel('Installation path', { exact: true })
+  await tabTo(page, install)
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByTestId('preset-install-command')).toContainText(
+    'theme add ./project-preset.json',
   )
+
+  const publish = page.getByRole('button', { name: 'Publish preset…' })
+  await tabTo(page, publish)
+  await page.keyboard.press('Enter')
+  const consent = page.getByLabel(
+    'I understand this preset will be public and retained as described above.',
+  )
+  await expect(consent).toBeFocused()
+  await expectVisibleFocus(page)
+  await page.keyboard.press('Space')
+  await expect(consent).toBeChecked()
+  await page.keyboard.press('Tab')
+  await expect(
+    page.getByRole('button', { name: 'Publish public snapshot' }),
+  ).toBeFocused()
+  await expect(
+    page.getByRole('button', { name: 'Publish public snapshot' }),
+  ).toBeEnabled()
+  await expectVisibleFocus(page)
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
+  await page.keyboard.press('Tab')
+  await expect(
+    page.getByRole('button', { name: 'Cancel publication' }),
+  ).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(consent).toHaveCount(0)
+  await expect(publish).toBeFocused()
+  await expectVisibleFocus(page)
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
