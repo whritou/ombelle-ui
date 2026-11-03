@@ -80,7 +80,7 @@ it('normalizes sparse drafts through the existing resolver without mutating them
 it.each([
   { ...preset, catalogRelease: '9.0.0' },
   { ...preset, compilerVersion: '9.0.0' },
-  { ...preset, styleFamily: 'liquid-glass' },
+  { ...preset, styleFamily: 'aurora' },
   { ...preset, revision: Number.MAX_SAFE_INTEGER + 1 },
   { ...preset, schemaVersion: '2.0' },
   { ...preset, extra: true },
@@ -104,6 +104,25 @@ it.each(['flat', 'minimalist', 'neo-brutalism'] as const)(
     ).toBeLessThanOrEqual(65_536)
   },
 )
+it('accepts the experimental liquid-glass family for publication', async () => {
+  const normalized = await normalizePublishedPreset(
+    getCatalog('0.1.0').presets['liquid-glass'],
+  )
+  expect(normalized.data).toMatchObject({
+    id: 'builtin-liquid-glass',
+    styleFamily: 'liquid-glass',
+  })
+})
+it('rejects a liquid-glass preset below the contrast bound like compile does', async () => {
+  const glass = structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
+  glass.design = { ...glass.design, glassOpacity: 0.6 }
+  await expect(normalizePublishedPreset(glass)).rejects.toThrow(
+    expect.objectContaining({
+      code: 'INVALID_DATA',
+      path: '/design/glassOpacity',
+    }),
+  )
+})
 it('does not include timestamp or snapshot identity in the preset hash', async () => {
   const other = {
     ...envelope,

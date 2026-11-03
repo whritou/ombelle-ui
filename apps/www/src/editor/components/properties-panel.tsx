@@ -1,5 +1,6 @@
 import type { Recipe, StyleFamily } from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
+import { draftFamily } from '../model'
 
 type Props = {
   recipe: Recipe
@@ -22,7 +23,7 @@ function FieldError({ diagnostic, path }: { diagnostic: CompileDiagnostic | null
 }
 
 export function PropertiesPanel({ recipe, diagnostic, onChange, onFamily, onDiagnostic }: Props) {
-  const family = recipe.presetRef.id.replace(/^builtin-/, '') as StyleFamily
+  const family = draftFamily(recipe)
   const changeProp = (key: keyof Recipe['props'], value: string | boolean) =>
     onChange({ ...recipe, props: { ...recipe.props, [key]: value } }, `props.${key}`)
   const changeOverride = (key: keyof Recipe['overrides'], value: number) =>
@@ -37,6 +38,7 @@ export function PropertiesPanel({ recipe, diagnostic, onChange, onFamily, onDiag
         <select id="family" value={family} onChange={(event) => onFamily(event.target.value as StyleFamily)}>
           <option value="flat">Flat</option><option value="minimalist">Minimalist</option>
           <option value="neo-brutalism">Neo brutalism</option>
+          <option value="liquid-glass">Liquid glass (Experimental)</option>
         </select>
         <FieldError diagnostic={diagnostic} path="/presetRef" />
       </div>

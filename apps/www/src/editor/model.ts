@@ -1,5 +1,5 @@
 import { getCatalog, resolveRecipePreset } from '@ombelle/catalog'
-import { validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
+import { isStyleFamily, styleSupport, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 
 export type EditorDraft = { storageVersion: 1; recipe: Recipe }
 
@@ -46,4 +46,18 @@ export function updateDraftRecipe(draft: EditorDraft, recipe: unknown): EditorDr
 
 export function changeDraftFamily(draft: EditorDraft, family: StyleFamily): EditorDraft {
   return updateDraftRecipe(draft, { ...draft.recipe, presetRef: presetRefFor(family) })
+}
+
+/** The style family of a pinned built-in preset reference (`builtin-<family>`). */
+export function draftFamily(recipe: Recipe): StyleFamily {
+  const family = recipe.presetRef.id.replace(/^builtin-/, '')
+  if (!isStyleFamily(family)) throw new Error('Unsupported preset reference')
+  return family
+}
+
+/** The experimental notice shown beside the Button export and CLI command. */
+export function experimentalNotice(family: StyleFamily): string | null {
+  return styleSupport('button', family) === 'experimental'
+    ? `${family} is experimental for button; see docs/components/liquid-glass.md for limitations`
+    : null
 }

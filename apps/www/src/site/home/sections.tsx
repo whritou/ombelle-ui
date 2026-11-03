@@ -3,6 +3,7 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { Check, Copy, FlaskConical, Minus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { styleSupport } from '@ombelle/contracts'
 import { ToggleGroup } from '../toggle-group'
 
 /** Copies text, showing a check for a moment; failures leave the text selectable. */
@@ -24,28 +25,28 @@ export function useCopy() {
 /* Component × style matrix                                            */
 /* ------------------------------------------------------------------ */
 type Status = 'stable' | 'experimental' | 'unavailable'
-// Rows follow docs/03-components-styles-accessibility.md. Liquid glass is not
-// shipped yet, so its column is "not yet" for every component.
+// Rows follow docs/03-components-styles-accessibility.md; the glass column
+// reads the contracts' compatibility table (docs/components/liquid-glass.md).
 const COMPONENTS = [
-  { name: 'Button', api: 'variant, size, loading', states: 'Default, hover, focus, pressed, disabled, loading', basis: '<button> or valid link' },
-  { name: 'Badge', api: 'variant, className', states: 'Default, destructive', basis: '<span>' },
-  { name: 'Card', api: 'Root, Header, Title, Description, Content, Footer', states: 'Default, dense', basis: '<section> or <div> with headings' },
-  { name: 'Input', api: 'Native input props, invalid, disabled', states: 'Empty, filled, focus, invalid, disabled', basis: '<input>' },
-  { name: 'Textarea', api: 'Native textarea props', states: 'Empty, filled, focus, invalid, disabled', basis: '<textarea>' },
-  { name: 'Label', api: 'Association, native label props', states: 'Default, required', basis: '<label>' },
-  { name: 'Checkbox', api: 'checked, mixed, disabled, onChange', states: 'Unchecked, checked, mixed, focus, invalid', basis: 'Primitive with form behavior' },
-  { name: 'Switch', api: 'checked, onCheckedChange', states: 'Off, on, focus, disabled', basis: 'Primitive with switch role' },
-  { name: 'Native Select', api: 'Native select props, options', states: 'Default, selected, focus, invalid, disabled', basis: '<select>' },
-  { name: 'Dialog', api: 'Trigger, Content, Title, Description, Close', states: 'Open, closed, scroll, focus return', basis: 'Reviewed dialog primitive' },
-  { name: 'Tabs', api: 'Root, List, Trigger, Content, orientation', states: 'Active, inactive, focus, disabled', basis: 'Reviewed tabs primitive' },
-  { name: 'Tooltip', api: 'Provider, Trigger, Content', states: 'Keyboard, hover, dismissal', basis: 'Reviewed tooltip primitive' },
+  { id: 'button', name: 'Button', api: 'variant, size, loading', states: 'Default, hover, focus, pressed, disabled, loading', basis: '<button> or valid link' },
+  { id: 'badge', name: 'Badge', api: 'variant, className', states: 'Default, destructive', basis: '<span>' },
+  { id: 'card', name: 'Card', api: 'Root, Header, Title, Description, Content, Footer', states: 'Default, dense', basis: '<section> or <div> with headings' },
+  { id: 'input', name: 'Input', api: 'Native input props, invalid, disabled', states: 'Empty, filled, focus, invalid, disabled', basis: '<input>' },
+  { id: 'textarea', name: 'Textarea', api: 'Native textarea props', states: 'Empty, filled, focus, invalid, disabled', basis: '<textarea>' },
+  { id: 'label', name: 'Label', api: 'Association, native label props', states: 'Default, required', basis: '<label>' },
+  { id: 'checkbox', name: 'Checkbox', api: 'checked, mixed, disabled, onChange', states: 'Unchecked, checked, mixed, focus, invalid', basis: 'Primitive with form behavior' },
+  { id: 'switch', name: 'Switch', api: 'checked, onCheckedChange', states: 'Off, on, focus, disabled', basis: 'Primitive with switch role' },
+  { id: 'native-select', name: 'Native Select', api: 'Native select props, options', states: 'Default, selected, focus, invalid, disabled', basis: '<select>' },
+  { id: 'dialog', name: 'Dialog', api: 'Trigger, Content, Title, Description, Close', states: 'Open, closed, scroll, focus return', basis: 'Reviewed dialog primitive' },
+  { id: 'tabs', name: 'Tabs', api: 'Root, List, Trigger, Content, orientation', states: 'Active, inactive, focus, disabled', basis: 'Reviewed tabs primitive' },
+  { id: 'tooltip', name: 'Tooltip', api: 'Provider, Trigger, Content', states: 'Keyboard, hover, dismissal', basis: 'Reviewed tooltip primitive' },
 ] as const
-const COLS = ['Flat', 'Minimalist', 'Neo-Brutalism', 'Liquid Glass (soon)']
+const COLS = ['Flat', 'Minimalist', 'Neo-Brutalism', 'Liquid Glass']
 
 function StatusDot({ s }: { s: Status }) {
   if (s === 'stable') return <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="size-3.5" aria-hidden /><span className="sr-only">Stable</span></span>
   if (s === 'experimental') return <span className="o-glass inline-flex size-7 items-center justify-center rounded-full text-primary"><FlaskConical className="size-3.5" aria-hidden /><span className="sr-only">Experimental</span></span>
-  return <span className="inline-flex size-7 items-center justify-center rounded-full border border-dashed border-muted-foreground/60 text-muted-foreground"><Minus className="size-3.5" aria-hidden /><span className="sr-only">Not yet available</span></span>
+  return <span className="inline-flex size-7 items-center justify-center rounded-full border border-dashed border-muted-foreground/60 text-muted-foreground"><Minus className="size-3.5" aria-hidden /><span className="sr-only">Not available</span></span>
 }
 
 export function MatrixSection() {
@@ -59,7 +60,7 @@ export function MatrixSection() {
           <h2 id="matrix" className="mt-3 text-4xl font-black md:text-5xl">12 components.<br />An honest matrix.</h2>
         </div>
         <p className="max-w-md text-muted-foreground md:justify-self-end">
-          We don&apos;t claim every combination works. Each component × style pair carries a published status — and stable is earned through testing, not assumed. Manual screen-reader review is still pending.
+          We don&apos;t claim every combination works. Each component × style pair carries a published status — and stable is earned through testing, not assumed. Liquid glass is experimental, and manual screen-reader review is still pending for every family.
         </p>
       </div>
       <div className="mt-12 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -81,7 +82,7 @@ export function MatrixSection() {
                     </button>
                   </th>
                   {[0, 1, 2].map(k => <td key={k} className="text-center"><StatusDot s="stable" /></td>)}
-                  <td className="text-center"><StatusDot s="unavailable" /></td>
+                  <td className="text-center"><StatusDot s={styleSupport(row.id, 'liquid-glass')} /></td>
                 </tr>
               ))}
             </tbody>
@@ -97,7 +98,8 @@ export function MatrixSection() {
           </dl>
           <div className="mt-6 flex flex-wrap gap-4 border-t border-border pt-4 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-2"><StatusDot s="stable" /> Stable target</span>
-            <span className="inline-flex items-center gap-2"><StatusDot s="unavailable" /> Not yet</span>
+            <span className="inline-flex items-center gap-2"><StatusDot s="experimental" /> Experimental</span>
+            <span className="inline-flex items-center gap-2"><StatusDot s="unavailable" /> Not available</span>
           </div>
         </aside>
       </div>
@@ -197,6 +199,12 @@ const SCENARIOS = [
     out: ['✓ Read local preset brand (flat, r2)', '+ plan  components/ui/presets/brand/r2/button.tsx', '= keep   project preset, theme and existing components', '◦ dry run — nothing written'],
   },
   {
+    id: 'glass', label: 'Liquid glass',
+    blurb: 'In a liquid glass project, experimental components install with a notice. Form controls are refused before anything is written.',
+    cmd: 'add card tabs --dry-run',
+    out: ['~ would create components/ui/card.tsx + card.css', '~ would create components/ui/tabs.tsx + tabs.css', '! Notice: liquid-glass is experimental for card, tabs; see docs/components/liquid-glass.md for limitations', '◦ dry run — nothing written'],
+  },
+  {
     id: 'dry', label: 'Dry run',
     blurb: 'Inspect every change first. Nothing is written to source, config, cache or dependencies.',
     cmd: 'add input dialog --dry-run',
@@ -279,9 +287,9 @@ const FIELDS = [
   { k: 'id', v: '"brand"', d: 'Readable identity. Never enough alone to reproduce a build.' },
   { k: 'revision', v: '2', d: 'Positive integer revision. A published code such as ps_…@1 always pins the same content.' },
   { k: 'catalogRelease', v: '"0.1.0"', d: 'Pins the exact component and style catalogue. No mutable remote defaults.' },
-  { k: 'styleFamily', v: '"neo-brutalism"', d: 'Flat, minimalist or neo-brutalism. Liquid glass is not available yet.' },
+  { k: 'styleFamily', v: '"neo-brutalism"', d: 'Flat, minimalist, neo-brutalism, or the experimental liquid-glass.' },
   { k: 'modes', v: '{ light, dark }', d: 'Semantic token overrides per colour mode. Hex or numeric OKLCH only.' },
-  { k: 'design', v: '{ radius, density, … }', d: 'Bounded radius, border, density, font and motion choices.' },
+  { k: 'design', v: '{ radius, density, … }', d: 'Bounded radius, border, density, font and motion choices. Glass presets add transparency, blur and opacity.' },
   { k: 'componentDefaults', v: '{ button }', d: 'Reviewed per-component defaults. Button is the first schema entry.' },
 ]
 

@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react'
+import { styleSupport } from '@ombelle/contracts'
 import { componentDocs } from '../../site/components/catalog'
 
 export const metadata = {
@@ -12,7 +13,7 @@ export default function ComponentsPage() {
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Components</p>
       <h1 className="mt-3 text-4xl font-black md:text-5xl">Components</h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-        Twelve accessible components built on shadcn and Radix UI. Each ships in flat, minimalist and neo-brutalism with light and dark modes, and installs as editable source.
+        Twelve accessible components built on shadcn and Radix UI. Each ships in flat, minimalist and neo-brutalism with light and dark modes, and installs as editable source. Six are also available in the experimental liquid glass style.
       </p>
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {componentDocs.map(doc => (
@@ -23,6 +24,9 @@ export default function ComponentsPage() {
                 <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
               </span>
               <span className="mt-1 text-sm text-muted-foreground">{doc.description}</span>
+              {styleSupport(doc.id, 'liquid-glass') === 'experimental' && (
+                <span className="o-glass mt-3 self-start rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Glass · experimental</span>
+              )}
             </a>
           </li>
         ))}

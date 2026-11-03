@@ -148,8 +148,18 @@ it.each(['envelope', 'preset', 'nested'])('rejects unknown fields in %s', async 
 
 it.each(['schemaVersion', 'catalogRelease', 'compilerVersion', 'styleFamily'])('reports unsupported %s as 422', async (field) => {
   const { origin } = await fixture()
-  const value = field === 'styleFamily' ? 'liquid-glass' : field === 'schemaVersion' ? '2.0' : '9.0.0'
+  const value = field === 'styleFamily' ? 'aurora' : field === 'schemaVersion' ? '2.0' : '9.0.0'
   await failure(await post(origin, randomUUID(), { preset: { ...preset, [field]: value } }), 422, 'UNSUPPORTED_RELEASE')
+})
+
+it('publishes an experimental liquid-glass preset and refuses one below the contrast bound', async () => {
+  const { origin } = await fixture()
+  const glass = JSON.parse(await readFile('packages/catalog/src/presets/liquid-glass.json', 'utf8'))
+  const published = await post(origin, randomUUID(), { preset: glass })
+  expect(published.status).toBe(201)
+  expect((await published.json() as PresetSnapshot).preset.styleFamily).toBe('liquid-glass')
+  const failing = { ...glass, design: { ...glass.design, glassOpacity: 0.6 } }
+  await failure(await post(origin, randomUUID(), { preset: failing }), 400, 'INVALID_DATA')
 })
 
 it('maps conflict, payload, minute quota and storage capacity to bounded safe responses', async () => {

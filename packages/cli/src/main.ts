@@ -6,6 +6,7 @@ import { createInterface } from 'node:readline/promises'
 import {
   FoundationError,
   supportedComponentIds,
+  componentsWithStyleSupport,
   type ComponentId,
   type Preset,
   type InstallPlan,
@@ -26,6 +27,7 @@ import { applyPlan } from './apply/transaction.js'
 import { formatPlan, planOutput } from './format.js'
 const exits: Record<string, number> = {
   INVALID_DATA: 2,
+  STYLE_UNAVAILABLE: 2,
   UNSUPPORTED_RELEASE: 3,
   UNSUPPORTED_PROJECT: 3,
   FILE_CONFLICT: 4,
@@ -37,6 +39,15 @@ const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
   '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
+function glassNotices(family: string, ids: readonly ComponentId[] | undefined): string[] {
+  if (family !== 'liquid-glass') return []
+  const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
+  const listed = ids ? experimental.filter((id) => ids.includes(id)) : experimental
+  return listed.length
+    ? ['liquid-glass is experimental for ' + listed.join(', ') +
+        '; see docs/components/liquid-glass.md for limitations']
+    : []
+}
 export async function runCli(
   args: string[],
   io: { stdout(text: string): void; stderr(text: string): void },
@@ -156,19 +167,17 @@ export async function runCli(
           'Run init --preset <local.json>.',
         )
       const recipe = recipeInput!.recipe
-      plan = await planRecipe(
-        context,
-        await compileRecipe({ recipe, darkSelector: context.darkSelector }),
-      )
+      const compiled = await compileRecipe({ recipe, darkSelector: context.darkSelector })
+      plan = await planRecipe(context, compiled)
+      plan.notices = glassNotices(compiled.preset.data.styleFamily, ['button'])
     } else if (command === 'add' && flags['--preset']) {
       const preset = presetInput!.preset
-      plan = await planComponentPreset(
-        context,
-        await compileButtonPreset({
-          preset,
-          darkSelector: context.darkSelector,
-        }),
-      )
+      const compiled = await compileButtonPreset({
+        preset,
+        darkSelector: context.darkSelector,
+      })
+      plan = await planComponentPreset(context, compiled)
+      plan.notices = glassNotices(compiled.preset.data.styleFamily, ['button'])
     } else {
       let preset: Preset | undefined = context.preset
       if (command !== 'add') {
@@ -196,6 +205,10 @@ export async function runCli(
         command === 'add'
           ? await planAdd(context, result)
           : await planTheme(context, result)
+      plan.notices = glassNotices(
+        result.preset.data.styleFamily,
+        command === 'add' ? (ids as ComponentId[]) : undefined,
+      )
     }
     if (presetInput)
       await applyPresetSourceToPlan(

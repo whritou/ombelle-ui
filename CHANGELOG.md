@@ -5,6 +5,10 @@
 - Fix `theme add`, `init` and `add` rejecting projects created by `shadcn init` with pnpm. The settings-only `pnpm-workspace.yaml` it writes (`packages: []`) in the app root is no longer treated as a workspace. Workspaces that declare packages, and any `pnpm-workspace.yaml` in a parent directory, are still rejected.
 - Fix Tailwind v4 detection for bare major ranges such as `tailwindcss: "^4"`, which shadcn templates declare.
 - Add genuine `shadcn init` Vite and Next.js fixtures and an integration test of the theme-only merge on them.
+- Add the experimental `liquid-glass` style family for Button, Badge, Card, Dialog, Tabs and Tooltip, with a built-in preset (blur 12px, opacity 0.87), opaque fallbacks, and a compile-time contrast bound that rejects a `glassOpacity` below the smallest passing value with `INVALID_DATA`. Flat, minimalist and neo-brutalism output is byte-identical.
+- Refuse the six form controls with a glass preset: compile and CLI planning fail with `STYLE_UNAVAILABLE` (exit 2) before any write, and `--yes` does not bypass it. Plan and dry-run output for experimental entries add a `Notice:` line and a `notices` JSON array, which is empty for stable families.
+- Offer liquid glass in the preset editor with transparency, blur and opacity controls, a limitations panel, and a live contrast readout that blocks export and publication; the Button editor shows the experimental notice beside its export. The snapshot service accepts glass presets once redeployed.
+- Add a liquid-glass browser spec (24 preview and 16 consumer cases) and pnpm Vite and Next.js glass consumers, raising the consumer matrix to 36 and the browser contract to 402 cases. See [liquid glass evidence](docs/evidence/liquid-glass.md) for what ran.
 
 ## 0.2.1 — 2 November 2026
 

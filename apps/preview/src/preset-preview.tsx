@@ -11,6 +11,16 @@ import { PresetGallery } from './generated/preset-gallery/gallery'
 import manifest from './generated/preset-gallery/manifest'
 import { gallerySources } from './generated/preset-gallery/sources'
 import './preset-preview.css'
+import { supportedComponentIds } from '../../../packages/contracts/src/component-ids.js'
+import {
+  styleSupport,
+  type StyleFamily,
+} from '../../../packages/contracts/src/style-families.js'
+
+// Placeholders come from the shared support table at runtime, so the gallery
+// source stays identical across families.
+const unavailableIds = (family: StyleFamily) =>
+  supportedComponentIds.filter((id) => styleSupport(id, family) === 'unavailable')
 
 function PresetPreview() {
   const [current, setCurrent] = React.useState<{
@@ -126,7 +136,13 @@ function PresetPreview() {
       <style data-preset-styles>
         {presetRuntimeStyles(current.message.result)}
       </style>
-      <PresetGallery />
+      <PresetGallery
+        unavailable={unavailableIds(current.message.result.preset.data.styleFamily)}
+        familyLabel={current.message.result.preset.data.styleFamily.replaceAll(
+          '-',
+          ' ',
+        )}
+      />
     </>
   ) : (
     <p role="status">Waiting for a valid preset…</p>

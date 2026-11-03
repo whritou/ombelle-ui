@@ -25,6 +25,7 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     changes: plan.changes,
     dependencyPlan: plan.dependencyPlan,
     warnings: plan.diagnostics,
+    notices: plan.notices,
     networkAccess: plan.networkAccess,
   }
 }
@@ -107,6 +108,7 @@ export function formatPlan(
           d.message,
       )
       .join('') +
+    plan.notices.map((n) => '\nNotice: ' + n).join('') +
     (plan.managerWarning ? '\nWarning: ' + plan.managerWarning : '') +
     (plan.dependencyPlan.length
       ? '\nDependencies: ' +

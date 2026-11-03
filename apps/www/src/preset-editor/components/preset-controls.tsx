@@ -1,6 +1,11 @@
 import { CircleAlert, RotateCcw } from 'lucide-react'
 import type { PresetEditorDraft, PresetEditablePath } from '../model'
-import { colorKeys, designControls, presetFieldValue } from '../model'
+import {
+  colorKeys,
+  designControls,
+  glassDesignControls,
+  presetFieldValue,
+} from '../model'
 import { browserColor } from '../contrast'
 export const fieldId = (path: string) => 'preset' + path.replaceAll('/', '-')
 /** Popover that holds a colour token's light and dark fields. */
@@ -119,9 +124,17 @@ export function ColorControls({ draft, errorPath, onEdit, onReset }: ControlProp
   )
 }
 export function DesignControls({ draft, errorPath, onEdit, onReset }: ControlProps) {
+  // Transparency, blur and opacity exist only for liquid glass drafts.
+  const designEntries: [
+    string,
+    (typeof designControls)[keyof typeof designControls] | (typeof glassDesignControls)[keyof typeof glassDesignControls],
+  ][] = [
+    ...Object.entries(designControls),
+    ...(draft.family === 'liquid-glass' ? Object.entries(glassDesignControls) : []),
+  ]
   return (
     <div className="preset-design-list">
-      {Object.entries(designControls).map(([key, control]) => {
+      {designEntries.map(([key, control]) => {
         const path = `/design/${key}` as PresetEditablePath,
           value = presetFieldValue(draft, path)
         const props = {
@@ -151,7 +164,8 @@ export function DesignControls({ draft, errorPath, onEdit, onReset }: ControlPro
             {'min' in control && (
               <small id={`${fieldId(path)}-hint`}>
                 {control.min} to {control.max}
-                {key === 'radiusRem' ? ' rem' : ' px'}
+                {'unit' in control ? control.unit : key === 'radiusRem' ? ' rem' : ' px'}
+                {'step' in control && control.step < 1 ? `, in steps of ${control.step}` : ''}
               </small>
             )}
           </div>

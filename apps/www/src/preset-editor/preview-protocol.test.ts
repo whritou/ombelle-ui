@@ -1,7 +1,11 @@
 import { beforeAll, expect, it } from 'vitest'
 import { compile, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
-import { supportedComponentIds, type CompileResult } from '@ombelle/contracts'
+import {
+  componentsWithStyleSupport,
+  supportedComponentIds,
+  type CompileResult,
+} from '@ombelle/contracts'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 import {
   verifyPresetRender,
@@ -100,6 +104,23 @@ it.each([
     expected.sources[Object.keys(expected.sources)[0]].canonicalHash =
       'a'.repeat(64)
   expect(await verifyPresetRender(input, 0, expected)).toBeNull()
+})
+it('accepts a liquid-glass render compiled from only its experimental components', async () => {
+  const glass = await compile({
+    preset: getCatalog('0.1.0').presets['liquid-glass'],
+    componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  const input = { ...message(), result: glass }
+  expect(await verifyPresetRender(input, 0, manifest)).toEqual(input)
+  const tampered = structuredClone(input)
+  tampered.result.artifacts.find((a) => a.kind === 'component')!.content +=
+    '\nalert(1)'
+  expect(await verifyPresetRender(tampered, 0, manifest)).toBeNull()
+  const flatWithGlassFamily = structuredClone(message())
+  flatWithGlassFamily.result.preset.data.styleFamily = 'liquid-glass'
+  expect(await verifyPresetRender(flatWithGlassFamily, 0, manifest)).toBeNull()
 })
 it('requires exact handshake and acknowledgement shapes', () => {
   expect(

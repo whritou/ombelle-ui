@@ -25,7 +25,8 @@ export async function presetFixtures() {
       'src/components/ui/button.tsx': 'a'.repeat(64),
     }
     const presets: Record<string, any> = {}
-    for (const ref of refs) {
+    const stable = c.family !== 'liquid-glass'
+    for (const ref of stable ? refs : []) {
       const artifacts: Record<string, any> = {},
         transformedHashes: Record<string, string> = {}
       for (const a of ref.artifacts.filter((a) => a.kind !== 'utility')) {
@@ -93,6 +94,7 @@ export async function presetFixtures() {
       audit: { exitCode: 0, scope: c.manager === 'bun' ? 'all' : 'production' },
       build: { exitCode: 0 },
     }
+    if (!stable) continue // Experimental glass rows carry no component preset evidence.
     consumers[c.id] = {
       family: c.family,
       framework: c.framework,
@@ -251,6 +253,7 @@ export async function consumerFixture() {
   const refs = await Promise.all(recipeFixtures().map(recipe => compileRecipe({recipe})))
   const recipes: Record<string, any> = {}
   for (const [id, row] of Object.entries(matrix)) {
+    if (row.family === 'liquid-glass') continue // No recipe evidence for experimental glass rows.
     const installed: Record<string, any> = {}
     for (const ref of refs) {
       const artifacts: Record<string, any> = {}

@@ -21,11 +21,13 @@ function tabContent(tab: Tab, result: RecipeCompileResult, json: string): string
   return result.artifacts.find((artifact) => artifact.kind === kind)?.content ?? ''
 }
 
-export function ArtifactPanel({ result, recipeJson, stale, onStatus }: {
+export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = null }: {
   result: RecipeCompileResult | null
   recipeJson: string | null
   stale: boolean
   onStatus: (message: string) => void
+  /** Experimental-family notice shown beside the export and CLI command. */
+  notice?: string | null
 }) {
   const [tab, setTab] = useState<Tab>('Usage')
   const content = result ? tabContent(tab, result, recipeJson ?? '') : ''
@@ -42,6 +44,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus }: {
       <div className="sectionTitle"><div><h2 id="artifacts-title">Generated output</h2><p>Compiled from this Button recipe.</p></div>
         {stale && <span className="staleBadge">Output is out of date</span>}
       </div>
+      {notice && <p className="artifactNote" data-testid="experimental-notice">{notice}</p>}
       {result ? <>
         <div className="artifactTabs" role="tablist" aria-label="Generated artifacts">
           {tabs.map((item) => <button key={item} type="button" role="tab" id={`artifact-${item.replaceAll(' ', '-')}`}

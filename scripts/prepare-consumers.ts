@@ -160,17 +160,20 @@ await boundedMap(
             : 'modern'
           : spec.manager
       ] = row.version
-      recipeRows[spec.id] = {
-        ...row.recipeEvidence,
-        cliRuntime: row.cliRuntime,
-        build: { status: 'pending' },
-      }
-      componentPresetRows[spec.id] = {
-        ...row.componentPresetEvidence,
-        ...spec,
-        managerVersion: row.version,
-        cliRuntime: row.cliRuntime,
-        build: { status: 'pending' },
+      // Glass consumers carry no recipe or component-preset evidence.
+      if (row.recipeEvidence && row.componentPresetEvidence) {
+        recipeRows[spec.id] = {
+          ...row.recipeEvidence,
+          cliRuntime: row.cliRuntime,
+          build: { status: 'pending' },
+        }
+        componentPresetRows[spec.id] = {
+          ...row.componentPresetEvidence,
+          ...spec,
+          managerVersion: row.version,
+          cliRuntime: row.cliRuntime,
+          build: { status: 'pending' },
+        }
       }
     }
     const observed = proof[spec.id] as {

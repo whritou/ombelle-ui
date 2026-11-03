@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import { DatabaseSync } from 'node:sqlite'
 import { expect, type Page } from '@playwright/test'
 import { canonicalize, sha256 } from '@ombelle/compiler'
-import type { PresetSnapshot, SnapshotSource, StyleFamily } from '@ombelle/contracts'
+import type { PresetSnapshot, SnapshotSource, StableStyleFamily } from '@ombelle/contracts'
 import { createPresetDraft, setPresetEdit, setPresetIdentity } from '../../apps/www/src/preset-editor/model.js'
 
 const editorUrl = 'http://127.0.0.1:3000/editor/preset'
@@ -14,7 +14,7 @@ export async function resetSnapshotBrowserQuota(): Promise<void> {
   try { db.exec('DELETE FROM rate_buckets') } finally { db.close() }
 }
 
-export async function publishEditorPreset(page: Page, family: StyleFamily = 'flat'): Promise<{ snapshot: PresetSnapshot; source: SnapshotSource; idempotencyKey: string }> {
+export async function publishEditorPreset(page: Page, family: StableStyleFamily = 'flat'): Promise<{ snapshot: PresetSnapshot; source: SnapshotSource; idempotencyKey: string }> {
   let draft = createPresetDraft(family)
   draft = setPresetIdentity(draft, 'name', `Browser ${family} snapshot`)
   draft = setPresetEdit(draft, '/modes/light/background', '#f4f5f6')

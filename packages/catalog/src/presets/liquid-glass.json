@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0",
+  "id": "builtin-liquid-glass",
+  "name": "Liquid glass",
+  "revision": 1,
+  "catalogRelease": "0.1.0",
+  "compilerVersion": "0.1.0",
+  "platform": "react-web",
+  "styleFamily": "liquid-glass",
+  "modes": {
+    "light": {
+      "background": "#EEF2F7",
+      "foreground": "#0F172A",
+      "card": "#FFFFFF",
+      "cardForeground": "#0F172A",
+      "popover": "#FFFFFF",
+      "popoverForeground": "#0F172A",
+      "primary": "#1D4ED8",
+      "primaryForeground": "#FFFFFF",
+      "secondary": "#E2E8F0",
+      "secondaryForeground": "#0F172A",
+      "muted": "#E2E8F0",
+      "mutedForeground": "#475569",
+      "accent": "#DBEAFE",
+      "accentForeground": "#0F172A",
+      "destructive": "#B91C1C",
+      "destructiveForeground": "#FFFFFF",
+      "border": "#CBD5E1",
+      "input": "#64748B",
+      "ring": "#1D4ED8"
+    },
+    "dark": {
+      "background": "#0B1120",
+      "foreground": "#F1F5F9",
+      "card": "#1E293B",
+      "cardForeground": "#F8FAFC",
+      "popover": "#1E293B",
+      "popoverForeground": "#F8FAFC",
+      "primary": "#93C5FD",
+      "primaryForeground": "#0B1120",
+      "secondary": "#334155",
+      "secondaryForeground": "#F8FAFC",
+      "muted": "#334155",
+      "mutedForeground": "#CBD5E1",
+      "accent": "#1E3A8A",
+      "accentForeground": "#F8FAFC",
+      "destructive": "#FCA5A5",
+      "destructiveForeground": "#0B1120",
+      "border": "#475569",
+      "input": "#94A3B8",
+      "ring": "#93C5FD"
+    }
+  },
+  "design": {
+    "fontFamilyId": "system-sans",
+    "radiusRem": 0.75,
+    "density": "comfortable",
+    "borderWidthPx": 1,
+    "shadowOffsetXPx": 0,
+    "shadowOffsetYPx": 0,
+    "motion": "full",
+    "transparency": "auto",
+    "glassBlurPx": 12,
+    "glassOpacity": 0.87
+  },
+  "componentDefaults": {
+    "button": {
+      "variant": "default",
+      "size": "default"
+    }
+  }
+}

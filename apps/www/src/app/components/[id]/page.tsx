@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, SlidersHorizontal } from 'lucide-react'
 import { getCatalog } from '@ombelle/catalog'
+import { styleSupport } from '@ombelle/contracts'
 import { componentDoc, componentDocs } from '../../../site/components/catalog'
 import { CodeBlock, CommandTabs } from '../../../site/components/code-block'
 import { ComponentPlayground } from '../../../site/components/playground'
@@ -29,6 +30,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
   if (!doc) notFound()
   const template = getCatalog('0.1.0').templates[doc.id]
   const index = componentDocs.indexOf(doc)
+  const glass = styleSupport(doc.id, 'liquid-glass')
   const previous = componentDocs[index - 1], next = componentDocs[index + 1]
   return (
     <div className="grid gap-10 py-10 xl:grid-cols-[minmax(0,1fr)_11rem]">
@@ -62,6 +64,11 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
             Adds <code className="font-mono text-foreground">{template.logicalPath}</code> and installs {template.dependencies.map(d => d.name).join(', ')} with lifecycle scripts disabled.
             {doc.client && ' This is a client component.'}
           </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {glass === 'experimental'
+              ? `In a liquid glass project the plan adds a notice that liquid-glass is experimental for ${doc.id}.`
+              : `In a liquid glass project, add ${doc.id} is refused with STYLE_UNAVAILABLE before anything is written.`}
+          </p>
         </section>
 
         <section aria-labelledby="usage" className="mt-14 scroll-mt-24">
@@ -74,7 +81,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         <section aria-labelledby="api" className="mt-14 scroll-mt-24">
           <h2 id="api" className="text-2xl font-black">API and states</h2>
           <dl className="mt-4 divide-y divide-border rounded-xl border border-border bg-card text-sm">
-            {[['API', doc.api], ['Minimum states', doc.states], ['Native basis', doc.basis], ['Styles', 'Flat, minimalist and neo-brutalism, light and dark. Liquid glass is not available yet.']].map(([term, value]) => (
+            {[['API', doc.api], ['Minimum states', doc.states], ['Native basis', doc.basis], ['Styles', `Stable in flat, minimalist and neo-brutalism, light and dark. Liquid glass: ${glass === 'experimental' ? 'experimental' : 'not available'}.`]].map(([term, value]) => (
               <div key={term} className="grid gap-1 p-4 sm:grid-cols-[10rem_1fr]">
                 <dt className="font-medium">{term}</dt>
                 <dd className="text-muted-foreground">{value}</dd>

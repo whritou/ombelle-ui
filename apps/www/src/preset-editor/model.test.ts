@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
-import { supportedStyleFamilies } from '@ombelle/contracts'
+import { styleFamilies } from '@ombelle/contracts'
 import {
   createPresetDraft,
   materializePreset,
@@ -12,9 +12,13 @@ import {
   planPresetFamilyChange,
   colorKeys,
   designControls,
+  glassDesignControls,
+  presetFieldValue,
+  presetGlassReport,
+  previewComponentIds,
 } from './model'
 
-it.each(supportedStyleFamilies)(
+it.each(styleFamilies)(
   'materializes %s without mutating catalog input',
   (family) => {
     const base = structuredClone(getCatalog('0.1.0').presets[family])
@@ -136,7 +140,7 @@ it('rejects unknown or oversized envelope data', () => {
   for (const input of [
     null,
     { ...draft, extra: true },
-    { ...draft, family: 'liquid-glass' },
+    { ...draft, family: 'aurora' },
     { ...draft, edits: { '/design/glassBlurPx': '1' } },
     { ...draft, edits: { '/design/radiusRem': 1 } },
     { ...draft, edits: { '/design/radiusRem': '1'.repeat(81) } },
@@ -146,4 +150,81 @@ it('rejects unknown or oversized envelope data', () => {
     { ...draft, edits: [] },
   ])
     expect(() => validateDraftEnvelope(input)).toThrow()
+})
+
+it('creates a valid liquid-glass draft based on builtin-liquid-glass', () => {
+  const draft = createPresetDraft('liquid-glass')
+  expect(validateDraftEnvelope(draft)).toEqual(draft)
+  const base = getCatalog('0.1.0').presets['liquid-glass']
+  expect(base.id).toBe('builtin-liquid-glass')
+  const preset = materializePreset(draft)
+  expect(preset.styleFamily).toBe('liquid-glass')
+  expect(preset.design).toEqual(base.design)
+  expect(presetFieldValue(draft, '/design/glassOpacity')).toBe('0.87')
+  expect(presetFieldValue(draft, '/design/glassBlurPx')).toBe('12')
+  expect(presetFieldValue(draft, '/design/transparency')).toBe('auto')
+  expect(Object.keys(glassDesignControls)).toEqual([
+    'transparency',
+    'glassBlurPx',
+    'glassOpacity',
+  ])
+})
+
+it('reports a failing contrast bound for a glass opacity edit of 0.6', () => {
+  const draft = createPresetDraft('liquid-glass')
+  expect(presetGlassReport(draft)).toMatchObject({ passes: true, opacity: 0.87 })
+  const thin = setPresetEdit(draft, '/design/glassOpacity', '0.6')
+  const report = presetGlassReport(thin)!
+  expect(report.passes).toBe(false)
+  expect(report.opacity).toBe(0.6)
+  expect(report.minimumOpacity).toEqual(expect.any(Number))
+  expect(report.pairs.some((pair) => !pair.passes)).toBe(true)
+  expect(
+    presetGlassReport(setPresetEdit(thin, '/design/transparency', 'reduced'))!
+      .passes,
+  ).toBe(true)
+  expect(presetGlassReport(createPresetDraft('flat'))).toBeNull()
+  expect(
+    presetGlassReport(setPresetEdit(draft, '/design/glassOpacity', 'x')),
+  ).toBeNull()
+})
+
+it('checks glass control bounds and keeps glass edits out of stable families', () => {
+  const draft = createPresetDraft('liquid-glass')
+  for (const [path, value] of [
+    ['/design/glassOpacity', '0.59'],
+    ['/design/glassOpacity', '1.01'],
+    ['/design/glassBlurPx', '25'],
+    ['/design/glassBlurPx', ''],
+    ['/design/transparency', 'none'],
+  ] as const)
+    expect(() => materializePreset(setPresetEdit(draft, path, value))).toThrow()
+  expect(
+    materializePreset(setPresetEdit(draft, '/design/glassBlurPx', '24')).design
+      .glassBlurPx,
+  ).toBe(24)
+  const edited = setPresetEdit(
+    setPresetEdit(draft, '/design/glassOpacity', '0.9'),
+    '/design/radiusRem',
+    '1',
+  )
+  const toFlat = planPresetFamilyChange(edited, 'flat')
+  expect(toFlat.draft.edits).toEqual({ '/design/radiusRem': '1' })
+  expect(toFlat.changes.every((c) => !c.path.includes('glass'))).toBe(true)
+  expect(() => materializePreset(toFlat.draft)).not.toThrow()
+  const back = planPresetFamilyChange(toFlat.draft, 'liquid-glass')
+  expect(back.draft.family).toBe('liquid-glass')
+  expect(materializePreset(back.draft).design.glassOpacity).toBe(0.87)
+})
+
+it('requests only components the family supports', () => {
+  expect(previewComponentIds('flat')).toHaveLength(12)
+  expect(previewComponentIds('liquid-glass')).toEqual([
+    'button',
+    'badge',
+    'card',
+    'dialog',
+    'tabs',
+    'tooltip',
+  ])
 })

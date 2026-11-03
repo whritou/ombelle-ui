@@ -1,5 +1,6 @@
 import { recipeFixtures } from '../fixtures/shared/recipes.ts'
 import { supportedStyleFamilies } from '../packages/contracts/src/style-families.ts'
+import { stableConsumerCases } from './consumer-matrix.ts'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import type { ConsumerEvidence } from './consumer-evidence.js'
 import path from 'node:path'
@@ -184,9 +185,14 @@ export async function validateRecipeMeasurements(
 }
 export async function validateRecipeConsumers(
   value: unknown,
-  matrix: Record<string, ConsumerEvidence>,
+  fullMatrix: Record<string, ConsumerEvidence>,
 ): Promise<void> {
-  const rows = object(value),
+  // Recipes are stable-family evidence; experimental glass consumers carry none.
+  const stable = new Set(stableConsumerCases().map((c) => c.id)),
+    matrix = Object.fromEntries(
+      Object.entries(fullMatrix).filter(([id]) => stable.has(id)),
+    ),
+    rows = object(value),
     refs = await references()
   if (
     Object.keys(rows).length !== 34 ||

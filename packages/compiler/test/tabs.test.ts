@@ -27,7 +27,7 @@ it.each(supportedStyleFamilies)(
     const find = (path: string) =>
       result.artifacts.find((a) => a.logicalPath === path)!.content
     expect(find('components/ui/tabs.css')).toBe(
-      await format(catalog.templates[input.componentIds[0]!].styles![family], {
+      await format(catalog.templates[input.componentIds[0]!].styles![family]!, {
         parser: 'css',
         plugins: [postcss],
         endOfLine: 'lf',

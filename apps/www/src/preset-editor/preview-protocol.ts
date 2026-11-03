@@ -1,7 +1,8 @@
 import { canonicalize, compile, sha256 } from '@ombelle/compiler'
 import {
-  supportedComponentIds,
+  componentsWithStyleSupport,
   isStyleFamily,
+  supportedComponentIds,
   type CompileResult,
   type ComponentId,
 } from '@ombelle/contracts'
@@ -97,9 +98,15 @@ export async function verifyPresetRender(
       result.artifacts.length
     )
       return null
+    // Glass previews compile only the components the family supports; the
+    // gallery shows labelled placeholders for the rest.
+    const componentIds = componentsWithStyleSupport(
+      result.preset.data.styleFamily,
+      ['stable', 'experimental'],
+    )
     const expected = await compile({
       preset: result.preset.data,
-      componentIds: supportedComponentIds,
+      componentIds,
       catalogRelease: '0.1.0',
       compilerVersion: '0.1.0',
     })
@@ -112,8 +119,11 @@ export async function verifyPresetRender(
     const sources = expected.artifacts.filter(
       (a) => a.kind === 'component' || a.kind === 'utility',
     )
+    // Every compiled source must be reviewed gallery source; a full family
+    // must also cover the whole manifest.
     if (
-      sources.length !== Object.keys(manifest.sources).length ||
+      (componentIds.length === supportedComponentIds.length &&
+        sources.length !== Object.keys(manifest.sources).length) ||
       sources.some(
         (a) => manifest.sources[a.logicalPath]?.canonicalHash !== a.sha256,
       )

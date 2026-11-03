@@ -30,7 +30,7 @@ it.each(supportedStyleFamilies)(
     expect(find('components/ui/native-select.tsx')).toContain(
       "import './native-select.css'",
     )
-    const catalogCss = getCatalog('0.1.0').templates[id].styles![family]
+    const catalogCss = getCatalog('0.1.0').templates[id].styles![family]!
     expect(find('components/ui/native-select.css')).toBe(
       await format(catalogCss, {
         parser: 'css',

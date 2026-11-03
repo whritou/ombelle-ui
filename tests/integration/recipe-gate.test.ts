@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import { compileRecipe } from '@ombelle/compiler'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
-import { consumerCases } from '../../scripts/consumer-matrix.js'
+import { stableConsumerCases } from '../../scripts/consumer-matrix.js'
 import {
   finalizeRecipeEvidence,
   recipeMeasurementKeys,
@@ -14,7 +14,7 @@ async function fixture() {
     ),
     matrix: Record<string, ConsumerEvidence> = {},
     consumers: Record<string, unknown> = {}
-  for (const spec of consumerCases()) {
+  for (const spec of stableConsumerCases()) {
     const recipes: Record<string, unknown> = {},
       sourceHashes: Record<string, string> = {}
     for (const ref of refs) {
