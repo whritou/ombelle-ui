@@ -325,36 +325,36 @@ async function attach(name: string, body: unknown, page: Page) {
 }
 
 async function axeOver(page: Page, mode: Mode, id: Backdrop, base: string, target = 'preview') {
-      await open(page, mode, base)
-      const axe = await new AxeBuilder({ page })
-        .include(`[data-backdrop="${id}"]`)
-        .withTags(wcag)
-        .analyze()
-      // axe cannot resolve contrast over gradient or pattern backdrops and reports those
-      // nodes as incomplete; the bounded contrast case measures them instead.
-      await attach('axe', { target, mode, id, violations: axe.violations, incomplete: axe.incomplete.map((r) => ({ id: r.id, nodes: r.nodes.length })) }, page)
-      expect(axe.violations).toEqual([])
+  await open(page, mode, base)
+  const axe = await new AxeBuilder({ page })
+    .include(`[data-backdrop="${id}"]`)
+    .withTags(wcag)
+    .analyze()
+  // axe cannot resolve contrast over gradient or pattern backdrops and reports those
+  // nodes as incomplete; the bounded contrast case measures them instead.
+  await attach('axe', { target, mode, id, violations: axe.violations, incomplete: axe.incomplete.map((r) => ({ id: r.id, nodes: r.nodes.length })) }, page)
+  expect(axe.violations).toEqual([])
 }
 
 async function boundedContrast(page: Page, mode: Mode, base: string, target = 'preview') {
-    await open(page, mode, base)
-    await addGhostProbe(page, 'solid')
-    const samples = [
-      ...(await sampleSlots(page, 'solid', '#000')),
-      ...(await sampleSlots(page, 'solid', '#fff')),
-    ]
-    await attach('bounded-contrast', { target, mode, samples }, page)
-    expect(samples).toHaveLength(2 * 9)
-    for (const s of samples) {
-      expect.soft(s.ratio, `${s.slot} over ${s.backdrop}: ${s.textColor} on pixel ${s.surfacePixel}`).toBeGreaterThanOrEqual(4.5)
-      // Cross-check: the sampled pixel matches computed background alpha-composited over the
-      // painted backdrop, which shows the pixel is the glass surface rather than text or border.
-      if (s.expectedPixel)
-        for (let i = 0; i < 3; i++)
-          expect
-            .soft(Math.abs(s.surfacePixel[i] - s.expectedPixel[i]), `${s.slot} over ${s.backdrop}: pixel ${s.surfacePixel} vs composite ${s.expectedPixel}`)
-            .toBeLessThanOrEqual(3)
-    }
+  await open(page, mode, base)
+  await addGhostProbe(page, 'solid')
+  const samples = [
+    ...(await sampleSlots(page, 'solid', '#000')),
+    ...(await sampleSlots(page, 'solid', '#fff')),
+  ]
+  await attach('bounded-contrast', { target, mode, samples }, page)
+  expect(samples).toHaveLength(2 * 9)
+  for (const s of samples) {
+    expect.soft(s.ratio, `${s.slot} over ${s.backdrop}: ${s.textColor} on pixel ${s.surfacePixel}`).toBeGreaterThanOrEqual(4.5)
+    // Cross-check: the sampled pixel matches computed background alpha-composited over the
+    // painted backdrop, which shows the pixel is the glass surface rather than text or border.
+    if (s.expectedPixel)
+      for (let i = 0; i < 3; i++)
+        expect
+          .soft(Math.abs(s.surfacePixel[i] - s.expectedPixel[i]), `${s.slot} over ${s.backdrop}: pixel ${s.surfacePixel} vs composite ${s.expectedPixel}`)
+          .toBeLessThanOrEqual(3)
+  }
 }
 
 for (const mode of modes) {
