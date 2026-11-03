@@ -122,6 +122,10 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+  /* Keep scrolled-to content (anchors, scrollIntoView) clear of the sticky header. */
+  html {
+    scroll-padding-top: 5rem;
+  }
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;

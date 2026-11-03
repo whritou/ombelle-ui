@@ -207,7 +207,8 @@
 }
 .preview {
   position: sticky;
-  top: 16px;
+  /* Below the 65px sticky site header. */
+  top: 80px;
   min-width: 0;
 }
 .contrast {
