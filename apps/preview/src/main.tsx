@@ -15,12 +15,13 @@ if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
     flat: () => import('./generated/flat/entry'),
     minimalist: () => import('./generated/minimalist/entry'),
     'neo-brutalism': () => import('./generated/neo-brutalism/entry'),
+    'liquid-glass': () => import('./generated/liquid-glass/entry'),
   }
   const load = family ? entries[family] : undefined
   if (load) {
     const { default: Scenario } = await load()
     createRoot(document.getElementById('root')!).render(<Scenario />)
   } else {
-    createRoot(document.getElementById('root')!).render(<main><h1>Unknown style family</h1><p>Choose flat, minimalist, or neo brutalism.</p></main>)
+    createRoot(document.getElementById('root')!).render(<main><h1>Unknown style family</h1><p>Choose flat, minimalist, neo brutalism, or liquid glass.</p></main>)
   }
 }

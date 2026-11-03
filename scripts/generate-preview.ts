@@ -4,11 +4,14 @@ import { compile, sha256 } from '@ombelle/compiler'
 import {
   supportedStyleFamilies,
   supportedComponentIds,
+  componentsWithStyleSupport,
 } from '@ombelle/contracts'
 import { writePreviewRecipes } from '../tests/helpers/recipe-fixture.js'
 import { writePreviewComponentPresets } from '../tests/helpers/component-preset-fixture.js'
 import { writePresetGallery } from './generate-preset-gallery.js'
-for (const family of supportedStyleFamilies) {
+type PreviewFamily = (typeof supportedStyleFamilies)[number] | 'liquid-glass'
+async function writeFamily(family: PreviewFamily) {
+  const glass = family === 'liquid-glass'
   const preset = JSON.parse(
     await fs.readFile(
       'packages/catalog/src/presets/' + family + '.json',
@@ -17,7 +20,9 @@ for (const family of supportedStyleFamilies) {
   )
   const result = await compile({
     preset,
-    componentIds: supportedComponentIds,
+    componentIds: glass
+      ? componentsWithStyleSupport('liquid-glass', ['experimental'])
+      : supportedComponentIds,
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
   })
@@ -39,65 +44,74 @@ for (const family of supportedStyleFamilies) {
     }
   }
   await fs.writeFile(root + '/manifest.json', JSON.stringify(result, null, 2))
-  await writePreviewRecipes(root)
+  if (!glass) await writePreviewRecipes(root)
   await fs.writeFile(
     root + '/transforms.json',
     JSON.stringify(transforms, null, 2),
   )
-  const scenario = (await fs.readFile('fixtures/shared/scenario.tsx', 'utf8'))
+  const scenario = (await fs.readFile(
+    glass ? 'fixtures/shared/glass-scenario.tsx' : 'fixtures/shared/scenario.tsx',
+    'utf8',
+  ))
     .replaceAll('STYLE_FAMILY', family)
     .replaceAll('@/components/ui', './components/ui')
   await fs.writeFile(root + '/scenario.tsx', scenario)
-  await fs.writeFile(
-    root + '/badge-fixture.tsx',
-    (await fs.readFile('fixtures/shared/badge-fixture.tsx', 'utf8')).replaceAll(
-      '@/components/ui',
-      './components/ui',
-    ),
-  )
-  await writePreviewComponentPresets(root)
-  await fs.writeFile(
-    root + '/card-fixture.tsx',
-    (await fs.readFile('fixtures/shared/card-fixture.tsx', 'utf8')).replaceAll(
-      '@/components/ui',
-      './components/ui',
-    ),
-  )
-  await fs.writeFile(
-    root + '/forms-fixture.tsx',
-    (await fs.readFile('fixtures/shared/forms-fixture.tsx', 'utf8')).replaceAll(
-      '@/components/ui',
-      './components/ui',
-    ),
-  )
-  await fs.writeFile(
-    root + '/state-fixture.tsx',
-    (await fs.readFile('fixtures/shared/state-fixture.tsx', 'utf8')).replaceAll(
-      '@/components/ui',
-      './components/ui',
-    ),
-  )
-  await fs.copyFile(
-    'fixtures/shared/state-fixture.css',
-    root + '/state-fixture.css',
-  )
-  for (const id of ['checkbox', 'switch', 'tabs', 'tooltip'])
+  if (!glass) {
     await fs.writeFile(
-      root + '/' + id + '-fixture.tsx',
-      (await fs.readFile('fixtures/shared/' + id + '-fixture.tsx', 'utf8'))
-        .replaceAll('@/components/ui', './components/ui'),
+      root + '/badge-fixture.tsx',
+      (await fs.readFile('fixtures/shared/badge-fixture.tsx', 'utf8')).replaceAll(
+        '@/components/ui',
+        './components/ui',
+      ),
     )
+    await writePreviewComponentPresets(root)
+    await fs.writeFile(
+      root + '/card-fixture.tsx',
+      (await fs.readFile('fixtures/shared/card-fixture.tsx', 'utf8')).replaceAll(
+        '@/components/ui',
+        './components/ui',
+      ),
+    )
+    await fs.writeFile(
+      root + '/forms-fixture.tsx',
+      (await fs.readFile('fixtures/shared/forms-fixture.tsx', 'utf8')).replaceAll(
+        '@/components/ui',
+        './components/ui',
+      ),
+    )
+    await fs.writeFile(
+      root + '/state-fixture.tsx',
+      (await fs.readFile('fixtures/shared/state-fixture.tsx', 'utf8')).replaceAll(
+        '@/components/ui',
+        './components/ui',
+      ),
+    )
+    await fs.copyFile(
+      'fixtures/shared/state-fixture.css',
+      root + '/state-fixture.css',
+    )
+    for (const id of ['checkbox', 'switch', 'tabs', 'tooltip'])
+      await fs.writeFile(
+        root + '/' + id + '-fixture.tsx',
+        (await fs.readFile('fixtures/shared/' + id + '-fixture.tsx', 'utf8'))
+          .replaceAll('@/components/ui', './components/ui'),
+      )
+  }
   await fs.writeFile(
     root + '/preview.css',
     '@import "../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n',
   )
   await fs.writeFile(
     root + '/entry.tsx',
-    "import './preview.css'\nimport manifest from './manifest.json'\nimport recipes from './recipes-manifest.json'\nconst hash = async (content: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content))),byte=>byte.toString(16).padStart(2,'0')).join('')\n;(window as any).__artifactHashes = manifest.artifacts.map(artifact => hash(artifact.content))\n;(window as any).__recipeArtifactHashes = Object.fromEntries(Object.entries(recipes).map(([id,result])=>[id,result.artifacts.map(artifact=>hash(artifact.content))]))\nexport {default} from './scenario'\n",
+    glass
+      ? "import './preview.css'\nimport manifest from './manifest.json'\nconst hash = async (content: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content))),byte=>byte.toString(16).padStart(2,'0')).join('')\n;(window as any).__artifactHashes = manifest.artifacts.map(artifact => hash(artifact.content))\nexport {default} from './scenario'\n"
+      : "import './preview.css'\nimport manifest from './manifest.json'\nimport recipes from './recipes-manifest.json'\nconst hash = async (content: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content))),byte=>byte.toString(16).padStart(2,'0')).join('')\n;(window as any).__artifactHashes = manifest.artifacts.map(artifact => hash(artifact.content))\n;(window as any).__recipeArtifactHashes = Object.fromEntries(Object.entries(recipes).map(([id,result])=>[id,result.artifacts.map(artifact=>hash(artifact.content))]))\nexport {default} from './scenario'\n",
   )
 }
+for (const family of supportedStyleFamilies) await writeFamily(family)
+await writeFamily('liquid-glass')
 await fs.writeFile(
   'apps/preview/src/generated/editor-buttons.ts',
-  `// Generated by scripts/generate-preview.ts from catalog release 0.1.0.\nexport const editorButtons = {\n${supportedStyleFamilies.map((family) => `  '${family}': () => import('./${family}/components/ui/button'),`).join('\n')}\n} as const\n`,
+  `// Generated by scripts/generate-preview.ts from catalog release 0.1.0.\nexport const editorButtons = {\n${[...supportedStyleFamilies, 'liquid-glass'].map((family) => `  '${family}': () => import('./${family}/components/ui/button'),`).join('\n')}\n} as const\n`,
 )
 await writePresetGallery('apps/preview/src/generated/preset-gallery')
