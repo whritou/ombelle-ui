@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.3.0 — unreleased
+## 0.3.0 — 4 November 2026
 
+- Publish `@ombelle-ui/cli@0.3.0` to npm; website commands use `npx @ombelle-ui/cli@0.3.0`.
 - Align all six workspace packages at 0.3.0. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged; recipe schema 1.0 gains an optional field.
 - Add optional Button recipe color overrides: `overrides.colors.{light,dark}.{background,foreground,border}`, mapped onto the tokens the chosen variant reads, with the preset color syntax and bounds. CLI 0.2.1 rejects recipes that use them; install those with 0.3.0.
 - Add hover and pressed states to flat and neo-brutalism Buttons, and hover to inactive Tabs triggers in the three stable families. Catalog 0.1.0 bytes change in place for those families' `ui-style.css`, `tabs.css` and scoped Button CSS; see `intentionalChanges` in the compiler style baseline.
