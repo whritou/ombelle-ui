@@ -95,6 +95,40 @@
       }
     ]
   },
+  "fixWaveRuns": {
+    "sourceCommit": "3fce385c0e75e6862156e43b68d4538358916da8",
+    "workingTree": "HEAD plus LF-only rewrites of generated schema and catalog files with identical content",
+    "date": "2026-11-03",
+    "runs": [
+      {
+        "command": "scratchpad tsx script calling prepareNodeConsumer for vite-liquid-glass and next-liquid-glass, then pnpm run build in each",
+        "status": "passed",
+        "consumers": {
+          "vite-liquid-glass": { "port": 4208, "prepareSeconds": 17.5, "buildSeconds": 3.0, "auditExitCode": 0, "pnpm": "11.25.0" },
+          "next-liquid-glass": { "port": 4209, "prepareSeconds": 28.1, "buildSeconds": 10.3, "auditExitCode": 0, "pnpm": "11.25.0" }
+        },
+        "consumerMap": ".artifacts/consumers.json held only these two rows"
+      },
+      {
+        "command": "corepack pnpm build:packages && corepack pnpm generate:preview",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "OMBELLE_BROWSER_CHANNEL=msedge corepack pnpm exec playwright test tests/e2e/liquid-glass.spec.ts",
+        "status": "passed",
+        "exitCode": 0,
+        "startedAt": "2026-11-03T12:31:31.679Z",
+        "durationMs": 117971,
+        "workers": 1,
+        "browser": "Chromium 156.0.4314.58 via msedge",
+        "counts": { "expected": 40, "passed": 40, "failed": 0, "skipped": 0, "flaky": 0, "preview": 24, "consumer": 16 },
+        "portsBefore": "3000, 4173, 4208 and 4209 free",
+        "portsAfter": "no listener on 3000, 4173, 4208 or 4209; Playwright stopped its own servers",
+        "resultsSha256": "a214fafb8d196e867a73e8eed18193aa102bf322e9ff202c6b9a8a0c1c4745d5"
+      }
+    ]
+  },
   "preRebaseRuns": [
     {
       "sourceCommit": "60a94f9dab9780a54bcb98d843b768db64d0cfad",
@@ -146,7 +180,6 @@
     "The ghost Button was checked on an injected clone, because the scenario has no ghost Button."
   ],
   "notRun": [
-    { "item": "16 glass consumer browser cases (pnpm Vite and Next.js)", "reason": "Not run before the rebase because ports 3000 and 4173 were held by another session; not run after it because no glass consumers were prepared in .artifacts/consumers.json" },
     { "item": "full 36-consumer prepare and build matrix", "reason": "no Bun or Yarn toolchain on this machine" },
     { "item": "pnpm check:foundation", "reason": "toolchain for the full gate absent" },
     { "item": "Bun and Yarn integration tests", "reason": "no native Bun executable; Yarn versions not cached by Corepack" },
