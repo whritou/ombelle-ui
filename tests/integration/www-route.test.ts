@@ -55,3 +55,20 @@ it('renders the public landing page with editor links and the published installe
   expect(html).toContain('Liquid Glass (soon)')
   expect(html).not.toContain('ombelle@alpha')
 })
+
+it('lists every catalog component and renders a docs page for each', async () => {
+  const { default: ComponentsPage } = await import('../../apps/www/src/app/components/page.js')
+  const { default: ComponentPage, generateStaticParams } = await import('../../apps/www/src/app/components/[id]/page.js')
+  const { supportedComponentIds } = await import('@ombelle/contracts')
+  const overview = renderToStaticMarkup(createElement(ComponentsPage))
+  for (const id of supportedComponentIds) expect(overview).toContain(`href="/components/${id}"`)
+  expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...supportedComponentIds].sort())
+  const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
+  for (const id of supportedComponentIds) {
+    const html = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))
+    expect(html.match(/<h1\b/g)).toHaveLength(1)
+    expect(html).toContain(`pnpm dlx ${runner} add ${id} --cwd APP --dry-run`)
+    // Only Button has a per-component editor.
+    expect(html.includes('href="/editor/component/button"')).toBe(id === 'button')
+  }
+})

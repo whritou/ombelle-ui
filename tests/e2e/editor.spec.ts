@@ -422,27 +422,7 @@ test('operates every Button editor control, artifact tab, download and publish d
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   const stored = async () => JSON.parse((await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft')))!).recipe
 
-  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow'], ['Demonstrate state', 'focus']] as const) {
-    await tabTo(page, page.getByLabel(label))
-    await page.keyboard.press('ArrowDown')
-    await expect(page.getByLabel(label)).toHaveValue(value)
-  }
-
-  await tabTo(page, page.getByRole('tab', { name: 'Usage' }))
-  for (const name of ['Component', 'CSS', 'Dependencies', 'Recipe JSON', 'Details', 'CLI', 'Usage']) {
-    await page.keyboard.press('ArrowRight')
-    await expect(page.getByRole('tab', { name, exact: true })).toBeFocused()
-    await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true')
-    await expectVisibleFocus(page)
-  }
-  await page.keyboard.press('ArrowLeft')
-  await expect(page.getByRole('tab', { name: 'CLI' })).toBeFocused()
-  await expect(page.getByRole('tabpanel')).toContainText('add --recipe ./')
-  await tabTo(page, page.getByRole('button', { name: 'Copy CLI' }))
-  await page.keyboard.press('Enter')
-  await expect(page.getByRole('status')).toContainText('CLI copied.')
-  await tabTo(page, page.getByRole('tabpanel'))
-
+  // The Customize rail comes first, then the preview controls and generated output.
   const family = page.getByLabel('Style family')
   await tabTo(page, family)
   await page.keyboard.press('ArrowUp')
@@ -467,6 +447,27 @@ test('operates every Button editor control, artifact tab, download and publish d
     await tabTo(page, page.getByLabel(`${label} value`))
     await page.keyboard.press('ArrowUp')
   }
+  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow'], ['Demonstrate state', 'focus']] as const) {
+    await tabTo(page, page.getByLabel(label))
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByLabel(label)).toHaveValue(value)
+  }
+
+  await tabTo(page, page.getByRole('tab', { name: 'Usage' }))
+  for (const name of ['Component', 'CSS', 'Dependencies', 'Recipe JSON', 'Details', 'CLI', 'Usage']) {
+    await page.keyboard.press('ArrowRight')
+    await expect(page.getByRole('tab', { name, exact: true })).toBeFocused()
+    await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true')
+    await expectVisibleFocus(page)
+  }
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('tab', { name: 'CLI' })).toBeFocused()
+  await expect(page.getByRole('tabpanel')).toContainText('add --recipe ./')
+  await tabTo(page, page.getByRole('button', { name: 'Copy CLI' }))
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('status')).toContainText('CLI copied.')
+  await tabTo(page, page.getByRole('tabpanel'))
+
   const expected = {
     presetRef: { id: 'builtin-minimalist' }, content: 'Keyboard ship',
     props: { variant: 'secondary', size: 'default', type: 'submit', disabled: true, loading: true },

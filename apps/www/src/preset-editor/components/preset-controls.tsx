@@ -1,8 +1,10 @@
-import { RotateCcw } from 'lucide-react'
+import { CircleAlert, RotateCcw } from 'lucide-react'
 import type { PresetEditorDraft, PresetEditablePath } from '../model'
 import { colorKeys, designControls, presetFieldValue } from '../model'
 import { browserColor } from '../contrast'
 export const fieldId = (path: string) => 'preset' + path.replaceAll('/', '-')
+/** Popover that holds a colour token's light and dark fields. */
+export const colorPanelId = (key: string) => 'preset-color-panel-' + key
 const human = (key: string) =>
   key.replace(/[A-Z]/g, (c) => ' ' + c.toLowerCase())
 const title = (key: string) => {
@@ -17,64 +19,75 @@ function pickerValue(value: string) {
   const rgb = browserColor(value)
   return rgb ? '#' + rgb.slice(0, 3).map(hex).join('') : '#000000'
 }
-export function PresetControls({
-  draft,
-  errorPath,
-  onEdit,
-  onReset,
-}: {
+/** Opens the colour popover holding `path`, if any, and focuses its field. */
+export function revealPresetField(path: string) {
+  const color = /^\/modes\/(?:light|dark)\/(\w+)$/.exec(path)
+  if (color) {
+    const panel = document.getElementById(colorPanelId(color[1]!))
+    if (panel && !panel.matches(':popover-open')) panel.showPopover()
+  }
+  document.getElementById(fieldId(path))?.focus()
+}
+type ControlProps = {
   draft: PresetEditorDraft
   errorPath?: string
   onEdit: (path: PresetEditablePath, value: string) => void
   onReset: (path: PresetEditablePath) => void
-}) {
-  // Reset disables its own button, so keep keyboard focus on the field it restored.
-  function reset(path: PresetEditablePath) {
-    onReset(path)
-    document.getElementById(fieldId(path))?.focus()
-  }
-  const resetButton = (path: PresetEditablePath, label: string) => (
+}
+function ResetButton({ draft, path, label, onReset }: Pick<ControlProps, 'draft' | 'onReset'> & { path: PresetEditablePath; label: string }) {
+  return (
     <button
       type="button"
       className="preset-reset"
       aria-label={label}
       title={label}
-      onClick={() => reset(path)}
+      // Reset disables its own button, so keep keyboard focus on the field it restored.
+      onClick={() => {
+        onReset(path)
+        document.getElementById(fieldId(path))?.focus()
+      }}
       disabled={!Object.hasOwn(draft.edits, path)}
     >
       <RotateCcw aria-hidden="true" size={14} />
     </button>
   )
+}
+export function ColorControls({ draft, errorPath, onEdit, onReset }: ControlProps) {
   return (
-    <>
-      <section className="preset-card" aria-labelledby="preset-colors-heading">
-        <div className="preset-card-head">
-          <h3 id="preset-colors-heading">Colors</h3>
-          <p>Hex or OKLCH. Every token has a light and a dark value.</p>
-        </div>
-        <div className="preset-color-table">
-          <div className="preset-color-columns" aria-hidden="true">
-            <span>Token</span>
-            <span>Light</span>
-            <span>Dark</span>
-          </div>
-          {colorKeys.map((key) => (
-            <div className="preset-color-row" key={key}>
-              <span className="preset-color-name" aria-hidden="true">
+    <ul className="preset-color-list" aria-label="Color tokens">
+      {colorKeys.map((key) => {
+        const light = presetFieldValue(draft, `/modes/light/${key}`),
+          dark = presetFieldValue(draft, `/modes/dark/${key}`)
+        const invalid = errorPath === `/modes/light/${key}` || errorPath === `/modes/dark/${key}`
+        const edited = Object.hasOwn(draft.edits, `/modes/light/${key}`) || Object.hasOwn(draft.edits, `/modes/dark/${key}`)
+        return (
+          <li key={key}>
+            <button
+              type="button"
+              className="preset-color-row"
+              popoverTarget={colorPanelId(key)}
+              aria-label={`${title(key)} colors: light ${light}, dark ${dark}${invalid ? ', invalid' : ''}`}
+              data-invalid={invalid || undefined}
+            >
+              <span className="preset-color-name">
                 {title(key)}
+                {edited && <span className="preset-edited" title="Customized" />}
               </span>
+              {invalid && <CircleAlert aria-hidden="true" size={14} className="preset-color-alert" />}
+              <span className="preset-swatch" aria-hidden="true" style={{ backgroundColor: light }} />
+              <span className="preset-swatch" aria-hidden="true" style={{ backgroundColor: dark }} />
+            </button>
+            <div id={colorPanelId(key)} popover="auto" className="preset-popover" aria-label={`${title(key)} colors`} role="dialog">
+              <p className="preset-popover-title">{title(key)}</p>
               {(['light', 'dark'] as const).map((mode) => {
                 const path: PresetEditablePath = `/modes/${mode}/${key}`,
-                  value = presetFieldValue(draft, path),
+                  value = mode === 'light' ? light : dark,
                   label = `${mode === 'light' ? 'Light' : 'Dark'} ${human(key)}`
                 return (
-                  <div className="preset-color-field" key={mode}>
+                  <div className="preset-control" key={mode}>
                     <label htmlFor={fieldId(path)}>{label}</label>
                     <div className="preset-input-row">
-                      <span
-                        className="preset-swatch"
-                        style={{ backgroundColor: value }}
-                      >
+                      <span className="preset-swatch preset-picker" style={{ backgroundColor: value }}>
                         <input
                           type="color"
                           tabIndex={-1}
@@ -89,72 +102,61 @@ export function PresetControls({
                         maxLength={80}
                         spellCheck={false}
                         aria-invalid={errorPath === path || undefined}
-                        aria-describedby={
-                          errorPath === path ? 'preset-error' : undefined
-                        }
+                        aria-describedby={errorPath === path ? 'preset-error' : undefined}
                         onChange={(e) => onEdit(path, e.target.value)}
                       />
-                      {resetButton(path, `Reset ${mode} ${human(key)}`)}
+                      <ResetButton draft={draft} path={path} label={`Reset ${mode} ${human(key)}`} onReset={onReset} />
                     </div>
                   </div>
                 )
               })}
+              <p className="preset-popover-hint">Hex such as #1d4ed8, or OKLCH such as oklch(55% 0.2 260).</p>
             </div>
-          ))}
-        </div>
-      </section>
-      <section className="preset-card" aria-labelledby="preset-design-heading">
-        <div className="preset-card-head">
-          <h3 id="preset-design-heading">Design tokens</h3>
-          <p>Shape, spacing, depth and motion shared by every component.</p>
-        </div>
-        <div className="preset-control-grid">
-          {Object.entries(designControls).map(([key, control]) => {
-            const path = `/design/${key}` as PresetEditablePath,
-              value = presetFieldValue(draft, path)
-            const props = {
-              id: fieldId(path),
-              value,
-              'aria-invalid': errorPath === path || undefined,
-              'aria-describedby':
-                errorPath === path ? 'preset-error' : undefined,
-            }
-            return (
-              <div className="preset-control" key={key}>
-                <label htmlFor={fieldId(path)}>{control.label}</label>
-                <div className="preset-input-row">
-                  {'options' in control ? (
-                    <select
-                      {...props}
-                      onChange={(e) => onEdit(path, e.target.value)}
-                    >
-                      {control.options.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      {...props}
-                      inputMode="decimal"
-                      maxLength={80}
-                      onChange={(e) => onEdit(path, e.target.value)}
-                    />
-                  )}
-                  {resetButton(path, `Reset ${control.label.toLowerCase()}`)}
-                </div>
-                {'min' in control && (
-                  <small>
-                    {control.min} to {control.max}
-                    {key === 'radiusRem' ? ' rem' : ' px'}
-                  </small>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </section>
-    </>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+export function DesignControls({ draft, errorPath, onEdit, onReset }: ControlProps) {
+  return (
+    <div className="preset-design-list">
+      {Object.entries(designControls).map(([key, control]) => {
+        const path = `/design/${key}` as PresetEditablePath,
+          value = presetFieldValue(draft, path)
+        const props = {
+          id: fieldId(path),
+          value,
+          'aria-invalid': errorPath === path || undefined,
+          'aria-describedby':
+            errorPath === path ? 'preset-error' : 'min' in control ? `${fieldId(path)}-hint` : undefined,
+        }
+        return (
+          <div className="preset-design-row" key={key}>
+            <label htmlFor={fieldId(path)}>{control.label}</label>
+            <div className="preset-input-row">
+              {'options' in control ? (
+                <select {...props} onChange={(e) => onEdit(path, e.target.value)}>
+                  {control.options.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input {...props} inputMode="decimal" maxLength={80} onChange={(e) => onEdit(path, e.target.value)} />
+              )}
+              <ResetButton draft={draft} path={path} label={`Reset ${control.label.toLowerCase()}`} onReset={onReset} />
+            </div>
+            {'min' in control && (
+              <small id={`${fieldId(path)}-hint`}>
+                {control.min} to {control.max}
+                {key === 'radiusRem' ? ' rem' : ' px'}
+              </small>
+            )}
+          </div>
+        )
+      })}
+    </div>
   )
 }
