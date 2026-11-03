@@ -23,6 +23,7 @@ const notice = (ids: readonly string[]) =>
   '; see docs/components/liquid-glass.md for limitations'
 const installOrder = ['button', 'dialog', 'badge', 'card', 'tabs', 'tooltip'] as const
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
+const flatPath = path.resolve('packages/catalog/src/presets/flat.json')
 
 async function writePresets() {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-glass-presets-'))
@@ -33,7 +34,12 @@ async function writePresets() {
   low.design.glassOpacity = 0.6
   const lowFile = path.join(dir, 'low-opacity.json')
   await fs.writeFile(lowFile, JSON.stringify(low))
-  return { glass, lowFile }
+  const high = JSON.parse(await fs.readFile(presetPath, 'utf8'))
+  high.revision = 2
+  high.design.glassOpacity = 0.95
+  const highFile = path.join(dir, 'high-opacity.json')
+  await fs.writeFile(highFile, JSON.stringify(high))
+  return { glass, lowFile, highFile }
 }
 
 async function seed(root: string, components: readonly ComponentId[]) {
@@ -171,5 +177,68 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(plan.status).toBe('success')
     expect(plan.notices).toEqual([notice(['button'])])
     expect(plan.warnings).toEqual([])
+  }, 180000)
+
+  it(`refuses theme add into glass while unavailable components are installed (${manager})`, async () => {
+    const root = await make()
+    roots.push(root)
+    const { glass } = await writePresets()
+    const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
+    await seed(root, ['input'])
+    const init = await command(['init', '--preset', flatPath, '--yes'])
+    expect(init.code, init.output).toBe(0)
+    const added = await command(['add', 'input', '--yes'])
+    expect(added.code, added.output).toBe(0)
+
+    const before = await snapshotTree(root)
+    const refused = await command(['theme', 'add', glass, '--yes'])
+    expect(refused.code, refused.output).toBe(2)
+    const error = jsonRecord(jsonRecord(refused.data).error)
+    expect(error).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
+    expect(String(error.message)).toContain('input')
+    expect(String(error.message)).toContain(glassIds.join(', '))
+    expect(await snapshotTree(root)).toEqual(before)
+  }, 180000)
+
+  it(`refuses theme add out of glass while glass component CSS is installed (${manager})`, async () => {
+    const root = await make()
+    roots.push(root)
+    const { glass } = await writePresets()
+    const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
+    await seed(root, ['card'])
+    const init = await command(['init', '--preset', glass, '--yes'])
+    expect(init.code, init.output).toBe(0)
+    const added = await command(['add', 'card', '--yes'])
+    expect(added.code, added.output).toBe(0)
+
+    const before = await snapshotTree(root)
+    const refused = await command(['theme', 'add', flatPath, '--yes'])
+    expect(refused.code, refused.output).toBe(2)
+    const error = jsonRecord(jsonRecord(refused.data).error)
+    expect(error).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/styleFamily' })
+    expect(String(error.message)).toContain('card.css')
+    expect(String(error.nextAction)).toBe('Remove card, switch the theme, then add them again.')
+    expect(await snapshotTree(root)).toEqual(before)
+  }, 180000)
+
+  it(`switches out of glass when only ui-style.css carries glass rules and re-applies glass (${manager})`, async () => {
+    const root = await make()
+    roots.push(root)
+    const { glass, highFile } = await writePresets()
+    const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
+    await seed(root, ['button', 'dialog'])
+    const init = await command(['init', '--preset', glass, '--yes'])
+    expect(init.code, init.output).toBe(0)
+    const added = await command(['add', 'button', 'dialog', '--yes'])
+    expect(added.code, added.output).toBe(0)
+
+    const again = await command(['theme', 'add', highFile, '--yes'])
+    expect(again.code, again.output).toBe(0)
+    expect(jsonRecord(again.data).notices).toEqual([notice(glassIds)])
+    expect(await fs.readFile(path.join(root, 'src/index.css'), 'utf8')).toContain('--glass-opacity: 0.95')
+
+    const flat = await command(['theme', 'add', flatPath, '--yes'])
+    expect(flat.code, flat.output).toBe(0)
+    expect(jsonRecord(flat.data).notices).toEqual([])
   }, 180000)
 }

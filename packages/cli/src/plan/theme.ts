@@ -2,19 +2,73 @@ import path from 'node:path'
 import postcss, { type Container, type Rule, type AtRule } from 'postcss'
 import {
   FoundationError,
+  componentsWithStyleSupport,
+  styleSupport,
+  supportedComponentIds,
+  type ComponentId,
   type ProjectContext,
   type CompileResult,
   type InstallPlan,
   type ManagedDeclaration,
 } from '@ombelle/contracts'
 import { sha256 } from '@ombelle/compiler'
+import { getCatalog } from '@ombelle/catalog'
 import { readText } from '../project/inspect.js'
 import { portable } from '../project/paths.js'
 import { appendState, baseLock, fileChange } from './components.js'
+// Managed global components recorded in the lock, keyed by catalog id.
+function installedComponents(context: ProjectContext): Map<ComponentId, string[]> {
+  const installed = new Map<ComponentId, string[]>()
+  for (const [file, record] of Object.entries(context.lock?.artifacts ?? {})) {
+    const match = /^components\/ui\/([a-z-]+)\.(tsx|css)$/.exec(record.logicalPath)
+    const id = match?.[1] as ComponentId | undefined
+    if (!id || !supportedComponentIds.includes(id)) continue
+    installed.set(id, [...(installed.get(id) ?? []), file])
+  }
+  return installed
+}
+
+// A family switch rewrites tokens and ui-style.css only, so it must not strand
+// installed component source that the target family cannot style safely.
+function assertFamilySwitch(context: ProjectContext, result: CompileResult): void {
+  const installed = installedComponents(context)
+  if (!installed.size) return
+  const target = result.preset.data.styleFamily
+  const ids = supportedComponentIds.filter((id) => installed.has(id))
+  if (target === 'liquid-glass') {
+    const blocked = ids.filter((id) => styleSupport(id, target) === 'unavailable')
+    if (blocked.length)
+      throw new FoundationError(
+        'STYLE_UNAVAILABLE',
+        'Installed components are unavailable for liquid-glass: ' + blocked.join(', ') +
+          '. Experimental liquid-glass components: ' +
+          componentsWithStyleSupport('liquid-glass', ['experimental']).join(', ') + '.',
+        '/componentIds',
+        'Keep a stable style family or remove ' + blocked.join(', ') + ' before switching to liquid-glass.',
+      )
+    return
+  }
+  if (context.preset?.styleFamily !== 'liquid-glass' || !context.lock) return
+  const templates = getCatalog(context.lock.catalogRelease).templates
+  const stranded = ids.filter((id) => templates[id].styles?.['liquid-glass'] !== undefined)
+  if (!stranded.length) return
+  const files = stranded.flatMap((id) =>
+    (installed.get(id) ?? []).filter((file) => file.endsWith('.css')),
+  )
+  throw new FoundationError(
+    'STYLE_UNAVAILABLE',
+    'Installed components carry liquid-glass styles that ' + target +
+      ' tokens do not bound: ' + stranded.join(', ') +
+      (files.length ? ' (' + files.sort().join(', ') + ')' : '') + '.',
+    '/styleFamily',
+    'Remove ' + stranded.join(', ') + ', switch the theme, then add them again.',
+  )
+}
 export async function planTheme(
   context: ProjectContext,
   result: CompileResult,
 ): Promise<InstallPlan> {
+  assertFamilySwitch(context, result)
   const original = await readText(context.root, context.cssEntry)
   if (original === null)
     throw new FoundationError(
