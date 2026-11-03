@@ -290,7 +290,7 @@ export function PresetSection() {
   return (
     <section aria-labelledby="preset" className="border-t border-border">
       <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 md:py-28 lg:grid-cols-[1.2fr_1fr] lg:items-center">
-        <div className="rounded-2xl border border-border bg-card p-5 font-mono text-sm shadow-soft">
+        <div className="min-w-0 overflow-x-auto rounded-2xl border border-border bg-card p-5 font-mono text-sm shadow-soft">
           <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground"><span>brand.preset.json</span><span>portable · no account</span></div>
           <p aria-hidden className="text-muted-foreground">{'{'}</p>
           <ul aria-label="Preset fields">

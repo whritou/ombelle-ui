@@ -21,7 +21,7 @@ export function StyleSelector({ value, onChange }: { value: StyleKey; onChange: 
         options={STYLES}
         onValueChange={onChange}
         className="inline-flex rounded-full border border-border bg-card p-1 shadow-soft"
-        itemClassName="min-h-10 rounded-full px-4 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground data-[state=on]:bg-foreground data-[state=on]:text-background"
+        itemClassName="min-h-10 rounded-full px-3 text-sm font-semibold sm:px-4 text-muted-foreground transition-colors hover:text-foreground data-[state=on]:bg-foreground data-[state=on]:text-background"
       />
       <span className="o-glass inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-muted-foreground">
         <Sparkles className="size-3.5 text-primary" aria-hidden /> Liquid Glass
