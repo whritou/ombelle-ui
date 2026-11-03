@@ -27,7 +27,7 @@ Ship liquid glass as the fourth style family. Make it usable through the same pr
 
 ### Family, not modifier
 
-Glass is a fourth `styleFamily` value, already reserved in `schemas/preset.schema.json` together with `design.transparency` (`auto | reduced`), `design.glassBlurPx` (0–24) and `design.glassOpacity` (0.6–1). Components inherit it through generated CSS, as with every family. `liquid-glass` joins `supportedStyleFamilies` in `packages/contracts`.
+Glass is a fourth `styleFamily` value, already reserved in `schemas/preset.schema.json` together with `design.transparency` (`auto | reduced`), `design.glassBlurPx` (0–24) and `design.glassOpacity` (0.6–1). Components inherit it through generated CSS, as with every family. In `packages/contracts`, the existing `supportedStyleFamilies` keeps meaning the three **stable** families whose full 12-component matrix the existing tests, scripts and consumers iterate. A new `styleFamilies` list adds `liquid-glass`, and `isStyleFamily` and the `StyleFamily` type widen to it. Code that must handle glass opts in explicitly, so the stable matrix cannot change by accident.
 
 ### Compatibility table
 
