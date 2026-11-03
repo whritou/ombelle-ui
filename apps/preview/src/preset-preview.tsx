@@ -117,6 +117,9 @@ function PresetPreview() {
           // Labels stay so focused form controls keep their accessible names.
           part.hidden = Boolean(focus) && part.dataset.component !== focus && part.dataset.component !== 'label'
     }
+    if (current.message.result.preset.data.styleFamily === 'liquid-glass')
+      document.documentElement.dataset.backdrop = 'photo'
+    else delete document.documentElement.dataset.backdrop
     if (focus) document.documentElement.dataset.focus = focus
     else delete document.documentElement.dataset.focus
     document.documentElement.dataset.presetHash =

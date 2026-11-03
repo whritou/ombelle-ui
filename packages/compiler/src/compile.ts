@@ -61,7 +61,7 @@ export async function compile(input: {
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
   if (family === 'liquid-glass') {
-    const glass = glassTokens(d)
+    const glass = glassTokens(preset.data)
     Object.assign(theme.light, glass.light)
     Object.assign(theme.dark, glass.dark)
   }

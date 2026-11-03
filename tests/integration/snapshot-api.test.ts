@@ -158,7 +158,7 @@ it('publishes an experimental liquid-glass preset and refuses one below the cont
   const published = await post(origin, randomUUID(), { preset: glass })
   expect(published.status).toBe(201)
   expect((await published.json() as PresetSnapshot).preset.styleFamily).toBe('liquid-glass')
-  const failing = { ...glass, design: { ...glass.design, glassOpacity: 0.6 } }
+  const failing = { ...glass, design: { ...glass.design, glassOpacity: 0.3 } }
   await failure(await post(origin, randomUUID(), { preset: failing }), 400, 'INVALID_DATA')
 })
 

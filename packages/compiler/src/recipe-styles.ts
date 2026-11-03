@@ -207,7 +207,7 @@ export function compileScopedButtonStyles(input: {
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
   if (data.styleFamily === 'liquid-glass') {
-    const glass = glassTokens(d)
+    const glass = glassTokens(data)
     Object.assign(light, glass.light)
     Object.assign(darkTokens, glass.dark)
   }

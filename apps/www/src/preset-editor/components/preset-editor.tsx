@@ -40,6 +40,7 @@ import {
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import styles from './preset-editor.module.css'
+import { useSiteDark } from '../../site/theme'
 
 const familyLabel = (family: StyleFamily) =>
   family === 'liquid-glass' ? 'Liquid glass (Experimental)' : family
@@ -55,6 +56,10 @@ export default function PresetEditor() {
   const [restoreWarning, setRestoreWarning] = useState<string | null>(null)
   const [mode, setMode] = useState<'light' | 'dark'>('light'),
     [viewport, setViewport] = useState<'wide' | 'narrow'>('wide')
+  // The preview follows the site theme; the select still overrides it until
+  // the theme toggles again.
+  const siteDark = useSiteDark()
+  useEffect(() => setMode(siteDark ? 'dark' : 'light'), [siteDark])
   const [previewStatus, setPreviewStatus] = useState<
     'connecting' | 'ready' | 'failed'
   >('connecting')

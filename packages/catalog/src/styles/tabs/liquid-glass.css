@@ -12,9 +12,8 @@
   flex-direction: row;
   align-items: flex-start;
 }
-/* The list reads --glass-inner-filter from a Card or Dialog ancestor. It does
-   not set the property itself, since that would cancel its own filter, and its
-   triggers never filter. */
+/* The list reads --glass-inner-filter and --glass-inner-opacity from a Card,
+   Dialog or Tooltip ancestor; its triggers never filter. */
 [data-slot='tabs-list'] {
   display: inline-flex;
   flex-shrink: 0;
@@ -26,7 +25,11 @@
   border-radius: calc(var(--radius) + 0.25rem);
   background: var(--muted);
   color: var(--muted-foreground);
-  box-shadow: inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent));
+  box-shadow:
+    inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
+    inset -1px -1px 0 color-mix(in srgb, var(--glass-highlight, white) 60%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--glass-highlight, white) 40%, transparent),
+    inset 0 -1px 2px rgb(0 0 0 / 0.08);
 }
 [data-slot='tabs-list'][data-orientation='horizontal'] {
   flex-direction: row;
@@ -86,9 +89,11 @@
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot='tabs-list'] {
-    background: color-mix(in srgb, var(--muted) calc(var(--glass-opacity) * 100%), transparent);
-    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(140%));
-    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(140%));
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%),
+      color-mix(in srgb, var(--muted) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   @media (prefers-reduced-transparency: reduce) {
     [data-slot='tabs-list'] {

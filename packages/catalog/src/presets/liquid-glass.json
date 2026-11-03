@@ -19,8 +19,8 @@
       "primaryForeground": "#FFFFFF",
       "secondary": "#E2E8F0",
       "secondaryForeground": "#0F172A",
-      "muted": "#E2E8F0",
-      "mutedForeground": "#475569",
+      "muted": "#F1F5F9",
+      "mutedForeground": "#334155",
       "accent": "#DBEAFE",
       "accentForeground": "#0F172A",
       "destructive": "#B91C1C",
@@ -40,8 +40,8 @@
       "primaryForeground": "#0B1120",
       "secondary": "#334155",
       "secondaryForeground": "#F8FAFC",
-      "muted": "#334155",
-      "mutedForeground": "#CBD5E1",
+      "muted": "#273449",
+      "mutedForeground": "#E2E8F0",
       "accent": "#1E3A8A",
       "accentForeground": "#F8FAFC",
       "destructive": "#FCA5A5",
@@ -60,8 +60,13 @@
     "shadowOffsetYPx": 0,
     "motion": "full",
     "transparency": "auto",
-    "glassBlurPx": 12,
-    "glassOpacity": 0.87
+    "glassBlurPx": 8,
+    "glassOpacity": 0.5,
+    "glassSaturation": 2,
+    "glassBackdropContrast": 0.45,
+    "glassBackdropTone": 0.4,
+    "glassSheen": 0.25,
+    "glassRim": 0.6
   },
   "componentDefaults": {
     "button": {

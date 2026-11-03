@@ -29,17 +29,24 @@ The initial schema includes Button defaults only. Adding controls for another co
 
 ### Liquid glass design fields
 
-Three `design` fields apply only when `styleFamily` is `liquid-glass`; the other families ignore them and their output does not change:
+Eight `design` fields apply only when `styleFamily` is `liquid-glass`; the other families ignore them and their output does not change. The filter and sheen fields are preset-driven so a glass preset can tune its material, and the contrast bound below is computed from the values the preset sets:
 
 | Field | Contract |
 | --- | --- |
-| `transparency` | `auto` (default) renders translucent surfaces; `reduced` renders every glass surface opaque with no blur |
-| `glassBlurPx` | Backdrop blur radius from 0 to 24 pixels; default 12 |
-| `glassOpacity` | Surface opacity from 0.6 to 1: the share of the surface colour in an sRGB mix with the backdrop. The built-in glass preset uses 0.87 |
+| `transparency` | `auto` (default) renders translucent surfaces; `reduced` renders every glass surface opaque with no blur, filter, or sheen |
+| `glassBlurPx` | Backdrop blur radius from 0 to 40 pixels; default 12. The built-in glass preset uses 8 |
+| `glassOpacity` | Surface opacity from 0.25 to 1: the share of the surface colour in an sRGB mix with the filtered backdrop; default 1. The built-in glass preset uses 0.5 |
+| `glassSaturation` | `saturate()` amount from 1 to 2; default 1.4. Built-in 2 |
+| `glassBackdropContrast` | `contrast()` amount from 0.3 to 1 that compresses the backdrop's channel range; default 1 (none). Built-in 0.45 |
+| `glassBackdropTone` | From 0 to 0.6: the backdrop's `brightness()` is `1 + tone` in light mode and `1 − tone` in dark mode, pushing it toward the mode's surfaces; default 0. Built-in 0.4 |
+| `glassSheen` | From 0 to 0.5: opacity of the white specular gradient at the top of each glass surface, scaled by 0.25 in dark mode; default 0. Built-in 0.25 |
+| `glassRim` | From 0 to 1: strength of the white edge light; default 0.35. Built-in 0.6. Decorative only |
 
-The compiler emits `--glass-blur` and `--glass-opacity` on `:root` in `ui-tokens.css` for glass presets only: the preset values with `auto`, and `0px` and `1` with `reduced`. Absent fields take the built-in glass preset's values.
+For glass presets only, the compiler emits `--glass-blur`, `--glass-opacity`, `--glass-saturation`, `--glass-contrast`, `--glass-brightness`, `--glass-sheen`, `--glass-highlight`, and `--glass-nested-opacity` in `ui-tokens.css`; brightness, sheen, highlight, and nested opacity also have dark values. With `reduced` the filter tokens are neutral, opacity is `1`, and sheen is `0`. Absent fields take the defaults above. Those defaults are neutral, so a preset written before these fields compiles to the same contrast bound as before.
 
-With `auto`, the compiler also enforces a worst-case contrast bound. Each declared surface and text pair, in light and dark mode, must reach 4.5:1 against the surface mixed with pure black and with pure white at `glassOpacity`, and the text luminance must not lie between those two mixes. Because the mix and relative luminance are monotone in each backdrop channel, the pair then reaches 4.5:1 over any backdrop. A failing pair is rejected with `INVALID_DATA` at `/design/glassOpacity`, naming the pair, the mode, and the smallest passing opacity. With `reduced`, the compiler evaluates the same pairs at opacity 1, so each opaque surface must reach 4.5:1 against its declared text colours. This is stricter than the stable families. The bound covers only the declared pairs, not other content placed on glass. [Liquid glass](components/liquid-glass.md#contrast-bound) lists the pairs.
+The glass backdrop filter is `blur() saturate() contrast() brightness()`, in that order. Filter functions act per channel on gamma-encoded sRGB values and clamp after each step (Filter Effects 1, sections 5 and 13). Blur averages and saturate is clamped to 0..1, so every channel enters `contrast(c)` inside 0..1 whatever the backdrop's colour. `contrast(c)` maps a channel `v` to `c·v + (1 − c)/2` and `brightness(k)` maps it to `k·v`, clamped. Both are increasing, so every backdrop pixel leaves the filter with each channel inside `[low, high]`: the images of 0 and 1. Saturation cannot widen that range.
+
+With `auto`, the compiler enforces a worst-case contrast bound over that range. Each declared surface and text pair, in light and dark mode, must reach 4.5:1 against the surface mixed at `glassOpacity` with grey `low` and no sheen, and with grey `high` under the full sheen. The text luminance must not lie between those two. Because the painted luminance increases with every backdrop channel and with the sheen, the pair then reaches 4.5:1 over any backdrop the filter can produce. Each pair must also reach 4.5:1 on its opaque surface, which the fallbacks use. Glass nested inside a glass Card, Dialog, or Tooltip drops its own filter and sees an unfiltered backdrop, so the compiler emits `--glass-nested-opacity`: the smallest coverage, at least `glassOpacity`, at which every pair passes against raw black and white. A failing pair is rejected with `INVALID_DATA` at `/design/glassOpacity`, naming the pair, the mode, and the smallest passing opacity. With `reduced`, the compiler evaluates the same pairs at opacity 1. This is stricter than the stable families. The bound covers only the declared pairs, not other content placed on glass. [Liquid glass](components/liquid-glass.md#contrast-bound) lists the pairs and the bound's assumptions.
 
 ## Resolution algorithm
 

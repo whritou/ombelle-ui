@@ -160,23 +160,29 @@ it('creates a valid liquid-glass draft based on builtin-liquid-glass', () => {
   const preset = materializePreset(draft)
   expect(preset.styleFamily).toBe('liquid-glass')
   expect(preset.design).toEqual(base.design)
-  expect(presetFieldValue(draft, '/design/glassOpacity')).toBe('0.87')
-  expect(presetFieldValue(draft, '/design/glassBlurPx')).toBe('12')
+  expect(presetFieldValue(draft, '/design/glassOpacity')).toBe('0.5')
+  expect(presetFieldValue(draft, '/design/glassBlurPx')).toBe('8')
+  expect(presetFieldValue(draft, '/design/glassBackdropContrast')).toBe('0.45')
   expect(presetFieldValue(draft, '/design/transparency')).toBe('auto')
   expect(Object.keys(glassDesignControls)).toEqual([
     'transparency',
     'glassBlurPx',
     'glassOpacity',
+    'glassSaturation',
+    'glassBackdropContrast',
+    'glassBackdropTone',
+    'glassSheen',
+    'glassRim',
   ])
 })
 
-it('reports a failing contrast bound for a glass opacity edit of 0.6', () => {
+it('reports a failing contrast bound for a glass opacity edit of 0.3', () => {
   const draft = createPresetDraft('liquid-glass')
-  expect(presetGlassReport(draft)).toMatchObject({ passes: true, opacity: 0.87 })
-  const thin = setPresetEdit(draft, '/design/glassOpacity', '0.6')
+  expect(presetGlassReport(draft)).toMatchObject({ passes: true, opacity: 0.5 })
+  const thin = setPresetEdit(draft, '/design/glassOpacity', '0.3')
   const report = presetGlassReport(thin)!
   expect(report.passes).toBe(false)
-  expect(report.opacity).toBe(0.6)
+  expect(report.opacity).toBe(0.3)
   expect(report.minimumOpacity).toEqual(expect.any(Number))
   expect(report.pairs.some((pair) => !pair.passes)).toBe(true)
   expect(
@@ -192,17 +198,22 @@ it('reports a failing contrast bound for a glass opacity edit of 0.6', () => {
 it('checks glass control bounds and keeps glass edits out of stable families', () => {
   const draft = createPresetDraft('liquid-glass')
   for (const [path, value] of [
-    ['/design/glassOpacity', '0.59'],
+    ['/design/glassOpacity', '0.24'],
     ['/design/glassOpacity', '1.01'],
-    ['/design/glassBlurPx', '25'],
+    ['/design/glassBlurPx', '41'],
+    ['/design/glassBackdropContrast', '0.29'],
+    ['/design/glassBackdropTone', '0.61'],
+    ['/design/glassSaturation', '2.1'],
+    ['/design/glassSheen', '0.51'],
+    ['/design/glassRim', '-0.1'],
     ['/design/glassBlurPx', ''],
     ['/design/transparency', 'none'],
   ] as const)
     expect(() => materializePreset(setPresetEdit(draft, path, value))).toThrow()
   expect(
-    materializePreset(setPresetEdit(draft, '/design/glassBlurPx', '24')).design
+    materializePreset(setPresetEdit(draft, '/design/glassBlurPx', '40')).design
       .glassBlurPx,
-  ).toBe(24)
+  ).toBe(40)
   const edited = setPresetEdit(
     setPresetEdit(draft, '/design/glassOpacity', '0.9'),
     '/design/radiusRem',
@@ -214,7 +225,7 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
   expect(() => materializePreset(toFlat.draft)).not.toThrow()
   const back = planPresetFamilyChange(toFlat.draft, 'liquid-glass')
   expect(back.draft.family).toBe('liquid-glass')
-  expect(materializePreset(back.draft).design.glassOpacity).toBe(0.87)
+  expect(materializePreset(back.draft).design.glassOpacity).toBe(0.5)
 })
 
 it('requests only components the family supports', () => {

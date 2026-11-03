@@ -6,6 +6,48 @@ A later fix-wave run on `3fce385` ran all 40 browser cases, including the 16 gla
 
 `pnpm check:foundation` was **not** run, so this slice has no full-gate result. The [machine-readable run record](liquid-glass-run.json) has the commands, counts, durations, result hashes, and the list of what was not run.
 
+## Glass realism run
+
+Branch `feat/glass-realism` adds backdrop compression to the glass filter (`contrast()` and `brightness()` after `blur()` and `saturate()`), models it in the contrast bound, adds the specular sheen and edge light, and lowers the built-in `glassOpacity` from 0.87 to 0.5. It ran on 3 November 2026 in the environment above, with generated contract files restored to their committed line endings.
+
+| Command | Result |
+| --- | --- |
+| `corepack pnpm typecheck` (after `build:packages` and `generate:preview`) | Passed |
+| `corepack pnpm test:unit` | 81 files, 820 tests passed |
+| `vitest run tests/integration/liquid-glass-cli.test.ts tests/integration/snapshot-api.test.ts` | 2 files, 42 tests passed |
+| `playwright test tests/e2e/liquid-glass.spec.ts tests/e2e/preset-editor.spec.ts` | 38 of 50 passed in 4.2 min, including all 24 glass preview cases. The 12 downloaded-preset parity cases did not run: they need prepared npm consumers and npm 11.19.0, and this machine has npm 11.17.0 |
+
+The browser run used Chromium 156 through the Edge channel, one worker, an empty consumer map, and the `corepack pnpm` shim described above. The glass consumer cases did not run, because no glass consumers were prepared. The 24 preview cases include the bounded-contrast probe, which now predicts each sampled pixel from the computed `backdrop-filter` and sheen gradient, and the reduced-transparency, no-`backdrop-filter`, forced-colours, and nested-filter fallbacks.
+
+The stable-family byte-identity guard in `test:unit` found no change to flat, minimalist, or neo-brutalism output.
+
+`packages/compiler/test/glass-contrast.test.ts` proves the filter model two ways. It checks the hand-computed range for `contrast(0.45) brightness(1.4)` and `brightness(0.6)`: light `[0.385, 1]` and dark `[0.165, 0.435]`. It then runs 1,508 backdrop colours, including the eight RGB cube corners, through a reference saturate, contrast, and brightness chain at saturation 1, 1.8, and 2. Every filtered channel stays inside the predicted range, and every painted text pair stays at or above both the reported worst ratio and 4.5:1 with no sheen, half sheen, and full sheen.
+
+### Minimum opacity per palette
+
+The lowest `glassOpacity` the bound allows, in 0.01 steps, with the built-in filter settings (contrast 0.45, tone 0.4, sheen 0.25):
+
+| Palette | Light | Dark | Nested light | Nested dark |
+| --- | --- | --- | --- | --- |
+| Built-in liquid glass (this branch) | 0.50 | 0.28 | 0.70 | 0.79 |
+| Same palette, no compression (contrast 1, tone 0, sheen 0.25) | 0.70 | 0.79 | 0.70 | 0.79 |
+| Previous built-in glass palette, raw bound | 0.87 | 0.86 | — | — |
+| Flat palette with the glass settings | 0.69 | 0.94 | — | — |
+| Minimalist palette with the glass settings | 0.70 | 0.42 | — | — |
+| Neo brutalism palette with the glass settings | 0.69 | 0.94 | — | — |
+
+Only the liquid glass palette ships with the glass family; the other three rows show what the same filter settings would allow for the stable families' palettes, whose `mutedForeground` colours sit close to 4.5:1 on `muted`.
+
+The previous palette's `mutedForeground` sat close to 4.5:1 on `muted` even when opaque, so no compression could make it thin. The branch darkens light `mutedForeground` to `#334155` and lightens dark `mutedForeground` to `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
+
+### Card over the bluebell photo
+
+The same Card and Buttons over the preset editor's backdrop photo, at 880 × 520 in the app's Chromium browser pane. Before uses the `origin/main` CSS and tokens; after uses this branch's compiler output.
+
+![Glass Card before: near-opaque surfaces](liquid-glass/card-over-photo-before.jpg)
+
+![Glass Card after: thinner glass with sheen and edge light](liquid-glass/card-over-photo-after.jpg)
+
 ## Post-rebase runs
 
 These ran on `fc41f51` on 3 November 2026:
@@ -71,7 +113,7 @@ In light and dark mode, over the solid, gradient, and pattern backdrops, the 24 
 
 ## Measurements
 
-The built-in glass preset uses `glassOpacity` 0.87, the smallest value at which both built-in palettes pass the contrast bound. The limiting pair is light `muted` with `mutedForeground`: 4.59:1 at 0.87 and 4.48:1 at 0.86.
+Before the [glass realism run](#glass-realism-run), the built-in glass preset used `glassOpacity` 0.87, the smallest value at which both built-in palettes passed the raw black and white bound. The limiting pair is light `muted` with `mutedForeground`: 4.59:1 at 0.87 and 4.48:1 at 0.86.
 
 In the browser run at `9f70fa2`, the worst measured contrast on a bounded pair was the inactive Tabs trigger: 4.60:1 in light mode over black, and 4.73:1 in dark mode over white. Sampled pixels matched the computed composites to within 1 per channel.
 

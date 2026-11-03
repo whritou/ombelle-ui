@@ -3,6 +3,7 @@ import { getCatalog } from '@ombelle/catalog'
 import type { Preset } from '@ombelle/contracts'
 import { contrastRatio } from '../../../tests/helpers/contrast.js'
 import {
+  glassBackdrop,
   glassContrastPairs,
   glassContrastReport,
   relativeLuminance,
@@ -62,7 +63,7 @@ it('threshold: minimumOpacity passes and one step below fails', () => {
       ['light'],
     )
   let x: number | null = null
-  for (let i = 60; i <= 100; i++)
+  for (let i = 25; i <= 100; i++)
     if (glassContrastReport(at(i / 100)).passes) {
       x = i / 100
       break
@@ -72,7 +73,7 @@ it('threshold: minimumOpacity passes and one step below fails', () => {
   expect(x).not.toBeNull()
   expect(report.minimumOpacity).toBe(x)
   expect(glassContrastReport(at(x!)).passes).toBe(true)
-  if (x! > 0.6) expect(glassContrastReport(at(x! - 0.01)).passes).toBe(false)
+  expect(glassContrastReport(at(x! - 0.01)).passes).toBe(false)
 })
 
 it('returns null minimumOpacity when even opacity 1 fails', () => {
@@ -163,4 +164,142 @@ it('fails text whose luminance lies between the two composites', () => {
   expect(pair.ratioOverBlack).toBeGreaterThanOrEqual(4.5)
   expect(pair.ratioOverWhite).toBeGreaterThanOrEqual(4.5)
   expect(pair.passes).toBe(false)
+})
+
+const glass = getCatalog('0.1.0').presets['liquid-glass'] as Preset
+
+it('maps black and white through contrast() then brightness(), clamped', () => {
+  const design = { ...glass.design, glassBackdropContrast: 0.45, glassBackdropTone: 0.4 }
+  // contrast(0.45) maps v to 0.45v + 0.275; brightness is 1.4 light, 0.6 dark.
+  const light = glassBackdrop(design, 'light')
+  expect(light).toMatchObject({ contrast: 0.45, brightness: 1.4, high: 1 }) // 0.725 * 1.4 clamps
+  expect(light.low).toBeCloseTo(0.385, 10)
+  const dark = glassBackdrop(design, 'dark')
+  expect(dark.brightness).toBe(0.6)
+  expect(dark.low).toBeCloseTo(0.165, 10)
+  expect(dark.high).toBeCloseTo(0.435, 10)
+})
+
+it('omitted filter fields keep the raw black and white bound', () => {
+  for (const mode of ['light', 'dark'] as const)
+    expect(glassBackdrop(flat.design, mode)).toMatchObject({
+      contrast: 1,
+      brightness: 1,
+      sheen: 0,
+      low: 0,
+      high: 1,
+    })
+})
+
+it('reduced transparency neutralizes the filter and sheen', () => {
+  const report = glassContrastReport({
+    ...glass,
+    design: { ...glass.design, transparency: 'reduced' },
+  })
+  expect(report.opacity).toBe(1)
+  expect(report.nestedOpacity).toEqual({ light: 1, dark: 1 })
+  expect(report.backdrop.light).toMatchObject({ low: 0, high: 1, sheen: 0 })
+})
+
+it('built-in palettes reach the documented minimum opacities', () => {
+  const report = glassContrastReport(glass)
+  expect(report.passes).toBe(true)
+  expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.28 })
+  expect(report.minimumOpacity).toBe(0.5)
+  // Nested glass sees a raw backdrop and needs more coverage.
+  expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.79 })
+  // Without compression the same palette needs nearly opaque glass.
+  const raw = glassContrastReport({
+    ...glass,
+    design: { ...glass.design, glassBackdropContrast: 1, glassBackdropTone: 0 },
+  })
+  expect(raw.minimumOpacity).toBeGreaterThanOrEqual(0.7)
+})
+
+// Reference chain written from the Filter Effects 1 definitions. blur() only
+// averages, so it is skipped; saturate() is the feColorMatrix saturate matrix;
+// every primitive clamps to 0..1.
+const clamp = (v: number) => Math.min(1, Math.max(0, v))
+function filterPixel(
+  [r, g, b]: readonly number[],
+  { saturation: s, contrast: c, brightness: k }: ReturnType<typeof glassBackdrop>,
+) {
+  return [
+    (0.213 + 0.787 * s) * r + (0.715 - 0.715 * s) * g + (0.072 - 0.072 * s) * b,
+    (0.213 - 0.213 * s) * r + (0.715 + 0.285 * s) * g + (0.072 - 0.072 * s) * b,
+    (0.213 - 0.213 * s) * r + (0.715 - 0.715 * s) * g + (0.072 + 0.928 * s) * b,
+  ].map((v) => clamp(clamp(c * clamp(v) + 0.5 - 0.5 * c) * k))
+}
+const lum = (rgb: readonly number[]) =>
+  rgb
+    .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0)
+const ratioOf = (a: number, b: number) =>
+  (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+const unit = (h: string) => hex(h).map((v) => v / 255)
+
+it('saturated backdrops never beat the grey extremes the bound uses', () => {
+  // A fixed LCG keeps the sample reproducible.
+  let seed = 12345
+  const rand = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31
+  const corners = [0, 1].flatMap((r) =>
+    [0, 1].flatMap((g) => [0, 1].map((b) => [r, g, b])),
+  )
+  const samples = [
+    ...corners,
+    ...Array.from({ length: 1500 }, () => [rand(), rand(), rand()]),
+  ]
+  for (const glassSaturation of [1, 1.8, 2]) {
+    const preset = { ...glass, design: { ...glass.design, glassSaturation } }
+    const report = glassContrastReport(preset)
+    expect(report.passes).toBe(true)
+    for (const mode of ['light', 'dark'] as const) {
+      const backdrop = glassBackdrop(preset.design, mode)
+      const colors = preset.modes[mode] as Record<string, string>
+      for (const [surface, text] of glassContrastPairs) {
+        const pair = report.pairs.find(
+          (p) => p.mode === mode && p.surface === surface && p.text === text,
+        )!
+        const floor = Math.min(pair.ratioOverBlack, pair.ratioOverWhite)
+        const s = unit(colors[surface])
+        const t = lum(unit(colors[text]))
+        for (const pixel of samples) {
+          const filtered = filterPixel(pixel, backdrop)
+          for (const v of filtered) {
+            expect(v).toBeGreaterThanOrEqual(backdrop.low - 1e-12)
+            expect(v).toBeLessThanOrEqual(backdrop.high + 1e-12)
+          }
+          for (const sheen of [0, backdrop.sheen / 2, backdrop.sheen]) {
+            const painted = s.map(
+              (v, i) =>
+                sheen +
+                (1 - sheen) *
+                  (report.opacity * v + (1 - report.opacity) * filtered[i]),
+            )
+            const actual = ratioOf(lum(painted), t)
+            expect(actual).toBeGreaterThanOrEqual(floor - 1e-9)
+            expect(actual).toBeGreaterThanOrEqual(4.5)
+          }
+        }
+      }
+    }
+  }
+})
+
+it('nested opacity holds over any raw backdrop pixel', () => {
+  const report = glassContrastReport(glass)
+  for (const mode of ['light', 'dark'] as const) {
+    const colors = glass.modes[mode] as Record<string, string>
+    const opacity = report.nestedOpacity![mode]
+    const { sheen } = report.backdrop[mode]
+    for (const [surface, text] of glassContrastPairs) {
+      const s = unit(colors[surface])
+      const t = lum(unit(colors[text]))
+      for (const b of [0, 0.25, 0.5, 0.75, 1])
+        for (const sh of [0, sheen]) {
+          const painted = s.map((v) => sh + (1 - sh) * (opacity * v + (1 - opacity) * b))
+          expect(ratioOf(lum(painted), t)).toBeGreaterThanOrEqual(4.5)
+        }
+    }
+  }
 })

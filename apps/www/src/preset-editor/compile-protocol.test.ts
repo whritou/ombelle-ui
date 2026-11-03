@@ -43,7 +43,7 @@ it('compiles only the experimental components for liquid glass', async () => {
   const failing = await handlePresetCompileMessage({
     type: 'compile-preset',
     requestId: 2,
-    draft: setPresetEdit(draft, '/design/glassOpacity', '0.6'),
+    draft: setPresetEdit(draft, '/design/glassOpacity', '0.3'),
   })
   expect(failing).toMatchObject({
     type: 'preset-invalid',

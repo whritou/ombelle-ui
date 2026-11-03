@@ -44,7 +44,7 @@ describe('liquid-glass compile', () => {
       'styles/ui-tokens.css',
     ])
     const tokens = artifact(result, 'styles/ui-tokens.css').replace(/\s+/g, '')
-    expect(tokens).toContain('--glass-blur:12px;')
+    expect(tokens).toContain('--glass-blur:8px;')
     expect(tokens).toContain('--glass-opacity:' + preset.design.glassOpacity + ';')
     const root = tokens.slice(0, tokens.indexOf('}'))
     expect(root).toContain('--glass-blur')
@@ -83,10 +83,10 @@ describe('liquid-glass compile', () => {
   })
 
   it('rejects low opacity', async () => {
-    const error = await build(withDesign({ glassOpacity: 0.6 })).catch((e) => e)
+    const error = await build(withDesign({ glassOpacity: 0.3 })).catch((e) => e)
     expect(error).toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
     expect(error.message).toMatch(
-      /^Liquid glass text contrast fails in (light|dark) for \w+ on \w+: \d+\.\d+:1 over a (black|white) backdrop\. Minimum passing glassOpacity is 0\.\d+\.$/,
+      /^Liquid glass text contrast fails in (light|dark) for \w+ on \w+: \d+\.\d+:1 (over the (darkest|brightest) filtered backdrop|on the opaque fallback surface)\. Minimum passing glassOpacity is 0\.\d+\.$/,
     )
   })
 

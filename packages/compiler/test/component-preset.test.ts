@@ -336,13 +336,13 @@ describe('liquid-glass component presets', () => {
         ).toBe(true)
     expect(style.content).toContain('@supports')
     expect(style.content).toContain('prefers-reduced-transparency: reduce')
-    expect(style.content).toContain('--glass-opacity: 0.87')
+    expect(style.content).toContain('--glass-opacity: 0.5')
     expect(style.content).not.toMatch(/:root|@theme|data-slot=["'](?:button|input|dialog)/)
   })
 
   it('rejects a glass Button preset that fails the contrast bound', async () => {
     const preset = structuredClone(catalog.presets['liquid-glass'])
-    preset.design.glassOpacity = 0.6
+    preset.design.glassOpacity = 0.3
     await expect(compileButtonPreset({ preset })).rejects.toMatchObject({
       code: 'INVALID_DATA',
       path: '/design/glassOpacity',
