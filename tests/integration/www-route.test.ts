@@ -6,6 +6,7 @@ import PresetEditorPage from '../../apps/www/src/app/editor/preset/page.js'
 import PrivacyPage from '../../apps/www/src/app/privacy/page.js'
 import SecurityPage from '../../apps/www/src/app/security/page.js'
 import HomePage from '../../apps/www/src/app/page.js'
+import { SiteFooter } from '../../apps/www/src/site/footer.js'
 import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 describe('Button editor route', () => {
@@ -31,14 +32,14 @@ it('publishes privacy, support and security pages without exposing an email addr
   expect(security).toContain('href="https://github.com/whritou/ombelle-ui/security/advisories/new"')
   expect(security).toContain('href="/privacy"')
   for (const html of [privacy, security]) expect(html).not.toMatch(/[\w.+-]+@[a-z0-9-]+\.[a-z]{2,}/i)
-  const home = renderToStaticMarkup(createElement(HomePage))
-  expect(home).toContain('href="/privacy"')
-  expect(home).toContain('href="/security"')
+  // Every page links to both through the shared footer in the root layout.
+  const footer = renderToStaticMarkup(createElement(SiteFooter))
+  expect(footer).toMatch(/<footer\b[\s\S]*href="\/privacy"[\s\S]*href="\/security"/)
 })
 
 it('renders the public landing page with editor links and the published installer', () => {
   const html = renderToStaticMarkup(createElement(HomePage))
-  expect(html).toMatch(/<main\b[^>]*>[\s\S]*<h1\b[^>]*>Ombelle<\/h1>/)
+  expect(html).toMatch(/<main\b[^>]*>[\s\S]*<h1\b[^>]*>Your components\.<br\/>[\s\S]*Your style\.[\s\S]*<\/h1>/)
   expect(html).toContain('href="/editor/component/button"')
   expect(html).toContain('href="/editor/preset"')
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
@@ -49,4 +50,8 @@ it('renders the public landing page with editor links and the published installe
   for (const prefix of ['pnpm dlx', 'bunx', 'yarn dlx --quiet']) expect(html).toContain(`${prefix} ${runner}`)
   expect(html).toContain('24 hours')
   expect(html.match(/<h1\b/g)).toHaveLength(1)
+  // Unshipped work is labelled as such; the design's placeholder installer is gone.
+  expect(html).toContain('React Native is not supported')
+  expect(html).toContain('Liquid Glass (soon)')
+  expect(html).not.toContain('ombelle@alpha')
 })

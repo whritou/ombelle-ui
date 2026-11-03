@@ -1,24 +1,42 @@
+/* Colours come from the site tokens so the shell follows light and dark. */
 .editor {
   max-width: 1440px;
   margin: 0 auto;
   padding: 40px 32px 80px;
-  color: #292524;
-  background: #faf9f6;
-  font-family: Arial, sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+}
+/* Undo the site's Tailwind reset inside the editor so native spacing, list
+   markers and heading weights keep the editor's original layout. */
+.editor :where(h1, h2, h3, h4, p, ul, ol, dl, dd, figure, pre, blockquote, fieldset, legend) {
+  margin: revert;
+}
+.editor :where(ul, ol, fieldset, legend) {
+  padding: revert;
+}
+.editor :where(ul, ol) {
+  list-style: revert;
+}
+.editor :where(h1, h2, h3, h4) {
+  font-size: revert;
+  font-weight: revert;
 }
 .editor header {
-  border-bottom: 1px solid #d6d3d1;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
   margin-bottom: 20px;
 }
 .editor h1 {
-  font-size: clamp(28px, 4vw, 44px);
-  line-height: 1.15;
-  letter-spacing: -0.04em;
+  font-size: clamp(32px, 4.4vw, 52px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
   margin: 12px 0;
 }
 .editor h2 {
   font-size: 22px;
+  font-weight: 800;
   margin: 24px 0 12px;
 }
 .editor h3 {
@@ -30,19 +48,22 @@
   line-height: 1.6;
 }
 .editor a {
-  color: #344e41;
+  color: var(--foreground);
+  font-weight: 600;
   text-decoration: underline;
+  text-decoration-color: var(--primary);
+  text-underline-offset: 4px;
 }
 .editor button,
 .editor input,
 .editor select,
 .editor textarea {
   font: inherit;
-  border: 1px solid #a8a29e;
-  border-radius: 5px;
-  padding: 9px 10px;
-  background: #fff;
-  color: #292524;
+  border: 1px solid var(--control);
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: var(--card);
+  color: var(--foreground);
   min-height: 44px;
 }
 .editor :global(.preset-publication-consent) {
@@ -63,31 +84,35 @@
 }
 .editor button {
   cursor: pointer;
+  border-radius: 999px;
+  padding-inline: 16px;
+  font-weight: 600;
 }
 .editor button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 .editor :focus-visible {
-  outline: 3px solid #42634c;
+  outline: 3px solid var(--ring);
   outline-offset: 3px;
 }
 .editor [aria-invalid='true'] {
-  border-color: #b91c1c;
+  border-color: var(--destructive);
 }
 .editor [role='alert'] {
-  border-left: 3px solid #b45309;
+  border-left: 3px solid var(--warning);
   padding: 8px 14px;
-  background: #fffbeb;
+  background: var(--warning-soft);
 }
 .editor fieldset {
-  border: 1px solid #d6d3d1;
+  border: 1px solid var(--border);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: var(--card);
 }
 .editor details {
   margin: 20px 0;
-  border-bottom: 1px solid #d6d3d1;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 20px;
 }
 .editor summary {
@@ -121,7 +146,7 @@
 .editor :global(.preset-swatch) {
   width: 24px;
   height: 24px;
-  border: 1px solid #a8a29e;
+  border: 1px solid var(--control);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -133,12 +158,16 @@
 }
 .editor textarea {
   margin: 12px 0;
-  font-family: monospace;
+  border-radius: 12px;
+  font-family: var(--font-mono);
   font-size: 13px;
 }
 .editor pre {
   padding: 16px;
-  background: #e7e5e4;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--muted);
+  font-family: var(--font-mono);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -151,13 +180,14 @@
   max-height: 80vh;
   overflow: auto;
   padding: 24px;
-  background: #faf9f6;
-  color: #292524;
-  border: 1px solid #a8a29e;
-  border-radius: 10px;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
 }
 .editor dialog::backdrop {
-  background: #29252480;
+  background: color-mix(in oklab, var(--ink) 50%, transparent);
 }
 .editor dialog li {
   overflow-wrap: anywhere;

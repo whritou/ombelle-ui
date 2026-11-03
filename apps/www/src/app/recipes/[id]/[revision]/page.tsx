@@ -4,7 +4,7 @@ import { recipeSnapshotInstallCommand } from '../../../../recipe-snapshots/insta
 import { readSnapshotConfig } from '../../../../snapshots/server/config'
 import { SnapshotServiceError } from '../../../../snapshots/server/errors'
 import { createRequestRecipeSnapshotService } from '../../../../snapshots/server/recipe-service'
-import styles from '../../../../preset-editor/components/preset-editor.module.css'
+import { DocPage } from '../../../../site/doc-page'
 
 // Availability, including withdrawal, must be checked on every request.
 export const dynamic = 'force-dynamic'
@@ -35,14 +35,16 @@ export default async function Page({
     const withdrawn = code === 'SNAPSHOT_WITHDRAWN'
     const missing = code === 'SNAPSHOT_NOT_FOUND'
     return (
-      <main className={styles.editor}>
-        <h1>
-          {withdrawn
+      <DocPage
+        eyebrow="Published code"
+        title={
+          withdrawn
             ? 'Snapshot withdrawn'
             : missing
               ? 'Snapshot not found'
-              : 'Snapshot unavailable'}
-        </h1>
+              : 'Snapshot unavailable'
+        }
+      >
         <p>
           {withdrawn
             ? 'This snapshot is no longer publicly available. Cached copies and installed source cannot be recalled.'
@@ -50,8 +52,10 @@ export default async function Page({
               ? 'No published snapshot exists at this exact reference.'
               : 'This snapshot could not be read. Check the reference or try again later.'}
         </p>
-        <a href="/editor/component/button">Open the Button editor</a>
-      </main>
+        <p>
+          <a href="/editor/component/button">Open the Button editor</a>
+        </p>
+      </DocPage>
     )
   }
 }

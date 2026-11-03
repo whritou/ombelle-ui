@@ -1,20 +1,21 @@
+import { DocPage } from '../../site/doc-page'
+import { repository } from '../../site/links'
+import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
+
 export const metadata = {
   title: 'Support and security · Ombelle',
   description: 'How to get help with Ombelle and report security issues.',
 }
 
-const repository = 'https://github.com/whritou/ombelle-ui'
-
 export default function SecurityPage() {
   return (
-    <main>
-      <h1>Support and security</h1>
+    <DocPage eyebrow="Help" title="Support and security">
 
       <h2>Support</h2>
       <p>
         For questions, bugs and feature requests, open an issue on{' '}
         <a href={`${repository}/issues`}>GitHub</a>. Include the command you ran,
-        the CLI version (<code>npx @ombelle-ui/cli@0.2.1 --help</code> prints
+        the CLI version (<code>{installerRunner(publishedInstaller)} --help</code> prints
         usage) and the JSON output of a <code>--dry-run --json</code> plan when
         relevant. Do not paste secrets or personal data in issues.
       </p>
@@ -41,6 +42,6 @@ export default function SecurityPage() {
       <p>
         See also <a href="/privacy">privacy and data retention</a>.
       </p>
-    </main>
+    </DocPage>
   )
 }

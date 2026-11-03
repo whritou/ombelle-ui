@@ -1,23 +1,35 @@
+/* Editor palette mapped onto the site tokens (light and dark themes). */
 .root {
-  --ink: #233237;
-  --paper: #f1f4f1;
-  --moss: #3e7469;
-  --mint: #b8ddc7;
-  --slate: #566b69;
-  --line: #c9d3ce;
-  --white: #fbfdfb;
+  --ink: var(--foreground);
+  --paper: var(--muted);
+  --moss: var(--primary);
+  --mint: var(--accent);
+  --slate: var(--muted-foreground);
+  --line: var(--border);
+  --white: var(--background);
+  --surface: var(--card);
   color: var(--ink);
   background: var(--white);
   min-height: 100vh;
-  max-width: none;
-  margin: 0;
+  max-width: 90rem;
+  margin: 0 auto;
   padding: 0 clamp(1rem, 3vw, 3rem) 3rem;
-  font: 400 1rem/1.5 system-ui, sans-serif;
+  font: 400 1rem/1.5 var(--font-sans);
 }
+
+/* Undo the site's Tailwind reset inside the editor so native spacing, list
+   markers, heading weights and links keep the editor's original layout. */
+.root :where(h1, h2, h3, h4, p, ul, ol, dl, dd, figure, pre, blockquote, fieldset, legend) { margin: revert; }
+.root :where(ul, ol, fieldset, legend) { padding: revert; }
+.root :where(ul, ol) { list-style: revert; }
+.root :where(h1, h2, h3, h4) { font-size: revert; font-weight: revert; }
+.root :where(a) { color: var(--moss); text-decoration: underline; text-underline-offset: 3px; }
+.root :where(button) { border: 1px solid var(--line); border-radius: .45rem; background: var(--surface); color: var(--ink); padding: .5rem .85rem; font-weight: 600; }
+.root :where(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) { border: 1px solid var(--control); border-radius: .4rem; background: var(--surface); color: var(--ink); }
 
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
 .root :is(button, input, select, pre):focus-visible {
-  outline: 3px solid var(--moss);
+  outline: 3px solid var(--ring);
   outline-offset: 3px;
 }
 .root button, .root select, .root input { font: inherit; }
@@ -33,17 +45,17 @@
   border-bottom: 1px solid var(--line);
   padding: 1.65rem 0 1.5rem;
 }
-.product { color: var(--moss); font-size: .9rem; font-weight: 700; margin-bottom: .4rem; }
-.header h1 { font-size: clamp(1.8rem, 2.8vw, 2.75rem); line-height: 1.12; letter-spacing: -.035em; margin-bottom: .5rem; }
+.product { color: var(--moss); font-family: var(--font-mono); font-size: .75rem; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; margin-bottom: .6rem; }
+.header h1 { font-size: clamp(2rem, 3.4vw, 3.25rem); font-weight: 900; line-height: 1.02; letter-spacing: -.03em; margin-bottom: .6rem; }
 .header p:last-child { color: var(--slate); margin-bottom: 0; max-width: 42rem; }
 .headerActions { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
 .headerActions button, .recoveryActions button {
-  border: 1px solid var(--line); border-radius: .45rem; color: var(--ink);
-  background: var(--white); padding: .64rem .9rem; white-space: nowrap; font-weight: 600;
+  border: 1px solid var(--line); border-radius: 999px; color: var(--ink);
+  background: var(--surface); min-height: 2.75rem; padding: .55rem 1.1rem; white-space: nowrap; font-weight: 600;
 }
-.headerActions .download { border-color: var(--moss); background: var(--moss); color: white; }
+.headerActions .download { border-color: var(--moss); background: var(--moss); color: var(--primary-foreground); }
 .headerActions button:not(:disabled):hover, .recoveryActions button:hover { border-color: var(--moss); }
-.headerActions .download:not(:disabled):hover { background: #315d54; }
+.headerActions .download:not(:disabled):hover { filter: brightness(1.08); }
 
 .workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18.5rem, 23rem); min-height: 50rem; }
 .primary { min-width: 0; padding: 1.75rem clamp(1rem, 2.5vw, 2.5rem) 0 0; }
@@ -55,25 +67,26 @@
 .viewControls { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
 .viewControls label { display: flex; align-items: center; gap: .55rem; font-size: .87rem; font-weight: 600; }
 .viewControls select, .root :global(.properties) select, .root :global(.properties) input[type="text"] {
-  border: 1px solid var(--line); border-radius: .4rem; background: white; color: var(--ink); padding: .48rem .65rem;
+  border: 1px solid var(--control); border-radius: .4rem; background: var(--surface); color: var(--ink); padding: .48rem .65rem;
 }
 .viewControls select { min-width: 6.2rem; }
 .specimen {
   min-height: 18rem;
   border: 1px solid var(--line);
-  border-radius: .65rem;
+  border-radius: 1rem;
   overflow: hidden;
   background: var(--paper);
+  box-shadow: var(--shadow-soft);
 }
 .specimen iframe { display: block; width: 100%; min-height: 18rem; border: 0; }
 .previewStatus { margin: .65rem 0 1.7rem; color: var(--slate); font-size: .84rem; }
 .codeSection { border-top: 1px solid var(--line); padding-top: 1.5rem; }
 .hashLine { color: var(--slate); font-size: .79rem; overflow-wrap: anywhere; margin-top: .8rem; }
-.hashLine span { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.hashLine span { font-family: var(--font-mono); }
 
 .root :global(.railHeading) { border-bottom: 1px solid var(--line); margin-bottom: .45rem; }
 .root :global(.fieldGroup) { display: grid; gap: .42rem; border-bottom: 1px solid var(--line); padding: 1rem 0 1.2rem; }
-.root :global(.fieldGroup) h3 { font-size: .97rem; margin: 0 0 .5rem; }
+.root :global(.fieldGroup) h3 { font-family: var(--font-mono); font-size: .72rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--slate); margin: 0 0 .5rem; }
 .root :global(.fieldGroup) > label, .root :global(.numberField) > label { font-size: .85rem; font-weight: 600; margin-top: .45rem; }
 .root :global(.properties) input[type="text"], .root :global(.properties) select { width: 100%; }
 .root :global(.checkRow) { display: flex; align-items: center; justify-content: space-between; padding: .45rem 0; }
@@ -84,27 +97,27 @@
 .root :global(.numberField) label span { color: var(--slate); font-weight: 400; }
 .root :global(.numberPair) { display: grid; grid-template-columns: minmax(0, 1fr) 5.3rem; align-items: center; gap: .8rem; }
 .root :global(.numberPair) input[type="range"] { width: 100%; accent-color: var(--moss); }
-.root :global(.numberPair) input[type="number"] { width: 100%; border: 1px solid var(--line); border-radius: .4rem; padding: .38rem .45rem; color: var(--ink); background: white; }
-.root :global(.fieldError) { color: #a12a2a; font-size: .83rem; }
+.root :global(.numberPair) input[type="number"] { width: 100%; border: 1px solid var(--control); border-radius: .4rem; padding: .38rem .45rem; color: var(--ink); background: var(--surface); }
+.root :global(.fieldError) { color: var(--destructive); font-size: .83rem; }
 
 .root :global(.artifacts) { min-width: 0; }
 .root :global(.artifactTabs) { display: flex; gap: .15rem; overflow-x: auto; border-bottom: 1px solid var(--line); }
 .root :global(.artifactTabs) button { border: 0; border-bottom: 2px solid transparent; background: none; color: var(--slate); padding: .55rem .75rem; white-space: nowrap; font-size: .83rem; font-weight: 600; }
 .root :global(.artifactTabs) button[aria-selected="true"] { color: var(--moss); border-bottom-color: var(--moss); }
-.root :global(.artifactToolbar) { display: flex; align-items: center; justify-content: space-between; padding: .55rem .7rem; border: 1px solid var(--line); border-bottom: 0; font-size: .84rem; font-weight: 600; }
-.root :global(.artifactToolbar) button { border: 1px solid var(--line); border-radius: .35rem; background: white; color: var(--ink); padding: .25rem .65rem; font-size: .8rem; }
-.root :global(.artifacts) pre { margin: 0; padding: 1rem; max-height: 20rem; min-height: 10rem; overflow: auto; border: 1px solid var(--line); background: #edf2ee; color: #192b2d; font: 400 .77rem/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.root :global(.artifactToolbar) { display: flex; align-items: center; justify-content: space-between; padding: .55rem .7rem; border: 1px solid var(--line); border-bottom: 0; border-radius: .75rem .75rem 0 0; background: var(--surface); font-size: .84rem; font-weight: 600; }
+.root :global(.artifactToolbar) button { border: 1px solid var(--line); border-radius: .35rem; background: var(--white); color: var(--ink); padding: .25rem .65rem; font-size: .8rem; }
+.root :global(.artifacts) pre { margin: 0; padding: 1rem; max-height: 20rem; min-height: 10rem; overflow: auto; border: 1px solid var(--line); border-radius: 0 0 .75rem .75rem; background: var(--paper); color: var(--ink); font: 400 .77rem/1.55 var(--font-mono); }
 .root :global(.artifactNote) { font-size: .83rem; color: var(--slate); margin: .75rem 0 0; }
-.root :global(.staleBadge) { border: 1px solid #b57536; color: #754611; border-radius: 10rem; padding: .2rem .5rem; font-size: .75rem; font-weight: 600; }
+.root :global(.staleBadge) { border: 1px solid var(--warning); color: var(--warning); border-radius: 10rem; padding: .2rem .5rem; font-size: .75rem; font-weight: 600; }
 .status { color: var(--slate); font-size: .84rem; min-height: 1.5rem; padding-top: .7rem; }
 .status p { margin: 0; }
-.recovery { max-width: 42rem; margin: 2rem auto; padding: 1.5rem; border: 2px solid #b57536; border-radius: .6rem; background: #fffaf0; }
+.recovery { max-width: 42rem; margin: 2rem auto; padding: 1.5rem; border: 2px solid var(--warning); border-radius: 1rem; background: var(--warning-soft); }
 .recovery h2 { font-size: 1.25rem; }
 .recoveryActions { display: flex; flex-wrap: wrap; gap: .6rem; }
-.recoveryActions button:first-child { background: var(--moss); border-color: var(--moss); color: white; }
+.recoveryActions button:first-child { background: var(--moss); border-color: var(--moss); color: var(--primary-foreground); }
 .preservedRecovery { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; border-bottom: 1px solid var(--line); padding: .85rem 0; }
 .preservedRecovery p { margin: 0 auto 0 0; color: var(--slate); font-size: .86rem; }
-.preservedRecovery button { border: 1px solid var(--moss); border-radius: .4rem; color: var(--moss); background: white; padding: .35rem .65rem; font-size: .82rem; font-weight: 600; }
+.preservedRecovery button { border: 1px solid var(--moss); border-radius: .4rem; color: var(--moss); background: var(--white); padding: .35rem .65rem; font-size: .82rem; font-weight: 600; }
 .root :global(.mobileTabs) { display: none; }
 
 @media (max-width: 800px) {
