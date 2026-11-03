@@ -142,6 +142,8 @@ A package manager may modify its cache, `node_modules`, lockfile, or run depende
 
 Machine-readable output includes `command`, `status`, `projectRoot`, `presetHash`, `catalogRelease`, `compilerVersion`, `changes`, `dependencyPlan`, `warnings`, and stable error codes. Error records include code, message, affected path or JSON pointer, and suggested next action. Redact credentials and local secrets.
 
+The implemented local CLI also includes `notices`, an array of strings that is always present and empty for stable style families. When a plan installs an experimental liquid glass entry, it holds one line naming those components, for example `liquid-glass is experimental for card, tabs; see docs/components/liquid-glass.md for limitations`, and the human-readable plan and dry-run output prints it as a `Notice:` line. Planning a component that is unavailable for the preset's family, such as Input with a liquid glass preset, fails with `STYLE_UNAVAILABLE` at `/componentIds` and exit code 2 before any write; `--yes` does not bypass it. See [liquid glass](components/liquid-glass.md#cli-behaviour).
+
 | Exit code | Meaning                                            |
 | --------- | -------------------------------------------------- |
 | 0         | Success or valid dry-run with no blocking conflict |

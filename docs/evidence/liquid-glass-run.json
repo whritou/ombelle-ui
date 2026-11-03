@@ -1,0 +1,157 @@
+{
+  "summaryFormat": "ombelle-liquid-glass/v1",
+  "scope": "experimental-liquid-glass-focused-verification",
+  "branch": "feat/liquid-glass-style",
+  "base": {
+    "branch": "origin/main",
+    "commit": "406766b",
+    "note": "The branch was rebased onto origin/main 406766b (PRs #33, #34 and #36; #35 not merged). git fetch failed on this machine with an SSL certificate error; origin/main had been updated by another session."
+  },
+  "environment": {
+    "os": "Windows 11 Home 10.0.26300",
+    "platform": "win32",
+    "node": "v24.19.0",
+    "pnpm": "11.25.0 via corepack pnpm",
+    "pnpmOnPath": false,
+    "pnpmShim": "A local shim that forwards to corepack pnpm was prepended to PATH for Playwright webServer commands only.",
+    "playwright": "1.64.1",
+    "browser": "Chromium 156.0.4314.58 via msedge",
+    "browserChannelNote": "OMBELLE_BROWSER_CHANNEL=msedge because Playwright's bundled Chromium is not installed here; CI uses bundled Chromium, which no run here exercised.",
+    "bun": "not available (no native Bun executable)",
+    "yarn": "not available (Yarn 1.22.22 and 4.18.1 not cached by Corepack)"
+  },
+  "baselineBeforeWork": {
+    "commit": "b68f8f1",
+    "command": "pnpm test:unit",
+    "unit": { "files": 74, "passed": 730, "failed": 0 },
+    "source": "controller ledger"
+  },
+  "postRebaseRuns": {
+    "sourceCommit": "fc41f5111c07cdeb905b68069c6ac54e451a3566",
+    "workingTree": "HEAD plus this task's uncommitted documentation and landing-sentence edits, and LF-only rewrites of generated schema and catalog files with identical content",
+    "date": "2026-11-03",
+    "runs": [
+      {
+        "command": "corepack pnpm typecheck",
+        "status": "passed",
+        "exitCode": 0,
+        "wallSeconds": 3
+      },
+      {
+        "command": "corepack pnpm test:unit",
+        "status": "passed",
+        "exitCode": 0,
+        "wallSeconds": 56,
+        "vitestDurationSeconds": 54.16,
+        "counts": { "files": 81, "passed": 812, "failed": 0, "skipped": 0 },
+        "includes": "stable-family byte-identity guard: 132 artifact hashes for flat, minimalist and neo-brutalism compile output, plus scoped Button preset and recipe output, unchanged",
+        "resultsSha256": "cbbb7d02e29db2d088d65ca8fa4aee56546f3f4c24303a2de6ec26cda0d812af"
+      },
+      {
+        "command": "corepack pnpm test:integration",
+        "status": "failed",
+        "exitCode": 1,
+        "startedAt": "2026-11-03T12:03:09Z",
+        "completedAt": "2026-11-03T12:08:29Z",
+        "wallSeconds": 320,
+        "vitestDurationSeconds": 318.79,
+        "counts": { "files": 64, "filesFailed": 11, "total": 494, "passed": 441, "failed": 30, "skipped": 23 },
+        "liquidGlassCli": { "file": "tests/integration/liquid-glass-cli.test.ts", "passed": 9, "failed": 0 },
+        "failureClassification": {
+          "environmental": 30,
+          "product": 0,
+          "byCause": {
+            "noNativeBunExecutable": 24,
+            "yarnNotCachedByCorepack": 5,
+            "barePnpmNotOnPath": 1
+          },
+          "details": "Bun: bun-consumers (9), bun-cross-runner (2), bun-manager (7), bun-options (2), component-preset-cli (2), minimalist-cli (1), recipe-cli (1) report 'Cannot resolve a supported native bun executable'. Yarn: yarn-consumers (3), minimalist-cli (1) and bun-cross-runner (1) report that Yarn 1.22.22 or 4.18.1 is not cached by Corepack. upstream.test.ts fails because its pinned shadcn registry boundary runs bare 'pnpm add', which is not on PATH."
+        },
+        "resultsSha256": "2ea334626c1841a4753f6785e4ac47962780fbc138b98d6b1954d8168a77cc00"
+      },
+      {
+        "command": "corepack pnpm build:packages && corepack pnpm generate:preview",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "OMBELLE_BROWSER_CHANNEL=msedge corepack pnpm exec playwright test tests/e2e/liquid-glass.spec.ts",
+        "status": "passed",
+        "exitCode": 0,
+        "startedAt": "2026-11-03T12:09:08.254Z",
+        "durationMs": 65898,
+        "workers": 1,
+        "consumerMap": ".artifacts/consumers.json was {} (no prepared glass consumers), so only the 24 preview cases ran; the 16 consumer cases were not run",
+        "counts": { "expected": 24, "passed": 24, "failed": 0, "skipped": 0, "flaky": 0 },
+        "portsBefore": "3000 and 4173 free",
+        "portsAfter": "no listener on 3000 or 4173; Playwright stopped its own servers",
+        "resultsSha256": "533d6ec25d011ed7c86613e0ab7d8a44522cf3f49c5a84ea57c117f3083f80fc"
+      },
+      {
+        "command": "corepack pnpm exec vitest run apps/www/src",
+        "status": "passed",
+        "exitCode": 0,
+        "counts": { "files": 32, "passed": 268, "failed": 0 }
+      }
+    ]
+  },
+  "preRebaseRuns": [
+    {
+      "sourceCommit": "60a94f9dab9780a54bcb98d843b768db64d0cfad",
+      "command": "pnpm test:integration",
+      "status": "failed",
+      "durationSeconds": 448,
+      "counts": { "passed": 435, "failed": 31, "skipped": 23 },
+      "liquidGlassCli": { "passed": 9, "failed": 0, "managers": ["pnpm", "npm"] },
+      "failureClassification": "30 environmental (no native Bun, Yarn 1.22.22 not cached by Corepack, upstream.test.ts calls bare pnpm); 1 real expectation in preview routing, fixed in the next commit and passing in the post-rebase run",
+      "source": "controller ledger"
+    },
+    {
+      "sourceCommit": "9f70fa2e93faea2afe38bcf920371facecd165c2",
+      "rebasedAs": "1e282e9134cc8e3be18562dde9344858b5f4e25c",
+      "command": "OMBELLE_BROWSER_CHANNEL=msedge pnpm exec playwright test tests/e2e/liquid-glass.spec.ts",
+      "status": "passed",
+      "durationSeconds": 70.2,
+      "counts": { "expected": 24, "passed": 24, "failed": 0 },
+      "browser": "Chromium 156.0.4314.58 via msedge",
+      "source": "controller ledger"
+    },
+    {
+      "command": "consumer preparation and build for vite-liquid-glass and next-liquid-glass",
+      "status": "passed",
+      "timingsSeconds": {
+        "vite-liquid-glass": { "prepare": 20.0, "build": 2.7 },
+        "next-liquid-glass": { "prepare": 27.6, "build": 11.3 }
+      },
+      "audit": "exit 0",
+      "installedComponents": ["button", "badge", "card", "dialog", "tabs", "tooltip"],
+      "artifactParity": "18 artifacts in each consumer byte-equal to compile output",
+      "source": "controller ledger (Task 10)"
+    }
+  ],
+  "measurements": {
+    "builtInGlassOpacity": 0.87,
+    "limitingPair": "light muted / mutedForeground: 4.59:1 at 0.87, 4.48:1 at 0.86",
+    "worstMeasuredBoundedContrast": {
+      "inactiveTabsTriggerLightOverBlack": 4.60,
+      "inactiveTabsTriggerDarkOverWhite": 4.73
+    },
+    "pixelSampling": "sampled pixels matched computed composites within 1 per channel",
+    "source": "pre-rebase browser run at 9f70fa2"
+  },
+  "methodNotes": [
+    "Reduced transparency was emulated through CDP Emulation.setEmulatedMedia, because Playwright has no reducedTransparency option, and confirmed with matchMedia.",
+    "Missing backdrop-filter support was simulated by stripping @supports blocks from four Vite-served CSS modules: preview.css, ui/card.css, ui/tabs.css and ui/tooltip.css.",
+    "The axe color-contrast rule is disabled only under forced-colors emulation, where axe reads author colours (the flat family fails the same way); measured forced-colour contrast on the solid section replaces it.",
+    "The ghost Button was checked on an injected clone, because the scenario has no ghost Button."
+  ],
+  "notRun": [
+    { "item": "16 glass consumer browser cases (pnpm Vite and Next.js)", "reason": "Not run before the rebase because ports 3000 and 4173 were held by another session; not run after it because no glass consumers were prepared in .artifacts/consumers.json" },
+    { "item": "full 36-consumer prepare and build matrix", "reason": "no Bun or Yarn toolchain on this machine" },
+    { "item": "pnpm check:foundation", "reason": "toolchain for the full gate absent" },
+    { "item": "Bun and Yarn integration tests", "reason": "no native Bun executable; Yarn versions not cached by Corepack" },
+    { "item": "bundled Chromium, Firefox, Safari, previous browser majors", "reason": "only the msedge channel is installed" },
+    { "item": "mid-range mobile device scrolling", "reason": "no device measurement in this slice" },
+    { "item": "human visual, keyboard, NVDA and VoiceOver review", "reason": "not performed" }
+  ]
+}
