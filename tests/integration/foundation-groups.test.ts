@@ -166,7 +166,7 @@ test('accepts complete portable structural evidence without any consumer root de
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
   expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 362 } } })
-  expect(Object.keys(result.consumerMatrix)).toHaveLength(34)
+  expect(Object.keys(result.consumerMatrix)).toHaveLength(36)
   expect(result.recipeEvidence.measurements).toHaveLength(90)
   expect(result.componentPresetEvidence.measurements).toHaveLength(90)
 }, 420000) // Fixture discovery plus two independently bounded runtime inventories.

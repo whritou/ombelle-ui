@@ -37,6 +37,17 @@ export async function writeScenarioFixture(
     path.join(src, 'index.css'),
     await fs.readFile('fixtures/shared/base.css', 'utf8'),
   )
+  if (family === 'liquid-glass') {
+    // The experimental scenario is self-contained: no optional or state fixtures.
+    await fs.writeFile(
+      path.join(src, 'scenario.tsx'),
+      (await fs.readFile('fixtures/shared/glass-scenario.tsx', 'utf8')).replaceAll(
+        'STYLE_FAMILY',
+        family,
+      ),
+    )
+    return
+  }
   let scenario = (
     await fs.readFile('fixtures/shared/scenario.tsx', 'utf8')
   ).replaceAll('STYLE_FAMILY', family)

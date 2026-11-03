@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import fs from 'node:fs'
 import { inflateSync } from 'node:zlib'
 import { contrastRatio } from '../helpers/contrast.js'
 
@@ -18,8 +19,22 @@ type Rgb = [number, number, number]
 const section = (page: Page, id: Backdrop) =>
   page.locator(`[data-backdrop="${id}"]`)
 
-async function open(page: Page, mode: Mode) {
-  await page.goto(previewUrl + '?mode=' + mode)
+// Standalone glass consumers (pnpm Vite and Next.js) run the same axe and bounded-contrast cases
+// when the prepared consumer map lists them; without a map only the preview cases run.
+const consumerMap: Record<string, { port: number }> = (() => {
+  try {
+    return JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
+  } catch {
+    return {}
+  }
+})()
+const glassConsumers = (['vite', 'next'] as const).flatMap((framework) => {
+  const row = consumerMap[framework + '-liquid-glass']
+  return row ? [{ framework, url: 'http://127.0.0.1:' + row.port + '/' }] : []
+})
+
+async function open(page: Page, mode: Mode, base = previewUrl) {
+  await page.goto(base + '?mode=' + mode)
   await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
   await expect(page.locator('html')).toHaveClass(mode === 'dark' ? /dark/ : /^(?!.*dark)/)
   await page.evaluate(() => document.fonts.ready)
@@ -309,28 +324,26 @@ async function attach(name: string, body: unknown, page: Page) {
   })
 }
 
-for (const mode of modes) {
-  for (const id of backdrops)
-    test(`liquid-glass ${mode}: axe over ${id}`, async ({ page }) => {
-      await open(page, mode)
+async function axeOver(page: Page, mode: Mode, id: Backdrop, base: string, target = 'preview') {
+      await open(page, mode, base)
       const axe = await new AxeBuilder({ page })
         .include(`[data-backdrop="${id}"]`)
         .withTags(wcag)
         .analyze()
       // axe cannot resolve contrast over gradient or pattern backdrops and reports those
       // nodes as incomplete; the bounded contrast case measures them instead.
-      await attach('axe', { mode, id, violations: axe.violations, incomplete: axe.incomplete.map((r) => ({ id: r.id, nodes: r.nodes.length })) }, page)
+      await attach('axe', { target, mode, id, violations: axe.violations, incomplete: axe.incomplete.map((r) => ({ id: r.id, nodes: r.nodes.length })) }, page)
       expect(axe.violations).toEqual([])
-    })
+}
 
-  test(`liquid-glass ${mode}: bounded contrast`, async ({ page }) => {
-    await open(page, mode)
+async function boundedContrast(page: Page, mode: Mode, base: string, target = 'preview') {
+    await open(page, mode, base)
     await addGhostProbe(page, 'solid')
     const samples = [
       ...(await sampleSlots(page, 'solid', '#000')),
       ...(await sampleSlots(page, 'solid', '#fff')),
     ]
-    await attach('bounded-contrast', { mode, samples }, page)
+    await attach('bounded-contrast', { target, mode, samples }, page)
     expect(samples).toHaveLength(2 * 9)
     for (const s of samples) {
       expect.soft(s.ratio, `${s.slot} over ${s.backdrop}: ${s.textColor} on pixel ${s.surfacePixel}`).toBeGreaterThanOrEqual(4.5)
@@ -342,7 +355,18 @@ for (const mode of modes) {
             .soft(Math.abs(s.surfacePixel[i] - s.expectedPixel[i]), `${s.slot} over ${s.backdrop}: pixel ${s.surfacePixel} vs composite ${s.expectedPixel}`)
             .toBeLessThanOrEqual(3)
     }
-  })
+}
+
+for (const mode of modes) {
+  for (const id of backdrops)
+    test(`liquid-glass ${mode}: axe over ${id}`, ({ page }) => axeOver(page, mode, id, previewUrl))
+
+  test(`liquid-glass ${mode}: bounded contrast`, ({ page }) => boundedContrast(page, mode, previewUrl))
+  for (const { framework, url } of glassConsumers) {
+    for (const id of backdrops)
+      test(`liquid-glass ${framework} consumer ${mode}: axe over ${id}`, ({ page }) => axeOver(page, mode, id, url, framework + ' consumer'))
+    test(`liquid-glass ${framework} consumer ${mode}: bounded contrast`, ({ page }) => boundedContrast(page, mode, url, framework + ' consumer'))
+  }
 
   test(`liquid-glass ${mode}: nested surfaces drop filter`, async ({ page }) => {
     await open(page, mode)
