@@ -67,11 +67,14 @@ export function GlassPanel({ report }: { report: GlassContrastReport | null }) {
           Liquid glass is experimental. Button, Badge, Card, Dialog, Tabs and
           Tooltip support it; the other components are unavailable.
         </p>
-        <ul>
-          {glassLimitations.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+        <details>
+          <summary>{glassLimitations.length} known limitations</summary>
+          <ul>
+            {glassLimitations.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </details>
       </section>
       <section aria-labelledby="glass-contrast-heading">
         <h2 id="glass-contrast-heading">Liquid glass contrast bound</h2>

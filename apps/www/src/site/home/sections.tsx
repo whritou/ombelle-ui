@@ -59,9 +59,6 @@ export function MatrixSection() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">The alpha catalogue</p>
           <h2 id="matrix" className="mt-3 text-4xl font-black md:text-5xl">12 components.<br />An honest matrix.</h2>
         </div>
-        <p className="max-w-md text-muted-foreground md:justify-self-end">
-          We don&apos;t claim every combination works. Each component × style pair carries a published status — and stable is earned through testing, not assumed. Liquid glass is experimental, and manual screen-reader review is still pending for every family.
-        </p>
       </div>
       <div className="mt-12 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="relative min-w-0 overflow-x-auto rounded-2xl border border-border bg-card">

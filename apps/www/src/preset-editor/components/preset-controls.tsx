@@ -7,6 +7,12 @@ import {
   presetFieldValue,
 } from '../model'
 import { browserColor } from '../contrast'
+import {
+  accentSchemes,
+  baseSchemes,
+  schemeMatches,
+  type ColorScheme,
+} from '../schemes'
 export const fieldId = (path: string) => 'preset' + path.replaceAll('/', '-')
 /** Popover that holds a colour token's light and dark fields. */
 export const colorPanelId = (key: string) => 'preset-color-panel-' + key
@@ -29,6 +35,9 @@ export function revealPresetField(path: string) {
   const color = /^\/modes\/(?:light|dark)\/(\w+)$/.exec(path)
   if (color) {
     const panel = document.getElementById(colorPanelId(color[1]!))
+    // The token list lives in a collapsed disclosure; open it first.
+    const disclosure = panel?.closest('details')
+    if (disclosure && !disclosure.open) disclosure.open = true
     if (panel && !panel.matches(':popover-open')) panel.showPopover()
   }
   document.getElementById(fieldId(path))?.focus()
@@ -157,7 +166,20 @@ export function DesignControls({ draft, errorPath, onEdit, onReset }: ControlPro
                   ))}
                 </select>
               ) : (
-                <input {...props} inputMode="decimal" maxLength={80} onChange={(e) => onEdit(path, e.target.value)} />
+                <>
+                  <input
+                    type="range"
+                    className="preset-slider"
+                    aria-label={`${control.label} slider`}
+                    min={control.min}
+                    max={control.max}
+                    step={'step' in control ? control.step : key === 'radiusRem' ? 0.05 : 1}
+                    // A partially typed or invalid value leaves the thumb at the minimum.
+                    value={Number.isFinite(Number(value)) && value !== '' ? Number(value) : control.min}
+                    onChange={(e) => onEdit(path, e.target.value)}
+                  />
+                  <input {...props} className="preset-number" inputMode="decimal" maxLength={80} onChange={(e) => onEdit(path, e.target.value)} />
+                </>
               )}
               <ResetButton draft={draft} path={path} label={`Reset ${control.label.toLowerCase()}`} onReset={onReset} />
             </div>
@@ -168,6 +190,81 @@ export function DesignControls({ draft, errorPath, onEdit, onReset }: ControlPro
                 {'step' in control && control.step < 1 ? `, in steps of ${control.step}` : ''}
               </small>
             )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+function touchesScheme(draft: PresetEditorDraft, schemes: readonly ColorScheme[]) {
+  return schemes.some((scheme) =>
+    (['light', 'dark'] as const).some((mode) =>
+      Object.keys(scheme[mode]).some((key) =>
+        Object.hasOwn(draft.edits, `/modes/${mode}/${key}`),
+      ),
+    ),
+  )
+}
+/** One-click colour schemes; ColorControls keeps every token editable. */
+export function ThemeControls({
+  draft,
+  onApply,
+  onResetGroup,
+}: {
+  draft: PresetEditorDraft
+  onApply: (scheme: ColorScheme, group: 'accent' | 'base') => void
+  onResetGroup: (group: 'accent' | 'base') => void
+}) {
+  const groups = [
+    { id: 'accent', label: 'Accent', schemes: accentSchemes },
+    { id: 'base', label: 'Base', schemes: baseSchemes },
+  ] as const
+  return (
+    <div className="preset-schemes">
+      {groups.map((group) => {
+        const active = group.schemes.find((scheme) => schemeMatches(draft, scheme))
+        const untouched = !touchesScheme(draft, group.schemes)
+        const current = active?.label ?? (untouched ? 'Style default' : 'Custom')
+        return (
+          <div
+            key={group.id}
+            role="group"
+            aria-label={`${group.label} color`}
+            className="preset-scheme-group"
+          >
+            <span className="preset-scheme-label" aria-hidden="true">
+              {group.label}
+              <span className="preset-scheme-current">{current}</span>
+            </span>
+            <div className="preset-scheme-options">
+              <button
+                type="button"
+                className="preset-scheme"
+                aria-pressed={!active && untouched}
+                aria-label={`Style default ${group.label.toLowerCase()}`}
+                title="Style default"
+                onClick={() => onResetGroup(group.id)}
+              >
+                <span className="preset-scheme-dot preset-scheme-default" aria-hidden="true" />
+              </button>
+              {group.schemes.map((scheme) => (
+                <button
+                  key={scheme.id}
+                  type="button"
+                  className="preset-scheme"
+                  aria-pressed={active?.id === scheme.id}
+                  aria-label={`${scheme.label} ${group.label.toLowerCase()}`}
+                  title={scheme.label}
+                  onClick={() => onApply(scheme, group.id)}
+                >
+                  <span
+                    className="preset-scheme-dot"
+                    aria-hidden="true"
+                    style={{ background: scheme.swatch }}
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         )
       })}
