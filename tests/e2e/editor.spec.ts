@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 import { compileRecipe } from '@ombelle/compiler'
 import { createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
+import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import exampleRecipe from '../../examples/recipe.example.json' with { type: 'json' }
 import fs from 'node:fs'
 
@@ -411,4 +413,113 @@ test('sandboxed preview receives validated recipe updates only over its port', a
       css: staleResult.artifacts.find((artifact) => artifact.kind === 'style')!.content,
       mode: 'light', viewport: 'wide', forcedState: 'none', requestId: 2000 } })
   await expect(button).toHaveText('Create project')
+})
+
+test('operates every Button editor control, artifact tab, download and publish dialog by keyboard', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending', { timeout: 30000 })
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
+  const stored = async () => JSON.parse((await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft')))!).recipe
+
+  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow'], ['Demonstrate state', 'focus']] as const) {
+    await tabTo(page, page.getByLabel(label))
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByLabel(label)).toHaveValue(value)
+  }
+
+  await tabTo(page, page.getByRole('tab', { name: 'Usage' }))
+  for (const name of ['Component', 'CSS', 'Dependencies', 'Recipe JSON', 'Details', 'CLI', 'Usage']) {
+    await page.keyboard.press('ArrowRight')
+    await expect(page.getByRole('tab', { name, exact: true })).toBeFocused()
+    await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true')
+    await expectVisibleFocus(page)
+  }
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('tab', { name: 'CLI' })).toBeFocused()
+  await expect(page.getByRole('tabpanel')).toContainText('add --recipe ./')
+  await tabTo(page, page.getByRole('button', { name: 'Copy CLI' }))
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('status')).toContainText('CLI copied.')
+  await tabTo(page, page.getByRole('tabpanel'))
+
+  const family = page.getByLabel('Style family')
+  await tabTo(page, family)
+  await page.keyboard.press('ArrowUp')
+  await expect(family).toHaveValue('minimalist')
+  await tabTo(page, page.getByLabel('Button text'))
+  await page.keyboard.press('ControlOrMeta+A')
+  await page.keyboard.type('Keyboard ship')
+  for (const [label, key, value] of [['Variant', 'ArrowDown', 'secondary'], ['Size', 'ArrowUp', 'default'], ['Button type', 'ArrowDown', 'submit']] as const) {
+    await tabTo(page, page.getByLabel(label, { exact: true }))
+    await page.keyboard.press(key)
+    await expect(page.getByLabel(label, { exact: true })).toHaveValue(value)
+  }
+  for (const label of ['Disabled', 'Loading']) {
+    await tabTo(page, page.getByLabel(label))
+    await page.keyboard.press('Space')
+    await expect(page.getByLabel(label)).toBeChecked()
+  }
+  for (const [id, label] of [['radiusRem', 'Corner radius'], ['borderWidthPx', 'Border width'], ['minHeightPx', 'Minimum height'],
+    ['shadowOffsetXPx', 'Shadow X offset'], ['shadowOffsetYPx', 'Shadow Y offset']] as const) {
+    await tabTo(page, page.locator(`#${id}-range`))
+    await page.keyboard.press('ArrowRight')
+    await tabTo(page, page.getByLabel(`${label} value`))
+    await page.keyboard.press('ArrowUp')
+  }
+  const expected = {
+    presetRef: { id: 'builtin-minimalist' }, content: 'Keyboard ship',
+    props: { variant: 'secondary', size: 'default', type: 'submit', disabled: true, loading: true },
+    overrides: { radiusRem: 0.2, borderWidthPx: 2.2, minHeightPx: 46, shadowOffsetXPx: 8, shadowOffsetYPx: 8 },
+  }
+  await expect.poll(stored).toMatchObject(expected)
+  await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]'))
+    .toHaveText('Keyboard ship', { timeout: 20000 })
+
+  const download = page.getByRole('button', { name: 'Download recipe JSON' })
+  await expect(download).toBeEnabled()
+  await tabTo(page, download, { backward: true })
+  const pending = page.waitForEvent('download')
+  await page.keyboard.press('Enter')
+  const file = await (await pending).path()
+  const { readFile } = await import('node:fs/promises')
+  expect(JSON.parse(await readFile(file, 'utf8'))).toMatchObject(expected)
+
+  const publish = page.getByRole('button', { name: 'Publish recipe…' })
+  await tabTo(page, publish)
+  await page.keyboard.press('Enter')
+  const consent = page.getByLabel('I understand this recipe will be public and retained as described above.')
+  await expect(consent).toBeFocused()
+  await expectVisibleFocus(page)
+  await page.keyboard.press('Space')
+  await expect(consent).toBeChecked()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Publish public snapshot' })).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Publish public snapshot' })).toBeEnabled()
+  await expectVisibleFocus(page)
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Cancel publication' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(consent).toHaveCount(0)
+  await expect(publish).toBeFocused()
+  await expectVisibleFocus(page)
+
+  await page.reload()
+  const text = page.getByLabel('Button text')
+  await expect(text).toHaveValue('Keyboard ship')
+  await tabTo(page, text)
+  await page.keyboard.press('End')
+  await page.keyboard.type(' now')
+  const undo = page.getByRole('button', { name: 'Undo', exact: true })
+  const redo = page.getByRole('button', { name: 'Redo', exact: true })
+  await tabTo(page, undo, { backward: true })
+  await page.keyboard.press('Enter')
+  await expect(text).toHaveValue('Keyboard ship')
+  await expect(redo).toBeFocused()
+  await expectVisibleFocus(page)
+  await page.keyboard.press('Enter')
+  await expect(text).toHaveValue('Keyboard ship now')
+  await expect(undo).toBeFocused()
+  await expectVisibleFocus(page)
 })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
 import { changeDraftFamily, type EditorDraft, type EditorView } from '../model'
@@ -45,6 +45,14 @@ export function ButtonEditor() {
   const [status, setStatus] = useState('Loading local draft…')
   const draft = history.present
   const compilation = useCompiler(draft.recipe)
+  const undoButton = useRef<HTMLButtonElement>(null)
+  const redoButton = useRef<HTMLButtonElement>(null)
+  const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => {
+    focusAfterHistory.current?.focus()
+    focusAfterHistory.current = null
+  }, [history])
 
   useEffect(() => {
     try {
@@ -140,8 +148,15 @@ export function ButtonEditor() {
       <div><p className={styles.product}>Ombelle / Component editor</p><h1>Button workbench</h1>
         <p>Shape one Button, inspect its output, and take the recipe into your project.</p></div>
       <div className={styles.headerActions}>
-        <button type="button" onClick={() => setHistory(undo)} disabled={!history.past.length || recovery !== null}>Undo</button>
-        <button type="button" onClick={() => setHistory(redo)} disabled={!history.future.length || recovery !== null}>Redo</button>
+        <button ref={undoButton} type="button" disabled={!history.past.length || recovery !== null} onClick={() => {
+          // The last undo disables this button; keep keyboard focus on Redo instead of losing it to the page.
+          if (history.past.length === 1) focusAfterHistory.current = redoButton.current
+          setHistory(undo)
+        }}>Undo</button>
+        <button ref={redoButton} type="button" disabled={!history.future.length || recovery !== null} onClick={() => {
+          if (history.future.length === 1) focusAfterHistory.current = undoButton.current
+          setHistory(redo)
+        }}>Redo</button>
         <button type="button" className={styles.download} onClick={saveDownload} disabled={!recipeJson || recovery !== null}>Download recipe JSON</button>
       </div>
     </header>
