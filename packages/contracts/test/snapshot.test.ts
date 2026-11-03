@@ -46,6 +46,10 @@ describe('snapshot contracts', () => {
     expect(result).not.toBe(envelope)
     expect(result.preset).not.toBe(preset)
   })
+  it('accepts an experimental liquid-glass envelope', () => {
+    const glass = { ...envelope, preset: { ...preset, styleFamily: 'liquid-glass' } }
+    expect(validatePresetSnapshot(glass).preset.styleFamily).toBe('liquid-glass')
+  })
   it.each([
     { ...envelope, extra: true },
     { ...envelope, preset: { ...preset, extra: true } },
@@ -62,7 +66,7 @@ describe('snapshot contracts', () => {
     { ...envelope, preset: { ...preset, name: 'x'.repeat(81) } },
     { ...envelope, preset: { ...preset, catalogRelease: '9.0.0' } },
     { ...envelope, preset: { ...preset, compilerVersion: '9.0.0' } },
-    { ...envelope, preset: { ...preset, styleFamily: 'liquid-glass' } },
+    { ...envelope, preset: { ...preset, styleFamily: 'aurora' } },
     { ...envelope, catalogRelease: '9.0.0' },
     { ...envelope, compilerVersion: '9.0.0' },
     { ...envelope, validationStatus: 'approved' },

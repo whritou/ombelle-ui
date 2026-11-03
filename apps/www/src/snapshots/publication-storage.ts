@@ -1,4 +1,4 @@
-import { isStableStyleFamily, validatePreset } from '@ombelle/contracts'
+import { isStyleFamily, validatePreset } from '@ombelle/contracts'
 import {
   publicationMaxAge,
   publicationMaxBytes,
@@ -37,7 +37,7 @@ function validateAttempt(input: unknown): PublishAttempt {
     preset.schemaVersion !== '1.0' ||
     preset.catalogRelease !== '0.1.0' ||
     preset.compilerVersion !== '0.1.0' ||
-    !isStableStyleFamily(preset.styleFamily) ||
+    !isStyleFamily(preset.styleFamily) ||
     bytes(JSON.stringify(preset)) > 65_536
   )
     throw new Error('Unsupported publication attempt.')
