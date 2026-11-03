@@ -1,7 +1,7 @@
 import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type RecipeSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
-export const publishedInstaller = { packageName: publicCliPackageName, version: '0.2.1' } as const
+export const publishedInstaller = { packageName: publicCliPackageName, version: '0.3.0' } as const
 
 export function installerRunner(release?: { packageName: string; version: string }): string {
   if (!release) return 'pnpm exec node packages/cli/dist/main.js'
