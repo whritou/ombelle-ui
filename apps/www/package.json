@@ -14,14 +14,20 @@
     "@ombelle/catalog": "workspace:*",
     "@ombelle/compiler": "workspace:*",
     "@ombelle/contracts": "workspace:*",
+    "@radix-ui/react-dialog": "1.3.1",
+    "@radix-ui/react-switch": "1.4.1",
+    "@radix-ui/react-tabs": "1.2.1",
     "@vercel/functions": "3.10.5",
+    "lucide-react": "1.55.0",
     "next": "16.4.3",
     "pg": "8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
     "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0"
+    "@types/react-dom": "19.3.0",
+    "tailwindcss": "4.3.3"
   }
 }

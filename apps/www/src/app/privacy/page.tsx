@@ -1,15 +1,14 @@
+import { DocPage } from '../../site/doc-page'
+import { repository } from '../../site/links'
+
 export const metadata = {
   title: 'Privacy and data retention · Ombelle',
   description: 'What the Ombelle publication service stores and for how long.',
 }
 
-const repository = 'https://github.com/whritou/ombelle-ui'
-
 export default function PrivacyPage() {
   return (
-    <main>
-      <h1>Privacy and data retention</h1>
-      <p>Last updated: 2 November 2026.</p>
+    <DocPage eyebrow="Legal" title="Privacy and data retention" lead="Last updated: 3 November 2026.">
 
       <h2>Operator</h2>
       <p>
@@ -48,7 +47,8 @@ export default function PrivacyPage() {
       <p>
         The editors keep drafts, history and pending publication state in your
         browser&apos;s local storage. They are not sent anywhere unless you
-        publish. Pending publication state expires after 24 hours. The site sets
+        publish. Pending publication state expires after 24 hours. The theme
+        toggle stores your light or dark choice there too. The site sets
         no cookies and uses no analytics or advertising.
       </p>
 
@@ -87,6 +87,6 @@ export default function PrivacyPage() {
         channel, without personal details in the issue. You may also complain
         to your data protection authority, in France the CNIL.
       </p>
-    </main>
+    </DocPage>
   )
 }

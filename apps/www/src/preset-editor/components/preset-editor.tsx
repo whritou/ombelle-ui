@@ -31,7 +31,12 @@ import {
   type TokenContrast,
 } from '../contrast'
 import { PresetPreviewFrame } from './preset-preview-frame'
-import { PresetControls, fieldId } from './preset-controls'
+import {
+  ColorControls,
+  DesignControls,
+  fieldId,
+  revealPresetField,
+} from './preset-controls'
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import styles from './preset-editor.module.css'
@@ -124,66 +129,97 @@ export default function PresetEditor() {
   const glassReport = glass ? presetGlassReport(draft) : null
   // A glass draft below the contrast bound cannot be exported or published.
   const glassBlocked = glassReport !== null && !glassReport.passes
+  const warnings = contrast.filter((pair) => pair.status === 'warning').length
+  const identity = (['name', 'id', 'revision'] as const).map((key) => (
+    <div className={styles.field} key={key}>
+      <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
+      <input
+        id={fieldId('/' + key)}
+        value={draft.identity[key]}
+        maxLength={key === 'revision' ? 16 : 80}
+        inputMode={key === 'revision' ? 'numeric' : undefined}
+        aria-invalid={diagnostic?.path === '/' + key || undefined}
+        onChange={(e) =>
+          commit(setPresetIdentity(draft, key, e.target.value), key)
+        }
+      />
+    </div>
+  ))
+  const controlProps = {
+    draft,
+    errorPath: diagnostic?.path,
+    onEdit: (path: Parameters<typeof setPresetEdit>[1], value: string) =>
+      commit(setPresetEdit(draft, path, value), path, true),
+    onReset: (path: Parameters<typeof resetPresetField>[1]) =>
+      commit(resetPresetField(draft, path), 'reset:' + path),
+  }
   return (
     <main className={styles.editor} aria-label="Global preset editor">
-      <header>
-        <a href="/">Ombelle</a>
-        <p>Project preset</p>
-        <h1>Global preset editor</h1>
-        <p>Make a theme that follows your next component into your project.</p>
-        <p>Draft — automated token contrast only</p>
-      </header>
-      <div className={styles.toolbar}>
-        <label htmlFor="preset-family">Style family</label>
-        <select
-          id="preset-family"
-          value={draft.family}
-          onChange={(e) => family(e.target.value as StyleFamily)}
-        >
-          {styleFamilies.map((family) => (
-            <option key={family} value={family}>
-              {familyLabel(family)}
-            </option>
-          ))}
-        </select>
-        <button
-          ref={undoButton}
-          type="button"
-          disabled={!history.past.length}
-          onClick={() => {
-            // The last undo disables this button; move focus to Redo instead of the page.
-            if (history.past.length === 1)
-              focusAfterHistory.current = redoButton.current
-            setHistory(undoPreset)
-          }}
-        >
-          Undo
-        </button>
-        <button
-          ref={redoButton}
-          type="button"
-          disabled={!history.future.length}
-          onClick={() => {
-            if (history.future.length === 1)
-              focusAfterHistory.current = undoButton.current
-            setHistory(redoPreset)
-          }}
-        >
-          Redo
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            confirm(
-              { draft: resetPresetTokens(draft), changes: [] },
-              'Reset all tokens?',
-            )
-          }
-        >
-          Reset all tokens
-        </button>
+      <div className={styles.top}>
+        <header>
+          <p className={styles.crumb}>
+            <a href="/">Ombelle</a> <span aria-hidden="true">/</span> Project
+            preset
+          </p>
+          <h1>Global preset editor</h1>
+          <p>Make a theme that follows your next component into your project.</p>
+          <p className={styles.badge}>Draft — automated token contrast only</p>
+        </header>
+        <div className={`${styles.toolbar} ${styles.actions}`}>
+          <label htmlFor="preset-family">Style family</label>
+          <select
+            id="preset-family"
+            value={draft.family}
+            onChange={(e) => family(e.target.value as StyleFamily)}
+          >
+            {styleFamilies.map((family) => (
+              <option key={family} value={family}>
+                {familyLabel(family)}
+              </option>
+            ))}
+          </select>
+          <button
+            ref={undoButton}
+            type="button"
+            disabled={!history.past.length}
+            onClick={() => {
+              // The last undo disables this button; move focus to Redo instead of the page.
+              if (history.past.length === 1)
+                focusAfterHistory.current = redoButton.current
+              setHistory(undoPreset)
+            }}
+          >
+            Undo
+          </button>
+          <button
+            ref={redoButton}
+            type="button"
+            disabled={!history.future.length}
+            onClick={() => {
+              if (history.future.length === 1)
+                focusAfterHistory.current = undoButton.current
+              setHistory(redoPreset)
+            }}
+          >
+            Redo
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              confirm(
+                { draft: resetPresetTokens(draft), changes: [] },
+                'Reset all tokens?',
+              )
+            }
+          >
+            Reset all tokens
+          </button>
+          <a href="#preset-export-heading" className={styles.getCode}>
+            Get code
+          </a>
+        </div>
       </div>
-      <p role="status" aria-live="polite">
+      <p role="status" aria-live="polite" className={styles.notice}>
         {notice}
       </p>
       {warning && <p role="alert">{warning}</p>}
@@ -240,7 +276,13 @@ export default function PresetEditor() {
         <div role="alert" id="preset-error">
           <p>{diagnostic.message}</p>
           {diagnostic.path && (
-            <a href={'#' + fieldId(diagnostic.path)}>
+            <a
+              href={'#' + fieldId(diagnostic.path)}
+              onClick={(event) => {
+                event.preventDefault()
+                revealPresetField(diagnostic.path!)
+              }}
+            >
               Review {diagnostic.path}
             </a>
           )}
@@ -251,94 +293,111 @@ export default function PresetEditor() {
           )}
         </div>
       )}
-      {glass && <GlassPanel report={glassReport} />}
+      {glass && (
+        <div className={styles.glass}>
+          <GlassPanel report={glassReport} />
+        </div>
+      )}
       <div className={styles.workbench}>
-        <section aria-labelledby="preset-controls-heading">
+        <section aria-labelledby="preset-controls-heading" className={styles.panel}>
           <h2 id="preset-controls-heading">Customize</h2>
-          <fieldset>
-            <legend>Preset identity</legend>
-            {(['id', 'name', 'revision'] as const).map((key) => (
-              <div className="preset-control" key={key}>
-                <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
-                <input
-                  id={fieldId('/' + key)}
-                  value={draft.identity[key]}
-                  maxLength={key === 'revision' ? 16 : 80}
-                  inputMode={key === 'revision' ? 'numeric' : undefined}
-                  aria-invalid={diagnostic?.path === '/' + key || undefined}
-                  onChange={(e) =>
-                    commit(setPresetIdentity(draft, key, e.target.value), key)
-                  }
-                />
-              </div>
-            ))}
-          </fieldset>
-          <PresetControls
-            draft={draft}
-            errorPath={diagnostic?.path}
-            onEdit={(path, value) =>
-              commit(setPresetEdit(draft, path, value), path, true)
-            }
-            onReset={(path) =>
-              commit(resetPresetField(draft, path), 'reset:' + path)
-            }
-          />
-        </section>
-        <div className={styles.preview}>
-          <div className={styles.toolbar}>
-            <label htmlFor="preset-mode">Preview mode</label>
-            <select
-              id="preset-mode"
-              value={mode}
-              onChange={(e) => setMode(e.target.value as typeof mode)}
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-            <label htmlFor="preset-width">Preview width</label>
-            <select
-              id="preset-width"
-              value={viewport}
-              onChange={(e) => setViewport(e.target.value as typeof viewport)}
-            >
-              <option value="wide">Wide</option>
-              <option value="narrow">320 pixels</option>
-            </select>
+          <div className={styles.group}>
+            <h3>Identity</h3>
+            {identity}
           </div>
-          <p data-testid="preset-preview-status">Preview {previewStatus}</p>
-          <PresetPreviewFrame
-            result={compiled.result}
-            view={{ mode, viewport }}
-            stale={compiled.stale}
-            onStatus={setPreviewStatus}
-          />
+          <div className={styles.group}>
+            <h3>Colors</h3>
+            <p className={styles.groupHint}>Light and dark values. Select a token to edit it.</p>
+            <ColorControls {...controlProps} />
+          </div>
+          <div className={styles.group}>
+            <h3>Design</h3>
+            <DesignControls {...controlProps} />
+          </div>
+        </section>
+        <div className={styles.canvas}>
+          <div className={styles.preview}>
+            <div className={`${styles.toolbar} ${styles.previewBar}`}>
+              <label htmlFor="preset-mode">Preview mode</label>
+              <select
+                id="preset-mode"
+                value={mode}
+                onChange={(e) => setMode(e.target.value as typeof mode)}
+              >
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+              <label htmlFor="preset-width">Preview width</label>
+              <select
+                id="preset-width"
+                value={viewport}
+                onChange={(e) => setViewport(e.target.value as typeof viewport)}
+              >
+                <option value="wide">Wide</option>
+                <option value="narrow">320 pixels</option>
+              </select>
+              <button
+                type="button"
+                popoverTarget="preset-contrast-panel"
+                className={styles.contrastChip}
+                data-warnings={warnings || undefined}
+              >
+                Contrast:{' '}
+                {contrast.length
+                  ? warnings
+                    ? `${warnings} warning${warnings === 1 ? '' : 's'}`
+                    : 'all pass'
+                  : 'pending'}
+              </button>
+              <p
+                data-testid="preset-preview-status"
+                className={styles.previewStatus}
+                data-status={previewStatus}
+              >
+                Preview {previewStatus}
+              </p>
+            </div>
+            <section
+              id="preset-contrast-panel"
+              popover="auto"
+              aria-label="Token contrast"
+              className={`preset-popover ${styles.contrastPanel}`}
+            >
+              <h2>Token contrast</h2>
+              <p>
+                Eight text pairs in both modes, using a 4.5:1 threshold. Warnings
+                do not prevent export. This does not evaluate every component
+                state or non-text contrast.
+              </p>
+              <div className={styles.contrast}>
+                {contrast.map((pair) => (
+                  <p key={pair.mode + pair.foreground} data-status={pair.status}>
+                    {pair.mode} {pair.foreground}/{pair.background}:{' '}
+                    {pair.status === 'not-evaluated'
+                      ? 'Not evaluated'
+                      : `${pair.ratio!.toFixed(2)}:1 — ${pair.status === 'pass' ? 'Pass' : 'Warning'}`}
+                  </p>
+                ))}
+              </div>
+            </section>
+            <PresetPreviewFrame
+              result={compiled.result}
+              view={{ mode, viewport }}
+              stale={compiled.stale}
+              onStatus={setPreviewStatus}
+            />
+          </div>
+          <div className={styles.exportCard}>
+            <PresetExportPanel
+              draft={draft}
+              state={compiled}
+              announce={setNotice}
+              blocked={glassBlocked}
+              describedBy={glass ? glassReadoutId : undefined}
+            />
+          </div>
         </div>
       </div>
-      <section aria-label="Token contrast">
-        <h2>Token contrast</h2>
-        <p>
-          Eight text pairs in both modes, using a 4.5:1 threshold. Warnings do
-          not prevent export. This does not evaluate every component state or
-          non-text contrast.
-        </p>
-        <div className={styles.contrast}>
-          {contrast.map((pair) => (
-            <p key={pair.mode + pair.foreground}>
-              {pair.mode} {pair.foreground}/{pair.background}:{' '}
-              {pair.status === 'not-evaluated'
-                ? 'Not evaluated'
-                : `${pair.ratio!.toFixed(2)}:1 — ${pair.status === 'pass' ? 'Pass' : 'Warning'}`}
-            </p>
-          ))}
-        </div>
-      </section>
-      <PresetExportPanel
-        draft={draft}
-        state={compiled}
-        announce={setNotice}
-        blocked={glassBlocked}
-        describedBy={glass ? glassReadoutId : undefined}
-      />
       <dialog
         ref={dialog}
         aria-labelledby="preset-confirm-heading"

@@ -1,24 +1,42 @@
+/* Colours come from the site tokens so the shell follows light and dark. */
 .editor {
   max-width: 1440px;
   margin: 0 auto;
   padding: 40px 32px 80px;
-  color: #292524;
-  background: #faf9f6;
-  font-family: Arial, sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+}
+/* Undo the site's Tailwind reset inside the editor so native spacing, list
+   markers and heading weights keep the editor's original layout. */
+.editor :where(h1, h2, h3, h4, p, ul, ol, dl, dd, figure, pre, blockquote, fieldset, legend) {
+  margin: revert;
+}
+.editor :where(ul, ol, fieldset, legend) {
+  padding: revert;
+}
+.editor :where(ul, ol) {
+  list-style: revert;
+}
+.editor :where(h1, h2, h3, h4) {
+  font-size: revert;
+  font-weight: revert;
 }
 .editor header {
-  border-bottom: 1px solid #d6d3d1;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
   margin-bottom: 20px;
 }
 .editor h1 {
-  font-size: clamp(28px, 4vw, 44px);
-  line-height: 1.15;
-  letter-spacing: -0.04em;
+  font-size: clamp(32px, 4.4vw, 52px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
   margin: 12px 0;
 }
 .editor h2 {
   font-size: 22px;
+  font-weight: 800;
   margin: 24px 0 12px;
 }
 .editor h3 {
@@ -30,19 +48,22 @@
   line-height: 1.6;
 }
 .editor a {
-  color: #344e41;
+  color: var(--foreground);
+  font-weight: 600;
   text-decoration: underline;
+  text-decoration-color: var(--primary);
+  text-underline-offset: 4px;
 }
 .editor button,
 .editor input,
 .editor select,
 .editor textarea {
   font: inherit;
-  border: 1px solid #a8a29e;
-  border-radius: 5px;
-  padding: 9px 10px;
-  background: #fff;
-  color: #292524;
+  border: 1px solid var(--control);
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: var(--card);
+  color: var(--foreground);
   min-height: 44px;
 }
 .editor :global(.preset-publication-consent) {
@@ -63,31 +84,35 @@
 }
 .editor button {
   cursor: pointer;
+  border-radius: 999px;
+  padding-inline: 16px;
+  font-weight: 600;
 }
 .editor button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 .editor :focus-visible {
-  outline: 3px solid #42634c;
+  outline: 3px solid var(--ring);
   outline-offset: 3px;
 }
 .editor [aria-invalid='true'] {
-  border-color: #b91c1c;
+  border-color: var(--destructive);
 }
 .editor [role='alert'] {
-  border-left: 3px solid #b45309;
+  border-left: 3px solid var(--warning);
   padding: 8px 14px;
-  background: #fffbeb;
+  background: var(--warning-soft);
 }
 .editor fieldset {
-  border: 1px solid #d6d3d1;
+  border: 1px solid var(--border);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: var(--card);
 }
 .editor details {
   margin: 20px 0;
-  border-bottom: 1px solid #d6d3d1;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 20px;
 }
 .editor summary {
@@ -121,7 +146,7 @@
 .editor :global(.preset-swatch) {
   width: 24px;
   height: 24px;
-  border: 1px solid #a8a29e;
+  border: 1px solid var(--control);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -133,12 +158,16 @@
 }
 .editor textarea {
   margin: 12px 0;
-  font-family: monospace;
+  border-radius: 12px;
+  font-family: var(--font-mono);
   font-size: 13px;
 }
 .editor pre {
   padding: 16px;
-  background: #e7e5e4;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--muted);
+  font-family: var(--font-mono);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -151,13 +180,14 @@
   max-height: 80vh;
   overflow: auto;
   padding: 24px;
-  background: #faf9f6;
-  color: #292524;
-  border: 1px solid #a8a29e;
-  border-radius: 10px;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
 }
 .editor dialog::backdrop {
-  background: #29252480;
+  background: color-mix(in oklab, var(--ink) 50%, transparent);
 }
 .editor dialog li {
   overflow-wrap: anywhere;
@@ -169,33 +199,440 @@
   flex-wrap: wrap;
   gap: 10px;
 }
+
+/* Header and global actions share one bar. */
+.top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+}
+.top header {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  max-width: 40rem;
+}
+.top header p {
+  margin: 4px 0;
+  color: var(--muted-foreground);
+}
+.editor .top h1 {
+  margin: 4px 0;
+  font-size: clamp(28px, 3.2vw, 40px);
+}
+.top .crumb {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.crumb a {
+  color: var(--primary);
+  text-decoration: none;
+}
+.top .badge {
+  display: inline-block;
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-size: 13px;
+}
+.actions {
+  gap: 8px;
+}
+.actions label {
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.editor .getCode {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 999px;
+  background: var(--primary);
+  padding: 0 18px;
+  color: var(--primary-foreground);
+  font-weight: 600;
+  text-decoration: none;
+}
+.notice {
+  min-height: 1.6em;
+  margin: 8px 0;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
+/* Workbench: a compact control panel beside a large canvas, like shadcn/create. */
 .workbench {
   display: grid;
-  grid-template-columns: minmax(280px, 400px) minmax(0, 1fr);
-  gap: 32px;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
 }
-.preview {
+.panel {
+  /* The site header scrolls away on editor pages. */
   position: sticky;
   top: 16px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  padding: 4px 14px 14px;
+}
+.editor .panel > h2 {
+  margin: 12px 0 4px;
+  font-size: 15px;
+}
+.group {
+  border-top: 1px solid var(--border);
+  padding: 12px 0 4px;
+}
+.panel > h2 + .group {
+  border-top: 0;
+}
+.editor .group h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.editor .groupHint {
+  margin: -4px 0 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.field {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.editor .field label,
+.editor :global(.preset-design-row) > label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-transform: capitalize;
+}
+.editor .field input,
+.editor :global(.preset-design-row) :is(input, select) {
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.editor :global(.preset-color-list) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.editor :global(.preset-color-row) {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  padding: 4px 8px;
+  font-weight: 500;
+  text-align: left;
+}
+.editor :global(.preset-color-row):hover,
+.editor :global(.preset-color-row)[aria-expanded='true'] {
+  background: var(--muted);
+}
+.editor :global(.preset-color-row)[data-invalid] {
+  border-color: var(--destructive);
+}
+.editor :global(.preset-color-name) {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.editor :global(.preset-edited) {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+.editor :global(.preset-color-alert) {
+  color: var(--destructive);
+}
+.editor :global(.preset-swatch) {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--control);
+  border-radius: 6px;
+}
+.editor :global(.preset-picker) {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+.editor :global(.preset-picker) input[type='color'] {
+  position: absolute;
+  inset: -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 16px);
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Popovers: anchored beside their row where supported, centred otherwise. */
+.editor :global(.preset-popover) {
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(34rem, calc(100dvh - 2rem));
+  overflow: auto;
+  margin: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--popover);
+  padding: 14px;
+  color: var(--popover-foreground);
+  box-shadow: var(--shadow-soft);
+}
+@supports (position-area: right) {
+  .editor :global(.preset-popover) {
+    margin: 0 8px;
+    position-area: right span-bottom;
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+}
+.editor :global(.preset-popover-title) {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+.editor :global(.preset-popover-hint) {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.editor :global(.preset-control) {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+}
+.editor :global(.preset-control) label {
+  font-size: 13px;
+}
+.editor :global(.preset-input-row) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+.editor :global(.preset-input-row) input:not([type='color']),
+.editor :global(.preset-input-row) select {
+  flex: 1;
   min-width: 0;
+  width: 0;
+}
+.editor :global(.preset-popover) input:not([type='color']) {
+  min-height: 38px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.editor :global(.preset-design-row) {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 8px;
+  margin-bottom: 6px;
+}
+.editor :global(.preset-design-row) small {
+  grid-column: 2;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.editor :global(.preset-reset) {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+}
+
+.canvas {
+  display: grid;
+  min-width: 0;
+  gap: 20px;
+}
+.preview,
+.exportCard {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  padding: 14px 16px 16px;
+}
+.exportCard {
+  scroll-margin-top: 16px;
+}
+.exportCard :global(section) > h2:first-child {
+  margin-top: 4px;
+}
+.previewBar {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.previewBar label {
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.previewBar select {
+  min-height: 36px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.editor .contrastChip {
+  min-height: 36px;
+  border-color: var(--border);
+  background: var(--background);
+  font-size: 13px;
+}
+.editor .contrastChip[data-warnings] {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+.editor .previewStatus {
+  margin: 0 0 0 auto;
+  border-radius: 999px;
+  background: var(--muted);
+  padding: 2px 12px;
+  font-size: 13px;
+}
+.previewStatus[data-status='ready']::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: oklch(0.62 0.17 150);
+}
+.preview section[aria-label='Preset preview'] > p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.editor .contrastPanel {
+  width: min(34rem, calc(100vw - 2rem));
+}
+@supports (position-area: bottom) {
+  .editor .contrastPanel {
+    margin: 8px 0;
+    position-area: bottom span-left;
+  }
+}
+.editor .contrastPanel h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.editor .contrastPanel > p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted-foreground);
 }
 .contrast {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
+}
+.editor .contrast p {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.editor .contrast p[data-status='warning'] {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+@media (max-width: 960px) {
+  .workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  .editor :global(.preset-color-list) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 2px 8px;
+  }
 }
 @media (max-width: 800px) {
   .editor {
     padding: 24px 16px 48px;
   }
-  .workbench {
+  .contrast {
     grid-template-columns: minmax(0, 1fr);
   }
-  .preview {
-    position: static;
+}
+@media (max-width: 560px) {
+  .field {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
   }
-  .contrast {
+}
+
+/* Liquid glass limitations and contrast bound, shown only for glass drafts. */
+.glass {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 16px;
+  margin: 8px 0 20px;
+}
+.glass > section {
+  border: 1px solid var(--warning);
+  border-radius: 16px;
+  background: var(--warning-soft);
+  padding: 4px 18px 14px;
+}
+.editor .glass h2 {
+  margin: 12px 0 6px;
+  font-size: 16px;
+}
+.editor .glass p,
+.editor .glass li {
+  font-size: 14px;
+}
+.editor .glass ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+@media (max-width: 800px) {
+  .glass {
     grid-template-columns: minmax(0, 1fr);
   }
 }

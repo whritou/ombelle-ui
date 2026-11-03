@@ -122,12 +122,15 @@ for (const family of supportedStyleFamilies)
       await frame(page)
         .getByRole('button', { name: 'Close', exact: true })
         .click()
+      // Contrast results open from the canvas toolbar.
+      await page.getByRole('button', { name: /^Contrast/ }).click()
       await expect(
         page
           .getByRole('region', { name: 'Token contrast', exact: true })
           .locator('p')
           .filter({ hasText: /:1 —/ }),
       ).toHaveCount(16)
+      await page.keyboard.press('Escape')
       const requests: string[] = []
       page.on('request', (request) => requests.push(request.url()))
       await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
@@ -268,7 +271,10 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
   await ready(page)
   await page.getByLabel('Corner radius', { exact: true }).fill('0.6')
   await page.getByLabel('Corner radius', { exact: true }).fill('0.5')
+  // Colour tokens are edited in a popover opened from their row.
+  await page.getByRole('button', { name: /^Primary colors/ }).click()
   await page.getByLabel('Dark primary', { exact: true }).fill('invalid')
+  await page.keyboard.press('Escape')
   await page
     .getByLabel('Style family', { exact: true })
     .selectOption('neo-brutalism')
@@ -709,6 +715,9 @@ test('supports keyboard editing and 320 pixel reflow', async ({
 
   const lightPrimary = page.getByLabel('Light primary', { exact: true })
   const lightDefault = await lightPrimary.inputValue()
+  await tabTo(page, page.getByRole('button', { name: /^Primary colors/ }))
+  await page.keyboard.press('Enter')
+  await expect(lightPrimary).toBeVisible()
   await tabTo(page, lightPrimary)
   await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('#1d4ed8')

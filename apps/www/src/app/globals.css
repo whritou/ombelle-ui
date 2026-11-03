@@ -1,19 +1,269 @@
+@import "tailwindcss" source("..");
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Consolas, monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-terminal-accent: var(--terminal-accent);
+}
+
+/* Brand: Ombelle pink + ink. Light primary is darkened from the design's
+   oklch(0.63 0.235 6) so pink text and white-on-pink labels reach 4.5:1. */
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, sans-serif;
+  color-scheme: light;
+  --radius: 0.75rem;
+  --ink: oklch(0.22 0.012 275);
+  --paper: oklch(0.985 0.004 350);
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--ink);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--ink);
+  --primary: oklch(0.55 0.22 6);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-soft: oklch(0.95 0.035 6);
+  --secondary: oklch(0.955 0.006 350);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.955 0.006 350);
+  --muted-foreground: oklch(0.47 0.015 275);
+  --accent: oklch(0.95 0.035 6);
+  --accent-foreground: oklch(0.42 0.17 6);
+  --destructive: oklch(0.52 0.21 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.5 0.12 60);
+  --warning-soft: oklch(0.97 0.04 85);
+  --border: oklch(0.9 0.008 350);
+  --input: oklch(0.82 0.01 350);
+  /* Form-control outlines in the editors (3:1 against surfaces). */
+  --control: oklch(0.62 0.012 275);
+  --ring: oklch(0.55 0.22 6);
+  /* Pink used on the always-dark terminal surfaces. */
+  --terminal-accent: oklch(0.72 0.19 6);
+  --grid-line: color-mix(in oklab, var(--foreground) 6%, transparent);
+  --shadow-brutal: 4px 4px 0 0 var(--foreground);
+  --shadow-soft: 0 1px 2px color-mix(in oklab, var(--ink) 6%, transparent),
+    0 12px 32px -12px color-mix(in oklab, var(--ink) 18%, transparent);
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.17 0.01 275);
+  --foreground: oklch(0.97 0.004 350);
+  --card: oklch(0.21 0.012 275);
+  --card-foreground: oklch(0.97 0.004 350);
+  --popover: oklch(0.21 0.012 275);
+  --popover-foreground: oklch(0.97 0.004 350);
+  --primary: oklch(0.68 0.22 6);
+  --primary-foreground: oklch(0.16 0.01 275);
+  --primary-soft: oklch(0.3 0.08 6);
+  --secondary: oklch(0.26 0.012 275);
+  --secondary-foreground: oklch(0.97 0.004 350);
+  --muted: oklch(0.26 0.012 275);
+  --muted-foreground: oklch(0.72 0.012 275);
+  --accent: oklch(0.3 0.08 6);
+  --accent-foreground: oklch(0.88 0.08 6);
+  --destructive: oklch(0.704 0.191 22.216);
+  --warning: oklch(0.82 0.12 80);
+  --warning-soft: oklch(0.26 0.04 70);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 22%);
+  --control: oklch(0.55 0.012 275);
+  --ring: oklch(0.68 0.22 6);
+  --terminal-accent: oklch(0.68 0.22 6);
+  --grid-line: oklch(1 0 0 / 5%);
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 30%), 0 16px 40px -16px oklch(0 0 0 / 60%);
 }
 
-main {
-  max-width: 72rem;
-  margin-inline: auto;
-  padding: 2rem;
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* Unsized preview iframes default to 300px; never let them widen a phone layout. */
+  iframe {
+    max-width: 100%;
+  }
+  /* Keep scrolled-to content (anchors, scrollIntoView) clear of the sticky header. */
+  html {
+    scroll-padding-top: 5rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  /* Turn motion off rather than shortening it: the initial transition-property
+     is `all`, so a tiny duration would make every style change transition,
+     and layout read straight after a change would still see the old value. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-pre {
-  overflow-x: auto;
+@utility bg-grid {
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
+@utility shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+@utility shadow-brutal {
+  box-shadow: var(--shadow-brutal);
+}
+
+/* ---------- Ombelle style families (showcase kit) ---------- */
+@layer components {
+  .o-kit { --o-r: 0.6rem; transition: all 0.3s ease; }
+  .o-kit * { transition: background-color .25s, border-color .25s, box-shadow .25s, border-radius .25s, color .25s, transform .15s; }
+
+  .o-card { background: var(--card); color: var(--card-foreground); border-radius: calc(var(--o-r) + 4px); }
+  .o-btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 2.75rem; padding: 0 1.1rem; font-weight: 600; font-size: .875rem; border-radius: var(--o-r); cursor: pointer; }
+  .o-btn-primary { background: var(--primary); color: var(--primary-foreground); }
+  .o-btn-ghost { background: transparent; color: var(--foreground); }
+  .o-input { width: 100%; min-height: 2.75rem; padding: 0 .85rem; font-size: .875rem; background: var(--background); color: var(--foreground); border-radius: var(--o-r); }
+  .o-input::placeholder { color: var(--muted-foreground); }
+  .o-badge { display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .6rem; font-size: .72rem; font-weight: 600; border-radius: 999px; }
+  .o-tabs { display: flex; gap: .25rem; padding: .25rem; border-radius: calc(var(--o-r) + 2px); }
+  .o-tab { flex: 1; min-height: 2.25rem; font-size: .8rem; font-weight: 600; border-radius: calc(var(--o-r) - 2px); color: var(--muted-foreground); }
+  .o-tab[data-state="active"] { color: var(--foreground); }
+  .o-switch { width: 2.5rem; height: 1.4rem; border-radius: 999px; position: relative; }
+  .o-switch > span { position: absolute; top: 3px; left: 3px; width: calc(1.4rem - 6px); height: calc(1.4rem - 6px); border-radius: 999px; transition: transform .2s; }
+  .o-switch[data-state="checked"] > span { transform: translateX(1.1rem); }
+
+  /* Flat */
+  [data-style="flat"] { --o-r: 0.6rem; }
+  [data-style="flat"] .o-card { background: var(--muted); }
+  [data-style="flat"] .o-input { background: var(--card); border: 0; }
+  [data-style="flat"] .o-btn-ghost { background: var(--card); }
+  [data-style="flat"] .o-btn-primary:hover { filter: brightness(1.06); }
+  [data-style="flat"] .o-badge { background: var(--primary); color: var(--primary-foreground); }
+  [data-style="flat"] .o-badge-muted { background: var(--card); color: var(--foreground); }
+  [data-style="flat"] .o-tabs { background: var(--card); }
+  [data-style="flat"] .o-tab[data-state="active"] { background: var(--primary); color: var(--primary-foreground); }
+  [data-style="flat"] .o-switch { background: var(--input); }
+  [data-style="flat"] .o-switch[data-state="checked"] { background: var(--primary); }
+  [data-style="flat"] .o-switch > span { background: var(--card); }
+
+  /* Minimalist */
+  [data-style="minimal"] { --o-r: 0.375rem; }
+  [data-style="minimal"] .o-card { border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
+  [data-style="minimal"] .o-input { border: 1px solid var(--input); background: transparent; }
+  [data-style="minimal"] .o-input:focus { border-color: var(--foreground); outline: none; }
+  [data-style="minimal"] .o-btn-primary { background: var(--foreground); color: var(--background); font-weight: 500; }
+  [data-style="minimal"] .o-btn-ghost { border: 1px solid var(--border); font-weight: 500; }
+  [data-style="minimal"] .o-badge { border: 1px solid var(--border); color: var(--foreground); font-weight: 500; }
+  [data-style="minimal"] .o-badge-dot::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: var(--primary); }
+  [data-style="minimal"] .o-tabs { border-bottom: 1px solid var(--border); border-radius: 0; padding: 0; gap: 1rem; }
+  [data-style="minimal"] .o-tab { flex: none; border-radius: 0; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  [data-style="minimal"] .o-tab[data-state="active"] { border-color: var(--foreground); }
+  [data-style="minimal"] .o-switch { background: var(--input); }
+  [data-style="minimal"] .o-switch[data-state="checked"] { background: var(--foreground); }
+  [data-style="minimal"] .o-switch > span { background: var(--background); }
+
+  /* Neo-Brutalism */
+  [data-style="brutal"] { --o-r: 0.25rem; }
+  [data-style="brutal"] .o-card { border: 2px solid var(--foreground); box-shadow: 6px 6px 0 0 var(--foreground); }
+  [data-style="brutal"] .o-input { border: 2px solid var(--foreground); background: var(--card); font-weight: 500; }
+  [data-style="brutal"] .o-input:focus { outline: none; box-shadow: 3px 3px 0 0 var(--primary); }
+  [data-style="brutal"] .o-btn { border: 2px solid var(--foreground); box-shadow: var(--shadow-brutal); text-transform: uppercase; letter-spacing: .04em; font-weight: 800; }
+  [data-style="brutal"] .o-btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 0 var(--foreground); }
+  [data-style="brutal"] .o-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 0 var(--foreground); }
+  [data-style="brutal"] .o-btn-ghost { background: var(--card); }
+  [data-style="brutal"] .o-badge { border: 2px solid var(--foreground); border-radius: 0.25rem; background: var(--primary); color: var(--primary-foreground); font-weight: 800; text-transform: uppercase; }
+  [data-style="brutal"] .o-badge-muted { background: var(--card); color: var(--foreground); }
+  [data-style="brutal"] .o-tabs { border: 2px solid var(--foreground); background: var(--card); }
+  [data-style="brutal"] .o-tab { font-weight: 800; text-transform: uppercase; }
+  [data-style="brutal"] .o-tab[data-state="active"] { background: var(--foreground); color: var(--background); }
+  [data-style="brutal"] .o-switch { border: 2px solid var(--foreground); background: var(--card); border-radius: .25rem; }
+  [data-style="brutal"] .o-switch[data-state="checked"] { background: var(--primary); }
+  [data-style="brutal"] .o-switch > span { background: var(--foreground); border-radius: .15rem; top: 1px; left: 1px; }
+
+  /* Liquid glass teaser (not a shipped style). */
+  .o-glass {
+    background: linear-gradient(135deg, color-mix(in oklab, var(--card) 55%, transparent), color-mix(in oklab, var(--primary) 12%, transparent));
+    border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+    backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  /* Long-form pages (privacy, security, snapshot states). */
+  .prose-doc { color: var(--muted-foreground); line-height: 1.7; }
+  .prose-doc h2 { margin-top: 2.75rem; color: var(--foreground); font-size: 1.5rem; font-weight: 800; line-height: 1.2; }
+  .prose-doc p, .prose-doc ul { margin-top: 1rem; }
+  .prose-doc ul { list-style: disc; padding-left: 1.25rem; }
+  .prose-doc li + li { margin-top: .5rem; }
+  .prose-doc a { color: var(--foreground); font-weight: 600; text-decoration: underline; text-decoration-color: var(--primary); text-underline-offset: 4px; }
+  .prose-doc a:hover { color: var(--primary); }
+  .prose-doc code { border-radius: .375rem; background: var(--muted); padding: .1rem .35rem; color: var(--foreground); font-family: var(--font-mono); font-size: .85em; overflow-wrap: anywhere; }
+  .prose-doc strong { color: var(--foreground); }
+}
+
+@keyframes float-slow { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+@utility animate-float { animation: float-slow 7s ease-in-out infinite; }
+
+@utility halo {
+  --hx: 70%;
+  --hy: 30%;
+  background:
+    radial-gradient(420px circle at var(--hx) var(--hy), color-mix(in oklab, var(--primary) 26%, transparent), transparent 70%),
+    radial-gradient(900px circle at var(--hx) var(--hy), color-mix(in oklab, var(--primary) 9%, transparent), transparent 70%);
+}
+
+@keyframes blink { 50% { opacity: 0 } }
+@utility animate-blink { animation: blink 1s steps(1) infinite; }
+
+@keyframes morph-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: translateY(0) } }
+@utility animate-morph-in { animation: morph-in 0.5s ease both; }
+
+@keyframes line-in { from { opacity: 0; transform: translateX(-0.25rem) } to { opacity: 1; transform: translateX(0) } }
+@utility animate-line-in { animation: line-in 0.3s ease both; }
+
+@keyframes grow-x { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+@utility animate-grow { animation: grow-x linear both; transform-origin: left; }

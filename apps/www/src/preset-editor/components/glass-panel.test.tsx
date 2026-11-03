@@ -10,7 +10,7 @@ import {
 } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
 import { GlassPanel, glassLimitations, glassPairsId, glassReadoutId } from './glass-panel'
-import { PresetControls } from './preset-controls'
+import { DesignControls } from './preset-controls'
 import { PresetExportPanel } from './preset-export-panel'
 
 const noop = () => {}
@@ -56,14 +56,14 @@ it('announces a one-line summary and keeps the pair list outside the live region
 
 it('renders transparency, blur and opacity controls only for glass drafts', () => {
   const glass = renderToStaticMarkup(
-    <PresetControls draft={createPresetDraft('liquid-glass')} onEdit={noop} onReset={noop} />,
+    <DesignControls draft={createPresetDraft('liquid-glass')} onEdit={noop} onReset={noop} />,
   )
   for (const label of ['Transparency', 'Glass blur', 'Glass opacity'])
     expect(glass).toContain(`>${label}</label>`)
   expect(glass).toContain('0.6 to 1, in steps of 0.01')
   expect(glass).toContain('0 to 24 px')
   const flat = renderToStaticMarkup(
-    <PresetControls draft={createPresetDraft('flat')} onEdit={noop} onReset={noop} />,
+    <DesignControls draft={createPresetDraft('flat')} onEdit={noop} onReset={noop} />,
   )
   expect(flat).not.toContain('Glass opacity')
   expect(flat).not.toContain('>Transparency</label>')

@@ -30,11 +30,21 @@ export async function assertPresetGalleryButtonPixels(input: {
   const { page, iframe, previewButton, installedButton, label } = input
   await iframe.scrollIntoViewIfNeeded()
   // Match the standalone document's raster origin before comparing pixels.
-  // A fractional host layout offset changes text antialiasing.
-  await iframe.evaluate((element) => {
+  // A fractional host layout offset changes text antialiasing. Offset the
+  // iframe onto whole pixels with relative positioning: unlike a fractional
+  // transform it is resolved before pixel snapping, so the measured and
+  // painted origins agree, and it moves only the iframe.
+  const placed = await iframe.evaluate((element) => {
+    element.style.position = 'relative'
+    element.style.left = '0px'
+    element.style.top = '0px'
     const box = element.getBoundingClientRect()
-    element.style.transform = `translate(${Math.floor(box.x) - box.x}px, ${Math.floor(box.y) - box.y}px)`
+    element.style.left = `${Math.ceil(box.x) - box.x}px`
+    element.style.top = `${Math.ceil(box.y) - box.y}px`
+    const after = element.getBoundingClientRect()
+    return { x: after.x, y: after.y }
   })
+  expect(Number.isInteger(placed.x) && Number.isInteger(placed.y), `iframe at ${placed.x},${placed.y}`).toBe(true)
   const inner = await previewButton.evaluate((element) => {
     const box = element.getBoundingClientRect()
     return { x: box.x, y: box.y, width: box.width, height: box.height }

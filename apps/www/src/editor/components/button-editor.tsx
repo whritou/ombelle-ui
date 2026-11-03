@@ -157,6 +157,7 @@ export function ButtonEditor() {
           if (history.future.length === 1) focusAfterHistory.current = undoButton.current
           setHistory(redo)
         }}>Redo</button>
+        <a href="#artifacts-title" className={styles.viewCode}>View code</a>
         <button type="button" className={styles.download} onClick={saveDownload} disabled={!recipeJson || recovery !== null}>Download recipe JSON</button>
       </div>
     </header>
@@ -180,6 +181,10 @@ export function ButtonEditor() {
       </div>}
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
+        <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`}>
+          <PropertiesPanel recipe={draft.recipe} diagnostic={displayedDiagnostic} onChange={edit} onFamily={chooseFamily}
+            onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
+        </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
           <section className={`${styles.previewSection} ${view.panel === 'code' ? styles.mobileHiddenPreview : ''}`} aria-labelledby="preview-title">
             <div className={styles.sectionTitle}><div><h2 id="preview-title">Live preview</h2><p>Compiled Button specimen</p></div>
@@ -201,10 +206,6 @@ export function ButtonEditor() {
             <p className={styles.hashLine}>Recipe hash: <span data-testid="recipe-hash">{compilation.result?.recipe.hash ?? 'Pending'}</span></p>
           </div>
         </div>
-        <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`}>
-          <PropertiesPanel recipe={draft.recipe} diagnostic={displayedDiagnostic} onChange={edit} onFamily={chooseFamily}
-            onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
-        </aside>
       </div>
     </>}
     <div className={styles.status}><StatusAnnouncer message={status} /></div>
