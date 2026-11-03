@@ -46,7 +46,7 @@ The family stylesheet `ui-style.css` for glass contains Input selectors only as 
 
 ### Contrast guarantee: worst-case backdrop bound
 
-A translucent surface renders as `mix(surface, backdrop, α)`, where α = `glassOpacity`. The mix happens in gamma-encoded sRGB, matching `color-mix(in srgb, …)`, and each channel is monotone in the backdrop. Blur only averages the backdrop. Relative luminance is monotone in every channel, so the rendered surface's luminance always lies between its mix over pure black and its mix over pure white. Contrast against a fixed text colour is extreme at those two ends. If the text meets 4.5:1 against both composites, it meets 4.5:1 over any backdrop.
+A translucent surface renders as `mix(surface, backdrop, α)`, where α = `glassOpacity`. The mix happens in gamma-encoded sRGB, matching `color-mix(in srgb, …)`, and each channel is monotone in the backdrop. Blur only averages the backdrop. Relative luminance is monotone in every channel, so the rendered surface's luminance always lies between its mix over pure black and its mix over pure white. Contrast against a fixed text colour is V-shaped in surface luminance, falling to 1:1 where the two match, so its minimum over that range sits at an end only when the text luminance lies outside the range. The bound therefore requires 4.5:1 against both composites and that the text luminance is not between them; then it meets 4.5:1 over any backdrop.
 
 `packages/compiler` gains a pure `glassContrastReport(preset)` that reuses the existing colour parsing and WCAG luminance formula. It checks each pair below in both modes, unless `transparency` is `reduced` (then the surfaces are opaque and the existing palette rules apply):
 

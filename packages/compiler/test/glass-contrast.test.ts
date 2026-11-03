@@ -115,3 +115,52 @@ it('pair list equals the spec table', () => {
     ['background', 'foreground'],
   ])
 })
+
+const cardPair = (preset: Preset, mode: 'light' | 'dark' = 'light') =>
+  glassContrastReport(preset).pairs.find(
+    (p) => p.mode === mode && p.surface === 'card' && p.text === 'cardForeground',
+  )!
+
+it('surface alpha lowers the effective opacity', () => {
+  const translucent = cardPair(
+    withColors(
+      { card: 'oklch(1 0 0 / 0.5)', cardForeground: '#000000' },
+      { glassOpacity: 1 },
+    ),
+  )
+  const equivalent = cardPair(
+    withColors(
+      { card: '#ffffff', cardForeground: '#000000' },
+      { glassOpacity: 0.5 },
+    ),
+  )
+  expect(translucent.ratioOverBlack).toBeCloseTo(equivalent.ratioOverBlack, 3)
+  expect(translucent.ratioOverWhite).toBeCloseTo(equivalent.ratioOverWhite, 3)
+  expect(translucent.ratioOverBlack).toBeLessThan(6) // opaque white on black text is 21:1
+})
+
+it('fails a pair whose text token is translucent', () => {
+  const pair = cardPair(
+    withColors(
+      { card: '#ffffff', cardForeground: 'oklch(0 0 0 / 0.9)' },
+      { glassOpacity: 1 },
+    ),
+  )
+  expect(pair.ratioOverBlack).toBeGreaterThan(4.5)
+  expect(pair.ratioOverWhite).toBeGreaterThan(4.5)
+  expect(pair.passes).toBe(false)
+})
+
+it('fails text whose luminance lies between the two composites', () => {
+  // A fully transparent black surface spans luminance 0..1; #767676 passes
+  // 4.5:1 against both ends yet matches some backdrop in between.
+  const pair = cardPair(
+    withColors(
+      { card: '#000000', cardForeground: '#767676' },
+      { glassOpacity: 0 },
+    ),
+  )
+  expect(pair.ratioOverBlack).toBeGreaterThanOrEqual(4.5)
+  expect(pair.ratioOverWhite).toBeGreaterThanOrEqual(4.5)
+  expect(pair.passes).toBe(false)
+})

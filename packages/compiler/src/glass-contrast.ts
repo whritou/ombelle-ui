@@ -37,19 +37,25 @@ const encode = (c: number) =>
 const decode = (c: number) =>
   c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
 
-/** Parses '#rrggbb' or 'oklch(L C H[ / A])' to gamma-encoded sRGB in 0..1. Alpha is ignored. */
-function parseColor(color: string): Rgb {
+type Color = { rgb: Rgb; alpha: number }
+
+/** Parses '#rrggbb' or 'oklch(L C H[ / A])' to gamma-encoded sRGB in 0..1 plus alpha. */
+function parseColor(color: string): Color {
   const value = color.trim()
   if (/^#[0-9a-f]{6}$/i.test(value))
-    return [1, 3, 5].map(
-      (i) => parseInt(value.slice(i, i + 2), 16) / 255,
-    ) as unknown as Rgb
-  const m = /^oklch\(\s*([^\s/)]+)\s+([^\s/)]+)\s+([^\s/)]+)(?:\s*\/\s*[^)]+)?\s*\)$/i.exec(
+    return {
+      rgb: [1, 3, 5].map(
+        (i) => parseInt(value.slice(i, i + 2), 16) / 255,
+      ) as unknown as Rgb,
+      alpha: 1,
+    }
+  const m = /^oklch\(\s*([^\s/)]+)\s+([^\s/)]+)\s+([^\s/)]+)(?:\s*\/\s*([^\s)]+))?\s*\)$/i.exec(
     value,
   )
   if (!m) throw new Error(`Unsupported colour for glass contrast: ${color}`)
   const num = (s: string) =>
     s.endsWith('%') ? Number(s.slice(0, -1)) / 100 : Number(s)
+  const alpha = m[4] === undefined ? 1 : clamp01(num(m[4]))
   const L = num(m[1])
   const C = Number(m[2])
   const h = (Number(m[3].replace('deg', '')) * Math.PI) / 180
@@ -63,14 +69,18 @@ function parseColor(color: string): Rgb {
     -1.2684380046 * l + 2.6097574011 * mm - 0.3413193965 * s,
     -0.0041960863 * l - 0.7034186147 * mm + 1.707614701 * s,
   ]
-  return lin.map((v) => clamp01(encode(clamp01(v)))) as unknown as Rgb
+  return {
+    rgb: lin.map((v) => clamp01(encode(clamp01(v)))) as unknown as Rgb,
+    alpha,
+  }
 }
 
 const luminanceOf = (rgb: Rgb) =>
   decode(rgb[0]) * 0.2126 + decode(rgb[1]) * 0.7152 + decode(rgb[2]) * 0.0722
 
+/** Luminance of the colour's own channels; alpha is not composited here. */
 export function relativeLuminance(color: string): number {
-  return luminanceOf(parseColor(color))
+  return luminanceOf(parseColor(color).rgb)
 }
 
 const ratio = (a: number, b: number) =>
@@ -84,28 +94,53 @@ const composite = (rgb: Rgb, alpha: number, b: 0 | 1): Rgb => [
   over(rgb[2], alpha, b),
 ]
 
+/**
+ * Contrast against the text is V-shaped in the surface luminance: it falls to
+ * 1:1 where the surface matches the text and rises on either side. Passing at
+ * both composite ends therefore only proves safety when the text luminance lies
+ * outside the [over-black, over-white] interval; inside it, some backdrop makes
+ * the surface match the text. With an effective coverage of 0.6..1 (an opaque
+ * surface token and the schema's glassOpacity range) both ends cannot pass with
+ * the text inside the interval: that needs (Yw + 0.05) / (Yb + 0.05) >=
+ * 4.5 * 4.5 = 20.25, while at coverage >= 0.6 the ratio is at most about 3.7.
+ * The explicit check keeps the guarantee if the range widens or a translucent
+ * surface token lowers the coverage.
+ */
+function textBetween(
+  textLum: number,
+  lumOverBlack: number,
+  lumOverWhite: number,
+): boolean {
+  return textLum > lumOverBlack && textLum < lumOverWhite
+}
+
 function evaluate(data: Preset, opacity: number): GlassContrastPair[] {
   const pairs: GlassContrastPair[] = []
   for (const mode of ['light', 'dark'] as const) {
     const colors = data.modes[mode] as Record<string, string>
     for (const [surface, text] of glassContrastPairs) {
-      const surfaceRgb = parseColor(colors[surface])
-      const textLum = relativeLuminance(colors[text])
-      const ratioOverBlack = ratio(
-        luminanceOf(composite(surfaceRgb, opacity, 0)),
-        textLum,
-      )
-      const ratioOverWhite = ratio(
-        luminanceOf(composite(surfaceRgb, opacity, 1)),
-        textLum,
-      )
+      const surfaceColor = parseColor(colors[surface])
+      const textColor = parseColor(colors[text])
+      // A translucent surface token stacks with glassOpacity: color-mix keeps
+      // the token's own alpha, so the effective coverage is opacity * alpha.
+      const effective = opacity * surfaceColor.alpha
+      const textLum = luminanceOf(textColor.rgb)
+      const lumOverBlack = luminanceOf(composite(surfaceColor.rgb, effective, 0))
+      const lumOverWhite = luminanceOf(composite(surfaceColor.rgb, effective, 1))
+      const ratioOverBlack = ratio(lumOverBlack, textLum)
+      const ratioOverWhite = ratio(lumOverWhite, textLum)
       pairs.push({
         mode,
         surface,
         text,
         ratioOverBlack,
         ratioOverWhite,
-        passes: ratioOverBlack >= 4.5 && ratioOverWhite >= 4.5,
+        passes:
+          // Translucent text takes on the backdrop too; it is never bounded.
+          textColor.alpha >= 1 &&
+          ratioOverBlack >= 4.5 &&
+          ratioOverWhite >= 4.5 &&
+          !textBetween(textLum, lumOverBlack, lumOverWhite),
       })
     }
   }
