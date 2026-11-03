@@ -15,7 +15,7 @@ import type { SnapshotStore } from '../../apps/www/src/snapshots/server/store.js
 let preset: Record<string, unknown>
 const cleanups: (() => Promise<void>)[] = []
 beforeAll(async () => { preset = JSON.parse(await readFile('examples/preset.example.json', 'utf8')) })
-afterEach(async () => { vi.unstubAllEnvs(); for (const close of cleanups.splice(0)) await close() })
+afterEach(async () => { vi.useRealTimers(); vi.unstubAllEnvs(); for (const close of cleanups.splice(0)) await close() })
 async function fixture() { const service = await startSnapshotService(); cleanups.push(service.close); return service }
 function post(origin: string, key: string = randomUUID(), body: unknown = { preset }, headers: Record<string, string> = {}) {
   return fetch(origin + '/api/v1/presets', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'Idempotency-Key': key, ...headers }, body: JSON.stringify(body) })
@@ -163,6 +163,8 @@ it('publishes an experimental liquid-glass preset and refuses one below the cont
 })
 
 it('maps conflict, payload, minute quota and storage capacity to bounded safe responses', async () => {
+  // Start at a minute boundary so the attempt burst cannot straddle two windows.
+  vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(Math.ceil(Date.now() / 60_000) * 60_000)
   const { origin, dbPath } = await fixture(), key = randomUUID()
   await post(origin, key)
   await failure(await post(origin, key, { preset: { ...preset, name: 'Changed' } }), 409, 'IDEMPOTENCY_CONFLICT')
