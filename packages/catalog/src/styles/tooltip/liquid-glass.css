@@ -1,0 +1,80 @@
+/* liquid-glass Tooltip (experimental) */
+[data-slot='tooltip-trigger']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+[data-slot='tooltip-content'] {
+  --glass-inner-filter: none;
+  z-index: 50;
+  max-inline-size: min(20rem, var(--radix-tooltip-content-available-width));
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  border-radius: var(--radius);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
+    0 0.5rem 1.5rem -0.5rem rgb(0 0 0 / 0.3);
+  animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
+}
+[data-slot='tooltip-arrow'] {
+  fill: var(--popover);
+  stroke: color-mix(in srgb, var(--foreground) 14%, transparent);
+  stroke-width: 1px;
+}
+@keyframes ombelle-tooltip-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='tooltip-content'] {
+    background: color-mix(in srgb, var(--popover) calc(var(--glass-opacity) * 100%), transparent);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='tooltip-content'] {
+      background: var(--popover);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='tooltip-content'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='tooltip-content'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+  [data-slot='tooltip-arrow'] {
+    fill: Canvas;
+    stroke: CanvasText;
+    forced-color-adjust: none;
+  }
+  [data-slot='tooltip-trigger']:focus-visible {
+    outline-color: Highlight;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='tooltip-content'] {
+    animation: none;
+  }
+}

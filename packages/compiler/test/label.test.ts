@@ -28,7 +28,7 @@ it.each(supportedStyleFamilies)(
     const find = (path: string) =>
       result.artifacts.find((a) => a.logicalPath === path)!.content
     expect(find('components/ui/label.tsx')).toContain("import './label.css'")
-    const catalogCss = getCatalog('0.1.0').templates[id].styles![family]
+    const catalogCss = getCatalog('0.1.0').templates[id].styles![family]!
     expect(find('components/ui/label.css')).toBe(
       await format(catalogCss, {
         parser: 'css',

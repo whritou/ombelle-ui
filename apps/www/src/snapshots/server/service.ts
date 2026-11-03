@@ -1,4 +1,4 @@
-import { FoundationError, type PresetSnapshot, type SnapshotReference } from '@ombelle/contracts'
+import { FoundationError, isStyleFamily, type PresetSnapshot, type SnapshotReference } from '@ombelle/contracts'
 import { normalizePublishedPreset, verifyPresetSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
@@ -40,7 +40,7 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
         const fields = input as Record<string, unknown>
         const releases = { schemaVersion: '1.0', catalogRelease: '0.1.0', compilerVersion: '0.1.0' }
         if (Object.entries(releases).some(([key, value]) => typeof fields[key] === 'string' && fields[key] !== value) ||
-            (typeof fields.styleFamily === 'string' && !['flat', 'minimalist', 'neo-brutalism'].includes(fields.styleFamily)))
+            (typeof fields.styleFamily === 'string' && !isStyleFamily(fields.styleFamily)))
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
       }
       let preset

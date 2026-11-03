@@ -71,6 +71,7 @@ export async function planRecipe(
     managedDeclarations: structuredClone(context.lock.managedDeclarations),
     dependencyPlan: [],
     diagnostics: [],
+    notices: [],
     networkAccess: false,
     recipe: { ...identity, importPath, examplePath },
   }

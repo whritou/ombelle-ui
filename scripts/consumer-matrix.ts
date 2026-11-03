@@ -9,7 +9,13 @@ export function consumerCases():readonly ConsumerCase[]{
   for(const id of ['classic-vite','modern-next','pnp-vite'] as const)rows.push({id:'yarn-'+id+suffix,family,framework:id==='modern-next'?'next':'vite',manager:'yarn',cliRuntime:'node',yarnFixtureId:id})
   for(const framework of ['vite','next'] as const)for(const format of ['text','binary'] as const)for(const runtime of ['node','bun'] as const)rows.push({id:'bun-'+format+'-'+framework+'-'+runtime+suffix,family,framework,manager:'bun',cliRuntime:runtime,bunFormat:format})
  }
+ // Experimental rows are appended last so every existing consumer ID and port is unchanged.
+ for(const framework of ['vite','next'] as const)rows.push({id:framework+'-liquid-glass',family:'liquid-glass',framework,manager:'pnpm',cliRuntime:'node'})
  return rows
+}
+/** Rows for stable families: the only ones that carry recipe and component-preset evidence. */
+export function stableConsumerCases():readonly ConsumerCase[]{
+ return consumerCases().filter(spec=>spec.family!=='liquid-glass')
 }
 export function assignConsumerPorts(cases:readonly ConsumerCase[],start=4174):Record<string,number>{
  if(!Number.isInteger(start)||start<1024)throw new Error('Invalid consumer port start')

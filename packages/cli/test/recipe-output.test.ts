@@ -22,6 +22,7 @@ it('shows precise recipe provenance and actionable conflict diagnostics in human
         path: 'rc_primary-button@2',
       },
     ],
+    notices: [],
     networkAccess: false,
     recipe: {
       ...identity,

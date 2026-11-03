@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
-import { supportedStyleFamilies, validateRecipe } from '@ombelle/contracts'
-import { changeDraftFamily, createEditorDraft, updateDraftRecipe, type EditorView } from './model.js'
+import { styleFamilies, validateRecipe } from '@ombelle/contracts'
+import { changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, updateDraftRecipe, type EditorView } from './model.js'
 import { serializeRecipe } from './storage.js'
 
 describe('Button editor model', () => {
-  it.each(supportedStyleFamilies)('creates a valid %s draft with the exact built-in preset', (family) => {
+  it.each(styleFamilies)('creates a valid %s draft with the exact built-in preset', (family) => {
     const draft = createEditorDraft(family)
     const preset = getCatalog('0.1.0').presets[family]
     expect(draft).toEqual({
@@ -28,6 +28,18 @@ describe('Button editor model', () => {
     })
     expect({ ...next.recipe, presetRef: original.recipe.presetRef }).toEqual(original.recipe)
     expect(original.recipe.presetRef.id).toBe('builtin-flat')
+  })
+
+  it('validates a liquid-glass draft and labels it experimental', () => {
+    const draft = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
+    expect(draft.recipe.presetRef.id).toBe('builtin-liquid-glass')
+    expect(validateRecipe(draft.recipe)).toEqual(draft.recipe)
+    expect(draftFamily(draft.recipe)).toBe('liquid-glass')
+    expect(experimentalNotice('liquid-glass')).toBe(
+      'liquid-glass is experimental for button; see docs/components/liquid-glass.md for limitations',
+    )
+    expect(experimentalNotice('flat')).toBeNull()
+    expect(draftFamily(createEditorDraft('minimalist').recipe)).toBe('minimalist')
   })
 
   it('rejects recipe updates outside the recipe schema', () => {

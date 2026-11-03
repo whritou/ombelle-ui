@@ -11,6 +11,7 @@ function PublicationConsent({
   canSubmit,
   enabled,
   focusConsent,
+  describedBy,
   onSubmit,
   onCancel,
 }: {
@@ -20,6 +21,7 @@ function PublicationConsent({
   canSubmit: boolean
   enabled: boolean
   focusConsent: boolean
+  describedBy?: string
   onSubmit: () => Promise<void>
   onCancel: () => void
 }) {
@@ -63,6 +65,7 @@ function PublicationConsent({
           <button
             type="button"
             disabled={!enabled || !accepted || pending}
+            aria-describedby={describedBy}
             onClick={() => {
               setAccepted(false)
               void onSubmit()
@@ -87,10 +90,13 @@ export function PublishPreset({
   preset,
   current,
   announce,
+  describedBy,
 }: {
   preset: ResolvedPreset | null
   current: boolean
   announce: (text: string) => void
+  /** Id of a readout explaining why publication is disabled. */
+  describedBy?: string
 }) {
   const publication = usePublication({ preset, current, announce })
   const { state } = publication
@@ -148,6 +154,7 @@ export function PublishPreset({
           canSubmit={state.status !== 'withdrawn'}
           pending={pending}
           focusConsent={state.status === 'validating'}
+          describedBy={describedBy}
           enabled={current && preset?.hash === state.attempt.presetHash}
           onSubmit={
             state.status === 'failed' ? publication.retry : publication.publish
@@ -162,6 +169,7 @@ export function PublishPreset({
         ref={openButton}
         type="button"
         disabled={!current || !preset || captured}
+        aria-describedby={describedBy}
         onClick={publication.confirm}
       >
         Publish preset…

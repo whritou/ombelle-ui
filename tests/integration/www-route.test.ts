@@ -50,8 +50,10 @@ it('renders the public landing page with editor links and the published installe
   for (const prefix of ['pnpm dlx', 'bunx', 'yarn dlx --quiet']) expect(html).toContain(`${prefix} ${runner}`)
   expect(html).toContain('24 hours')
   expect(html.match(/<h1\b/g)).toHaveLength(1)
-  // Unshipped work is labelled as such; the design's placeholder installer is gone.
+  // The design's placeholder installer is gone.
   expect(html).toContain('React Native is not supported')
-  expect(html).toContain('Liquid Glass (soon)')
+  // Liquid glass is shipped as experimental for six components only.
+  expect(html).toContain('Experimental for Button, Badge, Card, Dialog, Tabs and Tooltip')
+  expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')
 })

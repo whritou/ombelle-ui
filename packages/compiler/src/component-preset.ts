@@ -1,6 +1,7 @@
 import {
   FoundationError,
   isStyleFamily,
+  styleSupport,
   validatePreset,
   type Artifact,
   type ComponentPresetCompileResult,
@@ -37,7 +38,9 @@ export async function compileButtonPreset(input: {
     canonicalize({ presetHash: preset.hash, ...provenance }),
   )
   const template = getTemplate(catalog, 'button')
-  if (!isStyleFamily(preset.data.styleFamily))
+  const family = preset.data.styleFamily
+  // liquid-glass Button is experimental; unavailable family/component pairs stay rejected.
+  if (!isStyleFamily(family) || styleSupport('button', family) === 'unavailable')
     throw new FoundationError(
       'INVALID_DATA',
       'Style family is not available in the foundation',

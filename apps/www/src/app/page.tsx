@@ -64,10 +64,12 @@ export default function HomePage() {
             <Sparkles className="size-5 text-primary" aria-hidden />
             <div>
               <p className="font-display font-bold">Liquid Glass</p>
-              <p className="text-sm text-muted-foreground">Translucent, refractive surfaces. Not available yet — in the works for a future release.</p>
+              <p className="text-sm text-muted-foreground">Translucent surfaces with blur, an opaque fallback, and contrast checked for their text pairs over any backdrop. Experimental for Button, Badge, Card, Dialog, Tabs and Tooltip; form controls are not available in glass.</p>
             </div>
           </div>
-          <span className="rounded-full border border-border px-3 py-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">Coming soon</span>
+          <a href="/editor/preset" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">
+            <span className="font-mono text-xs uppercase tracking-wider text-primary">Experimental</span> Try it in the preset editor
+          </a>
         </div>
       </section>
 

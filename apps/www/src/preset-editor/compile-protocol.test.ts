@@ -27,6 +27,29 @@ it('compiles the exact twelve-component edited preset', async () => {
     }),
   })
 })
+it('compiles only the experimental components for liquid glass', async () => {
+  const draft = createPresetDraft('liquid-glass')
+  const response = await handlePresetCompileMessage({
+    type: 'compile-preset',
+    requestId: 1,
+    draft,
+  })
+  expect(response.type).toBe('preset-compiled')
+  const paths = (
+    response as { result: { artifacts: { logicalPath: string }[] } }
+  ).result.artifacts.map((a) => a.logicalPath)
+  expect(paths).toContain('components/ui/dialog.tsx')
+  expect(paths).not.toContain('components/ui/input.tsx')
+  const failing = await handlePresetCompileMessage({
+    type: 'compile-preset',
+    requestId: 2,
+    draft: setPresetEdit(draft, '/design/glassOpacity', '0.6'),
+  })
+  expect(failing).toMatchObject({
+    type: 'preset-invalid',
+    diagnostic: { code: 'INVALID_DATA', path: '/design/glassOpacity' },
+  })
+})
 it.each([
   null,
   { type: 'other', requestId: 1 },

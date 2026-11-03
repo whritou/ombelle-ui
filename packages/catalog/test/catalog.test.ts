@@ -5,6 +5,7 @@ import { getCatalog, getTemplate } from '../src/index.js'
 import {
   supportedComponentIds,
   supportedStyleFamilies,
+  validatePreset,
   type ComponentId,
 } from '@ombelle/contracts'
 import { Button } from '../src/templates/button.js'
@@ -336,7 +337,7 @@ describe('catalog contract', () => {
     ])
       expect(html).toContain(text)
   })
-  it('provides Card with all six parts and three separate family styles', () => {
+  it('provides Card with all six parts and separate family styles', () => {
     expect(supportedComponentIds).toContain('card')
     const card = getTemplate(getCatalog('0.1.0'), 'card')
     expect(card.logicalPath).toBe('components/ui/card.tsx')
@@ -363,6 +364,7 @@ describe('catalog contract', () => {
       'flat',
       'minimalist',
       'neo-brutalism',
+      'liquid-glass',
     ])
     for (const family of supportedStyleFamilies) {
       expect(card.styles?.[family]).toContain("[data-slot='card']")
@@ -500,6 +502,27 @@ describe('catalog contract', () => {
     for (const id of ['button', 'dialog', 'input'] as const)
       expect(getTemplate(c, id).id).toBe(id)
     expect(c.templates.dialog.content).toMatch(/^['"]use client['"]/)
+  })
+  it('provides the experimental liquid-glass preset and component styles', () => {
+    const c = getCatalog('0.1.0')
+    const preset = c.presets['liquid-glass']
+    expect(validatePreset(preset)).toEqual(preset)
+    expect(preset).toMatchObject({
+      id: 'builtin-liquid-glass',
+      styleFamily: 'liquid-glass',
+      design: { transparency: 'auto', glassBlurPx: 12, radiusRem: 0.75 },
+      componentDefaults: { button: { variant: 'default', size: 'default' } },
+    })
+    expect(c.styles['liquid-glass']).toContain('liquid-glass family')
+    expect(
+      supportedComponentIds.filter(
+        (id) => c.templates[id].styles?.['liquid-glass'] !== undefined,
+      ),
+    ).toEqual(['badge', 'card', 'tabs', 'tooltip'])
+    for (const id of supportedComponentIds)
+      if (c.templates[id].styles)
+        for (const family of supportedStyleFamilies)
+          expect(c.templates[id].styles?.[family]).toBeTypeOf('string')
   })
   it('rejects unknown releases', () => {
     try {

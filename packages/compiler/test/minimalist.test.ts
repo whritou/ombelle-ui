@@ -8,7 +8,8 @@ const build=(preset:unknown,componentIds:('button'|'dialog'|'input')[]=['button'
 it('registers the exact implemented families',()=>{
  expect(supportedStyleFamilies).toEqual(['flat','minimalist','neo-brutalism'])
  expect(isStyleFamily('minimalist')).toBe(true)
- for(const id of ['liquid-glass','constructor','__proto__'])expect(isStyleFamily(id)).toBe(false)
+ expect(isStyleFamily('liquid-glass')).toBe(true)
+ for(const id of ['constructor','__proto__'])expect(isStyleFamily(id)).toBe(false)
  expect(getCatalog('0.1.0').presets.minimalist).toMatchObject({id:'builtin-minimalist',revision:1,styleFamily:'minimalist',design:{radiusRem:0.375,borderWidthPx:1}})
 })
 it('compiles minimalist deterministically',async()=>{
@@ -18,7 +19,6 @@ it('compiles minimalist deterministically',async()=>{
  expect(first.artifacts.find(a=>a.logicalPath==='styles/ui-style.css')?.content).toContain('minimalist family')
  expect(first.theme.light['--primary']).toBe('#111827')
  expect(first.theme.dark['--primary']).toBe('#f9fafb')
- await expect(build({...preset,styleFamily:'liquid-glass'})).rejects.toMatchObject({code:'INVALID_DATA',path:'/styleFamily'})
 })
 it('preserves legacy artifact hashes',async()=>{
  for(const family of ['flat','neo-brutalism'] as const){

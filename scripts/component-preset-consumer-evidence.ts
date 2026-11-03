@@ -1,4 +1,4 @@
-import { consumerCases } from './consumer-matrix.ts'
+import { stableConsumerCases } from './consumer-matrix.ts'
 import {
   finalizeConsumerEvidence,
   type ConsumerEvidence,
@@ -19,9 +19,14 @@ const digest = (v: unknown) => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v)
 
 export async function validateComponentPresetConsumers(
   value: unknown,
-  matrix: Record<string, ConsumerEvidence>,
+  fullMatrix: Record<string, ConsumerEvidence>,
 ): Promise<void> {
-  const cases = consumerCases(),
+  // Component presets are stable-family evidence; experimental glass consumers carry none.
+  const cases = stableConsumerCases(),
+    ids = new Set(cases.map((c) => c.id)),
+    matrix = Object.fromEntries(
+      Object.entries(fullMatrix).filter(([id]) => ids.has(id)),
+    ),
     rows = object(value),
     refs = await componentPresetReferences()
   finalizeConsumerEvidence(cases, matrix)
