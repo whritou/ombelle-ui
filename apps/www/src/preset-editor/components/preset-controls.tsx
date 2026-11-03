@@ -14,6 +14,11 @@ export function PresetControls({
   onEdit: (path: PresetEditablePath, value: string) => void
   onReset: (path: PresetEditablePath) => void
 }) {
+  // Reset disables its own button, so keep keyboard focus on the field it restored.
+  function reset(path: PresetEditablePath) {
+    onReset(path)
+    document.getElementById(fieldId(path))?.focus()
+  }
   return (
     <>
       {(['light', 'dark'] as const).map((mode) => (
@@ -47,7 +52,7 @@ export function PresetControls({
                     <button
                       type="button"
                       aria-label={`Reset ${mode} ${human(key)}`}
-                      onClick={() => onReset(path)}
+                      onClick={() => reset(path)}
                       disabled={!Object.hasOwn(draft.edits, path)}
                     >
                       Reset
@@ -98,7 +103,7 @@ export function PresetControls({
                   <button
                     type="button"
                     aria-label={`Reset ${control.label.toLowerCase()}`}
-                    onClick={() => onReset(path)}
+                    onClick={() => reset(path)}
                     disabled={!Object.hasOwn(draft.edits, path)}
                   >
                     Reset
