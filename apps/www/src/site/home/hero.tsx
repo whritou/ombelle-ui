@@ -30,7 +30,7 @@ export function HeroSection() {
             </a>
           </div>
         </div>
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <StyleSelector value={style} onChange={setStyle} />
           <div aria-live="polite" className="sr-only">Showing {STYLES.find(s => s.value === style)?.label} style</div>
           <HeroComposition style={style} />

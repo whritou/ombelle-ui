@@ -276,9 +276,10 @@
   align-items: start;
 }
 .panel {
+  /* The site header scrolls away on editor pages. */
   position: sticky;
-  top: 80px;
-  max-height: calc(100dvh - 96px);
+  top: 16px;
+  max-height: calc(100dvh - 32px);
   overflow-y: auto;
   overscroll-behavior: contain;
   border: 1px solid var(--border);
@@ -489,7 +490,7 @@
   padding: 14px 16px 16px;
 }
 .exportCard {
-  scroll-margin-top: 80px;
+  scroll-margin-top: 16px;
 }
 .exportCard :global(section) > h2:first-child {
   margin-top: 4px;

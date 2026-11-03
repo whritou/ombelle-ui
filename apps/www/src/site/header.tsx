@@ -11,15 +11,18 @@ export function SiteHeader() {
   const pathname = usePathname()
   const current = (href: string) =>
     href === pathname || (href === '/components' && pathname.startsWith('/components/')) ? 'page' : undefined
+  // Pages that embed preview iframes scroll the header away: a pinned header
+  // would cover iframe content and intercept clicks inside it.
+  const pinned = !/^\/(editor|presets|recipes)\//.test(pathname)
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background">
+    <header className={`${pinned ? 'sticky top-0' : 'relative'} z-40 border-b border-border bg-background`}>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">
         Skip to content
       </a>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <div className="flex items-center gap-3">
           <Logo />
-          <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">alpha</span>
+          <span className="hidden rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">alpha</span>
         </div>
         <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
           {primaryLinks.map(link => (

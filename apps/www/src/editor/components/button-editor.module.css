@@ -64,7 +64,7 @@
 .primary { min-width: 0; display: grid; gap: 1.25rem; }
 /* Preview and output read as cards; the rail stays beside them while scrolling. */
 .previewSection, .codeSection { border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: 1.25rem; box-shadow: var(--shadow-soft); }
-.rail { position: sticky; top: 5rem; max-height: calc(100dvh - 6rem); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: 1.25rem 1.25rem 1.5rem; }
+.rail { position: sticky; top: 1rem; max-height: calc(100dvh - 2rem); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: 1.25rem 1.25rem 1.5rem; }
 .sectionTitle { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
 .sectionTitle h2, .root :global(.sectionTitle) h2, .root :global(.railHeading) h2 { font-size: 1.22rem; line-height: 1.2; letter-spacing: -.02em; margin-bottom: .3rem; }
 .sectionTitle p, .root :global(.sectionTitle) p, .root :global(.railHeading) p { color: var(--slate); font-size: .9rem; margin-bottom: 1.25rem; }
