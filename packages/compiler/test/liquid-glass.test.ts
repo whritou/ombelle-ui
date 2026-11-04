@@ -90,6 +90,15 @@ describe('liquid-glass compile', () => {
     )
   })
 
+  it('compiles a failing draft only in report mode, so an editor can preview it', async () => {
+    const preset = withDesign({ glassOpacity: 0.3 })
+    const preview = await compile({ preset, componentIds: experimental, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'report' })
+    expect(preview.artifacts.length).toBeGreaterThan(0)
+    expect(glassContrastReport(preview.preset.data).passes).toBe(false)
+    // The default still enforces the bound for installers and publication.
+    await expect(compile({ preset, componentIds: experimental, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'enforce' })).rejects.toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
+  })
+
   it('bounds a sparse custom palette', async () => {
     const error = await build({
       schemaVersion: '1.0',

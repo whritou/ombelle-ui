@@ -53,6 +53,21 @@ import { useSiteDark } from '../../site/theme'
 
 const familyLabel = (family: StyleFamily) =>
   family === 'liquid-glass' ? 'Liquid glass (Experimental)' : family
+const familyName = (family: StyleFamily) =>
+  ({
+    flat: 'Flat',
+    minimalist: 'Minimalist',
+    'neo-brutalism': 'Neo-brutalism',
+    'liquid-glass': 'Liquid glass',
+  })[family] ?? family
+/** "/modes/dark/primaryForeground" → "Dark primary foreground". */
+const changeLabel = (path: string) => {
+  const [, group, a, b] = path.split('/')
+  const words = (s: string) => s.replace(/[A-Z]/g, (c) => ' ' + c.toLowerCase())
+  const text = group === 'modes' ? `${a} ${words(b!)}` : words(a!)
+  return text[0]!.toUpperCase() + text.slice(1)
+}
+const isColor = (value: string) => /^#|^oklch\(/i.test(value)
 
 export default function PresetEditor() {
   const [history, setHistory] = useState(() =>
@@ -73,9 +88,10 @@ export default function PresetEditor() {
     'connecting' | 'ready' | 'failed'
   >('connecting')
   const [confirmation, setConfirmation] = useState<
-    (FamilyChange & { label: string }) | null
+    (FamilyChange & { label: string; description: string }) | null
   >(null)
   const dialog = useRef<HTMLDialogElement>(null),
+    cancelButton = useRef<HTMLButtonElement>(null),
     returnFocus = useRef<HTMLElement | null>(null)
   const undoButton = useRef<HTMLButtonElement>(null),
     redoButton = useRef<HTMLButtonElement>(null),
@@ -115,7 +131,11 @@ export default function PresetEditor() {
     focusAfterHistory.current = null
   }, [history])
   useEffect(() => {
-    if (confirmation) dialog.current?.showModal()
+    if (confirmation) {
+      dialog.current?.showModal()
+      // Start on Cancel, not the optional list toggle, so Enter is safe.
+      cancelButton.current?.focus()
+    }
     else if (dialog.current?.open) dialog.current.close()
   }, [confirmation])
   function commit(next: PresetEditorDraft, key: string, coalesce = false) {
@@ -129,13 +149,19 @@ export default function PresetEditor() {
     setConfirmation(null)
     returnFocus.current?.focus()
   }
-  function confirm(change: FamilyChange, label: string) {
+  function confirm(change: FamilyChange, label: string, description: string) {
     returnFocus.current = document.activeElement as HTMLElement
-    setConfirmation({ ...change, label })
+    setConfirmation({ ...change, label, description })
   }
   function family(family: StyleFamily) {
     const change = planPresetFamilyChange(draft, family)
-    if (change.changes.length) confirm(change, 'Change style family?')
+    const count = change.changes.length
+    if (count)
+      confirm(
+        change,
+        'Change style family?',
+        `Switching to ${familyName(family)} updates ${count} ${count === 1 ? 'value' : 'values'} you haven't customized to its style defaults. Everything you edited, and the preset name, stay as they are.`,
+      )
     else commit(change.draft, 'family')
   }
   const diagnostic = compiled.diagnostic
@@ -223,6 +249,7 @@ export default function PresetEditor() {
               confirm(
                 { draft: resetPresetTokens(draft), changes: [] },
                 'Reset all tokens?',
+                `Colors and design values go back to the ${familyName(draft.family)} defaults. The preset name, id and revision stay. You can undo this.`,
               )
             }
           >
@@ -464,22 +491,47 @@ export default function PresetEditor() {
         }}
       >
         <h2 id="preset-confirm-heading">{confirmation?.label}</h2>
-        <p>Explicitly customized values and preset identity are retained.</p>
+        <p className={styles.confirmText}>{confirmation?.description}</p>
         {confirmation && confirmation.changes.length > 0 && (
-          <ul>
-            {confirmation.changes.map((change) => (
-              <li key={change.path}>
-                {change.path}: {change.before} → {change.after}
-              </li>
-            ))}
-          </ul>
+          <details className={styles.confirmChanges}>
+            <summary>
+              Show the {confirmation.changes.length} values that change
+            </summary>
+            <ul>
+              {confirmation.changes.map((change) => (
+                <li key={change.path}>
+                  <span>{changeLabel(change.path)}</span>
+                  <span className={styles.confirmValues}>
+                    {isColor(change.before) && (
+                      <i aria-hidden="true" style={{ background: change.before }} />
+                    )}
+                    {change.before} →{' '}
+                    {isColor(change.after) && (
+                      <i aria-hidden="true" style={{ background: change.after }} />
+                    )}
+                    {change.after}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
-        <button type="button" onClick={() => finishConfirmation(false)}>
-          Cancel
-        </button>
-        <button type="button" onClick={() => finishConfirmation(true)}>
-          Confirm change
-        </button>
+        <div className={styles.confirmActions}>
+          <button
+            ref={cancelButton}
+            type="button"
+            onClick={() => finishConfirmation(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className={styles.confirmPrimary}
+            onClick={() => finishConfirmation(true)}
+          >
+            Confirm change
+          </button>
+        </div>
       </dialog>
     </main>
   )

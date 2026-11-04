@@ -22,6 +22,12 @@ export async function compile(input: {
   componentIds: readonly ComponentId[]
   catalogRelease: string
   compilerVersion: string
+  /**
+   * 'enforce' (default) rejects a glass preset below the contrast bound.
+   * 'report' compiles it anyway so an editor can preview the draft while it
+   * shows the failing bound; installers and publication always enforce.
+   */
+  glassContrast?: 'enforce' | 'report'
 }): Promise<CompileResult> {
   if (input.compilerVersion !== '0.1.0')
     throw new FoundationError(
@@ -40,7 +46,8 @@ export async function compile(input: {
     )
   const ids = [...new Set(input.componentIds)].sort()
   assertStyleAvailable(ids, family)
-  if (family === 'liquid-glass') assertGlassContrast(preset.data)
+  if (family === 'liquid-glass' && input.glassContrast !== 'report')
+    assertGlassContrast(preset.data)
   const theme: ThemeData = { light: {}, dark: {}, theme: {} }
   for (const mode of ['light', 'dark'] as const)
     for (const [key, value] of Object.entries(preset.data.modes[mode]))

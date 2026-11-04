@@ -45,10 +45,9 @@ it('compiles only the experimental components for liquid glass', async () => {
     requestId: 2,
     draft: setPresetEdit(draft, '/design/glassOpacity', '0.3'),
   })
-  expect(failing).toMatchObject({
-    type: 'preset-invalid',
-    diagnostic: { code: 'INVALID_DATA', path: '/design/glassOpacity' },
-  })
+  // Below the contrast bound the editor still compiles a preview; the glass
+  // panel reports the failure and export stays blocked.
+  expect(failing).toMatchObject({ type: 'preset-compiled' })
 })
 it.each([
   null,
