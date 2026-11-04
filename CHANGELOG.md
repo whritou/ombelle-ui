@@ -18,8 +18,9 @@
 - Grow the standalone consumer matrix from 36 to 40 rows with four ombelle consumers (pnpm and npm, Vite and Next), and the browser coverage contract to 534 cases across 17 specs.
 - Compare computed colours in the browser parity helpers as sRGB within one channel step and 0.01 alpha, because Next lowers `oklch()` to `lab()`; every other property is still compared exactly.
 
-## 0.3.1 — unreleased
+## 0.3.1 — 4 November 2026
 
+- Publish `@ombelle-ui/cli@0.3.1` to npm; website commands use `npx @ombelle-ui/cli@0.3.1`.
 - Align all six workspace packages at 0.3.1. Schemas 1.0 and catalog/compiler compatibility 0.1.0 are unchanged.
 - Add liquid-glass refraction: `add` installs `components/ui/liquid-glass-filter.tsx`. Mounted once, `<LiquidGlassFilter />` bends the backdrop at each rim with a slight prism edge in Chromium browsers, keeping the contrast bound. Other browsers keep the blurred glass, and the CLI prints a mount notice. The built-in glass preset's default blur drops from 8px to 3px so the refraction shows.
 - Website: the preset editor previews a liquid-glass draft below the contrast bound instead of freezing on the last valid one (`compile()` gains `glassContrast: 'report'`; installers and publication still enforce the bound); the glass notes become one quiet status bar; the family-change and reset dialogs are centred and explain what changes in plain words.
