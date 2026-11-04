@@ -79,7 +79,7 @@ it('SliderRow parks the range thumb at the minimum for partial or invalid text',
     const html = renderToStaticMarkup(<SliderRow {...slider} value={value} />)
     return /<input[^>]*type="range"[^>]*>/.exec(html)![0]
   }
-  for (const value of ['-', 'invalid', ''])
+  for (const value of ['-', 'invalid', '', '1.', '+5', ' 5'])
     expect(range(value)).toContain('value="0"')
   expect(range('1.25')).toContain('value="1.25"')
   // The text field keeps what was typed.
