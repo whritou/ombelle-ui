@@ -180,6 +180,13 @@
 }
 
 /* Header and global actions share one bar. */
+.editor .draftNote {
+  min-width: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
 .editor .getCode {
   display: inline-flex;
   align-items: center;

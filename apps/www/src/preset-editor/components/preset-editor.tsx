@@ -280,6 +280,7 @@ export default function PresetEditor() {
             describedBy={glass ? glassReadoutId : undefined}
           />
         }
+        extra={<span className={styles.draftNote}>Draft — automated token contrast only</span>}
       />
       <h1 className={styles.srOnly}>Preset editor</h1>
       {warning && <p role="alert">{warning}</p>}
