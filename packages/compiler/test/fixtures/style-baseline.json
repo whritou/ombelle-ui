@@ -198,6 +198,17 @@
       "reason": "ombelle family added"
     },
     {
+      "families": [
+        "minimalist"
+      ],
+      "logicalPaths": [
+        "styles/ui-style.css",
+        "scoped Button preset and recipe button.css"
+      ],
+      "spec": "fix/editor-preview-design",
+      "reason": "Minimalist Button hover and pressed states thin the ink toward the page (82% and 70%) and disabled Buttons become hairline outlines, matching the Minimalist UI kit; the previous darken-toward-black hover was invisible on near-black primaries"
+    },
+    {
       "logicalPaths": [
         "components/ui/button.tsx"
       ],

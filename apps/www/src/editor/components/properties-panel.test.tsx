@@ -8,7 +8,7 @@ import { PropertiesPanel, VariantPicker, shownNumber } from './properties-panel'
 const noop = () => {}
 const recipe = validateRecipe(exampleRecipe)
 const panel = (value = recipe) =>
-  renderToStaticMarkup(<PropertiesPanel recipe={value} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
+  renderToStaticMarkup(<PropertiesPanel recipe={value} family="flat" onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
 
 it('VariantPicker presses default for the example recipe and offers all six variants', () => {
   const html = renderToStaticMarkup(<VariantPicker value={recipe.props.variant ?? 'default'} onChange={noop} />)

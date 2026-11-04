@@ -28,8 +28,13 @@ export function SettingsScene(props: SceneProps) {
   const show = gate(props)
   return (
     <main className="preset-scene" data-testid="preset-scene" data-scene="settings">
-      <h1>Settings</h1>
-      <Tabs defaultValue="general">
+      <header className="scene-header">
+        <div>
+          <h1>Settings</h1>
+          <p className="scene-muted">Manage your profile and workspace.</p>
+        </div>
+      </header>
+      <Tabs defaultValue="general" className="scene-tabs">
         <TabsList aria-label="Settings sections">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
@@ -51,11 +56,15 @@ export function SettingsScene(props: SceneProps) {
                   {show(
                     'input',
                     'Input',
-                    <div className="scene-field">
-                      <Label htmlFor="scene-name">Full name</Label>
-                      <Input id="scene-name" defaultValue="Ada Lovelace" autoComplete="name" />
-                      <Label htmlFor="scene-email">Email</Label>
-                      <Input id="scene-email" type="email" defaultValue="ada@acme.test" autoComplete="email" />
+                    <div className="scene-columns">
+                      <div className="scene-field">
+                        <Label htmlFor="scene-name">Full name</Label>
+                        <Input id="scene-name" defaultValue="Ada Lovelace" autoComplete="name" />
+                      </div>
+                      <div className="scene-field">
+                        <Label htmlFor="scene-email">Email</Label>
+                        <Input id="scene-email" type="email" defaultValue="ada@acme.test" autoComplete="email" />
+                      </div>
                     </div>,
                   )}
                   {show(
@@ -78,7 +87,8 @@ export function SettingsScene(props: SceneProps) {
                     </div>,
                   )}
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="scene-actions scene-actions-end">
+                  <Button type="button" variant="outline">Cancel</Button>
                   <Button type="submit">Save profile</Button>
                 </CardFooter>
               </form>

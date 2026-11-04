@@ -11,7 +11,6 @@ import { useCompiler } from '../use-compiler'
 import type { CompileDiagnostic } from '../compile-protocol'
 import { PreviewFrame } from './preview-frame'
 import { PropertiesPanel } from './properties-panel'
-import { FamilyChip } from './family-chip'
 import { ArtifactPanel } from './artifact-panel'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
@@ -186,7 +185,6 @@ export function ButtonEditor() {
         },
       }}
       menu={{ label: 'More actions', items: menuItems }}
-      extra={<FamilyChip value={draftFamily(draft.recipe)} onChange={chooseFamily} />}
       primary={<RecipeGetCode className={styles.getCode} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
         secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
     />
@@ -206,7 +204,7 @@ export function ButtonEditor() {
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
-          <PropertiesPanel recipe={draft.recipe} diagnostic={displayedDiagnostic} onChange={edit}
+          <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit}
             onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>

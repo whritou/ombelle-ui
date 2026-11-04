@@ -92,6 +92,23 @@ const neo = async () => {
     strip(result.artifacts.find((a) => a.logicalPath === path)!.content)
 }
 
+it('minimalist buttons thin toward the page on hover and press, and go hairline when disabled', async () => {
+  const result = await compile({
+    preset: getCatalog('0.1.0').presets.minimalist,
+    componentIds: ['button'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  const style = strip(result.artifacts.find((a) => a.logicalPath === 'styles/ui-style.css')!.content)
+  expect(rule(style, '[data-slot="button"]:not(:disabled):hover')).toContain('background:color-mix(inoklab,var(--primary)82%,var(--background))')
+  expect(rule(style, '[data-slot="button"]:not(:disabled):active')).toContain('background:color-mix(inoklab,var(--primary)70%,var(--background))')
+  expect(style).not.toContain('var(--primary)90%,black')
+  const disabled = rule(style, '[data-slot="button"]:disabled')
+  expect(disabled).toContain('background:transparent')
+  expect(disabled).toContain('border-color:var(--border)')
+  expect(disabled).toContain('color:var(--muted-foreground)')
+})
+
 it('neo-brutalism preset carries the refreshed design values', () => {
   const p = getCatalog('0.1.0').presets['neo-brutalism']
   expect(p.design).toMatchObject({
