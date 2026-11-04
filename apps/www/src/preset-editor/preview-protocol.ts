@@ -109,6 +109,8 @@ export async function verifyPresetRender(
       componentIds,
       catalogRelease: '0.1.0',
       compilerVersion: '0.1.0',
+      // The editor previews glass drafts below the contrast bound too.
+      glassContrast: 'report',
     })
     if (
       canonicalize(expected) !== canonicalize(result) ||

@@ -105,6 +105,19 @@ it.each([
       'a'.repeat(64)
   expect(await verifyPresetRender(input, 0, expected)).toBeNull()
 })
+it('accepts a liquid-glass draft below the contrast bound so the editor can preview it', async () => {
+  const preset = structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
+  preset.design = { ...preset.design, glassOpacity: 0.3 }
+  const failing = await compile({
+    preset,
+    componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+    glassContrast: 'report',
+  })
+  const input = { ...message(), result: failing }
+  expect(await verifyPresetRender(input, 0, manifest)).toEqual(input)
+})
 it('accepts a liquid-glass render compiled from only its experimental components', async () => {
   const glass = await compile({
     preset: getCatalog('0.1.0').presets['liquid-glass'],
