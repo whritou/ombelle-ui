@@ -31,17 +31,20 @@
 }
 [data-slot='native-select-icon'] {
   position: absolute;
-  inset-inline-end: 1rem;
-  inset-block-start: 50%;
-  translate: 0 -50%;
-  inline-size: 1rem;
-  block-size: 1rem;
-  color: var(--muted-foreground);
+  box-sizing: border-box;
+  inset-inline-end: var(--border-width);
+  inset-block: var(--border-width);
+  inline-size: 2.5rem;
+  block-size: auto;
+  padding: 0.5rem;
+  border-inline-start: var(--border-width) solid var(--border);
+  background: var(--primary);
+  color: var(--primary-foreground);
   pointer-events: none;
 }
 [data-slot='native-select']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
 }
 [data-slot='native-select'][aria-invalid='true'] {
   border-color: var(--destructive);
@@ -52,6 +55,8 @@
 }
 [data-slot='native-select']:disabled {
   cursor: not-allowed;
+  border-style: dashed;
+  box-shadow: none;
 }
 select[multiple] + [data-slot='native-select-icon'] {
   display: none;
@@ -64,7 +69,12 @@ select[multiple] + [data-slot='native-select-icon'] {
     box-shadow: none;
   }
   [data-slot='native-select-icon'] {
+    background: Canvas;
     color: ButtonText;
+    border-inline-start-color: ButtonText;
+  }
+  [data-slot='native-select']:focus-visible {
+    outline-color: Highlight;
   }
   [data-slot='native-select'][aria-invalid='true'] {
     border-style: double;

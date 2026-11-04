@@ -16,7 +16,9 @@
   cursor: pointer;
   transition:
     background-color var(--motion-duration),
-    color var(--motion-duration);
+    color var(--motion-duration),
+    transform var(--motion-duration),
+    box-shadow var(--motion-duration);
 }
 [data-slot='switch'][data-state='unchecked'] {
   background: var(--muted);
@@ -43,13 +45,23 @@
   inset-inline-start: calc(100% - 1rem - 0.125rem);
 }
 [data-slot='switch']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
+}
+[data-slot='switch']:not(:disabled):not([data-disabled]):hover {
+  transform: translate(-2px, -2px);
+  box-shadow: calc(var(--shadow-x) + 2px) calc(var(--shadow-y) + 2px) 0 var(--border);
+}
+[data-slot='switch']:not(:disabled):not([data-disabled]):active {
+  transform: translate(var(--shadow-x), var(--shadow-y));
+  box-shadow: 0 0 0 var(--border);
 }
 [data-slot='switch']:disabled,
 [data-slot='switch'][data-disabled] {
   opacity: 0.5;
   cursor: not-allowed;
+  border-style: dashed;
+  box-shadow: none;
 }
 @media (forced-colors: active) {
   [data-slot='switch'] {

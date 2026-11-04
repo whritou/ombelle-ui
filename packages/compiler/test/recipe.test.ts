@@ -13,8 +13,8 @@ const scopedArtifactHashes: Record<string, readonly string[]> = {
     'b2bc251ec522f6662b69626694c8d8523b4233da6c55e616fe04f22995abe4dd',
   ],
   'neo-brutalism': [
-    '846e1ec8af7b98cf5e8997d44de2ff899d59b9bac03d35ee2296a374346dac31',
-    '38afc8b8846dd7932570a9979ef7554de570b1055a8abf76648e2b7a76c00dad',
+    '9c89e79e120b561d3c30c7a487197921e30aabb96cf24ef33f5b84afef627631',
+    '63ea60f98189848e3e8e4e3e056a98fcd6c2fc0034574229b30ec6ea74424f68',
   ],
 } as const
 it('normalizes defaults and stable identity across key order and dark context', async () => {
@@ -85,11 +85,11 @@ it('keeps existing recipe CSS and source output byte-for-byte stable', async () 
   ).toEqual([
     [
       'recipes/rc_primary-button/r2/button.css',
-      '846e1ec8af7b98cf5e8997d44de2ff899d59b9bac03d35ee2296a374346dac31',
+      '9c89e79e120b561d3c30c7a487197921e30aabb96cf24ef33f5b84afef627631',
     ],
     [
       'recipes/rc_primary-button/r2/button.tsx',
-      '38afc8b8846dd7932570a9979ef7554de570b1055a8abf76648e2b7a76c00dad',
+      '63ea60f98189848e3e8e4e3e056a98fcd6c2fc0034574229b30ec6ea74424f68',
     ],
   ])
 })

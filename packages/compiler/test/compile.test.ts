@@ -103,6 +103,15 @@ it('changes only ui-style.css and dialog.tsx among pre-existing artifacts', asyn
     'components/ui/*.css',
     'scoped Button preset and recipe button.css',
   ])
+  const neoRefresh = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'neo-brutalism family refresh',
+  ) as any
+  expect(neoRefresh.families).toEqual(['neo-brutalism'])
+  expect(neoRefresh.logicalPaths).toEqual([
+    'styles/ui-style.css',
+    'components/ui/*.css',
+    'scoped Button preset and recipe button.css',
+  ])
   for (const family of ['flat', 'neo-brutalism'] as const) {
     const result = await compile({
       preset: getCatalog('0.1.0').presets[family],

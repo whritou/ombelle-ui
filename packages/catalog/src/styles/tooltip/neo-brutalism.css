@@ -1,7 +1,7 @@
 /* neo-brutalism Tooltip */
 [data-slot='tooltip-trigger']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
 }
 [data-slot='tooltip-content'] {
   z-index: 50;

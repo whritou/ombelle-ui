@@ -50,7 +50,7 @@ it.each(supportedStyleFamilies)(
     expect(css).toContain('--card-padding: 1rem')
     expect(css).toContain(
       family === 'neo-brutalism'
-        ? 'box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border)'
+        ? 'box-shadow: calc(var(--shadow-x) * 2) calc(var(--shadow-y) * 2) 0'
         : 'box-shadow: none',
     )
     for (const mode of ['light', 'dark'] as const) {

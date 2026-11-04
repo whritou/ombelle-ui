@@ -32,6 +32,24 @@ it.each(['light', 'dark'] as const)('flat %s token pairs reach 4.5:1 and control
   expect(contrastRatio(rgb(m.input), rgb(m.card)), `${mode} input/card`).toBeGreaterThanOrEqual(3)
   expect(contrastRatio(rgb(m.input), rgb(m.background)), `${mode} input/background`).toBeGreaterThanOrEqual(3)
 })
+import neo from '../../packages/catalog/src/presets/neo-brutalism.json'
+it.each(['light', 'dark'] as const)('neo-brutalism %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
+  const m = neo.modes[mode] as Record<string, string>
+  for (const [f, b] of [
+    ['foreground', 'background'],
+    ['cardForeground', 'card'],
+    ['popoverForeground', 'popover'],
+    ['primaryForeground', 'primary'],
+    ['secondaryForeground', 'secondary'],
+    ['mutedForeground', 'muted'],
+    ['accentForeground', 'accent'],
+    ['destructiveForeground', 'destructive'],
+  ])
+    expect(contrastRatio(rgb(m[f]), rgb(m[b])), `${mode} ${f}/${b}`).toBeGreaterThanOrEqual(4.5)
+  for (const surface of ['background', 'card', 'muted'])
+    expect(contrastRatio(rgb(m.input), rgb(m[surface])), `${mode} input/${surface}`).toBeGreaterThanOrEqual(3)
+  expect(contrastRatio(rgb(m.border), rgb(m.card)), `${mode} border/card`).toBeGreaterThanOrEqual(3)
+})
 import minimalist from '../../packages/catalog/src/presets/minimalist.json'
 it.each(['light', 'dark'] as const)('minimalist %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
   const m = minimalist.modes[mode] as Record<string, string>
