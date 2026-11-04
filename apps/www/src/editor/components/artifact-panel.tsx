@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import { recipeFilename } from '../storage'
+import { highlightCode, type CodeLanguage } from './code-highlight'
+import code from './code-view.module.css'
 import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
 
 export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
@@ -22,6 +24,17 @@ function tabContent(tab: Tab, result: RecipeCompileResult, json: string): string
   if (tab === 'Install') return `${installerRunner(publishedInstaller)} add --recipe ./${recipeFilename(result.recipe.data)} --cwd APP --yes`
   const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
   return result.artifacts.find((artifact) => artifact.kind === kind)?.content ?? ''
+}
+
+const languages: Record<Tab, CodeLanguage> = { Usage: 'tsx', Component: 'tsx', CSS: 'css', Recipe: 'json', Install: 'shell' }
+const languageNames: Record<CodeLanguage, string> = { tsx: 'TSX', css: 'CSS', json: 'JSON', shell: 'Shell' }
+
+/** The file name shown on the editor tab: the artifact path where there is one. */
+function tabFile(tab: Tab, result: RecipeCompileResult): string {
+  if (tab === 'Recipe') return recipeFilename(result.recipe.data)
+  if (tab === 'Install') return 'Terminal'
+  const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
+  return result.artifacts.find((artifact) => artifact.kind === kind)?.logicalPath ?? tab
 }
 
 export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = null }: {
@@ -61,9 +74,13 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
             }}
             onClick={() => setTab(item)}>{item}</button>)}
         </div>
-        <div className="artifactToolbar"><span>{tab === 'Install' ? 'Local installation' : tab}</span>
-          <button type="button" onClick={() => void copy()} disabled={stale || (tab === 'Recipe' && !recipeJson)} aria-label={`Copy ${tab}`}>Copy</button></div>
-        <pre role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} tabIndex={0}><code>{content}</code></pre>
+        <div className={code.window}>
+          <div className={code.bar}>
+            <span className={code.file}><span className={code.fileName}>{tabFile(tab, result)}</span><span className={code.lang}>{languageNames[languages[tab]]}</span></span>
+            <button type="button" className={code.copy} onClick={() => void copy()} disabled={stale || (tab === 'Recipe' && !recipeJson)} aria-label={`Copy ${tab}`}>Copy</button>
+          </div>
+          <pre role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} tabIndex={0} className={code.code}><code>{highlightCode(content, languages[tab])}</code></pre>
+        </div>
         {tab === 'Install' && <p className="artifactNote">Run from the folder containing the downloaded {recipeFilename(result.recipe.data)} with Node 24.19.0 or newer Node 24. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
         {tab === 'Recipe' && <p className="artifactNote">ID: {result.recipe.data.id} · Revision: {result.recipe.data.revision}. Changed content at an installed ID and revision needs a new revision.</p>}
       </> : <p>Compiling generated output…</p>}

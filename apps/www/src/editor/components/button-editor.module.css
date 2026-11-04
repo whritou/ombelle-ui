@@ -47,7 +47,6 @@
 .root :global(.colorReset):hover:not(:disabled) { background: var(--muted); color: var(--ink); }
 .root :global(.colorSwatch):hover { border-color: var(--ink); }
 .root :global(.artifactTabs) button:hover:not([aria-selected="true"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
-.root :global(.artifactToolbar) button:hover:not(:disabled) { border-color: var(--control); background: var(--muted); }
 .root :global(.mobileTabs) button:hover:not([aria-current="page"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
 .recoveryActions button:hover:not(:disabled) { background: var(--muted); }
 .recoveryActions button:first-child:hover:not(:disabled) { background: var(--moss); filter: brightness(1.08); }
@@ -63,7 +62,7 @@
 }
 .recoveryActions button:hover { border-color: var(--moss); }
 /* Get code sits in the shared top bar. */
-.root .getCode { display: inline-flex; align-items: center; gap: .375rem; min-height: 32px; border: 0; border-radius: .375rem; white-space: nowrap; background: var(--primary); padding: 0 14px; color: var(--primary-foreground); font-weight: 600; }
+.root .getCode { display: inline-flex; align-items: center; gap: .375rem; min-height: 36px; height: 36px; border: 0; border-radius: .5rem; white-space: nowrap; background: var(--primary); padding: 0 16px; font-size: 15px; color: var(--primary-foreground); font-weight: 600; }
 .root .getCode:disabled { opacity: .55; cursor: not-allowed; }
 .root .getCode:not(:disabled):hover { filter: brightness(1.08); }
 
@@ -160,9 +159,6 @@
 .root :global(.artifactTabs) { display: flex; gap: .15rem; overflow-x: auto; border-bottom: 1px solid var(--line); }
 .root :global(.artifactTabs) button { border: 0; border-bottom: 2px solid transparent; background: none; color: var(--slate); padding: .55rem .75rem; white-space: nowrap; font-size: .83rem; font-weight: 600; }
 .root :global(.artifactTabs) button[aria-selected="true"] { color: var(--moss); border-bottom-color: var(--moss); }
-.root :global(.artifactToolbar) { display: flex; align-items: center; justify-content: space-between; padding: .55rem .7rem; border: 1px solid var(--line); border-bottom: 0; border-radius: .75rem .75rem 0 0; background: var(--surface); font-size: .84rem; font-weight: 600; }
-.root :global(.artifactToolbar) button { border: 1px solid var(--line); border-radius: .35rem; background: var(--white); color: var(--ink); padding: .25rem .65rem; font-size: .8rem; }
-.root :global(.artifacts) pre { margin: 0; padding: 1rem; max-height: 20rem; min-height: 10rem; overflow: auto; border: 1px solid var(--line); border-radius: 0 0 .75rem .75rem; background: var(--muted); color: var(--ink); font: 400 .77rem/1.55 var(--font-mono); }
 .root :global(.artifactNote) { font-size: .83rem; color: var(--slate); margin: .75rem 0 0; }
 .root :global(.artifactMeta) { display: flex; flex-wrap: wrap; gap: .25rem .9rem; margin: 1.25rem 0 0; padding-top: .75rem; border-top: 1px solid var(--line); color: var(--slate); font-size: .79rem; overflow-wrap: anywhere; }
 .root :global(.artifactMeta) span:first-child { font-family: var(--font-mono); }
