@@ -96,9 +96,9 @@ export async function validateTestResults(result, kind) {
   return { passed: assertions, failed: 0, skipped: 0 }
 }
 
-// Seventeen evidence-owning specs, without importing Playwright configuration
+// Seventeen evidence-owning specs (534 cases), without importing Playwright configuration
 // (which needs this runner's consumer roots). Update this contract with added specs.
-const browserSpecCounts = { 'badge.spec.ts': 30, 'card.spec.ts': 30, 'checkbox.spec.ts': 30, 'component-presets.spec.ts': 20, 'editor.spec.ts': 10, 'forms.spec.ts': 30, 'keyboard.spec.ts': 30, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 6, 'preset-editor.spec.ts': 28, 'recipes.spec.ts': 20, 'snapshot-presets.spec.ts': 22, 'recipe-snapshots.spec.ts': 6, 'switch.spec.ts': 30, 'tabs.spec.ts': 30, 'tooltip.spec.ts': 30, 'liquid-glass.spec.ts': 40 }
+const browserSpecCounts = { 'badge.spec.ts': 40, 'card.spec.ts': 40, 'checkbox.spec.ts': 40, 'component-presets.spec.ts': 34, 'editor.spec.ts': 11, 'forms.spec.ts': 40, 'keyboard.spec.ts': 40, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 8, 'preset-editor.spec.ts': 42, 'recipes.spec.ts': 34, 'snapshot-presets.spec.ts': 26, 'recipe-snapshots.spec.ts': 7, 'switch.spec.ts': 40, 'tabs.spec.ts': 40, 'tooltip.spec.ts': 40, 'liquid-glass.spec.ts': 40 }
 export function validateBrowserResults(result) {
   const remaining = { ...browserSpecCounts }, ids = new Set(), titles = new Set()
   let count = 0
