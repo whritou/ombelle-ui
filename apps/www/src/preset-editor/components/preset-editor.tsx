@@ -59,6 +59,8 @@ import {
   useDrawerState,
 } from '../../editor-shell'
 import { PresetChecks, presetWarningCount } from './preset-checks'
+import type { PresetScene } from '../preview-protocol'
+import { sceneComponents, sceneOptions } from '../preview-scenes'
 import styles from './preset-editor.module.css'
 import { useSiteDark } from '../../site/theme'
 
@@ -82,7 +84,8 @@ export default function PresetEditor() {
     [notice, setNotice] = useState('')
   const [restoreWarning, setRestoreWarning] = useState<string | null>(null)
   const [mode, setMode] = useState<'light' | 'dark'>('light'),
-    [viewport, setViewport] = useState<'wide' | 'narrow'>('wide')
+    [viewport, setViewport] = useState<'wide' | 'narrow'>('wide'),
+    [scene, setScene] = useState<PresetScene>('gallery')
   // The preview follows the site theme; the select still overrides it until
   // the theme toggles again.
   const siteDark = useSiteDark()
@@ -401,6 +404,12 @@ export default function PresetEditor() {
                 ]}
                 onChange={setMode}
               />
+              <SegmentedControl<PresetScene>
+                label="Preview page"
+                value={scene}
+                options={sceneOptions}
+                onChange={setScene}
+              />
               <SegmentedControl<typeof viewport>
                 label="Preview width"
                 value={viewport}
@@ -420,10 +429,13 @@ export default function PresetEditor() {
             </div>
             <PresetPreviewFrame
               result={compiled.result}
-              view={{ mode, viewport }}
+              view={scene === 'gallery' ? { mode, viewport } : { mode, viewport, scene }}
               stale={compiled.stale}
               onStatus={setPreviewStatus}
             />
+            <p className={styles.sceneComponents}>
+              Components in this page: {sceneComponents[scene]}
+            </p>
           </div>
         </div>
         <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>

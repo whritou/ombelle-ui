@@ -230,6 +230,54 @@ for (const family of supportedStyleFamilies)
       })
   }
 
+const scenes = [
+  { option: 'Dashboard', heading: 'Overview', components: 'Tabs, Card, Badge, Button, Switch, Tooltip' },
+  { option: 'Settings', heading: 'Settings', components: 'Tabs, Card, Label, Input, Native Select, Textarea, Checkbox, Switch, Button' },
+  { option: 'Sign in', heading: 'Sign in to Acme', components: 'Card, Label, Input, Checkbox, Button' },
+] as const
+for (const family of supportedStyleFamilies)
+  test(`shows the dashboard, settings and sign-in pages in ${family}`, async ({ page }) => {
+    await page.addInitScript(
+      (draft) =>
+        localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
+      createPresetDraft(family),
+    )
+    await page.goto(url)
+    await ready(page)
+    for (const scene of scenes) {
+      await segment(page, 'Preview page', scene.option).click()
+      await ready(page)
+      await expect(
+        frame(page).getByRole('heading', { name: scene.heading, exact: true, level: 1 }),
+      ).toBeVisible()
+      await expect(page.getByText('Components in this page: ' + scene.components)).toBeVisible()
+      const violations = (
+        await new AxeBuilder({ page })
+          .include('iframe[title="Global preset gallery"]')
+          .analyze()
+      ).violations
+      expect(violations).toEqual([])
+    }
+    await segment(page, 'Preview page', 'Gallery').click()
+    await ready(page)
+    await expect(frame(page).getByTestId('preset-gallery')).toBeVisible()
+  })
+
+test('shows labelled placeholders for the form controls liquid glass lacks', async ({ page }) => {
+  await page.addInitScript(
+    (draft) =>
+      localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
+    createPresetDraft('liquid-glass'),
+  )
+  await page.goto(url)
+  await ready(page)
+  await segment(page, 'Preview page', 'Sign in').click()
+  await ready(page)
+  await expect(frame(page).getByRole('heading', { name: 'Sign in to Acme', level: 1 })).toBeVisible()
+  await expect(frame(page).getByText('Unavailable in liquid glass')).toHaveCount(2)
+  await expect(frame(page).getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
+})
+
 test('restores raw draft and history after refresh', async ({ page }) => {
   await page.goto(url)
   await ready(page)

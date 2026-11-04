@@ -6,6 +6,7 @@ import { compile, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedComponentIds } from '@ombelle/contracts'
 import {
+  assertSceneSources,
   writePresetGallery,
   transformGallerySource,
 } from '../../scripts/generate-preset-gallery.js'
@@ -79,4 +80,25 @@ it('removes only known stylesheet imports and rewrites imports without touching 
       new Set(),
     ),
   ).rejects.toThrow('Unknown gallery stylesheet')
+})
+it('lets preview scenes import only reviewed gallery components', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-scenes-'))
+  roots.push(root)
+  const manifest = {
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+    sources: { 'components/ui/button.tsx': { canonicalHash: 'a', transformedHash: 'b' } },
+  } as const
+  await fs.writeFile(
+    path.join(root, 'ok.tsx'),
+    "import { Button } from '../generated/preset-gallery/components/ui/button'\n",
+  )
+  await expect(assertSceneSources(root, manifest)).resolves.toBeUndefined()
+  await fs.writeFile(
+    path.join(root, 'bad.tsx'),
+    "import { Rogue } from '../generated/preset-gallery/components/ui/rogue'\n",
+  )
+  await expect(assertSceneSources(root, manifest)).rejects.toThrow(
+    'bad.tsx imports unreviewed source',
+  )
 })

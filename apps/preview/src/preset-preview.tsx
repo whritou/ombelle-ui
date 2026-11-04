@@ -10,6 +10,7 @@ import {
 import { PresetGallery } from './generated/preset-gallery/gallery'
 import manifest from './generated/preset-gallery/manifest'
 import { gallerySources } from './generated/preset-gallery/sources'
+import { PresetScenePage } from './scenes'
 import './preset-preview.css'
 import { supportedComponentIds } from '../../../packages/contracts/src/component-ids.js'
 import {
@@ -117,6 +118,8 @@ function PresetPreview() {
           // Labels stay so focused form controls keep their accessible names.
           part.hidden = Boolean(focus) && part.dataset.component !== focus && part.dataset.component !== 'label'
     }
+    const scene = current.message.view.scene ?? 'gallery'
+    document.documentElement.dataset.scene = scene
     if (current.message.result.preset.data.styleFamily === 'liquid-glass')
       document.documentElement.dataset.backdrop = 'photo'
     else delete document.documentElement.dataset.backdrop
@@ -134,18 +137,24 @@ function PresetPreview() {
       status: 'applied',
     })
   }, [current])
+  const family = current?.message.result.preset.data.styleFamily
+  const scene = current?.message.view.scene ?? 'gallery'
+  const sceneProps = family
+    ? {
+        unavailable: unavailableIds(family),
+        familyLabel: family.replaceAll('-', ' '),
+      }
+    : { unavailable: [], familyLabel: '' }
   return current ? (
     <>
       <style data-preset-styles>
         {presetRuntimeStyles(current.message.result)}
       </style>
-      <PresetGallery
-        unavailable={unavailableIds(current.message.result.preset.data.styleFamily)}
-        familyLabel={current.message.result.preset.data.styleFamily.replaceAll(
-          '-',
-          ' ',
-        )}
-      />
+      {scene === 'gallery' ? (
+        <PresetGallery {...sceneProps} />
+      ) : (
+        <PresetScenePage scene={scene} {...sceneProps} />
+      )}
     </>
   ) : (
     <p role="status">Waiting for a valid preset…</p>

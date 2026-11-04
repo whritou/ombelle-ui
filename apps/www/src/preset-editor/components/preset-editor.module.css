@@ -402,6 +402,11 @@
   padding: 2px 12px;
   font-size: 13px;
 }
+.sceneComponents {
+  margin: 8px 0 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
 .previewStatus[data-status='ready']::before {
   content: '';
   display: inline-block;

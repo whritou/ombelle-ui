@@ -254,6 +254,8 @@
 
 .segmented {
   display: inline-flex;
+  max-width: 100%;
+  flex-wrap: wrap;
   padding: 2px;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
