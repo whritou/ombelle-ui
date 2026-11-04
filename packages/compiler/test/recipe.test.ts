@@ -9,7 +9,7 @@ const scopedArtifactHashes: Record<string, readonly string[]> = {
     'c013633ad3189eb8d799fec009f7bde5462bd0d11137147ed5788dc63479ae79',
   ],
   minimalist: [
-    'bfb004a57783208daf88fa8e04185589b6b78f00d073d1c456ddc0c9e1f8eb8e',
+    '76dfc85e88ae5d2b0450518eb85748dd2672fa5a4a8b5a51d8a435a245b44be3',
     'b2bc251ec522f6662b69626694c8d8523b4233da6c55e616fe04f22995abe4dd',
   ],
   'neo-brutalism': [
