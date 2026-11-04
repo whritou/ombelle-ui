@@ -27,6 +27,8 @@ On desktop, use a catalog navigation rail, a central preview and output area, an
 
 The properties panel groups controls into style family, component props, colors, shape, spacing, type, effects, and motion. Only show options supported by the selected component and style. Disable unavailable combinations with a reason rather than generating broken output.
 
+The Button editor's inspector has Style family, Content, Variant, Size & behavior, Icon, Padding & gap, Typography, Colors and Shape & depth sections. Number fields are bounded to the recipe schema's ranges, report out-of-range or off-step text instead of applying it, and show a reset once edited. Colors switch between Base, Hover and Pressed; empty hover and pressed fields keep the style family's state colors. Choosing icon-only relabels the content field as the accessible label. Every control writes a recipe field, so the preview, the generated files and `add --recipe` install the same result.
+
 Preview controls include light and dark mode, width presets, relevant interaction states, sample content, and background fixtures. Interaction state is distinct from exported props: forcing focus for a visual review should not emit a `focused` prop that does not exist.
 
 The output area shows usage TSX or JSX, component source, generated CSS, dependencies, and the CLI command. Every tab refers to the same resolved artifact set. Include reset, undo, redo, copy, download, and publish actions with accessible status messages.
