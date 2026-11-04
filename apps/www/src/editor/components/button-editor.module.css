@@ -10,9 +10,10 @@
   color: var(--ink);
   background: var(--white);
   min-height: 100vh;
-  max-width: 90rem;
+  /* Same page frame as the preset editor, so both top bars line up. */
+  max-width: none;
   margin: 0 auto;
-  padding: 0 clamp(1rem, 3vw, 3rem) 3rem;
+  padding: 0 clamp(16px, 2vw, 32px) 48px;
   font: 400 1rem/1.5 var(--font-sans);
 }
 

@@ -218,7 +218,7 @@ export default function PresetEditor() {
           onChange: (value) =>
             commit(setPresetIdentity(draft, 'name', value), 'name'),
         }}
-        revision={`Revision ${draft.identity.revision}`}
+        revision={`r${draft.identity.revision}`}
         status={notice}
         undo={{
           disabled: !history.past.length,
@@ -291,7 +291,7 @@ export default function PresetEditor() {
             describedBy={glass ? glassReadoutId : undefined}
           />
         }
-        extra={<span className={styles.draftNote}>Draft — automated token contrast only</span>}
+        extra={<span className={styles.draftNote} title="Draft — automated token contrast only">Draft — automated token contrast only</span>}
       />
       <h1 className={styles.srOnly}>Preset editor</h1>
       {warning && <p role="alert">{warning}</p>}
