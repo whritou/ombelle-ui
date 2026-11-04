@@ -15,7 +15,7 @@ import { FamilyChip } from './family-chip'
 import { ArtifactPanel } from './artifact-panel'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, SegmentedControl, type OverflowItem } from '../../editor-shell'
+import { EditorTopBar, SegmentedControl, previewModeOptions, previewWidthOptions, type OverflowItem } from '../../editor-shell'
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = { storageVersion: 1, recipe: validateRecipe(exampleRecipe) }
@@ -214,10 +214,10 @@ export function ButtonEditor() {
             <h2 id="preview-title" className={styles.srOnly}>Live preview</h2>
             <div className={styles.viewControls}>
               <SegmentedControl<EditorView['mode']> label="Preview mode" value={view.mode}
-                options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]}
+                options={previewModeOptions}
                 onChange={(mode) => setView((previous) => ({ ...previous, mode }))} />
               <SegmentedControl<EditorView['viewport']> label="Preview width" value={view.viewport}
-                options={[{ value: 'wide', label: 'Wide' }, { value: 'narrow', label: 'Narrow' }]}
+                options={previewWidthOptions('Narrow')}
                 onChange={(viewport) => setView((previous) => ({ ...previous, viewport }))} />
               <SegmentedControl<EditorView['forcedState']> label="Preview state" value={view.forcedState}
                 options={[{ value: 'none', label: 'Rest' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' }, { value: 'active', label: 'Active' }]}

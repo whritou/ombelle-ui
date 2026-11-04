@@ -56,6 +56,8 @@ import {
   InspectorSection,
   ReviewDrawer,
   SegmentedControl,
+  previewModeOptions,
+  previewWidthOptions,
   useDrawerState,
 } from '../../editor-shell'
 import { PresetChecks, presetWarningCount } from './preset-checks'
@@ -402,10 +404,7 @@ export default function PresetEditor() {
               <SegmentedControl<typeof mode>
                 label="Preview mode"
                 value={mode}
-                options={[
-                  { value: 'light', label: 'Light' },
-                  { value: 'dark', label: 'Dark' },
-                ]}
+                options={previewModeOptions}
                 onChange={setMode}
               />
               <SegmentedControl<PresetScene>
@@ -417,10 +416,7 @@ export default function PresetEditor() {
               <SegmentedControl<typeof viewport>
                 label="Preview width"
                 value={viewport}
-                options={[
-                  { value: 'wide', label: 'Wide' },
-                  { value: 'narrow', label: '320 px' },
-                ]}
+                options={previewWidthOptions('320 px')}
                 onChange={setViewport}
               />
               <p

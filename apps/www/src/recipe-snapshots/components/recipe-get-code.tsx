@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, type ReactNode } from 'react'
+import { Code } from 'lucide-react'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import { useRecipePublication } from '../use-publication'
 import { codeInstallCommand } from '../../snapshots/install-command'
@@ -66,6 +67,7 @@ export function RecipeGetCode({
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
+        <Code aria-hidden="true" size={16} />
         Get code
       </button>
       <GetCodeDialog

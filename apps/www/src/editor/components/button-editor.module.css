@@ -43,7 +43,7 @@
 }
 .recoveryActions button:hover { border-color: var(--moss); }
 /* Get code sits in the shared top bar. */
-.root .getCode { display: inline-flex; align-items: center; min-height: 32px; border: 0; border-radius: .375rem; white-space: nowrap; background: var(--primary); padding: 0 14px; color: var(--primary-foreground); font-weight: 600; }
+.root .getCode { display: inline-flex; align-items: center; gap: .375rem; min-height: 32px; border: 0; border-radius: .375rem; white-space: nowrap; background: var(--primary); padding: 0 14px; color: var(--primary-foreground); font-weight: 600; }
 .root .getCode:disabled { opacity: .55; cursor: not-allowed; }
 .root .getCode:not(:disabled):hover { filter: brightness(1.08); }
 

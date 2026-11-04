@@ -190,6 +190,7 @@
 .editor .getCode {
   display: inline-flex;
   align-items: center;
+  gap: 0.375rem;
   min-height: 32px;
   border-radius: 0.375rem;
   background: var(--primary);
@@ -375,7 +376,7 @@
   max-height: calc(100dvh - 32px);
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: var(--paper);
+  background: var(--card);
   overflow: hidden;
 }
 .drawerSlot[data-open] {

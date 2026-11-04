@@ -68,7 +68,9 @@ export function ReviewDrawer({
             }}
           >
             {tab.icon}
-            <span>{tab.label}</span>
+            <span className={styles.railTooltip} aria-hidden="true">
+              {tab.label}
+            </span>
             {tab.badge ? (
               <span className={styles.badge} aria-hidden="true">
                 {tab.badge}

@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, type ReactNode } from 'react'
+import { Code } from 'lucide-react'
 import type { ResolvedPreset } from '@ombelle/contracts'
 import { usePublication } from '../use-publication'
 import { codeInstallCommand } from '../install-command'
@@ -76,6 +77,7 @@ export function PresetGetCode({
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
+        <Code aria-hidden="true" size={16} />
         Get code
       </button>
       <GetCodeDialog

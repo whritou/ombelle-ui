@@ -7,8 +7,8 @@
   gap: 0.5rem 0.75rem;
   padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--border);
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--card);
+  color: var(--foreground);
 }
 
 .crumbs {
@@ -45,8 +45,8 @@
   padding: 0 0.5rem;
   border: 1px solid var(--control);
   border-radius: 0.375rem;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--card);
+  color: var(--foreground);
   font: inherit;
 }
 
@@ -73,10 +73,11 @@
   place-items: center;
   width: 32px;
   height: 32px;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--card);
+  color: var(--foreground);
   cursor: pointer;
 }
 
@@ -104,8 +105,8 @@
   padding: 0.25rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--card);
+  color: var(--foreground);
   box-shadow: 0 8px 24px oklch(0 0 0 / 15%);
 }
 
@@ -222,8 +223,8 @@
   padding: 0 0.375rem;
   border: 1px solid var(--control);
   border-radius: 0.25rem;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--card);
+  color: var(--foreground);
   font: inherit;
 }
 
@@ -280,8 +281,8 @@
 }
 
 .segmented button[aria-pressed='true'] {
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--card);
+  color: var(--foreground);
   box-shadow: 0 1px 2px oklch(0 0 0 / 15%);
 }
 
@@ -296,7 +297,7 @@
   width: 60px;
   padding: 0.5rem 0.25rem;
   border-inline-start: 1px solid var(--border);
-  background: var(--paper);
+  background: var(--card);
 }
 
 .railButton {
@@ -318,7 +319,36 @@
 
 .railButton:hover {
   background: var(--muted);
-  color: var(--ink);
+  color: var(--foreground);
+}
+
+/* Icon-only rail: the label shows as a tooltip on hover and keyboard focus. */
+.railTooltip {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 0.5rem);
+  z-index: 10;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.12s;
+}
+
+.railButton:hover .railTooltip,
+.railButton:focus-visible .railTooltip {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .railTooltip {
+    transition: none;
+  }
 }
 
 .badge {
@@ -328,7 +358,7 @@
   height: 16px;
   border-radius: 50%;
   background: var(--warning);
-  color: var(--paper);
+  color: var(--background);
   font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1;
@@ -347,8 +377,8 @@
   max-width: 340px;
   min-width: 0;
   border-inline-start: 1px solid var(--border);
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--card);
+  color: var(--foreground);
 }
 
 .drawerHead {
@@ -383,7 +413,7 @@
 
 .tabs button[aria-selected='true'] {
   background: var(--primary-soft);
-  color: var(--ink);
+  color: var(--foreground);
 }
 
 .panel {
