@@ -68,12 +68,14 @@ describe('catalog contract', () => {
         "[data-slot='tooltip-content']",
         "[data-slot='tooltip-arrow']",
         "[data-slot='tooltip-trigger']:focus-visible",
-        'var(--popover)',
-        'var(--popover-foreground)',
         '@media (forced-colors: active)',
         '@media (prefers-reduced-motion: reduce)',
       ])
         expect(css).toContain(rule)
+      // Minimalist paints its tooltip with the card surface; the others use popover.
+      const surface = family === 'minimalist' ? 'card' : 'popover'
+      expect(css).toContain(`var(--${surface})`)
+      expect(css).toContain(`var(--${surface}-foreground)`)
       expect(css).not.toMatch(/(?:left|right):/)
     }
   })

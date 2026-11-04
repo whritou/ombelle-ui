@@ -37,8 +37,8 @@
   display: none;
 }
 [data-slot='checkbox']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
 }
 [data-slot='checkbox'][aria-invalid='true'] {
   border-color: var(--destructive);

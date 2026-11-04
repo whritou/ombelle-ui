@@ -11,10 +11,12 @@
   min-inline-size: 0;
   min-height: var(--control-height);
   font-family: var(--font-family);
-  border: var(--border-width) solid var(--input);
-  border-radius: var(--radius);
+  border: 0;
+  border-bottom: var(--border-width) solid var(--input);
+  border-radius: 0;
   padding: 0.5rem 1rem;
-  background: var(--background);
+  padding-inline-start: 0;
+  background: transparent;
   color: var(--foreground);
   transition: background-color var(--motion-duration), border-color var(--motion-duration);
   box-shadow: none;
@@ -24,14 +26,14 @@
 [data-slot='native-select'][data-size='sm'] {
   min-height: 2rem;
   padding-block: 0.25rem;
-  padding-inline-start: 0.75rem;
+  padding-inline-start: 0;
 }
 [data-slot='native-select'][multiple] {
-  padding-inline-end: 1rem;
+  padding-inline-end: 0;
 }
 [data-slot='native-select-icon'] {
   position: absolute;
-  inset-inline-end: 1rem;
+  inset-inline-end: 0.25rem;
   inset-block-start: 50%;
   translate: 0 -50%;
   inline-size: 1rem;
@@ -40,12 +42,15 @@
   pointer-events: none;
 }
 [data-slot='native-select']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
 }
-[data-slot='native-select'][aria-invalid='true'] {
-  border-color: var(--destructive);
-  border-width: max(var(--border-width), 2px);
+[data-slot='native-select']:focus-visible {
+  border-bottom: 2px solid var(--ring);
+}
+[data-slot='native-select'][aria-invalid='true'],
+[data-slot='native-select'][aria-invalid='true']:focus-visible {
+  border-bottom: 2px solid var(--destructive);
 }
 [data-slot='native-select-wrapper']:has(select:disabled) {
   opacity: 0.5;
@@ -60,8 +65,11 @@ select[multiple] + [data-slot='native-select-icon'] {
   [data-slot='native-select'] {
     background: Field;
     color: FieldText;
-    border-color: ButtonText;
+    border-bottom-color: ButtonText;
     box-shadow: none;
+  }
+  [data-slot='native-select']:focus-visible {
+    border-bottom-color: Highlight;
   }
   [data-slot='native-select-icon'] {
     color: ButtonText;
@@ -69,7 +77,9 @@ select[multiple] + [data-slot='native-select-icon'] {
   [data-slot='native-select']:focus-visible {
     outline-color: Highlight;
   }
-  [data-slot='native-select'][aria-invalid='true'] {
-    border-style: double;
+  [data-slot='native-select'][aria-invalid='true'],
+  [data-slot='native-select'][aria-invalid='true']:focus-visible {
+    border-bottom-style: double;
+    border-bottom-width: 4px;
   }
 }

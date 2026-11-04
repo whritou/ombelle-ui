@@ -20,14 +20,14 @@ async function colors(locator:Locator,pseudo?:string){
   const behind=(element:Element|null):number[]=>{if(!element)return rgba('Canvas');return over(rgba(getComputedStyle(element).backgroundColor),behind(element.parentElement))}
   const style=getComputedStyle(el,pseudo),background=behind(el),foreground=rgba(style.color)
   if(pseudo)foreground[3]*=Number(style.opacity)
-  return {foreground:over(foreground,background).slice(0,3),background:background.slice(0,3),border:over(rgba(style.borderTopColor),background).slice(0,3),outside:behind(el.parentElement).slice(0,3),outline:over(rgba(style.outlineColor),behind(el.parentElement)).slice(0,3),outlineWidth:parseFloat(style.outlineWidth),outlineOffset:parseFloat(style.outlineOffset),bgRaw:rgba(style.backgroundColor),transform:style.transform}
+  return {foreground:over(foreground,background).slice(0,3),background:background.slice(0,3),border:over(rgba(style.borderTopColor),background).slice(0,3),borderBottom:over(rgba(style.borderBottomColor),background).slice(0,3),outside:behind(el.parentElement).slice(0,3),outline:over(rgba(style.outlineColor),behind(el.parentElement)).slice(0,3),outlineWidth:parseFloat(style.outlineWidth),outlineOffset:parseFloat(style.outlineOffset),bgRaw:rgba(style.backgroundColor),transform:style.transform}
  },pseudo??null)
 }
 const pair=(a:number[],b:number[])=>contrastRatio(a as [number,number,number],b as [number,number,number])
 async function textContrast(locator:Locator,pseudo?:string){const c=await colors(locator,pseudo),ratio=pair(c.foreground,c.background);expect(ratio).toBeGreaterThanOrEqual(4.5);return ratio}
 async function boundaryContrast(locator:Locator,variant:string){
  if(variant==='ghost'||variant==='link')return undefined
- const c=await colors(locator),ratio=pair(variant==='outline'||variant==='secondary'?c.border:c.background,c.outside)
+ const c=await colors(locator),ratio=pair(variant==='outline'||variant==='secondary'||variant==='destructive'?c.border:c.background,c.outside)
  expect(ratio).toBeGreaterThanOrEqual(3);return ratio
 }
 async function unclipped(locator:Locator){
@@ -83,8 +83,8 @@ for(const mode of ['light','dark']){
   const input=page.getByTestId('empty-input');await input.scrollIntoViewIfNeeded()
   expect(await input.evaluate(el=>el.matches(':placeholder-shown'))).toBe(true)
   ratios.placeholder=await textContrast(input,'::placeholder');await input.focus();ratios.placeholderFocus=await textContrast(input,'::placeholder')
-  const c=await colors(input);ratios.inputBoundary=Math.min(pair(c.border,c.background),pair(c.border,c.outside));ratios.focus=pair(c.outline,c.outside)
-  expect(ratios.inputBoundary).toBeGreaterThanOrEqual(3);expect(ratios.focus).toBeGreaterThanOrEqual(3);expect(c.outlineWidth).toBeGreaterThanOrEqual(3);await unclipped(input)
+  const c=await colors(input);ratios.inputBoundary=Math.min(pair(c.borderBottom,c.background),pair(c.borderBottom,c.outside));ratios.focus=pair(c.outline,c.outside)
+  expect(ratios.inputBoundary).toBeGreaterThanOrEqual(3);expect(ratios.focus).toBeGreaterThanOrEqual(3);expect(c.outlineWidth).toBeGreaterThanOrEqual(1);expect(c.outlineOffset).toBeGreaterThanOrEqual(4);await expect(input).toHaveCSS('border-bottom-width','2px');await unclipped(input)
   ratios.muted=await textContrast(page.locator('.note'))
   expect((await new AxeBuilder({page}).analyze()).violations).toEqual([])
   await page.getByTestId('state-dialog-trigger').focus();await page.getByTestId('state-dialog-trigger').press('Enter');await expect(page.getByTestId('state-dialog-accept')).toBeFocused();expect((await colors(page.getByRole('dialog'))).bgRaw[3]).toBe(255)
@@ -96,7 +96,7 @@ for(const mode of ['light','dark']){
   await page.keyboard.press('Escape');await expect(page.getByTestId('state-dialog-trigger')).toBeFocused()
   await page.emulateMedia({reducedMotion:'no-preference'});await page.evaluate(()=>document.documentElement.style.setProperty('--motion-duration','150ms'))
   await expect(input).toHaveCSS('transition-duration','0.15s, 0.15s');await page.emulateMedia({reducedMotion:'reduce'});await expect(input).toHaveCSS('transition-duration','0s')
-  await page.emulateMedia({forcedColors:'active'});await input.focus();const forced=await colors(input);expect(forced.outlineWidth).toBeGreaterThanOrEqual(3);expect(pair(forced.outline,forced.outside)).toBeGreaterThanOrEqual(3);expect(pair(forced.border,forced.background)).toBeGreaterThanOrEqual(3)
+  await page.emulateMedia({forcedColors:'active'});await input.focus();const forced=await colors(input);expect(forced.outlineWidth).toBeGreaterThanOrEqual(1);expect(pair(forced.outline,forced.outside)).toBeGreaterThanOrEqual(3);expect(pair(forced.borderBottom,forced.background)).toBeGreaterThanOrEqual(3)
   await page.emulateMedia({forcedColors:'none',reducedMotion:'reduce'})
   const textEvidence:unknown[]=[]
   for(const width of [1100,320])for(const open of [false,true]){

@@ -1,7 +1,7 @@
 /* minimalist Tooltip */
 [data-slot='tooltip-trigger']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
 }
 [data-slot='tooltip-content'] {
   z-index: 50;
@@ -10,17 +10,17 @@
   padding-inline: 0.75rem;
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
-  background: var(--popover);
-  color: var(--popover-foreground);
+  background: var(--card);
+  color: var(--card-foreground);
   font-family: var(--font-family);
   font-size: 0.875rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
-  box-shadow: none;
+  box-shadow: 0 6px 16px -8px rgb(0 0 0 / 18%);
   animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
 }
 [data-slot='tooltip-arrow'] {
-  fill: var(--popover);
+  fill: var(--card);
   stroke: var(--border);
   stroke-width: var(--border-width);
 }

@@ -113,6 +113,18 @@
       ],
       "spec": "docs/superpowers/plans/2026-11-04-editor-and-style-family-refresh.md",
       "reason": "flat family refresh"
+    },
+    {
+      "families": [
+        "minimalist"
+      ],
+      "logicalPaths": [
+        "styles/ui-style.css",
+        "components/ui/*.css",
+        "scoped Button preset and recipe button.css"
+      ],
+      "spec": "docs/superpowers/plans/2026-11-04-editor-and-style-family-refresh.md",
+      "reason": "minimalist family refresh"
     }
   ]
 }
