@@ -1,7 +1,8 @@
 // Aligns every current-version site with one release version.
 //   node scripts/set-version.mjs <x.y.z> [--date YYYY-MM-DD]   workspace release
 //   node scripts/set-version.mjs --published <x.y.z>           after npm publication
-//   node scripts/set-version.mjs --check                       verify alignment
+//   node scripts/set-version.mjs --check                       verify workspace alignment
+//   node scripts/set-version.mjs --check --published           verify the published-installer sites
 // Add --root <dir> to operate on another checkout. Each site is an explicit
 // { file, pattern } entry whose named group `v` is the version. A pattern that
 // does not match exactly once is an error; nothing is written in that case.
@@ -99,25 +100,28 @@ function formatDate(isoDate) {
   return Number(match[3]) + ' ' + months[month - 1] + ' ' + match[1]
 }
 
-function check(root) {
-  const reference = findOnly(readSite(root, 'packages/cli/package.json'), packageSites[3]).value
+function check(root, published) {
+  const sites = published ? publishedSites : workspaceSites
+  const reference = published
+    ? findOnly(readSite(root, publishedSites[0].file), publishedSites[0]).value
+    : findOnly(readSite(root, 'packages/cli/package.json'), packageSites[3]).value
   const stale = []
-  for (const site of workspaceSites) {
+  for (const site of sites) {
     const { value } = findOnly(readSite(root, site.file), site)
     if (value !== reference) stale.push(site.file + ' has ' + value + ', expected ' + reference)
   }
   if (stale.length > 0) {
-    console.error('set-version: version sites disagree with packages/cli/package.json:')
+    console.error('set-version: version sites disagree with ' + (published ? publishedSites[0].file : 'packages/cli/package.json') + ':')
     for (const line of stale) console.error('  ' + line)
     process.exit(1)
   }
-  console.log('All ' + workspaceSites.length + ' version sites match ' + reference)
+  console.log('All ' + sites.length + ' version sites match ' + reference)
 }
 
 const options = parseArguments(process.argv.slice(2))
 if (options.check) {
-  if (options.version || options.published) fail('--check takes no version')
-  check(options.root)
+  if (options.version) fail('--check takes no version')
+  check(options.root, options.published)
 } else {
   if (!options.version || !semver.test(options.version)) fail('expected a version such as 0.4.0')
   const version = options.version

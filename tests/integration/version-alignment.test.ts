@@ -95,6 +95,20 @@ it('--published only flips website commands', async () => {
   expect(await read(dir, 'README.md')).toContain('The six workspace packages are version **0.3.0**')
 })
 
+it('the website installer version matches every published-sentence site in the repository', async () => {
+  const result = await run(['--check', '--published'])
+  expect(result.code, result.stderr).toBe(0)
+})
+
+it('--check --published names a doc that disagrees with the website installer', async () => {
+  const dir = await copyRepoSubset(publishedFiles)
+  const file = path.join(dir, 'docs/snapshot-service-operations.md')
+  await fs.writeFile(file, (await fs.readFile(file, 'utf8')).replace('cli@0.3.0', 'cli@0.2.9'))
+  const result = await run(['--check', '--published', '--root', dir])
+  expect(result.code).toBe(1)
+  expect(result.stderr).toContain('docs/snapshot-service-operations.md')
+})
+
 it('--check fails and names a misaligned package', async () => {
   const dir = await copyRepoSubset(workspaceFiles)
   expect((await run(['--check', '--root', dir])).code).toBe(0)
