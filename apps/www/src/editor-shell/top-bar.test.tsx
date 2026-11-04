@@ -42,7 +42,7 @@ it('OverflowMenu puts destructive items last after a separator', () => {
     />,
   )
   expect(html).toContain('aria-label="More"')
-  expect(html).toContain('popovertarget="m"')
+  expect(html).toContain('popoverTarget="m"')
   expect(html).toContain('role="menu"')
   expect(html.match(/role="menuitem"/g)).toHaveLength(3)
   expect(html).toContain('role="separator"')

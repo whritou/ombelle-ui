@@ -44,7 +44,7 @@ export function OverflowMenu({
         type="button"
         className={styles.iconButton}
         aria-label={label}
-        {...{ popovertarget: id }}
+        popoverTarget={id}
       >
         <Ellipsis aria-hidden="true" size={16} />
       </button>

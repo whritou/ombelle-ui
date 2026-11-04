@@ -20,7 +20,8 @@ it('SliderRow puts the range on its own line and shows reset only when edited', 
   const html = renderToStaticMarkup(<SliderRow {...slider} />)
   expect(html).toContain('data-row="slider"')
   expect(html).toContain('type="range"')
-  expect(html).toContain('type="number"')
+  expect(html).toContain('inputMode="decimal"')
+  expect(html).not.toContain('type="number"')
   expect(html).toContain('aria-label="Reset corner radius"')
   expect(renderToStaticMarkup(<SliderRow {...slider} edited={false} />)).not.toContain(
     'Reset corner radius',

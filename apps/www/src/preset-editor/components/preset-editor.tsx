@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
+import type { StyleFamily } from '@ombelle/contracts'
 import {
   createPresetDraft,
   presetGlassReport,
@@ -32,9 +32,11 @@ import {
 } from '../contrast'
 import { PresetPreviewFrame } from './preset-preview-frame'
 import {
-  ColorControls,
   DesignControls,
+  FamilyPicker,
   ThemeControls,
+  TokenList,
+  familyNames,
   fieldId,
   revealPresetField,
 } from './preset-controls'
@@ -48,18 +50,15 @@ import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { PresetGetCode } from '../../snapshots/components/preset-get-code'
 import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
+import {
+  EditorTopBar,
+  InspectorSection,
+  SegmentedControl,
+} from '../../editor-shell'
 import styles from './preset-editor.module.css'
 import { useSiteDark } from '../../site/theme'
 
-const familyLabel = (family: StyleFamily) =>
-  family === 'liquid-glass' ? 'Liquid glass (Experimental)' : family
-const familyName = (family: StyleFamily) =>
-  ({
-    flat: 'Flat',
-    minimalist: 'Minimalist',
-    'neo-brutalism': 'Neo-brutalism',
-    'liquid-glass': 'Liquid glass',
-  })[family] ?? family
+const familyName = (family: StyleFamily) => familyNames[family]
 /** "/modes/dark/primaryForeground" → "Dark primary foreground". */
 const changeLabel = (path: string) => {
   const [, group, a, b] = path.split('/')
@@ -91,6 +90,7 @@ export default function PresetEditor() {
     (FamilyChange & { label: string; description: string }) | null
   >(null)
   const dialog = useRef<HTMLDialogElement>(null),
+    identityDialog = useRef<HTMLDialogElement>(null),
     cancelButton = useRef<HTMLButtonElement>(null),
     returnFocus = useRef<HTMLElement | null>(null)
   const undoButton = useRef<HTMLButtonElement>(null),
@@ -170,21 +170,11 @@ export default function PresetEditor() {
   // A glass draft below the contrast bound cannot be exported or published.
   const glassBlocked = glassReport !== null && !glassReport.passes
   const warnings = contrast.filter((pair) => pair.status === 'warning').length
-  const identity = (['name', 'id', 'revision'] as const).map((key) => (
-    <div className={styles.field} key={key}>
-      <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
-      <input
-        id={fieldId('/' + key)}
-        value={draft.identity[key]}
-        maxLength={key === 'revision' ? 16 : 80}
-        inputMode={key === 'revision' ? 'numeric' : undefined}
-        aria-invalid={diagnostic?.path === '/' + key || undefined}
-        onChange={(e) =>
-          commit(setPresetIdentity(draft, key, e.target.value), key)
-        }
-      />
-    </div>
-  ))
+  const warnedTokens = new Set(
+    contrast
+      .filter((pair) => pair.status === 'warning')
+      .flatMap((pair) => [pair.foreground, pair.background]),
+  )
   const controlProps = {
     draft,
     errorPath: diagnostic?.path,
@@ -195,96 +185,85 @@ export default function PresetEditor() {
   }
   return (
     <main className={styles.editor} aria-label="Global preset editor">
-      <div className={styles.top}>
-        <header>
-          <p className={styles.crumb}>
-            <a href="/">Ombelle</a> <span aria-hidden="true">/</span> Project
-            preset
-          </p>
-          <h1>Global preset editor</h1>
-          <p>Make a theme that follows your next component into your project.</p>
-          <p className={styles.badge}>Draft — automated token contrast only</p>
-        </header>
-        <div className={`${styles.toolbar} ${styles.actions}`}>
-          <label htmlFor="preset-family">Style family</label>
-          <select
-            id="preset-family"
-            value={draft.family}
-            onChange={(e) => family(e.target.value as StyleFamily)}
-          >
-            {styleFamilies.map((family) => (
-              <option key={family} value={family}>
-                {familyLabel(family)}
-              </option>
-            ))}
-          </select>
-          <button
-            ref={undoButton}
-            type="button"
-            disabled={!history.past.length}
-            onClick={() => {
-              // The last undo disables this button; move focus to Redo instead of the page.
-              if (history.past.length === 1)
-                focusAfterHistory.current = redoButton.current
-              setHistory(undoPreset)
-            }}
-          >
-            Undo
-          </button>
-          <button
-            ref={redoButton}
-            type="button"
-            disabled={!history.future.length}
-            onClick={() => {
-              if (history.future.length === 1)
-                focusAfterHistory.current = undoButton.current
-              setHistory(redoPreset)
-            }}
-          >
-            Redo
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              confirm(
-                { draft: resetPresetTokens(draft), changes: [] },
-                'Reset all tokens?',
-                `Colors and design values go back to the ${familyName(draft.family)} defaults. The preset name, id and revision stay. You can undo this.`,
-              )
-            }
-          >
-            Reset all tokens
-          </button>
+      <h1 className={styles.srOnly}>Global preset editor</h1>
+      <EditorTopBar
+        crumbs={['Presets']}
+        nameField={{
+          id: fieldId('/name'),
+          label: 'Preset name',
+          value: draft.identity.name,
+          maxLength: 80,
+          invalid: diagnostic?.path === '/name',
+          onChange: (value) =>
+            commit(setPresetIdentity(draft, 'name', value), 'name'),
+        }}
+        revision={`Revision ${draft.identity.revision}`}
+        status={notice}
+        undo={{
+          disabled: !history.past.length,
+          buttonRef: undoButton,
+          onClick: () => {
+            // The last undo disables this button; move focus to Redo instead of the page.
+            if (history.past.length === 1)
+              focusAfterHistory.current = redoButton.current
+            setHistory(undoPreset)
+          },
+        }}
+        redo={{
+          disabled: !history.future.length,
+          buttonRef: redoButton,
+          onClick: () => {
+            if (history.future.length === 1)
+              focusAfterHistory.current = undoButton.current
+            setHistory(redoPreset)
+          },
+        }}
+        menu={{
+          label: 'More actions',
+          items: [
+            {
+              id: 'download-json',
+              label: 'Download JSON',
+              onSelect: () => {
+                try {
+                  downloadPresetText(
+                    serializePresetExport(compiled, draft),
+                    'project-preset.json',
+                  )
+                  setNotice('Preset JSON downloaded.')
+                } catch {
+                  setNotice('Download failed. Your draft is intact.')
+                }
+              },
+            },
+            {
+              id: 'identity',
+              label: 'ID & revision…',
+              onSelect: () => identityDialog.current?.showModal(),
+            },
+            {
+              id: 'reset-tokens',
+              label: 'Reset all tokens…',
+              destructive: true,
+              onSelect: () =>
+                confirm(
+                  { draft: resetPresetTokens(draft), changes: [] },
+                  'Reset all tokens?',
+                  `Colors and design values go back to the ${familyName(draft.family)} defaults. The preset name, id and revision stay. You can undo this.`,
+                ),
+            },
+          ],
+        }}
+        primary={
           <PresetGetCode
             className={styles.getCode}
             preset={compiled.result?.preset ?? null}
             current={canExportPreset(compiled, draft) && !glassBlocked}
             announce={setNotice}
             describedBy={glass ? glassReadoutId : undefined}
-            secondary={
-              <button
-                type="button"
-                onClick={() => {
-                  try {
-                    downloadPresetText(
-                      serializePresetExport(compiled, draft),
-                      'project-preset.json',
-                    )
-                    setNotice('Preset JSON downloaded.')
-                  } catch {
-                    setNotice('Download failed. Your draft is intact.')
-                  }
-                }}
-              >
-                Download JSON instead
-              </button>
-            }
           />
-        </div>
-      </div>
-      <p role="status" aria-live="polite" className={styles.notice}>
-        {notice}
-      </p>
+        }
+      />
       {warning && <p role="alert">{warning}</p>}
       {restoreWarning && <p role="alert">{restoreWarning}</p>}
       {recovery !== null && (
@@ -362,10 +341,15 @@ export default function PresetEditor() {
         </div>
       )}
       <div className={styles.workbench}>
-        <section aria-labelledby="preset-controls-heading" className={styles.panel}>
-          <h2 id="preset-controls-heading">Customize</h2>
-          <div className={styles.group}>
-            <h3>Theme</h3>
+        <section aria-label="Preset inspector" className={styles.panel}>
+          <InspectorSection id="inspector-family" title="Style family">
+            <FamilyPicker value={draft.family} onChange={family} />
+          </InspectorSection>
+          <InspectorSection
+            id="inspector-colors"
+            title="Colors"
+            meta="Light and dark"
+          >
             <ThemeControls
               draft={draft}
               onApply={(scheme, group) =>
@@ -381,44 +365,36 @@ export default function PresetEditor() {
                 )
               }
             />
-            <details className={styles.disclosure}>
-              <summary>Customize all colors</summary>
-              <p className={styles.groupHint}>
-                Light and dark values. Select a token to edit it.
-              </p>
-              <ColorControls {...controlProps} />
-            </details>
-          </div>
-          <div className={styles.group}>
-            <h3>Design</h3>
-            <DesignControls {...controlProps} />
-          </div>
-          <div className={styles.group}>
-            <h3>Identity</h3>
-            {identity}
-          </div>
+            <TokenList {...controlProps} warnings={warnedTokens} />
+          </InspectorSection>
+          <InspectorSection id="inspector-shape" title="Typography & shape">
+            <DesignControls {...controlProps} section="shape" />
+          </InspectorSection>
+          <InspectorSection id="inspector-depth" title="Depth & motion">
+            <DesignControls {...controlProps} section="depth" />
+          </InspectorSection>
         </section>
         <div className={styles.canvas}>
           <div className={styles.preview}>
             <div className={`${styles.toolbar} ${styles.previewBar}`}>
-              <label htmlFor="preset-mode">Preview mode</label>
-              <select
-                id="preset-mode"
+              <SegmentedControl<typeof mode>
+                label="Preview mode"
                 value={mode}
-                onChange={(e) => setMode(e.target.value as typeof mode)}
-              >
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-              <label htmlFor="preset-width">Preview width</label>
-              <select
-                id="preset-width"
+                options={[
+                  { value: 'light', label: 'Light' },
+                  { value: 'dark', label: 'Dark' },
+                ]}
+                onChange={setMode}
+              />
+              <SegmentedControl<typeof viewport>
+                label="Preview width"
                 value={viewport}
-                onChange={(e) => setViewport(e.target.value as typeof viewport)}
-              >
-                <option value="wide">Wide</option>
-                <option value="narrow">320 pixels</option>
-              </select>
+                options={[
+                  { value: 'wide', label: 'Wide' },
+                  { value: 'narrow', label: '320 px' },
+                ]}
+                onChange={setViewport}
+              />
               <button
                 type="button"
                 popoverTarget="preset-contrast-panel"
@@ -530,6 +506,41 @@ export default function PresetEditor() {
             onClick={() => finishConfirmation(true)}
           >
             Confirm change
+          </button>
+        </div>
+      </dialog>
+      <dialog
+        ref={identityDialog}
+        className={styles.confirmDialog}
+        aria-labelledby="preset-identity-heading"
+      >
+        <h2 id="preset-identity-heading">ID &amp; revision</h2>
+        <p className={styles.confirmText}>
+          The id names this preset in your project. Raise the revision when you
+          publish a changed version.
+        </p>
+        {(['id', 'revision'] as const).map((key) => (
+          <div className={styles.field} key={key}>
+            <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
+            <input
+              id={fieldId('/' + key)}
+              value={draft.identity[key]}
+              maxLength={key === 'revision' ? 16 : 80}
+              inputMode={key === 'revision' ? 'numeric' : undefined}
+              aria-invalid={diagnostic?.path === '/' + key || undefined}
+              onChange={(e) =>
+                commit(setPresetIdentity(draft, key, e.target.value), key)
+              }
+            />
+          </div>
+        ))}
+        <div className={styles.confirmActions}>
+          <button
+            type="button"
+            className={styles.confirmPrimary}
+            onClick={() => identityDialog.current?.close()}
+          >
+            Done
           </button>
         </div>
       </dialog>

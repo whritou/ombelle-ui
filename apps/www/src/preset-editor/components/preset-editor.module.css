@@ -22,11 +22,6 @@
   font-size: revert;
   font-weight: revert;
 }
-.editor header {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 24px;
-  margin-bottom: 20px;
-}
 .editor h1 {
   font-size: clamp(32px, 4.4vw, 52px);
   font-weight: 900;
@@ -34,30 +29,30 @@
   letter-spacing: -0.03em;
   margin: 12px 0;
 }
-.editor h2 {
+:where(.editor) h2 {
   font-size: 22px;
   font-weight: 800;
   margin: 24px 0 12px;
 }
-.editor h3 {
+:where(.editor) h3 {
   font-size: 18px;
   margin-top: 24px;
 }
-.editor p {
+:where(.editor) p {
   margin: 10px 0;
   line-height: 1.6;
 }
-.editor a {
+:where(.editor) a {
   color: var(--foreground);
   font-weight: 600;
   text-decoration: underline;
   text-decoration-color: var(--primary);
   text-underline-offset: 4px;
 }
-.editor button,
-.editor input,
-.editor select,
-.editor textarea {
+:where(.editor) button,
+:where(.editor) input,
+:where(.editor) select,
+:where(.editor) textarea {
   font: inherit;
   border: 1px solid var(--control);
   border-radius: 8px;
@@ -66,13 +61,13 @@
   color: var(--foreground);
   min-height: 44px;
 }
-.editor button {
+:where(.editor) button {
   cursor: pointer;
   border-radius: 999px;
   padding-inline: 16px;
   font-weight: 600;
 }
-.editor button:disabled {
+:where(.editor) button:disabled {
   opacity: 0.5;
   cursor: default;
 }
@@ -104,7 +99,7 @@
   font-weight: 600;
   padding: 8px 0;
 }
-.editor label {
+:where(.editor) label {
   display: block;
   font-size: 14px;
   font-weight: 600;
@@ -134,8 +129,8 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.editor input,
-.editor textarea {
+:where(.editor) input,
+:where(.editor) textarea {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -185,71 +180,16 @@
 }
 
 /* Header and global actions share one bar. */
-.top {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px 24px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 20px;
-}
-.top header {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  max-width: 40rem;
-}
-.top header p {
-  margin: 4px 0;
-  color: var(--muted-foreground);
-}
-.editor .top h1 {
-  margin: 4px 0;
-  font-size: clamp(28px, 3.2vw, 40px);
-}
-.top .crumb {
-  margin: 0 0 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.crumb a {
-  color: var(--primary);
-  text-decoration: none;
-}
-.top .badge {
-  display: inline-block;
-  margin-top: 8px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 2px 12px;
-  font-size: 13px;
-}
-.actions {
-  gap: 8px;
-}
-.actions label {
-  font-size: 13px;
-  color: var(--muted-foreground);
-}
 .editor .getCode {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  border-radius: 999px;
+  min-height: 32px;
+  border-radius: 0.375rem;
   background: var(--primary);
-  padding: 0 18px;
+  padding: 0 14px;
   color: var(--primary-foreground);
   font-weight: 600;
   text-decoration: none;
-}
-.notice {
-  min-height: 1.6em;
-  margin: 8px 0;
-  font-size: 14px;
-  color: var(--muted-foreground);
 }
 
 /* Workbench: a compact control panel beside a large canvas, like shadcn/create. */
@@ -271,31 +211,6 @@
   background: var(--card);
   padding: 4px 14px 14px;
 }
-.editor .panel > h2 {
-  margin: 12px 0 4px;
-  font-size: 15px;
-}
-.group {
-  border-top: 1px solid var(--border);
-  padding: 12px 0 4px;
-}
-.panel > h2 + .group {
-  border-top: 0;
-}
-.editor .group h3 {
-  margin: 0 0 8px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-.editor .groupHint {
-  margin: -4px 0 8px;
-  font-size: 12px;
-  color: var(--muted-foreground);
-}
 .field {
   display: grid;
   grid-template-columns: 5.5rem minmax(0, 1fr);
@@ -303,15 +218,13 @@
   gap: 8px;
   margin-bottom: 6px;
 }
-.editor .field label,
-.editor :global(.preset-design-row) > label {
+.editor .field label {
   font-size: 13px;
   font-weight: 500;
   color: var(--muted-foreground);
   text-transform: capitalize;
 }
-.editor .field input,
-.editor :global(.preset-design-row) :is(input, select) {
+.editor .field input {
   min-height: 36px;
   padding: 6px 10px;
   font-size: 13px;
@@ -438,18 +351,6 @@
   font-family: var(--font-mono);
   font-size: 13px;
 }
-.editor :global(.preset-design-row) {
-  display: grid;
-  grid-template-columns: 6.5rem minmax(0, 1fr);
-  align-items: center;
-  gap: 2px 8px;
-  margin-bottom: 6px;
-}
-.editor :global(.preset-design-row) small {
-  grid-column: 2;
-  font-size: 11px;
-  color: var(--muted-foreground);
-}
 .editor :global(.preset-reset) {
   display: inline-flex;
   flex: 0 0 auto;
@@ -482,15 +383,6 @@
 .previewBar {
   gap: 8px;
   margin-bottom: 8px;
-}
-.previewBar label {
-  font-size: 13px;
-  color: var(--muted-foreground);
-}
-.previewBar select {
-  min-height: 36px;
-  padding: 4px 10px;
-  font-size: 13px;
 }
 .editor .contrastChip {
   min-height: 36px;
@@ -676,20 +568,6 @@
   max-width: none;
   padding: 20px clamp(16px, 2vw, 32px) 48px;
 }
-.top {
-  align-items: center;
-  padding-bottom: 14px;
-}
-.editor .top h1 {
-  margin: 2px 0;
-  font-size: clamp(24px, 2.2vw, 30px);
-}
-.top header p {
-  font-size: 14px;
-}
-.top .crumb {
-  margin-bottom: 2px;
-}
 @media (min-width: 961px) {
   .workbench {
     grid-template-columns: 21rem minmax(0, 1fr);
@@ -721,30 +599,6 @@
 }
 
 /* Collapsible full colour list under the scheme picker. */
-.disclosure {
-  margin-top: 10px;
-}
-.disclosure > summary {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  list-style: none;
-}
-.disclosure > summary::-webkit-details-marker {
-  display: none;
-}
-.disclosure > summary::before {
-  content: '▸';
-  font-size: 11px;
-  color: var(--muted-foreground);
-}
-.disclosure[open] > summary::before {
-  content: '▾';
-}
 
 /* Theme scheme picker. */
 .editor :global(.preset-schemes) {
@@ -794,38 +648,17 @@
 }
 
 /* Numeric design values: slider plus an exact number field. */
-.editor :global(.preset-design-row) :global(.preset-input-row) {
-  gap: 8px;
-}
-.editor :global(.preset-design-row) input:global(.preset-slider) {
-  flex: 1;
-  min-width: 0;
-  min-height: 24px;
-  padding: 0;
-  background: transparent;
-  accent-color: var(--primary);
-}
-.editor :global(.preset-design-row) input:global(.preset-number) {
-  flex: 0 0 4.5rem;
-  width: 4.5rem;
-  text-align: right;
-}
-.editor :global(.preset-design-row) small {
-  display: none;
-}
 @media (max-width: 960px) {
   .glass {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-.editor .glass details,
-.editor .disclosure {
+.editor .glass details {
   margin: 4px 0 0;
   padding: 0;
   border: 0;
 }
-.editor .glass summary,
-.editor .disclosure > summary {
+.editor .glass summary {
   padding: 4px 0;
 }
 
@@ -948,4 +781,152 @@
   border-color: var(--primary);
   background: var(--primary);
   color: var(--primary-foreground);
+}
+
+/* Top bar, inspector and preview controls come from the shared editor shell. */
+.editor .srOnly,
+.editor :global(.preset-sr) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.workbench {
+  margin-top: 16px;
+}
+.panel > section:last-child {
+  border-bottom: 0;
+}
+.editor [role='menu'][popover] {
+  margin: auto;
+}
+@supports (position-area: bottom) {
+  .editor [role='menu'][popover] {
+    margin: 4px 0;
+    position-area: bottom span-left;
+  }
+}
+.editor input[type='range'] {
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Style family picker. */
+.editor :global(.preset-families) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.editor :global(.preset-family) {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  min-height: 0;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 13px;
+  text-align: left;
+}
+.editor :global(.preset-family)[aria-pressed='true'] {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+.editor :global(.preset-family-sample) {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  height: 26px;
+}
+.editor :global(.preset-family-sample) i {
+  flex: 1;
+  border-radius: 6px;
+  background: var(--primary);
+}
+.editor :global(.preset-family-sample) i + i {
+  background: var(--muted);
+}
+.editor :global(.preset-family)[data-family='minimalist'] :global(.preset-family-sample) i {
+  border: 1px solid var(--foreground);
+  border-radius: 2px;
+  background: transparent;
+}
+.editor :global(.preset-family)[data-family='neo-brutalism'] :global(.preset-family-sample) i {
+  border: 2px solid var(--foreground);
+  border-radius: 0;
+  box-shadow: 2px 2px 0 var(--foreground);
+}
+.editor :global(.preset-family)[data-family='liquid-glass'] :global(.preset-family-sample) i {
+  border: 1px solid color-mix(in oklab, var(--paper) 70%, transparent);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 45%, transparent),
+    color-mix(in oklab, var(--muted) 70%, transparent)
+  );
+}
+.editor :global(.preset-family-tag) {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--muted);
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Colour tokens. */
+.editor :global(.preset-color-row)[data-warning] {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+.editor :global(.preset-token-toggle) {
+  min-height: 32px;
+  margin-top: 4px;
+  border: 0;
+  background: transparent;
+  padding: 0 4px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Design values. */
+.editor :global(.preset-design-list) {
+  display: grid;
+  gap: 14px;
+}
+.editor :global(.preset-choice) > div {
+  flex-wrap: wrap;
+}
+.editor :global(.preset-segmented-field) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.editor :global(.preset-segmented-field) button[aria-pressed] {
+  padding-inline: 10px;
+}
+.editor :global(.preset-shadow-row) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.editor :global(.preset-shadow-field) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+}
+.editor :global(.preset-shadow-field) input {
+  min-height: 32px;
+  padding: 0 6px;
 }

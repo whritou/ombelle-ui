@@ -73,9 +73,6 @@ export function SliderRow({
   onReset(): void
 }) {
   const shared = {
-    min,
-    max,
-    step,
     value,
     'aria-invalid': invalid ? (true as const) : undefined,
     'aria-describedby': describedBy,
@@ -87,7 +84,8 @@ export function SliderRow({
         {label}
       </label>
       <span className={styles.sliderNumber}>
-        <input id={`${id}-number`} type="number" {...shared} />
+        {/* Text, not type="number": a half-typed or invalid value stays visible and is reported, not discarded. */}
+        <input id={`${id}-number`} type="text" inputMode="decimal" maxLength={80} {...shared} />
         <span aria-hidden="true">{unit}</span>
       </span>
       {edited ? (
@@ -105,6 +103,9 @@ export function SliderRow({
         type="range"
         className={styles.sliderRange}
         aria-label={`${label} slider`}
+        min={min}
+        max={max}
+        step={step}
         {...shared}
       />
     </div>

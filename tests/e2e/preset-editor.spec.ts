@@ -51,6 +51,17 @@ async function ready(page: Page) {
     { timeout: 30000 },
   )
 }
+/** One option of a segmented control, such as Preview mode or Preview width. */
+const segment = (page: Page, group: string, option: string) =>
+  page
+    .getByRole('group', { name: group, exact: true })
+    .getByRole('button', { name: option, exact: true })
+const familyButton = (page: Page, name: string) =>
+  segment(page, 'Style family', name)
+async function chooseMenuItem(page: Page, name: string) {
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  await page.getByRole('menuitem', { name, exact: true }).click()
+}
 async function openExport(page: Page) {
   const panel = page.locator('details.preset-export')
   if ((await panel.getAttribute('open')) === null)
@@ -94,7 +105,7 @@ for (const family of supportedStyleFamilies)
       page,
     }) => {
       await seed(page, family)
-      await page.getByLabel('Preview mode', { exact: true }).selectOption(mode)
+      await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
       await expect(frame(page).locator('html')).toHaveClass(
         mode === 'dark' ? 'dark' : '',
       )
@@ -152,9 +163,7 @@ for (const family of supportedStyleFamilies)
       }) => {
         test.setTimeout(360000)
         await seed(page, family)
-        await page
-          .getByLabel('Preview mode', { exact: true })
-          .selectOption(mode)
+        await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
         await ready(page)
         const text = await download(page)
         expect(text).toBe(canonicalize(JSON.parse(text)) + '\n')
@@ -260,9 +269,7 @@ test('restores raw draft and history after refresh', async ({ page }) => {
     .click()
   await ready(page)
   await page.getByLabel('Border width', { exact: true }).fill('3')
-  await page
-    .getByRole('button', { name: 'Reset all tokens', exact: true })
-    .click()
+  await chooseMenuItem(page, 'Reset all tokens…')
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
     .click()
@@ -277,22 +284,16 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
   await ready(page)
   await page.getByLabel('Corner radius', { exact: true }).fill('0.6')
   await page.getByLabel('Corner radius', { exact: true }).fill('0.5')
-  // Colour tokens are edited in a popover opened from their row, inside the
-  // collapsed full colour list.
-  await page.locator('summary', { hasText: 'Customize all colors' }).click()
+  // Colour tokens are edited in a popover opened from their row; the full
+  // list sits behind a toggle.
+  await page.getByRole('button', { name: 'Show all 19 tokens' }).click()
   await page.getByRole('button', { name: /^Primary colors/ }).click()
   await page.getByLabel('Dark primary', { exact: true }).fill('invalid')
   await page.keyboard.press('Escape')
-  await page
-    .getByLabel('Style family', { exact: true })
-    .selectOption('neo-brutalism')
+  await familyButton(page, 'Neo-brutalism').click()
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-  await expect(page.getByLabel('Style family', { exact: true })).toHaveValue(
-    'flat',
-  )
-  await page
-    .getByLabel('Style family', { exact: true })
-    .selectOption('neo-brutalism')
+  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
+  await familyButton(page, 'Neo-brutalism').click()
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
     .click()
@@ -306,9 +307,7 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
     'project_preset',
   )
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
-  await expect(page.getByLabel('Style family', { exact: true })).toHaveValue(
-    'flat',
-  )
+  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
 })
 test('downloads corrupt and unknown-version recovery before reset', async ({
   page,
@@ -686,7 +685,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
     [undo, redo, defaultName],
     [redo, undo, 'Keyboard theme'],
   ] as const) {
-    await tabTo(page, from, { backward: true })
+    await tabTo(page, from)
     for (let presses = 0; presses < 40 && (await from.isEnabled()); presses++) {
       await expect(from).toBeFocused()
       await page.keyboard.press('Enter')
@@ -696,12 +695,12 @@ test('supports keyboard editing and 320 pixel reflow', async ({
     await expectVisibleFocus(page)
   }
 
-  const family = page.getByLabel('Style family', { exact: true })
+  const family = familyButton(page, 'Minimalist')
   const confirmDialog = page.getByRole('dialog', {
     name: 'Change style family?',
   })
-  await tabTo(page, family, { backward: true })
-  await page.keyboard.press('ArrowDown')
+  await tabTo(page, family)
+  await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeVisible()
   await expect(
     confirmDialog.getByRole('button', { name: 'Cancel', exact: true }),
@@ -709,9 +708,9 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
   await page.keyboard.press('Escape')
   await expect(confirmDialog).toBeHidden()
-  await expect(family).toHaveValue('flat')
+  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
   await expect(family).toBeFocused()
-  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeVisible()
   await page.keyboard.press('Tab')
   await expect(
@@ -720,14 +719,14 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
   await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeHidden()
-  await expect(family).toHaveValue('minimalist')
+  await expect(family).toHaveAttribute('aria-pressed', 'true')
   await expect(family).toBeFocused()
 
   const lightPrimary = page.getByLabel('Light primary', { exact: true })
   const lightDefault = await lightPrimary.inputValue()
-  await tabTo(page, page.locator('summary', { hasText: 'Customize all colors' }))
+  await tabTo(page, page.getByRole('button', { name: 'Show all 19 tokens' }))
   await page.keyboard.press('Enter')
-  await tabTo(page, page.getByRole('button', { name: /^Primary colors/ }))
+  await tabTo(page, page.getByRole('button', { name: /^Primary colors/ }), { backward: true })
   await page.keyboard.press('Enter')
   await expect(lightPrimary).toBeVisible()
   await tabTo(page, lightPrimary)
@@ -814,7 +813,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   ).toBe(true)
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
-  await page.getByLabel('Preview width', { exact: true }).selectOption('narrow')
+  await segment(page, 'Preview width', '320 px').click()
   await frame(page).getByTestId('preset-button').focus()
   await page.keyboard.press('Tab')
   expect(
