@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
-import { codeInstallCommand, packageManagers, publishedInstaller, snapshotInstallCommand } from './install-command'
+import { codeInstallCommand, compareVersions, offeredStyleFamilies, ombelleMinimumCli, packageManagers, publishedInstaller, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
@@ -91,4 +91,23 @@ describe('Get code commands', () => {
     expect(() => codeInstallCommand({ kind: 'recipe', source: recipe }, 'new', 'npm')).toThrow()
     expect(() => codeInstallCommand({ kind: 'preset', source }, 'recipe', 'npm')).toThrow()
   })
+})
+
+it('compares x.y.z versions numerically', () => {
+  expect(compareVersions('0.3.0', '0.4.0')).toBeLessThan(0)
+  expect(compareVersions('0.10.0', '0.4.0')).toBeGreaterThan(0)
+  expect(compareVersions('0.4.0', '0.4.0')).toBe(0)
+  expect(compareVersions('1.0.0', '0.99.99')).toBeGreaterThan(0)
+  expect(() => compareVersions('0.4', '0.4.0')).toThrow()
+})
+
+it('offers ombelle only from the minimum published installer', () => {
+  expect(ombelleMinimumCli).toBe('0.4.0')
+  expect(offeredStyleFamilies(undefined, { version: '0.3.1' })).not.toContain('ombelle')
+  expect(offeredStyleFamilies(undefined, { version: '0.4.0' })).toContain('ombelle')
+  expect(offeredStyleFamilies(undefined, { version: '0.5.2' })).toContain('ombelle')
+  // A restored ombelle draft keeps its own family visible.
+  expect(offeredStyleFamilies('ombelle', { version: '0.3.0' })).toContain('ombelle')
+  expect(offeredStyleFamilies()).toEqual(offeredStyleFamilies(undefined, publishedInstaller))
+  expect(offeredStyleFamilies(undefined, { version: '0.3.0' })).toEqual(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])
 })

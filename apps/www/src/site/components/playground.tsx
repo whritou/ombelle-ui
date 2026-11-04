@@ -2,7 +2,8 @@
 
 import * as Tabs from '@radix-ui/react-tabs'
 import { useEffect, useMemo, useState } from 'react'
-import { styleFamilies, styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
+import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { createPresetDraft } from '../../preset-editor/model'
 import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
@@ -17,7 +18,8 @@ const familyLabels: Record<StyleFamily, string> = {
   ombelle: 'Ombelle',
   'liquid-glass': 'Liquid Glass',
 }
-export const familyOptions: { value: StyleFamily; label: string }[] = styleFamilies.map((value) => ({
+// Same gate as the editors: only families the published installer can install.
+export const familyOptions: { value: StyleFamily; label: string }[] = offeredStyleFamilies().map((value) => ({
   value,
   label: familyLabels[value],
 }))

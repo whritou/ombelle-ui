@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CircleAlert, RotateCcw } from 'lucide-react'
-import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { type StyleFamily } from '@ombelle/contracts'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
 import type { PresetEditorDraft, PresetEditablePath } from '../model'
 import {
@@ -88,13 +89,16 @@ export const familyNames: Record<StyleFamily, string> = {
 export function FamilyPicker({
   value,
   onChange,
+  families = offeredStyleFamilies(value),
 }: {
   value: StyleFamily
   onChange(family: StyleFamily): void
+  /** Families to offer; defaults to those the published installer supports. */
+  families?: readonly StyleFamily[]
 }) {
   return (
     <div role="group" aria-label="Style family" className="preset-families">
-      {styleFamilies.map((family) => (
+      {families.map((family) => (
         <button
           key={family}
           type="button"

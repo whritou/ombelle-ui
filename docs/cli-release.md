@@ -24,6 +24,14 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 All six workspace packages use software version 0.4.0, which is not yet published; website commands keep `0.3.0` until it is. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
 
+Release 0.4.0 in this order:
+
+1. Publish `@ombelle-ui/cli@0.4.0` from the tested candidate and verify the registry integrity.
+2. Run `pnpm version:set --published 0.4.0` (then `--check --published`) and commit it to `main`.
+3. Deploy the website from `main`.
+
+The website offers the `ombelle` family only when its published installer version is at least `ombelleMinimumCli` (0.4.0, in `apps/www/src/snapshots/install-command.ts`), so deploying before step 2 keeps Ombelle hidden. The refreshed flat, minimalist and neo-brutalism built-in presets are not gated: a website deployed from `main` before step 2 publishes codes for the refreshed presets while its commands still name the older installer, which installs them with its older family stylesheets, so the result differs from the website preview. Keep to the order above.
+
 Post-publication checks on 2026-11-02:
 
 - The registry tarball is byte-for-byte identical to the candidate (integrity `sha512-TAkxY7UE…BDJFxJQ==`).

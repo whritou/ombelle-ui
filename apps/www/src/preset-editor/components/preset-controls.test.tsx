@@ -1,13 +1,15 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createPresetDraft, setPresetEdit } from '../model'
+import { styleFamilies } from '@ombelle/contracts'
 import { DesignControls, FamilyPicker, TokenList } from './preset-controls'
+import { offeredStyleFamilies, ombelleMinimumCli, publishedInstaller } from '../../snapshots/install-command'
 
 const noop = () => {}
 const handlers = { onEdit: noop, onReset: noop }
 
 it('FamilyPicker marks only the current family pressed and tags liquid glass as Beta', () => {
-  const html = renderToStaticMarkup(<FamilyPicker value="minimalist" onChange={noop} />)
+  const html = renderToStaticMarkup(<FamilyPicker value="minimalist" onChange={noop} families={styleFamilies} />)
   expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
   expect(html).toMatch(/aria-pressed="true"[^>]*>(?:(?!<\/button>).)*Minimalist/)
   expect(html.match(/aria-pressed="false"/g)).toHaveLength(4)
@@ -16,6 +18,21 @@ it('FamilyPicker marks only the current family pressed and tags liquid glass as 
   expect(html).toMatch(/data-family="liquid-glass"(?:(?!<\/button>).)*>Beta</)
   expect(html).toMatch(/data-family="ombelle"(?:(?!<\/button>).)*Ombelle/)
   expect(html).not.toMatch(/data-family="ombelle"(?:(?!<\/button>).)*>Beta</)
+})
+
+it('FamilyPicker offers ombelle only once the published installer supports it', () => {
+  const families = (html: string) => [...html.matchAll(/data-family="([^"]+)"/g)].map((match) => match[1])
+  const gated = renderToStaticMarkup(
+    <FamilyPicker value="flat" onChange={noop} families={offeredStyleFamilies('flat', { version: '0.3.0' })} />,
+  )
+  expect(families(gated)).toEqual(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])
+  const offered = renderToStaticMarkup(
+    <FamilyPicker value="flat" onChange={noop} families={offeredStyleFamilies('flat', { version: ombelleMinimumCli })} />,
+  )
+  expect(families(offered)).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
+  // The default follows the website's published installer.
+  const defaults = renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />)
+  expect(families(defaults)).toEqual([...offeredStyleFamilies('flat', publishedInstaller)])
 })
 
 it('TokenList shows five core tokens and a toggle for the rest', () => {

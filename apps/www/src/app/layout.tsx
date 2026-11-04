@@ -3,6 +3,7 @@ import { Archivo, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { SiteFooter } from '../site/footer'
 import { SiteHeader } from '../site/header'
 import { themeInitScript } from '../site/theme'
+import { familyList } from '../site/families'
 import './globals.css'
 
 // next/font downloads these at build time and serves them from this origin,
@@ -14,7 +15,7 @@ const jetbrains = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], v
 export const metadata = {
   title: 'Ombelle UI',
   description:
-    'Editable, accessible React components on shadcn and Radix UI, in flat, minimalist and neo-brutalism styles.',
+    `Editable, accessible React components on shadcn and Radix UI, in ${familyList()} styles.`,
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

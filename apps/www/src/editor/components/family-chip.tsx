@@ -2,7 +2,8 @@
 
 import { useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { type StyleFamily } from '@ombelle/contracts'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 
 export const familyNames: Record<StyleFamily, string> = {
   flat: 'Flat',
@@ -15,7 +16,16 @@ export const familyNames: Record<StyleFamily, string> = {
 export const familyPickerId = 'button-family-picker'
 
 /** The top-bar chip naming the recipe's style family; it opens a picker with a small sample of each look. */
-export function FamilyChip({ value, onChange }: { value: StyleFamily; onChange(family: StyleFamily): void }) {
+export function FamilyChip({
+  value,
+  onChange,
+  families = offeredStyleFamilies(value),
+}: {
+  value: StyleFamily
+  onChange(family: StyleFamily): void
+  /** Families to offer; defaults to those the published installer supports. */
+  families?: readonly StyleFamily[]
+}) {
   const chip = useRef<HTMLButtonElement>(null)
   return (
     <>
@@ -33,7 +43,7 @@ export function FamilyChip({ value, onChange }: { value: StyleFamily; onChange(f
       </button>
       <div id={familyPickerId} popover="auto" role="dialog" aria-label="Choose style family" className="be-family-popover">
         <div role="group" aria-label="Style family" className="be-families">
-          {styleFamilies.map((family) => (
+          {families.map((family) => (
             <button
               key={family}
               type="button"

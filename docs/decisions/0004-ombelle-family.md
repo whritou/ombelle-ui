@@ -1,6 +1,6 @@
 # Ombelle style family decision
 
-4 November 2026. Ombelle is added as a stable style family beside flat, minimalist and neo-brutalism. Liquid glass stays experimental and is unchanged.
+4 November 2026. Ombelle is added as a stable style family beside flat, minimalist and neo-brutalism, and ships in release 0.4.0 (a single release after 0.3.1, together with the style family refresh). Liquid glass stays experimental; this change does not alter it beyond what 0.3.1 already changed.
 
 ## Look
 
@@ -14,9 +14,10 @@ Ombelle is the product's own pink-and-ink look: pill-shaped buttons, badges, swi
 
 ## Where it is offered
 
-- Both editors: the preset editor Style family picker and the Button editor family chip list Ombelle, with a sample of a pill with an ink outline and an offset ink shadow on a pink fill. It carries no Beta tag.
+- Gate: the website offers Ombelle only when its published installer (`publishedInstaller` in `apps/www/src/snapshots/install-command.ts`) is at least `ombelleMinimumCli` (0.4.0). Until `pnpm version:set --published 0.4.0` lands after publication, the editors, the documentation playground and the public site copy omit it; a restored draft that already uses ombelle keeps it selectable. The release order is in [CLI release](../cli-release.md).
+- Both editors: once the gate opens, the preset editor Style family picker and the Button editor family chip list Ombelle, with a sample of a pill with an ink outline and an offset ink shadow on a pink fill. It carries no Beta tag.
 - Preview: the gallery generation iterates `supportedStyleFamilies`, so ombelle scenes are generated, and `apps/preview/src/main.tsx` routes `/ombelle/` to its generated entry.
-- Documentation playground: the component pages list Ombelle beside the other families.
+- Documentation playground and site copy: once the gate opens, the component pages list Ombelle beside the other families, and the home, components and layout copy derive their family list from the same gate.
 - Recipe and component-preset fixtures: `fixtures/shared/recipes.ts` derives its recipes from `supportedStyleFamilies`, so an `rc_ombelle_button` recipe fixture exists, and the recipe and component-preset fixture views import the ombelle installs. The recipe count checks in `scripts/recipe-evidence.ts` and `scripts/prepare-recipe-consumer.ts` follow that list instead of a literal `3`.
 - Consumers: the matrix gains four stable rows (`vite-ombelle`, `next-ombelle`, `npm-vite-ombelle`, `npm-next-ombelle`), taking it from 36 to 40 rows (38 stable, two experimental glass).
 
@@ -32,7 +33,9 @@ Recorded on 4 November 2026 on Windows 11 with Node 24.19.0 and pnpm 11.25.0 thr
 
 Not completed here: `pnpm prepare:consumers` prepared all pnpm and npm consumers, including the four ombelle ones, and the Yarn consumers, then stopped at the first Bun consumer because no native Bun executable is installed (`Cannot resolve a supported native bun executable`), so the matrix and its evidence were not written and `pnpm check:foundation` was not run. The browser cases that compare the downloaded ombelle preset with installed Vite and Next consumers pass on this machine, and the preset editor's ombelle page cases pass. Next's CSS pipeline lowers `oklch()` to `lab()`, so the parity helpers (`tests/helpers/color-compare.ts`) now compare computed colours as sRGB within one channel step and 0.01 alpha, and every other property exactly. The parity browser spec (`parity.spec.ts`), which needs the full set of prepared consumers, was not run for ombelle. No measured evidence file was regenerated, and nothing here supports a claim about ombelle consumers, real-browser forced-colors rendering, human keyboard or screen reader review, or contrast beyond the automated token-pair test. Rerun the gate on a machine with the full toolchain before extending the evidence documents.
 
-### Release 0.5.0 run
+### Earlier release-preparation run (as 0.5.0, superseded)
+
+This run prepared the branch as a separate 0.5.0 release. That release was folded into the single 0.4.0 release after 0.3.1; see the merged release run below.
 
 Recorded on 4 November 2026 on the same machine. `pnpm version:set 0.5.0` and `--check` (10 sites at 0.5.0) pass, and `pnpm install --frozen-lockfile --ignore-scripts`, `pnpm build:packages`, `pnpm typecheck` and `pnpm test:unit` (91 files, 931 tests) pass.
 
