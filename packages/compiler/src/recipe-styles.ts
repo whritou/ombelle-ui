@@ -4,8 +4,11 @@ import {
   FoundationError,
   recipeColorModes,
   recipeColorRoles,
+  recipeColorStates,
   recipeColorTokens,
+  recipeStateColorKey,
   type Recipe,
+  type RecipeIcon,
   type RecipeButtonVariant,
   type RecipeColorRole,
   type ResolvedPreset,
@@ -79,6 +82,8 @@ export function compileScopedButtonStyles(input: {
   scopeLabel?: 'recipe' | 'component-preset'
   /** Variant whose tokens `overrides.colors` replaces; defaults to 'default'. */
   variant?: RecipeButtonVariant
+  /** The recipe's normalized icon, which adds icon sizing and the icon-only shape. */
+  icon?: Required<RecipeIcon>
 }): string {
   const dark =
     input.scopeLabel === 'recipe'
@@ -230,6 +235,14 @@ export function compileScopedButtonStyles(input: {
     const mapped = mapping[key]
     if (mapped) overrides[mapped[0]] = value + mapped[1]
   }
+  const o = input.overrides
+  if (o.gapPx !== undefined) overrides.gap = o.gapPx + 'px'
+  if (o.fontWeight !== undefined) overrides['font-weight'] = String(o.fontWeight)
+  if (o.fontSizePx !== undefined) overrides['font-size'] = o.fontSizePx + 'px'
+  if (o.letterSpacingEm !== undefined)
+    overrides['letter-spacing'] = o.letterSpacingEm + 'em'
+  if (o.uppercase !== undefined)
+    overrides['text-transform'] = o.uppercase ? 'uppercase' : 'none'
   // Color overrides replace the tokens the selected variant reads, per mode.
   const variant = input.variant ?? 'default'
   const colorTokens = recipeColorTokens[variant]
@@ -255,6 +268,34 @@ export function compileScopedButtonStyles(input: {
     if (set('border'))
       paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
   }
+  // Hover and pressed overrides are painted per mode, after the family's own state rules
+  // and with higher specificity. A light value is limited to elements outside the dark
+  // class, so a mode without its own value keeps the family's state colors.
+  const states: string[] = []
+  if (colors)
+    for (const state of recipeColorStates) {
+      const pseudo = state === 'hover' ? ':hover' : ':active'
+      const target = scope + '[data-variant="' + variant + '"]:not(:disabled)' + pseudo
+      for (const mode of recipeColorModes) {
+        const values: Record<string, string> = {}
+        for (const role of recipeColorRoles) {
+          const value = colors[mode]?.[recipeStateColorKey(state, role)]
+          if (value === undefined) continue
+          const property =
+            role === 'background' ? 'background' : role === 'foreground' ? 'color' : 'border-color'
+          values[property] = normalizeColor(value)
+        }
+        if (!Object.keys(values).length) continue
+        states.push(
+          block(
+            mode === 'light'
+              ? target + ':not(' + dark + ',' + dark + ' *)'
+              : dark + ' ' + target + ',' + dark + target,
+            values,
+          ),
+        )
+      }
+    }
   // Complete local tokens stop the host preset from affecting this element in either mode.
   const tokens =
     block(scope, light) +
@@ -265,6 +306,27 @@ export function compileScopedButtonStyles(input: {
       : block(scope + '[data-size]', {
           'min-height': input.overrides.minHeightPx + 'px',
         })
+  // Text sizes keep their own padding unless overridden; the icon size stays square.
+  const paddingValues: Record<string, string> = {}
+  if (o.paddingXPx !== undefined) paddingValues['padding-inline'] = o.paddingXPx + 'px'
+  if (o.paddingYPx !== undefined) paddingValues['padding-block'] = o.paddingYPx + 'px'
+  const padding = Object.keys(paddingValues).length
+    ? block(scope + '[data-size]:not([data-size="icon"])', paddingValues)
+    : ''
+  const icon = input.icon
+    ? block(scope + '>svg', {
+        width: '1.25em',
+        height: '1.25em',
+        'flex-shrink': '0',
+      }) +
+      (input.icon.iconOnly
+        ? block(scope + '[data-icon-only][data-size]', {
+            'aspect-ratio': '1 / 1',
+            'padding-inline': '0',
+            'justify-content': 'center',
+          })
+        : '')
+    : ''
   // Same specificity as the family's variant rules and emitted after them, so it wins
   // there while the family's :hover/:active rules (higher specificity) still apply.
   const painted = Object.keys(paint).length
@@ -287,7 +349,10 @@ export function compileScopedButtonStyles(input: {
       'aspect-ratio': 'auto',
       padding: '0.5rem',
     }) +
-    height
+    height +
+    padding +
+    states.join('') +
+    icon
   )
 }
 
@@ -298,6 +363,7 @@ export function compileRecipeStyles(input: {
   scope: string
   darkSelector: string
   variant?: RecipeButtonVariant
+  icon?: Required<RecipeIcon>
 }): string {
   return compileScopedButtonStyles({
     ...input,

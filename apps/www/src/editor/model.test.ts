@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { styleFamilies, validateRecipe } from '@ombelle/contracts'
 import {
-  changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
+  baseColorRole, changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
+  withRecipeIcon, withRecipeOverride,
   type EditorView,
 } from './model.js'
 import { serializeRecipe } from './storage.js'
@@ -124,5 +125,46 @@ describe('Button editor model', () => {
     expect(reset.recipe.overrides).toEqual({})
     expect(draftFamily(reset.recipe)).toBe('ombelle')
     expect([reset.recipe.id, reset.recipe.revision]).toEqual([edited.recipe.id, edited.recipe.revision])
+  })
+  it('reads hover and pressed colors with the base role as fallback', () => {
+    const draft = createEditorDraft('flat')
+    const preset = getCatalog('0.1.0').presets.flat
+    expect(baseColorRole('hoverBackground')).toBe('background')
+    expect(baseColorRole('pressedForeground')).toBe('foreground')
+    expect(baseColorRole('border')).toBe('border')
+    expect(recipeColor(draft.recipe, 'light', 'hoverBackground')).toEqual({ value: preset.modes.light.primary, overridden: false })
+    const base = withRecipeColor(draft.recipe, 'dark', 'foreground', '#abcdef')
+    expect(recipeColor(base, 'dark', 'pressedForeground')).toEqual({ value: '#abcdef', overridden: false })
+    const hover = withRecipeColor(base, 'dark', 'hoverForeground', '#123456')
+    expect(recipeColor(hover, 'dark', 'hoverForeground')).toEqual({ value: '#123456', overridden: true })
+    expect(updateDraftRecipe(draft, hover).recipe.overrides.colors).toEqual({ dark: { foreground: '#abcdef', hoverForeground: '#123456' } })
+    expect(withRecipeColor(withRecipeColor(hover, 'dark', 'hoverForeground', undefined), 'dark', 'foreground', undefined).overrides).toEqual({})
+  })
+  it('sets and removes layout and type overrides', () => {
+    const draft = createEditorDraft('ombelle')
+    const set = withRecipeOverride(withRecipeOverride(draft.recipe, 'paddingXPx', 18), 'uppercase', true)
+    expect(updateDraftRecipe(draft, set).recipe.overrides).toEqual({ paddingXPx: 18, uppercase: true })
+    expect(withRecipeOverride(set, 'paddingXPx', undefined).overrides).toEqual({ uppercase: true })
+    expect(() => updateDraftRecipe(draft, withRecipeOverride(draft.recipe, 'fontWeight', 450)))
+      .toThrow(expect.objectContaining({ path: '/overrides/fontWeight' }))
+    expect(() => updateDraftRecipe(draft, withRecipeOverride(draft.recipe, 'gapPx', 30)))
+      .toThrow(expect.objectContaining({ path: '/overrides/gapPx' }))
+  })
+  it('writes icons with explicit position and mode, and removes them', () => {
+    const draft = createEditorDraft('flat')
+    const icon = withRecipeIcon(draft.recipe, { name: 'search' })
+    expect(icon.icon).toEqual({ name: 'search', position: 'start', iconOnly: false })
+    const only = withRecipeIcon(icon, { ...icon.icon, iconOnly: true })
+    expect(updateDraftRecipe(draft, only).recipe.icon).toEqual({ name: 'search', position: 'start', iconOnly: true })
+    expect(() => updateDraftRecipe(draft, { ...only, content: ' ' })).toThrow(expect.objectContaining({ path: '/content' }))
+    expect(withRecipeIcon(only, undefined)).not.toHaveProperty('icon')
+  })
+  it('reset removes the icon and every new override', () => {
+    const draft = createEditorDraft('flat')
+    const edited = updateDraftRecipe(draft, withRecipeIcon(withRecipeOverride(
+      withRecipeColor(draft.recipe, 'light', 'pressedBackground', '#000000'), 'letterSpacingEm', 0.1), { name: 'plus', iconOnly: true }))
+    const reset = resetDraftRecipe(edited, draft.recipe).recipe
+    expect(reset).not.toHaveProperty('icon')
+    expect(reset.overrides).toEqual({})
   })
 })
