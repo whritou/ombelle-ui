@@ -10,7 +10,7 @@ import {
 } from '../src/index.js'
 
 const preset = getCatalog('0.1.0').presets.flat
-const hash = '5ff15eb2735326caa531570abf3bb701cc2ad8e054ce90b2940888bed4bd6038'
+const hash = '7f67582cf9993de917f699fe5068e45a9b888b2d763e65009597ee3e6d9258b4'
 let envelope: PresetSnapshot
 beforeAll(async () => {
   envelope = {

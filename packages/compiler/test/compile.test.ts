@@ -94,6 +94,15 @@ it('changes only ui-style.css and dialog.tsx among pre-existing artifacts', asyn
     'components/ui/dialog.tsx',
     'styles/ui-style.css',
   ])
+  const flatRefresh = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'flat family refresh',
+  ) as any
+  expect(flatRefresh.families).toEqual(['flat'])
+  expect(flatRefresh.logicalPaths).toEqual([
+    'styles/ui-style.css',
+    'components/ui/*.css',
+    'scoped Button preset and recipe button.css',
+  ])
   for (const family of ['flat', 'neo-brutalism'] as const) {
     const result = await compile({
       preset: getCatalog('0.1.0').presets[family],
