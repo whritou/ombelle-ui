@@ -102,7 +102,14 @@ it('changes only ui-style.css and dialog.tsx among pre-existing artifacts', asyn
     'styles/ui-style.css',
     'components/ui/*.css',
     'scoped Button preset and recipe button.css',
+    'styles/ui-tokens.css',
+    'scoped Button preset and recipe components/ui/button.tsx',
   ])
+  const minimalistRefresh = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'minimalist family refresh',
+  ) as any
+  expect(minimalistRefresh.families).toEqual(['minimalist'])
+  expect(minimalistRefresh.logicalPaths).toEqual(flatRefresh.logicalPaths)
   const neoRefresh = baseline.intentionalChanges.find(
     (c: any) => c.reason === 'neo-brutalism family refresh',
   ) as any
@@ -111,6 +118,8 @@ it('changes only ui-style.css and dialog.tsx among pre-existing artifacts', asyn
     'styles/ui-style.css',
     'components/ui/*.css',
     'scoped Button preset and recipe button.css',
+    'styles/ui-tokens.css',
+    'scoped Button preset and recipe components/ui/button.tsx',
   ])
   const ombelleChange = baseline.intentionalChanges.find(
     (c: any) => c.reason === 'ombelle family added',

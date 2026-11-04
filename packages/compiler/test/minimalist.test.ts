@@ -106,6 +106,6 @@ it('uses a 1px focus outline with a 4px offset and uppercase labels and badges',
 it('records the minimalist family refresh as an intentional baseline change',()=>{
  const entry=(baseline.intentionalChanges as any[]).find(c=>c.reason==='minimalist family refresh')
  expect(entry.families).toEqual(['minimalist'])
- expect(entry.logicalPaths).toEqual(['styles/ui-style.css','components/ui/*.css','scoped Button preset and recipe button.css'])
+ expect(entry.logicalPaths).toEqual(['styles/ui-style.css','components/ui/*.css','scoped Button preset and recipe button.css','styles/ui-tokens.css','scoped Button preset and recipe components/ui/button.tsx'])
  expect((baseline.intentionalChanges as any[]).some(c=>c.reason==='flat family refresh')).toBe(true)
 })
