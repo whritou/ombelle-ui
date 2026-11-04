@@ -152,6 +152,13 @@ export async function compile(input: {
     for (const dep of template.dependencies)
       dependencies.set(dep.name, dep.version)
   }
+  // Glass surfaces refract in Chromium once this filter is mounted.
+  if (family === 'liquid-glass' && ids.length)
+    drafts.push({
+      logicalPath: 'components/ui/liquid-glass-filter.tsx',
+      kind: 'component',
+      content: catalog.glassFilter,
+    })
   if (ids.length)
     drafts.push({
       logicalPath: 'lib/utils.ts',

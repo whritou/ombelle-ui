@@ -60,7 +60,7 @@
     "shadowOffsetYPx": 0,
     "motion": "full",
     "transparency": "auto",
-    "glassBlurPx": 8,
+    "glassBlurPx": 3,
     "glassOpacity": 0.5,
     "glassSaturation": 2,
     "glassBackdropContrast": 0.45,

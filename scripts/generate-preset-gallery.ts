@@ -45,10 +45,16 @@ export async function writePresetGallery(root: string): Promise<void> {
       }),
     ),
   )
-  const result = results[0],
-    sources = result.artifacts.filter(
-      (item) => item.kind === 'component' || item.kind === 'utility',
-    )
+  const result = results[0]
+  // Glass-only supporting files, absent from the stable families by design.
+  const glassOnly = new Set(['components/ui/liquid-glass-filter.tsx'])
+  const sources = result.artifacts.filter(
+    (item) => item.kind === 'component' || item.kind === 'utility',
+  )
+  for (const family of results)
+    for (const artifact of family.artifacts)
+      if (glassOnly.has(artifact.logicalPath) && !sources.some((source) => source.logicalPath === artifact.logicalPath))
+        sources.push(artifact)
   const styles = new Set(
     result.artifacts
       .filter((item) => item.kind === 'style')
@@ -76,8 +82,9 @@ export async function writePresetGallery(root: string): Promise<void> {
         )
         return match
           ? match.sha256 === artifact.sha256
-          : componentsWithStyleSupport(styleFamilies[index], ['unavailable'])
-              .length > 0
+          : glassOnly.has(artifact.logicalPath) ||
+              componentsWithStyleSupport(styleFamilies[index], ['unavailable'])
+                .length > 0
       })
     )
       throw new Error(

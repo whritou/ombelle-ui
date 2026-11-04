@@ -44,7 +44,7 @@ describe('liquid-glass compile', () => {
       'styles/ui-tokens.css',
     ])
     const tokens = artifact(result, 'styles/ui-tokens.css').replace(/\s+/g, '')
-    expect(tokens).toContain('--glass-blur:8px;')
+    expect(tokens).toContain('--glass-blur:3px;')
     expect(tokens).toContain('--glass-opacity:' + preset.design.glassOpacity + ';')
     const root = tokens.slice(0, tokens.indexOf('}'))
     expect(root).toContain('--glass-blur')

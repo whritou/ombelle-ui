@@ -49,6 +49,7 @@ writeFileAtomicSync(
       componentStyles,
       presets,
       utility: readText(base + 'templates/utils.ts'),
+      glassFilter: readText(base + 'templates/liquid-glass-filter.tsx'),
     }) +
     ' as const\n',
 )
