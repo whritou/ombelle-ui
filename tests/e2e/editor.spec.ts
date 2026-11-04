@@ -6,6 +6,9 @@ import { recipeFixtures } from '../../fixtures/shared/recipes.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
 import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import exampleRecipe from '../../examples/recipe.example.json' with { type: 'json' }
+import {
+  chooseFamily, closeMoreActions, expectRecipeDownloadEnabled, familyChip, familyOption, menuItem, moreActions, openMenuItem, segment, toggle,
+} from '../helpers/button-editor-ui.js'
 import fs from 'node:fs'
 
 const consumerPorts = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8')) as Record<string, { port: number }>
@@ -41,24 +44,24 @@ async function buttonSnapshot(button: import('@playwright/test').Locator) {
 
 test('edits Button family, props, and bounded overrides', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
-  await page.getByLabel('Corner radius value').fill('3')
+  await page.getByLabel('Corner radius', { exact: true }).fill('3')
   await expect(page.getByRole('alert').filter({ hasText: 'Enter a value from 0 to 2 rem.' })).toBeVisible()
   const before = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
   expect(JSON.parse(before!).recipe.overrides.radiusRem).toBe(0)
-  await page.getByLabel('Style family').selectOption('flat')
-  await page.getByLabel('Variant').selectOption('outline')
-  await page.getByLabel('Size').selectOption('sm')
-  await page.getByLabel('Button type').selectOption('submit')
+  await chooseFamily(page, 'flat')
+  await segment(page, 'Variant', 'Outline').click()
+  await segment(page, 'Size', 'S').click()
+  await segment(page, 'Button type', 'submit').click()
   await page.getByLabel('Button text').fill('Ship release')
-  await page.getByLabel('Disabled').check()
-  await page.getByLabel('Loading').check()
-  await page.getByLabel('Corner radius value').fill('1.5')
-  await page.getByLabel('Border width value').fill('3')
-  await page.getByLabel('Minimum height value').fill('52')
-  await page.getByLabel('Shadow X offset value').fill('-4')
-  await page.getByLabel('Shadow Y offset value').fill('8')
+  await toggle(page, 'Disabled').click()
+  await toggle(page, 'Loading').click()
+  await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
+  await page.getByLabel('Border width', { exact: true }).fill('3')
+  await page.getByLabel('Minimum height', { exact: true }).fill('52')
+  await page.getByLabel('Shadow X offset', { exact: true }).fill('-4')
+  await page.getByLabel('Shadow Y offset', { exact: true }).fill('8')
   await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]')).toHaveText('Ship release', { timeout: 20000 })
-  await page.getByRole('button', { name: 'Download recipe JSON' }).click()
+  await (await openMenuItem(page, 'Download recipe JSON')).click()
   const raw = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
   expect(JSON.parse(raw!).recipe).toMatchObject({
     presetRef: { id: 'builtin-flat' }, content: 'Ship release',
@@ -73,8 +76,13 @@ test('view mode does not change recipe hash and a draft restores after reload', 
   await expect(page.getByRole('status')).toContainText('saved')
   await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending')
   const before = await page.getByTestId('recipe-hash').textContent()
-  await page.getByLabel('Preview mode').selectOption('dark')
-  await page.getByLabel('Preview width').selectOption('narrow')
+  await segment(page, 'Preview mode', 'Dark').click()
+  await segment(page, 'Preview width', 'Narrow').click()
+  for (const state of ['Hover', 'Focus', 'Active']) {
+    await segment(page, 'Preview state', state).click()
+    await expect(segment(page, 'Preview state', state)).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByTestId('recipe-hash')).toHaveText(before!)
+  }
   await expect(page.getByTestId('recipe-hash')).toHaveText(before!)
   await page.reload()
   await expect(page.getByLabel('Button text')).toHaveValue('Saved draft')
@@ -83,9 +91,10 @@ test('view mode does not change recipe hash and a draft restores after reload', 
 test('undo and redo preserve meaningful text edits', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByLabel('Button text').fill('First edit')
-  await page.getByLabel('Variant').selectOption('secondary')
+  await segment(page, 'Variant', 'Secondary').click()
+  await expect(segment(page, 'Variant', 'Secondary')).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Undo' }).click()
-  await expect(page.getByLabel('Variant')).toHaveValue('default')
+  await expect(segment(page, 'Variant', 'Default')).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Undo' }).click()
   await expect(page.getByLabel('Button text')).toHaveValue('Create project')
   await page.getByRole('button', { name: 'Redo' }).click()
@@ -109,7 +118,8 @@ test('invalid stored draft offers accessible recovery download before replacemen
   await expect(page.getByLabel('Button text')).toHaveValue('Create project')
   const archived = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.recoveries'))
   expect(JSON.parse(archived!).texts).toContain('{broken draft')
-  await expect(page.getByRole('button', { name: 'Download preserved draft' })).toBeVisible()
+  await expect(await openMenuItem(page, 'Download preserved draft')).toBeVisible()
+  await closeMoreActions(page)
   await page.evaluate(() => localStorage.setItem('ombelle.button-editor.draft', '{skipped recovery'))
   await page.reload()
   await page.getByRole('button', { name: 'Start new draft' }).click()
@@ -118,7 +128,7 @@ test('invalid stored draft offers accessible recovery download before replacemen
   const archivedAfter = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.recoveries'))
   expect(JSON.parse(archivedAfter!).texts).toContain('{skipped recovery')
   const preservedDownloadPromise = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Download preserved draft 2' }).click()
+  await (await openMenuItem(page, 'Download preserved draft 2')).click()
   const download = await preservedDownloadPromise
   expect(download.suggestedFilename()).toMatch(/recovery/)
   const { readFile } = await import('node:fs/promises')
@@ -153,7 +163,7 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
     await expect(page.getByRole('status')).toContainText('copied')
   }
   const downloadPromise = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Download recipe JSON' }).click()
+  await (await openMenuItem(page, 'Download recipe JSON')).click()
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/\.json$/)
   const file = await download.path()
@@ -177,12 +187,13 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
     localStorage.setItem('ombelle.button-editor.draft', JSON.stringify({ storageVersion: 1, recipe }))
   })
   await page.reload()
-  await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
-  await page.getByLabel('Loading').check()
-  await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
+  await expectRecipeDownloadEnabled(page)
+  await toggle(page, 'Loading').click()
+  await expect(toggle(page, 'Loading')).toBeChecked()
+  await expectRecipeDownloadEnabled(page)
   await page.getByRole('button', { name: 'Undo' }).click()
-  await expect(page.getByLabel('Loading')).not.toBeChecked()
-  await expect(page.getByRole('button', { name: 'Download recipe JSON' })).toBeEnabled()
+  await expect(toggle(page, 'Loading')).not.toBeChecked()
+  await expectRecipeDownloadEnabled(page)
   const raw = await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))
   expect(JSON.parse(raw!).recipe.props).toEqual({})
 })
@@ -193,14 +204,14 @@ test('mobile workspace tabs retain the draft and preview mode', async ({ page })
   await page.getByRole('button', { name: 'Customize', exact: true }).click()
   await page.getByLabel('Button text').fill('Mobile draft')
   await page.getByRole('button', { name: 'Preview', exact: true }).click()
-  await page.getByLabel('Preview mode').selectOption('dark')
+  await segment(page, 'Preview mode', 'Dark').click()
   await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]')).toHaveText('Mobile draft', { timeout: 20000 })
   await page.getByRole('button', { name: 'Code', exact: true }).click()
   await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
   await page.getByRole('button', { name: 'Customize', exact: true }).click()
   await expect(page.getByLabel('Button text')).toHaveValue('Mobile draft')
   await page.getByRole('button', { name: 'Preview', exact: true }).click()
-  await expect(page.getByLabel('Preview mode')).toHaveValue('dark')
+  await expect(segment(page, 'Preview mode', 'Dark')).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('editor and CLI-installed Button recipe have matching DOM and computed styles', async ({ context }) => {
@@ -219,7 +230,7 @@ test('editor and CLI-installed Button recipe have matching DOM and computed styl
           localStorage.setItem('ombelle.button-editor.draft', JSON.stringify({ storageVersion: 1, recipe: seed }))
         }, recipe)
         await editor.goto('http://127.0.0.1:3000/editor/component/button')
-        await editor.getByLabel('Preview mode').selectOption(mode)
+        await segment(editor, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
         await expect(editor.getByTestId('recipe-hash')).toHaveText(compiled.recipe.hash)
         const frame = editor.locator('iframe[title="Button recipe preview"]').contentFrame()
         const editorButton = frame.locator('[data-slot="recipe-button"]')
@@ -265,7 +276,7 @@ test('editor and CLI-installed Button recipe have matching DOM and computed styl
 
         if (family === 'flat' && mode === 'light') {
           for (const state of ['disabled', 'loading'] as const) {
-            await editor.getByLabel(state === 'disabled' ? 'Disabled' : 'Loading').check()
+            await toggle(editor, state === 'disabled' ? 'Disabled' : 'Loading').click()
             await expect(editor.getByTestId('recipe-hash')).not.toHaveText(compiled.recipe.hash)
             await consumer.getByRole('button', { name: state === 'disabled' ? 'Toggle recipe disabled' : 'Toggle recipe loading' }).click()
             await expect(editorButton).toBeDisabled()
@@ -277,7 +288,7 @@ test('editor and CLI-installed Button recipe have matching DOM and computed styl
             expect(actual.dom.ariaBusy).toBe(expected.dom.ariaBusy)
             expect(actual.styles).toEqual(expected.styles)
             expect(actual.interaction).toEqual(expected.interaction)
-            await editor.getByLabel(state === 'disabled' ? 'Disabled' : 'Loading').uncheck()
+            await toggle(editor, state === 'disabled' ? 'Disabled' : 'Loading').click()
             await consumer.getByRole('button', { name: state === 'disabled' ? 'Toggle recipe disabled' : 'Toggle recipe loading' }).click()
           }
           const longText = 'Long escaped text " } <script> & \\ '.repeat(4)
@@ -395,6 +406,24 @@ test('sandboxed preview receives validated recipe updates only over its port', a
     expect(await frame.locator('style').last().textContent()).toBe(css)
   }
 
+  // Each forced state is a validated render that styles the same specimen with its own class.
+  const forcedRecipe = createEditorDraft('flat').recipe
+  const forced = await compileRecipe({ recipe: forcedRecipe })
+  const forcedCss = forced.artifacts.find((artifact) => artifact.kind === 'style')!.content
+  for (const [index, [forcedState, className]] of ([['hover', 'editor-force-hover'], ['active', 'editor-force-active'], ['none', '']] as const).entries()) {
+    const requestId = index + 1500
+    await page.evaluate((payload) => {
+      const port = (window as typeof window & { __previewTestPort?: MessagePort }).__previewTestPort!
+      port.postMessage(payload)
+    }, {
+      type: 'render', requestId, scope: forced.scope,
+      state: { recipe: forced.recipe.data, css: forcedCss, mode: 'light', viewport: 'wide', forcedState, requestId },
+    })
+    await expect(button).toHaveAttribute('data-forced-state', forcedState)
+    if (className) await expect(button).toHaveClass(new RegExp(className))
+    else await expect(button).not.toHaveClass(/editor-force-/)
+  }
+
   await iframe.evaluate((element: HTMLIFrameElement) => { element.src = element.src })
   await expect(button).toHaveText('Create project')
   await expect(button).toHaveAttribute('data-ombelle-recipe', initial.scope)
@@ -421,35 +450,46 @@ test('operates every Button editor control, artifact tab, download and publish d
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   const stored = async () => JSON.parse((await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft')))!).recipe
 
-  // The Customize rail comes first, then the preview controls and generated output.
-  const family = page.getByLabel('Style family')
-  await tabTo(page, family)
-  await page.keyboard.press('ArrowUp')
-  await expect(family).toHaveValue('minimalist')
+  // The top bar comes first, then the inspector, the preview controls and generated output.
+  const chip = familyChip(page)
+  await tabTo(page, chip)
+  await page.keyboard.press('Enter')
+  const minimalist = familyOption(page, 'minimalist')
+  await expect(minimalist).toBeVisible()
+  await tabTo(page, minimalist)
+  await page.keyboard.press('Enter')
+  await expect(chip).toHaveAccessibleName('Style family: Minimalist')
+  await expect(chip).toBeFocused()
   await tabTo(page, page.getByLabel('Button text'))
   await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('Keyboard ship')
-  for (const [label, key, value] of [['Variant', 'ArrowDown', 'secondary'], ['Size', 'ArrowUp', 'default'], ['Button type', 'ArrowDown', 'submit']] as const) {
-    await tabTo(page, page.getByLabel(label, { exact: true }))
-    await page.keyboard.press(key)
-    await expect(page.getByLabel(label, { exact: true })).toHaveValue(value)
+  for (const [group, option] of [['Variant', 'Secondary'], ['Size', 'M'], ['Button type', 'submit']] as const) {
+    await tabTo(page, segment(page, group, option))
+    await page.keyboard.press('Enter')
+    await expect(segment(page, group, option)).toHaveAttribute('aria-pressed', 'true')
   }
-  for (const label of ['Disabled', 'Loading']) {
-    await tabTo(page, page.getByLabel(label))
+  for (const name of ['Disabled', 'Loading'] as const) {
+    await tabTo(page, toggle(page, name))
     await page.keyboard.press('Space')
-    await expect(page.getByLabel(label)).toBeChecked()
+    await expect(toggle(page, name)).toBeChecked()
   }
-  for (const [id, label] of [['radiusRem', 'Corner radius'], ['borderWidthPx', 'Border width'], ['minHeightPx', 'Minimum height'],
-    ['shadowOffsetXPx', 'Shadow X offset'], ['shadowOffsetYPx', 'Shadow Y offset']] as const) {
-    await tabTo(page, page.locator(`#${id}-range`))
+  // Each number field takes typed text; the sliders then step it with the arrow keys.
+  for (const [id, label, typed] of [['radiusRem', 'Corner radius', '0.1'], ['borderWidthPx', 'Border width', '2.1'], ['minHeightPx', 'Minimum height', '45']] as const) {
+    await tabTo(page, page.getByLabel(label, { exact: true }))
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.type(typed)
+    await tabTo(page, page.locator(`#button-${id}`))
     await page.keyboard.press('ArrowRight')
-    await tabTo(page, page.getByLabel(`${label} value`))
-    await page.keyboard.press('ArrowUp')
   }
-  for (const [label, value] of [['Preview mode', 'dark'], ['Preview width', 'narrow']] as const) {
-    await tabTo(page, page.getByLabel(label))
-    await page.keyboard.press('ArrowDown')
-    await expect(page.getByLabel(label)).toHaveValue(value)
+  for (const label of ['Shadow X offset', 'Shadow Y offset']) {
+    await tabTo(page, page.getByLabel(label, { exact: true }))
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.type('8')
+  }
+  for (const [group, option] of [['Preview mode', 'Dark'], ['Preview width', 'Narrow'], ['Preview state', 'Active']] as const) {
+    await tabTo(page, segment(page, group, option))
+    await page.keyboard.press('Enter')
+    await expect(segment(page, group, option)).toHaveAttribute('aria-pressed', 'true')
   }
 
   await tabTo(page, page.getByRole('tab', { name: 'Usage' }))
@@ -476,14 +516,20 @@ test('operates every Button editor control, artifact tab, download and publish d
   await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]'))
     .toHaveText('Keyboard ship', { timeout: 20000 })
 
-  const download = page.getByRole('button', { name: 'Download recipe JSON' })
+  // The download lives in the top bar's overflow menu; keyboard focus returns to its trigger afterwards.
+  const more = moreActions(page)
+  await tabTo(page, more, { backward: true, max: 250 })
+  await page.keyboard.press('Enter')
+  const download = menuItem(page, 'Download recipe JSON')
   await expect(download).toBeEnabled()
-  await tabTo(page, download, { backward: true })
+  await tabTo(page, download)
   const pending = page.waitForEvent('download')
   await page.keyboard.press('Enter')
   const file = await (await pending).path()
   const { readFile } = await import('node:fs/promises')
   expect(JSON.parse(await readFile(file, 'utf8'))).toMatchObject(expected)
+  await expect(more).toBeFocused()
+  await expectVisibleFocus(page)
 
   const getCode = page.getByRole('button', { name: 'Get code', exact: true })
   await tabTo(page, getCode)

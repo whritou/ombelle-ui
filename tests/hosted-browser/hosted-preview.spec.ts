@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { supportedComponentIds, supportedStyleFamilies } from '@ombelle/contracts'
 import { createPresetDraft } from '../../apps/www/src/preset-editor/model.js'
 import { compileRecipe } from '@ombelle/compiler'
+import { chooseFamily, expectRecipeDownloadEnabled, segment } from '../helpers/button-editor-ui.js'
 
 test('serves both nested runtime entries, modules and compiler workers with usable MIME types', async ({ request }) => {
   for (const kind of ['editor', 'preset']) {
@@ -36,20 +37,20 @@ test('compiles and renders all families and modes through hosted opaque iframes 
   await expect(recipeFrame).toHaveAttribute('sandbox', 'allow-scripts')
   const recipeButton = recipeFrame.contentFrame().locator('[data-slot="recipe-button"]')
   for (const family of supportedStyleFamilies) {
-    await page.getByLabel('Style family').selectOption(family)
+    await chooseFamily(page, family)
     await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('ombelle.button-editor.draft')!).recipe.presetRef.id)).toBe('builtin-' + family)
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('ombelle.button-editor.draft')!).recipe)
     const compiled = await compileRecipe({ recipe: saved })
     await expect(page.getByTestId('recipe-hash')).toHaveText(compiled.recipe.hash)
     for (const mode of ['light', 'dark']) {
-      await page.getByLabel('Preview mode').selectOption(mode)
+      await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
       await expect(recipeButton).toBeVisible()
       await expect(recipeButton).toHaveAttribute('data-ombelle-recipe', compiled.scope)
       await expect(recipeFrame.contentFrame().locator('.editor-preview')).toHaveClass(mode === 'dark' ? 'editor-preview dark' : 'editor-preview')
       expect(await recipeButton.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
     }
   }
-  await expect(page.getByRole('button', { name: 'Download recipe JSON', exact: true })).toBeEnabled()
+  await expectRecipeDownloadEnabled(page)
   for (const family of supportedStyleFamilies) {
     await page.evaluate(draft => {
       localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft))

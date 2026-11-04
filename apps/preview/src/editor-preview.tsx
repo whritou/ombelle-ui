@@ -4,6 +4,14 @@ import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../ww
 import { editorButtons } from './generated/editor-buttons'
 import './editor-preview.css'
 
+/** Forced preview states reuse a class so the specimen shows hover, focus or pressed without the pointer. */
+const forcedClass: Record<string, string | undefined> = {
+  none: undefined,
+  hover: 'editor-force-hover',
+  focus: 'editor-force-focus',
+  active: 'editor-force-active',
+}
+
 type ButtonModule = Awaited<ReturnType<(typeof editorButtons)[keyof typeof editorButtons]>>
 
 function EditorPreview() {
@@ -72,7 +80,7 @@ function EditorPreview() {
       disabled={state.recipe.props.disabled || state.recipe.props.loading}
       aria-busy={state.recipe.props.loading || undefined}
       data-forced-state={state.forcedState}
-      className={state.forcedState === 'focus' ? 'editor-force-focus' : state.forcedState === 'hover' ? 'editor-force-hover' : undefined}
+      className={forcedClass[state.forcedState]}
     >{state.recipe.content}</Button>}
   </div>
 }

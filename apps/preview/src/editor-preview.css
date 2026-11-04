@@ -8,3 +8,4 @@ body { font-family: Arial, sans-serif; }
 .editor-preview[data-viewport="narrow"] { max-width: 360px; margin: auto; }
 .editor-force-focus { outline: 2px solid var(--ring); outline-offset: 2px; }
 .editor-force-hover { filter: brightness(.92); }
+.editor-force-active { filter: brightness(.85); transform: translateY(1px); }

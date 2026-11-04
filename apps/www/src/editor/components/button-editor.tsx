@@ -11,10 +11,11 @@ import { useCompiler } from '../use-compiler'
 import type { CompileDiagnostic } from '../compile-protocol'
 import { PreviewFrame } from './preview-frame'
 import { PropertiesPanel } from './properties-panel'
+import { FamilyChip } from './family-chip'
 import { ArtifactPanel } from './artifact-panel'
 import { EditorTabs } from './editor-tabs'
-import { StatusAnnouncer } from './status-announcer'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
+import { EditorTopBar, SegmentedControl, type OverflowItem } from '../../editor-shell'
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = { storageVersion: 1, recipe: validateRecipe(exampleRecipe) }
@@ -43,11 +44,15 @@ export function ButtonEditor() {
   const [preservedRecoveries, setPreservedRecoveries] = useState<string[]>([])
   const [diagnostic, setDiagnostic] = useState<CompileDiagnostic | null>(null)
   const [status, setStatus] = useState('Loading local draft…')
+  // Text typed into the recipe ID field, kept while it is not yet a valid ID.
+  const [idText, setIdText] = useState<string | null>(null)
   const draft = history.present
   const compilation = useCompiler(draft.recipe)
   const undoButton = useRef<HTMLButtonElement>(null)
   const redoButton = useRef<HTMLButtonElement>(null)
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => setIdText(null), [draft.recipe.id])
 
   useEffect(() => {
     focusAfterHistory.current?.focus()
@@ -143,62 +148,90 @@ export function ButtonEditor() {
     catch { setStatus('Preserved draft download failed. The local recovery copy remains available.') }
   }
 
-  return <main className={styles.root}>
-    <header className={styles.header}>
-      <div><p className={styles.product}>Ombelle / Component editor</p><h1>Button workbench</h1>
-        <p>Shape one Button, inspect its output, and take the recipe into your project.</p></div>
-      <div className={styles.headerActions}>
-        <button ref={undoButton} type="button" disabled={!history.past.length || recovery !== null} onClick={() => {
+  function downloadRecovery() {
+    if (recovery === null) return
+    try { download('button-draft-recovery.txt', recovery, 'text/plain;charset=utf-8'); setStatus('Recovery copy downloaded.') }
+    catch { setStatus('Recovery download failed. The stored draft is still available.') }
+  }
+
+  const previewCurrent = !(compilation.stale || diagnostic || !resultMatchesDraft(compilation.result, draft.recipe))
+  const menuItems: OverflowItem[] = [
+    { id: 'download-json', label: 'Download recipe JSON', disabled: !recipeJson || recovery !== null, onSelect: saveDownload },
+    ...(recovery !== null ? [{ id: 'download-recovery', label: 'Download recovery copy', onSelect: downloadRecovery }] : []),
+    ...preservedRecoveries.map((_, index) => ({
+      id: `download-preserved-${index}`,
+      label: `Download preserved draft${preservedRecoveries.length === 1 ? '' : ` ${index + 1}`}`,
+      onSelect: () => downloadPreserved(index),
+    })),
+  ]
+
+  return <main className={styles.root} aria-label="Button recipe editor">
+    <h1 className={styles.srOnly}>Button workbench</h1>
+    <EditorTopBar
+      crumbs={['Components', 'Button']}
+      nameField={{
+        id: 'button-recipe-id', label: 'Recipe ID', value: idText ?? draft.recipe.id, maxLength: 80,
+        invalid: displayedDiagnostic?.path === '/id',
+        onChange: (value) => { setIdText(value); edit({ ...draft.recipe, id: value }, 'id') },
+      }}
+      revision={`r${draft.recipe.revision}`}
+      status={status}
+      undo={{
+        disabled: !history.past.length || recovery !== null, buttonRef: undoButton,
+        onClick: () => {
           // The last undo disables this button; keep keyboard focus on Redo instead of losing it to the page.
           if (history.past.length === 1) focusAfterHistory.current = redoButton.current
           setHistory(undo)
-        }}>Undo</button>
-        <button ref={redoButton} type="button" disabled={!history.future.length || recovery !== null} onClick={() => {
+        },
+      }}
+      redo={{
+        disabled: !history.future.length || recovery !== null, buttonRef: redoButton,
+        onClick: () => {
           if (history.future.length === 1) focusAfterHistory.current = undoButton.current
           setHistory(redo)
-        }}>Redo</button>
-        <a href="#artifacts-title" className={styles.viewCode}>View code</a>
-        <button type="button" onClick={saveDownload} disabled={!recipeJson || recovery !== null}>Download recipe JSON</button>
-        <RecipeGetCode className={styles.download} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
-          secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />
-      </div>
-    </header>
+        },
+      }}
+      menu={{ label: 'More actions', items: menuItems }}
+      extra={<FamilyChip value={draftFamily(draft.recipe)} onChange={chooseFamily} />}
+      primary={<RecipeGetCode className={styles.getCode} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
+        secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
+    />
 
     {recovery !== null ? <section className={styles.recovery} role="alert" aria-labelledby="recovery-title">
       <h2 id="recovery-title">Your saved draft needs recovery</h2>
       <p>The stored draft could not be validated. Download its original bytes, or start a new draft to keep them in a separate local recovery copy.</p>
       <div className={styles.recoveryActions}>
-        <button type="button" onClick={() => {
-          try { download('button-draft-recovery.txt', recovery, 'text/plain;charset=utf-8'); setStatus('Recovery copy downloaded.') }
-          catch { setStatus('Recovery download failed. The stored draft is still available.') }
-        }}>Download recovery copy</button>
+        <button type="button" onClick={downloadRecovery}>Download recovery copy</button>
         <button type="button" onClick={startNewDraft}>Start new draft</button>
       </div>
     </section> : <>
-      {preservedRecoveries.length > 0 && <div className={styles.preservedRecovery}>
-        <p>{preservedRecoveries.length} previous invalid draft{preservedRecoveries.length === 1 ? ' is' : 's are'} preserved on this device.</p>
-        {preservedRecoveries.map((_, index) => <button key={index} type="button" onClick={() => downloadPreserved(index)}>
-          Download preserved draft{preservedRecoveries.length === 1 ? '' : ` ${index + 1}`}
-        </button>)}
-      </div>}
+      {preservedRecoveries.length > 0 && <p className={styles.preservedRecovery}>
+        {preservedRecoveries.length} previous invalid draft{preservedRecoveries.length === 1 ? ' is' : 's are'} preserved on this device. Download {preservedRecoveries.length === 1 ? 'it' : 'them'} from More actions.
+      </p>}
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
-        <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`}>
-          <PropertiesPanel recipe={draft.recipe} diagnostic={displayedDiagnostic} onChange={edit} onFamily={chooseFamily}
+        <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
+          <PropertiesPanel recipe={draft.recipe} diagnostic={displayedDiagnostic} onChange={edit}
             onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
           <section className={`${styles.previewSection} ${view.panel === 'code' ? styles.mobileHiddenPreview : ''}`} aria-labelledby="preview-title">
-            <div className={styles.sectionTitle}><div><h2 id="preview-title">Live preview</h2><p>Compiled Button specimen</p></div>
-              <span className={styles.recipeMeta}>Recipe {draft.recipe.id} · r{draft.recipe.revision}</span></div>
+            <h2 id="preview-title" className={styles.srOnly}>Live preview</h2>
             <div className={styles.viewControls}>
-              <label>Preview mode <select value={view.mode} onChange={(event) => setView({ ...view, mode: event.target.value as EditorView['mode'] })}><option value="light">Light</option><option value="dark">Dark</option></select></label>
-              <label>Preview width <select value={view.viewport} onChange={(event) => setView({ ...view, viewport: event.target.value as EditorView['viewport'] })}><option value="wide">Wide</option><option value="narrow">Narrow</option></select></label>
+              <SegmentedControl<EditorView['mode']> label="Preview mode" value={view.mode}
+                options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]}
+                onChange={(mode) => setView((previous) => ({ ...previous, mode }))} />
+              <SegmentedControl<EditorView['viewport']> label="Preview width" value={view.viewport}
+                options={[{ value: 'wide', label: 'Wide' }, { value: 'narrow', label: 'Narrow' }]}
+                onChange={(viewport) => setView((previous) => ({ ...previous, viewport }))} />
+              <SegmentedControl<EditorView['forcedState']> label="Preview state" value={view.forcedState}
+                options={[{ value: 'none', label: 'Rest' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' }, { value: 'active', label: 'Active' }]}
+                onChange={(forcedState) => setView((previous) => ({ ...previous, forcedState }))} />
+              <p className={styles.previewStatus} data-status={previewCurrent ? 'current' : 'pending'}>
+                {previewCurrent ? 'Matches current recipe' : compilation.result ? 'Showing the last valid recipe' : 'Compiling preview…'}
+              </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} /></div>
-            <p className={styles.previewStatus}>{compilation.stale || diagnostic || !resultMatchesDraft(compilation.result, draft.recipe)
-              ? compilation.result ? 'Preview shows the last valid recipe.' : 'Compiling preview…'
-              : 'Preview matches the current recipe.'}</p>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
@@ -208,6 +241,5 @@ export function ButtonEditor() {
         </div>
       </div>
     </>}
-    <div className={styles.status}><StatusAnnouncer message={status} /></div>
   </main>
 }
