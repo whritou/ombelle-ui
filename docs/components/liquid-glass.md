@@ -1,6 +1,6 @@
 # Liquid glass
 
-Liquid glass is the fourth style family. It is **experimental** for Button, Badge, Card, Dialog, Tabs, and Tooltip in light and dark modes. Input, Textarea, Label, Checkbox, Switch, and Native Select are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twelve components.
+Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Button, Badge, Card, Dialog, Tabs, and Tooltip in light and dark modes. Input, Textarea, Label, Checkbox, Switch, and Native Select are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twelve components.
 
 Experimental means the family compiles, installs, and renders through the same preset, compiler, CLI, preview, and editor pipeline as the stable families, and has automated evidence for one browser build. It does not meet the stable bar in [liquid glass constraints](../03-components-styles-accessibility.md#liquid-glass-constraints): mid-range mobile scrolling, human review, and the broader browser range are still owed. See [liquid glass evidence](../evidence/liquid-glass.md) for what was measured and what was not run.
 

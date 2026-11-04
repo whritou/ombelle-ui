@@ -36,7 +36,7 @@ Status: **Met** means the recorded evidence satisfies the criterion for the decl
 
 | Gate item | Status | Evidence and gaps |
 | --- | --- | --- |
-| Choose a style | Met | The hosted preset editor offers the three stable families with confirmed family-switch intent ([`preset-editor.spec.ts`](../tests/e2e/preset-editor.spec.ts)) |
+| Choose a style | Met | The hosted preset editor offers the four stable families with confirmed family-switch intent ([`preset-editor.spec.ts`](../tests/e2e/preset-editor.spec.ts)) |
 | Configure both modes | Met | Paired light/dark token controls; the gallery renders each family in both modes |
 | Install source | Met with npm on the public path | Production smoke applied `init` by code with `npx @ombelle-ui/cli@0.2.1` on Linux. Other runners: dry-run only |
 | Add another component with the saved preset | Met with npm on the public path | Production smoke `add input` kept `ui-preset.json` unchanged. All four managers locally |

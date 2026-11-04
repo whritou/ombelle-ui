@@ -1,5 +1,5 @@
 name: Foundation
-# Full evidence gate: 36 consumer apps, the browser matrix and the evidence
+# Full evidence gate: 40 consumer apps, the browser matrix and the evidence
 # aggregate. It is too slow for every push, so it runs nightly on the default
 # branch and on demand (Actions > Foundation > Run workflow). ci.yml runs the
 # fast checks on every push and pull request.

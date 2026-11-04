@@ -1,6 +1,6 @@
 # Ombelle style family decision
 
-4 November 2026. Ombelle is added as a fourth stable style family beside flat, minimalist and neo-brutalism. Liquid glass stays experimental and is unchanged.
+4 November 2026. Ombelle is added as a stable style family beside flat, minimalist and neo-brutalism. Liquid glass stays experimental and is unchanged.
 
 ## Look
 
@@ -28,6 +28,6 @@ Nothing rewrites installed files. A project adopts ombelle only by running `init
 
 ## Verification status
 
-Recorded on 4 November 2026 on Windows 11 with Node 24.19.0 and pnpm 11.25.0 through corepack. Run on this machine: `pnpm build:packages`, `pnpm generate:preview`, `pnpm typecheck`, the unit suite, the focused integration tests that this change touched, and the preset editor browser cases for ombelle (gallery rendering in light and dark, and the dashboard, settings and sign-in pages).
+Recorded on 4 November 2026 on Windows 11 with Node 24.19.0 and pnpm 11.25.0 through corepack. Run on this machine: `pnpm build:packages`, `pnpm generate:preview`, `pnpm typecheck`, the full unit suite (`pnpm test:unit`: 91 files and 931 tests passed on the final run; an earlier run had one `snapshot-cache` 60-second timeout while another job loaded the machine, which did not recur), the focused integration tests that this change touched (two `foundation-groups` tests fail here with ENOENT on a fake-pnpm `calls.jsonl` because pnpm is not on PATH; the full `pnpm test:integration` was not run), and the preset editor browser cases for ombelle (gallery rendering in light and dark, and the dashboard, settings and sign-in pages).
 
 Not completed here: `pnpm prepare:consumers` prepared all pnpm and npm consumers, including the four ombelle ones, and the Yarn consumers, then stopped at the first Bun consumer because no native Bun executable is installed (`Cannot resolve a supported native bun executable`), so the matrix and its evidence were not written and `pnpm check:foundation` was not run. The browser cases that compare the downloaded ombelle preset with installed Vite and Next consumers pass on this machine, and the preset editor's ombelle page cases pass. Next's CSS pipeline lowers `oklch()` to `lab()`, so the parity helpers (`tests/helpers/color-compare.ts`) now compare computed colours as sRGB within one channel step and 0.01 alpha, and every other property exactly. The parity browser spec (`parity.spec.ts`), which needs the full set of prepared consumers, was not run for ombelle. No measured evidence file was regenerated, and nothing here supports a claim about ombelle consumers, real-browser forced-colors rendering, human keyboard or screen reader review, or contrast beyond the automated token-pair test. Rerun the gate on a machine with the full toolchain before extending the evidence documents.
