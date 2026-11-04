@@ -81,24 +81,57 @@ it('removes only known stylesheet imports and rewrites imports without touching 
     ),
   ).rejects.toThrow('Unknown gallery stylesheet')
 })
-it('lets preview scenes import only reviewed gallery components', async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-scenes-'))
-  roots.push(root)
-  const manifest = {
-    catalogRelease: '0.1.0',
-    compilerVersion: '0.1.0',
-    sources: { 'components/ui/button.tsx': { canonicalHash: 'a', transformedHash: 'b' } },
-  } as const
+const reviewed = ['components/ui/button.tsx']
+const gallery = '../generated/preset-gallery/components/ui/button'
+async function sceneRoot() {
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-scenes-'))
+  roots.push(base)
+  const scenes = path.join(base, 'scenes')
+  await fs.mkdir(path.join(scenes, 'nested'), { recursive: true })
+  return scenes
+}
+it('lets preview scenes import reviewed gallery components, react and their own files', async () => {
+  const scenes = await sceneRoot()
   await fs.writeFile(
-    path.join(root, 'ok.tsx'),
-    "import { Button } from '../generated/preset-gallery/components/ui/button'\n",
+    path.join(scenes, 'ok.tsx'),
+    `import * as React from 'react'
+import { Button } from '${gallery}'
+import { local } from './nested/local'
+export * from './nested/local'
+void [React, Button, local]
+`,
   )
-  await expect(assertSceneSources(root, manifest)).resolves.toBeUndefined()
   await fs.writeFile(
-    path.join(root, 'bad.tsx'),
-    "import { Rogue } from '../generated/preset-gallery/components/ui/rogue'\n",
+    path.join(scenes, 'nested', 'local.tsx'),
+    `import { Button } from '../${gallery}'
+export const local = Button
+`,
   )
-  await expect(assertSceneSources(root, manifest)).rejects.toThrow(
-    'bad.tsx imports unreviewed source',
+  await expect(assertSceneSources(scenes, reviewed)).resolves.toBeUndefined()
+})
+it.each([
+  ['a missing manifest key', `import { R } from '${gallery.replace('button', 'rogue')}'`, 'unreviewed source'],
+  ['a side-effect import', `import '${gallery.replace('button', 'rogue')}'`, 'unreviewed source'],
+  ['a dynamic import', `export const load = () => import('${gallery.replace('button', 'rogue')}')`, 'unreviewed source'],
+  ['a lib import', `import { cn } from '../generated/preset-gallery/lib/utils'`, 'unreviewed source'],
+  ['a re-export', `export { R } from '${gallery.replace('button', 'rogue')}'`, 'unreviewed source'],
+  ['a type import', `export type T = import('${gallery.replace('button', 'rogue')}').R`, 'unreviewed source'],
+  ['a disallowed relative file', `import { x } from '../../elsewhere/module'`, 'a disallowed file'],
+  ['a disallowed package', `import { x } from 'lodash'`, 'a disallowed package'],
+  ['a non-literal dynamic import', `export const load = (n: string) => import(n)`, 'Non-literal module specifier'],
+])('rejects %s in a scene', async (_name, source, message) => {
+  const scenes = await sceneRoot()
+  await fs.writeFile(path.join(scenes, 'ok.tsx'), `import { Button } from '${gallery}'
+`)
+  await fs.writeFile(path.join(scenes, 'bad.tsx'), source + '\n')
+  await expect(assertSceneSources(scenes, reviewed)).rejects.toThrow(message)
+})
+it('checks nested scene files', async () => {
+  const scenes = await sceneRoot()
+  await fs.writeFile(
+    path.join(scenes, 'nested', 'deep.tsx'),
+    `import { R } from '../${gallery.replace('button', 'rogue')}'
+`,
   )
+  await expect(assertSceneSources(scenes, reviewed)).rejects.toThrow('nested/deep.tsx')
 })

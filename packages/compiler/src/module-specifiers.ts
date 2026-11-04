@@ -13,6 +13,51 @@ export async function stripStylesheetImports(content: string, allowed: readonly 
   return content
 }
 
+/**
+ * Every module specifier a source references: static and side-effect imports,
+ * `export ... from`, dynamic `import()`, `import("x")` types and `require()`.
+ * A dynamic import or require with a non-literal argument is rejected.
+ */
+export async function collectModuleSpecifiers(content: string): Promise<string[]> {
+  const ast = await parsers.typescript.parse(content, {
+    filepath: 'artifact.tsx',
+  } as Parameters<typeof parsers.typescript.parse>[1])
+  const found: string[] = []
+  const literal = (node: any) => {
+    const value = node?.type === 'Literal' || node?.type === 'StringLiteral' ? node.value : undefined
+    if (typeof value !== 'string') throw new Error('Non-literal module specifier')
+    found.push(value)
+  }
+  const walk = (node: any): void => {
+    if (!node || typeof node !== 'object') return
+    if (Array.isArray(node)) return node.forEach(walk)
+    switch (node.type) {
+      case 'ImportDeclaration':
+      case 'ExportAllDeclaration':
+      case 'ExportNamedDeclaration':
+        if (node.source) literal(node.source)
+        break
+      case 'ImportExpression':
+        literal(node.source)
+        break
+      case 'TSImportType':
+        literal(node.argument?.literal ?? node.argument ?? node.parameter)
+        break
+      case 'TSExternalModuleReference':
+        literal(node.expression)
+        break
+      case 'CallExpression':
+        if (node.callee?.type === 'Import' || (node.callee?.type === 'Identifier' && node.callee.name === 'require'))
+          literal(node.arguments?.[0])
+        break
+    }
+    for (const [key, child] of Object.entries(node))
+      if (key !== 'parent' && key !== 'loc' && key !== 'range') walk(child)
+  }
+  walk(ast)
+  return found
+}
+
 /** Rewrite module imports without changing user-authored string literals. */
 export async function rewriteModuleSpecifiers(
   content: string,
