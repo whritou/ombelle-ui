@@ -78,10 +78,21 @@ describe('catalog contract', () => {
         '@media (prefers-reduced-motion: reduce)',
       ])
         expect(css).toContain(rule)
-      // Minimalist paints its tooltip with the card surface and ombelle with primary; the others use popover.
-      const surface = family === 'minimalist' ? 'card' : family === 'ombelle' ? 'primary' : 'popover'
-      expect(css).toContain(`var(--${surface})`)
-      expect(css).toContain(`var(--${surface}-foreground)`)
+      // Minimalist paints its tooltip with the card surface, ombelle and neo-brutalism with
+      // primary, flat as an inverted foreground block; the others use popover.
+      if (family === 'flat') {
+        expect(css).toContain('background: var(--foreground)')
+        expect(css).toContain('color: var(--background)')
+      } else {
+        const surface =
+          family === 'minimalist'
+            ? 'card'
+            : family === 'ombelle' || family === 'neo-brutalism'
+              ? 'primary'
+              : 'popover'
+        expect(css).toContain(`var(--${surface})`)
+        expect(css).toContain(`var(--${surface}-foreground)`)
+      }
       expect(css).not.toMatch(/(?:left|right):/)
     }
   })
@@ -456,12 +467,13 @@ describe('catalog contract', () => {
       for (const needle of [
         'appearance: none',
         "[data-size='sm']",
-        ':has(select:disabled)',
         'pointer-events: none',
         'inset-inline-end',
         "select[multiple] + [data-slot='native-select-icon']",
       ])
         expect(select).toContain(needle)
+      // Every family styles the disabled select, on the wrapper or on the select itself.
+      expect(select).toMatch(/:has\(select:disabled\)|\[data-slot='native-select'\]:disabled/)
       for (const needle of [
         "[data-slot='label'] > [aria-hidden='true']",
         'var(--destructive)',
@@ -545,7 +557,10 @@ describe('catalog contract', () => {
   it('has complete tokens for every referenced style variable', () => {
     const c = getCatalog('0.1.0')
     for (const family of supportedStyleFamilies) {
-      expect(Object.keys(c.presets[family].modes.light)).toHaveLength(19)
+      // Families with hard offset shadows also carry the optional shadowColor token.
+      expect(Object.keys(c.presets[family].modes.light)).toHaveLength(
+        family === 'neo-brutalism' || family === 'ombelle' ? 20 : 19,
+      )
       for (const token of c.styles[family].matchAll(/var\(--([a-z-]+)\)/g))
         expect([
           ...Object.keys(c.presets[family].modes.light).map((k) =>
@@ -558,6 +573,8 @@ describe('catalog contract', () => {
           'control-height',
           'font-family',
           'motion-duration',
+          // Custom properties the family stylesheet declares itself, such as --dialog-padding.
+          ...[...c.styles[family].matchAll(/(?:^|[{;\s])--([a-z-]+)\s*:/g)].map((m) => m[1]),
         ]).toContain(token[1])
     }
   })

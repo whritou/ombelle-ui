@@ -9,16 +9,18 @@
   appearance: none;
   inline-size: 100%;
   min-inline-size: 0;
-  min-height: var(--control-height);
+  min-height: calc(var(--control-height) + 0.25rem);
   font-family: var(--font-family);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
-  padding: 0.5rem 1rem;
-  background: var(--background);
-  color: var(--foreground);
+  padding: 0 0.75rem;
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 0.9375rem;
+  font-weight: 600;
   transition: background-color var(--motion-duration);
-  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
-  padding-inline-end: 2.5rem;
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow-color, var(--border));
+  padding-inline-end: 3.125rem;
   cursor: pointer;
 }
 [data-slot='native-select'][data-size='sm'] {
@@ -27,7 +29,8 @@
   padding-inline-start: 0.75rem;
 }
 [data-slot='native-select'][multiple] {
-  padding-inline-end: 1rem;
+  padding-block: 0.5rem;
+  padding-inline-end: 0.75rem;
 }
 [data-slot='native-select-icon'] {
   position: absolute;
@@ -35,25 +38,27 @@
   inset-inline-end: var(--border-width);
   inset-block: var(--border-width);
   inline-size: 2.5rem;
-  block-size: auto;
-  padding: 0.5rem;
+  /* An svg ignores top+bottom insets; size it to the field inside its border. */
+  block-size: calc(100% - var(--border-width) * 2);
+  padding: 0 0.625rem;
   border-inline-start: var(--border-width) solid var(--border);
   background: var(--primary);
   color: var(--primary-foreground);
   pointer-events: none;
 }
+[data-slot='native-select'][aria-invalid='true'] {
+  background: color-mix(in oklab, var(--destructive) 18%, var(--card));
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--destructive);
+}
 [data-slot='native-select']:focus-visible {
   outline: 3px dashed var(--ring);
   outline-offset: 4px;
-}
-[data-slot='native-select'][aria-invalid='true'] {
-  border-color: var(--destructive);
-  border-width: max(var(--border-width), 2px);
-}
-[data-slot='native-select-wrapper']:has(select:disabled) {
-  opacity: 0.5;
+  background: color-mix(in oklab, var(--primary) 25%, var(--card));
 }
 [data-slot='native-select']:disabled {
+  opacity: 1;
+  background: var(--muted);
+  color: var(--muted-foreground);
   cursor: not-allowed;
   border-style: dashed;
   box-shadow: none;
@@ -78,5 +83,10 @@ select[multiple] + [data-slot='native-select-icon'] {
   }
   [data-slot='native-select'][aria-invalid='true'] {
     border-style: double;
+    border-width: max(var(--border-width), 3px);
+  }
+  [data-slot='native-select']:disabled {
+    color: GrayText;
+    border-color: GrayText;
   }
 }

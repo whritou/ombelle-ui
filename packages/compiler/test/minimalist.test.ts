@@ -96,7 +96,7 @@ it('uses a 1px focus outline with a 4px offset and uppercase labels and badges',
   const r=rule(css('components/ui/'+name+'.css'),'[data-slot="'+name+'"]')
   expect(r).toContain('font-size:11px')
   expect(r).toContain('text-transform:uppercase')
-  expect(r).toMatch(/letter-spacing:0?.1em/)
+  expect(r).toMatch(name==='label'?/letter-spacing:0?\.12em/:/letter-spacing:0?\.1em/)
  }
  const tip=rule(css('components/ui/tooltip.css'),'[data-slot="tooltip-content"]')
  expect(tip).toContain('background:var(--card)')

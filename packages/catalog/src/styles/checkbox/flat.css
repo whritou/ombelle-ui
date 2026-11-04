@@ -10,7 +10,7 @@
   block-size: 1.5rem;
   padding: 0;
   border: 2px solid var(--input);
-  border-radius: calc(var(--radius) * 0.5);
+  border-radius: calc(var(--radius) * 0.625);
   background: var(--card);
   color: var(--foreground);
   box-shadow: none;
@@ -32,21 +32,22 @@
 [data-slot='checkbox-indicator'] svg {
   inline-size: 1rem;
   block-size: 1rem;
+  stroke-width: 3.4;
 }
 [data-slot='checkbox-indicator'][data-state='checked'] [data-checkbox-mark='indeterminate'],
 [data-slot='checkbox-indicator'][data-state='indeterminate'] [data-checkbox-mark='checked'] {
   display: none;
 }
 [data-slot='checkbox']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 [data-slot='checkbox'][aria-invalid='true'] {
   border-color: var(--destructive);
 }
 [data-slot='checkbox']:disabled,
 [data-slot='checkbox'][data-disabled] {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 @media (forced-colors: active) {

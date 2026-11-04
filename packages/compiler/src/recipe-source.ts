@@ -46,7 +46,7 @@ export function renderScopedButton(input: ScopedButtonRenderInput): string {
     ? `export type ${input.propsTypeName} = React.ComponentProps<'button'> & VariantProps<typeof buttonVariants> & { loading?: boolean }
 export function ${input.componentName}({className, variant=${JSON.stringify(variant)}, size=${JSON.stringify(size)}, type=${JSON.stringify(recipe.props.type)}, disabled=${recipe.props.disabled}, loading=${recipe.props.loading}, children=${JSON.stringify(recipe.content)}, ...props}: ${input.propsTypeName}) {
  const {asChild: _asChild, ...native} = props as typeof props & {asChild?:unknown}
- return <button {...native} ${scopeAttributes(input)} data-variant={variant} data-size={size} type={type} disabled={disabled || loading} aria-busy={loading || undefined} className={cn(buttonVariants({variant,size}),className)}>{children}</button>
+ return <button {...native} ${scopeAttributes(input)} data-variant={variant} data-size={size} type={type} disabled={disabled || loading} aria-busy={loading || undefined} className={cn(buttonVariants({variant,size}),className)}>{loading && <span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />}{children}</button>
 }`
     : `export type ${input.propsTypeName} = React.ComponentProps<'button'> & VariantProps<typeof buttonVariants>
 export function ${input.componentName}({className, variant=${JSON.stringify(variant)}, size=${JSON.stringify(size)}, type='button', children, ...props}: ${input.propsTypeName}) {

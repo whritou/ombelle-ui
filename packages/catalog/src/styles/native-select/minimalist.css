@@ -15,48 +15,54 @@
   border-bottom: var(--border-width) solid var(--input);
   border-radius: 0;
   padding: 0.5rem 1rem;
-  padding-inline-start: 0;
+  padding-inline-start: 2px;
   background: transparent;
   color: var(--foreground);
+  font-size: 0.9375rem;
   transition: background-color var(--motion-duration), border-color var(--motion-duration);
   box-shadow: none;
-  padding-inline-end: 2.5rem;
+  padding-inline-end: 1.75rem;
   cursor: pointer;
 }
 [data-slot='native-select'][data-size='sm'] {
   min-height: 2rem;
   padding-block: 0.25rem;
-  padding-inline-start: 0;
+  padding-inline-start: 2px;
 }
 [data-slot='native-select'][multiple] {
   padding-inline-end: 0;
 }
 [data-slot='native-select-icon'] {
   position: absolute;
-  inset-inline-end: 0.25rem;
+  inset-inline-end: 2px;
   inset-block-start: 50%;
   translate: 0 -50%;
   inline-size: 1rem;
   block-size: 1rem;
-  color: var(--muted-foreground);
+  color: var(--foreground);
   pointer-events: none;
 }
+/* Underline fields show focus as a 2px ink rule instead of an outline. */
 [data-slot='native-select']:focus-visible {
-  outline: 1px solid var(--ring);
-  outline-offset: 4px;
-}
-[data-slot='native-select']:focus-visible {
+  outline: 0;
   border-bottom: 2px solid var(--ring);
 }
 [data-slot='native-select'][aria-invalid='true'],
 [data-slot='native-select'][aria-invalid='true']:focus-visible {
   border-bottom: 2px solid var(--destructive);
 }
-[data-slot='native-select-wrapper']:has(select:disabled) {
-  opacity: 0.5;
+/* An invalid field already shows a 2px rule, so focus there keeps the hairline outline. */
+[data-slot='native-select'][aria-invalid='true']:focus-visible {
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
 }
 [data-slot='native-select']:disabled {
+  border-bottom-style: dotted;
+  color: var(--muted-foreground);
   cursor: not-allowed;
+}
+[data-slot='native-select-wrapper']:has(select:disabled) [data-slot='native-select-icon'] {
+  color: var(--muted-foreground);
 }
 select[multiple] + [data-slot='native-select-icon'] {
   display: none;
@@ -75,7 +81,15 @@ select[multiple] + [data-slot='native-select-icon'] {
     color: ButtonText;
   }
   [data-slot='native-select']:focus-visible {
-    outline-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+  [data-slot='native-select']:disabled {
+    color: GrayText;
+    border-bottom-color: GrayText;
+  }
+  [data-slot='native-select-wrapper']:has(select:disabled) [data-slot='native-select-icon'] {
+    color: GrayText;
   }
   [data-slot='native-select'][aria-invalid='true'],
   [data-slot='native-select'][aria-invalid='true']:focus-visible {

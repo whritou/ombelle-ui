@@ -29,7 +29,7 @@ it('flat uses a zero border width and filled-well inputs', async () => {
   expect(getCatalog('0.1.0').presets.flat.design.borderWidthPx).toBe(0)
   const { style } = await flatCss()
   expect(squash(style)).toContain(
-    '[data-slot="input"]{background:var(--muted);border:0;border-bottom:2pxsolidvar(--input)',
+    '[data-slot="input"]{min-height:calc(var(--control-height)+2px);padding-inline:0.75rem;background:var(--muted);border:0;border-bottom:2pxsolidvar(--input)',
   )
 })
 
@@ -61,14 +61,14 @@ it('flat surfaces keep a boundary in forced-colors mode', async () => {
   expect(style).toContain('[data-slot="dialog-content"]{border:1pxsolidCanvasText')
   expect(style).toContain('[data-slot="button"][data-variant="outline"]{border:2pxsolidButtonText')
   expect(forced('components/ui/card.css')).toContain('border:1pxsolidCanvasText')
-  expect(forced('components/ui/badge.css')).toContain('[data-slot="badge"]{background:Canvas;color:CanvasText;border:1pxsolidCanvasText')
+  expect(forced('components/ui/badge.css')).toContain('[data-slot="badge"],[data-slot="badge"][data-variant="outline"]{background:Canvas;color:CanvasText;border:1pxsolidCanvasText')
   expect(forced('components/ui/tooltip.css')).toContain('border:1pxsolidCanvasText')
   expect(forced('components/ui/switch.css')).toContain('border:2pxsolidButtonText')
   expect(forced('components/ui/tabs.css')).toContain('border:1pxsolidButtonText')
 })
 
 const strip = (css: string) =>
-  css.replace(/\/\*.*?\*\//g, '').replace(/\s+/g, '').replace(/'/g, '"')
+  css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, '').replace(/'/g, '"')
 // Declarations of every base rule whose selector list is exactly `selector`, joined.
 const rule = (css: string, selector: string) => {
   const out: string[] = []
@@ -121,23 +121,29 @@ it('neo-brutalism preset carries the refreshed design values', () => {
 
 it('neo-brutalism derives card and dialog shadows from the offsets', async () => {
   const css = await neo()
-  const shadow = 'box-shadow:calc(var(--shadow-x)*2)calc(var(--shadow-y)*2)0var(--border)'
-  expect(rule(css('components/ui/card.css'), '[data-slot="card"]')).toContain(shadow)
-  expect(rule(css('styles/ui-style.css'), '[data-slot="dialog-content"]')).toContain(shadow)
+  // Card casts a doubled offset and the dialog a 2.5x offset, both in the preset shadow colour.
+  expect(rule(css('components/ui/card.css'), '[data-slot="card"]')).toContain(
+    'box-shadow:calc(var(--shadow-x)*2)calc(var(--shadow-y)*2)0var(--shadow-color,var(--border))',
+  )
+  expect(rule(css('styles/ui-style.css'), '[data-slot="dialog-content"]')).toContain(
+    'box-shadow:calc(var(--shadow-x)*2.5)calc(var(--shadow-y)*2.5)0var(--shadow-color,var(--border))',
+  )
 })
 
 it('neo-brutalism keys lift on hover, sink on press, and go dashed when disabled', async () => {
   const css = await neo()
   const style = css('styles/ui-style.css')
   expect(rule(style, '[data-slot="button"]:not(:disabled):hover')).toContain(
-    'transform:translate(-2px,-2px);box-shadow:calc(var(--shadow-x)+2px)calc(var(--shadow-y)+2px)0var(--border)',
+    'transform:translate(-2px,-2px);box-shadow:calc(var(--shadow-x)+2px)calc(var(--shadow-y)+2px)0var(--shadow-color,var(--border))',
   )
   expect(rule(style, '[data-slot="button"]:not(:disabled):active')).toContain(
-    'transform:translate(var(--shadow-x),var(--shadow-y));box-shadow:000var(--border)',
+    'transform:translate(var(--shadow-x),var(--shadow-y));box-shadow:000var(--shadow-color,var(--border))',
   )
-  const disabled = rule(style, '[data-slot="button"]:disabled,[data-slot="input"]:disabled')
-  expect(disabled).toContain('border-style:dashed')
-  expect(disabled).toContain('box-shadow:none')
+  for (const selector of ['[data-slot="button"]:disabled,[data-slot="button"][data-variant]:disabled', '[data-slot="input"]:disabled']) {
+    const disabled = rule(style, selector)
+    expect(disabled, selector).toContain('border-style:dashed')
+    expect(disabled, selector).toContain('box-shadow:none')
+  }
   const tabs = css('components/ui/tabs.css')
   const active = rule(tabs, '[data-slot="tabs-trigger"][data-state="active"]')
   expect(active).toContain('background:var(--accent)')
@@ -237,15 +243,19 @@ it('ombelle outlines every control and casts hard offset shadows', async () => {
   const css = await ombelle()
   const style = css('styles/ui-style.css')
   const outline = 'border:var(--border-width)solidvar(--border)'
-  const shadow = 'box-shadow:var(--shadow-x)var(--shadow-y)0var(--border)'
+  // Buttons scale the offset per size; small controls cast 2/3 of it; fields rest on an inset hairline.
   expect(style).toContain(outline)
-  expect(style).toContain(shadow)
-  for (const [file, slot] of [['checkbox', 'checkbox'], ['switch', 'switch'], ['tabs', 'tabs-list'], ['native-select', 'native-select'], ['textarea', 'textarea']] as const) {
+  expect(style).toContain(
+    'box-shadow:calc(var(--shadow-x)*var(--ombelle-shadow-scale,1))calc(var(--shadow-y)*var(--ombelle-shadow-scale,1))0var(--shadow-color,var(--border))',
+  )
+  const small = 'box-shadow:calc(var(--shadow-x)*2/3)calc(var(--shadow-y)*2/3)0var(--shadow-color,var(--border))'
+  const inset = 'box-shadow:inset02px0color-mix(inoklab,var(--foreground)7%,transparent)'
+  for (const [file, slot, shadow] of [['checkbox', 'checkbox', small], ['switch', 'switch', small], ['tabs', 'tabs-list', small], ['native-select', 'native-select', inset], ['textarea', 'textarea', inset]] as const) {
     const base = rule(css(`components/ui/${file}.css`), `[data-slot="${slot}"]`)
     expect(base, slot).toContain(outline)
     expect(base, slot).toContain(shadow)
   }
-  const big = 'box-shadow:calc(var(--shadow-x)*5/3)calc(var(--shadow-y)*5/3)0var(--border)'
+  const big = 'box-shadow:calc(var(--shadow-x)*5/3)calc(var(--shadow-y)*5/3)0var(--shadow-color,var(--border))'
   expect(rule(css('components/ui/card.css'), '[data-slot="card"]')).toContain(big)
   expect(rule(style, '[data-slot="dialog-content"]')).toContain(big)
 })
@@ -254,10 +264,10 @@ it('ombelle buttons nudge on hover, press into the shadow and go dashed when dis
   const css = await ombelle()
   const style = css('styles/ui-style.css')
   expect(rule(style, '[data-slot="button"]:not(:disabled):hover')).toContain(
-    'transform:translate(-1px,-1px);box-shadow:calc(var(--shadow-x)+1px)calc(var(--shadow-y)+1px)0var(--border)',
+    'transform:translate(-1px,-1px);box-shadow:calc(var(--shadow-x)*var(--ombelle-shadow-scale,1)+1px)calc(var(--shadow-y)*var(--ombelle-shadow-scale,1)+1px)0var(--shadow-color,var(--border))',
   )
   expect(rule(style, '[data-slot="button"]:not(:disabled):active')).toContain(
-    'transform:translate(var(--shadow-x),var(--shadow-y));box-shadow:000var(--border)',
+    'transform:translate(calc(var(--shadow-x)*var(--ombelle-shadow-scale,1)),calc(var(--shadow-y)*var(--ombelle-shadow-scale,1)));box-shadow:000var(--shadow-color,var(--border))',
   )
   const disabled = rule(style, '[data-slot="button"]:disabled,[data-slot="input"]:disabled')
   expect(disabled).toContain('border-style:dashed')
@@ -287,19 +297,22 @@ it('ombelle fills the active tab with the foreground and styles the switch thumb
   expect(rule(sw, '[data-slot="switch"][data-state="checked"]')).toContain('background:var(--primary)')
 })
 
-it('ombelle tooltip is primary with an outlined arrow; labels, badges and tabs are uppercase', async () => {
+it('ombelle tooltip is primary with an outlined arrow; labels and badges are uppercase, tabs are not', async () => {
   const css = await ombelle()
   const tip = css('components/ui/tooltip.css')
   const content = rule(tip, '[data-slot="tooltip-content"]')
   expect(content).toContain('background:var(--primary)')
   expect(content).toContain('border:var(--border-width)solidvar(--border)')
   expect(rule(tip, '[data-slot="tooltip-arrow"]')).toContain('stroke:var(--border)')
-  for (const [file, slot, spacing] of [['label', 'label', true], ['badge', 'badge', true], ['tabs', 'tabs-trigger', false]] as const) {
-    const base = rule(css(`components/ui/${file}.css`), `[data-slot="${slot}"]`)
+  for (const slot of ['label', 'badge']) {
+    const base = rule(css(`components/ui/${slot}.css`), `[data-slot="${slot}"]`)
     expect(base, slot).toContain('text-transform:uppercase')
     expect(base, slot).toContain('font-weight:700')
-    if (spacing) expect(base, slot).toContain('letter-spacing:0.07em')
+    expect(base, slot).toContain('letter-spacing:0.07em')
   }
+  const trigger = rule(css('components/ui/tabs.css'), '[data-slot="tabs-trigger"]')
+  expect(trigger).toContain('font-weight:600')
+  expect(trigger).not.toContain('text-transform:uppercase')
 })
 
 it('ombelle keeps borders and focus in forced-colors but drops every shadow', async () => {

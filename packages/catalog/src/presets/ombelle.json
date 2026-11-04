@@ -27,7 +27,8 @@
       "destructiveForeground": "oklch(99% 0 0)",
       "border": "oklch(22% 0.012 275)",
       "input": "oklch(22% 0.012 275)",
-      "ring": "oklch(55% 0.22 6)"
+      "ring": "oklch(55% 0.22 6)",
+      "shadowColor": "oklch(22% 0.012 275)"
     },
     "dark": {
       "background": "oklch(17% 0.01 275)",
@@ -48,7 +49,8 @@
       "destructiveForeground": "oklch(16% 0.01 275)",
       "border": "oklch(97% 0.004 350 / 80%)",
       "input": "oklch(97% 0.004 350 / 80%)",
-      "ring": "oklch(68% 0.22 6)"
+      "ring": "oklch(68% 0.22 6)",
+      "shadowColor": "oklch(55% 0.22 6 / 70%)"
     }
   },
   "design": {

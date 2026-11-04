@@ -6,23 +6,32 @@
 [data-slot='tooltip-content'] {
   z-index: 50;
   max-inline-size: min(20rem, var(--radix-tooltip-content-available-width));
-  padding-block: 0.5rem;
-  padding-inline: 0.75rem;
+  padding-block: 0.375rem;
+  padding-inline: 0.6875rem;
   border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) - 2px);
   background: var(--primary);
   color: var(--primary-foreground);
   font-family: var(--font-family);
-  font-size: 0.875rem;
-  line-height: 1.5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
   overflow-wrap: anywhere;
-  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
+  box-shadow: calc(var(--shadow-x) * 2 / 3) calc(var(--shadow-y) * 2 / 3) 0
+    var(--shadow-color, var(--border));
   animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
 }
+/* Radix draws the arrow as polygon 0,0 30,0 15,10 in a 10x5 box (preserveAspectRatio none).
+   The dash skips the 30-unit base so the outline stays open where the arrow meets the bubble;
+   the arrow moves up by one border width so its fill covers the bubble border at the mouth.
+   The stroke is in user units: x2.35 gives about one border width on screen. */
 [data-slot='tooltip-arrow'] {
+  overflow: visible;
   fill: var(--primary);
   stroke: var(--border);
-  stroke-width: var(--border-width);
+  stroke-width: calc(var(--border-width) * 2.35);
+  stroke-dasharray: 0 30 100;
+  translate: 0 calc(var(--border-width) * -1);
 }
 @keyframes ombelle-tooltip-enter {
   from {

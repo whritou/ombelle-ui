@@ -266,6 +266,9 @@ export const presetSchema = {
         },
         "ring": {
           "$ref": "#/$defs/color"
+        },
+        "shadowColor": {
+          "$ref": "#/$defs/color"
         }
       }
     }

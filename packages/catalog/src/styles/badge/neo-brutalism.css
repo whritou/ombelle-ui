@@ -2,20 +2,24 @@
 [data-slot='badge'] {
   display: inline-flex;
   align-items: center;
+  gap: 0.375rem;
   max-width: 100%;
   min-width: 0;
-  padding: 0.125rem 0.5rem;
-  border: var(--border-width) solid var(--border);
+  min-block-size: 1.625rem;
+  padding: 0 0.625rem;
+  border: max(calc(var(--border-width) - 0.5px), 1px) solid var(--border);
   border-radius: var(--radius);
-  background: var(--secondary);
-  color: var(--secondary-foreground);
+  background: var(--primary);
+  color: var(--primary-foreground);
   font-family: var(--font-family);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.6875rem;
+  font-weight: 900;
   line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   white-space: normal;
   overflow-wrap: anywhere;
-  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
+  box-shadow: calc(var(--shadow-x) / 2) calc(var(--shadow-y) / 2) 0 var(--shadow-color, var(--border));
   transition: none;
   animation: none;
 }
@@ -24,6 +28,18 @@
 }
 [data-slot='badge']:nth-child(even) {
   transform: rotate(2deg);
+}
+[data-slot='badge'][data-variant='secondary'] {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+[data-slot='badge'][data-variant='outline'] {
+  background: var(--card);
+  color: var(--card-foreground);
+}
+[data-slot='badge'][data-variant='accent'] {
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 [data-slot='badge'][data-variant='destructive'] {
   background: var(--destructive);

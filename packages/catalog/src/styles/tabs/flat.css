@@ -20,7 +20,7 @@
   gap: 0.25rem;
   padding: 0.25rem;
   border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) * 1.25);
   background: var(--muted);
   color: var(--muted-foreground);
 }
@@ -37,12 +37,13 @@
   justify-content: center;
   min-inline-size: 2.75rem;
   min-block-size: 2.75rem;
-  padding-block: 0.5rem;
-  padding-inline: 0.75rem;
+  padding-block: 0;
+  padding-inline: 0.875rem;
   border: var(--border-width) solid transparent;
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) * 0.875);
   font: inherit;
-  font-weight: 500;
+  font-size: 0.8125rem;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -64,8 +65,8 @@
 }
 [data-slot='tabs-trigger']:focus-visible,
 [data-slot='tabs-content']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 [data-slot='tabs-trigger']:disabled,
 [data-slot='tabs-trigger'][data-disabled] {

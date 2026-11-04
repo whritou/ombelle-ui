@@ -3,7 +3,7 @@ import { cn } from './utils.js'
 import './badge.css'
 
 export type BadgeProps = React.ComponentProps<'span'> & {
-  variant?: 'default' | 'destructive'
+  variant?: 'default' | 'secondary' | 'outline' | 'accent' | 'destructive'
 }
 
 export function Badge({
