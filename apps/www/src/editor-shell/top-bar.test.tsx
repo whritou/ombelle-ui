@@ -2,7 +2,7 @@ import { createRef } from 'react'
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { EditorTopBar } from './top-bar'
-import { OverflowMenu } from './overflow-menu'
+import { OverflowMenu, menuFocusTarget } from './overflow-menu'
 
 const noop = () => {}
 const history = { disabled: false, onClick: noop, buttonRef: createRef<HTMLButtonElement>() }
@@ -44,6 +44,7 @@ it('OverflowMenu puts destructive items last after a separator', () => {
   expect(html).toContain('aria-label="More"')
   expect(html).toContain('popoverTarget="m"')
   expect(html).toContain('role="menu"')
+  expect(html).toContain('aria-haspopup="menu"')
   expect(html.match(/role="menuitem"/g)).toHaveLength(3)
   expect(html).toContain('role="separator"')
   expect(html.indexOf('Duplicate')).toBeLessThan(html.indexOf('role="separator"'))
@@ -61,4 +62,18 @@ it('EditorTopBar can render the name field read-only', () => {
   )
   expect(field(true)).toContain('readOnly=""')
   expect(field()).not.toContain('readOnly')
+})
+
+it('menuFocusTarget follows the menu keyboard pattern over enabled items', () => {
+  const disabled = [false, true, false, false]
+  expect(menuFocusTarget('ArrowDown', 0, disabled)).toBe(2)
+  expect(menuFocusTarget('ArrowDown', 3, disabled)).toBe(0)
+  expect(menuFocusTarget('ArrowUp', 2, disabled)).toBe(0)
+  expect(menuFocusTarget('ArrowUp', 0, disabled)).toBe(3)
+  expect(menuFocusTarget('ArrowDown', -1, disabled)).toBe(0)
+  expect(menuFocusTarget('ArrowUp', -1, disabled)).toBe(3)
+  expect(menuFocusTarget('Home', 3, disabled)).toBe(0)
+  expect(menuFocusTarget('End', 0, disabled)).toBe(3)
+  expect(menuFocusTarget('Tab', 0, disabled)).toBeNull()
+  expect(menuFocusTarget('ArrowDown', -1, [true, true])).toBeNull()
 })
