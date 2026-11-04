@@ -38,7 +38,7 @@ it('accepts a valid render payload and its next request', async () => {
 
 it('accepts every forced state, including active', async () => {
   const message = await renderMessage()
-  for (const forcedState of ['none', 'hover', 'focus', 'active'])
+  for (const forcedState of ['none', 'hover', 'focus', 'active', 'disabled', 'loading'])
     expect(acceptPreviewRender({ ...message, state: { ...message.state, forcedState } }, 0)).not.toBeNull()
 })
 

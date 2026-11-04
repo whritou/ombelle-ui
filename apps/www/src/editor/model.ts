@@ -10,7 +10,7 @@ export type EditorView = {
   mode: 'light' | 'dark'
   viewport: 'wide' | 'narrow'
   panel: 'preview' | 'customize' | 'code'
-  forcedState: 'none' | 'hover' | 'focus' | 'active'
+  forcedState: 'none' | 'hover' | 'focus' | 'active' | 'disabled' | 'loading'
 }
 
 function presetRefFor(family: StyleFamily): Recipe['presetRef'] {

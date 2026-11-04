@@ -1,15 +1,23 @@
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
+import { forcedStateSelector } from '../../www/src/editor/forced-states'
 import { editorButtons } from './generated/editor-buttons'
 import './editor-preview.css'
 
-/** Forced preview states reuse a class so the specimen shows hover, focus or pressed without the pointer. */
-const forcedClass: Record<string, string | undefined> = {
-  none: undefined,
-  hover: 'editor-force-hover',
-  focus: 'editor-force-focus',
-  active: 'editor-force-active',
+/**
+ * Forced preview states use the family's own rules: each rule written for :hover,
+ * :focus-visible or :active gets a copy for [data-forced-state], inserted right after
+ * it so the cascade order is unchanged.
+ */
+function mirrorForcedStates(group: CSSStyleSheet | CSSGroupingRule) {
+  for (let index = group.cssRules.length - 1; index >= 0; index--) {
+    const rule = group.cssRules[index]
+    if (rule instanceof CSSStyleRule) {
+      const forced = forcedStateSelector(rule.selectorText)
+      if (forced) group.insertRule(`${forced} { ${rule.style.cssText} }`, index + 1)
+    } else if (rule instanceof CSSGroupingRule) mirrorForcedStates(rule)
+  }
 }
 
 type ButtonModule = Awaited<ReturnType<(typeof editorButtons)[keyof typeof editorButtons]>>
@@ -68,22 +76,28 @@ function EditorPreview() {
   }, [family])
 
   const state = message?.state
+  const recipeStyle = React.useRef<HTMLStyleElement>(null)
+  React.useLayoutEffect(() => {
+    const sheet = recipeStyle.current?.sheet
+    if (sheet) mirrorForcedStates(sheet)
+  }, [state?.css])
   const Button = buttonModule && buttonModule.family === family ? buttonModule.module.Button : null
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
-    <style>{state?.css ?? ''}</style>
+    {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
+    <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>
     {/* Button always sets data-slot="button" on itself, but the recipe CSS targets
         data-slot="recipe-button", as the installed RecipeButton renders it. As a Slot
         parent it only lends variant classes and data attributes; the child's own
         data-slot wins the Slot merge. */}
-    {state && Button && <Button asChild variant={state.recipe.props.variant} size={state.recipe.props.size} className={forcedClass[state.forcedState]}>
+    {state && Button && <Button asChild variant={state.recipe.props.variant} size={state.recipe.props.size}>
       <button
         data-slot="recipe-button"
         data-ombelle-recipe={message.scope}
         type={state.recipe.props.type}
-        disabled={state.recipe.props.disabled || state.recipe.props.loading}
-        aria-busy={state.recipe.props.loading || undefined}
+        disabled={state.recipe.props.disabled || state.recipe.props.loading || state.forcedState === 'disabled' || state.forcedState === 'loading'}
+        aria-busy={state.recipe.props.loading || state.forcedState === 'loading' || undefined}
         data-forced-state={state.forcedState}
-      >{state.recipe.content}</button>
+      >{(state.recipe.props.loading || state.forcedState === 'loading') && <span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />}{state.recipe.content}</button>
     </Button>}
   </div>
 }
