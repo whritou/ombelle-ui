@@ -30,12 +30,16 @@ export function SignInScene(props: SceneProps) {
             {show(
               'input',
               'Input',
-              <div className="scene-field">
-                <Label htmlFor="scene-signin-email">Email</Label>
-                <Input id="scene-signin-email" type="email" autoComplete="email" placeholder="you@acme.test" />
-                <Label htmlFor="scene-signin-password">Password</Label>
-                <Input id="scene-signin-password" type="password" autoComplete="current-password" />
-              </div>,
+              <>
+                <div className="scene-field">
+                  <Label htmlFor="scene-signin-email">Email</Label>
+                  <Input id="scene-signin-email" type="email" autoComplete="email" placeholder="you@acme.test" />
+                </div>
+                <div className="scene-field">
+                  <Label htmlFor="scene-signin-password">Password</Label>
+                  <Input id="scene-signin-password" type="password" autoComplete="current-password" />
+                </div>
+              </>,
             )}
             {show(
               'checkbox',
@@ -46,7 +50,7 @@ export function SignInScene(props: SceneProps) {
               </div>,
             )}
           </CardContent>
-          <CardFooter className="scene-actions">
+          <CardFooter className="scene-actions scene-actions-stack">
             <Button type="submit">Sign in</Button>
             <Button type="button" variant="outline">Continue with SSO</Button>
           </CardFooter>

@@ -123,16 +123,7 @@
 .root :global(.be-shadow-field) { display: flex; align-items: center; gap: .3rem; min-width: 0; font-size: .8125rem; color: var(--slate); }
 .root :global(.be-shadow-field) input { flex: 1; min-width: 0; min-height: 28px; }
 
-/* Style family chip and its picker. */
-.root :global(.be-family-chip) { display: inline-flex; align-items: center; gap: .4rem; min-height: 32px; padding: 0 .625rem; border-radius: 999px; font-size: .8125rem; white-space: nowrap; }
-.root :global(.be-family-dot) { width: .65rem; height: .65rem; border-radius: 50%; background: var(--primary); }
-.root :global(.be-family-dot)[data-family="minimalist"] { border: 1px solid var(--ink); background: transparent; }
-.root :global(.be-family-dot)[data-family="neo-brutalism"] { border: 2px solid var(--ink); border-radius: 2px; }
-.root :global(.be-family-dot)[data-family="liquid-glass"] { background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 45%, transparent), color-mix(in oklab, var(--muted) 70%, transparent)); border: 1px solid var(--control); }
-.root :global(.be-family-popover) { width: min(22rem, calc(100vw - 2rem)); margin: auto; padding: .75rem; border: 1px solid var(--line); border-radius: .875rem; background: var(--popover); color: var(--popover-foreground); box-shadow: var(--shadow-soft); }
-@supports (position-area: bottom) {
-  .root :global(.be-family-popover) { margin: 4px 0; position-area: bottom span-left; }
-}
+/* Style family picker in the inspector. */
 .root :global(.be-families) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
 .root :global(.be-family) { position: relative; display: grid; justify-items: start; gap: .4rem; padding: .5rem; border-radius: .6rem; font-size: .8125rem; text-align: left; }
 .root :global(.be-family)[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
@@ -143,7 +134,7 @@
 .root :global(.be-family)[data-family="neo-brutalism"] :global(.be-family-sample) i { border: 2px solid var(--ink); border-radius: 0; box-shadow: 2px 2px 0 var(--ink); }
 .root :global(.be-family)[data-family="ombelle"] :global(.be-family-sample) i { border: 2px solid var(--ink); border-radius: 999px; background: oklch(72% 0.17 6); box-shadow: 2px 2px 0 var(--ink); }
 .root :global(.be-family)[data-family="liquid-glass"] :global(.be-family-sample) i { border: 1px solid var(--control); border-radius: 12px; background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 45%, transparent), color-mix(in oklab, var(--muted) 70%, transparent)); }
-.root :global(.be-family-tag) { position: absolute; bottom: 6px; right: 6px; padding: 0 6px; border: 1px solid var(--line); border-radius: 999px; background: var(--muted); font-size: .625rem; font-weight: 600; }
+.root :global(.be-family-tag) { position: absolute; top: -8px; right: 8px; padding: 0 6px; border: 1px solid var(--line); border-radius: 999px; background: var(--muted); font-size: .625rem; font-weight: 600; }
 
 .root :global(.artifacts) { min-width: 0; }
 .root :global(.artifactTabs) { display: flex; gap: .15rem; overflow-x: auto; border-bottom: 1px solid var(--line); }

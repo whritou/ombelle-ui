@@ -11,7 +11,6 @@ const familyNames = {
 } as const
 
 export const moreActions = (page: Page) => page.getByRole('button', { name: 'More actions', exact: true })
-export const familyChip = (page: Page) => page.getByRole('button', { name: /^Style family: / })
 export const familyOption = (page: Page, family: keyof typeof familyNames) =>
   page.getByRole('group', { name: 'Style family', exact: true }).getByRole('button', { name: new RegExp('^' + familyNames[family]) })
 export const menuItem = (page: Page, name: string) => page.getByRole('menuitem', { name, exact: true })
@@ -43,9 +42,8 @@ export async function expectRecipeDownloadEnabled(page: Page) {
   await closeMoreActions(page)
 }
 
-/** Chooses a recipe style family through the top-bar chip. */
+/** Chooses a recipe style family from the inspector cards. */
 export async function chooseFamily(page: Page, family: keyof typeof familyNames) {
-  await familyChip(page).click()
   await familyOption(page, family).click()
-  await expect(familyChip(page)).toHaveAccessibleName('Style family: ' + familyNames[family])
+  await expect(familyOption(page, family)).toHaveAttribute('aria-pressed', 'true')
 }

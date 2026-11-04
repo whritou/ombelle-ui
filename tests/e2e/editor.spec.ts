@@ -7,7 +7,7 @@ import { recipeStyles } from '../helpers/recipe-measurements.js'
 import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import exampleRecipe from '../../examples/recipe.example.json' with { type: 'json' }
 import {
-  chooseFamily, closeMoreActions, expectRecipeDownloadEnabled, familyChip, familyOption, menuItem, moreActions, openMenuItem, segment, toggle,
+  chooseFamily, closeMoreActions, expectRecipeDownloadEnabled, familyOption, menuItem, moreActions, openMenuItem, segment, toggle,
 } from '../helpers/button-editor-ui.js'
 import fs from 'node:fs'
 import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
@@ -467,16 +467,12 @@ test('operates every Button editor control, artifact tab, download and publish d
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   const stored = async () => JSON.parse((await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft')))!).recipe
 
-  // The top bar comes first, then the inspector, the preview controls and generated output.
-  const chip = familyChip(page)
-  await tabTo(page, chip)
-  await page.keyboard.press('Enter')
+  // The top bar comes first, then the inspector (style family first), the preview controls and generated output.
   const minimalist = familyOption(page, 'minimalist')
-  await expect(minimalist).toBeVisible()
   await tabTo(page, minimalist)
   await page.keyboard.press('Enter')
-  await expect(chip).toHaveAccessibleName('Style family: Minimalist')
-  await expect(chip).toBeFocused()
+  await expect(minimalist).toHaveAttribute('aria-pressed', 'true')
+  await expect(minimalist).toBeFocused()
   await tabTo(page, page.getByLabel('Button text'))
   await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('Keyboard ship')

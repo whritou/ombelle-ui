@@ -29,16 +29,22 @@ const stats = [
   { label: 'Deploys this month', value: '128', note: 'Up 8% on last month' },
 ]
 const projects = [
-  { name: 'Website refresh', status: 'On track', alert: false },
-  { name: 'Mobile onboarding', status: 'Needs attention', alert: true },
-  { name: 'Billing migration', status: 'On track', alert: false },
+  { name: 'Website refresh', detail: 'Updated 2 hours ago', status: 'On track', alert: false },
+  { name: 'Mobile onboarding', detail: 'Updated yesterday', status: 'Needs attention', alert: true },
+  { name: 'Billing migration', detail: 'Updated last week', status: 'On track', alert: false },
 ]
 
 export function DashboardScene(props: SceneProps) {
   const show = gate(props)
   return (
     <main className="preset-scene" data-testid="preset-scene" data-scene="dashboard">
-      <h1>Overview</h1>
+      <header className="scene-header">
+        <h1>Overview</h1>
+        <div className="scene-actions">
+          <Button variant="outline">Invite</Button>
+          <Button>New project</Button>
+        </div>
+      </header>
       <div className="scene-stats">
         {stats.map((stat) => (
           <Card key={stat.label}>
@@ -50,43 +56,55 @@ export function DashboardScene(props: SceneProps) {
           </Card>
         ))}
       </div>
-      <Tabs defaultValue="projects">
-        <TabsList aria-label="Dashboard sections">
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-        </TabsList>
-        <TabsContent value="projects">
-          <TooltipProvider delayDuration={300}>
-            <ul className="scene-list" aria-label="Projects">
-              {projects.map((project) => (
-                <li key={project.name} className="scene-list-row">
-                  <span className="scene-grow">{project.name}</span>
-                  <Badge variant={project.alert ? 'destructive' : 'default'}>
-                    {project.status}
-                  </Badge>
-                  {show(
-                    'switch',
-                    'Switch',
-                    <Switch aria-label={`Notify me about ${project.name}`} defaultChecked={!project.alert} />,
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="sm" aria-label={`Archive ${project.name}`}>
-                        Archive
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Moves {project.name} out of the active list.
-                      <TooltipArrow />
-                    </TooltipContent>
-                  </Tooltip>
-                </li>
-              ))}
-            </ul>
-          </TooltipProvider>
-        </TabsContent>
-        <TabsContent value="activity">Your latest changes are saved.</TabsContent>
-      </Tabs>
+      <Card>
+        <CardHeader>
+          <CardTitle level={2}>Projects</CardTitle>
+          <CardDescription>Everything your team is shipping.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="projects" className="scene-tabs">
+            <TabsList aria-label="Dashboard sections">
+              <TabsTrigger value="projects">Projects</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+            </TabsList>
+            <TabsContent value="projects">
+              <TooltipProvider delayDuration={300}>
+                <ul className="scene-list" aria-label="Projects">
+                  {projects.map((project) => (
+                    <li key={project.name} className="scene-list-row">
+                      <span className="scene-grow">
+                        <strong>{project.name}</strong>
+                        <span className="scene-muted">{project.detail}</span>
+                      </span>
+                      <Badge variant={project.alert ? 'destructive' : 'default'}>
+                        {project.status}
+                      </Badge>
+                      {show(
+                        'switch',
+                        'Switch',
+                        <Switch aria-label={`Notify me about ${project.name}`} defaultChecked={!project.alert} />,
+                      )}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          {/* Slot hands the trigger its own data-slot; keep the Button slot so the family styles it. */}
+                          <Button data-slot="button" variant="outline" size="sm" aria-label={`Archive ${project.name}`}>
+                            Archive
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Moves {project.name} out of the active list.
+                          <TooltipArrow />
+                        </TooltipContent>
+                      </Tooltip>
+                    </li>
+                  ))}
+                </ul>
+              </TooltipProvider>
+            </TabsContent>
+            <TabsContent value="activity">Your latest changes are saved.</TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </main>
   )
 }

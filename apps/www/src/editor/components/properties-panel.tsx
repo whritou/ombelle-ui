@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
-import type { Recipe, RecipeButtonVariant, RecipeColorMode, RecipeColorRole } from '@ombelle/contracts'
+import type { Recipe, RecipeButtonVariant, RecipeColorMode, RecipeColorRole, StyleFamily } from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { RECIPE_COLOR_PATTERN, recipeColor, withRecipeColor } from '../model'
+import { FamilyPicker } from './family-picker'
 
 type Props = {
   recipe: Recipe
+  family: StyleFamily
+  onFamily: (family: StyleFamily) => void
   diagnostic: CompileDiagnostic | null
   onChange: (recipe: Recipe, key: string) => void
   onDiagnostic: (path: string, message: string) => void
@@ -186,7 +189,7 @@ export function shownNumber(text: string | undefined, current: number | undefine
   return current === undefined ? '' : String(current)
 }
 
-export function PropertiesPanel({ recipe, diagnostic, onChange, onDiagnostic }: Props) {
+export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange, onDiagnostic }: Props) {
   // Text being typed in a number field stays local until it is a valid value in range.
   const [typing, setTyping] = useState<Partial<Record<OverrideKey, string>>>({})
   const changeProp = (key: keyof Recipe['props'], value: string | boolean) =>
@@ -215,6 +218,10 @@ export function PropertiesPanel({ recipe, diagnostic, onChange, onDiagnostic }: 
 
   return (
     <div className="properties">
+      <InspectorSection id="inspector-family" title="Style family">
+        <FamilyPicker value={family} onChange={onFamily} />
+        <FieldError diagnostic={diagnostic} path="/presetRef" />
+      </InspectorSection>
       <InspectorSection id="inspector-content" title="Content">
         <div className="be-stack">
           <label htmlFor="button-text" className="be-stack-label">Button text</label>
