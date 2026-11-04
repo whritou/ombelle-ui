@@ -404,7 +404,7 @@ for (const mode of modes) {
       const nestedButton = nested.getByRole('button', { name: 'Nested action' })
       await expect(nested).toHaveAttribute('data-slot', 'card')
       const card = await nested.evaluate((el) => getComputedStyle(el).backdropFilter)
-      expect(card).toMatch(/blur\(8px\)/)
+      expect(card).toMatch(/blur\(3px\)/)
       expect(await nestedButton.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe('none')
       // The scenario's nested Button is the primary variant, which never filters. Re-tag it with
       // each translucent variant and compare against the same variant outside any card.
@@ -423,7 +423,7 @@ for (const mode of modes) {
           }, variant)
         measured.push({ id, variant, inside, outside })
         expect(inside, `${id} nested ${variant}`).toBe('none')
-        expect(outside, `${id} top-level ${variant}`).toMatch(/blur\(8px\)/)
+        expect(outside, `${id} top-level ${variant}`).toMatch(/blur\(3px\)/)
       }
       await nestedButton.evaluate((el) => (el.dataset.variant = 'default'))
     }
