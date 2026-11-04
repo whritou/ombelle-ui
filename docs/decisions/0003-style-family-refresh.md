@@ -8,7 +8,7 @@ Existing installs keep their files. Nothing rewrites a project's installed CSS o
 
 Recipe IDs and revisions stay immutable. Hosted presets and Button recipes published before this release keep their codes, IDs and revisions; the stored data is unchanged and only the catalog bytes compiled from it differ. Output compiled with a published code before and after the upgrade can therefore differ in CSS.
 
-Hashes that changed in the baseline fixture (flat and neo-brutalism entries; the fixture holds no minimalist entry):
+Hashes that changed in the baseline fixture (flat and neo-brutalism entries; `style-baseline.json` holds no minimalist entry, so minimalist rows come from `stable-family-hashes.json`). All values were checked against both fixtures at HEAD and, for the before column, at eb7aea2. `stable-family-hashes.json` also moved 44 per-artifact hashes across the three families (component CSS, scoped Button preset and recipe `button.css` and `button.tsx`), not repeated here:
 
 | Family | Item | Before | After |
 | --- | --- | --- | --- |
@@ -18,6 +18,8 @@ Hashes that changed in the baseline fixture (flat and neo-brutalism entries; the
 | neo-brutalism | presetHash | `d4408485d0042453f1b9ba3b2e4340fc9b23ea38f973b49603b76f1b4c9c6fac` | `185439ee3afd7328de82b5cc6de82bb74673c949337f1fac46be55c9dd0d4eff` |
 | neo-brutalism | `styles/ui-style.css` | `77f61473299549a3ec932755ff95fd0b305c27ff300e8dfd6f834e211cfb9c89` | `a6736537fe17ae56301e105729486c915954e00f6ed776d7916da9433a4534b4` |
 | neo-brutalism | `styles/ui-tokens.css` | `74d62a415f3def94c2ec24001158efe6423dff557150d2295ab857dfa1c4622d` | `bba39121b70d2c5b6c788b6041e89a137961cccd6f3132d543d3d5b22f299b1c` |
+| minimalist | `styles/ui-style.css` (stable-family-hashes.json) | `9947e71835ddfa6d7cd84f35e178775c344f87d5f026b37b905c0a463c595af9` | `63b0384ef01efe83e7cd6ec2f735e346655548dd69ff09bd3b285c3971273624` |
+| minimalist | `styles/ui-tokens.css` (stable-family-hashes.json) | `ca818b13b7a8ed177d9f42953a8194a6faafa67d72fdc85699699dab88fdc29e` | `9c70952ac0233aff30b86048d2edd25dad8c30320d6e30a5df453aa61a9e3410` |
 
 The three `intentionalChanges` entries added for this refresh cover the `flat`, `minimalist` and `neo-brutalism` families, each for `styles/ui-style.css`, `components/ui/*.css` and the scoped Button preset and recipe `button.css`, citing `docs/superpowers/plans/2026-11-04-editor-and-style-family-refresh.md`.
 
