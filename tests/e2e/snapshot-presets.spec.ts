@@ -81,14 +81,18 @@ test('installs a scoped published Button into a differently themed host', async 
 const getCode = (page: Page) => page.getByRole('button', { name: 'Get code', exact: true })
 const codeDialog = (page: Page) => page.getByRole('dialog', { name: 'Get code' })
 async function openExport(page: Page) {
-  const panel = page.locator('details.preset-export')
-  if ((await panel.getAttribute('open')) === null) await panel.locator(':scope > summary').click()
+  // The drawer is closed by default: open it, then make sure Export is the active tab.
+  const rail = page.getByRole('button', { name: /^Open export/ })
+  if (await rail.count()) await rail.click()
+  const tab = page.getByRole('tab', { name: 'Export' })
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click()
 }
 
 test('publishes only when Get code opens and reuses the code for an unchanged draft', async ({ page }) => {
   const requests: string[] = []
   page.on('request', (request) => { if (request.url().endsWith('/api/v1/presets') && request.method() === 'POST') requests.push(request.url()) })
   await page.goto('http://127.0.0.1:3000/editor/preset')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   await expect(getCode(page)).toBeEnabled()
   expect(requests).toEqual([])
@@ -135,6 +139,7 @@ test('recovers a pending publication after refresh without submitting it', async
   await getCode(page).click()
   await expect(codeDialog(page).getByRole('alert')).toBeVisible()
   await page.reload()
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   expect(keys).toHaveLength(1)
   await getCode(page).click()
@@ -188,6 +193,7 @@ test('handles clipboard and storage denial while preserving draft exports', asyn
 test('shows share text and hash, downloads exact JSON, and preserves a safe draft', async ({ page }) => {
   const { snapshot } = await publishEditorPreset(page)
   await page.getByLabel('Preset name', { exact: true }).fill('Unpublished safe draft')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText(snapshot.presetHash)
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('ombelle:preset-editor:draft:v1')!).identity.name)).toBe('Unpublished safe draft')
   const draft = JSON.parse(await page.evaluate(() => localStorage.getItem('ombelle:preset-editor:draft:v1')!))
@@ -216,6 +222,7 @@ test('withdraws replay and respects conditional reads', async ({ page }) => {
 test('supports keyboard use, 320 pixel reflow, and axe checks', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 })
   await page.goto('http://127.0.0.1:3000/editor/preset')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   await page.getByLabel('Preset name', { exact: true }).focus()
   await page.keyboard.press('ControlOrMeta+A')

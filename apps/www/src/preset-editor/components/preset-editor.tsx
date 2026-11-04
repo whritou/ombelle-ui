@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import { Download, ShieldCheck } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
 import {
   createPresetDraft,
@@ -53,8 +54,11 @@ import { GlassPanel, glassReadoutId } from './glass-panel'
 import {
   EditorTopBar,
   InspectorSection,
+  ReviewDrawer,
   SegmentedControl,
+  useDrawerState,
 } from '../../editor-shell'
+import { PresetChecks, presetWarningCount } from './preset-checks'
 import styles from './preset-editor.module.css'
 import { useSiteDark } from '../../site/theme'
 
@@ -98,6 +102,11 @@ export default function PresetEditor() {
     redoButton = useRef<HTMLButtonElement>(null),
     focusAfterHistory = useRef<HTMLButtonElement | null>(null)
   const [contrast, setContrast] = useState<TokenContrast[]>([])
+  const [drawerOpen, setDrawerOpen] = useDrawerState(
+    'ombelle.preset-editor.drawer',
+    false,
+  )
+  const [drawerTab, setDrawerTab] = useState('checks')
   const draft = history.present,
     compiled = usePresetCompiler(draft)
   useEffect(() => {
@@ -170,7 +179,6 @@ export default function PresetEditor() {
   const glassReport = glass ? presetGlassReport(draft) : null
   // A glass draft below the contrast bound cannot be exported or published.
   const glassBlocked = glassReport !== null && !glassReport.passes
-  const warnings = contrast.filter((pair) => pair.status === 'warning').length
   const warnedTokens = new Set(
     contrast
       .filter((pair) => pair.status === 'warning')
@@ -402,19 +410,6 @@ export default function PresetEditor() {
                 ]}
                 onChange={setViewport}
               />
-              <button
-                type="button"
-                popoverTarget="preset-contrast-panel"
-                className={styles.contrastChip}
-                data-warnings={warnings || undefined}
-              >
-                Contrast:{' '}
-                {contrast.length
-                  ? warnings
-                    ? `${warnings} warning${warnings === 1 ? '' : 's'}`
-                    : 'all pass'
-                  : 'pending'}
-              </button>
               <p
                 data-testid="preset-preview-status"
                 className={styles.previewStatus}
@@ -423,29 +418,6 @@ export default function PresetEditor() {
                 Preview {previewStatus}
               </p>
             </div>
-            <section
-              id="preset-contrast-panel"
-              popover="auto"
-              aria-label="Token contrast"
-              className={`preset-popover ${styles.contrastPanel}`}
-            >
-              <h2>Token contrast</h2>
-              <p>
-                Eight text pairs in both modes, using a 4.5:1 threshold. Warnings
-                do not prevent export. This does not evaluate every component
-                state or non-text contrast.
-              </p>
-              <div className={styles.contrast}>
-                {contrast.map((pair) => (
-                  <p key={pair.mode + pair.foreground} data-status={pair.status}>
-                    {pair.mode} {pair.foreground}/{pair.background}:{' '}
-                    {pair.status === 'not-evaluated'
-                      ? 'Not evaluated'
-                      : `${pair.ratio!.toFixed(2)}:1 — ${pair.status === 'pass' ? 'Pass' : 'Warning'}`}
-                  </p>
-                ))}
-              </div>
-            </section>
             <PresetPreviewFrame
               result={compiled.result}
               view={{ mode, viewport }}
@@ -453,15 +425,44 @@ export default function PresetEditor() {
               onStatus={setPreviewStatus}
             />
           </div>
-          <div className={styles.exportCard}>
-            <PresetExportPanel
-              draft={draft}
-              state={compiled}
-              announce={setNotice}
-              blocked={glassBlocked}
-              describedBy={glass ? glassReadoutId : undefined}
-            />
-          </div>
+        </div>
+        <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
+          <ReviewDrawer
+            label="Review"
+            open={drawerOpen}
+            onOpenChange={setDrawerOpen}
+            activeTab={drawerTab}
+            onTabChange={setDrawerTab}
+            tabs={[
+              {
+                id: 'checks',
+                label: 'Checks',
+                icon: <ShieldCheck aria-hidden="true" size={16} />,
+                badge: presetWarningCount(contrast, glassReport),
+                content: (
+                  <PresetChecks
+                    contrast={contrast}
+                    glassReport={glassReport}
+                    onEditToken={revealPresetField}
+                  />
+                ),
+              },
+              {
+                id: 'export',
+                label: 'Export',
+                icon: <Download aria-hidden="true" size={16} />,
+                content: (
+                  <PresetExportPanel
+                    draft={draft}
+                    state={compiled}
+                    announce={setNotice}
+                    blocked={glassBlocked}
+                    describedBy={glass ? glassReadoutId : undefined}
+                  />
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
       <dialog

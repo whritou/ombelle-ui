@@ -640,6 +640,10 @@ for (const mode of modes) {
 
   test(`liquid-glass ${mode}: preset editor glass flow`, async ({ page }) => {
     const ready = async () => {
+      const exportRail = page.getByRole('button', { name: /^Open export/ })
+      if (await exportRail.count()) await exportRail.click()
+      const exportTab = page.getByRole('tab', { name: 'Export' })
+      if ((await exportTab.getAttribute('aria-selected')) !== 'true') await exportTab.click()
       await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', { timeout: 30000 })
       await expect(page.getByTestId('preset-preview-status')).toHaveText('Preview ready', { timeout: 30000 })
     }
@@ -654,8 +658,10 @@ for (const mode of modes) {
     await page.getByLabel('Preview mode', { exact: true }).selectOption(mode)
     await ready()
 
-    const exportPanel = page.locator('details.preset-export')
-    if ((await exportPanel.getAttribute('open')) === null) await exportPanel.locator(':scope > summary').click()
+    const exportRail = page.getByRole('button', { name: /^Open export/ })
+    if (await exportRail.count()) await exportRail.click()
+    const exportTab = page.getByRole('tab', { name: 'Export' })
+    if ((await exportTab.getAttribute('aria-selected')) !== 'true') await exportTab.click()
     const actions = ['Download preset JSON', 'Copy export', 'Get code'].map((name) =>
       page.getByRole('button', { name, exact: true }),
     )

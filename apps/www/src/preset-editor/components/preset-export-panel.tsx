@@ -55,11 +55,9 @@ export function PresetExportPanel({
     }
   }
   return (
-    <details className="preset-export">
-      <summary>
-        <h2 id="preset-export-heading">Preset JSON and local export</h2>
-      </summary>
+    <div className="preset-export">
       <section aria-labelledby="preset-export-heading">
+      <h2 id="preset-export-heading">Preset JSON and local export</h2>
       <p>
         Prefer <strong>Get code</strong> for a one-line install. Download the
         JSON to keep a local copy or install offline.
@@ -170,6 +168,6 @@ export function PresetExportPanel({
         source; changing markup requires an explicit migration.
       </p>
       </section>
-    </details>
+    </div>
   )
 }

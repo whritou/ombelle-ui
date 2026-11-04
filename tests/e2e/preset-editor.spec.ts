@@ -43,9 +43,13 @@ const url = 'http://127.0.0.1:3000/editor/preset'
 const frame = (page: Page) =>
   page.locator('iframe[title="Global preset gallery"]').contentFrame()
 async function ready(page: Page) {
-  await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', {
-    timeout: 30000,
-  })
+  // The hash readout lives in the Export tab, which is closed by default, so
+  // compilation is observed through the hash the preview frame acknowledges.
+  await expect(frame(page).locator('html')).toHaveAttribute(
+    'data-preset-hash',
+    /^\w+/,
+    { timeout: 30000 },
+  )
   await expect(page.getByTestId('preset-preview-status')).toHaveText(
     'Preview ready',
     { timeout: 30000 },
@@ -63,9 +67,11 @@ async function chooseMenuItem(page: Page, name: string) {
   await page.getByRole('menuitem', { name, exact: true }).click()
 }
 async function openExport(page: Page) {
-  const panel = page.locator('details.preset-export')
-  if ((await panel.getAttribute('open')) === null)
-    await panel.locator(':scope > summary').click()
+  // The drawer is closed by default: open it, then make sure Export is the active tab.
+  const rail = page.getByRole('button', { name: /^Open export/ })
+  if (await rail.count()) await rail.click()
+  const tab = page.getByRole('tab', { name: 'Export' })
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click()
 }
 async function download(page: Page) {
   await openExport(page)
@@ -139,15 +145,15 @@ for (const family of supportedStyleFamilies)
       await frame(page)
         .getByRole('button', { name: 'Close', exact: true })
         .click()
-      // Contrast results open from the canvas toolbar.
-      await page.getByRole('button', { name: /^Contrast/ }).click()
-      await expect(
-        page
-          .getByRole('region', { name: 'Token contrast', exact: true })
-          .locator('p')
-          .filter({ hasText: /:1 —/ }),
-      ).toHaveCount(16)
-      await page.keyboard.press('Escape')
+      // Contrast results open from the review drawer's Checks tab.
+      await page.getByRole('button', { name: /^Open checks/ }).click()
+      const checks = page.getByRole('tabpanel')
+      await expect(checks.getByText(/^\d \/ 8 pass$/)).toHaveCount(2)
+      await checks.getByRole('button', { name: 'Show', exact: true }).click()
+      expect(
+        (await checks.locator('#preset-checks-passing li').count()) +
+          (await checks.getByRole('list', { name: 'Warnings' }).locator('li').count()),
+      ).toBe(16)
       const requests: string[] = []
       page.on('request', (request) => requests.push(request.url()))
       await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
@@ -511,10 +517,12 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
       ).__presetRender,
   )
   await page.getByLabel('Corner radius', { exact: true }).fill('1.1')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText(
     original.result.preset.hash,
   )
   await ready(page)
+  await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   const current = await page.evaluate(
     () =>
       (
@@ -747,11 +755,10 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   // Close the colour popover the way a keyboard user would.
   await page.keyboard.press('Escape')
 
-  const exportSummary = page.locator('summary', {
-    hasText: 'Preset JSON and local export',
-  })
-  await tabTo(page, exportSummary, { max: 300 })
+  const exportRail = page.getByRole('button', { name: /^Open export/ })
+  await tabTo(page, exportRail, { max: 300 })
   await page.keyboard.press('Enter')
+  await expect(page.getByRole('tab', { name: 'Export' })).toBeFocused()
   const downloadButton = page.getByRole('button', {
     name: 'Download preset JSON',
     exact: true,
@@ -883,6 +890,29 @@ test('keeps focus on a non-core token field after resetting it', async ({ page }
   await page.getByRole('button', { name: /^Card colors/ }).click()
   await page.getByRole('button', { name: 'Reset light card', exact: true }).click()
   await expect(light).toBeFocused()
+})
+test('names warnings on the closed drawer rail and edits the failing token from Checks', async ({ page }) => {
+  const draft = setPresetEdit(
+    createPresetDraft('flat'),
+    '/modes/light/mutedForeground',
+    '#d4d4d8',
+  )
+  await page.addInitScript(
+    (draft) =>
+      localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
+    draft,
+  )
+  await page.goto(url)
+  await ready(page)
+  // The drawer starts closed; the rail still reports the warning.
+  const rail = page.getByRole('button', { name: /^Open checks: \d+ warnings?$/ })
+  await expect(rail).toBeVisible()
+  await rail.click()
+  const checks = page.getByRole('tabpanel')
+  await expect(checks.getByText('Muted foreground on muted')).toBeVisible()
+  await checks.getByRole('button', { name: 'Edit muted foreground token' }).click()
+  await expect(page.locator('#preset-color-panel-mutedForeground')).toBeVisible()
+  await expect(page.locator('#preset-modes-light-mutedForeground')).toBeFocused()
 })
 test('returns focus to the overflow menu after closing ID & revision', async ({ page }) => {
   await page.goto(url)

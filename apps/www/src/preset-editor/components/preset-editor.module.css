@@ -195,7 +195,7 @@
 /* Workbench: a compact control panel beside a large canvas, like shadcn/create. */
 .workbench {
   display: grid;
-  grid-template-columns: 19rem minmax(0, 1fr);
+  grid-template-columns: 19rem minmax(0, 1fr) auto;
   gap: 20px;
   align-items: start;
 }
@@ -361,38 +361,39 @@
   padding: 0;
 }
 
+.drawerSlot {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  max-height: calc(100dvh - 32px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.drawerSlot[data-open] {
+  width: 21rem;
+}
+.drawerSlot > aside {
+  flex: 1 1 auto;
+  max-width: none;
+  border-inline-start: 0;
+}
 .canvas {
   display: grid;
   min-width: 0;
   gap: 20px;
 }
-.preview,
-.exportCard {
+.preview {
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--card);
   padding: 14px 16px 16px;
 }
-.exportCard {
-  scroll-margin-top: 16px;
-}
-.exportCard :global(section) > h2:first-child {
-  margin-top: 4px;
-}
 .previewBar {
   gap: 8px;
   margin-bottom: 8px;
-}
-.editor .contrastChip {
-  min-height: 36px;
-  border-color: var(--border);
-  background: var(--background);
-  font-size: 13px;
-}
-.editor .contrastChip[data-warnings] {
-  border-color: var(--warning);
-  background: var(--warning-soft);
 }
 .editor .previewStatus {
   margin: 0 0 0 auto;
@@ -415,46 +416,24 @@
   font-size: 13px;
   color: var(--muted-foreground);
 }
-.editor .contrastPanel {
-  width: min(34rem, calc(100vw - 2rem));
-}
-@supports (position-area: bottom) {
-  .editor .contrastPanel {
-    margin: 8px 0;
-    position-area: bottom span-left;
-  }
-}
-.editor .contrastPanel h2 {
-  margin: 0 0 4px;
-  font-size: 16px;
-}
-.editor .contrastPanel > p {
-  margin: 0 0 10px;
-  font-size: 13px;
-  color: var(--muted-foreground);
-}
-.contrast {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  font-size: 12px;
-}
-.editor .contrast p {
-  margin: 0;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 6px 10px;
-  font-family: var(--font-mono);
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-.editor .contrast p[data-status='warning'] {
-  border-color: var(--warning);
-  background: var(--warning-soft);
-}
 @media (max-width: 960px) {
   .workbench {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .drawerSlot,
+  .drawerSlot[data-open] {
+    position: static;
+    width: auto;
+    max-height: none;
+  }
+  .drawerSlot > aside {
+    max-width: none;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .drawerSlot > aside:not(:has([role='tablist'])) {
+    flex-direction: row;
+    width: auto;
   }
   .panel {
     position: static;
@@ -470,9 +449,6 @@
 @media (max-width: 800px) {
   .editor {
     padding: 24px 16px 48px;
-  }
-  .contrast {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 560px) {
@@ -529,30 +505,6 @@
   }
 }
 
-/* JSON and CSS exports stay available but secondary to Get code. */
-.exportCard :global(.preset-export) > summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  list-style: none;
-  color: var(--muted-foreground);
-}
-.exportCard :global(.preset-export) > summary::-webkit-details-marker {
-  display: none;
-}
-.exportCard :global(.preset-export) > summary::before {
-  content: '▸';
-  font-size: 12px;
-}
-.exportCard :global(.preset-export[open]) > summary::before {
-  content: '▾';
-}
-.exportCard :global(.preset-export) > summary h2 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-}
 .editor .getCode {
   border: 0;
   cursor: pointer;
@@ -570,7 +522,7 @@
 }
 @media (min-width: 961px) {
   .workbench {
-    grid-template-columns: 21rem minmax(0, 1fr);
+    grid-template-columns: 21rem minmax(0, 1fr) auto;
   }
 }
 .glass {
