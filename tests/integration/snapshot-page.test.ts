@@ -14,6 +14,7 @@ import {
   initializeSnapshotStore,
   openSnapshotStore,
 } from '../../apps/www/src/snapshots/server/sqlite-store'
+import { publishedInstaller } from '../../apps/www/src/snapshots/install-command'
 import { createRequestSnapshotService } from '../../apps/www/src/snapshots/server/service'
 
 const roots: string[] = []
@@ -62,7 +63,7 @@ it('renders escaped read-only draft metadata, canonical JSON and precise scope i
   expect(html).toContain('Draft — automated token contrast only')
   expect(html).toContain(snapshot.presetHash)
   expect(html).toContain(`${snapshot.id}@1`)
-  expect(html).toContain('npx @ombelle-ui/cli@0.3.0 init --preset')
+  expect(html).toContain(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset`)
   expect(html).toContain('Node 24.19.0')
   expect(html).not.toContain('packages/cli/dist/main.js')
   expect(html).toContain('Existing shadcn theme')

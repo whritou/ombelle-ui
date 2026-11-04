@@ -10,6 +10,7 @@ import {
   chooseFamily, closeMoreActions, expectRecipeDownloadEnabled, familyChip, familyOption, menuItem, moreActions, openMenuItem, segment, toggle,
 } from '../helpers/button-editor-ui.js'
 import fs from 'node:fs'
+import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 const consumerPorts = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8')) as Record<string, { port: number }>
 
@@ -191,7 +192,7 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
   await page.getByRole('tab', { name: 'Install' }).click()
   const command = await page.getByRole('tabpanel').textContent()
   expect(command).toContain(download.suggestedFilename())
-  expect(command).toContain('npx @ombelle-ui/cli@0.3.0 add --recipe ./')
+  expect(command).toContain(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} add --recipe ./`)
   expect(command).not.toContain('packages/cli/dist/main.js')
   await expect(page.getByText('Run from the folder containing the downloaded')).toBeVisible()
   await page.evaluate(() => {

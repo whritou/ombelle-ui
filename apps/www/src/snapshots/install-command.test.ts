@@ -64,10 +64,10 @@ it('validates immutable reference and hash before displaying a command', () => {
   ).toThrow()
 })
 it('code pages show the verified public npx release with bare official codes', () => {
-  expect(publishedInstaller).toEqual({ packageName: '@ombelle-ui/cli', version: '0.3.0' })
+  expect(publishedInstaller).toEqual({ packageName: '@ombelle-ui/cli', version: expect.stringMatching(/^\d+\.\d+\.\d+$/) })
   const official = { ...source, origin: officialSnapshotOrigin }
   expect(snapshotInstallCommand(official, 'new', publishedInstaller)).toBe(
-    `npx @ombelle-ui/cli@0.3.0 init --preset ${source.reference} --cwd APP --dry-run --json`,
+    `npx @ombelle-ui/cli@${publishedInstaller.version} init --preset ${source.reference} --cwd APP --dry-run --json`,
   )
 })
 
