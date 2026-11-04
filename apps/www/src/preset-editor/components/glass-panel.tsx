@@ -25,7 +25,7 @@ export function glassReadoutSummary(report: GlassContrastReport | null): string 
     report.minimumOpacity === null
       ? 'No glass opacity passes; raise the contrast of the failing colors.'
       : `Minimum passing glass opacity: ${report.minimumOpacity}.`
-  return `Contrast bound fails at glass opacity ${report.opacity}: ${count} ${count === 1 ? 'pair is' : 'pairs are'} below 4.5:1. ${minimum} Export and publication are disabled until every pair passes.`
+  return `Contrast bound fails at glass opacity ${report.opacity}: ${count} ${count === 1 ? 'pair is' : 'pairs are'} below 4.5:1. ${minimum} The preview shows your settings; Get code and export stay disabled until every pair passes.`
 }
 const minimums = ({ minimumOpacityByMode: m, transparency }: GlassContrastReport) =>
   transparency === 'reduced' || m.light === null || m.dark === null
@@ -48,7 +48,11 @@ export function GlassContrastReadout({
   const failing = report?.pairs.filter((pair) => !pair.passes) ?? []
   return (
     <>
-      <p role="status" id={glassReadoutId}>
+      <p
+        role="status"
+        id={glassReadoutId}
+        data-status={report?.passes ? 'pass' : 'fail'}
+      >
         {glassReadoutSummary(report)}
       </p>
       {failing.length > 0 && (
