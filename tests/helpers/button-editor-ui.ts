@@ -6,6 +6,7 @@ const familyNames = {
   flat: 'Flat',
   minimalist: 'Minimalist',
   'neo-brutalism': 'Neo-brutalism',
+  ombelle: 'Ombelle',
   'liquid-glass': 'Liquid glass',
 } as const
 

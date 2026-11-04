@@ -14,9 +14,9 @@ const glassExperimental = ['button', 'badge', 'card', 'dialog', 'tabs', 'tooltip
 const glassUnavailable = ['checkbox', 'input', 'label', 'native-select', 'switch', 'textarea']
 
 describe('style support table', () => {
-  it('keeps the stable family list unchanged and widens styleFamilies', () => {
-    expect(supportedStyleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism'])
-    expect(styleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])
+  it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
+    expect(supportedStyleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle'])
+    expect(styleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
   })
   it('returns a status for every component and family pair', () => {
     for (const family of styleFamilies)
@@ -33,7 +33,12 @@ describe('style support table', () => {
     expect(componentsWithStyleSupport('liquid-glass', ['stable'])).toEqual([])
     expect(componentsWithStyleSupport('flat', ['stable'])).toEqual([...supportedComponentIds])
   })
+  it('marks ombelle stable for all twelve components', () => {
+    expect(supportedComponentIds).toHaveLength(12)
+    for (const id of supportedComponentIds) expect(styleSupport(id, 'ombelle')).toBe('stable')
+  })
   it('recognises families', () => {
+    expect(isStyleFamily('ombelle')).toBe(true)
     expect(isStyleFamily('liquid-glass')).toBe(true)
     expect(isStyleFamily('flat')).toBe(true)
     expect(isStyleFamily('constructor')).toBe(false)

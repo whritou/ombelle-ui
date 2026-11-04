@@ -112,7 +112,12 @@ it('changes only ui-style.css and dialog.tsx among pre-existing artifacts', asyn
     'components/ui/*.css',
     'scoped Button preset and recipe button.css',
   ])
-  for (const family of ['flat', 'neo-brutalism'] as const) {
+  const ombelleChange = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'ombelle family added',
+  ) as any
+  expect(ombelleChange.families).toEqual(['ombelle'])
+  expect(Object.keys(baseline.families)).toEqual(['flat', 'neo-brutalism', 'ombelle'])
+  for (const family of ['flat', 'neo-brutalism', 'ombelle'] as const) {
     const result = await compile({
       preset: getCatalog('0.1.0').presets[family],
       componentIds: ['button', 'dialog', 'input'],

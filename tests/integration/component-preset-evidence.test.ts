@@ -29,19 +29,19 @@ it('loads the foundation evidence validator through native Node without loader a
   )
   expect(result.code, result.output).toBe(0)
   expect(result.output).toContain(
-    'Expected all 90 component preset measurements',
+    'Expected all 160 component preset measurements',
   )
 })
 
 // Structural fixtures only; synthetic success records never enter retained run evidence.
-it('requires all 102 descriptor/preset installs and 90 app/host/preset/mode measurements', async () => {
+it('requires all 152 descriptor/preset installs and 160 app/host/preset/mode measurements', async () => {
   const { matrix, consumers } = await fixtures()
   await expect(
     validateComponentPresetConsumers(consumers, matrix),
   ).resolves.toBeUndefined()
   await expect(
     validateComponentPresetMeasurements(await measurements()),
-  ).resolves.toHaveLength(90)
+  ).resolves.toHaveLength(160)
   await expect(
     finalizeComponentPresetEvidence(
       { measurements: await measurements(), consumers },
@@ -53,7 +53,7 @@ it('requires all 102 descriptor/preset installs and 90 app/host/preset/mode meas
       (sum, row) => sum + Object.keys(row.presets).length,
       0,
     ),
-  ).toBe(102)
+  ).toBe(152)
 })
 it('rejects missing, duplicate, failed, stale, transformed or incomplete consumer records', async () => {
   const base = await fixtures(),
@@ -199,7 +199,7 @@ it('compares normalized screenshot pixels while retaining exact PNG hashes', asy
   const rows = await measurements()
   rows[30].screenshotHash = 'e'.repeat(64)
   await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(
-    90,
+    160,
   )
 
   const pixels = Buffer.from(rows[30].normalizedScreenshot.pixels, 'base64')

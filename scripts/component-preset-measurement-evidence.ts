@@ -117,7 +117,7 @@ export async function validateComponentPresetMeasurements(
     refs = await componentPresetReferences(),
     rendered = new Map<string, unknown>()
   if (!Array.isArray(value) || value.length !== expected.size)
-    throw Error('Expected all 90 component preset measurements')
+    throw Error('Expected all ' + expected.size + ' component preset measurements')
   for (const input of value) {
     const row = object(input),
       key = [row.hostFamily, row.presetId, row.mode, row.app].join('/')

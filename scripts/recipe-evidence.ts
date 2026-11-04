@@ -116,7 +116,7 @@ export async function validateRecipeMeasurements(
     refs = await references(),
     styles = new Map<string, unknown>()
   if (!Array.isArray(value) || value.length !== expected.size)
-    throw Error('Expected all 90 recipe measurements')
+    throw Error('Expected all ' + expected.size + ' recipe measurements')
   for (const item of value) {
     const row = object(item),
       key = [row.hostFamily, row.recipeId, row.mode, row.app].join('/')
@@ -195,7 +195,7 @@ export async function validateRecipeConsumers(
     rows = object(value),
     refs = await references()
   if (
-    Object.keys(rows).length !== 34 ||
+    Object.keys(rows).length !== 38 ||
     !equal(Object.keys(rows).sort(), Object.keys(matrix).sort())
   )
     throw Error('Recipe consumer descriptor set mismatch')

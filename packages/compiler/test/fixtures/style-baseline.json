@@ -82,6 +82,47 @@
           "sha256": "bba39121b70d2c5b6c788b6041e89a137961cccd6f3132d543d3d5b22f299b1c"
         }
       ]
+    },
+    "ombelle": {
+      "presetHash": "7bef50b68000f08ee8749525877c90985994bd027f8eac7f60390b4a317ea732",
+      "artifacts": [
+        {
+          "logicalPath": "components/ui/button.tsx",
+          "sha256": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69"
+        },
+        {
+          "logicalPath": "components/ui/dialog.tsx",
+          "sha256": "0bc4bfc0a3ce2dcc97a43182c5e21d553ee51758ec2646d3e53395283913a93e"
+        },
+        {
+          "logicalPath": "components/ui/input.tsx",
+          "sha256": "b96ca9259e76e63349cf9f0420c5815108971444f4cd0f025de999b10484dce4"
+        },
+        {
+          "logicalPath": "examples/button.tsx",
+          "sha256": "778dd2c07a9476fd4905ffce0c3700ec515f1cc07b3c23c9582426806d0cef4e"
+        },
+        {
+          "logicalPath": "examples/dialog.tsx",
+          "sha256": "0f88c9261f19da38ac40bb61f4a36459cc4da02bea0af743f56a40002604117d"
+        },
+        {
+          "logicalPath": "examples/input.tsx",
+          "sha256": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965"
+        },
+        {
+          "logicalPath": "lib/utils.ts",
+          "sha256": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb"
+        },
+        {
+          "logicalPath": "styles/ui-style.css",
+          "sha256": "11a6b466c91dd490f804e484e10851f9e15f05047f48b915b4c492820002325f"
+        },
+        {
+          "logicalPath": "styles/ui-tokens.css",
+          "sha256": "e6718be8fcc5b8c577bfea66dc3a2102ec663572531fa52fab9564b6e73a7810"
+        }
+      ]
     }
   },
   "intentionalChanges": [
@@ -137,6 +178,18 @@
       ],
       "spec": "docs/superpowers/plans/2026-11-04-editor-and-style-family-refresh.md",
       "reason": "neo-brutalism family refresh"
+    },
+    {
+      "families": [
+        "ombelle"
+      ],
+      "logicalPaths": [
+        "styles/ui-style.css",
+        "components/ui/*.css",
+        "styles/ui-tokens.css"
+      ],
+      "spec": "docs/superpowers/plans/2026-11-04-editor-and-style-family-refresh.md",
+      "reason": "ombelle family added"
     }
   ]
 }

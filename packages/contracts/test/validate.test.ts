@@ -62,6 +62,14 @@ describe('preset contract', () => {
       )
     },
   )
+  it('accepts ombelle as a style family', () => {
+    expect(validatePreset({ ...example, styleFamily: 'ombelle' }).styleFamily).toBe('ombelle')
+  })
+  it('rejects a style family outside the enum', () => {
+    expect(() => validatePreset({ ...example, styleFamily: 'not-a-family' })).toThrow(
+      expect.objectContaining({ code: 'INVALID_DATA', path: '/styleFamily' }),
+    )
+  })
   it('does not reject a schema-valid later style at schema validation', () => {
     expect(
       validatePreset({ ...example, styleFamily: 'minimalist' }).styleFamily,

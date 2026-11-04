@@ -68,3 +68,25 @@ it.each(['light', 'dark'] as const)('minimalist %s token pairs reach 4.5:1 and c
   expect(contrastRatio(rgb(m.input), rgb(m.card)), `${mode} input/card`).toBeGreaterThanOrEqual(3)
   expect(contrastRatio(rgb(m.destructive), rgb(m.background)), `${mode} destructive/background`).toBeGreaterThanOrEqual(4.5)
 })
+import ombelle from '../../packages/catalog/src/presets/ombelle.json'
+import { parseColor, compositeOver } from '../helpers/oklch.js'
+it.each(['light', 'dark'] as const)('ombelle %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
+  const m = ombelle.modes[mode] as Record<string, string>
+  for (const [f, b] of [
+    ['foreground', 'background'],
+    ['cardForeground', 'card'],
+    ['popoverForeground', 'popover'],
+    ['primaryForeground', 'primary'],
+    ['secondaryForeground', 'secondary'],
+    ['mutedForeground', 'muted'],
+    ['accentForeground', 'accent'],
+    ['destructiveForeground', 'destructive'],
+  ])
+    expect(contrastRatio(parseColor(m[f]).rgb, parseColor(m[b]).rgb), `${mode} ${f}/${b}`).toBeGreaterThanOrEqual(4.5)
+  // The dark border is translucent, so composite it over each surface it meets.
+  for (const surface of ['background', 'card', 'muted']) {
+    expect(contrastRatio(compositeOver(m.input, m[surface]), parseColor(m[surface]).rgb), `${mode} input/${surface}`).toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(compositeOver(m.border, m[surface]), parseColor(m[surface]).rgb), `${mode} border/${surface}`).toBeGreaterThanOrEqual(3)
+  }
+  expect(contrastRatio(compositeOver(m.ring, m.background), parseColor(m.background).rgb), `${mode} ring/background`).toBeGreaterThanOrEqual(3)
+})

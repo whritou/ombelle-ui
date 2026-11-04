@@ -6,7 +6,7 @@ import { supportedStyleFamilies, isStyleFamily } from '@ombelle/contracts'
 import baseline from './fixtures/style-baseline.json'
 const build=(preset:unknown,componentIds:('button'|'dialog'|'input')[]=['button','dialog','input'])=>compile({preset,componentIds,catalogRelease:'0.1.0',compilerVersion:'0.1.0'})
 it('registers the exact implemented families',()=>{
- expect(supportedStyleFamilies).toEqual(['flat','minimalist','neo-brutalism'])
+ expect(supportedStyleFamilies).toEqual(['flat','minimalist','neo-brutalism','ombelle'])
  expect(isStyleFamily('minimalist')).toBe(true)
  expect(isStyleFamily('liquid-glass')).toBe(true)
  for(const id of ['constructor','__proto__'])expect(isStyleFamily(id)).toBe(false)

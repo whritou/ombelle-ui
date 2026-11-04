@@ -7,10 +7,10 @@ import {
   validateRecipeMeasurements,
   recipeTransformedHashes,
 } from '../../scripts/recipe-evidence.ts'
-it('requires all 90 attributable app/host/recipe/mode outcomes', async () => {
+it('requires all 120 attributable app/host/recipe/mode outcomes', async () => {
   const data = await rows()
-  expect(data).toHaveLength(90)
-  await expect(validateRecipeMeasurements(data)).resolves.toHaveLength(90)
+  expect(data).toHaveLength(120)
+  await expect(validateRecipeMeasurements(data)).resolves.toHaveLength(120)
 })
 it('rejects missing duplicated failed tampered and stale recipe evidence', async () => {
   const data = await rows()

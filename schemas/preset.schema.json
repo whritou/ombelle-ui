@@ -13,7 +13,7 @@
     "catalogRelease": {"$ref": "#/$defs/release"},
     "compilerVersion": {"$ref": "#/$defs/release"},
     "platform": {"const": "react-web"},
-    "styleFamily": {"enum": ["flat", "minimalist", "neo-brutalism", "liquid-glass"]},
+    "styleFamily": {"enum": ["flat", "minimalist", "neo-brutalism", "ombelle", "liquid-glass"]},
     "modes": {
       "type": "object",
       "additionalProperties": false,

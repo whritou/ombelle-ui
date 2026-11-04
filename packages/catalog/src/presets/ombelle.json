@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "id": "builtin-ombelle",
+  "name": "Ombelle",
+  "revision": 1,
+  "catalogRelease": "0.1.0",
+  "compilerVersion": "0.1.0",
+  "platform": "react-web",
+  "styleFamily": "ombelle",
+  "modes": {
+    "light": {
+      "background": "oklch(98.5% 0.004 350)",
+      "foreground": "oklch(22% 0.012 275)",
+      "card": "#FFFFFF",
+      "cardForeground": "oklch(22% 0.012 275)",
+      "popover": "#FFFFFF",
+      "popoverForeground": "oklch(22% 0.012 275)",
+      "primary": "oklch(55% 0.22 6)",
+      "primaryForeground": "oklch(99% 0 0)",
+      "secondary": "oklch(95% 0.035 6)",
+      "secondaryForeground": "oklch(42% 0.17 6)",
+      "muted": "oklch(95.5% 0.006 350)",
+      "mutedForeground": "oklch(47% 0.015 275)",
+      "accent": "oklch(95% 0.035 6)",
+      "accentForeground": "oklch(42% 0.17 6)",
+      "destructive": "oklch(52% 0.21 27)",
+      "destructiveForeground": "oklch(99% 0 0)",
+      "border": "oklch(22% 0.012 275)",
+      "input": "oklch(22% 0.012 275)",
+      "ring": "oklch(55% 0.22 6)"
+    },
+    "dark": {
+      "background": "oklch(17% 0.01 275)",
+      "foreground": "oklch(97% 0.004 350)",
+      "card": "oklch(21% 0.012 275)",
+      "cardForeground": "oklch(97% 0.004 350)",
+      "popover": "oklch(21% 0.012 275)",
+      "popoverForeground": "oklch(97% 0.004 350)",
+      "primary": "oklch(68% 0.22 6)",
+      "primaryForeground": "oklch(16% 0.01 275)",
+      "secondary": "oklch(30% 0.08 6)",
+      "secondaryForeground": "oklch(88% 0.08 6)",
+      "muted": "oklch(26% 0.012 275)",
+      "mutedForeground": "oklch(72% 0.012 275)",
+      "accent": "oklch(30% 0.08 6)",
+      "accentForeground": "oklch(88% 0.08 6)",
+      "destructive": "oklch(70.4% 0.191 22.216)",
+      "destructiveForeground": "oklch(16% 0.01 275)",
+      "border": "oklch(97% 0.004 350 / 80%)",
+      "input": "oklch(97% 0.004 350 / 80%)",
+      "ring": "oklch(68% 0.22 6)"
+    }
+  },
+  "design": {
+    "fontFamilyId": "system-sans",
+    "radiusRem": 0.75,
+    "density": "comfortable",
+    "borderWidthPx": 1.5,
+    "shadowOffsetXPx": 3,
+    "shadowOffsetYPx": 3,
+    "motion": "full",
+    "transparency": "reduced"
+  },
+  "componentDefaults": {
+    "button": {
+      "variant": "default",
+      "size": "default"
+    }
+  }
+}
