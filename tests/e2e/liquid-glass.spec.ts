@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import { inflateSync } from 'node:zlib'
+import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { contrastRatio } from '../helpers/contrast.js'
 
 // Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
@@ -640,28 +641,23 @@ for (const mode of modes) {
 
   test(`liquid-glass ${mode}: preset editor glass flow`, async ({ page }) => {
     const ready = async () => {
-      const exportRail = page.getByRole('button', { name: /^Open export/ })
-      if (await exportRail.count()) await exportRail.click()
-      const exportTab = page.getByRole('tab', { name: 'Export' })
-      if ((await exportTab.getAttribute('aria-selected')) !== 'true') await exportTab.click()
+      await openExport(page)
       await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', { timeout: 30000 })
       await expect(page.getByTestId('preset-preview-status')).toHaveText('Preview ready', { timeout: 30000 })
     }
     await page.goto(editorUrl)
     await ready()
-    await page.getByLabel('Style family', { exact: true }).selectOption({ label: 'Liquid glass (Experimental)' })
+    // The picker button's name carries a Beta tag, so match the prefix.
+    await page.getByRole('group', { name: 'Style family', exact: true }).getByRole('button', { name: /^Liquid glass/ }).click()
     const confirm = page.getByRole('button', { name: 'Confirm change' })
     const limitations = page.getByRole('heading', { name: 'Liquid glass limitations' })
     await expect(confirm.or(limitations)).toBeVisible()
     if (await confirm.isVisible()) await confirm.click()
     await expect(limitations).toBeVisible()
-    await page.getByLabel('Preview mode', { exact: true }).selectOption(mode)
+    await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
     await ready()
 
-    const exportRail = page.getByRole('button', { name: /^Open export/ })
-    if (await exportRail.count()) await exportRail.click()
-    const exportTab = page.getByRole('tab', { name: 'Export' })
-    if ((await exportTab.getAttribute('aria-selected')) !== 'true') await exportTab.click()
+    await openExport(page)
     const actions = ['Download preset JSON', 'Copy export', 'Get code'].map((name) =>
       page.getByRole('button', { name, exact: true }),
     )

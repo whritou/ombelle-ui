@@ -4,6 +4,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { supportedComponentIds, supportedStyleFamilies, type PresetSnapshot } from '@ombelle/contracts'
+import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { canonicalize, frame, publishEditorPreset, resetSnapshotBrowserQuota, sha256 } from '../helpers/snapshot-browser.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
@@ -80,13 +81,6 @@ test('installs a scoped published Button into a differently themed host', async 
 
 const getCode = (page: Page) => page.getByRole('button', { name: 'Get code', exact: true })
 const codeDialog = (page: Page) => page.getByRole('dialog', { name: 'Get code' })
-async function openExport(page: Page) {
-  // The drawer is closed by default: open it, then make sure Export is the active tab.
-  const rail = page.getByRole('button', { name: /^Open export/ })
-  if (await rail.count()) await rail.click()
-  const tab = page.getByRole('tab', { name: 'Export' })
-  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click()
-}
 
 test('publishes only when Get code opens and reuses the code for an unchanged draft', async ({ page }) => {
   const requests: string[] = []
@@ -172,8 +166,13 @@ test('keeps local exports available when publication service is unavailable', as
   await page.goto('http://127.0.0.1:3000/editor/preset')
   await getCode(page).click()
   await expect(codeDialog(page).getByRole('alert')).toBeVisible()
+  // The preset editor's dialog no longer carries a JSON button; the local
+  // download lives in the top bar's More actions menu.
+  await page.keyboard.press('Escape')
+  await expect(codeDialog(page)).toHaveCount(0)
   const pending = page.waitForEvent('download')
-  await codeDialog(page).getByRole('button', { name: 'Download JSON instead', exact: true }).click()
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Download JSON', exact: true }).click()
   expect(JSON.parse(await fs.readFile(await (await pending).path()!, 'utf8')).schemaVersion).toBe('1.0')
 })
 
@@ -230,7 +229,7 @@ test('supports keyboard use, 320 pixel reflow, and axe checks', async ({ page })
   await expect(page.getByLabel('Preset name', { exact: true })).toHaveValue('Keyboard snapshot')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-  await page.getByLabel('Preview width', { exact: true }).selectOption('narrow')
+  await segment(page, 'Preview width', '320 px').click()
   await frame(page).getByTestId('preset-button').focus()
   await expect(frame(page).getByTestId('preset-button')).toBeFocused()
 })

@@ -60,7 +60,7 @@ test('compiles and renders all families and modes through hosted opaque iframes 
     await expect(galleryFrame).toHaveAttribute('src', '/ombelle-preview/preset-preview/')
     await expect(galleryFrame).toHaveAttribute('sandbox', 'allow-scripts')
     for (const mode of ['light', 'dark']) {
-      await page.getByLabel('Preview mode', { exact: true }).selectOption(mode)
+      await page.getByRole('group', { name: 'Preview mode', exact: true }).getByRole('button', { name: mode === 'dark' ? 'Dark' : 'Light', exact: true }).click()
       await expect(page.getByTestId('preset-preview-status')).toHaveText('Preview ready')
       await expect(galleryFrame.contentFrame().locator('html')).toHaveClass(mode === 'dark' ? 'dark' : '')
       for (const id of supportedComponentIds)

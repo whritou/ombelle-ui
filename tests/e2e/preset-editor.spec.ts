@@ -15,6 +15,7 @@ import {
   createPresetDraft,
   setPresetEdit,
 } from '../../apps/www/src/preset-editor/model.js'
+import { openExport, segment, waitForCompiled } from '../helpers/preset-editor-ui.js'
 import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
@@ -43,35 +44,20 @@ const url = 'http://127.0.0.1:3000/editor/preset'
 const frame = (page: Page) =>
   page.locator('iframe[title="Global preset gallery"]').contentFrame()
 async function ready(page: Page) {
-  // The hash readout lives in the Export tab, which is closed by default, so
-  // compilation is observed through the hash the preview frame acknowledges.
-  await expect(frame(page).locator('html')).toHaveAttribute(
-    'data-preset-hash',
-    /^\w+/,
-    { timeout: 30000 },
-  )
+  // The hash readout lives in the Export tab, which is closed by default. Get
+  // code is disabled until the current draft has compiled, so it carries the
+  // same "not Pending" guarantee without opening the drawer.
+  await waitForCompiled(page)
   await expect(page.getByTestId('preset-preview-status')).toHaveText(
     'Preview ready',
     { timeout: 30000 },
   )
 }
-/** One option of a segmented control, such as Preview mode or Preview width. */
-const segment = (page: Page, group: string, option: string) =>
-  page
-    .getByRole('group', { name: group, exact: true })
-    .getByRole('button', { name: option, exact: true })
 const familyButton = (page: Page, name: string) =>
   segment(page, 'Style family', name)
 async function chooseMenuItem(page: Page, name: string) {
   await page.getByRole('button', { name: 'More actions', exact: true }).click()
   await page.getByRole('menuitem', { name, exact: true }).click()
-}
-async function openExport(page: Page) {
-  // The drawer is closed by default: open it, then make sure Export is the active tab.
-  const rail = page.getByRole('button', { name: /^Open export/ })
-  if (await rail.count()) await rail.click()
-  const tab = page.getByRole('tab', { name: 'Export' })
-  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click()
 }
 async function download(page: Page) {
   await openExport(page)
@@ -522,7 +508,6 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
     original.result.preset.hash,
   )
   await ready(page)
-  await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   const current = await page.evaluate(
     () =>
       (
