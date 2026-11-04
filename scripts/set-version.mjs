@@ -23,7 +23,7 @@ const workspaceSites = [
   { file: 'README.md', pattern: /The six workspace packages are version \*\*(?<v>\d+\.\d+\.\d+)\*\*/g },
   { file: 'docs/cli-release.md', pattern: /ombelle-ui-cli-(?<v>\d+\.\d+\.\d+)\.tgz/g },
   { file: 'docs/cli-release.md', pattern: /All six workspace packages use software version (?<v>\d+\.\d+\.\d+)/g },
-  { file: 'docs/04-presets-and-contracts.md', pattern: /Workspace packages and the published installer are version (?<v>\d+\.\d+\.\d+)/g },
+  { file: 'docs/04-presets-and-contracts.md', pattern: /Workspace packages are version (?<v>\d+\.\d+\.\d+)/g },
 ]
 
 // The version the website tells people to install, and the docs that quote it.
@@ -35,6 +35,7 @@ const publishedSites = [
   { file: 'docs/foundation-local-usage.md', pattern: /The page shows the published `npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)`/g },
   { file: 'docs/snapshot-service-operations.md', pattern: /`npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)` resolves bare codes/g },
   { file: 'docs/07-delivery-plan.md', pattern: /installer is published as `@ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)`/g },
+  { file: 'docs/04-presets-and-contracts.md', pattern: /The published installer is version (?<v>\d+\.\d+\.\d+)/g },
 ]
 
 function fail(message) {

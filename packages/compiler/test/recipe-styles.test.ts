@@ -206,7 +206,7 @@ it('scoped glass tokens', async () => {
   })
   const light = `[data-slot="recipe-button"][data-ombelle-recipe="${glassScope}"]`
   expect(tokens[light]).toEqual({
-    '--glass-blur': '8px',
+    '--glass-blur': '3px',
     '--glass-brightness': '1.4',
     '--glass-contrast': '0.45',
     '--glass-highlight': 'color-mix(in srgb, white 60%, transparent)',

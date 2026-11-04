@@ -24,6 +24,8 @@ export type Catalog = {
   templates: Record<ComponentId, ComponentTemplate>
   styles: Record<StyleFamily, string>
   utility: string
+  /** Liquid-glass refraction filter component, installed with glass components. */
+  glassFilter: string
 }
 const baseDependencies: readonly string[] = [
   'react',
@@ -110,6 +112,7 @@ export function getCatalog(release: string): Catalog {
     templates,
     styles: { ...catalogData.styles },
     utility: catalogData.utility,
+    glassFilter: catalogData.glassFilter,
   }
 }
 export function getTemplate(

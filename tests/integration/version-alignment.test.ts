@@ -57,6 +57,7 @@ const publishedFiles = [
   'docs/foundation-local-usage.md',
   'docs/snapshot-service-operations.md',
   'docs/07-delivery-plan.md',
+  'docs/04-presets-and-contracts.md',
 ]
 
 async function withUnreleased(dir: string) {
@@ -83,7 +84,8 @@ it('sets a workspace release in a temp copy without touching history', async () 
   expect(release).toContain('`@ombelle-ui/cli@' + published + '` was published')
   expect(await read(dir, 'README.md')).toContain('The six workspace packages are version **' + next + '**')
   expect(await read(dir, 'README.md')).toContain('`npx @ombelle-ui/cli@' + published + '`')
-  expect(await read(dir, 'docs/04-presets-and-contracts.md')).toContain('Workspace packages and the published installer are version ' + next + '.')
+  expect(await read(dir, 'docs/04-presets-and-contracts.md')).toContain('Workspace packages are version ' + next + '.')
+  expect(await read(dir, 'docs/04-presets-and-contracts.md')).toContain('The published installer is version ' + published + ';')
   expect((await run(['--check', '--root', dir])).code).toBe(0)
 })
 
@@ -98,6 +100,9 @@ it('--published only flips website commands', async () => {
     expect(text, file).not.toContain('@ombelle-ui/cli@' + published)
   }
   for (const file of packageJsons) expect(JSON.parse(await read(dir, file)).version).toBe(current)
+  const contracts = await read(dir, 'docs/04-presets-and-contracts.md')
+  expect(contracts).toContain('The published installer is version ' + next + ';')
+  expect(contracts).toContain('Workspace packages are version ' + current + '.')
   expect(await read(dir, 'README.md')).toContain('The six workspace packages are version **' + current + '**')
 })
 

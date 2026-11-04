@@ -161,7 +161,7 @@ it('creates a valid liquid-glass draft based on builtin-liquid-glass', () => {
   expect(preset.styleFamily).toBe('liquid-glass')
   expect(preset.design).toEqual(base.design)
   expect(presetFieldValue(draft, '/design/glassOpacity')).toBe('0.5')
-  expect(presetFieldValue(draft, '/design/glassBlurPx')).toBe('8')
+  expect(presetFieldValue(draft, '/design/glassBlurPx')).toBe('3')
   expect(presetFieldValue(draft, '/design/glassBackdropContrast')).toBe('0.45')
   expect(presetFieldValue(draft, '/design/transparency')).toBe('auto')
   expect(Object.keys(glassDesignControls)).toEqual([

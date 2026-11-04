@@ -2,21 +2,28 @@
 
 ## Unreleased
 
-## 0.5.0 — 4 November 2026
-
-- Add `ombelle` as a stable style family beside flat, minimalist and neo-brutalism: a pink-and-ink look with pill-shaped controls, ink outlines, hard offset shadows and key-press states. The `styleFamily` enum in the preset schema gains `ombelle`, and the catalog gains the family stylesheet, a built-in preset and per-component styles. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged; output for the other families is byte-identical. Installers at 0.4.0 or older reject `ombelle` presets and codes, so install them with 0.5.0.
-- Website: the preset editor, Button editor, preview and documentation playground offer Ombelle, and the recipe and component-preset fixtures include it.
-- Grow the standalone consumer matrix from 36 to 40 rows with four ombelle consumers (pnpm and npm, Vite and Next), and the browser coverage contract from 404 to 534 cases.
-- Compare computed colours in the browser parity helpers as sRGB within one channel step and 0.01 alpha, because Next lowers `oklch()` to `lab()`; every other property is still compared exactly.
-
 ## 0.4.0 — 4 November 2026
 
-- Website: rebuild the preset editor on a shared editor shell with a top bar and inspector, sliders that keep focus and clamp the thumb, and a review drawer that holds contrast checks and export. Contrast pairs that were not evaluated are listed apart from passing ones, and the draft contrast notice stays visible.
+- Align all six workspace packages at 0.4.0, the next release after 0.3.1. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged.
+- Website: rebuild the preset editor on a shared editor shell with a top bar and inspector, sliders that keep focus and clamp the thumb, and a review drawer that holds contrast checks and export. Contrast pairs that were not evaluated are listed apart from passing ones, and the draft contrast notice stays visible. Download JSON stays disabled while export is blocked (stale draft or glass below the contrast bound).
 - Website: add dashboard, settings and sign-in preview scenes for presets.
 - Website: rebuild the Button editor on the same shell. This reintroduces the forced-state selector that 0.3.0 removed, now with Rest/Hover/Focus/Active preview states (the forced state gains `active`, `editor-force-active`), alongside a top bar (recipe ID shown read-only, revision, family chip, overflow menu), a shell-based inspector, Light/Dark and Wide/Narrow controls. Button output shrinks to five tabs with a metadata line.
 - Website: restore a level-1 heading in both editors.
 - Add `pnpm version:set <x.y.z>`, `--published <x.y.z>`, `--check` and `--check --published` to align workspace and published-installer version sites, and test that the packed CLI version matches the workspace CLI version.
-- Refresh the flat, minimalist and neo-brutalism style families: flat gains tone surfaces, filled fields and a forced-colors boundary; minimalist gains hairlines and underlined fields; neo-brutalism gains key-press depth and stickers. Catalog 0.1.0 bytes change in place for those families' `ui-style.css`, component CSS and scoped Button CSS; see `intentionalChanges` in the compiler style baseline. Existing installs keep their files until `theme add` or `add` is rerun. Liquid glass is unchanged.
+- Refresh the flat, minimalist and neo-brutalism style families: flat gains tone surfaces, filled fields and a forced-colors boundary; minimalist gains hairlines and underlined fields; neo-brutalism gains key-press depth and stickers. Catalog 0.1.0 bytes change in place for those families' `ui-style.css`, component CSS and scoped Button CSS; see `intentionalChanges` in the compiler style baseline. Existing installs keep their files until `theme add` or `add` is rerun.
+- Change the built-in flat, minimalist and neo-brutalism preset values: flat changes its palette and `borderWidthPx` 1 → 0; minimalist changes its palette and `radiusRem` 0.375 → 0.25; neo-brutalism changes its palette and `borderWidthPx` 2 → 2.5. Their `presetHash`, `styles/ui-tokens.css` and scoped Button scope hash move, so re-adding an installed recipe or scoped preset built from them at the same revision is now a conflict: bump the revision.
+- Add `ombelle` as a stable style family beside flat, minimalist and neo-brutalism: a pink-and-ink look with pill-shaped controls, ink outlines, hard offset shadows and key-press states. The `styleFamily` enum in the preset schema gains `ombelle`, and the catalog gains the family stylesheet, a built-in preset and per-component styles. Adding it does not change the other families' output. Installers at 0.3.1 or older reject `ombelle` presets and codes, so install them with 0.4.0.
+- Website: the preset editor, Button editor, preview and documentation playground support Ombelle, and the recipe and component-preset fixtures include it. The preset editor family picker and Button editor family chip offer it only once the published installer is 0.4.0 or later (`ombelleMinimumCli`).
+- Liquid glass output is as in 0.3.1 (refraction filter, 3px default blur); this release does not change it further.
+- Grow the standalone consumer matrix from 36 to 40 rows with four ombelle consumers (pnpm and npm, Vite and Next), and the browser coverage contract to 534 cases across 17 specs.
+- Compare computed colours in the browser parity helpers as sRGB within one channel step and 0.01 alpha, because Next lowers `oklch()` to `lab()`; every other property is still compared exactly.
+
+## 0.3.1 — unreleased
+
+- Align all six workspace packages at 0.3.1. Schemas 1.0 and catalog/compiler compatibility 0.1.0 are unchanged.
+- Add liquid-glass refraction: `add` installs `components/ui/liquid-glass-filter.tsx`. Mounted once, `<LiquidGlassFilter />` bends the backdrop at each rim with a slight prism edge in Chromium browsers, keeping the contrast bound. Other browsers keep the blurred glass, and the CLI prints a mount notice. The built-in glass preset's default blur drops from 8px to 3px so the refraction shows.
+- Website: the preset editor previews a liquid-glass draft below the contrast bound instead of freezing on the last valid one (`compile()` gains `glassContrast: 'report'`; installers and publication still enforce the bound); the glass notes become one quiet status bar; the family-change and reset dialogs are centred and explain what changes in plain words.
+- Keep generated schema and catalog files LF in checkouts, so a Windows release build no longer marks the tree dirty.
 
 ## 0.3.0 — 4 November 2026
 

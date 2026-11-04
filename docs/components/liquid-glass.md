@@ -27,7 +27,7 @@ A glass preset sets `styleFamily: "liquid-glass"` and these design fields, which
 | Field | Range | Built-in value | Effect |
 | --- | --- | --- | --- |
 | `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur, filter, or sheen |
-| `design.glassBlurPx` | 0–40 | 8 | Backdrop blur radius |
+| `design.glassBlurPx` | 0–40 | 3 | Backdrop blur radius; low values keep the refraction visible |
 | `design.glassOpacity` | 0.25–1 | 0.5 | Surface opacity: the share of the surface colour in the mix with the filtered backdrop |
 | `design.glassSaturation` | 1–2 | 2 | Backdrop `saturate()`; keeps the colour of what is behind the glass |
 | `design.glassBackdropContrast` | 0.3–1 | 0.45 | Backdrop `contrast()`; compresses the backdrop's light range |
@@ -75,7 +75,16 @@ The six unavailable components appear in the gallery as labelled placeholders.
 
 ## Glass cues
 
-Inside the feature query, each translucent surface paints a white specular gradient over its top 60 percent at `glassSheen`, which the contrast bound includes. Every glass surface also has a bright top-left inner rim, a softer bottom-right rim, a faint inner ring, and a 2px inner shadow along the bottom edge. These stay within 3px of the border, inside the smallest text inset, so they never sit behind text and do not enter the bound. There is no SVG displacement or refraction: a `url()` backdrop filter is Chromium-only, and a browser that rejects it would drop the whole filter, compressing nothing.
+Inside the feature query, each translucent surface paints a white specular gradient over its top 60 percent at `glassSheen`, which the contrast bound includes. Every glass surface also has a bright top-left inner rim, a softer bottom-right rim, a faint inner ring, and a 2px inner shadow along the bottom edge. These stay within 3px of the border, inside the smallest text inset, so they never sit behind text and do not enter the bound.
+
+## Refraction
+
+`add` installs `components/ui/liquid-glass-filter.tsx` with glass components. Mount `<LiquidGlassFilter />` once, for example in the root layout. It renders a hidden SVG filter (`#ombelle-liquid-glass`) that bends the backdrop inward near each rim and splits the red, green and blue channels slightly for a prism edge. It then sets `--glass-refraction: url(#ombelle-liquid-glass)` on `<html>`, and every glass `backdrop-filter` starts with `var(--glass-refraction,)`.
+
+- **Chromium only.** The component sets the property only when `navigator.userAgentData` reports Chromium (Chrome, Edge). A browser that rejected a `url()` backdrop filter would drop the whole filter, including the contrast compression the bound depends on. Safari, Firefox and pages that do not mount the filter keep the blurred glass unchanged.
+- **The contrast bound still holds.** Displacement only moves backdrop pixels and samples inward, never outside the element. The channel split recombines values within the same range. The compression in the same `backdrop-filter` runs after them.
+- **Fallbacks are unchanged.** Reduced transparency, forced colours and nested glass remove the filter as before.
+- **Blur.** The built-in preset uses a 3px blur so the refraction stays visible. Higher `glassBlurPx` values soften it.
 
 ## Fallbacks
 
@@ -93,7 +102,10 @@ Blur is never transitioned or animated. Transitions touch only colour and opacit
 
 ```text
 Notice: liquid-glass is experimental for card, tabs; see docs/components/liquid-glass.md for limitations
+Notice: mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers
 ```
+
+The second notice appears only for `add`, the command that writes the filter component.
 
 JSON output always includes a `notices` array. It is empty for stable families.
 

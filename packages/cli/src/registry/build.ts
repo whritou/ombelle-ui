@@ -36,8 +36,12 @@ export function buildRegistry(result: CompileResult): {
   const style = result.artifacts.find(
     (a) => a.logicalPath === 'styles/ui-style.css',
   )!
+  // Only catalog components become registry items; supporting files such as
+  // the liquid-glass filter have no template of their own.
   for (const artifact of result.artifacts.filter(
-    (a) => a.kind === 'component',
+    (a) =>
+      a.kind === 'component' &&
+      Object.hasOwn(catalog.templates, a.logicalPath.split('/').at(-1)!.replace('.tsx', '')),
   )) {
     const id = artifact.logicalPath
       .split('/')

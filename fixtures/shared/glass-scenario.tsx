@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip'
+import { LiquidGlassFilter } from '@/components/ui/liquid-glass-filter'
 
 const backdrops = [
   { id: 'solid', label: 'Solid', background: 'var(--background)' },
@@ -63,6 +64,7 @@ export default function GlassScenario() {
   }, [])
   return (
     <main data-ready={String(ready)} data-style="STYLE_FAMILY">
+      <LiquidGlassFilter />
       <header>
         <div>
           <h1>Ombelle liquid glass</h1>

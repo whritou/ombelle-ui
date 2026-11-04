@@ -8,6 +8,7 @@ import {
   type PresetRender,
 } from '../../www/src/preset-editor/preview-protocol'
 import { PresetGallery } from './generated/preset-gallery/gallery'
+import { LiquidGlassFilter } from './generated/preset-gallery/components/ui/liquid-glass-filter'
 import manifest from './generated/preset-gallery/manifest'
 import { gallerySources } from './generated/preset-gallery/sources'
 import { PresetScenePage } from './scenes'
@@ -150,6 +151,7 @@ function PresetPreview() {
       <style data-preset-styles>
         {presetRuntimeStyles(current.message.result)}
       </style>
+      {family === 'liquid-glass' && <LiquidGlassFilter />}
       {scene === 'gallery' ? (
         <PresetGallery {...sceneProps} />
       ) : (
