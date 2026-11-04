@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+## 0.4.0 — 4 November 2026
+
+- Website: rebuild the preset editor on a shared editor shell with a top bar and inspector, sliders that keep focus and clamp the thumb, and a review drawer that holds contrast checks and export. Contrast pairs that were not evaluated are listed apart from passing ones, and the draft contrast notice stays visible.
+- Website: add dashboard, settings and sign-in preview scenes for presets.
+- Website: rebuild the Button editor on the same shell with a top bar (recipe ID shown read-only, revision, family chip, overflow menu), a shell-based inspector, Light/Dark and Wide/Narrow controls, and Rest/Hover/Focus/Active preview states. The forced state gains `active` (`editor-force-active`). Button output shrinks to five tabs with a metadata line.
+- Website: restore a level-1 heading in both editors.
+- Add `pnpm version:set <x.y.z>`, `--published <x.y.z>`, `--check` and `--check --published` to align workspace and published-installer version sites, and test that the packed CLI version matches the workspace CLI version.
+- Refresh the flat, minimalist and neo-brutalism style families: flat gains tone surfaces, filled fields and a forced-colors boundary; minimalist gains hairlines and underlined fields; neo-brutalism gains key-press depth and stickers. Catalog 0.1.0 bytes change in place for those families' `ui-style.css`, component CSS and scoped Button CSS; see `intentionalChanges` in the compiler style baseline. Existing installs keep their files until `theme add` or `add` is rerun. Liquid glass is unchanged.
+
 ## 0.3.0 — 4 November 2026
 
 - Publish `@ombelle-ui/cli@0.3.0` to npm; website commands use `npx @ombelle-ui/cli@0.3.0`.
