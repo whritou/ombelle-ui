@@ -74,7 +74,7 @@ export function SliderRow({
 }) {
   // A half-typed or invalid value parks the thumb at the minimum, not the browser's midpoint.
   // Only the HTML valid-floating-point grammar counts: '1.', '+5' and ' 5' would snap to the midpoint.
-  const thumb = /^-?(d+(.d+)?|.d+)([eE][-+]?d+)?$/.test(value) ? value : String(min)
+  const thumb = /^-?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/.test(value) ? value : String(min)
   const shared = {
     value,
     'aria-invalid': invalid ? (true as const) : undefined,
