@@ -86,7 +86,12 @@
 }
 
 .iconButton:hover:not(:disabled) {
+  border-color: var(--control);
   background: var(--muted);
+}
+
+.iconButton:active:not(:disabled) {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
 }
 
 .iconButton:disabled {
@@ -133,6 +138,14 @@
 
 .menuItem:hover:not(:disabled) {
   background: var(--muted);
+}
+
+.menuItem:active:not(:disabled) {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
+}
+
+.menuItem[data-destructive='true']:hover:not(:disabled) {
+  background: var(--warning-soft);
 }
 
 .menuItem:disabled {
@@ -251,6 +264,15 @@
   cursor: pointer;
 }
 
+.sliderReset:hover:not(:disabled) {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.sliderReset:active:not(:disabled) {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
+}
+
 .sliderRange {
   grid-area: s;
   width: 100%;
@@ -282,6 +304,15 @@
   font: inherit;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.segmented button:hover:not(:disabled):not([aria-pressed='true']) {
+  background: color-mix(in oklab, var(--card) 60%, transparent);
+  color: var(--foreground);
+}
+
+.segmented button:hover:active:not(:disabled) {
+  background: var(--card);
 }
 
 .segmented button[aria-pressed='true'] {
@@ -324,6 +355,10 @@
 .railButton:hover {
   background: var(--muted);
   color: var(--foreground);
+}
+
+.railButton:active {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
 }
 
 /* Icon-only rail: the label shows as a tooltip on hover and keyboard focus. */
@@ -415,9 +450,30 @@
   cursor: pointer;
 }
 
+.tabs button:hover:not([aria-selected='true']) {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.tabs button:hover:active {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
+}
+
 .tabs button[aria-selected='true'] {
   background: var(--primary-soft);
   color: var(--foreground);
+}
+
+/* Interactive feedback eases in; globals.css turns it off under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .iconButton,
+  .menuItem,
+  .sliderReset,
+  .segmented button,
+  .railButton,
+  .tabs button {
+    transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+  }
 }
 
 .panel {

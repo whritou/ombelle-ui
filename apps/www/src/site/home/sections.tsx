@@ -75,7 +75,7 @@ export function MatrixSection() {
               {COMPONENTS.map((row, i) => (
                 <tr key={row.name} className={`border-b border-border transition-colors last:border-0 ${i === sel ? 'bg-accent' : 'hover:bg-muted'}`}>
                   <th scope="row" className="p-0 text-left">
-                    <button type="button" onClick={() => setSel(i)} aria-pressed={i === sel} className="w-full px-4 py-2.5 text-left font-semibold">
+                    <button type="button" onClick={() => setSel(i)} aria-pressed={i === sel} className="w-full px-4 py-2.5 text-left font-semibold transition-colors hover:text-primary active:bg-foreground/5">
                       {row.name}
                     </button>
                   </th>
@@ -147,7 +147,7 @@ export function CascadeSection() {
                   type="button"
                   aria-pressed={active}
                   onClick={() => setOn(p => p.map((v, k) => (k === i ? !v : v)))}
-                  className={`flex w-full items-center gap-4 rounded-xl border px-4 py-3 text-left transition-all ${wins ? 'border-primary bg-background shadow-soft' : active ? 'border-border bg-background' : 'border-dashed border-muted-foreground/40 bg-transparent'}`}
+                  className={`flex w-full items-center gap-4 rounded-xl border px-4 py-3 text-left transition-all ${wins ? 'border-primary bg-background shadow-soft' : active ? 'border-border bg-background hover:border-foreground/30' : 'border-dashed border-muted-foreground/40 bg-transparent hover:border-muted-foreground hover:bg-background/60'} active:scale-[0.99]`}
                 >
                   <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, '0')}</span>
                   <span className="flex-1">
@@ -237,7 +237,7 @@ export function TerminalSection({ release }: { release: string }) {
             <span aria-hidden className="size-3 rounded-full bg-terminal-accent" /><span aria-hidden className="size-3 rounded-full bg-paper/20 dark:bg-muted" /><span aria-hidden className="size-3 rounded-full bg-paper/20 dark:bg-muted" />
             <TabsPrimitive.List aria-label="CLI scenarios" className="ml-3 flex flex-wrap gap-1">
               {SCENARIOS.map(x => (
-                <TabsPrimitive.Trigger key={x.id} value={x.id} className="min-h-9 rounded-md px-3 font-mono text-xs text-paper/75 data-[state=active]:bg-paper/10 data-[state=active]:text-paper dark:text-muted-foreground dark:data-[state=active]:bg-muted dark:data-[state=active]:text-foreground">
+                <TabsPrimitive.Trigger key={x.id} value={x.id} className="min-h-9 rounded-md px-3 font-mono text-xs text-paper/75 transition-colors hover:bg-paper/5 hover:text-paper data-[state=active]:bg-paper/10 data-[state=active]:text-paper dark:text-muted-foreground dark:hover:bg-muted/60 dark:hover:text-foreground dark:data-[state=active]:bg-muted dark:data-[state=active]:text-foreground">
                   {x.label}
                 </TabsPrimitive.Trigger>
               ))}
@@ -255,7 +255,7 @@ export function TerminalSection({ release }: { release: string }) {
                     type="button"
                     aria-label="Copy command"
                     onClick={() => copy(full)}
-                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-paper/75 hover:bg-paper/10 dark:text-muted-foreground dark:hover:bg-muted"
+                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-paper/75 transition-colors hover:bg-paper/10 hover:text-paper active:bg-paper/20 dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-foreground dark:active:bg-foreground/10"
                   >
                     {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
                   </button>
@@ -308,7 +308,7 @@ export function PresetSection() {
                   onFocus={() => setI(k)}
                   onClick={() => setI(k)}
                   aria-pressed={k === i}
-                  className={`flex w-full gap-2 rounded-md px-4 py-1 text-left transition-colors ${k === i ? 'bg-accent' : 'hover:bg-muted'}`}
+                  className={`flex w-full gap-2 rounded-md px-4 py-1 text-left transition-colors ${k === i ? 'bg-accent' : 'hover:bg-muted active:bg-foreground/10'}`}
                 >
                   <span className={k === i ? 'text-accent-foreground' : 'text-foreground'}>&quot;{f.k}&quot;</span>
                   <span className="text-muted-foreground">:</span>

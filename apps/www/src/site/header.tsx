@@ -26,11 +26,11 @@ export function SiteHeader() {
         </div>
         <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
           {primaryLinks.map(link => (
-            <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-foreground">
+            <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-foreground/10 aria-[current=page]:text-foreground">
               {link.label}
             </a>
           ))}
-          <a href={repository} className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <a href={repository} className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-foreground/10">
             <GithubIcon className="size-4" /> GitHub
           </a>
         </nav>
@@ -38,7 +38,7 @@ export function SiteHeader() {
           <ThemeToggle />
           <Dialog.Root>
             <Dialog.Trigger asChild>
-              <button type="button" aria-label="Open menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border md:hidden">
+              <button type="button" aria-label="Open menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted active:bg-foreground/10 md:hidden">
                 <Menu className="size-5" aria-hidden />
               </button>
             </Dialog.Trigger>
@@ -48,14 +48,14 @@ export function SiteHeader() {
                 <div className="flex items-center justify-between">
                   <Dialog.Title className="font-display text-lg font-bold">Menu</Dialog.Title>
                   <Dialog.Close asChild>
-                    <button type="button" aria-label="Close menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border">
+                    <button type="button" aria-label="Close menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted active:bg-foreground/10">
                       <X className="size-4" aria-hidden />
                     </button>
                   </Dialog.Close>
                 </div>
                 <nav aria-label="Mobile" className="mt-6 flex flex-col gap-1">
                   {[...primaryLinks, { href: repository, label: 'GitHub' }].map(link => (
-                    <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-3 text-base font-medium hover:bg-muted aria-[current=page]:bg-muted">
+                    <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-3 text-base font-medium transition-colors hover:bg-muted active:bg-foreground/10 aria-[current=page]:bg-muted">
                       {link.label}
                     </a>
                   ))}

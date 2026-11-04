@@ -600,8 +600,8 @@
 .editor :global(.preset-scheme)[aria-pressed='true'] {
   border-color: var(--foreground);
 }
-.editor :global(.preset-scheme):hover {
-  border-color: var(--border);
+.editor :global(.preset-scheme):hover:not([aria-pressed='true']) {
+  border-color: var(--muted-foreground);
 }
 .editor :global(.preset-scheme-dot) {
   width: 24px;
@@ -901,4 +901,48 @@
 .editor :global(.preset-shadow-field) input {
   min-height: 32px;
   padding: 0 6px;
+}
+
+/* Hover and press feedback. The button default matches the base button rule's
+   specificity, so classed buttons with their own background keep it. */
+:where(.editor) button:where(:hover:not(:disabled)) {
+  border-color: var(--muted-foreground);
+  background: var(--muted);
+}
+:where(.editor) button:where(:active:not(:disabled)) {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
+}
+:where(.editor) a:hover {
+  color: var(--primary);
+}
+.editor summary:hover {
+  color: var(--primary);
+}
+.editor .getCode:not(:disabled):hover,
+.editor .confirmPrimary:not(:disabled):hover {
+  border-color: var(--primary);
+  background: var(--primary);
+  filter: brightness(1.08);
+}
+.editor .getCode:not(:disabled):active,
+.editor .confirmPrimary:not(:disabled):active {
+  filter: brightness(0.94);
+}
+.editor :global(.preset-color-row):active {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
+}
+.editor :global(.preset-scheme):hover,
+.editor :global(.preset-scheme):active {
+  background: transparent;
+}
+.editor :global(.preset-token-toggle):hover:not(:disabled) {
+  background: transparent;
+  color: var(--foreground);
+  text-decoration-thickness: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .editor button,
+  .editor summary {
+    transition: background-color 0.12s, border-color 0.12s, color 0.12s, filter 0.12s;
+  }
 }

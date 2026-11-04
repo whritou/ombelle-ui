@@ -22,7 +22,7 @@ export function ComponentsSidebar({ label = 'Components' }: { label?: string }) 
                 <a
                   href={link.href}
                   aria-current={link.href === pathname ? 'page' : undefined}
-                  className="block rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+                  className="block rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-foreground/10 aria-[current=page]:bg-muted aria-[current=page]:font-medium aria-[current=page]:text-foreground"
                 >
                   {link.label}
                 </a>

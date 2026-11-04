@@ -86,8 +86,7 @@ export function DashboardScene(props: SceneProps) {
                       )}
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          {/* Slot hands the trigger its own data-slot; keep the Button slot so the family styles it. */}
-                          <Button data-slot="button" variant="outline" size="sm" aria-label={`Archive ${project.name}`}>
+                          <Button variant="outline" size="sm" aria-label={`Archive ${project.name}`}>
                             Archive
                           </Button>
                         </TooltipTrigger>

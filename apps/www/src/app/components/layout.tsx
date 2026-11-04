@@ -11,7 +11,7 @@ export default function ComponentsLayout({ children }: { children: ReactNode }) 
       </div>
       <div className="min-w-0">
         <details className="group mt-6 rounded-xl border border-border bg-card md:hidden">
-          <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium">Browse components</summary>
+          <summary className="cursor-pointer list-none rounded-xl px-4 py-3 text-sm font-medium transition-colors hover:bg-muted active:bg-foreground/10 group-open:rounded-b-none">Browse components</summary>
           <div className="border-t border-border px-2 py-4">
             <ComponentsSidebar label="Components (mobile)" />
           </div>
