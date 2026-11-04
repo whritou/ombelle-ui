@@ -40,3 +40,28 @@ it('flat border width reaches the card rule while the input bottom rule stays 2p
   expect(squash(style)).toContain('border-bottom:2pxsolidvar(--input)')
   expect(squash(style)).not.toContain('border-bottom:var(--border-width)')
 })
+
+it('flat surfaces keep a boundary in forced-colors mode', async () => {
+  const flat = getCatalog('0.1.0').presets.flat
+  const result = await compile({
+    preset: flat,
+    componentIds: ['badge', 'button', 'card', 'dialog', 'switch', 'tabs', 'tooltip'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  const forced = (path: string) => {
+    const css = squash(result.artifacts.find((a) => a.logicalPath === path)!.content)
+    return css
+      .split('@media(forced-colors:active){')
+      .slice(1)
+      .join('')
+  }
+  const style = forced('styles/ui-style.css')
+  expect(style).toContain('[data-slot="dialog-content"]{border:1pxsolidCanvasText')
+  expect(style).toContain('[data-slot="button"][data-variant="outline"]{border:2pxsolidButtonText')
+  expect(forced('components/ui/card.css')).toContain('border:1pxsolidCanvasText')
+  expect(forced('components/ui/badge.css')).toContain('[data-slot="badge"]{background:Canvas;color:CanvasText;border:1pxsolidCanvasText')
+  expect(forced('components/ui/tooltip.css')).toContain('border:1pxsolidCanvasText')
+  expect(forced('components/ui/switch.css')).toContain('border:2pxsolidButtonText')
+  expect(forced('components/ui/tabs.css')).toContain('border:1pxsolidButtonText')
+})

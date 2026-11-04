@@ -42,3 +42,5 @@
 [data-slot="button"]:disabled{background:var(--muted);color:var(--muted-foreground);opacity:1;box-shadow:none}
 [data-slot="button"][data-variant="link"]:disabled,[data-slot="button"][data-variant="ghost"]:disabled{background:transparent}
 [data-slot="input"]:disabled{background:var(--muted);color:var(--muted-foreground);border-bottom-color:var(--border);opacity:1}
+/* forced-colors boundaries */
+@media(forced-colors: active){[data-slot="dialog-content"]{border:1px solid CanvasText;box-shadow:none}[data-slot="button"][data-variant="outline"]{border:2px solid ButtonText;box-shadow:none}}

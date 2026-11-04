@@ -5,7 +5,7 @@ import { getCatalog } from '@ombelle/catalog'
 import example from '../../../examples/recipe.example.json'
 const scopedArtifactHashes: Record<string, readonly string[]> = {
   flat: [
-    '7052a9ca06267c7cd853cd8125082c081637c142f18ee75e54d271d912916ddc',
+    'acff94182507ce43d1d3cfcf5da5916443e2568e53c9f7b4e6e6753b03797d0b',
     'c013633ad3189eb8d799fec009f7bde5462bd0d11137147ed5788dc63479ae79',
   ],
   minimalist: [

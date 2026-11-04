@@ -55,7 +55,7 @@
   [data-slot='switch'] {
     background: Canvas;
     color: CanvasText;
-    border-color: ButtonText;
+    border: 2px solid ButtonText;
     box-shadow: none;
   }
   [data-slot='switch'][data-state='unchecked'] {

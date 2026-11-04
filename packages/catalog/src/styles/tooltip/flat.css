@@ -38,7 +38,7 @@
   [data-slot='tooltip-content'] {
     background: Canvas;
     color: CanvasText;
-    border-color: CanvasText;
+    border: 1px solid CanvasText;
     box-shadow: none;
     forced-color-adjust: none;
   }

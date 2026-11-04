@@ -84,7 +84,7 @@
   [data-slot='tabs-list'] {
     background: Canvas;
     color: CanvasText;
-    border-color: ButtonText;
+    border: 1px solid ButtonText;
     box-shadow: none;
   }
   [data-slot='tabs-trigger'][data-state='inactive'] {

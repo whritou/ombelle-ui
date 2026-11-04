@@ -25,7 +25,7 @@
   [data-slot='badge'] {
     background: Canvas;
     color: CanvasText;
-    border-color: CanvasText;
+    border: 1px solid CanvasText;
     box-shadow: none;
   }
   [data-slot='badge'][data-variant='destructive'] {
