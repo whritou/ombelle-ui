@@ -383,6 +383,13 @@
 .drawerSlot[data-open] {
   width: 21rem;
 }
+/* Closed, the rail's tooltips sit outside the slot: don't clip them. */
+.drawerSlot:not([data-open]) {
+  overflow: visible;
+}
+.drawerSlot:not([data-open]) > aside {
+  border-radius: inherit;
+}
 .drawerSlot > aside {
   flex: 1 1 auto;
   max-width: none;
