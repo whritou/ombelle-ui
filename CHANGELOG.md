@@ -4,6 +4,7 @@
 
 ## 0.4.0 — 4 November 2026
 
+- Publish `@ombelle-ui/cli@0.4.0` to npm; website commands use `npx @ombelle-ui/cli@0.4.0`, and the editors now offer the ombelle family.
 - Align all six workspace packages at 0.4.0, the next release after 0.3.1. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged.
 - Website: rebuild the preset editor on a shared editor shell with a top bar and inspector, sliders that keep focus and clamp the thumb, and a review drawer that holds contrast checks and export. Contrast pairs that were not evaluated are listed apart from passing ones, and the draft contrast notice stays visible. Download JSON stays disabled while export is blocked (stale draft or glass below the contrast bound).
 - Website: add dashboard, settings and sign-in preview scenes for presets.
