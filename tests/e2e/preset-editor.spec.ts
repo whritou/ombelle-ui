@@ -18,6 +18,7 @@ import {
 import { openExport, segment, waitForCompiled } from '../helpers/preset-editor-ui.js'
 import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
 import {
   presetRuntimeStyles,
@@ -182,9 +183,10 @@ for (const family of supportedStyleFamilies)
               await consumer.evaluate(() => document.fonts.ready)
               const specimen = consumer.getByTestId('preset-gallery')
               await expect(specimen).toBeVisible()
-              expect(
+              expectColorParity(
                 await snapshotPresetDom(frame(page).getByTestId('preset-gallery')),
-              ).toEqual(await snapshotPresetDom(specimen))
+                await snapshotPresetDom(specimen),
+              )
               for (const artifact of result.artifacts.filter(
                 (a) => a.kind === 'component' || a.kind === 'utility',
               )) {
@@ -213,7 +215,8 @@ for (const family of supportedStyleFamilies)
               await consumer
                 .getByRole('button', { name: 'Open dialog', exact: true })
                 .click()
-              expect(await snapshotPresetDom(frame(page).getByRole('dialog'))).toEqual(
+              expectColorParity(
+                await snapshotPresetDom(frame(page).getByRole('dialog')),
                 await snapshotPresetDom(consumer.getByRole('dialog')),
               )
               await frame(page)

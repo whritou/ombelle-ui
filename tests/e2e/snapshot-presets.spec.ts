@@ -7,6 +7,7 @@ import { supportedComponentIds, supportedStyleFamilies, type PresetSnapshot } fr
 import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { canonicalize, frame, publishEditorPreset, resetSnapshotBrowserQuota, sha256 } from '../helpers/snapshot-browser.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
 
 test.beforeAll(async ({ browser }, info) => {
@@ -37,7 +38,7 @@ for (const family of supportedStyleFamilies)
             await consumer.evaluate(() => document.fonts.ready)
             const gallery = consumer.getByTestId('preset-gallery')
             await expect(gallery).toBeVisible()
-            expect(await snapshotPresetDom(frame(page).getByTestId('preset-gallery'))).toEqual(await snapshotPresetDom(gallery))
+            expectColorParity(await snapshotPresetDom(frame(page).getByTestId('preset-gallery')), await snapshotPresetDom(gallery))
             for (const artifact of result.artifacts.filter((a) => a.kind === 'component' || a.kind === 'utility')) {
               const content = await fs.readFile(path.join(root, 'src', artifact.logicalPath), 'utf8')
               expect(await sha256(content)).toBe(await sha256(artifact.content))
@@ -51,7 +52,7 @@ for (const family of supportedStyleFamilies)
             })
             await frame(page).getByRole('button', { name: 'Open dialog', exact: true }).click()
             await consumer.getByRole('button', { name: 'Open dialog', exact: true }).click()
-            expect(await snapshotPresetDom(frame(page).getByRole('dialog'))).toEqual(await snapshotPresetDom(consumer.getByRole('dialog')))
+            expectColorParity(await snapshotPresetDom(frame(page).getByRole('dialog')), await snapshotPresetDom(consumer.getByRole('dialog')))
             expect(await page.getByRole('dialog').count()).toBe(0)
           } finally { await consumer.close() }
         })
