@@ -136,7 +136,6 @@ Further known limitations:
 
 - The Tooltip arrow stays opaque while the content is translucent, so a seam is visible between them.
 - With `transparency: "reduced"`, glass presets must still reach 4.5:1 on their opaque surfaces. This is stricter than the stable families.
-- A Tooltip trigger that wraps a Button through `asChild` takes `data-slot="tooltip-trigger"`, so Button family styles do not reach it. This applies to every family, not only glass.
 - The contrast bound assumes the glass element filters the page itself; see [contrast bound](#contrast-bound) for the ancestors it does not cover.
 - There is no public catalog page that shows the stable, experimental, and unavailable matrix yet.
 

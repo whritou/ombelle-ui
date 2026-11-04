@@ -38,12 +38,14 @@ export function Button({
   const Component = asChild ? Slot : 'button'
   return (
     <Component
-      data-slot="button"
       data-variant={variant}
       data-size={size}
       {...(!asChild ? { type } : {})}
       className={cn(buttonVariants({ variant, size }), className)}
       {...props}
+      // Set after the spread: an asChild trigger (Tooltip, Dialog) passes its
+      // own data-slot through Radix Slot, which would hide the family styles.
+      data-slot="button"
     />
   )
 }

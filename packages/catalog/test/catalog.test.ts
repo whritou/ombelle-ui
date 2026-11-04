@@ -14,7 +14,13 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from '../src/templates/native-select.js'
-import { TooltipContent } from '../src/templates/tooltip.js'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../src/templates/tooltip.js'
+import { Dialog, DialogTrigger } from '../src/templates/dialog.js'
 import { runtimeDependencies } from '../src/manifest.js'
 import { Checkbox } from '../src/templates/checkbox.js'
 import { Switch, SwitchThumb } from '../src/templates/switch.js'
@@ -603,5 +609,57 @@ describe('catalog contract', () => {
     expect(html).toContain('id="email"')
     expect(html).toContain('disabled=""')
     expect(html).toContain('aria-label="Email"')
+  })
+  it('keeps the Button slot when an asChild trigger composes it', () => {
+    const tooltip = renderToStaticMarkup(
+      createElement(
+        TooltipProvider,
+        null,
+        createElement(
+          Tooltip,
+          null,
+          createElement(
+            TooltipTrigger,
+            { asChild: true },
+            createElement(Button, { variant: 'outline' }, 'Help'),
+          ),
+        ),
+      ),
+    )
+    expect(tooltip).toContain('data-slot="button"')
+    expect(tooltip).toContain('data-variant="outline"')
+    expect(tooltip).toContain('data-state="closed"')
+    expect(tooltip).not.toContain('data-slot="tooltip-trigger"')
+    const dialog = renderToStaticMarkup(
+      createElement(
+        Dialog,
+        null,
+        createElement(
+          DialogTrigger,
+          { asChild: true },
+          createElement(Button, null, 'Open'),
+        ),
+      ),
+    )
+    expect(dialog).toContain('data-slot="button"')
+    expect(dialog).toContain('aria-haspopup="dialog"')
+  })
+  it('keeps the Tooltip trigger slot for non-Button asChild children', () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        TooltipProvider,
+        null,
+        createElement(
+          Tooltip,
+          null,
+          createElement(
+            TooltipTrigger,
+            { asChild: true },
+            createElement('a', { href: '#help' }, 'Help'),
+          ),
+        ),
+      ),
+    )
+    expect(html).toContain('data-slot="tooltip-trigger"')
   })
 })
