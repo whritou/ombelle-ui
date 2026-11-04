@@ -48,7 +48,7 @@ The new components (Label, Textarea, Native Select) are installed only after the
 
 ## Complete gate and independent CI groups
 
-`pnpm check:foundation` remains the complete local gate: packages, all unit/integration tests, generated preview, all 40 consumer preparations and builds, typecheck, preview build, the full browser matrix (518 tests enumerated by `playwright test --list` at this commit; not run on this machine), and a fresh workspace audit. It uses the same evidence validators as CI. A successful command cannot reuse old group result files: owned JSON results are cleared before execution.
+`pnpm check:foundation` remains the complete local gate: packages, all unit/integration tests, generated preview, all 40 consumer preparations and builds, typecheck, preview build, the full browser matrix (`playwright test --list` enumerates 518 tests at this commit, an enumeration rather than a measured result; the evidence validator derives its expected count from the spec files and does not hard-code one, and the gate was not run on this machine), and a fresh workspace audit. It uses the same evidence validators as CI. A successful command cannot reuse old group result files: owned JSON results are cleared before execution.
 
 CI runs two independent checkouts with separate setup/cache scopes:
 
