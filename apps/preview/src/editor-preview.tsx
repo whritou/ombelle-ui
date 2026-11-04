@@ -2,6 +2,7 @@ import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
 import { editorButtons } from './generated/editor-buttons'
+import { RecipeIcon } from './recipe-icon'
 import './editor-preview.css'
 
 /** Forced preview states reuse a class so the specimen shows hover, focus or pressed without the pointer. */
@@ -83,9 +84,27 @@ function EditorPreview() {
         disabled={state.recipe.props.disabled || state.recipe.props.loading}
         aria-busy={state.recipe.props.loading || undefined}
         data-forced-state={state.forcedState}
-      >{state.recipe.content}</button>
+        {...recipeIconAttributes(state.recipe)}
+      >{recipeChildren(state.recipe)}</button>
     </Button>}
   </div>
+}
+
+type PreviewRecipe = PreviewRender['state']['recipe']
+
+/** The attributes the installed RecipeButton sets for its icon, so the scoped CSS matches. */
+function recipeIconAttributes(recipe: PreviewRecipe) {
+  if (!recipe.icon) return {}
+  return recipe.icon.iconOnly
+    ? { 'aria-label': recipe.content, 'data-icon-only': '' }
+    : { 'data-icon-position': recipe.icon.position ?? 'start' }
+}
+
+function recipeChildren(recipe: PreviewRecipe) {
+  if (!recipe.icon) return recipe.content
+  const glyph = <RecipeIcon name={recipe.icon.name} slot="recipe-button-icon" />
+  if (recipe.icon.iconOnly) return glyph
+  return recipe.icon.position === 'end' ? <>{recipe.content}{glyph}</> : <>{glyph}{recipe.content}</>
 }
 
 export function mountEditorPreview(element: HTMLElement) {

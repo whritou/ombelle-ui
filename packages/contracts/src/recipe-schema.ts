@@ -100,6 +100,41 @@ export const recipeSchema = {
       "minLength": 1,
       "maxLength": 200
     },
+    "icon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "description": "A reviewed lucide-react icon. In icon-only mode the content is the accessible label and no text is shown.",
+      "properties": {
+        "name": {
+          "enum": [
+            "arrow-left",
+            "arrow-right",
+            "check",
+            "chevron-right",
+            "download",
+            "external-link",
+            "plus",
+            "search",
+            "send",
+            "settings",
+            "trash",
+            "upload"
+          ]
+        },
+        "position": {
+          "enum": [
+            "start",
+            "end"
+          ]
+        },
+        "iconOnly": {
+          "type": "boolean"
+        }
+      }
+    },
     "overrides": {
       "type": "object",
       "additionalProperties": false,
@@ -129,10 +164,47 @@ export const recipeSchema = {
           "minimum": -16,
           "maximum": 16
         },
+        "paddingXPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 48,
+          "description": "Inline padding of the sm, default and lg sizes. The icon size and icon-only Buttons stay square."
+        },
+        "paddingYPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 24,
+          "description": "Block padding of the sm, default and lg sizes. The icon size and icon-only Buttons stay square."
+        },
+        "gapPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 24,
+          "description": "Space between the icon and the label."
+        },
+        "fontWeight": {
+          "type": "integer",
+          "minimum": 300,
+          "maximum": 800,
+          "multipleOf": 100
+        },
+        "fontSizePx": {
+          "type": "number",
+          "minimum": 11,
+          "maximum": 24
+        },
+        "letterSpacingEm": {
+          "type": "number",
+          "minimum": -0.05,
+          "maximum": 0.2
+        },
+        "uppercase": {
+          "type": "boolean"
+        },
         "colors": {
           "type": "object",
           "additionalProperties": false,
-          "description": "Per-mode Button colors. Omitted values fall back to the preset tokens the selected variant reads.",
+          "description": "Per-mode Button colors. Omitted base roles fall back to the preset tokens the selected variant reads; omitted hover and pressed roles keep the style family's own hover and pressed colors in that mode.",
           "properties": {
             "light": {
               "$ref": "#/$defs/buttonColors"
@@ -170,6 +242,24 @@ export const recipeSchema = {
           "$ref": "#/$defs/color"
         },
         "border": {
+          "$ref": "#/$defs/color"
+        },
+        "hoverBackground": {
+          "$ref": "#/$defs/color"
+        },
+        "hoverForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "hoverBorder": {
+          "$ref": "#/$defs/color"
+        },
+        "pressedBackground": {
+          "$ref": "#/$defs/color"
+        },
+        "pressedForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "pressedBorder": {
           "$ref": "#/$defs/color"
         }
       }

@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { validateRecipe } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
-import { withRecipeColor } from '../model'
+import { withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { PropertiesPanel, VariantPicker, shownNumber } from './properties-panel'
 
 const noop = () => {}
@@ -41,13 +41,14 @@ it('labels the button type group and switches', () => {
   const html = panel()
   expect(html).toContain('role="group" aria-label="Button type"')
   expect(html).toContain('role="group" aria-label="Size"')
-  expect(html.match(/role="switch"/g)).toHaveLength(2)
+  // Disabled, Loading and Uppercase; Icon only appears once an icon is chosen.
+  expect(html.match(/role="switch"/g)).toHaveLength(3)
   expect(html).toContain('aria-checked="false"')
 })
 
 it('orders the inspector sections as the canvas does', () => {
   const html = panel()
-  const titles = ['Content', 'Variant', 'Size &amp; behavior', 'Colors', 'Shape &amp; depth']
+  const titles = ['Content', 'Variant', 'Size &amp; behavior', 'Icon', 'Padding &amp; gap', 'Typography', 'Colors', 'Shape &amp; depth']
   const positions = titles.map((title) => html.indexOf(`>${title}</h2>`))
   expect(positions.every((position) => position >= 0)).toBe(true)
   expect([...positions].sort((a, b) => a - b)).toEqual(positions)
@@ -66,4 +67,40 @@ it('keeps the recipe ID read-only in the top bar', async () => {
   const { ButtonEditor } = await import('./button-editor')
   const html = render(<ButtonEditor />)
   expect(html).toMatch(/<input id="button-recipe-id"[^>]*readOnly=""/)
+})
+
+it('offers bounded padding, gap and typography sliders with resets once edited', () => {
+  const html = panel()
+  for (const [id, min, max, step] of [
+    ['paddingXPx', 0, 48, 1], ['paddingYPx', 0, 24, 1], ['gapPx', 0, 24, 1],
+    ['fontWeight', 300, 800, 100], ['fontSizePx', 11, 24, 1], ['letterSpacingEm', -0.05, 0.2, 0.01],
+  ] as const) {
+    expect(html).toContain(`id="button-${id}-number"`)
+    expect(html).toMatch(new RegExp(`id="button-${id}"[^>]*min="${min}" max="${max}" step="${step}"`))
+  }
+  expect(html).not.toContain('aria-label="Reset horizontal padding"')
+  const edited = panel(withRecipeOverride(withRecipeOverride(recipe, 'paddingXPx', 20), 'uppercase', true))
+  expect(edited).toContain('aria-label="Reset horizontal padding"')
+  expect(edited).toMatch(/id="button-uppercase"[^>]*aria-checked="true"/)
+})
+
+it('offers icons, a position and an icon-only mode that relabels the content field', () => {
+  const html = panel()
+  expect(html).toContain('<option value="" selected="">None</option>')
+  expect(html).toContain('<option value="arrow-right">Arrow right</option>')
+  expect(html).not.toContain('aria-label="Icon position"')
+  const withIcon = panel(withRecipeIcon(recipe, { name: 'arrow-right' }))
+  expect(withIcon).toContain('aria-label="Icon position"')
+  expect(withIcon).toContain('aria-label="Remove icon"')
+  expect(withIcon).toContain('>Button text<')
+  const only = panel(withRecipeIcon(recipe, { name: 'plus', iconOnly: true }))
+  expect(only).toContain('>Accessible label<')
+  expect(only).toMatch(/id="button-icon-only"[^>]*aria-checked="true"/)
+  expect(only).toContain('aria-describedby="button-text-hint"')
+})
+
+it('switches the color fields between base, hover and pressed states', () => {
+  const html = panel()
+  expect(html).toContain('role="group" aria-label="Color state"')
+  expect(html).toContain('aria-label="Light background"')
 })
