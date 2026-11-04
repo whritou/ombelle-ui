@@ -48,6 +48,10 @@
   color: var(--muted-foreground);
   cursor: pointer;
 }
+.close:hover:active,
+.iconButton:not(:disabled):hover:active {
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+}
 .close:hover,
 .iconButton:not(:disabled):hover {
   background: color-mix(in oklab, var(--foreground) 8%, transparent);
@@ -78,6 +82,10 @@
   color: var(--muted-foreground);
   font-weight: 600;
   cursor: pointer;
+}
+.tabs button:hover:not([aria-selected='true']) {
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+  color: var(--foreground);
 }
 .tabs button[aria-selected='true'] {
   background: color-mix(in oklab, var(--foreground) 9%, transparent);
@@ -123,6 +131,10 @@
   font-size: 13px;
   cursor: pointer;
 }
+.managers button:hover:not([aria-pressed='true']) {
+  border-color: var(--border);
+  color: var(--foreground);
+}
 .managers button[aria-pressed='true'] {
   border-color: var(--border);
   background: var(--background);
@@ -149,6 +161,12 @@
   color: var(--background);
   font-weight: 600;
   cursor: pointer;
+}
+.primary:not(:disabled):hover {
+  background: color-mix(in oklab, var(--foreground) 85%, var(--background));
+}
+.primary:not(:disabled):active {
+  background: color-mix(in oklab, var(--foreground) 75%, var(--background));
 }
 .primary:disabled {
   opacity: 0.55;
@@ -203,6 +221,13 @@
   text-underline-offset: 3px;
   cursor: pointer;
 }
+.secondary button:not(:disabled):hover,
+.secondary a:hover,
+.reference a:hover,
+.notice a:hover {
+  text-decoration-color: var(--primary);
+  text-decoration-thickness: 2px;
+}
 .secondary button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -216,5 +241,14 @@
       opacity: 0;
       transform: translateY(8px) scale(0.98);
     }
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .close,
+  .iconButton,
+  .tabs button,
+  .managers button,
+  .primary {
+    transition: background-color 0.12s, border-color 0.12s, color 0.12s;
   }
 }

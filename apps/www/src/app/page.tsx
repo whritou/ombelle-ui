@@ -68,7 +68,7 @@ export default function HomePage() {
               <p className="text-sm text-muted-foreground">Translucent surfaces with blur, an opaque fallback, and contrast checked for their text pairs over any backdrop. Experimental for Button, Badge, Card, Dialog, Tabs and Tooltip; form controls are not available in glass.</p>
             </div>
           </div>
-          <a href="/editor/preset" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-muted">
+          <a href="/editor/preset" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:border-foreground/30 hover:bg-muted active:bg-foreground/10">
             <span className="font-mono text-xs uppercase tracking-wider text-primary">Experimental</span> Try it in the preset editor
           </a>
         </div>
@@ -86,7 +86,7 @@ export default function HomePage() {
         <ul className="mt-10 grid gap-5 md:grid-cols-2">
           {editors.map(editor => (
             <li key={editor.href}>
-              <a href={editor.href} className="group flex h-full flex-col rounded-2xl border border-border bg-card p-6 shadow-soft transition-colors hover:border-primary">
+              <a href={editor.href} className="group flex h-full flex-col rounded-2xl border border-border bg-card p-6 shadow-soft transition-colors hover:border-primary hover:bg-muted/50 active:bg-muted">
                 <editor.icon className="size-6 text-primary" aria-hidden />
                 <span className="mt-4 font-display text-2xl font-black">{editor.title}</span>
                 <span className="mt-2 text-muted-foreground">{editor.text}</span>
@@ -154,10 +154,10 @@ export default function HomePage() {
         <h2 id="feedback" className="text-3xl font-black md:text-4xl">Local-first. Early. Open to feedback.</h2>
         <p className="mx-auto mt-3 max-w-md text-muted-foreground">Ombelle is in alpha — try the components in your own app and help shape what ships next.</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href="#get-started" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-foreground px-6 font-semibold text-background">
+          <a href="#get-started" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-foreground px-6 font-semibold text-background transition-colors hover:bg-foreground/85 active:bg-foreground/75">
             Get started <ArrowRight className="size-4" aria-hidden />
           </a>
-          <a href={`${repository}/issues`} className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-card px-6 font-semibold hover:bg-muted">
+          <a href={`${repository}/issues`} className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-card px-6 font-semibold transition-colors hover:border-foreground/30 hover:bg-muted active:bg-foreground/10">
             Share feedback on GitHub
           </a>
         </div>

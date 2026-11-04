@@ -34,6 +34,25 @@
 .root button, .root select, .root input { font: inherit; }
 .root button { cursor: pointer; }
 .root button:disabled { cursor: not-allowed; opacity: .5; }
+
+/* Hover and press feedback. The default has zero specificity so any button
+   with its own background keeps it; the rules below cover those buttons. */
+:where(.root) :where(button:hover:not(:disabled)) { border-color: var(--control); background: var(--muted); }
+:where(.root) :where(button:active:not(:disabled)) { background: color-mix(in oklab, var(--muted), var(--foreground) 8%); }
+.root a:hover { text-decoration-thickness: 2px; }
+.root .getCode:not(:disabled):active { filter: brightness(.94); }
+.root :global(.be-switch):hover:not(:disabled) { border-color: var(--ink); background: color-mix(in oklab, var(--muted), var(--foreground) 8%); }
+.root :global(.be-switch)[aria-checked="true"]:hover:not(:disabled) { border-color: var(--primary); background: var(--primary); filter: brightness(1.08); }
+.root :global(.colorReset):hover:not(:disabled) { background: var(--muted); color: var(--ink); }
+.root :global(.colorSwatch):hover { border-color: var(--ink); }
+.root :global(.artifactTabs) button:hover:not([aria-selected="true"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
+.root :global(.artifactToolbar) button:hover:not(:disabled), .root :global(.artifactCollapse):hover:not(:disabled) { border-color: var(--control); background: var(--muted); }
+.root :global(.mobileTabs) button:hover:not([aria-current="page"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
+.recoveryActions button:hover:not(:disabled) { background: var(--muted); }
+.recoveryActions button:first-child:hover:not(:disabled) { background: var(--moss); filter: brightness(1.08); }
+@media (prefers-reduced-motion: no-preference) {
+  .root button { transition: background-color .12s, border-color .12s, color .12s, filter .12s; }
+}
 .root h1, .root h2, .root h3, .root p { margin-top: 0; }
 
 .srOnly { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

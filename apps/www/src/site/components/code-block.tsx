@@ -24,7 +24,7 @@ export function CopyButton({ text, label = 'Copy code' }: { text: string; label?
       type="button"
       onClick={() => copy(text)}
       aria-label={label}
-      className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-foreground/10"
     >
       {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
     </button>
@@ -61,7 +61,7 @@ export function CommandTabs({ release, args, label = 'Package runner' }: { relea
         <Terminal className="size-4 text-muted-foreground" aria-hidden />
         <Tabs.List aria-label={label} className="flex gap-1">
           {runners.map(runner => (
-            <Tabs.Trigger key={runner.value} value={runner.value} className="rounded-md px-2.5 py-1 font-mono text-xs text-muted-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground">
+            <Tabs.Trigger key={runner.value} value={runner.value} className="rounded-md px-2.5 py-1 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground">
               {runner.value}
             </Tabs.Trigger>
           ))}

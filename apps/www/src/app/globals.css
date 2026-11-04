@@ -174,6 +174,12 @@
   .o-tabs { display: flex; gap: .25rem; padding: .25rem; border-radius: calc(var(--o-r) + 2px); }
   .o-tab { flex: 1; min-height: 2.25rem; font-size: .8rem; font-weight: 600; border-radius: calc(var(--o-r) - 2px); color: var(--muted-foreground); }
   .o-tab[data-state="active"] { color: var(--foreground); }
+  /* Hover and press feedback shared by every family; families add their own on top. */
+  [data-style] .o-btn-primary:hover { filter: brightness(1.08); }
+  [data-style] .o-btn-ghost:hover { background: color-mix(in oklab, var(--card), var(--foreground) 7%); }
+  [data-style] .o-btn:active { filter: brightness(.94); }
+  .o-tab:hover:not([data-state="active"], :disabled) { color: var(--foreground); }
+  .o-switch:hover { filter: brightness(1.08); }
   .o-switch { width: 2.5rem; height: 1.4rem; border-radius: 999px; position: relative; }
   .o-switch > span { position: absolute; top: 3px; left: 3px; width: calc(1.4rem - 6px); height: calc(1.4rem - 6px); border-radius: 999px; transition: transform .2s; }
   .o-switch[data-state="checked"] > span { transform: translateX(1.1rem); }

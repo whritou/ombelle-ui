@@ -1,6 +1,6 @@
 export function Logo({ className = '' }: { className?: string }) {
   return (
-    <a href="/" className={`inline-flex items-center rounded-md ${className}`} aria-label="Ombelle UI home">
+    <a href="/" className={`inline-flex items-center rounded-md transition-opacity hover:opacity-80 active:opacity-70 ${className}`} aria-label="Ombelle UI home">
       <img src="/ombelle-logo-dark.png" alt="" width={177} height={28} className="h-6 w-auto sm:h-7 dark:hidden" />
       <img src="/ombelle-logo-white.png" alt="" width={175} height={28} className="hidden h-6 w-auto sm:h-7 dark:block" />
     </a>

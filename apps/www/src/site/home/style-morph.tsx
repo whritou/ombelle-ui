@@ -105,8 +105,8 @@ export function StyleMorphSection() {
                         ? 'border-primary-foreground bg-primary-foreground text-primary'
                         : 'border-foreground bg-foreground text-background'
                       : brutal
-                        ? 'border-primary-foreground/60 text-primary-foreground'
-                        : 'border-border text-muted-foreground'
+                        ? 'border-primary-foreground/60 text-primary-foreground hover:border-primary-foreground hover:bg-primary-foreground/10'
+                        : 'border-border text-muted-foreground hover:border-foreground/40 hover:bg-foreground/5 hover:text-foreground'
                   }`}
                 >
                   {s.label}
