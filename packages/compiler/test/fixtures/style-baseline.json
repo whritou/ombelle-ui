@@ -6,7 +6,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69"
+          "sha256": "55dd41ea22c2eb003a933b531ffe9bbdef420229587f14462e990bb618ec2097"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -47,7 +47,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69"
+          "sha256": "55dd41ea22c2eb003a933b531ffe9bbdef420229587f14462e990bb618ec2097"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -88,7 +88,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "a47454aa9d7e42aae4fa74a59d606681ead91eb0c8d8a3cc6f71dcbb68b5bb69"
+          "sha256": "55dd41ea22c2eb003a933b531ffe9bbdef420229587f14462e990bb618ec2097"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -196,6 +196,13 @@
       ],
       "spec": "docs/superpowers/plans/2026-11-04-editor-and-style-family-refresh.md",
       "reason": "ombelle family added"
+    },
+    {
+      "logicalPaths": [
+        "components/ui/button.tsx"
+      ],
+      "spec": "fix/button-slot-in-aschild-triggers",
+      "reason": "Button sets data-slot=\"button\" after its props, so a Tooltip or Dialog asChild trigger no longer replaces the slot that family styles target"
     }
   ]
 }
