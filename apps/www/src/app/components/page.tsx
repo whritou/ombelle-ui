@@ -1,10 +1,11 @@
 import { ArrowRight } from 'lucide-react'
 import { styleSupport } from '@ombelle/contracts'
 import { componentDocs } from '../../site/components/catalog'
+import { familyList } from '../../site/families'
 
 export const metadata = {
   title: 'Components · Ombelle UI',
-  description: 'The twelve Ombelle components in flat, minimalist and neo-brutalism, with live previews, source and install commands.',
+  description: `The twelve Ombelle components in ${familyList()}, with live previews, source and install commands.`,
 }
 
 export default function ComponentsPage() {
@@ -13,7 +14,7 @@ export default function ComponentsPage() {
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Components</p>
       <h1 className="mt-3 text-4xl font-black md:text-5xl">Components</h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-        Twelve accessible components built on shadcn and Radix UI. Each ships in flat, minimalist and neo-brutalism with light and dark modes, and installs as editable source. Six are also available in the experimental liquid glass style.
+        Twelve accessible components built on shadcn and Radix UI. Each ships in {familyList()} with light and dark modes, and installs as editable source. Six are also available in the experimental liquid glass style.
       </p>
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {componentDocs.map(doc => (

@@ -68,12 +68,14 @@ describe('catalog contract', () => {
         "[data-slot='tooltip-content']",
         "[data-slot='tooltip-arrow']",
         "[data-slot='tooltip-trigger']:focus-visible",
-        'var(--popover)',
-        'var(--popover-foreground)',
         '@media (forced-colors: active)',
         '@media (prefers-reduced-motion: reduce)',
       ])
         expect(css).toContain(rule)
+      // Minimalist paints its tooltip with the card surface and ombelle with primary; the others use popover.
+      const surface = family === 'minimalist' ? 'card' : family === 'ombelle' ? 'primary' : 'popover'
+      expect(css).toContain(`var(--${surface})`)
+      expect(css).toContain(`var(--${surface}-foreground)`)
       expect(css).not.toMatch(/(?:left|right):/)
     }
   })
@@ -364,6 +366,7 @@ describe('catalog contract', () => {
       'flat',
       'minimalist',
       'neo-brutalism',
+      'ombelle',
       'liquid-glass',
     ])
     for (const family of supportedStyleFamilies) {
@@ -386,6 +389,7 @@ describe('catalog contract', () => {
         'flat',
         'minimalist',
         'neo-brutalism',
+        'ombelle',
       ])
       for (const family of supportedStyleFamilies)
         expect(template.styles?.[family]).toContain(

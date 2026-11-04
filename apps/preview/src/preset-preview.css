@@ -1,5 +1,6 @@
 @import './generated/preset-gallery/tailwind.css';
 @import './generated/preset-gallery/layout.css';
+@import './scenes.css';
 
 /* Liquid glass previews over a photo, so the translucency shows. Gallery text
    outside the glass surfaces gets a halo in the page colour; text on glass is

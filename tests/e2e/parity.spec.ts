@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import fs from 'node:fs'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
 test.beforeAll(async ({ browser }) => {
@@ -95,7 +96,8 @@ for (const family of supportedStyleFamilies)
             )
             expect(hashes).toEqual(manifest.artifacts.map((a: any) => a.sha256))
           } else {
-            expect(computed).toEqual(styles)
+            // Colours compare in sRGB: a CSS pipeline may serialise oklch() as lab().
+            expectColorParity(computed, styles)
             expect(html).toEqual(dom)
             expect(image.equals(reference)).toBe(true)
           }

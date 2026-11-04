@@ -1,0 +1,77 @@
+.checks {
+  display: grid;
+  gap: 12px;
+  font-size: 13px;
+}
+.checks :where(ul, h3, p) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.empty,
+.caveat {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.summary li {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.summary li:not([data-ok]) {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+.cards {
+  display: grid;
+  gap: 8px;
+}
+.card {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--warning);
+  border-radius: 10px;
+  background: var(--warning-soft);
+  padding: 8px 10px;
+  overflow-wrap: anywhere;
+}
+.card button,
+.passingHead button {
+  justify-self: start;
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  padding: 0 10px;
+  font: inherit;
+  cursor: pointer;
+}
+.passingHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.passingHead h3 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.passing {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px !important;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.passing li {
+  overflow-wrap: anywhere;
+}

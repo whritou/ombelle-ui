@@ -6,6 +6,7 @@ import { componentDoc, componentDocs } from '../../../site/components/catalog'
 import { CodeBlock, CommandTabs } from '../../../site/components/code-block'
 import { ComponentPlayground } from '../../../site/components/playground'
 import { publishedInstaller } from '../../../snapshots/install-command'
+import { familyList } from '../../../site/families'
 
 export const dynamicParams = false
 
@@ -81,7 +82,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         <section aria-labelledby="api" className="mt-14 scroll-mt-24">
           <h2 id="api" className="text-2xl font-black">API and states</h2>
           <dl className="mt-4 divide-y divide-border rounded-xl border border-border bg-card text-sm">
-            {[['API', doc.api], ['Minimum states', doc.states], ['Native basis', doc.basis], ['Styles', `Stable in flat, minimalist and neo-brutalism, light and dark. Liquid glass: ${glass === 'experimental' ? 'experimental' : 'not available'}.`]].map(([term, value]) => (
+            {[['API', doc.api], ['Minimum states', doc.states], ['Native basis', doc.basis], ['Styles', `Stable in ${familyList()}, light and dark. Liquid glass: ${glass === 'experimental' ? 'experimental' : 'not available'}.`]].map(([term, value]) => (
               <div key={term} className="grid gap-1 p-4 sm:grid-cols-[10rem_1fr]">
                 <dt className="font-medium">{term}</dt>
                 <dd className="text-muted-foreground">{value}</dd>

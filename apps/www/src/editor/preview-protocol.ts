@@ -7,7 +7,7 @@ export type PreviewFrameState = {
   css: string
   mode: 'light' | 'dark'
   viewport: 'wide' | 'narrow'
-  forcedState: 'none' | 'focus' | 'hover'
+  forcedState: 'none' | 'hover' | 'focus' | 'active'
   requestId: number
 }
 
@@ -57,7 +57,7 @@ export function acceptPreviewRender(input: unknown, previousRequestId: number): 
     !state.css.includes(`[data-ombelle-recipe='${input.scope}']`) ||
     !['light', 'dark'].includes(state.mode as string) ||
     !['wide', 'narrow'].includes(state.viewport as string) ||
-    !['none', 'focus', 'hover'].includes(state.forcedState as string)) return null
+    !['none', 'hover', 'focus', 'active'].includes(state.forcedState as string)) return null
   try {
     const recipe = validateRecipe(state.recipe)
     const preset = resolveRecipePreset(recipe.presetRef)

@@ -1,6 +1,7 @@
 import type { Recipe } from '@ombelle/contracts'
+import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.ts'
 export function recipeFixtures(): readonly Recipe[] {
-  return ['flat', 'minimalist', 'neo-brutalism'].map((family) => ({
+  return supportedStyleFamilies.map((family) => ({
     schemaVersion: '1.0',
     id: 'rc_' + family.replaceAll('-', '_') + '_button',
     revision: 1,

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { expect, it } from 'vitest'
 import { createPresetDraft, editablePaths, setPresetEdit } from './model'
 import { createPresetHistory, recordPresetDraft } from './history'
@@ -121,4 +122,23 @@ it('trims oldest history by UTF-8 bytes and tolerates access and partial-write f
   expect(loadPresetSession(storage).history.present.family).toBe(
     'neo-brutalism',
   )
+})
+it('restores a session saved by the 0.3.0 editor with its present draft intact', () => {
+  const fixture = JSON.parse(
+    readFileSync(new URL('./fixtures/session-0.3.0.json', import.meta.url), 'utf8'),
+  ) as Record<string, string>
+  const { storage } = memory()
+  for (const [key, value] of Object.entries(fixture)) storage.setItem(key, value)
+  const loaded = loadPresetSession(storage)
+  expect(loaded.recoveryRaw).toBeNull()
+  expect(loaded.warning).toBeNull()
+  expect(loaded.history.present).toEqual(JSON.parse(fixture[draftStorageKey]!))
+  expect(loaded.history.present.family).toBe('minimalist')
+  expect(loaded.history.present.identity.name).toBe('Studio preset')
+  expect(loaded.history.present.edits).toMatchObject({
+    '/design/radiusRem': '0.75',
+    '/modes/light/primary': '#1d4ed8',
+    '/design/density': 'compact',
+  })
+  expect(loaded.history.past).toHaveLength(4)
 })

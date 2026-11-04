@@ -12,7 +12,7 @@
   color: var(--card-foreground);
   font-family: var(--font-family);
   overflow-wrap: anywhere;
-  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
+  box-shadow: calc(var(--shadow-x) * 2) calc(var(--shadow-y) * 2) 0 var(--border);
 }
 [data-slot='card'][data-density='dense'] {
   --card-padding: 1rem;

@@ -49,11 +49,13 @@ export function PresetPreviewFrame({
       type: 'preset-render',
       requestId: ++sequence.current,
       result: latest.current.result,
-      // Omit an unset focus: the sandbox accepts only exact view shapes.
-      view: (({ mode, viewport, focus }) =>
-        focus ? { mode, viewport, focus } : { mode, viewport })(
-        latest.current.view,
-      ),
+      // Omit unset focus and the default scene: the sandbox accepts only exact view shapes.
+      view: (({ mode, viewport, focus, scene }) =>
+        focus
+          ? { mode, viewport, focus }
+          : scene && scene !== 'gallery'
+            ? { mode, viewport, scene }
+            : { mode, viewport })(latest.current.view),
     }
     latestSent.current = message
     arm()
@@ -111,7 +113,7 @@ export function PresetPreviewFrame({
   }, [attempt])
   useEffect(() => {
     send()
-  }, [result, view.mode, view.viewport, view.focus])
+  }, [result, view.mode, view.viewport, view.focus, view.scene])
   return (
     <section aria-label="Preset preview">
       {caption && (

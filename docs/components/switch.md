@@ -1,6 +1,6 @@
 # Switch
 
-Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, and neo-brutalism in light and dark modes through semantic tokens. Liquid glass is unavailable. The template is a client component.
+Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, neo-brutalism, and ombelle in light and dark modes through semantic tokens. Liquid glass is unavailable. The template is a client component.
 
 ## Install and compose
 
@@ -39,7 +39,7 @@ Radix renders a hidden native checkbox when the root belongs to a form and forwa
 
 ## Styles and generated artifacts
 
-The root target is 44 by 24 CSS pixels, with a 16px thumb. Consumers can enlarge the block dimension through layout or labels. Off uses muted background and foreground tokens; on uses primary and primary-foreground. All families include visible 3px ring focus with 3px offset, disabled styling, forced-color system colors, and reduced-motion rules. Flat and minimalist use rounded tracks; minimalist uses the input border token, and neo-brutalism uses the preset radius and offset shadow. Logical positioning supports both text directions. Focus is not clipped.
+The root target is 44 by 24 CSS pixels, with a 16px thumb. Consumers can enlarge the block dimension through layout or labels. Off uses muted background and foreground tokens; on uses primary and primary-foreground. All families include visible 3px ring focus with 3px offset, disabled styling, forced-color system colors, and reduced-motion rules. Flat and minimalist use rounded tracks; minimalist uses the input border token, neo-brutalism uses the preset radius and offset shadow, and ombelle uses a pill track with the preset offset shadow. Logical positioning supports both text directions. Focus is not clipped.
 
 Compilation emits components/ui/switch.tsx, components/ui/switch.css, and examples/switch.tsx plus shared utility/theme artifacts. Keep the colocated CSS import. The example includes a visible label and explicit thumb composition. Installer dry-run, aliases, destination paths, ownership hashes, and conflict safeguards remain in effect; --yes accepts a safe plan.
 

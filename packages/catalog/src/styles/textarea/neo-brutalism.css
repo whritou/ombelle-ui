@@ -20,8 +20,8 @@
   opacity: 1;
 }
 [data-slot='textarea']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
 }
 [data-slot='textarea'][aria-invalid='true'] {
   border-color: var(--destructive);
@@ -30,6 +30,8 @@
 [data-slot='textarea']:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  border-style: dashed;
+  box-shadow: none;
 }
 @media (forced-colors: active) {
   [data-slot='textarea'] {

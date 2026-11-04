@@ -3,10 +3,12 @@ import * as React from 'react'
 import { RecipeButton as Flat } from '@/components/ui/recipes/rc_flat_button/r1/button'
 import { RecipeButton as Minimalist } from '@/components/ui/recipes/rc_minimalist_button/r1/button'
 import { RecipeButton as Brutalist } from '@/components/ui/recipes/rc_neo_brutalism_button/r1/button'
+import { RecipeButton as Ombelle } from '@/components/ui/recipes/rc_ombelle_button/r1/button'
 const entries = {
   rc_flat_button: Flat,
   rc_minimalist_button: Minimalist,
   rc_neo_brutalism_button: Brutalist,
+  rc_ombelle_button: Ombelle,
 }
 export function RecipeFixture() {
   const query = new URLSearchParams(

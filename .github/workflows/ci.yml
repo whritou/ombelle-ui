@@ -1,6 +1,6 @@
 name: CI
 # Fast checks for every push and pull request, aiming for under five minutes.
-# The full Foundation gate (36 consumer apps, the browser matrix and
+# The full Foundation gate (40 consumer apps, the browser matrix and
 # evidence) runs nightly and on demand in foundation.yml.
 on:
   push:

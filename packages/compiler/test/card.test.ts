@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedStyleFamilies } from '@ombelle/contracts'
-import { compile } from '../src/index.js'
+import { compile, normalizeColor } from '../src/index.js'
 import baseline from './fixtures/style-baseline.json'
 
 it.each(supportedStyleFamilies)(
@@ -50,16 +50,18 @@ it.each(supportedStyleFamilies)(
     expect(css).toContain('--card-padding: 1rem')
     expect(css).toContain(
       family === 'neo-brutalism'
-        ? 'box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border)'
-        : 'box-shadow: none',
+        ? 'box-shadow: calc(var(--shadow-x) * 2) calc(var(--shadow-y) * 2) 0'
+        : family === 'ombelle'
+          ? 'box-shadow: calc(var(--shadow-x) * 5 / 3) calc(var(--shadow-y) * 5 / 3) 0'
+          : 'box-shadow: none',
     )
     for (const mode of ['light', 'dark'] as const) {
       const { card, cardForeground } = preset.modes[mode]
       assert(typeof card === 'string')
       assert(typeof cardForeground === 'string')
-      expect(result.theme[mode]['--card']).toBe(card.toLowerCase())
+      expect(result.theme[mode]['--card']).toBe(normalizeColor(card))
       expect(result.theme[mode]['--card-foreground']).toBe(
-        cardForeground.toLowerCase(),
+        normalizeColor(cardForeground),
       )
     }
     expect(result.dependencies).toEqual([
@@ -124,7 +126,7 @@ it.each(supportedStyleFamilies)(
       expect(
         combined.artifacts.find((a) => a.logicalPath === artifact.logicalPath),
       ).toEqual(artifact)
-    if (family === 'flat' || family === 'neo-brutalism')
+    if (family === 'flat' || family === 'neo-brutalism' || family === 'ombelle')
       for (const artifact of baseline.families[family].artifacts)
         expect(
           combined.artifacts.find((a) => a.logicalPath === artifact.logicalPath)

@@ -79,6 +79,14 @@ describe('Button editor model', () => {
     expect(JSON.stringify(draft.recipe)).toBe(before)
     expect(Object.keys(draft)).toEqual(['storageVersion', 'recipe'])
   })
+  it('round-trips a forced active state without touching recipe data', () => {
+    const draft = createEditorDraft('flat')
+    const before = JSON.stringify(draft.recipe)
+    const view: EditorView = { mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'active' }
+    expect(JSON.parse(JSON.stringify(view))).toEqual(view)
+    expect(view.forcedState).toBe('active')
+    expect(JSON.stringify(draft.recipe)).toBe(before)
+  })
   it('reads color overrides with the variant preset token as fallback', () => {
     const draft = createEditorDraft('flat')
     const preset = getCatalog('0.1.0').presets.flat

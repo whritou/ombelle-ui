@@ -3,16 +3,15 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { compileRecipe } from '@ombelle/compiler'
 import { changeDraftFamily, createEditorDraft, experimentalNotice } from '../model'
 import { ArtifactPanel } from './artifact-panel'
-import { PropertiesPanel } from './properties-panel'
+import { FamilyChip } from './family-chip'
 
 const noop = () => {}
 
 it('offers liquid glass and shows the experimental notice beside the export', async () => {
   const draft = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
-  const properties = renderToStaticMarkup(
-    <PropertiesPanel recipe={draft.recipe} diagnostic={null} onChange={noop} onFamily={noop} onDiagnostic={noop} />,
-  )
-  expect(properties).toContain('<option value="liquid-glass" selected="">Liquid glass (Experimental)</option>')
+  const picker = renderToStaticMarkup(<FamilyChip value="liquid-glass" onChange={noop} />)
+  expect(picker).toContain('aria-label="Style family: Liquid glass"')
+  expect(picker).toContain('Experimental')
   const result = await compileRecipe({ recipe: draft.recipe })
   const notice = experimentalNotice('liquid-glass')
   const panel = renderToStaticMarkup(

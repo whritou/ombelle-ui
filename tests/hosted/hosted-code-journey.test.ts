@@ -9,6 +9,7 @@ import { getCatalog } from '@ombelle/catalog'
 import type { PresetSnapshot, RecipeSnapshot } from '@ombelle/contracts'
 import recipe from '../../examples/recipe.example.json'
 import { startPublicationHttpBridge } from '../helpers/snapshot-service.js'
+import cliPackage from '../../packages/cli/package.json'
 import { createProject } from '../helpers/projects.js'
 import { openPostgresSnapshotStore, closePostgresPools } from '../../apps/www/src/snapshots/server/postgres-store.js'
 import { initializePostgresSnapshotStore } from '../../apps/www/src/snapshots/server/postgres-migrations.js'
@@ -50,7 +51,7 @@ it('publishes both codes on real Neon, installs the independent package, persist
   await fs.writeFile(path.join(packageRoot, 'package.json'), JSON.stringify({ name: 'independent-hosted-installer', private: true, type: 'module' }))
   const npm = await managerEntry('npm')
   const release = JSON.parse(await fs.readFile('.artifacts/cli-release/release.json', 'utf8'))
-  expect(release).toMatchObject({ packageName: '@ombelle-ui/cli', version: '0.3.1' })
+  expect(release).toMatchObject({ packageName: '@ombelle-ui/cli', version: cliPackage.version })
   const installation = await new Promise<{ code: number | null; text: string }>((resolve, reject) => {
     const child = spawn(process.execPath, [npm, 'install', release.tarball, '--offline', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: packageRoot, windowsHide: true, env: { ...process.env, NODE_OPTIONS: '', NODE_PATH: '' } })
     let text = ''; child.stdout.on('data', value => { text += value }); child.stderr.on('data', value => { text += value }); child.on('error', reject); child.on('close', code => resolve({ code, text }))

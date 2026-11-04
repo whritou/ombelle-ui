@@ -8,6 +8,7 @@ import { createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
 import { resetSnapshotBrowserQuota } from '../helpers/snapshot-browser.js'
+import { expectRecipeDownloadEnabled } from '../helpers/button-editor-ui.js'
 const url = 'http://127.0.0.1:3000/editor/component/button'
 // The local service shares one development rate bucket across every test and
 // worker.
@@ -19,7 +20,7 @@ test('publishes a recipe when Get code opens and opens a read-only share page wi
   let posts = 0
   page.on('request', request => { if (request.method() === 'POST' && request.url().endsWith('/api/v1/recipes')) posts++ })
   await page.goto(url)
-  await expect(page.getByRole('button', { name: 'Download recipe JSON', exact: true })).toBeEnabled()
+  await expectRecipeDownloadEnabled(page)
   await expect(getCode(page)).toBeEnabled()
   expect(posts).toBe(0)
   await getCode(page).click()

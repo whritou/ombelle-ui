@@ -1,0 +1,76 @@
+/* Layout for the preview pages. Colour, radius and type come from the preset. */
+.preset-scene {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+  padding: 24px;
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+.preset-scene h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.preset-scene .scene-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.preset-scene .scene-stack,
+.preset-scene .scene-fields,
+.preset-scene .scene-field {
+  display: grid;
+  gap: 12px;
+}
+.preset-scene .scene-field {
+  gap: 6px;
+}
+.preset-scene .scene-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preset-scene .scene-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.preset-scene .scene-list-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.preset-scene .scene-grow {
+  flex: 1 1 140px;
+}
+.preset-scene.scene-center {
+  min-height: 100vh;
+  align-content: center;
+  justify-items: center;
+}
+.preset-scene .scene-narrow {
+  width: 100%;
+  max-width: 400px;
+}
+.preset-scene .scene-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+html[data-backdrop='photo'] .preset-scene h1 {
+  text-shadow:
+    0 0 2px var(--background),
+    0 0 6px var(--background),
+    0 0 14px var(--background);
+}
+@media (max-width: 400px) {
+  .preset-scene {
+    padding: 16px;
+  }
+}

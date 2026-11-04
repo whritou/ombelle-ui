@@ -25,7 +25,7 @@ Run the preview from the repository checkout under review:
 3. `pnpm generate:preview`
 4. `pnpm dev:preview`
 
-Open `http://127.0.0.1:4173/<family>/?mode=<mode>` with `<family>` one of `flat`, `minimalist`, `neo-brutalism` and `<mode>` one of `light`, `dark`. Add the fixture query from the table below. Review each component in all three families. Do the full K, N and V passes in light mode for each family, then repeat the visual focus checks (steps marked *visual*) in dark mode.
+Open `http://127.0.0.1:4173/<family>/?mode=<mode>` with `<family>` one of `flat`, `minimalist`, `neo-brutalism`, `ombelle` and `<mode>` one of `light`, `dark`. Add the fixture query from the table below. Review each component in all four stable families. Do the full K, N and V passes in light mode for each family, then repeat the visual focus checks (steps marked *visual*) in dark mode.
 
 | Component | Preview query | Notes |
 | --- | --- | --- |

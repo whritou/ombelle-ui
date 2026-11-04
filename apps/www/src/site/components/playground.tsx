@@ -3,18 +3,26 @@
 import * as Tabs from '@radix-ui/react-tabs'
 import { useEffect, useMemo, useState } from 'react'
 import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { createPresetDraft } from '../../preset-editor/model'
 import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { ToggleGroup } from '../toggle-group'
 import { CodeBlock } from './code-block'
 
-export const familyOptions: { value: StyleFamily; label: string }[] = [
-  { value: 'flat', label: 'Flat' },
-  { value: 'minimalist', label: 'Minimalist' },
-  { value: 'neo-brutalism', label: 'Neo-Brutalism' },
-  { value: 'liquid-glass', label: 'Liquid Glass' },
-]
+// Exhaustive by type: adding a style family fails the typecheck until it has a label.
+const familyLabels: Record<StyleFamily, string> = {
+  flat: 'Flat',
+  minimalist: 'Minimalist',
+  'neo-brutalism': 'Neo-Brutalism',
+  ombelle: 'Ombelle',
+  'liquid-glass': 'Liquid Glass',
+}
+// Same gate as the editors: only families the published installer can install.
+export const familyOptions: { value: StyleFamily; label: string }[] = offeredStyleFamilies().map((value) => ({
+  value,
+  label: familyLabels[value],
+}))
 const glassDocs = 'https://github.com/whritou/ombelle-ui/blob/main/docs/components/liquid-glass.md'
 const modeOptions = [
   { value: 'light', label: 'Light' },

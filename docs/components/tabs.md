@@ -1,6 +1,6 @@
 # Tabs
 
-Tabs wraps reviewed Radix Tabs primitives, with flat, minimalist, and neo-brutalism styles in light and dark modes. Liquid glass is unavailable. The template is a client component.
+Tabs wraps reviewed Radix Tabs primitives, with flat, minimalist, neo-brutalism, and ombelle styles in light and dark modes. Liquid glass is unavailable. The template is a client component.
 
 ## Install and compose
 
@@ -42,7 +42,7 @@ Automatic activation is the default: moving focus to a trigger selects its panel
 
 ## Styles and artifacts
 
-Triggers have a preferred 44 by 44 CSS pixel minimum target. Semantic tokens distinguish inactive and active triggers across both modes. Flat uses a muted list and background active trigger, minimalist removes the list fill, and neo-brutalism uses a primary active trigger with preset offset shadow. Logical dimensions and padding support both text directions. Root and list orientation selectors provide horizontal and vertical layouts. Trigger and panel focus rings use a visible 3px outline with 3px offset; component styling does not clip focus. Disabled triggers, forced colors, and reduced motion are covered. Inactive content is hidden even when forceMount preserves its DOM.
+Triggers have a preferred 44 by 44 CSS pixel minimum target. Semantic tokens distinguish inactive and active triggers across both modes. Flat uses a muted list and background active trigger, minimalist removes the list fill, neo-brutalism uses a primary active trigger with preset offset shadow, and ombelle uses a pill list with the preset offset shadow. Logical dimensions and padding support both text directions. Root and list orientation selectors provide horizontal and vertical layouts. Trigger and panel focus rings use a visible 3px outline with 3px offset; component styling does not clip focus. Disabled triggers, forced colors, and reduced motion are covered. Inactive content is hidden even when forceMount preserves its DOM.
 
 Compilation emits components/ui/tabs.tsx, components/ui/tabs.css, and examples/tabs.tsx plus shared utility/theme files. Keep the colocated CSS import. The example includes a labelled list and disabled trigger. Installer dry-run, file ownership, alias rewriting, and conflict safeguards apply; --yes accepts a safe plan.
 

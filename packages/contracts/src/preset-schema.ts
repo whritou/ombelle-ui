@@ -47,6 +47,7 @@ export const presetSchema = {
         "flat",
         "minimalist",
         "neo-brutalism",
+        "ombelle",
         "liquid-glass"
       ]
     },

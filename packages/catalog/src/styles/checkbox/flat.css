@@ -9,9 +9,9 @@
   inline-size: 1.5rem;
   block-size: 1.5rem;
   padding: 0;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
-  background: var(--background);
+  border: 2px solid var(--input);
+  border-radius: calc(var(--radius) * 0.5);
+  background: var(--card);
   color: var(--foreground);
   box-shadow: none;
   cursor: pointer;
@@ -20,6 +20,7 @@
 [data-slot='checkbox'][data-state='checked'],
 [data-slot='checkbox'][data-state='indeterminate'] {
   background: var(--primary);
+  border-color: var(--primary);
   color: var(--primary-foreground);
 }
 [data-slot='checkbox-indicator'] {
@@ -42,7 +43,6 @@
 }
 [data-slot='checkbox'][aria-invalid='true'] {
   border-color: var(--destructive);
-  border-width: max(var(--border-width), 2px);
 }
 [data-slot='checkbox']:disabled,
 [data-slot='checkbox'][data-disabled] {

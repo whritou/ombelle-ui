@@ -1,6 +1,6 @@
 # Native Select
 
-Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, and `neo-brutalism` in light and dark modes. Liquid glass is unavailable for Native Select. A fully custom Select is a later component.
+Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable for Native Select. A fully custom Select is a later component.
 
 ## Install and compose
 
@@ -66,7 +66,7 @@ The chevron is lucide-react's `ChevronDownIcon`. It is hidden from assistive tec
 
 ## States and styles
 
-The `select` uses `appearance: none` and Textarea's treatment: border token (`--border` in flat and neo-brutalism, `--input` in minimalist), radius, `0.5rem 1rem` padding with inline-end padding of `2.5rem` that clears the icon, font, background, and foreground. Neo-brutalism adds the offset shadow; flat and minimalist have none. Minimum height is `var(--control-height)`.
+The `select` uses `appearance: none` and Textarea's treatment: border token (`--border` in flat, neo-brutalism and ombelle, `--input` in minimalist), radius, `0.5rem 1rem` padding with inline-end padding of `2.5rem` that clears the icon, font, background, and foreground. Neo-brutalism and ombelle add the offset shadow; flat and minimalist have none. Minimum height is `var(--control-height)`.
 
 | State | Selector | Treatment |
 | --- | --- | --- |

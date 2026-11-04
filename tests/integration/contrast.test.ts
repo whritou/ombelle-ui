@@ -9,3 +9,84 @@ it('computes opaque contrast accurately',()=>{
 it('rejects invalid contrast samples',()=>{
  for(const sample of [[-1,0,0],[256,0,0],[NaN,0,0],[0,0],[0,0,0,1]])expect(()=>contrastRatio(sample as [number,number,number],[0,0,0])).toThrow()
 })
+import flat from '../../packages/catalog/src/presets/flat.json'
+const rgb = (hex: string): [number, number, number] => [
+  parseInt(hex.slice(1, 3), 16),
+  parseInt(hex.slice(3, 5), 16),
+  parseInt(hex.slice(5, 7), 16),
+]
+it.each(['light', 'dark'] as const)('flat %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
+  const m = flat.modes[mode] as Record<string, string>
+  for (const [f, b] of [
+    ['foreground', 'background'],
+    ['cardForeground', 'card'],
+    ['popoverForeground', 'popover'],
+    ['primaryForeground', 'primary'],
+    ['secondaryForeground', 'secondary'],
+    ['mutedForeground', 'muted'],
+    ['accentForeground', 'accent'],
+    ['destructiveForeground', 'destructive'],
+  ])
+    expect(contrastRatio(rgb(m[f]), rgb(m[b])), `${mode} ${f}/${b}`).toBeGreaterThanOrEqual(4.5)
+  expect(contrastRatio(rgb(m.input), rgb(m.muted)), `${mode} input/muted`).toBeGreaterThanOrEqual(3)
+  expect(contrastRatio(rgb(m.input), rgb(m.card)), `${mode} input/card`).toBeGreaterThanOrEqual(3)
+  expect(contrastRatio(rgb(m.input), rgb(m.background)), `${mode} input/background`).toBeGreaterThanOrEqual(3)
+})
+import neo from '../../packages/catalog/src/presets/neo-brutalism.json'
+it.each(['light', 'dark'] as const)('neo-brutalism %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
+  const m = neo.modes[mode] as Record<string, string>
+  for (const [f, b] of [
+    ['foreground', 'background'],
+    ['cardForeground', 'card'],
+    ['popoverForeground', 'popover'],
+    ['primaryForeground', 'primary'],
+    ['secondaryForeground', 'secondary'],
+    ['mutedForeground', 'muted'],
+    ['accentForeground', 'accent'],
+    ['destructiveForeground', 'destructive'],
+  ])
+    expect(contrastRatio(rgb(m[f]), rgb(m[b])), `${mode} ${f}/${b}`).toBeGreaterThanOrEqual(4.5)
+  for (const surface of ['background', 'card', 'muted'])
+    expect(contrastRatio(rgb(m.input), rgb(m[surface])), `${mode} input/${surface}`).toBeGreaterThanOrEqual(3)
+  expect(contrastRatio(rgb(m.border), rgb(m.card)), `${mode} border/card`).toBeGreaterThanOrEqual(3)
+})
+import minimalist from '../../packages/catalog/src/presets/minimalist.json'
+it.each(['light', 'dark'] as const)('minimalist %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
+  const m = minimalist.modes[mode] as Record<string, string>
+  for (const [f, b] of [
+    ['foreground', 'background'],
+    ['cardForeground', 'card'],
+    ['popoverForeground', 'popover'],
+    ['primaryForeground', 'primary'],
+    ['secondaryForeground', 'secondary'],
+    ['mutedForeground', 'muted'],
+    ['accentForeground', 'accent'],
+    ['destructiveForeground', 'destructive'],
+  ])
+    expect(contrastRatio(rgb(m[f]), rgb(m[b])), `${mode} ${f}/${b}`).toBeGreaterThanOrEqual(4.5)
+  expect(contrastRatio(rgb(m.input), rgb(m.background)), `${mode} input/background`).toBeGreaterThanOrEqual(3)
+  expect(contrastRatio(rgb(m.input), rgb(m.card)), `${mode} input/card`).toBeGreaterThanOrEqual(3)
+  expect(contrastRatio(rgb(m.destructive), rgb(m.background)), `${mode} destructive/background`).toBeGreaterThanOrEqual(4.5)
+})
+import ombelle from '../../packages/catalog/src/presets/ombelle.json'
+import { parseColor, compositeOver } from '../helpers/oklch.js'
+it.each(['light', 'dark'] as const)('ombelle %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
+  const m = ombelle.modes[mode] as Record<string, string>
+  for (const [f, b] of [
+    ['foreground', 'background'],
+    ['cardForeground', 'card'],
+    ['popoverForeground', 'popover'],
+    ['primaryForeground', 'primary'],
+    ['secondaryForeground', 'secondary'],
+    ['mutedForeground', 'muted'],
+    ['accentForeground', 'accent'],
+    ['destructiveForeground', 'destructive'],
+  ])
+    expect(contrastRatio(parseColor(m[f]).rgb, parseColor(m[b]).rgb), `${mode} ${f}/${b}`).toBeGreaterThanOrEqual(4.5)
+  // The dark border is translucent, so composite it over each surface it meets.
+  for (const surface of ['background', 'card', 'muted']) {
+    expect(contrastRatio(compositeOver(m.input, m[surface]), parseColor(m[surface]).rgb), `${mode} input/${surface}`).toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(compositeOver(m.border, m[surface]), parseColor(m[surface]).rgb), `${mode} border/${surface}`).toBeGreaterThanOrEqual(3)
+  }
+  expect(contrastRatio(compositeOver(m.ring, m.background), parseColor(m.background).rgb), `${mode} ring/background`).toBeGreaterThanOrEqual(3)
+})

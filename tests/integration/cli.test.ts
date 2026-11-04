@@ -119,6 +119,22 @@ it('resolves init preset files from the invoking directory, independently of --c
   expect(theme.data.status).toBe('planned')
   expect(await snapshotTree(root)).toEqual(beforeTheme)
 })
+it('rejects a preset whose style family is outside the installer schema without touching the project', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const foreign = JSON.parse(await fs.readFile(preset, 'utf8'))
+  foreign.styleFamily = 'not-a-family'
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-foreign-'))
+  roots.push(dir)
+  const file = path.join(dir, 'foreign.json')
+  await fs.writeFile(file, JSON.stringify(foreign))
+  const before = await snapshotTree(root)
+  const result = await command(['init', '--preset', file, '--cwd', root, '--yes'])
+  expect(result.exitCode).not.toBe(0)
+  expect(result.data.error.code).toBe('INVALID_DATA')
+  expect(result.data.error.path).toBe('/styleFamily')
+  expect(await snapshotTree(root)).toEqual(before)
+})
 it('reports malformed JSON and missing initialization clearly', async () => {
   const root = await createProject('vite')
   roots.push(root)

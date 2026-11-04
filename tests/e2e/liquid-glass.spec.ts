@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import { inflateSync } from 'node:zlib'
+import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { contrastRatio } from '../helpers/contrast.js'
 
 // Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
@@ -640,22 +641,23 @@ for (const mode of modes) {
 
   test(`liquid-glass ${mode}: preset editor glass flow`, async ({ page }) => {
     const ready = async () => {
+      await openExport(page)
       await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', { timeout: 30000 })
       await expect(page.getByTestId('preset-preview-status')).toHaveText('Preview ready', { timeout: 30000 })
     }
     await page.goto(editorUrl)
     await ready()
-    await page.getByLabel('Style family', { exact: true }).selectOption({ label: 'Liquid glass (Experimental)' })
+    // The picker button's name carries a Beta tag, so match the prefix.
+    await page.getByRole('group', { name: 'Style family', exact: true }).getByRole('button', { name: /^Liquid glass/ }).click()
     const confirm = page.getByRole('button', { name: 'Confirm change' })
     const limitations = page.getByRole('heading', { name: 'Liquid glass limitations' })
     await expect(confirm.or(limitations)).toBeVisible()
     if (await confirm.isVisible()) await confirm.click()
     await expect(limitations).toBeVisible()
-    await page.getByLabel('Preview mode', { exact: true }).selectOption(mode)
+    await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
     await ready()
 
-    const exportPanel = page.locator('details.preset-export')
-    if ((await exportPanel.getAttribute('open')) === null) await exportPanel.locator(':scope > summary').click()
+    await openExport(page)
     const actions = ['Download preset JSON', 'Copy export', 'Get code'].map((name) =>
       page.getByRole('button', { name, exact: true }),
     )
@@ -667,6 +669,16 @@ for (const mode of modes) {
     await page.getByLabel('Glass opacity', { exact: true }).fill('0.3')
     await expect(readout).toContainText('Contrast bound fails at glass opacity 0.3')
     for (const action of actions) await expect(action).toBeDisabled()
+    // The top bar's Download JSON follows the same export gate.
+    const menuDownload = async (state: 'enabled' | 'disabled') => {
+      await page.getByRole('button', { name: 'More actions', exact: true }).click()
+      const item = page.getByRole('menuitem', { name: 'Download JSON', exact: true })
+      if (state === 'enabled') await expect(item).toBeEnabled()
+      else await expect(item).toBeDisabled()
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menu', { name: 'More actions' })).toBeHidden()
+    }
+    await menuDownload('disabled')
     await expect(readout.locator('li')).toHaveCount(0)
     const failing = await page.locator('#glass-contrast-pairs li').allInnerTexts()
     expect(failing.length).toBeGreaterThan(0)
@@ -677,6 +689,7 @@ for (const mode of modes) {
     await expect(readout).toContainText('Contrast bound passes at glass opacity 0.5')
     await ready()
     for (const action of actions) await expect(action).toBeEnabled()
+    await menuDownload('enabled')
 
     const gallery = page.locator('iframe[title="Global preset gallery"]').contentFrame()
     const unavailable = gallery.locator('[data-unavailable][aria-disabled="true"]')

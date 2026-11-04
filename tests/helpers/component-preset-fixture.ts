@@ -86,7 +86,8 @@ import * as React from 'react'
 import { Button as Flat } from '@/components/ui/presets/builtin-flat/r1/button'
 import { Button as Minimalist } from '@/components/ui/presets/builtin-minimalist/r1/button'
 import { Button as Brutalist } from '@/components/ui/presets/builtin-neo-brutalism/r1/button'
-const entries = { 'builtin-flat': Flat, 'builtin-minimalist': Minimalist, 'builtin-neo-brutalism': Brutalist }
+import { Button as Ombelle } from '@/components/ui/presets/builtin-ombelle/r1/button'
+const entries = { 'builtin-flat': Flat, 'builtin-minimalist': Minimalist, 'builtin-neo-brutalism': Brutalist, 'builtin-ombelle': Ombelle }
 export function ComponentPresetFixture() {
   const query = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search)
   const selected = query.get('componentPreset')

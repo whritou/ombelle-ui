@@ -116,7 +116,7 @@ export async function validateRecipeMeasurements(
     refs = await references(),
     styles = new Map<string, unknown>()
   if (!Array.isArray(value) || value.length !== expected.size)
-    throw Error('Expected all 90 recipe measurements')
+    throw Error('Expected all ' + expected.size + ' recipe measurements')
   for (const item of value) {
     const row = object(item),
       key = [row.hostFamily, row.recipeId, row.mode, row.app].join('/')
@@ -195,7 +195,7 @@ export async function validateRecipeConsumers(
     rows = object(value),
     refs = await references()
   if (
-    Object.keys(rows).length !== 34 ||
+    Object.keys(rows).length !== 38 ||
     !equal(Object.keys(rows).sort(), Object.keys(matrix).sort())
   )
     throw Error('Recipe consumer descriptor set mismatch')
@@ -222,7 +222,7 @@ export async function validateRecipeConsumers(
       )
     )
       throw Error('Missing protected project hashes ' + id)
-    if (Object.keys(recipes).length !== 3)
+    if (Object.keys(recipes).length !== refs.length)
       throw Error('Missing consumer recipe installation ' + id)
     for (const ref of refs) {
       const entry = object(recipes[ref.recipe.data.id + '@1']),

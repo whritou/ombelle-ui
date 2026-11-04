@@ -1,6 +1,6 @@
 # Textarea
 
-Textarea is a native multi-line text control. It keeps shadcn's `Textarea` name and `data-slot="textarea"` marker and has no client boundary. It supports `flat`, `minimalist`, and `neo-brutalism` in light and dark modes. Liquid glass is unavailable for Textarea.
+Textarea is a native multi-line text control. It keeps shadcn's `Textarea` name and `data-slot="textarea"` marker and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable for Textarea.
 
 ## Install and compose
 
@@ -35,7 +35,7 @@ Props are `React.ComponentProps<'textarea'>`. `value`/`defaultValue`, `rows`, `p
 
 ## States and styles
 
-Textarea uses its family's Input treatment: border token (`--border` in flat and neo-brutalism, `--input` in minimalist), radius, `0.5rem 1rem` padding, font, background, and foreground. Neo-brutalism adds Input's offset shadow; flat and minimalist have none. Width is 100%.
+Textarea uses its family's Input treatment: border token (`--border` in flat, neo-brutalism and ombelle, `--input` in minimalist), radius, `0.5rem 1rem` padding, font, background, and foreground. Neo-brutalism and ombelle add Input's offset shadow; flat and minimalist have none. Width is 100%.
 
 | State | Selector | Treatment |
 | --- | --- | --- |

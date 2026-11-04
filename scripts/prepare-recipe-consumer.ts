@@ -50,7 +50,7 @@ export async function prepareRecipeConsumer(input: {
       await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'),
     )
     if (
-      Object.keys(lock.recipes ?? {}).length !== 3 ||
+      Object.keys(lock.recipes ?? {}).length !== recipeFixtures().length ||
       lock.presetHash !== before.presetHash
     )
       throw Error('Recipe install changed defaults or missed a recipe')

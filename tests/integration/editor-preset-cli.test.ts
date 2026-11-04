@@ -222,3 +222,94 @@ for (const kind of ['vite', 'next'] as const)
     )
     expect(conflict.code, conflict.output).toBe(4)
   })
+// The 0.3.0 minimalist output is pinned under tests/fixtures/minimalist-0.3.0:
+// the preset and the exact ui-style.css bytes that catalog release shipped.
+// A current build cannot emit those bytes, so a project is installed through
+// the CLI with the legacy preset and its style file and lock record are then
+// set back to the shipped bytes.
+async function legacyMinimalistProject(kind: 'vite' | 'next') {
+  const root = await project(kind),
+    legacy = path.resolve('tests/fixtures/minimalist-0.3.0')
+  await fs.writeFile(
+    path.join(root, 'project-preset.json'),
+    await fs.readFile(path.join(legacy, 'preset.json')),
+  )
+  const init = await runBuiltCli(
+    'node',
+    ['init', '--preset', './project-preset.json', '--yes', '--json'],
+    root,
+  )
+  expect(init.code, init.output).toBe(0)
+  const added = await runBuiltCli(
+    'node',
+    ['add', 'input', '--yes', '--json'],
+    root,
+  )
+  expect(added.code, added.output).toBe(0)
+  const style = await fs.readFile(path.join(legacy, 'ui-style.css'), 'utf8')
+  await fs.writeFile(path.join(root, 'src/styles/ui-style.css'), style)
+  const lockFile = path.join(root, 'ui-library.lock.json'),
+    lock = JSON.parse(await fs.readFile(lockFile, 'utf8'))
+  lock.artifacts['src/styles/ui-style.css'].sha256 = await sha256(style)
+  await fs.writeFile(lockFile, JSON.stringify(lock))
+  await fs.writeFile(
+    path.join(root, 'refreshed-preset.json'),
+    JSON.stringify(getCatalog('0.1.0').presets.minimalist),
+  )
+  return root
+}
+for (const kind of ['vite', 'next'] as const) {
+  it(`plans the refreshed minimalist theme as an update over ${kind} files installed from 0.3.0 output`, async () => {
+    const root = await legacyMinimalistProject(kind),
+      before = await snapshotTree(root)
+    const dry = await runBuiltCli(
+      'node',
+      ['theme', 'add', './refreshed-preset.json', '--dry-run', '--json'],
+      root,
+    )
+    expect(dry.code, dry.output).toBe(0)
+    expect(await snapshotTree(root)).toEqual(before)
+    const changes = (jsonRecord(dry.data).changes ?? []) as {
+      path: string
+      action: string
+    }[]
+    expect(changes.find((c) => c.path === 'src/styles/ui-style.css')?.action).toBe('update')
+    const applied = await runBuiltCli(
+      'node',
+      ['theme', 'add', './refreshed-preset.json', '--yes', '--json'],
+      root,
+    )
+    expect(applied.code, applied.output).toBe(0)
+    const refreshed = await compile({
+      preset: getCatalog('0.1.0').presets.minimalist,
+      componentIds: ['input'],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+    expect(
+      await fs.readFile(path.join(root, 'src/styles/ui-style.css'), 'utf8'),
+    ).toBe(refreshed.artifacts.find((a) => a.logicalPath === 'styles/ui-style.css')!.content)
+  })
+  it(`keeps a hand-modified input.tsx untouched in ${kind} and still reports it as a conflict when re-added`, async () => {
+    const root = await legacyMinimalistProject(kind),
+      input = path.join(root, 'src/components/ui/input.tsx')
+    await fs.appendFile(input, '\n// locally edited\n')
+    const edited = await fs.readFile(input, 'utf8')
+    // theme add plans only tokens and ui-style.css: local component source stays.
+    const theme = await runBuiltCli(
+      'node',
+      ['theme', 'add', './refreshed-preset.json', '--yes', '--json'],
+      root,
+    )
+    expect(theme.code, theme.output).toBe(0)
+    expect(await fs.readFile(input, 'utf8')).toBe(edited)
+    const before = await snapshotTree(root)
+    const conflict = await runBuiltCli(
+      'node',
+      ['add', 'input', '--yes', '--json'],
+      root,
+    )
+    expect(conflict.code, conflict.output).toBe(4)
+    expect(await snapshotTree(root)).toEqual(before)
+  })
+}

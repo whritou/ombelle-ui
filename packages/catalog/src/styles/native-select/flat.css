@@ -11,10 +11,11 @@
   min-inline-size: 0;
   min-height: var(--control-height);
   font-family: var(--font-family);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border: 0;
+  border-bottom: 2px solid var(--input);
+  border-radius: var(--radius) var(--radius) 0 0;
   padding: 0.5rem 1rem;
-  background: var(--background);
+  background: var(--muted);
   color: var(--foreground);
   transition: background-color var(--motion-duration);
   box-shadow: none;
@@ -40,17 +41,25 @@
   pointer-events: none;
 }
 [data-slot='native-select']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  background: var(--card);
+  box-shadow: inset 0 0 0 2px var(--ring);
 }
 [data-slot='native-select'][aria-invalid='true'] {
-  border-color: var(--destructive);
-  border-width: max(var(--border-width), 2px);
+  border-bottom-color: var(--destructive);
+  background: color-mix(in srgb, var(--destructive) 8%, var(--muted));
+}
+[data-slot='native-select'][aria-invalid='true']:focus-visible {
+  background: color-mix(in srgb, var(--destructive) 6%, var(--card));
 }
 [data-slot='native-select-wrapper']:has(select:disabled) {
-  opacity: 0.5;
+  cursor: not-allowed;
 }
 [data-slot='native-select']:disabled {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-bottom-color: var(--border);
   cursor: not-allowed;
 }
 select[multiple] + [data-slot='native-select-icon'] {
@@ -67,6 +76,7 @@ select[multiple] + [data-slot='native-select-icon'] {
     color: ButtonText;
   }
   [data-slot='native-select'][aria-invalid='true'] {
-    border-style: double;
+    border-bottom-style: double;
+    border-bottom-width: 4px;
   }
 }

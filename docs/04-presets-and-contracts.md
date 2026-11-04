@@ -16,7 +16,7 @@ Use [preset.schema.json](../schemas/preset.schema.json) and [preset.example.json
 | `catalogRelease`    | Exact component and style catalog release                               |
 | `compilerVersion`   | Exact generator release                                                 |
 | `platform`          | Initially `react-web`; native will require a separate contract revision |
-| `styleFamily`       | Flat, minimalist, neo brutalism, or liquid glass                        |
+| `styleFamily`       | Flat, minimalist, neo brutalism, ombelle, or liquid glass               |
 | `modes`             | Light and dark semantic token overrides                                 |
 | `design`            | Portable bounded density, radius, border, font, and motion choices      |
 | `componentDefaults` | Reviewed per-component default props; Button is the first schema entry  |
@@ -132,7 +132,7 @@ The private CLI syntax is `ps_<32 lowercase hex>@1`; it is not a shadcn feature.
 
 Schema version, catalog release, compiler version, artifact hashes, and verification status are separate concerns. Increment the JSON schema version when data meaning or allowed structure breaks. Use semantic versioning for published packages and catalog contracts, with extra caution during `0.x` releases.
 
-Workspace packages and the published installer are version 0.3.1. Recipe schema 1.0 gains optional `overrides.colors`, which installer 0.2.1 rejects. This package release retains schema 1.0 and catalog/compiler compatibility 0.1.0: hosted distribution adds a transport and publication workflow without changing the selected generator release or reinterpreting existing saved data. A package version bump alone does not rewrite preset, recipe, snapshot or lockfile compatibility identifiers.
+Workspace packages are version 0.4.0. The published installer is version 0.3.1; website commands and the version-specific install guidance follow it, not the workspace version. Recipe schema 1.0 gains optional `overrides.colors`, which installer 0.2.1 rejects. This package release retains schema 1.0 and catalog/compiler compatibility 0.1.0: hosted distribution adds a transport and publication workflow without changing the selected generator release or reinterpreting existing saved data. A package version bump alone does not rewrite preset, recipe, snapshot or lockfile compatibility identifiers.
 
 Provide explicit migrations with before and after previews. Unknown major versions fail with a clear upgrade instruction. A migration cannot silently drop unsupported tokens, convert web effects into native code, or change a user's selected primitive implementation.
 

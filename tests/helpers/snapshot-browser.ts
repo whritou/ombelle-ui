@@ -3,6 +3,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { expect, type Page } from '@playwright/test'
 import { canonicalize, sha256 } from '@ombelle/compiler'
 import type { PresetSnapshot, SnapshotSource, StableStyleFamily } from '@ombelle/contracts'
+import { waitForCompiled } from './preset-editor-ui.js'
 import { createPresetDraft, setPresetEdit, setPresetIdentity } from '../../apps/www/src/preset-editor/model.js'
 
 const editorUrl = 'http://127.0.0.1:3000/editor/preset'
@@ -25,7 +26,7 @@ export async function publishEditorPreset(page: Page, family: StableStyleFamily 
     sessionStorage.setItem('ombelle:test:snapshot-editor-seeded', '1')
   }, draft)
   await page.goto(editorUrl)
-  await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', { timeout: 30000 })
+  await waitForCompiled(page)
   const response = page.waitForResponse((r) => r.url().endsWith('/api/v1/presets') && r.request().method() === 'POST')
   await page.getByRole('button', { name: 'Get code', exact: true }).click()
   const published = await response

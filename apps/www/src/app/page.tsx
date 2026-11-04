@@ -4,12 +4,13 @@ import { JourneySection } from '../site/home/journey'
 import { CascadeSection, MatrixSection, PresetSection, TerminalSection } from '../site/home/sections'
 import { StyleMorphSection } from '../site/home/style-morph'
 import { repository } from '../site/links'
+import { familyList } from '../site/families'
 import { installerRunner, publishedInstaller } from '../snapshots/install-command'
 
 export const metadata = {
   title: 'Ombelle UI — Your components. Your style.',
   description:
-    'Editable, accessible React components on shadcn and Radix UI for Vite and Next.js with Tailwind v4, in flat, minimalist and neo-brutalism styles with persistent project presets.',
+    `Editable, accessible React components on shadcn and Radix UI for Vite and Next.js with Tailwind v4, in ${familyList()} styles with persistent project presets.`,
 }
 
 const release = `${publishedInstaller.packageName}@${publishedInstaller.version}`

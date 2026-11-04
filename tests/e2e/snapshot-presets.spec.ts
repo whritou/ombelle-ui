@@ -4,8 +4,10 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { supportedComponentIds, supportedStyleFamilies, type PresetSnapshot } from '@ombelle/contracts'
+import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { canonicalize, frame, publishEditorPreset, resetSnapshotBrowserQuota, sha256 } from '../helpers/snapshot-browser.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
 
 test.beforeAll(async ({ browser }, info) => {
@@ -36,7 +38,7 @@ for (const family of supportedStyleFamilies)
             await consumer.evaluate(() => document.fonts.ready)
             const gallery = consumer.getByTestId('preset-gallery')
             await expect(gallery).toBeVisible()
-            expect(await snapshotPresetDom(frame(page).getByTestId('preset-gallery'))).toEqual(await snapshotPresetDom(gallery))
+            expectColorParity(await snapshotPresetDom(frame(page).getByTestId('preset-gallery')), await snapshotPresetDom(gallery))
             for (const artifact of result.artifacts.filter((a) => a.kind === 'component' || a.kind === 'utility')) {
               const content = await fs.readFile(path.join(root, 'src', artifact.logicalPath), 'utf8')
               expect(await sha256(content)).toBe(await sha256(artifact.content))
@@ -50,7 +52,7 @@ for (const family of supportedStyleFamilies)
             })
             await frame(page).getByRole('button', { name: 'Open dialog', exact: true }).click()
             await consumer.getByRole('button', { name: 'Open dialog', exact: true }).click()
-            expect(await snapshotPresetDom(frame(page).getByRole('dialog'))).toEqual(await snapshotPresetDom(consumer.getByRole('dialog')))
+            expectColorParity(await snapshotPresetDom(frame(page).getByRole('dialog')), await snapshotPresetDom(consumer.getByRole('dialog')))
             expect(await page.getByRole('dialog').count()).toBe(0)
           } finally { await consumer.close() }
         })
@@ -80,15 +82,12 @@ test('installs a scoped published Button into a differently themed host', async 
 
 const getCode = (page: Page) => page.getByRole('button', { name: 'Get code', exact: true })
 const codeDialog = (page: Page) => page.getByRole('dialog', { name: 'Get code' })
-async function openExport(page: Page) {
-  const panel = page.locator('details.preset-export')
-  if ((await panel.getAttribute('open')) === null) await panel.locator(':scope > summary').click()
-}
 
 test('publishes only when Get code opens and reuses the code for an unchanged draft', async ({ page }) => {
   const requests: string[] = []
   page.on('request', (request) => { if (request.url().endsWith('/api/v1/presets') && request.method() === 'POST') requests.push(request.url()) })
   await page.goto('http://127.0.0.1:3000/editor/preset')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   await expect(getCode(page)).toBeEnabled()
   expect(requests).toEqual([])
@@ -135,6 +134,7 @@ test('recovers a pending publication after refresh without submitting it', async
   await getCode(page).click()
   await expect(codeDialog(page).getByRole('alert')).toBeVisible()
   await page.reload()
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   expect(keys).toHaveLength(1)
   await getCode(page).click()
@@ -167,8 +167,13 @@ test('keeps local exports available when publication service is unavailable', as
   await page.goto('http://127.0.0.1:3000/editor/preset')
   await getCode(page).click()
   await expect(codeDialog(page).getByRole('alert')).toBeVisible()
+  // The preset editor's dialog no longer carries a JSON button; the local
+  // download lives in the top bar's More actions menu.
+  await page.keyboard.press('Escape')
+  await expect(codeDialog(page)).toHaveCount(0)
   const pending = page.waitForEvent('download')
-  await codeDialog(page).getByRole('button', { name: 'Download JSON instead', exact: true }).click()
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Download JSON', exact: true }).click()
   expect(JSON.parse(await fs.readFile(await (await pending).path()!, 'utf8')).schemaVersion).toBe('1.0')
 })
 
@@ -188,6 +193,7 @@ test('handles clipboard and storage denial while preserving draft exports', asyn
 test('shows share text and hash, downloads exact JSON, and preserves a safe draft', async ({ page }) => {
   const { snapshot } = await publishEditorPreset(page)
   await page.getByLabel('Preset name', { exact: true }).fill('Unpublished safe draft')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText(snapshot.presetHash)
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('ombelle:preset-editor:draft:v1')!).identity.name)).toBe('Unpublished safe draft')
   const draft = JSON.parse(await page.evaluate(() => localStorage.getItem('ombelle:preset-editor:draft:v1')!))
@@ -216,6 +222,7 @@ test('withdraws replay and respects conditional reads', async ({ page }) => {
 test('supports keyboard use, 320 pixel reflow, and axe checks', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 })
   await page.goto('http://127.0.0.1:3000/editor/preset')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   await page.getByLabel('Preset name', { exact: true }).focus()
   await page.keyboard.press('ControlOrMeta+A')
@@ -223,7 +230,7 @@ test('supports keyboard use, 320 pixel reflow, and axe checks', async ({ page })
   await expect(page.getByLabel('Preset name', { exact: true })).toHaveValue('Keyboard snapshot')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-  await page.getByLabel('Preview width', { exact: true }).selectOption('narrow')
+  await segment(page, 'Preview width', '320 px').click()
   await frame(page).getByTestId('preset-button').focus()
   await expect(frame(page).getByTestId('preset-button')).toBeFocused()
 })

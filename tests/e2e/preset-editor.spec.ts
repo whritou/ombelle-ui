@@ -11,12 +11,15 @@ import {
   supportedComponentIds,
   supportedStyleFamilies,
 } from '@ombelle/contracts'
+import { getCatalog } from '@ombelle/catalog'
 import {
   createPresetDraft,
   setPresetEdit,
 } from '../../apps/www/src/preset-editor/model.js'
+import { openExport, segment, waitForCompiled } from '../helpers/preset-editor-ui.js'
 import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
 import {
   presetRuntimeStyles,
@@ -43,18 +46,20 @@ const url = 'http://127.0.0.1:3000/editor/preset'
 const frame = (page: Page) =>
   page.locator('iframe[title="Global preset gallery"]').contentFrame()
 async function ready(page: Page) {
-  await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', {
-    timeout: 30000,
-  })
+  // The hash readout lives in the Export tab, which is closed by default. Get
+  // code is disabled until the current draft has compiled, so it carries the
+  // same "not Pending" guarantee without opening the drawer.
+  await waitForCompiled(page)
   await expect(page.getByTestId('preset-preview-status')).toHaveText(
     'Preview ready',
     { timeout: 30000 },
   )
 }
-async function openExport(page: Page) {
-  const panel = page.locator('details.preset-export')
-  if ((await panel.getAttribute('open')) === null)
-    await panel.locator(':scope > summary').click()
+const familyButton = (page: Page, name: string) =>
+  segment(page, 'Style family', name)
+async function chooseMenuItem(page: Page, name: string) {
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  await page.getByRole('menuitem', { name, exact: true }).click()
 }
 async function download(page: Page) {
   await openExport(page)
@@ -94,7 +99,7 @@ for (const family of supportedStyleFamilies)
       page,
     }) => {
       await seed(page, family)
-      await page.getByLabel('Preview mode', { exact: true }).selectOption(mode)
+      await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
       await expect(frame(page).locator('html')).toHaveClass(
         mode === 'dark' ? 'dark' : '',
       )
@@ -128,15 +133,15 @@ for (const family of supportedStyleFamilies)
       await frame(page)
         .getByRole('button', { name: 'Close', exact: true })
         .click()
-      // Contrast results open from the canvas toolbar.
-      await page.getByRole('button', { name: /^Contrast/ }).click()
-      await expect(
-        page
-          .getByRole('region', { name: 'Token contrast', exact: true })
-          .locator('p')
-          .filter({ hasText: /:1 —/ }),
-      ).toHaveCount(16)
-      await page.keyboard.press('Escape')
+      // Contrast results open from the review drawer's Checks tab.
+      await page.getByRole('button', { name: /^Open checks/ }).click()
+      const checks = page.getByRole('tabpanel')
+      await expect(checks.getByText(/^\d \/ 8 pass$/)).toHaveCount(2)
+      await checks.getByRole('button', { name: 'Show', exact: true }).click()
+      expect(
+        (await checks.locator('#preset-checks-passing li').count()) +
+          (await checks.getByRole('list', { name: 'Warnings' }).locator('li').count()),
+      ).toBe(16)
       const requests: string[] = []
       page.on('request', (request) => requests.push(request.url()))
       await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
@@ -152,9 +157,7 @@ for (const family of supportedStyleFamilies)
       }) => {
         test.setTimeout(360000)
         await seed(page, family)
-        await page
-          .getByLabel('Preview mode', { exact: true })
-          .selectOption(mode)
+        await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
         await ready(page)
         const text = await download(page)
         expect(text).toBe(canonicalize(JSON.parse(text)) + '\n')
@@ -181,9 +184,10 @@ for (const family of supportedStyleFamilies)
               await consumer.evaluate(() => document.fonts.ready)
               const specimen = consumer.getByTestId('preset-gallery')
               await expect(specimen).toBeVisible()
-              expect(
+              expectColorParity(
                 await snapshotPresetDom(frame(page).getByTestId('preset-gallery')),
-              ).toEqual(await snapshotPresetDom(specimen))
+                await snapshotPresetDom(specimen),
+              )
               for (const artifact of result.artifacts.filter(
                 (a) => a.kind === 'component' || a.kind === 'utility',
               )) {
@@ -212,7 +216,8 @@ for (const family of supportedStyleFamilies)
               await consumer
                 .getByRole('button', { name: 'Open dialog', exact: true })
                 .click()
-              expect(await snapshotPresetDom(frame(page).getByRole('dialog'))).toEqual(
+              expectColorParity(
+                await snapshotPresetDom(frame(page).getByRole('dialog')),
                 await snapshotPresetDom(consumer.getByRole('dialog')),
               )
               await frame(page)
@@ -228,6 +233,54 @@ for (const family of supportedStyleFamilies)
         )
       })
   }
+
+const scenes = [
+  { option: 'Dashboard', heading: 'Overview', components: 'Tabs, Card, Badge, Button, Switch, Tooltip' },
+  { option: 'Settings', heading: 'Settings', components: 'Tabs, Card, Label, Input, Native Select, Textarea, Checkbox, Switch, Button' },
+  { option: 'Sign in', heading: 'Sign in to Acme', components: 'Card, Label, Input, Checkbox, Button' },
+] as const
+for (const family of supportedStyleFamilies)
+  test(`shows the dashboard, settings and sign-in pages in ${family}`, async ({ page }) => {
+    await page.addInitScript(
+      (draft) =>
+        localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
+      createPresetDraft(family),
+    )
+    await page.goto(url)
+    await ready(page)
+    for (const scene of scenes) {
+      await segment(page, 'Preview page', scene.option).click()
+      await ready(page)
+      await expect(
+        frame(page).getByRole('heading', { name: scene.heading, exact: true, level: 1 }),
+      ).toBeVisible()
+      await expect(page.getByText('Components in this page: ' + scene.components)).toBeVisible()
+      const violations = (
+        await new AxeBuilder({ page })
+          .include('iframe[title="Global preset gallery"]')
+          .analyze()
+      ).violations
+      expect(violations).toEqual([])
+    }
+    await segment(page, 'Preview page', 'Gallery').click()
+    await ready(page)
+    await expect(frame(page).getByTestId('preset-gallery')).toBeVisible()
+  })
+
+test('shows labelled placeholders for the form controls liquid glass lacks', async ({ page }) => {
+  await page.addInitScript(
+    (draft) =>
+      localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
+    createPresetDraft('liquid-glass'),
+  )
+  await page.goto(url)
+  await ready(page)
+  await segment(page, 'Preview page', 'Sign in').click()
+  await ready(page)
+  await expect(frame(page).getByRole('heading', { name: 'Sign in to Acme', level: 1 })).toBeVisible()
+  await expect(frame(page).getByText('Unavailable in liquid glass')).toHaveCount(2)
+  await expect(frame(page).getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
+})
 
 test('restores raw draft and history after refresh', async ({ page }) => {
   await page.goto(url)
@@ -260,14 +313,13 @@ test('restores raw draft and history after refresh', async ({ page }) => {
     .click()
   await ready(page)
   await page.getByLabel('Border width', { exact: true }).fill('3')
-  await page
-    .getByRole('button', { name: 'Reset all tokens', exact: true })
-    .click()
+  await chooseMenuItem(page, 'Reset all tokens…')
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
     .click()
+  // Reset returns to the built-in flat preset's border width.
   await expect(page.getByLabel('Border width', { exact: true })).toHaveValue(
-    '1',
+    String(getCatalog('0.1.0').presets.flat.design.borderWidthPx),
   )
 })
 test('preserves explicit edits through confirmed and cancelled family changes', async ({
@@ -277,22 +329,16 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
   await ready(page)
   await page.getByLabel('Corner radius', { exact: true }).fill('0.6')
   await page.getByLabel('Corner radius', { exact: true }).fill('0.5')
-  // Colour tokens are edited in a popover opened from their row, inside the
-  // collapsed full colour list.
-  await page.locator('summary', { hasText: 'Customize all colors' }).click()
+  // Colour tokens are edited in a popover opened from their row; the full
+  // list sits behind a toggle.
+  await page.getByRole('button', { name: 'Show all 19 tokens' }).click()
   await page.getByRole('button', { name: /^Primary colors/ }).click()
   await page.getByLabel('Dark primary', { exact: true }).fill('invalid')
   await page.keyboard.press('Escape')
-  await page
-    .getByLabel('Style family', { exact: true })
-    .selectOption('neo-brutalism')
+  await familyButton(page, 'Neo-brutalism').click()
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-  await expect(page.getByLabel('Style family', { exact: true })).toHaveValue(
-    'flat',
-  )
-  await page
-    .getByLabel('Style family', { exact: true })
-    .selectOption('neo-brutalism')
+  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
+  await familyButton(page, 'Neo-brutalism').click()
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
     .click()
@@ -306,9 +352,7 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
     'project_preset',
   )
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
-  await expect(page.getByLabel('Style family', { exact: true })).toHaveValue(
-    'flat',
-  )
+  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
 })
 test('downloads corrupt and unknown-version recovery before reset', async ({
   page,
@@ -408,6 +452,11 @@ test('blocks stale exports during invalid edits and delayed compilation', async 
   await expect(
     page.getByRole('button', { name: 'Download preset JSON' }),
   ).toBeDisabled()
+  // The top bar's Download JSON is disabled for the same stale draft.
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  await expect(page.getByRole('menuitem', { name: 'Download JSON', exact: true })).toBeDisabled()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menu', { name: 'More actions' })).toBeHidden()
   await expect(page.locator('#preset-error')).toContainText('finite number')
   await page.getByLabel('Corner radius', { exact: true }).fill('1.1')
   await expect(
@@ -512,6 +561,7 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
       ).__presetRender,
   )
   await page.getByLabel('Corner radius', { exact: true }).fill('1.1')
+  await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText(
     original.result.preset.hash,
   )
@@ -686,7 +736,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
     [undo, redo, defaultName],
     [redo, undo, 'Keyboard theme'],
   ] as const) {
-    await tabTo(page, from, { backward: true })
+    await tabTo(page, from)
     for (let presses = 0; presses < 40 && (await from.isEnabled()); presses++) {
       await expect(from).toBeFocused()
       await page.keyboard.press('Enter')
@@ -696,12 +746,12 @@ test('supports keyboard editing and 320 pixel reflow', async ({
     await expectVisibleFocus(page)
   }
 
-  const family = page.getByLabel('Style family', { exact: true })
+  const family = familyButton(page, 'Minimalist')
   const confirmDialog = page.getByRole('dialog', {
     name: 'Change style family?',
   })
-  await tabTo(page, family, { backward: true })
-  await page.keyboard.press('ArrowDown')
+  await tabTo(page, family)
+  await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeVisible()
   await expect(
     confirmDialog.getByRole('button', { name: 'Cancel', exact: true }),
@@ -709,9 +759,9 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
   await page.keyboard.press('Escape')
   await expect(confirmDialog).toBeHidden()
-  await expect(family).toHaveValue('flat')
+  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
   await expect(family).toBeFocused()
-  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeVisible()
   await page.keyboard.press('Tab')
   await expect(
@@ -720,14 +770,14 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
   await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeHidden()
-  await expect(family).toHaveValue('minimalist')
+  await expect(family).toHaveAttribute('aria-pressed', 'true')
   await expect(family).toBeFocused()
 
   const lightPrimary = page.getByLabel('Light primary', { exact: true })
   const lightDefault = await lightPrimary.inputValue()
-  await tabTo(page, page.locator('summary', { hasText: 'Customize all colors' }))
+  await tabTo(page, page.getByRole('button', { name: 'Show all 19 tokens' }))
   await page.keyboard.press('Enter')
-  await tabTo(page, page.getByRole('button', { name: /^Primary colors/ }))
+  await tabTo(page, page.getByRole('button', { name: /^Primary colors/ }), { backward: true })
   await page.keyboard.press('Enter')
   await expect(lightPrimary).toBeVisible()
   await tabTo(page, lightPrimary)
@@ -748,11 +798,10 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   // Close the colour popover the way a keyboard user would.
   await page.keyboard.press('Escape')
 
-  const exportSummary = page.locator('summary', {
-    hasText: 'Preset JSON and local export',
-  })
-  await tabTo(page, exportSummary, { max: 300 })
+  const exportRail = page.getByRole('button', { name: /^Open export/ })
+  await tabTo(page, exportRail, { max: 300 })
   await page.keyboard.press('Enter')
+  await expect(page.getByRole('tab', { name: 'Export' })).toBeFocused()
   const downloadButton = page.getByRole('button', {
     name: 'Download preset JSON',
     exact: true,
@@ -814,7 +863,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   ).toBe(true)
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
-  await page.getByLabel('Preview width', { exact: true }).selectOption('narrow')
+  await segment(page, 'Preview width', '320 px').click()
   await frame(page).getByTestId('preset-button').focus()
   await page.keyboard.press('Tab')
   expect(
@@ -872,4 +921,76 @@ test('edits numeric design values with a slider and keeps the exact field in syn
   await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue('0.55')
   await page.getByLabel('Corner radius', { exact: true }).fill('1.25')
   await expect(slider).toHaveValue('1.25')
+})
+test('keeps focus on a non-core token field after resetting it', async ({ page }) => {
+  await page.goto(url)
+  await ready(page)
+  await page.getByRole('button', { name: 'Show all 19 tokens' }).click()
+  await page.getByRole('button', { name: /^Card colors/ }).click()
+  const light = page.getByLabel('Light card', { exact: true })
+  await light.fill('#123456')
+  await page.getByRole('button', { name: 'Show fewer tokens' }).click()
+  await page.getByRole('button', { name: /^Card colors/ }).click()
+  await page.getByRole('button', { name: 'Reset light card', exact: true }).click()
+  await expect(light).toBeFocused()
+})
+test('names warnings on the closed drawer rail and edits the failing token from Checks', async ({ page }) => {
+  const draft = setPresetEdit(
+    createPresetDraft('flat'),
+    '/modes/light/mutedForeground',
+    '#d4d4d8',
+  )
+  await page.addInitScript(
+    (draft) =>
+      localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
+    draft,
+  )
+  await page.goto(url)
+  await ready(page)
+  // The drawer starts closed; the rail still reports the warning.
+  const rail = page.getByRole('button', { name: /^Open checks: \d+ warnings?$/ })
+  await expect(rail).toBeVisible()
+  await rail.click()
+  const checks = page.getByRole('tabpanel')
+  await expect(checks.getByText('Muted foreground on muted')).toBeVisible()
+  await checks.getByRole('button', { name: 'Edit muted foreground token' }).click()
+  await expect(page.locator('#preset-color-panel-mutedForeground')).toBeVisible()
+  await expect(page.locator('#preset-modes-light-mutedForeground')).toBeFocused()
+})
+test('navigates the overflow menu by keyboard and returns focus after closing ID & revision', async ({ page }) => {
+  await page.goto(url)
+  await ready(page)
+  const more = page.getByRole('button', { name: 'More actions', exact: true })
+  const dialog = page.getByRole('dialog', { name: 'ID & revision' })
+  const item = (name: string) => page.getByRole('menuitem', { name, exact: true })
+  const menu = page.getByRole('menu', { name: 'More actions' })
+  // Menu keyboard pattern: opening focuses the first item; arrows wrap; Home/End; Escape returns to the trigger.
+  await more.focus()
+  await page.keyboard.press('Enter')
+  await expect(item('Download JSON')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(item('ID & revision…')).toBeFocused()
+  await page.keyboard.press('End')
+  await expect(item('Reset all tokens…')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(item('Download JSON')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(item('Reset all tokens…')).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(item('Download JSON')).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
+  await expect(more).toBeFocused()
+  await page.keyboard.press('Enter')
+  await item('ID & revision…').click()
+  await expect(dialog).toBeVisible()
+  await dialog.getByRole('button', { name: 'Done', exact: true }).click()
+  await expect(dialog).toBeHidden()
+  await expect(more).toBeFocused()
+  await more.click()
+  await page.getByRole('menuitem', { name: 'ID & revision…', exact: true }).click()
+  await expect(dialog).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await expect(more).toBeFocused()
 })

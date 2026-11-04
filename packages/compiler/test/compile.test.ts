@@ -94,7 +94,39 @@ it('changes only ui-style.css and dialog.tsx among pre-existing artifacts', asyn
     'components/ui/dialog.tsx',
     'styles/ui-style.css',
   ])
-  for (const family of ['flat', 'neo-brutalism'] as const) {
+  const flatRefresh = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'flat family refresh',
+  ) as any
+  expect(flatRefresh.families).toEqual(['flat'])
+  expect(flatRefresh.logicalPaths).toEqual([
+    'styles/ui-style.css',
+    'components/ui/*.css',
+    'scoped Button preset and recipe button.css',
+    'styles/ui-tokens.css',
+    'scoped Button preset and recipe components/ui/button.tsx',
+  ])
+  const minimalistRefresh = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'minimalist family refresh',
+  ) as any
+  expect(minimalistRefresh.families).toEqual(['minimalist'])
+  expect(minimalistRefresh.logicalPaths).toEqual(flatRefresh.logicalPaths)
+  const neoRefresh = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'neo-brutalism family refresh',
+  ) as any
+  expect(neoRefresh.families).toEqual(['neo-brutalism'])
+  expect(neoRefresh.logicalPaths).toEqual([
+    'styles/ui-style.css',
+    'components/ui/*.css',
+    'scoped Button preset and recipe button.css',
+    'styles/ui-tokens.css',
+    'scoped Button preset and recipe components/ui/button.tsx',
+  ])
+  const ombelleChange = baseline.intentionalChanges.find(
+    (c: any) => c.reason === 'ombelle family added',
+  ) as any
+  expect(ombelleChange.families).toEqual(['ombelle'])
+  expect(Object.keys(baseline.families)).toEqual(['flat', 'neo-brutalism', 'ombelle'])
+  for (const family of ['flat', 'neo-brutalism', 'ombelle'] as const) {
     const result = await compile({
       preset: getCatalog('0.1.0').presets[family],
       componentIds: ['button', 'dialog', 'input'],

@@ -1,6 +1,6 @@
 # Tooltip
 
-Tooltip wraps reviewed Radix Tooltip primitives, with flat, minimalist, and neo-brutalism styles in light and dark modes. Liquid glass is deferred and unavailable. The template is a client component.
+Tooltip wraps reviewed Radix Tooltip primitives, with flat, minimalist, neo-brutalism, and ombelle styles in light and dark modes. Liquid glass is deferred and unavailable. The template is a client component.
 
 ## Install and compose
 
@@ -44,7 +44,7 @@ Pointer hover opens the tooltip after the configured delay; keyboard focus opens
 
 ## Styles and artifacts
 
-The content uses semantic popover colors for both modes, readable text, logical padding and sizing, wrapping, and a width bounded by the available collision space. The default side offset separates content from the trigger focus ring. Consumers must still check placement around other focusable controls and keep triggers at least 24 by 24 CSS pixels (44 by 44 preferred). Flat has a subtle shadow, minimalist removes it, and neo-brutalism uses the preset offset shadow. Arrow fill and outline match the content. Trigger focus uses a 3px ring with 3px offset. Forced colors use system colors for content, arrow and focus; reduced motion removes the entry fade.
+The content uses semantic popover colors for both modes, readable text, logical padding and sizing, wrapping, and a width bounded by the available collision space. The default side offset separates content from the trigger focus ring. Consumers must still check placement around other focusable controls and keep triggers at least 24 by 24 CSS pixels (44 by 44 preferred). Flat has a subtle shadow, minimalist removes it, neo-brutalism and ombelle use the preset offset shadow (ombelle fills the content with the primary color). Arrow fill and outline match the content. Trigger focus uses a 3px ring with 3px offset. Forced colors use system colors for content, arrow and focus; reduced motion removes the entry fade.
 
 Compilation emits components/ui/tooltip.tsx, components/ui/tooltip.css and examples/tooltip.tsx plus shared utility/theme files. Keep the colocated CSS import. The example has a visibly labelled button and descriptive text with an optional arrow. Installer dry-run, file ownership, alias rewriting and conflict safeguards apply; --yes accepts a safe plan.
 

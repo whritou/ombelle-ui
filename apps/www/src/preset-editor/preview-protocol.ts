@@ -7,11 +7,18 @@ import {
   type ComponentId,
 } from '@ombelle/contracts'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
-/** `focus` shows only that component's section of the gallery. */
+export const presetScenes = ['gallery', 'dashboard', 'settings', 'sign-in'] as const
+export type PresetScene = (typeof presetScenes)[number]
+/**
+ * `focus` shows only that component's section of the gallery. `scene` picks a
+ * page built from catalog components; a missing scene means 'gallery'. The two
+ * are alternatives and are never sent together.
+ */
 export type PresetView = {
   mode: 'light' | 'dark'
   viewport: 'wide' | 'narrow'
   focus?: ComponentId
+  scene?: PresetScene
 }
 export type PresetRender = {
   type: 'preset-render'
@@ -76,7 +83,9 @@ export async function verifyPresetRender(
       !(
         exact(input.view, ['mode', 'viewport']) ||
         (exact(input.view, ['mode', 'viewport', 'focus']) &&
-          (supportedComponentIds as readonly unknown[]).includes(input.view.focus))
+          (supportedComponentIds as readonly unknown[]).includes(input.view.focus)) ||
+        (exact(input.view, ['mode', 'viewport', 'scene']) &&
+          (presetScenes as readonly unknown[]).includes(input.view.scene))
       ) ||
       !['light', 'dark'].includes(input.view.mode as string) ||
       !['wide', 'narrow'].includes(input.view.viewport as string)

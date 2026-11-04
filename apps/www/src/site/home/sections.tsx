@@ -5,6 +5,7 @@ import { Check, Copy, FlaskConical, Minus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { styleSupport } from '@ombelle/contracts'
 import { ToggleGroup } from '../toggle-group'
+import { familyHeadings, siteStableFamilies } from '../families'
 
 /** Copies text, showing a check for a moment; failures leave the text selectable. */
 export function useCopy() {
@@ -41,7 +42,7 @@ const COMPONENTS = [
   { id: 'tabs', name: 'Tabs', api: 'Root, List, Trigger, Content, orientation', states: 'Active, inactive, focus, disabled', basis: 'Reviewed tabs primitive' },
   { id: 'tooltip', name: 'Tooltip', api: 'Provider, Trigger, Content', states: 'Keyboard, hover, dismissal', basis: 'Reviewed tooltip primitive' },
 ] as const
-const COLS = ['Flat', 'Minimalist', 'Neo-Brutalism', 'Liquid Glass']
+const COLS = [...siteStableFamilies.map((family) => familyHeadings[family]), 'Liquid Glass']
 
 function StatusDot({ s }: { s: Status }) {
   if (s === 'stable') return <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="size-3.5" aria-hidden /><span className="sr-only">Stable</span></span>
@@ -78,7 +79,7 @@ export function MatrixSection() {
                       {row.name}
                     </button>
                   </th>
-                  {[0, 1, 2].map(k => <td key={k} className="text-center"><StatusDot s="stable" /></td>)}
+                  {siteStableFamilies.map(family => <td key={family} className="text-center"><StatusDot s="stable" /></td>)}
                   <td className="text-center"><StatusDot s={styleSupport(row.id, 'liquid-glass')} /></td>
                 </tr>
               ))}
@@ -284,7 +285,7 @@ const FIELDS = [
   { k: 'id', v: '"brand"', d: 'Readable identity. Never enough alone to reproduce a build.' },
   { k: 'revision', v: '2', d: 'Positive integer revision. A published code such as ps_…@1 always pins the same content.' },
   { k: 'catalogRelease', v: '"0.1.0"', d: 'Pins the exact component and style catalogue. No mutable remote defaults.' },
-  { k: 'styleFamily', v: '"neo-brutalism"', d: 'Flat, minimalist, neo-brutalism, or the experimental liquid-glass.' },
+  { k: 'styleFamily', v: '"neo-brutalism"', d: [...siteStableFamilies, 'or the experimental liquid-glass.'].join(', ').replace(/^./, (first) => first.toUpperCase()) },
   { k: 'modes', v: '{ light, dark }', d: 'Semantic token overrides per colour mode. Hex or numeric OKLCH only.' },
   { k: 'design', v: '{ radius, density, … }', d: 'Bounded radius, border, density, font and motion choices. Glass presets add transparency, blur and opacity.' },
   { k: 'componentDefaults', v: '{ button }', d: 'Reviewed per-component defaults. Button is the first schema entry.' },

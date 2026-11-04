@@ -1,6 +1,6 @@
 # Card
 
-Card groups related presentational content. It supports `flat`, `minimalist`, and `neo-brutalism` in light and dark modes, with default or dense spacing. Liquid glass is unavailable in this slice.
+Card groups related presentational content. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes, with default or dense spacing. Liquid glass is unavailable in this slice.
 
 ## Install and compose
 
@@ -48,7 +48,7 @@ Choose the title's heading level from the surrounding page outline. A Card is a 
 
 ## Styles and density
 
-Default spacing uses `1.5rem` for root vertical padding and gaps, and for header/content/footer horizontal padding. Dense uses `1rem` for those values. Both use the preset's card surface, card foreground, muted foreground, border width/color, radius, and font tokens. Flat and minimalist use no decorative shadow; neo-brutalism uses the preset's offset shadow. Long words wrap, and footers can wrap their contents. Forced colors use system colors and remove the shadow; Card introduces no animation or transition.
+Default spacing uses `1.5rem` for root vertical padding and gaps, and for header/content/footer horizontal padding. Dense uses `1rem` for those values. Both use the preset's card surface, card foreground, muted foreground, border width/color, radius, and font tokens. Flat and minimalist use no decorative shadow; neo-brutalism uses the preset's offset shadow, and ombelle uses a larger offset shadow with a rounder radius. Long words wrap, and footers can wrap their contents. Forced colors use system colors and remove the shadow; Card introduces no animation or transition.
 
 Card uses the saved global preset. A later theme operation can change semantic tokens; it does not rewrite the installed family's `card.css`. Changing the family of installed source requires an explicit migration. Component-scoped presets and recipes remain Button-only.
 

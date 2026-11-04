@@ -10,6 +10,7 @@ import { resolveBunExecutable } from '../../packages/cli/src/apply/executable.js
 import { randomUUID } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
 import { startSnapshotService } from '../helpers/snapshot-service.js'
+import cliPackage from '../../packages/cli/package.json'
 import exampleRecipe from '../../examples/recipe.example.json'
 
 const owned: string[] = []
@@ -54,7 +55,7 @@ it('runs the installed npm bin through npm exec without registry resolution', as
   expect(result.stdout).toContain('add --recipe')
 })
 it('packs only standalone installer files, complete license notices and no install scripts or workspace references', async () => {
-  expect(release).toMatchObject({ packageName: '@ombelle-ui/cli', version: '0.3.1', integrity: expect.stringMatching(/^sha512-/) })
+  expect(release).toMatchObject({ packageName: '@ombelle-ui/cli', version: cliPackage.version, integrity: expect.stringMatching(/^sha512-/) })
   const root = path.dirname(path.dirname(binary)), manifest = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'))
   expect(manifest.private).not.toBe(true)
   expect(manifest.dependencies ?? {}).toEqual({})

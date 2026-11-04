@@ -73,6 +73,25 @@ it('accepts a focused view only for a catalog component', async () => {
       await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', focus } }, 0, manifest),
     ).toBeNull()
 })
+it('accepts a named scene, treats a missing scene as the gallery and rejects unknown scenes', async () => {
+  for (const scene of ['gallery', 'dashboard', 'settings', 'sign-in']) {
+    const scened = { ...message(), view: { mode: 'light', viewport: 'wide', scene } }
+    expect(await verifyPresetRender(scened, 0, manifest)).toEqual(scened)
+  }
+  expect(await verifyPresetRender(message(), 0, manifest)).not.toBeNull()
+  for (const scene of ['billing', '', 1, null, '__proto__', 'Settings'])
+    expect(
+      await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', scene } }, 0, manifest),
+    ).toBeNull()
+  // A scene and a focus are alternatives, never combined.
+  expect(
+    await verifyPresetRender(
+      { ...message(), view: { mode: 'light', viewport: 'wide', scene: 'settings', focus: 'tabs' } },
+      0,
+      manifest,
+    ),
+  ).toBeNull()
+})
 it.each([
   'css',
   'hash',

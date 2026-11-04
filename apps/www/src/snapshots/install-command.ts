@@ -1,7 +1,36 @@
-import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type RecipeSnapshotSource, type SnapshotSource } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, styleFamilies, validateRecipeSnapshotSource, validateSnapshotSource, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
 export const publishedInstaller = { packageName: publicCliPackageName, version: '0.3.1' } as const
+
+/** First published installer that accepts `ombelle` presets and codes. */
+export const ombelleMinimumCli = '0.4.0'
+
+/** Compares two x.y.z versions numerically: negative, zero or positive. */
+export function compareVersions(a: string, b: string): number {
+  const parse = (version: string) => {
+    if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Expected an x.y.z version.')
+    return version.split('.').map(Number)
+  }
+  const left = parse(a), right = parse(b)
+  for (let index = 0; index < 3; index++)
+    if (left[index] !== right[index]) return left[index]! - right[index]!
+  return 0
+}
+
+/**
+ * Style families the website offers for new choices. A family the published
+ * installer cannot install stays hidden until that installer is released, so
+ * every command the site shows works. `current` keeps an already-selected
+ * family (from a restored draft) visible.
+ */
+export function offeredStyleFamilies(
+  current?: StyleFamily,
+  installer: { version: string } = publishedInstaller,
+): readonly StyleFamily[] {
+  const ombelle = compareVersions(installer.version, ombelleMinimumCli) >= 0
+  return styleFamilies.filter((family) => family !== 'ombelle' || ombelle || family === current)
+}
 
 export function installerRunner(release?: { packageName: string; version: string }): string {
   if (!release) return 'pnpm exec node packages/cli/dist/main.js'

@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
+  collectModuleSpecifiers,
   compile,
   rewriteModuleSpecifiers,
   sha256,
@@ -27,6 +29,62 @@ export async function transformGallerySource(
   return rewriteModuleSpecifiers(source, (specifier) =>
     specifier === '@/lib/utils' ? '../../lib/utils' : specifier,
   )
+}
+// Bare packages a scene may import besides its own files; the type-only
+// protocol import is the one shared helper outside the scenes folder.
+const sceneBareAllowlist = ['react']
+const sceneSharedAllowlist = ['apps/www/src/preset-editor/preview-protocol']
+
+async function sceneFiles(directory: string): Promise<string[]> {
+  const files: string[] = []
+  for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name)
+    if (entry.isDirectory()) files.push(...(await sceneFiles(full)))
+    else if (/\.[cm]?[jt]sx?$/.test(entry.name)) files.push(full)
+  }
+  return files
+}
+
+/**
+ * Preview scenes are hand-written pages that may use only the reviewed gallery
+ * sources. Every import form in every scene file (recursively) must be a
+ * reviewed gallery source (a manifest key), a file inside the scenes folder or
+ * an allowlisted helper; anything else fails generation. Run it before any
+ * output is written. Scenes are not hashed themselves: this guard is what keeps
+ * them to the sources that verifyGallerySources reviews.
+ */
+export async function assertSceneSources(
+  scenesDirectory: string,
+  reviewedSources: readonly string[],
+): Promise<void> {
+  const posix = (value: string) => path.resolve(value).split(path.sep).join('/')
+  const scenesRoot = posix(scenesDirectory)
+  const repoRoot = posix(path.join(scenesDirectory, '../../../..'))
+  const galleryRoot = posix(path.join(scenesDirectory, '../generated/preset-gallery')) + '/'
+  for (const file of await sceneFiles(scenesDirectory)) {
+    const name = path.relative(scenesDirectory, file).split(path.sep).join('/')
+    const specifiers = await collectModuleSpecifiers(await fs.readFile(file, 'utf8'))
+    for (const specifier of specifiers) {
+      const fail = (reason: string): never => {
+        throw new Error('Scene ' + name + ' imports ' + reason + ': ' + specifier)
+      }
+      if (!specifier.startsWith('.')) {
+        if (!sceneBareAllowlist.includes(specifier)) fail('a disallowed package')
+        continue
+      }
+      const target = path.posix.normalize(
+        path.posix.join(path.posix.dirname(posix(file)), specifier),
+      )
+      if (target.startsWith(galleryRoot)) {
+        const rest = target.slice(galleryRoot.length)
+        if (!reviewedSources.some((key) => key === rest + '.tsx' || key === rest + '.ts'))
+          fail('unreviewed source')
+      } else if (target === scenesRoot || target.startsWith(scenesRoot + '/')) {
+        continue
+      } else if (!sceneSharedAllowlist.some((shared) => target === repoRoot + '/' + shared))
+        fail('a disallowed file')
+    }
+  }
 }
 export async function writePresetGallery(root: string): Promise<void> {
   const catalog = getCatalog('0.1.0')
@@ -65,6 +123,14 @@ export async function writePresetGallery(root: string): Promise<void> {
     compilerVersion: '0.1.0',
     sources: {},
   }
+  const scenesDirectory = fileURLToPath(
+    new URL('../apps/preview/src/scenes', import.meta.url),
+  )
+  // Before anything is written, so a failing guard leaves no partial output.
+  await assertSceneSources(
+    scenesDirectory,
+    sources.map((source) => source.logicalPath),
+  )
   for (const family of results)
     for (const artifact of family.artifacts)
       if (
@@ -121,9 +187,13 @@ export async function writePresetGallery(root: string): Promise<void> {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}:${value};`)
     .join('')
+  const sceneSource = path
+    .relative(root, scenesDirectory)
+    .split(path.sep)
+    .join('/')
   await fs.writeFile(
     path.join(root, 'tailwind.css'),
-    `@import "tailwindcss";\n@custom-variant dark (&:where(.dark, .dark *));\n@source "./components";\n@source "./gallery.tsx";\n@theme inline {${mappings}}\n`,
+    `@import "tailwindcss";\n@custom-variant dark (&:where(.dark, .dark *));\n@source "./components";\n@source "./gallery.tsx";\n@source "${sceneSource}";\n@theme inline {${mappings}}\n`,
   )
   await fs.writeFile(
     path.join(root, 'manifest.json'),

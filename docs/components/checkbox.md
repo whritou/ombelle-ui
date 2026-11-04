@@ -1,6 +1,6 @@
 # Checkbox
 
-Checkbox wraps the reviewed Radix Checkbox primitive with Lucide check and minus marks. It supports `flat`, `minimalist`, and `neo-brutalism` in light and dark modes. Liquid glass is unavailable. The component is a client component.
+Checkbox wraps the reviewed Radix Checkbox primitive with Lucide check and minus marks. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable. The component is a client component.
 
 ## Install and compose
 
@@ -37,7 +37,7 @@ Radix renders a hidden native checkbox input when the root belongs to a form, fo
 
 ## Styles and generated files
 
-The root has a 24 by 24 CSS pixel target with semantic background/foreground and border tokens. Checked and mixed states use `--primary` and `--primary-foreground` with distinct check/minus marks. All families expose a visible 3px `--ring` focus outline at a 3px offset, destructive invalid border, disabled treatment, forced-color system colors and double invalid borders, and reduced-motion rules. Minimalist uses `--input` for the border; neo-brutalism adds the preset offset shadow. Logical sizes and spacing support RTL. Consumers can enlarge the target with layout or labels.
+The root has a 24 by 24 CSS pixel target with semantic background/foreground and border tokens. Checked and mixed states use `--primary` and `--primary-foreground` with distinct check/minus marks. All families expose a visible 3px `--ring` focus outline at a 3px offset, destructive invalid border, disabled treatment, forced-color system colors and double invalid borders, and reduced-motion rules. Minimalist uses `--input` for the border; neo-brutalism and ombelle add the preset offset shadow. Logical sizes and spacing support RTL. Consumers can enlarge the target with layout or labels.
 
 Compilation emits `components/ui/checkbox.tsx`, `components/ui/checkbox.css`, and `examples/checkbox.tsx`, plus shared utility and theme artifacts. Keep the colocated CSS import when moving the source. The generated example includes labelled required/invalid and mixed controls. The installer respects aliases, destination paths, ownership hashes, dry-run, and conflict checks; `--yes` does not bypass modified-file conflicts.
 

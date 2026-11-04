@@ -36,6 +36,12 @@ it('accepts a valid render payload and its next request', async () => {
   expect(acceptPreviewRender({ ...first, requestId: 2, state: { ...first.state, mode: 'dark', viewport: 'narrow', forcedState: 'focus', requestId: 2 } }, 1)?.requestId).toBe(2)
 })
 
+it('accepts every forced state, including active', async () => {
+  const message = await renderMessage()
+  for (const forcedState of ['none', 'hover', 'focus', 'active'])
+    expect(acceptPreviewRender({ ...message, state: { ...message.state, forcedState } }, 0)).not.toBeNull()
+})
+
 it('accepts a liquid-glass Button render', async () => {
   const message = await renderMessage('liquid-glass')
   expect(acceptPreviewRender(message, 0)).toEqual(message)
@@ -45,7 +51,7 @@ it('rejects malformed recipe, mode, forced state, and scope', async () => {
   const message = await renderMessage()
   expect(acceptPreviewRender({ ...message, state: { ...message.state, recipe: { ...message.state.recipe, content: '' } } }, 0)).toBeNull()
   expect(acceptPreviewRender({ ...message, state: { ...message.state, mode: 'sepia' } }, 0)).toBeNull()
-  expect(acceptPreviewRender({ ...message, state: { ...message.state, forcedState: 'active' } }, 0)).toBeNull()
+  expect(acceptPreviewRender({ ...message, state: { ...message.state, forcedState: 'pressed' } }, 0)).toBeNull()
   expect(acceptPreviewRender({ ...message, scope: 'not-a-scope' }, 0)).toBeNull()
 })
 
