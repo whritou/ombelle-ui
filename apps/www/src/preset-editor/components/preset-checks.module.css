@@ -75,3 +75,13 @@
 .passing li {
   overflow-wrap: anywhere;
 }
+
+.card button:hover,
+.passingHead button:hover {
+  border-color: var(--muted-foreground);
+  background: var(--muted);
+}
+.card button:active,
+.passingHead button:active {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
+}

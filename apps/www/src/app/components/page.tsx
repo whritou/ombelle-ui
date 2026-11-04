@@ -19,7 +19,7 @@ export default function ComponentsPage() {
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {componentDocs.map(doc => (
           <li key={doc.id}>
-            <a href={`/components/${doc.id}`} className="group flex h-full flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary">
+            <a href={`/components/${doc.id}`} className="group flex h-full flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary hover:bg-muted/50 active:bg-muted">
               <span className="flex items-center justify-between font-display text-lg font-bold">
                 {doc.name}
                 <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />

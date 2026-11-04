@@ -29,8 +29,8 @@ const modeOptions = [
   { value: 'dark', label: 'Dark' },
 ] as const
 
-const tabClass = 'rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm'
-const toggleItem = 'min-h-9 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:line-through disabled:hover:text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm'
+const tabClass = 'rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm'
+const toggleItem = 'min-h-9 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:line-through disabled:hover:text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm'
 
 /**
  * Live preview of one catalog component, compiled in the browser from the
@@ -72,7 +72,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
       {family === 'liquid-glass' && (
         <p className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
           Liquid glass is experimental: automated checks in one browser, no manual review yet.{' '}
-          <a href={glassDocs} className="font-medium text-foreground underline decoration-primary underline-offset-4">Limitations</a>
+          <a href={glassDocs} className="font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Limitations</a>
         </p>
       )}
       {glass === 'unavailable' && (

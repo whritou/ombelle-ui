@@ -1,7 +1,7 @@
 import { GithubIcon, Logo } from './logo'
 import { primaryLinks, repository } from './links'
 
-const linkClass = 'text-muted-foreground hover:text-foreground'
+const linkClass = 'text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline hover:decoration-primary'
 
 export function SiteFooter() {
   return (

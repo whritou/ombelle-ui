@@ -42,7 +42,7 @@ function StageChoose({ style, onPick }: { style: StyleKey; onPick: (s: StyleKey)
               className={`o-kit group relative flex flex-col items-center justify-center gap-4 rounded-2xl border p-6 text-left transition-all duration-300 ${
                 active
                   ? 'border-primary bg-background shadow-soft'
-                  : 'border-border bg-background/50 hover:-translate-y-1 hover:border-foreground/30'
+                  : 'border-border bg-background/50 hover:-translate-y-1 hover:border-foreground/30 hover:bg-background active:translate-y-0'
               }`}
             >
               {active && (
@@ -149,7 +149,7 @@ function StageInstall({ style, radius, density, release, reduce }: { style: Styl
             type="button"
             aria-label="Copy command"
             onClick={() => copy(cmd)}
-            className="ml-auto inline-flex size-8 items-center justify-center rounded-md text-paper/75 hover:bg-paper/10 dark:text-muted-foreground dark:hover:bg-muted"
+            className="ml-auto inline-flex size-8 items-center justify-center rounded-md text-paper/75 transition-colors hover:bg-paper/10 hover:text-paper active:bg-paper/20 dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-foreground dark:active:bg-foreground/10"
           >
             {copied ? <Check className="size-4 text-terminal-accent" aria-hidden /> : <Copy className="size-4" aria-hidden />}
           </button>
@@ -223,7 +223,7 @@ export function JourneySection({ release }: { release: string }) {
             <p className="mt-4 max-w-lg text-muted-foreground">Follow a single Button from catalogue to your repo — pick it, bend it, ship it.</p>
           </div>
           {!reduce && (
-            <button type="button" onClick={() => setPaused(p => !p)} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border px-4 text-sm font-semibold hover:bg-muted">
+            <button type="button" onClick={() => setPaused(p => !p)} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border px-4 text-sm font-semibold transition-colors hover:border-foreground/30 hover:bg-muted active:bg-foreground/10">
               {paused ? <Play className="size-4" aria-hidden /> : <Pause className="size-4" aria-hidden />}
               {paused ? 'Play tour' : 'Pause tour'}
             </button>
@@ -242,7 +242,7 @@ export function JourneySection({ release }: { release: string }) {
                     aria-current={active ? 'step' : undefined}
                     onClick={() => { manual(); setStage(i) }}
                     className={`relative w-full min-w-0 overflow-hidden rounded-xl border p-3 text-left transition-colors sm:p-4 lg:mb-2 ${
-                      active ? 'border-primary bg-background shadow-soft' : 'border-transparent hover:bg-background/60'
+                      active ? 'border-primary bg-background shadow-soft' : 'border-transparent hover:border-border hover:bg-background/60 active:bg-background'
                     }`}
                   >
                     {active && auto && (

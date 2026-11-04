@@ -43,7 +43,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
             <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{doc.description}</p>
           </div>
           {doc.id === 'button' && (
-            <a href="/editor/component/button" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 font-semibold text-primary-foreground">
+            <a href="/editor/component/button" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 font-semibold text-primary-foreground transition-[filter] hover:brightness-110 active:brightness-95">
               <SlidersHorizontal className="size-4" aria-hidden /> Customize
             </a>
           )}
@@ -56,7 +56,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         <section aria-labelledby="installation" className="mt-14 scroll-mt-24">
           <h2 id="installation" className="text-2xl font-black">Installation</h2>
           <p className="mt-2 text-muted-foreground">
-            Run in a project initialized with an Ombelle preset (see <a href="/#get-started" className="font-medium text-foreground underline decoration-primary underline-offset-4">Get started</a>). The component uses the saved project preset. Review the dry-run plan, then run it again with <code className="font-mono text-foreground">--yes</code>.
+            Run in a project initialized with an Ombelle preset (see <a href="/#get-started" className="font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Get started</a>). The component uses the saved project preset. Review the dry-run plan, then run it again with <code className="font-mono text-foreground">--yes</code>.
           </p>
           <div className="mt-4">
             <CommandTabs release={release} args={`add ${doc.id} --cwd APP --dry-run`} />
@@ -92,15 +92,15 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         </section>
 
         <nav aria-label="Pagination" className="mt-14 flex justify-between gap-4 border-t border-border pt-6 text-sm">
-          {previous ? <a href={`/components/${previous.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium hover:bg-muted"><ArrowLeft className="size-4" aria-hidden /> {previous.name}</a> : <span />}
-          {next && <a href={`/components/${next.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium hover:bg-muted">{next.name} <ArrowRight className="size-4" aria-hidden /></a>}
+          {previous ? <a href={`/components/${previous.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10"><ArrowLeft className="size-4" aria-hidden /> {previous.name}</a> : <span />}
+          {next && <a href={`/components/${next.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10">{next.name} <ArrowRight className="size-4" aria-hidden /></a>}
         </nav>
       </main>
       <div className="hidden xl:block">
         <nav aria-label="On this page" className="sticky top-24 text-sm">
           <p className="mb-2 font-semibold">On this page</p>
           <ul className="space-y-2">
-            {sections.map(s => <li key={s.id}><a href={`#${s.id}`} className="text-muted-foreground hover:text-foreground">{s.label}</a></li>)}
+            {sections.map(s => <li key={s.id}><a href={`#${s.id}`} className="text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline hover:decoration-primary">{s.label}</a></li>)}
           </ul>
         </nav>
       </div>

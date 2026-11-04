@@ -22,10 +22,10 @@ export function HeroSection() {
             Ombelle installs editable, accessible React component source built on shadcn and Radix into your Vite or Next.js app — in distinct visual families you can switch, tune and own.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <a href="#get-started" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 font-semibold text-primary-foreground shadow-soft transition-transform hover:-translate-y-0.5">
+            <a href="#get-started" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 font-semibold text-primary-foreground shadow-soft transition-[transform,filter] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95">
               Get started <ArrowRight className="size-4" aria-hidden />
             </a>
-            <a href="/editor/preset" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-card px-6 font-semibold text-foreground transition-colors hover:bg-muted">
+            <a href="/editor/preset" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border bg-card px-6 font-semibold text-foreground transition-colors hover:border-foreground/30 hover:bg-muted active:bg-foreground/10">
               <Palette className="size-4" aria-hidden /> Design a preset
             </a>
           </div>
