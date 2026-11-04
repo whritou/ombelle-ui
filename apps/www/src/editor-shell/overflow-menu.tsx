@@ -13,6 +13,21 @@ export type OverflowItem = {
 }
 
 /**
+ * Fixed position for a menu opening under its trigger, right edges aligned,
+ * kept inside the viewport.
+ */
+export function menuPosition(
+  trigger: Pick<DOMRect, 'bottom' | 'right'>,
+  viewportWidth: number,
+  gap = 4,
+): { top: number; right: number } {
+  return {
+    top: Math.round(trigger.bottom + gap),
+    right: Math.max(gap, Math.round(viewportWidth - trigger.right)),
+  }
+}
+
+/**
  * Menu keyboard pattern: ArrowDown/ArrowUp move to the next/previous enabled
  * item and wrap, Home/End go to the first/last enabled item. Returns the item
  * index to focus, or null when the key is not a menu navigation key or no item
@@ -50,16 +65,36 @@ export function OverflowMenu({
   const destructive = items.filter((item) => item.destructive)
   const menuItems = () =>
     Array.from(menu.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [])
-  // Opening the menu moves focus to its first enabled item.
+  // The menu opens under its trigger, then focus moves to its first enabled item.
   useEffect(() => {
     const element = menu.current
     if (!element) return
+    const place = () => {
+      const anchor = trigger.current?.getBoundingClientRect()
+      if (!anchor) return
+      const { top, right } = menuPosition(anchor, document.documentElement.clientWidth)
+      element.style.top = top + 'px'
+      element.style.right = right + 'px'
+    }
+    const onBeforeToggle = (event: Event) => {
+      if ((event as Event & { newState?: string }).newState === 'open') place()
+    }
     const onToggle = (event: Event) => {
       if ((event as Event & { newState?: string }).newState !== 'open') return
       menuItems().find((item) => !item.disabled)?.focus()
     }
+    // The pinned top bar keeps the trigger in place on scroll; a resize can move it.
+    const onResize = () => {
+      if (element.matches(':popover-open')) place()
+    }
+    element.addEventListener('beforetoggle', onBeforeToggle)
     element.addEventListener('toggle', onToggle)
-    return () => element.removeEventListener('toggle', onToggle)
+    window.addEventListener('resize', onResize)
+    return () => {
+      element.removeEventListener('beforetoggle', onBeforeToggle)
+      element.removeEventListener('toggle', onToggle)
+      window.removeEventListener('resize', onResize)
+    }
   }, [])
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {

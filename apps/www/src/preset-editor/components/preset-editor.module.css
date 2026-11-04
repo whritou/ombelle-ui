@@ -773,15 +773,6 @@
 .panel > section:last-child {
   border-bottom: 0;
 }
-.editor [role='menu'][popover] {
-  margin: auto;
-}
-@supports (position-area: bottom) {
-  .editor [role='menu'][popover] {
-    margin: 4px 0;
-    position-area: bottom span-left;
-  }
-}
 .editor input[type='range'] {
   min-height: 24px;
   padding: 0;

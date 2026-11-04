@@ -2,7 +2,7 @@ import { createRef } from 'react'
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { EditorTopBar } from './top-bar'
-import { OverflowMenu, menuFocusTarget } from './overflow-menu'
+import { OverflowMenu, menuFocusTarget, menuPosition } from './overflow-menu'
 
 const noop = () => {}
 const history = { disabled: false, onClick: noop, buttonRef: createRef<HTMLButtonElement>() }
@@ -76,4 +76,9 @@ it('menuFocusTarget follows the menu keyboard pattern over enabled items', () =>
   expect(menuFocusTarget('End', 0, disabled)).toBe(3)
   expect(menuFocusTarget('Tab', 0, disabled)).toBeNull()
   expect(menuFocusTarget('ArrowDown', -1, [true, true])).toBeNull()
+})
+
+it('menuPosition opens the menu under its trigger, right edges aligned, inside the viewport', () => {
+  expect(menuPosition({ bottom: 40.4, right: 1200 }, 1440)).toEqual({ top: 44, right: 240 })
+  expect(menuPosition({ bottom: 40, right: 1440 }, 1440)).toEqual({ top: 44, right: 4 })
 })

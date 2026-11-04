@@ -110,6 +110,10 @@
 }
 
 .menu {
+  /* Placed under its trigger by OverflowMenu; the UA centring is replaced. */
+  position: fixed;
+  inset: auto;
+  margin: 0;
   min-width: 11rem;
   padding: 0.25rem;
   border: 1px solid var(--border);
