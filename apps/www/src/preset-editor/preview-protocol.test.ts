@@ -116,7 +116,9 @@ it('accepts a liquid-glass draft below the contrast bound so the editor can prev
     glassContrast: 'report',
   })
   const input = { ...message(), result: failing }
-  expect(await verifyPresetRender(input, 0, manifest)).toEqual(input)
+  const filter = failing.artifacts.find((a) => a.logicalPath === 'components/ui/liquid-glass-filter.tsx')!
+  const withFilter = { ...manifest, sources: { ...manifest.sources, [filter.logicalPath]: { canonicalHash: filter.sha256, transformedHash: await sha256(filter.content) } } }
+  expect(await verifyPresetRender(input, 0, withFilter)).toEqual(input)
 })
 it('accepts a liquid-glass render compiled from only its experimental components', async () => {
   const glass = await compile({
