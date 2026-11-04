@@ -198,7 +198,7 @@ export default function PresetEditor() {
       commit(resetPresetField(draft, path), 'reset:' + path),
   }
   return (
-    <main className={styles.editor} aria-label="Global preset editor">
+    <main className={styles.editor} aria-label="Preset editor">
       <EditorTopBar
         crumbs={['Presets']}
         nameField={{

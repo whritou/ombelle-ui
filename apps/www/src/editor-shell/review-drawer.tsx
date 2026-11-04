@@ -93,7 +93,7 @@ export function ReviewDrawer({
   return (
     <aside aria-label={label} className={styles.drawer}>
       <div className={styles.drawerHead}>
-        <div role="tablist" aria-label={label} onKeyDown={onKeyDown} className={styles.tabs}>
+        <div role="tablist" aria-label={`${label} sections`} onKeyDown={onKeyDown} className={styles.tabs}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -107,7 +107,12 @@ export function ReviewDrawer({
             >
               {tab.icon}
               {tab.label}
-              {tab.badge ? <span className={styles.badge}>{tab.badge}</span> : null}
+              {/* The count is decoration here; the panel lists the warnings themselves. */}
+              {tab.badge ? (
+                <span className={styles.badge} aria-hidden="true">
+                  {tab.badge}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>

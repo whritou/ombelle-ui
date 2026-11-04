@@ -23,6 +23,10 @@ it('open ReviewDrawer renders tabs and a close button', () => {
     <ReviewDrawer label="Review" open onOpenChange={noop} activeTab="checks" onTabChange={noop} tabs={tabs} />,
   )
   expect(html).toContain('role="tablist"')
+  // The drawer and its tablist have distinct names, and the open tab's badge stays out of its name.
+  expect(html).toContain('<aside aria-label="Review"')
+  expect(html).toContain('role="tablist" aria-label="Review sections"')
+  expect(html).toMatch(/role="tab"[^>]*>Checks<span[^>]*aria-hidden="true"[^>]*>1<\/span>/)
   expect(html.match(/aria-selected="true"/g)).toHaveLength(1)
   expect(html).toContain('role="tabpanel"')
   expect(html).toContain('aria-label="Close review"')

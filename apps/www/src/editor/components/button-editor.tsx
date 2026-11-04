@@ -161,7 +161,7 @@ export function ButtonEditor() {
     })),
   ]
 
-  return <main className={styles.root} aria-label="Button recipe editor">
+  return <main className={styles.root} aria-label="Button editor">
     <EditorTopBar
       crumbs={['Components', 'Button']}
       nameField={{
