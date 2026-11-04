@@ -123,10 +123,22 @@ export function TokenList({
   warnings,
 }: ControlProps & { warnings: ReadonlySet<string> }) {
   const [all, setAll] = useState(false)
+  // Tokens touched here stay listed, so a reset never unmounts the popover that holds focus.
+  const [touched, setTouched] = useState<ReadonlySet<string>>(new Set())
+  const touch = (path: PresetEditablePath) =>
+    setTouched((previous) => new Set(previous).add(path.split('/')[3]!))
+  const edit: typeof onEdit = (path, value) => {
+    touch(path)
+    onEdit(path, value)
+  }
+  const reset: typeof onReset = (path) => {
+    touch(path)
+    onReset(path)
+  }
   const isEdited = (key: string) =>
     Object.hasOwn(draft.edits, `/modes/light/${key}`) || Object.hasOwn(draft.edits, `/modes/dark/${key}`)
   const visible = colorKeys.filter(
-    (key) => all || baseTokens.includes(key) || isEdited(key) || warnings.has(key),
+    (key) => all || baseTokens.includes(key) || isEdited(key) || warnings.has(key) || touched.has(key),
   )
   return (
     <>
@@ -171,7 +183,7 @@ export function TokenList({
                             tabIndex={-1}
                             aria-hidden="true"
                             value={pickerValue(value)}
-                            onChange={(e) => onEdit(path, e.target.value)}
+                            onChange={(e) => edit(path, e.target.value)}
                           />
                         </span>
                         <input
@@ -181,9 +193,9 @@ export function TokenList({
                           spellCheck={false}
                           aria-invalid={errorPath === path || undefined}
                           aria-describedby={errorPath === path ? 'preset-error' : undefined}
-                          onChange={(e) => onEdit(path, e.target.value)}
+                          onChange={(e) => edit(path, e.target.value)}
                         />
-                        <ResetButton draft={draft} path={path} label={`Reset ${mode} ${human(key)}`} onReset={onReset} />
+                        <ResetButton draft={draft} path={path} label={`Reset ${mode} ${human(key)}`} onReset={reset} />
                       </div>
                     </div>
                   )

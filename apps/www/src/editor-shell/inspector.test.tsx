@@ -73,3 +73,15 @@ it('ControlRow ties the label to its control and marks edited rows', () => {
   expect(html).toContain('for="n"')
   expect(html).toContain('data-edited="true"')
 })
+
+it('SliderRow parks the range thumb at the minimum for partial or invalid text', () => {
+  const range = (value: string) => {
+    const html = renderToStaticMarkup(<SliderRow {...slider} value={value} />)
+    return /<input[^>]*type="range"[^>]*>/.exec(html)![0]
+  }
+  for (const value of ['-', 'invalid', ''])
+    expect(range(value)).toContain('value="0"')
+  expect(range('1.25')).toContain('value="1.25"')
+  // The text field keeps what was typed.
+  expect(renderToStaticMarkup(<SliderRow {...slider} value="-" />)).toContain('value="-"')
+})

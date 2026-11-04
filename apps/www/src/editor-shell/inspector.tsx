@@ -72,6 +72,8 @@ export function SliderRow({
   onChange(value: string): void
   onReset(): void
 }) {
+  // A half-typed or invalid value parks the thumb at the minimum, not the browser's midpoint.
+  const thumb = value.trim() !== '' && Number.isFinite(Number(value)) ? value : String(min)
   const shared = {
     value,
     'aria-invalid': invalid ? (true as const) : undefined,
@@ -107,6 +109,7 @@ export function SliderRow({
         max={max}
         step={step}
         {...shared}
+        value={thumb}
       />
     </div>
   )

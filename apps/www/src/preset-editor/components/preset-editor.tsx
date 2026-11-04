@@ -91,6 +91,7 @@ export default function PresetEditor() {
   >(null)
   const dialog = useRef<HTMLDialogElement>(null),
     identityDialog = useRef<HTMLDialogElement>(null),
+    identityOpener = useRef<HTMLElement | null>(null),
     cancelButton = useRef<HTMLButtonElement>(null),
     returnFocus = useRef<HTMLElement | null>(null)
   const undoButton = useRef<HTMLButtonElement>(null),
@@ -239,7 +240,13 @@ export default function PresetEditor() {
             {
               id: 'identity',
               label: 'ID & revision…',
-              onSelect: () => identityDialog.current?.showModal(),
+              onSelect: () => {
+                // The menu light-dismisses; remember its trigger so closing can return there.
+                identityOpener.current = document.querySelector<HTMLElement>(
+                  'button[aria-label="More actions"]',
+                )
+                identityDialog.current?.showModal()
+              },
             },
             {
               id: 'reset-tokens',
@@ -513,6 +520,11 @@ export default function PresetEditor() {
         ref={identityDialog}
         className={styles.confirmDialog}
         aria-labelledby="preset-identity-heading"
+        onClose={() => {
+          // Fires for Done and Escape alike.
+          identityOpener.current?.focus()
+          identityOpener.current = null
+        }}
       >
         <h2 id="preset-identity-heading">ID &amp; revision</h2>
         <p className={styles.confirmText}>
