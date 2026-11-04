@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { validateRecipe } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
 import { withRecipeColor } from '../model'
-import { PropertiesPanel, VariantPicker } from './properties-panel'
+import { PropertiesPanel, VariantPicker, shownNumber } from './properties-panel'
 
 const noop = () => {}
 const recipe = validateRecipe(exampleRecipe)
@@ -51,4 +51,19 @@ it('orders the inspector sections as the canvas does', () => {
   const positions = titles.map((title) => html.indexOf(`>${title}</h2>`))
   expect(positions.every((position) => position >= 0)).toBe(true)
   expect([...positions].sort((a, b) => a - b)).toEqual(positions)
+})
+
+it('shows typed number text only while its error is reported or it spells the saved value', () => {
+  expect(shownNumber('3', 1.5, 0, 2, true)).toBe('3')
+  expect(shownNumber('3', 1.5, 0, 2, false)).toBe('1.5')
+  expect(shownNumber('1.', 1, 0, 2, false)).toBe('1.')
+  expect(shownNumber('1.2', 1, 0, 2, false)).toBe('1')
+  expect(shownNumber(undefined, undefined, 0, 2, false)).toBe('')
+})
+
+it('keeps the recipe ID read-only in the top bar', async () => {
+  const { renderToStaticMarkup: render } = await import('react-dom/server')
+  const { ButtonEditor } = await import('./button-editor')
+  const html = render(<ButtonEditor />)
+  expect(html).toMatch(/<input id="button-recipe-id"[^>]*readOnly=""/)
 })

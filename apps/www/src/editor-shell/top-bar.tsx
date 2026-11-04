@@ -29,6 +29,7 @@ export function EditorTopBar({
     value: string
     maxLength: number
     invalid?: boolean
+    readOnly?: boolean
     onChange(value: string): void
   }
   revision: string
@@ -53,6 +54,7 @@ export function EditorTopBar({
           type="text"
           value={nameField.value}
           maxLength={nameField.maxLength}
+          readOnly={nameField.readOnly}
           aria-invalid={nameField.invalid ? true : undefined}
           onChange={(event) => nameField.onChange(event.target.value)}
         />

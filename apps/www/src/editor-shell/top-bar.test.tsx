@@ -50,3 +50,15 @@ it('OverflowMenu puts destructive items last after a separator', () => {
   expect(html.indexOf('role="separator"')).toBeLessThan(html.indexOf('Delete'))
   expect(html).toContain('disabled=""')
 })
+
+it('EditorTopBar can render the name field read-only', () => {
+  const props = {
+    crumbs: ['A'], revision: 'r1', status: '', undo: history, redo: history,
+    menu: { label: 'More', items: [] }, primary: null,
+  }
+  const field = (readOnly?: boolean) => renderToStaticMarkup(
+    <EditorTopBar {...props} nameField={{ id: 'n', label: 'Recipe ID', value: 'x', maxLength: 9, readOnly, onChange: noop }} />,
+  )
+  expect(field(true)).toContain('readOnly=""')
+  expect(field()).not.toContain('readOnly')
+})

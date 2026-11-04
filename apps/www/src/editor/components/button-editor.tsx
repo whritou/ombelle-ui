@@ -44,15 +44,11 @@ export function ButtonEditor() {
   const [preservedRecoveries, setPreservedRecoveries] = useState<string[]>([])
   const [diagnostic, setDiagnostic] = useState<CompileDiagnostic | null>(null)
   const [status, setStatus] = useState('Loading local draft…')
-  // Text typed into the recipe ID field, kept while it is not yet a valid ID.
-  const [idText, setIdText] = useState<string | null>(null)
   const draft = history.present
   const compilation = useCompiler(draft.recipe)
   const undoButton = useRef<HTMLButtonElement>(null)
   const redoButton = useRef<HTMLButtonElement>(null)
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
-
-  useEffect(() => setIdText(null), [draft.recipe.id])
 
   useEffect(() => {
     focusAfterHistory.current?.focus()
@@ -170,9 +166,8 @@ export function ButtonEditor() {
     <EditorTopBar
       crumbs={['Components', 'Button']}
       nameField={{
-        id: 'button-recipe-id', label: 'Recipe ID', value: idText ?? draft.recipe.id, maxLength: 80,
-        invalid: displayedDiagnostic?.path === '/id',
-        onChange: (value) => { setIdText(value); edit({ ...draft.recipe, id: value }, 'id') },
+        id: 'button-recipe-id', label: 'Recipe ID', value: draft.recipe.id, maxLength: 80, readOnly: true,
+        onChange: () => {},
       }}
       revision={`r${draft.recipe.revision}`}
       status={status}

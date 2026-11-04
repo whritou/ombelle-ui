@@ -176,18 +176,24 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic }: ColorProps)
   )
 }
 
+/**
+ * Typed text shows only while its error is still reported, or while it is another spelling of the saved
+ * value ("1." for 1). Once another edit clears the error, the field shows the recipe's value again.
+ */
+export function shownNumber(text: string | undefined, current: number | undefined, min: number, max: number, reported: boolean): string {
+  const valid = text !== undefined && numberPattern.test(text) && Number(text) >= min && Number(text) <= max
+  if (text !== undefined && ((!valid && reported) || (valid && Number(text) === current))) return text
+  return current === undefined ? '' : String(current)
+}
+
 export function PropertiesPanel({ recipe, diagnostic, onChange, onDiagnostic }: Props) {
   // Text being typed in a number field stays local until it is a valid value in range.
   const [typing, setTyping] = useState<Partial<Record<OverrideKey, string>>>({})
   const changeProp = (key: keyof Recipe['props'], value: string | boolean) =>
     onChange({ ...recipe, props: { ...recipe.props, [key]: value } }, `props.${key}`)
   const inRange = (raw: string, min: number, max: number) => numberPattern.test(raw) && Number(raw) >= min && Number(raw) <= max
-  const display = (key: OverrideKey, min: number, max: number) => {
-    const current = recipe.overrides[key], text = typing[key]
-    // Keep what was typed while it is invalid, or is another spelling of the saved value ("1." for 1).
-    if (text !== undefined && (!inRange(text, min, max) || Number(text) === current)) return text
-    return current === undefined ? '' : String(current)
-  }
+  const display = (key: OverrideKey, min: number, max: number) =>
+    shownNumber(typing[key], recipe.overrides[key], min, max, diagnostic?.path === `/overrides/${key}`)
   const update = (key: OverrideKey, raw: string, min: number, max: number, unit: string) => {
     setTyping({ ...typing, [key]: raw })
     if (!inRange(raw, min, max)) {
