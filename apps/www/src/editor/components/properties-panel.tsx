@@ -1,10 +1,14 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
-import type { Recipe, RecipeButtonVariant, RecipeColorMode, RecipeColorRole, StyleFamily } from '@ombelle/contracts'
+import {
+  recipeIcons, recipeStateColorKey,
+  type Recipe, type RecipeButtonVariant, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole,
+  type RecipeIconName, type StyleFamily,
+} from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
-import { RECIPE_COLOR_PATTERN, recipeColor, withRecipeColor } from '../model'
+import { RECIPE_COLOR_PATTERN, recipeColor, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
 
 type Props = {
@@ -16,7 +20,33 @@ type Props = {
   onDiagnostic: (path: string, message: string) => void
 }
 
-type OverrideKey = 'radiusRem' | 'borderWidthPx' | 'minHeightPx' | 'shadowOffsetXPx' | 'shadowOffsetYPx'
+type OverrideKey = 'radiusRem' | 'borderWidthPx' | 'minHeightPx' | 'shadowOffsetXPx' | 'shadowOffsetYPx' |
+  'paddingXPx' | 'paddingYPx' | 'gapPx' | 'fontWeight' | 'fontSizePx' | 'letterSpacingEm'
+type Slider = { key: OverrideKey; label: string; min: number; max: number; step: number; unit: string }
+const spacingSliders: readonly Slider[] = [
+  { key: 'paddingXPx', label: 'Horizontal padding', min: 0, max: 48, step: 1, unit: 'px' },
+  { key: 'paddingYPx', label: 'Vertical padding', min: 0, max: 24, step: 1, unit: 'px' },
+  { key: 'gapPx', label: 'Icon gap', min: 0, max: 24, step: 1, unit: 'px' },
+]
+const typeSliders: readonly Slider[] = [
+  { key: 'fontWeight', label: 'Font weight', min: 300, max: 800, step: 100, unit: '' },
+  { key: 'fontSizePx', label: 'Font size', min: 11, max: 24, step: 1, unit: 'px' },
+  { key: 'letterSpacingEm', label: 'Letter spacing', min: -0.05, max: 0.2, step: 0.01, unit: 'em' },
+]
+const iconNames = Object.keys(recipeIcons) as RecipeIconName[]
+const iconLabel = (name: string) => name.charAt(0).toUpperCase() + name.slice(1).replaceAll('-', ' ')
+const iconPositions = [
+  { value: 'start', label: 'Leading' },
+  { value: 'end', label: 'Trailing' },
+] as const
+type ColorState = 'base' | 'hover' | 'pressed'
+const colorStates = [
+  { value: 'base', label: 'Base' },
+  { value: 'hover', label: 'Hover' },
+  { value: 'pressed', label: 'Pressed' },
+] as const
+const colorKey = (state: ColorState, role: RecipeColorRole): RecipeColorKey =>
+  state === 'base' ? role : recipeStateColorKey(state, role)
 const sliders = [
   { key: 'radiusRem', label: 'Corner radius', min: 0, max: 2, step: 0.1, unit: 'rem' },
   { key: 'borderWidthPx', label: 'Border width', min: 0, max: 4, step: 0.1, unit: 'px' },
@@ -91,11 +121,14 @@ export function VariantPicker({ value, onChange }: { value: RecipeButtonVariant;
   )
 }
 
-function SwitchRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange(next: boolean): void }) {
+function SwitchRow({ id, label, checked, onChange, describedBy }: {
+  id: string; label: string; checked: boolean; onChange(next: boolean): void; describedBy?: string
+}) {
   return (
     <div className="be-switch-row">
       <label htmlFor={id}>{label}</label>
-      <button id={id} type="button" role="switch" aria-checked={checked} className="be-switch" onClick={() => onChange(!checked)} />
+      <button id={id} type="button" role="switch" aria-checked={checked} aria-describedby={describedBy} className="be-switch"
+        onClick={() => onChange(!checked)} />
     </div>
   )
 }
@@ -111,21 +144,27 @@ function StackField({ label, children }: { label: string; children: ReactNode })
 
 type ColorProps = Pick<Props, 'recipe' | 'diagnostic' | 'onChange' | 'onDiagnostic'>
 
-function ColorFields({ recipe, diagnostic, onChange, onDiagnostic }: ColorProps) {
+function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state }: ColorProps & { state: ColorState }) {
   // Text being typed stays local until it is a complete color, then it becomes a recipe edit.
   const [typing, setTyping] = useState<Record<string, string>>({})
-  const commit = (mode: RecipeColorMode, role: RecipeColorRole, value: string | undefined) =>
-    onChange(withRecipeColor(recipe, mode, role, value), `overrides.colors.${mode}.${role}`)
+  const commit = (mode: RecipeColorMode, role: RecipeColorRole, value: string | undefined) => {
+    const key = colorKey(state, role)
+    onChange(withRecipeColor(recipe, mode, key, value), `overrides.colors.${mode}.${key}`)
+  }
+  const fallback = state === 'base' ? 'Preset' : 'Family'
 
   return (
     <div className="be-colors">
-      {colorRoles.map(({ role, label }) => (
+      {colorRoles.map(({ role, label: roleLabel }) => {
+        const label = state === 'base' ? roleLabel : `${state === 'hover' ? 'Hover' : 'Pressed'} ${roleLabel.toLowerCase()}`
+        return (
         <div className="be-color-role" role="group" aria-labelledby={`color-role-${role}`} key={role}>
           <span id={`color-role-${role}`} className="be-color-role-name">{label}</span>
           <div className="be-color-chips">
             {colorModes.map(({ mode, label: modeLabel }) => {
-              const key = `${mode}-${role}`, path = `/overrides/colors/${mode}/${role}`
-              const { value, overridden } = recipeColor(recipe, mode, role)
+              const field = colorKey(state, role)
+              const key = `${mode}-${field}`, path = `/overrides/colors/${mode}/${field}`
+              const { value, overridden } = recipeColor(recipe, mode, field)
               const text = typing[key] ?? (overridden ? value : '')
               const name = `${modeLabel} ${label.toLowerCase()}`
               const invalid = diagnostic?.path === path
@@ -138,7 +177,7 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic }: ColorProps)
                         onChange={(event) => commit(mode, role, event.target.value)} />
                     </span>
                     <input id={`color-${key}`} type="text" className="colorText" aria-label={name} value={text}
-                      placeholder="Preset" title={overridden ? undefined : `Preset: ${value}`} maxLength={80} spellCheck={false}
+                      placeholder={fallback} title={overridden ? undefined : state === 'base' ? `Preset: ${value}` : `Family ${state} color, from ${value}`} maxLength={80} spellCheck={false}
                       data-overridden={overridden || undefined} aria-invalid={invalid || undefined}
                       aria-describedby={invalid ? `color-${key}-error` : undefined}
                       onChange={(event) => {
@@ -154,8 +193,8 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic }: ColorProps)
                         setTyping(rest)
                       }} />
                     {overridden && (
-                      <button type="button" className="colorReset" aria-label={`Reset ${mode} ${label.toLowerCase()} to preset`}
-                        title={`Reset ${mode} ${label.toLowerCase()} to preset`}
+                      <button type="button" className="colorReset" aria-label={`Reset ${mode} ${label.toLowerCase()} to ${fallback.toLowerCase()}`}
+                        title={`Reset ${mode} ${label.toLowerCase()} to ${fallback.toLowerCase()}`}
                         onClick={() => {
                           const rest = { ...typing }
                           delete rest[key]
@@ -174,7 +213,8 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic }: ColorProps)
             })}
           </div>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -200,7 +240,11 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
   const update = (key: OverrideKey, raw: string, min: number, max: number, unit: string) => {
     setTyping({ ...typing, [key]: raw })
     if (!inRange(raw, min, max)) {
-      onDiagnostic(`/overrides/${key}`, `Enter a value from ${min} to ${max} ${unit}.`)
+      onDiagnostic(`/overrides/${key}`, `Enter a value from ${min} to ${max}${unit ? ' ' + unit : ''}.`)
+      return
+    }
+    if (key === 'fontWeight' && Number(raw) % 100 !== 0) {
+      onDiagnostic(`/overrides/${key}`, 'Enter a weight in steps of 100, such as 500 or 600.')
       return
     }
     onChange({ ...recipe, overrides: { ...recipe.overrides, [key]: Number(raw) } }, `overrides.${key}`)
@@ -215,6 +259,22 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
     document.getElementById(focusId)?.focus()
     onChange({ ...recipe, overrides }, `overrides.${key}`)
   }
+  const slider = ({ key, label, min, max, step, unit }: Slider) => {
+    const id = `button-${key}`, path = `/overrides/${key}`
+    return (
+      <div key={key}>
+        <SliderRow id={id} label={label} value={display(key, min, max)} min={min} max={max} step={step} unit={unit}
+          edited={recipe.overrides[key] !== undefined} invalid={diagnostic?.path === path}
+          describedBy={diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined}
+          onChange={(raw) => update(key, raw, min, max, unit)} onReset={() => reset(key, `${id}-number`)} />
+        <FieldError diagnostic={diagnostic} path={path} />
+      </div>
+    )
+  }
+  const [colorState, setColorState] = useState<ColorState>('base')
+  const icon = recipe.icon
+  const iconOnly = icon?.iconOnly ?? false
+  const changeIcon = (next: Partial<NonNullable<Recipe['icon']>> | undefined) => onChange(withRecipeIcon(recipe, next), 'icon')
 
   return (
     <div className="properties">
@@ -224,11 +284,13 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
       </InspectorSection>
       <InspectorSection id="inspector-content" title="Content">
         <div className="be-stack">
-          <label htmlFor="button-text" className="be-stack-label">Button text</label>
+          <label htmlFor="button-text" className="be-stack-label">{iconOnly ? 'Accessible label' : 'Button text'}</label>
           <input id="button-text" type="text" maxLength={200} value={recipe.content}
             aria-invalid={diagnostic?.path === '/content' || undefined}
+            aria-describedby={iconOnly ? 'button-text-hint' : undefined}
             onChange={(event) => onChange({ ...recipe, content: event.target.value }, 'content')} />
         </div>
+        {iconOnly && <p id="button-text-hint" className="colorHint">Icon-only Buttons show no text. Screen readers announce this label.</p>}
         <FieldError diagnostic={diagnostic} path="/content" />
       </InspectorSection>
       <InspectorSection id="inspector-variant" title="Variant">
@@ -251,23 +313,66 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
         <SwitchRow id="button-loading" label="Loading" checked={recipe.props.loading ?? false}
           onChange={(next) => changeProp('loading', next)} />
       </InspectorSection>
+      <InspectorSection id="inspector-icon" title="Icon">
+        <div className="be-stack">
+          <label htmlFor="button-icon" className="be-stack-label">Icon</label>
+          <span className="be-icon-select">
+            <select id="button-icon" value={icon?.name ?? ''}
+              onChange={(event) => changeIcon(event.target.value ? { ...icon, name: event.target.value as RecipeIconName } : undefined)}>
+              <option value="">None</option>
+              {iconNames.map((name) => <option key={name} value={name}>{iconLabel(name)}</option>)}
+            </select>
+            {icon && (
+              <button type="button" className="colorReset" aria-label="Remove icon" title="Remove icon"
+                onClick={() => {
+                  document.getElementById('button-icon')?.focus()
+                  changeIcon(undefined)
+                }}>
+                <RotateCcw aria-hidden="true" size={14} />
+              </button>
+            )}
+          </span>
+        </div>
+        <FieldError diagnostic={diagnostic} path="/icon" />
+        {icon && (
+          <>
+            <StackField label="Position">
+              <SegmentedControl label="Icon position" value={icon.position ?? 'start'} options={iconPositions}
+                onChange={(position) => changeIcon({ ...icon, position })} />
+            </StackField>
+            <SwitchRow id="button-icon-only" label="Icon only" checked={iconOnly} describedBy="button-icon-only-hint"
+              onChange={(next) => changeIcon({ ...icon, iconOnly: next })} />
+            <p id="button-icon-only-hint" className="colorHint">
+              {iconOnly ? 'The Content field is the accessible label.' : 'Hides the text and keeps it as the accessible label.'}
+            </p>
+          </>
+        )}
+      </InspectorSection>
+      <InspectorSection id="inspector-spacing" title="Padding & gap" meta="Text sizes">
+        <p className="colorHint">Applies to the S, M and L sizes. The Icon size and icon-only Buttons stay square.</p>
+        {spacingSliders.map(slider)}
+      </InspectorSection>
+      <InspectorSection id="inspector-type" title="Typography">
+        {typeSliders.map(slider)}
+        <div className="be-uppercase">
+          <SwitchRow id="button-uppercase" label="Uppercase" checked={recipe.overrides.uppercase ?? false}
+            onChange={(next) => onChange(withRecipeOverride(recipe, 'uppercase', next ? true : undefined), 'overrides.uppercase')} />
+        </div>
+        <FieldError diagnostic={diagnostic} path="/overrides/uppercase" />
+      </InspectorSection>
       <InspectorSection id="inspector-colors" title="Colors" meta="Light and dark">
-        <p className="colorHint">Hex such as #1d4ed8 or OKLCH such as oklch(55% 0.2 260). Empty fields use the preset.</p>
-        <ColorFields recipe={recipe} diagnostic={diagnostic} onChange={onChange} onDiagnostic={onDiagnostic} />
+        <StackField label="State">
+          <SegmentedControl label="Color state" value={colorState} options={colorStates} onChange={(state) => setColorState(state as ColorState)} />
+        </StackField>
+        <p className="colorHint">
+          {colorState === 'base'
+            ? 'Hex such as #1d4ed8 or OKLCH such as oklch(55% 0.2 260). Empty fields use the preset.'
+            : `Colors while the Button is ${colorState === 'hover' ? 'hovered' : 'pressed'}. Empty fields keep the style family's ${colorState} color.`}
+        </p>
+        <ColorFields key={colorState} state={colorState} recipe={recipe} diagnostic={diagnostic} onChange={onChange} onDiagnostic={onDiagnostic} />
       </InspectorSection>
       <InspectorSection id="inspector-shape" title="Shape & depth">
-        {sliders.map(({ key, label, min, max, step, unit }) => {
-          const id = `button-${key}`, path = `/overrides/${key}`
-          return (
-            <div key={key}>
-              <SliderRow id={id} label={label} value={display(key, min, max)} min={min} max={max} step={step} unit={unit}
-                edited={recipe.overrides[key] !== undefined} invalid={diagnostic?.path === path}
-                describedBy={diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined}
-                onChange={(raw) => update(key, raw, min, max, unit)} onReset={() => reset(key, `${id}-number`)} />
-              <FieldError diagnostic={diagnostic} path={path} />
-            </div>
-          )
-        })}
+        {sliders.map(slider)}
         <span className="be-stack-label" aria-hidden="true">Shadow offset</span>
         <div role="group" aria-label="Shadow offset" className="be-shadow-row">
           {shadows.map(({ key, axis, min, max }) => {

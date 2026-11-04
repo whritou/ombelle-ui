@@ -10,6 +10,11 @@ import {
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
 export { resolveRecipePreset } from './recipe-preset.js'
+/** The pinned icon package that recipe Buttons with an icon depend on. */
+export const recipeIconDependency = {
+  name: 'lucide-react',
+  version: runtimeDependencies['lucide-react'],
+} as const
 export type ComponentTemplate = {
   id: ComponentId
   content: string

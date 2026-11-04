@@ -1,10 +1,16 @@
 import {
+  normalizeRecipe,
   validateRecipe,
   type NormalizedRecipe,
   type RecipeCompileResult,
   type Artifact,
 } from '@ombelle/contracts'
-import { getCatalog, getTemplate, resolveRecipePreset } from '@ombelle/catalog'
+import {
+  getCatalog,
+  getTemplate,
+  recipeIconDependency,
+  resolveRecipePreset,
+} from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
 import typescript from 'prettier/plugins/typescript'
 import estree from 'prettier/plugins/estree'
@@ -25,17 +31,10 @@ export async function compileRecipe(input: {
     builtin = resolveRecipePreset(raw.presetRef),
     catalog = getCatalog(raw.presetRef.catalogRelease)
   const preset = await resolvePreset(builtin, catalog)
-  const data: NormalizedRecipe = {
-    ...raw,
-    props: {
-      variant: preset.data.componentDefaults?.button?.variant ?? 'default',
-      size: preset.data.componentDefaults?.button?.size ?? 'default',
-      type: 'button',
-      disabled: false,
-      loading: false,
-      ...raw.props,
-    },
-  }
+  const data: NormalizedRecipe = normalizeRecipe(
+    raw,
+    preset.data.componentDefaults?.button,
+  )
   const recipe = { data, hash: await sha256(canonicalize(data)) },
     provenance = {
       catalogRelease: raw.presetRef.catalogRelease,
@@ -72,13 +71,18 @@ export async function compileRecipe(input: {
         scope,
         darkSelector,
         variant: data.props.variant,
+        icon: data.icon,
       }),
     },
     {
       logicalPath:
         'examples/recipes/' + data.id + '/r' + data.revision + '.tsx',
       kind: 'usage',
-      content: `import {RecipeButton} from '@/components/ui/${base}/button'\nexport function Example(){return <RecipeButton variant=${JSON.stringify(data.props.variant)} size=${JSON.stringify(data.props.size)} type=${JSON.stringify(data.props.type)} disabled={${data.props.disabled}} loading={${data.props.loading}}>{${JSON.stringify(data.content)}}</RecipeButton>}`,
+      content: `import {RecipeButton} from '@/components/ui/${base}/button'\nexport function Example(){return <RecipeButton variant=${JSON.stringify(data.props.variant)} size=${JSON.stringify(data.props.size)} type=${JSON.stringify(data.props.type)} disabled={${data.props.disabled}} loading={${data.props.loading}}${
+        data.icon?.iconOnly
+          ? ` aria-label={${JSON.stringify(data.content)}} />}`
+          : `>{${JSON.stringify(data.content)}}</RecipeButton>}`
+      }`,
     },
     { logicalPath: 'lib/utils.ts', kind: 'utility', content: catalog.utility },
   ]
@@ -97,9 +101,12 @@ export async function compileRecipe(input: {
   }
   return {
     artifacts,
-    dependencies: template.dependencies.filter(
-      ({ name }) => name !== '@radix-ui/react-slot',
-    ),
+    dependencies: [
+      ...template.dependencies.filter(
+        ({ name }) => name !== '@radix-ui/react-slot',
+      ),
+      ...(data.icon ? [{ ...recipeIconDependency }] : []),
+    ],
     recipe,
     preset,
     scope,

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
 import { forcedStateSelector } from '../../www/src/editor/forced-states'
 import { editorButtons } from './generated/editor-buttons'
+import { RecipeIcon } from './recipe-icon'
 import './editor-preview.css'
 
 /**
@@ -97,9 +98,27 @@ function EditorPreview() {
         disabled={state.recipe.props.disabled || state.recipe.props.loading || state.forcedState === 'disabled' || state.forcedState === 'loading'}
         aria-busy={state.recipe.props.loading || state.forcedState === 'loading' || undefined}
         data-forced-state={state.forcedState}
-      >{(state.recipe.props.loading || state.forcedState === 'loading') && <span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />}{state.recipe.content}</button>
+        {...recipeIconAttributes(state.recipe)}
+      >{(state.recipe.props.loading || state.forcedState === 'loading') && <span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />}{recipeChildren(state.recipe)}</button>
     </Button>}
   </div>
+}
+
+type PreviewRecipe = PreviewRender['state']['recipe']
+
+/** The attributes the installed RecipeButton sets for its icon, so the scoped CSS matches. */
+function recipeIconAttributes(recipe: PreviewRecipe) {
+  if (!recipe.icon) return {}
+  return recipe.icon.iconOnly
+    ? { 'aria-label': recipe.content, 'data-icon-only': '' }
+    : { 'data-icon-position': recipe.icon.position ?? 'start' }
+}
+
+function recipeChildren(recipe: PreviewRecipe) {
+  if (!recipe.icon) return recipe.content
+  const glyph = <RecipeIcon name={recipe.icon.name} slot="recipe-button-icon" />
+  if (recipe.icon.iconOnly) return glyph
+  return recipe.icon.position === 'end' ? <>{recipe.content}{glyph}</> : <>{glyph}{recipe.content}</>
 }
 
 export function mountEditorPreview(element: HTMLElement) {
