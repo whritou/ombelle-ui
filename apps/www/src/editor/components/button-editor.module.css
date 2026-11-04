@@ -51,7 +51,7 @@
 .primary { min-width: 0; display: grid; gap: 1.25rem; }
 /* Preview and output read as cards; the rail stays beside them while scrolling. */
 .previewSection, .codeSection { border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: 1.25rem; box-shadow: var(--shadow-soft); }
-.rail { position: sticky; top: 1rem; max-height: calc(100dvh - 2rem); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: .25rem 1rem 0; }
+.rail { position: sticky; top: calc(var(--editor-bar-height, 0px) + 1rem); max-height: calc(100dvh - var(--editor-bar-height, 0px) - 2rem); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: .25rem 1rem 0; }
 .rail section:last-child { border-bottom: 0; }
 .sectionTitle { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
 .sectionTitle h2, .root :global(.sectionTitle) h2, .root :global(.railHeading) h2 { font-size: 1.22rem; line-height: 1.2; letter-spacing: -.02em; margin-bottom: .3rem; }

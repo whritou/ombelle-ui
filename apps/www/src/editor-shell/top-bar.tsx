@@ -1,7 +1,7 @@
 'use client'
 
 import { Redo2, Undo2 } from 'lucide-react'
-import type { ReactNode, Ref } from 'react'
+import { useEffect, useRef, type ReactNode, type Ref } from 'react'
 import styles from './editor-shell.module.css'
 import { OverflowMenu, type OverflowItem } from './overflow-menu'
 
@@ -40,8 +40,9 @@ export function EditorTopBar({
   primary: ReactNode
   extra?: ReactNode
 }) {
+  const bar = useStickyBarHeight()
   return (
-    <header className={styles.topBar}>
+    <header ref={bar} className={styles.topBar}>
       <nav aria-label="Breadcrumb" className={styles.crumbs}>
         {crumbs.map((crumb, index) => (
           <span key={`${index}-${crumb}`}>{crumb}</span>
@@ -90,4 +91,27 @@ export function EditorTopBar({
       </div>
     </header>
   )
+}
+
+/** CSS variable holding the pinned top bar's height, for sticky panels below it. */
+export const editorBarHeightVar = '--editor-bar-height'
+
+// The bar wraps on narrow screens, so its height is measured, not assumed.
+function useStickyBarHeight() {
+  const ref = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const element = ref.current
+    if (!element || typeof ResizeObserver === 'undefined') return
+    const root = document.documentElement
+    const update = () =>
+      root.style.setProperty(editorBarHeightVar, `${element.getBoundingClientRect().height}px`)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty(editorBarHeightVar)
+    }
+  }, [])
+  return ref
 }

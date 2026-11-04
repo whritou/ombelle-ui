@@ -1,6 +1,10 @@
 /* Shared editor shell. Colours come from the site tokens in globals.css. */
 
+/* Pinned while the page scrolls; the site header scrolls away on editor pages. */
 .topBar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
