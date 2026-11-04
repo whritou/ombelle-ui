@@ -43,11 +43,11 @@ it('announces a one-line summary and keeps the pair list outside the live region
   )!
   const failing = report.pairs.filter((pair) => !pair.passes).length
   const html = renderToStaticMarkup(<GlassPanel report={report} />)
-  const live = new RegExp(`<p role="status" id="${glassReadoutId}">([^<]*)</p>`).exec(html)
+  const live = new RegExp(`<p role="status" id="${glassReadoutId}" data-status="fail">([^<]*)</p>`).exec(html)
   expect(live?.[1]).toBe(
     `Contrast bound fails at glass opacity 0.3: ${failing} pairs are below 4.5:1. ` +
       `Minimum passing glass opacity: ${report.minimumOpacity}. ` +
-      'Export and publication are disabled until every pair passes.',
+      'The preview shows your settings; Get code and export stay disabled until every pair passes.',
   )
   expect(html).toContain(`<ul id="${glassPairsId}" aria-label="Failing contrast pairs">`)
   expect(html.match(/<li>light: |<li>dark: /g)).toHaveLength(failing)

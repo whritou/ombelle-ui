@@ -828,3 +828,124 @@
 .editor .disclosure > summary {
   padding: 4px 0;
 }
+
+/* Liquid glass: one quiet status bar instead of two warning cards. Only a
+   failing contrast bound is coloured. Headings stay for screen readers. */
+.glass {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 4px 24px;
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 6px 14px;
+}
+.glass > section {
+  flex: 1 1 22rem;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+.editor .glass h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.editor .glass p,
+.editor .glass li,
+.editor .glass summary {
+  color: var(--muted-foreground);
+  font-size: 12.5px;
+}
+.editor .glass details {
+  display: inline;
+}
+.editor .glass summary {
+  display: inline;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.editor .glass p[data-status='fail'],
+.editor .glass p[data-status='fail'] + ul li {
+  color: var(--destructive);
+}
+
+/* Confirmation dialog: centred (the site reset removes the native auto
+   margins) with a short message and an optional list of changed values. */
+.editor .confirmDialog {
+  position: fixed;
+  inset: 0;
+  width: min(30rem, calc(100vw - 32px));
+  height: fit-content;
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 22px 24px 20px;
+  border-radius: 16px;
+}
+.editor .confirmDialog h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.editor .confirmText {
+  margin: 0 0 12px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+.editor .confirmChanges {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  font-size: 13px;
+}
+.editor .confirmChanges summary {
+  padding: 2px 0;
+  font-weight: 500;
+}
+.editor .confirmChanges ul {
+  max-height: 14rem;
+  overflow: auto;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.editor .confirmChanges li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.editor .confirmValues {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.editor .confirmValues i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.editor .confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.editor .confirmPrimary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
