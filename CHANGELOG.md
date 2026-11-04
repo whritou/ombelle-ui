@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.0 — 4 November 2026
+
+- Add `ombelle` as a stable style family beside flat, minimalist and neo-brutalism: a pink-and-ink look with pill-shaped controls, ink outlines, hard offset shadows and key-press states. The `styleFamily` enum in the preset schema gains `ombelle`, and the catalog gains the family stylesheet, a built-in preset and per-component styles. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged; output for the other families is byte-identical. Installers at 0.4.0 or older reject `ombelle` presets and codes, so install them with 0.5.0.
+- Website: the preset editor, Button editor, preview and documentation playground offer Ombelle, and the recipe and component-preset fixtures include it.
+- Grow the standalone consumer matrix from 36 to 40 rows with four ombelle consumers (pnpm and npm, Vite and Next), and the browser coverage contract from 404 to 534 cases.
+- Compare computed colours in the browser parity helpers as sRGB within one channel step and 0.01 alpha, because Next lowers `oklch()` to `lab()`; every other property is still compared exactly.
+
 ## 0.4.0 — 4 November 2026
 
 - Website: rebuild the preset editor on a shared editor shell with a top bar and inspector, sliders that keep focus and clamp the thumb, and a review drawer that holds contrast checks and export. Contrast pairs that were not evaluated are listed apart from passing ones, and the draft contrast notice stays visible.

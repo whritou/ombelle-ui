@@ -1,5 +1,5 @@
 import type { Recipe } from '@ombelle/contracts'
-import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
+import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.ts'
 export function recipeFixtures(): readonly Recipe[] {
   return supportedStyleFamilies.map((family) => ({
     schemaVersion: '1.0',
