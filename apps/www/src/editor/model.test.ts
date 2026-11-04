@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import { styleFamilies, validateRecipe } from '@ombelle/contracts'
 import {
-  changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, updateDraftRecipe, withRecipeColor,
+  changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
   type EditorView,
 } from './model.js'
 import { serializeRecipe } from './storage.js'
@@ -109,5 +109,20 @@ describe('Button editor model', () => {
     expect(draft.recipe.overrides).toEqual({})
     expect(() => updateDraftRecipe(draft, withRecipeColor(draft.recipe, 'light', 'border', 'oklch(0.5 0.9 20)')))
       .toThrow(expect.objectContaining({ path: '/overrides/colors/light/border' }))
+  })
+  it('resets content, props and overrides but keeps the family and identity', () => {
+    const start = createEditorDraft('flat').recipe
+    const edited = updateDraftRecipe(changeDraftFamily(createEditorDraft('flat'), 'ombelle'), {
+      ...changeDraftFamily(createEditorDraft('flat'), 'ombelle').recipe,
+      id: 'rc_mine', revision: 4, content: 'Ship it',
+      props: { ...start.props, variant: 'outline', size: 'lg' },
+      overrides: { radiusRem: 0.25, colors: { light: { background: '#336699' } } },
+    })
+    const reset = resetDraftRecipe(edited, start)
+    expect(reset.recipe.content).toBe(start.content)
+    expect(reset.recipe.props).toEqual(start.props)
+    expect(reset.recipe.overrides).toEqual({})
+    expect(draftFamily(reset.recipe)).toBe('ombelle')
+    expect([reset.recipe.id, reset.recipe.revision]).toEqual([edited.recipe.id, edited.recipe.revision])
   })
 })

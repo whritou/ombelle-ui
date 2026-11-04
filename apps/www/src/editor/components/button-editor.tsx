@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
-import { changeDraftFamily, draftFamily, experimentalNotice, type EditorDraft, type EditorView } from '../model'
+import { changeDraftFamily, draftFamily, experimentalNotice, resetDraftRecipe, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
 import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
 import { resultMatchesDraft } from '../result-match'
@@ -112,6 +112,16 @@ export function ButtonEditor() {
     catch (error) { setDiagnostic({ code: 'INVALID_PRESET', message: error instanceof Error ? error.message : 'Unsupported preset.', path: '/presetRef' }) }
   }
 
+  function resetRecipe() {
+    try {
+      setHistory(recordDraft(history, resetDraftRecipe(draft, initialDraft.recipe).recipe, { groupKey: 'reset', at: Date.now() }))
+      setDiagnostic(null)
+      setStatus('Recipe reset to the starting content and family values. Undo restores your changes.')
+    } catch {
+      setStatus('Recipe reset failed. Your draft is unchanged.')
+    }
+  }
+
   function saveDownload() {
     try {
       const text = serializeRecipe(draft)
@@ -158,6 +168,7 @@ export function ButtonEditor() {
       label: `Download preserved draft${preservedRecoveries.length === 1 ? '' : ` ${index + 1}`}`,
       onSelect: () => downloadPreserved(index),
     })),
+    { id: 'reset-recipe', label: 'Reset recipe', destructive: true, disabled: recovery !== null, onSelect: resetRecipe },
   ]
 
   return <main className={styles.root} aria-label="Button editor">
