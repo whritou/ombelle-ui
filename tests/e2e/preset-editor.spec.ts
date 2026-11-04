@@ -42,7 +42,7 @@ type FrameProbe = {
   }>
 }
 
-const url = 'http://127.0.0.1:3000/editor/preset'
+const url = 'http://127.0.0.1:3000/editor/preset?page=gallery'
 const frame = (page: Page) =>
   page.locator('iframe[title="Global preset gallery"]').contentFrame()
 async function ready(page: Page) {
@@ -240,14 +240,18 @@ const scenes = [
   { option: 'Sign in', heading: 'Sign in to Acme', components: 'Card, Label, Input, Checkbox, Button' },
 ] as const
 for (const family of supportedStyleFamilies)
-  test(`shows the dashboard, settings and sign-in pages in ${family}`, async ({ page }) => {
+  test(`opens on the dashboard and shows the dashboard, settings and sign-in pages in ${family}`, async ({ page }) => {
     await page.addInitScript(
       (draft) =>
         localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
       createPresetDraft(family),
     )
-    await page.goto(url)
+    await page.goto('http://127.0.0.1:3000/editor/preset')
     await ready(page)
+    await expect(segment(page, 'Preview page', 'Dashboard')).toHaveAttribute('aria-pressed', 'true')
+    await expect(
+      page.getByRole('group', { name: 'Preview page' }).getByRole('button', { name: 'Gallery' }),
+    ).toHaveCount(0)
     for (const scene of scenes) {
       await segment(page, 'Preview page', scene.option).click()
       await ready(page)
@@ -262,7 +266,7 @@ for (const family of supportedStyleFamilies)
       ).violations
       expect(violations).toEqual([])
     }
-    await segment(page, 'Preview page', 'Gallery').click()
+    await page.goto(url)
     await ready(page)
     await expect(frame(page).getByTestId('preset-gallery')).toBeVisible()
   })

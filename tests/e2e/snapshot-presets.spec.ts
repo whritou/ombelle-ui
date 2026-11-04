@@ -86,7 +86,7 @@ const codeDialog = (page: Page) => page.getByRole('dialog', { name: 'Get code' }
 test('publishes only when Get code opens and reuses the code for an unchanged draft', async ({ page }) => {
   const requests: string[] = []
   page.on('request', (request) => { if (request.url().endsWith('/api/v1/presets') && request.method() === 'POST') requests.push(request.url()) })
-  await page.goto('http://127.0.0.1:3000/editor/preset')
+  await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   await expect(getCode(page)).toBeEnabled()
@@ -113,7 +113,7 @@ test('retries after the server commits and the response is lost', async ({ page 
       await route.abort()
     } else await route.continue()
   })
-  await page.goto('http://127.0.0.1:3000/editor/preset')
+  await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await getCode(page).click()
   await expect(codeDialog(page).getByRole('alert')).toBeVisible()
   await codeDialog(page).getByRole('button', { name: 'Try again', exact: true }).click()
@@ -130,7 +130,7 @@ test('recovers a pending publication after refresh without submitting it', async
     if (keys.length === 1) { await route.fetch(); await route.abort() }
     else await route.continue()
   })
-  await page.goto('http://127.0.0.1:3000/editor/preset')
+  await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await getCode(page).click()
   await expect(codeDialog(page).getByRole('alert')).toBeVisible()
   await page.reload()
@@ -151,7 +151,7 @@ test('ignores a stale publication response after editing and reset', async ({ pa
     await held
     try { await route.fulfill({ response }) } catch { /* The edit aborted this request. */ }
   })
-  await page.goto('http://127.0.0.1:3000/editor/preset')
+  await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await getCode(page).click()
   await expect(codeDialog(page)).toContainText('Generating')
   await page.keyboard.press('Escape')
@@ -164,7 +164,7 @@ test('ignores a stale publication response after editing and reset', async ({ pa
 
 test('keeps local exports available when publication service is unavailable', async ({ page }) => {
   await page.route('**/api/v1/presets', (route) => route.abort())
-  await page.goto('http://127.0.0.1:3000/editor/preset')
+  await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await getCode(page).click()
   await expect(codeDialog(page).getByRole('alert')).toBeVisible()
   // The preset editor's dialog no longer carries a JSON button; the local
@@ -178,7 +178,7 @@ test('keeps local exports available when publication service is unavailable', as
 })
 
 test('handles clipboard and storage denial while preserving draft exports', async ({ page }) => {
-  await page.goto('http://127.0.0.1:3000/editor/preset')
+  await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await openExport(page)
   await page.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { throw new Error('denied') } } }) })
   await page.getByRole('button', { name: 'Copy export', exact: true }).click()
@@ -221,7 +221,7 @@ test('withdraws replay and respects conditional reads', async ({ page }) => {
 
 test('supports keyboard use, 320 pixel reflow, and axe checks', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 })
-  await page.goto('http://127.0.0.1:3000/editor/preset')
+  await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await openExport(page)
   await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending')
   await page.getByLabel('Preset name', { exact: true }).focus()

@@ -56,7 +56,7 @@ test('compiles and renders all families and modes through hosted opaque iframes 
       localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft))
       localStorage.removeItem('ombelle:preset-editor:history:v1')
     }, createPresetDraft(family))
-    await page.goto('/editor/preset')
+    await page.goto('/editor/preset?page=gallery')
     const galleryFrame = page.locator('iframe[title="Global preset gallery"]')
     await expect(galleryFrame).toHaveAttribute('src', '/ombelle-preview/preset-preview/')
     await expect(galleryFrame).toHaveAttribute('sandbox', 'allow-scripts')
