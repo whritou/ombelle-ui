@@ -450,6 +450,11 @@ test('blocks stale exports during invalid edits and delayed compilation', async 
   await expect(
     page.getByRole('button', { name: 'Download preset JSON' }),
   ).toBeDisabled()
+  // The top bar's Download JSON is disabled for the same stale draft.
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  await expect(page.getByRole('menuitem', { name: 'Download JSON', exact: true })).toBeDisabled()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menu', { name: 'More actions' })).toBeHidden()
   await expect(page.locator('#preset-error')).toContainText('finite number')
   await page.getByLabel('Corner radius', { exact: true }).fill('1.1')
   await expect(

@@ -182,6 +182,8 @@ export default function PresetEditor() {
   const glassReport = glass ? presetGlassReport(draft) : null
   // A glass draft below the contrast bound cannot be exported or published.
   const glassBlocked = glassReport !== null && !glassReport.passes
+  // Download JSON and Get code share one gate: a current, unblocked draft.
+  const exportable = canExportPreset(compiled, draft) && !glassBlocked
   const warnedTokens = new Set(
     contrast
       .filter((pair) => pair.status === 'warning')
@@ -235,6 +237,7 @@ export default function PresetEditor() {
             {
               id: 'download-json',
               label: 'Download JSON',
+              disabled: !exportable,
               onSelect: () => {
                 try {
                   downloadPresetText(
@@ -275,7 +278,7 @@ export default function PresetEditor() {
           <PresetGetCode
             className={styles.getCode}
             preset={compiled.result?.preset ?? null}
-            current={canExportPreset(compiled, draft) && !glassBlocked}
+            current={exportable}
             announce={setNotice}
             describedBy={glass ? glassReadoutId : undefined}
           />

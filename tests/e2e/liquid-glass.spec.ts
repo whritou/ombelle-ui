@@ -669,6 +669,16 @@ for (const mode of modes) {
     await page.getByLabel('Glass opacity', { exact: true }).fill('0.3')
     await expect(readout).toContainText('Contrast bound fails at glass opacity 0.3')
     for (const action of actions) await expect(action).toBeDisabled()
+    // The top bar's Download JSON follows the same export gate.
+    const menuDownload = async (state: 'enabled' | 'disabled') => {
+      await page.getByRole('button', { name: 'More actions', exact: true }).click()
+      const item = page.getByRole('menuitem', { name: 'Download JSON', exact: true })
+      if (state === 'enabled') await expect(item).toBeEnabled()
+      else await expect(item).toBeDisabled()
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menu', { name: 'More actions' })).toBeHidden()
+    }
+    await menuDownload('disabled')
     await expect(readout.locator('li')).toHaveCount(0)
     const failing = await page.locator('#glass-contrast-pairs li').allInnerTexts()
     expect(failing.length).toBeGreaterThan(0)
@@ -679,6 +689,7 @@ for (const mode of modes) {
     await expect(readout).toContainText('Contrast bound passes at glass opacity 0.5')
     await ready()
     for (const action of actions) await expect(action).toBeEnabled()
+    await menuDownload('enabled')
 
     const gallery = page.locator('iframe[title="Global preset gallery"]').contentFrame()
     const unavailable = gallery.locator('[data-unavailable][aria-disabled="true"]')
