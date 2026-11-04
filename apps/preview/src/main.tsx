@@ -11,7 +11,7 @@ if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
   mountEditorPreview(document.getElementById('root')!)
 } else {
   const family = selectFamily(window.location.pathname)
-  const entries: Partial<Record<StyleFamily, () => Promise<{ default: React.ComponentType }>>> = {
+  const entries: Record<StyleFamily, () => Promise<{ default: React.ComponentType }>> = {
     flat: () => import('./generated/flat/entry'),
     minimalist: () => import('./generated/minimalist/entry'),
     'neo-brutalism': () => import('./generated/neo-brutalism/entry'),
