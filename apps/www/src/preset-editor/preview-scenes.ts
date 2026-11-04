@@ -1,7 +1,7 @@
 import type { PresetScene } from './preview-protocol'
 
+/** Pages offered in the preset editor. The gallery stays reachable with ?page=gallery. */
 export const sceneOptions: { value: PresetScene; label: string }[] = [
-  { value: 'gallery', label: 'Gallery' },
   { value: 'dashboard', label: 'Dashboard' },
   { value: 'settings', label: 'Settings' },
   { value: 'sign-in', label: 'Sign in' },

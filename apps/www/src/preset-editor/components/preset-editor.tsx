@@ -61,7 +61,7 @@ import {
   useDrawerState,
 } from '../../editor-shell'
 import { PresetChecks, presetWarningCount } from './preset-checks'
-import type { PresetScene } from '../preview-protocol'
+import { presetScenes, type PresetScene } from '../preview-protocol'
 import { sceneComponents, sceneOptions } from '../preview-scenes'
 import styles from './preset-editor.module.css'
 import { useSiteDark } from '../../site/theme'
@@ -87,7 +87,13 @@ export default function PresetEditor() {
   const [restoreWarning, setRestoreWarning] = useState<string | null>(null)
   const [mode, setMode] = useState<'light' | 'dark'>('light'),
     [viewport, setViewport] = useState<'wide' | 'narrow'>('wide'),
-    [scene, setScene] = useState<PresetScene>('gallery')
+    [scene, setScene] = useState<PresetScene>('dashboard')
+  // ?page= opens a preview page directly, including the component gallery,
+  // which the page picker no longer offers.
+  useEffect(() => {
+    const page = new URLSearchParams(window.location.search).get('page')
+    if (presetScenes.includes(page as PresetScene)) setScene(page as PresetScene)
+  }, [])
   // The preview follows the site theme; the select still overrides it until
   // the theme toggles again.
   const siteDark = useSiteDark()

@@ -6,7 +6,7 @@ import type { PresetSnapshot, SnapshotSource, StableStyleFamily } from '@ombelle
 import { waitForCompiled } from './preset-editor-ui.js'
 import { createPresetDraft, setPresetEdit, setPresetIdentity } from '../../apps/www/src/preset-editor/model.js'
 
-const editorUrl = 'http://127.0.0.1:3000/editor/preset'
+const editorUrl = 'http://127.0.0.1:3000/editor/preset?page=gallery'
 const frame = (page: Page) => page.locator('iframe[title="Global preset gallery"]').contentFrame()
 
 export async function resetSnapshotBrowserQuota(): Promise<void> {

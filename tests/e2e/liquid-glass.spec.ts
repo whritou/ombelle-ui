@@ -9,7 +9,7 @@ import { contrastRatio } from '../helpers/contrast.js'
 // Accessible names repeat across the three backdrop copies, so every scenario
 // locator is scoped to its [data-backdrop] section.
 const previewUrl = 'http://127.0.0.1:4173/liquid-glass/'
-const editorUrl = 'http://127.0.0.1:3000/editor/preset'
+const editorUrl = 'http://127.0.0.1:3000/editor/preset?page=gallery'
 const wcag = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const backdrops = ['solid', 'gradient', 'pattern'] as const
 const modes = ['light', 'dark'] as const
