@@ -45,6 +45,7 @@
 
 .nameField input {
   min-width: 0;
+  height: 32px;
   min-height: 32px;
   padding: 0 0.5rem;
   border: 1px solid var(--control);
@@ -72,11 +73,14 @@
   margin-inline-start: auto;
 }
 
+/* Sizes are fixed here so editor-page element styles (such as a 44px button
+   minimum) cannot change the shared top bar. */
 .iconButton {
   display: inline-grid;
   place-items: center;
   width: 32px;
   height: 32px;
+  min-height: 32px;
   padding: 0;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
@@ -110,6 +114,10 @@
 }
 
 .menu {
+  /* Placed under its trigger by OverflowMenu; the UA centring is replaced. */
+  position: fixed;
+  inset: auto;
+  margin: 0;
   min-width: 11rem;
   padding: 0.25rem;
   border: 1px solid var(--border);

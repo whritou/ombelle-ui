@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useDrawerState } from '../../editor-shell'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import { recipeFilename } from '../storage'
 import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
@@ -34,7 +33,6 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
   notice?: string | null
 }) {
   const [tab, setTab] = useState<Tab>('Usage')
-  const [open, setOpen] = useDrawerState('ombelle.button-editor.output', true)
   const content = result ? tabContent(tab, result, recipeJson ?? '') : ''
   async function copy() {
     try {
@@ -48,14 +46,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
     <section className="artifacts" aria-labelledby="artifacts-title">
       <div className="sectionTitle"><div><h2 id="artifacts-title">Generated output</h2><p>Compiled from this Button recipe.</p></div>
         {stale && <span className="staleBadge">Output is out of date</span>}
-        <button type="button" className="artifactCollapse" aria-expanded={open} aria-controls="artifact-body"
-          aria-label={open ? 'Collapse generated output' : 'Expand generated output'} onClick={() => setOpen(!open)}>{open ? 'Collapse' : 'Expand'}</button>
       </div>
-      <p className="artifactMeta" data-testid="artifact-meta">
-        <span data-testid="recipe-hash">{result?.recipe.hash ?? 'Pending'}</span>
-        {result && artifactMeta(result).slice(1).map((item) => <span key={item}>{item}</span>)}
-      </p>
-      <div id="artifact-body" hidden={!open}>
       {notice && <p className="artifactNote" data-testid="experimental-notice">{notice}</p>}
       {result ? <>
         <div className="artifactTabs" role="tablist" aria-label="Generated artifacts">
@@ -76,7 +67,11 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
         {tab === 'Install' && <p className="artifactNote">Run from the folder containing the downloaded {recipeFilename(result.recipe.data)} with Node 24.19.0 or newer Node 24. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
         {tab === 'Recipe' && <p className="artifactNote">ID: {result.recipe.data.id} · Revision: {result.recipe.data.revision}. Changed content at an installed ID and revision needs a new revision.</p>}
       </> : <p>Compiling generated output…</p>}
-      </div>
+      {/* Build details close the page: recipe hash, provenance, dependencies. */}
+      <footer className="artifactMeta" data-testid="artifact-meta">
+        <span data-testid="recipe-hash">{result?.recipe.hash ?? 'Pending'}</span>
+        {result && artifactMeta(result).slice(1).map((item) => <span key={item}>{item}</span>)}
+      </footer>
     </section>
   )
 }

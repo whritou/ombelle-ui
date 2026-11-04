@@ -13,7 +13,10 @@ it('renders exactly the five output tabs in order', async () => {
   const html = renderToStaticMarkup(<ArtifactPanel result={result} recipeJson="{}" stale={false} onStatus={() => {}} />)
   const names = [...html.matchAll(/role="tab"[^>]*>([^<]+)</g)].map((match) => match[1])
   expect(names).toEqual(['Usage', 'Component', 'CSS', 'Recipe', 'Install'])
-  expect(html).toContain('aria-label="Collapse generated output"')
+  expect(html).not.toContain('generated output"')
+  expect(html).not.toContain('Collapse')
+  // Build details sit after the tabs and code, at the end of the panel.
+  expect(html.indexOf('data-testid="artifact-meta"')).toBeGreaterThan(html.indexOf('role="tabpanel"'))
   expect(html).not.toContain('View code')
 })
 

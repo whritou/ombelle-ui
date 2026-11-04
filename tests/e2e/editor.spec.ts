@@ -154,20 +154,14 @@ test('failed recovery download cannot lose invalid bytes when replacement storag
   expect(await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))).toBe('{failed recovery')
 })
 
-test('output panel collapse keeps focus on its toggle and persists', async ({ page }) => {
+test('output panel stays open and ends with the build details', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
-  const toggle = page.getByRole('button', { name: 'Collapse generated output' })
   await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
-  await toggle.focus()
-  await page.keyboard.press('Enter')
-  await expect(page.getByRole('button', { name: 'Expand generated output' })).toBeFocused()
-  await expect(page.getByRole('tab', { name: 'Usage' })).toBeHidden()
+  await expect(page.getByRole('button', { name: /generated output/ })).toHaveCount(0)
   await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending')
-  await page.reload()
-  await expect(page.getByRole('button', { name: 'Expand generated output' })).toBeVisible()
-  await expect(page.getByRole('tab', { name: 'Usage' })).toBeHidden()
-  await page.getByRole('button', { name: 'Expand generated output' }).click()
-  await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
+  const tabsBottom = (await page.getByRole('tabpanel').boundingBox())!
+  const meta = (await page.getByTestId('artifact-meta').boundingBox())!
+  expect(meta.y).toBeGreaterThan(tabsBottom.y + tabsBottom.height)
 })
 
 test('artifact tabs support copy and validated recipe JSON download', async ({ page, context }) => {

@@ -51,6 +51,20 @@ export function changeDraftFamily(draft: EditorDraft, family: StyleFamily): Edit
   return updateDraftRecipe(draft, { ...draft.recipe, presetRef: presetRefFor(family) })
 }
 
+/**
+ * Puts the content, props and style overrides back to the starting recipe's
+ * content and props with no overrides, so the family's own values apply. The
+ * style family, recipe id and revision stay.
+ */
+export function resetDraftRecipe(draft: EditorDraft, start: Recipe): EditorDraft {
+  return updateDraftRecipe(draft, {
+    ...draft.recipe,
+    props: structuredClone(start.props),
+    content: start.content,
+    overrides: {},
+  })
+}
+
 /** The style family of a pinned built-in preset reference (`builtin-<family>`). */
 export function draftFamily(recipe: Recipe): StyleFamily {
   const family = recipe.presetRef.id.replace(/^builtin-/, '')

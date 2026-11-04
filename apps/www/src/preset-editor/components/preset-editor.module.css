@@ -185,6 +185,16 @@
   color: var(--muted-foreground);
   font-size: 0.75rem;
   line-height: 1.2;
+  white-space: nowrap;
+}
+/* Below wide screens the note shortens to "Draft…" (full text on hover and
+   for assistive tech) so the bar keeps one row, like the Button editor. */
+@media (max-width: 1279px) {
+  .editor .draftNote {
+    max-width: 3.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .editor .getCode {
@@ -537,9 +547,10 @@
 
 /* Full-width workbench, like shadcn/create: compact header, controls rail
    and a canvas that uses the rest of the viewport. */
+/* Same page frame as the Button editor, so both top bars line up. */
 .editor {
   max-width: none;
-  padding: 20px clamp(16px, 2vw, 32px) 48px;
+  padding: 0 clamp(16px, 2vw, 32px) 48px;
 }
 @media (min-width: 961px) {
   .workbench {
@@ -772,15 +783,6 @@
 }
 .panel > section:last-child {
   border-bottom: 0;
-}
-.editor [role='menu'][popover] {
-  margin: auto;
-}
-@supports (position-area: bottom) {
-  .editor [role='menu'][popover] {
-    margin: 4px 0;
-    position-area: bottom span-left;
-  }
 }
 .editor input[type='range'] {
   min-height: 24px;
