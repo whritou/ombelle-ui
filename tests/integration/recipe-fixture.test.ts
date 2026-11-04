@@ -2,14 +2,16 @@ import { expect, it } from 'vitest'
 import fs from 'node:fs/promises'
 import { compileRecipe } from '@ombelle/compiler'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
+import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { recipeReferenceBank } from '../helpers/recipe-fixture.js'
 import { createProject } from '../helpers/projects.js'
 import { writeScenarioFixture } from '../helpers/scenario-fixture.js'
 import path from 'node:path'
-it('uses three exact generated recipe identities and an independent canonical source bank', async () => {
+it('uses one exact generated recipe identity per stable family and an independent canonical source bank', async () => {
   const recipes = recipeFixtures()
-  expect(recipes).toHaveLength(3)
-  expect(new Set(recipes.map((r) => r.id)).size).toBe(3)
+  expect(recipes).toHaveLength(supportedStyleFamilies.length)
+  expect(recipes.map((r) => r.id)).toContain('rc_ombelle_button')
+  expect(new Set(recipes.map((r) => r.id)).size).toBe(supportedStyleFamilies.length)
   const bank = await recipeReferenceBank()
   for (const recipe of recipes) {
     const result = await compileRecipe({ recipe })
@@ -22,6 +24,7 @@ it('renders generated RecipeButtons through a separate fixture view', async () =
   expect(source).toContain('/recipes/rc_flat_button/r1/button')
   expect(source).toContain('/recipes/rc_minimalist_button/r1/button')
   expect(source).toContain('/recipes/rc_neo_brutalism_button/r1/button')
+  expect(source).toContain('/recipes/rc_ombelle_button/r1/button')
   expect(source).not.toContain('@ombelle/')
 })
 it('keeps ordinary consumer fixtures independent of uninstalled recipe modules', async () => {

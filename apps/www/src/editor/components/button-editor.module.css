@@ -141,6 +141,7 @@
 .root :global(.be-family-sample) i + i { background: var(--muted); }
 .root :global(.be-family)[data-family="minimalist"] :global(.be-family-sample) i { border: 1px solid var(--ink); border-radius: 2px; background: transparent; }
 .root :global(.be-family)[data-family="neo-brutalism"] :global(.be-family-sample) i { border: 2px solid var(--ink); border-radius: 0; box-shadow: 2px 2px 0 var(--ink); }
+.root :global(.be-family)[data-family="ombelle"] :global(.be-family-sample) i { border: 2px solid var(--ink); border-radius: 999px; background: oklch(72% 0.17 6); box-shadow: 2px 2px 0 var(--ink); }
 .root :global(.be-family)[data-family="liquid-glass"] :global(.be-family-sample) i { border: 1px solid var(--control); border-radius: 12px; background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 45%, transparent), color-mix(in oklab, var(--muted) 70%, transparent)); }
 .root :global(.be-family-tag) { position: absolute; bottom: 6px; right: 6px; padding: 0 6px; border: 1px solid var(--line); border-radius: 999px; background: var(--muted); font-size: .625rem; font-weight: 600; }
 

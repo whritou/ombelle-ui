@@ -110,7 +110,7 @@ async function fixture() {
   )
   return { matrix, input: { measurements, consumers } }
 }
-it('requires complete recipe measurements and all 102 installed recipes with finished builds', async () => {
+it('requires complete recipe measurements and every stable-family recipe installed in every stable consumer with finished builds', async () => {
   const { matrix, input } = await fixture()
   await expect(finalizeRecipeEvidence(input, matrix)).resolves.toMatchObject({
     measurements: expect.any(Array),

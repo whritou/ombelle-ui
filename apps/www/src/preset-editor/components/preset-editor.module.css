@@ -825,6 +825,12 @@
   border-radius: 0;
   box-shadow: 2px 2px 0 var(--foreground);
 }
+.editor :global(.preset-family)[data-family='ombelle'] :global(.preset-family-sample) i {
+  border: 2px solid var(--foreground);
+  border-radius: 999px;
+  background: oklch(72% 0.17 6);
+  box-shadow: 2px 2px 0 var(--foreground);
+}
 .editor :global(.preset-family)[data-family='liquid-glass'] :global(.preset-family-sample) i {
   border: 1px solid color-mix(in oklab, var(--paper) 70%, transparent);
   border-radius: 12px;

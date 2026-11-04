@@ -170,5 +170,9 @@
   "ombelle/component-preset/examples/scoped-presets/builtin-ombelle/r1.tsx": "10bbcb57051e2e61a6b0bd78321008bfe029c4548e00360a32792621e6e68c89",
   "ombelle/component-preset/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
   "ombelle/component-preset/scoped-presets/builtin-ombelle/r1/button.css": "4c7836247abb3e9329901ddc41b26e9f552535056da6e8d33f61e24bfa7be5a4",
-  "ombelle/component-preset/scoped-presets/builtin-ombelle/r1/button.tsx": "c1e8b3dfec8616b16d22aefc3f74c3eae99a68cd2fba76ec4b35c1f3008f0231"
+  "ombelle/component-preset/scoped-presets/builtin-ombelle/r1/button.tsx": "c1e8b3dfec8616b16d22aefc3f74c3eae99a68cd2fba76ec4b35c1f3008f0231",
+  "ombelle/recipe/examples/recipes/rc_ombelle_button/r1.tsx": "39dc48d11732ee7713f8a18a69337bca85ca81d67b520da6f43f7f1702315bca",
+  "ombelle/recipe/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
+  "ombelle/recipe/recipes/rc_ombelle_button/r1/button.css": "bdad31fc9ef79a58cd4b480154b2e5194f06fd3e04e1d92a5cdf5901fb73776f",
+  "ombelle/recipe/recipes/rc_ombelle_button/r1/button.tsx": "496128bbf876e281753150aefe6a2f17cd70c37a3bbbee6d184d1a74272ebc4c"
 }

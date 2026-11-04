@@ -1,6 +1,6 @@
 # Badge
 
-Badge displays a short status or category as a native `span`. It is available in flat, minimalist, and neo brutalism, in light and dark mode. Use descriptive text such as “Needs attention” so a destructive state does not rely on color alone. Interactive tags or filters need a real button or link.
+Badge displays a short status or category as a native `span`. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Use descriptive text such as “Needs attention” so a destructive state does not rely on color alone. Interactive tags or filters need a real button or link.
 
 ## Install and use
 

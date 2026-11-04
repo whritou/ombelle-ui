@@ -14,6 +14,8 @@ it('FamilyPicker marks only the current family pressed and tags liquid glass as 
   for (const name of ['Flat', 'Neo-brutalism', 'Ombelle', 'Liquid glass']) expect(html).toContain(name)
   expect(html.match(/>Beta</g)).toHaveLength(1)
   expect(html).toMatch(/data-family="liquid-glass"(?:(?!<\/button>).)*>Beta</)
+  expect(html).toMatch(/data-family="ombelle"(?:(?!<\/button>).)*Ombelle/)
+  expect(html).not.toMatch(/data-family="ombelle"(?:(?!<\/button>).)*>Beta</)
 })
 
 it('TokenList shows five core tokens and a toggle for the rest', () => {

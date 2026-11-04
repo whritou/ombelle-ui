@@ -1,6 +1,6 @@
 # Label
 
-Label names a form control. It keeps shadcn's `Label` name and `data-slot="label"` marker, but renders a native `label` rather than Radix Label, so it has no client boundary. It supports `flat`, `minimalist`, and `neo-brutalism` in light and dark modes. Liquid glass is unavailable for Label.
+Label names a form control. It keeps shadcn's `Label` name and `data-slot="label"` marker, but renders a native `label` rather than Radix Label, so it has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable for Label.
 
 ## Install and compose
 
@@ -42,7 +42,7 @@ The requirement belongs to the control. Assistive technology reads it from the c
 
 ## Styles
 
-Label is `inline-flex` with a `0.5rem` gap, `0.875rem` text, line height 1.25, the family font, and `--foreground`. Weight is 500 in flat and minimalist and 700 in neo-brutalism. The direct child `[aria-hidden="true"]` marker uses `--destructive`. Under forced colors the label and marker use `CanvasText`. Label introduces no animation or transition. Label uses the saved global preset; a later theme operation can change semantic tokens but does not rewrite the installed `label.css`.
+Label is `inline-flex` with a `0.5rem` gap, `0.875rem` text, line height 1.25, the family font, and `--foreground`. Weight is 500 in flat and minimalist 700 in neo-brutalism, and 700 in ombelle, where the text is small, uppercase and letter-spaced and the required marker is a pill. The direct child `[aria-hidden="true"]` marker uses `--destructive`. Under forced colors the label and marker use `CanvasText`. Label introduces no animation or transition. Label uses the saved global preset; a later theme operation can change semantic tokens but does not rewrite the installed `label.css`.
 
 ## Generated files and ownership
 

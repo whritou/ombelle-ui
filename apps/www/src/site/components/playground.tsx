@@ -13,6 +13,7 @@ export const familyOptions: { value: StyleFamily; label: string }[] = [
   { value: 'flat', label: 'Flat' },
   { value: 'minimalist', label: 'Minimalist' },
   { value: 'neo-brutalism', label: 'Neo-Brutalism' },
+  { value: 'ombelle', label: 'Ombelle' },
   { value: 'liquid-glass', label: 'Liquid Glass' },
 ]
 const glassDocs = 'https://github.com/whritou/ombelle-ui/blob/main/docs/components/liquid-glass.md'

@@ -4,6 +4,7 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { getCatalog } from '@ombelle/catalog'
 import type { FileChange, ProjectLock } from '@ombelle/contracts'
+import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { createProject } from '../helpers/projects.js'
 import { runBuiltCli, jsonRecord } from '../helpers/cli-runtime.js'
 import { snapshotTree } from '../helpers/tree.js'
@@ -50,7 +51,7 @@ async function seedDependencies(
 }
 
 for (const framework of ['vite', 'next'] as const)
-  for (const family of ['flat', 'minimalist', 'neo-brutalism'] as const)
+  for (const family of supportedStyleFamilies)
     it.each(formIds)(
       `plans and installs owned %s artifacts in ${framework}/${family}`,
       async (id) => {

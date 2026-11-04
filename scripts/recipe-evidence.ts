@@ -222,7 +222,7 @@ export async function validateRecipeConsumers(
       )
     )
       throw Error('Missing protected project hashes ' + id)
-    if (Object.keys(recipes).length !== 3)
+    if (Object.keys(recipes).length !== refs.length)
       throw Error('Missing consumer recipe installation ' + id)
     for (const ref of refs) {
       const entry = object(recipes[ref.recipe.data.id + '@1']),

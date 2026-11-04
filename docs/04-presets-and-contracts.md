@@ -16,7 +16,7 @@ Use [preset.schema.json](../schemas/preset.schema.json) and [preset.example.json
 | `catalogRelease`    | Exact component and style catalog release                               |
 | `compilerVersion`   | Exact generator release                                                 |
 | `platform`          | Initially `react-web`; native will require a separate contract revision |
-| `styleFamily`       | Flat, minimalist, neo brutalism, or liquid glass                        |
+| `styleFamily`       | Flat, minimalist, neo brutalism, ombelle, or liquid glass               |
 | `modes`             | Light and dark semantic token overrides                                 |
 | `design`            | Portable bounded density, radius, border, font, and motion choices      |
 | `componentDefaults` | Reviewed per-component default props; Button is the first schema entry  |
