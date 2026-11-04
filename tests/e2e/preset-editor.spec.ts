@@ -11,6 +11,7 @@ import {
   supportedComponentIds,
   supportedStyleFamilies,
 } from '@ombelle/contracts'
+import { getCatalog } from '@ombelle/catalog'
 import {
   createPresetDraft,
   setPresetEdit,
@@ -316,8 +317,9 @@ test('restores raw draft and history after refresh', async ({ page }) => {
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
     .click()
+  // Reset returns to the built-in flat preset's border width.
   await expect(page.getByLabel('Border width', { exact: true })).toHaveValue(
-    '1',
+    String(getCatalog('0.1.0').presets.flat.design.borderWidthPx),
   )
 })
 test('preserves explicit edits through confirmed and cancelled family changes', async ({
