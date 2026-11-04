@@ -52,7 +52,7 @@ export function renderScopedButton(input: ScopedButtonRenderInput): string {
     ? `export type ${input.propsTypeName} = React.ComponentProps<'button'> & VariantProps<typeof buttonVariants> & { loading?: boolean }
 export function ${input.componentName}({className, variant=${JSON.stringify(variant)}, size=${JSON.stringify(size)}, type=${JSON.stringify(recipe.props.type)}, disabled=${recipe.props.disabled}, loading=${recipe.props.loading}, children=${JSON.stringify(recipe.content)}, ...props}: ${input.propsTypeName}) {
  const {asChild: _asChild, ...native} = props as typeof props & {asChild?:unknown}
- return <button {...native} ${scopeAttributes(input)} data-variant={variant} data-size={size} type={type} disabled={disabled || loading} aria-busy={loading || undefined} className={cn(buttonVariants({variant,size}),className)}>{children}</button>
+ return <button {...native} ${scopeAttributes(input)} data-variant={variant} data-size={size} type={type} disabled={disabled || loading} aria-busy={loading || undefined} className={cn(buttonVariants({variant,size}),className)}>{loading && <span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />}{children}</button>
 }`
     : `export type ${input.propsTypeName} = React.ComponentProps<'button'> & VariantProps<typeof buttonVariants>
 export function ${input.componentName}({className, variant=${JSON.stringify(variant)}, size=${JSON.stringify(size)}, type='button', children, ...props}: ${input.propsTypeName}) {
@@ -77,15 +77,18 @@ function iconRecipeDefinition(
   const glyph = `<${Icon} aria-hidden="true" focusable="false" data-slot="${input.slot}-icon" />`
   const head = `import { ${Icon} } from 'lucide-react'
 `
+  // While loading, the spinner takes the icon's place (or leads an end icon).
+  const spinner = '<span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />'
+  const loadingGlyph = `{loading ? ${spinner} : ${glyph}}`
   const shared = `className, variant=${JSON.stringify(variant)}, size=${JSON.stringify(size)}, type=${JSON.stringify(recipe.props.type)}, disabled=${recipe.props.disabled}, loading=${recipe.props.loading}`
   const attributes = `${scopeAttributes(input)} data-variant={variant} data-size={size} type={type} disabled={disabled || loading} aria-busy={loading || undefined} className={cn(buttonVariants({variant,size}),className)}`
   if (icon.iconOnly)
     return head + `export type ${input.propsTypeName} = Omit<React.ComponentProps<'button'>, 'children'> & VariantProps<typeof buttonVariants> & { loading?: boolean }
 export function ${input.componentName}({${shared}, 'aria-label': ariaLabel=${JSON.stringify(recipe.content)}, ...props}: ${input.propsTypeName}) {
  const {asChild: _asChild, children: _children, ...native} = props as typeof props & {asChild?:unknown; children?:unknown}
- return <button {...native} ${attributes} aria-label={ariaLabel} data-icon-only="">${glyph}</button>
+ return <button {...native} ${attributes} aria-label={ariaLabel} data-icon-only="">${loadingGlyph}</button>
 }`
-  const content = icon.position === 'end' ? `{children}${glyph}` : `${glyph}{children}`
+  const content = icon.position === 'end' ? `{loading && ${spinner}}{children}${glyph}` : `${loadingGlyph}{children}`
   return head + `export type ${input.propsTypeName} = React.ComponentProps<'button'> & VariantProps<typeof buttonVariants> & { loading?: boolean }
 export function ${input.componentName}({${shared}, children=${JSON.stringify(recipe.content)}, ...props}: ${input.propsTypeName}) {
  const {asChild: _asChild, ...native} = props as typeof props & {asChild?:unknown}

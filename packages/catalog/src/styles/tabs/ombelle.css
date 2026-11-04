@@ -17,13 +17,14 @@
   flex-shrink: 0;
   align-self: flex-start;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem;
+  gap: 2px;
+  padding: 3px;
   border: var(--border-width) solid var(--border);
   border-radius: 999px;
-  background: var(--muted);
+  background: var(--card);
   color: var(--muted-foreground);
-  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
+  box-shadow: calc(var(--shadow-x) * 2 / 3) calc(var(--shadow-y) * 2 / 3) 0
+    var(--shadow-color, var(--border));
 }
 [data-slot='tabs-list'][data-orientation='horizontal'] {
   flex-direction: row;
@@ -39,14 +40,14 @@
   justify-content: center;
   min-inline-size: 2.75rem;
   min-block-size: 2.75rem;
-  padding-block: 0.5rem;
-  padding-inline: 0.75rem;
+  padding-block: 0;
+  padding-inline: 1rem;
   border: var(--border-width) solid transparent;
   border-radius: 999px;
   font: inherit;
   font-size: 0.8125rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 600;
+  text-transform: none;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -71,6 +72,9 @@
 [data-slot='tabs-content']:focus-visible {
   outline: 2.5px solid var(--ring);
   outline-offset: 3px;
+}
+[data-slot='tabs-trigger']:focus-visible {
+  outline-offset: 2px;
 }
 [data-slot='tabs-trigger']:disabled,
 [data-slot='tabs-trigger'][data-disabled] {

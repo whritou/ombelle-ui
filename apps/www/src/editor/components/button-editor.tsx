@@ -229,7 +229,7 @@ export function ButtonEditor() {
                 options={previewWidthOptions('Narrow')}
                 onChange={(viewport) => setView((previous) => ({ ...previous, viewport }))} />
               <SegmentedControl<EditorView['forcedState']> label="Preview state" value={view.forcedState}
-                options={[{ value: 'none', label: 'Rest' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' }, { value: 'active', label: 'Active' }]}
+                options={[{ value: 'none', label: 'Rest' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' }, { value: 'active', label: 'Active' }, { value: 'disabled', label: 'Disabled' }, { value: 'loading', label: 'Loading' }]}
                 onChange={(forcedState) => setView((previous) => ({ ...previous, forcedState }))} />
               <p className={styles.previewStatus} data-status={previewCurrent ? 'current' : 'pending'}>
                 {previewCurrent ? 'Matches current recipe' : compilation.result ? 'Showing the last valid recipe' : 'Compiling preview…'}

@@ -5,14 +5,15 @@
   display: inline-flex;
   vertical-align: middle;
   flex-shrink: 0;
-  inline-size: 2.75rem;
-  block-size: 1.5rem;
+  inline-size: 3rem;
+  block-size: 1.75rem;
   padding: 0;
   border: var(--border-width) solid var(--border);
   border-radius: 999px;
-  background: var(--muted);
+  background: var(--card);
   color: var(--foreground);
-  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--border);
+  box-shadow: calc(var(--shadow-x) * 2 / 3) calc(var(--shadow-y) * 2 / 3) 0
+    var(--shadow-color, var(--border));
   cursor: pointer;
   transition:
     background-color var(--motion-duration),
@@ -21,7 +22,7 @@
     box-shadow var(--motion-duration);
 }
 [data-slot='switch'][data-state='unchecked'] {
-  background: var(--muted);
+  background: var(--card);
   color: var(--foreground);
 }
 [data-slot='switch'][data-state='checked'] {
@@ -32,10 +33,10 @@
   box-sizing: border-box;
   position: absolute;
   inset-block-start: 50%;
-  inset-inline-start: 0.125rem;
+  inset-inline-start: 0.1875rem;
   transform: translateY(-50%);
-  inline-size: 1rem;
-  block-size: 1rem;
+  inline-size: 1.1875rem;
+  block-size: 1.1875rem;
   border: var(--border-width) solid transparent;
   border-radius: 999px;
   background: var(--foreground);
@@ -43,7 +44,7 @@
   transition: inset-inline-start var(--motion-duration);
 }
 [data-slot='switch-thumb'][data-state='checked'] {
-  inset-inline-start: calc(100% - 1rem - 0.125rem);
+  inset-inline-start: calc(100% - 1.1875rem - 0.1875rem);
   border-color: var(--border);
   background: var(--card);
 }
@@ -53,11 +54,12 @@
 }
 [data-slot='switch']:not(:disabled):not([data-disabled]):hover {
   transform: translate(-1px, -1px);
-  box-shadow: calc(var(--shadow-x) + 1px) calc(var(--shadow-y) + 1px) 0 var(--border);
+  box-shadow: calc(var(--shadow-x) * 2 / 3 + 1px) calc(var(--shadow-y) * 2 / 3 + 1px) 0
+    var(--shadow-color, var(--border));
 }
 [data-slot='switch']:not(:disabled):not([data-disabled]):active {
-  transform: translate(var(--shadow-x), var(--shadow-y));
-  box-shadow: 0 0 0 var(--border);
+  transform: translate(calc(var(--shadow-x) * 2 / 3), calc(var(--shadow-y) * 2 / 3));
+  box-shadow: 0 0 0 var(--shadow-color, var(--border));
 }
 [data-slot='switch']:disabled,
 [data-slot='switch'][data-disabled] {

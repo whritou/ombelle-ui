@@ -21,6 +21,16 @@
   background: var(--destructive);
   color: var(--destructive-foreground);
 }
+[data-slot='badge'][data-variant='accent'] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='badge'][data-variant='outline'] {
+  border-color: color-mix(in srgb, var(--foreground) 40%, transparent);
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
 @media (forced-colors: active) {
   [data-slot='badge'] {
     background: Canvas;

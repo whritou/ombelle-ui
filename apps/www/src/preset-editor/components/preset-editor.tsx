@@ -455,7 +455,7 @@ export default function PresetEditor() {
               {
                 id: 'checks',
                 label: 'Checks',
-                icon: <ShieldCheck aria-hidden="true" size={16} />,
+                icon: <ShieldCheck aria-hidden="true" size={20} />,
                 badge: presetWarningCount(contrast, glassReport),
                 content: (
                   <PresetChecks
@@ -468,7 +468,7 @@ export default function PresetEditor() {
               {
                 id: 'export',
                 label: 'Export',
-                icon: <Download aria-hidden="true" size={16} />,
+                icon: <Download aria-hidden="true" size={20} />,
                 content: (
                   <PresetExportPanel
                     draft={draft}

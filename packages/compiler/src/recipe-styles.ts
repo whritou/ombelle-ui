@@ -216,7 +216,7 @@ export function compileScopedButtonStyles(input: {
         ? 'Georgia, serif'
         : d.fontFamilyId === 'system-mono'
           ? 'monospace'
-          : 'Arial, sans-serif',
+          : "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
   if (data.styleFamily === 'liquid-glass') {

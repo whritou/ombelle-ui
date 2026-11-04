@@ -10,7 +10,7 @@ export function Input({
       data-slot="input"
       type={type}
       className={cn(
-        'w-full disabled:cursor-not-allowed disabled:opacity-50',
+        'w-full disabled:cursor-not-allowed',
         className,
       )}
       {...props}

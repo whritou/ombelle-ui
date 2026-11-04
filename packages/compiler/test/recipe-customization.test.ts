@@ -36,7 +36,10 @@ async function compiled(extra: { overrides?: Fields; icon?: unknown; props?: Fie
 it('keeps recipes without the new fields free of their rules and of lucide-react', async () => {
   const plain = await compiled()
   expect(plain.file('component')).not.toContain('lucide-react')
-  expect(plain.css).not.toMatch(/padding-inline|letter-spacing|text-transform|:hover:not\(\.dark/)
+  // The family itself may set letter-spacing and uppercase (neo-brutalism does, as its kit
+  // shows); only the customization rules must be absent.
+  expect(plain.css).not.toMatch(/padding-inline|:hover:not\(\.dark/)
+  expect(plain.rule('[data-size]:not([data-size="icon"])')).toBeUndefined()
   expect(plain.result.dependencies.map((d) => d.name)).not.toContain('lucide-react')
   expect(plain.result.recipe.data).not.toHaveProperty('icon')
 })
@@ -69,7 +72,8 @@ it('renders a leading or trailing lucide icon and adds the pinned dependency', a
   const start = await compiled({ icon: { name: 'arrow-right' } })
   const source = start.file('component')
   expect(source).toContain("import { ArrowRight } from 'lucide-react'")
-  expect(source).toMatch(/<ArrowRight[\s\S]*?aria-hidden="true"[\s\S]*?\/>\s*\{children\}/)
+  // While loading, a spinner takes the leading icon's place: {loading ? <spinner/> : <ArrowRight/>}.
+  expect(source).toMatch(/<ArrowRight[\s\S]*?aria-hidden="true"[\s\S]*?\/>\s*\)?\}?\s*\{children\}/)
   expect(source).toContain('data-icon-position="start"')
   expect(start.result.recipe.data.icon).toEqual({ name: 'arrow-right', position: 'start', iconOnly: false })
   expect(start.result.dependencies).toContainEqual({ name: 'lucide-react', version: '1.55.0' })

@@ -45,7 +45,9 @@ it.each(supportedStyleFamilies)(
       (a) => a.logicalPath === 'components/ui/card.css',
     )!.content
     expect(css).toContain(`/* ${family} Card */`)
-    expect(css).toContain('--card-padding: 1.5rem')
+    expect(css).toContain(
+      `--card-padding: ${family === 'minimalist' ? '1.25rem' : '1.125rem'}`,
+    )
     expect(css).toContain("[data-slot='card'][data-density='dense']")
     expect(css).toContain('--card-padding: 1rem')
     expect(css).toContain(
@@ -53,7 +55,9 @@ it.each(supportedStyleFamilies)(
         ? 'box-shadow: calc(var(--shadow-x) * 2) calc(var(--shadow-y) * 2) 0'
         : family === 'ombelle'
           ? 'box-shadow: calc(var(--shadow-x) * 5 / 3) calc(var(--shadow-y) * 5 / 3) 0'
-          : 'box-shadow: none',
+          : family === 'flat'
+            ? 'box-shadow: inset 0 0 0 var(--border-width) var(--border)'
+            : 'box-shadow: none',
     )
     for (const mode of ['light', 'dark'] as const) {
       const { card, cardForeground } = preset.modes[mode]

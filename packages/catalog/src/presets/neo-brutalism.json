@@ -27,7 +27,8 @@
       "destructiveForeground": "#111111",
       "border": "#111111",
       "input": "#111111",
-      "ring": "#111111"
+      "ring": "#111111",
+      "shadowColor": "#111111"
     },
     "dark": {
       "background": "#141414",
@@ -48,7 +49,8 @@
       "destructiveForeground": "#111111",
       "border": "#F5F5F5",
       "input": "#F5F5F5",
-      "ring": "#F5F5F5"
+      "ring": "#F5F5F5",
+      "shadowColor": "#FF90E8"
     }
   },
   "design": {

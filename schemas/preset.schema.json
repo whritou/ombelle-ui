@@ -93,7 +93,8 @@
         "destructiveForeground": {"$ref": "#/$defs/color"},
         "border": {"$ref": "#/$defs/color"},
         "input": {"$ref": "#/$defs/color"},
-        "ring": {"$ref": "#/$defs/color"}
+        "ring": {"$ref": "#/$defs/color"},
+        "shadowColor": {"$ref": "#/$defs/color"}
       }
     }
   }
