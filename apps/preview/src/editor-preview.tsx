@@ -71,17 +71,20 @@ function EditorPreview() {
   const Button = buttonModule && buttonModule.family === family ? buttonModule.module.Button : null
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     <style>{state?.css ?? ''}</style>
-    {state && Button && <Button
-      data-slot="recipe-button"
-      data-ombelle-recipe={message.scope}
-      variant={state.recipe.props.variant}
-      size={state.recipe.props.size}
-      type={state.recipe.props.type}
-      disabled={state.recipe.props.disabled || state.recipe.props.loading}
-      aria-busy={state.recipe.props.loading || undefined}
-      data-forced-state={state.forcedState}
-      className={forcedClass[state.forcedState]}
-    >{state.recipe.content}</Button>}
+    {/* Button always sets data-slot="button" on itself, but the recipe CSS targets
+        data-slot="recipe-button", as the installed RecipeButton renders it. As a Slot
+        parent it only lends variant classes and data attributes; the child's own
+        data-slot wins the Slot merge. */}
+    {state && Button && <Button asChild variant={state.recipe.props.variant} size={state.recipe.props.size} className={forcedClass[state.forcedState]}>
+      <button
+        data-slot="recipe-button"
+        data-ombelle-recipe={message.scope}
+        type={state.recipe.props.type}
+        disabled={state.recipe.props.disabled || state.recipe.props.loading}
+        aria-busy={state.recipe.props.loading || undefined}
+        data-forced-state={state.forcedState}
+      >{state.recipe.content}</button>
+    </Button>}
   </div>
 }
 
