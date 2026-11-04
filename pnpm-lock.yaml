@@ -147,6 +147,9 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
+      '@ombelle/preview':
+        specifier: workspace:*
+        version: link:../preview
       '@tailwindcss/postcss':
         specifier: 4.3.3
         version: 4.3.3
