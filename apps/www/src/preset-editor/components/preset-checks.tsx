@@ -37,7 +37,8 @@ export function PresetChecks({
   if (!contrast.length)
     return <p className={styles.empty}>Contrast checks are pending.</p>
   const warnings = contrast.filter((pair) => pair.status === 'warning')
-  const passing = contrast.filter((pair) => pair.status !== 'warning')
+  const passing = contrast.filter((pair) => pair.status === 'pass')
+  const unevaluated = contrast.filter((pair) => pair.status === 'not-evaluated')
   const glassFails = glassReport !== null && !glassReport.passes
   return (
     <div className={styles.checks}>
@@ -89,11 +90,24 @@ export function PresetChecks({
           ))}
         </ul>
       )}
+      {unevaluated.length > 0 && (
+        <section aria-label="Not evaluated pairs">
+          <h3>Not evaluated ({unevaluated.length})</h3>
+          <ul className={styles.passing} data-testid="preset-checks-unevaluated">
+            {unevaluated.map((pair) => (
+              <li key={pair.mode + pair.foreground} data-status="not-evaluated">
+                {sentence(pair.mode)} {words(pair.foreground)}/
+                {words(pair.background)}: Not evaluated
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {passing.length > 0 && (
         <section aria-label="Passing pairs">
           <div className={styles.passingHead}>
             <h3>
-              {warnings.length ? 'Other pairs' : 'Passing pairs'} (
+              Passing pairs (
               {passing.length})
             </h3>
             <button
