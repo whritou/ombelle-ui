@@ -71,8 +71,6 @@
 .root .previewStatus { margin: 0 0 0 auto; border-radius: 999px; background: var(--muted); padding: 2px 12px; color: var(--slate); font-size: .8125rem; }
 .previewStatus[data-status='current']::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: oklch(.62 .17 150); }
 .codeSection { min-width: 0; }
-.hashLine { color: var(--slate); font-size: .79rem; overflow-wrap: anywhere; margin-top: .8rem; }
-.hashLine span { font-family: var(--font-mono); }
 
 /* Inspector controls. Section chrome, sliders and segmented controls come from the shared editor shell. */
 .root :global(.properties) { display: grid; }
@@ -154,6 +152,9 @@
 .root :global(.artifactToolbar) button { border: 1px solid var(--line); border-radius: .35rem; background: var(--white); color: var(--ink); padding: .25rem .65rem; font-size: .8rem; }
 .root :global(.artifacts) pre { margin: 0; padding: 1rem; max-height: 20rem; min-height: 10rem; overflow: auto; border: 1px solid var(--line); border-radius: 0 0 .75rem .75rem; background: var(--muted); color: var(--ink); font: 400 .77rem/1.55 var(--font-mono); }
 .root :global(.artifactNote) { font-size: .83rem; color: var(--slate); margin: .75rem 0 0; }
+.root :global(.artifactMeta) { display: flex; flex-wrap: wrap; gap: .25rem .9rem; margin: 0 0 .8rem; color: var(--slate); font-size: .79rem; overflow-wrap: anywhere; }
+.root :global(.artifactMeta) span:first-child { font-family: var(--font-mono); }
+.root :global(.artifactCollapse) { border: 1px solid var(--line); border-radius: .35rem; background: var(--white); color: var(--ink); padding: .25rem .65rem; font-size: .8rem; }
 .root :global(.staleBadge) { border: 1px solid var(--warning); color: var(--warning); border-radius: 10rem; padding: .2rem .5rem; font-size: .75rem; font-weight: 600; }
 .status { color: var(--slate); font-size: .84rem; min-height: 1.5rem; padding-top: .7rem; }
 .status p { margin: 0; }

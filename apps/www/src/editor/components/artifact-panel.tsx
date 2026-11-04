@@ -1,22 +1,26 @@
 import { useState } from 'react'
+import { useDrawerState } from '../../editor-shell'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import { recipeFilename } from '../storage'
 import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
 
-type Tab = 'Usage' | 'Component' | 'CSS' | 'Dependencies' | 'Recipe JSON' | 'Details' | 'CLI'
-const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Dependencies', 'Recipe JSON', 'Details', 'CLI']
+export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
+const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Recipe', 'Install']
+
+/** Metadata line: recipe hash, catalog/compiler provenance, then the dependency list. */
+export function artifactMeta(result: RecipeCompileResult): string[] {
+  return [
+    result.recipe.hash,
+    `Catalog ${result.provenance.catalogRelease} · Compiler ${result.provenance.compilerVersion}`,
+    ...(result.dependencies.length
+      ? [result.dependencies.map(({ name, version }) => `${name}@${version}`).join(', ')]
+      : ['No additional dependencies']),
+  ]
+}
 
 function tabContent(tab: Tab, result: RecipeCompileResult, json: string): string {
-  if (tab === 'Dependencies') return result.dependencies.length
-    ? result.dependencies.map(({ name, version }) => `${name}@${version}`).join('\n')
-    : 'No additional dependencies.'
-  if (tab === 'Recipe JSON') return json
-  if (tab === 'Details') return [
-    `Recipe hash: ${result.recipe.hash}`, `Preset hash: ${result.preset.hash}`,
-    `Catalog release: ${result.provenance.catalogRelease}`,
-    `Compiler version: ${result.provenance.compilerVersion}`,
-  ].join('\n')
-  if (tab === 'CLI') return `${installerRunner(publishedInstaller)} add --recipe ./${recipeFilename(result.recipe.data)} --cwd APP --yes`
+  if (tab === 'Recipe') return json
+  if (tab === 'Install') return `${installerRunner(publishedInstaller)} add --recipe ./${recipeFilename(result.recipe.data)} --cwd APP --yes`
   const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
   return result.artifacts.find((artifact) => artifact.kind === kind)?.content ?? ''
 }
@@ -30,6 +34,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
   notice?: string | null
 }) {
   const [tab, setTab] = useState<Tab>('Usage')
+  const [open, setOpen] = useDrawerState('ombelle.button-editor.output', true)
   const content = result ? tabContent(tab, result, recipeJson ?? '') : ''
   async function copy() {
     try {
@@ -43,7 +48,14 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
     <section className="artifacts" aria-labelledby="artifacts-title">
       <div className="sectionTitle"><div><h2 id="artifacts-title">Generated output</h2><p>Compiled from this Button recipe.</p></div>
         {stale && <span className="staleBadge">Output is out of date</span>}
+        <button type="button" className="artifactCollapse" aria-expanded={open} aria-controls="artifact-body"
+          aria-label={open ? 'Collapse generated output' : 'Expand generated output'} onClick={() => setOpen(!open)}>{open ? 'Collapse' : 'Expand'}</button>
       </div>
+      <p className="artifactMeta" data-testid="artifact-meta">
+        <span data-testid="recipe-hash">{result?.recipe.hash ?? 'Pending'}</span>
+        {result && artifactMeta(result).slice(1).map((item) => <span key={item}>{item}</span>)}
+      </p>
+      <div id="artifact-body" hidden={!open}>
       {notice && <p className="artifactNote" data-testid="experimental-notice">{notice}</p>}
       {result ? <>
         <div className="artifactTabs" role="tablist" aria-label="Generated artifacts">
@@ -58,12 +70,13 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
             }}
             onClick={() => setTab(item)}>{item}</button>)}
         </div>
-        <div className="artifactToolbar"><span>{tab === 'CLI' ? 'Local installation' : tab}</span>
-          <button type="button" onClick={() => void copy()} disabled={stale || (tab === 'Recipe JSON' && !recipeJson)} aria-label={`Copy ${tab}`}>Copy</button></div>
+        <div className="artifactToolbar"><span>{tab === 'Install' ? 'Local installation' : tab}</span>
+          <button type="button" onClick={() => void copy()} disabled={stale || (tab === 'Recipe' && !recipeJson)} aria-label={`Copy ${tab}`}>Copy</button></div>
         <pre role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} tabIndex={0}><code>{content}</code></pre>
-        {tab === 'CLI' && <p className="artifactNote">Run from the folder containing the downloaded {recipeFilename(result.recipe.data)} with Node 24.19.0 or newer Node 24. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
-        {tab === 'Recipe JSON' && <p className="artifactNote">ID: {result.recipe.data.id} · Revision: {result.recipe.data.revision}. Changed content at an installed ID and revision needs a new revision.</p>}
+        {tab === 'Install' && <p className="artifactNote">Run from the folder containing the downloaded {recipeFilename(result.recipe.data)} with Node 24.19.0 or newer Node 24. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
+        {tab === 'Recipe' && <p className="artifactNote">ID: {result.recipe.data.id} · Revision: {result.recipe.data.revision}. Changed content at an installed ID and revision needs a new revision.</p>}
       </> : <p>Compiling generated output…</p>}
+      </div>
     </section>
   )
 }

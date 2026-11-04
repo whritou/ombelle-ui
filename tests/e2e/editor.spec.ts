@@ -153,10 +153,26 @@ test('failed recovery download cannot lose invalid bytes when replacement storag
   expect(await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))).toBe('{failed recovery')
 })
 
+test('output panel collapse keeps focus on its toggle and persists', async ({ page }) => {
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  const toggle = page.getByRole('button', { name: 'Collapse generated output' })
+  await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
+  await toggle.focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'Expand generated output' })).toBeFocused()
+  await expect(page.getByRole('tab', { name: 'Usage' })).toBeHidden()
+  await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending')
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Expand generated output' })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Usage' })).toBeHidden()
+  await page.getByRole('button', { name: 'Expand generated output' }).click()
+  await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
+})
+
 test('artifact tabs support copy and validated recipe JSON download', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('http://127.0.0.1:3000/editor/component/button')
-  for (const name of ['Usage', 'Component', 'CSS', 'Dependencies', 'CLI']) {
+  for (const name of ['Usage', 'Component', 'CSS', 'Recipe', 'Install']) {
     await page.getByRole('tab', { name }).click()
     await expect(page.getByRole('tabpanel')).not.toBeEmpty()
     await page.getByRole('button', { name: `Copy ${name}` }).click()
@@ -172,7 +188,7 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
   const recipe = validateRecipe(JSON.parse(await readFile(file!, 'utf8')))
   expect(recipe.component).toBe('button')
   await expect(page.getByRole('status')).toContainText('downloaded')
-  await page.getByRole('tab', { name: 'CLI' }).click()
+  await page.getByRole('tab', { name: 'Install' }).click()
   const command = await page.getByRole('tabpanel').textContent()
   expect(command).toContain(download.suggestedFilename())
   expect(command).toContain('npx @ombelle-ui/cli@0.3.0 add --recipe ./')
@@ -493,18 +509,18 @@ test('operates every Button editor control, artifact tab, download and publish d
   }
 
   await tabTo(page, page.getByRole('tab', { name: 'Usage' }))
-  for (const name of ['Component', 'CSS', 'Dependencies', 'Recipe JSON', 'Details', 'CLI', 'Usage']) {
+  for (const name of ['Component', 'CSS', 'Recipe', 'Install', 'Usage']) {
     await page.keyboard.press('ArrowRight')
     await expect(page.getByRole('tab', { name, exact: true })).toBeFocused()
     await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true')
     await expectVisibleFocus(page)
   }
   await page.keyboard.press('ArrowLeft')
-  await expect(page.getByRole('tab', { name: 'CLI' })).toBeFocused()
+  await expect(page.getByRole('tab', { name: 'Install' })).toBeFocused()
   await expect(page.getByRole('tabpanel')).toContainText('add --recipe ./')
-  await tabTo(page, page.getByRole('button', { name: 'Copy CLI' }))
+  await tabTo(page, page.getByRole('button', { name: 'Copy Install' }))
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('status')).toContainText('CLI copied.')
+  await expect(page.getByRole('status')).toContainText('Install copied.')
   await tabTo(page, page.getByRole('tabpanel'))
 
   const expected = {
