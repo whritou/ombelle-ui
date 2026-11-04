@@ -1,7 +1,7 @@
 'use client'
 
 import { PanelRightClose } from 'lucide-react'
-import type { KeyboardEvent, ReactNode } from 'react'
+import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import styles from './editor-shell.module.css'
 
 export type DrawerTab = {
@@ -16,6 +16,12 @@ function railLabel(tab: DrawerTab) {
   const base = `Open ${tab.label.toLowerCase()}`
   if (!tab.badge) return base
   return `${base}: ${tab.badge} ${tab.badge === 1 ? 'warning' : 'warnings'}`
+}
+
+// The closed rail and the open drawer are different trees, so the element that
+// had focus is unmounted by a toggle. This names the element to focus after it.
+export function drawerFocusId(open: boolean, activeTab: string): string {
+  return open ? `${activeTab}-tab` : `${activeTab}-rail`
 }
 
 export function ReviewDrawer({
@@ -33,19 +39,32 @@ export function ReviewDrawer({
   activeTab: string
   onTabChange(id: string): void
 }) {
+  // Only set by toggles made inside the drawer, so a parent that opens it
+  // programmatically never has focus pulled onto it.
+  const restoreFocus = useRef(false)
+  const toggle = (next: boolean) => {
+    restoreFocus.current = true
+    onOpenChange(next)
+  }
+  useEffect(() => {
+    if (!restoreFocus.current) return
+    restoreFocus.current = false
+    document.getElementById(drawerFocusId(open, activeTab))?.focus()
+  }, [open, activeTab])
   if (!open) {
     return (
       <aside aria-label={label} className={styles.rail}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
+            id={`${tab.id}-rail`}
             type="button"
             className={styles.railButton}
             aria-label={railLabel(tab)}
             aria-expanded="false"
             onClick={() => {
               onTabChange(tab.id)
-              onOpenChange(true)
+              toggle(true)
             }}
           >
             {tab.icon}
@@ -97,7 +116,7 @@ export function ReviewDrawer({
           className={styles.iconButton}
           aria-label={`Close ${label.toLowerCase()}`}
           aria-expanded="true"
-          onClick={() => onOpenChange(false)}
+          onClick={() => toggle(false)}
         >
           <PanelRightClose aria-hidden="true" size={16} />
         </button>

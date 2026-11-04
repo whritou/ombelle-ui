@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { ReviewDrawer } from './review-drawer'
+import { drawerFocusId, ReviewDrawer } from './review-drawer'
 
 const noop = () => {}
 const tabs = [
@@ -28,4 +28,15 @@ it('open ReviewDrawer renders tabs and a close button', () => {
   expect(html).toContain('aria-label="Close review"')
   expect(html).toContain('>x<')
   expect(html).not.toContain('>y<')
+})
+
+it('gives each focus target an id that matches where focus is restored', () => {
+  const closed = renderToStaticMarkup(
+    <ReviewDrawer label="Review" open={false} onOpenChange={noop} activeTab="checks" onTabChange={noop} tabs={tabs} />,
+  )
+  const open = renderToStaticMarkup(
+    <ReviewDrawer label="Review" open onOpenChange={noop} activeTab="checks" onTabChange={noop} tabs={tabs} />,
+  )
+  expect(closed).toContain(`id="${drawerFocusId(false, 'checks')}"`)
+  expect(open).toContain(`id="${drawerFocusId(true, 'checks')}"`)
 })
