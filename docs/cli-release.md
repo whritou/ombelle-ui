@@ -22,7 +22,7 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.3.1, which is not yet published; website commands keep `0.3.0` until it is. 0.3.1 adds the liquid-glass refraction filter component. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
+All six workspace packages use software version 0.3.1. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
 
 Post-publication checks on 2026-11-02:
 
@@ -33,7 +33,9 @@ Post-publication checks on 2026-11-02:
 
 `@ombelle-ui/cli@0.3.0` was published on 2026-11-04 from `a9e56fc` and is the `latest` tag; its registry integrity `sha512-3YPRTtPy…HeQgSXBrZjYkw==` matches the tested candidate. The candidate's `release.json` records `workingTreeDirty: true` only because the Windows build rewrote three generated files with LF line endings; their content was unchanged. 0.3.0 adds recipe color overrides and the hover/pressed catalog styles; 0.2.1 rejects recipes that use colors.
 
-Code pages and Get code therefore show `@ombelle-ui/cli@0.3.0` commands. The runner table below was measured for 0.2.1 and has not been repeated for 0.3.0. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
+`@ombelle-ui/cli@0.3.1` was published on 2026-11-04 from `4c0563d`, built in a clean worktree (`workingTreeDirty: false`), and is the `latest` tag; its registry integrity `sha512-oTZ/4Hlu…LzdsQ==` matches the tested candidate. It adds the liquid-glass refraction filter component and its `add` notice.
+
+Code pages and Get code therefore show `@ombelle-ui/cli@0.3.1` commands. The runner table below was measured for 0.2.1 and has not been repeated for 0.3.x. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
 
 ## Verified public runners
 
