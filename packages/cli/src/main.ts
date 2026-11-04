@@ -39,14 +39,17 @@ const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
   '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
-function glassNotices(family: string, ids: readonly ComponentId[] | undefined): string[] {
+function glassNotices(family: string, ids: readonly ComponentId[] | undefined, installsFilter = false): string[] {
   if (family !== 'liquid-glass') return []
   const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
   const listed = ids ? experimental.filter((id) => ids.includes(id)) : experimental
-  return listed.length
-    ? ['liquid-glass is experimental for ' + listed.join(', ') +
-        '; see docs/components/liquid-glass.md for limitations']
-    : []
+  if (!listed.length) return []
+  const notices = ['liquid-glass is experimental for ' + listed.join(', ') +
+    '; see docs/components/liquid-glass.md for limitations']
+  // Only `add` writes the filter component; other commands have none to mount.
+  if (installsFilter)
+    notices.push('mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers')
+  return notices
 }
 export async function runCli(
   args: string[],
@@ -208,6 +211,7 @@ export async function runCli(
       plan.notices = glassNotices(
         result.preset.data.styleFamily,
         command === 'add' ? (ids as ComponentId[]) : undefined,
+        command === 'add',
       )
     }
     if (presetInput)

@@ -1,4 +1,6 @@
 /* liquid-glass family (experimental) */
+/* Glass surfaces refract their backdrop when <LiquidGlassFilter /> sets
+   --glass-refraction (Chromium only); otherwise the blurred glass is unchanged. */
 [data-slot="button"], [data-slot="input"], [data-slot="dialog-close"] {
   font-family: var(--font-family);
   min-height: var(--control-height);
@@ -49,18 +51,18 @@
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot="button"][data-variant="secondary"] {
     background: linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, var(--secondary) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
-    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
-    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   [data-slot="button"][data-variant="outline"], [data-slot="button"][data-variant="ghost"] {
     background: linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
-    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
-    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   [data-slot="dialog-content"] {
     background: linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, var(--popover) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
-    -webkit-backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
-    backdrop-filter: var(--glass-inner-filter, blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   @media (prefers-reduced-transparency: reduce) {
     [data-slot="button"][data-variant="secondary"] { background: var(--secondary); -webkit-backdrop-filter: none; backdrop-filter: none; }

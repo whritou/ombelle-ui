@@ -18,6 +18,8 @@ afterEach(async () => {
 })
 
 const glassIds = componentsWithStyleSupport('liquid-glass', ['experimental'])
+const mountNotice =
+  'mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers'
 const notice = (ids: readonly string[]) =>
   'liquid-glass is experimental for ' + ids.join(', ') +
   '; see docs/components/liquid-glass.md for limitations'
@@ -85,13 +87,14 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const dryPlan = jsonRecord(dry.data)
     expect(dryPlan.status).toBe('planned')
     expect(dryPlan.warnings).toEqual([])
-    expect(dryPlan.notices).toEqual([notice(glassIds)])
+    expect(dryPlan.notices).toEqual([notice(glassIds), mountNotice])
 
     const applied = await command([...addArgs, '--yes'])
     expect(applied.code, applied.output).toBe(0)
     const appliedPlan = jsonRecord(applied.data)
     expect(appliedPlan.status).toBe('success')
-    expect(appliedPlan.notices).toEqual([notice(glassIds)])
+    expect(appliedPlan.notices).toEqual([notice(glassIds), mountNotice])
+    expect(await fs.readFile(path.join(root, 'src/components/ui/liquid-glass-filter.tsx'), 'utf8')).toContain('ombelle-liquid-glass')
 
     const canonical = await compile({
       preset: JSON.parse(await fs.readFile(glass, 'utf8')),
@@ -113,7 +116,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     // A subset only lists the ids it installs.
     const again = await command(['add', 'badge', '--dry-run'])
     expect(again.code, again.output).toBe(0)
-    expect(jsonRecord(again.data).notices).toEqual([notice(['badge'])])
+    expect(jsonRecord(again.data).notices).toEqual([notice(['badge']), mountNotice])
 
     // Unavailable component: refused, nothing written.
     const before = await snapshotTree(root)

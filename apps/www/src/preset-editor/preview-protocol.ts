@@ -109,6 +109,8 @@ export async function verifyPresetRender(
       componentIds,
       catalogRelease: '0.1.0',
       compilerVersion: '0.1.0',
+      // The editor previews glass drafts below the contrast bound too.
+      glassContrast: 'report',
     })
     if (
       canonicalize(expected) !== canonicalize(result) ||
@@ -121,9 +123,14 @@ export async function verifyPresetRender(
     )
     // Every compiled source must be reviewed gallery source; a full family
     // must also cover the whole manifest.
+    // The gallery also carries the glass-only filter, which full stable
+    // families do not compile.
+    const shared = Object.keys(manifest.sources).filter(
+      (path) => path !== 'components/ui/liquid-glass-filter.tsx',
+    )
     if (
       (componentIds.length === supportedComponentIds.length &&
-        sources.length !== Object.keys(manifest.sources).length) ||
+        sources.length !== shared.length) ||
       sources.some(
         (a) => manifest.sources[a.logicalPath]?.canonicalHash !== a.sha256,
       )

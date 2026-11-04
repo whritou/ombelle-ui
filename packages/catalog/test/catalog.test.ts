@@ -510,7 +510,7 @@ describe('catalog contract', () => {
     expect(preset).toMatchObject({
       id: 'builtin-liquid-glass',
       styleFamily: 'liquid-glass',
-      design: { transparency: 'auto', glassBlurPx: 8, glassOpacity: 0.5, radiusRem: 0.75 },
+      design: { transparency: 'auto', glassBlurPx: 3, glassOpacity: 0.5, radiusRem: 0.75 },
       componentDefaults: { button: { variant: 'default', size: 'default' } },
     })
     expect(c.styles['liquid-glass']).toContain('liquid-glass family')

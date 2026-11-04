@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add liquid-glass refraction: `add` installs `components/ui/liquid-glass-filter.tsx`. Mounted once, `<LiquidGlassFilter />` bends the backdrop at each rim with a slight prism edge in Chromium browsers, keeping the contrast bound. Other browsers keep the blurred glass, and the CLI prints a mount notice. The built-in glass preset's default blur drops from 8px to 3px so the refraction shows.
+
 ## 0.3.0 — 4 November 2026
 
 - Publish `@ombelle-ui/cli@0.3.0` to npm; website commands use `npx @ombelle-ui/cli@0.3.0`.

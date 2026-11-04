@@ -105,6 +105,21 @@ it.each([
       'a'.repeat(64)
   expect(await verifyPresetRender(input, 0, expected)).toBeNull()
 })
+it('accepts a liquid-glass draft below the contrast bound so the editor can preview it', async () => {
+  const preset = structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
+  preset.design = { ...preset.design, glassOpacity: 0.3 }
+  const failing = await compile({
+    preset,
+    componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+    glassContrast: 'report',
+  })
+  const input = { ...message(), result: failing }
+  const filter = failing.artifacts.find((a) => a.logicalPath === 'components/ui/liquid-glass-filter.tsx')!
+  const withFilter = { ...manifest, sources: { ...manifest.sources, [filter.logicalPath]: { canonicalHash: filter.sha256, transformedHash: await sha256(filter.content) } } }
+  expect(await verifyPresetRender(input, 0, withFilter)).toEqual(input)
+})
 it('accepts a liquid-glass render compiled from only its experimental components', async () => {
   const glass = await compile({
     preset: getCatalog('0.1.0').presets['liquid-glass'],
@@ -113,7 +128,11 @@ it('accepts a liquid-glass render compiled from only its experimental components
     compilerVersion: '0.1.0',
   })
   const input = { ...message(), result: glass }
-  expect(await verifyPresetRender(input, 0, manifest)).toEqual(input)
+  // The real gallery manifest carries the glass-only filter as well.
+  const filter = glass.artifacts.find((a) => a.logicalPath === 'components/ui/liquid-glass-filter.tsx')!
+  const withFilter = { ...manifest, sources: { ...manifest.sources, [filter.logicalPath]: { canonicalHash: filter.sha256, transformedHash: await sha256(filter.content) } } }
+  expect(await verifyPresetRender(input, 0, withFilter)).toEqual(input)
+  expect(await verifyPresetRender(message(), 0, withFilter)).toEqual(message())
   const tampered = structuredClone(input)
   tampered.result.artifacts.find((a) => a.kind === 'component')!.content +=
     '\nalert(1)'
