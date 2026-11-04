@@ -10,16 +10,16 @@ import { SiteFooter } from '../../apps/www/src/site/footer.js'
 import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 describe('Button editor route', () => {
-  it('renders the Button workbench heading and editor context in the main landmark', () => {
+  it('renders the Button editor heading and breadcrumb context in the main landmark', () => {
     const html = renderToStaticMarkup(createElement(ButtonEditorPage))
 
-    expect(html).toMatch(/<main\b[^>]*>[\s\S]*Component editor[\s\S]*<h1\b[^>]*>Button workbench<\/h1>/)
+    expect(html).toMatch(/<main\b[^>]*>[\s\S]*Breadcrumb[\s\S]*Components[\s\S]*<h1\b[^>]*>Button editor<\/h1>/)
   })
 })
 
-it('renders the global preset editor heading in the main landmark', () => {
+it('renders the preset editor heading in the main landmark', () => {
   const html = renderToStaticMarkup(createElement(PresetEditorPage))
-  expect(html).toMatch(/<main\b[^>]*>[\s\S]*<h1\b[^>]*>Global preset editor<\/h1>/)
+  expect(html).toMatch(/<main\b[^>]*>[\s\S]*Breadcrumb[\s\S]*Presets[\s\S]*<h1\b[^>]*>Preset editor<\/h1>/)
   expect(html).toContain('Draft — automated token contrast only')
 })
 

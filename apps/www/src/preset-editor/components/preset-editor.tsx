@@ -197,7 +197,6 @@ export default function PresetEditor() {
   }
   return (
     <main className={styles.editor} aria-label="Global preset editor">
-      <h1 className={styles.srOnly}>Global preset editor</h1>
       <EditorTopBar
         crumbs={['Presets']}
         nameField={{
@@ -282,6 +281,7 @@ export default function PresetEditor() {
           />
         }
       />
+      <h1 className={styles.srOnly}>Preset editor</h1>
       {warning && <p role="alert">{warning}</p>}
       {restoreWarning && <p role="alert">{restoreWarning}</p>}
       {recovery !== null && (

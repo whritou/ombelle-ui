@@ -162,7 +162,6 @@ export function ButtonEditor() {
   ]
 
   return <main className={styles.root} aria-label="Button recipe editor">
-    <h1 className={styles.srOnly}>Button workbench</h1>
     <EditorTopBar
       crumbs={['Components', 'Button']}
       nameField={{
@@ -191,6 +190,7 @@ export function ButtonEditor() {
       primary={<RecipeGetCode className={styles.getCode} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
         secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
     />
+    <h1 className={styles.srOnly}>Button editor</h1>
 
     {recovery !== null ? <section className={styles.recovery} role="alert" aria-labelledby="recovery-title">
       <h2 id="recovery-title">Your saved draft needs recovery</h2>
