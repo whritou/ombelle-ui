@@ -23,7 +23,7 @@ const mountNotice =
 const notice = (ids: readonly string[]) =>
   'liquid-glass is experimental for ' + ids.join(', ') +
   '; see docs/components/liquid-glass.md for limitations'
-const installOrder = ['button', 'dialog', 'badge', 'card', 'tabs', 'tooltip'] as const
+const installOrder = ['button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu'] as const
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
 const flatPath = path.resolve('packages/catalog/src/presets/flat.json')
 
@@ -62,8 +62,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the six experimental ids', () => {
-  expect(glassIds).toEqual(['button', 'badge', 'card', 'dialog', 'tabs', 'tooltip'])
+it('lists the eight experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'tabs', 'tooltip'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {
@@ -106,7 +106,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
       (a) => a.logicalPath.startsWith('components/ui/') && a.logicalPath.endsWith('.css'),
     )
     expect(css.map((a) => a.logicalPath).sort()).toEqual(
-      ['badge', 'card', 'tabs', 'tooltip'].map((id) => 'components/ui/' + id + '.css'),
+      ['alert', 'badge', 'card', 'dropdown-menu', 'tabs', 'tooltip'].map((id) => 'components/ui/' + id + '.css'),
     )
     for (const artifact of canonical.artifacts.filter((a) => a.logicalPath.startsWith('components/ui/')))
       expect(await fs.readFile(path.join(root, 'src', artifact.logicalPath), 'utf8'), artifact.logicalPath)

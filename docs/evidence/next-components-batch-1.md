@@ -15,11 +15,13 @@ The visual source of truth is the design canvas's four "next 10 components" shee
 | `corepack pnpm typecheck` | passed |
 | `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 105 files, 1030 tests passed |
 | `tests/integration/preset-gallery-generation`, `preview-routing`, `hosted-preview-build` | 3 files, 16 tests passed |
+| `tests/integration/liquid-glass-cli`, `www-route` (after the first CI run flagged them) | 2 files, 20 tests passed |
+| CI (`checks`, four `integration` shards) | see the pull request |
 | Playwright screenshots, four families plus glass, light and dark, overlays open | 44 component captures and 3 scene captures, reviewed against the sheets |
 
 With the default worker count, `packages/cli/test/snapshot-cache.test.ts` ("bounds valid entries to 100 and 16 MiB during writes") hit its 60-second timeout under full-suite load. It passes alone (27/27) and in the four-worker run above. It does not touch the catalog.
 
-Not run: `pnpm check:foundation`, the full `test:integration` suite, and the browser e2e suite (`test:e2e`). The e2e suite does not run in CI or on this machine. The scene component lists in `tests/e2e/preset-editor.spec.ts` were updated but not executed. The consumer matrix does not install the new components yet.
+The first CI run failed two integration tests that still hard-coded the six glass ids and expected every catalog id on the website; both now cover the new components, and the glass CLI test installs Alert and Dropdown Menu through the real CLI. Not run locally: `pnpm check:foundation`, the rest of `test:integration` (CI runs it), and the browser e2e suite (`test:e2e`). The e2e suite does not run in CI or on this machine. The scene component lists in `tests/e2e/preset-editor.spec.ts` were updated but not executed. The consumer matrix does not install the new components yet.
 
 ## New tests
 
