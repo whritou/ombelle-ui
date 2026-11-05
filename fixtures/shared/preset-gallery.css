@@ -56,6 +56,18 @@ body {
   display: grid;
   gap: 12px;
 }
+.preset-inline-nav {
+  align-items: stretch;
+  min-height: 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.preset-inline-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: inherit;
+}
 .preset-form,
 .preset-form > div {
   display: grid;

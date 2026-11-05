@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
 import { Button } from '../generated/preset-gallery/components/ui/button'
+import { Separator } from '../generated/preset-gallery/components/ui/separator'
 import {
   Card,
   CardContent,
@@ -61,6 +62,7 @@ export function SignInScene(props: SceneProps) {
           </CardContent>
           <CardFooter className="scene-actions scene-actions-stack">
             <Button type="submit">Sign in</Button>
+            {show('separator', 'Separator', <Separator>or</Separator>)}
             <Button type="button" variant="outline">Continue with SSO</Button>
           </CardFooter>
         </form>

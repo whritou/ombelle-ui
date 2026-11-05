@@ -1,0 +1,95 @@
+/* flat Avatar */
+[data-slot='avatar'] {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+}
+[data-slot='avatar'][data-size='sm'] {
+  inline-size: 2rem;
+  block-size: 2rem;
+  font-size: 0.6875rem;
+}
+[data-slot='avatar'][data-size='lg'] {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  font-size: 1.125rem;
+}
+[data-slot='avatar'][data-variant='primary'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='avatar'][data-variant='secondary'] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='avatar-image'] {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+[data-slot='avatar-fallback'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+}
+[data-slot='avatar-status'] {
+  box-sizing: border-box;
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: #15803d;
+}
+[data-slot='avatar-status'][data-status='offline'] {
+  background: var(--muted-foreground);
+}
+[data-slot='avatar-group'] {
+  display: inline-flex;
+  align-items: center;
+}
+[data-slot='avatar-group'] > [data-slot='avatar'] {
+  outline: 2px solid var(--card);
+}
+[data-slot='avatar-group'] > [data-slot='avatar'] + [data-slot='avatar'] {
+  margin-inline-start: -0.625rem;
+}
+@media (forced-colors: active) {
+  [data-slot='avatar'] {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+  [data-slot='avatar-status'] {
+    background: CanvasText;
+    border-color: Canvas;
+  }
+  [data-slot='avatar-status'][data-status='offline'] {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+  [data-slot='avatar-group'] > [data-slot='avatar'] {
+    outline-color: Canvas;
+  }
+}

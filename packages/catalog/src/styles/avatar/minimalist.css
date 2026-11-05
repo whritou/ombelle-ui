@@ -1,0 +1,97 @@
+/* minimalist Avatar */
+[data-slot='avatar'] {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: var(--border-width) solid var(--input);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--card-foreground);
+  font-family: var(--font-family);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+}
+[data-slot='avatar'][data-size='sm'] {
+  inline-size: 1.875rem;
+  block-size: 1.875rem;
+  font-size: 0.6875rem;
+}
+[data-slot='avatar'][data-size='lg'] {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  font-size: 1.0625rem;
+}
+[data-slot='avatar'][data-variant='primary'] {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='avatar'][data-variant='secondary'] {
+  background: var(--muted);
+  color: var(--foreground);
+}
+[data-slot='avatar-image'] {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+[data-slot='avatar-fallback'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+}
+[data-slot='avatar-status'] {
+  box-sizing: border-box;
+  position: absolute;
+  inset-block-end: 1px;
+  inset-inline-end: 1px;
+  inline-size: 0.6875rem;
+  block-size: 0.6875rem;
+  border: 2px solid var(--background);
+  border-radius: 50%;
+  background: #2f6b3a;
+}
+[data-slot='avatar-status'][data-status='offline'] {
+  background: var(--muted-foreground);
+}
+[data-slot='avatar-group'] {
+  display: inline-flex;
+  align-items: center;
+}
+[data-slot='avatar-group'] > [data-slot='avatar'] {
+  outline: 2px solid var(--background);
+}
+[data-slot='avatar-group'] > [data-slot='avatar'] + [data-slot='avatar'] {
+  margin-inline-start: -0.5rem;
+}
+@media (forced-colors: active) {
+  [data-slot='avatar'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  [data-slot='avatar-status'] {
+    background: CanvasText;
+    border-color: Canvas;
+  }
+  [data-slot='avatar-status'][data-status='offline'] {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+  [data-slot='avatar-group'] > [data-slot='avatar'] {
+    outline-color: Canvas;
+  }
+}
