@@ -52,8 +52,8 @@ it('hand-computed pair: white surface over black at 0.8', () => {
 })
 
 it('threshold: minimumOpacity passes and one step below fails', () => {
-  // The card, popover and muted pairs at full coverage: the palette below sets only their colours.
-  const pairs = glassContrastPairs.filter((p) => p.coverage === undefined && p.text !== 'destructive')
+  // The untinted card, popover and muted pairs at full coverage: the palette below sets only their colours.
+  const pairs = glassContrastPairs.filter((p) => p.coverage === undefined && p.tint === undefined && p.text !== 'destructive')
   const reportAt = (preset: Preset) => glassContrastReportFor(preset, pairs)
   const at = (o: number) =>
     withColors(
@@ -134,6 +134,7 @@ it('pair list equals the spec table', () => {
     { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 }, coverage: 0.78 },
     { surface: 'card', text: 'mutedForeground', tint: { color: 'primary', light: 0.18, dark: 0.22 }, coverage: 0.78 },
     { surface: 'popover', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
+    { surface: 'popover', text: 'mutedForeground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
   ])
 })
 
@@ -355,8 +356,8 @@ it('reduced transparency evaluates tinted surfaces opaque', () => {
     design: { ...glass.design, transparency: 'reduced' },
   } as Preset
   const pairs = tintedReport(preset).pairs.filter((p) => p.tint !== undefined)
-  // The six tinted Button specs, the four tinted selection specs and the extra one, in two modes.
-  expect(pairs).toHaveLength(22)
+  // The six tinted Button specs, the five tinted selection specs and the extra one, in two modes.
+  expect(pairs).toHaveLength(24)
   for (const p of pairs) {
     expect(p.passes).toBe(true)
     expect(Math.abs(p.ratioOverBlack - p.ratioOverWhite)).toBeLessThan(1e-6)

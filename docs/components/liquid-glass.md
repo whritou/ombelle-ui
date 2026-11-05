@@ -103,7 +103,7 @@ The bound is checked in light and dark mode for these pairs:
 | `card` | `destructive` | Error messages beside a field, on the card that holds the form |
 | `card` + `primary` 26% light / 30% dark at 80% coverage | `foreground` | Checkbox mark and radio dot when checked |
 | `card` + `primary` 18% light / 22% dark at 78% coverage | `foreground`, `mutedForeground` | Checked Radio Group option label and description |
-| `popover` + `primary` 18% light / 22% dark | `foreground` | Highlighted Select option |
+| `popover` + `primary` 18% light / 22% dark | `foreground`, `mutedForeground` | Highlighted Select option and its hint |
 
 A tinted surface is a token surface mixed with a tint token at a fixed percentage per mode, the same mix the CSS paints. It is checked like any other pair: over the darkest and brightest filtered backdrop, with and without sheen, and on its opaque fallback. The editor readout names the tint, for example "foreground on card + primary 26%".
 

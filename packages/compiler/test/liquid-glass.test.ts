@@ -358,7 +358,7 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'destructive', ...glassTints.destructive } })
     const report = glassContrastReport(builtin())
     const tinted = report.pairs.filter((p) => p.tint !== undefined)
-    expect(tinted).toHaveLength(20)
+    expect(tinted).toHaveLength(22)
     for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.passes).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
@@ -466,17 +466,19 @@ describe('liquid-glass Button', () => {
     const selection = report.pairs.filter(
       (p) => p.tint?.color === 'primary' || p.coverage === 0.55,
     )
-    expect(selection).toHaveLength(16)
+    expect(selection).toHaveLength(18)
     for (const pair of selection) expect(pair.passes, JSON.stringify(pair)).toBe(true)
   })
-  it('declares the Select highlighted option pair and it passes', () => {
+  it('declares the Select highlighted option and hint pairs and they pass', () => {
     const rest = { color: 'primary', light: 0.18, dark: 0.22 } as const
-    // Highlighted options tint the popover glass; the disabled option's mutedForeground is already declared on it.
+    // Highlighted options tint the popover glass, under both the option text and its hint;
+    // the disabled option's mutedForeground is already declared on the untinted popover.
     expect(glassContrastPairs).toContainEqual({ surface: 'popover', text: 'foreground', tint: rest })
+    expect(glassContrastPairs).toContainEqual({ surface: 'popover', text: 'mutedForeground', tint: rest })
     expect(glassContrastPairs).toContainEqual({ surface: 'popover', text: 'mutedForeground' })
     const report = glassContrastReport(builtin())
     const pairs = report.pairs.filter((p) => p.surface === 'popover' && p.tint?.color === 'primary')
-    expect(pairs).toHaveLength(2)
+    expect(pairs).toHaveLength(4)
     for (const pair of pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
     expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
