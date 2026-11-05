@@ -34,7 +34,7 @@ it('compiles Progress in liquid glass: a glass track, a glossy solid primary fil
   })
   expect(at(track).background).toBe('color-mix(insrgb,var(--foreground)10%,var(--card))')
   expect(at(track, 'supports').background).toBe(
-    'color-mix(insrgb,color-mix(insrgb,var(--foreground)10%,var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.5))*100%),transparent)',
+    'color-mix(insrgb,color-mix(insrgb,var(--foreground)10%,var(--card))calc(var(--glass-inner-opacity,var(--glass-opacity))*100%),transparent)',
   )
   expect(at(track, 'supports')['backdrop-filter']).toContain('blur(var(--glass-blur))')
   expect(at(track, 'reduced')).toMatchObject({ background: 'color-mix(insrgb,var(--foreground)10%,var(--card))', 'backdrop-filter': 'none' })

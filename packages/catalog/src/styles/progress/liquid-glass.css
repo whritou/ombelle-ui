@@ -1,4 +1,4 @@
-/* liquid-glass Progress (experimental): a glass track (foreground 10% over the card, at half the glass coverage) with a
+/* liquid-glass Progress (experimental): a glass track (foreground 10% over the card, at the glass coverage) with a
    solid, glossy primary fill and a primary glow; complete is green. No text sits on either, so there is no contrast pair.
    Without backdrop-filter, or under reduced transparency, the track is opaque. */
 [data-slot='progress'] {
@@ -50,9 +50,9 @@
   }
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  /* The track is nested glass at half the coverage, like the kit's 50% track. */
+  /* The track is card glass at the full glass coverage, as the kit's track (50%, its glass opacity). */
   [data-slot='progress'] {
-    background: color-mix(in srgb, color-mix(in srgb, var(--foreground) 10%, var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.5)) * 100%), transparent);
+    background: color-mix(in srgb, color-mix(in srgb, var(--foreground) 10%, var(--card)) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
     -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
     backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
