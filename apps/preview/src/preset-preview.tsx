@@ -12,6 +12,8 @@ import { LiquidGlassFilter } from './generated/preset-gallery/components/ui/liqu
 import manifest from './generated/preset-gallery/manifest'
 import { gallerySources } from './generated/preset-gallery/sources'
 import { PresetScenePage } from './scenes'
+import { GlassBackdropArt, hasLabPreviewInk } from './glass-backdrop-art'
+import { GlassControlHalo } from './glass-control-halo'
 import './preset-preview.css'
 import { supportedComponentIds } from '../../../packages/contracts/src/component-ids.js'
 import {
@@ -126,9 +128,11 @@ function PresetPreview() {
       document.documentElement.dataset.backdrop = 'glass'
       if (backdrop === 'kit') delete document.documentElement.dataset.glassBackdrop
       else document.documentElement.dataset.glassBackdrop = backdrop
+      document.documentElement.toggleAttribute('data-glass-lab-ink', hasLabPreviewInk(current.message.result.preset.data, backdrop))
     } else {
       delete document.documentElement.dataset.backdrop
       delete document.documentElement.dataset.glassBackdrop
+      document.documentElement.removeAttribute('data-glass-lab-ink')
     }
     if (focus) document.documentElement.dataset.focus = focus
     else delete document.documentElement.dataset.focus
@@ -145,6 +149,13 @@ function PresetPreview() {
     })
   }, [current])
   const family = current?.message.result.preset.data.styleFamily
+  const design = current?.message.result.preset.data.design
+  const glassFilterKey = [
+    design?.transparency,
+    design?.glassRefraction,
+    design?.glassRefractionWidth,
+    Boolean(design?.glassHalo || design?.glassMotion),
+  ].join(':')
   const scene = current?.message.view.scene ?? 'gallery'
   const sceneProps = family
     ? {
@@ -157,7 +168,9 @@ function PresetPreview() {
       <style data-preset-styles>
         {presetRuntimeStyles(current.message.result)}
       </style>
-      {family === 'liquid-glass' && <LiquidGlassFilter />}
+      {family === 'liquid-glass' && <LiquidGlassFilter key={glassFilterKey} />}
+      {family === 'liquid-glass' && <GlassBackdropArt scene={current.message.view.backdrop ?? 'kit'} />}
+      {family === 'liquid-glass' && <GlassControlHalo enabled={design?.transparency !== 'reduced' && (design?.glassHalo ?? 0) > 0} />}
       {scene === 'gallery' ? (
         <PresetGallery {...sceneProps} />
       ) : (

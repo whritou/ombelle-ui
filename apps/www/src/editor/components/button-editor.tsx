@@ -18,6 +18,7 @@ import { EditorTopBar, SegmentedControl, previewModeOptions, previewWidthOptions
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = { storageVersion: 1, recipe: validateRecipe(exampleRecipe) }
+const initialRecipeJson = serializeRecipe(initialDraft)
 const initialView: EditorView = { mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' }
 const initialHistory: EditorHistory = { past: [], present: initialDraft, future: [] }
 
@@ -108,7 +109,13 @@ export function ButtonEditor() {
   }
 
   function chooseFamily(family: StyleFamily) {
-    try { edit(changeDraftFamily(draft, family).recipe, 'family') }
+    try {
+      // The shipped Neo-Brutalism specimen pins square corners and a hard shadow.
+      const source = family === 'liquid-glass' && serializeRecipe(draft) === initialRecipeJson
+        ? resetDraftRecipe(draft, initialDraft.recipe)
+        : draft
+      edit(changeDraftFamily(source, family).recipe, 'family')
+    }
     catch (error) { setDiagnostic({ code: 'INVALID_PRESET', message: error instanceof Error ? error.message : 'Unsupported preset.', path: '/presetRef' }) }
   }
 

@@ -1,9 +1,11 @@
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
+import { resolveRecipePreset } from '@ombelle/catalog'
 import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
 import { forcedStateSelector } from '../../www/src/editor/forced-states'
 import { draftFamily } from '../../www/src/editor/model'
 import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
+import { GlassBackdropArt, hasLabPreviewInk } from './glass-backdrop-art'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
@@ -75,6 +77,11 @@ function EditorPreview() {
   const state = message?.state
   const family = state && draftFamily(state.recipe)
   const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
+  const glassBackdrop = glassPreset && glassPresetBackdrop(glassPreset)
+  const overrides = state?.recipe.overrides
+  const useLabInk = Boolean(state && state.mode === 'light' && glassBackdrop
+    && !Object.keys(overrides ?? {}).some((key) => key === 'colors' || key.startsWith('glass'))
+    && hasLabPreviewInk(resolveRecipePreset(state.recipe.presetRef), glassBackdrop))
   React.useEffect(() => {
     if (!family || !(family in editorButtons)) return
     let active = true
@@ -84,15 +91,17 @@ function EditorPreview() {
 
   // The iframe owns its backdrop; the preset changes only the specimen and its preview.
   React.useEffect(() => {
-    if (!glassPreset) return
+    if (!glassBackdrop) return
     const root = document.documentElement
     root.dataset.backdrop = 'glass'
-    root.dataset.glassBackdrop = glassPresetBackdrop(glassPreset)
+    if (glassBackdrop !== 'kit') root.dataset.glassBackdrop = glassBackdrop
+    root.toggleAttribute('data-glass-lab-ink', useLabInk)
     return () => {
       delete root.dataset.backdrop
       delete root.dataset.glassBackdrop
+      root.removeAttribute('data-glass-lab-ink')
     }
-  }, [glassPreset])
+  }, [glassBackdrop, useLabInk])
 
   const recipeStyle = React.useRef<HTMLStyleElement>(null)
   const specimen = React.useRef<HTMLButtonElement>(null)
@@ -111,11 +120,11 @@ function EditorPreview() {
       for (const token of filterTokens) root.style.removeProperty(token)
     }
   }, [Button, family, state?.css, state?.mode])
-  const overrides = state?.recipe.overrides
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
     <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>
     {glassPreset && Button && <LiquidGlassFilter key={`${glassPreset}:${overrides?.glassHalo}:${overrides?.glassMotion}`} />}
+    {glassBackdrop && <GlassBackdropArt scene={glassBackdrop} />}
     {/* Button always sets data-slot="button" on itself, but the recipe CSS targets
         data-slot="recipe-button", as the installed RecipeButton renders it. As a Slot
         parent it only lends variant classes and data attributes; the child's own

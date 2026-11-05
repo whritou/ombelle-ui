@@ -15,6 +15,7 @@ import postcss from 'prettier/plugins/postcss'
 import { resolvePreset } from './resolve.js'
 import { sha256 } from './hash.js'
 import { assertGlassContrast, glassTokens } from './glass.js'
+import { glassMaterialActive } from './glass-contrast.js'
 const variable = (key: string) =>
   '--' + key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
 // Usage examples emitted as examples/<id>.tsx; Input uses the fallback.
@@ -148,7 +149,7 @@ export async function compile(input: {
     {
       logicalPath: 'styles/ui-style.css',
       kind: 'style',
-      content: catalog.styles[family],
+      content: catalog.styles[family] + (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : ''),
     },
   ]
   const dependencies = new Map<string, string>()

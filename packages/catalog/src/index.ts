@@ -46,6 +46,8 @@ export type Catalog = {
   presets: Record<StyleFamily, Preset>
   templates: Record<ComponentId, ComponentTemplate>
   styles: Record<StyleFamily, string>
+  /** Lab paint rules used by Liquid Glass presets with material settings. */
+  glassLabStyle: string
   utility: string
   /** Liquid-glass refraction filter component, installed with glass components. */
   glassFilter: string
@@ -229,6 +231,7 @@ export function getCatalog(release: string): Catalog {
     ) as Record<StartingPresetId, Preset>,
     templates,
     styles: { ...catalogData.styles },
+    glassLabStyle: catalogData.glassLabStyle,
     utility: catalogData.utility,
     glassFilter: catalogData.glassFilter,
   }

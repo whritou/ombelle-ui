@@ -25,6 +25,10 @@ html[data-backdrop='glass'] .preset-gallery .preset-form {
 html[data-backdrop='glass'] .preset-gallery .preset-form :is(label, p) {
   text-shadow: none;
 }
+html[data-glass-backdrop] .preset-gallery :is(h1, h2, header p) {
+  color: var(--glass-preview-ink);
+  text-shadow: var(--glass-preview-text-shadow);
+}
 
 /* Component pages focus one gallery section; centre it like a docs preview. */
 html[data-focus] .preset-gallery {

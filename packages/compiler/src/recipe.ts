@@ -66,6 +66,7 @@ export async function compileRecipe(input: {
       content: compileRecipeStyles({
         familyCss:
           catalog.styles[builtin.styleFamily as keyof typeof catalog.styles],
+        glassLabCss: catalog.glassLabStyle,
         preset,
         overrides: data.overrides,
         scope,

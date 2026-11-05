@@ -37,10 +37,16 @@ it('builds nested static runtime HTML/assets and workers without touching unrela
       expect(css.toLowerCase(), kind).toContain('#7c5cd6')
       expect(css, kind).toMatch(/\[data-backdrop=["']?glass["']?\]/)
       expect(css, kind).not.toContain('glass-backdrop.webp')
-      // The material lab's backdrops, picked in the preset editor.
-      for (const backdrop of ['prism', 'grid', 'night', 'peach'])
-        expect(css, kind + ' ' + backdrop).toMatch(new RegExp(`\\[data-glass-backdrop=["']?${backdrop}["']?\\]`))
+      expect(css, kind).toContain('.glass-backdrop-art')
+      expect(css, kind).toContain('[data-glass-backdrop]')
     }
+    // The lab scenes now ship as shared SVG markup in the runtime, rather than CSS gradients.
+    const runtime = (await Promise.all(assets.filter(name => name.endsWith('.js')).map(
+      name => fs.readFile(`apps/www/public/ombelle-preview/assets/${name}`, 'utf8'),
+    ))).join('\n').toLowerCase()
+    expect(runtime).toContain('m-90 490c140 590 281 105 466 240s671 535 1050 40')
+    for (const color of ['#15265e', '#101b3b', '#060b20', '#db8170'])
+      expect(runtime).toContain(color)
     for (const worker of ['editor', 'preset']) {
       const bytes = await fs.readFile(`apps/www/public/${worker}-compiler.worker.js`, 'utf8')
       expect(bytes).toContain('onmessage')

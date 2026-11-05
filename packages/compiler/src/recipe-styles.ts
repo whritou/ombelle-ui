@@ -14,6 +14,7 @@ import {
   type ResolvedPreset,
 } from '@ombelle/contracts'
 import { assertGlassContrast, glassTokens } from './glass.js'
+import { glassMaterialActive } from './glass-contrast.js'
 import { normalizeColor } from './resolve.js'
 
 export function validateRecipeDarkSelector(value: string): string {
@@ -54,6 +55,8 @@ const allowedMediaConditions = [
   '(prefers-reduced-transparency: reduce)',
   // The glass Card's hover lift, which only devices that hover get.
   '(hover: hover)',
+  'not (forced-colors: active)',
+  'not (prefers-reduced-transparency: reduce)',
 ]
 // The single reviewed liquid-glass feature query; compared whitespace-normalized.
 const glassSupportsCondition =
@@ -99,6 +102,7 @@ function withGlassOverrides(data: ResolvedPreset['data'], overrides: Recipe['ove
 
 export function compileScopedButtonStyles(input: {
   familyCss: string
+  glassLabCss?: string
   preset: ResolvedPreset
   overrides: Recipe['overrides']
   scope: string
@@ -137,7 +141,8 @@ export function compileScopedButtonStyles(input: {
     '"]'
   const data = withGlassOverrides(input.preset.data, input.overrides)
   if (data.styleFamily === 'liquid-glass') assertGlassContrast(data)
-  const root = postcss.parse(input.familyCss)
+  const lab = data.styleFamily === 'liquid-glass' && glassMaterialActive(data.design)
+  const root = postcss.parse(input.familyCss + (lab ? input.glassLabCss ?? '' : ''))
   root.walkAtRules((rule) => {
     const params = normalizeConditionParams(rule.params)
     if (
@@ -361,6 +366,13 @@ export function compileScopedButtonStyles(input: {
     if (glass)
       for (const mode of recipeColorModes) {
         const target = mode === 'light' ? light : darkTokens
+        if (lab && (variant === 'default' || variant === 'destructive') && set('background')) {
+          const custom = colors[mode]?.background !== undefined
+          target['--glass-lab-button-veil'] = custom
+            ? 'color-mix(in srgb, var(' + variable(colorTokens.background) + ') var(--glass-tint-amount), var(--card))'
+            : 'initial'
+          if (variant === 'destructive') target['--glass-lab-button-ink'] = custom ? 'var(--foreground)' : 'initial'
+        }
         if (set('foreground') && colors[mode]?.foreground === undefined && colorTokens.foreground !== 'foreground')
           target[variable(colorTokens.foreground)] = target['--foreground']
         if (variant === 'secondary' && set('background') && colors[mode]?.background === undefined)
@@ -466,6 +478,7 @@ export function compileScopedButtonStyles(input: {
 
 export function compileRecipeStyles(input: {
   familyCss: string
+  glassLabCss?: string
   preset: ResolvedPreset
   overrides: Recipe['overrides']
   scope: string

@@ -55,6 +55,7 @@ writeFileAtomicSync(
     JSON.stringify({
       templates,
       styles,
+      glassLabStyle: readText(base + 'styles/liquid-glass-lab.css'),
       componentStyles,
       presets,
       startingPresets,

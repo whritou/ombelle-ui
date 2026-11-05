@@ -1,13 +1,19 @@
 import { FoundationError, type Preset } from '@ombelle/contracts'
+import { normalizeColor } from './resolve.js'
 import {
   glassBackdrop,
   glassContrastReport,
   glassDesignDefaults,
   glassMaterialActive,
+  relativeLuminance,
   glassTints,
 } from './glass-contrast.js'
 
 // Internal liquid-glass helpers shared by full-theme and scoped Button compiles.
+const originalGlassEdges = new Set([
+  'oklch(20.8% 0.040 265.8 / 14%)',
+  'oklch(96.8% 0.007 247.9 / 14%)',
+].map(normalizeColor))
 export function assertGlassContrast(
   data: Parameters<typeof glassContrastReport>[0],
 ) {
@@ -58,17 +64,31 @@ export function glassTokens(data: Preset): {
   const design = data.design
   const d = { ...glassDesignDefaults, ...design }
   const opaque = design.transparency === 'reduced'
+  const lab = glassMaterialActive(design)
   // Nested glass gets the coverage that holds over a raw backdrop. A preset
   // without one fails assertGlassContrast before tokens are written.
   const nested = glassContrastReport(data).nestedOpacity ?? { light: 1, dark: 1 }
   const mode = (m: 'light' | 'dark') => {
     const backdrop = glassBackdrop(design, m)
+    const veil = data.modes[m].card ?? data.modes.light.card ?? '#ffffff'
+    const warm = ['#f4a5b3', '#2e1a24'].includes(veil.toLowerCase())
+    const darkVeil = relativeLuminance(veil) < 0.18
+    const edge = data.modes[m].border
     return {
       '--glass-brightness': String(backdrop.brightness),
       '--glass-sheen': String(backdrop.sheen),
       '--glass-nested-opacity': String(nested[m]),
       '--glass-primary-tint': Math.round(glassTints.primary[m] * 100) + '%',
       '--glass-destructive-tint': Math.round(glassTints.destructive[m] * 100) + '%',
+      ...(lab ? {
+        '--glass-lab-rim': String(d.glassRim),
+        '--glass-lab-custom-edge': edge && !originalGlassEdges.has(normalizeColor(edge)) ? edge : 'initial',
+        '--glass-lab-rim-color': warm ? '255 234 229' : '232 250 255',
+        '--glass-lab-shadow-color': warm ? '76 27 32' : '0 10 37',
+        '--glass-lab-bounce-color': warm ? '255 195 155' : '204 244 255',
+        '--glass-lab-danger-veil': darkVeil ? '#76203c' : '#ffafba',
+        '--glass-lab-danger-ink': darkVeil ? '#fff1f4' : '#410f22',
+      } : {}),
     }
   }
   return {
