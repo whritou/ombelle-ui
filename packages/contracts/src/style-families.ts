@@ -13,6 +13,7 @@ export function isStyleFamily(value: unknown): value is StyleFamily {
 
 const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'alert',
+  'avatar',
   'button',
   'badge',
   'card',
@@ -25,6 +26,7 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'popover',
   'radio-group',
   'select',
+  'separator',
   'switch',
   'tabs',
   'textarea',

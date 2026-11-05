@@ -135,6 +135,7 @@ it('pair list equals the spec table', () => {
     { surface: 'card', text: 'mutedForeground', tint: { color: 'primary', light: 0.18, dark: 0.22 }, coverage: 0.78 },
     { surface: 'popover', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
     { surface: 'popover', text: 'mutedForeground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
+    { surface: 'popover', text: 'foreground' },
   ])
 })
 

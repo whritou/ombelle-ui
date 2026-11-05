@@ -148,6 +148,8 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'popover', text: 'foreground', tint: primaryRest },
   // Its hint (select-item-hint) on the highlighted row: mutedForeground under the same tint.
   { surface: 'popover', text: 'mutedForeground', tint: primaryRest },
+  // Plain Select options: foreground (not popoverForeground) on the untinted popover glass.
+  { surface: 'popover', text: 'foreground' },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))

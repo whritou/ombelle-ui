@@ -544,6 +544,7 @@ describe('catalog contract', () => {
     ).toEqual([
       'alert',
       'badge',
+      'avatar',
       'card',
       'checkbox',
       'dropdown-menu',
@@ -553,6 +554,7 @@ describe('catalog contract', () => {
       'radio-group',
       'select',
       'switch',
+      'separator',
       'tabs',
       'textarea',
       'tooltip',

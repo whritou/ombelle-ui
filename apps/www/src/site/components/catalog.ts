@@ -411,6 +411,7 @@ export function SharePreset() {
   },
   avatar: {
     name: 'Avatar',
+    glassMinimumCli: '0.5.0',
     description: 'A person\'s image with initials as a fallback, a presence dot and overlapping groups.',
     api: 'Avatar (size, variant), AvatarImage, AvatarFallback, AvatarStatus (status), AvatarGroup',
     states: 'Image, fallback, online, offline',
@@ -431,6 +432,7 @@ export function Owner() {
   },
   separator: {
     name: 'Separator',
+    glassMinimumCli: '0.5.0',
     description: 'A horizontal or vertical rule, optionally with a centred label.',
     api: 'orientation (horizontal, vertical), decorative, children as label',
     states: 'Horizontal, vertical, labelled',

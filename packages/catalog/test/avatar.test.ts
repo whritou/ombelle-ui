@@ -45,7 +45,7 @@ describe('Avatar catalog contract', () => {
         "[data-slot='avatar-status'][data-status='offline']",
         "[data-slot='avatar-group'] > [data-slot='avatar'] + [data-slot='avatar']",
       ],
-      glass: 'unavailable',
+      glass: 'experimental',
     })
   })
 

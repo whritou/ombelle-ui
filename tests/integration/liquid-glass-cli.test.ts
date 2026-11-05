@@ -25,7 +25,7 @@ const notice = (ids: readonly string[]) =>
   '; see docs/components/liquid-glass.md for limitations'
 const installOrder = [
   'button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input',
-  'label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select',
+  'label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select', 'avatar', 'separator',
 ] as const
 const installed = glassIds.filter((id) => (installOrder as readonly string[]).includes(id))
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
@@ -66,8 +66,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the seventeen experimental ids', () => {
-  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'radio-group', 'select', 'switch', 'tabs', 'textarea', 'tooltip'])
+it('lists the nineteen experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'tabs', 'textarea', 'tooltip'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {
@@ -111,8 +111,8 @@ for (const manager of ['pnpm', 'npm'] as const) {
     )
     expect(css.map((a) => a.logicalPath).sort()).toEqual(
       [
-        'alert', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover',
-        'radio-group', 'select', 'switch', 'tabs', 'textarea', 'tooltip',
+        'alert', 'avatar', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover',
+        'radio-group', 'select', 'separator', 'switch', 'tabs', 'textarea', 'tooltip',
       ].map((id) => 'components/ui/' + id + '.css'),
     )
     for (const artifact of canonical.artifacts.filter((a) => a.logicalPath.startsWith('components/ui/')))
@@ -128,7 +128,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     // Unavailable component: refused, nothing written.
     const before = await snapshotTree(root)
     expect(Object.keys(before)).toContain(lockName)
-    const refused = await command(['add', 'avatar', '--yes'])
+    const refused = await command(['add', 'skeleton', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
     expect(await snapshotTree(root)).toEqual(before)
@@ -143,7 +143,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const init = await command(['init', '--preset', glass, '--yes'])
     expect(init.code, init.output).toBe(0)
     const before = await snapshotTree(root)
-    const refused = await command(['add', 'button', 'avatar', '--yes'])
+    const refused = await command(['add', 'button', 'skeleton', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error).code).toBe('STYLE_UNAVAILABLE')
     const after = await snapshotTree(root)
@@ -194,10 +194,10 @@ for (const manager of ['pnpm', 'npm'] as const) {
     roots.push(root)
     const { glass } = await writePresets()
     const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
-    await seed(root, ['avatar'])
+    await seed(root, ['skeleton'])
     const init = await command(['init', '--preset', flatPath, '--yes'])
     expect(init.code, init.output).toBe(0)
-    const added = await command(['add', 'avatar', '--yes'])
+    const added = await command(['add', 'skeleton', '--yes'])
     expect(added.code, added.output).toBe(0)
 
     const before = await snapshotTree(root)
@@ -205,7 +205,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(refused.code, refused.output).toBe(2)
     const error = jsonRecord(jsonRecord(refused.data).error)
     expect(error).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    expect(String(error.message)).toContain('avatar')
+    expect(String(error.message)).toContain('skeleton')
     expect(String(error.message)).toContain(glassIds.join(', '))
     expect(await snapshotTree(root)).toEqual(before)
   }, 180000)

@@ -1,0 +1,130 @@
+/* liquid-glass Avatar (experimental): foreground initials on card glass discs with a white rim at 55% and a soft shadow.
+   The primary variant mixes the resting Button tint into the card (the Button rest contrast pair); default and
+   secondary are neutral card glass (foreground on card). Without backdrop-filter the disc is opaque. */
+[data-slot='avatar'] {
+  --glass-tint: transparent;
+  --glass-tint-amount: 0%;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: var(--border-width) solid rgb(255 255 255 / 55%);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+  /* The shadow's offset follows the shadow offset (0 6px 14px -8px at 0 / 12). */
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
+    calc(var(--shadow-x) * 0.5) calc(var(--shadow-y) * 0.5) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 1.167) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -0.667) rgb(0 0 0 / 0.35);
+}
+[data-slot='avatar'][data-size='sm'] {
+  inline-size: 2rem;
+  block-size: 2rem;
+  font-size: 0.6875rem;
+}
+[data-slot='avatar'][data-size='lg'] {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  font-size: 1.125rem;
+}
+[data-slot='avatar'][data-variant='primary'] {
+  --glass-tint: var(--primary);
+  --glass-tint-amount: var(--glass-primary-tint);
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+[data-slot='avatar-image'] {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+[data-slot='avatar-fallback'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+}
+/* A green presence dot with a white ring; offline is the muted foreground. */
+[data-slot='avatar-status'] {
+  box-sizing: border-box;
+  position: absolute;
+  inset-block-end: -1px;
+  inset-inline-end: -1px;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border: 2px solid rgb(255 255 255 / 85%);
+  border-radius: 50%;
+  background: #16A34A;
+}
+[data-slot='avatar-status'][data-status='offline'] {
+  background: var(--muted-foreground);
+}
+/* Groups overlap with a white rim instead of an opaque ring. */
+[data-slot='avatar-group'] {
+  display: inline-flex;
+  align-items: center;
+}
+[data-slot='avatar-group'] > * {
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 55%);
+}
+[data-slot='avatar-group'] > * + * {
+  margin-inline-start: -0.625rem;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* The tint is mixed into the card first, then the full glass coverage applies; nested in glass the disc paints
+     at the full nested opacity. */
+  [data-slot='avatar'] {
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%),
+      color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='avatar'] {
+      background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='avatar'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+/* Forced colours: presence is filled when online and hollow otherwise, so it never depends on colour alone. */
+@media (forced-colors: active) {
+  [data-slot='avatar'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='avatar-status'] {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+  [data-slot='avatar-status'][data-status='online'] {
+    background: CanvasText;
+    border-color: Canvas;
+  }
+  [data-slot='avatar-group'] > * {
+    box-shadow: none;
+    outline: 2px solid Canvas;
+  }
+}
