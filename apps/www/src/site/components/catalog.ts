@@ -15,6 +15,8 @@ export type ComponentDoc = {
   minimumCli?: string
   /** First published installer that accepts this component in liquid glass, when later than the component itself. */
   glassMinimumCli?: string
+  /** A short note shown under the usage example. */
+  note?: string
 }
 
 // Usage mirrors docs/components/*.md where a page exists; API and states follow
@@ -37,6 +39,8 @@ export function Actions() {
     </>
   )
 }`,
+    // Site previews render current catalog source, ahead of the published installer.
+    note: 'Liquid glass Buttons were restyled to one ink in 0.5.0.',
   },
   badge: {
     name: 'Badge',
