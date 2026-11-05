@@ -69,6 +69,8 @@
   font-variant-numeric: tabular-nums;
   text-align: end;
 }
+/* The kit sets numeric headers in the same monospace figures as their cells. */
+[data-slot='table-head'][data-numeric],
 [data-slot='table-cell'][data-numeric] {
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   font-size: 0.8125rem;

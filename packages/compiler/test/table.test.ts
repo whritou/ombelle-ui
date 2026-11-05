@@ -72,8 +72,12 @@ it('compiles Table in liquid glass: one glass container, a muted glass header an
     'color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,var(--glass-opacity))*100%),transparent)',
   )
   expect(squash(css)).not.toMatch(/--(primary|accent)-foreground|var\(--accent\)/)
-  // Numeric cells keep tabular digits.
+  // Numeric cells keep tabular digits; numeric headers and cells are 13px monospace, as in the kit.
   expect(at(cell + '[data-numeric]')['font-variant-numeric']).toBe('tabular-nums')
+  for (const numeric of [head + '[data-numeric]', cell + '[data-numeric]']) {
+    expect(at(numeric)['font-size'], numeric).toBe('0.8125rem')
+    expect(at(numeric)['font-family'], numeric).toMatch(/monospace/)
+  }
   // Reduced transparency paints opaque surfaces without blur.
   expect(at(container, 'reduced')).toMatchObject({ background: 'var(--card)', 'backdrop-filter': 'none' })
   expect(at(head, 'reduced').background).toBe('var(--muted)')
