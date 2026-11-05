@@ -66,6 +66,8 @@ it('compiles Radio Group in liquid glass with tinted option rows and its fallbac
   expect(block(checkedRow)).toContain('border-color:color-mix(insrgb,var(--primary)55%,transparent)')
   expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.78))*100%),transparent)')
   expect(block(row + ':has([data-disabled])')).toContain('border-style:dashed')
+  // A radio inside a row drops its own filter: the row's glass is its backdrop.
+  expect(block(row + '*')).toBe('--glass-inner-filter:none;')
   expect(block('[data-slot="radio-group-option-description"]')).toContain('color:var(--muted-foreground)')
   expect(flat).toContain('{background:color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card));-webkit-backdrop-filter:none;backdrop-filter:none')
   const forced = forcedBlock(css)
