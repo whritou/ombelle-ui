@@ -429,6 +429,55 @@ export function SignInOptions() {
   return <Separator>or</Separator>
 }`,
   },
+  table: {
+    name: 'Table',
+    description: 'A native data table with header, footer, caption, numeric columns and selected rows.',
+    api: 'Table, TableCaption, TableHeader, TableBody, TableFooter, TableRow (selected), TableHead (numeric, scope), TableCell (numeric)',
+    states: 'Default, selected row, numeric column',
+    basis: 'Native <table> in a horizontal scroll container',
+    client: false,
+    minimumCli: '0.5.0',
+    usage: `import {
+  Table, TableCaption, TableHeader, TableBody, TableRow, TableHead, TableCell,
+} from '@/components/ui/table'
+
+export function Projects() {
+  return (
+    <Table>
+      <TableCaption>Projects and their owners.</TableCaption>
+      <TableHeader>
+        <TableRow><TableHead>Project</TableHead><TableHead numeric>Components</TableHead></TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow><TableCell>Website refresh</TableCell><TableCell numeric>12</TableCell></TableRow>
+      </TableBody>
+    </Table>
+  )
+}`,
+  },
+  accordion: {
+    name: 'Accordion',
+    description: 'Stacked headings that each show or hide a section of content.',
+    api: 'Accordion (type, collapsible, value), AccordionItem, AccordionTrigger (level), AccordionContent',
+    states: 'Open, closed, disabled, focus',
+    basis: 'Reviewed Radix accordion primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import {
+  Accordion, AccordionItem, AccordionTrigger, AccordionContent,
+} from '@/components/ui/accordion'
+
+export function Faq() {
+  return (
+    <Accordion type="single" collapsible>
+      <AccordionItem value="preset">
+        <AccordionTrigger>What does a preset change?</AccordionTrigger>
+        <AccordionContent>Colors, radius, borders, shadows and type.</AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+}`,
+  },
 }
 
 export const componentDocs: ComponentDoc[] = supportedComponentIds

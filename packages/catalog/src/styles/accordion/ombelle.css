@@ -1,0 +1,121 @@
+/* ombelle Accordion */
+[data-slot='accordion'] {
+  overflow: hidden;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--card);
+  color: var(--card-foreground);
+  font-family: var(--font-family);
+}
+[data-slot='accordion-item'] + [data-slot='accordion-item'] {
+  border-block-start: var(--border-width) solid var(--border);
+}
+[data-slot='accordion-header'] {
+  display: flex;
+  margin: 0;
+  font: inherit;
+}
+[data-slot='accordion-trigger'] {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-block-size: 2.75rem;
+  padding-block: 0.875rem;
+  padding-inline: 1rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--motion-duration);
+}
+[data-slot='accordion-trigger'][data-state='open'] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='accordion-trigger']:not(:disabled):hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+/* The container clips overflow, so the focus ring sits inside the trigger. */
+[data-slot='accordion-trigger']:focus-visible {
+  outline: 2.5px solid var(--ring);
+  outline-offset: -4px;
+}
+[data-slot='accordion-trigger']:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+[data-slot='accordion-icon'] {
+  display: flex;
+  flex-shrink: 0;
+}
+[data-slot='accordion-icon'] svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  transition: rotate var(--motion-duration);
+}
+[data-accordion-icon='plus'] {
+  display: none;
+}
+[data-state='open'] > [data-slot='accordion-icon'] [data-accordion-icon='chevron'] {
+  rotate: 180deg;
+}
+[data-slot='accordion-content'] {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+[data-slot='accordion-content'][data-state='open'] {
+  animation: ombelle-accordion-open var(--motion-duration) ease-out;
+}
+[data-slot='accordion-content-inner'] {
+  padding-block: 0.75rem 1rem;
+  padding-inline: 1rem;
+}
+@keyframes ombelle-accordion-open {
+  from {
+    block-size: 0;
+  }
+  to {
+    block-size: var(--radix-accordion-content-height);
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='accordion'] {
+    border-color: CanvasText;
+  }
+  [data-slot='accordion-item'] + [data-slot='accordion-item'] {
+    border-block-start-color: CanvasText;
+  }
+  [data-slot='accordion-trigger'][data-state='open'],
+  [data-slot='accordion-trigger']:not(:disabled):hover {
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='accordion-trigger']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='accordion-trigger']:disabled {
+    color: GrayText;
+  }
+  [data-slot='accordion-content'] {
+    color: CanvasText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='accordion-content'][data-state='open'] {
+    animation: none;
+  }
+  [data-slot='accordion-trigger'],
+  [data-slot='accordion-icon'] svg {
+    transition: none;
+  }
+}

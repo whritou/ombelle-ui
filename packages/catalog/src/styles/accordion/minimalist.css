@@ -1,0 +1,106 @@
+/* minimalist Accordion */
+[data-slot='accordion'] {
+  border-block-start: 1px solid var(--foreground);
+  color: var(--foreground);
+  font-family: var(--font-family);
+}
+[data-slot='accordion-item'] {
+  border-block-end: 1px solid var(--border);
+}
+[data-slot='accordion-header'] {
+  display: flex;
+  margin: 0;
+  font: inherit;
+}
+[data-slot='accordion-trigger'] {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-block-size: 2.75rem;
+  padding-block: 1rem;
+  padding-inline: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+}
+[data-slot='accordion-trigger'][data-state='open'] {
+  font-weight: 600;
+}
+[data-slot='accordion-trigger']:focus-visible {
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
+}
+[data-slot='accordion-trigger']:disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+[data-slot='accordion-icon'] {
+  display: flex;
+  flex-shrink: 0;
+}
+[data-slot='accordion-icon'] svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  stroke-width: 1.5;
+  transition: rotate var(--motion-duration);
+}
+[data-accordion-icon='chevron'] {
+  display: none;
+}
+/* The plus turns into a close mark when the item is open. */
+[data-state='open'] > [data-slot='accordion-icon'] [data-accordion-icon='plus'] {
+  rotate: 45deg;
+}
+[data-slot='accordion-content'] {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+[data-slot='accordion-content'][data-state='open'] {
+  animation: ombelle-accordion-open var(--motion-duration) ease-out;
+}
+[data-slot='accordion-content-inner'] {
+  padding-block: 0 1.125rem;
+}
+@keyframes ombelle-accordion-open {
+  from {
+    block-size: 0;
+  }
+  to {
+    block-size: var(--radix-accordion-content-height);
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='accordion'] {
+    border-block-start-color: CanvasText;
+  }
+  [data-slot='accordion-item'] {
+    border-block-end-color: CanvasText;
+  }
+  [data-slot='accordion-content'] {
+    color: CanvasText;
+  }
+  [data-slot='accordion-trigger']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='accordion-trigger']:disabled {
+    color: GrayText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='accordion-content'][data-state='open'] {
+    animation: none;
+  }
+  [data-slot='accordion-icon'] svg {
+    transition: none;
+  }
+}
