@@ -1,4 +1,4 @@
-import { supportedComponentIds, type ComponentId } from '@ombelle/contracts'
+import { componentsWithStyleSupport, supportedComponentIds, type ComponentId } from '@ombelle/contracts'
 import { compareVersions, publishedInstaller } from '../../snapshots/install-command'
 
 export type ComponentDoc = {
@@ -526,4 +526,23 @@ export const componentDocs: ComponentDoc[] = supportedComponentIds
 
 export function componentDoc(id: string): ComponentDoc | undefined {
   return componentDocs.find((doc) => doc.id === id)
+}
+
+/** "A, B and C" for display copy. */
+function listNames(names: readonly string[]): string {
+  return names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + ' and ' + names.at(-1)
+}
+
+/**
+ * Components that are experimental in liquid glass, from the contracts'
+ * support table, in its order. `published` keeps only those the published
+ * installer can add, for copy shown next to its commands.
+ */
+export function glassComponentList({ published = false }: { published?: boolean } = {}): string {
+  const listed = new Set(componentDocs.map((doc) => doc.id))
+  return listNames(
+    componentsWithStyleSupport('liquid-glass', ['experimental'])
+      .filter((id) => !published || listed.has(id))
+      .map((id) => docs[id].name),
+  )
 }
