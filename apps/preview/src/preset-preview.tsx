@@ -122,7 +122,7 @@ function PresetPreview() {
     const scene = current.message.view.scene ?? 'gallery'
     document.documentElement.dataset.scene = scene
     if (current.message.result.preset.data.styleFamily === 'liquid-glass')
-      document.documentElement.dataset.backdrop = 'photo'
+      document.documentElement.dataset.backdrop = 'glass'
     else delete document.documentElement.dataset.backdrop
     if (focus) document.documentElement.dataset.focus = focus
     else delete document.documentElement.dataset.focus
