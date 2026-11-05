@@ -33,6 +33,8 @@ export type GlassPairSpec = {
    * paint the surface whole, so all three ignore it.
    */
   coverage?: number
+  /** A checked mark (Checkbox, Radio, Switch): painted opaque when the material is on, so evaluated opaque. */
+  solid?: true
 }
 export type GlassBackdrop = {
   /** CSS saturate(), contrast() and brightness() amounts, in filter order. */
@@ -150,7 +152,7 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   // Error messages beside a field sit on the card glass that holds the form.
   { surface: 'card', text: 'destructive' },
   // Checked Checkbox and Radio: the foreground mark or dot on the checked tint at 80% coverage.
-  { surface: 'card', text: 'foreground', tint: primaryChecked, coverage: glassCheckedControlCoverage },
+  { surface: 'card', text: 'foreground', tint: primaryChecked, coverage: glassCheckedControlCoverage, solid: true },
   // Checked Radio Group option rows: the label and description on the resting primary tint at 78%.
   // Unchecked rows are the field surface, bounded by the field pairs above.
   { surface: 'card', text: 'foreground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
@@ -331,8 +333,10 @@ type Resolved = {
   textColor: Color
   textLum: number
   backdrop: GlassBackdrop
-  /** Share of the text glow plate, 0 without the material. */
+  /** Share of the text outline plate, 0 without the material. */
   plate: number
+  /** A checked mark painted opaque because the material is on. */
+  solid: boolean
 }
 
 /** The material settings: any of them above 0 turns on the shared material, including the pointer shine. */
@@ -363,10 +367,10 @@ export const glassEffectiveSheen = (design: Preset['design'] | undefined, mode: 
   withPointerShine(glassBackdrop(design, mode), design).sheen
 
 /**
- * With the material on, glass text carries a tight glow in its surface colour (stacked text-shadows), the plate
- * WCAG measures the glyph against. The bound composites the surface at this share over whatever the glass paints.
+ * With the material on, glass text is drawn over an opaque 1px ring in its surface colour (-webkit-text-stroke under
+ * the fill), the adjacent background WCAG measures the glyph against: 4.5:1 holds within 1px of every glyph.
  */
-export const glassTextPlate = 0.85
+export const glassTextPlate = 1
 
 function resolve(
   data: Preset,
@@ -377,7 +381,7 @@ function resolve(
     const colors = data.modes[mode] as Record<string, string>
     const backdrop = withPointerShine(glassBackdrop(data.design, mode), data.design)
     const reduced = data.design?.transparency === 'reduced'
-    for (const { surface, text, tint, coverage } of specs) {
+    for (const { surface, text, tint, coverage, solid } of specs) {
       const textColor = parseColor(colors[text])
       const base = parseColor(colors[surface])
       const amount = tint?.[mode]
@@ -397,7 +401,8 @@ function resolve(
         textColor,
         textLum: luminanceOf(textColor.rgb),
         backdrop,
-        plate: glassMaterialActive(data.design) ? glassTextPlate : 0,
+        plate: glassMaterialActive(data.design) && !solid ? glassTextPlate : 0,
+        solid: Boolean(solid) && glassMaterialActive(data.design),
       })
     }
   }
@@ -410,10 +415,11 @@ const filtered = (r: Resolved, opacity: number) =>
   bound(
     r.surfaceColor,
     r.textLum,
-    opacity * r.coverage * r.surfaceColor.alpha,
+    r.solid ? r.surfaceColor.alpha : opacity * r.coverage * r.surfaceColor.alpha,
     r.backdrop.low,
     r.backdrop.high,
-    r.backdrop.sheen,
+    // A solid mark paints one colour: no sheen gradient and no pointer shine reach it.
+    r.solid ? 0 : r.backdrop.sheen,
     r.plate * r.surfaceColor.alpha,
   )
 // Nested glass drops its own filter and sees the raw backdrop: any 0..1 pixel.
@@ -422,7 +428,7 @@ const filtered = (r: Resolved, opacity: number) =>
 // some coverage also passes the opaque fallback, whose painted luminance lies
 // inside the same interval.
 const raw = (r: Resolved, opacity: number) =>
-  bound(r.surfaceColor, r.textLum, opacity * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen, r.plate * r.surfaceColor.alpha)
+  bound(r.surfaceColor, r.textLum, r.solid ? r.surfaceColor.alpha : opacity * r.surfaceColor.alpha, 0, 1, r.solid ? 0 : r.backdrop.sheen, r.plate * r.surfaceColor.alpha)
 // Translucent text takes on the backdrop too; it is never bounded.
 const opaqueText = (r: Resolved) => r.textColor.alpha >= 1
 

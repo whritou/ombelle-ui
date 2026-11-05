@@ -155,6 +155,13 @@ Each PR runs:
 
 The PR body states that `test:e2e` was not run.
 
+## Amendments during implementation
+
+- **Family base (PR 2).** `builtin-liquid-glass` keeps today's look and Cristal ships as `builtin-liquid-glass-cristal`, the editor's default. `resolvePreset` fills saved presets' missing fields from the base, so a Cristal base would change every saved 0.5 project.
+- **Dark mode (PR 2).** The light wash (a 38% white card) fails its opaque fallback; dark mode uses tinted dark veils (Claire `#1B2540`, Rosée `#2A1D33`, Relief `#2E1A24`, Fumée `#091127`) with rims, relief and halo kept.
+- **Text outline and solid marks (PR 2, chosen by the user).** With the material on, glass text sits on an opaque 1px ring in its surface colour, and checked Checkbox, Radio and Switch fills paint solid; the contrast bound counts both, so thin presets keep the 4.5:1 guarantee within 1px of every glyph.
+- **Motion and surfaces (PR 1 review).** Only Card lifts, on hover-capable devices; nothing presses. Surfaces that scroll or clip carry the material on their own shadow with no halo; fields keep veil and rim.
+
 ## Out of scope
 
 - Stable status for liquid glass.

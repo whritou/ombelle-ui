@@ -75,7 +75,7 @@ For glass drafts, both editors show the glass labels with a one-line hint each; 
 
 ## Starting presets
 
-The catalog ships eight liquid glass starting points, in the order the editor lists them (`startingPresetOrder` and `catalog.startingPresets` in `@ombelle/catalog`). Picking one loads all its values; every setting stays editable, and the draft saves and installs like any custom preset.
+The catalog ships eight liquid glass starting points (`startingPresetOrder` and `catalog.startingPresets` in `@ombelle/catalog`). The preset editor's starting-point picker, which lists them in this order with Cristal as the default, comes with the editor work that follows this release step; until then a starting preset is used by saving its JSON and passing it to `init` or `theme add`.
 
 | Preset | Id | Opacity | Blur | Contrast | Shine | Refraction · width | Rim | Halo | Relief | Motion | Dispersion | Tint |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -99,8 +99,9 @@ The catalog ships eight liquid glass starting points, in the order the editor li
   | Fumée | `#091127` · `#F0F7FF`, the dark palette in both modes | the same |
 
 - **Accents.** `primary` and `ring` follow the tint: Claire `#0B6AA8` (dark `#7DD3FC`), Rosée `#A3245A` (`#F9A8D4`), Relief `#8C1D3A` (`#FECDD3`), Fumée `#7DD3FC`.
-- **Contrast.** Every starting preset passes the contrast bound. The lowest passing opacity is 0.25 (the schema floor) for all of them except Relief, at 0.26, and Liquid glass, at 0.57.
-- **The family base stays Liquid glass.** `resolvePreset` fills a saved preset's missing fields from `presets['liquid-glass']`. A Cristal base would give every saved 0.5 project Cristal's halo, refraction and glow, so the base is today's look and Cristal is the editor's default starting point.
+- **Fumé** is a dark veil with light ink, so its light mode uses the dark palette for every colour, `background`, `input` and `border` included: a light-mode app gets dark page tokens with Fumé.
+- **Contrast.** Every starting preset passes the contrast bound. The lowest passing opacity is 0.25 (the schema floor) for all seven new presets and 0.57 for Liquid glass.
+- **The family base stays Liquid glass.** `resolvePreset` fills a saved preset's missing fields from `presets['liquid-glass']`. A Cristal base would give every saved 0.5 project Cristal's halo, refraction and text outline, so the base is today's look and Cristal is a separate starting point.
 
 ## Upgrading from 0.4.x
 
@@ -136,7 +137,9 @@ Screenshots of every variant and state, the other glass components on the kit ba
 
 A translucent surface shows its backdrop through it. Text on it cannot be checked against one fixed colour, so the compiler checks the two extremes instead. Before the surface is mixed in, the glass filter compresses the backdrop: `contrast()` and `brightness()` map every channel of every backdrop pixel into a range `[low, high]`, whatever its colour or saturation. The compiler mixes the surface colour with grey `low`, and with grey `high` under the full specular sheen, at the preset's opacity. Any real backdrop, blurred or not, produces a surface whose brightness lies between those two. The compiler requires 4.5:1 against both, and requires the text to be either lighter or darker than both. Together these keep 4.5:1 over any backdrop. Compressing the backdrop is what lets the glass be thin: the built-in palette needs opacity 0.57; over raw black and white the 55% field placeholder would never pass.
 
-**Text glow plate.** When any material setting is above 0, glass text carries a tight glow in its surface colour: three stacked `text-shadow`s (1, 2 and 4px), the `--glass-plate` colour at 85%. The material lab uses the same aid. WCAG measures text against its adjacent background, so the bound evaluates each glyph against the plate: the surface at 85% over whatever the glass paints, sheen and pointer shine included. This is what lets the starting presets stay as thin as the lab draws them. Forced colours remove the glow.
+**Text outline plate.** When any material setting is above 0, glass text is drawn over an opaque 1px ring in its surface colour: a 2px `-webkit-text-stroke` in `--glass-plate`, painted under the fill (`paint-order: stroke fill`). Each glass slot names its own plate (card, popover, background, muted, the tinted Button, selected row, open trigger and highlighted option), so the ring matches the surface the bound evaluates. Badge, a solid fill, takes none. WCAG measures text against its adjacent background, so the bound evaluates each glyph against its ring: **4.5:1 holds within 1px of every glyph**, whatever the backdrop. This is what lets the starting presets stay as thin as the lab draws them. Forced colours remove the outline. A browser without `paint-order` on HTML text draws the stroke over the fill, so glyphs look slightly heavier there.
+
+**Solid marks.** With the material on, checked Checkbox, Radio Group and Switch fills paint opaque (no glass coverage, no sheen), and the bound evaluates their marks on that opaque fill, since no text outline reaches an SVG tick or a dot.
 
 The compiler also requires each pair to pass on its opaque surface, which every fallback uses, and computes `--glass-nested-opacity` for glass nested in a glass Card, Dialog, or Tooltip. Nested glass drops its own filter, so its coverage is bounded against raw black and white.
 

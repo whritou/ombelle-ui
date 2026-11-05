@@ -604,7 +604,7 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked })
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: rest })
     // The check mark and radio dot sit on the checked control at 80% coverage.
-    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked, coverage: 0.8 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked, coverage: 0.8, solid: true })
     // Unchecked option rows are the field surface, so the field pairs at 55% bound their label and description;
     // checked rows are the rest tint at 78%, the lowest coverage at which their text passes.
     expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', coverage: 0.55 })
@@ -788,34 +788,50 @@ describe('liquid glass material review fixes', () => {
     expect(glassEffectiveSheen(lit.design, 'light')).toBeCloseTo(1 - 0.6 * (1 - 0.6 * 0.4), 4)
   })
 
-  it('evaluates text on its glow plate when the material is on', () => {
-    expect(glassTextPlate).toBe(0.85)
-    const at = (design: Partial<Preset['design']>) => {
-      const report = glassContrastReport(withDesign({ glassOpacity: 0.4, ...design }))
-      return report.pairs.find((p) => p.mode === 'light' && p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined)!
-    }
-    // Over the darkest backdrop the plate is what keeps dark ink readable on a 40% veil.
-    expect(at({ glassHalo: 0.5 }).ratioOverBlack).toBeGreaterThan(at({}).ratioOverBlack)
-    expect(at({ glassHalo: 0.5 }).ratioOverBlack).toBeGreaterThan(4.5)
+  it('evaluates text on its outline plate and checked marks opaque when the material is on', () => {
+    expect(glassTextPlate).toBe(1)
+    const pick = (design: Partial<Preset['design']>, match: (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => boolean) =>
+      glassContrastReport(withDesign({ glassOpacity: 0.4, ...design })).pairs.find((p) => p.mode === 'light' && match(p))!
+    const text = (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined
+    // On its ring the glyph reads the same over any backdrop.
+    expect(pick({ glassHalo: 0.5 }, text).ratioOverBlack).toBeCloseTo(pick({ glassHalo: 0.5 }, text).ratioOverWhite, 2)
+    expect(pick({}, text).ratioOverBlack).toBeLessThan(pick({}, text).ratioOverWhite)
+    const mark = (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => p.coverage === 0.8
+    // A solid mark paints one opaque colour with no sheen: the backdrop and the opacity no longer matter.
+    expect(pick({ glassHalo: 0.5 }, mark).ratioOverWhite).toBeCloseTo(pick({ glassHalo: 0.5 }, mark).ratioOverBlack, 2)
+    expect(pick({ glassHalo: 0.5, glassOpacity: 0.9 }, mark).ratioOverWhite).toBeCloseTo(pick({ glassHalo: 0.5 }, mark).ratioOverWhite, 2)
   })
 
-  it('draws the glow plate behind glass text in the surface colour', async () => {
+  it('draws the outline plate on every plated slot and keeps Badge and forced colours clear', async () => {
     const result = await build(builtin())
     const root = postcss.root()
     for (const sheet of result.artifacts.filter((a) => a.kind === 'style')) root.append(postcss.parse(sheet.content).nodes)
-    const glows: string[] = []
-    root.walkDecls('text-shadow', (decl) => {
-      if (decl.value.includes('--glass-plate')) glows.push(squash((decl.parent as postcss.Rule).selector) + ' ' + squash(decl.value))
+    const strokes: string[] = []
+    root.walkDecls('-webkit-text-stroke', (decl) => {
+      if (decl.value.includes('--glass-plate')) strokes.push(squash((decl.parent as postcss.Rule).selector) + ' ' + squash(decl.value))
     })
-    expect(glows.length).toBe(1)
-    expect(glows[0]).toContain('calc(var(--glass-material,0)*85%)')
-    for (const slot of ['card', 'button', 'popover-content', 'table-container', 'input', 'textarea'])
-      expect(glows[0], slot).toContain('[data-slot="' + slot + '"]')
+    expect(strokes.length).toBe(1)
+    expect(strokes[0]).toContain('calc(var(--glass-material,0)*2px)var(--glass-plate)')
+    for (const slot of ['card', 'button', 'popover-content', 'table-head', 'table-cell', 'tabs-trigger', 'radio-group-option', 'select-item', 'input'])
+      expect(strokes[0], slot).toContain('[data-slot="' + slot + '"]')
+    expect(strokes[0]).not.toContain('[data-slot="badge"]')
+    let paintOrder = false
+    let badgeClear = false
     let forced = false
-    root.walkDecls('text-shadow', (decl) => {
-      if (decl.value === 'none' && decl.parent?.parent?.type === 'atrule' && (decl.parent.parent as postcss.AtRule).params.includes('forced-colors')) forced = true
+    root.walkDecls((decl) => {
+      if (decl.prop === 'paint-order' && decl.value === 'stroke fill') paintOrder = true
+      const selector = squash((decl.parent as postcss.Rule).selector ?? '')
+      if (decl.prop === '-webkit-text-stroke' && decl.value === '0' && selector === '[data-slot="badge"]') badgeClear = true
+      if (decl.prop === '-webkit-text-stroke' && decl.value === '0' && decl.parent?.parent?.type === 'atrule' && (decl.parent.parent as postcss.AtRule).params.includes('forced-colors')) forced = true
     })
-    expect(forced).toBe(true)
+    expect([paintOrder, badgeClear, forced]).toEqual([true, true, true])
+    for (const slot of ['checkbox', 'radio-group-item', 'switch']) {
+      let solid = false
+      root.walkDecls('background', (decl) => {
+        if (squash((decl.parent as postcss.Rule).selector ?? '').includes('[data-slot="' + slot + '"]') && decl.value.includes('max(') && decl.value.includes('var(--glass-material, 0) * 100%')) solid = true
+      })
+      expect(solid, slot).toBe(true)
+    }
   })
 
   it('writes the material flag only when a material setting is above 0', async () => {
@@ -920,7 +936,7 @@ describe('liquid glass starting presets and the bound', () => {
       'builtin-liquid-glass-cristal': 0.25,
       'builtin-liquid-glass-givre': 0.25,
       'builtin-liquid-glass-fume': 0.25,
-      'builtin-liquid-glass-relief': 0.26,
+      'builtin-liquid-glass-relief': 0.25,
       'builtin-liquid-glass-clear': 0.25,
       'builtin-liquid-glass-prism': 0.25,
       'builtin-liquid-glass-liquid': 0.25,

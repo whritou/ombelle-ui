@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { getCatalog, getTemplate, startingPresetOrder } from '../src/index.js'
+import { catalogData } from '../src/generated.js'
 import {
   supportedComponentIds,
   supportedStyleFamilies,
@@ -729,5 +730,9 @@ describe('liquid glass starting presets', () => {
     expect(c.startingPresets['builtin-liquid-glass-cristal'].modes.light.primary).toBe('#0B6AA8')
     expect(c.startingPresets['builtin-liquid-glass-fume'].modes.light.cardForeground).toBe('#F0F7FF')
     expect(c.startingPresets['builtin-liquid-glass'].design.glassOpacity).toBe(0.57)
+  })
+  it('lists exactly the starting preset files, each under its own id', () => {
+    expect(Object.keys(catalogData.startingPresets).sort()).toEqual([...startingPresetOrder].sort())
+    for (const [id, preset] of Object.entries(catalogData.startingPresets)) expect(preset.id).toBe(id)
   })
 })

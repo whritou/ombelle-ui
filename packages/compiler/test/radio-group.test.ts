@@ -55,7 +55,7 @@ it('compiles Radio Group in liquid glass with tinted option rows and its fallbac
   // The checked radio takes the primary tint at rest + 8 points and a primary rim at 60%.
   expect(block(item + '[data-state="checked"]')).toContain('--glass-tint:var(--primary);--glass-tint-amount:calc(var(--glass-primary-tint)+8%)')
   expect(block(item + '[data-state="checked"]')).toContain('border-color:color-mix(insrgb,var(--primary)60%,transparent)')
-  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.8))*100%),transparent)')
+  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))max(calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.8))*100%),calc(var(--glass-material,0)*100%)),transparent)')
   // The dot stays foreground ink.
   expect(block('[data-slot="radio-group-indicator"]')).toContain('background:var(--foreground)')
   // Option rows are glass rows: the field surface (background at 55%), the rest tint at 78% when checked, dashed when disabled.

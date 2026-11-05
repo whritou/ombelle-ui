@@ -5,22 +5,27 @@
 ## What changed
 
 - **Eight starting presets** in `packages/catalog/src/presets/`, listed by `startingPresetOrder`: Cristal (the editor's default), Givré, Fumé, Relief, Clear, Prism, Liquid, and today's Liquid glass. The values, tints and accents are in `docs/components/liquid-glass.md`.
-- **Text glow plate:** with the material on, glass text gets a stacked glow in its surface colour, and the contrast bound evaluates each glyph against it (`glassTextPlate`, 85%).
+- **Text outline plate:** with the material on, glass text sits on an opaque 1px ring in its surface colour (`-webkit-text-stroke` under the fill), and the bound evaluates each glyph against it (`glassTextPlate` 1). Checked Checkbox, Radio and Switch fills paint solid and are evaluated opaque.
 - **Family base unchanged:** `builtin-liquid-glass` still holds today's look, so saved projects resolve as before.
 
 ## Contrast
 
 | Preset | Lowest passing opacity | Notes |
 | --- | --- | --- |
-| Cristal, Givré, Fumé, Clear, Prism, Liquid | 0.25 (schema floor) | Lab values kept; Liquid's lab opacity of 0.18 raised to the 0.25 floor |
-| Relief | 0.26 | Light `destructive` tuned from `#7F1D1D` to `#641515` |
+| Cristal, Givré, Fumé, Relief, Clear, Prism, Liquid | 0.25 (schema floor) | Lab values kept; Liquid's lab opacity of 0.18 raised to the 0.25 floor; Relief's light `destructive` tuned from `#7F1D1D` to `#641515` |
 | Liquid glass | 0.57 | Unchanged |
 
-Without the glow plate none of the seven new presets passed at any opacity: Cristal's light text reached 2.61:1 over the brightest filtered backdrop. A 38% white wash as the dark card, the first plan for dark mode, failed its opaque fallback at about 1.03:1, so dark mode uses tinted dark veils instead.
+Without a text plate none of the seven new presets passed at any opacity: Cristal's light text reached 2.61:1 over the brightest filtered backdrop. A first soft glow (stacked `text-shadow`s credited at 85%) was rejected in review: it draws at most 81% at the glyph edge and about 50% half a pixel out, and it never reached the SVG checkbox and radio marks. A 38% white wash as the dark card, the first plan for dark mode, failed its opaque fallback at about 1.03:1, so dark mode uses tinted dark veils instead.
 
 ## Checks
 
-The results are in `pr-body` and the PR. `test:e2e` was not run.
+| Check | Result |
+| --- | --- |
+| `corepack pnpm typecheck` | pass |
+| `VITEST_MAX_WORKERS=4 corepack pnpm test:unit` | 1156 of 1156. An earlier run timed out once in `packages/cli/test/snapshot-cache.test.ts` (untouched; passes alone, 27/27) |
+| `preset-gallery-generation`, `preview-routing`, `hosted-preview-build`, `liquid-glass-cli`, `www-route` | 37 of 37 |
+
+`test:e2e` was not run.
 
 ## Screenshots
 
