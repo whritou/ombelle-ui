@@ -10,7 +10,7 @@
   font-family: var(--font-family);
   box-shadow:
     inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
-    var(--shadow-x) var(--shadow-y) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 2.667) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -1) rgb(0 0 0 / 0.35);
+    var(--shadow-x) var(--shadow-y) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 2.667) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -1) rgb(0 0 0 / 0.35), var(--glass-material-shadow, 0 0 #0000);
 }
 [data-slot='accordion'] * {
   --glass-inner-filter: none;

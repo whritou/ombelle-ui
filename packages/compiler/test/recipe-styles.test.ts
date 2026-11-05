@@ -205,6 +205,9 @@ it('scoped glass tokens', async () => {
     ;(tokens[selector] ??= {})[decl.prop] = decl.value
   })
   const light = `[data-slot="recipe-button"][data-ombelle-recipe="${glassScope}"]`
+  // The shared material's shadow list rides along on the Button; it is checked in liquid-glass.test.ts.
+  expect(tokens[light]?.['--glass-material-shadow']).toContain('var(--glass-depth, 0)')
+  delete tokens[light]!['--glass-material-shadow']
   expect(tokens[light]).toEqual({
     '--glass-blur': '3px',
     '--glass-brightness': '1.4',

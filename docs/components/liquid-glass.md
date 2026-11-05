@@ -46,10 +46,18 @@ A glass preset sets `styleFamily: "liquid-glass"` and these design fields, which
 | `design.glassBlurPx` | 0–40 | 3 | Backdrop blur radius; low values keep the refraction visible |
 | `design.glassOpacity` | 0.25–1 | 0.57 | Surface opacity: the share of the surface colour in the mix with the filtered backdrop |
 | `design.glassSaturation` | 1–2 | 2 | Backdrop `saturate()`; keeps the colour of what is behind the glass |
-| `design.glassBackdropContrast` | 0.3–1 | 0.45 | Backdrop `contrast()`; compresses the backdrop's light range |
+| `design.glassBackdropContrast` | 0.3–1.6 | 0.45 | Backdrop `contrast()`: below 1 compresses the backdrop's light range, above 1 deepens it. Above 1 it also adds a drop shadow of alpha `(contrast − 1) × 0.545` (`--glass-drop`) |
 | `design.glassBackdropTone` | 0–0.6 | 0.4 | Backdrop `brightness()` of `1 + tone` in light mode and `1 − tone` in dark mode |
-| `design.glassSheen` | 0–0.5 | 0.25 | White specular gradient over the top of each surface; a quarter as strong in dark mode |
+| `design.glassSheen` | 0–1 | 0.25 | White specular gradient over the top of each surface; a quarter as strong in dark mode |
 | `design.glassRim` | 0–1 | 0.6 | Edge light: a bright top-left and softer bottom-right inner rim |
+| `design.glassRefraction` | 0–1 | absent | Displacement strength along the rim (`--glass-refraction-strength`, the value ÷ 6.9). Chromium only |
+| `design.glassRefractionWidth` | 0–0.3 | absent | Share of the surface the rim refraction reaches (`--glass-refraction-width`). When set, `LiquidGlassFilter` uses a rim-only map instead of the edge ramp and prism |
+| `design.glassHalo` | 0–1 | absent | Strength of the rim light near the pointer (`--glass-halo`). Needs `LiquidGlassFilter` |
+| `design.glassDepth` | 0–1 | absent | Relief: a bevel, an inner bounce light and a layered drop shadow (`--glass-depth`) |
+| `design.glassMotion` | 0–1 | absent | How far the shine follows the pointer, a Card's hover lift and the Button press (`--glass-motion`) |
+| `design.glassDispersion` | 0–1 | absent | Pink, amber and cyan fringe along the rim (`--glass-dispersion`) |
+
+The six material fields are optional. A preset that leaves them out compiles to the same tokens as before, and every material layer in the stylesheet multiplies by a token that falls back to 0, so it renders as before. Under `transparency: "reduced"` halo, refraction and dispersion are 0; depth and motion keep their values.
 
 Backdrop contrast, tone, and sheen enter the contrast bound, so changing them changes the smallest passing opacity. Blur, saturation, and rim cannot affect it. See [preset fields](../04-presets-and-contracts.md#liquid-glass-design-fields) for the tokens and the contract.
 
@@ -153,6 +161,18 @@ The preview gallery renders each glass component over three declared backdrops, 
 
 A component that a family cannot style appears in the gallery as a labelled placeholder; no glass component is unavailable now, so the glass gallery shows none.
 
+## Material recipes
+
+The material is defined once in the family stylesheet and applied as three recipes.
+
+| Recipe | Layers | Slots |
+| --- | --- | --- |
+| Surface | Relief, rim dispersion, extra drop shadow, pointer shine and pointer halo (not on surfaces that scroll); Card lifts on hover | Card, Dialog, Popover, Dropdown Menu and its submenu, Select content, Tooltip, Alert, the Table and Accordion containers |
+| Control | The same layers; nothing moves | Button, Badge, Tabs list, Select trigger |
+| Mark | The veil and rim their own sheets paint | Input, Textarea, Native Select, Checkbox, Switch, Radio Group items, Avatar, Progress, Skeleton |
+
+Fields are Marks because `<input>`, `<textarea>` and `<select>` render no pseudo-elements. Card, Tooltip, Alert and the Controls carry the material on `::before`, under their content, and the pointer halo on `::after`, a ring masked to the border. Surfaces that scroll or clip (Dialog, Popover, Dropdown Menu, Select content, the Table and Accordion containers) carry it on their own `box-shadow` and have no halo or pointer shine, so nothing is clipped or scrolls away. Relief and rim dispersion stay within 3px of the rim, outside every text inset. The pointer shine sits under the content and enters the contrast bound. Only a Card moves, lifting on hover on devices that hover; nothing presses. The layout rules sit in `@layer components`, so utility classes such as `absolute` or `sticky` still apply. Under `prefers-reduced-transparency` the pseudo layers are removed. The slot lists are exported from `@ombelle/catalog` as `glassSurfaceSlots`, `glassControlSlots`, `glassMarkSlots` and `glassHaloSelector`.
+
 ## Glass cues
 
 Inside the feature query, each translucent surface paints a white specular gradient over its top 60 percent at `glassSheen`, which the contrast bound includes. Every glass surface also has a bright top-left inner rim, a softer bottom-right rim, a faint inner ring, and a 2px inner shadow along the bottom edge. These stay within 3px of the border, inside the smallest text inset, so they never sit behind text and do not enter the bound.
@@ -165,13 +185,15 @@ Inside the feature query, each translucent surface paints a white specular gradi
 - **The contrast bound still holds.** Displacement only moves backdrop pixels and samples inward, never outside the element. The channel split recombines values within the same range. The compression in the same `backdrop-filter` runs after them.
 - **Fallbacks are unchanged.** Reduced transparency, forced colours and nested glass remove the filter as before.
 - **Blur.** The built-in preset uses a 3px blur so the refraction stays visible. Higher `glassBlurPx` values soften it.
+- **Rim refraction.** When the preset sets `glassRefractionWidth` and `glassRefraction` above 0, the filter displaces only a band along the rim; at 0 it removes `--glass-refraction` instead of referencing an empty filter, from a rounded-rectangle distance map, with the strength from `glassRefraction`. The filter re-reads both tokens when `<html>` changes class or style, for example on a theme switch.
+- **Pointer halo.** The same component adds one pointer listener for the page. It runs only when the preset sets a halo or motion, writes at most once per animation frame, and sets `--pointer-x`, `--pointer-y` and `data-halo-active` on the glass Surface or Control under the pointer (recipe Buttons included) and clears them when the pointer leaves; touch shows the halo while pressed. Under reduced motion it writes no position, so the halo stays at the top edge and the shine does not travel. Without the component there is no halo and the shine stays at the top left.
 
 ## Fallbacks
 
 1. **Opaque base.** Glass surfaces are opaque outside any feature query, using the relevant surface token.
 2. **Feature query.** Translucency and blur apply only inside `@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))`. A browser without filter support never shows text over an unblurred backdrop.
 3. **Reduced transparency.** `@media (prefers-reduced-transparency: reduce)` restores opaque surfaces and removes the filter. The preset field `transparency: "reduced"` does the same at compile time: its tokens pin every surface's coverage to 1 (`--glass-inner-opacity`, which covered surfaces such as the 55% field read before their coverage, and `--glass-nested-opacity`), remove the filter (`--glass-inner-filter: none`) and the sheen, and back the Skeleton film with `card` (`--glass-film-backing`).
-4. **Forced colours.** `@media (forced-colors: active)` uses system colours with no filter and no translucency.
+4. **Forced colours.** `@media (forced-colors: active)` uses system colours with no filter and no translucency. The material's `::before` and `::after` layers are removed.
 5. **Glass identity in every fallback.** The edge (`--border-width` in the `border` colour), an inner top highlight, and the preset radius remain.
 
 Blur is never transitioned or animated. Transitions touch only colour and opacity and are disabled by `prefers-reduced-motion`. Everything nested inside a glass Card, Dialog, or Tooltip, including another Card, drops its own filter and uses `--glass-nested-opacity`.

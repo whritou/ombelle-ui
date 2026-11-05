@@ -76,3 +76,42 @@ describe('preset contract', () => {
     ).toBe('minimalist')
   })
 })
+
+describe('liquid glass material settings', () => {
+  const glass = (design: Record<string, number>) => ({
+    ...example,
+    styleFamily: 'liquid-glass',
+    design: { ...example.design, ...design },
+  })
+  it('accepts the material settings at their maxima', () => {
+    const design = validatePreset(
+      glass({
+        glassRefraction: 1,
+        glassRefractionWidth: 0.3,
+        glassHalo: 1,
+        glassDepth: 1,
+        glassMotion: 1,
+        glassDispersion: 1,
+        glassBackdropContrast: 1.25,
+        glassSheen: 0.76,
+      }),
+    ).design as Record<string, unknown>
+    expect(design.glassRefractionWidth).toBe(0.3)
+    expect(design.glassBackdropContrast).toBe(1.25)
+    expect(design.glassSheen).toBe(0.76)
+  })
+  it.each([
+    ['glassRefractionWidth', 0.31],
+    ['glassBackdropContrast', 1.61],
+    ['glassSheen', 1.01],
+    ['glassHalo', 1.01],
+  ])('rejects %s at %s', (field, value) => {
+    try {
+      validatePreset(glass({ [field]: value }))
+      expect.unreachable()
+    } catch (error) {
+      expect(error).toBeInstanceOf(FoundationError)
+      expect((error as FoundationError).path).toBe('/design/' + field)
+    }
+  })
+})

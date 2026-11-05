@@ -3,6 +3,7 @@ import {
   glassBackdrop,
   glassContrastReport,
   glassDesignDefaults,
+  glassMaterialActive,
   glassTints,
 } from './glass-contrast.js'
 
@@ -88,6 +89,7 @@ export function glassTokens(data: Preset): {
             '--glass-film-backing': '1',
           }
         : {}),
+      ...materialTokens(design, opaque),
       ...mode('light'),
     },
     dark: {
@@ -95,4 +97,28 @@ export function glassTokens(data: Preset): {
       ...mode('dark'),
     },
   }
+}
+
+const round4 = (value: number) => String(Math.round(value * 10000) / 10000)
+
+// Material settings are optional; a token is written only when its field is set, so presets
+// written before them keep byte-identical tokens. Reduced transparency turns off the effects
+// that need a live backdrop (halo, refraction, dispersion) and keeps depth and motion.
+function materialTokens(design: Preset['design'], opaque: boolean): Record<string, string> {
+  const tokens: Record<string, string> = {}
+  const set = (name: string, value: number | undefined, off = false) => {
+    if (value !== undefined) tokens[name] = off ? '0' : round4(value)
+  }
+  set('--glass-refraction-strength', design.glassRefraction === undefined ? undefined : design.glassRefraction / 6.9, opaque)
+  set('--glass-refraction-width', design.glassRefractionWidth)
+  set('--glass-halo', design.glassHalo, opaque)
+  set('--glass-depth', design.glassDepth)
+  set('--glass-motion', design.glassMotion)
+  set('--glass-dispersion', design.glassDispersion, opaque)
+  const contrast = design.glassBackdropContrast
+  const drop = contrast === undefined ? 0 : Math.max(0, (contrast - 1) * 0.545)
+  if (drop > 0) tokens['--glass-drop'] = round4(drop)
+  // Gates the pointer shine: presets written before these settings already set a sheen.
+  if (glassMaterialActive(design)) tokens['--glass-material'] = '1'
+  return tokens
 }
