@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import { inflateSync } from 'node:zlib'
 import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { contrastRatio } from '../helpers/contrast.js'
+import { glassFailingPairLine } from '../helpers/glass-readout.js'
 
 // Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
 // Accessible names repeat across the three backdrop copies, so every scenario
@@ -666,7 +667,7 @@ for (const mode of modes) {
     const failing = await page.locator('#glass-contrast-pairs li').allInnerTexts()
     expect(failing.length).toBeGreaterThan(0)
     for (const pair of failing)
-      expect(pair).toMatch(/^(light|dark): \S+ on \S+, \d+\.\d{2}:1 (over the (darkest|brightest) filtered backdrop|on the opaque fallback surface)$/)
+      expect(pair).toMatch(glassFailingPairLine)
 
     await page.getByRole('button', { name: 'Reset glass opacity' }).click()
     await expect(readout).toContainText('Contrast bound passes at glass opacity 0.57:')

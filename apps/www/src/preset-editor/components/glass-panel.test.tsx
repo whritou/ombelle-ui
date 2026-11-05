@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { glassFailingPairLine } from '../../../../../tests/helpers/glass-readout'
 import {
   canonicalize,
   compile,
@@ -137,4 +138,11 @@ it('lists the tint in a failing tinted pair', () => {
   // The Button pairs share surface and text; each is listed with its own tint.
   for (const tint of ['primary 26%', 'destructive 16%', 'destructive 24%'])
     expect(html).toContain('light: foreground on card + ' + tint)
+  // Every listed line, tinted, covered or both, matches the pattern the e2e readout check uses.
+  const list = /aria-label="Failing contrast pairs">(.*?)<\/ul>/.exec(html)![1]
+  const lines = [...list.matchAll(/<li>(.*?)<\/li>/g)].map((m) => m[1].replace(/<!-- -->/g, ''))
+  expect(lines.some((line) => line.includes(' + foreground 6% at 60% coverage, '))).toBe(true)
+  expect(lines.some((line) => line.includes(' at 55% coverage, '))).toBe(true)
+  expect(lines.some((line) => !line.includes(' + ') && !line.includes(' coverage, '))).toBe(true)
+  for (const line of lines) expect(line).toMatch(glassFailingPairLine)
 })
