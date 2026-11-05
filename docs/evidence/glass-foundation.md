@@ -12,12 +12,13 @@ Branch `feat/glass-foundation`. Windows 11, Node v24.19.0, pnpm 11.25.0 (through
 | --- | --- |
 | `corepack pnpm build:packages` | passed |
 | `corepack pnpm typecheck` | passed |
-| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 119 files, 1104 tests passed |
+| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 119 files, 1111 tests passed |
 | `tests/integration/preset-gallery-generation`, `preview-routing`, `hosted-preview-build`, `liquid-glass-cli`, `www-route` | 5 files, 36 tests passed |
 | `node scripts/build-hosted-preview.mjs` | passed |
 | Playwright screenshots, light and dark: Button variants, states and hover per variant; Card, Dialog, Popover, Dropdown Menu, Tooltip, Tabs, Badge and Alert on the kit backdrop; the Button editor preview with a glass recipe in every variant and forced state | 26 captures and one inspector capture, reviewed against the kit board |
+| After the review fixes: `node scripts/build-hosted-preview.mjs`, the 22 gallery captures retaken, and a computed-style probe | Every retaken capture is byte-identical to the recorded one. At the built-in 0 / 12 the Card shadow computes to `0px 12px 32.004px -15.996px` and the Button glow to `0px 6px 15.996px -9.996px`, as before; with −16 / −16 the Card shadow computes to `-16px -16px 42.672px -21.328px`, and with 12 / 0 to `12px 0px 32.004px -15.996px`. A glass link computes 6px inline padding at `sm`, default and `lg` |
 
-The checks above ran after the last code change on the branch, the Button size fix below.
+The checks above ran after the last code change on the branch, the review fixes (magnitude shadows, link padding, neutral Button pairs, one-mode recipe fallbacks and editor labels).
 
 Not run: `pnpm check:foundation`, the rest of `test:integration` (CI runs it), and the browser e2e suite (`test:e2e`), which does not run in CI or on this machine. No consumer-matrix row installs the new Button rules.
 
