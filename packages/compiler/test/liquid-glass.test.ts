@@ -7,7 +7,7 @@ import {
   type ComponentId,
   type Preset,
 } from '@ombelle/contracts'
-import { compile, glassContrastPairs, glassContrastReport, glassTints } from '../src/index.js'
+import { compile, glassContrastPairs, glassContrastReport, glassEffectiveSheen, glassTextPlate, glassTints } from '../src/index.js'
 import { squash } from './new-component-artifacts.js'
 
 const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
@@ -604,7 +604,7 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked })
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: rest })
     // The check mark and radio dot sit on the checked control at 80% coverage.
-    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked, coverage: 0.8 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked, coverage: 0.8, solid: true })
     // Unchecked option rows are the field surface, so the field pairs at 55% bound their label and description;
     // checked rows are the rest tint at 78%, the lowest coverage at which their text passes.
     expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', coverage: 0.55 })
@@ -782,10 +782,56 @@ describe('liquid glass material review fixes', () => {
   const overflowSlots = ['dialog-content', 'popover-content', 'dropdown-menu-content', 'dropdown-menu-sub-content', 'select-content', 'table-container', 'accordion']
 
   it('counts the pointer shine in the bound when a material setting is on', () => {
-    const plain = glassContrastReport(builtin())
-    const lit = glassContrastReport(withDesign({ glassHalo: 0.5 }))
-    const pick = (r: typeof plain) => r.pairs.find((p) => p.mode === 'dark' && p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined)!
-    expect(pick(lit).ratioOverWhite).toBeLessThan(pick(plain).ratioOverWhite)
+    const plain = withDesign({ glassSheen: 0.4 })
+    const lit = withDesign({ glassSheen: 0.4, glassHalo: 0.5 })
+    expect(glassEffectiveSheen(plain.design, 'light')).toBe(0.4)
+    expect(glassEffectiveSheen(lit.design, 'light')).toBeCloseTo(1 - 0.6 * (1 - 0.6 * 0.4), 4)
+  })
+
+  it('evaluates text on its outline plate and checked marks opaque when the material is on', () => {
+    expect(glassTextPlate).toBe(1)
+    const pick = (design: Partial<Preset['design']>, match: (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => boolean) =>
+      glassContrastReport(withDesign({ glassOpacity: 0.4, ...design })).pairs.find((p) => p.mode === 'light' && match(p))!
+    const text = (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined
+    // On its ring the glyph reads the same over any backdrop.
+    expect(pick({ glassHalo: 0.5 }, text).ratioOverBlack).toBeCloseTo(pick({ glassHalo: 0.5 }, text).ratioOverWhite, 2)
+    expect(pick({}, text).ratioOverBlack).toBeLessThan(pick({}, text).ratioOverWhite)
+    const mark = (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => p.coverage === 0.8
+    // A solid mark paints one opaque colour with no sheen: the backdrop and the opacity no longer matter.
+    expect(pick({ glassHalo: 0.5 }, mark).ratioOverWhite).toBeCloseTo(pick({ glassHalo: 0.5 }, mark).ratioOverBlack, 2)
+    expect(pick({ glassHalo: 0.5, glassOpacity: 0.9 }, mark).ratioOverWhite).toBeCloseTo(pick({ glassHalo: 0.5 }, mark).ratioOverWhite, 2)
+  })
+
+  it('draws the outline plate on every plated slot and keeps Badge and forced colours clear', async () => {
+    const result = await build(builtin())
+    const root = postcss.root()
+    for (const sheet of result.artifacts.filter((a) => a.kind === 'style')) root.append(postcss.parse(sheet.content).nodes)
+    const strokes: string[] = []
+    root.walkDecls('-webkit-text-stroke', (decl) => {
+      if (decl.value.includes('--glass-plate')) strokes.push(squash((decl.parent as postcss.Rule).selector) + ' ' + squash(decl.value))
+    })
+    expect(strokes.length).toBe(1)
+    expect(strokes[0]).toContain('calc(var(--glass-material,0)*2px)var(--glass-plate)')
+    for (const slot of ['card', 'button', 'popover-content', 'table-head', 'table-cell', 'tabs-trigger', 'radio-group-option', 'select-item', 'input'])
+      expect(strokes[0], slot).toContain('[data-slot="' + slot + '"]')
+    expect(strokes[0]).not.toContain('[data-slot="badge"]')
+    let paintOrder = false
+    let badgeClear = false
+    let forced = false
+    root.walkDecls((decl) => {
+      if (decl.prop === 'paint-order' && decl.value === 'stroke fill') paintOrder = true
+      const selector = squash((decl.parent as postcss.Rule).selector ?? '')
+      if (decl.prop === '-webkit-text-stroke' && decl.value === '0' && selector === '[data-slot="badge"]') badgeClear = true
+      if (decl.prop === '-webkit-text-stroke' && decl.value === '0' && decl.parent?.parent?.type === 'atrule' && (decl.parent.parent as postcss.AtRule).params.includes('forced-colors')) forced = true
+    })
+    expect([paintOrder, badgeClear, forced]).toEqual([true, true, true])
+    for (const slot of ['checkbox', 'radio-group-item', 'switch']) {
+      let solid = false
+      root.walkDecls('background', (decl) => {
+        if (squash((decl.parent as postcss.Rule).selector ?? '').includes('[data-slot="' + slot + '"]') && decl.value.includes('max(') && decl.value.includes('var(--glass-material, 0) * 100%')) solid = true
+      })
+      expect(solid, slot).toBe(true)
+    }
   })
 
   it('writes the material flag only when a material setting is above 0', async () => {
@@ -880,5 +926,26 @@ describe('liquid glass material review fixes', () => {
       if (rule.selectors.some((s) => s.includes(':not([data-halo-active])')) && rule.toString().includes('--pointer-x')) resets++
     })
     expect(resets).toBe(1)
+  })
+})
+
+describe('liquid glass starting presets and the bound', () => {
+  it('every starting preset passes the contrast bound', () => {
+    const c = getCatalog('0.1.0')
+    const expected: Record<string, number> = {
+      'builtin-liquid-glass-cristal': 0.25,
+      'builtin-liquid-glass-givre': 0.25,
+      'builtin-liquid-glass-fume': 0.25,
+      'builtin-liquid-glass-relief': 0.25,
+      'builtin-liquid-glass-clear': 0.25,
+      'builtin-liquid-glass-prism': 0.25,
+      'builtin-liquid-glass-liquid': 0.25,
+      'builtin-liquid-glass': 0.57,
+    }
+    for (const [id, minimumOpacity] of Object.entries(expected)) {
+      const report = glassContrastReport(c.startingPresets[id as keyof typeof c.startingPresets])
+      expect(report.passes, id).toBe(true)
+      expect(report.minimumOpacity, id).toEqual(minimumOpacity)
+    }
   })
 })

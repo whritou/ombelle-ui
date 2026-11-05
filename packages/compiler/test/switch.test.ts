@@ -95,7 +95,7 @@ it('compiles Switch in liquid glass with the on tint, a solid thumb and its fall
   expect(block(on)).toContain('--glass-tint:var(--primary);--glass-tint-amount:calc(var(--glass-primary-tint)+8%)')
   expect(block(on)).toContain('border-color:color-mix(insrgb,var(--primary)60%,transparent)')
   expect(block(on)).toContain('color-mix(insrgb,var(--primary)70%,transparent)')
-  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.85))*100%),transparent)')
+  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))max(calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.85))*100%),calc(var(--glass-material,0)*100%)),transparent)')
   // The thumb is solid white with the kit's shadow, so its position reads over any backdrop.
   const thumb = block('[data-slot="switch-thumb"]')
   expect(thumb).toContain('background:#fff')

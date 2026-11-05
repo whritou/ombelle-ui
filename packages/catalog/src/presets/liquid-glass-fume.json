@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "1.0",
+  "id": "builtin-liquid-glass-fume",
+  "name": "Fumé",
+  "revision": 1,
+  "catalogRelease": "0.1.0",
+  "compilerVersion": "0.1.0",
+  "platform": "react-web",
+  "styleFamily": "liquid-glass",
+  "modes": {
+    "light": {
+      "background": "#0B1120",
+      "foreground": "#F0F7FF",
+      "card": "#091127",
+      "cardForeground": "#F0F7FF",
+      "popover": "#091127",
+      "popoverForeground": "#F0F7FF",
+      "primary": "#7DD3FC",
+      "primaryForeground": "#0B1120",
+      "secondary": "#334155",
+      "secondaryForeground": "#F8FAFC",
+      "muted": "#273449",
+      "mutedForeground": "#E2E8F0",
+      "accent": "#1E3A8A",
+      "accentForeground": "#F8FAFC",
+      "destructive": "#FECACA",
+      "destructiveForeground": "#0B1120",
+      "border": "oklch(96.8% 0.007 247.9 / 14%)",
+      "input": "#94A3B8",
+      "ring": "#7DD3FC"
+    },
+    "dark": {
+      "background": "#0B1120",
+      "foreground": "#F0F7FF",
+      "card": "#091127",
+      "cardForeground": "#F0F7FF",
+      "popover": "#091127",
+      "popoverForeground": "#F0F7FF",
+      "primary": "#7DD3FC",
+      "primaryForeground": "#0B1120",
+      "secondary": "#334155",
+      "secondaryForeground": "#F8FAFC",
+      "muted": "#273449",
+      "mutedForeground": "#E2E8F0",
+      "accent": "#1E3A8A",
+      "accentForeground": "#F8FAFC",
+      "destructive": "#FECACA",
+      "destructiveForeground": "#0B1120",
+      "border": "oklch(96.8% 0.007 247.9 / 14%)",
+      "input": "#94A3B8",
+      "ring": "#7DD3FC"
+    }
+  },
+  "design": {
+    "fontFamilyId": "system-sans",
+    "radiusRem": 0.75,
+    "density": "comfortable",
+    "borderWidthPx": 1,
+    "shadowOffsetXPx": 0,
+    "shadowOffsetYPx": 12,
+    "motion": "full",
+    "transparency": "auto",
+    "glassBlurPx": 12,
+    "glassOpacity": 0.76,
+    "glassSaturation": 1,
+    "glassBackdropContrast": 1.378,
+    "glassBackdropTone": 0,
+    "glassSheen": 0.68,
+    "glassRim": 0.58,
+    "glassRefraction": 0.66,
+    "glassRefractionWidth": 0.08,
+    "glassHalo": 0.64,
+    "glassDepth": 0.0,
+    "glassMotion": 0.42,
+    "glassDispersion": 0.0
+  },
+  "componentDefaults": {
+    "button": {
+      "variant": "default",
+      "size": "default"
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { getCatalog, getTemplate } from '../src/index.js'
+import { getCatalog, getTemplate, startingPresetOrder } from '../src/index.js'
+import { catalogData } from '../src/generated.js'
 import {
   supportedComponentIds,
   supportedStyleFamilies,
@@ -700,5 +701,38 @@ describe('catalog contract', () => {
       ),
     )
     expect(html).toContain('data-slot="tooltip-trigger"')
+  })
+})
+
+describe('liquid glass starting presets', () => {
+  it('starting presets load and validate', () => {
+    const c = getCatalog('0.1.0')
+    expect(startingPresetOrder).toEqual([
+      'builtin-liquid-glass-cristal',
+      'builtin-liquid-glass-givre',
+      'builtin-liquid-glass-fume',
+      'builtin-liquid-glass-relief',
+      'builtin-liquid-glass-clear',
+      'builtin-liquid-glass-prism',
+      'builtin-liquid-glass-liquid',
+      'builtin-liquid-glass',
+    ])
+    expect(startingPresetOrder.map((id) => c.startingPresets[id].name)).toEqual([
+      'Cristal', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Liquid glass',
+    ])
+    for (const id of startingPresetOrder) {
+      expect(validatePreset(c.startingPresets[id])).toEqual(c.startingPresets[id])
+      expect(c.startingPresets[id].styleFamily).toBe('liquid-glass')
+    }
+    // The family base stays today's look: resolvePreset fills saved presets' missing fields from it.
+    expect(c.startingPresets['builtin-liquid-glass']).toEqual(c.presets['liquid-glass'])
+    expect(c.startingPresets['builtin-liquid-glass-relief'].modes.light.card).toBe('#F4A5B3')
+    expect(c.startingPresets['builtin-liquid-glass-cristal'].modes.light.primary).toBe('#0B6AA8')
+    expect(c.startingPresets['builtin-liquid-glass-fume'].modes.light.cardForeground).toBe('#F0F7FF')
+    expect(c.startingPresets['builtin-liquid-glass'].design.glassOpacity).toBe(0.57)
+  })
+  it('lists exactly the starting preset files, each under its own id', () => {
+    expect(Object.keys(catalogData.startingPresets).sort()).toEqual([...startingPresetOrder].sort())
+    for (const [id, preset] of Object.entries(catalogData.startingPresets)) expect(preset.id).toBe(id)
   })
 })

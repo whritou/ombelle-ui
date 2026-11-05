@@ -162,3 +162,28 @@
 @media (forced-colors: active) {
   [data-slot="card"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before, [data-slot="card"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after { content: none; }
 }
+/* Text outline plate: with the material on, glass text is drawn over an opaque 1px ring in its surface colour
+   (a 2px stroke painted under the fill). The contrast bound evaluates each glyph against that ring (glassTextPlate):
+   4.5:1 holds within 1px of every glyph. Without the material the stroke is 0. The stroke colour resolves on the slot
+   that declares it, so each slot below names its own plate; Badge is a solid fill and takes none. */
+[data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="table-cell"], [data-slot="accordion"], [data-slot="accordion-trigger"], [data-slot="avatar"] { --glass-plate: var(--card); }
+[data-slot="table-head"], [data-slot="table-footer"], [data-slot="tabs-list"] { --glass-plate: var(--muted); }
+[data-slot="tabs-trigger"] { --glass-plate: var(--muted); }
+[data-slot="tabs-trigger"][data-state="active"] { --glass-plate: var(--background); }
+[data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"] { --glass-plate: var(--popover); }
+[data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-slot="radio-group-option"] { --glass-plate: var(--background); }
+[data-slot="button"] { --glass-plate: color-mix(in srgb, var(--glass-tint, transparent) var(--glass-tint-amount, 0%), var(--card)); }
+[data-slot="button"][data-variant="outline"] { --glass-plate: color-mix(in srgb, var(--glass-tint, transparent) var(--glass-tint-amount, 0%), var(--background)); }
+[data-state="selected"] > [data-slot="table-cell"], [data-slot="accordion-trigger"][data-state="open"] { --glass-plate: color-mix(in srgb, var(--primary) 12%, var(--card)); }
+[data-slot="select-item"] { --glass-plate: var(--popover); }
+[data-slot="select-item"][data-highlighted] { --glass-plate: color-mix(in srgb, var(--primary) var(--glass-primary-tint, 18%), var(--popover)); }
+[data-slot="avatar"][data-variant="primary"] { --glass-plate: color-mix(in srgb, var(--primary) var(--glass-primary-tint, 18%), var(--card)); }
+[data-slot="radio-group-option"]:has([data-state="checked"]) { --glass-plate: color-mix(in srgb, var(--primary) var(--glass-primary-tint, 18%), var(--card)); }
+[data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="table-cell"], [data-slot="table-head"], [data-slot="table-footer"], [data-slot="accordion"], [data-slot="accordion-trigger"], [data-slot="avatar"], [data-slot="tabs-list"], [data-slot="tabs-trigger"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-slot="button"], [data-slot="radio-group-option"], [data-slot="select-item"] {
+  -webkit-text-stroke: calc(var(--glass-material, 0) * 2px) var(--glass-plate);
+  paint-order: stroke fill;
+}
+[data-slot="badge"] { -webkit-text-stroke: 0; }
+@media (forced-colors: active) {
+  [data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="table-cell"], [data-slot="table-head"], [data-slot="table-footer"], [data-slot="accordion"], [data-slot="accordion-trigger"], [data-slot="avatar"], [data-slot="tabs-list"], [data-slot="tabs-trigger"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-slot="button"], [data-slot="radio-group-option"], [data-slot="select-item"] { -webkit-text-stroke: 0; }
+}

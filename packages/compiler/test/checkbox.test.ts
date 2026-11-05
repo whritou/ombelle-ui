@@ -101,7 +101,7 @@ it('compiles Checkbox in liquid glass with the checked tint and its fallbacks', 
   expect(flat).toContain(checked + ',' + box + '[data-state="indeterminate"]{--glass-tint:var(--primary);--glass-tint-amount:calc(var(--glass-primary-tint)+8%)')
   expect(block(checked + ',' + box + '[data-state="indeterminate"]')).toContain('border-color:color-mix(insrgb,var(--primary)60%,transparent)')
   expect(block(checked + ',' + box + '[data-state="indeterminate"]')).toContain('color-mix(insrgb,var(--primary)70%,transparent)')
-  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.8))*100%),transparent)')
+  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))max(calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.8))*100%),calc(var(--glass-material,0)*100%)),transparent)')
   // The mark stays foreground ink in every state.
   expect(block(box)).toContain('color:var(--foreground)')
   expect(flat).not.toMatch(/--primary-foreground/)
