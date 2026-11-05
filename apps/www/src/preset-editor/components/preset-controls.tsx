@@ -344,7 +344,7 @@ export function DesignControls({
           )
         const hintId = `${fieldId(path)}-hint`
         const glassHintId = `${fieldId(path)}-glass-hint`
-        const glassHint = glass && key === 'borderWidthPx' ? glassControlHints.borderWidthPx : null
+        const glassHint = !glass ? null : key === 'borderWidthPx' ? glassControlHints.borderWidthPx : 'hint' in control ? control.hint : null
         return (
           <div key={key}>
             <SliderRow

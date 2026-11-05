@@ -48,7 +48,13 @@ export function updateDraftRecipe(draft: EditorDraft, recipe: unknown): EditorDr
 }
 
 export function changeDraftFamily(draft: EditorDraft, family: StyleFamily): EditorDraft {
-  return updateDraftRecipe(draft, { ...draft.recipe, presetRef: presetRefFor(family) })
+  // Glass material overrides apply only to liquid glass, and no other family shows them, so they are
+  // dropped on the way out instead of staying hidden in the exported recipe. Undo brings them back.
+  const overrides =
+    family === 'liquid-glass'
+      ? draft.recipe.overrides
+      : Object.fromEntries(Object.entries(draft.recipe.overrides).filter(([key]) => !key.startsWith('glass')))
+  return updateDraftRecipe(draft, { ...draft.recipe, presetRef: presetRefFor(family), overrides })
 }
 
 /**

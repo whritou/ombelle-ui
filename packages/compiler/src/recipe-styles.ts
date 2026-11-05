@@ -76,6 +76,27 @@ function pruneEmptyAtRules(container: postcss.Container) {
   }
 }
 
+/** The material settings a Button recipe may override on liquid glass. */
+const glassOverrideKeys = [
+  'glassOpacity',
+  'glassBlurPx',
+  'glassBackdropContrast',
+  'glassSheen',
+  'glassRim',
+  'glassHalo',
+  'glassDepth',
+  'glassMotion',
+  'glassDispersion',
+] as const
+
+/** The preset with the recipe's glass overrides applied; other families ignore them. */
+function withGlassOverrides(data: ResolvedPreset['data'], overrides: Recipe['overrides']): ResolvedPreset['data'] {
+  if (data.styleFamily !== 'liquid-glass') return data
+  const design = { ...data.design }
+  for (const key of glassOverrideKeys) if (overrides[key] !== undefined) design[key] = overrides[key]
+  return { ...data, design }
+}
+
 export function compileScopedButtonStyles(input: {
   familyCss: string
   preset: ResolvedPreset
@@ -114,8 +135,8 @@ export function compileScopedButtonStyles(input: {
     '="' +
     input.scope +
     '"]'
-  if (input.preset.data.styleFamily === 'liquid-glass')
-    assertGlassContrast(input.preset.data)
+  const data = withGlassOverrides(input.preset.data, input.overrides)
+  if (data.styleFamily === 'liquid-glass') assertGlassContrast(data)
   const root = postcss.parse(input.familyCss)
   root.walkAtRules((rule) => {
     const params = normalizeConditionParams(rule.params)
@@ -208,8 +229,7 @@ export function compileScopedButtonStyles(input: {
   root.walkComments((comment) => {
     comment.remove()
   })
-  const data = input.preset.data,
-    d = data.design
+  const d = data.design
   const light: Record<string, string> = {},
     darkTokens: Record<string, string> = {}
   for (const [k, v] of Object.entries(data.modes.light)) light[variable(k)] = v

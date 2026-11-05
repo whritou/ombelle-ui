@@ -599,3 +599,40 @@ it('a one-mode glass ghost background override leaves the other mode with no sur
   expect(darkOnly.light['--background']).toBe('transparent')
   expect(darkOnly.css.replace(/\s+/g, '')).toContain(`.dark${selector},.dark${selector}{-webkit-backdrop-filter:var(--glass-inner-filter,`)
 })
+it('glass recipe overrides become scoped material tokens', async () => {
+  const { catalog, preset } = await glassPreset()
+  const scoped = (family: 'liquid-glass' | 'flat', p = preset) =>
+    compileRecipeStyles({
+      familyCss: catalog.styles[family],
+      preset: p,
+      overrides: { glassHalo: 0.9, glassDepth: 0.4, glassOpacity: 0.8 },
+      scope: glassScope,
+      darkSelector: '.dark',
+    })
+  const tokens: Record<string, string> = {}
+  postcss.parse(scoped('liquid-glass')).walkDecls(/^--glass-/, (decl) => {
+    if ((decl.parent as postcss.Rule).selector === `[data-slot="recipe-button"][data-ombelle-recipe="${glassScope}"]`)
+      tokens[decl.prop] = decl.value
+  })
+  expect(tokens['--glass-halo']).toBe('0.9')
+  expect(tokens['--glass-depth']).toBe('0.4')
+  expect(tokens['--glass-opacity']).toBe('0.8')
+  expect(tokens['--glass-material']).toBe('1')
+  // A flat recipe ignores them: its preset may have changed family after the recipe was edited.
+  const flat = (
+    await compile({ preset: catalog.presets.flat, componentIds: [], catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
+  ).preset
+  expect(scoped('flat', flat)).not.toMatch(/--glass-(halo|depth|opacity)/)
+})
+it('glass recipe overrides stay inside the contrast bound', async () => {
+  const { catalog, preset } = await glassPreset()
+  expect(() =>
+    compileRecipeStyles({
+      familyCss: catalog.styles['liquid-glass'],
+      preset,
+      overrides: { glassOpacity: 0.3 },
+      scope: glassScope,
+      darkSelector: '.dark',
+    }),
+  ).toThrow(expect.objectContaining({ code: 'INVALID_DATA', path: '/design/glassOpacity' }))
+})

@@ -180,3 +180,12 @@ describe('Button editor model', () => {
     expect(reset.overrides).toEqual({})
   })
 })
+
+it('leaving liquid glass drops the glass material overrides the other families cannot show', () => {
+  const glass = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
+  const tuned = updateDraftRecipe(glass, { ...glass.recipe, overrides: { ...glass.recipe.overrides, radiusRem: 1, glassHalo: 0.9, glassDepth: 0.4 } })
+  const flat = changeDraftFamily(tuned, 'flat')
+  expect(flat.recipe.overrides).toEqual({ radiusRem: 1 })
+  // Staying in glass keeps them.
+  expect(changeDraftFamily(tuned, 'liquid-glass').recipe.overrides).toMatchObject({ glassHalo: 0.9, glassDepth: 0.4 })
+})

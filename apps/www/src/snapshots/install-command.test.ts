@@ -111,3 +111,20 @@ it('offers ombelle only from the minimum published installer', () => {
   expect(offeredStyleFamilies()).toEqual(offeredStyleFamilies(undefined, publishedInstaller))
   expect(offeredStyleFamilies(undefined, { version: '0.3.0' })).toEqual(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])
 })
+
+it('holds back commands for glass material settings until the installer that accepts them is published', async () => {
+  const { glassMaterialMinimumCli, materialInstallBlocked } = await import('./install-command')
+  expect(glassMaterialMinimumCli).toBe('0.5.0')
+  const old = { version: '0.4.1' }, next = { version: '0.5.0' }
+  // The built-in 0.5 look uses none of them.
+  const base = { glassSheen: 0.25, glassBackdropContrast: 0.45, glassOpacity: 0.57 }
+  expect(materialInstallBlocked({ design: base }, old)).toBe(false)
+  // A material field, even at 0, or a value past the 0.4.x ranges needs 0.5.0.
+  for (const design of [{ ...base, glassHalo: 0 }, { ...base, glassSheen: 0.6 }, { ...base, glassBackdropContrast: 1.2 }]) {
+    expect(materialInstallBlocked({ design }, old)).toBe(true)
+    expect(materialInstallBlocked({ design }, next)).toBe(false)
+  }
+  expect(materialInstallBlocked({ overrides: { radiusRem: 1 } }, old)).toBe(false)
+  expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, old)).toBe(true)
+  expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, next)).toBe(false)
+})

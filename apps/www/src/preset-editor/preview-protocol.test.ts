@@ -190,3 +190,34 @@ it('requires exact handshake and acknowledgement shapes', () => {
     }),
   ).toBe(false)
 })
+it('accepts a glass preview backdrop with or without a scene and rejects unknown ones', async () => {
+  for (const backdrop of ['kit', 'prism', 'grid', 'night', 'peach']) {
+    const view = { ...message(), view: { mode: 'light', viewport: 'wide', backdrop } }
+    expect(await verifyPresetRender(view, 0, manifest)).toEqual(view)
+    const scened = { ...message(), view: { mode: 'dark', viewport: 'wide', scene: 'settings', backdrop } }
+    expect(await verifyPresetRender(scened, 0, manifest)).toEqual(scened)
+  }
+  for (const backdrop of ['beach', '', 1, null, '__proto__'])
+    expect(
+      await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', backdrop } }, 0, manifest),
+    ).toBeNull()
+})
+it('the editor sends the glass backdrop with the view it renders', async () => {
+  const { sentPresetView } = await import('./preview-protocol')
+  expect(sentPresetView({ mode: 'light', viewport: 'wide', backdrop: 'peach' })).toEqual({ mode: 'light', viewport: 'wide', backdrop: 'peach' })
+  expect(sentPresetView({ mode: 'dark', viewport: 'wide', scene: 'dashboard', backdrop: 'night' })).toEqual({
+    mode: 'dark',
+    viewport: 'wide',
+    scene: 'dashboard',
+    backdrop: 'night',
+  })
+  // Unset focus and the default scene stay out, as the sandbox accepts only exact view shapes.
+  expect(sentPresetView({ mode: 'light', viewport: 'wide', scene: 'gallery' })).toEqual({ mode: 'light', viewport: 'wide' })
+  for (const view of [
+    { mode: 'light', viewport: 'wide', backdrop: 'grid' },
+    { mode: 'light', viewport: 'wide', focus: 'button', backdrop: 'prism' },
+  ] as const) {
+    const sent = { ...message(), view: sentPresetView(view) }
+    expect(await verifyPresetRender(sent, 0, manifest)).toEqual(sent)
+  }
+})

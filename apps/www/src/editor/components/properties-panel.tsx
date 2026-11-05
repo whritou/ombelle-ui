@@ -10,7 +10,7 @@ import type { CompileDiagnostic } from '../compile-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { RECIPE_COLOR_PATTERN, recipeColor, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
-import { designControlLabel, glassControlHints } from '../../preset-editor/model'
+import { designControlLabel, glassControlHints, glassDesignControls } from '../../preset-editor/model'
 
 type Props = {
   recipe: Recipe
@@ -22,8 +22,15 @@ type Props = {
 }
 
 type OverrideKey = 'radiusRem' | 'borderWidthPx' | 'minHeightPx' | 'shadowOffsetXPx' | 'shadowOffsetYPx' |
-  'paddingXPx' | 'paddingYPx' | 'gapPx' | 'fontWeight' | 'fontSizePx' | 'letterSpacingEm'
-type Slider = { key: OverrideKey; label: string; min: number; max: number; step: number; unit: string }
+  'paddingXPx' | 'paddingYPx' | 'gapPx' | 'fontWeight' | 'fontSizePx' | 'letterSpacingEm' | GlassOverrideKey
+type Slider = { key: OverrideKey; label: string; min: number; max: number; step: number; unit: string; hint?: string }
+type GlassOverrideKey = (typeof glassOverrideKeys)[number]
+// The glass material a Button may override, in the preset editor's order and with its labels, ranges and hints.
+const glassOverrideKeys = ['glassOpacity', 'glassBlurPx', 'glassBackdropContrast', 'glassSheen', 'glassRim', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion'] as const
+const glassSliders: readonly Slider[] = glassOverrideKeys.map((key) => {
+  const { label, min, max, step, unit, hint } = glassDesignControls[key]
+  return { key, label, min, max, step, unit: unit.trim(), hint }
+})
 const spacingSliders: readonly Slider[] = [
   { key: 'paddingXPx', label: 'Horizontal padding', min: 0, max: 48, step: 1, unit: 'px' },
   { key: 'paddingYPx', label: 'Vertical padding', min: 0, max: 24, step: 1, unit: 'px' },
@@ -265,10 +272,10 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
     onChange({ ...recipe, overrides }, `overrides.${key}`)
   }
   const glass = family === 'liquid-glass'
-  const slider = ({ key, label: plain, min, max, step, unit }: Slider) => {
+  const slider = ({ key, label: plain, min, max, step, unit, hint: materialHint }: Slider) => {
     const id = `button-${key}`, path = `/overrides/${key}`
     const label = key === 'borderWidthPx' ? designControlLabel(key, family) : plain
-    const hint = glass && key === 'borderWidthPx' ? glassControlHints.borderWidthPx : null
+    const hint = !glass ? null : key === 'borderWidthPx' ? glassControlHints.borderWidthPx : (materialHint ?? null)
     const error = diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined
     return (
       <div key={key}>
@@ -408,6 +415,12 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
         {glass && <p id="button-shadow-hint" className="colorHint">{glassControlHints.shadowOffsetXPx}</p>}
         {shadows.map(({ key }) => <FieldError key={key} diagnostic={diagnostic} path={`/overrides/${key}`} />)}
       </InspectorSection>
+      {glass && (
+        <InspectorSection id="inspector-glass-material" title="Glass material" meta="This Button">
+          <p className="colorHint">Empty values follow the preset. Opacity and contrast are held to the same text contrast bound.</p>
+          {glassSliders.map(slider)}
+        </InspectorSection>
+      )}
     </div>
   )
 }

@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Download, ShieldCheck } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
 import {
+  applyGlassTint,
+  applyStartingPreset,
   createPresetDraft,
   presetGlassReport,
   setPresetEdit,
@@ -51,6 +53,15 @@ import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { PresetGetCode } from '../../snapshots/components/preset-get-code'
 import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
+import { GlassStartingPoints, previewBackdropFor } from './glass-starting-points'
+
+const backdropOptions: { value: PresetBackdrop; label: string }[] = [
+  { value: 'kit', label: 'Kit' },
+  { value: 'prism', label: 'Prisme' },
+  { value: 'grid', label: 'Trame' },
+  { value: 'night', label: 'Nuit' },
+  { value: 'peach', label: 'Pêche' },
+]
 import {
   EditorTopBar,
   InspectorSection,
@@ -61,7 +72,7 @@ import {
   useDrawerState,
 } from '../../editor-shell'
 import { PresetChecks, presetWarningCount } from './preset-checks'
-import { presetScenes, type PresetScene } from '../preview-protocol'
+import { presetScenes, type PresetBackdrop, type PresetScene } from '../preview-protocol'
 import { sceneComponents, sceneOptions } from '../preview-scenes'
 import styles from './preset-editor.module.css'
 import { useSiteDark } from '../../site/theme'
@@ -87,7 +98,8 @@ export default function PresetEditor() {
   const [restoreWarning, setRestoreWarning] = useState<string | null>(null)
   const [mode, setMode] = useState<'light' | 'dark'>('light'),
     [viewport, setViewport] = useState<'wide' | 'narrow'>('wide'),
-    [scene, setScene] = useState<PresetScene>('dashboard')
+    [scene, setScene] = useState<PresetScene>('dashboard'),
+    [backdrop, setBackdrop] = useState<PresetBackdrop>('kit')
   // ?page= opens a preview page directly, including the component gallery,
   // which the page picker no longer offers.
   useEffect(() => {
@@ -375,6 +387,18 @@ export default function PresetEditor() {
           <InspectorSection id="inspector-family" title="Style family">
             <FamilyPicker value={draft.family} onChange={family} />
           </InspectorSection>
+          {glass && (
+            <InspectorSection id="inspector-glass" title="Glass material" meta="Starting preset and tint">
+              <GlassStartingPoints
+                draft={draft}
+                onPick={(id) => {
+                  commit(applyStartingPreset(draft, id), 'glass:preset')
+                  setBackdrop((current) => previewBackdropFor(id, current))
+                }}
+                onTint={(tint) => commit(applyGlassTint(draft, tint), 'glass:tint')}
+              />
+            </InspectorSection>
+          )}
           <InspectorSection
             id="inspector-colors"
             title="Colors"
@@ -419,6 +443,14 @@ export default function PresetEditor() {
                 options={sceneOptions}
                 onChange={setScene}
               />
+              {glass && (
+                <SegmentedControl<PresetBackdrop>
+                  label="Preview backdrop"
+                  value={backdrop}
+                  options={backdropOptions}
+                  onChange={setBackdrop}
+                />
+              )}
               <SegmentedControl<typeof viewport>
                 label="Preview width"
                 value={viewport}
@@ -435,7 +467,12 @@ export default function PresetEditor() {
             </div>
             <PresetPreviewFrame
               result={compiled.result}
-              view={scene === 'gallery' ? { mode, viewport } : { mode, viewport, scene }}
+              view={{
+                mode,
+                viewport,
+                ...(scene === 'gallery' ? {} : { scene }),
+                ...(glass && backdrop !== 'kit' ? { backdrop } : {}),
+              }}
               stale={compiled.stale}
               onStatus={setPreviewStatus}
             />

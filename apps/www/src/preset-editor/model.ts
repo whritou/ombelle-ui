@@ -1,4 +1,4 @@
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler'
 import {
   FoundationError,
@@ -44,16 +44,25 @@ export const designControls = {
   motion: { label: 'Motion', options: ['full', 'reduced'] },
 } as const
 // Liquid glass only: these render, validate and materialize for glass drafts.
+// In the material lab's order, then the two backdrop filters the lab does not use.
 export const glassDesignControls = {
   transparency: { label: 'Transparency', options: ['auto', 'reduced'] },
-  glassBlurPx: { label: 'Glass blur', min: 0, max: 40, step: 1, unit: ' px' },
-  glassOpacity: { label: 'Glass opacity', min: 0.25, max: 1, step: 0.01, unit: '' },
-  glassSaturation: { label: 'Glass saturation', min: 1, max: 2, step: 0.05, unit: '' },
-  glassBackdropContrast: { label: 'Backdrop contrast', min: 0.3, max: 1, step: 0.01, unit: '' },
-  glassBackdropTone: { label: 'Backdrop tone', min: 0, max: 0.6, step: 0.01, unit: '' },
-  glassSheen: { label: 'Specular sheen', min: 0, max: 0.5, step: 0.01, unit: '' },
-  glassRim: { label: 'Rim light', min: 0, max: 1, step: 0.01, unit: '' },
+  glassOpacity: { label: 'Glass opacity', min: 0.25, max: 1, step: 0.01, unit: '', hint: 'How much of the veil colour covers the backdrop.' },
+  glassBlurPx: { label: 'Glass blur', min: 0, max: 40, step: 1, unit: ' px', hint: 'Backdrop blur; low values keep the refraction visible.' },
+  glassBackdropContrast: { label: 'Backdrop contrast', min: 0.3, max: 1.6, step: 0.01, unit: '', hint: 'Below 1 softens the backdrop; above 1 deepens it and adds a drop shadow.' },
+  glassSheen: { label: 'Shine', min: 0, max: 1, step: 0.01, unit: '', hint: 'The white specular light across each surface.' },
+  glassRefraction: { label: 'Refraction', min: 0, max: 1, step: 0.01, unit: '', hint: 'How far the backdrop bends along the rim. Chromium only.' },
+  glassRefractionWidth: { label: 'Refraction width', min: 0, max: 0.3, step: 0.01, unit: '', hint: 'How much of the surface the rim refraction reaches. Chromium only.' },
+  glassRim: { label: 'Rim light', min: 0, max: 1, step: 0.01, unit: '', hint: 'The edge line and top highlight.' },
+  glassHalo: { label: 'Pointer halo', min: 0, max: 1, step: 0.01, unit: '', hint: 'Rim light near the pointer; needs LiquidGlassFilter.' },
+  glassDepth: { label: 'Relief', min: 0, max: 1, step: 0.01, unit: '', hint: 'Bevel along the rim and a layered drop shadow.' },
+  glassMotion: { label: 'Motion', min: 0, max: 1, step: 0.01, unit: '', hint: 'How far the shine follows the pointer and a Card lifts on hover.' },
+  glassDispersion: { label: 'Dispersion', min: 0, max: 1, step: 0.01, unit: '', hint: 'Pink, amber and cyan fringe along the rim.' },
+  glassSaturation: { label: 'Glass saturation', min: 1, max: 2, step: 0.05, unit: '', hint: 'Keeps the colour of what is behind the glass.' },
+  glassBackdropTone: { label: 'Backdrop tone', min: 0, max: 0.6, step: 0.01, unit: '', hint: 'Pushes the backdrop toward the mode: lighter in light mode, darker in dark.' },
 } as const
+/** Material settings a preset may leave out; they read as 0, which draws nothing. */
+const optionalGlassFields: readonly string[] = ['glassRefraction', 'glassRefractionWidth', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion']
 /**
  * Liquid glass repurposes the shadow offsets, border width and border colour as its
  * drop-shadow offsets and edge. Values are shared across families; only labels change.
@@ -175,15 +184,78 @@ export function presetFieldValue(
   path: PresetEditablePath,
 ): string {
   if (Object.hasOwn(draft.edits, path)) return draft.edits[path]!
-  const base = getCatalog('0.1.0').presets[draft.family]
+  return fieldValueOf(getCatalog('0.1.0').presets[draft.family], path)
+}
+
+/** A preset's value for an editable path, as the editor stores it. */
+function fieldValueOf(preset: Preset, path: PresetEditablePath): string {
   const [, group, key, token] = path.split('/')
-  return String(
-    group === 'design'
-      ? base.design[key as keyof Preset['design']]
-      : base.modes[key as 'light' | 'dark'][
-          token as (typeof colorKeys)[number]
-        ],
+  if (group === 'design') {
+    const value = preset.design[key as keyof Preset['design']]
+    return String(value === undefined && optionalGlassFields.includes(key!) ? 0 : value)
+  }
+  return String(preset.modes[key as 'light' | 'dark'][token as (typeof colorKeys)[number]])
+}
+
+/** Replaces every value with the starting preset's; the family base clears the edits. */
+export function applyStartingPreset(input: PresetEditorDraft, id: StartingPresetId): PresetEditorDraft {
+  const draft = validateDraftEnvelope(input)
+  const catalog = getCatalog('0.1.0')
+  const base = catalog.presets['liquid-glass']
+  const preset = catalog.startingPresets[id]
+  const edits: PresetEditorDraft['edits'] = {}
+  for (const path of editablePathsFor('liquid-glass')) {
+    const value = fieldValueOf(preset, path)
+    if (value !== fieldValueOf(base, path)) edits[path] = value
+  }
+  return validateDraftEnvelope({ ...draft, family: 'liquid-glass', edits })
+}
+
+/** The starting preset a glass draft still equals, or null once any value differs. */
+export function matchingStartingPreset(draft: PresetEditorDraft): StartingPresetId | null {
+  if (draft.family !== 'liquid-glass') return null
+  const catalog = getCatalog('0.1.0')
+  const paths = editablePathsFor('liquid-glass')
+  return (
+    startingPresetOrder.find((id) =>
+      paths.every((path) => presetFieldValue(draft, path) === fieldValueOf(catalog.startingPresets[id], path)),
+    ) ?? null
   )
+}
+
+/** Writes a tint's veil, ink and accent into both modes. White restores the family base colours. */
+export function applyGlassTint(input: PresetEditorDraft, tint: GlassTintId | 'white'): PresetEditorDraft {
+  const draft = validateDraftEnvelope(input)
+  const base = getCatalog('0.1.0').presets['liquid-glass']
+  const edits = { ...draft.edits }
+  const set = (mode: 'light' | 'dark', key: (typeof colorKeys)[number], value: string | undefined) => {
+    const path = `/modes/${mode}/${key}` as PresetEditablePath
+    if (value === undefined || value === base.modes[mode][key]) delete edits[path]
+    else edits[path] = value
+  }
+  const tintKeys = ['card', 'popover', 'cardForeground', 'popoverForeground', 'foreground', 'primary', 'ring', 'primaryForeground', 'destructive'] as const
+  if (tint === 'white') {
+    for (const mode of ['light', 'dark'] as const) for (const key of colorKeys) set(mode, key, base.modes[mode][key])
+    return validateDraftEnvelope({ ...draft, edits })
+  }
+  // Rosee on a Relief draft takes Relief's warmer veil.
+  const warm = tint === 'rose' && presetFieldValue(draft, '/modes/light/card') === glassTintPalettes.relief.light.card
+  const palette = glassTintPalettes[warm ? 'relief' : tint]
+  for (const mode of ['light', 'dark'] as const) {
+    if (mode === 'light' && palette.lightUsesDarkPalette)
+      for (const key of colorKeys) set('light', key, presetFieldValue({ ...draft, edits }, `/modes/dark/${key}` as PresetEditablePath))
+    else if (mode === 'light' && presetFieldValue({ ...draft, edits }, '/modes/light/background') === presetFieldValue({ ...draft, edits }, '/modes/dark/background'))
+      // Leaving Fumee: light mode returns to the light palette.
+      for (const key of colorKeys) set('light', key, base.modes.light[key])
+    for (const key of tintKeys) {
+      const value = (palette[mode] as Record<string, string | undefined>)[key]
+      if (value !== undefined) set(mode, key, value)
+      // Fumée's light mode keeps the dark palette's error colour it just copied.
+      else if (key === 'destructive' && !(mode === 'light' && palette.lightUsesDarkPalette))
+        set(mode, key, base.modes[mode].destructive)
+    }
+  }
+  return validateDraftEnvelope({ ...draft, edits })
 }
 
 export function materializePreset(input: PresetEditorDraft): Preset {
@@ -284,7 +356,12 @@ export function planPresetFamilyChange(
       allowed.includes(path as PresetEditablePath),
     ),
   )
-  const draft = validateDraftEnvelope({ ...before, family, edits })
+  let draft = validateDraftEnvelope({ ...before, family, edits })
+  // Glass starts from Cristal, the default starting point; the user's own edits win.
+  if (family === 'liquid-glass' && before.family !== 'liquid-glass') {
+    const cristal = applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-cristal')
+    draft = validateDraftEnvelope({ ...draft, edits: { ...cristal.edits, ...edits } })
+  }
   const shared = editablePathsFor(before.family).filter((path) =>
     allowed.includes(path),
   )

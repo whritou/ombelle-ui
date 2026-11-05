@@ -6,6 +6,28 @@ export const publishedInstaller = { packageName: publicCliPackageName, version: 
 /** First published installer that accepts `ombelle` presets and codes. */
 export const ombelleMinimumCli = '0.4.0'
 
+/** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
+export const glassMaterialMinimumCli = '0.5.0'
+const materialFields = ['glassRefraction', 'glassRefractionWidth', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion']
+
+/**
+ * True when a preset design or recipe overrides use what the published installer rejects: a material field
+ * (even at 0), sheen above 0.5 or backdrop contrast above 1 (the 0.4.x ranges), or any glass* recipe override.
+ * The site then shows no command, so every command it shows works.
+ */
+export function materialInstallBlocked(
+  input: { design?: Record<string, unknown>; overrides?: Record<string, unknown> },
+  installer: { version: string } = publishedInstaller,
+): boolean {
+  if (compareVersions(installer.version, glassMaterialMinimumCli) >= 0) return false
+  const d = input.design ?? {}
+  const preset =
+    materialFields.some((key) => d[key] !== undefined) ||
+    (typeof d.glassSheen === 'number' && d.glassSheen > 0.5) ||
+    (typeof d.glassBackdropContrast === 'number' && d.glassBackdropContrast > 1)
+  return preset || Object.keys(input.overrides ?? {}).some((key) => key.startsWith('glass'))
+}
+
 /** Compares two x.y.z versions numerically: negative, zero or positive. */
 export function compareVersions(a: string, b: string): number {
   const parse = (version: string) => {

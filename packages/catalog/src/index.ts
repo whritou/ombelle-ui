@@ -10,6 +10,7 @@ import {
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
 export { resolveRecipePreset } from './recipe-preset.js'
+export { glassTintPalettes, type GlassTintId, type GlassTintPalette } from './glass-tints.js'
 export { glassControlSlots, glassHaloSelector, glassHostedSlots, glassMarkSlots, glassSurfaceSlots } from './glass-recipes.js'
 /** The pinned icon package that recipe Buttons with an icon depend on. */
 export const recipeIconDependency = {

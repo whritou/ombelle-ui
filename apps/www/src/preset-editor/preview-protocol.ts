@@ -9,6 +9,9 @@ import {
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 export const presetScenes = ['gallery', 'dashboard', 'settings', 'sign-in'] as const
 export type PresetScene = (typeof presetScenes)[number]
+/** Liquid glass preview backdrops: the design kit's, then the material lab's four. Preview only, never saved. */
+export const presetBackdrops = ['kit', 'prism', 'grid', 'night', 'peach'] as const
+export type PresetBackdrop = (typeof presetBackdrops)[number]
 /**
  * `focus` shows only that component's section of the gallery. `scene` picks a
  * page built from catalog components; a missing scene means 'gallery'. The two
@@ -19,6 +22,7 @@ export type PresetView = {
   viewport: 'wide' | 'narrow'
   focus?: ComponentId
   scene?: PresetScene
+  backdrop?: PresetBackdrop
 }
 export type PresetRender = {
   type: 'preset-render'
@@ -45,6 +49,16 @@ const positiveId = (value: unknown): value is number =>
   typeof value === 'number' && Number.isSafeInteger(value) && value > 0
 const hash = (value: unknown): value is string =>
   typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
+/** The view as sent: unset focus and the default scene are omitted, since the sandbox accepts only exact view shapes. */
+export function sentPresetView({ mode, viewport, focus, scene, backdrop }: PresetView): PresetView {
+  const shape: PresetView = focus
+    ? { mode, viewport, focus }
+    : scene && scene !== 'gallery'
+      ? { mode, viewport, scene }
+      : { mode, viewport }
+  return backdrop ? { ...shape, backdrop } : shape
+}
+
 export function isPresetHandshake(
   input: unknown,
   type: 'ready' | 'init',
@@ -80,12 +94,15 @@ export async function verifyPresetRender(
       !positiveId(input.requestId) ||
       input.requestId <= previousRequestId ||
       !record(input.view) ||
-      !(
-        exact(input.view, ['mode', 'viewport']) ||
-        (exact(input.view, ['mode', 'viewport', 'focus']) &&
-          (supportedComponentIds as readonly unknown[]).includes(input.view.focus)) ||
-        (exact(input.view, ['mode', 'viewport', 'scene']) &&
-          (presetScenes as readonly unknown[]).includes(input.view.scene))
+      (Object.hasOwn(input.view, 'backdrop') &&
+        !(presetBackdrops as readonly unknown[]).includes(input.view.backdrop)) ||
+      !((view) =>
+        exact(view, ['mode', 'viewport']) ||
+        (exact(view, ['mode', 'viewport', 'focus']) &&
+          (supportedComponentIds as readonly unknown[]).includes(view.focus)) ||
+        (exact(view, ['mode', 'viewport', 'scene']) &&
+          (presetScenes as readonly unknown[]).includes(view.scene)))(
+        Object.fromEntries(Object.entries(input.view).filter(([key]) => key !== 'backdrop')),
       ) ||
       !['light', 'dark'].includes(input.view.mode as string) ||
       !['wide', 'narrow'].includes(input.view.viewport as string)

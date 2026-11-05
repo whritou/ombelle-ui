@@ -82,7 +82,13 @@ it('renders the glass material controls only for glass drafts', () => {
     'Glass saturation',
     'Backdrop contrast',
     'Backdrop tone',
-    'Specular sheen',
+    'Shine',
+    'Refraction',
+    'Refraction width',
+    'Pointer halo',
+    'Relief',
+    'Motion',
+    'Dispersion',
     'Rim light',
   ])
     expect(glass).toContain(`>${label}</label>`)

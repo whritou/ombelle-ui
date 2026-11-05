@@ -4,6 +4,7 @@ import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../ww
 import { forcedStateSelector } from '../../www/src/editor/forced-states'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
+import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
 import './editor-preview.css'
 
 /**
@@ -93,6 +94,7 @@ function EditorPreview() {
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
     <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>
+    {family === 'liquid-glass' && <LiquidGlassFilter />}
     {/* Button always sets data-slot="button" on itself, but the recipe CSS targets
         data-slot="recipe-button", as the installed RecipeButton renders it. As a Slot
         parent it only lends variant classes and data attributes; the child's own

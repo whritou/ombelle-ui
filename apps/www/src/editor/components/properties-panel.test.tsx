@@ -134,3 +134,19 @@ it('Button editor describes the glass edge colour fields with their hint', () =>
   const flat = render('flat')
   expect(flat).not.toContain('color-role-border-hint')
 })
+
+it('the Button editor shows material sliders for glass recipes only', () => {
+  const render = (family: 'flat' | 'liquid-glass', value = recipe) =>
+    renderToStaticMarkup(<PropertiesPanel recipe={value} family={family} onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
+  const flat = render('flat')
+  expect(flat).not.toContain('id="inspector-glass-material"')
+  expect(flat).not.toContain('button-glassHalo')
+  const glass = render('liquid-glass')
+  expect(glass).toContain('id="inspector-glass-material"')
+  for (const key of ['glassOpacity', 'glassBlurPx', 'glassBackdropContrast', 'glassSheen', 'glassRim', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion'])
+    expect(glass).toContain(`id="button-${key}"`)
+  expect(glass).toContain('Pointer halo')
+  // An override shows its value and a reset; the rest follow the preset.
+  const edited = render('liquid-glass', withRecipeOverride(recipe, 'glassHalo', 0.9))
+  expect(edited).toMatch(/id="button-glassHalo-number"[^>]*value="0.9"/)
+})

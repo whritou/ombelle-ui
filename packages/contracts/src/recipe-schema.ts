@@ -201,6 +201,52 @@ export const recipeSchema = {
         "uppercase": {
           "type": "boolean"
         },
+        "glassOpacity": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 1,
+          "description": "Liquid glass only, like every glass* override: replaces the preset's value on this Button and is held to the same contrast bound. Ignored by other style families."
+        },
+        "glassBlurPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 40
+        },
+        "glassBackdropContrast": {
+          "type": "number",
+          "minimum": 0.3,
+          "maximum": 1.6
+        },
+        "glassSheen": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassRim": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassHalo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassDepth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassMotion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassDispersion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "colors": {
           "type": "object",
           "additionalProperties": false,

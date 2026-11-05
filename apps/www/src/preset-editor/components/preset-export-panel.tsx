@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
-import { installerRunner, publishedInstaller } from '../../snapshots/install-command'
+import { glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller } from '../../snapshots/install-command'
 import {
   canExportPreset,
   serializePresetExport,
@@ -157,11 +157,20 @@ export function PresetExportPanel({
         Replace <code>APP</code> with your target project directory. The CLI
         uses its existing package manager.
       </p>
-      <pre data-testid="preset-install-command">
-        {installerRunner(publishedInstaller)}{' '}
-        {install === 'new' ? 'init --preset' : 'theme add'}{' '}
-        ./project-preset.json --cwd APP --dry-run --json
-      </pre>
+      {materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
+        <p data-testid="preset-install-held">
+          This preset uses liquid glass material settings, which need{' '}
+          {publishedInstaller.packageName} {glassMaterialMinimumCli}. That release
+          is not published yet: download the preset now, and the command appears
+          here once it is.
+        </p>
+      ) : (
+        <pre data-testid="preset-install-command">
+          {installerRunner(publishedInstaller)}{' '}
+          {install === 'new' ? 'init --preset' : 'theme add'}{' '}
+          ./project-preset.json --cwd APP --dry-run --json
+        </pre>
+      )}
       <p>
         Review the plan, then replace <code>--dry-run --json</code> with{' '}
         <code>--yes</code> to apply. A theme merge preserves existing component
