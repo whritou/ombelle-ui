@@ -137,4 +137,8 @@ it('compiles Native Select in liquid glass with its reduced-transparency and for
   expect(flat).toContain(field + '{background:Field')
   expect(forcedBlock(css)).toContain('color:FieldText')
   expect(block('[data-slot="native-select-icon"]')).toContain('color:var(--muted-foreground)')
+  // The browser draws the option list opaque; without a colour it shows the translucent field or the light default in
+  // dark mode, so options and groups paint the opaque popover.
+  for (const part of ['option', 'optgroup'])
+    expect(block(field + part)).toBe('background-color:var(--popover);color:var(--popover-foreground);')
 })

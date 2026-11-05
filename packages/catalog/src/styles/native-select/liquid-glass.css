@@ -62,6 +62,15 @@ select[multiple] + [data-slot='native-select-icon'] {
   border-style: dashed;
   cursor: not-allowed;
 }
+/* The browser draws the option list opaque: paint it the opaque popover so dark mode does not get a light list. */
+[data-slot='native-select'] option {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
+[data-slot='native-select'] optgroup {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot='native-select'] {
     background:
