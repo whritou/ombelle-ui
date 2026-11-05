@@ -1,0 +1,39 @@
+/* flat Skeleton */
+[data-slot='skeleton'] {
+  display: block;
+  inline-size: 100%;
+  block-size: 0.75rem;
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--muted);
+  animation: ombelle-skeleton-pulse calc(var(--motion-duration) * 10) ease-in-out infinite alternate;
+}
+[data-slot='skeleton'][data-shape='circle'] {
+  flex-shrink: 0;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: 50%;
+}
+[data-slot='skeleton'][data-shape='block'] {
+  block-size: 6rem;
+  border-radius: calc(var(--radius) + 2px);
+}
+@keyframes ombelle-skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='skeleton'] {
+    background: Canvas;
+    border: 1px solid GrayText;
+    forced-color-adjust: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='skeleton'] {
+    animation: none;
+  }
+}

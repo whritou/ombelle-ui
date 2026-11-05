@@ -45,12 +45,15 @@ export function expectComponentContract(
     expect(css).not.toMatch(/margin-(?:left|right)|padding-(?:left|right)/)
   }
   // Radix Presence keeps a closing overlay mounted while it carries an
-  // animation it did not see start, so enter animations run only while open.
+  // animation it did not see start, so enter animations on mounted content
+  // (any *-content slot) run only while open. Looping indicators such as a
+  // skeleton pulse are not managed by Presence and are exempt.
   for (const css of Object.values(template.styles ?? {}))
     for (const [, selector, body] of css!.matchAll(/([^{}]+)\{([^{}]*)\}/g))
       if (/(?:^|;|\s)animation:\s*(?!none)/.test(body!))
         for (const part of selector!.split(','))
-          expect(part, `${id} animation outside the open state`).toContain("[data-state='open']")
+          if (/-content'\]/.test(part))
+            expect(part, `${id} animation outside the open state`).toContain("[data-state='open']")
   expect(styleSupport(id, 'liquid-glass')).toBe(expected.glass)
   if (expected.glass === 'experimental')
     expect(template.styles?.['liquid-glass']).toContain(

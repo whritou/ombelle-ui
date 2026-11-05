@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../generated/preset-gallery/components/ui/select'
+import { Skeleton } from '../generated/preset-gallery/components/ui/skeleton'
 import { Switch } from '../generated/preset-gallery/components/ui/switch'
 import {
   Tabs,
@@ -211,6 +212,14 @@ export function SettingsScene(props: SceneProps) {
             Invite people from the members page.
             {show('separator', 'Separator', <Separator />)}
             Members you remove keep access until the end of the day.
+            {show(
+              'skeleton',
+              'Skeleton',
+              <div className="scene-stack" aria-busy="true" aria-label="Loading members">
+                <Skeleton style={{ inlineSize: '60%' }} />
+                <Skeleton style={{ inlineSize: '40%' }} />
+              </div>,
+            )}
           </div>
         </TabsContent>
         <TabsContent value="billing">Your plan renews on the first of the month.</TabsContent>

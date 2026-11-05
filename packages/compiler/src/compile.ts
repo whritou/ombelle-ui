@@ -56,6 +56,10 @@ usageExamples.avatar = `import { Avatar, AvatarImage, AvatarFallback, AvatarStat
 export function Example(){return <><Avatar size="lg" variant="primary" role="img" aria-label="Ada Lovelace, online"><AvatarImage src="/ada.png" alt="" /><AvatarFallback>AL</AvatarFallback><AvatarStatus /></Avatar><AvatarGroup aria-label="Reviewers"><Avatar role="img" aria-label="Grace Hopper"><AvatarFallback>GH</AvatarFallback></Avatar><Avatar variant="secondary" role="img" aria-label="3 more reviewers"><AvatarFallback>+3</AvatarFallback></Avatar></AvatarGroup></>}`
 usageExamples.separator = `import { Separator } from '@/components/ui/separator'
 export function Example(){return <><Separator>or</Separator><nav aria-label="Footer"><a href="/docs">Docs</a><Separator orientation="vertical" /><a href="/changelog">Changelog</a></nav></>}`
+usageExamples.progress = `import { Progress } from '@/components/ui/progress'
+export function Example(){return <><p id="install-label">Installing components</p><Progress value={64} aria-labelledby="install-label" /><Progress aria-label="Checking contrast" /></>}`
+usageExamples.skeleton = `import { Skeleton } from '@/components/ui/skeleton'
+export function Example(){return <div aria-busy="true" aria-label="Loading project"><Skeleton shape="circle" /><Skeleton style={{ inlineSize: '60%' }} /><Skeleton /></div>}`
 const defaultUsage =
   'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
 export async function compile(input: {

@@ -51,6 +51,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   popover: ['@radix-ui/react-popover'],
   avatar: ['@radix-ui/react-avatar'],
   separator: ['@radix-ui/react-separator'],
+  progress: ['@radix-ui/react-progress'],
 }
 const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   checkbox: ['checkbox', 'checkbox-indicator'],
@@ -138,6 +139,7 @@ const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'avatar-group',
   ],
   separator: ['separator', 'separator-label'],
+  progress: ['progress', 'progress-indicator'],
 }
 export function getCatalog(release: string): Catalog {
   if (release !== '0.1.0')
