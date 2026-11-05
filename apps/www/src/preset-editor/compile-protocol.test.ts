@@ -4,7 +4,7 @@ import { supportedComponentIds } from '@ombelle/contracts'
 import { createPresetDraft, materializePreset, setPresetEdit } from './model'
 import { handlePresetCompileMessage } from './compile-protocol'
 
-it('compiles the exact twelve-component edited preset', async () => {
+it('compiles the exact full-catalog edited preset', async () => {
   let draft = setPresetEdit(
     createPresetDraft('minimalist'),
     '/modes/light/primary',

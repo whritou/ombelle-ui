@@ -1,0 +1,38 @@
+import * as React from 'react'
+import { cn } from './utils.js'
+import './alert.css'
+
+export type AlertProps = React.ComponentProps<'div'> & {
+  variant?: 'default' | 'destructive'
+}
+
+/**
+ * A default Alert is a polite status message; a destructive Alert is
+ * announced immediately. Pass role to override.
+ */
+export function Alert({ className, variant = 'default', ...props }: AlertProps) {
+  return (
+    <div
+      role={variant === 'destructive' ? 'alert' : 'status'}
+      {...props}
+      data-slot="alert"
+      data-variant={variant}
+      className={cn(className)}
+    />
+  )
+}
+
+export function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div {...props} data-slot="alert-title" className={cn(className)} />
+  )
+}
+
+export function AlertDescription({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
+  return (
+    <div {...props} data-slot="alert-description" className={cn(className)} />
+  )
+}

@@ -1,4 +1,5 @@
 import { supportedComponentIds, type ComponentId } from '@ombelle/contracts'
+import { compareVersions, publishedInstaller } from '../../snapshots/install-command'
 
 export type ComponentDoc = {
   id: ComponentId
@@ -10,6 +11,8 @@ export type ComponentDoc = {
   basis: string
   client: boolean
   usage: string
+  /** First published installer that can add this component; listed only from then on. */
+  minimumCli?: string
 }
 
 // Usage mirrors docs/components/*.md where a page exists; API and states follow
@@ -267,10 +270,111 @@ export function ProjectHelp() {
   )
 }`,
   },
+  select: {
+    name: 'Select',
+    description: 'A custom listbox for choosing one value, with typeahead and keyboard navigation.',
+    api: 'Select, SelectTrigger (size), SelectValue, SelectContent (position), SelectGroup, SelectLabel, SelectItem (hint), SelectSeparator',
+    states: 'Open, highlighted, selected, disabled, invalid, focus',
+    basis: 'Reviewed Radix select primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/select'
+
+export function RolePicker() {
+  return (
+    <Select defaultValue="designer">
+      <SelectTrigger aria-label="Role"><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="designer">Designer</SelectItem>
+        <SelectItem value="engineer">Engineer</SelectItem>
+        <SelectItem value="researcher" disabled hint="Seat limit">Researcher</SelectItem>
+      </SelectContent>
+    </Select>
+  )
+}`,
+  },
+  'radio-group': {
+    name: 'Radio Group',
+    description: 'Picks one option from a set, as plain radios or selectable option rows.',
+    api: 'RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionLabel, RadioGroupOptionDescription',
+    states: 'Checked, unchecked, disabled, invalid, focus',
+    basis: 'Reviewed Radix radio group primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import {
+  RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionLabel,
+} from '@/components/ui/radio-group'
+
+export function PlanPicker() {
+  return (
+    <RadioGroup defaultValue="team" aria-label="Plan">
+      <RadioGroupOption>
+        <RadioGroupItem value="starter" />
+        <RadioGroupOptionLabel>Starter</RadioGroupOptionLabel>
+      </RadioGroupOption>
+      <RadioGroupOption>
+        <RadioGroupItem value="team" />
+        <RadioGroupOptionLabel>Team</RadioGroupOptionLabel>
+      </RadioGroupOption>
+    </RadioGroup>
+  )
+}`,
+  },
+  'dropdown-menu': {
+    name: 'Dropdown Menu',
+    description: 'A menu of actions opened from a trigger, with submenus, checkbox and radio items.',
+    api: 'DropdownMenu, Trigger, Content, Label, Item (variant, inset), CheckboxItem, RadioGroup, RadioItem, Separator, Shortcut, Sub, SubTrigger, SubContent',
+    states: 'Open, highlighted, checked, disabled, destructive, focus',
+    basis: 'Reviewed Radix dropdown menu primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+
+export function ProjectActions() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Actions</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>Rename</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive">Archive</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}`,
+  },
+  alert: {
+    name: 'Alert',
+    description: 'A status or error message with an optional icon, title and description.',
+    api: 'variant (default, destructive), AlertTitle, AlertDescription',
+    states: 'Default (role status), destructive (role alert)',
+    basis: '<div> with a live-region role',
+    client: false,
+    minimumCli: '0.5.0',
+    usage: `import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+
+export function SaveStatus() {
+  return (
+    <Alert>
+      <AlertTitle>Preset saved</AlertTitle>
+      <AlertDescription>New components now install with this preset.</AlertDescription>
+    </Alert>
+  )
+}`,
+  },
 }
 
 export const componentDocs: ComponentDoc[] = supportedComponentIds
   .map((id) => ({ id, ...docs[id] }))
+  .filter((doc) => !doc.minimumCli || compareVersions(publishedInstaller.version, doc.minimumCli) >= 0)
   .sort((a, b) => a.name.localeCompare(b.name))
 
 export function componentDoc(id: string): ComponentDoc | undefined {

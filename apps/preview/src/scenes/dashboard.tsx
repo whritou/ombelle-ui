@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
 import { Badge } from '../generated/preset-gallery/components/ui/badge'
 import { Button } from '../generated/preset-gallery/components/ui/button'
 import {
@@ -7,6 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from '../generated/preset-gallery/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '../generated/preset-gallery/components/ui/dropdown-menu'
 import { Switch } from '../generated/preset-gallery/components/ui/switch'
 import {
   Tabs,
@@ -45,6 +55,14 @@ export function DashboardScene(props: SceneProps) {
           <Button>New project</Button>
         </div>
       </header>
+      {show(
+        'alert',
+        'Alert',
+        <Alert variant="destructive">
+          <AlertTitle>Mobile onboarding needs attention</AlertTitle>
+          <AlertDescription>Two checks failed on the latest preview build.</AlertDescription>
+        </Alert>,
+      )}
       <div className="scene-stats">
         {stats.map((stat) => (
           <Card key={stat.label}>
@@ -95,6 +113,30 @@ export function DashboardScene(props: SceneProps) {
                           <TooltipArrow />
                         </TooltipContent>
                       </Tooltip>
+                      {show(
+                        'dropdown-menu',
+                        'Dropdown Menu',
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon-sm" aria-label={`More actions for ${project.name}`}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <circle cx="5" cy="12" r="1.8" />
+                                <circle cx="12" cy="12" r="1.8" />
+                                <circle cx="19" cy="12" r="1.8" />
+                              </svg>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>{project.name}</DropdownMenuLabel>
+                            <DropdownMenuItem>
+                              Rename<DropdownMenuShortcut>F2</DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem variant="destructive">Delete project</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>,
+                      )}
                     </li>
                   ))}
                 </ul>

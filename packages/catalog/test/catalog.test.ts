@@ -540,7 +540,7 @@ describe('catalog contract', () => {
       supportedComponentIds.filter(
         (id) => c.templates[id].styles?.['liquid-glass'] !== undefined,
       ),
-    ).toEqual(['badge', 'card', 'tabs', 'tooltip'])
+    ).toEqual(['alert', 'badge', 'card', 'dropdown-menu', 'tabs', 'tooltip'])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)
         for (const family of supportedStyleFamilies)

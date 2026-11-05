@@ -58,15 +58,23 @@ it('renders the public landing page with editor links and the published installe
   expect(html).not.toContain('ombelle@alpha')
 })
 
-it('lists every catalog component and renders a docs page for each', async () => {
+it('lists every component the published installer can add and renders a docs page for each', async () => {
   const { default: ComponentsPage } = await import('../../apps/www/src/app/components/page.js')
   const { default: ComponentPage, generateStaticParams } = await import('../../apps/www/src/app/components/[id]/page.js')
   const { supportedComponentIds, styleSupport } = await import('@ombelle/contracts')
+  const { componentDocs } = await import('../../apps/www/src/site/components/catalog.js')
+  const { compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
+  // A component newer than the published installer stays off the site, so every command it shows works.
+  const listed = componentDocs.map((doc) => doc.id)
+  for (const doc of componentDocs)
+    if (doc.minimumCli) expect(compareVersions(publishedInstaller.version, doc.minimumCli)).toBeGreaterThanOrEqual(0)
+  const hidden = supportedComponentIds.filter((id) => !listed.includes(id))
   const overview = renderToStaticMarkup(createElement(ComponentsPage))
-  for (const id of supportedComponentIds) expect(overview).toContain(`href="/components/${id}"`)
-  expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...supportedComponentIds].sort())
+  for (const id of listed) expect(overview).toContain(`href="/components/${id}"`)
+  for (const id of hidden) expect(overview).not.toContain(`href="/components/${id}"`)
+  expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...listed].sort())
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
-  for (const id of supportedComponentIds) {
+  for (const id of listed) {
     const html = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))
     expect(html.match(/<h1\b/g)).toHaveLength(1)
     expect(html).toContain(`pnpm dlx ${runner} add ${id} --cwd APP --dry-run`)

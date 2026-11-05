@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add Select (Radix Select 2.4.1), Radio Group (Radix Radio Group 1.5.1), Dropdown Menu (Radix Dropdown Menu 2.2.1) and Alert to the catalog in flat, minimalist, neo-brutalism and ombelle, each with colocated component CSS, a usage example and light and dark styles. Alert and Dropdown Menu are experimental in liquid glass; Select and Radio Group are unavailable there.
+- Existing artifacts are byte-identical: the stable family hashes gain 48 entries for the new files and change none, so the style baseline declares no new intentional change.
+- Preview: the preset gallery shows the four components; the dashboard gains an alert and per-project action menus, settings gains a role Select and a digest Radio Group, and sign-in gains a status alert.
+- Website: the components pages list the new components only once the published installer can add them (`minimumCli` 0.5.0).
+
 ## 0.4.1 — 5 November 2026
 
 - Publish `@ombelle-ui/cli@0.4.1` to npm; website commands use `npx @ombelle-ui/cli@0.4.1`.
