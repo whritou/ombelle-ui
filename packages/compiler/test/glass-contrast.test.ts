@@ -6,6 +6,8 @@ import {
   glassBackdrop,
   glassContrastPairs,
   glassContrastReport,
+  glassContrastReportFor,
+  type GlassPairSpec,
   relativeLuminance,
 } from '../src/glass-contrast.js'
 
@@ -106,14 +108,21 @@ it('oklch inputs behave like hex', () => {
 
 it('pair list equals the spec table', () => {
   expect(glassContrastPairs).toEqual([
-    ['card', 'cardForeground'],
-    ['card', 'mutedForeground'],
-    ['popover', 'popoverForeground'],
-    ['popover', 'mutedForeground'],
-    ['muted', 'foreground'],
-    ['muted', 'mutedForeground'],
-    ['secondary', 'secondaryForeground'],
-    ['background', 'foreground'],
+    { surface: 'card', text: 'cardForeground' },
+    { surface: 'card', text: 'mutedForeground' },
+    { surface: 'popover', text: 'popoverForeground' },
+    { surface: 'popover', text: 'mutedForeground' },
+    { surface: 'muted', text: 'foreground' },
+    { surface: 'muted', text: 'mutedForeground' },
+    { surface: 'secondary', text: 'secondaryForeground' },
+    { surface: 'background', text: 'foreground' },
+    { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
+    { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.26, dark: 0.3 } },
+    { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.16, dark: 0.2 } },
+    { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.24, dark: 0.28 } },
+    { surface: 'card', text: 'foreground' },
+    { surface: 'card', text: 'foreground', tint: { color: 'foreground', light: 0.06, dark: 0.06 } },
+    { surface: 'background', text: 'foreground', tint: { color: 'foreground', light: 0.06, dark: 0.06 } },
   ])
 })
 
@@ -204,10 +213,10 @@ it('reduced transparency neutralizes the filter and sheen', () => {
 it('built-in palettes reach the documented minimum opacities', () => {
   const report = glassContrastReport(glass)
   expect(report.passes).toBe(true)
-  expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.28 })
+  expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.32 })
   expect(report.minimumOpacity).toBe(0.5)
   // Nested glass sees a raw backdrop and needs more coverage.
-  expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.79 })
+  expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.9 })
   // Without compression the same palette needs nearly opaque glass.
   const raw = glassContrastReport({
     ...glass,
@@ -256,7 +265,7 @@ it('saturated backdrops never beat the grey extremes the bound uses', () => {
     for (const mode of ['light', 'dark'] as const) {
       const backdrop = glassBackdrop(preset.design, mode)
       const colors = preset.modes[mode] as Record<string, string>
-      for (const [surface, text] of glassContrastPairs) {
+      for (const { surface, text } of glassContrastPairs) {
         const pair = report.pairs.find(
           (p) => p.mode === mode && p.surface === surface && p.text === text,
         )!
@@ -292,7 +301,7 @@ it('nested opacity holds over any raw backdrop pixel', () => {
     const colors = glass.modes[mode] as Record<string, string>
     const opacity = report.nestedOpacity![mode]
     const { sheen } = report.backdrop[mode]
-    for (const [surface, text] of glassContrastPairs) {
+    for (const { surface, text } of glassContrastPairs) {
       const s = unit(colors[surface])
       const t = lum(unit(colors[text]))
       for (const b of [0, 0.25, 0.5, 0.75, 1])
@@ -301,5 +310,44 @@ it('nested opacity holds over any raw backdrop pixel', () => {
           expect(ratioOf(lum(painted), t)).toBeGreaterThanOrEqual(4.5)
         }
     }
+  }
+})
+
+const tintedSpec: GlassPairSpec = {
+  surface: 'card',
+  text: 'foreground',
+  tint: { color: 'primary', light: 0.18, dark: 0.22 },
+}
+const tintedReport = (preset: Preset) =>
+  glassContrastReportFor(preset, [...glassContrastPairs, tintedSpec])
+const tintedPair = (preset: Preset, mode: 'light' | 'dark') =>
+  tintedReport(preset).pairs.find((p) => p.tint !== undefined && p.mode === mode)!
+
+it('tinted pair mixes the tint into the surface before compositing', () => {
+  const light = tintedPair(glass, 'light')
+  expect(light.tint).toEqual({ color: 'primary', amount: 0.18 })
+  expect(light.passes).toBe(true)
+  expect(
+    Math.min(light.ratioOverBlack, light.ratioOverWhite, light.ratioOpaque),
+  ).toBeGreaterThan(6.3)
+  const dark = tintedPair(glass, 'dark')
+  expect(dark.tint).toEqual({ color: 'primary', amount: 0.22 })
+  expect(
+    Math.min(dark.ratioOverBlack, dark.ratioOverWhite, dark.ratioOpaque),
+  ).toBeGreaterThan(5.0)
+})
+
+it('reduced transparency evaluates tinted surfaces opaque', () => {
+  const preset = {
+    ...glass,
+    design: { ...glass.design, transparency: 'reduced' },
+  } as Preset
+  const pairs = tintedReport(preset).pairs.filter((p) => p.tint !== undefined)
+  // The six tinted Button specs plus the extra one, in two modes.
+  expect(pairs).toHaveLength(14)
+  for (const p of pairs) {
+    expect(p.passes).toBe(true)
+    expect(Math.abs(p.ratioOverBlack - p.ratioOverWhite)).toBeLessThan(1e-6)
+    expect(Math.abs(p.ratioOverBlack - p.ratioOpaque)).toBeLessThan(1e-6)
   }
 })

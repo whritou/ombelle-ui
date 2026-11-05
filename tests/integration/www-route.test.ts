@@ -88,5 +88,7 @@ it('lists every component the published installer can add and renders a docs pag
     else expect(html).toContain(`add ${id} is refused with STYLE_UNAVAILABLE`)
     // Only Button has a per-component editor.
     expect(html.includes('href="/editor/component/button"')).toBe(id === 'button')
+    // Glass Button previews show the 0.5.0 restyle, so the Button page says so.
+    expect(html.includes('Liquid glass Buttons were restyled to one ink in 0.5.0.')).toBe(id === 'button')
   }
 })

@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { validateRecipe } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
 import { withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
+import { glassControlHints } from '../../preset-editor/model'
 import { PropertiesPanel, VariantPicker, shownNumber } from './properties-panel'
 
 const noop = () => {}
@@ -103,4 +104,33 @@ it('switches the color fields between base, hover and pressed states', () => {
   const html = panel()
   expect(html).toContain('role="group" aria-label="Color state"')
   expect(html).toContain('aria-label="Light background"')
+})
+
+it('Button editor relabels shadow and border overrides for glass', () => {
+  const render = (family: 'flat' | 'liquid-glass') =>
+    renderToStaticMarkup(<PropertiesPanel recipe={recipe} family={family} onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
+  const glass = render('liquid-glass')
+  for (const label of ['Glass shadow X', 'Glass shadow Y', 'Glass edge width', 'Glass edge colour'])
+    expect(glass).toContain(label)
+  for (const hint of Object.values(glassControlHints)) expect(glass).toContain(hint)
+  expect(glass).not.toContain('Shadow X offset')
+  expect(glass).not.toContain('>Border width<')
+  const flat = render('flat')
+  expect(flat).toContain('Shadow X offset')
+  expect(flat).toContain('Border width')
+  expect(flat).not.toContain('Glass shadow')
+  expect(flat).not.toContain('Glass edge')
+  for (const hint of Object.values(glassControlHints)) expect(flat).not.toContain(hint)
+})
+
+it('Button editor describes the glass edge colour fields with their hint', () => {
+  const render = (family: 'flat' | 'liquid-glass') =>
+    renderToStaticMarkup(<PropertiesPanel recipe={recipe} family={family} onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
+  const glass = render('liquid-glass')
+  expect(glass).toContain(`<p id="color-role-border-hint" class="colorHint">${glassControlHints.border}</p>`)
+  for (const mode of ['light', 'dark'])
+    expect(glass).toMatch(new RegExp(`id="color-${mode}-border"[^>]*aria-describedby="color-role-border-hint"`))
+  expect(glass.match(/aria-describedby="color-role-border-hint"/g)).toHaveLength(4)
+  const flat = render('flat')
+  expect(flat).not.toContain('color-role-border-hint')
 })

@@ -76,6 +76,13 @@ function EditorPreview() {
     return () => { active = false }
   }, [family])
 
+  // Liquid glass needs the kit backdrop behind it; any other family clears it.
+  React.useEffect(() => {
+    if (family === 'liquid-glass') document.documentElement.dataset.backdrop = 'glass'
+    else delete document.documentElement.dataset.backdrop
+    return () => { delete document.documentElement.dataset.backdrop }
+  }, [family])
+
   const state = message?.state
   const recipeStyle = React.useRef<HTMLStyleElement>(null)
   React.useLayoutEffect(() => {

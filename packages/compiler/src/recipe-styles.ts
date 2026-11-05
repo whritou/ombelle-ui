@@ -264,8 +264,23 @@ export function compileScopedButtonStyles(input: {
     // and borders from different tokens; paint the overridden roles from the mapped token.
     if (set('background') && (variant === 'outline' || variant === 'ghost' || variant === 'link'))
       paint.background = 'var(' + variable(colorTokens.background) + ')'
-    if (set('foreground') && (variant === 'outline' || variant === 'link'))
+    // Glass Buttons are one ink: every label reads --foreground, so a foreground override is
+    // painted for every variant, and secondary card glass reads the overridden token as its card.
+    const glass = data.styleFamily === 'liquid-glass'
+    if (set('foreground') && (variant === 'outline' || variant === 'link' || glass))
       paint.color = 'var(' + variable(colorTokens.foreground) + ')'
+    if (glass && set('background') && variant === 'secondary')
+      paint['--card'] = 'var(' + variable(colorTokens.background) + ')'
+    // Glass paints the label from --foreground and the secondary surface from --card, so a
+    // mode without its own override keeps what glass draws there, not the solid-fill token.
+    if (glass)
+      for (const mode of recipeColorModes) {
+        const target = mode === 'light' ? light : darkTokens
+        if (set('foreground') && colors[mode]?.foreground === undefined && colorTokens.foreground !== 'foreground')
+          target[variable(colorTokens.foreground)] = target['--foreground']
+        if (variant === 'secondary' && set('background') && colors[mode]?.background === undefined)
+          target[variable(colorTokens.background)] = target['--card']
+      }
     if (set('border'))
       paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
   }

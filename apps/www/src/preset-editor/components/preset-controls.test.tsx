@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { createPresetDraft, setPresetEdit } from '../model'
+import { createPresetDraft, glassControlHints, planPresetFamilyChange, presetFieldValue, setPresetEdit } from '../model'
 import { styleFamilies } from '@ombelle/contracts'
 import { DesignControls, FamilyPicker, TokenList } from './preset-controls'
 import { offeredStyleFamilies, ombelleMinimumCli, publishedInstaller } from '../../snapshots/install-command'
@@ -78,9 +78,50 @@ it('DesignControls splits shape from depth by section', () => {
   expect(shape).toContain('Corner radius')
   expect(shape).not.toContain('Shadow')
   expect(shape).not.toContain('Glass blur')
-  expect(depth).toContain('Shadow offset')
+  expect(depth).toContain('aria-label="Glass shadow offset"')
   expect(depth).toContain('aria-label="Motion"')
   expect(depth).toContain('aria-label="Transparency"')
   expect(depth).toContain('Glass blur')
   expect(depth).not.toContain('Corner radius')
+})
+
+it('glass drafts relabel the repurposed controls', () => {
+  const render = (family: 'flat' | 'liquid-glass') => {
+    const draft = createPresetDraft(family)
+    // Strip tags so labels split across screen-reader-only spans read as one string.
+    return (
+      renderToStaticMarkup(<DesignControls draft={draft} {...handlers} />) +
+      renderToStaticMarkup(<TokenList draft={draft} {...handlers} warnings={new Set()} />)
+    ).replace(/<[^>]+>/g, '')
+  }
+  const glass = render('liquid-glass')
+  for (const label of ['Glass shadow X', 'Glass shadow Y', 'Glass edge width', 'Glass edge colour'])
+    expect(glass).toContain(label)
+  for (const hint of Object.values(glassControlHints)) expect(glass).toContain(hint)
+  expect(glass).not.toContain('Border width')
+  expect(glass).not.toContain('Border')
+  const flat = render('flat')
+  const tokens = (family: 'flat' | 'liquid-glass') =>
+    renderToStaticMarkup(<TokenList draft={createPresetDraft(family)} {...handlers} warnings={new Set()} />)
+  expect(tokens('liquid-glass')).toContain('aria-label="Glass edge colour: light')
+  expect(tokens('flat')).toContain('aria-label="Border colors: light')
+  expect(tokens('liquid-glass')).toContain('aria-label="Reset light glass edge colour"')
+  expect(tokens('flat')).toContain('aria-label="Reset light border"')
+  expect(flat).toContain('Shadow X offset')
+  expect(flat).toContain('Border width')
+  expect(flat).not.toContain('Glass shadow')
+  expect(flat).not.toContain('Glass edge')
+  for (const hint of Object.values(glassControlHints)) expect(flat).not.toContain(hint)
+})
+
+it('repurposed values survive a family round trip', () => {
+  const glass = setPresetEdit(createPresetDraft('liquid-glass'), '/design/shadowOffsetYPx', '20')
+  const flat = planPresetFamilyChange(glass, 'flat').draft
+  expect(presetFieldValue(flat, '/design/shadowOffsetYPx')).toBe('20')
+  expect(renderToStaticMarkup(<DesignControls draft={flat} {...handlers} />).replace(/<[^>]+>/g, '')).toContain('Shadow Y offset')
+  const back = planPresetFamilyChange(flat, 'liquid-glass').draft
+  expect(presetFieldValue(back, '/design/shadowOffsetYPx')).toBe('20')
+  const html = renderToStaticMarkup(<DesignControls draft={back} {...handlers} />)
+  expect(html.replace(/<[^>]+>/g, '')).toContain('Glass shadow Y')
+  expect(html).toContain('value="20"')
 })

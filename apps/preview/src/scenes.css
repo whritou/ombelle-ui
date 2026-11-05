@@ -181,12 +181,12 @@
   font-size: 12px;
 }
 
-/* Liquid glass sits on the photo: no stage dots, a see-through window. */
-html[data-backdrop='photo'] .scene-stage,
-html[data-backdrop='photo'] .scene-window {
+/* Liquid glass sits on the kit backdrop: no stage dots, a see-through window. */
+html[data-backdrop='glass'] .scene-stage,
+html[data-backdrop='glass'] .scene-window {
   background: transparent;
 }
-html[data-backdrop='photo'] .preset-scene :is(h1, .scene-header p) {
+html[data-backdrop='glass'] .preset-scene :is(h1, .scene-header p) {
   text-shadow:
     0 0 2px var(--background),
     0 0 6px var(--background),

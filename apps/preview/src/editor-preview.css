@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./glass-backdrop.css";
 @source "./generated/*/components/ui/button.tsx";
 
 html, body, #root { width: 100%; min-height: 100%; margin: 0; }
@@ -7,3 +8,5 @@ body { font-family: Arial, sans-serif; }
 .editor-preview { box-sizing: border-box; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; background-color: #f4f4f5; background-image: radial-gradient(rgb(24 24 27 / .14) 1px, transparent 1px); background-size: 16px 16px; }
 .editor-preview.dark { background-color: #18181b; background-image: radial-gradient(rgb(250 250 250 / .12) 1px, transparent 1px); }
 .editor-preview[data-viewport="narrow"] { max-width: 360px; margin: auto; }
+/* Liquid glass shows over the kit backdrop instead of the dotted stage. */
+html[data-backdrop="glass"] .editor-preview { background: none; }

@@ -28,6 +28,16 @@ it('builds nested static runtime HTML/assets and workers without touching unrela
       }
       expect(html).not.toMatch(/127\.0\.0\.1|localhost|\/src\/main.tsx|[A-Z]:\\/)
     }
+    // The kit backdrop ships in each preview entry's CSS, and the old photo is gone.
+    const assets = await fs.readdir('apps/www/public/ombelle-preview/assets')
+    for (const kind of ['editor', 'preset']) {
+      const files = assets.filter(name => name.startsWith(`${kind}-preview-`) && name.endsWith('.css'))
+      expect(files.length, kind).toBe(1)
+      const css = await fs.readFile(`apps/www/public/ombelle-preview/assets/${files[0]}`, 'utf8')
+      expect(css.toLowerCase(), kind).toContain('#7c5cd6')
+      expect(css, kind).toMatch(/\[data-backdrop=["']?glass["']?\]/)
+      expect(css, kind).not.toContain('glass-backdrop.webp')
+    }
     for (const worker of ['editor', 'preset']) {
       const bytes = await fs.readFile(`apps/www/public/${worker}-compiler.worker.js`, 'utf8')
       expect(bytes).toContain('onmessage')

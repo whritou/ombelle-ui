@@ -8,7 +8,7 @@ Experimental means the family compiles, installs, and renders through the same p
 
 | Component | Glass status | Glass treatment |
 | --- | --- | --- |
-| Button | Experimental | Secondary, outline, and ghost variants are translucent; default and destructive stay solid |
+| Button | Experimental | One ink, all glass: every label is `foreground` at weight 600 on card glass. Default is tinted `primary` and destructive is tinted `destructive`, secondary is neutral, outline is background glass with the `input` border, ghost has no surface until hover, and link is text with a `primary` underline. Restyled to one ink in 0.5.0; see [Button](#button) |
 | Badge | Experimental | Solid fill with the glass highlight border and inner highlight; no translucency |
 | Card | Experimental | Translucent root surface with specular sheen and edge light |
 | Dialog | Experimental | Translucent content; the overlay is a plain dim with no blur |
@@ -22,7 +22,7 @@ Experimental means the family compiles, installs, and renders through the same p
 
 One compatibility table in `packages/contracts` (23 components × 5 families, each `stable`, `experimental`, or `unavailable`) is read by the compiler, the CLI, the snapshot service, and both editors.
 
-The glass family stylesheet `ui-style.css` styles Input as glass inside `@supports (backdrop-filter)`, over an opaque card baseline that browsers without backdrop filters, reduced transparency and forced colours (`Field` and `FieldText`) fall back to. Focus colours the border and adds the 3px ring; disabled fields are dashed at 50% opacity; `aria-invalid` gives a 2px destructive border (double in forced colours). Screenshots of the gallery form and of a field nested in a Popover, light and dark: [images/glass-input](../evidence/images/glass-input/). Place forms on a glass or card surface: labels and messages beside a field are plain text and are not covered by the bound when they sit straight on a photo.
+The glass family stylesheet `ui-style.css` styles Input as glass inside `@supports (backdrop-filter)`, over an opaque card baseline that browsers without backdrop filters, reduced transparency and forced colours (`Field` and `FieldText`) fall back to. Focus colours the border and adds the 3px ring; disabled fields are dashed at 50% opacity; `aria-invalid` gives a 2px destructive border (double in forced colours). Screenshots of the gallery form and of a field nested in a Popover, light and dark: [images/glass-input](../evidence/images/glass-input/). Place forms on a glass or card surface: labels and messages beside a field are plain text and are not covered by the bound when they sit straight on the backdrop.
 
 ## Preset fields
 
@@ -41,6 +41,34 @@ A glass preset sets `styleFamily: "liquid-glass"` and these design fields, which
 
 Backdrop contrast, tone, and sheen enter the contrast bound, so changing them changes the smallest passing opacity. Blur, saturation, and rim cannot affect it. See [preset fields](../04-presets-and-contracts.md#liquid-glass-design-fields) for the tokens and the contract.
 
+## Repurposed controls
+
+Three shared design controls that glass used to ignore now drive the glass edges and drop shadows. Their values are kept when a draft switches family, as for every other field.
+
+| Control (preset and Button editor) | Glass label | Glass effect | Built-in value |
+| --- | --- | --- | --- |
+| Shadow X / Shadow Y (`shadowOffsetXPx`, `shadowOffsetYPx`) | Glass shadow X, Glass shadow Y | Offset of the glass drop shadow on Card, Dialog, Popover, Dropdown Menu and Tooltip, and of the Button glow. Blur and spread scale from the offset's magnitude, the larger of \|X\| and \|Y\|, so 0 / 12 reproduces the kit's shadows and negative or sideways offsets stay soft | 0 / 12 |
+| Border width (`borderWidthPx`) | Glass edge width | Thickness of every glass edge hairline | 1 |
+| Border colour (`border` token, light and dark) | Glass edge colour | Colour of every glass edge, used as is. Preset colours may carry alpha (`oklch(L C H / A)`), so the token sets the edge's strength. Input and the outline Button keep the `input` colour | light `oklch(20.8% 0.040 265.8 / 14%)`, dark `oklch(96.8% 0.007 247.9 / 14%)` |
+
+For glass drafts, both editors show the glass labels with a one-line hint each; for other families the labels stay "Shadow X offset", "Shadow Y offset", "Border width" and "Border". Edges carry no text, so an opaque `border` colour makes a solid edge and does not change the contrast bound. Negative offsets move the shadow left and up. `box-shadow` offsets are physical, so they do not flip in right-to-left layouts. A Button recipe's shadow and border overrides apply to the scoped glass Button's glow and edge.
+
+Upgrading from 0.4.x: `init` saved the whole preset to `ui-preset.json`, including the 0.4.x glass values `border` `#CBD5E1` (light) / `#475569` (dark) and `shadowOffsetYPx: 0`. Running `theme add` with that file under 0.5.0 gives solid slate edges and no drop shadow or glow. To keep the kit look, set `border` to `oklch(20.8% 0.040 265.8 / 14%)` (light) and `oklch(96.8% 0.007 247.9 / 14%)` (dark) and `shadowOffsetYPx` to `12`, or start again from the built-in liquid glass preset.
+
+## Button
+
+Liquid glass Buttons were restyled to one ink in 0.5.0. Earlier installers ship the previous look, with solid default and destructive fills; rerun `add button` or `theme add` with 0.5.0 to get the new rules.
+
+- Every label is `var(--foreground)` at weight 600, and the edge is `var(--border-width) solid var(--border)`.
+- Default is card glass tinted with `primary`, with a `primary` rim at 55% and a `primary` glow. Destructive is tinted with `destructive`, with a rim at 60%. The tint amounts are per-mode tokens: `--glass-primary-tint` (18% light, 22% dark) and `--glass-destructive-tint` (16% light, 20% dark). Hover adds 8 points.
+- Secondary is neutral card glass. Outline is `background` glass at 60% of the glass opacity with the `input` border. Ghost has no surface until hover. Link is `foreground` text with a 2px `primary` underline.
+- Sizes follow the kit: default is 40px high with 18px inline padding, `sm` 32px with 12px padding and 13px type, `lg` 48px with 22px padding and 15px type, and link has 6px padding.
+- Hover brightens the top highlight and lengthens the glow; secondary and outline gain a 6% `foreground` tint. Pressed moves 1px down with an inner shade. Focus is a 3px ring offset by 3px; disabled is 50% opacity.
+- Reduced transparency and missing backdrop filters paint the tinted card opaque, with no blur. Forced colours use `ButtonFace` with `ButtonText` text and border; the default variant gets a 3px border.
+- Recipe colour overrides still apply on top: a `foreground` override paints the label of every variant, and a secondary `background` override replaces its card surface. A mode without its own override keeps that mode's `foreground` label and, for secondary, its `card` surface.
+
+Screenshots of every variant and state, the other glass components on the kit backdrop and the Button editor with a glass recipe, light and dark: [glass foundation evidence](../evidence/glass-foundation.md).
+
 ## Contrast bound
 
 A translucent surface shows its backdrop through it. Text on it cannot be checked against one fixed colour, so the compiler checks the two extremes instead. Before the surface is mixed in, the glass filter compresses the backdrop: `contrast()` and `brightness()` map every channel of every backdrop pixel into a range `[low, high]`, whatever its colour or saturation. The compiler mixes the surface colour with grey `low`, and with grey `high` under the full specular sheen, at the preset's opacity. Any real backdrop, blurred or not, produces a surface whose brightness lies between those two. The compiler requires 4.5:1 against both, and requires the text to be either lighter or darker than both. Together these keep 4.5:1 over any backdrop. Compressing the backdrop is what lets the glass be thin: the built-in palette needs opacity 0.5 instead of about 0.9 over raw black and white.
@@ -56,16 +84,25 @@ The bound is checked in light and dark mode for these pairs:
 | `card` | `cardForeground`, `mutedForeground` | Card |
 | `popover` | `popoverForeground`, `mutedForeground` | Dialog content, Tooltip content |
 | `muted` | `foreground`, `mutedForeground` | Tabs list and inactive triggers |
-| `secondary` | `secondaryForeground` | Secondary Button |
-| `background` | `foreground` | Outline and ghost Button |
+| `secondary` | `secondaryForeground` | Kept for custom presets; the one-ink secondary Button is card glass |
+| `background` | `foreground` | Kept for custom presets; the outline Button is `background` glass at 60% coverage, which this full-coverage pair does not bound |
+| `card` + `primary` 18% light / 22% dark | `foreground` | Default Button at rest |
+| `card` + `primary` 26% light / 30% dark | `foreground` | Default Button on hover |
+| `card` + `destructive` 16% light / 20% dark | `foreground` | Destructive Button at rest |
+| `card` + `destructive` 24% light / 28% dark | `foreground` | Destructive Button on hover |
+| `card` | `foreground` | Secondary Button at rest, ghost Button on hover |
+| `card` + `foreground` 6% | `foreground` | Secondary Button on hover |
+| `background` + `foreground` 6% | `foreground` | Outline Button on hover, at full coverage |
+
+A tinted surface is a token surface mixed with a tint token at a fixed percentage per mode, the same mix the CSS paints. It is checked like any other pair: over the darkest and brightest filtered backdrop, with and without sheen, and on its opaque fallback. The editor readout names the tint, for example "foreground on card + primary 26%".
 
 A failing pair stops compilation with `INVALID_DATA` at `/design/glassOpacity`. The message names the pair, the mode, and the smallest passing opacity, rounded up to 0.01. With `transparency: "reduced"` the surfaces are opaque, and the ordinary palette contrast rules apply to them at 4.5:1.
 
-The built-in glass preset uses opacity 0.5, the smallest value at which both built-in palettes pass. Light mode needs 0.5 and dark mode 0.28; nested glass uses 0.7 in light and 0.79 in dark. To reach these, the built-in palette darkens light `mutedForeground` to `#334155` and lightens dark `mutedForeground` to `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
+The built-in glass preset uses opacity 0.5, the smallest value at which both built-in palettes pass. Light mode needs 0.5 and dark mode 0.32; nested glass uses 0.7 in light and 0.9 in dark. The tinted Button pairs raised the dark values from 0.28 and 0.79 in 0.5.0; the overall minimum is still 0.5. The neutral Button pairs (secondary, ghost hover and the 6% hover tint) do not change these values. To reach these, the built-in palette darkens light `mutedForeground` to `#334155` and lightens dark `mutedForeground` to `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
 
-Solid fills keep their existing contrast pairs: the default and destructive Button, both Badge variants, and the active Tabs trigger.
+Solid fills keep their existing contrast pairs: both Badge variants and the active Tabs trigger.
 
-The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is not a bounded pair.
+The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are the outline Button, whose `background` glass covers only 60% of the glass opacity, and ghost and link at rest, which sit straight on the backdrop. The outline pairs are checked at full coverage; bounding them at 60% needs a coverage field on contrast pairs, which is deferred to PR B.
 
 ## Declared backdrops
 
@@ -96,7 +133,7 @@ Inside the feature query, each translucent surface paints a white specular gradi
 2. **Feature query.** Translucency and blur apply only inside `@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))`. A browser without filter support never shows text over an unblurred backdrop.
 3. **Reduced transparency.** `@media (prefers-reduced-transparency: reduce)` restores opaque surfaces and removes the filter. The preset field `transparency: "reduced"` does the same at compile time.
 4. **Forced colours.** `@media (forced-colors: active)` uses system colours with no filter and no translucency.
-5. **Glass identity in every fallback.** A 1px highlight border, an inner top highlight, and the preset radius remain.
+5. **Glass identity in every fallback.** The edge (`--border-width` in the `border` colour), an inner top highlight, and the preset radius remain.
 
 Blur is never transitioned or animated. Transitions touch only colour and opacity and are disabled by `prefers-reduced-motion`. Everything nested inside a glass Card, Dialog, or Tooltip, including another Card, drops its own filter and uses `--glass-nested-opacity`.
 
@@ -124,8 +161,9 @@ Re-applying another glass preset to a glass project is not a family switch. It s
 
 ## Editors
 
-- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency and the seven glass material controls appear only for glass, and the glass preview renders over a photo of a bluebell wood so the translucency shows. The preview follows the site's light or dark theme for every family; the Preview mode select still overrides it until the theme toggles again. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails. The readout states the minimum passing opacity, and the lowest passing opacity for each mode when the bound passes. The gallery shows the unavailable components greyed out as "Unavailable in liquid glass".
-- **Button editor** (`/editor/component/button`): accepts glass, and shows the experimental notice beside the export and CLI command.
+- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency and the seven glass material controls appear only for glass, and the glass preview renders over the kit backdrop (violet, amber, green and blue light spots over a green-to-violet gradient with soft vertical bands), so the translucency shows. Shadow, border width and border colour carry their glass labels. The preview follows the site's light or dark theme for every family; the Preview mode select still overrides it until the theme toggles again. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails. The readout states the minimum passing opacity, and the lowest passing opacity for each mode when the bound passes. The gallery shows the unavailable components greyed out as "Unavailable in liquid glass".
+- **Button editor** (`/editor/component/button`): accepts glass, previews it over the same kit backdrop, relabels the shadow and border overrides as in [repurposed controls](#repurposed-controls), and shows the experimental notice beside the export and CLI command.
+- **Component playgrounds** on the website use the preset preview, so their glass examples sit on the kit backdrop too. The backdrop is declared once, in `apps/preview/src/glass-backdrop.css`; it replaced the earlier backdrop photo, which was removed.
 
 ## Limitations
 

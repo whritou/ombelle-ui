@@ -54,6 +54,31 @@ export const glassDesignControls = {
   glassSheen: { label: 'Specular sheen', min: 0, max: 0.5, step: 0.01, unit: '' },
   glassRim: { label: 'Rim light', min: 0, max: 1, step: 0.01, unit: '' },
 } as const
+/**
+ * Liquid glass repurposes the shadow offsets, border width and border colour as its
+ * drop-shadow offsets and edge. Values are shared across families; only labels change.
+ */
+export function designControlLabel(
+  key: keyof typeof designControls | 'border',
+  family: StyleFamily,
+): string {
+  if (family === 'liquid-glass') {
+    if (key === 'shadowOffsetXPx') return 'Glass shadow X'
+    if (key === 'shadowOffsetYPx') return 'Glass shadow Y'
+    if (key === 'borderWidthPx') return 'Glass edge width'
+    if (key === 'border') return 'Glass edge colour'
+  }
+  return key === 'border' ? 'Border' : designControls[key].label
+}
+export const glassControlHints: Record<
+  'shadowOffsetXPx' | 'shadowOffsetYPx' | 'borderWidthPx' | 'border',
+  string
+> = {
+  shadowOffsetXPx: 'Offsets the soft shadow under floating glass.',
+  shadowOffsetYPx: 'Offsets the soft shadow under floating glass.',
+  borderWidthPx: 'Thickness of every glass edge.',
+  border: 'Colour and strength of every glass edge; may include transparency.',
+}
 export type PresetEditablePath =
   | `/modes/${'light' | 'dark'}/${(typeof colorKeys)[number]}`
   | `/design/${keyof typeof designControls}`

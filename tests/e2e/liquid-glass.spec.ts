@@ -201,22 +201,6 @@ async function restoreIsolation(page: Page) {
   })
 }
 
-/** Adds a ghost Button next to the secondary one; the scenario renders no ghost variant. */
-async function addGhostProbe(page: Page, id: Backdrop) {
-  await section(page, id)
-    .locator('[data-slot="button"][data-variant="secondary"]')
-    .evaluate((secondary) => {
-      const ghost = secondary.cloneNode(true) as HTMLElement
-      ghost.dataset.variant = 'ghost'
-      ghost.dataset.glassProbe = 'ghost'
-      ghost.className = ghost.className
-        .replace('bg-secondary', 'bg-transparent')
-        .replace('text-secondary-foreground', 'text-foreground')
-      ghost.textContent = 'Ghost probe'
-      secondary.after(ghost)
-    })
-}
-
 /**
  * Samples every declared glass text slot of one backdrop section. `color` paints the backdrop
  * (#000 or #fff) for the bounded case; null keeps the declared backdrop.
@@ -251,10 +235,10 @@ async function sampleSlots(page: Page, id: Backdrop, color: string | null): Prom
   samples.push(tab)
   await restoreIsolation(page)
 
+  // One ink: a ghost Button has no glass surface until hover, so only the surfaced variants are sampled.
   for (const [slot, button] of [
     ['secondary Button', sec.locator('[data-slot="button"][data-variant="secondary"]').first()],
     ['outline Button', sec.getByRole('button', { name: `Open ${id} dialog` })],
-    ['ghost Button', sec.locator('[data-glass-probe="ghost"]')],
   ] as const) {
     await button.scrollIntoViewIfNeeded()
     await isolate(button, id, color)
@@ -297,7 +281,7 @@ async function surfaceStyles(page: Page) {
   return page.evaluate(() =>
     Array.from(
       document.querySelectorAll<HTMLElement>(
-        '[data-slot="card"], [data-slot="tabs-list"], [data-slot="button"][data-variant="secondary"], [data-slot="button"][data-variant="outline"], [data-slot="button"][data-variant="ghost"], [data-slot="dialog-content"], [data-slot="tooltip-content"]',
+        '[data-slot="card"], [data-slot="tabs-list"], [data-slot="button"][data-variant="secondary"], [data-slot="button"][data-variant="outline"], [data-slot="dialog-content"], [data-slot="tooltip-content"]',
       ),
     ).map((el) => {
       const s = getComputedStyle(el)
@@ -364,13 +348,12 @@ async function axeOver(page: Page, mode: Mode, id: Backdrop, base: string, targe
 
 async function boundedContrast(page: Page, mode: Mode, base: string, target = 'preview') {
   await open(page, mode, base)
-  await addGhostProbe(page, 'solid')
   const samples = [
     ...(await sampleSlots(page, 'solid', '#000')),
     ...(await sampleSlots(page, 'solid', '#fff')),
   ]
   await attach('bounded-contrast', { target, mode, samples }, page)
-  expect(samples).toHaveLength(2 * 9)
+  expect(samples).toHaveLength(2 * 8)
   for (const s of samples) {
     expect.soft(s.ratio, `${s.slot} over ${s.backdrop}: ${s.textColor} on pixel ${s.surfacePixel}`).toBeGreaterThanOrEqual(4.5)
     // Cross-check: the sampled pixel matches the computed background alpha-composited over the
@@ -407,9 +390,9 @@ for (const mode of modes) {
       const card = await nested.evaluate((el) => getComputedStyle(el).backdropFilter)
       expect(card).toMatch(/blur\(3px\)/)
       expect(await nestedButton.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe('none')
-      // The scenario's nested Button is the primary variant, which never filters. Re-tag it with
-      // each translucent variant and compare against the same variant outside any card.
-      for (const variant of ['secondary', 'outline', 'ghost']) {
+      // One ink: every surfaced variant is glass. Re-tag the nested Button with each variant and
+      // compare against the same variant outside any card. Ghost has no surface at rest.
+      for (const variant of ['default', 'secondary', 'destructive', 'outline', 'ghost']) {
         await nestedButton.evaluate((el, v) => (el.dataset.variant = v), variant)
         const inside = await nestedButton.evaluate((el) => getComputedStyle(el).backdropFilter)
         const outside = await sec
@@ -424,7 +407,8 @@ for (const mode of modes) {
           }, variant)
         measured.push({ id, variant, inside, outside })
         expect(inside, `${id} nested ${variant}`).toBe('none')
-        expect(outside, `${id} top-level ${variant}`).toMatch(/blur\(3px\)/)
+        if (variant === 'ghost') expect(outside, `${id} top-level ghost at rest`).toBe('none')
+        else expect(outside, `${id} top-level ${variant}`).toMatch(/blur\(3px\)/)
       }
       await nestedButton.evaluate((el) => (el.dataset.variant = 'default'))
     }
@@ -496,10 +480,9 @@ for (const mode of modes) {
     expect(rewrites.reduce((n, r) => n + r.stripped.length, 0)).toBeGreaterThan(0)
     const styles = await allSurfaceStyles(page)
     expectOpaqueWithoutFilter(styles)
-    await addGhostProbe(page, 'pattern')
     const samples = await sampleSlots(page, 'pattern', null)
     await attach('no-backdrop-filter', { mode, rewrites, styles, samples }, page)
-    expect(samples).toHaveLength(9)
+    expect(samples).toHaveLength(8)
     for (const s of samples)
       expect.soft(s.ratio, `${s.slot} over pattern: ${s.textColor} on pixel ${s.surfacePixel}`).toBeGreaterThanOrEqual(4.5)
   })

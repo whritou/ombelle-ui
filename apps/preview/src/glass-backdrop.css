@@ -1,0 +1,17 @@
+/* The liquid glass design kit's backdrop. Every glass preview sits over it so
+   the translucency has something to show; the family's own edges and shadows
+   are drawn against it. */
+html[data-backdrop='glass'] {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(circle at 16% 28%, #7C5CD6 0 14%, transparent 34%),
+    radial-gradient(circle at 72% 18%, #F2B84B 0 7%, transparent 26%),
+    radial-gradient(circle at 86% 78%, #2F7D5B 0 18%, transparent 42%),
+    radial-gradient(circle at 38% 88%, #3B5BDB 0 12%, transparent 36%),
+    repeating-linear-gradient(96deg, transparent 0 120px, rgb(40 30 20 / 35%) 120px 150px, transparent 150px 260px),
+    linear-gradient(165deg, #24402F, #4B3F8F 55%, #6B8F4E);
+  background-attachment: fixed;
+}
+html[data-backdrop='glass'] body {
+  background: transparent;
+}

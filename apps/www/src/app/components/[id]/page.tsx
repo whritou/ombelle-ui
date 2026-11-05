@@ -77,6 +77,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
           <div className="mt-4">
             <CodeBlock code={doc.usage} title="example.tsx" />
           </div>
+          {doc.note && <p className="mt-3 text-sm text-muted-foreground">{doc.note}</p>}
         </section>
 
         <section aria-labelledby="api" className="mt-14 scroll-mt-24">
