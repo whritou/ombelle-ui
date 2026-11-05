@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { applyStartingPreset, createPresetDraft, setPresetEdit } from '../model'
-import { GlassStartingPoints } from './glass-starting-points'
+import { GlassStartingPoints, previewBackdropFor } from './glass-starting-points'
 import { DesignControls } from './preset-controls'
 
 const noop = () => {}
@@ -35,4 +35,9 @@ it('shows a one-line hint under every material slider', () => {
   )
   expect(html).toContain('Rim light near the pointer; needs LiquidGlassFilter.')
   expect(html).toContain('How far the backdrop bends along the rim. Chromium only.')
+})
+
+it('shows Relief on the Pêche backdrop and keeps the current one otherwise', () => {
+  expect(previewBackdropFor('builtin-liquid-glass-relief', 'prism')).toBe('peach')
+  expect(previewBackdropFor('builtin-liquid-glass-cristal', 'night')).toBe('night')
 })

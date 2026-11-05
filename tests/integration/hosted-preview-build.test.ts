@@ -37,6 +37,9 @@ it('builds nested static runtime HTML/assets and workers without touching unrela
       expect(css.toLowerCase(), kind).toContain('#7c5cd6')
       expect(css, kind).toMatch(/\[data-backdrop=["']?glass["']?\]/)
       expect(css, kind).not.toContain('glass-backdrop.webp')
+      // The material lab's backdrops, picked in the preset editor.
+      for (const backdrop of ['prism', 'grid', 'night', 'peach'])
+        expect(css, kind + ' ' + backdrop).toMatch(new RegExp(`\\[data-glass-backdrop=["']?${backdrop}["']?\\]`))
     }
     for (const worker of ['editor', 'preset']) {
       const bytes = await fs.readFile(`apps/www/public/${worker}-compiler.worker.js`, 'utf8')

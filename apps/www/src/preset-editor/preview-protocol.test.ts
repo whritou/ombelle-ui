@@ -190,3 +190,15 @@ it('requires exact handshake and acknowledgement shapes', () => {
     }),
   ).toBe(false)
 })
+it('accepts a glass preview backdrop with or without a scene and rejects unknown ones', async () => {
+  for (const backdrop of ['kit', 'prism', 'grid', 'night', 'peach']) {
+    const view = { ...message(), view: { mode: 'light', viewport: 'wide', backdrop } }
+    expect(await verifyPresetRender(view, 0, manifest)).toEqual(view)
+    const scened = { ...message(), view: { mode: 'dark', viewport: 'wide', scene: 'settings', backdrop } }
+    expect(await verifyPresetRender(scened, 0, manifest)).toEqual(scened)
+  }
+  for (const backdrop of ['beach', '', 1, null, '__proto__'])
+    expect(
+      await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', backdrop } }, 0, manifest),
+    ).toBeNull()
+})

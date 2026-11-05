@@ -15,3 +15,35 @@ html[data-backdrop='glass'] {
 html[data-backdrop='glass'] body {
   background: transparent;
 }
+
+/* The material lab's backdrops, picked in the preset editor's glass preview. They replace the kit gradient
+   (data-backdrop stays 'glass', so every rule above still applies). */
+html[data-backdrop='glass'][data-glass-backdrop='prism'] {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 7%) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 7%) 0 1px, transparent 1px 30px),
+    radial-gradient(circle at 78% 30%, transparent 0 150px, rgb(197 255 246 / 28%) 151px 153px, transparent 154px 176px, rgb(197 255 246 / 20%) 177px 179px, transparent 180px),
+    repeating-linear-gradient(152deg, transparent 0 6px, rgb(239 255 250 / 18%) 6px 7px),
+    linear-gradient(152deg, transparent 0 34%, #010D37 38%, #2167C5 44%, #E6FFEF 47%, #55E5C7 53%, #3D8CEC 60%, transparent 66%),
+    linear-gradient(150deg, #15265E, #053D6F);
+}
+html[data-backdrop='glass'][data-glass-backdrop='grid'] {
+  background-image:
+    linear-gradient(162deg, transparent 0 58%, rgb(129 244 213 / 80%) 58.2% 58.6%, transparent 58.8% 62%, rgb(129 244 213 / 80%) 62.2% 62.6%, transparent 62.8%),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 26%) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 26%) 0 1px, transparent 1px 30px),
+    linear-gradient(150deg, #101B3B, #214B87);
+}
+html[data-backdrop='glass'][data-glass-backdrop='night'] {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 5%) 0 1px, transparent 1px 30px),
+    radial-gradient(circle at 78% 30%, transparent 0 150px, rgb(197 255 246 / 22%) 151px 153px, transparent 154px),
+    linear-gradient(152deg, transparent 0 36%, #2A1470 41%, #9774EF 48%, #E6FFEF 50%, #4C25B9 58%, transparent 66%),
+    linear-gradient(150deg, #060B20, #1B1445);
+}
+html[data-backdrop='glass'][data-glass-backdrop='peach'] {
+  background-image:
+    linear-gradient(176deg, #BC7880 0 12%, transparent 12.2%),
+    linear-gradient(184deg, transparent 0 74%, #F1A87C 74.2%, #B87967),
+    linear-gradient(140deg, #DB8170, #B86E88);
+}
