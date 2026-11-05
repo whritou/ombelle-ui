@@ -25,7 +25,7 @@
       "accentForeground": "#0F172A",
       "destructive": "#B91C1C",
       "destructiveForeground": "#FFFFFF",
-      "border": "#CBD5E1",
+      "border": "oklch(20.8% 0.040 265.8 / 14%)",
       "input": "#64748B",
       "ring": "#1D4ED8"
     },
@@ -46,7 +46,7 @@
       "accentForeground": "#F8FAFC",
       "destructive": "#FCA5A5",
       "destructiveForeground": "#0B1120",
-      "border": "#475569",
+      "border": "oklch(96.8% 0.007 247.9 / 14%)",
       "input": "#94A3B8",
       "ring": "#93C5FD"
     }
@@ -57,7 +57,7 @@
     "density": "comfortable",
     "borderWidthPx": 1,
     "shadowOffsetXPx": 0,
-    "shadowOffsetYPx": 0,
+    "shadowOffsetYPx": 12,
     "motion": "full",
     "transparency": "auto",
     "glassBlurPx": 3,

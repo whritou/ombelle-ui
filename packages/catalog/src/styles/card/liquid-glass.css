@@ -6,7 +6,7 @@
   gap: var(--card-padding);
   min-width: 0;
   padding-block: var(--card-padding);
-  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  border: var(--border-width) solid var(--border);
   border-radius: calc(var(--radius) * 1.5);
   background: var(--card);
   color: var(--card-foreground);
@@ -17,7 +17,7 @@
     inset -1px -1px 0 color-mix(in srgb, var(--glass-highlight, white) 60%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--glass-highlight, white) 40%, transparent),
     inset 0 -1px 2px rgb(0 0 0 / 0.08),
-    0 0.75rem 2rem -1rem rgb(0 0 0 / 0.25);
+    var(--shadow-x) var(--shadow-y) calc(var(--shadow-y) * 2.667) calc(var(--shadow-y) * -1.333) rgb(0 0 0 / 0.25);
 }
 /* Glass nested in a card drops its own filter and uses the coverage that holds
    over a raw backdrop. */

@@ -7,6 +7,7 @@ import {
   type Preset,
 } from '@ombelle/contracts'
 import { compile, glassContrastReport } from '../src/index.js'
+import { squash } from './new-component-artifacts.js'
 
 const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
 const unavailable = componentsWithStyleSupport('liquid-glass', ['unavailable'])
@@ -162,5 +163,63 @@ describe('liquid-glass compile', () => {
         for (const selector of rule.selectors)
           expect(selector.match(/\[data-slot=/g)?.length ?? 0, sheet.logicalPath + ' ' + selector).toBeLessThanOrEqual(1)
       })
+  })
+})
+
+describe('liquid-glass edges and shadows', () => {
+  const styleSheets = (result: Awaited<ReturnType<typeof build>>) =>
+    result.artifacts.filter((a) => a.kind === 'style' && a.logicalPath !== 'styles/ui-tokens.css')
+  const ruleBody = (result: Awaited<ReturnType<typeof build>>, slot: string) => {
+    let body = ''
+    for (const sheet of styleSheets(result))
+      postcss.parse(sheet.content).walkRules((rule) => {
+        if (rule.selectors.map(squash).includes('[data-slot="' + slot + '"]'))
+          body += rule.nodes.map((n) => squash(n.toString())).join(';') + ';'
+      })
+    return body
+  }
+
+  it('glass edges and drop shadows read the preset tokens', async () => {
+    const result = await build(builtin())
+    for (const sheet of styleSheets(result))
+      expect(squash(sheet.content), sheet.logicalPath).not.toContain(
+        'color-mix(insrgb,var(--foreground)14%,transparent)',
+      )
+    for (const slot of ['card', 'dialog-content', 'popover-content', 'tooltip-content']) {
+      const body = ruleBody(result, slot)
+      expect(body, slot).toContain('var(--border-width)solidvar(--border)')
+    }
+    for (const slot of ['card', 'popover-content'])
+      expect(ruleBody(result, slot), slot).toContain('var(--shadow-x)var(--shadow-y)')
+    expect(ruleBody(result, 'dialog-content')).toContain(
+      'calc(var(--shadow-x)*2)calc(var(--shadow-y)*2)calc(var(--shadow-y)*4)calc(var(--shadow-y)*-1.333)',
+    )
+    // Tooltip's drop shadow is 8px at the built-in offset, so it scales by 2/3 to keep its look.
+    expect(ruleBody(result, 'tooltip-content')).toContain(
+      'calc(var(--shadow-x)*0.667)calc(var(--shadow-y)*0.667)',
+    )
+  })
+
+  it('built-in glass preset reproduces the kit edge and shadow', () => {
+    const preset = builtin()
+    expect(preset.design.shadowOffsetXPx).toBe(0)
+    expect(preset.design.shadowOffsetYPx).toBe(12)
+    expect(preset.design.borderWidthPx).toBe(1)
+    expect(preset.modes.light.border).toBe('oklch(20.8% 0.040 265.8 / 14%)')
+    expect(preset.modes.dark.border).toBe('oklch(96.8% 0.007 247.9 / 14%)')
+    expect(glassContrastReport(preset).passes).toBe(true)
+  })
+
+  it('opaque border and negative offsets still compile', async () => {
+    const preset = withDesign({ shadowOffsetXPx: -16, shadowOffsetYPx: -16 })
+    preset.modes.light.border = '#CBD5E1'
+    preset.modes.dark.border = '#475569'
+    const result = await build(preset)
+    expect(ruleBody(result, 'card')).toContain('var(--shadow-x)var(--shadow-y)')
+    expect(artifact(result, 'styles/ui-tokens.css').replace(/\s+/g, '')).toContain('--shadow-x:-16px')
+    const reference = glassContrastReport(builtin())
+    const report = glassContrastReport(preset)
+    expect(report.passes).toBe(reference.passes)
+    expect(report.pairs).toEqual(reference.pairs)
   })
 })
