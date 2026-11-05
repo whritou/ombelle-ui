@@ -6,7 +6,7 @@ import {
   type ComponentId,
   type Preset,
 } from '@ombelle/contracts'
-import { compile, glassContrastPairs, glassContrastReport } from '../src/index.js'
+import { compile, glassContrastPairs, glassContrastReport, glassTints } from '../src/index.js'
 import { squash } from './new-component-artifacts.js'
 
 const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
@@ -314,11 +314,22 @@ describe('liquid-glass Button', () => {
     ] as const
     for (const tint of specs)
       expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint })
+    // Secondary rest and ghost hover are foreground on card glass; secondary and outline
+    // hover add a 6% foreground tint to the card and background glass.
+    const neutral = { color: 'foreground', light: 0.06, dark: 0.06 } as const
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground' })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: neutral })
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', tint: neutral })
+    // The tint fractions follow the emitted tokens.
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'primary', ...glassTints.primary } })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'destructive', ...glassTints.destructive } })
     const report = glassContrastReport(builtin())
     const tinted = report.pairs.filter((p) => p.tint !== undefined)
-    expect(tinted).toHaveLength(8)
-    for (const pair of tinted) expect(pair.passes, JSON.stringify(pair)).toBe(true)
+    expect(tinted).toHaveLength(12)
+    for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.passes).toBe(true)
+    expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.32 })
+    expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.9 })
   })
 
   it('reduced transparency paints the tinted Button opaque', async () => {

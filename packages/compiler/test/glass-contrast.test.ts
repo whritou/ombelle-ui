@@ -120,6 +120,9 @@ it('pair list equals the spec table', () => {
     { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.26, dark: 0.3 } },
     { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.16, dark: 0.2 } },
     { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.24, dark: 0.28 } },
+    { surface: 'card', text: 'foreground' },
+    { surface: 'card', text: 'foreground', tint: { color: 'foreground', light: 0.06, dark: 0.06 } },
+    { surface: 'background', text: 'foreground', tint: { color: 'foreground', light: 0.06, dark: 0.06 } },
   ])
 })
 
@@ -340,8 +343,8 @@ it('reduced transparency evaluates tinted surfaces opaque', () => {
     design: { ...glass.design, transparency: 'reduced' },
   } as Preset
   const pairs = tintedReport(preset).pairs.filter((p) => p.tint !== undefined)
-  // The four Button specs plus the extra one, in two modes.
-  expect(pairs).toHaveLength(10)
+  // The six tinted Button specs plus the extra one, in two modes.
+  expect(pairs).toHaveLength(14)
   for (const p of pairs) {
     expect(p.passes).toBe(true)
     expect(Math.abs(p.ratioOverBlack - p.ratioOverWhite)).toBeLessThan(1e-6)

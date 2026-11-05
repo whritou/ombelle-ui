@@ -71,6 +71,20 @@ export const glassTints = {
   primary: { light: 0.18, dark: 0.22 },
   destructive: { light: 0.16, dark: 0.2 },
 } as const
+/** Points a Button hover adds to the resting tint (`+ 8%` in the stylesheet). */
+export const glassHoverTint = 0.08
+/** The neutral `foreground` tint secondary and outline Buttons gain on hover (6% in the stylesheet). */
+export const glassNeutralHoverTint = 0.06
+
+const tintPairs = (color: keyof typeof glassTints): GlassPairSpec[] => {
+  const rest = glassTints[color]
+  const hover = (v: number) => Math.round((v + glassHoverTint) * 100) / 100
+  return [
+    { surface: 'card', text: 'foreground', tint: { color, ...rest } },
+    { surface: 'card', text: 'foreground', tint: { color, light: hover(rest.light), dark: hover(rest.dark) } },
+  ]
+}
+const neutralHover: GlassTint = { color: 'foreground', light: glassNeutralHoverTint, dark: glassNeutralHoverTint }
 
 export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'card', text: 'cardForeground' },
@@ -82,10 +96,15 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'secondary', text: 'secondaryForeground' },
   { surface: 'background', text: 'foreground' },
   // One-ink Button: foreground on card glass tinted at rest and on hover (+8 points).
-  { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
-  { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.26, dark: 0.3 } },
-  { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.16, dark: 0.2 } },
-  { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.24, dark: 0.28 } },
+  ...tintPairs('primary'),
+  ...tintPairs('destructive'),
+  // Secondary at rest and ghost on hover: foreground on untinted card glass.
+  { surface: 'card', text: 'foreground' },
+  // Secondary and outline hover: a 6% foreground tint on card and background glass.
+  // Outline glass covers only 60% of the glass opacity; the bound checks it at full
+  // coverage until pairs carry a coverage field.
+  { surface: 'card', text: 'foreground', tint: neutralHover },
+  { surface: 'background', text: 'foreground', tint: neutralHover },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
