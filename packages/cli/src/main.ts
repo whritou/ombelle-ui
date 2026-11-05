@@ -25,9 +25,11 @@ import { planAdd } from './plan/components.js'
 import { planTheme } from './plan/theme.js'
 import { applyPlan } from './apply/transaction.js'
 import { formatPlan, planOutput } from './format.js'
+import { assertKnownComponentIds } from './component-ids.js'
 const exits: Record<string, number> = {
   INVALID_DATA: 2,
   STYLE_UNAVAILABLE: 2,
+  UNKNOWN_COMPONENT: 2,
   UNSUPPORTED_RELEASE: 3,
   UNSUPPORTED_PROJECT: 3,
   FILE_CONFLICT: 4,
@@ -134,6 +136,9 @@ export async function runCli(
         'INVALID_DATA',
         'Choose npm, pnpm, yarn, or bun for --package-manager',
       )
+    // Component ids are checked against the catalog before any preset,
+    // project, or style-support work, in every family.
+    if (command === 'add') assertKnownComponentIds(positional.slice(1))
     let presetInput: ResolvedPresetInput | undefined
     let recipeInput: ResolvedRecipeInput | undefined
     if (typeof flags['--recipe'] === 'string') {
@@ -192,7 +197,7 @@ export async function runCli(
           context.root,
           'Run init --preset <local.json>.',
         )
-      const ids = command === 'add' ? positional.slice(1) : []
+      const ids: ComponentId[] = command === 'add' ? positional.slice(1) as ComponentId[] : []
       if (command === 'add' && !ids.length)
         throw new FoundationError(
           'INVALID_DATA',
@@ -312,7 +317,8 @@ export async function runCli(
     else
       io.stderr(
         e.code + ': ' + e.message + (e.path ? ' (' + e.path + ')' : '') +
-        (e.code === 'RESOLUTION_FAILURE' ? '\nNext: ' + e.nextAction : ''),
+        (e.code === 'RESOLUTION_FAILURE' || e.code === 'UNKNOWN_COMPONENT'
+          ? '\nNext: ' + e.nextAction : ''),
       )
     return exits[e.code] ?? 1
   }

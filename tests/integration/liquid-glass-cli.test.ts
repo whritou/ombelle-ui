@@ -127,23 +127,28 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(jsonRecord(again.data).notices).toEqual([notice(['badge']), mountNotice])
   }, 180000)
 
-  it(`add unknown-component in a glass project fails before any write (${manager})`, async () => {
+  it.each([
+    { family: 'liquid-glass', preset: 'glass' },
+    { family: 'flat', preset: 'flat' },
+  ] as const)(`add with an id outside the catalog in a $family project fails before any write (${manager})`, async ({ preset }) => {
     const root = await make()
     roots.push(root)
     const { glass } = await writePresets()
     const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
     await seed(root, ['button'])
-    const init = await command(['init', '--preset', glass, '--yes'])
+    const init = await command(['init', '--preset', preset === 'glass' ? glass : flatPath, '--yes'])
     expect(init.code, init.output).toBe(0)
     const before = await snapshotTree(root)
     expect(Object.keys(before)).toContain(lockName)
-    // No catalog component is unavailable in glass now; an id outside the catalog still takes the refusal path,
-    // as a whole, with --yes.
-    const refused = await command(['add', 'button', 'unknown-component', '--yes'])
+    // The catalog check runs before style support in every family, so the typo is not reported as
+    // STYLE_UNAVAILABLE, and the whole add is refused, even with --yes.
+    const refused = await command(['add', 'button', 'unknown-component', 'buton', '--yes'])
     expect(refused.code, refused.output).toBe(2)
-    expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    // The message names the id; its "is unavailable" wording is not asserted.
-    expect(String(jsonRecord(jsonRecord(refused.data).error).message).toLowerCase()).toContain('unknown-component')
+    expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({
+      code: 'UNKNOWN_COMPONENT',
+      path: '/componentIds',
+      message: 'Unknown components: unknown-component, buton (did you mean button?)',
+    })
     const after = await snapshotTree(root)
     expect(after).toEqual(before)
     expect(Object.keys(after).some((f) => f.endsWith('/button.tsx'))).toBe(false)

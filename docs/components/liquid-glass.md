@@ -211,7 +211,7 @@ The second notice appears only for `add`, the command that writes the filter com
 
 JSON output always includes a `notices` array. It is empty for stable families.
 
-Every catalog component can be planned in a glass project. The refusal remains for a component that a family marks unavailable: planning it fails with `STYLE_UNAVAILABLE` and exit code 2 before any write, the message names the component and lists the experimental glass components, a plan that includes it fails as a whole, and `--yes` does not bypass it. In a glass project an id outside the catalog, such as `add button unknown-component`, takes the same path today.
+Every catalog component can be planned in a glass project. The refusal remains for a component that a family marks unavailable: planning it fails with `STYLE_UNAVAILABLE` and exit code 2 before any write, the message names the component and lists the experimental glass components, a plan that includes it fails as a whole, and `--yes` does not bypass it.
 
 `init` and `theme add` rewrite the tokens and `ui-style.css` only, so they check the managed components recorded in the project lock before any write. `--yes` bypasses neither refusal:
 
