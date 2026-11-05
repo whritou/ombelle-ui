@@ -1,6 +1,6 @@
 # Select
 
-Select is a custom single-value listbox built on the reviewed Radix Select primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable: `add select` in a liquid glass project is refused with `STYLE_UNAVAILABLE` before anything is written. The template is a client component. Use [Native Select](native-select.md) when you need the platform picker, native form autofill, or no JavaScript.
+Select is a custom single-value listbox built on the reviewed Radix Select primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component. Use [Native Select](native-select.md) when you need the platform picker, native form autofill, or no JavaScript.
 
 ## Install and compose
 
@@ -62,3 +62,7 @@ Offset shadows use `var(--shadow-color, var(--border))`, so dark ombelle and neo
 Compilation emits `components/ui/select.tsx`, `components/ui/select.css` and `examples/select.tsx` plus the shared utility and theme files. Adding Select does not change existing artifacts. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-select 2.4.1 (MIT), clsx 2.1.1, tailwind-merge 3.7.0 and lucide-react 1.55.0.
 
 Catalog, compiler and preview checks cover this slice; see [the batch 1 verification record](../evidence/next-components-batch-1.md). Consumer-matrix rows, the browser e2e suite, and human NVDA and VoiceOver review are pending.
+
+## Liquid glass
+
+In liquid glass, the trigger is the Input field surface with a `foreground` value, a `mutedForeground` placeholder and a static `mutedForeground` chevron (the kit does not turn it). The list is the Dropdown Menu glass surface: nested glass inside it drops its own blur, and it animates only while open. Option text is `foreground`. A highlighted option is its own glass surface: `popover` with `primary` 18% light / 22% dark mixed in, painted at the nested glass coverage (`--glass-nested-opacity`) under the sheen, which is exactly the tinted pair the contrast bound checks for its text and its hint, over any pixel of the list beneath. The selected option is weight 600 with the check, and a disabled option is `mutedForeground`. Reduced transparency mixes the highlight into an opaque `popover`; forced colours use `Field`, `Highlight` and `GrayText`, and the check stays visible. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.

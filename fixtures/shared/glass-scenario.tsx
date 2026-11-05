@@ -41,14 +41,9 @@ const backdrops = [
   },
 ] as const
 
-const unavailable = [
-  'checkbox',
-  'input',
-  'label',
-  'native-select',
-  'switch',
-  'textarea',
-] as const
+// The fixture writers replace GLASS_UNAVAILABLE with the components the support table marks unavailable in
+// liquid glass (componentsWithStyleSupport), comma-separated.
+const unavailable = 'GLASS_UNAVAILABLE'.split(',').filter(Boolean)
 
 export default function GlassScenario() {
   const [ready, setReady] = React.useState(false)

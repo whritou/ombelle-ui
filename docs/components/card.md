@@ -1,6 +1,6 @@
 # Card
 
-Card groups related presentational content. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes, with default or dense spacing. Liquid glass is unavailable in this slice.
+Card groups related presentational content. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes, with default or dense spacing. Liquid glass is experimental for Card: a translucent root surface with specular sheen and edge light; see [liquid glass](liquid-glass.md).
 
 ## Install and compose
 

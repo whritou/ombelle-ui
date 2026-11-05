@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { glassFailingPairLine } from '../../../../../tests/helpers/glass-readout'
 import {
   canonicalize,
   compile,
@@ -28,12 +29,16 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
     '<section aria-labelledby="glass-limitations-heading"><h2 id="glass-limitations-heading">Liquid glass limitations</h2>',
   )
   for (const item of glassLimitations) expect(html).toContain(`<li>${item}</li>`)
+  // Every form control is experimental in glass now, so the panel no longer claims they are unavailable.
+  expect(glassLimitations).toHaveLength(5)
+  expect(html).not.toContain('form controls other than Input')
+  expect(html).toContain('<summary>5 known limitations</summary>')
   // The supported list follows the contracts' support table, so it names every glass component.
   expect(html).toContain(
-    'Liquid glass is experimental. Alert, Button, Badge, Card, Dialog, Dropdown Menu, Input, Popover, Tabs and Tooltip support it; the other components are unavailable.',
+    'Liquid glass is experimental. Alert, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Native Select, Radio Group, Select, Switch, Tabs, Textarea and Tooltip support it; the other components are unavailable.',
   )
   expect(html).toContain(`role="status" id="${glassReadoutId}"`)
-  expect(html).toContain('Contrast bound passes at glass opacity 0.5')
+  expect(html).toContain('Contrast bound passes at glass opacity 0.57:')
 })
 
 it('names failing pairs and the minimum opacity when the bound fails', () => {
@@ -42,7 +47,8 @@ it('names failing pairs and the minimum opacity when the bound fails', () => {
   )!
   const html = renderToStaticMarkup(<GlassPanel report={report} />)
   expect(html).toContain('Contrast bound fails at glass opacity 0.3')
-  expect(html).toMatch(/light: mutedForeground on card, \d\.\d\d:1 over the darkest filtered backdrop/)
+  // Pairs painted at part of the glass opacity name their coverage.
+  expect(html).toMatch(/light: mutedForeground on background at 55% coverage, \d\.\d\d:1 over the darkest filtered backdrop/)
   expect(html).toContain(`Minimum passing glass opacity: ${report.minimumOpacity}.`)
 })
 
@@ -136,4 +142,11 @@ it('lists the tint in a failing tinted pair', () => {
   // The Button pairs share surface and text; each is listed with its own tint.
   for (const tint of ['primary 26%', 'destructive 16%', 'destructive 24%'])
     expect(html).toContain('light: foreground on card + ' + tint)
+  // Every listed line, tinted, covered or both, matches the pattern the e2e readout check uses.
+  const list = /aria-label="Failing contrast pairs">(.*?)<\/ul>/.exec(html)![1]
+  const lines = [...list.matchAll(/<li>(.*?)<\/li>/g)].map((m) => m[1].replace(/<!-- -->/g, ''))
+  expect(lines.some((line) => line.includes(' + foreground 6% at 60% coverage, '))).toBe(true)
+  expect(lines.some((line) => line.includes(' at 55% coverage, '))).toBe(true)
+  expect(lines.some((line) => !line.includes(' + ') && !line.includes(' coverage, '))).toBe(true)
+  for (const line of lines) expect(line).toMatch(glassFailingPairLine)
 })

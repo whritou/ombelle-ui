@@ -46,7 +46,7 @@ describe('Radio Group catalog contract', () => {
         "[data-slot='radio-group-option']:has([data-slot='radio-group-item'][data-state='checked'])",
         "[data-slot='radio-group-option']:has([data-slot='radio-group-item'][data-disabled])",
       ],
-      glass: 'unavailable',
+      glass: 'experimental',
     })
   })
 

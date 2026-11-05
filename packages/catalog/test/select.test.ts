@@ -60,7 +60,7 @@ describe('Select catalog contract', () => {
         "[data-slot='select-item-hint']",
         "[data-slot='select-separator']",
       ],
-      glass: 'unavailable',
+      glass: 'experimental',
     })
   })
 

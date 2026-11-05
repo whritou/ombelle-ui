@@ -16,11 +16,18 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'button',
   'badge',
   'card',
+  'checkbox',
   'dialog',
   'dropdown-menu',
   'input',
+  'label',
+  'native-select',
   'popover',
+  'radio-group',
+  'select',
+  'switch',
   'tabs',
+  'textarea',
   'tooltip',
 ])
 

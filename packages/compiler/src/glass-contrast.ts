@@ -9,6 +9,8 @@ export type GlassContrastPair = {
   text: ColorKey
   /** The tint mixed into the surface, with the amount resolved for this mode. */
   tint?: { color: ColorKey; amount: number }
+  /** The share of the glass opacity the surface covers, when it is less than 1. */
+  coverage?: number
   /** Over the darkest backdrop the glass filter can produce, without sheen. */
   ratioOverBlack: number
   /** Over the brightest filtered backdrop, under the full sheen. */
@@ -23,6 +25,14 @@ export type GlassPairSpec = {
   surface: ColorKey
   text: ColorKey
   tint?: GlassTint
+  /**
+   * Fraction in 0..1 of the glass opacity the surface paints at top level, as in
+   * calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%).
+   * Defaults to 1. Nested glass replaces the whole product with
+   * --glass-nested-opacity, and the opaque fallback and reduced transparency
+   * paint the surface whole, so all three ignore it.
+   */
+  coverage?: number
 }
 export type GlassBackdrop = {
   /** CSS saturate(), contrast() and brightness() amounts, in filter order. */
@@ -73,6 +83,17 @@ export const glassTints = {
 } as const
 /** Points a Button hover adds to the resting tint (`+ 8%` in the stylesheet). */
 export const glassHoverTint = 0.08
+/** Fields paint the background token at 55% of the glass opacity at top level. */
+export const glassFieldCoverage = 0.55
+/** Outline Buttons paint the background token at 60% of the glass opacity at top level. */
+export const glassOutlineCoverage = 0.6
+/** Checked Checkbox and Radio Group controls paint the tinted card at 80% of the glass opacity at top level. */
+export const glassCheckedControlCoverage = 0.8
+/**
+ * Radio Group option rows paint the field surface (background at 55%) when unchecked, so the field pairs bound their
+ * label and description; checked rows paint the resting tint at 78%, the lowest coverage at which their text passes.
+ */
+export const glassCheckedOptionCoverage = 0.78
 /** The neutral `foreground` tint secondary and outline Buttons gain on hover (6% in the stylesheet). */
 export const glassNeutralHoverTint = 0.06
 
@@ -83,6 +104,13 @@ const tintPairs = (color: keyof typeof glassTints): GlassPairSpec[] => {
     { surface: 'card', text: 'foreground', tint: { color, ...rest } },
     { surface: 'card', text: 'foreground', tint: { color, light: hover(rest.light), dark: hover(rest.dark) } },
   ]
+}
+const primaryRest: GlassTint = { color: 'primary', ...glassTints.primary }
+// Checked controls take the Button hover tint: the resting tint + 8 points.
+const primaryChecked: GlassTint = {
+  color: 'primary',
+  light: Math.round((glassTints.primary.light + glassHoverTint) * 100) / 100,
+  dark: Math.round((glassTints.primary.dark + glassHoverTint) * 100) / 100,
 }
 const neutralHover: GlassTint = { color: 'foreground', light: glassNeutralHoverTint, dark: glassNeutralHoverTint }
 
@@ -100,11 +128,26 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   ...tintPairs('destructive'),
   // Secondary at rest and ghost on hover: foreground on untinted card glass.
   { surface: 'card', text: 'foreground' },
-  // Secondary and outline hover: a 6% foreground tint on card and background glass.
-  // Outline glass covers only 60% of the glass opacity; the bound checks it at full
-  // coverage until pairs carry a coverage field.
+  // Secondary hover: a 6% foreground tint on card glass.
   { surface: 'card', text: 'foreground', tint: neutralHover },
-  { surface: 'background', text: 'foreground', tint: neutralHover },
+  // Outline at rest and on hover: background glass at 60% of the glass opacity.
+  { surface: 'background', text: 'foreground', coverage: glassOutlineCoverage },
+  { surface: 'background', text: 'foreground', tint: neutralHover, coverage: glassOutlineCoverage },
+  // Fields: the value and placeholder on background glass at 55% of the glass opacity.
+  { surface: 'background', text: 'foreground', coverage: glassFieldCoverage },
+  { surface: 'background', text: 'mutedForeground', coverage: glassFieldCoverage },
+  // Error messages beside a field sit on the card glass that holds the form.
+  { surface: 'card', text: 'destructive' },
+  // Checked Checkbox and Radio: the foreground mark or dot on the checked tint at 80% coverage.
+  { surface: 'card', text: 'foreground', tint: primaryChecked, coverage: glassCheckedControlCoverage },
+  // Checked Radio Group option rows: the label and description on the resting primary tint at 78%.
+  // Unchecked rows are the field surface, bounded by the field pairs above.
+  { surface: 'card', text: 'foreground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
+  { surface: 'card', text: 'mutedForeground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
+  // Select highlighted option: foreground on the popover glass under the resting primary tint.
+  { surface: 'popover', text: 'foreground', tint: primaryRest },
+  // Its hint (select-item-hint) on the highlighted row: mutedForeground under the same tint.
+  { surface: 'popover', text: 'mutedForeground', tint: primaryRest },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
@@ -261,6 +304,9 @@ type Resolved = {
   surface: ColorKey
   text: ColorKey
   tint?: { color: ColorKey; amount: number }
+  /** The declared coverage, or 1 when the surface is opaque under reduced transparency. */
+  coverage: number
+  declaredCoverage?: number
   surfaceColor: Color
   textColor: Color
   textLum: number
@@ -275,7 +321,8 @@ function resolve(
   for (const mode of ['light', 'dark'] as const) {
     const colors = data.modes[mode] as Record<string, string>
     const backdrop = glassBackdrop(data.design, mode)
-    for (const { surface, text, tint } of specs) {
+    const reduced = data.design?.transparency === 'reduced'
+    for (const { surface, text, tint, coverage } of specs) {
       const textColor = parseColor(colors[text])
       const base = parseColor(colors[surface])
       const amount = tint?.[mode]
@@ -286,6 +333,8 @@ function resolve(
         ...(tint && amount !== undefined
           ? { tint: { color: tint.color, amount } }
           : {}),
+        coverage: reduced ? 1 : (coverage ?? 1),
+        ...(coverage !== undefined && coverage !== 1 ? { declaredCoverage: coverage } : {}),
         surfaceColor:
           tint && amount !== undefined
             ? mixTint(base, parseColor(colors[tint.color]), amount)
@@ -300,19 +349,21 @@ function resolve(
 }
 
 // A translucent surface token stacks with the glass opacity: color-mix keeps
-// the token's own alpha, so the effective coverage is opacity * alpha.
+// the token's own alpha, so the effective coverage is opacity * coverage * alpha.
 const filtered = (r: Resolved, opacity: number) =>
   bound(
     r.surfaceColor,
     r.textLum,
-    opacity * r.surfaceColor.alpha,
+    opacity * r.coverage * r.surfaceColor.alpha,
     r.backdrop.low,
     r.backdrop.high,
     r.backdrop.sheen,
   )
 // Nested glass drops its own filter and sees the raw backdrop: any 0..1 pixel.
-// Passing here at some coverage also passes the opaque fallback, whose painted
-// luminance lies inside the same interval.
+// A covered surface nested in glass paints at the full nested opacity (its CSS
+// fallback carries the coverage), so coverage does not enter here. Passing at
+// some coverage also passes the opaque fallback, whose painted luminance lies
+// inside the same interval.
 const raw = (r: Resolved, opacity: number) =>
   bound(r.surfaceColor, r.textLum, opacity * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
 // Translucent text takes on the backdrop too; it is never bounded.
@@ -356,6 +407,7 @@ export function glassContrastReportFor(
       surface: r.surface,
       text: r.text,
       ...(r.tint ? { tint: r.tint } : {}),
+      ...(r.declaredCoverage !== undefined ? { coverage: r.declaredCoverage } : {}),
       ratioOverBlack: glass.overDarkest,
       ratioOverWhite: glass.overBrightest,
       ratioOpaque: Math.min(opaque.overDarkest, opaque.overBrightest),

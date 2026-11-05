@@ -1,0 +1,125 @@
+/* liquid-glass Switch (experimental): a card-glass track with a 10% foreground film; on takes the primary tint and rim.
+   The thumb is solid white with a shadow, so its position reads over any backdrop. Without backdrop-filter the track is opaque. */
+[data-slot='switch'] {
+  --glass-tint: var(--foreground);
+  --glass-tint-amount: 10%;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  flex-shrink: 0;
+  inline-size: 2.75rem;
+  block-size: 1.625rem;
+  padding: 0;
+  border: var(--border-width) solid var(--input);
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+  color: var(--foreground);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.1);
+  cursor: pointer;
+  transition: background-color var(--motion-duration), border-color var(--motion-duration), box-shadow var(--motion-duration);
+}
+[data-slot='switch'][data-state='unchecked'] {
+  --glass-tint: var(--foreground);
+  --glass-tint-amount: 10%;
+}
+/* The glow's offset follows the shadow offset (0 4px 10px -6px at 0 / 12). */
+[data-slot='switch'][data-state='checked'] {
+  --glass-tint: var(--primary);
+  --glass-tint-amount: calc(var(--glass-primary-tint) + 8%);
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.1),
+    calc(var(--shadow-x) * 0.333) calc(var(--shadow-y) * 0.333) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 0.833) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -0.5) color-mix(in srgb, var(--primary) 70%, transparent);
+}
+[data-slot='switch-thumb'] {
+  box-sizing: border-box;
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-start: 2px;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3), inset 0 -1px 0 rgb(0 0 0 / 0.06);
+  pointer-events: none;
+  transition: inset-inline-start var(--motion-duration);
+}
+[data-slot='switch-thumb'][data-state='checked'] {
+  inset-inline-start: calc(100% - 1.25rem - 2px);
+}
+[data-slot='switch']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='switch']:disabled,
+[data-slot='switch'][data-disabled] {
+  opacity: 0.5;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* One surface rule: the tint is mixed into the card, then the track covers 55% of the glass opacity off and 85% on.
+     Nested in glass it paints at the full nested opacity. */
+  [data-slot='switch'] {
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  [data-slot='switch'][data-state='checked'] {
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.85)) * 100%), transparent);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='switch'],
+    [data-slot='switch'][data-state='checked'] {
+      background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='switch'],
+    [data-slot='switch'][data-state='checked'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+/* Forced colours: the thumb's position shows the state; on also takes a Highlight edge. */
+@media (forced-colors: active) {
+  [data-slot='switch'],
+  [data-slot='switch'][data-state='unchecked'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+  [data-slot='switch'][data-state='checked'] {
+    background: Canvas;
+    border-color: Highlight;
+    box-shadow: none;
+  }
+  [data-slot='switch-thumb'] {
+    background: CanvasText;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+  [data-slot='switch']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='switch']:disabled,
+  [data-slot='switch'][data-disabled] {
+    color: GrayText;
+    border-color: GrayText;
+  }
+  [data-slot='switch-thumb'][data-disabled] {
+    background: GrayText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='switch'],
+  [data-slot='switch-thumb'] {
+    transition: none;
+  }
+}

@@ -84,6 +84,7 @@ export function ProjectSummary() {
   },
   checkbox: {
     name: 'Checkbox',
+    glassMinimumCli: '0.5.0',
     description: 'A Radix checkbox with checked, unchecked and mixed states.',
     api: 'checked (true, false, "indeterminate"), onCheckedChange, disabled, name, value, required',
     states: 'Unchecked, checked, mixed, focus, invalid',
@@ -145,6 +146,7 @@ export function EmailField() {
   },
   label: {
     name: 'Label',
+    glassMinimumCli: '0.5.0',
     description: 'Names a form control with a native label element.',
     api: 'htmlFor and native label props',
     states: 'Default, required indication',
@@ -166,6 +168,7 @@ export function ProjectName() {
   },
   'native-select': {
     name: 'Native Select',
+    glassMinimumCli: '0.5.0',
     description: "Styles the browser's own select control.",
     api: 'NativeSelect, NativeSelectOption, NativeSelectOptGroup, native select props',
     states: 'Default, selected, focus, invalid, disabled',
@@ -193,6 +196,7 @@ export function RegionField() {
   },
   switch: {
     name: 'Switch',
+    glassMinimumCli: '0.5.0',
     description: 'A Radix switch for on/off settings.',
     api: 'Switch (checked, onCheckedChange, name, value), SwitchThumb',
     states: 'Off, on, focus, disabled',
@@ -235,6 +239,7 @@ export function ProjectSections() {
   },
   textarea: {
     name: 'Textarea',
+    glassMinimumCli: '0.5.0',
     description: 'A native multi-line text control.',
     api: 'Native textarea props, aria-invalid, disabled',
     states: 'Empty, filled, focus, invalid, disabled',
@@ -279,6 +284,7 @@ export function ProjectHelp() {
   },
   select: {
     name: 'Select',
+    glassMinimumCli: '0.5.0',
     description: 'A custom listbox for choosing one value, with typeahead and keyboard navigation.',
     api: 'Select, SelectTrigger (size), SelectValue, SelectContent (position), SelectGroup, SelectLabel, SelectItem (hint), SelectSeparator',
     states: 'Open, highlighted, selected, disabled, invalid, focus',
@@ -304,6 +310,7 @@ export function RolePicker() {
   },
   'radio-group': {
     name: 'Radio Group',
+    glassMinimumCli: '0.5.0',
     description: 'Picks one option from a set, as plain radios or selectable option rows.',
     api: 'RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionLabel, RadioGroupOptionDescription',
     states: 'Checked, unchecked, disabled, invalid, focus',

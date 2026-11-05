@@ -56,6 +56,9 @@ const allowedMediaConditions = [
 // The single reviewed liquid-glass feature query; compared whitespace-normalized.
 const glassSupportsCondition =
   '((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))'
+// The family's glass filter chain, which nested glass replaces through --glass-inner-filter.
+const glassFilter =
+  'var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)))'
 const normalizeConditionParams = (params: string) =>
   params
     .replace(/\s+/g, ' ')
@@ -247,6 +250,7 @@ export function compileScopedButtonStyles(input: {
   const variant = input.variant ?? 'default'
   const colorTokens = recipeColorTokens[variant]
   const paint: Record<string, string> = {}
+  let glassPaint = ''
   const colors = input.overrides.colors
   if (colors) {
     for (const mode of recipeColorModes) {
@@ -267,12 +271,66 @@ export function compileScopedButtonStyles(input: {
     // Glass Buttons are one ink: every label reads --foreground, so a foreground override is
     // painted for every variant, and secondary card glass reads the overridden token as its card.
     const glass = data.styleFamily === 'liquid-glass'
+    // Glass outline and ghost overrides replace the colour of the glass mix, not the glass:
+    // outline is the override at the outline's coverage (its hover tint still mixes in), ghost
+    // is the ghost hover surface in the override colour. Without backdrop filters and under
+    // reduced transparency the override stays opaque.
+    if (glass && set('background') && (variant === 'outline' || variant === 'ghost')) {
+      const token = 'var(' + variable(colorTokens.background) + ')'
+      const opaque =
+        variant === 'outline'
+          ? 'color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), ' + token + ')'
+          : token
+      paint.background = opaque
+      const selector = scope + '[data-variant="' + variant + '"]'
+      const surface: Record<string, string> =
+        variant === 'outline'
+          ? {
+              background:
+                'linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, ' +
+                opaque +
+                ' calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.6)) * 100%), transparent)',
+            }
+          : {
+              background:
+                'color-mix(in srgb, ' +
+                token +
+                ' calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent)',
+              '-webkit-backdrop-filter': glassFilter,
+              'backdrop-filter': glassFilter,
+            }
+      // A ghost mode without its own override keeps ghost's rest: no surface and no filter.
+      const lightOnly = colors.dark?.background === undefined
+      const darkOnly = colors.light?.background === undefined
+      const surfaceSelector =
+        variant === 'ghost' && lightOnly
+          ? selector + ':not(' + dark + ',' + dark + ' *)'
+          : variant === 'ghost' && darkOnly
+            ? dark + ' ' + selector + ',' + dark + selector
+            : selector
+      glassPaint =
+        '@supports ' +
+        glassSupportsCondition +
+        '{' +
+        block(surfaceSelector, surface) +
+        '@media (prefers-reduced-transparency: reduce){' +
+        block(selector, {
+          background: opaque,
+          '-webkit-backdrop-filter': 'none',
+          'backdrop-filter': 'none',
+        }) +
+        '}}' +
+        '@media (forced-colors: active){' +
+        block(selector, { background: 'ButtonFace' }) +
+        '}'
+    }
     if (set('foreground') && (variant === 'outline' || variant === 'link' || glass))
       paint.color = 'var(' + variable(colorTokens.foreground) + ')'
     if (glass && set('background') && variant === 'secondary')
       paint['--card'] = 'var(' + variable(colorTokens.background) + ')'
-    // Glass paints the label from --foreground and the secondary surface from --card, so a
-    // mode without its own override keeps what glass draws there, not the solid-fill token.
+    // Glass paints the label from --foreground, the secondary surface from --card, outline from
+    // --background and ghost with no surface, so a mode without its own override keeps what glass
+    // draws there, not the solid-fill token.
     if (glass)
       for (const mode of recipeColorModes) {
         const target = mode === 'light' ? light : darkTokens
@@ -280,6 +338,12 @@ export function compileScopedButtonStyles(input: {
           target[variable(colorTokens.foreground)] = target['--foreground']
         if (variant === 'secondary' && set('background') && colors[mode]?.background === undefined)
           target[variable(colorTokens.background)] = target['--card']
+        // Glass outline is background glass, so its card token falls back to that mode's background;
+        // ghost has no surface at rest, so its background token falls back to transparent.
+        if (variant === 'outline' && set('background') && colors[mode]?.background === undefined)
+          target[variable(colorTokens.background)] = target['--background']
+        if (variant === 'ghost' && set('background') && colors[mode]?.background === undefined)
+          target[variable(colorTokens.background)] = 'transparent'
       }
     if (set('border'))
       paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
@@ -352,6 +416,7 @@ export function compileScopedButtonStyles(input: {
     tokens +
     root.toString() +
     painted +
+    glassPaint +
     block(scope, {
       ...overrides,
       'white-space': 'normal',

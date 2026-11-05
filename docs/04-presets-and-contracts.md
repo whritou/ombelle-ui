@@ -35,7 +35,7 @@ Eight `design` fields apply only when `styleFamily` is `liquid-glass`; the other
 | --- | --- |
 | `transparency` | `auto` (default) renders translucent surfaces; `reduced` renders every glass surface opaque with no blur, filter, or sheen |
 | `glassBlurPx` | Backdrop blur radius from 0 to 40 pixels; default 12. The built-in glass preset uses 8 |
-| `glassOpacity` | Surface opacity from 0.25 to 1: the share of the surface colour in an sRGB mix with the filtered backdrop; default 1. The built-in glass preset uses 0.5 |
+| `glassOpacity` | Surface opacity from 0.25 to 1: the share of the surface colour in an sRGB mix with the filtered backdrop; default 1. The built-in glass preset uses 0.57 |
 | `glassSaturation` | `saturate()` amount from 1 to 2; default 1.4. Built-in 2 |
 | `glassBackdropContrast` | `contrast()` amount from 0.3 to 1 that compresses the backdrop's channel range; default 1 (none). Built-in 0.45 |
 | `glassBackdropTone` | From 0 to 0.6: the backdrop's `brightness()` is `1 + tone` in light mode and `1 − tone` in dark mode, pushing it toward the mode's surfaces; default 0. Built-in 0.4 |

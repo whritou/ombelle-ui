@@ -1,13 +1,12 @@
 import type { GlassContrastReport } from '@ombelle/compiler'
 import { glassComponentList } from '../../site/components/catalog'
 
-// From docs/superpowers/specs/2026-11-03-liquid-glass-design.md, updated when Input became experimental.
+// From docs/superpowers/specs/2026-11-03-liquid-glass-design.md, updated when the form controls became experimental.
 export const glassLimitations = [
   'no mid-range mobile scrolling measurement',
   'no human visual, keyboard or screen-reader review',
   'the contrast guarantee covers the declared text pairs, not consumer content placed on glass',
   'browsers outside the recorded run were not tested',
-  'form controls other than Input are unavailable',
   'the hosted snapshot service must be redeployed before glass codes resolve publicly',
 ] as const
 export const glassReadoutId = 'glass-contrast-readout'
@@ -66,12 +65,15 @@ export function GlassContrastReadout({
                   pair.mode +
                   pair.surface +
                   pair.text +
-                  (pair.tint ? pair.tint.color + pair.tint.amount : '')
+                  (pair.tint ? pair.tint.color + pair.tint.amount : '') +
+                  (pair.coverage ?? '')
                 }
               >
                 {pair.mode}: {pair.text} on {pair.surface}
                 {pair.tint &&
                   ` + ${pair.tint.color} ${Math.round(pair.tint.amount * 100)}%`}
+                {pair.coverage !== undefined &&
+                  ` at ${Math.round(pair.coverage * 100)}% coverage`}
                 , {ratio(value)}:1 {where}
               </li>
             )

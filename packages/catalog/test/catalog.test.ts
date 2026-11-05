@@ -407,6 +407,7 @@ describe('catalog contract', () => {
         'minimalist',
         'neo-brutalism',
         'ombelle',
+        'liquid-glass',
       ])
       for (const family of supportedStyleFamilies)
         expect(template.styles?.[family]).toContain(
@@ -532,7 +533,7 @@ describe('catalog contract', () => {
     expect(preset).toMatchObject({
       id: 'builtin-liquid-glass',
       styleFamily: 'liquid-glass',
-      design: { transparency: 'auto', glassBlurPx: 3, glassOpacity: 0.5, radiusRem: 0.75 },
+      design: { transparency: 'auto', glassBlurPx: 3, glassOpacity: 0.57, radiusRem: 0.75 },
       componentDefaults: { button: { variant: 'default', size: 'default' } },
     })
     expect(c.styles['liquid-glass']).toContain('liquid-glass family')
@@ -540,7 +541,22 @@ describe('catalog contract', () => {
       supportedComponentIds.filter(
         (id) => c.templates[id].styles?.['liquid-glass'] !== undefined,
       ),
-    ).toEqual(['alert', 'badge', 'card', 'dropdown-menu', 'popover', 'tabs', 'tooltip'])
+    ).toEqual([
+      'alert',
+      'badge',
+      'card',
+      'checkbox',
+      'dropdown-menu',
+      'label',
+      'popover',
+      'native-select',
+      'radio-group',
+      'select',
+      'switch',
+      'tabs',
+      'textarea',
+      'tooltip',
+    ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)
         for (const family of supportedStyleFamilies)

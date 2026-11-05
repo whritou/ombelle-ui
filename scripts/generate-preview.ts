@@ -54,6 +54,7 @@ async function writeFamily(family: PreviewFamily) {
     'utf8',
   ))
     .replaceAll('STYLE_FAMILY', family)
+    .replaceAll('GLASS_UNAVAILABLE', componentsWithStyleSupport(family, ['unavailable']).join(','))
     .replaceAll('@/components/ui', './components/ui')
   await fs.writeFile(root + '/scenario.tsx', scenario)
   if (!glass) {

@@ -1,6 +1,6 @@
 # Radio Group
 
-Radio Group picks one value from a set, built on the reviewed Radix Radio Group primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable. The template is a client component.
+Radio Group picks one value from a set, built on the reviewed Radix Radio Group primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 
@@ -76,3 +76,7 @@ Option rows are styled through `:has()` on the checked or disabled radio. Radios
 Compilation emits `components/ui/radio-group.tsx`, `components/ui/radio-group.css` and `examples/radio-group.tsx`. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-radio-group 1.5.1 (MIT), clsx 2.1.1 and tailwind-merge 3.7.0.
 
 See [the batch 1 verification record](../evidence/next-components-batch-1.md). Consumer-matrix rows, the browser e2e suite, and human screen-reader review are pending.
+
+## Liquid glass
+
+In liquid glass, radios are field glass with the `input` border; checked is `card` + `primary` 26% / 30% at 80% coverage with a `primary` rim at 60%, a glow and a `foreground` dot. Unchecked option rows are the field surface (`background` at 55%), so the field pairs bound their label and description. A checked row is `card` + `primary` 18% / 22% at 78% coverage with a `primary` rim at 55%; 78% is the lowest coverage at which its `mutedForeground` description passes in dark mode with the built-in preset, and it passes at exactly 4.50:1. Both row coverages are denser than the kit tile's 40% and 70%. Disabled rows are dashed at 55% opacity. In forced colours the checked row and radio take a `Highlight` edge and the dot is `CanvasText`. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.

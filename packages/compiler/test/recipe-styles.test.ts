@@ -211,8 +211,8 @@ it('scoped glass tokens', async () => {
     '--glass-contrast': '0.45',
     '--glass-destructive-tint': '16%',
     '--glass-highlight': 'color-mix(in srgb, white 60%, transparent)',
-    '--glass-nested-opacity': '0.7',
-    '--glass-opacity': '0.5',
+    '--glass-nested-opacity': '0.69',
+    '--glass-opacity': '0.57',
     '--glass-primary-tint': '18%',
     '--glass-saturation': '2',
     '--glass-sheen': '0.25',
@@ -225,7 +225,7 @@ it('scoped glass tokens', async () => {
     '--glass-brightness': '0.6',
     '--glass-destructive-tint': '20%',
     '--glass-highlight': 'color-mix(in srgb, white 20%, transparent)',
-    '--glass-nested-opacity': '0.9',
+    '--glass-nested-opacity': '0.92',
     '--glass-primary-tint': '22%',
     '--glass-sheen': '0.0625',
   })
@@ -526,4 +526,71 @@ it('a one-mode glass secondary background override leaves the other mode on card
   expect(lightOnly.dark['--secondary']).toBe(lightOnly.dark['--card'])
   const darkOnly = await colorCss('liquid-glass', 'secondary', { dark: { background: '#223344' } })
   expect(darkOnly.light['--secondary']).toBe(darkOnly.light['--card'])
+})
+it.each(['outline', 'ghost'] as const)(
+  'a glass %s background override replaces the colour of the glass mix instead of painting it solid',
+  async (variant) => {
+    const { css, paint } = await colorCss('liquid-glass', variant, { light: { background: '#ff0000' }, dark: { background: '#00ff00' } })
+    const token = variant === 'outline' ? 'var(--card)' : 'var(--background)'
+    // Without backdrop filters the override is opaque; outline keeps its hover tint.
+    expect(paint).toEqual({
+      background: variant === 'outline' ? `color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), ${token})` : token,
+    })
+    const selector = `${colorSelector}[data-variant="${variant}"]`
+    const inSupports = (media?: string) => {
+      const out: Record<string, string> = {}
+      postcss.parse(css).walkRules((rule) => {
+        if (rule.selector !== selector) return
+        const parent = rule.parent
+        const supports = media ? parent?.parent : parent
+        if (supports?.type !== 'atrule' || (supports as postcss.AtRule).name !== 'supports') return
+        if (media && (parent as postcss.AtRule).params !== media) return
+        if (!media && supports.parent?.type !== 'root') return
+        rule.walkDecls((d) => {
+          out[d.prop] = d.value.replace(/\s+/g, '')
+        })
+      })
+      return out
+    }
+    const glass = inSupports()
+    if (variant === 'outline')
+      expect(glass.background).toBe(
+        'linear-gradient(tobottom,color-mix(insrgb,whitecalc(var(--glass-sheen)*100%),transparent),transparent60%),' +
+          'color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.6))*100%),transparent)',
+      )
+    else {
+      // The ghost hover surface, in the override colour.
+      expect(glass.background).toBe(
+        'color-mix(insrgb,var(--background)calc(var(--glass-inner-opacity,var(--glass-opacity))*100%),transparent)',
+      )
+      expect(glass['backdrop-filter']).toContain('var(--glass-inner-filter,')
+    }
+    expect(inSupports('(prefers-reduced-transparency: reduce)')).toMatchObject({
+      background: paint.background.replace(/\s+/g, ''),
+      'backdrop-filter': 'none',
+    })
+    // The paint follows the family's glass rules, so it wins at equal specificity.
+    expect(css.lastIndexOf('@supports')).toBeGreaterThan(css.indexOf(`${selector}{background:`))
+  },
+)
+it('a one-mode glass outline background override leaves the other mode on background glass', async () => {
+  const lightOnly = await colorCss('liquid-glass', 'outline', { light: { background: '#ff0000' } })
+  expect(lightOnly.light['--card']).toBe('#ff0000')
+  // Outline glass reads the overridden card token, which in dark falls back to the dark background.
+  expect(lightOnly.dark['--card']).toBe(lightOnly.dark['--background'])
+  const darkOnly = await colorCss('liquid-glass', 'outline', { dark: { background: '#ff0000' } })
+  expect(darkOnly.light['--card']).toBe(darkOnly.light['--background'])
+})
+it('a one-mode glass ghost background override leaves the other mode with no surface at rest', async () => {
+  const selector = `${colorSelector}[data-variant="ghost"]`
+  const lightOnly = await colorCss('liquid-glass', 'ghost', { light: { background: '#ff0000' } })
+  expect(lightOnly.light['--background']).toBe('#ff0000')
+  expect(lightOnly.dark['--background']).toBe('transparent')
+  // The glass surface and its filter apply only in the overridden mode.
+  const flat = lightOnly.css.replace(/\s+/g, '')
+  expect(flat).toContain(`${selector}:not(.dark,.dark*){-webkit-backdrop-filter:var(--glass-inner-filter,`)
+  expect(flat).not.toContain(`${selector}{-webkit-backdrop-filter:var(--glass-inner-filter,`)
+  const darkOnly = await colorCss('liquid-glass', 'ghost', { dark: { background: '#ff0000' } })
+  expect(darkOnly.light['--background']).toBe('transparent')
+  expect(darkOnly.css.replace(/\s+/g, '')).toContain(`.dark${selector},.dark${selector}{-webkit-backdrop-filter:var(--glass-inner-filter,`)
 })

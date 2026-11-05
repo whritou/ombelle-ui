@@ -1,0 +1,130 @@
+/* liquid-glass Checkbox (experimental): a field-glass box; checked and indeterminate take the primary tint and rim,
+   and the mark stays foreground ink. Without backdrop-filter both surfaces are opaque. */
+[data-slot='checkbox'] {
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  padding: 0;
+  border: var(--border-width) solid var(--input);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: inset 0 -1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent));
+  cursor: pointer;
+  transition: background-color var(--motion-duration), border-color var(--motion-duration), box-shadow var(--motion-duration);
+}
+/* The glow's offset follows the shadow offset (0 4px 10px -6px at 0 / 12). */
+[data-slot='checkbox'][data-state='checked'],
+[data-slot='checkbox'][data-state='indeterminate'] {
+  --glass-tint: var(--primary);
+  --glass-tint-amount: calc(var(--glass-primary-tint) + 8%);
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
+    calc(var(--shadow-x) * 0.333) calc(var(--shadow-y) * 0.333) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 0.833) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -0.5) color-mix(in srgb, var(--primary) 70%, transparent);
+}
+[data-slot='checkbox-indicator'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  pointer-events: none;
+}
+[data-slot='checkbox-indicator'] svg {
+  inline-size: 0.8125rem;
+  block-size: 0.8125rem;
+  stroke-width: 3;
+}
+[data-slot='checkbox-indicator'][data-state='checked'] [data-checkbox-mark='indeterminate'],
+[data-slot='checkbox-indicator'][data-state='indeterminate'] [data-checkbox-mark='checked'] {
+  display: none;
+}
+[data-slot='checkbox']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='checkbox'][aria-invalid='true'] {
+  border-color: var(--destructive);
+  border-width: max(var(--border-width), 2px);
+}
+[data-slot='checkbox']:disabled,
+[data-slot='checkbox'][data-disabled] {
+  opacity: 0.5;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* Unchecked is field glass: background at 55% of the glass opacity. Checked is the tinted card at 80%;
+     the mark is the declared foreground pair at that coverage. Nested in glass both paint at the full nested opacity. */
+  [data-slot='checkbox'] {
+    background: color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  [data-slot='checkbox'][data-state='checked'],
+  [data-slot='checkbox'][data-state='indeterminate'] {
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.8)) * 100%), transparent);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='checkbox'] {
+      background: var(--background);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    [data-slot='checkbox'][data-state='checked'],
+    [data-slot='checkbox'][data-state='indeterminate'] {
+      background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='checkbox'],
+    [data-slot='checkbox'][data-state='checked'],
+    [data-slot='checkbox'][data-state='indeterminate'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+/* Forced colours: the mark shows the state; checked boxes also take a Highlight edge. */
+@media (forced-colors: active) {
+  [data-slot='checkbox'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+  [data-slot='checkbox'][data-state='checked'],
+  [data-slot='checkbox'][data-state='indeterminate'] {
+    background: Canvas;
+    border-color: Highlight;
+    box-shadow: none;
+  }
+  [data-slot='checkbox-indicator'] {
+    color: CanvasText;
+  }
+  [data-slot='checkbox']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='checkbox'][aria-invalid='true'] {
+    border-style: double;
+    border-width: max(var(--border-width), 3px);
+  }
+  [data-slot='checkbox']:disabled,
+  [data-slot='checkbox'][data-disabled] {
+    color: GrayText;
+    border-color: GrayText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='checkbox'] {
+    transition: none;
+  }
+}

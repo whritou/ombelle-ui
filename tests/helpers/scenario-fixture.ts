@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import type { StyleFamily } from '@ombelle/contracts'
+import { componentsWithStyleSupport, type StyleFamily } from '@ombelle/contracts'
 import { writeConsumerComponentPresetFixture } from './component-preset-fixture.js'
 export type ScenarioFixtures = {
   recipes?: boolean
@@ -41,10 +41,9 @@ export async function writeScenarioFixture(
     // The experimental scenario is self-contained: no optional or state fixtures.
     await fs.writeFile(
       path.join(src, 'scenario.tsx'),
-      (await fs.readFile('fixtures/shared/glass-scenario.tsx', 'utf8')).replaceAll(
-        'STYLE_FAMILY',
-        family,
-      ),
+      (await fs.readFile('fixtures/shared/glass-scenario.tsx', 'utf8'))
+        .replaceAll('STYLE_FAMILY', family)
+        .replaceAll('GLASS_UNAVAILABLE', componentsWithStyleSupport(family, ['unavailable']).join(',')),
     )
     return
   }
