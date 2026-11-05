@@ -54,6 +54,8 @@ it('renders the public landing page with editor links and the published installe
   expect(html).toContain('React Native is not supported')
   // Liquid glass is shipped as experimental for six components only.
   expect(html).toContain('Experimental for Button, Badge, Card, Dialog, Tabs and Tooltip')
+  // Components newer than the published installer stay off the home page copy.
+  expect(html).not.toContain('Experimental for Alert')
   expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')
 })

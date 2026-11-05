@@ -1,4 +1,5 @@
 import type { GlassContrastReport } from '@ombelle/compiler'
+import { glassComponentList } from '../../site/components/catalog'
 
 // Verbatim from docs/superpowers/specs/2026-11-03-liquid-glass-design.md.
 export const glassLimitations = [
@@ -79,8 +80,8 @@ export function GlassPanel({ report }: { report: GlassContrastReport | null }) {
       <section aria-labelledby="glass-limitations-heading">
         <h2 id="glass-limitations-heading">Liquid glass limitations</h2>
         <p>
-          Liquid glass is experimental. Button, Badge, Card, Dialog, Tabs and
-          Tooltip support it; the other components are unavailable.
+          Liquid glass is experimental. {glassComponentList()} support it; the
+          other components are unavailable.
         </p>
         <details>
           <summary>{glassLimitations.length} known limitations</summary>
