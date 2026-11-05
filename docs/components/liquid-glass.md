@@ -60,9 +60,12 @@ Liquid glass Buttons were restyled to one ink in 0.5.0. Earlier installers ship 
 - Every label is `var(--foreground)` at weight 600, and the edge is `var(--border-width) solid var(--border)`.
 - Default is card glass tinted with `primary`, with a `primary` rim at 55% and a `primary` glow. Destructive is tinted with `destructive`, with a rim at 60%. The tint amounts are per-mode tokens: `--glass-primary-tint` (18% light, 22% dark) and `--glass-destructive-tint` (16% light, 20% dark). Hover adds 8 points.
 - Secondary is neutral card glass. Outline is `background` glass at 60% of the glass opacity with the `input` border. Ghost has no surface until hover. Link is `foreground` text with a 2px `primary` underline.
+- Sizes follow the kit: default is 40px high with 18px inline padding, `sm` 32px with 12px padding and 13px type, `lg` 48px with 22px padding and 15px type, and link has 6px padding.
 - Hover brightens the top highlight and lengthens the glow; secondary and outline gain a 6% `foreground` tint. Pressed moves 1px down with an inner shade. Focus is a 3px ring offset by 3px; disabled is 50% opacity.
 - Reduced transparency and missing backdrop filters paint the tinted card opaque, with no blur. Forced colours use `ButtonFace` with `ButtonText` text and border; the default variant gets a 3px border.
 - Recipe colour overrides still apply on top: a `foreground` override paints the label of every variant, and a secondary `background` override replaces its card surface.
+
+Screenshots of every variant and state, the other glass components on the kit backdrop and the Button editor with a glass recipe, light and dark: [glass foundation evidence](../evidence/glass-foundation.md).
 
 ## Contrast bound
 
