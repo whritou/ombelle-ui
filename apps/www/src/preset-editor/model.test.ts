@@ -204,7 +204,7 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
     ['/design/glassBackdropContrast', '0.29'],
     ['/design/glassBackdropTone', '0.61'],
     ['/design/glassSaturation', '2.1'],
-    ['/design/glassSheen', '0.51'],
+    ['/design/glassSheen', '1.01'],
     ['/design/glassRim', '-0.1'],
     ['/design/glassBlurPx', ''],
     ['/design/transparency', 'none'],
