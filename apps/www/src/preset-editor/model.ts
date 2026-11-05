@@ -250,7 +250,9 @@ export function applyGlassTint(input: PresetEditorDraft, tint: GlassTintId | 'wh
     for (const key of tintKeys) {
       const value = (palette[mode] as Record<string, string | undefined>)[key]
       if (value !== undefined) set(mode, key, value)
-      else if (key === 'destructive') set(mode, key, base.modes[mode].destructive)
+      // Fumée's light mode keeps the dark palette's error colour it just copied.
+      else if (key === 'destructive' && !(mode === 'light' && palette.lightUsesDarkPalette))
+        set(mode, key, base.modes[mode].destructive)
     }
   }
   return validateDraftEnvelope({ ...draft, edits })

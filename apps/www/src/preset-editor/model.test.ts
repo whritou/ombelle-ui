@@ -318,3 +318,16 @@ it('tint chips write veil, ink and accent for both modes', () => {
   const smoke = materializePreset(applyGlassTint(createPresetDraft('liquid-glass'), 'smoke'))
   expect(smoke.modes.light).toMatchObject({ card: '#091127', cardForeground: '#F0F7FF', background: smoke.modes.dark.background })
 })
+
+it('every tint chip keeps every starting preset inside the contrast bound', async () => {
+  const { startingPresetOrder } = await import('@ombelle/catalog')
+  const failing: string[] = []
+  for (const id of startingPresetOrder)
+    for (const tint of ['clear', 'rose', 'smoke', 'white'] as const) {
+      const report = presetGlassReport(applyGlassTint(applyStartingPreset(createPresetDraft('liquid-glass'), id), tint))
+      if (!report?.passes) failing.push(`${id} ${tint} (needs ${report?.minimumOpacity ?? 'no opacity'})`)
+    }
+  // Known, on the base preset only, which has no material and so no text outline plate: its 0.57 is just short
+  // for the Rosée veil (the readout asks for 0.6), and the dark Fumée veil cannot pass without the plate.
+  expect(failing).toEqual(['builtin-liquid-glass rose (needs 0.6)', 'builtin-liquid-glass smoke (needs no opacity)'])
+})
