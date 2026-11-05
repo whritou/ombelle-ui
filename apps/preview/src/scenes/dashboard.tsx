@@ -1,4 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarStatus,
+} from '../generated/preset-gallery/components/ui/avatar'
 import { Badge } from '../generated/preset-gallery/components/ui/badge'
 import { Button } from '../generated/preset-gallery/components/ui/button'
 import {
@@ -17,6 +23,14 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '../generated/preset-gallery/components/ui/dropdown-menu'
+import { Input } from '../generated/preset-gallery/components/ui/input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverTitle,
+  PopoverTrigger,
+} from '../generated/preset-gallery/components/ui/popover'
 import { Switch } from '../generated/preset-gallery/components/ui/switch'
 import {
   Tabs,
@@ -39,10 +53,10 @@ const stats = [
   { label: 'Deploys this month', value: '128', note: 'Up 8% on last month' },
 ]
 const projects = [
-  { name: 'Website refresh', detail: 'Updated 2 hours ago', status: 'On track', alert: false },
-  { name: 'Mobile onboarding', detail: 'Updated yesterday', status: 'Needs attention', alert: true },
-  { name: 'Billing migration', detail: 'Updated last week', status: 'On track', alert: false },
-]
+  { name: 'Website refresh', detail: 'Updated 2 hours ago', status: 'On track', alert: false, owner: 'Ada Lovelace', initials: 'AL', tone: 'primary' },
+  { name: 'Mobile onboarding', detail: 'Updated yesterday', status: 'Needs attention', alert: true, owner: 'Grace Hopper', initials: 'GH', tone: 'default' },
+  { name: 'Billing migration', detail: 'Updated last week', status: 'On track', alert: false, owner: 'Margaret Knight', initials: 'MK', tone: 'secondary' },
+] as const
 
 export function DashboardScene(props: SceneProps) {
   const show = gate(props)
@@ -51,7 +65,24 @@ export function DashboardScene(props: SceneProps) {
       <header className="scene-header">
         <h1>Overview</h1>
         <div className="scene-actions">
-          <Button variant="outline">Invite</Button>
+          {show(
+            'popover',
+            'Popover',
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">Invite</Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" aria-labelledby="scene-invite-title">
+                <PopoverTitle id="scene-invite-title">Invite to Acme</PopoverTitle>
+                <PopoverDescription>Anyone with the link can join this workspace.</PopoverDescription>
+                {show(
+                  'input',
+                  'Input',
+                  <Input aria-label="Invite link" defaultValue="acme.app/join/7f3a2c" readOnly />,
+                )}
+              </PopoverContent>
+            </Popover>,
+          )}
           <Button>New project</Button>
         </div>
       </header>
@@ -78,6 +109,22 @@ export function DashboardScene(props: SceneProps) {
         <CardHeader>
           <CardTitle level={2}>Projects</CardTitle>
           <CardDescription>Everything your team is shipping.</CardDescription>
+          {show(
+            'avatar',
+            'Avatar',
+            <AvatarGroup aria-label="Reviewers">
+              <Avatar variant="primary" role="img" aria-label="Ada Lovelace, online">
+                <AvatarFallback>AL</AvatarFallback>
+                <AvatarStatus />
+              </Avatar>
+              <Avatar role="img" aria-label="Grace Hopper">
+                <AvatarFallback>GH</AvatarFallback>
+              </Avatar>
+              <Avatar variant="secondary" role="img" aria-label="3 more reviewers">
+                <AvatarFallback>+3</AvatarFallback>
+              </Avatar>
+            </AvatarGroup>,
+          )}
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="projects" className="scene-tabs">
@@ -90,6 +137,13 @@ export function DashboardScene(props: SceneProps) {
                 <ul className="scene-list" aria-label="Projects">
                   {projects.map((project) => (
                     <li key={project.name} className="scene-list-row">
+                      {show(
+                        'avatar',
+                        'Avatar',
+                        <Avatar size="sm" variant={project.tone} role="img" aria-label={`Owner: ${project.owner}`}>
+                          <AvatarFallback>{project.initials}</AvatarFallback>
+                        </Avatar>,
+                      )}
                       <span className="scene-grow">
                         <strong>{project.name}</strong>
                         <span className="scene-muted">{project.detail}</span>

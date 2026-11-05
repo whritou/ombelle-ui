@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
 import { Button } from '../generated/preset-gallery/components/ui/button'
+import { Separator } from '../generated/preset-gallery/components/ui/separator'
 import {
   Card,
   CardContent,
@@ -205,7 +206,13 @@ export function SettingsScene(props: SceneProps) {
             </Card>
           </div>
         </TabsContent>
-        <TabsContent value="members">Invite people from the members page.</TabsContent>
+        <TabsContent value="members">
+          <div className="scene-stack">
+            Invite people from the members page.
+            {show('separator', 'Separator', <Separator />)}
+            Members you remove keep access until the end of the day.
+          </div>
+        </TabsContent>
         <TabsContent value="billing">Your plan renews on the first of the month.</TabsContent>
       </Tabs>
     </main>

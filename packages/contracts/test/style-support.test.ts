@@ -10,8 +10,8 @@ import {
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'tabs', 'tooltip']
-const glassUnavailable = ['checkbox', 'input', 'label', 'native-select', 'radio-group', 'select', 'switch', 'textarea']
+const glassExperimental = ['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'popover', 'tabs', 'tooltip']
+const glassUnavailable = ['avatar', 'checkbox', 'input', 'label', 'native-select', 'radio-group', 'select', 'separator', 'switch', 'textarea']
 
 describe('style support table', () => {
   it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
@@ -33,8 +33,8 @@ describe('style support table', () => {
     expect(componentsWithStyleSupport('liquid-glass', ['stable'])).toEqual([])
     expect(componentsWithStyleSupport('flat', ['stable'])).toEqual([...supportedComponentIds])
   })
-  it('marks ombelle stable for all sixteen components', () => {
-    expect(supportedComponentIds).toHaveLength(16)
+  it('marks ombelle stable for all nineteen components', () => {
+    expect(supportedComponentIds).toHaveLength(19)
     for (const id of supportedComponentIds) expect(styleSupport(id, 'ombelle')).toBe('stable')
   })
   it('recognises families', () => {
@@ -52,7 +52,7 @@ describe('style support table', () => {
       expect(error).toMatchObject({
         code: 'STYLE_UNAVAILABLE',
         message:
-          'Label is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, card, dialog, dropdown-menu, tabs, tooltip.',
+          'Label is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, card, dialog, dropdown-menu, popover, tabs, tooltip.',
         path: '/componentIds',
         nextAction: 'Choose a stable family for this component or remove it.',
       })

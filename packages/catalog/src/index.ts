@@ -48,6 +48,9 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   select: ['@radix-ui/react-select', 'lucide-react'],
   'radio-group': ['@radix-ui/react-radio-group'],
   'dropdown-menu': ['@radix-ui/react-dropdown-menu', 'lucide-react'],
+  popover: ['@radix-ui/react-popover'],
+  avatar: ['@radix-ui/react-avatar'],
+  separator: ['@radix-ui/react-separator'],
 }
 const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   checkbox: ['checkbox', 'checkbox-indicator'],
@@ -119,6 +122,22 @@ const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'dropdown-menu-sub-content',
   ],
   alert: ['alert', 'alert-title', 'alert-description'],
+  popover: [
+    'popover',
+    'popover-trigger',
+    'popover-anchor',
+    'popover-content',
+    'popover-title',
+    'popover-description',
+  ],
+  avatar: [
+    'avatar',
+    'avatar-image',
+    'avatar-fallback',
+    'avatar-status',
+    'avatar-group',
+  ],
+  separator: ['separator', 'separator-label'],
 }
 export function getCatalog(release: string): Catalog {
   if (release !== '0.1.0')

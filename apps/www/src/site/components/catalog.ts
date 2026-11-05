@@ -370,6 +370,65 @@ export function SaveStatus() {
   )
 }`,
   },
+  popover: {
+    name: 'Popover',
+    description: 'A non-modal panel anchored to a trigger, for short forms and details.',
+    api: 'Popover, PopoverTrigger, PopoverAnchor, PopoverContent (side, align), PopoverTitle (level), PopoverDescription',
+    states: 'Open, closed, focus',
+    basis: 'Reviewed Radix popover primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import {
+  Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription,
+} from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+
+export function SharePreset() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild><Button>Share preset</Button></PopoverTrigger>
+      <PopoverContent aria-labelledby="share-title">
+        <PopoverTitle id="share-title">Share preset</PopoverTitle>
+        <PopoverDescription>Anyone with the link can install this preset.</PopoverDescription>
+      </PopoverContent>
+    </Popover>
+  )
+}`,
+  },
+  avatar: {
+    name: 'Avatar',
+    description: 'A person\'s image with initials as a fallback, a presence dot and overlapping groups.',
+    api: 'Avatar (size, variant), AvatarImage, AvatarFallback, AvatarStatus (status), AvatarGroup',
+    states: 'Image, fallback, online, offline',
+    basis: 'Reviewed Radix avatar primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import { Avatar, AvatarImage, AvatarFallback, AvatarStatus } from '@/components/ui/avatar'
+
+export function Owner() {
+  return (
+    <Avatar role="img" aria-label="Ada Lovelace, online">
+      <AvatarImage src="/ada.png" alt="" />
+      <AvatarFallback>AL</AvatarFallback>
+      <AvatarStatus />
+    </Avatar>
+  )
+}`,
+  },
+  separator: {
+    name: 'Separator',
+    description: 'A horizontal or vertical rule, optionally with a centred label.',
+    api: 'orientation (horizontal, vertical), decorative, children as label',
+    states: 'Horizontal, vertical, labelled',
+    basis: 'Reviewed Radix separator primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import { Separator } from '@/components/ui/separator'
+
+export function SignInOptions() {
+  return <Separator>or</Separator>
+}`,
+  },
 }
 
 export const componentDocs: ComponentDoc[] = supportedComponentIds

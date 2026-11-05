@@ -39,6 +39,20 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverTitle,
+  PopoverDescription,
+} from '@/components/ui/popover'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarStatus,
+  AvatarGroup,
+} from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
 import { Switch, SwitchThumb } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
@@ -151,6 +165,42 @@ export function PresetGallery({
                 it.
               </AlertDescription>
             </Alert>
+          </div>
+        </section>,
+      )}
+      {gate(
+        'avatar',
+        'Avatar',
+        <section aria-label="People" data-component="avatar">
+          <h2>People</h2>
+          <div className="preset-row">
+            <Avatar size="lg" variant="primary" role="img" aria-label="Ada Lovelace, online">
+              <AvatarFallback>AL</AvatarFallback>
+              <AvatarStatus />
+            </Avatar>
+            <Avatar role="img" aria-label="Grace Hopper">
+              <AvatarFallback>GH</AvatarFallback>
+            </Avatar>
+            <Avatar size="sm" variant="secondary" role="img" aria-label="Margaret Knight">
+              <AvatarFallback>MK</AvatarFallback>
+            </Avatar>
+          </div>
+          <div className="preset-row">
+            <AvatarGroup aria-label="Reviewers">
+              <Avatar variant="primary" role="img" aria-label="Ada Lovelace">
+                <AvatarFallback>AL</AvatarFallback>
+              </Avatar>
+              <Avatar role="img" aria-label="Grace Hopper">
+                <AvatarFallback>GH</AvatarFallback>
+              </Avatar>
+              <Avatar variant="secondary" role="img" aria-label="Margaret Knight">
+                <AvatarFallback>MK</AvatarFallback>
+              </Avatar>
+              <Avatar variant="secondary" role="img" aria-label="3 more reviewers">
+                <AvatarFallback>+3</AvatarFallback>
+              </Avatar>
+            </AvatarGroup>
+            <span>6 people review this preset</span>
           </div>
         </section>,
       )}
@@ -348,6 +398,49 @@ export function PresetGallery({
               <DropdownMenuItem variant="destructive">Archive</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        </section>,
+      )}
+      {gate(
+        'popover',
+        'Popover',
+        <section aria-label="Sharing" data-component="popover">
+          <h2>Sharing</h2>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button>Share preset</Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" aria-labelledby="preset-share-title">
+              <PopoverTitle id="preset-share-title">Share preset</PopoverTitle>
+              <PopoverDescription>
+                Anyone with the link can install this preset.
+              </PopoverDescription>
+              {gate(
+                'input',
+                'Input',
+                <Input aria-label="Preset link" defaultValue="ombelle.dev/p/7f3a2c" readOnly />,
+              )}
+            </PopoverContent>
+          </Popover>
+        </section>,
+      )}
+      {gate(
+        'separator',
+        'Separator',
+        <section aria-label="Sign-in options" data-component="separator">
+          <h2>Sign-in options</h2>
+          <div className="preset-stack">
+            <Button variant="outline">Continue with SSO</Button>
+            <Separator>or</Separator>
+            <Button>Continue with email</Button>
+            <Separator />
+            <nav aria-label="Footer" className="preset-row preset-inline-nav">
+              <a href="#docs">Docs</a>
+              <Separator orientation="vertical" />
+              <a href="#components">Components</a>
+              <Separator orientation="vertical" />
+              <a href="#changelog">Changelog</a>
+            </nav>
+          </div>
         </section>,
       )}
       <section aria-label="Dialog" data-component="dialog">

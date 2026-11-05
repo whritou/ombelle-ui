@@ -50,6 +50,12 @@ usageExamples['dropdown-menu'] = `import { DropdownMenu, DropdownMenuTrigger, Dr
 export function Example(){return <DropdownMenu><DropdownMenuTrigger>Project actions</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuLabel>Project</DropdownMenuLabel><DropdownMenuItem>Rename<DropdownMenuShortcut>F2</DropdownMenuShortcut></DropdownMenuItem><DropdownMenuItem>Duplicate</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem variant="destructive">Archive</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}`
 usageExamples.alert = `import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 export function Example(){return <><Alert><AlertTitle>Preset saved</AlertTitle><AlertDescription>New components now install with this preset.</AlertDescription></Alert><Alert variant="destructive"><AlertTitle>Install blocked</AlertTitle><AlertDescription>Review the local change before replacing it.</AlertDescription></Alert></>}`
+usageExamples.popover = `import { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverDescription } from '@/components/ui/popover'
+export function Example(){return <Popover><PopoverTrigger>Share preset</PopoverTrigger><PopoverContent aria-labelledby="share-title"><PopoverTitle id="share-title">Share preset</PopoverTitle><PopoverDescription>Anyone with the link can install this preset.</PopoverDescription></PopoverContent></Popover>}`
+usageExamples.avatar = `import { Avatar, AvatarImage, AvatarFallback, AvatarStatus, AvatarGroup } from '@/components/ui/avatar'
+export function Example(){return <><Avatar size="lg" variant="primary" role="img" aria-label="Ada Lovelace, online"><AvatarImage src="/ada.png" alt="" /><AvatarFallback>AL</AvatarFallback><AvatarStatus /></Avatar><AvatarGroup aria-label="Reviewers"><Avatar role="img" aria-label="Grace Hopper"><AvatarFallback>GH</AvatarFallback></Avatar><Avatar variant="secondary" role="img" aria-label="3 more reviewers"><AvatarFallback>+3</AvatarFallback></Avatar></AvatarGroup></>}`
+usageExamples.separator = `import { Separator } from '@/components/ui/separator'
+export function Example(){return <><Separator>or</Separator><nav aria-label="Footer"><a href="/docs">Docs</a><Separator orientation="vertical" /><a href="/changelog">Changelog</a></nav></>}`
 const defaultUsage =
   'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
 export async function compile(input: {

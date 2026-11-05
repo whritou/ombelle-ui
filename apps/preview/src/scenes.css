@@ -200,3 +200,6 @@ html[data-backdrop='photo'] .preset-scene :is(h1, .scene-header p) {
     padding: 16px;
   }
 }
+.preset-scene [data-slot="card-header"] > [data-slot="avatar-group"] {
+  margin-block-start: 8px;
+}

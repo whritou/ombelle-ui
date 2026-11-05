@@ -6,6 +6,8 @@
 - Existing artifacts are byte-identical: the stable family hashes gain 48 entries for the new files and change none, so the style baseline declares no new intentional change.
 - Preview: the preset gallery shows the four components; the dashboard gains an alert and per-project action menus, settings gains a role Select and a digest Radio Group, and sign-in gains a status alert.
 - Website: the components pages list the new components only once the published installer can add them (`minimumCli` 0.5.0).
+- Add Popover (Radix Popover 1.3.1), Avatar (Radix Avatar 1.3.1) and Separator (Radix Separator 1.2.0) in the four stable families. Popover is experimental in liquid glass; Avatar and Separator are unavailable there. The stable family hashes gain 36 entries and change none.
+- Preview: dashboard rows show owner avatars, the projects card a reviewer stack, and Invite opens a popover; sign-in separates its options with "or" and the settings Members tab uses a separator.
 
 ## 0.4.1 — 5 November 2026
 
