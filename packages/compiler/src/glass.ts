@@ -3,6 +3,7 @@ import {
   glassBackdrop,
   glassContrastReport,
   glassDesignDefaults,
+  glassTints,
 } from './glass-contrast.js'
 
 // Internal liquid-glass helpers shared by full-theme and scoped Button compiles.
@@ -57,6 +58,8 @@ export function glassTokens(data: Preset): {
       '--glass-brightness': String(backdrop.brightness),
       '--glass-sheen': String(backdrop.sheen),
       '--glass-nested-opacity': String(nested[m]),
+      '--glass-primary-tint': Math.round(glassTints.primary[m] * 100) + '%',
+      '--glass-destructive-tint': Math.round(glassTints.destructive[m] * 100) + '%',
     }
   }
   return {

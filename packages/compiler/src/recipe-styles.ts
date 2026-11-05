@@ -264,8 +264,13 @@ export function compileScopedButtonStyles(input: {
     // and borders from different tokens; paint the overridden roles from the mapped token.
     if (set('background') && (variant === 'outline' || variant === 'ghost' || variant === 'link'))
       paint.background = 'var(' + variable(colorTokens.background) + ')'
-    if (set('foreground') && (variant === 'outline' || variant === 'link'))
+    // Glass Buttons are one ink: every label reads --foreground, so a foreground override is
+    // painted for every variant, and secondary card glass reads the overridden token as its card.
+    const glass = data.styleFamily === 'liquid-glass'
+    if (set('foreground') && (variant === 'outline' || variant === 'link' || glass))
       paint.color = 'var(' + variable(colorTokens.foreground) + ')'
+    if (glass && set('background') && variant === 'secondary')
+      paint['--card'] = 'var(' + variable(colorTokens.background) + ')'
     if (set('border'))
       paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
   }

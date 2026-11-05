@@ -6,7 +6,7 @@ import {
   type ComponentId,
   type Preset,
 } from '@ombelle/contracts'
-import { compile, glassContrastReport } from '../src/index.js'
+import { compile, glassContrastPairs, glassContrastReport } from '../src/index.js'
 import { squash } from './new-component-artifacts.js'
 
 const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
@@ -221,5 +221,113 @@ describe('liquid-glass edges and shadows', () => {
     const report = glassContrastReport(preset)
     expect(report.passes).toBe(reference.passes)
     expect(report.pairs).toEqual(reference.pairs)
+  })
+})
+
+describe('liquid-glass Button', () => {
+  type Where = 'root' | 'supports' | 'reduced' | 'forced' | 'supports-forced'
+  const where = (rule: postcss.Rule): Where => {
+    const chain: string[] = []
+    for (let p = rule.parent as Container | undefined; p && p.type !== 'root'; p = p.parent as Container | undefined)
+      if (p.type === 'atrule') chain.unshift(normalize((p as postcss.AtRule).name + ' ' + (p as postcss.AtRule).params))
+    const key = chain.join('|')
+    if (key === '') return 'root'
+    if (key === normalize(supportsCondition.slice(1))) return 'supports'
+    if (key.endsWith('media (prefers-reduced-transparency: reduce)')) return 'reduced'
+    if (key === 'media (forced-colors: active)') return 'forced'
+    return 'supports-forced'
+  }
+  /** Squashed declarations of every rule with exactly this selector in this context. */
+  const decls = (css: string, selector: string, at: Where = 'root') => {
+    const out: Record<string, string> = {}
+    postcss.parse(css).walkRules((rule) => {
+      if (where(rule) !== at || !rule.selectors.map(squash).includes(squash(selector))) return
+      rule.walkDecls((d) => {
+        out[d.prop] = squash(d.value)
+      })
+    })
+    return out
+  }
+  const styleOf = async () => artifact(await build(builtin()), 'styles/ui-style.css')
+
+  it('glass Button is one ink', async () => {
+    const result = await build(builtin())
+    const css = artifact(result, 'styles/ui-style.css')
+    postcss.parse(css).walkRules((rule) => {
+      if (!rule.selector.includes('data-slot="button"')) return
+      rule.walkDecls('color', (d) => {
+        expect(d.value, rule.selector).not.toMatch(/--(primary|destructive|secondary|accent)-foreground/)
+      })
+    })
+    expect(decls(css, '[data-slot="button"]')).toMatchObject({
+      color: 'var(--foreground)',
+      'font-weight': '600',
+    })
+    expect(decls(css, '[data-slot="button"][data-variant="default"]')).toMatchObject({
+      '--glass-tint': 'var(--primary)',
+      '--glass-tint-amount': 'var(--glass-primary-tint)',
+      'border-color': 'color-mix(insrgb,var(--primary)55%,transparent)',
+    })
+    expect(decls(css, '[data-slot="button"][data-variant="destructive"]')).toMatchObject({
+      '--glass-tint': 'var(--destructive)',
+      '--glass-tint-amount': 'var(--glass-destructive-tint)',
+      'border-color': 'color-mix(insrgb,var(--destructive)60%,transparent)',
+    })
+    // The resting tints are per-mode tokens, so scoped recipes follow their own dark class.
+    const tokens = squash(artifact(result, 'styles/ui-tokens.css'))
+    const root = tokens.slice(0, tokens.indexOf('}'))
+    const dark = tokens.slice(tokens.indexOf('.dark{'), tokens.indexOf('}', tokens.indexOf('.dark{')))
+    expect(root).toContain('--glass-primary-tint:18%;')
+    expect(root).toContain('--glass-destructive-tint:16%;')
+    expect(dark).toContain('--glass-primary-tint:22%;')
+    expect(dark).toContain('--glass-destructive-tint:20%;')
+    // Hover adds 8 tint points.
+    expect(decls(css, '[data-slot="button"][data-variant="default"]:not(:disabled):hover')).toMatchObject({
+      '--glass-tint-amount': 'calc(var(--glass-primary-tint)+8%)',
+    })
+    expect(decls(css, '[data-slot="button"][data-variant="destructive"]:not(:disabled):hover')).toMatchObject({
+      '--glass-tint-amount': 'calc(var(--glass-destructive-tint)+8%)',
+    })
+    // One shared surface rule mixes the tint into the card, then applies the glass coverage.
+    expect(decls(css, '[data-slot="button"]', 'supports').background).toContain(
+      'color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,var(--glass-opacity))*100%),transparent)',
+    )
+    expect(decls(css, '[data-slot="button"][data-variant="link"]')).toMatchObject({
+      'text-decoration-color': 'var(--primary)',
+      'text-decoration-thickness': '2px',
+    })
+    expect(decls(css, '[data-slot="button"][data-variant="default"]', 'forced')).toMatchObject({
+      'border-width': '3px',
+    })
+    expect(decls(css, '[data-slot="button"][data-variant]', 'forced')).toMatchObject({
+      background: 'ButtonFace',
+      'border-color': 'ButtonText',
+    })
+  })
+
+  it('glass Button pairs are declared and pass', () => {
+    const specs = [
+      { color: 'primary', light: 0.18, dark: 0.22 },
+      { color: 'primary', light: 0.26, dark: 0.3 },
+      { color: 'destructive', light: 0.16, dark: 0.2 },
+      { color: 'destructive', light: 0.24, dark: 0.28 },
+    ] as const
+    for (const tint of specs)
+      expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint })
+    const report = glassContrastReport(builtin())
+    const tinted = report.pairs.filter((p) => p.tint !== undefined)
+    expect(tinted).toHaveLength(8)
+    for (const pair of tinted) expect(pair.passes, JSON.stringify(pair)).toBe(true)
+    expect(report.passes).toBe(true)
+  })
+
+  it('reduced transparency paints the tinted Button opaque', async () => {
+    const css = await styleOf()
+    const reduced = decls(css, '[data-slot="button"]', 'reduced')
+    expect(reduced['backdrop-filter']).toBe('none')
+    expect(reduced['-webkit-backdrop-filter']).toBe('none')
+    expect(reduced.background).toBe('color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))')
+    // The fallback without backdrop-filter is the same opaque tinted surface.
+    expect(decls(css, '[data-slot="button"]').background).toBe(reduced.background)
   })
 })

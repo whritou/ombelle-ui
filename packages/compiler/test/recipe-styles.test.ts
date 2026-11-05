@@ -209,16 +209,24 @@ it('scoped glass tokens', async () => {
     '--glass-blur': '3px',
     '--glass-brightness': '1.4',
     '--glass-contrast': '0.45',
+    '--glass-destructive-tint': '16%',
     '--glass-highlight': 'color-mix(in srgb, white 60%, transparent)',
     '--glass-nested-opacity': '0.7',
     '--glass-opacity': '0.5',
+    '--glass-primary-tint': '18%',
     '--glass-saturation': '2',
     '--glass-sheen': '0.25',
+    // The family's one-ink Button rule resets its tint and glow on the same selector.
+    '--glass-glow': 'transparent',
+    '--glass-tint': 'transparent',
+    '--glass-tint-amount': '0%',
   })
   expect(tokens[`.night ${light},.night${light}`]).toEqual({
     '--glass-brightness': '0.6',
+    '--glass-destructive-tint': '20%',
     '--glass-highlight': 'color-mix(in srgb, white 20%, transparent)',
-    '--glass-nested-opacity': '0.79',
+    '--glass-nested-opacity': '0.9',
+    '--glass-primary-tint': '22%',
     '--glass-sheen': '0.0625',
   })
 })
@@ -448,4 +456,52 @@ it('keeps color override output deterministic and unchanged without colors', asy
       darkSelector: '.dark',
     }),
   )
+})
+it('glass recipe Button uses its shadow and border overrides', async () => {
+  const { catalog, preset } = await glassPreset()
+  const css = compileRecipeStyles({
+    familyCss: catalog.styles['liquid-glass'],
+    preset,
+    overrides: { shadowOffsetYPx: 4, borderWidthPx: 2 },
+    scope: glassScope,
+    darkSelector: '.night',
+  })
+  const scope = `[data-slot="recipe-button"][data-ombelle-recipe="${glassScope}"]`
+  // The last top-level rule on the scope carries the overrides, after the preset tokens.
+  let last: Record<string, string> = {}
+  const root = postcss.parse(css)
+  root.each((node) => {
+    if (node.type !== 'rule' || node.selector !== scope) return
+    last = {}
+    node.walkDecls((d) => {
+      last[d.prop] = d.value
+    })
+  })
+  expect(last).toMatchObject({ '--shadow-y': '4px', '--border-width': '2px' })
+  // The scoped one-ink rules read those tokens for the glow and the edge.
+  const body: string[] = []
+  root.walkRules((rule) => {
+    if (rule.parent?.type === 'root' && rule.selector === scope)
+      rule.walkDecls((d) => {
+        body.push(d.prop + ':' + d.value.replace(/\s+/g, ''))
+      })
+  })
+  expect(body).toContain('border:var(--border-width)solidvar(--border)')
+  expect(body.filter((d) => d.startsWith('box-shadow:')).join(';')).toContain('calc(var(--shadow-y)*0.5)')
+  const flat = css.replace(/\s+/g, '')
+  expect(flat).toContain('color:var(--foreground)')
+  expect(flat).toContain(`${scope}[data-variant="default"]{--glass-tint:var(--primary)`)
+})
+it('glass recipe colour overrides apply over one ink', async () => {
+  const fg = await colorCss('liquid-glass', 'default', { light: { foreground: '#112233' } })
+  expect(fg.light['--primary-foreground']).toBe('#112233')
+  expect(fg.paint).toEqual({ color: 'var(--primary-foreground)' })
+  const sec = await colorCss('liquid-glass', 'secondary', { dark: { background: '#223344' } })
+  expect(sec.dark['--secondary']).toBe('#223344')
+  // Secondary is card glass: the override replaces the card this Button's glass reads.
+  expect(sec.paint).toEqual({ '--card': 'var(--secondary)' })
+  // Default and destructive read their background token as the glass tint.
+  const def = await colorCss('liquid-glass', 'default', { light: { background: '#ff0000' } })
+  expect(def.light['--primary']).toBe('#ff0000')
+  expect(def.css).not.toContain('[data-variant="default"]{')
 })

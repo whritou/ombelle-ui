@@ -128,16 +128,12 @@ it('lists the tint in a failing tinted pair', () => {
   // 0.25 (4.61:1), so the report is built at 0.1, below what the editor offers.
   const preset = materializePreset(createPresetDraft('liquid-glass'))
   preset.design = { ...preset.design, glassOpacity: 0.1 }
-  const report = glassContrastReportFor(preset, [
-    ...glassContrastPairs,
-    {
-      surface: 'card',
-      text: 'foreground',
-      tint: { color: 'primary', light: 0.18, dark: 0.22 },
-    },
-  ])
+  const report = glassContrastReportFor(preset, glassContrastPairs)
   const html = renderToStaticMarkup(<GlassPanel report={report} />)
   expect(html).toMatch(
     /light: foreground on card \+ primary 18%, \d\.\d\d:1 over the darkest filtered backdrop/,
   )
+  // The Button pairs share surface and text; each is listed with its own tint.
+  for (const tint of ['primary 26%', 'destructive 16%', 'destructive 24%'])
+    expect(html).toContain('light: foreground on card + ' + tint)
 })

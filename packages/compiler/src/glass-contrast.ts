@@ -66,6 +66,12 @@ export const glassDesignDefaults = {
 export const glassDarkSheenScale = 0.25
 export const glassMinimumOpacity = 0.25
 
+/** Resting Button tints per mode, as fractions, written as --glass-<color>-tint; hover adds 8 points. */
+export const glassTints = {
+  primary: { light: 0.18, dark: 0.22 },
+  destructive: { light: 0.16, dark: 0.2 },
+} as const
+
 export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'card', text: 'cardForeground' },
   { surface: 'card', text: 'mutedForeground' },
@@ -75,6 +81,11 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'muted', text: 'mutedForeground' },
   { surface: 'secondary', text: 'secondaryForeground' },
   { surface: 'background', text: 'foreground' },
+  // One-ink Button: foreground on card glass tinted at rest and on hover (+8 points).
+  { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
+  { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.26, dark: 0.3 } },
+  { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.16, dark: 0.2 } },
+  { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.24, dark: 0.28 } },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))

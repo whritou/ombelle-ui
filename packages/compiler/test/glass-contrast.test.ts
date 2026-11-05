@@ -116,6 +116,10 @@ it('pair list equals the spec table', () => {
     { surface: 'muted', text: 'mutedForeground' },
     { surface: 'secondary', text: 'secondaryForeground' },
     { surface: 'background', text: 'foreground' },
+    { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 } },
+    { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.26, dark: 0.3 } },
+    { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.16, dark: 0.2 } },
+    { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.24, dark: 0.28 } },
   ])
 })
 
@@ -206,10 +210,10 @@ it('reduced transparency neutralizes the filter and sheen', () => {
 it('built-in palettes reach the documented minimum opacities', () => {
   const report = glassContrastReport(glass)
   expect(report.passes).toBe(true)
-  expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.28 })
+  expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.32 })
   expect(report.minimumOpacity).toBe(0.5)
   // Nested glass sees a raw backdrop and needs more coverage.
-  expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.79 })
+  expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.9 })
   // Without compression the same palette needs nearly opaque glass.
   const raw = glassContrastReport({
     ...glass,
@@ -336,7 +340,8 @@ it('reduced transparency evaluates tinted surfaces opaque', () => {
     design: { ...glass.design, transparency: 'reduced' },
   } as Preset
   const pairs = tintedReport(preset).pairs.filter((p) => p.tint !== undefined)
-  expect(pairs).toHaveLength(2)
+  // The four Button specs plus the extra one, in two modes.
+  expect(pairs).toHaveLength(10)
   for (const p of pairs) {
     expect(p.passes).toBe(true)
     expect(Math.abs(p.ratioOverBlack - p.ratioOverWhite)).toBeLessThan(1e-6)
