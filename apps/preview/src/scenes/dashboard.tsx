@@ -31,6 +31,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from '../generated/preset-gallery/components/ui/popover'
+import { Progress } from '../generated/preset-gallery/components/ui/progress'
 import { Switch } from '../generated/preset-gallery/components/ui/switch'
 import {
   Table,
@@ -110,6 +111,15 @@ export function DashboardScene(props: SceneProps) {
               <CardTitle level={2}>{stat.value}</CardTitle>
             </CardHeader>
             <CardContent>{stat.note}</CardContent>
+            {stat.label === 'Deploys this month'
+              ? show(
+                  'progress',
+                  'Progress',
+                  <CardContent>
+                    <Progress value={128} max={200} aria-label="Deploys used this month: 128 of 200" />
+                  </CardContent>,
+                )
+              : null}
           </Card>
         ))}
       </div>

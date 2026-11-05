@@ -60,6 +60,10 @@ usageExamples.table = `import { Table, TableCaption, TableHeader, TableBody, Tab
 export function Example(){return <Table><TableCaption>Projects and their owners.</TableCaption><TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Owner</TableHead><TableHead numeric>Components</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Website refresh</TableCell><TableCell>Ada L.</TableCell><TableCell numeric>12</TableCell></TableRow><TableRow selected><TableCell>Billing migration</TableCell><TableCell>Margaret K.</TableCell><TableCell numeric>5</TableCell></TableRow></TableBody></Table>}`
 usageExamples.accordion = `import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 export function Example(){return <Accordion type="single" collapsible defaultValue="preset"><AccordionItem value="preset"><AccordionTrigger>What does a preset change?</AccordionTrigger><AccordionContent>Colors, radius, borders, shadows and type.</AccordionContent></AccordionItem><AccordionItem value="edit"><AccordionTrigger>Can I edit installed components?</AccordionTrigger><AccordionContent>Yes. Installed source stays yours to edit.</AccordionContent></AccordionItem></Accordion>}`
+usageExamples.progress = `import { Progress } from '@/components/ui/progress'
+export function Example(){return <><p id="install-label">Installing components</p><Progress value={64} aria-labelledby="install-label" /><Progress aria-label="Checking contrast" /></>}`
+usageExamples.skeleton = `import { Skeleton } from '@/components/ui/skeleton'
+export function Example(){return <div aria-busy="true" aria-label="Loading project"><Skeleton shape="circle" /><Skeleton style={{ inlineSize: '60%' }} /><Skeleton /></div>}`
 const defaultUsage =
   'import { Input } from \'@/components/ui/input\'\nexport function Example(){return <label>Email<Input id="email" type="email" /></label>}'
 export async function compile(input: {

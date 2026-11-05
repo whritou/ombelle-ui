@@ -478,6 +478,45 @@ export function Faq() {
   )
 }`,
   },
+  progress: {
+    name: 'Progress',
+    description: 'Shows how far a task has got, or that it is running when the amount is unknown.',
+    api: 'value (null for indeterminate), max, getValueLabel',
+    states: 'Loading, complete, indeterminate',
+    basis: 'Reviewed Radix progress primitive',
+    client: true,
+    minimumCli: '0.5.0',
+    usage: `import { Progress } from '@/components/ui/progress'
+
+export function InstallProgress() {
+  return (
+    <>
+      <p id="install-label">Installing components</p>
+      <Progress value={64} aria-labelledby="install-label" />
+    </>
+  )
+}`,
+  },
+  skeleton: {
+    name: 'Skeleton',
+    description: 'A decorative placeholder shaped like the content that is loading.',
+    api: 'shape (text, circle, block), className, style',
+    states: 'Pulsing, static under reduced motion',
+    basis: '<div aria-hidden> inside a region marked aria-busy',
+    client: false,
+    minimumCli: '0.5.0',
+    usage: `import { Skeleton } from '@/components/ui/skeleton'
+
+export function LoadingProject() {
+  return (
+    <div aria-busy="true" aria-label="Loading project">
+      <Skeleton shape="circle" />
+      <Skeleton style={{ inlineSize: '60%' }} />
+      <Skeleton />
+    </div>
+  )
+}`,
+  },
 }
 
 export const componentDocs: ComponentDoc[] = supportedComponentIds

@@ -9,9 +9,9 @@ export const sceneOptions: { value: PresetScene; label: string }[] = [
 
 /** The catalog components each preview page uses, shown under the frame. */
 export const sceneComponents: Record<PresetScene, string> = {
-  gallery: 'All twenty-one catalog components',
-  dashboard: 'Alert, Popover, Input, Avatar, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu, Table',
+  gallery: 'All twenty-three catalog components',
+  dashboard: 'Alert, Popover, Input, Avatar, Progress, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu, Table',
   settings:
-    'Tabs, Card, Label, Input, Select, Native Select, Textarea, Checkbox, Switch, Radio Group, Alert, Separator, Accordion, Button',
+    'Tabs, Card, Label, Input, Select, Native Select, Textarea, Checkbox, Switch, Radio Group, Alert, Separator, Skeleton, Accordion, Button',
   'sign-in': 'Card, Alert, Label, Input, Checkbox, Button, Separator',
 }

@@ -64,7 +64,7 @@ describe('liquid-glass compile', () => {
   })
 
   it.each(unavailable)('refuses unavailable component %s', async (id) => {
-    expect(unavailable).toHaveLength(12)
+    expect(unavailable).toHaveLength(14)
     await expect(build(builtin(), ['button', id])).rejects.toMatchObject({
       code: 'STYLE_UNAVAILABLE',
       path: '/componentIds',

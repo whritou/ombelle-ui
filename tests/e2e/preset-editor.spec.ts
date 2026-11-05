@@ -235,8 +235,8 @@ for (const family of supportedStyleFamilies)
   }
 
 const scenes = [
-  { option: 'Dashboard', heading: 'Overview', components: 'Alert, Popover, Input, Avatar, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu, Table' },
-  { option: 'Settings', heading: 'Settings', components: 'Tabs, Card, Label, Input, Select, Native Select, Textarea, Checkbox, Switch, Radio Group, Alert, Separator, Accordion, Button' },
+  { option: 'Dashboard', heading: 'Overview', components: 'Alert, Popover, Input, Avatar, Progress, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu, Table' },
+  { option: 'Settings', heading: 'Settings', components: 'Tabs, Card, Label, Input, Select, Native Select, Textarea, Checkbox, Switch, Radio Group, Alert, Separator, Skeleton, Accordion, Button' },
   { option: 'Sign in', heading: 'Sign in to Acme', components: 'Card, Alert, Label, Input, Checkbox, Button, Separator' },
 ] as const
 for (const family of supportedStyleFamilies)

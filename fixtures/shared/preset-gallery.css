@@ -60,6 +60,24 @@ body {
   gap: 8px;
   flex-wrap: nowrap;
 }
+.preset-skeleton-card {
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+.preset-grow {
+  flex: 1;
+  gap: 10px;
+}
+.preset-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+}
+.preset-progress-label span + span {
+  font-family: ui-monospace, monospace;
+  font-weight: 500;
+}
 .preset-inline-nav {
   align-items: stretch;
   min-height: 24px;

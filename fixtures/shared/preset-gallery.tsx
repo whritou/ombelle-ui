@@ -68,6 +68,8 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion'
+import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Switch, SwitchThumb } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
@@ -543,6 +545,47 @@ export function PresetGallery({
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+        </section>,
+      )}
+      {gate(
+        'progress',
+        'Progress',
+        <section aria-label="Progress" data-component="progress">
+          <h2>Progress</h2>
+          <div className="preset-stack">
+            <div className="preset-progress-label">
+              <span id="preset-progress-install">Installing components</span>
+              <span>64%</span>
+            </div>
+            <Progress value={64} aria-labelledby="preset-progress-install" />
+            <div className="preset-progress-label">
+              <span id="preset-progress-contrast">Contrast checks</span>
+              <span>8 / 8</span>
+            </div>
+            <Progress value={8} max={8} aria-labelledby="preset-progress-contrast" />
+            <div className="preset-progress-label">
+              <span id="preset-progress-sync">Syncing presets</span>
+            </div>
+            <Progress aria-labelledby="preset-progress-sync" />
+          </div>
+        </section>,
+      )}
+      {gate(
+        'skeleton',
+        'Skeleton',
+        <section aria-label="Loading" data-component="skeleton">
+          <h2>Loading</h2>
+          <div className="preset-stack" aria-busy="true" aria-label="Loading project">
+            <div className="preset-row preset-skeleton-card">
+              <Skeleton shape="circle" />
+              <div className="preset-stack preset-grow">
+                <Skeleton style={{ inlineSize: '60%' }} />
+                <Skeleton style={{ inlineSize: '85%' }} />
+              </div>
+            </div>
+            <Skeleton shape="block" />
+            <Skeleton style={{ inlineSize: '70%' }} />
+          </div>
         </section>,
       )}
       <section aria-label="Dialog" data-component="dialog">

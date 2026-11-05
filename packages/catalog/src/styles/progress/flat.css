@@ -1,0 +1,61 @@
+/* flat Progress */
+[data-slot='progress'] {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  inline-size: 100%;
+  block-size: 0.625rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--muted);
+}
+[data-slot='progress-indicator'] {
+  flex-shrink: 0;
+  block-size: 100%;
+  inline-size: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: inline-size var(--motion-duration) ease-out;
+}
+[data-slot='progress-indicator'][data-state='complete'] {
+  background: #15803d;
+}
+/* Indeterminate: a segment sweeps across. At rest (reduced-motion presets or the
+   OS setting) the whole track is a faded fill, so it never reads as an amount. */
+[data-slot='progress-indicator'][data-state='indeterminate'] {
+  inline-size: 100%;
+  opacity: 0.45;
+  animation: ombelle-progress-sweep calc(var(--motion-duration) * 10) ease-in-out infinite;
+}
+@keyframes ombelle-progress-sweep {
+  from {
+    inline-size: 40%;
+    margin-inline-start: -40%;
+    opacity: 1;
+  }
+  to {
+    inline-size: 40%;
+    margin-inline-start: 100%;
+    opacity: 1;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='progress'] {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='progress-indicator'],
+  [data-slot='progress-indicator'][data-state='complete'] {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='progress-indicator'] {
+    transition: none;
+  }
+  [data-slot='progress-indicator'][data-state='indeterminate'] {
+    animation: none;
+  }
+}
