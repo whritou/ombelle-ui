@@ -163,7 +163,7 @@ export function compileScopedButtonStyles(input: {
             )
           if (
             node.type === 'attribute' &&
-            !['data-slot', 'data-size', 'data-variant'].includes(node.attribute)
+            !['data-slot', 'data-size', 'data-variant', 'data-halo-active'].includes(node.attribute)
           )
             throw new FoundationError(
               'INVALID_DATA',
@@ -178,6 +178,9 @@ export function compileScopedButtonStyles(input: {
               ':hover',
               ':active',
               ':focus-visible',
+              // The shared glass material's shine and pointer halo.
+              '::before',
+              '::after',
             ].includes(node.value)
           )
             throw new FoundationError(

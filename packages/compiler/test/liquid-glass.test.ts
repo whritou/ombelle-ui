@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import postcss, { type Container, type Node } from 'postcss'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalog, glassControlSlots, glassHaloSelector, glassMarkSlots, glassSurfaceSlots } from '@ombelle/catalog'
 import {
   componentsWithStyleSupport,
   type ComponentId,
@@ -704,5 +704,68 @@ describe('liquid glass material tokens', () => {
     await build(preset).catch((error) => {
       expect(error.code).toBe('INVALID_DATA')
     })
+  })
+})
+
+describe('liquid glass shared material', () => {
+  const familyRoot = async (preset: Preset = builtin()) => postcss.parse(artifact(await build(preset), 'styles/ui-style.css'))
+  const material = /var\(--glass-(depth|dispersion|halo|motion|drop|material)(?![-\w])([^)]*)\)/g
+  const inside = (node: Node, name: string, params?: RegExp) => {
+    for (let parent = node.parent; parent && parent.type !== 'root'; parent = parent.parent)
+      if (parent.type === 'atrule' && (parent as postcss.AtRule).name === name && (!params || params.test((parent as postcss.AtRule).params))) return true
+    return false
+  }
+
+  it('every material layer is scaled by a token that falls back to 0', async () => {
+    const root = await familyRoot()
+    let reads = 0
+    root.walkDecls((decl) => {
+      for (const match of decl.value.matchAll(material)) {
+        reads++
+        expect(squash(match[2]!), decl.toString()).toBe(',0')
+      }
+    })
+    expect(reads).toBeGreaterThan(5)
+    root.walkRules((rule) => {
+      if (!rule.nodes.some((n) => n.type === 'decl' && n.value.includes('--glass-halo'))) return
+      for (const selector of rule.selectors) expect(selector).toContain('[data-halo-active]')
+    })
+  })
+
+  it('recipes reach their slots', async () => {
+    const root = await familyRoot()
+    const rulesFor = (slot: string) => {
+      const found: postcss.Rule[] = []
+      root.walkRules((rule) => {
+        if (rule.selectors.some((s) => squash(s).startsWith('[data-slot="' + slot + '"]'))) found.push(rule)
+      })
+      return found
+    }
+    for (const slot of [...glassSurfaceSlots, ...glassControlSlots]) {
+      expect(glassHaloSelector).toContain('[data-slot="' + slot + '"]')
+      expect(rulesFor(slot).some((r) => r.selectors.some((s) => s.includes('::after')) && r.toString().includes('--glass-halo')), slot).toBe(true)
+    }
+    for (const slot of glassMarkSlots) {
+      expect(glassHaloSelector).not.toContain('[data-slot="' + slot + '"]')
+      expect(rulesFor(slot).some((r) => r.toString().includes('--glass-halo')), slot).toBe(false)
+    }
+    const moves = (slot: string, state: string, prop: string) =>
+      rulesFor(slot).some((r) => !inside(r, 'media') && r.selectors.some((s) => s.includes(state)) && r.nodes.some((n) => n.type === 'decl' && n.prop === prop && n.value.includes('--glass-motion')))
+    expect(moves('card', ':hover', 'translate')).toBe(true)
+    for (const slot of ['button', 'select-trigger']) {
+      expect(moves(slot, ':active', 'scale'), slot).toBe(true)
+      expect(moves(slot, ':hover', 'translate'), slot).toBe(false)
+    }
+    root.walkDecls((decl) => {
+      if (!inside(decl, 'media', /prefers-reduced-motion/)) return
+      expect(decl.value.includes('--glass-motion') && (decl.prop === 'translate' || decl.prop === 'scale'), decl.toString()).toBe(false)
+      expect(decl.value).not.toContain('--pointer-x')
+    })
+    let pseudoOff = 0
+    root.walkRules((rule) => {
+      if (!inside(rule, 'media', /forced-colors/)) return
+      if (rule.selectors.some((s) => s.includes('::before') || s.includes('::after')) && rule.toString().includes('content: none')) pseudoOff++
+    })
+    expect(pseudoOff).toBeGreaterThan(0)
   })
 })
