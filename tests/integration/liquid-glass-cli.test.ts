@@ -75,7 +75,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
   const make = () => (manager === 'npm' ? createNpmProject('vite') : createProject('vite'))
   const lockName = manager === 'npm' ? 'package-lock.json' : 'pnpm-lock.yaml'
 
-  it(`installs liquid-glass components with notices and refuses unavailable ones (${manager})`, async () => {
+  it(`installs liquid-glass components with notices (${manager})`, async () => {
     const root = await make()
     roots.push(root)
     const { glass } = await writePresets()
@@ -125,13 +125,9 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const again = await command(['add', 'badge', '--dry-run'])
     expect(again.code, again.output).toBe(0)
     expect(jsonRecord(again.data).notices).toEqual([notice(['badge']), mountNotice])
-
-    // No glass component is unavailable now; Task C4 restores the refusal check.
-    expect(Object.keys(await snapshotTree(root))).toContain(lockName)
   }, 180000)
 
-  // No glass component is unavailable now; Task C4 replaces this refusal test.
-  it.skip(`refuses a mixed add as a whole (${manager})`, async () => {
+  it(`add unknown-component in a glass project fails before any write (${manager})`, async () => {
     const root = await make()
     roots.push(root)
     const { glass } = await writePresets()
@@ -140,9 +136,13 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const init = await command(['init', '--preset', glass, '--yes'])
     expect(init.code, init.output).toBe(0)
     const before = await snapshotTree(root)
-    const refused = await command(['add', 'button', 'skeleton', '--yes'])
-    expect(refused.code, refused.output).not.toBe(0)
-    expect(jsonRecord(jsonRecord(refused.data).error).code).toBe('STYLE_UNAVAILABLE')
+    expect(Object.keys(before)).toContain(lockName)
+    // No catalog component is unavailable in glass now; an id outside the catalog still takes the refusal path,
+    // as a whole, with --yes.
+    const refused = await command(['add', 'button', 'unknown-component', '--yes'])
+    expect(refused.code, refused.output).toBe(2)
+    expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
+    expect(String(jsonRecord(jsonRecord(refused.data).error).message)).toContain('Unknown-component')
     const after = await snapshotTree(root)
     expect(after).toEqual(before)
     expect(Object.keys(after).some((f) => f.endsWith('/button.tsx'))).toBe(false)
@@ -184,28 +184,6 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(plan.status).toBe('success')
     expect(plan.notices).toEqual([notice(['button'])])
     expect(plan.warnings).toEqual([])
-  }, 180000)
-
-  // No glass component is unavailable now; Task C4 replaces this refusal test.
-  it.skip(`refuses theme add into glass while unavailable components are installed (${manager})`, async () => {
-    const root = await make()
-    roots.push(root)
-    const { glass } = await writePresets()
-    const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
-    await seed(root, ['skeleton'])
-    const init = await command(['init', '--preset', flatPath, '--yes'])
-    expect(init.code, init.output).toBe(0)
-    const added = await command(['add', 'skeleton', '--yes'])
-    expect(added.code, added.output).toBe(0)
-
-    const before = await snapshotTree(root)
-    const refused = await command(['theme', 'add', glass, '--yes'])
-    expect(refused.code, refused.output).toBe(2)
-    const error = jsonRecord(jsonRecord(refused.data).error)
-    expect(error).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    expect(String(error.message)).toContain('skeleton')
-    expect(String(error.message)).toContain(glassIds.join(', '))
-    expect(await snapshotTree(root)).toEqual(before)
   }, 180000)
 
   it(`refuses theme add out of glass while glass component CSS is installed (${manager})`, async () => {
