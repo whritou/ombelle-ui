@@ -45,7 +45,7 @@ One spec, three PRs, in order. Each branches off `main` after the previous one m
 
 ### Built-in preset
 
-- `packages/catalog/src/presets/liquid-glass.json` gets values that reproduce the kit: shadow offset 0 / 12 (today's `0 .75rem` drop shadow), border width 1, and `border` set to today's hairline, the foreground at 14% alpha: `oklch(…/ 14%)` of `#0F172A` in light and of `#F1F5F9` in dark, converted exactly when implemented. The `border` token has no other use in glass, so this changes nothing else.
+- `packages/catalog/src/presets/liquid-glass.json` gets values that reproduce the kit: shadow offset 0 / 12 (today's `0 .75rem` drop shadow), border width 1, and `border` set to today's hairline, the foreground at 14% alpha: `oklch(20.8% 0.040 265.8 / 14%)` in light (`#0F172A`) and `oklch(96.8% 0.007 247.9 / 14%)` in dark (`#F1F5F9`). The `border` token has no other use in glass, so this changes nothing else.
 - The preset hash and `styles/ui-tokens.css` change; the changelog states it. Liquid glass has no stable-hash fixture, so `stable-family-hashes.json` and the style baseline do not move.
 
 ### Tinted-surface contrast model
