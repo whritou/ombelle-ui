@@ -26,9 +26,11 @@ export type GlassPairSpec = {
   text: ColorKey
   tint?: GlassTint
   /**
-   * Fraction in 0..1 of the glass opacity the surface paints, as in
-   * calc(var(--glass-opacity) * 55%). Defaults to 1. The opaque fallback and
-   * reduced transparency paint the surface whole, so they ignore it.
+   * Fraction in 0..1 of the glass opacity the surface paints at top level, as in
+   * calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%).
+   * Defaults to 1. Nested glass replaces the whole product with
+   * --glass-nested-opacity, and the opaque fallback and reduced transparency
+   * paint the surface whole, so all three ignore it.
    */
   coverage?: number
 }
@@ -81,6 +83,10 @@ export const glassTints = {
 } as const
 /** Points a Button hover adds to the resting tint (`+ 8%` in the stylesheet). */
 export const glassHoverTint = 0.08
+/** Fields paint the background token at 55% of the glass opacity at top level. */
+export const glassFieldCoverage = 0.55
+/** Outline Buttons paint the background token at 60% of the glass opacity at top level. */
+export const glassOutlineCoverage = 0.6
 /** The neutral `foreground` tint secondary and outline Buttons gain on hover (6% in the stylesheet). */
 export const glassNeutralHoverTint = 0.06
 
@@ -108,11 +114,16 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   ...tintPairs('destructive'),
   // Secondary at rest and ghost on hover: foreground on untinted card glass.
   { surface: 'card', text: 'foreground' },
-  // Secondary and outline hover: a 6% foreground tint on card and background glass.
-  // Outline glass covers only 60% of the glass opacity; the bound checks it at full
-  // coverage until pairs carry a coverage field.
+  // Secondary hover: a 6% foreground tint on card glass.
   { surface: 'card', text: 'foreground', tint: neutralHover },
-  { surface: 'background', text: 'foreground', tint: neutralHover },
+  // Outline at rest and on hover: background glass at 60% of the glass opacity.
+  { surface: 'background', text: 'foreground', coverage: glassOutlineCoverage },
+  { surface: 'background', text: 'foreground', tint: neutralHover, coverage: glassOutlineCoverage },
+  // Fields: the value and placeholder on background glass at 55% of the glass opacity.
+  { surface: 'background', text: 'foreground', coverage: glassFieldCoverage },
+  { surface: 'background', text: 'mutedForeground', coverage: glassFieldCoverage },
+  // Error messages beside a field sit on the card glass that holds the form.
+  { surface: 'card', text: 'destructive' },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
@@ -325,13 +336,12 @@ const filtered = (r: Resolved, opacity: number) =>
     r.backdrop.sheen,
   )
 // Nested glass drops its own filter and sees the raw backdrop: any 0..1 pixel.
-// Passing here at some coverage also passes the opaque fallback, whose painted
-// luminance lies inside the same interval.
+// A covered surface nested in glass paints at the full nested opacity (its CSS
+// fallback carries the coverage), so coverage does not enter here. Passing at
+// some coverage also passes the opaque fallback, whose painted luminance lies
+// inside the same interval.
 const raw = (r: Resolved, opacity: number) =>
-  bound(r.surfaceColor, r.textLum, opacity * r.coverage * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
-// The opaque fallback paints the whole surface token, whatever its glass coverage.
-const opaqueFallback = (r: Resolved) =>
-  bound(r.surfaceColor, r.textLum, r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
+  bound(r.surfaceColor, r.textLum, opacity * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
 // Translucent text takes on the backdrop too; it is never bounded.
 const opaqueText = (r: Resolved) => r.textColor.alpha >= 1
 
@@ -367,7 +377,7 @@ export function glassContrastReportFor(
   const nestedOpacity = nested(resolved, opacity)
   const results = resolved.map((r): GlassContrastPair => {
     const glass = filtered(r, opacity)
-    const opaque = opaqueFallback(r)
+    const opaque = raw(r, 1)
     return {
       mode: r.mode,
       surface: r.surface,

@@ -52,6 +52,9 @@ it('hand-computed pair: white surface over black at 0.8', () => {
 })
 
 it('threshold: minimumOpacity passes and one step below fails', () => {
+  // The card, popover and muted pairs at full coverage: the palette below sets only their colours.
+  const pairs = glassContrastPairs.filter((p) => p.coverage === undefined && p.text !== 'destructive')
+  const reportAt = (preset: Preset) => glassContrastReportFor(preset, pairs)
   const at = (o: number) =>
     withColors(
       {
@@ -66,16 +69,16 @@ it('threshold: minimumOpacity passes and one step below fails', () => {
     )
   let x: number | null = null
   for (let i = 25; i <= 100; i++)
-    if (glassContrastReport(at(i / 100)).passes) {
+    if (reportAt(at(i / 100)).passes) {
       x = i / 100
       break
     }
-  const report = glassContrastReport(at(0.8))
+  const report = reportAt(at(0.8))
   expect(x).toBeGreaterThan(0.6)
   expect(x).not.toBeNull()
   expect(report.minimumOpacity).toBe(x)
-  expect(glassContrastReport(at(x!)).passes).toBe(true)
-  expect(glassContrastReport(at(x! - 0.01)).passes).toBe(false)
+  expect(reportAt(at(x!)).passes).toBe(true)
+  expect(reportAt(at(x! - 0.01)).passes).toBe(false)
 })
 
 it('returns null minimumOpacity when even opacity 1 fails', () => {
@@ -122,7 +125,11 @@ it('pair list equals the spec table', () => {
     { surface: 'card', text: 'foreground', tint: { color: 'destructive', light: 0.24, dark: 0.28 } },
     { surface: 'card', text: 'foreground' },
     { surface: 'card', text: 'foreground', tint: { color: 'foreground', light: 0.06, dark: 0.06 } },
-    { surface: 'background', text: 'foreground', tint: { color: 'foreground', light: 0.06, dark: 0.06 } },
+    { surface: 'background', text: 'foreground', coverage: 0.6 },
+    { surface: 'background', text: 'foreground', tint: { color: 'foreground', light: 0.06, dark: 0.06 }, coverage: 0.6 },
+    { surface: 'background', text: 'foreground', coverage: 0.55 },
+    { surface: 'background', text: 'mutedForeground', coverage: 0.55 },
+    { surface: 'card', text: 'destructive' },
   ])
 })
 
@@ -213,16 +220,17 @@ it('reduced transparency neutralizes the filter and sheen', () => {
 it('built-in palettes reach the documented minimum opacities', () => {
   const report = glassContrastReport(glass)
   expect(report.passes).toBe(true)
-  expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.32 })
-  expect(report.minimumOpacity).toBe(0.5)
+  expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.4 })
+  expect(report.minimumOpacity).toBe(0.57)
   // Nested glass sees a raw backdrop and needs more coverage.
-  expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.9 })
-  // Without compression the same palette needs nearly opaque glass.
+  expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
+  // Without compression the same palette needs nearly opaque glass, or no opacity passes at all:
+  // over raw black, the field placeholder at 55% coverage never reaches 4.5:1.
   const raw = glassContrastReport({
     ...glass,
     design: { ...glass.design, glassBackdropContrast: 1, glassBackdropTone: 0 },
   })
-  expect(raw.minimumOpacity).toBeGreaterThanOrEqual(0.7)
+  expect(raw.minimumOpacity ?? 1).toBeGreaterThanOrEqual(0.7)
 })
 
 // Reference chain written from the Filter Effects 1 definitions. blur() only
@@ -375,7 +383,7 @@ it('coverage scales the glass share of a pair but not its opaque fallback', () =
   expect(glassContrastReportFor(preset, [{ ...full, coverage: 1 }]).pairs[0].ratioOverBlack).toBe(plain.ratioOverBlack)
 })
 
-it('coverage raises the minimum and nested opacities', () => {
+it('coverage raises the minimum opacity but not the nested opacity', () => {
   const preset = withColors(
     { card: '#ffffff', cardForeground: '#000000' },
     { glassOpacity: 0.5 },
@@ -385,7 +393,8 @@ it('coverage raises the minimum and nested opacities', () => {
   // At half coverage, opacity o paints like opacity o / 2 at full coverage.
   expect(full.minimumOpacity).toBeLessThan(0.5)
   expect(Math.abs(half.minimumOpacity! - full.minimumOpacity! * 2)).toBeLessThanOrEqual(0.0100001)
-  expect(half.nestedOpacity!.light).toBeGreaterThan(full.nestedOpacity!.light)
+  // Nested, a covered surface paints at the full nested opacity, as its CSS does.
+  expect(half.nestedOpacity).toEqual(full.nestedOpacity)
 })
 
 it('reduced transparency evaluates covered surfaces opaque', () => {
