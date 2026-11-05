@@ -59,7 +59,10 @@ export const recipeIcons: Record<RecipeIconName, string> = {
  * on the selected variant from its mapped token: outline/ghost/link `background`,
  * outline/link `color`, and `border-color` for every variant. Once a role is painted,
  * a mode without its own override shows that mode's preset token. Outline and
- * ghost hover/active states keep the family's --accent colors.
+ * ghost hover/active states keep the family's --accent colors. Liquid glass is
+ * one ink: it paints every label from `foreground` and the secondary surface from
+ * `card`, so there a mode without its own override keeps that mode's
+ * `foreground` (and, for secondary, `card`).
  */
 export const recipeColorTokens: Record<
   RecipeButtonVariant,

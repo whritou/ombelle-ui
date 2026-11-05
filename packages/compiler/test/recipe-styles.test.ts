@@ -505,3 +505,25 @@ it('glass recipe colour overrides apply over one ink', async () => {
   expect(def.light['--primary']).toBe('#ff0000')
   expect(def.css).not.toContain('[data-variant="default"]{')
 })
+it.each(['default', 'secondary', 'destructive', 'outline'] as const)(
+  'a one-mode glass %s foreground override leaves the other mode on the one-ink label',
+  async (variant) => {
+    const token = { default: '--primary-foreground', secondary: '--secondary-foreground', destructive: '--destructive-foreground', outline: '--card-foreground' }[variant]
+    const lightOnly = await colorCss('liquid-glass', variant, { light: { foreground: '#112233' } })
+    expect(lightOnly.light[token]).toBe('#112233')
+    expect(lightOnly.dark[token]).toBe(lightOnly.dark['--foreground'])
+    const darkOnly = await colorCss('liquid-glass', variant, { dark: { foreground: '#ddeeff' } })
+    expect(darkOnly.dark[token]).toBe('#ddeeff')
+    expect(darkOnly.light[token]).toBe(darkOnly.light['--foreground'])
+    // Other families keep the preset token in the mode without an override.
+    const flat = await colorCss('flat', variant, { light: { foreground: '#112233' } })
+    expect(flat.dark[token]).toBe(getCatalog('0.1.0').presets.flat.modes.dark[token.slice(2).replace(/-(.)/g, (_, c: string) => c.toUpperCase()) as 'foreground']!.toLowerCase())
+  },
+)
+it('a one-mode glass secondary background override leaves the other mode on card glass', async () => {
+  const lightOnly = await colorCss('liquid-glass', 'secondary', { light: { background: '#223344' } })
+  expect(lightOnly.light['--secondary']).toBe('#223344')
+  expect(lightOnly.dark['--secondary']).toBe(lightOnly.dark['--card'])
+  const darkOnly = await colorCss('liquid-glass', 'secondary', { dark: { background: '#223344' } })
+  expect(darkOnly.light['--secondary']).toBe(darkOnly.light['--card'])
+})

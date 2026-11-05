@@ -271,6 +271,17 @@ export function compileScopedButtonStyles(input: {
       paint.color = 'var(' + variable(colorTokens.foreground) + ')'
     if (glass && set('background') && variant === 'secondary')
       paint['--card'] = 'var(' + variable(colorTokens.background) + ')'
+    // Glass paints the label from --foreground and the secondary surface from --card, so a
+    // mode without its own override keeps what glass draws there, not the solid-fill token.
+    if (glass)
+      for (const mode of recipeColorModes) {
+        const target = mode === 'light' ? light : darkTokens
+        const own = data.modes[mode]
+        if (set('foreground') && colors[mode]?.foreground === undefined && colorTokens.foreground !== 'foreground')
+          target[variable(colorTokens.foreground)] = own.foreground
+        if (variant === 'secondary' && set('background') && colors[mode]?.background === undefined)
+          target[variable(colorTokens.background)] = own.card
+      }
     if (set('border'))
       paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
   }
