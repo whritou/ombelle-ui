@@ -4,6 +4,7 @@
 
 ## 0.4.1 — 5 November 2026
 
+- Publish `@ombelle-ui/cli@0.4.1` to npm; website commands use `npx @ombelle-ui/cli@0.4.1`.
 - Align all six workspace packages at 0.4.1. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged; the preset and recipe schemas gain optional fields. Installers at 0.4.0 or older reject presets that set `shadowColor` (the built-in ombelle and neo-brutalism presets now do) and recipes that use the new Button fields, so install those with 0.4.1.
 - Restyle every component of the flat, minimalist, neo-brutalism and ombelle families to match their UI kits: colours, borders, radii, shadows, weights, type and every state (hover, pressed, focus, disabled, invalid, checked, selected, open). Control and touch-target sizes are kept where a kit draws them smaller. Neo-brutalism disabled controls are dashed, flat and grey instead of faded; ombelle fields keep a 2.5px focus outline. Catalog 0.1.0 bytes change in place; see `intentionalChanges` in the compiler style baseline. Existing installs keep their files until `theme add` or `add` is rerun.
 - Add an optional `shadowColor` preset colour (`--shadow-color`); offset shadows fall back to `--border`. The built-in ombelle preset uses rose and neo-brutalism pink shadows in dark mode.

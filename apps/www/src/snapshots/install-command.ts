@@ -1,7 +1,7 @@
 import { officialSnapshotOrigin, publicCliPackageName, styleFamilies, validateRecipeSnapshotSource, validateSnapshotSource, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
-export const publishedInstaller = { packageName: publicCliPackageName, version: '0.4.0' } as const
+export const publishedInstaller = { packageName: publicCliPackageName, version: '0.4.1' } as const
 
 /** First published installer that accepts `ombelle` presets and codes. */
 export const ombelleMinimumCli = '0.4.0'
