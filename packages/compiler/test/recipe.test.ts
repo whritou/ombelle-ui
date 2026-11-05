@@ -5,16 +5,16 @@ import { getCatalog } from '@ombelle/catalog'
 import example from '../../../examples/recipe.example.json'
 const scopedArtifactHashes: Record<string, readonly string[]> = {
   flat: [
-    'd5a72597bccbb00af23bf0eaf246f7e11acc80a898b7cca09059006d62859e0a',
-    'bf5398f42e1380bce898bcec08f5e0bbd5d7be720f5aef67551288adb48aa621',
+    'febe72ab5c88cf83e76060473786bc81df8de8f2018b550b3606866700d301d8',
+    '51b699ec580af1a171d685f53fad6426cb45aeeb708917a8cd2a7adbb87f1fc5',
   ],
   minimalist: [
-    '46dec20d9e6da8ed28aa36e22c28d2f904f4e594c69045cd77188a9cb49f0020',
-    '44e8474e91ea3ddb4784f12fb1e97cf51f75968525e24fdf35621ea988dc4c66',
+    'eb4f2cbf1ddef55b25ff6adab0bb75480e7161d13c397fd236ef1e82d47d82e6',
+    '8a0fd18bd6c205cfa39aab34c28e9e01d8c8a5ec6612476e8a093238515e560f',
   ],
   'neo-brutalism': [
-    '75649b7205bb68416fd21fa1c9a5774141f0992ef71029cd3038db32b7f1eedf',
-    'cc39d477328e10db05b8e223705b84d11d9abec3efab4b1fb49455cf2d37f566',
+    'd9bd72559adb12d6b202922790ede3a949dea751940f8ba3a3265d6a0781248a',
+    'be506c2c82e5941120e410ef544415e7413c26ea3d071c192bc39845d219652d',
   ],
 } as const
 it('normalizes defaults and stable identity across key order and dark context', async () => {
@@ -85,11 +85,11 @@ it('keeps existing recipe CSS and source output byte-for-byte stable', async () 
   ).toEqual([
     [
       'recipes/rc_primary-button/r2/button.css',
-      '75649b7205bb68416fd21fa1c9a5774141f0992ef71029cd3038db32b7f1eedf',
+      'd9bd72559adb12d6b202922790ede3a949dea751940f8ba3a3265d6a0781248a',
     ],
     [
       'recipes/rc_primary-button/r2/button.tsx',
-      'cc39d477328e10db05b8e223705b84d11d9abec3efab4b1fb49455cf2d37f566',
+      'be506c2c82e5941120e410ef544415e7413c26ea3d071c192bc39845d219652d',
     ],
   ])
 })

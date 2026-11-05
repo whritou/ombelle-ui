@@ -31,6 +31,7 @@
 [data-slot="button"][data-size="sm"] { min-height: 2rem; padding: 0.25rem 0.75rem; }
 [data-slot="button"][data-size="lg"] { min-height: 3rem; padding: 0.75rem 1.25rem; }
 [data-slot="button"][data-size="icon"] { width: max(var(--control-height), 2em); min-height: max(var(--control-height), 2em); padding: 0; }
+[data-slot="button"][data-size="icon-sm"] { width: 2rem; min-height: 2rem; padding: 0; }
 [data-slot="input"] { width: 100%; min-width: 0; background: var(--background); color: var(--foreground); }
 [data-slot="input"]::placeholder { color: var(--muted-foreground); opacity: 1; }
 [data-slot="input"][aria-invalid="true"] { border-color: var(--destructive); border-width: max(var(--border-width), 2px); }
@@ -39,6 +40,9 @@
 [data-slot="dialog-overlay"] { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.45); }
 [data-slot="dialog-content"] { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; width: min(28rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 2rem; padding-inline-end: calc(var(--control-height) + 1.5rem); border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); border-radius: calc(var(--radius) * 1.5); background: var(--popover); color: var(--popover-foreground); font-family: var(--font-family); box-shadow: inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), inset -1px -1px 0 color-mix(in srgb, var(--glass-highlight, white) 60%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--glass-highlight, white) 40%, transparent), inset 0 -1px 2px rgb(0 0 0 / 0.08), 0 1.5rem 3rem -1rem rgb(0 0 0 / 0.35); }
 [data-slot="dialog-content"] * { --glass-inner-filter: none; --glass-inner-opacity: var(--glass-nested-opacity); }
+[data-slot="dialog-header"] { display: flex; flex-direction: column; gap: 0.5rem; margin-block-end: 1rem; }
+[data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: 600; line-height: 1.3; }
+[data-slot="dialog-description"] { margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--muted-foreground); }
 [data-slot="dialog-close"] {
   position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem;
   display: inline-flex; align-items: center; justify-content: center;

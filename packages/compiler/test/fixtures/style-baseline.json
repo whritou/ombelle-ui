@@ -6,11 +6,11 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "bc3281636ecf4ae7d07f8b6bc7718ea51b097de8506bc333bf0eecddefcb38af"
+          "sha256": "1d114e0acca0898dbe5db559dada84732e1618ae0a91c20f4c74d5be34a49af0"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "0e3cb713d3c833a79334c26a8d382dfd695f8489f9d0f205609887d4d5aeae94"
+          "sha256": "8f6dad935471a75a925b1f68d84738e078064ce29a0eee72d9270d81f761f46d"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -34,7 +34,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "7f89387f315fecfb2c0c5190654afdc6faf4f399bafb49099df0a58ced429415"
+          "sha256": "23f0836d4e53b00f077e629ab2f14ff3f927932a4be255e9b58af232e849569c"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -47,11 +47,11 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "bc3281636ecf4ae7d07f8b6bc7718ea51b097de8506bc333bf0eecddefcb38af"
+          "sha256": "1d114e0acca0898dbe5db559dada84732e1618ae0a91c20f4c74d5be34a49af0"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "0e3cb713d3c833a79334c26a8d382dfd695f8489f9d0f205609887d4d5aeae94"
+          "sha256": "8f6dad935471a75a925b1f68d84738e078064ce29a0eee72d9270d81f761f46d"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -75,7 +75,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "f05f6394eab4d6a059779ad6a48700fbb96d309ab25d51853b33baf447839c6b"
+          "sha256": "0d691a2322274e186032ede3f20674060a605c932c165afb7eec6fdf75bf0104"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -88,11 +88,11 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "bc3281636ecf4ae7d07f8b6bc7718ea51b097de8506bc333bf0eecddefcb38af"
+          "sha256": "1d114e0acca0898dbe5db559dada84732e1618ae0a91c20f4c74d5be34a49af0"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "0e3cb713d3c833a79334c26a8d382dfd695f8489f9d0f205609887d4d5aeae94"
+          "sha256": "8f6dad935471a75a925b1f68d84738e078064ce29a0eee72d9270d81f761f46d"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -116,7 +116,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "0af096973ec23d357183de85004dc1c1b9ca7a0b9433fec767c37cffed09c991"
+          "sha256": "d9c775c983347c8c49a7b163a831efc3cca871c93b0a1bf3cc2474d5ad2e7629"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -234,6 +234,23 @@
       ],
       "spec": "fix/catalog-match-ui-kits",
       "reason": "The four stable families are restyled to match their design UI kits, with a Button loading spinner, new Badge variants, dialog title and description slots, a system-ui font stack and an optional shadowColor token for offset shadows."
+    },
+    {
+      "families": [
+        "flat",
+        "minimalist",
+        "neo-brutalism",
+        "ombelle",
+        "liquid-glass"
+      ],
+      "logicalPaths": [
+        "styles/ui-style.css",
+        "components/ui/button.tsx",
+        "components/ui/dialog.tsx",
+        "scoped Button preset and recipe button.css and button.tsx"
+      ],
+      "spec": "fix/kit-followups",
+      "reason": "Button icon-sm size and DialogHeader part with per-family styles (neo-brutalism title band no longer depends on child order); Ombelle outline Button on the card surface; outline recipe colour overrides map to card and cardForeground and are painted in every family"
     }
   ]
 }

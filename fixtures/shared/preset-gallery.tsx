@@ -28,6 +28,7 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
@@ -223,11 +224,13 @@ export function PresetGallery({
             <Button variant="outline">Open dialog</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle>Ready to publish?</DialogTitle>
-            <DialogDescription>
-              This is a preview. Your preset stays on this device until you
-              download it.
-            </DialogDescription>
+            <DialogHeader>
+              <DialogTitle>Ready to publish?</DialogTitle>
+              <DialogDescription>
+                This is a preview. Your preset stays on this device until you
+                download it.
+              </DialogDescription>
+            </DialogHeader>
             <p className="preset-dialog-copy">
               Review your choices and close this dialog to continue editing.
             </p>

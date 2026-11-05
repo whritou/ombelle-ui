@@ -377,7 +377,7 @@ it.each([
   ['default', '--primary', '--primary-foreground'],
   ['secondary', '--secondary', '--secondary-foreground'],
   ['destructive', '--destructive', '--destructive-foreground'],
-  ['outline', '--background', '--foreground'],
+  ['outline', '--card', '--card-foreground'],
   ['ghost', '--background', '--foreground'],
   ['link', '--background', '--foreground'],
 ] as const)(
@@ -404,6 +404,12 @@ it('paints only the overridden roles that families do not read from the mapped t
   expect(border.paint).toEqual({ 'border-color': 'var(--border)' })
   const ghost = await colorCss('flat', 'ghost', { light: { background: '#ff0000' } })
   expect(ghost.paint).toEqual({ background: 'var(--background)' })
+  // Flat draws outline Buttons transparent and neo-brutalism on the card: painting makes
+  // the override show in every family.
+  for (const family of ['flat', 'neo-brutalism'] as const) {
+    const outline = await colorCss(family, 'outline', { light: { background: '#ff0000', foreground: '#00ff00' } })
+    expect(outline.paint).toEqual({ background: 'var(--card)', color: 'var(--card-foreground)' })
+  }
   const link = await colorCss('liquid-glass', 'link', {
     dark: { background: '#ff0000', foreground: '#00ff00' },
   })
