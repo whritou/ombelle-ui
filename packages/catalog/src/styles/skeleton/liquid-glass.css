@@ -1,6 +1,7 @@
 /* liquid-glass Skeleton (experimental): a frosted shape, a 10% foreground film with a white top sheen and a white rim.
    The pulse follows the preset motion duration and is removed under reduced motion. No text, so no contrast pair.
-   Without backdrop-filter, or under reduced transparency, the film is opaque. */
+   Without backdrop-filter the film stays a translucent 10% tint, unblurred. Under reduced transparency it is opaque
+   over card without the sheen: the OS setting through the media rule, a reduced preset through --glass-film-backing. */
 [data-slot='skeleton'] {
   box-sizing: border-box;
   display: block;
@@ -9,8 +10,8 @@
   border: 1px solid rgb(255 255 255 / 30%);
   border-radius: 999px;
   background:
-    linear-gradient(to bottom, rgb(255 255 255 / 35%), transparent 70%),
-    color-mix(in srgb, var(--foreground) 10%, transparent);
+    linear-gradient(to bottom, color-mix(in srgb, white calc((1 - var(--glass-film-backing, 0)) * 35%), transparent), transparent 70%),
+    color-mix(in srgb, var(--foreground) 10%, color-mix(in srgb, var(--card) calc(var(--glass-film-backing, 0) * 100%), transparent));
   animation: ombelle-skeleton-pulse calc(var(--motion-duration) * 10) ease-in-out infinite alternate;
 }
 [data-slot='skeleton'][data-shape='circle'] {

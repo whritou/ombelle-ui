@@ -42,7 +42,7 @@ A glass preset sets `styleFamily: "liquid-glass"` and these design fields, which
 
 | Field | Range | Built-in value | Effect |
 | --- | --- | --- | --- |
-| `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur, filter, or sheen |
+| `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur, filter, or sheen: the tokens set `--glass-opacity`, `--glass-inner-opacity` and `--glass-nested-opacity` to 1 and `--glass-inner-filter` to `none`, so covered and nested surfaces paint their whole token too |
 | `design.glassBlurPx` | 0–40 | 3 | Backdrop blur radius; low values keep the refraction visible |
 | `design.glassOpacity` | 0.25–1 | 0.57 | Surface opacity: the share of the surface colour in the mix with the filtered backdrop |
 | `design.glassSaturation` | 1–2 | 2 | Backdrop `saturate()`; keeps the colour of what is behind the glass |
@@ -170,7 +170,7 @@ Inside the feature query, each translucent surface paints a white specular gradi
 
 1. **Opaque base.** Glass surfaces are opaque outside any feature query, using the relevant surface token.
 2. **Feature query.** Translucency and blur apply only inside `@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))`. A browser without filter support never shows text over an unblurred backdrop.
-3. **Reduced transparency.** `@media (prefers-reduced-transparency: reduce)` restores opaque surfaces and removes the filter. The preset field `transparency: "reduced"` does the same at compile time.
+3. **Reduced transparency.** `@media (prefers-reduced-transparency: reduce)` restores opaque surfaces and removes the filter. The preset field `transparency: "reduced"` does the same at compile time: its tokens pin every surface's coverage to 1 (`--glass-inner-opacity`, which covered surfaces such as the 55% field read before their coverage, and `--glass-nested-opacity`), remove the filter (`--glass-inner-filter: none`) and the sheen, and back the Skeleton film with `card` (`--glass-film-backing`).
 4. **Forced colours.** `@media (forced-colors: active)` uses system colours with no filter and no translucency.
 5. **Glass identity in every fallback.** The edge (`--border-width` in the `border` colour), an inner top highlight, and the preset radius remain.
 

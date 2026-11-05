@@ -22,13 +22,16 @@ it('compiles Skeleton in liquid glass: a 10% foreground film with a white sheen 
   const css = result.artifacts.find((a) => a.logicalPath === 'components/ui/skeleton.css')!.content
   const at = (selector: string, context: Context = 'root') => rulesIn(css, selector, context)
   const sk = '[data-slot="skeleton"]'
-  const film = 'color-mix(insrgb,var(--foreground)10%,transparent)'
+  // Unset, --glass-film-backing leaves the kit's 10% film over nothing under a 35% white sheen; a reduced preset
+  // sets it to 1, so the film is opaque over card and the sheen is gone, as under the OS setting.
+  const film = 'color-mix(insrgb,var(--foreground)10%,color-mix(insrgb,var(--card)calc(var(--glass-film-backing,0)*100%),transparent))'
+  const sheen = 'color-mix(insrgb,whitecalc((1-var(--glass-film-backing,0))*35%),transparent)'
   expect(at(sk)).toMatchObject({
     border: '1pxsolidrgb(255255255/30%)',
     'border-radius': '999px',
     animation: 'ombelle-skeleton-pulsecalc(var(--motion-duration)*10)ease-in-outinfinitealternate',
   })
-  expect(at(sk).background).toBe('linear-gradient(tobottom,rgb(255255255/35%),transparent70%),' + film)
+  expect(at(sk).background).toBe('linear-gradient(tobottom,' + sheen + ',transparent70%),' + film)
   expect(at(sk, 'supports')['backdrop-filter']).toContain('blur(var(--glass-blur))')
   expect(at(sk, 'reduced')).toMatchObject({ background: 'color-mix(insrgb,var(--foreground)10%,var(--card))', 'backdrop-filter': 'none' })
   expect(at(sk + '[data-shape="circle"]')['border-radius']).toBe('50%')

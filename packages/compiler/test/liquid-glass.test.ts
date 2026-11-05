@@ -95,6 +95,100 @@ describe('liquid-glass compile', () => {
     expect(tokens).toContain('--glass-opacity:1;')
   })
 
+  // The bound evaluates every pair opaque under transparency "reduced", so the CSS must paint every glass surface
+  // opaque: covered surfaces read --glass-inner-opacity before their coverage fallback, so it is pinned at the root.
+  it('reduced transparency paints every covered and nested surface opaque, with no filter or sheen', async () => {
+    const preset = withDesign({ transparency: 'reduced', glassOpacity: 0.6 })
+    expect(glassContrastReport(preset).passes).toBe(true)
+    const result = await build(preset)
+    const tokens = squash(artifact(result, 'styles/ui-tokens.css'))
+    const block = (selector: string) => {
+      const start = tokens.indexOf(selector + '{') + selector.length + 1
+      return Object.fromEntries(
+        tokens.slice(start, tokens.indexOf('}', start)).split(';').filter(Boolean)
+          .map((d) => [d.slice(0, d.indexOf(':')), d.slice(d.indexOf(':') + 1)]),
+      ) as Record<string, string>
+    }
+    const light = block(':root')
+    const dark = { ...light, ...block('.dark') }
+    expect(light).toMatchObject({
+      '--glass-inner-opacity': '1',
+      '--glass-inner-filter': 'none',
+      '--glass-nested-opacity': '1',
+      '--glass-film-backing': '1',
+    })
+    expect(dark['--glass-nested-opacity']).toBe('1')
+    // Resolve var() with fallbacks, as the cascade does.
+    const resolve = (value: string, env: Record<string, string>): string => {
+      let out = value
+      for (let i = out.lastIndexOf('var('); i !== -1; i = out.lastIndexOf('var(')) {
+        let depth = 0
+        let end = i + 3
+        let comma = -1
+        for (; end < out.length; end++) {
+          if (out[end] === '(') depth++
+          else if (out[end] === ')' && --depth === 0) break
+          else if (out[end] === ',' && depth === 1 && comma === -1) comma = end
+        }
+        const name = out.slice(i + 4, comma === -1 ? end : comma).trim()
+        const fallback = comma === -1 ? undefined : out.slice(comma + 1, end).trim()
+        const replacement =
+          name in env ? resolve(env[name]!, env) : name.startsWith('--glass') ? (fallback ?? '') : '#000'
+        out = out.slice(0, i) + replacement + out.slice(end + 1)
+      }
+      return out
+    }
+    // Every calc(... * 100%) evaluates to a fraction of the whole token.
+    const fractions = (value: string) => {
+      const out: number[] = []
+      for (const match of value.matchAll(/calc\(/g)) {
+        let depth = 0
+        let end = match.index!
+        for (; end < value.length; end++) {
+          if (value[end] === '(') depth++
+          else if (value[end] === ')' && --depth === 0) break
+        }
+        const body = value.slice(match.index! + 5, end)
+        if (!/\*\s*100%$/.test(body.trim())) continue
+        const expression = body.trim().replace(/\*\s*100%$/, '').replaceAll('calc', '')
+        expect(expression, value).toMatch(/^[\d.\s*+\-()]+$/)
+        out.push(Function('return ' + expression)() as number)
+      }
+      return out
+    }
+    const sheets = result.artifacts.filter((a) => a.kind === 'style' && a.logicalPath !== 'styles/ui-tokens.css')
+    let surfaces = 0
+    for (const env of [light, dark])
+      // Top level, and nested in a glass Card, Dialog or Tooltip, which re-point the inner values.
+      for (const nested of [false, true]) {
+        const scope = nested
+          ? { ...env, '--glass-inner-opacity': 'var(--glass-nested-opacity)', '--glass-inner-filter': 'none' }
+          : env
+        for (const sheet of sheets)
+          postcss.parse(sheet.content).walkDecls((d) => {
+            const raw = squash(d.value)
+            if (d.prop === 'background' && /--glass-(inner-opacity|opacity|film-backing)/.test(raw)) {
+              surfaces++
+              const resolved = resolve(raw, scope)
+              for (const sheen of raw.match(/calc\(var\(--glass-sheen\)\*\d+%\)/g) ?? [])
+                expect(resolve(sheen, scope), sheet.logicalPath).toBe('calc(0*' + sheen.match(/(\d+%)\)$/)![1] + ')')
+              // The Skeleton film's literal sheen fades with its backing.
+              if (raw.includes('(1-var(--glass-film-backing,0))')) expect(resolved).toContain('calc((1-1)*35%)')
+              const coverage = fractions(resolved.replace(/calc\(0\*\d+%\)/g, ''))
+              expect(coverage.length, sheet.logicalPath + ' ' + raw).toBeGreaterThan(0)
+              for (const c of coverage) expect(c, sheet.logicalPath + ' ' + raw).toBe(1)
+            }
+            if (d.prop.endsWith('backdrop-filter') && raw.includes('--glass-inner-filter'))
+              expect(resolve(raw, scope), sheet.logicalPath).toBe('none')
+          })
+      }
+    expect(surfaces).toBeGreaterThan(40)
+    // The built-in preset keeps its translucent tokens: none of the reduced pins are emitted.
+    const builtinTokens = artifact(await build(builtin()), 'styles/ui-tokens.css')
+    for (const pin of ['--glass-inner-opacity', '--glass-inner-filter', '--glass-film-backing'])
+      expect(builtinTokens).not.toContain(pin)
+  })
+
   it('emits no glass tokens for other families', async () => {
     for (const family of ['flat', 'minimalist', 'neo-brutalism'] as const) {
       const result = await build(getCatalog('0.1.0').presets[family], ['button'])
