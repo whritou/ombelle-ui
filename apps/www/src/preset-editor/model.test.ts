@@ -16,6 +16,9 @@ import {
   presetFieldValue,
   presetGlassReport,
   previewComponentIds,
+  applyStartingPreset,
+  matchingStartingPreset,
+  applyGlassTint,
 } from './model'
 
 it.each(styleFamilies)(
@@ -164,16 +167,8 @@ it('creates a valid liquid-glass draft based on builtin-liquid-glass', () => {
   expect(presetFieldValue(draft, '/design/glassBlurPx')).toBe('3')
   expect(presetFieldValue(draft, '/design/glassBackdropContrast')).toBe('0.45')
   expect(presetFieldValue(draft, '/design/transparency')).toBe('auto')
-  expect(Object.keys(glassDesignControls)).toEqual([
-    'transparency',
-    'glassBlurPx',
-    'glassOpacity',
-    'glassSaturation',
-    'glassBackdropContrast',
-    'glassBackdropTone',
-    'glassSheen',
-    'glassRim',
-  ])
+  // The material settings a preset leaves out read as 0.
+  expect(presetFieldValue(draft, '/design/glassHalo')).toBe('0')
 })
 
 it('reports a failing contrast bound for a glass opacity edit of 0.3', () => {
@@ -225,7 +220,8 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
   expect(() => materializePreset(toFlat.draft)).not.toThrow()
   const back = planPresetFamilyChange(toFlat.draft, 'liquid-glass')
   expect(back.draft.family).toBe('liquid-glass')
-  expect(materializePreset(back.draft).design.glassOpacity).toBe(0.57)
+  // Switching into glass starts from Cristal.
+  expect(materializePreset(back.draft).design.glassOpacity).toBe(0.4)
 })
 
 it('requests only components the family supports', () => {
@@ -255,4 +251,70 @@ it('requests only components the family supports', () => {
     'textarea',
     'tooltip',
   ])
+})
+
+it('picking a starting point replaces every value', () => {
+  const catalog = getCatalog('0.1.0')
+  let draft = setPresetEdit(createPresetDraft('liquid-glass'), '/modes/light/primary', '#123456')
+  draft = applyStartingPreset(draft, 'builtin-liquid-glass-relief')
+  const preset = materializePreset(draft)
+  const relief = catalog.startingPresets['builtin-liquid-glass-relief']
+  expect(preset.modes).toEqual(relief.modes)
+  for (const [key, value] of Object.entries(relief.design))
+    expect(String(preset.design[key as keyof typeof preset.design] ?? 0), key).toBe(String(value))
+  expect(matchingStartingPreset(draft)).toBe('builtin-liquid-glass-relief')
+  expect(matchingStartingPreset(setPresetEdit(draft, '/design/glassHalo', '0.2'))).toBe(null)
+  // The family base is a starting point too, and picking it clears the edits.
+  expect(applyStartingPreset(draft, 'builtin-liquid-glass').edits).toEqual({})
+  expect(matchingStartingPreset(createPresetDraft('liquid-glass'))).toBe('builtin-liquid-glass')
+})
+
+it('switching into liquid glass starts from Cristal and keeps the user edits', () => {
+  const flat = setPresetEdit(createPresetDraft('flat'), '/design/radiusRem', '1.25')
+  const { draft, changes } = planPresetFamilyChange(flat, 'liquid-glass')
+  expect(presetFieldValue(draft, '/design/radiusRem')).toBe('1.25')
+  expect(presetFieldValue(draft, '/design/glassHalo')).toBe('0.6')
+  expect(presetFieldValue(draft, '/modes/light/card')).toBe('#DAF6FF')
+  expect(changes.some((change) => change.path === '/modes/light/card')).toBe(true)
+  const withoutRadius = { ...draft, edits: { ...draft.edits } }
+  delete withoutRadius.edits['/design/radiusRem']
+  expect(matchingStartingPreset(withoutRadius)).toBe('builtin-liquid-glass-cristal')
+})
+
+it('glass drafts expose the material settings in the lab order with their ranges', () => {
+  expect(Object.keys(glassDesignControls)).toEqual([
+    'transparency',
+    'glassOpacity',
+    'glassBlurPx',
+    'glassBackdropContrast',
+    'glassSheen',
+    'glassRefraction',
+    'glassRefractionWidth',
+    'glassRim',
+    'glassHalo',
+    'glassDepth',
+    'glassMotion',
+    'glassDispersion',
+    'glassSaturation',
+    'glassBackdropTone',
+  ])
+  expect(glassDesignControls.glassBackdropContrast.max).toBe(1.6)
+  expect(glassDesignControls.glassSheen.max).toBe(1)
+  expect(glassDesignControls.glassRefractionWidth.max).toBe(0.3)
+  for (const key of ['glassRefraction', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion'] as const)
+    expect(glassDesignControls[key]).toMatchObject({ min: 0, max: 1, step: 0.01 })
+  const draft = setPresetEdit(createPresetDraft('liquid-glass'), '/design/glassDepth', '0.4')
+  expect(materializePreset(draft).design.glassDepth).toBe(0.4)
+})
+
+it('tint chips write veil, ink and accent for both modes', () => {
+  const draft = applyGlassTint(createPresetDraft('liquid-glass'), 'rose')
+  const preset = materializePreset(draft)
+  expect(preset.modes.light).toMatchObject({ card: '#FFD7EB', popover: '#FFD7EB', cardForeground: '#102038', primary: '#A3245A', ring: '#A3245A' })
+  expect(preset.modes.dark).toMatchObject({ card: '#2A1D33', primary: '#F9A8D4', cardForeground: '#F0F7FF' })
+  // On a Relief draft, Rosee takes Relief's warmer veil.
+  const relief = applyGlassTint(applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-relief'), 'rose')
+  expect(materializePreset(relief).modes.light.card).toBe('#F4A5B3')
+  const smoke = materializePreset(applyGlassTint(createPresetDraft('liquid-glass'), 'smoke'))
+  expect(smoke.modes.light).toMatchObject({ card: '#091127', cardForeground: '#F0F7FF', background: smoke.modes.dark.background })
 })
