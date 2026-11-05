@@ -53,6 +53,21 @@ import {
   AvatarGroup,
 } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+import {
+  Table,
+  TableCaption,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion'
 import { Switch, SwitchThumb } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
@@ -441,6 +456,93 @@ export function PresetGallery({
               <a href="#changelog">Changelog</a>
             </nav>
           </div>
+        </section>,
+      )}
+      {gate(
+        'table',
+        'Table',
+        <section aria-label="Projects table" data-component="table">
+          <h2>Projects table</h2>
+          <Table>
+            <TableCaption>4 of 12 projects · 1 selected</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Project</TableHead>
+                <TableHead>Owner</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead numeric>Components</TableHead>
+                <TableHead numeric>Updated</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[
+                ['Website refresh', 'Ada L.', 'AL', 'primary', 'On track', '12', '2 h ago', false],
+                ['Mobile onboarding', 'Grace H.', 'GH', 'default', 'Needs attention', '8', 'Yesterday', false],
+                ['Billing migration', 'Margaret K.', 'MK', 'secondary', 'On track', '5', 'Oct 28', true],
+                ['Design system docs', 'Ada L.', 'AL', 'primary', 'Draft', '21', 'Oct 21', false],
+              ].map(([project, owner, initials, tone, status, count, updated, selected]) => (
+                <TableRow key={project as string} selected={selected as boolean}>
+                  <TableCell>{project}</TableCell>
+                  <TableCell>
+                    <span className="preset-row preset-tight">
+                      {gate(
+                        'avatar',
+                        'Avatar',
+                        <Avatar size="sm" variant={tone as 'default' | 'primary' | 'secondary'} aria-hidden="true">
+                          <AvatarFallback>{initials}</AvatarFallback>
+                        </Avatar>,
+                      )}
+                      {owner}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        status === 'Needs attention'
+                          ? 'destructive'
+                          : status === 'Draft'
+                            ? 'outline'
+                            : 'secondary'
+                      }
+                    >
+                      {status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell numeric>{count}</TableCell>
+                  <TableCell numeric>{updated}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </section>,
+      )}
+      {gate(
+        'accordion',
+        'Accordion',
+        <section aria-label="Questions" data-component="accordion">
+          <h2>Questions</h2>
+          <Accordion type="single" collapsible defaultValue="preset">
+            <AccordionItem value="preset">
+              <AccordionTrigger>What does a preset change?</AccordionTrigger>
+              <AccordionContent>
+                Colors, radius, borders, shadows and type. Installed source
+                stays yours to edit.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="edit">
+              <AccordionTrigger>Can I edit installed components?</AccordionTrigger>
+              <AccordionContent>
+                Yes. The CLI only replaces a file you have not changed.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="families">
+              <AccordionTrigger>Which families are stable?</AccordionTrigger>
+              <AccordionContent>
+                Flat, minimalist, neo brutalism and ombelle. Liquid glass is
+                experimental.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </section>,
       )}
       <section aria-label="Dialog" data-component="dialog">

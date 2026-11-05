@@ -1,5 +1,6 @@
 export const supportedComponentIds = [
   'alert',
+  'accordion',
   'button',
   'badge',
   'avatar',
@@ -16,6 +17,7 @@ export const supportedComponentIds = [
   'switch',
   'separator',
   'tabs',
+  'table',
   'textarea',
   'tooltip',
 ] as const

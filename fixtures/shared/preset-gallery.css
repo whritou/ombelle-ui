@@ -56,6 +56,10 @@ body {
   display: grid;
   gap: 12px;
 }
+.preset-tight {
+  gap: 8px;
+  flex-wrap: nowrap;
+}
 .preset-inline-nav {
   align-items: stretch;
   min-height: 24px;
