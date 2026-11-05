@@ -4,6 +4,7 @@ import * as postcss from 'prettier/plugins/postcss'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedStyleFamilies, type ComponentId } from '@ombelle/contracts'
 import { compile } from '../src/index.js'
+import { forcedBlock, squash } from './new-component-artifacts.js'
 import baseline from './fixtures/style-baseline.json'
 
 const id = 'native-select' as ComponentId
@@ -112,3 +113,28 @@ it.each(supportedStyleFamilies)(
         ).toBe(artifact.sha256)
   },
 )
+
+it('compiles Native Select in liquid glass with its reduced-transparency and forced-colors fallbacks', async () => {
+  const result = await compile({
+    ...base,
+    preset: getCatalog('0.1.0').presets['liquid-glass'],
+    componentIds: [id],
+  })
+  const css = result.artifacts.find(
+    (a) => a.logicalPath === 'components/ui/native-select.css',
+  )!.content
+  const flat = squash(css)
+  const block = (selector: string) => flat.split(selector + '{')[1]?.split('}')[0] ?? ''
+  expect(flat).toContain('@media(forced-colors:active)')
+  expect(flat).toContain('prefers-reduced-transparency')
+  const field = '[data-slot="native-select"]'
+  expect(flat).toContain('@supports((backdrop-filter:blur(1px))or(-webkit-backdrop-filter:blur(1px)))')
+  expect(block(field)).toContain('border:var(--border-width)solidvar(--input)')
+  expect(flat).toContain('color-mix(insrgb,var(--background)calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.55))*100%),transparent)')
+  expect(flat).toContain(field + '[aria-invalid="true"]{border-color:var(--destructive);border-width:max(var(--border-width),2px)')
+  expect(flat).toContain(field + ':disabled{opacity:0.5')
+  expect(flat).toContain(field + '{background:var(--background)')
+  expect(flat).toContain(field + '{background:Field')
+  expect(forcedBlock(css)).toContain('color:FieldText')
+  expect(block('[data-slot="native-select-icon"]')).toContain('color:var(--muted-foreground)')
+})

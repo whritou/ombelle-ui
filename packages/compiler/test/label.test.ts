@@ -4,6 +4,7 @@ import * as postcss from 'prettier/plugins/postcss'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedStyleFamilies, type ComponentId } from '@ombelle/contracts'
 import { compile } from '../src/index.js'
+import { forcedBlock, squash } from './new-component-artifacts.js'
 import baseline from './fixtures/style-baseline.json'
 
 const id = 'label' as ComponentId
@@ -104,3 +105,22 @@ it.each(supportedStyleFamilies)(
         ).toBe(artifact.sha256)
   },
 )
+
+it('compiles Label in liquid glass with its reduced-transparency and forced-colors fallbacks', async () => {
+  const result = await compile({
+    ...base,
+    preset: getCatalog('0.1.0').presets['liquid-glass'],
+    componentIds: [id],
+  })
+  const css = result.artifacts.find(
+    (a) => a.logicalPath === 'components/ui/label.css',
+  )!.content
+  const flat = squash(css)
+  const block = (selector: string) => flat.split(selector + '{')[1]?.split('}')[0] ?? ''
+  expect(flat).toContain('@media(forced-colors:active)')
+  expect(flat).toContain('prefers-reduced-transparency')
+  const label = block('[data-slot="label"]')
+  expect(label).toContain('font-size:0.875rem')
+  expect(label).toContain('font-weight:500')
+  expect(label).toContain('color:var(--foreground)')
+})

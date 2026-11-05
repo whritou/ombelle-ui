@@ -10,8 +10,8 @@ import {
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'input', 'popover', 'tabs', 'tooltip']
-const glassUnavailable = ['accordion', 'avatar', 'checkbox', 'label', 'native-select', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'textarea']
+const glassExperimental = ['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'tabs', 'textarea', 'tooltip']
+const glassUnavailable = ['accordion', 'avatar', 'checkbox', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table']
 
 describe('style support table', () => {
   it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
@@ -44,15 +44,15 @@ describe('style support table', () => {
     expect(isStyleFamily('constructor')).toBe(false)
   })
   it('refuses unavailable components in input order', () => {
-    expect(() => assertStyleAvailable(['card', 'textarea'], 'liquid-glass')).toThrow(FoundationError)
+    expect(() => assertStyleAvailable(['card', 'table'], 'liquid-glass')).toThrow(FoundationError)
     try {
-      assertStyleAvailable(['card', 'label', 'textarea'], 'liquid-glass')
+      assertStyleAvailable(['card', 'accordion', 'table'], 'liquid-glass')
       expect.unreachable()
     } catch (error) {
       expect(error).toMatchObject({
         code: 'STYLE_UNAVAILABLE',
         message:
-          'Label is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, card, dialog, dropdown-menu, input, popover, tabs, tooltip.',
+          'Accordion is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, card, dialog, dropdown-menu, input, label, popover, native-select, tabs, textarea, tooltip.',
         path: '/componentIds',
         nextAction: 'Choose a stable family for this component or remove it.',
       })

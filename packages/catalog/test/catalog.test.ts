@@ -407,6 +407,7 @@ describe('catalog contract', () => {
         'minimalist',
         'neo-brutalism',
         'ombelle',
+        'liquid-glass',
       ])
       for (const family of supportedStyleFamilies)
         expect(template.styles?.[family]).toContain(
@@ -540,7 +541,18 @@ describe('catalog contract', () => {
       supportedComponentIds.filter(
         (id) => c.templates[id].styles?.['liquid-glass'] !== undefined,
       ),
-    ).toEqual(['alert', 'badge', 'card', 'dropdown-menu', 'popover', 'tabs', 'tooltip'])
+    ).toEqual([
+      'alert',
+      'badge',
+      'card',
+      'dropdown-menu',
+      'label',
+      'popover',
+      'native-select',
+      'tabs',
+      'textarea',
+      'tooltip',
+    ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)
         for (const family of supportedStyleFamilies)

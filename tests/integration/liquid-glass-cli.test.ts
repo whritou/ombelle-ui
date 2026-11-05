@@ -24,6 +24,7 @@ const notice = (ids: readonly string[]) =>
   'liquid-glass is experimental for ' + ids.join(', ') +
   '; see docs/components/liquid-glass.md for limitations'
 const installOrder = ['button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input'] as const
+const installed = glassIds.filter((id) => (installOrder as readonly string[]).includes(id))
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
 const flatPath = path.resolve('packages/catalog/src/presets/flat.json')
 
@@ -62,8 +63,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the ten experimental ids', () => {
-  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'input', 'popover', 'tabs', 'tooltip'])
+it('lists the thirteen experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'tabs', 'textarea', 'tooltip'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {
@@ -87,13 +88,13 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const dryPlan = jsonRecord(dry.data)
     expect(dryPlan.status).toBe('planned')
     expect(dryPlan.warnings).toEqual([])
-    expect(dryPlan.notices).toEqual([notice(glassIds), mountNotice])
+    expect(dryPlan.notices).toEqual([notice(installed), mountNotice])
 
     const applied = await command([...addArgs, '--yes'])
     expect(applied.code, applied.output).toBe(0)
     const appliedPlan = jsonRecord(applied.data)
     expect(appliedPlan.status).toBe('success')
-    expect(appliedPlan.notices).toEqual([notice(glassIds), mountNotice])
+    expect(appliedPlan.notices).toEqual([notice(installed), mountNotice])
     expect(await fs.readFile(path.join(root, 'src/components/ui/liquid-glass-filter.tsx'), 'utf8')).toContain('ombelle-liquid-glass')
 
     const canonical = await compile({
@@ -121,7 +122,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     // Unavailable component: refused, nothing written.
     const before = await snapshotTree(root)
     expect(Object.keys(before)).toContain(lockName)
-    const refused = await command(['add', 'label', '--yes'])
+    const refused = await command(['add', 'table', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
     expect(await snapshotTree(root)).toEqual(before)
@@ -136,7 +137,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const init = await command(['init', '--preset', glass, '--yes'])
     expect(init.code, init.output).toBe(0)
     const before = await snapshotTree(root)
-    const refused = await command(['add', 'button', 'label', '--yes'])
+    const refused = await command(['add', 'button', 'table', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error).code).toBe('STYLE_UNAVAILABLE')
     const after = await snapshotTree(root)
@@ -187,10 +188,10 @@ for (const manager of ['pnpm', 'npm'] as const) {
     roots.push(root)
     const { glass } = await writePresets()
     const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
-    await seed(root, ['label'])
+    await seed(root, ['table'])
     const init = await command(['init', '--preset', flatPath, '--yes'])
     expect(init.code, init.output).toBe(0)
-    const added = await command(['add', 'label', '--yes'])
+    const added = await command(['add', 'table', '--yes'])
     expect(added.code, added.output).toBe(0)
 
     const before = await snapshotTree(root)
@@ -198,7 +199,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(refused.code, refused.output).toBe(2)
     const error = jsonRecord(jsonRecord(refused.data).error)
     expect(error).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    expect(String(error.message)).toContain('label')
+    expect(String(error.message)).toContain('table')
     expect(String(error.message)).toContain(glassIds.join(', '))
     expect(await snapshotTree(root)).toEqual(before)
   }, 180000)

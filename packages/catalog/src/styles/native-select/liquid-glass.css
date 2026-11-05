@@ -1,0 +1,109 @@
+/* liquid-glass Native Select (experimental): the field surface, as Input */
+[data-slot='native-select-wrapper'] {
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+[data-slot='native-select'] {
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--control-height);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  text-align: start;
+  border: var(--border-width) solid var(--input);
+  border-radius: var(--radius);
+  padding-block: 0;
+  padding-inline: 0.875rem 2.375rem;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color var(--motion-duration), border-color var(--motion-duration), color var(--motion-duration);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06), inset 0 -1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent));
+}
+[data-slot='native-select'][data-size='sm'] {
+  min-block-size: 2rem;
+  padding-inline-start: 0.75rem;
+}
+[data-slot='native-select'][multiple] {
+  padding-block: 0.5rem;
+  padding-inline-end: 0.875rem;
+}
+[data-slot='native-select-icon'] {
+  position: absolute;
+  box-sizing: border-box;
+  inset-inline-end: 0.75rem;
+  inset-block: 0;
+  margin-block: auto;
+  inline-size: 1rem;
+  block-size: 1rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+select[multiple] + [data-slot='native-select-icon'] {
+  display: none;
+}
+[data-slot='native-select']:focus-visible {
+  border-color: var(--ring);
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='native-select'][aria-invalid='true'] {
+  border-color: var(--destructive);
+  border-width: max(var(--border-width), 2px);
+}
+[data-slot='native-select']:disabled {
+  opacity: 0.5;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='native-select'] {
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 60%), transparent), transparent 70%),
+      color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='native-select'] {
+      background: var(--background);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='native-select'] {
+      background: Field;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='native-select'] {
+    color: FieldText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+  [data-slot='native-select-icon'] {
+    color: ButtonText;
+  }
+  [data-slot='native-select']:focus-visible {
+    outline-color: Highlight;
+    border-color: Highlight;
+  }
+  [data-slot='native-select'][aria-invalid='true'] {
+    border-style: double;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='native-select'] {
+    transition: none;
+  }
+}

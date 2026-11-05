@@ -238,8 +238,11 @@ it('requests only components the family supports', () => {
     'dialog',
     'dropdown-menu',
     'input',
+    'label',
     'popover',
+    'native-select',
     'tabs',
+    'textarea',
     'tooltip',
   ])
 })

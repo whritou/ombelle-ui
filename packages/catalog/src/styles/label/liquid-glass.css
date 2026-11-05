@@ -1,0 +1,29 @@
+/* liquid-glass Label (experimental) */
+[data-slot='label'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+[data-slot='label'] > [aria-hidden='true'] {
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+@media (forced-colors: active) {
+  [data-slot='label'] {
+    color: CanvasText;
+  }
+  [data-slot='label'] > [aria-hidden='true'] {
+    color: CanvasText;
+  }
+}
+/* Labels carry no surface, so there is no backdrop to fall back from. */
+@media (prefers-reduced-transparency: reduce) {
+  [data-slot='label'] {
+    color: var(--foreground);
+  }
+}
