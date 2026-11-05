@@ -57,6 +57,8 @@ it('compiles Select in liquid glass: the field trigger, the Dropdown Menu surfac
   expect(block(trigger + ':focus-visible')).toContain('border-color:var(--ring)')
   expect(block(trigger + '[aria-invalid="true"]')).toContain('border-color:var(--destructive)')
   expect(block(trigger + ':disabled,' + trigger + '[data-disabled]')).toContain('border-style:dashed')
+  // The item hint is the kit's caption: 11px, 600, uppercase, letter-spaced, mutedForeground.
+  expect(block('[data-slot="select-item-hint"]')).toBe('margin-inline-start:auto;color:var(--muted-foreground);font-size:0.6875rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;')
   // The content is the Dropdown Menu glass surface, animated only when open.
   expect(block(content)).toContain('border:var(--border-width)solidvar(--border)')
   expect(block(content)).toContain('color:var(--popover-foreground)')

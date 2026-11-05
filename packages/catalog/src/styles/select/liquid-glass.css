@@ -116,10 +116,14 @@
   color: var(--muted-foreground);
   cursor: not-allowed;
 }
+/* The kit's caption: 11px, 600, uppercase and letter-spaced. */
 [data-slot='select-item-hint'] {
   margin-inline-start: auto;
   color: var(--muted-foreground);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 [data-slot='select-item-indicator'] {
   position: absolute;
