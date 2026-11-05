@@ -91,8 +91,7 @@ export function GlassPanel({ report }: { report: GlassContrastReport | null }) {
       <section aria-labelledby="glass-limitations-heading">
         <h2 id="glass-limitations-heading">Liquid glass limitations</h2>
         <p>
-          Liquid glass is experimental. {glassComponentList()} support it; the
-          other components are unavailable.
+          Liquid glass is experimental. {glassComponentList()} support it.
         </p>
         <details>
           <summary>{glassLimitations.length} known limitations</summary>

@@ -27,7 +27,7 @@ it('compiles the exact full-catalog edited preset', async () => {
     }),
   })
 })
-it('compiles only the experimental components for liquid glass', async () => {
+it('compiles every component for liquid glass', async () => {
   const draft = createPresetDraft('liquid-glass')
   const response = await handlePresetCompileMessage({
     type: 'compile-preset',
@@ -38,11 +38,7 @@ it('compiles only the experimental components for liquid glass', async () => {
   const paths = (
     response as { result: { artifacts: { logicalPath: string }[] } }
   ).result.artifacts.map((a) => a.logicalPath)
-  expect(paths).toContain('components/ui/dialog.tsx')
-  expect(paths).toContain('components/ui/input.tsx')
-  expect(paths).toContain('components/ui/textarea.tsx')
-  expect(paths).toContain('components/ui/table.tsx')
-  expect(paths).toContain('components/ui/skeleton.tsx')
+  for (const id of supportedComponentIds) expect(paths).toContain(`components/ui/${id}.tsx`)
   const failing = await handlePresetCompileMessage({
     type: 'compile-preset',
     requestId: 2,
