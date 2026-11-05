@@ -49,6 +49,16 @@ const positiveId = (value: unknown): value is number =>
   typeof value === 'number' && Number.isSafeInteger(value) && value > 0
 const hash = (value: unknown): value is string =>
   typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
+/** The view as sent: unset focus and the default scene are omitted, since the sandbox accepts only exact view shapes. */
+export function sentPresetView({ mode, viewport, focus, scene, backdrop }: PresetView): PresetView {
+  const shape: PresetView = focus
+    ? { mode, viewport, focus }
+    : scene && scene !== 'gallery'
+      ? { mode, viewport, scene }
+      : { mode, viewport }
+  return backdrop ? { ...shape, backdrop } : shape
+}
+
 export function isPresetHandshake(
   input: unknown,
   type: 'ready' | 'init',

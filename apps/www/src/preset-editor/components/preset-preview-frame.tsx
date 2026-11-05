@@ -5,6 +5,7 @@ import { previewFrameUrl } from '../../editor/preview-url'
 import {
   isPresetAck,
   isPresetHandshake,
+  sentPresetView,
   type PresetRender,
   type PresetView,
 } from '../preview-protocol'
@@ -49,13 +50,7 @@ export function PresetPreviewFrame({
       type: 'preset-render',
       requestId: ++sequence.current,
       result: latest.current.result,
-      // Omit unset focus and the default scene: the sandbox accepts only exact view shapes.
-      view: (({ mode, viewport, focus, scene }) =>
-        focus
-          ? { mode, viewport, focus }
-          : scene && scene !== 'gallery'
-            ? { mode, viewport, scene }
-            : { mode, viewport })(latest.current.view),
+      view: sentPresetView(latest.current.view),
     }
     latestSent.current = message
     arm()
@@ -113,7 +108,7 @@ export function PresetPreviewFrame({
   }, [attempt])
   useEffect(() => {
     send()
-  }, [result, view.mode, view.viewport, view.focus, view.scene])
+  }, [result, view.mode, view.viewport, view.focus, view.scene, view.backdrop])
   return (
     <section aria-label="Preset preview">
       {caption && (
