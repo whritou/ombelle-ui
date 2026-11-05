@@ -208,6 +208,8 @@ it('scoped glass tokens', async () => {
   // The shared material's shadow list rides along on the Button; it is checked in liquid-glass.test.ts.
   expect(tokens[light]?.['--glass-material-shadow']).toContain('var(--glass-depth, 0)')
   delete tokens[light]!['--glass-material-shadow']
+  expect(tokens[light]?.['--glass-plate']).toContain('var(--card)')
+  delete tokens[light]!['--glass-plate']
   expect(tokens[light]).toEqual({
     '--glass-blur': '3px',
     '--glass-brightness': '1.4',

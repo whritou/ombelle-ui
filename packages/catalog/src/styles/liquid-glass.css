@@ -162,3 +162,18 @@
 @media (forced-colors: active) {
   [data-slot="card"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before, [data-slot="card"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after { content: none; }
 }
+/* Text glow plate: with the material on, glass text carries a tight glow in its surface colour, stacked so it reads
+   as a soft outline. The contrast bound evaluates each glyph against it (glassTextPlate, 85%). */
+[data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="accordion"], [data-slot="badge"], [data-slot="tabs-list"] { --glass-plate: var(--card); }
+[data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"] { --glass-plate: var(--popover); }
+[data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"] { --glass-plate: var(--background); }
+[data-slot="button"] { --glass-plate: color-mix(in srgb, var(--glass-tint, transparent) var(--glass-tint-amount, 0%), var(--card)); }
+[data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="accordion"], [data-slot="badge"], [data-slot="tabs-list"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-slot="button"] {
+  text-shadow:
+    0 0 1px color-mix(in srgb, var(--glass-plate) calc(var(--glass-material, 0) * 85%), transparent),
+    0 0 2px color-mix(in srgb, var(--glass-plate) calc(var(--glass-material, 0) * 85%), transparent),
+    0 0 4px color-mix(in srgb, var(--glass-plate) calc(var(--glass-material, 0) * 85%), transparent);
+}
+@media (forced-colors: active) {
+  [data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="accordion"], [data-slot="badge"], [data-slot="tabs-list"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-slot="button"] { text-shadow: none; }
+}

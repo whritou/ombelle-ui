@@ -285,9 +285,12 @@ function bound(
   low: number,
   high: number,
   sheen: number,
+  plate = 0,
 ) {
-  const darkest = luminanceOf(paint(surface.rgb, alpha, low, 0))
-  const brightest = luminanceOf(paint(surface.rgb, alpha, high, sheen))
+  // The glow plate lies over the painted glass: an affine mix, so the extremes stay at the same backdrops.
+  const onPlate = (painted: Rgb) => painted.map((c, i) => plate * surface.rgb[i]! + (1 - plate) * c) as unknown as Rgb
+  const darkest = luminanceOf(onPlate(paint(surface.rgb, alpha, low, 0)))
+  const brightest = luminanceOf(onPlate(paint(surface.rgb, alpha, high, sheen)))
   const overDarkest = ratio(darkest, textLum)
   const overBrightest = ratio(brightest, textLum)
   return {
@@ -328,6 +331,8 @@ type Resolved = {
   textColor: Color
   textLum: number
   backdrop: GlassBackdrop
+  /** Share of the text glow plate, 0 without the material. */
+  plate: number
 }
 
 /** The material settings: any of them above 0 turns on the shared material, including the pointer shine. */
@@ -352,6 +357,16 @@ const withPointerShine = (backdrop: GlassBackdrop, design: Preset['design'] | un
   glassMaterialActive(design)
     ? { ...backdrop, sheen: round(1 - (1 - backdrop.sheen) * (1 - glassPointerShine * backdrop.sheen)) }
     : backdrop
+
+/** The white the contrast bound assumes over a surface, pointer shine included. */
+export const glassEffectiveSheen = (design: Preset['design'] | undefined, mode: 'light' | 'dark') =>
+  withPointerShine(glassBackdrop(design, mode), design).sheen
+
+/**
+ * With the material on, glass text carries a tight glow in its surface colour (stacked text-shadows), the plate
+ * WCAG measures the glyph against. The bound composites the surface at this share over whatever the glass paints.
+ */
+export const glassTextPlate = 0.85
 
 function resolve(
   data: Preset,
@@ -382,6 +397,7 @@ function resolve(
         textColor,
         textLum: luminanceOf(textColor.rgb),
         backdrop,
+        plate: glassMaterialActive(data.design) ? glassTextPlate : 0,
       })
     }
   }
@@ -398,6 +414,7 @@ const filtered = (r: Resolved, opacity: number) =>
     r.backdrop.low,
     r.backdrop.high,
     r.backdrop.sheen,
+    r.plate * r.surfaceColor.alpha,
   )
 // Nested glass drops its own filter and sees the raw backdrop: any 0..1 pixel.
 // A covered surface nested in glass paints at the full nested opacity (its CSS
@@ -405,7 +422,7 @@ const filtered = (r: Resolved, opacity: number) =>
 // some coverage also passes the opaque fallback, whose painted luminance lies
 // inside the same interval.
 const raw = (r: Resolved, opacity: number) =>
-  bound(r.surfaceColor, r.textLum, opacity * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
+  bound(r.surfaceColor, r.textLum, opacity * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen, r.plate * r.surfaceColor.alpha)
 // Translucent text takes on the backdrop too; it is never bounded.
 const opaqueText = (r: Resolved) => r.textColor.alpha >= 1
 

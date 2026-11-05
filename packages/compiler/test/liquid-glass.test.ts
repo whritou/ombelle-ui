@@ -7,7 +7,7 @@ import {
   type ComponentId,
   type Preset,
 } from '@ombelle/contracts'
-import { compile, glassContrastPairs, glassContrastReport, glassTints } from '../src/index.js'
+import { compile, glassContrastPairs, glassContrastReport, glassEffectiveSheen, glassTextPlate, glassTints } from '../src/index.js'
 import { squash } from './new-component-artifacts.js'
 
 const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
@@ -782,10 +782,40 @@ describe('liquid glass material review fixes', () => {
   const overflowSlots = ['dialog-content', 'popover-content', 'dropdown-menu-content', 'dropdown-menu-sub-content', 'select-content', 'table-container', 'accordion']
 
   it('counts the pointer shine in the bound when a material setting is on', () => {
-    const plain = glassContrastReport(builtin())
-    const lit = glassContrastReport(withDesign({ glassHalo: 0.5 }))
-    const pick = (r: typeof plain) => r.pairs.find((p) => p.mode === 'dark' && p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined)!
-    expect(pick(lit).ratioOverWhite).toBeLessThan(pick(plain).ratioOverWhite)
+    const plain = withDesign({ glassSheen: 0.4 })
+    const lit = withDesign({ glassSheen: 0.4, glassHalo: 0.5 })
+    expect(glassEffectiveSheen(plain.design, 'light')).toBe(0.4)
+    expect(glassEffectiveSheen(lit.design, 'light')).toBeCloseTo(1 - 0.6 * (1 - 0.6 * 0.4), 4)
+  })
+
+  it('evaluates text on its glow plate when the material is on', () => {
+    expect(glassTextPlate).toBe(0.85)
+    const at = (design: Partial<Preset['design']>) => {
+      const report = glassContrastReport(withDesign({ glassOpacity: 0.4, ...design }))
+      return report.pairs.find((p) => p.mode === 'light' && p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined)!
+    }
+    // Over the darkest backdrop the plate is what keeps dark ink readable on a 40% veil.
+    expect(at({ glassHalo: 0.5 }).ratioOverBlack).toBeGreaterThan(at({}).ratioOverBlack)
+    expect(at({ glassHalo: 0.5 }).ratioOverBlack).toBeGreaterThan(4.5)
+  })
+
+  it('draws the glow plate behind glass text in the surface colour', async () => {
+    const result = await build(builtin())
+    const root = postcss.root()
+    for (const sheet of result.artifacts.filter((a) => a.kind === 'style')) root.append(postcss.parse(sheet.content).nodes)
+    const glows: string[] = []
+    root.walkDecls('text-shadow', (decl) => {
+      if (decl.value.includes('--glass-plate')) glows.push(squash((decl.parent as postcss.Rule).selector) + ' ' + squash(decl.value))
+    })
+    expect(glows.length).toBe(1)
+    expect(glows[0]).toContain('calc(var(--glass-material,0)*85%)')
+    for (const slot of ['card', 'button', 'popover-content', 'table-container', 'input', 'textarea'])
+      expect(glows[0], slot).toContain('[data-slot="' + slot + '"]')
+    let forced = false
+    root.walkDecls('text-shadow', (decl) => {
+      if (decl.value === 'none' && decl.parent?.parent?.type === 'atrule' && (decl.parent.parent as postcss.AtRule).params.includes('forced-colors')) forced = true
+    })
+    expect(forced).toBe(true)
   })
 
   it('writes the material flag only when a material setting is above 0', async () => {
@@ -880,5 +910,26 @@ describe('liquid glass material review fixes', () => {
       if (rule.selectors.some((s) => s.includes(':not([data-halo-active])')) && rule.toString().includes('--pointer-x')) resets++
     })
     expect(resets).toBe(1)
+  })
+})
+
+describe('liquid glass starting presets and the bound', () => {
+  it('every starting preset passes the contrast bound', () => {
+    const c = getCatalog('0.1.0')
+    const expected: Record<string, number> = {
+      'builtin-liquid-glass-cristal': 0.25,
+      'builtin-liquid-glass-givre': 0.25,
+      'builtin-liquid-glass-fume': 0.25,
+      'builtin-liquid-glass-relief': 0.26,
+      'builtin-liquid-glass-clear': 0.25,
+      'builtin-liquid-glass-prism': 0.25,
+      'builtin-liquid-glass-liquid': 0.25,
+      'builtin-liquid-glass': 0.57,
+    }
+    for (const [id, minimumOpacity] of Object.entries(expected)) {
+      const report = glassContrastReport(c.startingPresets[id as keyof typeof c.startingPresets])
+      expect(report.passes, id).toBe(true)
+      expect(report.minimumOpacity, id).toEqual(minimumOpacity)
+    }
   })
 })
