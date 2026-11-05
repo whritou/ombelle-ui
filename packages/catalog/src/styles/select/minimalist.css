@@ -83,7 +83,6 @@
   font-family: var(--font-family);
   font-size: 0.875rem;
   box-shadow: 0 12px 28px -16px rgb(0 0 0 / 22%);
-  animation: ombelle-select-enter var(--motion-duration) ease-out;
 }
 [data-slot='select-viewport'] {
   display: flex;
@@ -157,6 +156,9 @@
   inline-size: 1rem;
   block-size: 1rem;
 }
+[data-slot='select-content'][data-state='open'] {
+  animation: ombelle-select-enter var(--motion-duration) ease-out;
+}
 @keyframes ombelle-select-enter {
   from {
     opacity: 0;
@@ -202,7 +204,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='select-content'] {
+  [data-slot='select-content'][data-state='open'] {
     animation: none;
   }
   [data-slot='select-icon'] {
