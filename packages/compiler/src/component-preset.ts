@@ -77,6 +77,7 @@ export async function compileButtonPreset(input: {
           catalog.styles[
             preset.data.styleFamily as keyof typeof catalog.styles
           ],
+        glassLabCss: catalog.glassLabStyle,
         preset,
         overrides: {},
         scope,

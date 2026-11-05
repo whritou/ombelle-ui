@@ -930,6 +930,19 @@ describe('liquid glass material review fixes', () => {
 })
 
 describe('liquid glass starting presets and the bound', () => {
+  it('compiles the lab surface layers for the new material and keeps the original preset paint', async () => {
+    const catalog = getCatalog('0.1.0')
+    const lab = await build(catalog.startingPresets['builtin-liquid-glass-cristal'])
+    const legacy = await build(catalog.presets['liquid-glass'])
+    const sheet = (result: typeof lab) => result.artifacts.find(({ logicalPath }) => logicalPath === 'styles/ui-style.css')!.content
+    expect(sheet(lab)).toContain('var(--glass-lab-card-shadow)')
+    expect(sheet(lab)).toContain('ellipse 90% 66%')
+    expect(sheet(lab)).toContain('var(--glass-lab-control-shadow)')
+    expect(sheet(legacy)).not.toContain('--glass-lab-card-shadow')
+    expect(lab.theme.light['--glass-lab-custom-edge']).toBe('initial')
+    expect(lab.theme.dark['--glass-lab-custom-edge']).toBe('initial')
+  })
+
   it('every starting preset passes the contrast bound', () => {
     const c = getCatalog('0.1.0')
     const expected: Record<string, number> = {

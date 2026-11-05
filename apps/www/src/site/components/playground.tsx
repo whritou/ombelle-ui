@@ -64,6 +64,9 @@ export function ComponentPlayground({ id, name, source, styles }: {
   }, [family, glassPreset])
   const compiled = usePresetCompiler(draft)
   const css = styles[family]
+  const glassCss = family === 'liquid-glass' && compiled.result?.preset.data.styleFamily === family && !compiled.stale
+    ? compiled.result?.artifacts.find(({ logicalPath }) => logicalPath === 'styles/ui-style.css')?.content
+    : undefined
   const families = familyOptions.map(option =>
     option.value === 'liquid-glass'
       ? glass === 'unavailable'
@@ -111,6 +114,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
         <Tabs.Content value="code" className="mt-3 space-y-3">
           <CodeBlock code={source} title={`components/ui/${id}.tsx`} maxHeight="28rem" />
           {css && <CodeBlock code={css} title={`${family} styles`} maxHeight="20rem" />}
+          {glassCss && <CodeBlock code={glassCss} title="Liquid Glass · shared material" maxHeight="20rem" />}
         </Tabs.Content>
       </Tabs.Root>
     </div>

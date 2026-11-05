@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { supportedComponentIds, supportedStyleFamilies } from '@ombelle/contracts'
 import { createPresetDraft } from '../../apps/www/src/preset-editor/model.js'
-import { compileRecipe } from '@ombelle/compiler'
+import { getCatalog } from '@ombelle/catalog'
+import { compile, compileRecipe } from '@ombelle/compiler'
+import { createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { chooseFamily, expectRecipeDownloadEnabled, segment } from '../helpers/button-editor-ui.js'
 
 test('serves both nested runtime entries, modules and compiler workers with usable MIME types', async ({ request }) => {
@@ -34,8 +36,13 @@ test('previews the lab materials from the component directory and Button editor'
   await expect(picker).toHaveValue('builtin-liquid-glass-relief')
   const preview = page.frameLocator('iframe[title="Card preview"]')
   await expect(preview.locator('html')).toHaveAttribute('data-glass-backdrop', 'peach')
+  await expect(preview.locator('svg.glass-backdrop-art')).toBeVisible()
   const card = preview.locator('[data-slot="card"]').first()
   await expect.poll(() => card.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-depth').trim())).toBe('0.9')
+  await expect(card).toHaveCSS('border-radius', '28px')
+  await expect(card).toHaveCSS('background-image', 'none')
+  await expect.poll(() => card.evaluate((el) => getComputedStyle(el, '::before').backgroundImage)).toMatch(/radial-gradient.*linear-gradient/)
+  await expect(card).toHaveCSS('-webkit-text-stroke-width', '0px')
   await picker.selectOption({ label: 'Givré' })
   await expect.poll(() => card.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-blur').trim())).toBe('26px')
 
@@ -46,6 +53,8 @@ test('previews the lab materials from the component directory and Button editor'
   const recipe = page.frameLocator('iframe[title="Button recipe preview"]')
   const button = recipe.locator('[data-slot="recipe-button"]')
   await expect.poll(() => button.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-blur').trim())).toBe('9px')
+  await expect(button).toHaveCSS('border-radius', '10px')
+  await expect(button).toHaveCSS('background-image', /^linear-gradient\(140deg/)
   await buttonPreset.selectOption({ label: 'Relief' })
   await expect(recipe.locator('html')).toHaveAttribute('data-glass-backdrop', 'peach')
   await expect.poll(() => button.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-depth').trim())).toBe('0.9')
@@ -62,6 +71,50 @@ test('previews the lab materials from the component directory and Button editor'
   await expect(readout).toContainText('Contrast bound passes at glass opacity 0.39')
   const gallery = page.frameLocator('iframe[title="Global preset gallery"]')
   await expect(gallery.locator('html')).toHaveAttribute('data-glass-backdrop', 'peach')
+  const input = gallery.locator('[data-slot="input"]').first()
+  await expect(input).toHaveCSS('background-image', /^linear-gradient\(140deg/)
+  await input.hover()
+  await expect(gallery.locator('[data-slot="glass-field-halo"]')).toBeVisible()
+  const tab = gallery.locator('[data-slot="tabs-trigger"]').first()
+  await tab.hover()
+  await expect(tab).toHaveAttribute('data-halo-active', '')
+  await expect(gallery.locator('[data-slot="glass-field-halo"]')).toBeHidden()
+})
+
+test('lab paint survives consumer stylesheet order and keeps scoped recipe colors', async ({ page }) => {
+  const preset = getCatalog('0.1.0').startingPresets['builtin-liquid-glass-cristal']
+  const result = await compile({
+    preset, componentIds: ['badge', 'select', 'tabs'], catalogRelease: '0.1.0', compilerVersion: '0.1.0',
+  })
+  const sheet = (path: string) => result.artifacts.find((artifact) => artifact.logicalPath === path)!.content
+  // Consumers import theme CSS first. The colocated component styles load later.
+  await page.setContent(`<style>${[
+    'styles/ui-tokens.css', 'styles/ui-style.css', 'components/ui/badge.css',
+    'components/ui/select.css', 'components/ui/tabs.css',
+  ].map(sheet).join('\n')}</style>
+    <span data-slot="badge" data-variant="accent">Badge</span>
+    <button data-slot="select-trigger" data-size="default">Select</button>
+    <div data-slot="select-content" role="listbox">Options</div>
+    <div data-slot="tabs-list" data-orientation="horizontal">Tabs</div>`)
+  for (const slot of ['badge', 'select-trigger', 'select-content', 'tabs-list']) {
+    const element = page.locator(`[data-slot="${slot}"]`)
+    await expect(element).toHaveCSS('background-image', /^linear-gradient\(140deg/)
+    await expect(element).toHaveCSS('border-top-color', /^rgba\(232, 250, 255,/)
+  }
+
+  const recipe = createEditorDraft('liquid-glass').recipe
+  const original = await compileRecipe({ recipe })
+  const custom = await compileRecipe({ recipe: {
+    ...recipe, overrides: { colors: { light: { background: '#123456', border: '#ab2455' } } },
+  } })
+  await page.setContent([original, custom].map((entry) => `
+    <style>${entry.artifacts.find((artifact) => artifact.kind === 'style')!.content}</style>
+    <button data-slot="recipe-button" data-variant="default" data-ombelle-recipe="${entry.scope}">Recipe</button>
+  `).join('\n'))
+  const button = (scope: string) => page.locator(`[data-ombelle-recipe="${scope}"]`)
+  await expect(button(custom.scope)).toHaveCSS('border-top-color', 'rgb(171, 36, 85)')
+  const originalVeil = await button(original.scope).evaluate((el) => getComputedStyle(el).backgroundColor)
+  await expect(button(custom.scope)).not.toHaveCSS('background-color', originalVeil)
 })
 
 test('compiles and renders all families and modes through hosted opaque iframes with no preview server', async ({ page }) => {
