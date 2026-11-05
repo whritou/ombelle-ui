@@ -1,6 +1,6 @@
 # Checkbox
 
-Checkbox wraps the reviewed Radix Checkbox primitive with Lucide check and minus marks. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable. The component is a client component.
+Checkbox wraps the reviewed Radix Checkbox primitive with Lucide check and minus marks. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The component is a client component.
 
 ## Install and compose
 
@@ -44,3 +44,7 @@ Compilation emits `components/ui/checkbox.tsx`, `components/ui/checkbox.css`, an
 Runtime dependencies are exactly React 19.3.1, `@radix-ui/react-checkbox` 1.4.1 (MIT), `lucide-react` 1.55.0 (ISC), clsx 2.1.1, and tailwind-merge 3.7.0. Generated components have no Ombelle runtime dependency. Primitive dependencies are scoped to this component's imports.
 
 Focused catalog/compiler checks and a local Chromium behavior probe cover this implementation. Full preview/generated-consumer matrix coverage is part of the shared final M2 verification task. Human NVDA and VoiceOver review remains pending; this page does not claim that review or certify consuming applications.
+
+## Liquid glass
+
+In liquid glass, the box is field glass (`background` at 55%) with the `input` border. Checked and indeterminate are `card` + `primary` at the resting tint + 8 points (26% light, 30% dark) at 80% coverage, with a `primary` rim at 60% and a glow; the mark stays `foreground`, a declared contrast pair at 80%. Disabled is dashed at 50% opacity. Reduced transparency and missing backdrop filters paint the same surfaces opaque; in forced colours the checked box takes a `Highlight` edge and the visible mark carries the state. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.

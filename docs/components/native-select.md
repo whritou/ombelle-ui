@@ -1,6 +1,6 @@
 # Native Select
 
-Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable for Native Select. A fully custom Select is a later component.
+Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental for Native Select; see [Liquid glass](#liquid-glass). A fully custom Select is a later component.
 
 ## Install and compose
 
@@ -88,3 +88,7 @@ Native Select uses React 19.3.1, clsx 2.1.1, tailwind-merge 3.7.0, and `lucide-r
 Adding Native Select beside existing components preserves their source, the shared utility, and saved project defaults. Manager selection and lockfile format stay intact. The Ombelle ownership lock gains records for the three Native Select artifacts and retains prior entries; TSX and CSS have independent ownership hashes. An identical repeat is a no-op, dry-run writes nothing, and edits to either file produce `FILE_CONFLICT` even with `--yes`. A project installed before the native form controls must first refresh its shared stylesheet; see [Migrating installs created before native form controls](../foundation-local-usage.md#migrating-installs-created-before-native-form-controls).
 
 Add `&forms=1` to a light/dark preview URL to inspect the shared form fixture. See [form controls verification evidence](../evidence/form-controls.md) for measured coverage. This catalog slice does not establish full-catalog stability or certify consuming applications.
+
+## Liquid glass
+
+In liquid glass, Native Select is the Input field surface (`background` glass at 55% under a 60% sheen, `input` border, `foreground` value) with a `mutedForeground` chevron, and the same focus, invalid and disabled treatments. The open option list is drawn by the browser and is not glass. Reduced transparency and missing backdrop filters paint `background` opaque; forced colours use `Field`, `FieldText` and `ButtonText`. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.

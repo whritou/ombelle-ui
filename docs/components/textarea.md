@@ -1,6 +1,6 @@
 # Textarea
 
-Textarea is a native multi-line text control. It keeps shadcn's `Textarea` name and `data-slot="textarea"` marker and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable for Textarea.
+Textarea is a native multi-line text control. It keeps shadcn's `Textarea` name and `data-slot="textarea"` marker and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental for Textarea; see [Liquid glass](#liquid-glass).
 
 ## Install and compose
 
@@ -56,3 +56,7 @@ Textarea adds no dependency versions: it uses React 19.3.1, clsx 2.1.1, and tail
 Adding Textarea beside existing components preserves their source, the shared utility, and saved project defaults. Manager selection and lockfile ownership stay intact. The Ombelle ownership lock gains records for the three Textarea artifacts and retains prior entries; TSX and CSS have independent ownership hashes. An identical repeat is a no-op, dry-run writes nothing, and edits to either file produce `FILE_CONFLICT` even with `--yes`. A project installed before the native form controls must first refresh its shared stylesheet; see [Migrating installs created before native form controls](../foundation-local-usage.md#migrating-installs-created-before-native-form-controls).
 
 Add `&forms=1` to a light/dark preview URL to inspect the shared form fixture. See [form controls verification evidence](../evidence/form-controls.md) for measured coverage. This catalog slice does not establish full-catalog stability or certify consuming applications.
+
+## Liquid glass
+
+In liquid glass, Textarea is the Input field surface: `background` glass at 55% of the glass opacity under a 60% sheen, with the `input` border, a `foreground` value and a `mutedForeground` placeholder, both declared contrast pairs at that coverage. Focus adds the ring-coloured border and a 3px ring offset by 2px; `aria-invalid` gives a 2px `destructive` border; disabled is dashed at 50% opacity. Nested in glass, it drops its own blur and paints at the full nested opacity. It keeps `resize: vertical`, which the kit tile does not draw. Reduced transparency and missing backdrop filters paint `background` opaque; forced colours use `Field` and `FieldText`. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.

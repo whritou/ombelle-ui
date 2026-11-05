@@ -1,6 +1,6 @@
 # Switch
 
-Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, neo-brutalism, and ombelle in light and dark modes through semantic tokens. Liquid glass is unavailable. The template is a client component.
+Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, neo-brutalism, and ombelle in light and dark modes through semantic tokens. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 
@@ -46,3 +46,7 @@ Compilation emits components/ui/switch.tsx, components/ui/switch.css, and exampl
 Runtime dependencies are exactly React 19.3.1, @radix-ui/react-switch 1.4.1 (MIT), clsx 2.1.1, and tailwind-merge 3.7.0. There is no Ombelle runtime dependency; the primitive is scoped to Switch imports.
 
 Focused catalog/compiler checks and a local Chromium behavior probe cover this implementation. Shared preview and generated consumer matrix evidence belongs to the final M2 verification task. Human NVDA and VoiceOver review remains pending.
+
+## Liquid glass
+
+In liquid glass, the track is `card` + `foreground` 10% at 55% coverage with the `input` border. On is `card` + `primary` 26% light / 30% dark at 85% with a `primary` rim at 60% and a glow; the kit tile draws 34%, but the selection rule is the resting tint + 8 points. The thumb is solid white with a shadow, so its position reads over any backdrop. Disabled is dashed at 50% opacity. The switch carries no text, so it adds no contrast pair. In forced colours the thumb is `CanvasText` and on adds a `Highlight` border. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.

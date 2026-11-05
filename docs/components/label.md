@@ -1,6 +1,6 @@
 # Label
 
-Label names a form control. It keeps shadcn's `Label` name and `data-slot="label"` marker, but renders a native `label` rather than Radix Label, so it has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is unavailable for Label.
+Label names a form control. It keeps shadcn's `Label` name and `data-slot="label"` marker, but renders a native `label` rather than Radix Label, so it has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental for Label; see [Liquid glass](#liquid-glass).
 
 ## Install and compose
 
@@ -53,3 +53,7 @@ Label adds no dependency versions: it uses React 19.3.1, clsx 2.1.1, and tailwin
 Adding Label beside existing components preserves their source, the shared utility, and saved project defaults. Manager selection and lockfile ownership stay intact. The Ombelle ownership lock gains records for the three Label artifacts and retains prior entries; TSX and CSS have independent ownership hashes. An identical repeat is a no-op, dry-run writes nothing, and edits to either file produce `FILE_CONFLICT` even with `--yes`. A project installed before the native form controls must first refresh its shared stylesheet; see [Migrating installs created before native form controls](../foundation-local-usage.md#migrating-installs-created-before-native-form-controls).
 
 Add `&forms=1` to a light/dark preview URL to inspect the shared form fixture. See [form controls verification evidence](../evidence/form-controls.md) for measured coverage. This catalog slice does not establish full-catalog stability or certify consuming applications.
+
+## Liquid glass
+
+In liquid glass, Label is plain `foreground` text at 14px and weight 500, with the required marker in `mutedForeground` at weight 400. It has no surface of its own, so its contrast holds only on a declared glass surface, such as the glass Card that holds the form. Forced colours use `CanvasText`. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.
