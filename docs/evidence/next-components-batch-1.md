@@ -57,6 +57,8 @@ The review found and fixed three issues:
 - **Gallery alerts.** The alerts touched and had no icons. The gallery now spaces them and shows the info and warning icons from the sheet.
 - **Capture script.** The script cropped overlays wrongly when menus flipped above their trigger. This was a harness bug, not a component defect.
 
+A later browser probe found that a closed Select or Dropdown Menu could stay mounted with `data-state="closed"`. Radix Presence waits for an `animationend` when a closing element still carries an animation name it never saw start, which happens with the 0ms enter animation of reduced-motion presets or in a background frame. The enter animation now runs only on `[data-state='open']`, and the catalog contract asserts that for every new component. A Playwright probe then opened and closed each overlay with Escape in all four families and both modes: every overlay unmounted and returned focus to its trigger.
+
 Open note: in neo brutalism dark, the preset's near-white dashed focus ring has low contrast on the cyan checked card. This is the existing kit `ring` token, shared with Checkbox and the other controls, and is left for a family-level change.
 
 ## Screenshots

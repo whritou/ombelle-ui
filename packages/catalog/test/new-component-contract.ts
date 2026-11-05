@@ -44,6 +44,13 @@ export function expectComponentContract(
     expect(css).not.toMatch(/(?:^|[\s;{])(?:left|right|top|bottom):/m)
     expect(css).not.toMatch(/margin-(?:left|right)|padding-(?:left|right)/)
   }
+  // Radix Presence keeps a closing overlay mounted while it carries an
+  // animation it did not see start, so enter animations run only while open.
+  for (const css of Object.values(template.styles ?? {}))
+    for (const [, selector, body] of css!.matchAll(/([^{}]+)\{([^{}]*)\}/g))
+      if (/(?:^|;|\s)animation:\s*(?!none)/.test(body!))
+        for (const part of selector!.split(','))
+          expect(part, `${id} animation outside the open state`).toContain("[data-state='open']")
   expect(styleSupport(id, 'liquid-glass')).toBe(expected.glass)
   if (expected.glass === 'experimental')
     expect(template.styles?.['liquid-glass']).toContain(

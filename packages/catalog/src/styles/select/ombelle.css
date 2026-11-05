@@ -82,7 +82,6 @@
   font-size: 0.875rem;
   box-shadow: calc(var(--shadow-x) * 4 / 3) calc(var(--shadow-y) * 4 / 3) 0
     var(--shadow-color, var(--border));
-  animation: ombelle-select-enter var(--motion-duration) ease-out;
 }
 [data-slot='select-viewport'] {
   display: flex;
@@ -164,6 +163,9 @@
   inline-size: 1rem;
   block-size: 1rem;
 }
+[data-slot='select-content'][data-state='open'] {
+  animation: ombelle-select-enter var(--motion-duration) ease-out;
+}
 @keyframes ombelle-select-enter {
   from {
     opacity: 0;
@@ -204,7 +206,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='select-content'] {
+  [data-slot='select-content'][data-state='open'] {
     animation: none;
   }
   [data-slot='select-icon'] {
