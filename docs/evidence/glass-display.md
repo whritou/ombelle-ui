@@ -12,10 +12,10 @@ Branch `feat/glass-display`. Windows 11, Node v24.19.0, pnpm 11.25.0 (through co
 | --- | --- |
 | `corepack pnpm build:packages` | passed |
 | `corepack pnpm typecheck` | passed |
-| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 119 files, 1118 tests passed, including `packages/cli/test/transaction.test.ts` and the untouched `packages/compiler/test/stable-families.test.ts` |
+| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 119 files, 1119 tests passed (after the review fixes below), including `packages/cli/test/transaction.test.ts` and the untouched `packages/compiler/test/stable-families.test.ts` |
 | `tests/integration/preset-gallery-generation`, `preview-routing`, `hosted-preview-build`, `liquid-glass-cli`, `www-route` | 5 files, 35 tests passed |
 | `node scripts/build-hosted-preview.mjs` | passed |
-| Playwright screenshots, light and dark, on the kit backdrop | 15 captures, reviewed against the kit tiles; one difference fixed (below) |
+| Playwright screenshots, light and dark, on the kit backdrop | 15 captures, reviewed against the kit tiles; one difference fixed (below). The two Progress captures were retaken after the review fixes |
 
 No test is skipped: the refusal cases that needed an unavailable glass component were rewritten (see below). Earlier task runs on this branch saw `packages/cli/test/transaction.test.ts` fail with "Cannot locate a pnpm JavaScript entry", an environmental locator error unrelated to these changes; in this run it passed.
 
@@ -71,7 +71,7 @@ A selected row and an open trigger set `--glass-tint` and `--glass-tint-amount`,
 | Separator on the bare backdrop | (none) | The label has no surface, as in the kit; it reads on the gallery backdrop, but its contrast there is not bounded | None (ruling C-4) |
 | Table | Table | Container, header, hairlines, selected row and numeric alignment match. Numeric headers were sans 12px; the kit sets them in 13px monospace | Fixed: `fix(catalog): set numeric glass table headers in monospace figures, as the kit does` |
 | Accordion | Accordion | Container, hairlines, 15px / 600 triggers at 44px, open tint and turned chevron match | None |
-| Progress | Progress | Track, glossy fill, glow and green complete fill match | None |
+| Progress | Progress | Glossy fill, glow and green complete fill match. The track painted at half the glass opacity, but the kit's 50% track is its full glass opacity (0.5) | Fixed in the review fixes: the track paints at the glass opacity (0.57 alpha in the browser, from 0.285) |
 | Skeleton | Skeleton | Frosted film, sheen and rim; text, circle and block shapes match | None |
 
 Differences judged acceptable, each from a recorded ruling or an earlier PR:
@@ -83,6 +83,16 @@ Differences judged acceptable, each from a recorded ruling or an earlier PR:
 - **Glass is a little denser and `primary` is blue**, from the built-in preset (opacity 0.57, tuned in PR B) rather than the kit's demo values.
 - **The gallery shows Progress, Skeleton and the bare Separator on the backdrop**, not inside a glass card as in the kit tiles, so they show their top-level coverage.
 - **The selection tint is a literal 12%** in two stylesheets, not a token, so `ui-tokens.css` does not change; the compiler tests pin both the CSS value and `glassTints.selection`.
+
+## Review fixes
+
+The whole-branch review found, and this branch fixes:
+
+- **Reduced transparency, from PRs A and B (unreleased).** With `transparency: "reduced"` the bound evaluates every pair opaque, but covered surfaces read `--glass-inner-opacity` before their `calc(var(--glass-opacity) * k)` fallback (k 0.55, 0.6, 0.78, 0.8, 0.85), so fields, the outline Button, checked rows and controls and the switch track stayed translucent over an unfiltered backdrop; the review measured seven pairs below 4.5:1, such as the dark placeholder at 3.38:1. A reduced preset's tokens now set `--glass-inner-opacity: 1`, `--glass-inner-filter: none` and `--glass-film-backing: 1` (`--glass-nested-opacity` is already 1), and the Skeleton film reads the backing, so it is opaque over `card` without its sheen. `packages/compiler/test/liquid-glass.test.ts` resolves every glass `background` of a reduced compile, at top level and nested, light and dark, and checks that each coverage is 1, each sheen 0 and each filter `none`. The built-in preset's `ui-tokens.css` and its bound (0.57; nested 0.69 and 0.92) are unchanged; only `progress.css` (the track below) and `skeleton.css` (same painted film when unset) change bytes.
+- **Progress track** at the full glass opacity, as the kit (see the visual review).
+- Stale "unavailable in glass" statements in the README, local usage, Tabs, Tooltip, readiness and delivery-plan docs and the changelog; the scenario comment that carried the fixture token; `*.tsbuildinfo` ignored; two test titles and assertions.
+
+The reduced-transparency path was checked by compiler tests, not in the browser.
 
 ## Screenshots
 
