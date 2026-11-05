@@ -12,10 +12,10 @@ Branch `feat/glass-form-controls`. Windows 11, Node v24.19.0, pnpm 11.25.0 (thro
 | --- | --- |
 | `corepack pnpm build:packages` | passed |
 | `corepack pnpm typecheck` | passed |
-| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 119 files, 1117 tests passed, including `packages/cli/test/transaction.test.ts` and the untouched `packages/compiler/test/stable-families.test.ts` |
+| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 119 files, 1120 tests passed, including `packages/cli/test/transaction.test.ts` and the untouched `packages/compiler/test/stable-families.test.ts` |
 | `tests/integration/preset-gallery-generation`, `preview-routing`, `hosted-preview-build`, `liquid-glass-cli`, `www-route` | 5 files, 37 tests passed |
 | `node scripts/build-hosted-preview.mjs` | passed |
-| Playwright screenshots, light and dark, on the kit backdrop | 26 captures, reviewed against the kit tiles; two differences fixed (below) |
+| Playwright screenshots, light and dark, on the kit backdrop | 26 captures, reviewed against the kit tiles; two differences fixed (below). `select-open` recaptured after the highlight repaint |
 
 The checks above ran after the last code change on the branch. Earlier task runs on this branch saw `packages/cli/test/transaction.test.ts` fail with "Cannot locate a pnpm JavaScript entry", an environmental locator error unrelated to these changes; in this run it passed.
 
@@ -42,6 +42,8 @@ The smallest ratio of each new pair, over the darkest filtered backdrop, the bri
 | `foreground` on `popover` + `primary` 18% / 22% (highlighted Select option) | 7.63 | 5.41 |
 | `mutedForeground` on `popover` + `primary` 18% / 22% (its item hint) | 6.26 | 4.81 |
 
+The two Select rows are the pairs at the top-level glass opacity. The highlighted option sits inside the list's glass, so its CSS paints that same tinted surface (`primary` mixed into `popover` first, then the coverage) as nested glass: at `--glass-nested-opacity` (0.69 light, 0.92 dark) under the sheen, over whatever the list has painted beneath it. That is exactly the nested bound the compiler evaluates, over any pixel from black to white: `foreground` 6.35 / 15.46 light and 8.87 / 5.51 dark, the hint 5.20 / 12.67 light and 7.88 / 4.90 dark (darkest / brightest). Composited over the list's own glass on the filtered backdrop, the hint's smallest ratio is 9.88 in light and 5.97 in dark. The opaque fallback and reduced transparency paint the opaque tinted mix. Before this repaint the tint was laid over the already painted list glass, a surface the model did not evaluate; measured that way, the dark hint fell to 4.37:1 and dark `foreground` to 4.91:1.
+
 The dark checked-row description passes at exactly 4.50:1 (4.5014), so it is the first pair a custom preset fails. With `transparency: "reduced"` every pair passes on its opaque surface.
 
 ## What changed
@@ -54,8 +56,8 @@ The dark checked-row description passes at exactly 4.50:1 (4.5014), so it is the
 
 ## Tests added or extended on this branch
 
-- `packages/compiler/test/{label,textarea,native-select,checkbox,switch,radio-group,select}.test.ts`: each compiles in glass with its surface, states and fallbacks. Radio Group checks that a radio inside an option row drops its own filter; Select checks the item hint is the kit's caption.
-- `packages/compiler/test/glass-contrast.test.ts` and `liquid-glass.test.ts`: the coverage model, the declared pairs (including the Select hint on a highlighted option), the pinned preset values and minimum opacities.
+- `packages/compiler/test/{label,textarea,native-select,checkbox,switch,radio-group,select}.test.ts`: each compiles in glass with its surface, states and fallbacks. Radio Group checks that a radio inside an option row drops its own filter; Select checks the item hint is the kit's caption. Select also checks that the highlighted option paints the modelled tinted popover (opaque mix outside `@supports` and under reduced transparency) and that option text is `foreground`; Native Select checks that options and groups paint the opaque `popover`.
+- `packages/compiler/test/glass-contrast.test.ts` and `liquid-glass.test.ts`: the coverage model, the declared pairs (including the Select hint on a highlighted option), the pinned preset values and minimum opacities. `liquid-glass.test.ts` also checks that the `INVALID_DATA` message names the failing pair's tint and coverage and points to "Upgrading from 0.4.x", using the values a 0.4.x `init` saved.
 - `packages/compiler/test/recipe-styles.test.ts`: glass outline and ghost background overrides keep the glass, with opaque fallbacks.
 - `tests/integration/liquid-glass-cli.test.ts`: installs all seventeen glass components, including the seven form controls, and refuses Avatar.
 - `tests/integration/www-route.test.ts`: the seven form controls are not claimed in glass on the site while the published installer is 0.4.1.
@@ -83,7 +85,7 @@ Differences judged acceptable or out of scope, each from a recorded ruling:
 - **The Select chevron does not turn** when open; the kit chevron is static.
 - **Fields nested in glass** paint at the full nested opacity (0.69 light, 0.92 dark), heavier than the kit's lighter glass inside a card.
 - **The gallery form sits on the backdrop**, not inside a glass card as in the kit tiles, so the controls show their top-level coverage.
-- **The Native Select option list** is drawn by the browser and is not glass.
+- **The Native Select option list** is drawn by the browser and is not glass. Its options and groups paint the opaque `popover` with `popoverForeground`, so the dark list is not the browser's light default.
 
 ## Screenshots
 
