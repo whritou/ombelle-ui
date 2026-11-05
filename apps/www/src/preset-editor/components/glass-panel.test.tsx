@@ -33,10 +33,12 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
   expect(glassLimitations).toHaveLength(5)
   expect(html).not.toContain('form controls other than Input')
   expect(html).toContain('<summary>5 known limitations</summary>')
-  // The supported list follows the contracts' support table, so it names every glass component.
+  // The supported list follows the contracts' support table, so it names every component.
   expect(html).toContain(
-    'Liquid glass is experimental. Alert, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Native Select, Radio Group, Select, Switch, Tabs, Textarea and Tooltip support it; the other components are unavailable.',
+    'Liquid glass is experimental. Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea and Tooltip support it.',
   )
+  // No component is unavailable in glass any more, so the panel names none.
+  expect(html).not.toContain('unavailable')
   expect(html).toContain(`role="status" id="${glassReadoutId}"`)
   expect(html).toContain('Contrast bound passes at glass opacity 0.57:')
 })

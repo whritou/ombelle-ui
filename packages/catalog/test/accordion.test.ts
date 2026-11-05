@@ -39,7 +39,7 @@ describe('Accordion catalog contract', () => {
         "[data-slot='accordion-content']",
         "[data-slot='accordion-content-inner']",
       ],
-      glass: 'unavailable',
+      glass: 'experimental',
     })
   })
 

@@ -1,0 +1,152 @@
+/* liquid-glass Table (experimental): one glass container with the edge, the rim highlight and the drop shadow. Inside it
+   the header is muted glass with mutedForeground labels, rows are edge hairlines, and a selected row mixes 12% primary
+   into the card glass and keeps foreground text. Header and selected cells are nested glass: no blur of their own and
+   the nested coverage, as the declared pairs model them. */
+[data-slot='table-container'] {
+  position: relative;
+  inline-size: 100%;
+  overflow-x: auto;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--card);
+  box-shadow:
+    inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
+    var(--shadow-x) var(--shadow-y) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 2.667) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -1) rgb(0 0 0 / 0.35);
+}
+[data-slot='table-container'] * {
+  --glass-inner-filter: none;
+  --glass-inner-opacity: var(--glass-nested-opacity);
+}
+[data-slot='table'] {
+  inline-size: 100%;
+  border-collapse: collapse;
+  caption-side: bottom;
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+}
+[data-slot='table-caption'] {
+  padding-block: 0.6875rem;
+  padding-inline: 1rem;
+  border-block-start: var(--border-width) solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  text-align: start;
+}
+[data-slot='table-head'] {
+  padding-block: 0.6875rem;
+  padding-inline: 1rem;
+  border-block-end: var(--border-width) solid var(--border);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: start;
+  white-space: nowrap;
+}
+[data-slot='table-cell'] {
+  padding-block: 0.6875rem;
+  padding-inline: 1rem;
+  border-block-start: var(--border-width) solid var(--border);
+  vertical-align: middle;
+}
+[data-slot='table-body'] > tr:first-child > * {
+  border-block-start: 0;
+}
+[data-state='selected'] > [data-slot='table-cell'] {
+  --glass-tint: var(--primary);
+  --glass-tint-amount: 12%;
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+}
+/* Footer cells are muted glass like the header, with foreground text. */
+[data-slot='table-footer'] > tr > * {
+  border-block-start: var(--border-width) solid var(--border);
+  background: var(--muted);
+  font-weight: 600;
+}
+[data-slot='table-head'][data-numeric],
+[data-slot='table-cell'][data-numeric] {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+/* The kit sets numeric headers in the same monospace figures as their cells. */
+[data-slot='table-head'][data-numeric],
+[data-slot='table-cell'][data-numeric] {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='table-container'] {
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 40%),
+      color-mix(in srgb, var(--card) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  [data-slot='table-head'] {
+    background: color-mix(in srgb, var(--muted) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+  }
+  [data-slot='table-footer'] > tr > * {
+    background: color-mix(in srgb, var(--muted) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+  }
+  /* The tint is mixed into the card first, then the glass coverage applies: the declared selected-row pair. */
+  [data-state='selected'] > [data-slot='table-cell'] {
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='table-container'] {
+      background: var(--card);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    [data-slot='table-head'] {
+      background: var(--muted);
+    }
+    [data-slot='table-footer'] > tr > * {
+      background: var(--muted);
+    }
+    [data-state='selected'] > [data-slot='table-cell'] {
+      background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='table-container'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='table-container'] {
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='table'] {
+    color: CanvasText;
+  }
+  [data-slot='table-caption'] {
+    border-block-start-color: CanvasText;
+    color: CanvasText;
+  }
+  [data-slot='table-head'] {
+    background: Canvas;
+    color: CanvasText;
+    border-block-end-color: CanvasText;
+  }
+  [data-slot='table-cell'] {
+    border-block-start-color: CanvasText;
+  }
+  [data-slot='table-footer'] > tr > * {
+    background: Canvas;
+    border-block-start-color: CanvasText;
+  }
+  /* Selected rows are bold as well as highlighted, so the state never depends on colour alone. */
+  [data-state='selected'] > [data-slot='table-cell'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+    font-weight: 600;
+  }
+}

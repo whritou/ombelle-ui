@@ -1,6 +1,6 @@
 # Separator
 
-Separator draws a horizontal or vertical rule, optionally with a centred label such as "or". It is built on the reviewed Radix Separator primitive and is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable.
+Separator draws a horizontal or vertical rule, optionally with a centred label such as "or". It is built on the reviewed Radix Separator primitive and is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass).
 
 ## Install and compose
 
@@ -47,3 +47,7 @@ Forced colors draw every rule in `CanvasText`. All dimensions are logical, so th
 Compilation emits `components/ui/separator.tsx`, `components/ui/separator.css` and `examples/separator.tsx`. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-separator 1.2.0 (MIT), clsx 2.1.1 and tailwind-merge 3.7.0.
 
 See [the batch 2 verification record](../evidence/next-components-batch-2.md).
+
+## Liquid glass
+
+In liquid glass, a separator is an etched hairline: a `var(--border-width)` line in the `border` colour with the glass highlight 1px beside it, below a horizontal rule and at the end side of a vertical one. The highlight is a logical border, so vertical rules follow the text direction. The label is `mutedForeground` at 12px / 600 with no surface of its own, as in the design kit: inside a Card or other glass panel the `mutedForeground` on `card` contrast pair covers it, and on a bare backdrop its contrast depends on that backdrop. Forced colours draw the rule in `CanvasText` without the highlight. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.

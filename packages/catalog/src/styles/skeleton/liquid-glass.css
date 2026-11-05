@@ -1,0 +1,66 @@
+/* liquid-glass Skeleton (experimental): a frosted shape, a 10% foreground film with a white top sheen and a white rim.
+   The pulse follows the preset motion duration and is removed under reduced motion. No text, so no contrast pair.
+   Without backdrop-filter the film stays a translucent 10% tint, unblurred. Under reduced transparency it is opaque
+   over card without the sheen: the OS setting through the media rule, a reduced preset through --glass-film-backing. */
+[data-slot='skeleton'] {
+  box-sizing: border-box;
+  display: block;
+  inline-size: 100%;
+  block-size: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 999px;
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, white calc((1 - var(--glass-film-backing, 0)) * 35%), transparent), transparent 70%),
+    color-mix(in srgb, var(--foreground) 10%, color-mix(in srgb, var(--card) calc(var(--glass-film-backing, 0) * 100%), transparent));
+  animation: ombelle-skeleton-pulse calc(var(--motion-duration) * 10) ease-in-out infinite alternate;
+}
+[data-slot='skeleton'][data-shape='circle'] {
+  flex-shrink: 0;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: 50%;
+}
+[data-slot='skeleton'][data-shape='block'] {
+  block-size: 4.5rem;
+  border-radius: calc(var(--radius) + 2px);
+}
+@keyframes ombelle-skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='skeleton'] {
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='skeleton'] {
+      background: color-mix(in srgb, var(--foreground) 10%, var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='skeleton'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='skeleton'] {
+    background: Canvas;
+    border-color: GrayText;
+    forced-color-adjust: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='skeleton'] {
+    animation: none;
+  }
+}

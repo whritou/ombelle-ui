@@ -21,7 +21,7 @@ describe('Skeleton catalog contract', () => {
         "[data-slot='skeleton'][data-shape='block']",
         '@media (prefers-reduced-motion: reduce)',
       ],
-      glass: 'unavailable',
+      glass: 'experimental',
     })
   })
 

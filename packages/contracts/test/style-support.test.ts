@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   supportedComponentIds,
   supportedStyleFamilies,
@@ -10,8 +10,8 @@ import {
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['alert', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'switch', 'tabs', 'textarea', 'tooltip']
-const glassUnavailable = ['accordion', 'avatar', 'progress', 'separator', 'skeleton', 'table']
+const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip']
+const glassUnavailable: string[] = []
 
 describe('style support table', () => {
   it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
@@ -43,21 +43,41 @@ describe('style support table', () => {
     expect(isStyleFamily('flat')).toBe(true)
     expect(isStyleFamily('constructor')).toBe(false)
   })
-  it('refuses unavailable components in input order', () => {
-    expect(() => assertStyleAvailable(['card', 'table'], 'liquid-glass')).toThrow(FoundationError)
+  it('accepts every component in liquid glass', () => {
+    expect(() => assertStyleAvailable([...supportedComponentIds], 'liquid-glass')).not.toThrow()
+  })
+})
+
+// No real family leaves a component unavailable now, so a synthetic one keeps the refusal covered.
+describe('assertStyleAvailable with a synthetic family', () => {
+  it('refuses the first unavailable component in input order', async () => {
+    vi.resetModules()
+    vi.doMock('../src/style-families.js', async (importOriginal) => {
+      const actual = await importOriginal<typeof import('../src/style-families.js')>()
+      return {
+        ...actual,
+        styleSupport: (id: string, family: string) =>
+          family !== 'liquid-glass' ? 'stable' : ['progress', 'skeleton'].includes(id) ? 'unavailable' : 'experimental',
+      }
+    })
     try {
-      assertStyleAvailable(['card', 'accordion', 'table'], 'liquid-glass')
-      expect.unreachable()
-    } catch (error) {
-      expect(error).toMatchObject({
-        code: 'STYLE_UNAVAILABLE',
-        message:
-          'Accordion is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, card, checkbox, dialog, dropdown-menu, input, label, popover, native-select, radio-group, select, switch, tabs, textarea, tooltip.',
-        path: '/componentIds',
-        nextAction: 'Choose a stable family for this component or remove it.',
-      })
+      const support = await import('../src/style-support.js')
+      const diagnostics = await import('../src/diagnostics.js')
+      expect(() => support.assertStyleAvailable(['card', 'skeleton'], 'liquid-glass')).toThrow(diagnostics.FoundationError)
+      expect(() => support.assertStyleAvailable(['card', 'progress', 'skeleton'], 'liquid-glass')).toThrow(
+        expect.objectContaining({
+          code: 'STYLE_UNAVAILABLE',
+          message: expect.stringMatching(/^Progress is unavailable for liquid-glass\. Experimental liquid-glass components: alert, accordion, .*tooltip\.$/),
+          path: '/componentIds',
+          nextAction: 'Choose a stable family for this component or remove it.',
+        }),
+      )
+      expect(support.componentsWithStyleSupport('liquid-glass', ['experimental'])).not.toContain('progress')
+      expect(() => support.assertStyleAvailable(['button', 'card'], 'liquid-glass')).not.toThrow()
+      expect(() => support.assertStyleAvailable(['progress', 'skeleton'], 'flat')).not.toThrow()
+    } finally {
+      vi.doUnmock('../src/style-families.js')
+      vi.resetModules()
     }
-    expect(() => assertStyleAvailable(['button', 'card'], 'liquid-glass')).not.toThrow()
-    expect(() => assertStyleAvailable([...supportedComponentIds], 'flat')).not.toThrow()
   })
 })

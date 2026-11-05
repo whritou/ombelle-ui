@@ -1,6 +1,7 @@
 import { expect } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import type { ComponentId, StyleFamily } from '@ombelle/contracts'
+import postcss, { type Container } from 'postcss'
 import { compile } from '../src/index.js'
 
 const input = (family: StyleFamily) => ({
@@ -11,6 +12,32 @@ const input = (family: StyleFamily) => ({
 
 // The compiler formats CSS, so compare whitespace- and quote-insensitively.
 export const squash = (css: string) => css.replace(/\s+/g, '').replace(/'/g, '"')
+
+export type Context = 'root' | 'supports' | 'reduced' | 'forced' | 'supports-forced' | 'motion'
+
+const contextOf = (rule: postcss.Rule): Context => {
+  const chain: string[] = []
+  for (let p = rule.parent as Container | undefined; p && p.type !== 'root'; p = p.parent as Container | undefined)
+    if (p.type === 'atrule') chain.push((p as postcss.AtRule).params.replace(/\s+/g, ''))
+  const key = chain.join('|')
+  if (key === '') return 'root'
+  if (key.includes('prefers-reduced-transparency')) return 'reduced'
+  if (key.includes('prefers-reduced-motion')) return 'motion'
+  if (key.includes('forced-colors')) return key.includes('backdrop-filter') ? 'supports-forced' : 'forced'
+  return 'supports'
+}
+
+/** Squashed declarations of every rule with exactly this (squashed) selector in this at-rule context. */
+export function rulesIn(css: string, selector: string, context: Context = 'root') {
+  const out: Record<string, string> = {}
+  postcss.parse(css).walkRules((rule) => {
+    if (contextOf(rule) !== context || !rule.selectors.map(squash).includes(squash(selector))) return
+    rule.walkDecls((d) => {
+      out[d.prop] = squash(d.value)
+    })
+  })
+  return out
+}
 
 /** Declarations inside every forced-colors block, squashed. */
 export const forcedBlock = (css: string) =>

@@ -411,6 +411,7 @@ export function SharePreset() {
   },
   avatar: {
     name: 'Avatar',
+    glassMinimumCli: '0.5.0',
     description: 'A person\'s image with initials as a fallback, a presence dot and overlapping groups.',
     api: 'Avatar (size, variant), AvatarImage, AvatarFallback, AvatarStatus (status), AvatarGroup',
     states: 'Image, fallback, online, offline',
@@ -431,6 +432,7 @@ export function Owner() {
   },
   separator: {
     name: 'Separator',
+    glassMinimumCli: '0.5.0',
     description: 'A horizontal or vertical rule, optionally with a centred label.',
     api: 'orientation (horizontal, vertical), decorative, children as label',
     states: 'Horizontal, vertical, labelled',
@@ -445,6 +447,7 @@ export function SignInOptions() {
   },
   table: {
     name: 'Table',
+    glassMinimumCli: '0.5.0',
     description: 'A native data table with header, footer, caption, numeric columns and selected rows.',
     api: 'Table, TableCaption, TableHeader, TableBody, TableFooter, TableRow (selected), TableHead (numeric, scope), TableCell (numeric)',
     states: 'Default, selected row, numeric column',
@@ -471,6 +474,7 @@ export function Projects() {
   },
   accordion: {
     name: 'Accordion',
+    glassMinimumCli: '0.5.0',
     description: 'Stacked headings that each show or hide a section of content.',
     api: 'Accordion (type, collapsible, value), AccordionItem, AccordionTrigger (level), AccordionContent',
     states: 'Open, closed, disabled, focus',
@@ -494,6 +498,7 @@ export function Faq() {
   },
   progress: {
     name: 'Progress',
+    glassMinimumCli: '0.5.0',
     description: 'Shows how far a task has got, or that it is running when the amount is unknown.',
     api: 'value (null for indeterminate), max, getValueLabel',
     states: 'Loading, complete, indeterminate',
@@ -513,6 +518,7 @@ export function InstallProgress() {
   },
   skeleton: {
     name: 'Skeleton',
+    glassMinimumCli: '0.5.0',
     description: 'A decorative placeholder shaped like the content that is loading.',
     api: 'shape (text, circle, block), className, style',
     states: 'Pulsing, static under reduced motion',

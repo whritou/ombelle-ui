@@ -1,6 +1,6 @@
 # Table
 
-Table styles a native HTML table for tabular data. It provides a header, a footer, a caption, right-aligned numeric columns and a selected-row state, all inside a container that scrolls horizontally when the table is wider than its space. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable. It has no client boundary and no dependency beyond the shared utility.
+Table styles a native HTML table for tabular data. It provides a header, a footer, a caption, right-aligned numeric columns and a selected-row state, all inside a container that scrolls horizontally when the table is wider than its space. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
 
 ## Install and compose
 
@@ -60,3 +60,7 @@ In forced colors the rules and frame use `CanvasText`, and the selected row uses
 Compilation emits `components/ui/table.tsx`, `components/ui/table.css` and `examples/table.tsx`. Table adds no dependency versions.
 
 See [the batch 3 verification record](../evidence/next-components-batch-3.md).
+
+## Liquid glass
+
+In liquid glass, the container is one card glass surface with the glass edge and a drop shadow, and rows are separated by hairlines. The header is `muted` glass with `mutedForeground` labels at 12px / 600; it paints at the full nested glass opacity, denser than the design kit's overlay, so the declared `muted` pair describes it. A selected row mixes 12% `primary` into the card at the same nested coverage and keeps `foreground` text, a declared contrast pair. Reduced transparency and missing backdrop filters paint every surface opaque; in forced colours a selected row is `Highlight` with `HighlightText` at weight 600. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.

@@ -1,0 +1,161 @@
+/* liquid-glass Accordion (experimental): a glass container with edge hairlines between items. Triggers are foreground
+   at 600 on the card glass; the open trigger mixes 12% primary into the card glass (nested in the container) and its
+   chevron turns. Content is mutedForeground and its height animation runs only while open. */
+[data-slot='accordion'] {
+  overflow: hidden;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  box-shadow:
+    inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
+    var(--shadow-x) var(--shadow-y) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 2.667) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -1) rgb(0 0 0 / 0.35);
+}
+[data-slot='accordion'] * {
+  --glass-inner-filter: none;
+  --glass-inner-opacity: var(--glass-nested-opacity);
+}
+* + [data-slot='accordion-item'] {
+  border-block-start: var(--border-width) solid var(--border);
+}
+[data-slot='accordion-header'] {
+  display: flex;
+  margin: 0;
+  font: inherit;
+}
+[data-slot='accordion-trigger'] {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-block-size: 2.75rem;
+  padding-block: 0.75rem;
+  padding-inline: 1rem;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--motion-duration);
+}
+[data-slot='accordion-trigger'][data-state='open'] {
+  --glass-tint: var(--primary);
+  --glass-tint-amount: 12%;
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+}
+/* The container clips overflow, so the focus ring sits inside the trigger. */
+[data-slot='accordion-trigger']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: -4px;
+}
+[data-slot='accordion-trigger']:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+[data-slot='accordion-icon'] {
+  display: flex;
+  flex-shrink: 0;
+}
+[data-slot='accordion-icon'] svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  transition: rotate var(--motion-duration);
+}
+[data-accordion-icon='plus'] {
+  display: none;
+}
+[data-state='open'] > [data-slot='accordion-icon'] [data-accordion-icon='chevron'] {
+  rotate: 180deg;
+}
+[data-slot='accordion-content'] {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+[data-slot='accordion-content'][data-state='open'] {
+  animation: ombelle-accordion-open var(--motion-duration) ease-out;
+}
+[data-slot='accordion-content-inner'] {
+  padding-block: 0.625rem 1rem;
+  padding-inline: 1rem;
+}
+@keyframes ombelle-accordion-open {
+  from {
+    block-size: 0;
+  }
+  to {
+    block-size: var(--radix-accordion-content-height);
+  }
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='accordion'] {
+    background: color-mix(in srgb, var(--card) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  /* The tint is mixed into the card first, then the glass coverage applies: the declared open-trigger pair. */
+  [data-slot='accordion-trigger'][data-state='open'] {
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='accordion'] {
+      background: var(--card);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    [data-slot='accordion-trigger'][data-state='open'] {
+      background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='accordion'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='accordion'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  * + [data-slot='accordion-item'] {
+    border-block-start-color: CanvasText;
+  }
+  /* The open trigger keeps a CanvasText bar at its start edge as well as the turned chevron, so it never depends on
+     colour alone. Its start padding gives up the bar's width, so the title does not shift. */
+  [data-slot='accordion-trigger'][data-state='open'] {
+    background: Canvas;
+    color: CanvasText;
+    border-inline-start: 0.25rem solid CanvasText;
+    padding-inline-start: 0.75rem;
+  }
+  [data-slot='accordion-trigger']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='accordion-trigger']:disabled {
+    color: GrayText;
+  }
+  [data-slot='accordion-content'] {
+    color: CanvasText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='accordion-content'][data-state='open'] {
+    animation: none;
+  }
+  [data-slot='accordion-trigger'],
+  [data-slot='accordion-icon'] svg {
+    transition: none;
+  }
+}

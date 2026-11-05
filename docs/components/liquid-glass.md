@@ -1,6 +1,6 @@
 # Liquid glass
 
-Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Alert, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Native Select, Radio Group, Select, Switch, Tabs, Textarea, and Tooltip in light and dark modes. Avatar, Separator, Table, Accordion, Progress, and Skeleton are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twenty-three components.
+Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for all twenty-three components in light and dark modes: Accordion, Alert, Avatar, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Native Select, Popover, Progress, Radio Group, Select, Separator, Skeleton, Switch, Table, Tabs, Textarea, and Tooltip. No component is unavailable in glass; the compatibility table keeps the `unavailable` status for future components and families. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twenty-three components.
 
 Experimental means the family compiles, installs, and renders through the same preset, compiler, CLI, preview, and editor pipeline as the stable families, and has automated evidence for one browser build. It does not meet the stable bar in [liquid glass constraints](../03-components-styles-accessibility.md#liquid-glass-constraints): mid-range mobile scrolling, human review, and the broader browser range are still owed. See [liquid glass evidence](../evidence/liquid-glass.md) for what was measured and what was not run.
 
@@ -25,11 +25,16 @@ Experimental means the family compiles, installs, and renders through the same p
 | Switch | Experimental | A `card` + `foreground` 10% track at 55% coverage; on is `card` + `primary` 26% / 30% at 85% with a `primary` rim at 60% and a glow. The thumb is solid white with a shadow, so its position reads over any backdrop and in forced colours. Disabled is dashed. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
 | Radio Group | Experimental | Field-glass radios; checked is `card` + `primary` 26% / 30% at 80% with a `primary` rim and a `foreground` dot. Option rows are the field surface (`background` at 55%), so the field pairs bound their label and description; a checked row is `card` + `primary` 18% / 22% at 78% with a `primary` rim at 55%; disabled rows are dashed. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
 | Select | Experimental | The trigger is the field surface; the list is the Dropdown Menu glass surface. A highlighted option is its own glass surface, `popover` + `primary` 18% / 22% at the nested glass coverage, with its `foreground` text and hint declared pairs; the selected option is weight 600 with the check; a disabled option is `mutedForeground`. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
-| Avatar, Separator, Table, Accordion, Progress, Skeleton | Unavailable | Refused with `STYLE_UNAVAILABLE` |
+| Avatar | Experimental | `foreground` initials at weight 600 on card glass discs with a white rim at 55%, an inner highlight and a soft drop shadow. The primary variant is `card` + `primary` 18% / 22%, the resting Button pair, with a `primary` rim at 55%; default and secondary are neutral card glass. The presence dot is `#16A34A` with a white ring, and offline is `mutedForeground`; in forced colours online is filled and offline hollow. A group overlaps its avatars by 10px and layers a white 55% rim over each avatar's own highlight and shadow. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Separator | Experimental | An etched hairline: a `var(--border-width)` line in the `border` colour with the glass highlight 1px beside it. The highlight is a logical border, so vertical separators flip in right-to-left layouts; each line's box is 1px larger than the kit's `box-shadow` highlight. The label is `mutedForeground` at 12px / 600 with no surface of its own, as in the kit, so its contrast comes from what it sits on (see [contrast bound](#contrast-bound)). Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Table | Experimental | One card-glass container with the glass edge, a radius 4px larger than the preset radius and a drop shadow; it scrolls horizontally when the table is wider. The header is `muted` glass with `mutedForeground` labels at 12px / 600, painted at the full nested opacity, so it is denser than the kit's 55% overlay but exactly the declared `muted` pair. Rows are separated by hairlines. A selected row is `card` + `primary` 12% at the nested coverage with `foreground` text, a declared pair; in forced colours it is `Highlight` and weight 600. Numeric cells align to the end with tabular figures. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Accordion | Experimental | A card-glass container with hairlines between items. Triggers are `foreground` at 15px / 600 and at least 44px high; the open trigger is `card` + `primary` 12% at the nested coverage, the selected-row pair, and its chevron turns. Content is `mutedForeground`, and its height animates only while opening. In forced colours the open trigger keeps a 4px `CanvasText` bar at its start edge as well as the chevron, and gives up that width from its padding so the title does not move. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Progress | Experimental | A 10px pill track of `card` + `foreground` 10% at the glass opacity, as the kit's track, with the glass edge and an inner shadow. The fill is solid `primary` with a gloss and a glow; complete is `#16A34A`; indeterminate is a faded full fill with a sweep that stops under reduced motion. No text sits on it, so it declares no pair. Forced colours fill with `Highlight`. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Skeleton | Experimental | Frosted shapes: a 10% `foreground` film with a white top sheen and a white rim at 30%, in text, circle and block shapes. It carries no text. Its pulse stops under reduced motion. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
 
 One compatibility table in `packages/contracts` (23 components × 5 families, each `stable`, `experimental`, or `unavailable`) is read by the compiler, the CLI, the snapshot service, and both editors.
 
-The glass family stylesheet `ui-style.css` styles Input as glass inside `@supports (backdrop-filter)`, over an opaque `background` baseline that browsers without backdrop filters, reduced transparency and forced colours (`Field` and `FieldText`) fall back to. The field paints `color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent)`: 55% of the glass opacity at top level, and the full `--glass-nested-opacity` when nested in glass. Focus colours the border with `ring` and adds the 3px ring, offset by 2px; disabled fields are dashed at 50% opacity; `aria-invalid` gives a 2px destructive border (double in forced colours). Textarea, Native Select and the Select trigger share this surface. Screenshots of every form control, light and dark: [glass form controls evidence](../evidence/glass-form-controls.md); the earlier Input captures are in [images/glass-input](../evidence/images/glass-input/). Place forms on a glass or card surface: labels and messages beside a field are plain text. Error messages in `destructive` are bounded on `card` glass; on the bare backdrop no text is covered by the bound.
+The glass family stylesheet `ui-style.css` styles Input as glass inside `@supports (backdrop-filter)`, over an opaque `background` baseline that browsers without backdrop filters, reduced transparency and forced colours (`Field` and `FieldText`) fall back to. The field paints `color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent)`: 55% of the glass opacity at top level, and the full `--glass-nested-opacity` when nested in glass. Focus colours the border with `ring` and adds the 3px ring, offset by 2px; disabled fields are dashed at 50% opacity; `aria-invalid` gives a 2px destructive border (double in forced colours). Textarea, Native Select and the Select trigger share this surface. Screenshots of every form control, light and dark: [glass form controls evidence](../evidence/glass-form-controls.md); of Avatar, Separator, Table, Accordion, Progress and Skeleton: [glass display evidence](../evidence/glass-display.md); the earlier Input captures are in [images/glass-input](../evidence/images/glass-input/). Place forms on a glass or card surface: labels and messages beside a field are plain text. Error messages in `destructive` are bounded on `card` glass; on the bare backdrop no text is covered by the bound.
 
 ## Preset fields
 
@@ -37,7 +42,7 @@ A glass preset sets `styleFamily: "liquid-glass"` and these design fields, which
 
 | Field | Range | Built-in value | Effect |
 | --- | --- | --- | --- |
-| `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur, filter, or sheen |
+| `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur, filter, or sheen: the tokens set `--glass-opacity`, `--glass-inner-opacity` and `--glass-nested-opacity` to 1 and `--glass-inner-filter` to `none`, so covered and nested surfaces paint their whole token too |
 | `design.glassBlurPx` | 0–40 | 3 | Backdrop blur radius; low values keep the refraction visible |
 | `design.glassOpacity` | 0.25–1 | 0.57 | Surface opacity: the share of the surface colour in the mix with the filtered backdrop |
 | `design.glassSaturation` | 1–2 | 2 | Backdrop `saturate()`; keeps the colour of what is behind the glass |
@@ -102,16 +107,16 @@ The bound is checked in light and dark mode for these pairs:
 
 | Surface | Text | Used by |
 | --- | --- | --- |
-| `card` | `cardForeground`, `mutedForeground` | Card |
+| `card` | `cardForeground`, `mutedForeground` | Card; `mutedForeground` also for the Table caption, Accordion content, and a Separator label inside a Card |
 | `popover` | `popoverForeground`, `mutedForeground` | Dialog content, Tooltip content |
-| `muted` | `foreground`, `mutedForeground` | Tabs list and inactive triggers |
+| `muted` | `foreground`, `mutedForeground` | Tabs list and inactive triggers; Table footer and header |
 | `secondary` | `secondaryForeground` | Kept for custom presets; the one-ink secondary Button is card glass |
 | `background` | `foreground` | Kept for custom presets |
-| `card` + `primary` 18% light / 22% dark | `foreground` | Default Button at rest |
+| `card` + `primary` 18% light / 22% dark | `foreground` | Default Button at rest, primary Avatar initials |
 | `card` + `primary` 26% light / 30% dark | `foreground` | Default Button on hover |
 | `card` + `destructive` 16% light / 20% dark | `foreground` | Destructive Button at rest |
 | `card` + `destructive` 24% light / 28% dark | `foreground` | Destructive Button on hover |
-| `card` | `foreground` | Secondary Button at rest, ghost Button on hover |
+| `card` | `foreground` | Secondary Button at rest, ghost Button on hover, neutral Avatar initials, Table body text, Accordion triggers |
 | `card` + `foreground` 6% | `foreground` | Secondary Button on hover |
 | `background` at 60% coverage | `foreground` | Outline Button at rest |
 | `background` + `foreground` 6% at 60% coverage | `foreground` | Outline Button on hover |
@@ -121,6 +126,8 @@ The bound is checked in light and dark mode for these pairs:
 | `card` + `primary` 26% light / 30% dark at 80% coverage | `foreground` | Checkbox mark and radio dot when checked |
 | `card` + `primary` 18% light / 22% dark at 78% coverage | `foreground`, `mutedForeground` | Checked Radio Group option label and description |
 | `popover` + `primary` 18% light / 22% dark | `foreground`, `mutedForeground` | Highlighted Select option and its hint |
+| `popover` | `foreground` | Plain Select option |
+| `card` + `primary` 12% light / 12% dark | `foreground` | Selected Table row, open Accordion trigger |
 
 A tinted surface is a token surface mixed with a tint token at a fixed percentage per mode, the same mix the CSS paints. It is checked like any other pair: over the darkest and brightest filtered backdrop, with and without sheen, and on its opaque fallback. The editor readout names the tint, for example "foreground on card + primary 26%".
 
@@ -132,7 +139,9 @@ The built-in glass preset uses opacity 0.57, the smallest value at which both bu
 
 Solid fills keep their existing contrast pairs: both Badge variants and the active Tabs trigger.
 
-The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are ghost and link at rest, which sit straight on the backdrop. The outline Button is bounded at its 60% coverage.
+The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are ghost and link at rest, which sit straight on the backdrop. The Separator label is the same: it is `mutedForeground` text with no surface of its own, bounded by `mutedForeground` on `card` inside a Card or other glass panel and dependent on the backdrop elsewhere. The outline Button is bounded at its 60% coverage. Progress and Skeleton carry no text, so they declare no pair.
+
+The Table header, a selected row and an open Accordion trigger sit inside their container's glass, so they paint at the full `--glass-nested-opacity` (0.69 light, 0.92 dark with the built-in preset), the coverage at which the nested bound evaluates their pairs. The kit draws the header as a 55% `muted` overlay and the selected row and open trigger as 12% `primary` overlays; the CSS instead mixes the tint into the surface first and then applies the glass coverage, so what it paints is the declared pair. The 12% selection tint is a literal in the two stylesheets, not a token.
 
 ## Declared backdrops
 
@@ -142,7 +151,7 @@ The preview gallery renders each glass component over three declared backdrops, 
 - **gradient**: a three-stop orange, blue, and near-black linear gradient;
 - **pattern**: a 12px black and white checkerboard, a high-frequency worst case for blur.
 
-The unavailable components appear in the gallery as labelled placeholders.
+A component that a family cannot style appears in the gallery as a labelled placeholder; no glass component is unavailable now, so the glass gallery shows none.
 
 ## Glass cues
 
@@ -161,7 +170,7 @@ Inside the feature query, each translucent surface paints a white specular gradi
 
 1. **Opaque base.** Glass surfaces are opaque outside any feature query, using the relevant surface token.
 2. **Feature query.** Translucency and blur apply only inside `@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))`. A browser without filter support never shows text over an unblurred backdrop.
-3. **Reduced transparency.** `@media (prefers-reduced-transparency: reduce)` restores opaque surfaces and removes the filter. The preset field `transparency: "reduced"` does the same at compile time.
+3. **Reduced transparency.** `@media (prefers-reduced-transparency: reduce)` restores opaque surfaces and removes the filter. The preset field `transparency: "reduced"` does the same at compile time: its tokens pin every surface's coverage to 1 (`--glass-inner-opacity`, which covered surfaces such as the 55% field read before their coverage, and `--glass-nested-opacity`), remove the filter (`--glass-inner-filter: none`) and the sheen, and back the Skeleton film with `card` (`--glass-film-backing`).
 4. **Forced colours.** `@media (forced-colors: active)` uses system colours with no filter and no translucency.
 5. **Glass identity in every fallback.** The edge (`--border-width` in the `border` colour), an inner top highlight, and the preset radius remain.
 
@@ -180,18 +189,18 @@ The second notice appears only for `add`, the command that writes the filter com
 
 JSON output always includes a `notices` array. It is empty for stable families.
 
-Planning an unavailable component, such as `add avatar` in a glass project, fails with `STYLE_UNAVAILABLE` and exit code 2 before any write. The message names the component and lists the experimental glass components. An `init` whose component list includes an unavailable component fails as a whole. `--yes` does not bypass the refusal.
+Every catalog component can be planned in a glass project. The refusal remains for a component that a family marks unavailable: planning it fails with `STYLE_UNAVAILABLE` and exit code 2 before any write, the message names the component and lists the experimental glass components, a plan that includes it fails as a whole, and `--yes` does not bypass it. In a glass project an id outside the catalog, such as `add button unknown-component`, takes the same path today.
 
 `init` and `theme add` rewrite the tokens and `ui-style.css` only, so they check the managed components recorded in the project lock before any write. `--yes` bypasses neither refusal:
 
-- **Into glass.** If any installed component is unavailable for liquid glass, such as Avatar in a flat project, switching to a glass preset fails with `STYLE_UNAVAILABLE` at `/componentIds`. The message names the installed unavailable components and lists the experimental glass components. Keep a stable family, or remove those components first.
-- **Out of glass.** Alert, Badge, Card, Checkbox, Dropdown Menu, Label, Native Select, Popover, Radio Group, Select, Switch, Tabs, Textarea, and Tooltip install colocated glass CSS, such as `components/ui/card.css`, that depends on the `--glass-*` tokens and the contrast bound. If any of them is installed in a glass project, switching to a stable preset fails with `STYLE_UNAVAILABLE` at `/styleFamily`, naming the components and their CSS files. Remove them, switch the theme, then add them again. Button, Dialog, and Input keep their glass rules in `ui-style.css`, which the switch rewrites, so they do not block it.
+- **Into glass.** If any installed component is unavailable for liquid glass, switching to a glass preset fails with `STYLE_UNAVAILABLE` at `/componentIds`. The message names the installed unavailable components and lists the experimental glass components. No catalog component is unavailable in glass now, so this check no longer blocks a switch into glass.
+- **Out of glass.** Accordion, Alert, Avatar, Badge, Card, Checkbox, Dropdown Menu, Label, Native Select, Popover, Progress, Radio Group, Select, Separator, Skeleton, Switch, Table, Tabs, Textarea, and Tooltip install colocated glass CSS, such as `components/ui/card.css`, that depends on the `--glass-*` tokens and the contrast bound. If any of them is installed in a glass project, switching to a stable preset fails with `STYLE_UNAVAILABLE` at `/styleFamily`, naming the components and their CSS files. Remove them, switch the theme, then add them again. Button, Dialog, and Input keep their glass rules in `ui-style.css`, which the switch rewrites, so they do not block it.
 
 Re-applying another glass preset to a glass project is not a family switch. It still runs the contrast bound.
 
 ## Editors
 
-- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency and the seven glass material controls appear only for glass, and the glass preview renders over the kit backdrop (violet, amber, green and blue light spots over a green-to-violet gradient with soft vertical bands), so the translucency shows. Shadow, border width and border colour carry their glass labels. The preview follows the site's light or dark theme for every family; the Preview mode select still overrides it until the theme toggles again. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails. The readout states the minimum passing opacity, and the lowest passing opacity for each mode when the bound passes. The gallery shows the unavailable components greyed out as "Unavailable in liquid glass".
+- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency and the seven glass material controls appear only for glass, and the glass preview renders over the kit backdrop (violet, amber, green and blue light spots over a green-to-violet gradient with soft vertical bands), so the translucency shows. Shadow, border width and border colour carry their glass labels. The preview follows the site's light or dark theme for every family; the Preview mode select still overrides it until the theme toggles again. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails. The readout states the minimum passing opacity, and the lowest passing opacity for each mode when the bound passes. Every component renders in glass; the gallery greys out as "Unavailable in liquid glass" only a component that the support table marks unavailable, and none is now.
 - **Button editor** (`/editor/component/button`): accepts glass, previews it over the same kit backdrop, relabels the shadow and border overrides as in [repurposed controls](#repurposed-controls), and shows the experimental notice beside the export and CLI command.
 - **Component playgrounds** on the website use the preset preview, so their glass examples sit on the kit backdrop too. The backdrop is declared once, in `apps/preview/src/glass-backdrop.css`; it replaced the earlier backdrop photo, which was removed.
 

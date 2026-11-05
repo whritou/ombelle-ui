@@ -36,14 +36,16 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the seventeen experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['alert', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'switch', 'tabs', 'textarea', 'tooltip'])
+  it('compiles the twenty-three experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'avatar', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
       result.artifacts.filter((a) => a.kind === 'style').map((a) => a.logicalPath),
     ).toEqual([
+      'components/ui/accordion.css',
       'components/ui/alert.css',
+      'components/ui/avatar.css',
       'components/ui/badge.css',
       'components/ui/card.css',
       'components/ui/checkbox.css',
@@ -51,9 +53,13 @@ describe('liquid-glass compile', () => {
       'components/ui/label.css',
       'components/ui/native-select.css',
       'components/ui/popover.css',
+      'components/ui/progress.css',
       'components/ui/radio-group.css',
       'components/ui/select.css',
+      'components/ui/separator.css',
+      'components/ui/skeleton.css',
       'components/ui/switch.css',
+      'components/ui/table.css',
       'components/ui/tabs.css',
       'components/ui/textarea.css',
       'components/ui/tooltip.css',
@@ -77,12 +83,9 @@ describe('liquid-glass compile', () => {
     expect(second.preset.hash).toBe(first.preset.hash)
   })
 
-  it.each(unavailable)('refuses unavailable component %s', async (id) => {
-    expect(unavailable).toHaveLength(6)
-    await expect(build(builtin(), ['button', id])).rejects.toMatchObject({
-      code: 'STYLE_UNAVAILABLE',
-      path: '/componentIds',
-    })
+  // Every component is experimental in glass, so no component can be refused; Task C4 replaces the refusal tests.
+  it('has no unavailable component left to refuse', () => {
+    expect(unavailable).toEqual([])
   })
 
   it('reduced transparency emits opaque tokens', async () => {
@@ -90,6 +93,100 @@ describe('liquid-glass compile', () => {
     const tokens = artifact(result, 'styles/ui-tokens.css').replace(/\s+/g, '')
     expect(tokens).toContain('--glass-blur:0px;')
     expect(tokens).toContain('--glass-opacity:1;')
+  })
+
+  // The bound evaluates every pair opaque under transparency "reduced", so the CSS must paint every glass surface
+  // opaque: covered surfaces read --glass-inner-opacity before their coverage fallback, so it is pinned at the root.
+  it('reduced transparency paints every covered and nested surface opaque, with no filter or sheen', async () => {
+    const preset = withDesign({ transparency: 'reduced', glassOpacity: 0.6 })
+    expect(glassContrastReport(preset).passes).toBe(true)
+    const result = await build(preset)
+    const tokens = squash(artifact(result, 'styles/ui-tokens.css'))
+    const block = (selector: string) => {
+      const start = tokens.indexOf(selector + '{') + selector.length + 1
+      return Object.fromEntries(
+        tokens.slice(start, tokens.indexOf('}', start)).split(';').filter(Boolean)
+          .map((d) => [d.slice(0, d.indexOf(':')), d.slice(d.indexOf(':') + 1)]),
+      ) as Record<string, string>
+    }
+    const light = block(':root')
+    const dark = { ...light, ...block('.dark') }
+    expect(light).toMatchObject({
+      '--glass-inner-opacity': '1',
+      '--glass-inner-filter': 'none',
+      '--glass-nested-opacity': '1',
+      '--glass-film-backing': '1',
+    })
+    expect(dark['--glass-nested-opacity']).toBe('1')
+    // Resolve var() with fallbacks, as the cascade does.
+    const resolve = (value: string, env: Record<string, string>): string => {
+      let out = value
+      for (let i = out.lastIndexOf('var('); i !== -1; i = out.lastIndexOf('var(')) {
+        let depth = 0
+        let end = i + 3
+        let comma = -1
+        for (; end < out.length; end++) {
+          if (out[end] === '(') depth++
+          else if (out[end] === ')' && --depth === 0) break
+          else if (out[end] === ',' && depth === 1 && comma === -1) comma = end
+        }
+        const name = out.slice(i + 4, comma === -1 ? end : comma).trim()
+        const fallback = comma === -1 ? undefined : out.slice(comma + 1, end).trim()
+        const replacement =
+          name in env ? resolve(env[name]!, env) : name.startsWith('--glass') ? (fallback ?? '') : '#000'
+        out = out.slice(0, i) + replacement + out.slice(end + 1)
+      }
+      return out
+    }
+    // Every calc(... * 100%) evaluates to a fraction of the whole token.
+    const fractions = (value: string) => {
+      const out: number[] = []
+      for (const match of value.matchAll(/calc\(/g)) {
+        let depth = 0
+        let end = match.index!
+        for (; end < value.length; end++) {
+          if (value[end] === '(') depth++
+          else if (value[end] === ')' && --depth === 0) break
+        }
+        const body = value.slice(match.index! + 5, end)
+        if (!/\*\s*100%$/.test(body.trim())) continue
+        const expression = body.trim().replace(/\*\s*100%$/, '').replaceAll('calc', '')
+        expect(expression, value).toMatch(/^[\d.\s*+\-()]+$/)
+        out.push(Function('return ' + expression)() as number)
+      }
+      return out
+    }
+    const sheets = result.artifacts.filter((a) => a.kind === 'style' && a.logicalPath !== 'styles/ui-tokens.css')
+    let surfaces = 0
+    for (const env of [light, dark])
+      // Top level, and nested in a glass Card, Dialog or Tooltip, which re-point the inner values.
+      for (const nested of [false, true]) {
+        const scope = nested
+          ? { ...env, '--glass-inner-opacity': 'var(--glass-nested-opacity)', '--glass-inner-filter': 'none' }
+          : env
+        for (const sheet of sheets)
+          postcss.parse(sheet.content).walkDecls((d) => {
+            const raw = squash(d.value)
+            if (d.prop === 'background' && /--glass-(inner-opacity|opacity|film-backing)/.test(raw)) {
+              surfaces++
+              const resolved = resolve(raw, scope)
+              for (const sheen of raw.match(/calc\(var\(--glass-sheen\)\*\d+%\)/g) ?? [])
+                expect(resolve(sheen, scope), sheet.logicalPath).toBe('calc(0*' + sheen.match(/(\d+%)\)$/)![1] + ')')
+              // The Skeleton film's literal sheen fades with its backing.
+              if (raw.includes('(1-var(--glass-film-backing,0))')) expect(resolved).toContain('calc((1-1)*35%)')
+              const coverage = fractions(resolved.replace(/calc\(0\*\d+%\)/g, ''))
+              expect(coverage.length, sheet.logicalPath + ' ' + raw).toBeGreaterThan(0)
+              for (const c of coverage) expect(c, sheet.logicalPath + ' ' + raw).toBe(1)
+            }
+            if (d.prop.endsWith('backdrop-filter') && raw.includes('--glass-inner-filter'))
+              expect(resolve(raw, scope), sheet.logicalPath).toBe('none')
+          })
+      }
+    expect(surfaces).toBeGreaterThan(40)
+    // The built-in preset keeps its translucent tokens: none of the reduced pins are emitted.
+    const builtinTokens = artifact(await build(builtin()), 'styles/ui-tokens.css')
+    for (const pin of ['--glass-inner-opacity', '--glass-inner-filter', '--glass-film-backing'])
+      expect(builtinTokens).not.toContain(pin)
   })
 
   it('emits no glass tokens for other families', async () => {
@@ -203,6 +300,31 @@ describe('liquid-glass compile', () => {
         for (const selector of rule.selectors)
           expect(selector.match(/\[data-slot=/g)?.length ?? 0, sheet.logicalPath + ' ' + selector).toBeLessThanOrEqual(1)
       })
+  })
+
+  // --glass-tint inherits: a selected table row or an open accordion trigger sets 12% primary, which would reach a
+  // nested Button, Avatar, Switch or Select item if it read the variable without setting it. Every rule that reads
+  // the tint therefore sits on an element that sets it itself, in the same selector or in its bare data-slot rule.
+  it('never reads an inherited glass tint', async () => {
+    const result = await build(builtin())
+    const setters = new Set<string>()
+    const readers: string[] = []
+    for (const sheet of result.artifacts.filter((a) => a.kind === 'style'))
+      postcss.parse(sheet.content).walkRules((rule) => {
+        const sets = rule.nodes.some((n) => n.type === 'decl' && n.prop === '--glass-tint')
+        const reads = rule.nodes.some((n) => n.type === 'decl' && n.prop !== '--glass-tint' && n.value.includes('var(--glass-tint'))
+        for (const selector of rule.selectors.map(squash)) {
+          if (sets) setters.add(selector)
+          if (reads) readers.push(sheet.logicalPath + ' ' + selector)
+        }
+      })
+    expect(readers.length).toBeGreaterThan(10)
+    for (const reader of readers) {
+      const selector = reader.split(' ')[1]!
+      const subject = selector.split(/[>+~]/).at(-1)!
+      const slot = subject.match(/^\[data-slot="[^"]+"\]/)?.[0]
+      expect(setters.has(selector) || (slot !== undefined && setters.has(slot)), reader).toBe(true)
+    }
   })
 })
 
@@ -385,7 +507,7 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'destructive', ...glassTints.destructive } })
     const report = glassContrastReport(builtin())
     const tinted = report.pairs.filter((p) => p.tint !== undefined)
-    expect(tinted).toHaveLength(22)
+    expect(tinted).toHaveLength(24)
     for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.passes).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
@@ -493,7 +615,8 @@ describe('liquid-glass Button', () => {
     const selection = report.pairs.filter(
       (p) => p.tint?.color === 'primary' || p.coverage === 0.55,
     )
-    expect(selection).toHaveLength(18)
+    // With the Table selected row and open Accordion trigger (primary 12%) in both modes.
+    expect(selection).toHaveLength(20)
     for (const pair of selection) expect(pair.passes, JSON.stringify(pair)).toBe(true)
   })
   it('declares the Select highlighted option and hint pairs and they pass', () => {
@@ -506,6 +629,16 @@ describe('liquid-glass Button', () => {
     const report = glassContrastReport(builtin())
     const pairs = report.pairs.filter((p) => p.surface === 'popover' && p.tint?.color === 'primary')
     expect(pairs).toHaveLength(4)
+    for (const pair of pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
+    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
+    expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
+  })
+  it('declares plain Select item text, foreground on the untinted popover, and it passes', () => {
+    // Select items are var(--foreground) on the popover glass list; popoverForeground alone does not bound them.
+    expect(glassContrastPairs).toContainEqual({ surface: 'popover', text: 'foreground' })
+    const report = glassContrastReport(builtin())
+    const pairs = report.pairs.filter((p) => p.surface === 'popover' && p.text === 'foreground' && !p.tint && p.coverage === undefined)
+    expect(pairs.map((p) => p.mode)).toEqual(['light', 'dark'])
     for (const pair of pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
     expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })

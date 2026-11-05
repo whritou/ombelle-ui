@@ -76,10 +76,15 @@ export const glassDesignDefaults = {
 export const glassDarkSheenScale = 0.25
 export const glassMinimumOpacity = 0.25
 
-/** Resting Button tints per mode, as fractions, written as --glass-<color>-tint; hover adds 8 points. */
+/**
+ * Resting Button tints per mode, as fractions, written as --glass-<color>-tint; hover adds 8 points. `selection` is the
+ * `primary` tint on selected Table rows and open Accordion triggers; it is 12% in both modes, which those stylesheets
+ * write as `12%`.
+ */
 export const glassTints = {
   primary: { light: 0.18, dark: 0.22 },
   destructive: { light: 0.16, dark: 0.2 },
+  selection: { light: 0.12, dark: 0.12 },
 } as const
 /** Points a Button hover adds to the resting tint (`+ 8%` in the stylesheet). */
 export const glassHoverTint = 0.08
@@ -97,7 +102,7 @@ export const glassCheckedOptionCoverage = 0.78
 /** The neutral `foreground` tint secondary and outline Buttons gain on hover (6% in the stylesheet). */
 export const glassNeutralHoverTint = 0.06
 
-const tintPairs = (color: keyof typeof glassTints): GlassPairSpec[] => {
+const tintPairs = (color: 'primary' | 'destructive'): GlassPairSpec[] => {
   const rest = glassTints[color]
   const hover = (v: number) => Math.round((v + glassHoverTint) * 100) / 100
   return [
@@ -148,6 +153,12 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'popover', text: 'foreground', tint: primaryRest },
   // Its hint (select-item-hint) on the highlighted row: mutedForeground under the same tint.
   { surface: 'popover', text: 'mutedForeground', tint: primaryRest },
+  // Plain Select options: foreground (not popoverForeground) on the untinted popover glass.
+  { surface: 'popover', text: 'foreground' },
+  // Selected Table rows and open Accordion triggers: foreground on the card glass tinted with primary 12%, nested in
+  // their glass container. Header labels (mutedForeground on muted), body text and trigger text (foreground on card)
+  // and Accordion content (mutedForeground on card) are bounded by the pairs above.
+  { surface: 'card', text: 'foreground', tint: { color: 'primary', ...glassTints.selection } },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))

@@ -232,8 +232,10 @@ it('requests only components the family supports', () => {
   expect(previewComponentIds('flat')).toHaveLength(23)
   expect(previewComponentIds('liquid-glass')).toEqual([
     'alert',
+    'accordion',
     'button',
     'badge',
+    'avatar',
     'card',
     'checkbox',
     'dialog',
@@ -241,11 +243,15 @@ it('requests only components the family supports', () => {
     'input',
     'label',
     'popover',
+    'progress',
     'native-select',
     'radio-group',
     'select',
     'switch',
+    'separator',
+    'skeleton',
     'tabs',
+    'table',
     'textarea',
     'tooltip',
   ])

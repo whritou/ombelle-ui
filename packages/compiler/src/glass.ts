@@ -77,6 +77,17 @@ export function glassTokens(data: Preset): {
       '--glass-saturation': opaque ? '1' : String(d.glassSaturation),
       '--glass-contrast': opaque ? '1' : String(d.glassBackdropContrast),
       '--glass-highlight': 'color-mix(in srgb, white ' + Math.round(d.glassRim * 100) + '%, transparent)',
+      // Reduced transparency is evaluated opaque, so it is painted opaque: every covered surface reads
+      // --glass-inner-opacity before its coverage fallback and every filter reads --glass-inner-filter.
+      // Nested glass re-points them to --glass-nested-opacity, which is 1 here. The Skeleton film, a
+      // tint over nothing, gets the card behind it from --glass-film-backing.
+      ...(opaque
+        ? {
+            '--glass-inner-opacity': '1',
+            '--glass-inner-filter': 'none',
+            '--glass-film-backing': '1',
+          }
+        : {}),
       ...mode('light'),
     },
     dark: {

@@ -271,7 +271,7 @@ for (const family of supportedStyleFamilies)
     await expect(frame(page).getByTestId('preset-gallery')).toBeVisible()
   })
 
-test('shows the labelled placeholder for the one sign-in component liquid glass lacks', async ({ page }) => {
+test('renders every sign-in component in liquid glass, with no placeholder', async ({ page }) => {
   await page.addInitScript(
     (draft) =>
       localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
@@ -282,8 +282,9 @@ test('shows the labelled placeholder for the one sign-in component liquid glass 
   await segment(page, 'Preview page', 'Sign in').click()
   await ready(page)
   await expect(frame(page).getByRole('heading', { name: 'Sign in to Acme', level: 1 })).toBeVisible()
-  // The form controls are experimental in glass; only the Separator stays gated.
-  await expect(frame(page).getByText('Unavailable in liquid glass')).toHaveCount(1)
+  // Every component is experimental in glass, so the Separator renders instead of a placeholder.
+  await expect(frame(page).getByText('Unavailable in liquid glass')).toHaveCount(0)
+  await expect(frame(page).locator('[data-slot="separator"]').first()).toBeVisible()
   await expect(frame(page).getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
 

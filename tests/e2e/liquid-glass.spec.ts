@@ -616,11 +616,13 @@ for (const mode of modes) {
 
   test(`liquid-glass ${mode}: unavailable placeholders`, async ({ page }) => {
     await open(page, mode)
-    // The scenario lists exactly the components the support table marks unavailable in glass.
+    // The scenario lists exactly the components the support table marks unavailable in glass; with none left it
+    // renders no section, so no empty heading.
     const expected = componentsWithStyleSupport('liquid-glass', ['unavailable'])
     const placeholders = page.locator('[data-unavailable]')
     await expect(placeholders).toHaveCount(expected.length)
-    await expect(placeholders).toHaveText(Array(expected.length).fill('Unavailable in liquid glass'))
+    await expect(page.locator('#unavailable-heading')).toHaveCount(expected.length > 0 ? 1 : 0)
+    expect(await placeholders.allInnerTexts()).toEqual(Array(expected.length).fill('Unavailable in liquid glass'))
     expect(await placeholders.evaluateAll((els) => els.map((el) => el.getAttribute('data-unavailable')))).toEqual(expected)
   })
 
@@ -677,8 +679,9 @@ for (const mode of modes) {
     await menuDownload('enabled')
 
     const gallery = page.locator('iframe[title="Global preset gallery"]').contentFrame()
+    // The gallery's placeholders follow the support table too; no glass component is unavailable now.
     const unavailable = gallery.locator('[data-unavailable][aria-disabled="true"]')
-    await expect(unavailable).toHaveCount(6)
+    await expect(unavailable).toHaveCount(componentsWithStyleSupport('liquid-glass', ['unavailable']).length)
     for (const entry of await unavailable.all()) await expect(entry).toContainText('Unavailable in liquid glass')
 
     const axe = await new AxeBuilder({ page }).withTags(wcag).analyze()

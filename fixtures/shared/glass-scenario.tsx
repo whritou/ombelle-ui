@@ -41,8 +41,8 @@ const backdrops = [
   },
 ] as const
 
-// The fixture writers replace GLASS_UNAVAILABLE with the components the support table marks unavailable in
-// liquid glass (componentsWithStyleSupport), comma-separated.
+// The fixture writers replace the quoted placeholder below with the components the support table marks unavailable in
+// liquid glass (componentsWithStyleSupport), comma-separated. With none left the section is not rendered.
 const unavailable = 'GLASS_UNAVAILABLE'.split(',').filter(Boolean)
 
 export default function GlassScenario() {
@@ -139,14 +139,16 @@ export default function GlassScenario() {
           </section>
         ))}
       </TooltipProvider>
-      <section aria-labelledby="unavailable-heading">
-        <h2 id="unavailable-heading">Not yet available</h2>
-        {unavailable.map((id) => (
-          <p key={id} data-unavailable={id}>
-            Unavailable in liquid glass
-          </p>
-        ))}
-      </section>
+      {unavailable.length > 0 && (
+        <section aria-labelledby="unavailable-heading">
+          <h2 id="unavailable-heading">Not yet available</h2>
+          {unavailable.map((id) => (
+            <p key={id} data-unavailable={id}>
+              Unavailable in liquid glass
+            </p>
+          ))}
+        </section>
+      )}
       <p className="note">
         Generated components · experimental liquid glass · editable source
       </p>

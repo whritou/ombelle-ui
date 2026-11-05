@@ -23,7 +23,7 @@ describe('Separator catalog contract', () => {
         "[data-slot='separator'][data-labelled][data-orientation='horizontal']",
         "[data-slot='separator'][data-labelled][data-orientation='horizontal']::before",
       ],
-      glass: 'unavailable',
+      glass: 'experimental',
     })
   })
 
