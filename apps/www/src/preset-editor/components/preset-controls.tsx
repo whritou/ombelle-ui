@@ -6,7 +6,9 @@ import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
 import type { PresetEditorDraft, PresetEditablePath } from '../model'
 import {
   colorKeys,
+  designControlLabel,
   designControls,
+  glassControlHints,
   glassDesignControls,
   presetFieldValue,
 } from '../model'
@@ -154,30 +156,32 @@ export function TokenList({
           const invalid = errorPath === `/modes/light/${key}` || errorPath === `/modes/dark/${key}`
           const edited = isEdited(key)
           const warned = warnings.has(key)
+          const glassEdge = key === 'border' && draft.family === 'liquid-glass'
+          const name = key === 'border' ? designControlLabel('border', draft.family) : title(key)
           return (
             <li key={key}>
               <button
                 type="button"
                 className="preset-color-row"
                 popoverTarget={colorPanelId(key)}
-                aria-label={`${title(key)} colors: light ${light}, dark ${dark}${invalid ? ', invalid' : ''}${warned ? ', contrast warning' : ''}`}
+                aria-label={`${name}${glassEdge ? ':' : ' colors:'} light ${light}, dark ${dark}${invalid ? ', invalid' : ''}${warned ? ', contrast warning' : ''}`}
                 data-invalid={invalid || undefined}
                 data-warning={warned || undefined}
               >
                 <span className="preset-color-name">
-                  {title(key)}
+                  {name}
                   {edited && <span className="preset-edited" title="Customized" />}
                 </span>
                 {invalid && <CircleAlert aria-hidden="true" size={14} className="preset-color-alert" />}
                 <span className="preset-swatch" aria-hidden="true" style={{ backgroundColor: light }} />
                 <span className="preset-swatch" aria-hidden="true" style={{ backgroundColor: dark }} />
               </button>
-              <div id={colorPanelId(key)} popover="auto" className="preset-popover" aria-label={`${title(key)} colors`} role="dialog">
-                <p className="preset-popover-title">{title(key)}</p>
+              <div id={colorPanelId(key)} popover="auto" className="preset-popover" aria-label={`${name} colors`} role="dialog">
+                <p className="preset-popover-title">{name}</p>
                 {(['light', 'dark'] as const).map((mode) => {
                   const path: PresetEditablePath = `/modes/${mode}/${key}`,
                     value = mode === 'light' ? light : dark,
-                    label = `${mode === 'light' ? 'Light' : 'Dark'} ${human(key)}`
+                    label = `${mode === 'light' ? 'Light' : 'Dark'} ${glassEdge ? name.toLowerCase() : human(key)}`
                   return (
                     <div className="preset-control" key={mode}>
                       <label htmlFor={fieldId(path)}>{label}</label>
@@ -197,7 +201,7 @@ export function TokenList({
                           maxLength={80}
                           spellCheck={false}
                           aria-invalid={errorPath === path || undefined}
-                          aria-describedby={errorPath === path ? 'preset-error' : undefined}
+                          aria-describedby={errorPath === path ? 'preset-error' : glassEdge ? 'preset-glass-edge-hint' : undefined}
                           onChange={(e) => edit(path, e.target.value)}
                         />
                         <ResetButton draft={draft} path={path} label={`Reset ${mode} ${human(key)}`} onReset={reset} />
@@ -205,6 +209,7 @@ export function TokenList({
                     </div>
                   )
                 })}
+                {glassEdge && <p id="preset-glass-edge-hint" className="preset-popover-hint">{glassControlHints.border}</p>}
                 <p className="preset-popover-hint">Hex such as #1d4ed8, or OKLCH such as oklch(55% 0.2 260).</p>
               </div>
             </li>
@@ -256,14 +261,29 @@ export function DesignControls({
   const shown = designEntries.filter(
     ([key]) => !section || (section === 'shape') === shapeKeys.includes(key),
   )
+  const glass = draft.family === 'liquid-glass'
+  const labelFor = (key: string, fallback: string) =>
+    key === 'shadowOffsetXPx' || key === 'shadowOffsetYPx' || key === 'borderWidthPx'
+      ? designControlLabel(key, draft.family)
+      : fallback
+  const shadowHintId = 'preset-shadow-hint'
   const shadowField = (key: 'shadowOffsetXPx' | 'shadowOffsetYPx', axis: 'X' | 'Y') => {
     const path = `/design/${key}` as PresetEditablePath
     return (
       <div className="preset-shadow-field">
         <label htmlFor={fieldId(path)}>
-          <span className="preset-sr">Shadow </span>
-          {axis}
-          <span className="preset-sr"> offset</span>
+          {glass ? (
+            <>
+              <span className="preset-sr">Glass shadow </span>
+              {axis}
+            </>
+          ) : (
+            <>
+              <span className="preset-sr">Shadow </span>
+              {axis}
+              <span className="preset-sr"> offset</span>
+            </>
+          )}
         </label>
         <input
           id={fieldId(path)}
@@ -272,13 +292,13 @@ export function DesignControls({
           spellCheck={false}
           value={presetFieldValue(draft, path)}
           aria-invalid={errorPath === path || undefined}
-          aria-describedby={errorPath === path ? 'preset-error' : undefined}
+          aria-describedby={errorPath === path ? 'preset-error' : glass ? shadowHintId : undefined}
           onChange={(e) => onEdit(path, e.target.value)}
         />
         <ResetButton
           draft={draft}
           path={path}
-          label={`Reset shadow ${axis.toLowerCase()} offset`}
+          label={glass ? `Reset ${designControlLabel(key, draft.family).toLowerCase()}` : `Reset shadow ${axis.toLowerCase()} offset`}
           onReset={onReset}
         />
       </div>
@@ -296,6 +316,11 @@ export function DesignControls({
             <div key={key} role="group" aria-label="Shadow offset" className="preset-shadow-row">
               {shadowField('shadowOffsetXPx', 'X')}
               {shadowField('shadowOffsetYPx', 'Y')}
+              {glass && (
+                <p id={shadowHintId} className="preset-control-hint">
+                  {glassControlHints.shadowOffsetXPx}
+                </p>
+              )}
             </div>
           )
         if ('options' in control)
@@ -318,11 +343,13 @@ export function DesignControls({
             </div>
           )
         const hintId = `${fieldId(path)}-hint`
+        const glassHintId = `${fieldId(path)}-glass-hint`
+        const glassHint = glass && key === 'borderWidthPx' ? glassControlHints.borderWidthPx : null
         return (
           <div key={key}>
             <SliderRow
               id={fieldId(path)}
-              label={control.label}
+              label={labelFor(key, control.label)}
               value={value}
               min={control.min}
               max={control.max}
@@ -330,13 +357,18 @@ export function DesignControls({
               unit={'unit' in control ? control.unit.trim() : key === 'radiusRem' ? 'rem' : 'px'}
               edited={edited}
               invalid={errorPath === path}
-              describedBy={errorPath === path ? 'preset-error' : hintId}
+              describedBy={errorPath === path ? 'preset-error' : glassHint ? `${hintId} ${glassHintId}` : hintId}
               onChange={(next) => onEdit(path, next)}
               onReset={() => {
                 onReset(path)
                 document.getElementById(fieldId(path))?.focus()
               }}
             />
+            {glassHint && (
+              <p id={glassHintId} className="preset-control-hint">
+                {glassHint}
+              </p>
+            )}
             <small id={hintId} hidden>
               {control.min} to {control.max}
               {'unit' in control ? control.unit : key === 'radiusRem' ? ' rem' : ' px'}

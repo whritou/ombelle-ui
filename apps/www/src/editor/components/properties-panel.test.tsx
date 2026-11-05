@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { validateRecipe } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
 import { withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
+import { glassControlHints } from '../../preset-editor/model'
 import { PropertiesPanel, VariantPicker, shownNumber } from './properties-panel'
 
 const noop = () => {}
@@ -103,4 +104,21 @@ it('switches the color fields between base, hover and pressed states', () => {
   const html = panel()
   expect(html).toContain('role="group" aria-label="Color state"')
   expect(html).toContain('aria-label="Light background"')
+})
+
+it('Button editor relabels shadow and border overrides for glass', () => {
+  const render = (family: 'flat' | 'liquid-glass') =>
+    renderToStaticMarkup(<PropertiesPanel recipe={recipe} family={family} onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
+  const glass = render('liquid-glass')
+  for (const label of ['Glass shadow X', 'Glass shadow Y', 'Glass edge width', 'Glass edge colour'])
+    expect(glass).toContain(label)
+  for (const hint of Object.values(glassControlHints)) expect(glass).toContain(hint)
+  expect(glass).not.toContain('Shadow X offset')
+  expect(glass).not.toContain('>Border width<')
+  const flat = render('flat')
+  expect(flat).toContain('Shadow X offset')
+  expect(flat).toContain('Border width')
+  expect(flat).not.toContain('Glass shadow')
+  expect(flat).not.toContain('Glass edge')
+  for (const hint of Object.values(glassControlHints)) expect(flat).not.toContain(hint)
 })

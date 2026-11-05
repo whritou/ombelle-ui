@@ -10,6 +10,7 @@ import type { CompileDiagnostic } from '../compile-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { RECIPE_COLOR_PATTERN, recipeColor, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
+import { designControlLabel, glassControlHints } from '../../preset-editor/model'
 
 type Props = {
   recipe: Recipe
@@ -144,7 +145,7 @@ function StackField({ label, children }: { label: string; children: ReactNode })
 
 type ColorProps = Pick<Props, 'recipe' | 'diagnostic' | 'onChange' | 'onDiagnostic'>
 
-function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state }: ColorProps & { state: ColorState }) {
+function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family }: ColorProps & { state: ColorState; family: StyleFamily }) {
   // Text being typed stays local until it is a complete color, then it becomes a recipe edit.
   const [typing, setTyping] = useState<Record<string, string>>({})
   const commit = (mode: RecipeColorMode, role: RecipeColorRole, value: string | undefined) => {
@@ -155,11 +156,14 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state }: Colo
 
   return (
     <div className="be-colors">
-      {colorRoles.map(({ role, label: roleLabel }) => {
+      {colorRoles.map(({ role, label: plainLabel }) => {
+        const roleLabel = role === 'border' ? designControlLabel('border', family) : plainLabel
+        const hint = role === 'border' && family === 'liquid-glass' ? glassControlHints.border : null
         const label = state === 'base' ? roleLabel : `${state === 'hover' ? 'Hover' : 'Pressed'} ${roleLabel.toLowerCase()}`
         return (
         <div className="be-color-role" role="group" aria-labelledby={`color-role-${role}`} key={role}>
           <span id={`color-role-${role}`} className="be-color-role-name">{label}</span>
+          {hint && <p id="color-role-border-hint" className="colorHint">{hint}</p>}
           <div className="be-color-chips">
             {colorModes.map(({ mode, label: modeLabel }) => {
               const field = colorKey(state, role)
@@ -259,14 +263,19 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
     document.getElementById(focusId)?.focus()
     onChange({ ...recipe, overrides }, `overrides.${key}`)
   }
-  const slider = ({ key, label, min, max, step, unit }: Slider) => {
+  const glass = family === 'liquid-glass'
+  const slider = ({ key, label: plain, min, max, step, unit }: Slider) => {
     const id = `button-${key}`, path = `/overrides/${key}`
+    const label = key === 'borderWidthPx' ? designControlLabel(key, family) : plain
+    const hint = glass && key === 'borderWidthPx' ? glassControlHints.borderWidthPx : null
+    const error = diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined
     return (
       <div key={key}>
         <SliderRow id={id} label={label} value={display(key, min, max)} min={min} max={max} step={step} unit={unit}
           edited={recipe.overrides[key] !== undefined} invalid={diagnostic?.path === path}
-          describedBy={diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined}
+          describedBy={[error, hint ? `${id}-glass-hint` : undefined].filter(Boolean).join(' ') || undefined}
           onChange={(raw) => update(key, raw, min, max, unit)} onReset={() => reset(key, `${id}-number`)} />
+        {hint && <p id={`${id}-glass-hint`} className="colorHint">{hint}</p>}
         <FieldError diagnostic={diagnostic} path={path} />
       </div>
     )
@@ -369,11 +378,11 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
             ? 'Hex such as #1d4ed8 or OKLCH such as oklch(55% 0.2 260). Empty fields use the preset.'
             : `Colors while the Button is ${colorState === 'hover' ? 'hovered' : 'pressed'}. Empty fields keep the style family's ${colorState} color.`}
         </p>
-        <ColorFields key={colorState} state={colorState} recipe={recipe} diagnostic={diagnostic} onChange={onChange} onDiagnostic={onDiagnostic} />
+        <ColorFields key={colorState} state={colorState} family={family} recipe={recipe} diagnostic={diagnostic} onChange={onChange} onDiagnostic={onDiagnostic} />
       </InspectorSection>
       <InspectorSection id="inspector-shape" title="Shape & depth">
         {sliders.map(slider)}
-        <span className="be-stack-label" aria-hidden="true">Shadow offset</span>
+        <span className="be-stack-label" aria-hidden="true">{glass ? 'Glass shadow offset' : 'Shadow offset'}</span>
         <div role="group" aria-label="Shadow offset" className="be-shadow-row">
           {shadows.map(({ key, axis, min, max }) => {
             const id = `button-${key}`, path = `/overrides/${key}`
@@ -381,12 +390,12 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
               <div className="be-shadow-field" key={key}>
                 <span aria-hidden="true">{axis}</span>
                 <input id={id} type="text" inputMode="decimal" maxLength={80} spellCheck={false}
-                  aria-label={`Shadow ${axis} offset`} value={display(key, min, max)} placeholder="Preset"
+                  aria-label={designControlLabel(key, family)} value={display(key, min, max)} placeholder="Preset"
                   aria-invalid={diagnostic?.path === path || undefined}
-                  aria-describedby={diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined}
+                  aria-describedby={[diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined, glass ? 'button-shadow-hint' : undefined].filter(Boolean).join(' ') || undefined}
                   onChange={(event) => update(key, event.target.value, min, max, 'px')} />
                 {recipe.overrides[key] !== undefined && (
-                  <button type="button" className="colorReset" aria-label={`Reset shadow ${axis.toLowerCase()} offset`}
+                  <button type="button" className="colorReset" aria-label={glass ? `Reset ${designControlLabel(key, family).toLowerCase()}` : `Reset shadow ${axis.toLowerCase()} offset`}
                     onClick={() => reset(key, id)}>
                     <RotateCcw aria-hidden="true" size={14} />
                   </button>
@@ -395,6 +404,7 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
             )
           })}
         </div>
+        {glass && <p id="button-shadow-hint" className="colorHint">{glassControlHints.shadowOffsetXPx}</p>}
         {shadows.map(({ key }) => <FieldError key={key} diagnostic={diagnostic} path={`/overrides/${key}`} />)}
       </InspectorSection>
     </div>
