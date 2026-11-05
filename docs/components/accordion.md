@@ -1,6 +1,6 @@
 # Accordion
 
-Accordion stacks headings that each show or hide a section of content, built on the reviewed Radix Accordion primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable. The template is a client component.
+Accordion stacks headings that each show or hide a section of content, built on the reviewed Radix Accordion primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 
@@ -57,3 +57,7 @@ The ombelle container clips its corners, so its focus ring is drawn inside the t
 Compilation emits `components/ui/accordion.tsx`, `components/ui/accordion.css` and `examples/accordion.tsx`. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-accordion 1.3.1 (MIT), clsx 2.1.1, tailwind-merge 3.7.0 and lucide-react 1.55.0.
 
 See [the batch 3 verification record](../evidence/next-components-batch-3.md).
+
+## Liquid glass
+
+In liquid glass, the accordion is one card glass container with hairlines between items. Triggers are `foreground` at 15px / 600; the open trigger mixes 12% `primary` into the card at the nested glass coverage, the same declared pair as a selected Table row, and its chevron turns. Content is `mutedForeground`. Reduced transparency and missing backdrop filters paint the surfaces opaque. In forced colours the open trigger keeps a `CanvasText` bar at its start edge beside the turned chevron, and its padding gives up the bar's width so the title stays in place. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.

@@ -1,6 +1,6 @@
 # Avatar
 
-Avatar shows a person's image, with their initials as a fallback while the image loads or when it fails, built on the reviewed Radix Avatar primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable. The template is a client component.
+Avatar shows a person's image, with their initials as a fallback while the image loads or when it fails, built on the reviewed Radix Avatar primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 
@@ -58,3 +58,7 @@ Online green follows each kit: `oklch(62% 0.15 150)`, `#15803d`, `#2f6b3a` or `#
 Compilation emits `components/ui/avatar.tsx`, `components/ui/avatar.css` and `examples/avatar.tsx`. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-avatar 1.3.1 (MIT), clsx 2.1.1 and tailwind-merge 3.7.0.
 
 See [the batch 2 verification record](../evidence/next-components-batch-2.md).
+
+## Liquid glass
+
+In liquid glass, avatars are card glass discs with `foreground` initials at weight 600, a white rim at 55%, an inner highlight and a soft drop shadow. The primary variant mixes `primary` into the card at the resting Button tint (18% light, 22% dark) with a `primary` rim at 55%; default and secondary are neutral card glass. Both initials pairs are declared in the contrast bound. The presence dot is `#16A34A` with a white ring. A group overlaps its avatars by 10px and layers a white 55% rim over each avatar's own highlight and shadow. Reduced transparency and missing backdrop filters paint the disc opaque; forced colours keep the filled and hollow status dot. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.

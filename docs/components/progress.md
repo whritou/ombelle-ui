@@ -1,6 +1,6 @@
 # Progress
 
-Progress shows how far a task has got, or that it is running when the amount is unknown, built on the reviewed Radix Progress primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable. The template is a client component.
+Progress shows how far a task has got, or that it is running when the amount is unknown, built on the reviewed Radix Progress primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 
@@ -43,3 +43,7 @@ The indeterminate segment sweeps along the track. Its duration is ten times the 
 Compilation emits `components/ui/progress.tsx`, `components/ui/progress.css` and `examples/progress.tsx`. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-progress 1.2.1 (MIT), clsx 2.1.1 and tailwind-merge 3.7.0.
 
 See [the batch 4 verification record](../evidence/next-components-batch-4.md).
+
+## Liquid glass
+
+In liquid glass, the track is a 10px pill of `card` with 10% `foreground` at half the glass opacity, with the glass edge and an inner shadow. The fill is solid `primary` with a gloss and a glow, complete is `#16A34A`, and indeterminate is a faded full fill with a sweep that stops under reduced motion. No text sits on the bar, so it adds no contrast pair. Reduced transparency and missing backdrop filters paint the track opaque; forced colours fill with `Highlight`. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.

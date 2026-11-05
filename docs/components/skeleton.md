@@ -1,6 +1,6 @@
 # Skeleton
 
-Skeleton is a decorative placeholder shaped like the content that is loading. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is unavailable. It has no client boundary and no dependency beyond the shared utility.
+Skeleton is a decorative placeholder shaped like the content that is loading. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
 
 ## Install and compose
 
@@ -47,3 +47,7 @@ The pulse lasts ten times the preset's motion duration, so reduced-motion preset
 Compilation emits `components/ui/skeleton.tsx`, `components/ui/skeleton.css` and `examples/skeleton.tsx`. Skeleton adds no dependency versions.
 
 See [the batch 4 verification record](../evidence/next-components-batch-4.md).
+
+## Liquid glass
+
+In liquid glass, skeleton shapes are frosted: a 10% `foreground` film with a white top sheen and a white rim at 30%, in the text, circle and block shapes. They carry no text, so they add no contrast pair. The pulse stops under reduced motion, and reduced transparency paints the film opaque over `card` without blur. Forced colours draw `Canvas` shapes with a `GrayText` edge. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.
