@@ -28,10 +28,8 @@ const channels = [
 
 // Surfaces the pointer halo can light. Kept in step with glassHaloSelector in @ombelle/catalog by its tests.
 export const haloSelector =
-  '[data-slot="card"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], ' +
-  '[data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="alert"], ' +
-  '[data-slot="table-container"], [data-slot="accordion"], [data-slot="button"], [data-slot="badge"], [data-slot="tabs-list"], ' +
-  '[data-slot="select-trigger"]'
+  '[data-slot="card"], [data-slot="tooltip-content"], [data-slot="alert"], [data-slot="button"], [data-slot="badge"], ' +
+  '[data-slot="tabs-list"], [data-slot="select-trigger"], [data-slot="recipe-button"], [data-slot="scoped-button"]'
 
 type PointerSurface = {
   style: { setProperty(name: string, value: string): void; removeProperty(name: string): void }
@@ -102,6 +100,21 @@ const rimMapUrl = (widthFraction: number) => {
   return canvas.toDataURL()
 }
 
+/** Refraction applies only when the preset leaves the original edge filter on, or sets a rim map and a strength. */
+export function refracts(material: { width: number; strength: number } | undefined) {
+  return material === undefined || (material.width > 0 && material.strength > 0)
+}
+
+/** The pointer listener runs only when the preset uses it: a halo or a shine that travels. */
+export function tracksPointer(halo: number, motion: number) {
+  return halo > 0 || motion > 0
+}
+
+const readNumber = (style: CSSStyleDeclaration, name: string) => {
+  const value = parseFloat(style.getPropertyValue(name))
+  return Number.isFinite(value) ? value : 0
+}
+
 const readMaterial = () => {
   const style = getComputedStyle(document.documentElement)
   const width = parseFloat(style.getPropertyValue('--glass-refraction-width'))
@@ -119,17 +132,31 @@ type UserAgentData = { brands?: readonly { brand: string }[] }
  */
 export function LiquidGlassFilter() {
   const [material, setMaterial] = React.useState<{ width: number; strength: number; url?: string }>()
+  const [chromium, setChromium] = React.useState(false)
   React.useEffect(() => {
+    const tokens = getComputedStyle(document.documentElement)
+    // Presets without a halo or travelling shine pay nothing per pointer move.
+    if (!tracksPointer(readNumber(tokens, '--glass-halo'), readNumber(tokens, '--glass-motion'))) return
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
     let current: PointerSurface | null = null
-    const follow = (event: PointerEvent) => {
-      const surface = glassSurfaceFor(event.target)
+    let frame = 0
+    let last: PointerEvent | undefined
+    // One write per animation frame: reading the box right after a write would force layout on every move.
+    const flush = () => {
+      frame = 0
+      if (!last) return
+      const surface = glassSurfaceFor(last.target)
       if (surface !== current) clearGlassPointer(current)
       current = surface
-      if (surface) applyGlassPointer(surface, event.clientX, event.clientY, motion.matches)
+      if (surface) applyGlassPointer(surface, last.clientX, last.clientY, motion.matches)
+    }
+    const follow = (event: PointerEvent) => {
+      last = event
+      if (!frame) frame = requestAnimationFrame(flush)
     }
     const release = (event: PointerEvent) => {
       if (event.type === 'pointerup' && event.pointerType === 'mouse') return
+      last = undefined
       clearGlassPointer(current)
       current = null
     }
@@ -145,6 +172,7 @@ export function LiquidGlassFilter() {
       document.removeEventListener('pointerup', release)
       document.removeEventListener('pointercancel', release)
       root.removeEventListener('pointerleave', release)
+      if (frame) cancelAnimationFrame(frame)
       clearGlassPointer(current)
     }
   }, [])
@@ -155,7 +183,7 @@ export function LiquidGlassFilter() {
     if (!data?.brands?.some((entry) => entry.brand === 'Chromium')) return
     // Glass surfaces read this inherited property in their backdrop-filter.
     const root = document.documentElement
-    root.style.setProperty('--glass-refraction', 'url(#ombelle-liquid-glass)')
+    setChromium(true)
     // The preset's tokens may change at runtime (a theme switch), so they are re-read when the root changes.
     const update = () => {
       const next = readMaterial()
@@ -173,6 +201,13 @@ export function LiquidGlassFilter() {
       root.style.removeProperty('--glass-refraction')
     }
   }, [])
+  // A rim map at width or strength 0 would be an empty filter, which some engines paint transparent.
+  React.useEffect(() => {
+    const root = document.documentElement
+    if (!chromium) return
+    if (refracts(material)) root.style.setProperty('--glass-refraction', 'url(#ombelle-liquid-glass)')
+    else root.style.removeProperty('--glass-refraction')
+  }, [chromium, material])
   return (
     <svg
       aria-hidden="true"

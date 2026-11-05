@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import postcss, { type Container, type Node } from 'postcss'
-import { getCatalog, glassControlSlots, glassHaloSelector, glassMarkSlots, glassSurfaceSlots } from '@ombelle/catalog'
+import { getCatalog, glassControlSlots, glassHaloSelector, glassHostedSlots, glassMarkSlots, glassSurfaceSlots } from '@ombelle/catalog'
 import {
   componentsWithStyleSupport,
   type ComponentId,
@@ -669,6 +669,8 @@ describe('liquid glass material tokens', () => {
       glassDepth: 0.5,
       glassMotion: 0.5,
       glassDispersion: 0.5,
+      // With the material on, the bound counts the pointer shine; the built-in then needs 0.79.
+      glassOpacity: 0.8,
     }
     const root = block(await tokensOf(withDesign(material)), ':root')
     expect(root).toContain('--glass-halo:0.5;')
@@ -742,6 +744,7 @@ describe('liquid glass shared material', () => {
       return found
     }
     for (const slot of [...glassSurfaceSlots, ...glassControlSlots]) {
+      if ((glassHostedSlots as readonly string[]).includes(slot)) continue
       expect(glassHaloSelector).toContain('[data-slot="' + slot + '"]')
       expect(rulesFor(slot).some((r) => r.selectors.some((s) => s.includes('::after')) && r.toString().includes('--glass-halo')), slot).toBe(true)
     }
@@ -751,9 +754,8 @@ describe('liquid glass shared material', () => {
     }
     const moves = (slot: string, state: string, prop: string) =>
       rulesFor(slot).some((r) => !inside(r, 'media') && r.selectors.some((s) => s.includes(state)) && r.nodes.some((n) => n.type === 'decl' && n.prop === prop && n.value.includes('--glass-motion')))
-    expect(moves('card', ':hover', 'translate')).toBe(true)
     for (const slot of ['button', 'select-trigger']) {
-      expect(moves(slot, ':active', 'scale'), slot).toBe(true)
+      expect(moves(slot, ':active', 'scale'), slot).toBe(false)
       expect(moves(slot, ':hover', 'translate'), slot).toBe(false)
     }
     root.walkDecls((decl) => {
@@ -767,5 +769,116 @@ describe('liquid glass shared material', () => {
       if (rule.selectors.some((s) => s.includes('::before') || s.includes('::after')) && rule.toString().includes('content: none')) pseudoOff++
     })
     expect(pseudoOff).toBeGreaterThan(0)
+  })
+})
+
+describe('liquid glass material review fixes', () => {
+  const familyRoot = async (preset: Preset = builtin()) => postcss.parse(artifact(await build(preset), 'styles/ui-style.css'))
+  const insideAt = (node: Node, name: string, params?: RegExp) => {
+    for (let parent = node.parent; parent && parent.type !== 'root'; parent = parent.parent)
+      if (parent.type === 'atrule' && (parent as postcss.AtRule).name === name && (!params || params.test((parent as postcss.AtRule).params))) return true
+    return false
+  }
+  const overflowSlots = ['dialog-content', 'popover-content', 'dropdown-menu-content', 'dropdown-menu-sub-content', 'select-content', 'table-container', 'accordion']
+
+  it('counts the pointer shine in the bound when a material setting is on', () => {
+    const plain = glassContrastReport(builtin())
+    const lit = glassContrastReport(withDesign({ glassHalo: 0.5 }))
+    const pick = (r: typeof plain) => r.pairs.find((p) => p.mode === 'dark' && p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined)!
+    expect(pick(lit).ratioOverWhite).toBeLessThan(pick(plain).ratioOverWhite)
+  })
+
+  it('writes the material flag only when a material setting is above 0', async () => {
+    const zeros = { glassHalo: 0, glassDepth: 0, glassMotion: 0, glassDispersion: 0, glassRefraction: 0, glassRefractionWidth: 0 }
+    const tokens = artifact(await build(withDesign(zeros), ['button']), 'styles/ui-tokens.css')
+    expect(tokens).not.toContain('--glass-material')
+    expect(glassContrastReport(withDesign(zeros))).toEqual(glassContrastReport(builtin()))
+  })
+
+  it('keeps relief light within 3px of the rim', async () => {
+    const root = await familyRoot()
+    let insets = 0
+    root.walkDecls((decl) => {
+      if (!decl.value.includes('--glass-depth') && !decl.value.includes('--glass-dispersion')) return
+      const shadows: string[] = []
+      let depth = 0
+      let start = 0
+      for (let i = 0; i < decl.value.length; i++) {
+        const c = decl.value[i]
+        if (c === '(') depth++
+        else if (c === ')') depth--
+        else if (c === ',' && depth === 0) {
+          shadows.push(decl.value.slice(start, i))
+          start = i + 1
+        }
+      }
+      shadows.push(decl.value.slice(start))
+      for (const shadow of shadows) {
+        const parts = shadow.trim().match(/^inset\s+(-?[\d.]+)(?:px)?\s+(-?[\d.]+)(?:px)?\s+([\d.]+)(?:px)?/)
+        if (!parts) continue
+        insets++
+        const [x, y, blur] = parts.slice(1).map(Number)
+        expect(Math.max(Math.abs(x!), Math.abs(y!)) + blur!, shadow).toBeLessThanOrEqual(4)
+      }
+    })
+    expect(insets).toBeGreaterThan(3)
+  })
+
+  it('puts the material on the host shadow of scrolling surfaces, with no pseudo layers', async () => {
+    const result = await build(builtin())
+    const root = postcss.root()
+    for (const sheet of result.artifacts.filter((a) => a.kind === 'style')) root.append(postcss.parse(sheet.content).nodes)
+    for (const slot of overflowSlots) {
+      expect(glassHaloSelector).not.toContain('[data-slot="' + slot + '"]')
+      let pseudo = false
+      let hosted = false
+      root.walkRules((rule) => {
+        for (const selector of rule.selectors.map(squash)) {
+          if (!selector.startsWith('[data-slot="' + slot + '"]')) continue
+          if (selector.includes('::before') || selector.includes('::after')) pseudo = true
+          if (rule.nodes.some((n) => n.type === 'decl' && n.prop === 'box-shadow' && n.value.includes('var(--glass-material-shadow'))) hosted = true
+        }
+      })
+      expect(pseudo, slot).toBe(false)
+      expect(hosted, slot).toBe(true)
+    }
+  })
+
+  it('drops the material layers under prefers-reduced-transparency', async () => {
+    const root = await familyRoot()
+    let off = 0
+    root.walkRules((rule) => {
+      if (!insideAt(rule, 'media', /prefers-reduced-transparency/)) return
+      if (rule.selectors.some((s) => s.includes('::before')) && rule.selectors.some((s) => s.includes('::after')) && rule.toString().includes('content: none')) off++
+    })
+    expect(off).toBe(1)
+  })
+
+  it('layers the layout rules below utilities and moves nothing on press', async () => {
+    const root = await familyRoot()
+    root.walkDecls((decl) => {
+      if (decl.prop === 'isolation' || (decl.prop === 'position' && decl.value === 'relative' && decl.parent && (decl.parent as postcss.Rule).selectors?.length > 3)) {
+        expect(insideAt(decl, 'layer', /^components$/), decl.parent!.toString().slice(0, 60)).toBe(true)
+      }
+      if (decl.prop === 'translate' && decl.value.includes('--glass-motion')) {
+        expect(insideAt(decl, 'layer', /^components$/)).toBe(true)
+        expect(insideAt(decl, 'media', /hover:\s*hover/)).toBe(true)
+      }
+      expect(decl.prop === 'scale' && decl.value.includes('--glass-motion'), decl.toString()).toBe(false)
+    })
+  })
+
+  it('lights recipe and scoped Buttons too', () => {
+    expect(glassHaloSelector).toContain('[data-slot="recipe-button"]')
+    expect(glassHaloSelector).toContain('[data-slot="scoped-button"]')
+  })
+
+  it('resets the pointer position on surfaces that are not lit', async () => {
+    const root = await familyRoot()
+    let resets = 0
+    root.walkRules((rule) => {
+      if (rule.selectors.some((s) => s.includes(':not([data-halo-active])')) && rule.toString().includes('--pointer-x')) resets++
+    })
+    expect(resets).toBe(1)
   })
 })

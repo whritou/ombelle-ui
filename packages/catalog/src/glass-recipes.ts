@@ -29,7 +29,24 @@ export const glassMarkSlots = [
   'skeleton',
 ] as const
 
-/** Every surface the pointer halo can light: LiquidGlassFilter finds the hovered one with closest(). */
-export const glassHaloSelector = [...glassSurfaceSlots, ...glassControlSlots]
+/** Surfaces that scroll or clip carry the material on their own box-shadow and have no halo. */
+export const glassHostedSlots = [
+  'dialog-content',
+  'popover-content',
+  'dropdown-menu-content',
+  'dropdown-menu-sub-content',
+  'select-content',
+  'table-container',
+  'accordion',
+] as const
+
+/** Every surface the pointer halo can light: LiquidGlassFilter finds the hovered one with closest(). Recipe and
+ * scoped Buttons carry the same material under their own slot names. */
+export const glassHaloSelector = [
+  ...glassSurfaceSlots.filter((slot) => !(glassHostedSlots as readonly string[]).includes(slot)),
+  ...glassControlSlots,
+  'recipe-button',
+  'scoped-button',
+]
   .map((slot) => '[data-slot="' + slot + '"]')
   .join(', ')

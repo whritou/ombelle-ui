@@ -167,11 +167,11 @@ The material is defined once in the family stylesheet and applied as three recip
 
 | Recipe | Layers | Slots |
 | --- | --- | --- |
-| Surface | Relief, rim dispersion, extra drop shadow, pointer shine and pointer halo; Card also lifts on hover and presses | Card, Dialog, Popover, Dropdown Menu and its submenu, Select content, Tooltip, Alert, the Table and Accordion containers |
-| Control | The same layers; Button and Select trigger press, nothing lifts | Button, Badge, Tabs list, Select trigger |
+| Surface | Relief, rim dispersion, extra drop shadow, pointer shine and pointer halo (not on surfaces that scroll); Card lifts on hover | Card, Dialog, Popover, Dropdown Menu and its submenu, Select content, Tooltip, Alert, the Table and Accordion containers |
+| Control | The same layers; nothing moves | Button, Badge, Tabs list, Select trigger |
 | Mark | The veil and rim their own sheets paint | Input, Textarea, Native Select, Checkbox, Switch, Radio Group items, Avatar, Progress, Skeleton |
 
-Fields are Marks because `<input>`, `<textarea>` and `<select>` render no pseudo-elements. Surfaces and Controls carry the material on `::before`, under their content, and the pointer halo on `::after`, a ring masked to the border. Overlays and text containers do not move on hover or press. The slot lists are exported from `@ombelle/catalog` as `glassSurfaceSlots`, `glassControlSlots`, `glassMarkSlots` and `glassHaloSelector`.
+Fields are Marks because `<input>`, `<textarea>` and `<select>` render no pseudo-elements. Card, Tooltip, Alert and the Controls carry the material on `::before`, under their content, and the pointer halo on `::after`, a ring masked to the border. Surfaces that scroll or clip (Dialog, Popover, Dropdown Menu, Select content, the Table and Accordion containers) carry it on their own `box-shadow` and have no halo or pointer shine, so nothing is clipped or scrolls away. Relief and rim dispersion stay within 3px of the rim, outside every text inset. The pointer shine sits under the content and enters the contrast bound. Only a Card moves, lifting on hover on devices that hover; nothing presses. The layout rules sit in `@layer components`, so utility classes such as `absolute` or `sticky` still apply. Under `prefers-reduced-transparency` the pseudo layers are removed. The slot lists are exported from `@ombelle/catalog` as `glassSurfaceSlots`, `glassControlSlots`, `glassMarkSlots` and `glassHaloSelector`.
 
 ## Glass cues
 
@@ -185,8 +185,8 @@ Inside the feature query, each translucent surface paints a white specular gradi
 - **The contrast bound still holds.** Displacement only moves backdrop pixels and samples inward, never outside the element. The channel split recombines values within the same range. The compression in the same `backdrop-filter` runs after them.
 - **Fallbacks are unchanged.** Reduced transparency, forced colours and nested glass remove the filter as before.
 - **Blur.** The built-in preset uses a 3px blur so the refraction stays visible. Higher `glassBlurPx` values soften it.
-- **Rim refraction.** When the preset sets `glassRefractionWidth`, the filter displaces only a band along the rim, from a rounded-rectangle distance map, with the strength from `glassRefraction`. The filter re-reads both tokens when `<html>` changes class or style, for example on a theme switch.
-- **Pointer halo.** The same component adds one pointer listener for the page. It writes `--pointer-x`, `--pointer-y` and `data-halo-active` on the glass Surface or Control under the pointer and clears them when the pointer leaves; touch shows the halo while pressed. Under reduced motion it writes no position, so the halo stays at the top edge and the shine does not travel. Without the component there is no halo and the shine stays at the top left.
+- **Rim refraction.** When the preset sets `glassRefractionWidth` and `glassRefraction` above 0, the filter displaces only a band along the rim; at 0 it removes `--glass-refraction` instead of referencing an empty filter, from a rounded-rectangle distance map, with the strength from `glassRefraction`. The filter re-reads both tokens when `<html>` changes class or style, for example on a theme switch.
+- **Pointer halo.** The same component adds one pointer listener for the page. It runs only when the preset sets a halo or motion, writes at most once per animation frame, and sets `--pointer-x`, `--pointer-y` and `data-halo-active` on the glass Surface or Control under the pointer (recipe Buttons included) and clears them when the pointer leaves; touch shows the halo while pressed. Under reduced motion it writes no position, so the halo stays at the top edge and the shine does not travel. Without the component there is no halo and the shine stays at the top left.
 
 ## Fallbacks
 

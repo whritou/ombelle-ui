@@ -52,6 +52,8 @@ const allowedMediaConditions = [
   '(prefers-reduced-motion: reduce)',
   '(forced-colors: active)',
   '(prefers-reduced-transparency: reduce)',
+  // The glass Card's hover lift, which only devices that hover get.
+  '(hover: hover)',
 ]
 // The single reviewed liquid-glass feature query; compared whitespace-normalized.
 const glassSupportsCondition =
@@ -119,7 +121,9 @@ export function compileScopedButtonStyles(input: {
     const params = normalizeConditionParams(rule.params)
     if (
       !(rule.name === 'media' && allowedMediaConditions.includes(params)) &&
-      !(rule.name === 'supports' && params === glassSupportsCondition)
+      !(rule.name === 'supports' && params === glassSupportsCondition) &&
+      // The glass material's layout rules sit below utilities.
+      !(rule.name === 'layer' && params === 'components')
     )
       throw new FoundationError(
         'INVALID_DATA',

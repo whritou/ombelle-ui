@@ -330,6 +330,29 @@ type Resolved = {
   backdrop: GlassBackdrop
 }
 
+/** The material settings: any of them above 0 turns on the shared material, including the pointer shine. */
+export const glassMaterialFields = [
+  'glassRefraction',
+  'glassRefractionWidth',
+  'glassHalo',
+  'glassDepth',
+  'glassMotion',
+  'glassDispersion',
+] as const
+
+export const glassMaterialActive = (design: Preset['design'] | undefined) =>
+  design?.transparency !== 'reduced' && glassMaterialFields.some((field) => (design?.[field] ?? 0) > 0)
+
+/** Share of the sheen the pointer shine adds on top of the sheen gradient, where it peaks. */
+export const glassPointerShine = 0.6
+
+// With the material on, a white radial shine at sheen x 0.6 sits over the sheen gradient. Both are white, so
+// the surface sees 1 - (1 - s)(1 - 0.6 s) of white where the shine peaks; the bound takes that worst case.
+const withPointerShine = (backdrop: GlassBackdrop, design: Preset['design'] | undefined): GlassBackdrop =>
+  glassMaterialActive(design)
+    ? { ...backdrop, sheen: round(1 - (1 - backdrop.sheen) * (1 - glassPointerShine * backdrop.sheen)) }
+    : backdrop
+
 function resolve(
   data: Preset,
   specs: readonly GlassPairSpec[],
@@ -337,7 +360,7 @@ function resolve(
   const out: Resolved[] = []
   for (const mode of ['light', 'dark'] as const) {
     const colors = data.modes[mode] as Record<string, string>
-    const backdrop = glassBackdrop(data.design, mode)
+    const backdrop = withPointerShine(glassBackdrop(data.design, mode), data.design)
     const reduced = data.design?.transparency === 'reduced'
     for (const { surface, text, tint, coverage } of specs) {
       const textColor = parseColor(colors[text])

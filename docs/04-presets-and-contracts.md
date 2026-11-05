@@ -37,10 +37,18 @@ Eight `design` fields apply only when `styleFamily` is `liquid-glass`; the other
 | `glassBlurPx` | Backdrop blur radius from 0 to 40 pixels; default 12. The built-in glass preset uses 8 |
 | `glassOpacity` | Surface opacity from 0.25 to 1: the share of the surface colour in an sRGB mix with the filtered backdrop; default 1. The built-in glass preset uses 0.57 |
 | `glassSaturation` | `saturate()` amount from 1 to 2; default 1.4. Built-in 2 |
-| `glassBackdropContrast` | `contrast()` amount from 0.3 to 1 that compresses the backdrop's channel range; default 1 (none). Built-in 0.45 |
+| `glassBackdropContrast` | `contrast()` amount from 0.3 to 1.6: below 1 it compresses the backdrop's channel range, above 1 it deepens it and adds a drop shadow of alpha `(c − 1) × 0.545`; default 1 (none). Built-in 0.45 |
 | `glassBackdropTone` | From 0 to 0.6: the backdrop's `brightness()` is `1 + tone` in light mode and `1 − tone` in dark mode, pushing it toward the mode's surfaces; default 0. Built-in 0.4 |
-| `glassSheen` | From 0 to 0.5: opacity of the white specular gradient at the top of each glass surface, scaled by 0.25 in dark mode; default 0. Built-in 0.25 |
+| `glassSheen` | From 0 to 1: opacity of the white specular gradient at the top of each glass surface, scaled by 0.25 in dark mode; default 0. Built-in 0.25 |
 | `glassRim` | From 0 to 1: strength of the white edge light; default 0.35. Built-in 0.6. Decorative only |
+| `glassRefraction` | Optional, 0 to 1: rim refraction strength (`--glass-refraction-strength` = value ÷ 6.9). Chromium only. Off under `reduced` |
+| `glassRefractionWidth` | Optional, 0 to 0.3: share of the surface the rim refraction reaches |
+| `glassHalo` | Optional, 0 to 1: rim light near the pointer, lit by `LiquidGlassFilter`. Off under `reduced` |
+| `glassDepth` | Optional, 0 to 1: relief within 3px of the rim and a layered drop shadow |
+| `glassMotion` | Optional, 0 to 1: how far the shine follows the pointer and a Card's hover lift |
+| `glassDispersion` | Optional, 0 to 1: colour fringe along the rim. Off under `reduced` |
+
+The six optional material fields write their tokens only when set, so a preset without them compiles to the same tokens as before. When any of them is above 0, the material adds a white shine of `sheen × 0.6` that the contrast bound counts: the bound uses `1 − (1 − s)(1 − 0.6 s)` as the sheen.
 
 For glass presets only, the compiler emits `--glass-blur`, `--glass-opacity`, `--glass-saturation`, `--glass-contrast`, `--glass-brightness`, `--glass-sheen`, `--glass-highlight`, `--glass-nested-opacity`, `--glass-primary-tint`, and `--glass-destructive-tint` in `ui-tokens.css`; brightness, sheen, highlight, nested opacity, and the two Button tint amounts also have dark values. With `reduced` the filter tokens are neutral, opacity is `1`, and sheen is `0`. Absent fields take the defaults above. Those defaults are neutral, so a preset written before these fields compiles to the same contrast bound as before.
 

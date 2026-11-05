@@ -3,6 +3,7 @@ import {
   glassBackdrop,
   glassContrastReport,
   glassDesignDefaults,
+  glassMaterialActive,
   glassTints,
 } from './glass-contrast.js'
 
@@ -118,6 +119,6 @@ function materialTokens(design: Preset['design'], opaque: boolean): Record<strin
   const drop = contrast === undefined ? 0 : Math.max(0, (contrast - 1) * 0.545)
   if (drop > 0) tokens['--glass-drop'] = round4(drop)
   // Gates the pointer shine: presets written before these settings already set a sheen.
-  if (Object.keys(tokens).length > 0) tokens['--glass-material'] = '1'
+  if (glassMaterialActive(design)) tokens['--glass-material'] = '1'
   return tokens
 }

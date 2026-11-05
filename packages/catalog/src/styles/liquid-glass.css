@@ -42,7 +42,7 @@
 [data-slot="input"]:disabled { border-style: dashed; }
 [data-slot="button"]:focus-visible, [data-slot="dialog-close"]:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
 [data-slot="dialog-overlay"] { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.45); }
-[data-slot="dialog-content"] { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; width: min(28rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 2rem; padding-inline-end: calc(var(--control-height) + 1.5rem); border: var(--border-width) solid var(--border); border-radius: calc(var(--radius) * 1.5); background: var(--popover); color: var(--popover-foreground); font-family: var(--font-family); box-shadow: inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), inset -1px -1px 0 color-mix(in srgb, var(--glass-highlight, white) 60%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--glass-highlight, white) 40%, transparent), inset 0 -1px 2px rgb(0 0 0 / 0.08), calc(var(--shadow-x) * 2) calc(var(--shadow-y) * 2) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 4) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -1.333) rgb(0 0 0 / 0.35); }
+[data-slot="dialog-content"] { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; width: min(28rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 2rem; padding-inline-end: calc(var(--control-height) + 1.5rem); border: var(--border-width) solid var(--border); border-radius: calc(var(--radius) * 1.5); background: var(--popover); color: var(--popover-foreground); font-family: var(--font-family); box-shadow: inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), inset -1px -1px 0 color-mix(in srgb, var(--glass-highlight, white) 60%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--glass-highlight, white) 40%, transparent), inset 0 -1px 2px rgb(0 0 0 / 0.08), calc(var(--shadow-x) * 2) calc(var(--shadow-y) * 2) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 4) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -1.333) rgb(0 0 0 / 0.35), var(--glass-material-shadow, 0 0 #0000); }
 [data-slot="dialog-content"] * { --glass-inner-filter: none; --glass-inner-opacity: var(--glass-nested-opacity); }
 [data-slot="dialog-header"] { display: flex; flex-direction: column; gap: 0.5rem; margin-block-end: 1rem; }
 [data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: 600; line-height: 1.3; }
@@ -109,44 +109,56 @@
   [data-slot="input"]:focus-visible { border-color: Highlight; }
   [data-slot="input"][aria-invalid="true"] { border-style: double; }
 }
-/* Shared material (Surface and Control recipes). Every layer is scaled by a material token that falls back
-   to 0, so a preset without the material settings renders as before. ::before sits under the content of an
-   isolated host and carries relief, rim dispersion, an extra drop shadow and a shine that follows the pointer
-   by Motion; ::after is the pointer halo, a ring masked to the border, lit where LiquidGlassFilter writes
-   --pointer-x / --pointer-y and data-halo-active. */
-[data-slot="card"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="alert"], [data-slot="table-container"], [data-slot="accordion"], [data-slot="button"], [data-slot="badge"], [data-slot="tabs-list"], [data-slot="select-trigger"] { isolation: isolate; }
-[data-slot="card"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="alert"], [data-slot="table-container"], [data-slot="accordion"], [data-slot="button"], [data-slot="badge"], [data-slot="tabs-list"], [data-slot="select-trigger"] { position: relative; }
-[data-slot="card"]::before, [data-slot="dialog-content"]::before, [data-slot="popover-content"]::before, [data-slot="dropdown-menu-content"]::before, [data-slot="dropdown-menu-sub-content"]::before, [data-slot="select-content"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="table-container"]::before, [data-slot="accordion"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
-  background: radial-gradient(ellipse 90% 66% at calc(23% + (var(--pointer-x, 23%) - 23%) * var(--glass-motion, 0)) calc(var(--pointer-y, 0%) * var(--glass-motion, 0)), rgb(255 255 255 / calc(var(--glass-sheen, 0) * 0.6 * var(--glass-material, 0))), transparent 73%);
-  box-shadow:
-    inset 3px 3px 7px rgb(255 255 255 / calc(var(--glass-depth, 0) * 0.85)),
-    inset -1px -2px 4px rgb(232 250 255 / calc(var(--glass-depth, 0) * 0.74)),
-    inset 0 -10px 19px rgb(204 244 255 / calc(var(--glass-depth, 0) * 0.74)),
-    inset 2px 0 3px -1px rgb(255 80 170 / calc(var(--glass-dispersion, 0) * 0.75)),
-    inset -2px 0 3px -1px rgb(60 200 255 / calc(var(--glass-dispersion, 0) * 0.75)),
-    inset 0 2px 3px -1px rgb(255 214 110 / calc(var(--glass-dispersion, 0) * 0.5)),
+/* Shared material (Surface and Control recipes). Every layer is scaled by a material token that falls back to 0,
+   so a preset without the material settings renders as before. Relief and rim dispersion stay within 3px of the
+   rim, outside every text inset; the drop shadows are outer. The pointer shine sits under the content and the
+   contrast bound counts it (glassPointerShine). Surfaces that scroll or clip carry the shadows on their own
+   box-shadow and have no pseudo layers, so nothing is clipped or scrolls away; the others draw relief and shine on
+   ::before and the pointer halo, a ring masked to the border, on ::after where LiquidGlassFilter sets
+   data-halo-active, --pointer-x and --pointer-y. Layout rules sit in @layer components so utilities win. */
+[data-slot="card"], [data-slot="tooltip-content"], [data-slot="alert"], [data-slot="button"], [data-slot="badge"], [data-slot="tabs-list"], [data-slot="select-trigger"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="table-container"], [data-slot="accordion"] {
+  --glass-material-shadow:
+    inset 1px 1px 2px rgb(255 255 255 / calc(var(--glass-depth, 0) * 0.85)),
+    inset -1px -1px 2px rgb(232 250 255 / calc(var(--glass-depth, 0) * 0.74)),
+    inset 0 -2px 2px rgb(204 244 255 / calc(var(--glass-depth, 0) * 0.74)),
+    inset 1px 0 2px rgb(255 80 170 / calc(var(--glass-dispersion, 0) * 0.75)),
+    inset -1px 0 2px rgb(60 200 255 / calc(var(--glass-dispersion, 0) * 0.75)),
+    inset 0 1px 2px rgb(255 214 110 / calc(var(--glass-dispersion, 0) * 0.5)),
     4px 7px 13px rgb(0 10 37 / calc(var(--glass-depth, 0) * 0.16)),
     12px 28px 44px rgb(0 10 37 / calc(var(--glass-depth, 0) * 0.38)),
     0 16px 38px rgb(0 10 37 / var(--glass-drop, 0));
 }
-[data-slot="card"][data-halo-active]::after, [data-slot="dialog-content"][data-halo-active]::after, [data-slot="popover-content"][data-halo-active]::after, [data-slot="dropdown-menu-content"][data-halo-active]::after, [data-slot="dropdown-menu-sub-content"][data-halo-active]::after, [data-slot="select-content"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="table-container"][data-halo-active]::after, [data-slot="accordion"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after {
+[data-slot="card"], [data-slot="tooltip-content"], [data-slot="alert"], [data-slot="button"], [data-slot="badge"], [data-slot="tabs-list"], [data-slot="select-trigger"]:not([data-halo-active]) { --pointer-x: 23%; --pointer-y: 0%; }
+[data-slot="card"], [data-slot="tooltip-content"], [data-slot="alert"] { --glass-halo-size: 120px; }
+@layer components {
+  [data-slot="card"], [data-slot="tooltip-content"], [data-slot="alert"], [data-slot="button"], [data-slot="badge"], [data-slot="tabs-list"], [data-slot="select-trigger"] { position: relative; isolation: isolate; }
+  [data-slot="card"] { transition: translate var(--motion-duration) ease; }
+  @media (hover: hover) {
+    [data-slot="card"]:hover { translate: 0 calc(-9px * var(--glass-motion, 0)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot="card"]:hover { translate: none; }
+  }
+}
+[data-slot="card"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(ellipse 90% 66% at calc(23% + (var(--pointer-x, 23%) - 23%) * var(--glass-motion, 0)) calc(var(--pointer-y, 0%) * var(--glass-motion, 0)), rgb(255 255 255 / calc(var(--glass-sheen, 0) * 0.6 * var(--glass-material, 0))), transparent 73%);
+  box-shadow: var(--glass-material-shadow);
+}
+[data-slot="card"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after {
   content: ""; position: absolute; inset: -2px; z-index: 2; padding: 3px; border-radius: inherit; pointer-events: none;
   background: radial-gradient(circle var(--glass-halo-size, 44px) at var(--pointer-x, 50%) var(--pointer-y, 0%), white, rgb(232 250 255 / 0.9) 26%, rgb(232 250 255 / 0.4) 62%, transparent);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
   opacity: var(--glass-halo, 0);
 }
-[data-slot="card"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="alert"], [data-slot="table-container"], [data-slot="accordion"] { --glass-halo-size: 120px; }
-[data-slot="card"] { transition: translate 170ms ease, scale 170ms ease; }
-[data-slot="card"]:hover { translate: 0 calc(-9px * var(--glass-motion, 0)); }
-[data-slot="card"]:active, [data-slot="button"]:not(:disabled):active, [data-slot="select-trigger"]:active { scale: calc(1 - 0.06 * var(--glass-motion, 0)); }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot="card"]:hover { translate: none; }
-  [data-slot="card"]:active, [data-slot="button"]:not(:disabled):active, [data-slot="select-trigger"]:active { scale: none; }
-  [data-slot="card"]::before, [data-slot="dialog-content"]::before, [data-slot="popover-content"]::before, [data-slot="dropdown-menu-content"]::before, [data-slot="dropdown-menu-sub-content"]::before, [data-slot="select-content"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="table-container"]::before, [data-slot="accordion"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before { background: radial-gradient(ellipse 90% 66% at 23% 0%, rgb(255 255 255 / calc(var(--glass-sheen, 0) * 0.6 * var(--glass-material, 0))), transparent 73%); }
-  [data-slot="card"][data-halo-active]::after, [data-slot="dialog-content"][data-halo-active]::after, [data-slot="popover-content"][data-halo-active]::after, [data-slot="dropdown-menu-content"][data-halo-active]::after, [data-slot="dropdown-menu-sub-content"][data-halo-active]::after, [data-slot="select-content"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="table-container"][data-halo-active]::after, [data-slot="accordion"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after { --pointer-x: 50%; --pointer-y: 0%; }
+  [data-slot="card"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before { background: radial-gradient(ellipse 90% 66% at 23% 0%, rgb(255 255 255 / calc(var(--glass-sheen, 0) * 0.6 * var(--glass-material, 0))), transparent 73%); }
+  [data-slot="card"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after { --pointer-x: 50%; --pointer-y: 0%; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  [data-slot="card"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before, [data-slot="card"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after { content: none; }
 }
 @media (forced-colors: active) {
-  [data-slot="card"]::before, [data-slot="dialog-content"]::before, [data-slot="popover-content"]::before, [data-slot="dropdown-menu-content"]::before, [data-slot="dropdown-menu-sub-content"]::before, [data-slot="select-content"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="table-container"]::before, [data-slot="accordion"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before, [data-slot="card"][data-halo-active]::after, [data-slot="dialog-content"][data-halo-active]::after, [data-slot="popover-content"][data-halo-active]::after, [data-slot="dropdown-menu-content"][data-halo-active]::after, [data-slot="dropdown-menu-sub-content"][data-halo-active]::after, [data-slot="select-content"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="table-container"][data-halo-active]::after, [data-slot="accordion"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after { content: none; }
+  [data-slot="card"]::before, [data-slot="tooltip-content"]::before, [data-slot="alert"]::before, [data-slot="button"]::before, [data-slot="badge"]::before, [data-slot="tabs-list"]::before, [data-slot="select-trigger"]::before, [data-slot="card"][data-halo-active]::after, [data-slot="tooltip-content"][data-halo-active]::after, [data-slot="alert"][data-halo-active]::after, [data-slot="button"][data-halo-active]::after, [data-slot="badge"][data-halo-active]::after, [data-slot="tabs-list"][data-halo-active]::after, [data-slot="select-trigger"][data-halo-active]::after { content: none; }
 }

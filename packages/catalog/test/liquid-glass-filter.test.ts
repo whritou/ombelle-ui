@@ -6,6 +6,8 @@ import {
   glassRimMapPixels,
   glassSurfaceFor,
   haloSelector,
+  refracts,
+  tracksPointer,
 } from '../src/templates/liquid-glass-filter.js'
 
 // A minimal element: the helpers only use these members.
@@ -66,5 +68,19 @@ describe('LiquidGlassFilter pointer', () => {
   })
   it('clearing a surface that has gone does not throw', () => {
     expect(() => clearGlassPointer(null)).not.toThrow()
+  })
+})
+
+describe('LiquidGlassFilter gating', () => {
+  it('refracts with the original edge filter or a rim map with a strength, never an empty filter', () => {
+    expect(refracts(undefined)).toBe(true)
+    expect(refracts({ width: 0.13, strength: 0.08 })).toBe(true)
+    expect(refracts({ width: 0, strength: 0.08 })).toBe(false)
+    expect(refracts({ width: 0.13, strength: 0 })).toBe(false)
+  })
+  it('tracks the pointer only for a halo or a travelling shine', () => {
+    expect(tracksPointer(0, 0)).toBe(false)
+    expect(tracksPointer(0.6, 0)).toBe(true)
+    expect(tracksPointer(0, 0.4)).toBe(true)
   })
 })
