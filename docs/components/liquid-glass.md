@@ -17,12 +17,12 @@ Experimental means the family compiles, installs, and renders through the same p
 | Alert | Experimental | Solid card surface with the glass highlight; no blur, so long messages stay crisp |
 | Dropdown Menu | Experimental | Translucent menu and submenu panels; drops the blur under reduced transparency |
 | Popover | Experimental | Translucent panel; nested glass inside it drops its own blur |
-| Input | Experimental | A field of card glass with the input-colour border. Value and placeholder are the card text pairs the contrast bound checks (`cardForeground` and `mutedForeground` on `card`). Nested in glass, such as in a Dialog, it drops its own blur and uses the nested opacity. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Input | Experimental | A field of `background` glass at 55% of the glass opacity, under a 60% sheen, with the input-colour border. The value is `foreground` and the placeholder `mutedForeground`; both are declared pairs at 55% coverage. Nested in glass, such as in a Dialog, it drops its own blur and uses the full nested opacity. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
 | Label, Textarea, Native Select, Checkbox, Switch, Select, Radio Group, Avatar, Separator, Table, Accordion, Progress, Skeleton | Unavailable | Refused with `STYLE_UNAVAILABLE` |
 
 One compatibility table in `packages/contracts` (23 components × 5 families, each `stable`, `experimental`, or `unavailable`) is read by the compiler, the CLI, the snapshot service, and both editors.
 
-The glass family stylesheet `ui-style.css` styles Input as glass inside `@supports (backdrop-filter)`, over an opaque card baseline that browsers without backdrop filters, reduced transparency and forced colours (`Field` and `FieldText`) fall back to. Focus colours the border and adds the 3px ring; disabled fields are dashed at 50% opacity; `aria-invalid` gives a 2px destructive border (double in forced colours). Screenshots of the gallery form and of a field nested in a Popover, light and dark: [images/glass-input](../evidence/images/glass-input/). Place forms on a glass or card surface: labels and messages beside a field are plain text and are not covered by the bound when they sit straight on the backdrop.
+The glass family stylesheet `ui-style.css` styles Input as glass inside `@supports (backdrop-filter)`, over an opaque `background` baseline that browsers without backdrop filters, reduced transparency and forced colours (`Field` and `FieldText`) fall back to. The field paints `color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent)`: 55% of the glass opacity at top level, and the full `--glass-nested-opacity` when nested in glass. Focus colours the border with `ring` and adds the 3px ring, offset by 2px; disabled fields are dashed at 50% opacity; `aria-invalid` gives a 2px destructive border (double in forced colours). Screenshots of the gallery form and of a field nested in a Popover, light and dark: [images/glass-input](../evidence/images/glass-input/). Place forms on a glass or card surface: labels and messages beside a field are plain text. Error messages in `destructive` are bounded on `card` glass; on the bare backdrop no text is covered by the bound.
 
 ## Preset fields
 
@@ -32,7 +32,7 @@ A glass preset sets `styleFamily: "liquid-glass"` and these design fields, which
 | --- | --- | --- | --- |
 | `design.transparency` | `auto` or `reduced` | `auto` | `reduced` makes every glass surface opaque, with no blur, filter, or sheen |
 | `design.glassBlurPx` | 0–40 | 3 | Backdrop blur radius; low values keep the refraction visible |
-| `design.glassOpacity` | 0.25–1 | 0.5 | Surface opacity: the share of the surface colour in the mix with the filtered backdrop |
+| `design.glassOpacity` | 0.25–1 | 0.57 | Surface opacity: the share of the surface colour in the mix with the filtered backdrop |
 | `design.glassSaturation` | 1–2 | 2 | Backdrop `saturate()`; keeps the colour of what is behind the glass |
 | `design.glassBackdropContrast` | 0.3–1 | 0.45 | Backdrop `contrast()`; compresses the backdrop's light range |
 | `design.glassBackdropTone` | 0–0.6 | 0.4 | Backdrop `brightness()` of `1 + tone` in light mode and `1 − tone` in dark mode |
@@ -61,7 +61,7 @@ Liquid glass Buttons were restyled to one ink in 0.5.0. Earlier installers ship 
 
 - Every label is `var(--foreground)` at weight 600, and the edge is `var(--border-width) solid var(--border)`.
 - Default is card glass tinted with `primary`, with a `primary` rim at 55% and a `primary` glow. Destructive is tinted with `destructive`, with a rim at 60%. The tint amounts are per-mode tokens: `--glass-primary-tint` (18% light, 22% dark) and `--glass-destructive-tint` (16% light, 20% dark). Hover adds 8 points.
-- Secondary is neutral card glass. Outline is `background` glass at 60% of the glass opacity with the `input` border. Ghost has no surface until hover. Link is `foreground` text with a 2px `primary` underline.
+- Secondary is neutral card glass. Outline is `background` glass at 60% of the glass opacity with the `input` border; nested in glass it paints at the full nested opacity. Ghost has no surface until hover. Link is `foreground` text with a 2px `primary` underline.
 - Sizes follow the kit: default is 40px high with 18px inline padding, `sm` 32px with 12px padding and 13px type, `lg` 48px with 22px padding and 15px type, and link has 6px padding.
 - Hover brightens the top highlight and lengthens the glow; secondary and outline gain a 6% `foreground` tint. Pressed moves 1px down with an inner shade. Focus is a 3px ring offset by 3px; disabled is 50% opacity.
 - Reduced transparency and missing backdrop filters paint the tinted card opaque, with no blur. Forced colours use `ButtonFace` with `ButtonText` text and border; the default variant gets a 3px border.
@@ -71,7 +71,7 @@ Screenshots of every variant and state, the other glass components on the kit ba
 
 ## Contrast bound
 
-A translucent surface shows its backdrop through it. Text on it cannot be checked against one fixed colour, so the compiler checks the two extremes instead. Before the surface is mixed in, the glass filter compresses the backdrop: `contrast()` and `brightness()` map every channel of every backdrop pixel into a range `[low, high]`, whatever its colour or saturation. The compiler mixes the surface colour with grey `low`, and with grey `high` under the full specular sheen, at the preset's opacity. Any real backdrop, blurred or not, produces a surface whose brightness lies between those two. The compiler requires 4.5:1 against both, and requires the text to be either lighter or darker than both. Together these keep 4.5:1 over any backdrop. Compressing the backdrop is what lets the glass be thin: the built-in palette needs opacity 0.5 instead of about 0.9 over raw black and white.
+A translucent surface shows its backdrop through it. Text on it cannot be checked against one fixed colour, so the compiler checks the two extremes instead. Before the surface is mixed in, the glass filter compresses the backdrop: `contrast()` and `brightness()` map every channel of every backdrop pixel into a range `[low, high]`, whatever its colour or saturation. The compiler mixes the surface colour with grey `low`, and with grey `high` under the full specular sheen, at the preset's opacity. Any real backdrop, blurred or not, produces a surface whose brightness lies between those two. The compiler requires 4.5:1 against both, and requires the text to be either lighter or darker than both. Together these keep 4.5:1 over any backdrop. Compressing the backdrop is what lets the glass be thin: the built-in palette needs opacity 0.57; over raw black and white the 55% field placeholder would never pass.
 
 The compiler also requires each pair to pass on its opaque surface, which every fallback uses, and computes `--glass-nested-opacity` for glass nested in a glass Card, Dialog, or Tooltip. Nested glass drops its own filter, so its coverage is bounded against raw black and white.
 
@@ -85,24 +85,30 @@ The bound is checked in light and dark mode for these pairs:
 | `popover` | `popoverForeground`, `mutedForeground` | Dialog content, Tooltip content |
 | `muted` | `foreground`, `mutedForeground` | Tabs list and inactive triggers |
 | `secondary` | `secondaryForeground` | Kept for custom presets; the one-ink secondary Button is card glass |
-| `background` | `foreground` | Kept for custom presets; the outline Button is `background` glass at 60% coverage, which this full-coverage pair does not bound |
+| `background` | `foreground` | Kept for custom presets |
 | `card` + `primary` 18% light / 22% dark | `foreground` | Default Button at rest |
 | `card` + `primary` 26% light / 30% dark | `foreground` | Default Button on hover |
 | `card` + `destructive` 16% light / 20% dark | `foreground` | Destructive Button at rest |
 | `card` + `destructive` 24% light / 28% dark | `foreground` | Destructive Button on hover |
 | `card` | `foreground` | Secondary Button at rest, ghost Button on hover |
 | `card` + `foreground` 6% | `foreground` | Secondary Button on hover |
-| `background` + `foreground` 6% | `foreground` | Outline Button on hover, at full coverage |
+| `background` at 60% coverage | `foreground` | Outline Button at rest |
+| `background` + `foreground` 6% at 60% coverage | `foreground` | Outline Button on hover |
+| `background` at 55% coverage | `foreground` | Input value |
+| `background` at 55% coverage | `mutedForeground` | Input placeholder |
+| `card` | `destructive` | Error messages beside a field, on the card that holds the form |
 
 A tinted surface is a token surface mixed with a tint token at a fixed percentage per mode, the same mix the CSS paints. It is checked like any other pair: over the darkest and brightest filtered backdrop, with and without sheen, and on its opaque fallback. The editor readout names the tint, for example "foreground on card + primary 26%".
 
+A pair with a coverage is painted at that fraction of the glass opacity, the same `calc(var(--glass-opacity) * coverage)` the CSS uses at top level. It is checked over the filtered backdrop at that coverage. Its opaque fallback and reduced transparency paint the whole token, so they ignore it. Nested in glass, the CSS uses the full `--glass-nested-opacity`, so the nested bound ignores coverage too. The editor readout names the coverage, for example "mutedForeground on background at 55% coverage".
+
 A failing pair stops compilation with `INVALID_DATA` at `/design/glassOpacity`. The message names the pair, the mode, and the smallest passing opacity, rounded up to 0.01. With `transparency: "reduced"` the surfaces are opaque, and the ordinary palette contrast rules apply to them at 4.5:1.
 
-The built-in glass preset uses opacity 0.5, the smallest value at which both built-in palettes pass. Light mode needs 0.5 and dark mode 0.32; nested glass uses 0.7 in light and 0.9 in dark. The tinted Button pairs raised the dark values from 0.28 and 0.79 in 0.5.0; the overall minimum is still 0.5. The neutral Button pairs (secondary, ghost hover and the 6% hover tint) do not change these values. To reach these, the built-in palette darkens light `mutedForeground` to `#334155` and lightens dark `mutedForeground` to `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
+The built-in glass preset uses opacity 0.57, the smallest value at which both built-in palettes pass. Light mode needs 0.57 and dark mode 0.4; nested glass uses 0.69 in light and 0.92 in dark. In 0.5.0 the field and error-message pairs raised these from 0.5 and 0.32 (nested 0.7 and 0.9): the Input placeholder at 55% coverage would need opacity 0.93 with the previous palette, and `destructive` on `card` 0.75. So the built-in palette moves to opacity 0.57, darkens light `mutedForeground` from `#334155` to `#1E293B`, and changes `destructive` from `#B91C1C` to `#7F1D1D` in light and from `#FCA5A5` to `#FECACA` in dark. Dark `mutedForeground` stays `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
 
 Solid fills keep their existing contrast pairs: both Badge variants and the active Tabs trigger.
 
-The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are the outline Button, whose `background` glass covers only 60% of the glass opacity, and ghost and link at rest, which sit straight on the backdrop. The outline pairs are checked at full coverage; bounding them at 60% needs a coverage field on contrast pairs, which is deferred to PR B.
+The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are ghost and link at rest, which sit straight on the backdrop. The outline Button is bounded at its 60% coverage.
 
 ## Declared backdrops
 

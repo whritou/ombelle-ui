@@ -647,7 +647,7 @@ for (const mode of modes) {
     const readout = page.locator('#glass-contrast-readout')
     await expect(readout).toHaveAttribute('role', 'status')
     for (const action of actions) await expect(action).toBeEnabled()
-    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.5')
+    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.57:')
 
     await page.getByLabel('Glass opacity', { exact: true }).fill('0.3')
     await expect(readout).toContainText('Contrast bound fails at glass opacity 0.3')
@@ -669,7 +669,7 @@ for (const mode of modes) {
       expect(pair).toMatch(/^(light|dark): \S+ on \S+, \d+\.\d{2}:1 (over the (darkest|brightest) filtered backdrop|on the opaque fallback surface)$/)
 
     await page.getByRole('button', { name: 'Reset glass opacity' }).click()
-    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.5')
+    await expect(readout).toContainText('Contrast bound passes at glass opacity 0.57:')
     await ready()
     for (const action of actions) await expect(action).toBeEnabled()
     await menuDownload('enabled')

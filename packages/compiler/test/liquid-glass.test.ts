@@ -26,6 +26,11 @@ const withDesign = (design: Partial<Preset['design']>): Preset => {
 const supportsCondition =
   '@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))'
 
+// The built-in preset is tuned so every declared pair passes at its minimum opacity.
+const TUNED_OPACITY = 0.57
+const TUNED_LIGHT_MUTED = '#1E293B'
+const TUNED_DESTRUCTIVE = { light: '#7F1D1D', dark: '#FECACA' }
+
 const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
@@ -334,12 +339,12 @@ describe('liquid-glass Button', () => {
     ] as const
     for (const tint of specs)
       expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint })
-    // Secondary rest and ghost hover are foreground on card glass; secondary and outline
-    // hover add a 6% foreground tint to the card and background glass.
+    // Secondary rest and ghost hover are foreground on card glass; secondary hover adds a 6%
+    // foreground tint to card glass, and outline hover to background glass at 60% coverage.
     const neutral = { color: 'foreground', light: 0.06, dark: 0.06 } as const
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground' })
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: neutral })
-    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', tint: neutral })
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', tint: neutral, coverage: 0.6 })
     // The tint fractions follow the emitted tokens.
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'primary', ...glassTints.primary } })
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'destructive', ...glassTints.destructive } })
@@ -348,8 +353,8 @@ describe('liquid-glass Button', () => {
     expect(tinted).toHaveLength(12)
     for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.passes).toBe(true)
-    expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.32 })
-    expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.9 })
+    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.4 })
+    expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
   })
 
   it('glass link keeps 6px inline padding at every size', async () => {
@@ -378,5 +383,59 @@ describe('liquid-glass Button', () => {
     expect(reduced.background).toBe('color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))')
     // The fallback without backdrop-filter is the same opaque tinted surface.
     expect(decls(css, '[data-slot="button"]').background).toBe(reduced.background)
+  })
+  it('fields are background glass with a declared placeholder pair', async () => {
+    const css = await styleOf()
+    const glassField = decls(css, '[data-slot="input"]', 'supports')
+    expect(glassField.background).toContain('color-mix(insrgb,whitecalc(var(--glass-sheen)*60%),transparent)')
+    expect(glassField.background).toContain(
+      'color-mix(insrgb,var(--background)calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.55))*100%),transparent)',
+    )
+    expect(glassField['backdrop-filter']).toContain('var(--glass-inner-filter,')
+    // The value is foreground on the field; the opaque baselines are the background token.
+    expect(decls(css, '[data-slot="input"]')).toMatchObject({
+      background: 'var(--background)',
+      color: 'var(--foreground)',
+      border: 'var(--border-width)solidvar(--input)',
+    })
+    expect(decls(css, '[data-slot="input"]', 'reduced').background).toBe('var(--background)')
+    expect(decls(css, '[data-slot="input"]', 'supports-forced').background).toBe('Field')
+    expect(decls(css, '[data-slot="input"]', 'forced').color).toBe('FieldText')
+    // States: ring and ring-coloured border on focus, 2px destructive when invalid, dashed at 50% when disabled.
+    expect(decls(css, '[data-slot="input"]:focus-visible')).toMatchObject({
+      'border-color': 'var(--ring)',
+      outline: '3pxsolidvar(--ring)',
+      'outline-offset': '2px',
+    })
+    expect(decls(css, '[data-slot="input"][aria-invalid="true"]')).toMatchObject({
+      'border-color': 'var(--destructive)',
+      'border-width': 'max(var(--border-width),2px)',
+    })
+    expect(decls(css, '[data-slot="input"]:disabled')).toMatchObject({ 'border-style': 'dashed', opacity: '0.5' })
+
+    // Field value and placeholder are bounded at the field's 55% coverage; error text on card glass.
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', coverage: 0.55 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'mutedForeground', coverage: 0.55 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'destructive' })
+    // Outline Buttons are background glass at 60%, at rest and with the 6% hover tint; nested, both paint at the full nested opacity.
+    expect(decls(css, '[data-slot="button"][data-variant="outline"]', 'supports').background).toContain(
+      'color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--background))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.6))*100%),transparent)',
+    )
+    const neutral = { color: 'foreground', light: 0.06, dark: 0.06 } as const
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', coverage: 0.6 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', tint: neutral, coverage: 0.6 })
+    expect(glassContrastPairs).not.toContainEqual({ surface: 'background', text: 'foreground', tint: neutral })
+
+    const preset = builtin()
+    const report = glassContrastReport(preset)
+    for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
+    expect(report.passes).toBe(true)
+    expect(preset.design.glassOpacity).toBe(report.minimumOpacity)
+    expect(preset.design.glassOpacity).toBe(TUNED_OPACITY)
+    expect(preset.modes.light.mutedForeground).toBe(TUNED_LIGHT_MUTED)
+    expect(preset.modes.light.destructive).toBe(TUNED_DESTRUCTIVE.light)
+    expect(preset.modes.dark.destructive).toBe(TUNED_DESTRUCTIVE.dark)
+    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.4 })
+    expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
   })
 })

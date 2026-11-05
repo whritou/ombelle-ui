@@ -66,12 +66,15 @@ export function GlassContrastReadout({
                   pair.mode +
                   pair.surface +
                   pair.text +
-                  (pair.tint ? pair.tint.color + pair.tint.amount : '')
+                  (pair.tint ? pair.tint.color + pair.tint.amount : '') +
+                  (pair.coverage ?? '')
                 }
               >
                 {pair.mode}: {pair.text} on {pair.surface}
                 {pair.tint &&
                   ` + ${pair.tint.color} ${Math.round(pair.tint.amount * 100)}%`}
+                {pair.coverage !== undefined &&
+                  ` at ${Math.round(pair.coverage * 100)}% coverage`}
                 , {ratio(value)}:1 {where}
               </li>
             )

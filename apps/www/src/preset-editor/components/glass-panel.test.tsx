@@ -33,7 +33,7 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
     'Liquid glass is experimental. Alert, Button, Badge, Card, Dialog, Dropdown Menu, Input, Popover, Tabs and Tooltip support it; the other components are unavailable.',
   )
   expect(html).toContain(`role="status" id="${glassReadoutId}"`)
-  expect(html).toContain('Contrast bound passes at glass opacity 0.5')
+  expect(html).toContain('Contrast bound passes at glass opacity 0.57:')
 })
 
 it('names failing pairs and the minimum opacity when the bound fails', () => {
@@ -42,7 +42,8 @@ it('names failing pairs and the minimum opacity when the bound fails', () => {
   )!
   const html = renderToStaticMarkup(<GlassPanel report={report} />)
   expect(html).toContain('Contrast bound fails at glass opacity 0.3')
-  expect(html).toMatch(/light: mutedForeground on card, \d\.\d\d:1 over the darkest filtered backdrop/)
+  // Pairs painted at part of the glass opacity name their coverage.
+  expect(html).toMatch(/light: mutedForeground on background at 55% coverage, \d\.\d\d:1 over the darkest filtered backdrop/)
   expect(html).toContain(`Minimum passing glass opacity: ${report.minimumOpacity}.`)
 })
 
