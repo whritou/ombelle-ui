@@ -1,7 +1,7 @@
 import { getCatalog, resolveRecipePreset } from '@ombelle/catalog'
 import {
   isStyleFamily, recipeColorRoles, recipeColorTokens, styleSupport, validateRecipe,
-  type Recipe, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole, type RecipeIcon, type StyleFamily,
+  type Recipe, type RecipeButtonVariant, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole, type RecipeIcon, type StyleFamily,
 } from '@ombelle/contracts'
 
 export type EditorDraft = { storageVersion: 1; recipe: Recipe }
@@ -92,8 +92,21 @@ export function recipeColor(recipe: Recipe, mode: RecipeColorMode, key: RecipeCo
   if (override !== undefined) return { value: override, overridden: true }
   const role = baseColorRole(key)
   if (role !== key) return { value: recipeColor(recipe, mode, role).value, overridden: false }
-  const token = recipeColorTokens[recipe.props.variant ?? 'default'][role]
-  return { value: resolveRecipePreset(recipe.presetRef).modes[mode][token] ?? '', overridden: false }
+  const variant = recipe.props.variant ?? 'default'
+  const preset = resolveRecipePreset(recipe.presetRef)
+  const token = preset.styleFamily === 'liquid-glass' ? glassColorToken(variant, role) : recipeColorTokens[variant][role]
+  return { value: preset.modes[mode][token] ?? '', overridden: false }
+}
+
+/**
+ * The token one-ink glass renders for a role: every label is `foreground`, secondary is
+ * card glass and outline is background glass. Default and destructive show their tint.
+ */
+function glassColorToken(variant: RecipeButtonVariant, role: RecipeColorRole) {
+  if (role === 'foreground') return 'foreground'
+  if (role === 'background' && variant === 'secondary') return 'card'
+  if (role === 'background' && variant === 'outline') return 'background'
+  return recipeColorTokens[variant][role]
 }
 
 /** Sets (or, with undefined, clears) one color override, dropping empty groups. */

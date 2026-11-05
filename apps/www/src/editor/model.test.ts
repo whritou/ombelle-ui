@@ -99,6 +99,18 @@ describe('Button editor model', () => {
     expect(recipeColor(colored, 'dark', 'foreground')).toEqual({ value: '#123456', overridden: true })
     expect(recipeColor(colored, 'light', 'foreground').overridden).toBe(false)
   })
+  it('reads glass fallbacks from what one-ink glass renders', () => {
+    const draft = createEditorDraft('liquid-glass')
+    const preset = getCatalog('0.1.0').presets['liquid-glass']
+    const as = (variant: 'default' | 'secondary' | 'destructive' | 'outline') => ({ ...draft.recipe, props: { ...draft.recipe.props, variant } })
+    for (const variant of ['default', 'secondary', 'destructive', 'outline'] as const)
+      for (const mode of ['light', 'dark'] as const)
+        expect(recipeColor(as(variant), mode, 'foreground'), variant + ' ' + mode).toEqual({ value: preset.modes[mode].foreground, overridden: false })
+    // Default and destructive keep their tint colour; secondary is card glass and outline background glass.
+    expect(recipeColor(as('default'), 'dark', 'background').value).toBe(preset.modes.dark.primary)
+    expect(recipeColor(as('secondary'), 'dark', 'background').value).toBe(preset.modes.dark.card)
+    expect(recipeColor(as('outline'), 'light', 'background').value).toBe(preset.modes.light.background)
+  })
 
   it('sets and clears color overrides without leaving empty groups', () => {
     const draft = createEditorDraft('neo-brutalism')

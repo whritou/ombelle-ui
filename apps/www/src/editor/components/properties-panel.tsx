@@ -384,7 +384,7 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
       <InspectorSection id="inspector-shape" title="Shape & depth">
         {sliders.map(slider)}
         <span className="be-stack-label" aria-hidden="true">{glass ? 'Glass shadow offset' : 'Shadow offset'}</span>
-        <div role="group" aria-label="Shadow offset" className="be-shadow-row">
+        <div role="group" aria-label={glass ? 'Glass shadow offset' : 'Shadow offset'} className="be-shadow-row">
           {shadows.map(({ key, axis, min, max }) => {
             const id = `button-${key}`, path = `/overrides/${key}`
             return (

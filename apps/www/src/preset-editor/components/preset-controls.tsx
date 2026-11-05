@@ -204,7 +204,7 @@ export function TokenList({
                           aria-describedby={errorPath === path ? 'preset-error' : glassEdge ? 'preset-glass-edge-hint' : undefined}
                           onChange={(e) => edit(path, e.target.value)}
                         />
-                        <ResetButton draft={draft} path={path} label={`Reset ${mode} ${human(key)}`} onReset={reset} />
+                        <ResetButton draft={draft} path={path} label={`Reset ${mode} ${glassEdge ? name.toLowerCase() : human(key)}`} onReset={reset} />
                       </div>
                     </div>
                   )
@@ -313,7 +313,7 @@ export function DesignControls({
         if (key === 'shadowOffsetYPx') return null
         if (key === 'shadowOffsetXPx')
           return (
-            <div key={key} role="group" aria-label="Shadow offset" className="preset-shadow-row">
+            <div key={key} role="group" aria-label={glass ? 'Glass shadow offset' : 'Shadow offset'} className="preset-shadow-row">
               {shadowField('shadowOffsetXPx', 'X')}
               {shadowField('shadowOffsetYPx', 'Y')}
               {glass && (
