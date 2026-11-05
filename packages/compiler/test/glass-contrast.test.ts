@@ -351,3 +351,54 @@ it('reduced transparency evaluates tinted surfaces opaque', () => {
     expect(Math.abs(p.ratioOverBlack - p.ratioOpaque)).toBeLessThan(1e-6)
   }
 })
+
+it('coverage scales the glass share of a pair but not its opaque fallback', () => {
+  const preset = withColors(
+    { card: '#ffffff', cardForeground: '#000000' },
+    { glassOpacity: 0.8 },
+  )
+  const full: GlassPairSpec = { surface: 'card', text: 'cardForeground' }
+  const partial: GlassPairSpec = { ...full, coverage: 0.5 }
+  const [covered] = glassContrastReportFor(preset, [partial]).pairs
+  const [equivalent] = glassContrastReportFor(
+    { ...preset, design: { ...preset.design, glassOpacity: 0.4 } },
+    [full],
+  ).pairs
+  expect(covered.coverage).toBe(0.5)
+  expect(covered.ratioOverBlack).toBeCloseTo(equivalent.ratioOverBlack, 10)
+  expect(covered.ratioOverWhite).toBeCloseTo(equivalent.ratioOverWhite, 10)
+  // The fallback paints the surface opaque, whatever its glass coverage.
+  expect(covered.ratioOpaque).toBeCloseTo(21, 6)
+  // An omitted coverage is full coverage, and the pair carries no coverage field.
+  const [plain] = glassContrastReportFor(preset, [full]).pairs
+  expect(plain).not.toHaveProperty('coverage')
+  expect(glassContrastReportFor(preset, [{ ...full, coverage: 1 }]).pairs[0].ratioOverBlack).toBe(plain.ratioOverBlack)
+})
+
+it('coverage raises the minimum and nested opacities', () => {
+  const preset = withColors(
+    { card: '#ffffff', cardForeground: '#000000' },
+    { glassOpacity: 0.5 },
+  )
+  const full = glassContrastReportFor(preset, [{ surface: 'card', text: 'cardForeground' }])
+  const half = glassContrastReportFor(preset, [{ surface: 'card', text: 'cardForeground', coverage: 0.5 }])
+  // At half coverage, opacity o paints like opacity o / 2 at full coverage.
+  expect(full.minimumOpacity).toBeLessThan(0.5)
+  expect(Math.abs(half.minimumOpacity! - full.minimumOpacity! * 2)).toBeLessThanOrEqual(0.0100001)
+  expect(half.nestedOpacity!.light).toBeGreaterThan(full.nestedOpacity!.light)
+})
+
+it('reduced transparency evaluates covered surfaces opaque', () => {
+  const preset = {
+    ...glass,
+    design: { ...glass.design, transparency: 'reduced' },
+  } as Preset
+  const report = glassContrastReportFor(preset, [
+    { surface: 'background', text: 'mutedForeground', coverage: 0.55 },
+  ])
+  expect(report.passes).toBe(true)
+  for (const p of report.pairs) {
+    expect(Math.abs(p.ratioOverBlack - p.ratioOpaque)).toBeLessThan(1e-6)
+    expect(Math.abs(p.ratioOverWhite - p.ratioOpaque)).toBeLessThan(1e-6)
+  }
+})

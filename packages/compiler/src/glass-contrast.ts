@@ -9,6 +9,8 @@ export type GlassContrastPair = {
   text: ColorKey
   /** The tint mixed into the surface, with the amount resolved for this mode. */
   tint?: { color: ColorKey; amount: number }
+  /** The share of the glass opacity the surface covers, when it is less than 1. */
+  coverage?: number
   /** Over the darkest backdrop the glass filter can produce, without sheen. */
   ratioOverBlack: number
   /** Over the brightest filtered backdrop, under the full sheen. */
@@ -23,6 +25,12 @@ export type GlassPairSpec = {
   surface: ColorKey
   text: ColorKey
   tint?: GlassTint
+  /**
+   * Fraction in 0..1 of the glass opacity the surface paints, as in
+   * calc(var(--glass-opacity) * 55%). Defaults to 1. The opaque fallback and
+   * reduced transparency paint the surface whole, so they ignore it.
+   */
+  coverage?: number
 }
 export type GlassBackdrop = {
   /** CSS saturate(), contrast() and brightness() amounts, in filter order. */
@@ -261,6 +269,9 @@ type Resolved = {
   surface: ColorKey
   text: ColorKey
   tint?: { color: ColorKey; amount: number }
+  /** The declared coverage, or 1 when the surface is opaque under reduced transparency. */
+  coverage: number
+  declaredCoverage?: number
   surfaceColor: Color
   textColor: Color
   textLum: number
@@ -275,7 +286,8 @@ function resolve(
   for (const mode of ['light', 'dark'] as const) {
     const colors = data.modes[mode] as Record<string, string>
     const backdrop = glassBackdrop(data.design, mode)
-    for (const { surface, text, tint } of specs) {
+    const reduced = data.design?.transparency === 'reduced'
+    for (const { surface, text, tint, coverage } of specs) {
       const textColor = parseColor(colors[text])
       const base = parseColor(colors[surface])
       const amount = tint?.[mode]
@@ -286,6 +298,8 @@ function resolve(
         ...(tint && amount !== undefined
           ? { tint: { color: tint.color, amount } }
           : {}),
+        coverage: reduced ? 1 : (coverage ?? 1),
+        ...(coverage !== undefined && coverage !== 1 ? { declaredCoverage: coverage } : {}),
         surfaceColor:
           tint && amount !== undefined
             ? mixTint(base, parseColor(colors[tint.color]), amount)
@@ -300,12 +314,12 @@ function resolve(
 }
 
 // A translucent surface token stacks with the glass opacity: color-mix keeps
-// the token's own alpha, so the effective coverage is opacity * alpha.
+// the token's own alpha, so the effective coverage is opacity * coverage * alpha.
 const filtered = (r: Resolved, opacity: number) =>
   bound(
     r.surfaceColor,
     r.textLum,
-    opacity * r.surfaceColor.alpha,
+    opacity * r.coverage * r.surfaceColor.alpha,
     r.backdrop.low,
     r.backdrop.high,
     r.backdrop.sheen,
@@ -314,7 +328,10 @@ const filtered = (r: Resolved, opacity: number) =>
 // Passing here at some coverage also passes the opaque fallback, whose painted
 // luminance lies inside the same interval.
 const raw = (r: Resolved, opacity: number) =>
-  bound(r.surfaceColor, r.textLum, opacity * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
+  bound(r.surfaceColor, r.textLum, opacity * r.coverage * r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
+// The opaque fallback paints the whole surface token, whatever its glass coverage.
+const opaqueFallback = (r: Resolved) =>
+  bound(r.surfaceColor, r.textLum, r.surfaceColor.alpha, 0, 1, r.backdrop.sheen)
 // Translucent text takes on the backdrop too; it is never bounded.
 const opaqueText = (r: Resolved) => r.textColor.alpha >= 1
 
@@ -350,12 +367,13 @@ export function glassContrastReportFor(
   const nestedOpacity = nested(resolved, opacity)
   const results = resolved.map((r): GlassContrastPair => {
     const glass = filtered(r, opacity)
-    const opaque = raw(r, 1)
+    const opaque = opaqueFallback(r)
     return {
       mode: r.mode,
       surface: r.surface,
       text: r.text,
       ...(r.tint ? { tint: r.tint } : {}),
+      ...(r.declaredCoverage !== undefined ? { coverage: r.declaredCoverage } : {}),
       ratioOverBlack: glass.overDarkest,
       ratioOverWhite: glass.overBrightest,
       ratioOpaque: Math.min(opaque.overDarkest, opaque.overBrightest),
