@@ -50,7 +50,10 @@ it('compiles Avatar in liquid glass: foreground initials on glass discs with a w
   expect(block('[data-slot="avatar-status"]')).toContain('background:#16a34a')
   expect(block('[data-slot="avatar-status"]')).toContain('border:2pxsolidrgb(255255255/85%)')
   // Groups overlap with a white rim instead of an opaque ring.
-  expect(block('[data-slot="avatar-group"]>*')).toContain('box-shadow:0002pxrgb(255255255/55%)')
+  // The rim is layered over the avatar's own highlight and drop shadow, which a plain box-shadow would replace.
+  expect(block(disc)).toContain('box-shadow:var(--glass-avatar-shadow)')
+  expect(block(disc)).toMatch(/--glass-avatar-shadow:inset01px0var\(--glass-highlight/)
+  expect(block('[data-slot="avatar-group"]>*')).toContain('box-shadow:0002pxrgb(255255255/55%),var(--glass-avatar-shadow,00transparent)')
   expect(block('[data-slot="avatar-group"]>*+*')).toContain('margin-inline-start:-0.625rem')
   expect(flat).not.toMatch(/outline:2pxsolidvar\(--card\)/)
   // Forced colours: presence fills when online and is hollow otherwise, so it never depends on colour.
