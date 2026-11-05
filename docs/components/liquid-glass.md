@@ -47,11 +47,13 @@ Three shared design controls that glass used to ignore now drive the glass edges
 
 | Control (preset and Button editor) | Glass label | Glass effect | Built-in value |
 | --- | --- | --- | --- |
-| Shadow X / Shadow Y (`shadowOffsetXPx`, `shadowOffsetYPx`) | Glass shadow X, Glass shadow Y | Offset of the glass drop shadow on Card, Dialog, Popover, Dropdown Menu and Tooltip, and of the Button glow. Blur and spread scale from Y, so 0 / 12 reproduces the kit's shadows | 0 / 12 |
+| Shadow X / Shadow Y (`shadowOffsetXPx`, `shadowOffsetYPx`) | Glass shadow X, Glass shadow Y | Offset of the glass drop shadow on Card, Dialog, Popover, Dropdown Menu and Tooltip, and of the Button glow. Blur and spread scale from the offset's magnitude, the larger of \|X\| and \|Y\|, so 0 / 12 reproduces the kit's shadows and negative or sideways offsets stay soft | 0 / 12 |
 | Border width (`borderWidthPx`) | Glass edge width | Thickness of every glass edge hairline | 1 |
 | Border colour (`border` token, light and dark) | Glass edge colour | Colour of every glass edge, used as is. Preset colours may carry alpha (`oklch(L C H / A)`), so the token sets the edge's strength. Input and the outline Button keep the `input` colour | light `oklch(20.8% 0.040 265.8 / 14%)`, dark `oklch(96.8% 0.007 247.9 / 14%)` |
 
-For glass drafts, both editors show the glass labels with a one-line hint each; for other families the labels stay "Shadow X offset", "Shadow Y offset", "Border width" and "Border". Edges carry no text, so an opaque `border` colour makes a solid edge and does not change the contrast bound. Negative offsets move the shadow toward the start and top. A Button recipe's shadow and border overrides apply to the scoped glass Button's glow and edge.
+For glass drafts, both editors show the glass labels with a one-line hint each; for other families the labels stay "Shadow X offset", "Shadow Y offset", "Border width" and "Border". Edges carry no text, so an opaque `border` colour makes a solid edge and does not change the contrast bound. Negative offsets move the shadow left and up. `box-shadow` offsets are physical, so they do not flip in right-to-left layouts. A Button recipe's shadow and border overrides apply to the scoped glass Button's glow and edge.
+
+Upgrading from 0.4.x: `init` saved the whole preset to `ui-preset.json`, including the 0.4.x glass values `border` `#CBD5E1` (light) / `#475569` (dark) and `shadowOffsetYPx: 0`. Running `theme add` with that file under 0.5.0 gives solid slate edges and no drop shadow or glow. To keep the kit look, set `border` to `oklch(20.8% 0.040 265.8 / 14%)` (light) and `oklch(96.8% 0.007 247.9 / 14%)` (dark) and `shadowOffsetYPx` to `12`, or start again from the built-in liquid glass preset.
 
 ## Button
 
@@ -63,7 +65,7 @@ Liquid glass Buttons were restyled to one ink in 0.5.0. Earlier installers ship 
 - Sizes follow the kit: default is 40px high with 18px inline padding, `sm` 32px with 12px padding and 13px type, `lg` 48px with 22px padding and 15px type, and link has 6px padding.
 - Hover brightens the top highlight and lengthens the glow; secondary and outline gain a 6% `foreground` tint. Pressed moves 1px down with an inner shade. Focus is a 3px ring offset by 3px; disabled is 50% opacity.
 - Reduced transparency and missing backdrop filters paint the tinted card opaque, with no blur. Forced colours use `ButtonFace` with `ButtonText` text and border; the default variant gets a 3px border.
-- Recipe colour overrides still apply on top: a `foreground` override paints the label of every variant, and a secondary `background` override replaces its card surface.
+- Recipe colour overrides still apply on top: a `foreground` override paints the label of every variant, and a secondary `background` override replaces its card surface. A mode without its own override keeps that mode's `foreground` label and, for secondary, its `card` surface.
 
 Screenshots of every variant and state, the other glass components on the kit backdrop and the Button editor with a glass recipe, light and dark: [glass foundation evidence](../evidence/glass-foundation.md).
 
@@ -83,21 +85,24 @@ The bound is checked in light and dark mode for these pairs:
 | `popover` | `popoverForeground`, `mutedForeground` | Dialog content, Tooltip content |
 | `muted` | `foreground`, `mutedForeground` | Tabs list and inactive triggers |
 | `secondary` | `secondaryForeground` | Kept for custom presets; the one-ink secondary Button is card glass |
-| `background` | `foreground` | Outline and ghost Button text |
+| `background` | `foreground` | Kept for custom presets; the outline Button is `background` glass at 60% coverage, which this full-coverage pair does not bound |
 | `card` + `primary` 18% light / 22% dark | `foreground` | Default Button at rest |
 | `card` + `primary` 26% light / 30% dark | `foreground` | Default Button on hover |
 | `card` + `destructive` 16% light / 20% dark | `foreground` | Destructive Button at rest |
 | `card` + `destructive` 24% light / 28% dark | `foreground` | Destructive Button on hover |
+| `card` | `foreground` | Secondary Button at rest, ghost Button on hover |
+| `card` + `foreground` 6% | `foreground` | Secondary Button on hover |
+| `background` + `foreground` 6% | `foreground` | Outline Button on hover, at full coverage |
 
 A tinted surface is a token surface mixed with a tint token at a fixed percentage per mode, the same mix the CSS paints. It is checked like any other pair: over the darkest and brightest filtered backdrop, with and without sheen, and on its opaque fallback. The editor readout names the tint, for example "foreground on card + primary 26%".
 
 A failing pair stops compilation with `INVALID_DATA` at `/design/glassOpacity`. The message names the pair, the mode, and the smallest passing opacity, rounded up to 0.01. With `transparency: "reduced"` the surfaces are opaque, and the ordinary palette contrast rules apply to them at 4.5:1.
 
-The built-in glass preset uses opacity 0.5, the smallest value at which both built-in palettes pass. Light mode needs 0.5 and dark mode 0.32; nested glass uses 0.7 in light and 0.9 in dark. The tinted Button pairs raised the dark values from 0.28 and 0.79 in 0.5.0; the overall minimum is still 0.5. To reach these, the built-in palette darkens light `mutedForeground` to `#334155` and lightens dark `mutedForeground` to `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
+The built-in glass preset uses opacity 0.5, the smallest value at which both built-in palettes pass. Light mode needs 0.5 and dark mode 0.32; nested glass uses 0.7 in light and 0.9 in dark. The tinted Button pairs raised the dark values from 0.28 and 0.79 in 0.5.0; the overall minimum is still 0.5. The neutral Button pairs (secondary, ghost hover and the 6% hover tint) do not change these values. To reach these, the built-in palette darkens light `mutedForeground` to `#334155` and lightens dark `mutedForeground` to `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
 
 Solid fills keep their existing contrast pairs: both Badge variants and the active Tabs trigger.
 
-The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is not a bounded pair. The Button surfaces outside the bound are the untinted secondary (`foreground` on `card`), outline at 60% of the glass opacity, the 6% `foreground` hover tint of secondary and outline, and ghost and link at rest, which sit straight on the backdrop.
+The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are the outline Button, whose `background` glass covers only 60% of the glass opacity, and ghost and link at rest, which sit straight on the backdrop. The outline pairs are checked at full coverage; bounding them at 60% needs a coverage field on contrast pairs, which is deferred to PR B.
 
 ## Declared backdrops
 

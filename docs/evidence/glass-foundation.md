@@ -23,7 +23,7 @@ Not run: `pnpm check:foundation`, the rest of `test:integration` (CI runs it), a
 
 ## Contrast bound, built-in preset
 
-`glassContrastReport` for `packages/catalog/src/presets/liquid-glass.json` passes. The minimum opacity is 0.5. The lowest passing opacity is 0.5 in light and 0.32 in dark, and `--glass-nested-opacity` is 0.7 in light and 0.9 in dark. The editor readout says "Lowest passing opacity: 0.5 light, 0.32 dark." The four tinted Button pairs raised the dark values from 0.28 and 0.79.
+`glassContrastReport` for `packages/catalog/src/presets/liquid-glass.json` passes. The minimum opacity is 0.5. The lowest passing opacity is 0.5 in light and 0.32 in dark, and `--glass-nested-opacity` is 0.7 in light and 0.9 in dark. The editor readout says "Lowest passing opacity: 0.5 light, 0.32 dark." The four tinted Button pairs raised the dark values from 0.28 and 0.79; the three neutral Button pairs declared after review leave them unchanged.
 
 The smallest ratio of each new pair, over the darkest filtered backdrop, the brightest, and the opaque fallback:
 
@@ -33,14 +33,17 @@ The smallest ratio of each new pair, over the darkest filtered backdrop, the bri
 | `foreground` on `card` + `primary` 26% / 30% (hover) | 6.32 | 4.79 |
 | `foreground` on `card` + `destructive` 16% / 20% (rest) | 6.93 | 5.39 |
 | `foreground` on `card` + `destructive` 24% / 28% (hover) | 6.31 | 4.97 |
+| `foreground` on `card` (secondary rest, ghost hover) | 8.29 | 6.62 |
+| `foreground` on `card` + `foreground` 6% (secondary hover) | 7.65 | 6.06 |
+| `foreground` on `background` + `foreground` 6% (outline hover, full coverage) | 7.10 | 7.10 |
 
 With `transparency: "reduced"` every pair passes on its opaque surface.
 
 ## What changed
 
-- **Repurposed controls.** Shadow X / Y set the glass drop shadow offset on Card, Dialog, Popover, Dropdown Menu and Tooltip and the Button glow, with blur and spread scaled from Y. Border width sets the thickness of every glass edge. The `border` colour is the edge colour; Input and the outline Button keep `input`. For glass drafts both editors label them "Glass shadow X", "Glass shadow Y", "Glass edge width" and "Glass edge colour", with a hint each.
+- **Repurposed controls.** Shadow X / Y set the glass drop shadow offset on Card, Dialog, Popover, Dropdown Menu and Tooltip and the Button glow, with blur and spread scaled from the offset's magnitude, the larger of |X| and |Y|. Border width sets the thickness of every glass edge. The `border` colour is the edge colour; Input and the outline Button keep `input`. For glass drafts both editors label them "Glass shadow X", "Glass shadow Y", "Glass edge width" and "Glass edge colour", with a hint each.
 - **Built-in preset.** Shadow 0 / 12, border width 1, `border` light `oklch(20.8% 0.040 265.8 / 14%)` and dark `oklch(96.8% 0.007 247.9 / 14%)`. These reproduce the previous fixed shadows and the 14% foreground hairline.
-- **Tinted-surface contrast model** in `packages/compiler/src/glass-contrast.ts`, with the four Button pairs above. The tint amounts are emitted as `--glass-primary-tint` and `--glass-destructive-tint` per mode.
+- **Tinted-surface contrast model** in `packages/compiler/src/glass-contrast.ts`, with the seven Button pairs above. The tint pairs derive their fractions from `glassTints`. The tint amounts are emitted as `--glass-primary-tint` and `--glass-destructive-tint` per mode.
 - **One-ink Button** in `packages/catalog/src/styles/liquid-glass.css` and the scoped recipe CSS.
 - **Kit backdrop** in `apps/preview/src/glass-backdrop.css`, behind the preset preview, the Button editor preview and the website playgrounds. The `glass-backdrop.webp` photo was removed.
 
@@ -50,10 +53,10 @@ With `transparency: "reduced"` every pair passes on its opaque surface.
 - `packages/compiler/test/liquid-glass.test.ts`:
   - edges use `var(--border-width) solid var(--border)`, and no stylesheet keeps the 14% mix;
   - drop shadows read `--shadow-x` / `--shadow-y`;
-  - an opaque `border` and negative offsets still compile;
-  - the Button is one ink, its pairs are declared and pass, and reduced transparency paints the tinted Button opaque.
-- `packages/compiler/test/recipe-styles.test.ts`: a glass recipe's shadow and border overrides reach the scoped Button glow and edge, and colour overrides apply over one ink.
-- `apps/www` editor tests: glass labels and hints for the repurposed controls, values kept across a flat round trip, and the Button editor's edge-colour hint.
+  - an opaque `border` and negative offsets still compile, and every glass drop shadow and the Button glow scale blur and spread from the offset magnitude;
+  - the Button is one ink, its seven pairs are declared and pass at the documented minimums, a link keeps 6px inline padding at `sm` and `lg`, and reduced transparency paints the tinted Button opaque.
+- `packages/compiler/test/recipe-styles.test.ts`: a glass recipe's shadow and border overrides reach the scoped Button glow and edge, and colour overrides apply over one ink; a one-mode `foreground` override leaves the other mode on `foreground`, and a one-mode secondary `background` override leaves the other mode on `card`.
+- `apps/www` editor tests: glass labels and hints for the repurposed controls, the glass edge-colour reset and shadow group labels, values kept across a flat round trip, the Button editor's edge-colour hint, and inherited glass colours that show what one ink renders.
 - `tests/integration/hosted-preview-build.test.ts`: the built preview CSS carries the kit gradient for both previews and no longer references the photo.
 - `tests/integration/www-route.test.ts`: only the Button page carries the 0.5.0 restyle note.
 - `packages/compiler/test/stable-families.test.ts` passes unchanged, so the stable families' bytes did not move.
