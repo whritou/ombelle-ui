@@ -36,8 +36,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the sixteen experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['alert', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'switch', 'tabs', 'textarea', 'tooltip'])
+  it('compiles the seventeen experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['alert', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'switch', 'tabs', 'textarea', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -52,6 +52,7 @@ describe('liquid-glass compile', () => {
       'components/ui/native-select.css',
       'components/ui/popover.css',
       'components/ui/radio-group.css',
+      'components/ui/select.css',
       'components/ui/switch.css',
       'components/ui/tabs.css',
       'components/ui/textarea.css',
@@ -77,7 +78,7 @@ describe('liquid-glass compile', () => {
   })
 
   it.each(unavailable)('refuses unavailable component %s', async (id) => {
-    expect(unavailable).toHaveLength(7)
+    expect(unavailable).toHaveLength(6)
     await expect(build(builtin(), ['button', id])).rejects.toMatchObject({
       code: 'STYLE_UNAVAILABLE',
       path: '/componentIds',
@@ -357,7 +358,7 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'destructive', ...glassTints.destructive } })
     const report = glassContrastReport(builtin())
     const tinted = report.pairs.filter((p) => p.tint !== undefined)
-    expect(tinted).toHaveLength(18)
+    expect(tinted).toHaveLength(20)
     for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.passes).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
@@ -465,7 +466,19 @@ describe('liquid-glass Button', () => {
     const selection = report.pairs.filter(
       (p) => p.tint?.color === 'primary' || p.coverage === 0.55,
     )
-    expect(selection).toHaveLength(14)
+    expect(selection).toHaveLength(16)
     for (const pair of selection) expect(pair.passes, JSON.stringify(pair)).toBe(true)
+  })
+  it('declares the Select highlighted option pair and it passes', () => {
+    const rest = { color: 'primary', light: 0.18, dark: 0.22 } as const
+    // Highlighted options tint the popover glass; the disabled option's mutedForeground is already declared on it.
+    expect(glassContrastPairs).toContainEqual({ surface: 'popover', text: 'foreground', tint: rest })
+    expect(glassContrastPairs).toContainEqual({ surface: 'popover', text: 'mutedForeground' })
+    const report = glassContrastReport(builtin())
+    const pairs = report.pairs.filter((p) => p.surface === 'popover' && p.tint?.color === 'primary')
+    expect(pairs).toHaveLength(2)
+    for (const pair of pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
+    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
+    expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
   })
 })

@@ -1,6 +1,6 @@
 # Liquid glass
 
-Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Alert, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Native Select, Radio Group, Switch, Tabs, Textarea, and Tooltip in light and dark modes. Select, Avatar, Separator, Table, Accordion, Progress, and Skeleton are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twenty-three components.
+Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Alert, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Native Select, Radio Group, Select, Switch, Tabs, Textarea, and Tooltip in light and dark modes. Avatar, Separator, Table, Accordion, Progress, and Skeleton are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twenty-three components.
 
 Experimental means the family compiles, installs, and renders through the same preset, compiler, CLI, preview, and editor pipeline as the stable families, and has automated evidence for one browser build. It does not meet the stable bar in [liquid glass constraints](../03-components-styles-accessibility.md#liquid-glass-constraints): mid-range mobile scrolling, human review, and the broader browser range are still owed. See [liquid glass evidence](../evidence/liquid-glass.md) for what was measured and what was not run.
 
@@ -21,7 +21,8 @@ Experimental means the family compiles, installs, and renders through the same p
 | Checkbox | Experimental | A field-glass box (`background` at 55%) with the input-colour border. Checked and indeterminate are `card` + `primary` at the resting tint + 8 points (26% light, 30% dark) at 80% coverage, with a `primary` rim at 60% and a glow; the mark stays `foreground`, a declared pair at 80%. Disabled is dashed at 50% opacity. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
 | Switch | Experimental | A `card` + `foreground` 10% track at 55% coverage; on is `card` + `primary` 26% / 30% at 85% with a `primary` rim at 60% and a glow. The thumb is solid white with a shadow, so its position reads over any backdrop and in forced colours. Disabled is dashed. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
 | Radio Group | Experimental | Field-glass radios; checked is `card` + `primary` 26% / 30% at 80% with a `primary` rim and a `foreground` dot. Option rows are the field surface (`background` at 55%), so the field pairs bound their label and description; a checked row is `card` + `primary` 18% / 22% at 78% with a `primary` rim at 55%; disabled rows are dashed. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
-| Select, Avatar, Separator, Table, Accordion, Progress, Skeleton | Unavailable | Refused with `STYLE_UNAVAILABLE` |
+| Select | Experimental | The trigger is the field surface; the list is the Dropdown Menu glass surface. A highlighted option is `popover` glass + `primary` 18% / 22%; the selected option is weight 600 with the check; a disabled option is `mutedForeground`. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Avatar, Separator, Table, Accordion, Progress, Skeleton | Unavailable | Refused with `STYLE_UNAVAILABLE` |
 
 One compatibility table in `packages/contracts` (23 components × 5 families, each `stable`, `experimental`, or `unavailable`) is read by the compiler, the CLI, the snapshot service, and both editors.
 
@@ -102,6 +103,7 @@ The bound is checked in light and dark mode for these pairs:
 | `card` | `destructive` | Error messages beside a field, on the card that holds the form |
 | `card` + `primary` 26% light / 30% dark at 80% coverage | `foreground` | Checkbox mark and radio dot when checked |
 | `card` + `primary` 18% light / 22% dark at 78% coverage | `foreground`, `mutedForeground` | Checked Radio Group option label and description |
+| `popover` + `primary` 18% light / 22% dark | `foreground` | Highlighted Select option |
 
 A tinted surface is a token surface mixed with a tint token at a fixed percentage per mode, the same mix the CSS paints. It is checked like any other pair: over the darkest and brightest filtered backdrop, with and without sheen, and on its opaque fallback. The editor readout names the tint, for example "foreground on card + primary 26%".
 

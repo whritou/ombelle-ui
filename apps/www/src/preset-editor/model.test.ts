@@ -243,6 +243,7 @@ it('requests only components the family supports', () => {
     'popover',
     'native-select',
     'radio-group',
+    'select',
     'switch',
     'tabs',
     'textarea',

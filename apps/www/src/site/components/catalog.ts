@@ -284,6 +284,7 @@ export function ProjectHelp() {
   },
   select: {
     name: 'Select',
+    glassMinimumCli: '0.5.0',
     description: 'A custom listbox for choosing one value, with typeahead and keyboard navigation.',
     api: 'Select, SelectTrigger (size), SelectValue, SelectContent (position), SelectGroup, SelectLabel, SelectItem (hint), SelectSeparator',
     states: 'Open, highlighted, selected, disabled, invalid, focus',

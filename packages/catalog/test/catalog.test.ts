@@ -551,6 +551,7 @@ describe('catalog contract', () => {
       'popover',
       'native-select',
       'radio-group',
+      'select',
       'switch',
       'tabs',
       'textarea',

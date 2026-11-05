@@ -63,8 +63,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the sixteen experimental ids', () => {
-  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'radio-group', 'switch', 'tabs', 'textarea', 'tooltip'])
+it('lists the seventeen experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'radio-group', 'select', 'switch', 'tabs', 'textarea', 'tooltip'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {

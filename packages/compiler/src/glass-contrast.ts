@@ -144,6 +144,8 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   // Unchecked rows are the field surface, bounded by the field pairs above.
   { surface: 'card', text: 'foreground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
   { surface: 'card', text: 'mutedForeground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
+  // Select highlighted option: foreground on the popover glass under the resting primary tint.
+  { surface: 'popover', text: 'foreground', tint: primaryRest },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))

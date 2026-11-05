@@ -24,6 +24,7 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'native-select',
   'popover',
   'radio-group',
+  'select',
   'switch',
   'tabs',
   'textarea',
