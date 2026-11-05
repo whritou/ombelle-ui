@@ -17,9 +17,10 @@ export const recipeIconDependency = {
   name: 'lucide-react',
   version: runtimeDependencies['lucide-react'],
 } as const
-/** The liquid glass starting points in picker order: Cristal (the editor's default) first, the family base last. */
+export const defaultGlassPresetId = 'builtin-liquid-glass-cristal'
+/** The liquid glass starting points in picker order: Cristal first, the original family base last. */
 export const startingPresetOrder = [
-  'builtin-liquid-glass-cristal',
+  defaultGlassPresetId,
   'builtin-liquid-glass-givre',
   'builtin-liquid-glass-fume',
   'builtin-liquid-glass-relief',

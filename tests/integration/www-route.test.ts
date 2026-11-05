@@ -60,32 +60,35 @@ it('renders the public landing page with editor links and the published installe
   expect(html).not.toContain('ombelle@alpha')
 })
 
-it('lists every component the published installer can add and renders a docs page for each', async () => {
+it('lists the catalog and offers install commands only for components the published installer accepts', async () => {
   const { default: ComponentsPage } = await import('../../apps/www/src/app/components/page.js')
   const { default: ComponentPage, generateStaticParams } = await import('../../apps/www/src/app/components/[id]/page.js')
   const { supportedComponentIds, styleSupport } = await import('@ombelle/contracts')
-  const { componentDocs, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
+  const { componentDocs, componentInstallable, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
   const { compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
-  // A component newer than the published installer stays off the site, so every command it shows works.
   const listed = componentDocs.map((doc) => doc.id)
-  for (const doc of componentDocs)
-    if (doc.minimumCli) expect(compareVersions(publishedInstaller.version, doc.minimumCli)).toBeGreaterThanOrEqual(0)
-  const hidden = supportedComponentIds.filter((id) => !listed.includes(id))
+  expect([...listed].sort()).toEqual([...supportedComponentIds].sort())
   const overview = renderToStaticMarkup(createElement(ComponentsPage))
   for (const id of listed) expect(overview).toContain(`href="/components/${id}"`)
-  for (const id of hidden) expect(overview).not.toContain(`href="/components/${id}"`)
   expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...listed].sort())
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
   // Input is experimental in the catalog's glass family but needs a newer installer than the published one.
   expect(styleSupport('input', 'liquid-glass')).toBe('experimental')
   expect(glassOnSite('input')).toBe(false)
-  for (const id of listed) {
+  for (const doc of componentDocs) {
+    const { id } = doc
     const html = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))
     expect(html.match(/<h1\b/g)).toHaveLength(1)
-    expect(html).toContain(`pnpm dlx ${runner} add ${id} --cwd APP --dry-run`)
-    // Glass status follows the contracts' table, limited to what the published installer accepts.
-    if (glassOnSite(id)) expect(html).toContain('Liquid glass: experimental.')
-    else expect(html).toContain(`add ${id} is refused with STYLE_UNAVAILABLE`)
+    const command = `pnpm dlx ${runner} add ${id} --cwd APP --dry-run`
+    if (componentInstallable(doc)) {
+      if (doc.minimumCli) expect(compareVersions(publishedInstaller.version, doc.minimumCli)).toBeGreaterThanOrEqual(0)
+      expect(html).toContain(command)
+      if (!glassOnSite(id)) expect(html).toContain(`add ${id} is refused with STYLE_UNAVAILABLE`)
+    } else {
+      expect(html).not.toContain(command)
+      expect(html).toContain(`Requires CLI ${doc.minimumCli}`)
+    }
+    expect(html).toContain('Liquid glass: experimental.')
     // Only Button has a per-component editor.
     expect(html.includes('href="/editor/component/button"')).toBe(id === 'button')
     // Glass Button previews show the 0.5.0 restyle, so the Button page says so.
@@ -93,17 +96,27 @@ it('lists every component the published installer can add and renders a docs pag
   }
 })
 
-it('form controls are claimed on the site only from 0.5.0', async () => {
+it('previews form controls in Liquid Glass while gating installation on 0.5.0', async () => {
   const { styleSupport } = await import('@ombelle/contracts')
   const { componentDoc, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
   const formControls = ['label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select'] as const
   expect(publishedInstaller.version).toBe('0.4.1')
   for (const id of formControls) {
     expect(styleSupport(id, 'liquid-glass'), id).toBe('experimental')
-    // Select and Radio Group need 0.5.0 for the component itself, so they are not listed yet.
     const doc = componentDoc(id)
-    if (doc) expect(doc.glassMinimumCli, id).toBe('0.5.0')
-    else expect(['select', 'radio-group']).toContain(id)
+    expect(doc?.glassMinimumCli ?? doc?.minimumCli, id).toBe('0.5.0')
     expect(glassOnSite(id), id).toBe(false)
   }
+})
+
+it('offers the lab glass presets in the component directory and previews Select ahead of the published installer', async () => {
+  const { default: ComponentsPage } = await import('../../apps/www/src/app/components/page.js')
+  const { default: ComponentPage } = await import('../../apps/www/src/app/components/[id]/page.js')
+  const overview = renderToStaticMarkup(createElement(ComponentsPage))
+  expect(overview).toContain('Glass preview preset')
+  for (const label of ['Cristal', 'Givré', 'Fumé', 'Relief']) expect(overview).toContain(label)
+  expect(overview).toContain('href="/components/select"')
+  const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
+  expect(select).toContain('Requires CLI 0.5.0')
+  expect(select).not.toContain('add select --cwd APP --dry-run')
 })

@@ -1,7 +1,7 @@
-import { getCatalog, resolveRecipePreset } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalog, resolveRecipePreset, type StartingPresetId } from '@ombelle/catalog'
 import {
-  isStyleFamily, recipeColorRoles, recipeColorTokens, styleSupport, validateRecipe,
-  type Recipe, type RecipeButtonVariant, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole, type RecipeIcon, type StyleFamily,
+  recipeColorRoles, recipeColorTokens, styleSupport, validateRecipe,
+  type Preset, type Recipe, type RecipeButtonVariant, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole, type RecipeIcon, type StyleFamily,
 } from '@ombelle/contracts'
 
 export type EditorDraft = { storageVersion: 1; recipe: Recipe }
@@ -13,14 +13,22 @@ export type EditorView = {
   forcedState: 'none' | 'hover' | 'focus' | 'active' | 'disabled' | 'loading'
 }
 
-function presetRefFor(family: StyleFamily): Recipe['presetRef'] {
-  const preset = getCatalog('0.1.0').presets[family]
+function presetRef(preset: Preset): Recipe['presetRef'] {
   return {
     id: preset.id,
     revision: preset.revision,
     catalogRelease: preset.catalogRelease,
     compilerVersion: preset.compilerVersion,
   }
+}
+
+function presetRefFor(family: StyleFamily): Recipe['presetRef'] {
+  const catalog = getCatalog('0.1.0')
+  return presetRef(family === 'liquid-glass' ? catalog.startingPresets[defaultGlassPresetId] : catalog.presets[family])
+}
+
+export function withGlassPreset(recipe: Recipe, id: StartingPresetId): Recipe {
+  return { ...recipe, presetRef: presetRef(getCatalog(recipe.presetRef.catalogRelease).startingPresets[id]) }
 }
 
 export function createEditorDraft(family: StyleFamily): EditorDraft {
@@ -54,7 +62,8 @@ export function changeDraftFamily(draft: EditorDraft, family: StyleFamily): Edit
     family === 'liquid-glass'
       ? draft.recipe.overrides
       : Object.fromEntries(Object.entries(draft.recipe.overrides).filter(([key]) => !key.startsWith('glass')))
-  return updateDraftRecipe(draft, { ...draft.recipe, presetRef: presetRefFor(family), overrides })
+  const ref = draftFamily(draft.recipe) === family ? draft.recipe.presetRef : presetRefFor(family)
+  return updateDraftRecipe(draft, { ...draft.recipe, presetRef: ref, overrides })
 }
 
 /**
@@ -73,11 +82,8 @@ export function resetDraftRecipe(draft: EditorDraft, start: Recipe): EditorDraft
   })
 }
 
-/** The style family of a pinned built-in preset reference (`builtin-<family>`). */
 export function draftFamily(recipe: Recipe): StyleFamily {
-  const family = recipe.presetRef.id.replace(/^builtin-/, '')
-  if (!isStyleFamily(family)) throw new Error('Unsupported preset reference')
-  return family
+  return resolveRecipePreset(recipe.presetRef).styleFamily
 }
 
 /** Syntax accepted for recipe colors; the contract also checks OKLCH bounds. */

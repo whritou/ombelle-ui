@@ -38,6 +38,7 @@ export function GetCodeDialog({
   code,
   scopes,
   commandFor,
+  installUnavailable,
   onRetry,
   announce,
   children,
@@ -48,6 +49,7 @@ export function GetCodeDialog({
   code: CodeStatus
   scopes: readonly CodeScope[]
   commandFor: (scope: string, manager: PackageManager) => string
+  installUnavailable?: string
   onRetry: () => void
   announce: (text: string) => void
   /** Secondary local exports, such as the JSON download. */
@@ -70,7 +72,7 @@ export function GetCodeDialog({
   }, [open, mounted])
   const active = scopes.find((item) => item.id === scope) ?? scopes[0]!
   const command =
-    code.status === 'ready' ? commandFor(active.id, manager) : null
+    code.status === 'ready' && !installUnavailable ? commandFor(active.id, manager) : null
   useEffect(() => setCopied(false), [command])
 
   function chooseManager(next: PackageManager) {
@@ -223,7 +225,7 @@ export function GetCodeDialog({
                 {command ??
                   (code.status === 'publishing'
                     ? `Generating your ${subject} code…`
-                    : 'No code yet.')}
+                    : installUnavailable ?? 'No code yet.')}
               </code>
             </pre>
           </div>

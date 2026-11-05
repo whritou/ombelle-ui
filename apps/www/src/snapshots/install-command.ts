@@ -1,4 +1,4 @@
-import { officialSnapshotOrigin, publicCliPackageName, styleFamilies, validateRecipeSnapshotSource, validateSnapshotSource, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, styleFamilies, validateRecipeSnapshotSource, validateSnapshotSource, type Recipe, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
 export const publishedInstaller = { packageName: publicCliPackageName, version: '0.4.1' } as const
@@ -8,6 +8,7 @@ export const ombelleMinimumCli = '0.4.0'
 
 /** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
 export const glassMaterialMinimumCli = '0.5.0'
+export const glassMaterialInstallNotice = `Installing this Liquid Glass material requires CLI ${glassMaterialMinimumCli}.`
 const materialFields = ['glassRefraction', 'glassRefractionWidth', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion']
 
 /**
@@ -26,6 +27,11 @@ export function materialInstallBlocked(
     (typeof d.glassSheen === 'number' && d.glassSheen > 0.5) ||
     (typeof d.glassBackdropContrast === 'number' && d.glassBackdropContrast > 1)
   return preset || Object.keys(input.overrides ?? {}).some((key) => key.startsWith('glass'))
+}
+
+export function recipeInstallBlocked(recipe: Pick<Recipe, 'overrides' | 'presetRef'>, installer: { version: string } = publishedInstaller): boolean {
+  return materialInstallBlocked(recipe, installer) ||
+    (compareVersions(installer.version, glassMaterialMinimumCli) < 0 && recipe.presetRef.id.startsWith('builtin-liquid-glass-'))
 }
 
 /** Compares two x.y.z versions numerically: negative, zero or positive. */

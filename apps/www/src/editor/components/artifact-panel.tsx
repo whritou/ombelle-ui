@@ -3,7 +3,7 @@ import type { Recipe, RecipeCompileResult } from '@ombelle/contracts'
 import { recipeFilename } from '../storage'
 import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
-import { glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller } from '../../snapshots/install-command'
+import { glassMaterialMinimumCli, installerRunner, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
 
 export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
 const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Recipe', 'Install']
@@ -21,8 +21,8 @@ export function artifactMeta(result: RecipeCompileResult): string[] {
 
 /** The Install tab: the command, or why there is none yet for glass material overrides. */
 export function installText(recipe: Recipe, installer: { version: string } = publishedInstaller): string {
-  if (materialInstallBlocked({ overrides: recipe.overrides }, installer))
-    return `# Glass material overrides need ${publishedInstaller.packageName} ${glassMaterialMinimumCli}, which is not published yet.
+  if (recipeInstallBlocked(recipe, installer))
+    return `# Glass material needs ${publishedInstaller.packageName} ${glassMaterialMinimumCli}, which is not published yet.
 # Download the recipe now; the install command appears here once ${glassMaterialMinimumCli} is released.`
   return `${installerRunner({ ...publishedInstaller, version: installer.version })} add --recipe ./${recipeFilename(recipe)} --cwd APP --yes`
 }

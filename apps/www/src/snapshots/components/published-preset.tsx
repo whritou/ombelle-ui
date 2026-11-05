@@ -6,7 +6,7 @@ import { PresetPreviewFrame } from '../../preset-editor/components/preset-previe
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
-import { publishedInstaller, snapshotInstallCommand } from '../install-command'
+import { glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, snapshotInstallCommand } from '../install-command'
 import {
   createSnapshotPreviewSession,
   selectSnapshotPreview,
@@ -199,6 +199,7 @@ export function PublishedPreset({
           {announcement}
         </p>
       </section>
+      {materialInstallBlocked({ design: snapshot.preset.design }) ? <p>{glassMaterialInstallNotice}</p> : (
       <section aria-labelledby="snapshot-install-heading">
         <h2 id="snapshot-install-heading">
           Install with the Ombelle CLI
@@ -239,6 +240,7 @@ export function PublishedPreset({
           </section>
         ))}
       </section>
+      )}
     </main>
   )
 }

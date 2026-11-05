@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import { useRecipePublication } from '../use-publication'
-import { codeInstallCommand } from '../../snapshots/install-command'
+import { codeInstallCommand, glassMaterialInstallNotice, recipeInstallBlocked } from '../../snapshots/install-command'
 import {
   GetCodeDialog,
   type CodeStatus,
@@ -76,6 +76,7 @@ export function RecipeGetCode({
         subject="recipe"
         code={code}
         scopes={scopes}
+        installUnavailable={recipe && recipeInstallBlocked(recipe.data) ? glassMaterialInstallNotice : undefined}
         announce={announce}
         onRetry={() => void publication.generate()}
         commandFor={(_scope, manager) =>

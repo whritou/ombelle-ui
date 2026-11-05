@@ -8,9 +8,11 @@ import {
 } from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
-import { RECIPE_COLOR_PATTERN, recipeColor, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
+import { RECIPE_COLOR_PATTERN, recipeColor, withGlassPreset, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
 import { designControlLabel, glassControlHints, glassDesignControls } from '../../preset-editor/model'
+import { GlassPresetSelect } from '../../site/glass-preset-select'
+import { glassPresetId } from '../../site/glass-presets'
 
 type Props = {
   recipe: Recipe
@@ -297,6 +299,9 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
     <div className="properties">
       <InspectorSection id="inspector-family" title="Style family">
         <FamilyPicker value={family} onChange={onFamily} />
+        {glass && <GlassPresetSelect label="Glass preset" value={glassPresetId(recipe.presetRef.id)} onChange={(id) => {
+          if (id) onChange(withGlassPreset(recipe, id), 'glass:preset')
+        }} />}
         <FieldError diagnostic={diagnostic} path="/presetRef" />
       </InspectorSection>
       <InspectorSection id="inspector-content" title="Content">

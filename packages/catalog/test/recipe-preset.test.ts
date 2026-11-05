@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import { resolveRecipePreset } from '../src/index.js'
 import example from '../../../examples/recipe.example.json'
-it.each(['flat', 'minimalist', 'neo-brutalism'])(
+it.each(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass', 'liquid-glass-cristal', 'liquid-glass-givre', 'liquid-glass-fume', 'liquid-glass-relief'])(
   'resolves exact built-in %s',
   (family) => {
     const ref = { ...example.presetRef, id: 'builtin-' + family }

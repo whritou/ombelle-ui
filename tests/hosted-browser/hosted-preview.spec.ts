@@ -26,6 +26,44 @@ test('serves both nested runtime entries, modules and compiler workers with usab
   }
 })
 
+test('previews the lab materials from the component directory and Button editor', async ({ page }) => {
+  await page.goto('/components')
+  await page.getByLabel('Glass preview preset').selectOption({ label: 'Relief' })
+  await page.locator('a[href="/components/card?glass=builtin-liquid-glass-relief"]').click()
+  const picker = page.getByLabel('Glass preview preset')
+  await expect(picker).toHaveValue('builtin-liquid-glass-relief')
+  const preview = page.frameLocator('iframe[title="Card preview"]')
+  await expect(preview.locator('html')).toHaveAttribute('data-glass-backdrop', 'peach')
+  const card = preview.locator('[data-slot="card"]').first()
+  await expect.poll(() => card.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-depth').trim())).toBe('0.9')
+  await picker.selectOption({ label: 'Givré' })
+  await expect.poll(() => card.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-blur').trim())).toBe('26px')
+
+  await page.goto('/editor/component/button')
+  await chooseFamily(page, 'liquid-glass')
+  const buttonPreset = page.getByLabel('Glass preset', { exact: true })
+  await expect(buttonPreset).toHaveValue('builtin-liquid-glass-cristal')
+  const recipe = page.frameLocator('iframe[title="Button recipe preview"]')
+  const button = recipe.locator('[data-slot="recipe-button"]')
+  await expect.poll(() => button.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-blur').trim())).toBe('9px')
+  await buttonPreset.selectOption({ label: 'Relief' })
+  await expect(recipe.locator('html')).toHaveAttribute('data-glass-backdrop', 'peach')
+  await expect.poll(() => button.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-depth').trim())).toBe('0.9')
+  await button.hover()
+  await expect(button).toHaveAttribute('data-halo-active', '')
+
+  await page.goto('/editor/preset?page=gallery')
+  await page.getByRole('group', { name: 'Style family', exact: true }).getByRole('button', { name: /^Liquid glass/ }).click()
+  await page.getByRole('button', { name: 'Confirm change' }).click()
+  await expect(page.getByRole('button', { name: 'Cristal (default)', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  const readout = page.locator('#glass-contrast-readout')
+  await expect(readout).toContainText('Contrast bound passes at glass opacity 0.4')
+  await page.getByRole('button', { name: 'Relief', exact: true }).click()
+  await expect(readout).toContainText('Contrast bound passes at glass opacity 0.39')
+  const gallery = page.frameLocator('iframe[title="Global preset gallery"]')
+  await expect(gallery.locator('html')).toHaveAttribute('data-glass-backdrop', 'peach')
+})
+
 test('compiles and renders all families and modes through hosted opaque iframes with no preview server', async ({ page }) => {
   const failures: string[] = []
   page.on('requestfailed', request => { if (request.url().includes('/ombelle-preview/')) failures.push(request.url()) })
