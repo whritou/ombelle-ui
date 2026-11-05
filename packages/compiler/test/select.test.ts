@@ -69,7 +69,22 @@ it('compiles Select in liquid glass: the field trigger, the Dropdown Menu surfac
   expect(block(content)).not.toContain('animation')
   // The highlighted option takes the primary tint; the selected one is bold with the check.
   expect(block(item + '[data-highlighted]')).toContain('--glass-tint:var(--primary);--glass-tint-amount:var(--glass-primary-tint)')
-  expect(flat).toContain('color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),transparent)')
+  // Option text is the foreground the highlight pairs declare, not the popover foreground it would inherit.
+  expect(block(item)).toContain('color:var(--foreground)')
+  expect(flat).not.toContain('color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),transparent)')
+  const tinted = 'color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--popover))'
+  // Without backdrop-filter the content is opaque popover, so the highlight is the opaque tinted mix.
+  expect(block(item + '[data-highlighted]')).toContain('background:' + tinted + ';')
+  // With backdrop-filter the highlight is its own glass surface, painted as the model's tinted popover pair: the tint
+  // mixed into the popover first, then the glass coverage (nested inside the content), under the content's sheen.
+  const supports = flat.split('@supports((backdrop-filter:blur(1px))or(-webkit-backdrop-filter:blur(1px))){')[1] ?? ''
+  expect(supports.split(item + '[data-highlighted]{')[1]?.split('}')[0]).toBe(
+    'background:linear-gradient(tobottom,color-mix(insrgb,whitecalc(var(--glass-sheen)*100%),transparent),transparent60%),' +
+      'color-mix(insrgb,' + tinted + 'calc(var(--glass-inner-opacity,var(--glass-opacity))*100%),transparent);',
+  )
+  // Reduced transparency paints the opaque tinted mix.
+  const reduced = supports.split('@media(prefers-reduced-transparency:reduce){')[1] ?? ''
+  expect(reduced.split(item + '[data-highlighted]{')[1]?.split('}')[0]).toBe('background:' + tinted + ';')
   expect(block(item + '[data-state="checked"]')).toContain('font-weight:600')
   expect(block('[data-slot="select-item-indicator"]')).toContain('position:absolute')
   expect(block(item + '[data-disabled]')).toContain('color:var(--muted-foreground)')

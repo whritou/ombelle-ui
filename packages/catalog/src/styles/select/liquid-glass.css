@@ -1,5 +1,6 @@
 /* liquid-glass Select (experimental): the field surface on the trigger, the Dropdown Menu glass surface on the list.
-   Highlighted options take a light primary tint; the selected option is bold with a check. */
+   Highlighted options take a light primary tint; the selected option is bold with a check. Option text is the
+   foreground the highlighted-option contrast pairs declare. */
 [data-slot='select-trigger'] {
   box-sizing: border-box;
   display: inline-flex;
@@ -101,13 +102,14 @@
   padding-inline: 0.625rem 2rem;
   border-radius: calc(var(--radius) - 2px);
   outline: none;
+  color: var(--foreground);
   cursor: pointer;
   user-select: none;
 }
 [data-slot='select-item'][data-highlighted] {
   --glass-tint: var(--primary);
   --glass-tint-amount: var(--glass-primary-tint);
-  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), transparent);
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--popover));
 }
 [data-slot='select-item'][data-state='checked'] {
   font-weight: 600;
@@ -180,6 +182,13 @@
       color-mix(in srgb, var(--popover) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
     -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
     backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  /* The highlight is its own glass surface, painted as the modelled pair: the tint mixed into the popover first, then
+     the glass coverage (the nested coverage inside the content, which holds over any pixel beneath), under the sheen. */
+  [data-slot='select-item'][data-highlighted] {
+    background:
+      linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%),
+      color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--popover)) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
   }
   @media (prefers-reduced-transparency: reduce) {
     [data-slot='select-trigger'] {
