@@ -3,7 +3,7 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { Check, Copy, FlaskConical, Minus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { styleSupport } from '@ombelle/contracts'
+import { glassOnSite } from '../components/catalog'
 import { ToggleGroup } from '../toggle-group'
 import { familyHeadings, siteStableFamilies } from '../families'
 
@@ -27,7 +27,8 @@ export function useCopy() {
 /* ------------------------------------------------------------------ */
 type Status = 'stable' | 'experimental' | 'unavailable'
 // Rows follow docs/03-components-styles-accessibility.md; the glass column
-// reads the contracts' compatibility table (docs/components/liquid-glass.md).
+// reads the contracts' compatibility table (docs/components/liquid-glass.md),
+// limited to what the published installer accepts.
 const COMPONENTS = [
   { id: 'button', name: 'Button', api: 'variant, size, loading', states: 'Default, hover, focus, pressed, disabled, loading', basis: '<button> or valid link' },
   { id: 'badge', name: 'Badge', api: 'variant, className', states: 'Default, destructive', basis: '<span>' },
@@ -80,7 +81,7 @@ export function MatrixSection() {
                     </button>
                   </th>
                   {siteStableFamilies.map(family => <td key={family} className="text-center"><StatusDot s="stable" /></td>)}
-                  <td className="text-center"><StatusDot s={styleSupport(row.id, 'liquid-glass')} /></td>
+                  <td className="text-center"><StatusDot s={glassOnSite(row.id) ? 'experimental' : 'unavailable'} /></td>
                 </tr>
               ))}
             </tbody>

@@ -1,4 +1,4 @@
-import { componentsWithStyleSupport, supportedComponentIds, type ComponentId } from '@ombelle/contracts'
+import { componentsWithStyleSupport, styleSupport, supportedComponentIds, type ComponentId } from '@ombelle/contracts'
 import { compareVersions, publishedInstaller } from '../../snapshots/install-command'
 
 export type ComponentDoc = {
@@ -13,6 +13,8 @@ export type ComponentDoc = {
   usage: string
   /** First published installer that can add this component; listed only from then on. */
   minimumCli?: string
+  /** First published installer that accepts this component in liquid glass, when later than the component itself. */
+  glassMinimumCli?: string
 }
 
 // Usage mirrors docs/components/*.md where a page exists; API and states follow
@@ -119,6 +121,7 @@ export function Confirm() {
   },
   input: {
     name: 'Input',
+    glassMinimumCli: '0.5.0',
     description: 'A native text input with invalid and disabled styling.',
     api: 'Native input props, aria-invalid, disabled',
     states: 'Empty, filled, focus, invalid, disabled',
@@ -528,6 +531,17 @@ export function componentDoc(id: string): ComponentDoc | undefined {
   return componentDocs.find((doc) => doc.id === id)
 }
 
+/**
+ * Whether the website may say an id is experimental in liquid glass: the
+ * support table says so and the published installer can add it there.
+ */
+export function glassOnSite(id: ComponentId): boolean {
+  if (styleSupport(id, 'liquid-glass') !== 'experimental') return false
+  const doc = componentDoc(id)
+  if (!doc) return false
+  return !doc.glassMinimumCli || compareVersions(publishedInstaller.version, doc.glassMinimumCli) >= 0
+}
+
 /** "A, B and C" for display copy. */
 function listNames(names: readonly string[]): string {
   return names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + ' and ' + names.at(-1)
@@ -539,10 +553,9 @@ function listNames(names: readonly string[]): string {
  * installer can add, for copy shown next to its commands.
  */
 export function glassComponentList({ published = false }: { published?: boolean } = {}): string {
-  const listed = new Set(componentDocs.map((doc) => doc.id))
   return listNames(
     componentsWithStyleSupport('liquid-glass', ['experimental'])
-      .filter((id) => !published || listed.has(id))
+      .filter((id) => !published || glassOnSite(id))
       .map((id) => docs[id].name),
   )
 }

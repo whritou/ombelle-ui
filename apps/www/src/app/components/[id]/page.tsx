@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, SlidersHorizontal } from 'lucide-react'
 import { getCatalog } from '@ombelle/catalog'
-import { styleSupport } from '@ombelle/contracts'
-import { componentDoc, componentDocs } from '../../../site/components/catalog'
+import { componentDoc, componentDocs, glassOnSite } from '../../../site/components/catalog'
 import { CodeBlock, CommandTabs } from '../../../site/components/code-block'
 import { ComponentPlayground } from '../../../site/components/playground'
 import { publishedInstaller } from '../../../snapshots/install-command'
@@ -31,7 +30,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
   if (!doc) notFound()
   const template = getCatalog('0.1.0').templates[doc.id]
   const index = componentDocs.indexOf(doc)
-  const glass = styleSupport(doc.id, 'liquid-glass')
+  // What the published installer does, so every claim on the page holds today.
+  const glass = glassOnSite(doc.id) ? 'experimental' : 'unavailable'
   const previous = componentDocs[index - 1], next = componentDocs[index + 1]
   return (
     <div className="grid gap-10 py-10 xl:grid-cols-[minmax(0,1fr)_11rem]">

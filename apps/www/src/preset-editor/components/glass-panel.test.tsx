@@ -25,7 +25,7 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
   for (const item of glassLimitations) expect(html).toContain(`<li>${item}</li>`)
   // The supported list follows the contracts' support table, so it names every glass component.
   expect(html).toContain(
-    'Liquid glass is experimental. Alert, Button, Badge, Card, Dialog, Dropdown Menu, Popover, Tabs and Tooltip support it; the other components are unavailable.',
+    'Liquid glass is experimental. Alert, Button, Badge, Card, Dialog, Dropdown Menu, Input, Popover, Tabs and Tooltip support it; the other components are unavailable.',
   )
   expect(html).toContain(`role="status" id="${glassReadoutId}"`)
   expect(html).toContain('Contrast bound passes at glass opacity 0.5')

@@ -237,6 +237,7 @@ it('requests only components the family supports', () => {
     'card',
     'dialog',
     'dropdown-menu',
+    'input',
     'popover',
     'tabs',
     'tooltip',

@@ -1,6 +1,6 @@
 # Liquid glass
 
-Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Button, Badge, Card, Dialog, Tabs, and Tooltip in light and dark modes. Input, Textarea, Label, Checkbox, Switch, and Native Select are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twelve components.
+Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Alert, Button, Badge, Card, Dialog, Dropdown Menu, Input, Popover, Tabs, and Tooltip in light and dark modes. Label, Textarea, Native Select, Checkbox, Switch, Select, Radio Group, Avatar, Separator, Table, Accordion, Progress, and Skeleton are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twenty-three components.
 
 Experimental means the family compiles, installs, and renders through the same preset, compiler, CLI, preview, and editor pipeline as the stable families, and has automated evidence for one browser build. It does not meet the stable bar in [liquid glass constraints](../03-components-styles-accessibility.md#liquid-glass-constraints): mid-range mobile scrolling, human review, and the broader browser range are still owed. See [liquid glass evidence](../evidence/liquid-glass.md) for what was measured and what was not run.
 
@@ -14,11 +14,15 @@ Experimental means the family compiles, installs, and renders through the same p
 | Dialog | Experimental | Translucent content; the overlay is a plain dim with no blur |
 | Tabs | Experimental | Translucent list; the active trigger is an opaque inner surface |
 | Tooltip | Experimental | Translucent content |
-| Input, Textarea, Label, Checkbox, Switch, Native Select | Unavailable | Refused with `STYLE_UNAVAILABLE` |
+| Alert | Experimental | Solid card surface with the glass highlight; no blur, so long messages stay crisp |
+| Dropdown Menu | Experimental | Translucent menu and submenu panels; drops the blur under reduced transparency |
+| Popover | Experimental | Translucent panel; nested glass inside it drops its own blur |
+| Input | Experimental | A field of card glass with the input-colour border. Value and placeholder are the card text pairs the contrast bound checks (`cardForeground` and `mutedForeground` on `card`). Nested in glass, such as in a Dialog, it drops its own blur and uses the nested opacity. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Label, Textarea, Native Select, Checkbox, Switch, Select, Radio Group, Avatar, Separator, Table, Accordion, Progress, Skeleton | Unavailable | Refused with `STYLE_UNAVAILABLE` |
 
-One compatibility table in `packages/contracts` (12 components × 4 families, each `stable`, `experimental`, or `unavailable`) is read by the compiler, the CLI, the snapshot service, and both editors.
+One compatibility table in `packages/contracts` (23 components × 5 families, each `stable`, `experimental`, or `unavailable`) is read by the compiler, the CLI, the snapshot service, and both editors.
 
-The glass family stylesheet `ui-style.css` contains Input selectors only as an opaque, non-glass baseline. They have no effect, because Input cannot be installed with a glass preset.
+The glass family stylesheet `ui-style.css` styles Input as glass inside `@supports (backdrop-filter)`, over an opaque card baseline that browsers without backdrop filters, reduced transparency and forced colours (`Field` and `FieldText`) fall back to. Focus colours the border and adds the 3px ring; disabled fields are dashed at 50% opacity; `aria-invalid` gives a 2px destructive border (double in forced colours). Screenshots of the gallery form and of a field nested in a Popover, light and dark: [images/glass-input](../evidence/images/glass-input/). Place forms on a glass or card surface: labels and messages beside a field are plain text and are not covered by the bound when they sit straight on a photo.
 
 ## Preset fields
 
@@ -71,7 +75,7 @@ The preview gallery renders each glass component over three declared backdrops, 
 - **gradient**: a three-stop orange, blue, and near-black linear gradient;
 - **pattern**: a 12px black and white checkerboard, a high-frequency worst case for blur.
 
-The six unavailable components appear in the gallery as labelled placeholders.
+The unavailable components appear in the gallery as labelled placeholders.
 
 ## Glass cues
 
@@ -109,18 +113,18 @@ The second notice appears only for `add`, the command that writes the filter com
 
 JSON output always includes a `notices` array. It is empty for stable families.
 
-Planning an unavailable component, such as `add input` in a glass project, fails with `STYLE_UNAVAILABLE` and exit code 2 before any write. The message names the component and lists the experimental glass components. An `init` whose component list includes an unavailable component fails as a whole. `--yes` does not bypass the refusal.
+Planning an unavailable component, such as `add label` in a glass project, fails with `STYLE_UNAVAILABLE` and exit code 2 before any write. The message names the component and lists the experimental glass components. An `init` whose component list includes an unavailable component fails as a whole. `--yes` does not bypass the refusal.
 
 `init` and `theme add` rewrite the tokens and `ui-style.css` only, so they check the managed components recorded in the project lock before any write. `--yes` bypasses neither refusal:
 
-- **Into glass.** If any installed component is unavailable for liquid glass, such as Input in a flat project, switching to a glass preset fails with `STYLE_UNAVAILABLE` at `/componentIds`. The message names the installed unavailable components and lists the experimental glass components. Keep a stable family, or remove those components first.
+- **Into glass.** If any installed component is unavailable for liquid glass, such as Label in a flat project, switching to a glass preset fails with `STYLE_UNAVAILABLE` at `/componentIds`. The message names the installed unavailable components and lists the experimental glass components. Keep a stable family, or remove those components first.
 - **Out of glass.** Badge, Card, Tabs, and Tooltip install colocated glass CSS, such as `components/ui/card.css`, that depends on the `--glass-*` tokens and the contrast bound. If any of them is installed in a glass project, switching to a stable preset fails with `STYLE_UNAVAILABLE` at `/styleFamily`, naming the components and their CSS files. Remove them, switch the theme, then add them again. Button and Dialog keep their glass rules in `ui-style.css`, which the switch rewrites, so they do not block it.
 
 Re-applying another glass preset to a glass project is not a family switch. It still runs the contrast bound.
 
 ## Editors
 
-- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency and the seven glass material controls appear only for glass, and the glass preview renders over a photo of a bluebell wood so the translucency shows. The preview follows the site's light or dark theme for every family; the Preview mode select still overrides it until the theme toggles again. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails. The readout states the minimum passing opacity, and the lowest passing opacity for each mode when the bound passes. The gallery shows the six unavailable components greyed out as "Unavailable in liquid glass".
+- **Preset editor** (`/editor/preset`): the family picker offers "Liquid glass (Experimental)". Transparency and the seven glass material controls appear only for glass, and the glass preview renders over a photo of a bluebell wood so the translucency shows. The preview follows the site's light or dark theme for every family; the Preview mode select still overrides it until the theme toggles again. A limitations panel is always visible for glass, together with a live contrast-bound readout. Export and publication are disabled while any pair fails. The readout states the minimum passing opacity, and the lowest passing opacity for each mode when the bound passes. The gallery shows the unavailable components greyed out as "Unavailable in liquid glass".
 - **Button editor** (`/editor/component/button`): accepts glass, and shows the experimental notice beside the export and CLI command.
 
 ## Limitations
@@ -129,7 +133,7 @@ Re-applying another glass preset to a glass project is not a family switch. It s
 - no human visual, keyboard or screen-reader review
 - the contrast guarantee covers the declared text pairs, not consumer content placed on glass
 - browsers outside the recorded run were not tested
-- form controls are unavailable
+- form controls other than Input are unavailable
 - the hosted snapshot service must be redeployed before glass codes resolve publicly
 
 Further known limitations:

@@ -1,13 +1,13 @@
 import type { GlassContrastReport } from '@ombelle/compiler'
 import { glassComponentList } from '../../site/components/catalog'
 
-// Verbatim from docs/superpowers/specs/2026-11-03-liquid-glass-design.md.
+// From docs/superpowers/specs/2026-11-03-liquid-glass-design.md, updated when Input became experimental.
 export const glassLimitations = [
   'no mid-range mobile scrolling measurement',
   'no human visual, keyboard or screen-reader review',
   'the contrast guarantee covers the declared text pairs, not consumer content placed on glass',
   'browsers outside the recorded run were not tested',
-  'form controls are unavailable',
+  'form controls other than Input are unavailable',
   'the hosted snapshot service must be redeployed before glass codes resolve publicly',
 ] as const
 export const glassReadoutId = 'glass-contrast-readout'

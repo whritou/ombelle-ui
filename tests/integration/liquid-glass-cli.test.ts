@@ -23,7 +23,7 @@ const mountNotice =
 const notice = (ids: readonly string[]) =>
   'liquid-glass is experimental for ' + ids.join(', ') +
   '; see docs/components/liquid-glass.md for limitations'
-const installOrder = ['button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover'] as const
+const installOrder = ['button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input'] as const
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
 const flatPath = path.resolve('packages/catalog/src/presets/flat.json')
 
@@ -62,8 +62,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the nine experimental ids', () => {
-  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'popover', 'tabs', 'tooltip'])
+it('lists the ten experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'input', 'popover', 'tabs', 'tooltip'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {
@@ -121,7 +121,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     // Unavailable component: refused, nothing written.
     const before = await snapshotTree(root)
     expect(Object.keys(before)).toContain(lockName)
-    const refused = await command(['add', 'input', '--yes'])
+    const refused = await command(['add', 'label', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
     expect(await snapshotTree(root)).toEqual(before)
@@ -136,7 +136,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const init = await command(['init', '--preset', glass, '--yes'])
     expect(init.code, init.output).toBe(0)
     const before = await snapshotTree(root)
-    const refused = await command(['add', 'button', 'input', '--yes'])
+    const refused = await command(['add', 'button', 'label', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error).code).toBe('STYLE_UNAVAILABLE')
     const after = await snapshotTree(root)
@@ -187,10 +187,10 @@ for (const manager of ['pnpm', 'npm'] as const) {
     roots.push(root)
     const { glass } = await writePresets()
     const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
-    await seed(root, ['input'])
+    await seed(root, ['label'])
     const init = await command(['init', '--preset', flatPath, '--yes'])
     expect(init.code, init.output).toBe(0)
-    const added = await command(['add', 'input', '--yes'])
+    const added = await command(['add', 'label', '--yes'])
     expect(added.code, added.output).toBe(0)
 
     const before = await snapshotTree(root)
@@ -198,7 +198,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(refused.code, refused.output).toBe(2)
     const error = jsonRecord(jsonRecord(refused.data).error)
     expect(error).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    expect(String(error.message)).toContain('input')
+    expect(String(error.message)).toContain('label')
     expect(String(error.message)).toContain(glassIds.join(', '))
     expect(await snapshotTree(root)).toEqual(before)
   }, 180000)

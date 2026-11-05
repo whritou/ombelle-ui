@@ -2,7 +2,8 @@
 
 import * as Tabs from '@radix-ui/react-tabs'
 import { useEffect, useMemo, useState } from 'react'
-import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
+import { type ComponentId, type StyleFamily } from '@ombelle/contracts'
+import { glassOnSite } from './catalog'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { createPresetDraft } from '../../preset-editor/model'
 import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
@@ -51,7 +52,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
   const draft = useMemo(() => createPresetDraft(family), [family])
   const compiled = usePresetCompiler(draft)
   const css = styles[family]
-  const glass = styleSupport(id, 'liquid-glass')
+  const glass = glassOnSite(id) ? 'experimental' : 'unavailable'
   const families = familyOptions.map(option =>
     option.value === 'liquid-glass'
       ? glass === 'unavailable'

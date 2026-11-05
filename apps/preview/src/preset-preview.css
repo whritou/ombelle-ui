@@ -11,11 +11,24 @@ html[data-backdrop='photo'] {
 html[data-backdrop='photo'] body {
   background: transparent;
 }
-html[data-backdrop='photo'] .preset-gallery :is(h1, h2, header p) {
+html[data-backdrop='photo'] .preset-gallery :is(h1, h2, header p, form label, form p) {
   text-shadow:
     0 0 2px var(--background),
     0 0 6px var(--background),
     0 0 14px var(--background);
+}
+
+/* Forms sit on a card surface over the photo, as an app would place them, so
+   labels and messages beside the glass fields stay readable. */
+html[data-backdrop='photo'] .preset-gallery .preset-form {
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  border-radius: calc(var(--radius) * 1.5);
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+  color: var(--card-foreground);
+}
+html[data-backdrop='photo'] .preset-gallery .preset-form :is(label, p) {
+  text-shadow: none;
 }
 
 /* Component pages focus one gallery section; centre it like a docs preview. */
