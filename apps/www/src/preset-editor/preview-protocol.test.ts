@@ -139,7 +139,7 @@ it('accepts a liquid-glass draft below the contrast bound so the editor can prev
   const withFilter = { ...manifest, sources: { ...manifest.sources, [filter.logicalPath]: { canonicalHash: filter.sha256, transformedHash: await sha256(filter.content) } } }
   expect(await verifyPresetRender(input, 0, withFilter)).toEqual(input)
 })
-it('accepts a liquid-glass render compiled from only its experimental components', async () => {
+it('accepts a liquid-glass render compiled from every component, all experimental in glass', async () => {
   const glass = await compile({
     preset: getCatalog('0.1.0').presets['liquid-glass'],
     componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
