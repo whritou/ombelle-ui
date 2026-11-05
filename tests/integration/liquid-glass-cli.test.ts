@@ -23,7 +23,10 @@ const mountNotice =
 const notice = (ids: readonly string[]) =>
   'liquid-glass is experimental for ' + ids.join(', ') +
   '; see docs/components/liquid-glass.md for limitations'
-const installOrder = ['button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input'] as const
+const installOrder = [
+  'button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input',
+  'label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select',
+] as const
 const installed = glassIds.filter((id) => (installOrder as readonly string[]).includes(id))
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
 const flatPath = path.resolve('packages/catalog/src/presets/flat.json')
@@ -107,7 +110,10 @@ for (const manager of ['pnpm', 'npm'] as const) {
       (a) => a.logicalPath.startsWith('components/ui/') && a.logicalPath.endsWith('.css'),
     )
     expect(css.map((a) => a.logicalPath).sort()).toEqual(
-      ['alert', 'badge', 'card', 'dropdown-menu', 'popover', 'tabs', 'tooltip'].map((id) => 'components/ui/' + id + '.css'),
+      [
+        'alert', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover',
+        'radio-group', 'select', 'switch', 'tabs', 'textarea', 'tooltip',
+      ].map((id) => 'components/ui/' + id + '.css'),
     )
     for (const artifact of canonical.artifacts.filter((a) => a.logicalPath.startsWith('components/ui/')))
       expect(await fs.readFile(path.join(root, 'src', artifact.logicalPath), 'utf8'), artifact.logicalPath)
@@ -122,7 +128,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     // Unavailable component: refused, nothing written.
     const before = await snapshotTree(root)
     expect(Object.keys(before)).toContain(lockName)
-    const refused = await command(['add', 'table', '--yes'])
+    const refused = await command(['add', 'avatar', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
     expect(await snapshotTree(root)).toEqual(before)
@@ -137,7 +143,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const init = await command(['init', '--preset', glass, '--yes'])
     expect(init.code, init.output).toBe(0)
     const before = await snapshotTree(root)
-    const refused = await command(['add', 'button', 'table', '--yes'])
+    const refused = await command(['add', 'button', 'avatar', '--yes'])
     expect(refused.code, refused.output).not.toBe(0)
     expect(jsonRecord(jsonRecord(refused.data).error).code).toBe('STYLE_UNAVAILABLE')
     const after = await snapshotTree(root)
@@ -188,10 +194,10 @@ for (const manager of ['pnpm', 'npm'] as const) {
     roots.push(root)
     const { glass } = await writePresets()
     const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
-    await seed(root, ['table'])
+    await seed(root, ['avatar'])
     const init = await command(['init', '--preset', flatPath, '--yes'])
     expect(init.code, init.output).toBe(0)
-    const added = await command(['add', 'table', '--yes'])
+    const added = await command(['add', 'avatar', '--yes'])
     expect(added.code, added.output).toBe(0)
 
     const before = await snapshotTree(root)
@@ -199,7 +205,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(refused.code, refused.output).toBe(2)
     const error = jsonRecord(jsonRecord(refused.data).error)
     expect(error).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    expect(String(error.message)).toContain('table')
+    expect(String(error.message)).toContain('avatar')
     expect(String(error.message)).toContain(glassIds.join(', '))
     expect(await snapshotTree(root)).toEqual(before)
   }, 180000)
