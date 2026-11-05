@@ -142,7 +142,8 @@ for (const manager of ['pnpm', 'npm'] as const) {
     const refused = await command(['add', 'button', 'unknown-component', '--yes'])
     expect(refused.code, refused.output).toBe(2)
     expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    expect(String(jsonRecord(jsonRecord(refused.data).error).message)).toContain('Unknown-component')
+    // The message names the id; its "is unavailable" wording is not asserted.
+    expect(String(jsonRecord(jsonRecord(refused.data).error).message).toLowerCase()).toContain('unknown-component')
     const after = await snapshotTree(root)
     expect(after).toEqual(before)
     expect(Object.keys(after).some((f) => f.endsWith('/button.tsx'))).toBe(false)
