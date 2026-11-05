@@ -7,6 +7,18 @@
 - Preview: the preset gallery shows the four components; the dashboard gains an alert and per-project action menus, settings gains a role Select and a digest Radio Group, and sign-in gains a status alert.
 - Website: the components pages list the new components only once the published installer can add them (`minimumCli` 0.5.0).
 
+## 0.4.1 — 5 November 2026
+
+- Publish `@ombelle-ui/cli@0.4.1` to npm; website commands use `npx @ombelle-ui/cli@0.4.1`.
+- Align all six workspace packages at 0.4.1. Schema 1.0 and catalog/compiler compatibility 0.1.0 are unchanged; the preset and recipe schemas gain optional fields. Installers at 0.4.0 or older reject presets that set `shadowColor` (the built-in ombelle and neo-brutalism presets now do) and recipes that use the new Button fields, so install those with 0.4.1.
+- Restyle every component of the flat, minimalist, neo-brutalism and ombelle families to match their UI kits: colours, borders, radii, shadows, weights, type and every state (hover, pressed, focus, disabled, invalid, checked, selected, open). Control and touch-target sizes are kept where a kit draws them smaller. Neo-brutalism disabled controls are dashed, flat and grey instead of faded; ombelle fields keep a 2.5px focus outline. Catalog 0.1.0 bytes change in place; see `intentionalChanges` in the compiler style baseline. Existing installs keep their files until `theme add` or `add` is rerun.
+- Add an optional `shadowColor` preset colour (`--shadow-color`); offset shadows fall back to `--border`. The built-in ombelle preset uses rose and neo-brutalism pink shadows in dark mode.
+- Map `system-sans` to the system-ui stack (`system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`) instead of Arial.
+- Badge gains `secondary`, `outline` and `accent` variants. Button gains a `loading` prop with a spinner and an `icon-sm` size, and keeps its `data-slot` inside asChild triggers such as Tooltip. Dialog gains `DialogHeader`, and its title and description render `data-slot`s. Button and Input templates no longer force disabled opacity; each family styles its own disabled state.
+- Button recipes gain optional padding and gap, typography (weight, size, letter spacing, uppercase), hover and pressed colours per mode, and a reviewed lucide-react icon (leading, trailing or icon-only). Recipes without them compile to the same bytes. Outline colour overrides map to `card`/`cardForeground` and apply in every family; loading recipes render a spinner.
+- Website: the preset editor previews pages in a browser frame on a dotted stage with corrected spacing, drops the Gallery page from the picker (`?page=gallery` still opens it), and fixes the review rail and its tooltips, the overflow menu position, the export drawer layout and the shared top bar size. The Button editor moves the family picker into the inspector, adds Reset recipe, Disabled and Loading preview states, forced states that use each family's real `:hover`, `:focus-visible` and `:active` rules, a code-editor output view, and the new recipe controls. Site controls gain hover, press and focus states.
+- Build: the website redeploys when the preview app changes.
+
 ## 0.4.0 — 4 November 2026
 
 - Publish `@ombelle-ui/cli@0.4.0` to npm; website commands use `npx @ombelle-ui/cli@0.4.0`, and the editors now offer the ombelle family.
