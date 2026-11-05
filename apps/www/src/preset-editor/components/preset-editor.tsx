@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Download, ShieldCheck } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
 import {
+  applyGlassTint,
+  applyStartingPreset,
   createPresetDraft,
   presetGlassReport,
   setPresetEdit,
@@ -51,6 +53,7 @@ import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { PresetGetCode } from '../../snapshots/components/preset-get-code'
 import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
+import { GlassStartingPoints } from './glass-starting-points'
 import {
   EditorTopBar,
   InspectorSection,
@@ -375,6 +378,15 @@ export default function PresetEditor() {
           <InspectorSection id="inspector-family" title="Style family">
             <FamilyPicker value={draft.family} onChange={family} />
           </InspectorSection>
+          {glass && (
+            <InspectorSection id="inspector-glass" title="Glass material" meta="Starting preset and tint">
+              <GlassStartingPoints
+                draft={draft}
+                onPick={(id) => commit(applyStartingPreset(draft, id), 'glass:preset')}
+                onTint={(tint) => commit(applyGlassTint(draft, tint), 'glass:tint')}
+              />
+            </InspectorSection>
+          )}
           <InspectorSection
             id="inspector-colors"
             title="Colors"
