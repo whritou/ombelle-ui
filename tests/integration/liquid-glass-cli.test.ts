@@ -26,6 +26,7 @@ const notice = (ids: readonly string[]) =>
 const installOrder = [
   'button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input',
   'label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select', 'avatar', 'separator',
+  'table', 'accordion',
 ] as const
 const installed = glassIds.filter((id) => (installOrder as readonly string[]).includes(id))
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
@@ -66,8 +67,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the nineteen experimental ids', () => {
-  expect(glassIds).toEqual(['alert', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'tabs', 'textarea', 'tooltip'])
+it('lists the twenty-one experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'tabs', 'table', 'textarea', 'tooltip'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {
@@ -111,8 +112,8 @@ for (const manager of ['pnpm', 'npm'] as const) {
     )
     expect(css.map((a) => a.logicalPath).sort()).toEqual(
       [
-        'alert', 'avatar', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover',
-        'radio-group', 'select', 'separator', 'switch', 'tabs', 'textarea', 'tooltip',
+        'accordion', 'alert', 'avatar', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover',
+        'radio-group', 'select', 'separator', 'switch', 'table', 'tabs', 'textarea', 'tooltip',
       ].map((id) => 'components/ui/' + id + '.css'),
     )
     for (const artifact of canonical.artifacts.filter((a) => a.logicalPath.startsWith('components/ui/')))

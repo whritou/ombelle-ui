@@ -447,6 +447,7 @@ export function SignInOptions() {
   },
   table: {
     name: 'Table',
+    glassMinimumCli: '0.5.0',
     description: 'A native data table with header, footer, caption, numeric columns and selected rows.',
     api: 'Table, TableCaption, TableHeader, TableBody, TableFooter, TableRow (selected), TableHead (numeric, scope), TableCell (numeric)',
     states: 'Default, selected row, numeric column',
@@ -473,6 +474,7 @@ export function Projects() {
   },
   accordion: {
     name: 'Accordion',
+    glassMinimumCli: '0.5.0',
     description: 'Stacked headings that each show or hide a section of content.',
     api: 'Accordion (type, collapsible, value), AccordionItem, AccordionTrigger (level), AccordionContent',
     states: 'Open, closed, disabled, focus',

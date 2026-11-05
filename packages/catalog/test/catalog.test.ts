@@ -543,6 +543,7 @@ describe('catalog contract', () => {
       ),
     ).toEqual([
       'alert',
+      'accordion',
       'badge',
       'avatar',
       'card',
@@ -556,6 +557,7 @@ describe('catalog contract', () => {
       'switch',
       'separator',
       'tabs',
+      'table',
       'textarea',
       'tooltip',
     ])

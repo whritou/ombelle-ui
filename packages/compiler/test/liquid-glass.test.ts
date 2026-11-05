@@ -36,13 +36,14 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the nineteen experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['alert', 'avatar', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'separator', 'switch', 'tabs', 'textarea', 'tooltip'])
+  it('compiles the twenty-one experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'avatar', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'separator', 'switch', 'table', 'tabs', 'textarea', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
       result.artifacts.filter((a) => a.kind === 'style').map((a) => a.logicalPath),
     ).toEqual([
+      'components/ui/accordion.css',
       'components/ui/alert.css',
       'components/ui/avatar.css',
       'components/ui/badge.css',
@@ -56,6 +57,7 @@ describe('liquid-glass compile', () => {
       'components/ui/select.css',
       'components/ui/separator.css',
       'components/ui/switch.css',
+      'components/ui/table.css',
       'components/ui/tabs.css',
       'components/ui/textarea.css',
       'components/ui/tooltip.css',
@@ -80,7 +82,7 @@ describe('liquid-glass compile', () => {
   })
 
   it.each(unavailable)('refuses unavailable component %s', async (id) => {
-    expect(unavailable).toHaveLength(4)
+    expect(unavailable).toHaveLength(2)
     await expect(build(builtin(), ['button', id])).rejects.toMatchObject({
       code: 'STYLE_UNAVAILABLE',
       path: '/componentIds',
@@ -387,7 +389,7 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'destructive', ...glassTints.destructive } })
     const report = glassContrastReport(builtin())
     const tinted = report.pairs.filter((p) => p.tint !== undefined)
-    expect(tinted).toHaveLength(22)
+    expect(tinted).toHaveLength(24)
     for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.passes).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
@@ -495,7 +497,8 @@ describe('liquid-glass Button', () => {
     const selection = report.pairs.filter(
       (p) => p.tint?.color === 'primary' || p.coverage === 0.55,
     )
-    expect(selection).toHaveLength(18)
+    // With the Table selected row and open Accordion trigger (primary 12%) in both modes.
+    expect(selection).toHaveLength(20)
     for (const pair of selection) expect(pair.passes, JSON.stringify(pair)).toBe(true)
   })
   it('declares the Select highlighted option and hint pairs and they pass', () => {

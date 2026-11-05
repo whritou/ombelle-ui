@@ -41,7 +41,8 @@ it('compiles only the experimental components for liquid glass', async () => {
   expect(paths).toContain('components/ui/dialog.tsx')
   expect(paths).toContain('components/ui/input.tsx')
   expect(paths).toContain('components/ui/textarea.tsx')
-  expect(paths).not.toContain('components/ui/table.tsx')
+  expect(paths).toContain('components/ui/table.tsx')
+  expect(paths).not.toContain('components/ui/skeleton.tsx')
   const failing = await handlePresetCompileMessage({
     type: 'compile-preset',
     requestId: 2,

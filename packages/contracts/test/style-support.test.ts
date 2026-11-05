@@ -10,8 +10,8 @@ import {
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'separator', 'switch', 'tabs', 'textarea', 'tooltip']
-const glassUnavailable = ['accordion', 'progress', 'skeleton', 'table']
+const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'separator', 'switch', 'table', 'tabs', 'textarea', 'tooltip']
+const glassUnavailable = ['progress', 'skeleton']
 
 describe('style support table', () => {
   it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
@@ -44,15 +44,15 @@ describe('style support table', () => {
     expect(isStyleFamily('constructor')).toBe(false)
   })
   it('refuses unavailable components in input order', () => {
-    expect(() => assertStyleAvailable(['card', 'table'], 'liquid-glass')).toThrow(FoundationError)
+    expect(() => assertStyleAvailable(['card', 'skeleton'], 'liquid-glass')).toThrow(FoundationError)
     try {
-      assertStyleAvailable(['card', 'accordion', 'table'], 'liquid-glass')
+      assertStyleAvailable(['card', 'progress', 'skeleton'], 'liquid-glass')
       expect.unreachable()
     } catch (error) {
       expect(error).toMatchObject({
         code: 'STYLE_UNAVAILABLE',
         message:
-          'Accordion is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, avatar, card, checkbox, dialog, dropdown-menu, input, label, popover, native-select, radio-group, select, switch, separator, tabs, textarea, tooltip.',
+          'Progress is unavailable for liquid-glass. Experimental liquid-glass components: alert, accordion, button, badge, avatar, card, checkbox, dialog, dropdown-menu, input, label, popover, native-select, radio-group, select, switch, separator, tabs, table, textarea, tooltip.',
         path: '/componentIds',
         nextAction: 'Choose a stable family for this component or remove it.',
       })

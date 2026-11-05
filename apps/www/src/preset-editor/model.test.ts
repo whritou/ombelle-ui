@@ -232,6 +232,7 @@ it('requests only components the family supports', () => {
   expect(previewComponentIds('flat')).toHaveLength(23)
   expect(previewComponentIds('liquid-glass')).toEqual([
     'alert',
+    'accordion',
     'button',
     'badge',
     'avatar',
@@ -248,6 +249,7 @@ it('requests only components the family supports', () => {
     'switch',
     'separator',
     'tabs',
+    'table',
     'textarea',
     'tooltip',
   ])
