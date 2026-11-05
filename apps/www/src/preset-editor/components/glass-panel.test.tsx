@@ -29,6 +29,10 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
     '<section aria-labelledby="glass-limitations-heading"><h2 id="glass-limitations-heading">Liquid glass limitations</h2>',
   )
   for (const item of glassLimitations) expect(html).toContain(`<li>${item}</li>`)
+  // Every form control is experimental in glass now, so the panel no longer claims they are unavailable.
+  expect(glassLimitations).toHaveLength(5)
+  expect(html).not.toContain('form controls other than Input')
+  expect(html).toContain('<summary>5 known limitations</summary>')
   // The supported list follows the contracts' support table, so it names every glass component.
   expect(html).toContain(
     'Liquid glass is experimental. Alert, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Native Select, Radio Group, Select, Switch, Tabs, Textarea and Tooltip support it; the other components are unavailable.',
