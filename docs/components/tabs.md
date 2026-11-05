@@ -1,6 +1,6 @@
 # Tabs
 
-Tabs wraps reviewed Radix Tabs primitives, with flat, minimalist, neo-brutalism, and ombelle styles in light and dark modes. Liquid glass is unavailable. The template is a client component.
+Tabs wraps reviewed Radix Tabs primitives, with flat, minimalist, neo-brutalism, and ombelle styles in light and dark modes. Liquid glass is experimental; see [liquid glass](liquid-glass.md). The template is a client component.
 
 ## Install and compose
 

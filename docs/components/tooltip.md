@@ -1,6 +1,6 @@
 # Tooltip
 
-Tooltip wraps reviewed Radix Tooltip primitives, with flat, minimalist, neo-brutalism, and ombelle styles in light and dark modes. Liquid glass is deferred and unavailable. The template is a client component.
+Tooltip wraps reviewed Radix Tooltip primitives, with flat, minimalist, neo-brutalism, and ombelle styles in light and dark modes. Liquid glass is experimental; see [liquid glass](liquid-glass.md). The template is a client component.
 
 ## Install and compose
 
