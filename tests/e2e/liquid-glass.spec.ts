@@ -5,6 +5,7 @@ import { inflateSync } from 'node:zlib'
 import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { contrastRatio } from '../helpers/contrast.js'
 import { glassFailingPairLine } from '../helpers/glass-readout.js'
+import { componentsWithStyleSupport } from '@ombelle/contracts'
 
 // Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
 // Accessible names repeat across the three backdrop copies, so every scenario
@@ -615,12 +616,12 @@ for (const mode of modes) {
 
   test(`liquid-glass ${mode}: unavailable placeholders`, async ({ page }) => {
     await open(page, mode)
+    // The scenario lists exactly the components the support table marks unavailable in glass.
+    const expected = componentsWithStyleSupport('liquid-glass', ['unavailable'])
     const placeholders = page.locator('[data-unavailable]')
-    await expect(placeholders).toHaveCount(6)
-    await expect(placeholders).toHaveText(Array(6).fill('Unavailable in liquid glass'))
-    expect(await placeholders.evaluateAll((els) => els.map((el) => el.getAttribute('data-unavailable')))).toEqual([
-      'checkbox', 'input', 'label', 'native-select', 'switch', 'textarea',
-    ])
+    await expect(placeholders).toHaveCount(expected.length)
+    await expect(placeholders).toHaveText(Array(expected.length).fill('Unavailable in liquid glass'))
+    expect(await placeholders.evaluateAll((els) => els.map((el) => el.getAttribute('data-unavailable')))).toEqual(expected)
   })
 
   test(`liquid-glass ${mode}: preset editor glass flow`, async ({ page }) => {
