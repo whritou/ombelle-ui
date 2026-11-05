@@ -172,18 +172,19 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family
               const text = typing[key] ?? (overridden ? value : '')
               const name = `${modeLabel} ${label.toLowerCase()}`
               const invalid = diagnostic?.path === path
+              const describedBy = [invalid ? `color-${key}-error` : undefined, hint ? 'color-role-border-hint' : undefined].filter(Boolean).join(' ') || undefined
               return (
                 <div className="be-color-cell" key={mode}>
                   <label htmlFor={`color-${key}`} className="be-chip-mode">{modeLabel}</label>
                   <div className="be-color-chip" data-inherited={overridden ? undefined : 'true'} data-invalid={invalid || undefined}>
                     <span className="colorSwatch" style={{ backgroundColor: value }}>
-                      <input type="color" aria-label={`${name} picker`} value={pickerValue(value)}
+                      <input type="color" aria-label={`${name} picker`} aria-describedby={hint ? 'color-role-border-hint' : undefined} value={pickerValue(value)}
                         onChange={(event) => commit(mode, role, event.target.value)} />
                     </span>
                     <input id={`color-${key}`} type="text" className="colorText" aria-label={name} value={text}
                       placeholder={fallback} title={overridden ? undefined : state === 'base' ? `Preset: ${value}` : `Family ${state} color, from ${value}`} maxLength={80} spellCheck={false}
                       data-overridden={overridden || undefined} aria-invalid={invalid || undefined}
-                      aria-describedby={invalid ? `color-${key}-error` : undefined}
+                      aria-describedby={describedBy}
                       onChange={(event) => {
                         const next = event.target.value.trim()
                         setTyping({ ...typing, [key]: event.target.value })

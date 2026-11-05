@@ -122,3 +122,15 @@ it('Button editor relabels shadow and border overrides for glass', () => {
   expect(flat).not.toContain('Glass edge')
   for (const hint of Object.values(glassControlHints)) expect(flat).not.toContain(hint)
 })
+
+it('Button editor describes the glass edge colour fields with their hint', () => {
+  const render = (family: 'flat' | 'liquid-glass') =>
+    renderToStaticMarkup(<PropertiesPanel recipe={recipe} family={family} onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
+  const glass = render('liquid-glass')
+  expect(glass).toContain(`<p id="color-role-border-hint" class="colorHint">${glassControlHints.border}</p>`)
+  for (const mode of ['light', 'dark'])
+    expect(glass).toMatch(new RegExp(`id="color-${mode}-border"[^>]*aria-describedby="color-role-border-hint"`))
+  expect(glass.match(/aria-describedby="color-role-border-hint"/g)).toHaveLength(4)
+  const flat = render('flat')
+  expect(flat).not.toContain('color-role-border-hint')
+})
