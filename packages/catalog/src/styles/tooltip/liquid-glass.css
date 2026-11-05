@@ -21,7 +21,7 @@
     inset -1px -1px 0 color-mix(in srgb, var(--glass-highlight, white) 60%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--glass-highlight, white) 40%, transparent),
     inset 0 -1px 2px rgb(0 0 0 / 0.08),
-    calc(var(--shadow-x) * 0.667) calc(var(--shadow-y) * 0.667) calc(var(--shadow-y) * 2) calc(var(--shadow-y) * -0.667) rgb(0 0 0 / 0.3);
+    calc(var(--shadow-x) * 0.667) calc(var(--shadow-y) * 0.667) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 2) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -0.667) rgb(0 0 0 / 0.3);
   animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
 }
 [data-slot='tooltip-content'] * {

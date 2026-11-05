@@ -191,8 +191,9 @@ describe('liquid-glass edges and shadows', () => {
     }
     for (const slot of ['card', 'popover-content'])
       expect(ruleBody(result, slot), slot).toContain('var(--shadow-x)var(--shadow-y)')
+    const magnitude = 'max(var(--shadow-x),calc(var(--shadow-x)*-1),var(--shadow-y),calc(var(--shadow-y)*-1))'
     expect(ruleBody(result, 'dialog-content')).toContain(
-      'calc(var(--shadow-x)*2)calc(var(--shadow-y)*2)calc(var(--shadow-y)*4)calc(var(--shadow-y)*-1.333)',
+      'calc(var(--shadow-x)*2)calc(var(--shadow-y)*2)calc(' + magnitude + '*4)calc(' + magnitude + '*-1.333)',
     )
     // Tooltip's drop shadow is 8px at the built-in offset, so it scales by 2/3 to keep its look.
     expect(ruleBody(result, 'tooltip-content')).toContain(
@@ -217,6 +218,25 @@ describe('liquid-glass edges and shadows', () => {
     const result = await build(preset)
     expect(ruleBody(result, 'card')).toContain('var(--shadow-x)var(--shadow-y)')
     expect(artifact(result, 'styles/ui-tokens.css').replace(/\s+/g, '')).toContain('--shadow-x:-16px')
+    // Blur and spread scale from the offset magnitude, so a negative or X-only offset keeps a
+    // positive blur and a non-positive spread instead of a hard slab.
+    const magnitude = 'max(var(--shadow-x),calc(var(--shadow-x)*-1),var(--shadow-y),calc(var(--shadow-y)*-1))'
+    for (const slot of ['card', 'dialog-content', 'popover-content', 'dropdown-menu-content', 'tooltip-content']) {
+      const body = ruleBody(result, slot)
+      expect(body, slot).toContain('calc(' + magnitude + '*')
+      expect(body, slot).toContain('calc(' + magnitude + '*-')
+      expect(body, slot).not.toMatch(/calc\(var\(--shadow-y\)\*-?[\d.]+\)(rgb|var\(--glass-glow)/)
+    }
+    for (const selector of ['[data-slot="button"]', '[data-slot="button"]:not(:disabled):hover']) {
+      let shadow = ''
+      postcss.parse(artifact(result, 'styles/ui-style.css')).walkRules((rule) => {
+        if (rule.parent?.type === 'root' && rule.selectors.map(squash).includes(squash(selector)))
+          rule.walkDecls('box-shadow', (d) => { shadow = squash(d.value) })
+      })
+      expect(shadow, selector).toContain('calc(' + magnitude + '*')
+      expect(shadow, selector).toContain('calc(' + magnitude + '*-')
+      expect(shadow, selector).not.toMatch(/calc\(var\(--shadow-y\)\*-?[\d.]+\)(rgb|var\(--glass-glow)/)
+    }
     const reference = glassContrastReport(builtin())
     const report = glassContrastReport(preset)
     expect(report.passes).toBe(reference.passes)
@@ -330,6 +350,24 @@ describe('liquid-glass Button', () => {
     expect(report.passes).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.5, dark: 0.32 })
     expect(report.nestedOpacity).toEqual({ light: 0.7, dark: 0.9 })
+  })
+
+  it('glass link keeps 6px inline padding at every size', async () => {
+    const css = await styleOf()
+    // The link rule must out-rank the size rules, which come later at equal specificity.
+    for (const size of ['sm', 'lg'])
+      expect(decls(css, '[data-slot="button"][data-variant="link"][data-size="' + size + '"]'), size).toMatchObject({
+        'padding-inline': '0.375rem',
+      })
+    let sizeIndex = -1
+    let linkIndex = -1
+    postcss.parse(css).walkRules((rule) => {
+      if (where(rule) !== 'root') return
+      const selectors = rule.selectors.map(squash)
+      if (selectors.includes('[data-slot="button"][data-size="lg"]')) sizeIndex = rule.source!.start!.offset
+      if (selectors.includes('[data-slot="button"][data-variant="link"][data-size="lg"]')) linkIndex = rule.source!.start!.offset
+    })
+    expect(linkIndex).toBeGreaterThan(sizeIndex)
   })
 
   it('reduced transparency paints the tinted Button opaque', async () => {
