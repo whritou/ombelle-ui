@@ -71,6 +71,12 @@ export const glassDesignDefaults = {
   glassBackdropTone: 0,
   glassSheen: 0,
   glassRim: 0.35,
+  glassRefraction: 0,
+  glassRefractionWidth: 0,
+  glassHalo: 0,
+  glassDepth: 0,
+  glassMotion: 0,
+  glassDispersion: 0,
 } as const
 /** Dark mode scales the white sheen down; a bright sheen on dark glass would wash out light text. */
 export const glassDarkSheenScale = 0.25

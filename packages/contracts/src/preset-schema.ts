@@ -134,7 +134,7 @@ export const presetSchema = {
         "glassBackdropContrast": {
           "type": "number",
           "minimum": 0.3,
-          "maximum": 1
+          "maximum": 1.6
         },
         "glassBackdropTone": {
           "type": "number",
@@ -144,9 +144,39 @@ export const presetSchema = {
         "glassSheen": {
           "type": "number",
           "minimum": 0,
-          "maximum": 0.5
+          "maximum": 1
         },
         "glassRim": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassRefraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassRefractionWidth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3
+        },
+        "glassHalo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassDepth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassMotion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glassDispersion": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
