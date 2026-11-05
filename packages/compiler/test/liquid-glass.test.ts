@@ -103,7 +103,34 @@ describe('liquid-glass compile', () => {
     const error = await build(withDesign({ glassOpacity: 0.3 })).catch((e) => e)
     expect(error).toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
     expect(error.message).toMatch(
-      /^Liquid glass text contrast fails in (light|dark) for \w+ on \w+: \d+\.\d+:1 (over the (darkest|brightest) filtered backdrop|on the opaque fallback surface)\. Minimum passing glassOpacity is 0\.\d+\.$/,
+      /^Liquid glass text contrast fails in (light|dark) for \w+ on \w+( tinted \w+ \d+%)?( at \d+% coverage)?: \d+\.\d+:1 (over the (darkest|brightest) filtered backdrop|on the opaque fallback surface)\. Minimum passing glassOpacity is 0\.\d+\. See "Upgrading from 0\.4\.x" in docs\/components\/liquid-glass\.md\.$/,
+    )
+  })
+
+  it("names the failing pair's tint and coverage and points a 0.4.x preset to the upgrade note", async () => {
+    // The values a 0.4.x init saved into ui-preset.json.
+    const saved = withDesign({ glassOpacity: 0.5 })
+    saved.modes.light.mutedForeground = '#334155'
+    saved.modes.light.destructive = '#B91C1C'
+    saved.modes.dark.destructive = '#FCA5A5'
+    const error = await build(saved, ['button']).catch((e) => e)
+    expect(error).toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
+    expect(error.message).toBe(
+      'Liquid glass text contrast fails in light for mutedForeground on background at 55% coverage: 2.98:1 over the darkest filtered backdrop. ' +
+        'Minimum passing glassOpacity is 0.93. See "Upgrading from 0.4.x" in docs/components/liquid-glass.md.',
+    )
+    // A tinted pair names its tint, and a tinted pair at partial coverage names both.
+    const tinted = builtin()
+    tinted.modes.dark.primary = '#D0D0D0'
+    const tintError = await build(tinted, ['button']).catch((e) => e)
+    expect(tintError.message).toMatch(
+      /^Liquid glass text contrast fails in dark for mutedForeground on card tinted primary 22% at 78% coverage: \d+\.\d+:1 over the brightest filtered backdrop\. Minimum passing glassOpacity is 0\.64\. See "Upgrading from 0\.4\.x" in docs\/components\/liquid-glass\.md\.$/,
+    )
+    const hover = builtin()
+    hover.modes.dark.primary = '#FFFFFF'
+    const hoverError = await build(hover, ['button']).catch((e) => e)
+    expect(hoverError.message).toMatch(
+      /^Liquid glass text contrast fails in dark for foreground on card tinted primary 30%: \d+\.\d+:1 [^.]+\. Raise contrast between foreground and card; no glassOpacity passes\. See "Upgrading from 0\.4\.x" in docs\/components\/liquid-glass\.md\.$/,
     )
   })
 

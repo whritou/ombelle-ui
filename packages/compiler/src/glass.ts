@@ -26,6 +26,12 @@ export function assertGlassContrast(
       failing.text +
       ' on ' +
       failing.surface +
+      (failing.tint
+        ? ' tinted ' + failing.tint.color + ' ' + Math.round(failing.tint.amount * 100) + '%'
+        : '') +
+      (failing.coverage === undefined
+        ? ''
+        : ' at ' + Math.round(failing.coverage * 100) + '% coverage') +
       ': ' +
       (Math.floor(worst * 100) / 100).toFixed(2) +
       ':1 ' +
@@ -37,7 +43,9 @@ export function assertGlassContrast(
           ' and ' +
           failing.surface +
           '; no glassOpacity passes.'
-        : 'Minimum passing glassOpacity is ' + report.minimumOpacity + '.'),
+        : 'Minimum passing glassOpacity is ' + report.minimumOpacity + '.') +
+      // A 0.4.x init saved the whole built-in preset, which fails the pairs 0.5.0 adds.
+      ' See "Upgrading from 0.4.x" in docs/components/liquid-glass.md.',
     '/design/glassOpacity',
   )
 }
