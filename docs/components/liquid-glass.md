@@ -132,7 +132,7 @@ The built-in glass preset uses opacity 0.57, the smallest value at which both bu
 
 Solid fills keep their existing contrast pairs: both Badge variants and the active Tabs trigger.
 
-The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are ghost and link at rest, which sit straight on the backdrop. The outline Button is bounded at its 60% coverage.
+The bound covers only the pairs above. Text that you place on a glass surface with other tokens is your responsibility. For example, Tabs panel text inside a glass Card uses `foreground` on `card`, which is bounded only because the secondary Button declares that pair. The Button surfaces outside the bound are ghost and link at rest, which sit straight on the backdrop. The Separator label is the same: it is `mutedForeground` text with no surface of its own, bounded by `mutedForeground` on `card` inside a Card or other glass panel and dependent on the backdrop elsewhere. The outline Button is bounded at its 60% coverage.
 
 ## Declared backdrops
 

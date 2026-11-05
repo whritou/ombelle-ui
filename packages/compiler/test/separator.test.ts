@@ -17,7 +17,7 @@ it.each(supportedStyleFamilies)(
   },
 )
 
-it('compiles Separator in liquid glass: an etched hairline and a label on card glass', async () => {
+it('compiles Separator in liquid glass: an etched hairline and a label with no surface', async () => {
   const result = await compile({
     preset: getCatalog('0.1.0').presets['liquid-glass'],
     componentIds: ['separator'],
@@ -38,19 +38,16 @@ it('compiles Separator in liquid glass: an etched hairline and a label on card g
   expect(block(labelled)).toContain('color:var(--muted-foreground)')
   expect(block(labelled + '::before,' + labelled + '::after')).toContain('border-block-start:var(--border-width)solidvar(--border)')
   expect(block(labelled + '::before,' + labelled + '::after')).toContain('border-block-end:1pxsolid' + highlight)
-  // The label paints the card glass its contrast pair is checked against, at full glass coverage.
-  expect(block('[data-slot="separator-label"]')).toContain('background:var(--card)')
-  expect(flat).toContain('@supports((backdrop-filter:blur(1px))or(-webkit-backdrop-filter:blur(1px)))')
-  expect(flat).toContain('color-mix(insrgb,var(--card)calc(var(--glass-inner-opacity,var(--glass-opacity))*100%),transparent)')
-  expect(flat).toContain('prefers-reduced-transparency')
+  // As in the kit, the label paints no surface of its own: it is bounded by the glass it sits on.
+  expect(flat).not.toContain('[data-slot="separator-label"]')
+  expect(flat).not.toMatch(/background|backdrop-filter/)
   expect(flat).not.toMatch(/(?:^|[;{])(?:left|right|top|bottom|width|height):/)
   // Forced colours: system-colour lines and text; the highlight is dropped.
   const forced = forcedBlock(css)
   expect(forced).toContain('border-block-start-color:CanvasText')
   expect(forced).toContain('border-inline-start-color:CanvasText')
   expect(forced).toContain('color:CanvasText')
-  expect(forced).toContain('[data-slot="separator-label"]{background:Canvas')
-  // mutedForeground on card glass is declared and passes with the built-in preset.
+  // Inside a Card or other glass panel, mutedForeground on card glass bounds the label; it is declared and passes.
   expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'mutedForeground' })
   const report = glassContrastReport(getCatalog('0.1.0').presets['liquid-glass'])
   const label = report.pairs.filter((p) => p.surface === 'card' && p.text === 'mutedForeground' && !p.tint && p.coverage === undefined)
