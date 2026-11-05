@@ -41,7 +41,7 @@ const backdrops = [
   },
 ] as const
 
-// The fixture writers replace GLASS_UNAVAILABLE with the components the support table marks unavailable in
+// The fixture writers replace the quoted placeholder below with the components the support table marks unavailable in
 // liquid glass (componentsWithStyleSupport), comma-separated. With none left the section is not rendered.
 const unavailable = 'GLASS_UNAVAILABLE'.split(',').filter(Boolean)
 
