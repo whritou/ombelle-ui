@@ -133,11 +133,12 @@
     border-block-start-color: CanvasText;
   }
   /* The open trigger keeps a CanvasText bar at its start edge as well as the turned chevron, so it never depends on
-     colour alone. */
+     colour alone. Its start padding gives up the bar's width, so the title does not shift. */
   [data-slot='accordion-trigger'][data-state='open'] {
     background: Canvas;
     color: CanvasText;
     border-inline-start: 0.25rem solid CanvasText;
+    padding-inline-start: 0.75rem;
   }
   [data-slot='accordion-trigger']:focus-visible {
     outline-color: Highlight;

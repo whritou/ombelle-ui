@@ -92,7 +92,8 @@ it('compiles Accordion in liquid glass: a glass container, an open trigger tinte
   expect(at('[data-slot="accordion-icon"]svg', 'motion').transition).toBe('none')
   // Forced colours: system colours; the open trigger also carries a CanvasText bar, so it never depends on colour alone.
   expect(at(root, 'forced')).toMatchObject({ background: 'Canvas', color: 'CanvasText', 'border-color': 'CanvasText', 'box-shadow': 'none' })
-  expect(at(open, 'forced')).toMatchObject({ background: 'Canvas', color: 'CanvasText', 'border-inline-start': '0.25remsolidCanvasText' })
+  // The bar takes its width out of the start padding (1rem at rest), so the open title stays put.
+  expect(at(open, 'forced')).toMatchObject({ background: 'Canvas', color: 'CanvasText', 'border-inline-start': '0.25remsolidCanvasText', 'padding-inline-start': '0.75rem' })
   expect(at(trigger + ':focus-visible', 'forced')['outline-color']).toBe('Highlight')
   expect(at(trigger + ':disabled', 'forced').color).toBe('GrayText')
   // Pairs: trigger text is foreground on card, content mutedForeground on card, the open trigger foreground on the card
