@@ -276,11 +276,10 @@ export function compileScopedButtonStyles(input: {
     if (glass)
       for (const mode of recipeColorModes) {
         const target = mode === 'light' ? light : darkTokens
-        const own = data.modes[mode]
         if (set('foreground') && colors[mode]?.foreground === undefined && colorTokens.foreground !== 'foreground')
-          target[variable(colorTokens.foreground)] = own.foreground
+          target[variable(colorTokens.foreground)] = target['--foreground']
         if (variant === 'secondary' && set('background') && colors[mode]?.background === undefined)
-          target[variable(colorTokens.background)] = own.card
+          target[variable(colorTokens.background)] = target['--card']
       }
     if (set('border'))
       paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
