@@ -29,8 +29,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the nine experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['alert', 'badge', 'button', 'card', 'dialog', 'dropdown-menu', 'popover', 'tabs', 'tooltip'])
+  it('compiles the ten experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['alert', 'badge', 'button', 'card', 'dialog', 'dropdown-menu', 'input', 'popover', 'tabs', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -64,7 +64,7 @@ describe('liquid-glass compile', () => {
   })
 
   it.each(unavailable)('refuses unavailable component %s', async (id) => {
-    expect(unavailable).toHaveLength(14)
+    expect(unavailable).toHaveLength(13)
     await expect(build(builtin(), ['button', id])).rejects.toMatchObject({
       code: 'STYLE_UNAVAILABLE',
       path: '/componentIds',

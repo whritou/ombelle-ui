@@ -64,7 +64,7 @@ it('lists every component the published installer can add and renders a docs pag
   const { default: ComponentsPage } = await import('../../apps/www/src/app/components/page.js')
   const { default: ComponentPage, generateStaticParams } = await import('../../apps/www/src/app/components/[id]/page.js')
   const { supportedComponentIds, styleSupport } = await import('@ombelle/contracts')
-  const { componentDocs } = await import('../../apps/www/src/site/components/catalog.js')
+  const { componentDocs, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
   const { compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
   // A component newer than the published installer stays off the site, so every command it shows works.
   const listed = componentDocs.map((doc) => doc.id)
@@ -76,12 +76,15 @@ it('lists every component the published installer can add and renders a docs pag
   for (const id of hidden) expect(overview).not.toContain(`href="/components/${id}"`)
   expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...listed].sort())
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
+  // Input is experimental in the catalog's glass family but needs a newer installer than the published one.
+  expect(styleSupport('input', 'liquid-glass')).toBe('experimental')
+  expect(glassOnSite('input')).toBe(false)
   for (const id of listed) {
     const html = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))
     expect(html.match(/<h1\b/g)).toHaveLength(1)
     expect(html).toContain(`pnpm dlx ${runner} add ${id} --cwd APP --dry-run`)
-    // Glass status follows the contracts' compatibility table.
-    if (styleSupport(id, 'liquid-glass') === 'experimental') expect(html).toContain('Liquid glass: experimental.')
+    // Glass status follows the contracts' table, limited to what the published installer accepts.
+    if (glassOnSite(id)) expect(html).toContain('Liquid glass: experimental.')
     else expect(html).toContain(`add ${id} is refused with STYLE_UNAVAILABLE`)
     // Only Button has a per-component editor.
     expect(html.includes('href="/editor/component/button"')).toBe(id === 'button')

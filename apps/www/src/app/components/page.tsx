@@ -1,6 +1,5 @@
 import { ArrowRight } from 'lucide-react'
-import { styleSupport } from '@ombelle/contracts'
-import { componentDocs } from '../../site/components/catalog'
+import { componentDocs, glassOnSite } from '../../site/components/catalog'
 import { familyList } from '../../site/families'
 
 export const metadata = {
@@ -25,7 +24,7 @@ export default function ComponentsPage() {
                 <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
               </span>
               <span className="mt-1 text-sm text-muted-foreground">{doc.description}</span>
-              {styleSupport(doc.id, 'liquid-glass') === 'experimental' && (
+              {glassOnSite(doc.id) && (
                 <span className="o-glass mt-3 self-start rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Glass · experimental</span>
               )}
             </a>

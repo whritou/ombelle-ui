@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Liquid glass: Input is experimental. It is a field of card glass whose value and placeholder use the card text pairs the contrast bound already checks, so the built-in preset still passes at opacity 0.5. Nested in glass it drops its own blur. Reduced transparency, missing backdrop filters and forced colours fall back to an opaque field. Only the liquid-glass family stylesheet changes; the stable families are byte-identical. The website keeps describing Input as unavailable in glass until the published installer is 0.5.0 (`glassMinimumCli`), because 0.4.1 still refuses it.
 - Add Select (Radix Select 2.4.1), Radio Group (Radix Radio Group 1.5.1), Dropdown Menu (Radix Dropdown Menu 2.2.1) and Alert to the catalog in flat, minimalist, neo-brutalism and ombelle, each with colocated component CSS, a usage example and light and dark styles. Alert and Dropdown Menu are experimental in liquid glass; Select and Radio Group are unavailable there.
 - Existing artifacts are byte-identical: the stable family hashes gain 48 entries for the new files and change none, so the style baseline declares no new intentional change.
 - Preview: the preset gallery shows the four components; the dashboard gains an alert and per-project action menus, settings gains a role Select and a digest Radio Group, and sign-in gains a status alert.
