@@ -4,7 +4,7 @@ import * as postcss from 'prettier/plugins/postcss'
 import { getCatalog } from '@ombelle/catalog'
 import { supportedStyleFamilies, type ComponentId } from '@ombelle/contracts'
 import { compile } from '../src/index.js'
-import { forcedBlock, squash } from './new-component-artifacts.js'
+import { squash } from './new-component-artifacts.js'
 import baseline from './fixtures/style-baseline.json'
 
 const id = 'label' as ComponentId
