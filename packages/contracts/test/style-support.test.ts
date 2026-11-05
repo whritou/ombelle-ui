@@ -10,8 +10,8 @@ import {
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'tabs', 'textarea', 'tooltip']
-const glassUnavailable = ['accordion', 'avatar', 'checkbox', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table']
+const glassExperimental = ['alert', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'switch', 'tabs', 'textarea', 'tooltip']
+const glassUnavailable = ['accordion', 'avatar', 'progress', 'select', 'separator', 'skeleton', 'table']
 
 describe('style support table', () => {
   it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
@@ -52,7 +52,7 @@ describe('style support table', () => {
       expect(error).toMatchObject({
         code: 'STYLE_UNAVAILABLE',
         message:
-          'Accordion is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, card, dialog, dropdown-menu, input, label, popover, native-select, tabs, textarea, tooltip.',
+          'Accordion is unavailable for liquid-glass. Experimental liquid-glass components: alert, button, badge, card, checkbox, dialog, dropdown-menu, input, label, popover, native-select, radio-group, switch, tabs, textarea, tooltip.',
         path: '/componentIds',
         nextAction: 'Choose a stable family for this component or remove it.',
       })

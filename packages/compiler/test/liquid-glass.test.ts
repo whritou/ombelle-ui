@@ -28,15 +28,16 @@ const supportsCondition =
 
 // The built-in preset is tuned so every declared pair passes at its minimum opacity.
 const TUNED_OPACITY = 0.57
-const TUNED_LIGHT_MUTED = '#1E293B'
+const TUNED_LIGHT_MUTED = '#131B2E'
+const TUNED_DARK_MUTED = '#E5EBF2'
 const TUNED_DESTRUCTIVE = { light: '#7F1D1D', dark: '#FECACA' }
 
 const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the thirteen experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['alert', 'badge', 'button', 'card', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'tabs', 'textarea', 'tooltip'])
+  it('compiles the sixteen experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['alert', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'switch', 'tabs', 'textarea', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -45,10 +46,13 @@ describe('liquid-glass compile', () => {
       'components/ui/alert.css',
       'components/ui/badge.css',
       'components/ui/card.css',
+      'components/ui/checkbox.css',
       'components/ui/dropdown-menu.css',
       'components/ui/label.css',
       'components/ui/native-select.css',
       'components/ui/popover.css',
+      'components/ui/radio-group.css',
+      'components/ui/switch.css',
       'components/ui/tabs.css',
       'components/ui/textarea.css',
       'components/ui/tooltip.css',
@@ -73,7 +77,7 @@ describe('liquid-glass compile', () => {
   })
 
   it.each(unavailable)('refuses unavailable component %s', async (id) => {
-    expect(unavailable).toHaveLength(10)
+    expect(unavailable).toHaveLength(7)
     await expect(build(builtin(), ['button', id])).rejects.toMatchObject({
       code: 'STYLE_UNAVAILABLE',
       path: '/componentIds',
@@ -353,10 +357,10 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: { color: 'destructive', ...glassTints.destructive } })
     const report = glassContrastReport(builtin())
     const tinted = report.pairs.filter((p) => p.tint !== undefined)
-    expect(tinted).toHaveLength(12)
+    expect(tinted).toHaveLength(18)
     for (const pair of report.pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.passes).toBe(true)
-    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.4 })
+    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
     expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
   })
 
@@ -436,9 +440,30 @@ describe('liquid-glass Button', () => {
     expect(preset.design.glassOpacity).toBe(report.minimumOpacity)
     expect(preset.design.glassOpacity).toBe(TUNED_OPACITY)
     expect(preset.modes.light.mutedForeground).toBe(TUNED_LIGHT_MUTED)
+    expect(preset.modes.dark.mutedForeground).toBe(TUNED_DARK_MUTED)
     expect(preset.modes.light.destructive).toBe(TUNED_DESTRUCTIVE.light)
     expect(preset.modes.dark.destructive).toBe(TUNED_DESTRUCTIVE.dark)
-    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.4 })
+    expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
     expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
+  })
+  it('glass selection pairs are declared and pass', () => {
+    const rest = { color: 'primary', light: 0.18, dark: 0.22 } as const
+    const checked = { color: 'primary', light: 0.26, dark: 0.3 } as const
+    // Checked boxes, checked radios and on switches reuse the Button hover tint; checked rows the rest tint.
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: rest })
+    // The check mark and radio dot sit on the checked control at 80% coverage.
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked, coverage: 0.8 })
+    // Option rows: label and description on background glass at 40%, and on the tinted row at 70% when checked.
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', coverage: 0.4 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'mutedForeground', coverage: 0.4 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: rest, coverage: 0.7 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'mutedForeground', tint: rest, coverage: 0.7 })
+    const report = glassContrastReport(builtin())
+    const selection = report.pairs.filter(
+      (p) => p.tint?.color === 'primary' || (p.coverage !== undefined && [0.4, 0.7, 0.8].includes(p.coverage)),
+    )
+    expect(selection).toHaveLength(14)
+    for (const pair of selection) expect(pair.passes, JSON.stringify(pair)).toBe(true)
   })
 })

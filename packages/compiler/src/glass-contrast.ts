@@ -87,6 +87,11 @@ export const glassHoverTint = 0.08
 export const glassFieldCoverage = 0.55
 /** Outline Buttons paint the background token at 60% of the glass opacity at top level. */
 export const glassOutlineCoverage = 0.6
+/** Checked Checkbox and Radio Group controls paint the tinted card at 80% of the glass opacity at top level. */
+export const glassCheckedControlCoverage = 0.8
+/** Radio Group option rows paint the background token at 40% of the glass opacity, and the tinted card at 70% when checked. */
+export const glassOptionCoverage = 0.4
+export const glassCheckedOptionCoverage = 0.7
 /** The neutral `foreground` tint secondary and outline Buttons gain on hover (6% in the stylesheet). */
 export const glassNeutralHoverTint = 0.06
 
@@ -97,6 +102,13 @@ const tintPairs = (color: keyof typeof glassTints): GlassPairSpec[] => {
     { surface: 'card', text: 'foreground', tint: { color, ...rest } },
     { surface: 'card', text: 'foreground', tint: { color, light: hover(rest.light), dark: hover(rest.dark) } },
   ]
+}
+const primaryRest: GlassTint = { color: 'primary', ...glassTints.primary }
+// Checked controls take the Button hover tint: the resting tint + 8 points.
+const primaryChecked: GlassTint = {
+  color: 'primary',
+  light: Math.round((glassTints.primary.light + glassHoverTint) * 100) / 100,
+  dark: Math.round((glassTints.primary.dark + glassHoverTint) * 100) / 100,
 }
 const neutralHover: GlassTint = { color: 'foreground', light: glassNeutralHoverTint, dark: glassNeutralHoverTint }
 
@@ -124,6 +136,14 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'background', text: 'mutedForeground', coverage: glassFieldCoverage },
   // Error messages beside a field sit on the card glass that holds the form.
   { surface: 'card', text: 'destructive' },
+  // Checked Checkbox and Radio: the foreground mark or dot on the checked tint at 80% coverage.
+  { surface: 'card', text: 'foreground', tint: primaryChecked, coverage: glassCheckedControlCoverage },
+  // Radio Group option rows: the label and description on background glass at 40%, and on the
+  // resting primary tint at 70% when checked.
+  { surface: 'background', text: 'foreground', coverage: glassOptionCoverage },
+  { surface: 'background', text: 'mutedForeground', coverage: glassOptionCoverage },
+  { surface: 'card', text: 'foreground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
+  { surface: 'card', text: 'mutedForeground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
 ]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))

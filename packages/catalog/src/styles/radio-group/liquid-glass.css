@@ -1,0 +1,195 @@
+/* liquid-glass Radio Group (experimental): field-glass radios with a foreground dot, and glass option rows
+   tinted when checked and dashed when disabled. Without backdrop-filter every surface is opaque. */
+[data-slot='radio-group'] {
+  display: grid;
+  gap: 0.625rem;
+  color: var(--foreground);
+  font-family: var(--font-family);
+}
+[data-slot='radio-group-item'] {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  padding: 0;
+  border: var(--border-width) solid var(--input);
+  border-radius: 50%;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color var(--motion-duration), border-color var(--motion-duration);
+}
+/* Keeps a 24px hit target around the 20px circle. */
+[data-slot='radio-group-item']::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+}
+[data-slot='radio-group-item'][data-state='checked'] {
+  --glass-tint: var(--primary);
+  --glass-tint-amount: calc(var(--glass-primary-tint) + 8%);
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  box-shadow: calc(var(--shadow-x) * 0.333) calc(var(--shadow-y) * 0.333) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * 0.833) calc(max(var(--shadow-x), calc(var(--shadow-x) * -1), var(--shadow-y), calc(var(--shadow-y) * -1)) * -0.5) color-mix(in srgb, var(--primary) 70%, transparent);
+}
+[data-slot='radio-group-indicator'] {
+  display: block;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: 50%;
+  background: var(--foreground);
+}
+[data-slot='radio-group-item']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='radio-group-item']:disabled,
+[data-slot='radio-group-item'][data-disabled] {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+[data-slot='radio-group-item'][aria-invalid='true'] {
+  border-color: var(--destructive);
+  border-width: max(var(--border-width), 2px);
+}
+[data-slot='radio-group-option'] {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-block: 0.75rem;
+  padding-inline: 0.875rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color var(--motion-duration), border-color var(--motion-duration);
+}
+[data-slot='radio-group-option'] > [role='radio'] {
+  margin-block-start: 1px;
+}
+[data-slot='radio-group-option']:has([data-state='checked']) {
+  --glass-tint: var(--primary);
+  --glass-tint-amount: var(--glass-primary-tint);
+  background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+[data-slot='radio-group-option']:has([data-disabled]) {
+  opacity: 0.55;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+[data-slot='radio-group-option-label'] {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+[data-slot='radio-group-option-description'] {
+  display: block;
+  margin-block-start: 0.125rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* Radios are field glass (background at 55% of the glass opacity) and the tinted card at 80% when checked.
+     Rows are background glass at 40%, and the tinted card at 70% when checked; their text is declared at those
+     coverages. Nested in glass every surface paints at the full nested opacity. */
+  [data-slot='radio-group-item'] {
+    background: color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  [data-slot='radio-group-item'][data-state='checked'] {
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.8)) * 100%), transparent);
+  }
+  [data-slot='radio-group-option'] {
+    background: color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.4)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  [data-slot='radio-group-option']:has([data-state='checked']) {
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.7)) * 100%), transparent);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='radio-group-item'],
+    [data-slot='radio-group-option'] {
+      background: var(--background);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    [data-slot='radio-group-item'][data-state='checked'],
+    [data-slot='radio-group-option']:has([data-state='checked']) {
+      background: color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='radio-group-item'],
+    [data-slot='radio-group-item'][data-state='checked'],
+    [data-slot='radio-group-option'],
+    [data-slot='radio-group-option']:has([data-state='checked']) {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+/* Forced colours: the dot shows the checked radio; the checked row also takes a Highlight edge. */
+@media (forced-colors: active) {
+  [data-slot='radio-group-item'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+  }
+  [data-slot='radio-group-item'][data-state='checked'] {
+    background: Canvas;
+    border-color: Highlight;
+    box-shadow: none;
+  }
+  [data-slot='radio-group-indicator'] {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+  [data-slot='radio-group-item']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='radio-group-item']:disabled,
+  [data-slot='radio-group-item'][data-disabled] {
+    border-color: GrayText;
+  }
+  [data-slot='radio-group-item'][aria-invalid='true'] {
+    border-style: double;
+    border-width: max(var(--border-width), 3px);
+  }
+  [data-slot='radio-group-option'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  [data-slot='radio-group-option']:has([data-state='checked']) {
+    background: Canvas;
+    color: CanvasText;
+    border-color: Highlight;
+  }
+  [data-slot='radio-group-option']:has([data-disabled]) {
+    color: GrayText;
+    border-color: GrayText;
+  }
+  [data-slot='radio-group-option-description'] {
+    color: CanvasText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='radio-group-item'],
+  [data-slot='radio-group-option'] {
+    transition: none;
+  }
+}

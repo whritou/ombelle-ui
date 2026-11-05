@@ -84,6 +84,7 @@ export function ProjectSummary() {
   },
   checkbox: {
     name: 'Checkbox',
+    glassMinimumCli: '0.5.0',
     description: 'A Radix checkbox with checked, unchecked and mixed states.',
     api: 'checked (true, false, "indeterminate"), onCheckedChange, disabled, name, value, required',
     states: 'Unchecked, checked, mixed, focus, invalid',
@@ -193,6 +194,7 @@ export function RegionField() {
   },
   switch: {
     name: 'Switch',
+    glassMinimumCli: '0.5.0',
     description: 'A Radix switch for on/off settings.',
     api: 'Switch (checked, onCheckedChange, name, value), SwitchThumb',
     states: 'Off, on, focus, disabled',
@@ -304,6 +306,7 @@ export function RolePicker() {
   },
   'radio-group': {
     name: 'Radio Group',
+    glassMinimumCli: '0.5.0',
     description: 'Picks one option from a set, as plain radios or selectable option rows.',
     api: 'RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionLabel, RadioGroupOptionDescription',
     states: 'Checked, unchecked, disabled, invalid, focus',
