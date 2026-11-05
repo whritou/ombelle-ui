@@ -1,4 +1,4 @@
-import { getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler'
 import {
   FoundationError,
@@ -342,6 +342,7 @@ export function resetPresetField(
   return copy
 }
 export function resetPresetTokens(draft: PresetEditorDraft): PresetEditorDraft {
+  if (draft.family === 'liquid-glass') return applyStartingPreset(draft, defaultGlassPresetId)
   return validateDraftEnvelope({ ...draft, edits: {} })
 }
 export function planPresetFamilyChange(
@@ -359,7 +360,7 @@ export function planPresetFamilyChange(
   let draft = validateDraftEnvelope({ ...before, family, edits })
   // Glass starts from Cristal, the default starting point; the user's own edits win.
   if (family === 'liquid-glass' && before.family !== 'liquid-glass') {
-    const cristal = applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-cristal')
+    const cristal = applyStartingPreset(createPresetDraft('liquid-glass'), defaultGlassPresetId)
     draft = validateDraftEnvelope({ ...draft, edits: { ...cristal.edits, ...edits } })
   }
   const shared = editablePathsFor(before.family).filter((path) =>

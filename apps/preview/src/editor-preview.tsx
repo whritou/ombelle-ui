@@ -2,6 +2,8 @@ import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
 import { forcedStateSelector } from '../../www/src/editor/forced-states'
+import { draftFamily } from '../../www/src/editor/model'
+import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
@@ -23,6 +25,7 @@ function mirrorForcedStates(group: CSSStyleSheet | CSSGroupingRule) {
 }
 
 type ButtonModule = Awaited<ReturnType<(typeof editorButtons)[keyof typeof editorButtons]>>
+const filterTokens = ['--glass-refraction-width', '--glass-refraction-strength', '--glass-halo', '--glass-motion']
 
 function EditorPreview() {
   const [message, setMessage] = React.useState<PreviewRender | null>(null)
@@ -69,7 +72,9 @@ function EditorPreview() {
     }
   }, [])
 
-  const family = message?.state.recipe.presetRef.id.replace(/^builtin-/, '') as keyof typeof editorButtons | undefined
+  const state = message?.state
+  const family = state && draftFamily(state.recipe)
+  const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
   React.useEffect(() => {
     if (!family || !(family in editorButtons)) return
     let active = true
@@ -77,30 +82,47 @@ function EditorPreview() {
     return () => { active = false }
   }, [family])
 
-  // Liquid glass needs the kit backdrop behind it; any other family clears it.
+  // The iframe owns its backdrop; the preset changes only the specimen and its preview.
   React.useEffect(() => {
-    if (family === 'liquid-glass') document.documentElement.dataset.backdrop = 'glass'
-    else delete document.documentElement.dataset.backdrop
-    return () => { delete document.documentElement.dataset.backdrop }
-  }, [family])
+    if (!glassPreset) return
+    const root = document.documentElement
+    root.dataset.backdrop = 'glass'
+    root.dataset.glassBackdrop = glassPresetBackdrop(glassPreset)
+    return () => {
+      delete root.dataset.backdrop
+      delete root.dataset.glassBackdrop
+    }
+  }, [glassPreset])
 
-  const state = message?.state
   const recipeStyle = React.useRef<HTMLStyleElement>(null)
+  const specimen = React.useRef<HTMLButtonElement>(null)
+  const Button = buttonModule && buttonModule.family === family ? buttonModule.module.Button : null
   React.useLayoutEffect(() => {
     const sheet = recipeStyle.current?.sheet
     if (sheet) mirrorForcedStates(sheet)
   }, [state?.css])
-  const Button = buttonModule && buttonModule.family === family ? buttonModule.module.Button : null
+  React.useLayoutEffect(() => {
+    if (family !== 'liquid-glass' || !specimen.current) return
+    const root = document.documentElement
+    const material = getComputedStyle(specimen.current)
+    // The recipe keeps its CSS scoped to the Button. The iframe's filter reads these controls from the root.
+    for (const token of filterTokens) root.style.setProperty(token, material.getPropertyValue(token))
+    return () => {
+      for (const token of filterTokens) root.style.removeProperty(token)
+    }
+  }, [Button, family, state?.css, state?.mode])
+  const overrides = state?.recipe.overrides
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
     <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>
-    {family === 'liquid-glass' && <LiquidGlassFilter />}
+    {glassPreset && Button && <LiquidGlassFilter key={`${glassPreset}:${overrides?.glassHalo}:${overrides?.glassMotion}`} />}
     {/* Button always sets data-slot="button" on itself, but the recipe CSS targets
         data-slot="recipe-button", as the installed RecipeButton renders it. As a Slot
         parent it only lends variant classes and data attributes; the child's own
         data-slot wins the Slot merge. */}
     {state && Button && <Button asChild variant={state.recipe.props.variant} size={state.recipe.props.size}>
       <button
+        ref={specimen}
         data-slot="recipe-button"
         data-ombelle-recipe={message.scope}
         type={state.recipe.props.type}

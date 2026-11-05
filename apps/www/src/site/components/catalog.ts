@@ -11,7 +11,7 @@ export type ComponentDoc = {
   basis: string
   client: boolean
   usage: string
-  /** First published installer that can add this component; listed only from then on. */
+  /** First installer that can add this component. Earlier releases are preview-only. */
   minimumCli?: string
   /** First published installer that accepts this component in liquid glass, when later than the component itself. */
   glassMinimumCli?: string
@@ -541,8 +541,11 @@ export function LoadingProject() {
 
 export const componentDocs: ComponentDoc[] = supportedComponentIds
   .map((id) => ({ id, ...docs[id] }))
-  .filter((doc) => !doc.minimumCli || compareVersions(publishedInstaller.version, doc.minimumCli) >= 0)
   .sort((a, b) => a.name.localeCompare(b.name))
+
+export function componentInstallable(doc: ComponentDoc): boolean {
+  return !doc.minimumCli || compareVersions(publishedInstaller.version, doc.minimumCli) >= 0
+}
 
 export function componentDoc(id: string): ComponentDoc | undefined {
   return componentDocs.find((doc) => doc.id === id)
@@ -555,7 +558,7 @@ export function componentDoc(id: string): ComponentDoc | undefined {
 export function glassOnSite(id: ComponentId): boolean {
   if (styleSupport(id, 'liquid-glass') !== 'experimental') return false
   const doc = componentDoc(id)
-  if (!doc) return false
+  if (!doc || !componentInstallable(doc)) return false
   return !doc.glassMinimumCli || compareVersions(publishedInstaller.version, doc.glassMinimumCli) >= 0
 }
 

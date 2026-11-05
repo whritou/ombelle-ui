@@ -11,7 +11,8 @@ import { serializeRecipe } from './storage.js'
 describe('Button editor model', () => {
   it.each(styleFamilies)('creates a valid %s draft with the exact built-in preset', (family) => {
     const draft = createEditorDraft(family)
-    const preset = getCatalog('0.1.0').presets[family]
+    const catalog = getCatalog('0.1.0')
+    const preset = family === 'liquid-glass' ? catalog.startingPresets['builtin-liquid-glass-cristal'] : catalog.presets[family]
     expect(draft).toEqual({
       storageVersion: 1,
       recipe: {
@@ -36,7 +37,7 @@ describe('Button editor model', () => {
 
   it('validates a liquid-glass draft and labels it experimental', () => {
     const draft = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
-    expect(draft.recipe.presetRef.id).toBe('builtin-liquid-glass')
+    expect(draft.recipe.presetRef.id).toBe('builtin-liquid-glass-cristal')
     expect(validateRecipe(draft.recipe)).toEqual(draft.recipe)
     expect(draftFamily(draft.recipe)).toBe('liquid-glass')
     expect(experimentalNotice('liquid-glass')).toBe(
@@ -101,7 +102,7 @@ describe('Button editor model', () => {
   })
   it('reads glass fallbacks from what one-ink glass renders', () => {
     const draft = createEditorDraft('liquid-glass')
-    const preset = getCatalog('0.1.0').presets['liquid-glass']
+    const preset = getCatalog('0.1.0').startingPresets['builtin-liquid-glass-cristal']
     const as = (variant: 'default' | 'secondary' | 'destructive' | 'outline') => ({ ...draft.recipe, props: { ...draft.recipe.props, variant } })
     for (const variant of ['default', 'secondary', 'destructive', 'outline'] as const)
       for (const mode of ['light', 'dark'] as const)

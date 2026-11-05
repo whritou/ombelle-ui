@@ -1,4 +1,4 @@
-import { getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { matchingStartingPreset, type PresetEditorDraft } from '../model'
 import type { PresetBackdrop } from '../preview-protocol'
 
@@ -7,7 +7,6 @@ export function previewBackdropFor(id: StartingPresetId, current: PresetBackdrop
   return id === 'builtin-liquid-glass-relief' ? 'peach' : current
 }
 
-const defaultPreset: StartingPresetId = 'builtin-liquid-glass-cristal'
 const tints: readonly { id: GlassTintId | 'white'; label: string; swatch: string }[] = [
   { id: 'clear', label: 'Claire', swatch: glassTintPalettes.clear.light.card },
   { id: 'rose', label: 'Rosée', swatch: glassTintPalettes.rose.light.card },
@@ -35,7 +34,7 @@ export function GlassStartingPoints({
         </span>
         {startingPresetOrder.map((id) => (
           <button key={id} type="button" data-preset={id} aria-pressed={current === id} onClick={() => onPick(id)}>
-            {presets[id].name + (id === defaultPreset ? ' (default)' : '')}
+            {presets[id].name + (id === defaultGlassPresetId ? ' (default)' : '')}
           </button>
         ))}
       </div>

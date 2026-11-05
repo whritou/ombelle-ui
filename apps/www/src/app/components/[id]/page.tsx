@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, SlidersHorizontal } from 'lucide-react'
 import { getCatalog } from '@ombelle/catalog'
-import { componentDoc, componentDocs, glassOnSite } from '../../../site/components/catalog'
+import { styleSupport } from '@ombelle/contracts'
+import { componentDoc, componentDocs, componentInstallable, glassOnSite } from '../../../site/components/catalog'
 import { CodeBlock, CommandTabs } from '../../../site/components/code-block'
 import { ComponentPlayground } from '../../../site/components/playground'
 import { publishedInstaller } from '../../../snapshots/install-command'
@@ -30,8 +31,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
   if (!doc) notFound()
   const template = getCatalog('0.1.0').templates[doc.id]
   const index = componentDocs.indexOf(doc)
-  // What the published installer does, so every claim on the page holds today.
-  const glass = glassOnSite(doc.id) ? 'experimental' : 'unavailable'
+  const glass = styleSupport(doc.id, 'liquid-glass')
+  const installable = componentInstallable(doc)
   const previous = componentDocs[index - 1], next = componentDocs[index + 1]
   return (
     <div className="grid gap-10 py-10 xl:grid-cols-[minmax(0,1fr)_11rem]">
@@ -58,18 +59,26 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
           <p className="mt-2 text-muted-foreground">
             Run in a project initialized with an Ombelle preset (see <a href="/#get-started" className="font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Get started</a>). The component uses the saved project preset. Review the dry-run plan, then run it again with <code className="font-mono text-foreground">--yes</code>.
           </p>
-          <div className="mt-4">
-            <CommandTabs release={release} args={`add ${doc.id} --cwd APP --dry-run`} />
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Adds <code className="font-mono text-foreground">{template.logicalPath}</code> and installs {template.dependencies.map(d => d.name).join(', ')} with lifecycle scripts disabled.
-            {doc.client && ' This is a client component.'}
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {glass === 'experimental'
-              ? `In a liquid glass project the plan adds a notice that liquid-glass is experimental for ${doc.id}.`
-              : `In a liquid glass project, add ${doc.id} is refused with STYLE_UNAVAILABLE before anything is written.`}
-          </p>
+          {installable ? (
+            <>
+              <div className="mt-4">
+                <CommandTabs release={release} args={`add ${doc.id} --cwd APP --dry-run`} />
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Adds <code className="font-mono text-foreground">{template.logicalPath}</code> and installs {template.dependencies.map(d => d.name).join(', ')} with lifecycle scripts disabled.
+                {doc.client && ' This is a client component.'}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {glassOnSite(doc.id)
+                  ? `In a liquid glass project the plan adds a notice that liquid-glass is experimental for ${doc.id}.`
+                  : `With the published CLI, add ${doc.id} is refused with STYLE_UNAVAILABLE in a liquid glass project.`}
+              </p>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Requires CLI {doc.minimumCli}. The live preview uses the current catalog.
+            </p>
+          )}
         </section>
 
         <section aria-labelledby="usage" className="mt-14 scroll-mt-24">

@@ -33,10 +33,13 @@ it('summarizes hash, release and dependencies on the metadata line', async () =>
 
 it('the Install tab explains why a recipe with glass material overrides has no command yet', async () => {
   const { installText } = await import('./artifact-panel')
-  const { withRecipeOverride } = await import('../model.js')
+  const { withGlassPreset, withRecipeOverride } = await import('../model.js')
   const glass = createEditorDraft('liquid-glass').recipe
-  expect(installText(glass, { version: '0.4.1' })).toContain('add --recipe')
-  const material = withRecipeOverride(glass, 'glassHalo', 0.9)
+  const legacy = withGlassPreset(glass, 'builtin-liquid-glass')
+  expect(installText(legacy, { version: '0.4.1' })).toContain('add --recipe')
+  expect(installText(glass, { version: '0.4.1' })).not.toContain('add --recipe')
+  expect(installText(glass, { version: '0.5.0' })).toContain('add --recipe')
+  const material = withRecipeOverride(legacy, 'glassHalo', 0.9)
   const held = installText(material, { version: '0.4.1' })
   expect(held).not.toContain('add --recipe')
   expect(held).toContain('0.5.0')

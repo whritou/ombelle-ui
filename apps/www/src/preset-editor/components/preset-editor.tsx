@@ -99,7 +99,7 @@ export default function PresetEditor() {
   const [mode, setMode] = useState<'light' | 'dark'>('light'),
     [viewport, setViewport] = useState<'wide' | 'narrow'>('wide'),
     [scene, setScene] = useState<PresetScene>('dashboard'),
-    [backdrop, setBackdrop] = useState<PresetBackdrop>('kit')
+    [backdrop, setBackdrop] = useState<PresetBackdrop>('prism')
   // ?page= opens a preview page directly, including the component gallery,
   // which the page picker no longer offers.
   useEffect(() => {

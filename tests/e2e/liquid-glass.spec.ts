@@ -641,6 +641,9 @@ for (const mode of modes) {
     await expect(confirm.or(limitations)).toBeVisible()
     if (await confirm.isVisible()) await confirm.click()
     await expect(limitations).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Cristal (default)', exact: true })).toHaveAttribute('aria-pressed', 'true')
+    // The original material still exercises the export guard when its veil is too thin.
+    await page.locator('[data-preset="builtin-liquid-glass"]').click()
     await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
     await ready()
 

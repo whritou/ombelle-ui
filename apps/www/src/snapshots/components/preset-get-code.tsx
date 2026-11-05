@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { ResolvedPreset } from '@ombelle/contracts'
 import { usePublication } from '../use-publication'
-import { codeInstallCommand } from '../install-command'
+import { codeInstallCommand, glassMaterialInstallNotice, materialInstallBlocked } from '../install-command'
 import { GetCodeDialog, type CodeStatus } from './get-code-dialog'
 
 const scopes = [
@@ -86,6 +86,7 @@ export function PresetGetCode({
         subject="preset"
         code={code}
         scopes={scopes}
+        installUnavailable={preset && materialInstallBlocked({ design: preset.data.design }) ? glassMaterialInstallNotice : undefined}
         announce={announce}
         onRetry={() => void publication.generate()}
         commandFor={(scope, manager) =>

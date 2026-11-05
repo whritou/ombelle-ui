@@ -2,13 +2,15 @@
 
 import * as Tabs from '@radix-ui/react-tabs'
 import { useEffect, useMemo, useState } from 'react'
-import { type ComponentId, type StyleFamily } from '@ombelle/contracts'
-import { glassOnSite } from './catalog'
+import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
+import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
-import { createPresetDraft } from '../../preset-editor/model'
+import { applyStartingPreset, createPresetDraft } from '../../preset-editor/model'
 import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { ToggleGroup } from '../toggle-group'
+import { GlassPresetSelect } from '../glass-preset-select'
+import { glassPresetBackdrop, glassPresetId } from '../glass-presets'
 import { CodeBlock } from './code-block'
 
 // Exhaustive by type: adding a style family fails the typecheck until it has a label.
@@ -44,15 +46,24 @@ export function ComponentPlayground({ id, name, source, styles }: {
   styles: Partial<Record<StyleFamily, string>>
 }) {
   const [family, setFamily] = useState<StyleFamily>('flat')
+  const [glassPreset, setGlassPreset] = useState<StartingPresetId>(defaultGlassPresetId)
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const [status, setStatus] = useState<'connecting' | 'ready' | 'failed'>('connecting')
+  const glass = styleSupport(id, 'liquid-glass')
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) setMode('dark')
-  }, [])
-  const draft = useMemo(() => createPresetDraft(family), [family])
+    const selected = glassPresetId(new URLSearchParams(window.location.search).get('glass'))
+    if (selected && glass === 'experimental') {
+      setGlassPreset(selected)
+      setFamily('liquid-glass')
+    }
+  }, [glass])
+  const draft = useMemo(() => {
+    const base = createPresetDraft(family)
+    return family === 'liquid-glass' ? applyStartingPreset(base, glassPreset) : base
+  }, [family, glassPreset])
   const compiled = usePresetCompiler(draft)
   const css = styles[family]
-  const glass = glassOnSite(id) ? 'experimental' : 'unavailable'
   const families = familyOptions.map(option =>
     option.value === 'liquid-glass'
       ? glass === 'unavailable'
@@ -71,10 +82,10 @@ export function ComponentPlayground({ id, name, source, styles }: {
         </span>
       </div>
       {family === 'liquid-glass' && (
-        <p className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
-          Liquid glass is experimental: automated checks in one browser, no manual review yet.{' '}
-          <a href={glassDocs} className="font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Limitations</a>
-        </p>
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2">
+          <GlassPresetSelect value={glassPreset} onChange={(id) => { if (id) setGlassPreset(id) }} />
+          <a href={glassDocs} className="text-sm font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Liquid Glass limitations</a>
+        </div>
       )}
       {glass === 'unavailable' && (
         <p className="text-sm text-muted-foreground">{name} is not available in liquid glass; the CLI refuses it in glass projects.</p>
@@ -88,7 +99,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
           <div className="overflow-hidden rounded-xl border border-border bg-card">
             <PresetPreviewFrame
               result={compiled.result}
-              view={{ mode, viewport: 'wide', focus: id }}
+              view={{ mode, viewport: 'wide', focus: id, backdrop: family === 'liquid-glass' ? glassPresetBackdrop(glassPreset) : undefined }}
               stale={compiled.stale}
               onStatus={setStatus}
               title={`${name} preview`}
