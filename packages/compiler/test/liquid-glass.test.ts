@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import postcss, { type Container, type Node } from 'postcss'
 import { getCatalog } from '@ombelle/catalog'
@@ -642,5 +643,66 @@ describe('liquid-glass Button', () => {
     for (const pair of pairs) expect(pair.passes, JSON.stringify(pair)).toBe(true)
     expect(report.minimumOpacityByMode).toEqual({ light: 0.57, dark: 0.57 })
     expect(report.nestedOpacity).toEqual({ light: 0.69, dark: 0.92 })
+  })
+})
+
+describe('liquid glass material tokens', () => {
+  const tokensOf = async (preset: Preset) =>
+    artifact(await build(preset, ['button']), 'styles/ui-tokens.css')
+  const block = (css: string, selector: string) => {
+    const start = css.indexOf(selector + ' {')
+    return css.slice(start, css.indexOf('}', start)).replace(/\s+/g, '')
+  }
+
+  it('a preset without material settings keeps byte-identical tokens', async () => {
+    const css = await tokensOf(builtin())
+    // Recorded on main before the material settings existed.
+    expect(createHash('sha256').update(css).digest('hex')).toBe('b4bb4064391a19e314a341d297533fd0f8c5aae4c53dbcc8a9c578b6db76e6a9')
+    expect(css).not.toContain('--glass-halo')
+  })
+
+  it('material settings become tokens', async () => {
+    const material = {
+      glassRefraction: 0.5,
+      glassRefractionWidth: 0.5 * 0.3,
+      glassHalo: 0.5,
+      glassDepth: 0.5,
+      glassMotion: 0.5,
+      glassDispersion: 0.5,
+    }
+    const root = block(await tokensOf(withDesign(material)), ':root')
+    expect(root).toContain('--glass-halo:0.5;')
+    expect(root).toContain('--glass-depth:0.5;')
+    expect(root).toContain('--glass-motion:0.5;')
+    expect(root).toContain('--glass-dispersion:0.5;')
+    expect(root).toContain('--glass-refraction-width:0.15;')
+    expect(root).toContain('--glass-refraction-strength:0.0725;')
+    expect(root).not.toContain('--glass-drop')
+    const reduced = block(await tokensOf(withDesign({ ...material, glassBackdropContrast: 1.25, transparency: 'reduced' })), ':root')
+    expect(reduced).toContain('--glass-halo:0;')
+    expect(reduced).toContain('--glass-refraction-strength:0;')
+    expect(reduced).toContain('--glass-dispersion:0;')
+    expect(reduced).toContain('--glass-depth:0.5;')
+    // Opaque, so the bound passes at any contrast; the extra drop shadow still follows it.
+    expect(reduced).toContain('--glass-drop:0.1363;')
+  })
+
+  it('extremes compile and the bound reports', async () => {
+    const preset = withDesign({
+      glassBackdropContrast: 1.6,
+      glassRefraction: 1,
+      glassRefractionWidth: 0.3,
+      glassHalo: 1,
+      glassDepth: 1,
+      glassMotion: 1,
+      glassDispersion: 1,
+    })
+    const report = glassContrastReport(preset)
+    for (const pair of report.pairs) {
+      expect(Number.isFinite(pair.ratioOverBlack) && Number.isFinite(pair.ratioOverWhite)).toBe(true)
+    }
+    await build(preset).catch((error) => {
+      expect(error.code).toBe('INVALID_DATA')
+    })
   })
 })
