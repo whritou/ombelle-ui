@@ -16,6 +16,19 @@ export const recipeIconDependency = {
   name: 'lucide-react',
   version: runtimeDependencies['lucide-react'],
 } as const
+/** The liquid glass starting points in picker order: Cristal (the editor's default) first, the family base last. */
+export const startingPresetOrder = [
+  'builtin-liquid-glass-cristal',
+  'builtin-liquid-glass-givre',
+  'builtin-liquid-glass-fume',
+  'builtin-liquid-glass-relief',
+  'builtin-liquid-glass-clear',
+  'builtin-liquid-glass-prism',
+  'builtin-liquid-glass-liquid',
+  'builtin-liquid-glass',
+] as const
+export type StartingPresetId = (typeof startingPresetOrder)[number]
+
 export type ComponentTemplate = {
   id: ComponentId
   content: string
@@ -25,6 +38,8 @@ export type ComponentTemplate = {
   styles?: Partial<Record<StyleFamily, string>>
 }
 export type Catalog = {
+  /** Liquid glass starting points, keyed by preset id; see startingPresetOrder. */
+  startingPresets: Record<StartingPresetId, Preset>
   release: string
   presets: Record<StyleFamily, Preset>
   templates: Record<ComponentId, ComponentTemplate>
@@ -204,6 +219,12 @@ export function getCatalog(release: string): Catalog {
         validatePreset(catalogData.presets[family]),
       ]),
     ) as Record<StyleFamily, Preset>,
+    startingPresets: Object.fromEntries(
+      startingPresetOrder.map((id) => [
+        id,
+        validatePreset(catalogData.startingPresets[id as keyof typeof catalogData.startingPresets]),
+      ]),
+    ) as Record<StartingPresetId, Preset>,
     templates,
     styles: { ...catalogData.styles },
     utility: catalogData.utility,
