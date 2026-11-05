@@ -41,7 +41,7 @@ test('previews the lab materials from the component directory and Button editor'
 
   await page.goto('/editor/component/button')
   await chooseFamily(page, 'liquid-glass')
-  const buttonPreset = page.getByLabel('Glass preset', { exact: true })
+  const buttonPreset = page.getByRole('combobox', { name: 'Glass preset', exact: true })
   await expect(buttonPreset).toHaveValue('builtin-liquid-glass-cristal')
   const recipe = page.frameLocator('iframe[title="Button recipe preview"]')
   const button = recipe.locator('[data-slot="recipe-button"]')
