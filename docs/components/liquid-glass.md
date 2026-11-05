@@ -73,6 +73,35 @@ Three shared design controls that glass used to ignore now drive the glass edges
 
 For glass drafts, both editors show the glass labels with a one-line hint each; for other families the labels stay "Shadow X offset", "Shadow Y offset", "Border width" and "Border". Edges carry no text, so an opaque `border` colour makes a solid edge and does not change the contrast bound. Negative offsets move the shadow left and up. `box-shadow` offsets are physical, so they do not flip in right-to-left layouts. A Button recipe's shadow and border overrides apply to the scoped glass Button's glow and edge.
 
+## Starting presets
+
+The catalog ships eight liquid glass starting points, in the order the editor lists them (`startingPresetOrder` and `catalog.startingPresets` in `@ombelle/catalog`). Picking one loads all its values; every setting stays editable, and the draft saves and installs like any custom preset.
+
+| Preset | Id | Opacity | Blur | Contrast | Shine | Refraction · width | Rim | Halo | Relief | Motion | Dispersion | Tint |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Cristal (default) | `builtin-liquid-glass-cristal` | 0.4 | 9 | 1.25 | 0.76 | 0.55 · 0.13 | 0.72 | 0.6 | 0 | 0.42 | 0 | Claire |
+| Givré | `builtin-liquid-glass-givre` | 0.69 | 26 | 1.178 | 0.46 | 0.22 · 0.21 | 0.48 | 0.44 | 0 | 0.24 | 0 | Rosée |
+| Fumé | `builtin-liquid-glass-fume` | 0.76 | 12 | 1.378 | 0.68 | 0.66 · 0.08 | 0.58 | 0.64 | 0 | 0.42 | 0 | Fumée |
+| Relief | `builtin-liquid-glass-relief` | 0.39 | 17 | 1.1 | 0.13 | 0.33 · 0.08 | 0.73 | 0.76 | 0.9 | 0.24 | 0 | Rosée (warm) |
+| Clear | `builtin-liquid-glass-clear` | 0.42 | 16 | 1.111 | 0.6 | 0 · 0 | 0.8 | 0.8 | 0.35 | 0.3 | 0 | Claire |
+| Prism | `builtin-liquid-glass-prism` | 0.3 | 20 | 1.139 | 0.7 | 0.2 · 0.1 | 0.85 | 0.9 | 0.4 | 0.3 | 1 | Claire |
+| Liquid | `builtin-liquid-glass-liquid` | 0.25 | 3 | 1.167 | 0.7 | 1 · 0.22 | 0.7 | 0.8 | 0.5 | 0.4 | 0.3 | Claire |
+| Liquid glass | `builtin-liquid-glass` | 0.57 | 3 | 0.45 | 0.25 | — | 0.6 | — | — | — | — | White |
+
+- **Values.** They come from the material lab: opacity, shine, rim and the material settings as fractions, and contrast as `1 + lab contrast / 180`. The lab applies no saturation or tone, so those are 1 and 0. Liquid's lab opacity of 0.18 is below the schema's floor and ships at 0.25. Relief's light `destructive` is `#641515`, so error text passes on its warm rose veil.
+- **Tints** are the card and popover colours with their ink, written into both modes:
+
+  | Tint | Light veil · ink | Dark veil · ink |
+  | --- | --- | --- |
+  | Claire | `#DAF6FF` · `#102038` | `#1B2540` · `#F0F7FF` |
+  | Rosée | `#FFD7EB` · `#102038` | `#2A1D33` · `#F0F7FF` |
+  | Rosée (warm), Relief | `#F4A5B3` · `#301B22` | `#2E1A24` · `#F0F7FF` |
+  | Fumée | `#091127` · `#F0F7FF`, the dark palette in both modes | the same |
+
+- **Accents.** `primary` and `ring` follow the tint: Claire `#0B6AA8` (dark `#7DD3FC`), Rosée `#A3245A` (`#F9A8D4`), Relief `#8C1D3A` (`#FECDD3`), Fumée `#7DD3FC`.
+- **Contrast.** Every starting preset passes the contrast bound. The lowest passing opacity is 0.25 (the schema floor) for all of them except Relief, at 0.26, and Liquid glass, at 0.57.
+- **The family base stays Liquid glass.** `resolvePreset` fills a saved preset's missing fields from `presets['liquid-glass']`. A Cristal base would give every saved 0.5 project Cristal's halo, refraction and glow, so the base is today's look and Cristal is the editor's default starting point.
+
 ## Upgrading from 0.4.x
 
 `init` saved the whole built-in preset to `ui-preset.json`, and `add` compiles that saved file. So every glass project initialized with 0.4.x keeps the 0.4.x values, not only projects with a custom preset. Under 0.5.0 those values fail the contrast pairs 0.5.0 adds (the field placeholder at 55% coverage, `destructive` on `card`, the checked Radio Group row and the highlighted Select option hint): every `add`, even `add button`, and `theme add` with that file stop with `INVALID_DATA` at `/design/glassOpacity`, for example `Liquid glass text contrast fails in light for mutedForeground on background at 55% coverage: 2.98:1 over the darkest filtered backdrop. Minimum passing glassOpacity is 0.93. See "Upgrading from 0.4.x" in docs/components/liquid-glass.md.` Raising `glassOpacity` to 0.93 passes but makes the glass nearly opaque. Instead, set the 0.5.0 values in `ui-preset.json`, or run `theme add` with a copy of the 0.5.0 built-in liquid glass preset:
@@ -106,6 +135,8 @@ Screenshots of every variant and state, the other glass components on the kit ba
 ## Contrast bound
 
 A translucent surface shows its backdrop through it. Text on it cannot be checked against one fixed colour, so the compiler checks the two extremes instead. Before the surface is mixed in, the glass filter compresses the backdrop: `contrast()` and `brightness()` map every channel of every backdrop pixel into a range `[low, high]`, whatever its colour or saturation. The compiler mixes the surface colour with grey `low`, and with grey `high` under the full specular sheen, at the preset's opacity. Any real backdrop, blurred or not, produces a surface whose brightness lies between those two. The compiler requires 4.5:1 against both, and requires the text to be either lighter or darker than both. Together these keep 4.5:1 over any backdrop. Compressing the backdrop is what lets the glass be thin: the built-in palette needs opacity 0.57; over raw black and white the 55% field placeholder would never pass.
+
+**Text glow plate.** When any material setting is above 0, glass text carries a tight glow in its surface colour: three stacked `text-shadow`s (1, 2 and 4px), the `--glass-plate` colour at 85%. The material lab uses the same aid. WCAG measures text against its adjacent background, so the bound evaluates each glyph against the plate: the surface at 85% over whatever the glass paints, sheen and pointer shine included. This is what lets the starting presets stay as thin as the lab draws them. Forced colours remove the glow.
 
 The compiler also requires each pair to pass on its opaque surface, which every fallback uses, and computes `--glass-nested-opacity` for glass nested in a glass Card, Dialog, or Tooltip. Nested glass drops its own filter, so its coverage is bounded against raw black and white.
 
