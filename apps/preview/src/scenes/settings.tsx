@@ -1,4 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '../generated/preset-gallery/components/ui/accordion'
 import { Button } from '../generated/preset-gallery/components/ui/button'
 import { Separator } from '../generated/preset-gallery/components/ui/separator'
 import {
@@ -222,7 +228,25 @@ export function SettingsScene(props: SceneProps) {
             )}
           </div>
         </TabsContent>
-        <TabsContent value="billing">Your plan renews on the first of the month.</TabsContent>
+        <TabsContent value="billing">
+          <div className="scene-stack">
+            Your plan renews on the first of the month.
+            {show(
+              'accordion',
+              'Accordion',
+              <Accordion type="single" collapsible defaultValue="invoices">
+                <AccordionItem value="invoices">
+                  <AccordionTrigger level={2}>Where are my invoices?</AccordionTrigger>
+                  <AccordionContent>Invoices are emailed to the billing contact and listed here each month.</AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="seats">
+                  <AccordionTrigger level={2}>How are seats counted?</AccordionTrigger>
+                  <AccordionContent>Every member with edit access uses one seat. Viewers are free.</AccordionContent>
+                </AccordionItem>
+              </Accordion>,
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
     </main>
   )

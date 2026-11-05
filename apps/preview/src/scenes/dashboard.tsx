@@ -34,6 +34,14 @@ import {
 import { Progress } from '../generated/preset-gallery/components/ui/progress'
 import { Switch } from '../generated/preset-gallery/components/ui/switch'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../generated/preset-gallery/components/ui/table'
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -206,7 +214,38 @@ export function DashboardScene(props: SceneProps) {
                 </ul>
               </TooltipProvider>
             </TabsContent>
-            <TabsContent value="activity">Your latest changes are saved.</TabsContent>
+            <TabsContent value="activity">
+              {show(
+                'table',
+                'Table',
+                <Table aria-label="Recent deploys">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Project</TableHead>
+                      <TableHead>Environment</TableHead>
+                      <TableHead numeric>Duration</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Website refresh</TableCell>
+                      <TableCell>Production</TableCell>
+                      <TableCell numeric>1 m 42 s</TableCell>
+                    </TableRow>
+                    <TableRow selected>
+                      <TableCell>Mobile onboarding</TableCell>
+                      <TableCell>Preview</TableCell>
+                      <TableCell numeric>58 s</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Billing migration</TableCell>
+                      <TableCell>Preview</TableCell>
+                      <TableCell numeric>2 m 05 s</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>,
+              )}
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

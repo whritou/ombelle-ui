@@ -11,7 +11,7 @@ import {
 } from '../src/index.js'
 
 const glassExperimental = ['alert', 'button', 'badge', 'card', 'dialog', 'dropdown-menu', 'popover', 'tabs', 'tooltip']
-const glassUnavailable = ['avatar', 'checkbox', 'input', 'label', 'native-select', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'textarea']
+const glassUnavailable = ['accordion', 'avatar', 'checkbox', 'input', 'label', 'native-select', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'textarea']
 
 describe('style support table', () => {
   it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
@@ -33,8 +33,8 @@ describe('style support table', () => {
     expect(componentsWithStyleSupport('liquid-glass', ['stable'])).toEqual([])
     expect(componentsWithStyleSupport('flat', ['stable'])).toEqual([...supportedComponentIds])
   })
-  it('marks ombelle stable for all twenty-one components', () => {
-    expect(supportedComponentIds).toHaveLength(21)
+  it('marks ombelle stable for all twenty-three components', () => {
+    expect(supportedComponentIds).toHaveLength(23)
     for (const id of supportedComponentIds) expect(styleSupport(id, 'ombelle')).toBe('stable')
   })
   it('recognises families', () => {

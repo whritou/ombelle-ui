@@ -1,0 +1,75 @@
+/* minimalist Table */
+[data-slot='table-container'] {
+  position: relative;
+  inline-size: 100%;
+  overflow-x: auto;
+}
+[data-slot='table'] {
+  inline-size: 100%;
+  border-collapse: collapse;
+  caption-side: bottom;
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+}
+[data-slot='table-caption'] {
+  padding-block: 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  text-align: start;
+}
+[data-slot='table-head'] {
+  padding-block: 0.625rem;
+  padding-inline: 0 0.75rem;
+  border-block-end: 1px solid var(--foreground);
+  color: var(--muted-foreground);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-align: start;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+[data-slot='table-cell'] {
+  padding-block: 0.875rem;
+  padding-inline: 0 0.75rem;
+  border-block-end: 1px solid var(--border);
+  vertical-align: middle;
+}
+[data-slot='table-row'][data-state='selected'] > [data-slot='table-cell'] {
+  background: var(--muted);
+}
+[data-slot='table-row'][data-state='selected'] > [data-slot='table-cell']:first-child {
+  padding-inline-start: 0.625rem;
+  box-shadow: inset 2px 0 0 var(--foreground);
+}
+[data-slot='table-row'][data-state='selected'] > [data-slot='table-cell']:first-child:dir(rtl) {
+  box-shadow: inset -2px 0 0 var(--foreground);
+}
+[data-slot='table-footer'] > [data-slot='table-row'] > * {
+  border-block-start: 1px solid var(--foreground);
+  font-weight: 600;
+}
+[data-slot='table-head'][data-numeric],
+[data-slot='table-cell'][data-numeric] {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+[data-slot='table-cell'][data-numeric] {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+}
+@media (forced-colors: active) {
+  [data-slot='table-head'] {
+    color: CanvasText;
+    border-block-end-color: CanvasText;
+  }
+  [data-slot='table-cell'] {
+    border-block-end-color: CanvasText;
+  }
+  [data-slot='table-row'][data-state='selected'] > [data-slot='table-cell'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+}

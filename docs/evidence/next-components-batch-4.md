@@ -4,14 +4,14 @@
 
 ## Source and environment
 
-Branch `feat/progress-skeleton`, cut from `main` at `3a856e7` (after batch 2; batch 3 was still in review). Windows 11, Node v24.19.0, pnpm 11.25.0 (through corepack). The browser checks used Playwright 1.64.1 driving Microsoft Edge 156.0.4314.58 (Chromium) against the www dev server on port 3100, after `node scripts/build-hosted-preview.mjs`. The visual source is the canvas's four "next 10 components" sheets and the family UI kits.
+Branch `feat/progress-skeleton`, cut from `main` at `3a856e7` (after batch 2) and merged with `main` after batch 3 landed; the checks below ran on the merged tree (23 components). Windows 11, Node v24.19.0, pnpm 11.25.0 (through corepack). The browser checks used Playwright 1.64.1 driving Microsoft Edge 156.0.4314.58 (Chromium) against the www dev server on port 3100, after `node scripts/build-hosted-preview.mjs`. The visual source is the canvas's four "next 10 components" sheets and the family UI kits.
 
 ## What ran
 
 | Check | Result |
 | --- | --- |
 | `corepack pnpm typecheck` | passed |
-| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 115 files, 1070 tests passed |
+| `corepack pnpm test:unit` (`VITEST_MAX_WORKERS=4`) | 119 files, 1090 tests passed |
 | `tests/integration/preset-gallery-generation`, `preview-routing`, `hosted-preview-build`, `liquid-glass-cli`, `www-route` | 5 files, 36 tests passed |
 | Playwright screenshots, four families, light and dark: Progress at 64%, complete and indeterminate, and Skeleton lines, circle and block | 16 component captures and 2 scene captures, reviewed against the sheets |
 

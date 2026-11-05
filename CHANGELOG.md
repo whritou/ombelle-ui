@@ -7,6 +7,8 @@
 - Preview: the preset gallery shows the four components; the dashboard gains an alert and per-project action menus, settings gains a role Select and a digest Radio Group, and sign-in gains a status alert.
 - Website: the components pages list the new components only once the published installer can add them (`minimumCli` 0.5.0).
 - Add Popover (Radix Popover 1.3.1), Avatar (Radix Avatar 1.3.1) and Separator (Radix Separator 1.2.0) in the four stable families. Popover is experimental in liquid glass; Avatar and Separator are unavailable there. The stable family hashes gain 36 entries and change none.
+- Add Table (native table with caption, footer, numeric columns and selected rows) and Accordion (Radix Accordion 1.3.1) in the four stable families. Both are unavailable in liquid glass. The stable family hashes gain 24 entries and change none.
+- Preview: the dashboard Activity tab lists recent deploys in a Table, and the settings Billing tab answers questions in an Accordion.
 - Add Progress (Radix Progress 1.2.1, with complete and indeterminate states) and Skeleton (decorative placeholder in text, circle and block shapes) in the four stable families. Both are unavailable in liquid glass. Their looping animations stop under reduced-motion presets and the OS setting. The stable family hashes gain 24 entries and change none.
 - Preview: the dashboard shows monthly deploy usage in a Progress bar, and the settings Members tab shows a Skeleton while members load.
 - Preview: dashboard rows show owner avatars, the projects card a reviewer stack, and Invite opens a popover; sign-in separates its options with "or" and the settings Members tab uses a separator.

@@ -57,6 +57,10 @@ body {
   gap: 12px;
 }
 .preset-tight {
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+.preset-skeleton-card {
   gap: 14px;
   flex-wrap: nowrap;
 }

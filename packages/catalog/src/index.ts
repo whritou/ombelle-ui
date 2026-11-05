@@ -51,6 +51,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   popover: ['@radix-ui/react-popover'],
   avatar: ['@radix-ui/react-avatar'],
   separator: ['@radix-ui/react-separator'],
+  accordion: ['@radix-ui/react-accordion', 'lucide-react'],
   progress: ['@radix-ui/react-progress'],
 }
 const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
@@ -139,6 +140,26 @@ const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'avatar-group',
   ],
   separator: ['separator', 'separator-label'],
+  accordion: [
+    'accordion',
+    'accordion-item',
+    'accordion-header',
+    'accordion-trigger',
+    'accordion-icon',
+    'accordion-content',
+    'accordion-content-inner',
+  ],
+  table: [
+    'table-container',
+    'table',
+    'table-caption',
+    'table-header',
+    'table-body',
+    'table-footer',
+    'table-row',
+    'table-head',
+    'table-cell',
+  ],
   progress: ['progress', 'progress-indicator'],
 }
 export function getCatalog(release: string): Catalog {
