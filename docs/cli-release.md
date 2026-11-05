@@ -1,6 +1,6 @@
 # Standalone CLI candidate
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.4.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.4.1.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
 Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
 
@@ -22,7 +22,15 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.4.0, which is published as `@ombelle-ui/cli@0.4.0`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
+All six workspace packages use software version 0.4.1, which is published as `@ombelle-ui/cli@0.4.0`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
+
+Release 0.4.1 in this order:
+
+1. Publish `@ombelle-ui/cli@0.4.1` from the tested candidate and verify the registry integrity.
+2. Run `pnpm version:set --published 0.4.1` (then `--check --published`) and commit it to `main`.
+3. Deploy the website from `main`.
+
+0.4.1 has no version gate on the website. The website deploys from `main` on every merge, so it already publishes ombelle and neo-brutalism preset codes with `shadowColor` and recipe codes with the new Button fields. Installer 0.4.0 rejects those, and installs the other families with their 0.4.0 stylesheets, which differ from the preview. Publish 0.4.1 and complete step 2 promptly.
 
 Release 0.4.0 in this order:
 
