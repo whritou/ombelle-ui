@@ -20,6 +20,7 @@ const buttonVariants = cva(
         default: 'text-sm',
         lg: 'text-base',
         icon: 'aspect-square',
+        'icon-sm': 'aspect-square',
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },

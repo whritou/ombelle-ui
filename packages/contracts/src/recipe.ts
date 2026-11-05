@@ -56,8 +56,8 @@ export const recipeIcons: Record<RecipeIconName, string> = {
  * follow them in both modes. Because families paint ghost/link backgrounds
  * transparent, link text from different tokens and borders from --border,
  * --input or the variant color, the compiler also paints each overridden role
- * on the selected variant from its mapped token: ghost/link `background`,
- * link `color`, and `border-color` for every variant. Once a role is painted,
+ * on the selected variant from its mapped token: outline/ghost/link `background`,
+ * outline/link `color`, and `border-color` for every variant. Once a role is painted,
  * a mode without its own override shows that mode's preset token. Outline and
  * ghost hover/active states keep the family's --accent colors.
  */
@@ -68,7 +68,9 @@ export const recipeColorTokens: Record<
   default: { background: 'primary', foreground: 'primaryForeground', border: 'border' },
   secondary: { background: 'secondary', foreground: 'secondaryForeground', border: 'border' },
   destructive: { background: 'destructive', foreground: 'destructiveForeground', border: 'border' },
-  outline: { background: 'background', foreground: 'foreground', border: 'border' },
+  // Outline buttons sit on a card surface in the kits; families that draw them
+  // transparent or from --background still show overrides, painted below.
+  outline: { background: 'card', foreground: 'cardForeground', border: 'border' },
   ghost: { background: 'background', foreground: 'foreground', border: 'border' },
   link: { background: 'background', foreground: 'foreground', border: 'border' },
 }

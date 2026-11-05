@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
@@ -124,10 +125,12 @@ export default function GlassScenario() {
                   <Button variant="outline">Open {id} dialog</Button>
                 </DialogTrigger>
                 <DialogContent>
-                  <DialogTitle>Confirm changes</DialogTitle>
-                  <DialogDescription>
-                    Review your project settings before continuing.
-                  </DialogDescription>
+                  <DialogHeader>
+                    <DialogTitle>Confirm changes</DialogTitle>
+                    <DialogDescription>
+                      Review your project settings before continuing.
+                    </DialogDescription>
+                  </DialogHeader>
                   <Button>Confirm</Button>
                 </DialogContent>
               </Dialog>

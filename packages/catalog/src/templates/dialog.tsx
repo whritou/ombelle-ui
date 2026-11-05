@@ -6,6 +6,10 @@ import { cn } from './utils.js'
 export const Dialog = DialogPrimitive.Root
 export const DialogTrigger = DialogPrimitive.Trigger
 export const DialogClose = DialogPrimitive.Close
+/** Groups the title and description at the top of the dialog; families style it as one block. */
+export function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
+  return <div data-slot="dialog-header" className={cn(className)} {...props} />
+}
 export function DialogTitle({
   className,
   ...props

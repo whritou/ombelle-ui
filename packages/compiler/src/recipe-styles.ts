@@ -259,11 +259,12 @@ export function compileScopedButtonStyles(input: {
     }
     const set = (role: RecipeColorRole) =>
       colors.light?.[role] !== undefined || colors.dark?.[role] !== undefined
-    // Families paint ghost/link transparent, link text from --primary in some families,
+    // Families paint ghost/link transparent and outline from --card, --background or
+    // nothing at all, link text from --primary in some families,
     // and borders from different tokens; paint the overridden roles from the mapped token.
-    if (set('background') && (variant === 'ghost' || variant === 'link'))
+    if (set('background') && (variant === 'outline' || variant === 'ghost' || variant === 'link'))
       paint.background = 'var(' + variable(colorTokens.background) + ')'
-    if (set('foreground') && variant === 'link')
+    if (set('foreground') && (variant === 'outline' || variant === 'link'))
       paint.color = 'var(' + variable(colorTokens.foreground) + ')'
     if (set('border'))
       paint['border-color'] = 'var(' + variable(colorTokens.border) + ')'
