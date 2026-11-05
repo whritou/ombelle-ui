@@ -530,7 +530,7 @@ it('a one-mode glass secondary background override leaves the other mode on card
 it.each(['outline', 'ghost'] as const)(
   'a glass %s background override replaces the colour of the glass mix instead of painting it solid',
   async (variant) => {
-    const { css, paint } = await colorCss('liquid-glass', variant, { light: { background: '#ff0000' } })
+    const { css, paint } = await colorCss('liquid-glass', variant, { light: { background: '#ff0000' }, dark: { background: '#00ff00' } })
     const token = variant === 'outline' ? 'var(--card)' : 'var(--background)'
     // Without backdrop filters the override is opaque; outline keeps its hover tint.
     expect(paint).toEqual({
@@ -573,3 +573,24 @@ it.each(['outline', 'ghost'] as const)(
     expect(css.lastIndexOf('@supports')).toBeGreaterThan(css.indexOf(`${selector}{background:`))
   },
 )
+it('a one-mode glass outline background override leaves the other mode on background glass', async () => {
+  const lightOnly = await colorCss('liquid-glass', 'outline', { light: { background: '#ff0000' } })
+  expect(lightOnly.light['--card']).toBe('#ff0000')
+  // Outline glass reads the overridden card token, which in dark falls back to the dark background.
+  expect(lightOnly.dark['--card']).toBe(lightOnly.dark['--background'])
+  const darkOnly = await colorCss('liquid-glass', 'outline', { dark: { background: '#ff0000' } })
+  expect(darkOnly.light['--card']).toBe(darkOnly.light['--background'])
+})
+it('a one-mode glass ghost background override leaves the other mode with no surface at rest', async () => {
+  const selector = `${colorSelector}[data-variant="ghost"]`
+  const lightOnly = await colorCss('liquid-glass', 'ghost', { light: { background: '#ff0000' } })
+  expect(lightOnly.light['--background']).toBe('#ff0000')
+  expect(lightOnly.dark['--background']).toBe('transparent')
+  // The glass surface and its filter apply only in the overridden mode.
+  const flat = lightOnly.css.replace(/\s+/g, '')
+  expect(flat).toContain(`${selector}:not(.dark,.dark*){-webkit-backdrop-filter:var(--glass-inner-filter,`)
+  expect(flat).not.toContain(`${selector}{-webkit-backdrop-filter:var(--glass-inner-filter,`)
+  const darkOnly = await colorCss('liquid-glass', 'ghost', { dark: { background: '#ff0000' } })
+  expect(darkOnly.light['--background']).toBe('transparent')
+  expect(darkOnly.css.replace(/\s+/g, '')).toContain(`.dark${selector},.dark${selector}{-webkit-backdrop-filter:var(--glass-inner-filter,`)
+})
