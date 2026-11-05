@@ -30,3 +30,15 @@ it('summarizes hash, release and dependencies on the metadata line', async () =>
   const withDeps = artifactMeta({ ...result, dependencies: [{ name: 'clsx', version: '2.1.1' }] })
   expect(withDeps.at(-1)).toBe('clsx@2.1.1')
 })
+
+it('the Install tab explains why a recipe with glass material overrides has no command yet', async () => {
+  const { installText } = await import('./artifact-panel')
+  const { withRecipeOverride } = await import('../model.js')
+  const glass = createEditorDraft('liquid-glass').recipe
+  expect(installText(glass, { version: '0.4.1' })).toContain('add --recipe')
+  const material = withRecipeOverride(glass, 'glassHalo', 0.9)
+  const held = installText(material, { version: '0.4.1' })
+  expect(held).not.toContain('add --recipe')
+  expect(held).toContain('0.5.0')
+  expect(installText(material, { version: '0.5.0' })).toContain('add --recipe')
+})
