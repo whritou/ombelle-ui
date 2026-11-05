@@ -1,0 +1,94 @@
+/* liquid-glass Progress (experimental): a glass track (foreground 10% over the card, at half the glass coverage) with a
+   solid, glossy primary fill and a primary glow; complete is green. No text sits on either, so there is no contrast pair.
+   Without backdrop-filter, or under reduced transparency, the track is opaque. */
+[data-slot='progress'] {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  inline-size: 100%;
+  block-size: 0.625rem;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 10%, var(--card));
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 12%);
+}
+[data-slot='progress-indicator'] {
+  flex-shrink: 0;
+  block-size: 100%;
+  inline-size: 0;
+  border-radius: 999px;
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 35%), transparent 60%),
+    var(--primary);
+  box-shadow: 0 0 10px -2px color-mix(in srgb, var(--primary) 80%, transparent);
+  transition: inline-size var(--motion-duration) ease-out;
+}
+[data-slot='progress-indicator'][data-state='complete'] {
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 35%), transparent 60%),
+    #16A34A;
+  box-shadow: 0 0 10px -2px rgb(22 163 74 / 80%);
+}
+/* Indeterminate: a segment sweeps across. At rest (reduced-motion presets or the
+   OS setting) the whole track is a faded full fill, so it never reads as an amount. */
+[data-slot='progress-indicator'][data-state='indeterminate'] {
+  inline-size: 100%;
+  opacity: 0.45;
+  animation: ombelle-progress-sweep calc(var(--motion-duration) * 10) ease-in-out infinite;
+}
+@keyframes ombelle-progress-sweep {
+  from {
+    inline-size: 40%;
+    margin-inline-start: -40%;
+    opacity: 1;
+  }
+  to {
+    inline-size: 40%;
+    margin-inline-start: 100%;
+    opacity: 1;
+  }
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* The track is nested glass at half the coverage, like the kit's 50% track. */
+  [data-slot='progress'] {
+    background: color-mix(in srgb, color-mix(in srgb, var(--foreground) 10%, var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.5)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='progress'] {
+      background: color-mix(in srgb, var(--foreground) 10%, var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='progress'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='progress'] {
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='progress-indicator'],
+  [data-slot='progress-indicator'][data-state='complete'] {
+    background: Highlight;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='progress-indicator'] {
+    transition: none;
+  }
+  [data-slot='progress-indicator'][data-state='indeterminate'] {
+    animation: none;
+  }
+}

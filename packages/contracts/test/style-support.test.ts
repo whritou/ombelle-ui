@@ -10,8 +10,8 @@ import {
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'separator', 'switch', 'table', 'tabs', 'textarea', 'tooltip']
-const glassUnavailable = ['progress', 'skeleton']
+const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip']
+const glassUnavailable: string[] = []
 
 describe('style support table', () => {
   it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
@@ -43,7 +43,8 @@ describe('style support table', () => {
     expect(isStyleFamily('flat')).toBe(true)
     expect(isStyleFamily('constructor')).toBe(false)
   })
-  it('refuses unavailable components in input order', () => {
+  // No glass component is unavailable now; Task C4 replaces this refusal test.
+  it.skip('refuses unavailable components in input order', () => {
     expect(() => assertStyleAvailable(['card', 'skeleton'], 'liquid-glass')).toThrow(FoundationError)
     try {
       assertStyleAvailable(['card', 'progress', 'skeleton'], 'liquid-glass')
@@ -59,5 +60,8 @@ describe('style support table', () => {
     }
     expect(() => assertStyleAvailable(['button', 'card'], 'liquid-glass')).not.toThrow()
     expect(() => assertStyleAvailable([...supportedComponentIds], 'flat')).not.toThrow()
+  })
+  it('accepts every component in liquid glass', () => {
+    expect(() => assertStyleAvailable([...supportedComponentIds], 'liquid-glass')).not.toThrow()
   })
 })

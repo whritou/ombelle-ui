@@ -26,7 +26,7 @@ const notice = (ids: readonly string[]) =>
 const installOrder = [
   'button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input',
   'label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select', 'avatar', 'separator',
-  'table', 'accordion',
+  'table', 'accordion', 'progress', 'skeleton',
 ] as const
 const installed = glassIds.filter((id) => (installOrder as readonly string[]).includes(id))
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
@@ -67,8 +67,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the twenty-one experimental ids', () => {
-  expect(glassIds).toEqual(['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'tabs', 'table', 'textarea', 'tooltip'])
+it('lists the twenty-three experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'progress', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {
@@ -112,8 +112,8 @@ for (const manager of ['pnpm', 'npm'] as const) {
     )
     expect(css.map((a) => a.logicalPath).sort()).toEqual(
       [
-        'accordion', 'alert', 'avatar', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover',
-        'radio-group', 'select', 'separator', 'switch', 'table', 'tabs', 'textarea', 'tooltip',
+        'accordion', 'alert', 'avatar', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover', 'progress',
+        'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip',
       ].map((id) => 'components/ui/' + id + '.css'),
     )
     for (const artifact of canonical.artifacts.filter((a) => a.logicalPath.startsWith('components/ui/')))
@@ -126,16 +126,12 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(again.code, again.output).toBe(0)
     expect(jsonRecord(again.data).notices).toEqual([notice(['badge']), mountNotice])
 
-    // Unavailable component: refused, nothing written.
-    const before = await snapshotTree(root)
-    expect(Object.keys(before)).toContain(lockName)
-    const refused = await command(['add', 'skeleton', '--yes'])
-    expect(refused.code, refused.output).not.toBe(0)
-    expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({ code: 'STYLE_UNAVAILABLE', path: '/componentIds' })
-    expect(await snapshotTree(root)).toEqual(before)
+    // No glass component is unavailable now; Task C4 restores the refusal check.
+    expect(Object.keys(await snapshotTree(root))).toContain(lockName)
   }, 180000)
 
-  it(`refuses a mixed add as a whole (${manager})`, async () => {
+  // No glass component is unavailable now; Task C4 replaces this refusal test.
+  it.skip(`refuses a mixed add as a whole (${manager})`, async () => {
     const root = await make()
     roots.push(root)
     const { glass } = await writePresets()
@@ -190,7 +186,8 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(plan.warnings).toEqual([])
   }, 180000)
 
-  it(`refuses theme add into glass while unavailable components are installed (${manager})`, async () => {
+  // No glass component is unavailable now; Task C4 replaces this refusal test.
+  it.skip(`refuses theme add into glass while unavailable components are installed (${manager})`, async () => {
     const root = await make()
     roots.push(root)
     const { glass } = await writePresets()

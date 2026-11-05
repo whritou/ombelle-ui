@@ -23,7 +23,7 @@ describe('Progress catalog contract', () => {
         "[data-slot='progress-indicator'][data-state='indeterminate']",
         '@media (prefers-reduced-motion: reduce)',
       ],
-      glass: 'unavailable',
+      glass: 'experimental',
     })
   })
 

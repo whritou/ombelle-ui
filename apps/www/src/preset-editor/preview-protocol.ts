@@ -131,7 +131,8 @@ export async function verifyPresetRender(
       (a) => a.kind === 'component' || a.kind === 'utility',
     )
     // Every compiled source must be reviewed gallery source; a full family
-    // must also cover the whole manifest.
+    // (glass included, once it supports every component) must also cover the
+    // whole manifest.
     // The gallery also carries the glass-only filter, which full stable
     // families do not compile.
     const shared = Object.keys(manifest.sources).filter(
@@ -139,7 +140,8 @@ export async function verifyPresetRender(
     )
     if (
       (componentIds.length === supportedComponentIds.length &&
-        sources.length !== shared.length) ||
+        sources.filter((a) => a.logicalPath !== 'components/ui/liquid-glass-filter.tsx').length !==
+          shared.length) ||
       sources.some(
         (a) => manifest.sources[a.logicalPath]?.canonicalHash !== a.sha256,
       )

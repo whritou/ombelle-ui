@@ -129,7 +129,7 @@ it('rejects a compiled result for a different preset hash without exposing a fra
   session.dispose()
 })
 it.each([
-  ['liquid-glass', ['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'switch', 'separator', 'tabs', 'table', 'textarea', 'tooltip']],
+  ['liquid-glass', ['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip']],
   ['flat', supportedComponentIds],
 ] as const)(
   'compiles the components a %s snapshot supports for its preview',

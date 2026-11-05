@@ -36,8 +36,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the twenty-one experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'avatar', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'radio-group', 'select', 'separator', 'switch', 'table', 'tabs', 'textarea', 'tooltip'])
+  it('compiles the twenty-three experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'avatar', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -53,9 +53,11 @@ describe('liquid-glass compile', () => {
       'components/ui/label.css',
       'components/ui/native-select.css',
       'components/ui/popover.css',
+      'components/ui/progress.css',
       'components/ui/radio-group.css',
       'components/ui/select.css',
       'components/ui/separator.css',
+      'components/ui/skeleton.css',
       'components/ui/switch.css',
       'components/ui/table.css',
       'components/ui/tabs.css',
@@ -81,12 +83,9 @@ describe('liquid-glass compile', () => {
     expect(second.preset.hash).toBe(first.preset.hash)
   })
 
-  it.each(unavailable)('refuses unavailable component %s', async (id) => {
-    expect(unavailable).toHaveLength(2)
-    await expect(build(builtin(), ['button', id])).rejects.toMatchObject({
-      code: 'STYLE_UNAVAILABLE',
-      path: '/componentIds',
-    })
+  // Every component is experimental in glass, so no component can be refused; Task C4 replaces the refusal tests.
+  it('has no unavailable component left to refuse', () => {
+    expect(unavailable).toEqual([])
   })
 
   it('reduced transparency emits opaque tokens', async () => {

@@ -498,6 +498,7 @@ export function Faq() {
   },
   progress: {
     name: 'Progress',
+    glassMinimumCli: '0.5.0',
     description: 'Shows how far a task has got, or that it is running when the amount is unknown.',
     api: 'value (null for indeterminate), max, getValueLabel',
     states: 'Loading, complete, indeterminate',
@@ -517,6 +518,7 @@ export function InstallProgress() {
   },
   skeleton: {
     name: 'Skeleton',
+    glassMinimumCli: '0.5.0',
     description: 'A decorative placeholder shaped like the content that is loading.',
     api: 'shape (text, circle, block), className, style',
     states: 'Pulsing, static under reduced motion',
