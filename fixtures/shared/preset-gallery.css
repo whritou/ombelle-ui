@@ -52,6 +52,10 @@ body {
   flex-wrap: wrap;
   gap: 12px;
 }
+.preset-stack {
+  display: grid;
+  gap: 12px;
+}
 .preset-form,
 .preset-form > div {
   display: grid;

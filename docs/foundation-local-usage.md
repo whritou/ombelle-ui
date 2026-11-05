@@ -128,7 +128,7 @@ Dark mode follows the project's configured single class, default `.dark`; `.nigh
 
 Run `pnpm build:packages` and `pnpm generate:preview`, then run `pnpm dev:preview` and `pnpm dev:www` in separate terminals. Open [the global preset editor](http://127.0.0.1:3000/editor/preset). The preview server supplies its sandboxed gallery; valid JSON/CSS export also works when that server is unavailable.
 
-Choose flat, minimalist, or neo brutalism and customize the light/dark colors, system font, radius, density, border width, shadow offsets, and motion. The gallery includes all twelve catalog components and an interactive Dialog. The editor uses preset schema 1.0 and catalog/compiler 0.1.0. Colors use the existing hex/OKLCH contract. Contrast warnings evaluate eight text pairs in both modes; the draft status describes that limited automated check.
+Choose flat, minimalist, or neo brutalism and customize the light/dark colors, system font, radius, density, border width, shadow offsets, and motion. The gallery includes all sixteen catalog components and an interactive Dialog. The editor uses preset schema 1.0 and catalog/compiler 0.1.0. Colors use the existing hex/OKLCH contract. Contrast warnings evaluate eight text pairs in both modes; the draft status describes that limited automated check.
 
 Explicit token edits survive a family change, including values equal to the previous base. The confirmation lists untouched values that will change to the new base. Cancel, undo/redo, field reset, and confirmed full reset preserve the preset's editable identity. Incomplete input stays in the draft and produces a field-linked validation error. Export actions become available only after that exact current draft compiles.
 

@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
 import { Button } from '../generated/preset-gallery/components/ui/button'
 import {
   Card,
@@ -27,6 +28,14 @@ export function SignInScene(props: SceneProps) {
             <CardDescription>Welcome back. Pick up where you left off.</CardDescription>
           </CardHeader>
           <CardContent className="scene-fields">
+            {show(
+              'alert',
+              'Alert',
+              <Alert>
+                <AlertTitle>Your session expired</AlertTitle>
+                <AlertDescription>Sign in again to keep editing your presets.</AlertDescription>
+              </Alert>,
+            )}
             {show(
               'input',
               'Input',

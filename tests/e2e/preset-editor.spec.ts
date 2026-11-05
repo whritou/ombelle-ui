@@ -235,9 +235,9 @@ for (const family of supportedStyleFamilies)
   }
 
 const scenes = [
-  { option: 'Dashboard', heading: 'Overview', components: 'Tabs, Card, Badge, Button, Switch, Tooltip' },
-  { option: 'Settings', heading: 'Settings', components: 'Tabs, Card, Label, Input, Native Select, Textarea, Checkbox, Switch, Button' },
-  { option: 'Sign in', heading: 'Sign in to Acme', components: 'Card, Label, Input, Checkbox, Button' },
+  { option: 'Dashboard', heading: 'Overview', components: 'Alert, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu' },
+  { option: 'Settings', heading: 'Settings', components: 'Tabs, Card, Label, Input, Select, Native Select, Textarea, Checkbox, Switch, Radio Group, Alert, Button' },
+  { option: 'Sign in', heading: 'Sign in to Acme', components: 'Card, Alert, Label, Input, Checkbox, Button' },
 ] as const
 for (const family of supportedStyleFamilies)
   test(`opens on the dashboard and shows the dashboard, settings and sign-in pages in ${family}`, async ({ page }) => {

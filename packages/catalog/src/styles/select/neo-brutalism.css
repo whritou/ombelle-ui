@@ -1,0 +1,229 @@
+/* neo-brutalism Select */
+[data-slot='select-trigger'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--control-height);
+  padding-block: 0.375rem;
+  padding-inline: 0.75rem 0.375rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  font-family: var(--font-family);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: start;
+  box-shadow: var(--shadow-x) var(--shadow-y) 0
+    var(--shadow-color, var(--border));
+  cursor: pointer;
+  transition:
+    transform var(--motion-duration),
+    box-shadow var(--motion-duration);
+}
+[data-slot='select-trigger'][data-size='sm'] {
+  min-block-size: 2rem;
+  padding-block: 0.125rem;
+  font-size: 0.8125rem;
+}
+[data-slot='select-trigger'] > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-slot='select-trigger'][data-placeholder] {
+  color: var(--muted-foreground);
+}
+[data-slot='select-icon'] {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  inline-size: 1.625rem;
+  block-size: 1.625rem;
+  padding: 3px;
+  border: 2px solid var(--border);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  stroke-width: 3;
+}
+[data-slot='select-trigger'][data-state='open'] [data-slot='select-icon'] {
+  rotate: 180deg;
+}
+[data-slot='select-trigger']:focus-visible {
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
+}
+[data-slot='select-trigger'][aria-invalid='true'] {
+  border-color: var(--destructive);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--destructive);
+}
+[data-slot='select-trigger']:disabled,
+[data-slot='select-trigger'][data-disabled] {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-style: dashed;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+[data-slot='select-content'] {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 50;
+  min-inline-size: max(8rem, var(--radix-select-trigger-width));
+  max-block-size: var(--radix-select-content-available-height);
+  overflow: hidden;
+  padding: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: calc(var(--shadow-x) * 1.5) calc(var(--shadow-y) * 1.5) 0
+    var(--shadow-color, var(--border));
+}
+[data-slot='select-viewport'] {
+  display: flex;
+  flex-direction: column;
+}
+[data-slot='select-label'] {
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
+  border-block-end: var(--border-width) solid var(--border);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 0.6875rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+[data-slot='select-item'] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 2.5rem;
+  padding-block: 0.375rem;
+  padding-inline: 0.75rem 2.25rem;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+}
+[data-slot='select-item'] + [data-slot='select-item'] {
+  border-block-start: 2px solid var(--border);
+}
+[data-slot='select-item'][data-state='checked'] {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-weight: 900;
+}
+[data-slot='select-item'][data-highlighted] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='select-item'][data-disabled] {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--muted) 0 6px,
+    var(--popover) 6px 12px
+  );
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+[data-slot='select-item-hint'] {
+  margin-inline-start: auto;
+  color: var(--foreground);
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+[data-slot='select-item-indicator'] {
+  position: absolute;
+  inset-inline-end: 0.75rem;
+  display: flex;
+}
+[data-slot='select-item-indicator'] svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  stroke-width: 3.5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+[data-slot='select-separator'] {
+  block-size: 0;
+  border-block-start: var(--border-width) solid var(--border);
+}
+[data-slot='select-scroll-up-button'],
+[data-slot='select-scroll-down-button'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 1.5rem;
+  background: var(--muted);
+  cursor: default;
+}
+[data-slot='select-scroll-up-button'] svg,
+[data-slot='select-scroll-down-button'] svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+@media (forced-colors: active) {
+  [data-slot='select-trigger'] {
+    background: Field;
+    color: FieldText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='select-icon'] {
+    background: Canvas;
+    color: ButtonText;
+    border-color: ButtonText;
+  }
+  [data-slot='select-trigger']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='select-trigger'][aria-invalid='true'] {
+    border-style: double;
+  }
+  [data-slot='select-content'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='select-label'] {
+    background: Canvas;
+    color: CanvasText;
+    border-block-end-color: CanvasText;
+  }
+  [data-slot='select-item'] + [data-slot='select-item'] {
+    border-block-start-color: CanvasText;
+  }
+  [data-slot='select-item'][data-state='checked'] {
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='select-item'][data-highlighted] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='select-item'][data-disabled] {
+    background: Canvas;
+    color: GrayText;
+  }
+  [data-slot='select-separator'] {
+    border-block-start-color: CanvasText;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='select-trigger'] {
+    transition: none;
+  }
+}

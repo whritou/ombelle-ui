@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
 import { Button } from '../generated/preset-gallery/components/ui/button'
 import {
   Card,
@@ -14,6 +15,20 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from '../generated/preset-gallery/components/ui/native-select'
+import {
+  RadioGroup,
+  RadioGroupItem,
+  RadioGroupOption,
+  RadioGroupOptionDescription,
+  RadioGroupOptionLabel,
+} from '../generated/preset-gallery/components/ui/radio-group'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../generated/preset-gallery/components/ui/select'
 import { Switch } from '../generated/preset-gallery/components/ui/switch'
 import {
   Tabs,
@@ -68,13 +83,33 @@ export function SettingsScene(props: SceneProps) {
                     </div>,
                   )}
                   {show(
+                    'select',
+                    'Select',
+                    <div className="scene-field">
+                      <Label id="scene-role-label">Role</Label>
+                      <Select defaultValue="designer">
+                        <SelectTrigger aria-labelledby="scene-role-label">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="designer">Designer</SelectItem>
+                          <SelectItem value="engineer">Engineer</SelectItem>
+                          <SelectItem value="product">Product manager</SelectItem>
+                          <SelectItem value="researcher" disabled hint="Seat limit">
+                            Researcher
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>,
+                  )}
+                  {show(
                     'native-select',
                     'Native Select',
                     <div className="scene-field">
-                      <Label htmlFor="scene-role">Role</Label>
-                      <NativeSelect id="scene-role" defaultValue="designer">
-                        <NativeSelectOption value="designer">Designer</NativeSelectOption>
-                        <NativeSelectOption value="engineer">Engineer</NativeSelectOption>
+                      <Label htmlFor="scene-language">Language</Label>
+                      <NativeSelect id="scene-language" defaultValue="en">
+                        <NativeSelectOption value="en">English</NativeSelectOption>
+                        <NativeSelectOption value="fr">French</NativeSelectOption>
                       </NativeSelect>
                     </div>,
                   )}
@@ -115,6 +150,36 @@ export function SettingsScene(props: SceneProps) {
                     <Label htmlFor="scene-mentions">Notify me when I am mentioned</Label>
                   </div>,
                 )}
+                {show(
+                  'radio-group',
+                  'Radio Group',
+                  <div className="scene-field">
+                    <Label id="scene-digest-label">Digest frequency</Label>
+                    <RadioGroup defaultValue="weekly" aria-labelledby="scene-digest-label">
+                      <RadioGroupOption>
+                        <RadioGroupItem value="daily" />
+                        <span>
+                          <RadioGroupOptionLabel>Daily</RadioGroupOptionLabel>
+                          <RadioGroupOptionDescription>Every morning at 9:00</RadioGroupOptionDescription>
+                        </span>
+                      </RadioGroupOption>
+                      <RadioGroupOption>
+                        <RadioGroupItem value="weekly" />
+                        <span>
+                          <RadioGroupOptionLabel>Weekly</RadioGroupOptionLabel>
+                          <RadioGroupOptionDescription>Mondays, with a summary of reviews</RadioGroupOptionDescription>
+                        </span>
+                      </RadioGroupOption>
+                      <RadioGroupOption>
+                        <RadioGroupItem value="realtime" disabled />
+                        <span>
+                          <RadioGroupOptionLabel>Real time</RadioGroupOptionLabel>
+                          <RadioGroupOptionDescription>Available on the Team plan</RadioGroupOptionDescription>
+                        </span>
+                      </RadioGroupOption>
+                    </RadioGroup>
+                  </div>,
+                )}
               </CardContent>
             </Card>
             <Card>
@@ -124,6 +189,16 @@ export function SettingsScene(props: SceneProps) {
                   Removes every project and member. This cannot be undone.
                 </CardDescription>
               </CardHeader>
+              {show(
+                'alert',
+                'Alert',
+                <CardContent>
+                  <Alert variant="destructive" role="note">
+                    <AlertTitle>3 projects are still deploying</AlertTitle>
+                    <AlertDescription>Wait for them to finish before you delete this workspace.</AlertDescription>
+                  </Alert>
+                </CardContent>,
+              )}
               <CardFooter>
                 <Button variant="destructive">Delete workspace</Button>
               </CardFooter>
