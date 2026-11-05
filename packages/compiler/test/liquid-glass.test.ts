@@ -207,6 +207,31 @@ describe('liquid-glass compile', () => {
           expect(selector.match(/\[data-slot=/g)?.length ?? 0, sheet.logicalPath + ' ' + selector).toBeLessThanOrEqual(1)
       })
   })
+
+  // --glass-tint inherits: a selected table row or an open accordion trigger sets 12% primary, which would reach a
+  // nested Button, Avatar, Switch or Select item if it read the variable without setting it. Every rule that reads
+  // the tint therefore sits on an element that sets it itself, in the same selector or in its bare data-slot rule.
+  it('never reads an inherited glass tint', async () => {
+    const result = await build(builtin())
+    const setters = new Set<string>()
+    const readers: string[] = []
+    for (const sheet of result.artifacts.filter((a) => a.kind === 'style'))
+      postcss.parse(sheet.content).walkRules((rule) => {
+        const sets = rule.nodes.some((n) => n.type === 'decl' && n.prop === '--glass-tint')
+        const reads = rule.nodes.some((n) => n.type === 'decl' && n.prop !== '--glass-tint' && n.value.includes('var(--glass-tint'))
+        for (const selector of rule.selectors.map(squash)) {
+          if (sets) setters.add(selector)
+          if (reads) readers.push(sheet.logicalPath + ' ' + selector)
+        }
+      })
+    expect(readers.length).toBeGreaterThan(10)
+    for (const reader of readers) {
+      const selector = reader.split(' ')[1]!
+      const subject = selector.split(/[>+~]/).at(-1)!
+      const slot = subject.match(/^\[data-slot="[^"]+"\]/)?.[0]
+      expect(setters.has(selector) || (slot !== undefined && setters.has(slot)), reader).toBe(true)
+    }
+  })
 })
 
 describe('liquid-glass edges and shadows', () => {
