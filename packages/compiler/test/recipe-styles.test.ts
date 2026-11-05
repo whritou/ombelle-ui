@@ -527,3 +527,49 @@ it('a one-mode glass secondary background override leaves the other mode on card
   const darkOnly = await colorCss('liquid-glass', 'secondary', { dark: { background: '#223344' } })
   expect(darkOnly.light['--secondary']).toBe(darkOnly.light['--card'])
 })
+it.each(['outline', 'ghost'] as const)(
+  'a glass %s background override replaces the colour of the glass mix instead of painting it solid',
+  async (variant) => {
+    const { css, paint } = await colorCss('liquid-glass', variant, { light: { background: '#ff0000' } })
+    const token = variant === 'outline' ? 'var(--card)' : 'var(--background)'
+    // Without backdrop filters the override is opaque; outline keeps its hover tint.
+    expect(paint).toEqual({
+      background: variant === 'outline' ? `color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), ${token})` : token,
+    })
+    const selector = `${colorSelector}[data-variant="${variant}"]`
+    const inSupports = (media?: string) => {
+      const out: Record<string, string> = {}
+      postcss.parse(css).walkRules((rule) => {
+        if (rule.selector !== selector) return
+        const parent = rule.parent
+        const supports = media ? parent?.parent : parent
+        if (supports?.type !== 'atrule' || (supports as postcss.AtRule).name !== 'supports') return
+        if (media && (parent as postcss.AtRule).params !== media) return
+        if (!media && supports.parent?.type !== 'root') return
+        rule.walkDecls((d) => {
+          out[d.prop] = d.value.replace(/\s+/g, '')
+        })
+      })
+      return out
+    }
+    const glass = inSupports()
+    if (variant === 'outline')
+      expect(glass.background).toBe(
+        'linear-gradient(tobottom,color-mix(insrgb,whitecalc(var(--glass-sheen)*100%),transparent),transparent60%),' +
+          'color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.6))*100%),transparent)',
+      )
+    else {
+      // The ghost hover surface, in the override colour.
+      expect(glass.background).toBe(
+        'color-mix(insrgb,var(--background)calc(var(--glass-inner-opacity,var(--glass-opacity))*100%),transparent)',
+      )
+      expect(glass['backdrop-filter']).toContain('var(--glass-inner-filter,')
+    }
+    expect(inSupports('(prefers-reduced-transparency: reduce)')).toMatchObject({
+      background: paint.background.replace(/\s+/g, ''),
+      'backdrop-filter': 'none',
+    })
+    // The paint follows the family's glass rules, so it wins at equal specificity.
+    expect(css.lastIndexOf('@supports')).toBeGreaterThan(css.indexOf(`${selector}{background:`))
+  },
+)

@@ -63,6 +63,8 @@ export const recipeIcons: Record<RecipeIconName, string> = {
  * one ink: it paints every label from `foreground` and the secondary surface from
  * `card`, so there a mode without its own override keeps that mode's
  * `foreground` (and, for secondary, `card`).
+ * Glass outline and ghost `background` overrides replace the colour of the
+ * glass surface rather than painting an opaque token over it.
  */
 export const recipeColorTokens: Record<
   RecipeButtonVariant,

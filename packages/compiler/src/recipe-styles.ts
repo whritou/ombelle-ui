@@ -56,7 +56,10 @@ const allowedMediaConditions = [
 // The single reviewed liquid-glass feature query; compared whitespace-normalized.
 const glassSupportsCondition =
   '((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))'
-const normalizeConditionParams = (params: string) =>
+// The family's glass filter chain, which nested glass replaces through --glass-inner-filter.
+const glassFilter =
+  'var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)))'
+const normalizeConditionParams =(params: string) =>
   params
     .replace(/\s+/g, ' ')
     .replace(/\(\s/g, '(')
@@ -247,6 +250,7 @@ export function compileScopedButtonStyles(input: {
   const variant = input.variant ?? 'default'
   const colorTokens = recipeColorTokens[variant]
   const paint: Record<string, string> = {}
+  let glassPaint = ''
   const colors = input.overrides.colors
   if (colors) {
     for (const mode of recipeColorModes) {
@@ -267,6 +271,50 @@ export function compileScopedButtonStyles(input: {
     // Glass Buttons are one ink: every label reads --foreground, so a foreground override is
     // painted for every variant, and secondary card glass reads the overridden token as its card.
     const glass = data.styleFamily === 'liquid-glass'
+    // Glass outline and ghost overrides replace the colour of the glass mix, not the glass:
+    // outline is the override at the outline's coverage (its hover tint still mixes in), ghost
+    // is the ghost hover surface in the override colour. Without backdrop filters and under
+    // reduced transparency the override stays opaque.
+    if (glass && set('background') && (variant === 'outline' || variant === 'ghost')) {
+      const token = 'var(' + variable(colorTokens.background) + ')'
+      const opaque =
+        variant === 'outline'
+          ? 'color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), ' + token + ')'
+          : token
+      paint.background = opaque
+      const selector = scope + '[data-variant="' + variant + '"]'
+      const surface: Record<string, string> =
+        variant === 'outline'
+          ? {
+              background:
+                'linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%), color-mix(in srgb, ' +
+                opaque +
+                ' calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.6)) * 100%), transparent)',
+            }
+          : {
+              background:
+                'color-mix(in srgb, ' +
+                token +
+                ' calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent)',
+              '-webkit-backdrop-filter': glassFilter,
+              'backdrop-filter': glassFilter,
+            }
+      glassPaint =
+        '@supports ' +
+        glassSupportsCondition +
+        '{' +
+        block(selector, surface) +
+        '@media (prefers-reduced-transparency: reduce){' +
+        block(selector, {
+          background: opaque,
+          '-webkit-backdrop-filter': 'none',
+          'backdrop-filter': 'none',
+        }) +
+        '}}' +
+        '@media (forced-colors: active){' +
+        block(selector, { background: 'ButtonFace' }) +
+        '}'
+    }
     if (set('foreground') && (variant === 'outline' || variant === 'link' || glass))
       paint.color = 'var(' + variable(colorTokens.foreground) + ')'
     if (glass && set('background') && variant === 'secondary')
@@ -352,6 +400,7 @@ export function compileScopedButtonStyles(input: {
     tokens +
     root.toString() +
     painted +
+    glassPaint +
     block(scope, {
       ...overrides,
       'white-space': 'normal',
