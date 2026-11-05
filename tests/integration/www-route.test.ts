@@ -92,3 +92,18 @@ it('lists every component the published installer can add and renders a docs pag
     expect(html.includes('Liquid glass Buttons were restyled to one ink in 0.5.0.')).toBe(id === 'button')
   }
 })
+
+it('form controls are claimed on the site only from 0.5.0', async () => {
+  const { styleSupport } = await import('@ombelle/contracts')
+  const { componentDoc, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
+  const formControls = ['label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select'] as const
+  expect(publishedInstaller.version).toBe('0.4.1')
+  for (const id of formControls) {
+    expect(styleSupport(id, 'liquid-glass'), id).toBe('experimental')
+    // Select and Radio Group need 0.5.0 for the component itself, so they are not listed yet.
+    const doc = componentDoc(id)
+    if (doc) expect(doc.glassMinimumCli, id).toBe('0.5.0')
+    else expect(['select', 'radio-group']).toContain(id)
+    expect(glassOnSite(id), id).toBe(false)
+  }
+})
