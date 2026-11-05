@@ -99,8 +99,8 @@
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   /* Radios are field glass (background at 55% of the glass opacity) and the tinted card at 80% when checked.
-     Rows are background glass at 40%, and the tinted card at 70% when checked; their text is declared at those
-     coverages. Nested in glass every surface paints at the full nested opacity. */
+     Unchecked rows are the field surface (background at 55%) and checked rows the tinted card at 78%; their text is
+     declared at those coverages. Nested in glass every surface paints at the full nested opacity. */
   [data-slot='radio-group-item'] {
     background: color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent);
     -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
@@ -110,12 +110,12 @@
     background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.8)) * 100%), transparent);
   }
   [data-slot='radio-group-option'] {
-    background: color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.4)) * 100%), transparent);
+    background: color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent);
     -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
     backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
   [data-slot='radio-group-option']:has([data-state='checked']) {
-    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.7)) * 100%), transparent);
+    background: color-mix(in srgb, color-mix(in srgb, var(--glass-tint) var(--glass-tint-amount), var(--card)) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.78)) * 100%), transparent);
   }
   @media (prefers-reduced-transparency: reduce) {
     [data-slot='radio-group-item'],

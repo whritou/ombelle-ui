@@ -1,6 +1,6 @@
 # Liquid glass
 
-Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Alert, Button, Badge, Card, Dialog, Dropdown Menu, Input, Popover, Tabs, and Tooltip in light and dark modes. Label, Textarea, Native Select, Checkbox, Switch, Select, Radio Group, Avatar, Separator, Table, Accordion, Progress, and Skeleton are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twenty-three components.
+Liquid glass is the experimental style family, beside the four stable ones. It is **experimental** for Alert, Button, Badge, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Native Select, Radio Group, Switch, Tabs, Textarea, and Tooltip in light and dark modes. Select, Avatar, Separator, Table, Accordion, Progress, and Skeleton are **unavailable** in glass: the compiler and CLI refuse them rather than giving them a fallback. Flat, minimalist, neo-brutalism, and ombelle remain the stable families for all twenty-three components.
 
 Experimental means the family compiles, installs, and renders through the same preset, compiler, CLI, preview, and editor pipeline as the stable families, and has automated evidence for one browser build. It does not meet the stable bar in [liquid glass constraints](../03-components-styles-accessibility.md#liquid-glass-constraints): mid-range mobile scrolling, human review, and the broader browser range are still owed. See [liquid glass evidence](../evidence/liquid-glass.md) for what was measured and what was not run.
 
@@ -18,7 +18,10 @@ Experimental means the family compiles, installs, and renders through the same p
 | Dropdown Menu | Experimental | Translucent menu and submenu panels; drops the blur under reduced transparency |
 | Popover | Experimental | Translucent panel; nested glass inside it drops its own blur |
 | Input | Experimental | A field of `background` glass at 55% of the glass opacity, under a 60% sheen, with the input-colour border. The value is `foreground` and the placeholder `mutedForeground`; both are declared pairs at 55% coverage. Nested in glass, such as in a Dialog, it drops its own blur and uses the full nested opacity. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
-| Label, Textarea, Native Select, Checkbox, Switch, Select, Radio Group, Avatar, Separator, Table, Accordion, Progress, Skeleton | Unavailable | Refused with `STYLE_UNAVAILABLE` |
+| Checkbox | Experimental | A field-glass box (`background` at 55%) with the input-colour border. Checked and indeterminate are `card` + `primary` at the resting tint + 8 points (26% light, 30% dark) at 80% coverage, with a `primary` rim at 60% and a glow; the mark stays `foreground`, a declared pair at 80%. Disabled is dashed at 50% opacity. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Switch | Experimental | A `card` + `foreground` 10% track at 55% coverage; on is `card` + `primary` 26% / 30% at 85% with a `primary` rim at 60% and a glow. The thumb is solid white with a shadow, so its position reads over any backdrop and in forced colours. Disabled is dashed. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Radio Group | Experimental | Field-glass radios; checked is `card` + `primary` 26% / 30% at 80% with a `primary` rim and a `foreground` dot. Option rows are the field surface (`background` at 55%), so the field pairs bound their label and description; a checked row is `card` + `primary` 18% / 22% at 78% with a `primary` rim at 55%; disabled rows are dashed. Installing it needs `@ombelle-ui/cli` 0.5.0 or later. |
+| Select, Avatar, Separator, Table, Accordion, Progress, Skeleton | Unavailable | Refused with `STYLE_UNAVAILABLE` |
 
 One compatibility table in `packages/contracts` (23 components × 5 families, each `stable`, `experimental`, or `unavailable`) is read by the compiler, the CLI, the snapshot service, and both editors.
 
@@ -94,9 +97,11 @@ The bound is checked in light and dark mode for these pairs:
 | `card` + `foreground` 6% | `foreground` | Secondary Button on hover |
 | `background` at 60% coverage | `foreground` | Outline Button at rest |
 | `background` + `foreground` 6% at 60% coverage | `foreground` | Outline Button on hover |
-| `background` at 55% coverage | `foreground` | Input value |
-| `background` at 55% coverage | `mutedForeground` | Input placeholder |
+| `background` at 55% coverage | `foreground` | Input value, unchecked Radio Group option label |
+| `background` at 55% coverage | `mutedForeground` | Input placeholder, unchecked Radio Group option description |
 | `card` | `destructive` | Error messages beside a field, on the card that holds the form |
+| `card` + `primary` 26% light / 30% dark at 80% coverage | `foreground` | Checkbox mark and radio dot when checked |
+| `card` + `primary` 18% light / 22% dark at 78% coverage | `foreground`, `mutedForeground` | Checked Radio Group option label and description |
 
 A tinted surface is a token surface mixed with a tint token at a fixed percentage per mode, the same mix the CSS paints. It is checked like any other pair: over the darkest and brightest filtered backdrop, with and without sheen, and on its opaque fallback. The editor readout names the tint, for example "foreground on card + primary 26%".
 
@@ -104,7 +109,7 @@ A pair with a coverage is painted at that fraction of the glass opacity, the sam
 
 A failing pair stops compilation with `INVALID_DATA` at `/design/glassOpacity`. The message names the pair, the mode, and the smallest passing opacity, rounded up to 0.01. With `transparency: "reduced"` the surfaces are opaque, and the ordinary palette contrast rules apply to them at 4.5:1.
 
-The built-in glass preset uses opacity 0.57, the smallest value at which both built-in palettes pass. Light mode needs 0.57 and dark mode 0.4; nested glass uses 0.69 in light and 0.92 in dark. In 0.5.0 the field and error-message pairs raised these from 0.5 and 0.32 (nested 0.7 and 0.9): the Input placeholder at 55% coverage would need opacity 0.93 with the previous palette, and `destructive` on `card` 0.75. So the built-in palette moves to opacity 0.57, darkens light `mutedForeground` from `#334155` to `#1E293B`, and changes `destructive` from `#B91C1C` to `#7F1D1D` in light and from `#FCA5A5` to `#FECACA` in dark. Dark `mutedForeground` stays `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
+The built-in glass preset uses opacity 0.57, the smallest value at which both built-in palettes pass. Light mode needs 0.57 and dark mode 0.57; nested glass uses 0.69 in light and 0.92 in dark. The checked Radio Group row raised the dark minimum from 0.4: its `mutedForeground` description on the 22% tint is the closest dark pair, and the row's 78% coverage is the lowest at which it passes at 0.57 with the palette unchanged. In 0.5.0 the field and error-message pairs raised these from 0.5 and 0.32 (nested 0.7 and 0.9): the Input placeholder at 55% coverage would need opacity 0.93 with the previous palette, and `destructive` on `card` 0.75. So the built-in palette moves to opacity 0.57, darkens light `mutedForeground` from `#334155` to `#1E293B`, and changes `destructive` from `#B91C1C` to `#7F1D1D` in light and from `#FCA5A5` to `#FECACA` in dark. Dark `mutedForeground` stays `#E2E8F0`, with `muted` at `#F1F5F9` and `#273449`.
 
 Solid fills keep their existing contrast pairs: both Badge variants and the active Tabs trigger.
 

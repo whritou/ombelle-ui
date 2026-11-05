@@ -89,9 +89,11 @@ export const glassFieldCoverage = 0.55
 export const glassOutlineCoverage = 0.6
 /** Checked Checkbox and Radio Group controls paint the tinted card at 80% of the glass opacity at top level. */
 export const glassCheckedControlCoverage = 0.8
-/** Radio Group option rows paint the background token at 40% of the glass opacity, and the tinted card at 70% when checked. */
-export const glassOptionCoverage = 0.4
-export const glassCheckedOptionCoverage = 0.7
+/**
+ * Radio Group option rows paint the field surface (background at 55%) when unchecked, so the field pairs bound their
+ * label and description; checked rows paint the resting tint at 78%, the lowest coverage at which their text passes.
+ */
+export const glassCheckedOptionCoverage = 0.78
 /** The neutral `foreground` tint secondary and outline Buttons gain on hover (6% in the stylesheet). */
 export const glassNeutralHoverTint = 0.06
 
@@ -138,10 +140,8 @@ export const glassContrastPairs: readonly GlassPairSpec[] = [
   { surface: 'card', text: 'destructive' },
   // Checked Checkbox and Radio: the foreground mark or dot on the checked tint at 80% coverage.
   { surface: 'card', text: 'foreground', tint: primaryChecked, coverage: glassCheckedControlCoverage },
-  // Radio Group option rows: the label and description on background glass at 40%, and on the
-  // resting primary tint at 70% when checked.
-  { surface: 'background', text: 'foreground', coverage: glassOptionCoverage },
-  { surface: 'background', text: 'mutedForeground', coverage: glassOptionCoverage },
+  // Checked Radio Group option rows: the label and description on the resting primary tint at 78%.
+  // Unchecked rows are the field surface, bounded by the field pairs above.
   { surface: 'card', text: 'foreground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
   { surface: 'card', text: 'mutedForeground', tint: primaryRest, coverage: glassCheckedOptionCoverage },
 ]

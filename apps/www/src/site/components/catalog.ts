@@ -146,6 +146,7 @@ export function EmailField() {
   },
   label: {
     name: 'Label',
+    glassMinimumCli: '0.5.0',
     description: 'Names a form control with a native label element.',
     api: 'htmlFor and native label props',
     states: 'Default, required indication',
@@ -167,6 +168,7 @@ export function ProjectName() {
   },
   'native-select': {
     name: 'Native Select',
+    glassMinimumCli: '0.5.0',
     description: "Styles the browser's own select control.",
     api: 'NativeSelect, NativeSelectOption, NativeSelectOptGroup, native select props',
     states: 'Default, selected, focus, invalid, disabled',
@@ -237,6 +239,7 @@ export function ProjectSections() {
   },
   textarea: {
     name: 'Textarea',
+    glassMinimumCli: '0.5.0',
     description: 'A native multi-line text control.',
     api: 'Native textarea props, aria-invalid, disabled',
     states: 'Empty, filled, focus, invalid, disabled',

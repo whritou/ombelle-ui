@@ -28,8 +28,8 @@ const supportsCondition =
 
 // The built-in preset is tuned so every declared pair passes at its minimum opacity.
 const TUNED_OPACITY = 0.57
-const TUNED_LIGHT_MUTED = '#131B2E'
-const TUNED_DARK_MUTED = '#E5EBF2'
+const TUNED_LIGHT_MUTED = '#1E293B'
+const TUNED_DARK_MUTED = '#E2E8F0'
 const TUNED_DESTRUCTIVE = { light: '#7F1D1D', dark: '#FECACA' }
 
 const normalize = (css: string) =>
@@ -454,14 +454,16 @@ describe('liquid-glass Button', () => {
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: rest })
     // The check mark and radio dot sit on the checked control at 80% coverage.
     expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: checked, coverage: 0.8 })
-    // Option rows: label and description on background glass at 40%, and on the tinted row at 70% when checked.
-    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', coverage: 0.4 })
-    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'mutedForeground', coverage: 0.4 })
-    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: rest, coverage: 0.7 })
-    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'mutedForeground', tint: rest, coverage: 0.7 })
+    // Unchecked option rows are the field surface, so the field pairs at 55% bound their label and description;
+    // checked rows are the rest tint at 78%, the lowest coverage at which their text passes.
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'foreground', coverage: 0.55 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'background', text: 'mutedForeground', coverage: 0.55 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'foreground', tint: rest, coverage: 0.78 })
+    expect(glassContrastPairs).toContainEqual({ surface: 'card', text: 'mutedForeground', tint: rest, coverage: 0.78 })
+    expect(glassContrastPairs.filter((p) => p.coverage === 0.4 || p.coverage === 0.7)).toEqual([])
     const report = glassContrastReport(builtin())
     const selection = report.pairs.filter(
-      (p) => p.tint?.color === 'primary' || (p.coverage !== undefined && [0.4, 0.7, 0.8].includes(p.coverage)),
+      (p) => p.tint?.color === 'primary' || p.coverage === 0.55,
     )
     expect(selection).toHaveLength(14)
     for (const pair of selection) expect(pair.passes, JSON.stringify(pair)).toBe(true)

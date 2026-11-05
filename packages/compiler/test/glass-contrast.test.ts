@@ -131,10 +131,8 @@ it('pair list equals the spec table', () => {
     { surface: 'background', text: 'mutedForeground', coverage: 0.55 },
     { surface: 'card', text: 'destructive' },
     { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.26, dark: 0.3 }, coverage: 0.8 },
-    { surface: 'background', text: 'foreground', coverage: 0.4 },
-    { surface: 'background', text: 'mutedForeground', coverage: 0.4 },
-    { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 }, coverage: 0.7 },
-    { surface: 'card', text: 'mutedForeground', tint: { color: 'primary', light: 0.18, dark: 0.22 }, coverage: 0.7 },
+    { surface: 'card', text: 'foreground', tint: { color: 'primary', light: 0.18, dark: 0.22 }, coverage: 0.78 },
+    { surface: 'card', text: 'mutedForeground', tint: { color: 'primary', light: 0.18, dark: 0.22 }, coverage: 0.78 },
   ])
 })
 

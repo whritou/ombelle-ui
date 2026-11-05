@@ -58,13 +58,13 @@ it('compiles Radio Group in liquid glass with tinted option rows and its fallbac
   expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.8))*100%),transparent)')
   // The dot stays foreground ink.
   expect(block('[data-slot="radio-group-indicator"]')).toContain('background:var(--foreground)')
-  // Option rows are glass rows: background glass at 40%, tinted at rest when checked, dashed when disabled.
+  // Option rows are glass rows: the field surface (background at 55%), the rest tint at 78% when checked, dashed when disabled.
   expect(block(row)).toContain('border:var(--border-width)solidvar(--border)')
-  expect(flat).toContain('color-mix(insrgb,var(--background)calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.4))*100%),transparent)')
+  expect(flat).toContain('}' + row + '{background:color-mix(insrgb,var(--background)calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.55))*100%),transparent)')
   const checkedRow = row + ':has([data-state="checked"])'
   expect(block(checkedRow)).toContain('--glass-tint:var(--primary);--glass-tint-amount:var(--glass-primary-tint)')
   expect(block(checkedRow)).toContain('border-color:color-mix(insrgb,var(--primary)55%,transparent)')
-  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.7))*100%),transparent)')
+  expect(flat).toContain('color-mix(insrgb,color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card))calc(var(--glass-inner-opacity,calc(var(--glass-opacity)*0.78))*100%),transparent)')
   expect(block(row + ':has([data-disabled])')).toContain('border-style:dashed')
   expect(block('[data-slot="radio-group-option-description"]')).toContain('color:var(--muted-foreground)')
   expect(flat).toContain('{background:color-mix(insrgb,var(--glass-tint)var(--glass-tint-amount),var(--card));-webkit-backdrop-filter:none;backdrop-filter:none')
