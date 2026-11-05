@@ -7,6 +7,8 @@ export type GlassContrastPair = {
   mode: 'light' | 'dark'
   surface: ColorKey
   text: ColorKey
+  /** The tint mixed into the surface, with the amount resolved for this mode. */
+  tint?: { color: ColorKey; amount: number }
   /** Over the darkest backdrop the glass filter can produce, without sheen. */
   ratioOverBlack: number
   /** Over the brightest filtered backdrop, under the full sheen. */
@@ -14,6 +16,13 @@ export type GlassContrastPair = {
   /** The opaque fallback surface, with and without its sheen. */
   ratioOpaque: number
   passes: boolean
+}
+/** Fractions in 0..1 of `color` mixed into the surface, per mode. */
+export type GlassTint = { color: ColorKey; light: number; dark: number }
+export type GlassPairSpec = {
+  surface: ColorKey
+  text: ColorKey
+  tint?: GlassTint
 }
 export type GlassBackdrop = {
   /** CSS saturate(), contrast() and brightness() amounts, in filter order. */
@@ -57,17 +66,16 @@ export const glassDesignDefaults = {
 export const glassDarkSheenScale = 0.25
 export const glassMinimumOpacity = 0.25
 
-export const glassContrastPairs: readonly [surface: ColorKey, text: ColorKey][] =
-  [
-    ['card', 'cardForeground'],
-    ['card', 'mutedForeground'],
-    ['popover', 'popoverForeground'],
-    ['popover', 'mutedForeground'],
-    ['muted', 'foreground'],
-    ['muted', 'mutedForeground'],
-    ['secondary', 'secondaryForeground'],
-    ['background', 'foreground'],
-  ]
+export const glassContrastPairs: readonly GlassPairSpec[] = [
+  { surface: 'card', text: 'cardForeground' },
+  { surface: 'card', text: 'mutedForeground' },
+  { surface: 'popover', text: 'popoverForeground' },
+  { surface: 'popover', text: 'mutedForeground' },
+  { surface: 'muted', text: 'foreground' },
+  { surface: 'muted', text: 'mutedForeground' },
+  { surface: 'secondary', text: 'secondaryForeground' },
+  { surface: 'background', text: 'foreground' },
+]
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const encode = (c: number) =>
@@ -202,28 +210,56 @@ function bound(
   }
 }
 
+/**
+ * color-mix(in srgb, tint amount, surface): a linear mix of gamma-encoded
+ * channels, premultiplied by alpha as CSS does (equal to a plain mix when both
+ * colours are opaque).
+ */
+function mixTint(surface: Color, tint: Color, amount: number): Color {
+  const alpha = amount * tint.alpha + (1 - amount) * surface.alpha
+  if (alpha === 0) return { rgb: surface.rgb, alpha }
+  const rgb = surface.rgb.map(
+    (s, i) =>
+      (amount * tint.alpha * tint.rgb[i] + (1 - amount) * surface.alpha * s) /
+      alpha,
+  ) as unknown as Rgb
+  return { rgb, alpha }
+}
+
 type Resolved = {
   mode: 'light' | 'dark'
   surface: ColorKey
   text: ColorKey
+  tint?: { color: ColorKey; amount: number }
   surfaceColor: Color
   textColor: Color
   textLum: number
   backdrop: GlassBackdrop
 }
 
-function resolve(data: Preset): Resolved[] {
+function resolve(
+  data: Preset,
+  specs: readonly GlassPairSpec[],
+): Resolved[] {
   const out: Resolved[] = []
   for (const mode of ['light', 'dark'] as const) {
     const colors = data.modes[mode] as Record<string, string>
     const backdrop = glassBackdrop(data.design, mode)
-    for (const [surface, text] of glassContrastPairs) {
+    for (const { surface, text, tint } of specs) {
       const textColor = parseColor(colors[text])
+      const base = parseColor(colors[surface])
+      const amount = tint?.[mode]
       out.push({
         mode,
         surface,
         text,
-        surfaceColor: parseColor(colors[surface]),
+        ...(tint && amount !== undefined
+          ? { tint: { color: tint.color, amount } }
+          : {}),
+        surfaceColor:
+          tint && amount !== undefined
+            ? mixTint(base, parseColor(colors[tint.color]), amount)
+            : base,
         textColor,
         textLum: luminanceOf(textColor.rgb),
         backdrop,
@@ -270,18 +306,26 @@ function nested(resolved: Resolved[], opacity: number) {
 }
 
 export function glassContrastReport(data: Preset): GlassContrastReport {
+  return glassContrastReportFor(data, glassContrastPairs)
+}
+
+export function glassContrastReportFor(
+  data: Preset,
+  pairs: readonly GlassPairSpec[],
+): GlassContrastReport {
   const transparency = data.design?.transparency ?? 'auto'
   const configured = data.design?.glassOpacity ?? glassDesignDefaults.glassOpacity
   const opacity = transparency === 'reduced' ? 1 : configured
-  const resolved = resolve(data)
+  const resolved = resolve(data, pairs)
   const nestedOpacity = nested(resolved, opacity)
-  const pairs = resolved.map((r): GlassContrastPair => {
+  const results = resolved.map((r): GlassContrastPair => {
     const glass = filtered(r, opacity)
     const opaque = raw(r, 1)
     return {
       mode: r.mode,
       surface: r.surface,
       text: r.text,
+      ...(r.tint ? { tint: r.tint } : {}),
       ratioOverBlack: glass.overDarkest,
       ratioOverWhite: glass.overBrightest,
       ratioOpaque: Math.min(opaque.overDarkest, opaque.overBrightest),
@@ -289,11 +333,11 @@ export function glassContrastReport(data: Preset): GlassContrastReport {
     }
   })
   const lowest = (mode: 'light' | 'dark') => {
-    const pairs = resolved.filter((r) => r.mode === mode)
-    if (nestedOpacity === null || !pairs.every(opaqueText)) return null
+    const modePairs = resolved.filter((r) => r.mode === mode)
+    if (nestedOpacity === null || !modePairs.every(opaqueText)) return null
     return (
       steps(glassMinimumOpacity).find((o) =>
-        pairs.every((r) => filtered(r, o).passes),
+        modePairs.every((r) => filtered(r, o).passes),
       ) ?? null
     )
   }
@@ -310,8 +354,8 @@ export function glassContrastReport(data: Preset): GlassContrastReport {
       dark: glassBackdrop(data.design, 'dark'),
     },
     nestedOpacity,
-    pairs,
-    passes: pairs.every((p) => p.passes),
+    pairs: results,
+    passes: results.every((p) => p.passes),
     minimumOpacity,
     minimumOpacityByMode,
   }

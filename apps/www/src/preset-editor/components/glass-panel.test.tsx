@@ -1,6 +1,11 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { canonicalize, compile } from '@ombelle/compiler'
+import {
+  canonicalize,
+  compile,
+  glassContrastPairs,
+  glassContrastReportFor,
+} from '@ombelle/compiler'
 import {
   createPresetDraft,
   materializePreset,
@@ -116,4 +121,23 @@ it('disables otherwise-ready export and publish with a description while blocked
     expect(ready).toMatch(button(name, false))
     expect(blocked).toMatch(button(name, true))
   }
+})
+
+it('lists the tint in a failing tinted pair', () => {
+  // The tinted foreground-on-card pair still passes at the draft minimum of
+  // 0.25 (4.61:1), so the report is built at 0.1, below what the editor offers.
+  const preset = materializePreset(createPresetDraft('liquid-glass'))
+  preset.design = { ...preset.design, glassOpacity: 0.1 }
+  const report = glassContrastReportFor(preset, [
+    ...glassContrastPairs,
+    {
+      surface: 'card',
+      text: 'foreground',
+      tint: { color: 'primary', light: 0.18, dark: 0.22 },
+    },
+  ])
+  const html = renderToStaticMarkup(<GlassPanel report={report} />)
+  expect(html).toMatch(
+    /light: foreground on card \+ primary 18%, \d\.\d\d:1 over the darkest filtered backdrop/,
+  )
 })

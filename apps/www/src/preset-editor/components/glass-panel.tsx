@@ -62,8 +62,10 @@ export function GlassContrastReadout({
             const [value, where] = worst(pair)
             return (
               <li key={pair.mode + pair.surface + pair.text}>
-                {pair.mode}: {pair.text} on {pair.surface}, {ratio(value)}:1{' '}
-                {where}
+                {pair.mode}: {pair.text} on {pair.surface}
+                {pair.tint &&
+                  ` + ${pair.tint.color} ${Math.round(pair.tint.amount * 100)}%`}
+                , {ratio(value)}:1 {where}
               </li>
             )
           })}
