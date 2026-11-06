@@ -5,7 +5,7 @@ import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../ww
 import { forcedStateSelector } from '../../www/src/editor/forced-states'
 import { draftFamily } from '../../www/src/editor/model'
 import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
-import { GlassBackdropArt, hasLabPreviewInk } from './glass-backdrop-art'
+import { GlassBackdropArt, hasLabPreviewInk, setGlassBackdrop } from './glass-backdrop-art'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
@@ -106,14 +106,8 @@ function EditorPreview() {
   React.useEffect(() => {
     if (!glassBackdrop) return
     const root = document.documentElement
-    root.dataset.backdrop = 'glass'
-    if (glassBackdrop !== 'kit') root.dataset.glassBackdrop = glassBackdrop
-    root.toggleAttribute('data-glass-lab-ink', useLabInk)
-    return () => {
-      delete root.dataset.backdrop
-      delete root.dataset.glassBackdrop
-      root.removeAttribute('data-glass-lab-ink')
-    }
+    setGlassBackdrop(root, glassBackdrop, useLabInk)
+    return () => setGlassBackdrop(root, undefined)
   }, [glassBackdrop, useLabInk])
 
   const recipeStyle = React.useRef<HTMLStyleElement>(null)

@@ -25,6 +25,19 @@ export function hasLabPreviewInk(preset: Preset, scene: PresetBackdrop): boolean
   })
 }
 
+/**
+ * Puts the preview root over a glass backdrop, or takes it off with undefined. Every glass
+ * preview goes through here so one starting preset shows the same scene everywhere. Kit is
+ * the stylesheet's own gradient: naming it would switch that gradient off with no art drawn.
+ */
+export function setGlassBackdrop(root: HTMLElement, scene: PresetBackdrop | undefined, labInk = false) {
+  if (scene) root.dataset.backdrop = 'glass'
+  else delete root.dataset.backdrop
+  if (scene && scene !== 'kit') root.dataset.glassBackdrop = scene
+  else delete root.dataset.glassBackdrop
+  root.toggleAttribute('data-glass-lab-ink', Boolean(scene) && labInk)
+}
+
 /** The lab's optical test backgrounds, kept as vector art so the same lines refract at any size. */
 export function GlassBackdropArt({ scene }: { scene: PresetBackdrop }) {
   if (scene === 'kit') return null
