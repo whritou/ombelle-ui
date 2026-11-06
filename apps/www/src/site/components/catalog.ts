@@ -579,3 +579,8 @@ export function glassComponentList({ published = false }: { published?: boolean 
       .map((id) => docs[id].name),
   )
 }
+
+/** Whether some component experimental in liquid glass still waits for a newer published installer. */
+export function glassGatedOnSite(): boolean {
+  return componentsWithStyleSupport('liquid-glass', ['experimental']).some((id) => !glassOnSite(id))
+}

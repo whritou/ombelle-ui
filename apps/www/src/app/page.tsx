@@ -5,7 +5,7 @@ import { CascadeSection, MatrixSection, PresetSection, TerminalSection } from '.
 import { StyleMorphSection } from '../site/home/style-morph'
 import { repository } from '../site/links'
 import { familyList } from '../site/families'
-import { glassComponentList } from '../site/components/catalog'
+import { glassComponentList, glassGatedOnSite } from '../site/components/catalog'
 import { installerRunner, publishedInstaller } from '../snapshots/install-command'
 
 export const metadata = {
@@ -66,7 +66,7 @@ export default function HomePage() {
             <Sparkles className="size-5 text-primary" aria-hidden />
             <div>
               <p className="font-display font-bold">Liquid Glass</p>
-              <p className="text-sm text-muted-foreground">Translucent surfaces with blur, an opaque fallback, and contrast checked for their text pairs over any backdrop. Experimental for {glassComponentList({ published: true })}; form controls are not available in glass.</p>
+              <p className="text-sm text-muted-foreground">Translucent surfaces with blur, an opaque fallback, and contrast checked for their text pairs over any backdrop. Experimental for {glassComponentList({ published: true })}{glassGatedOnSite() ? '; the other components need a newer installer.' : '.'}</p>
             </div>
           </div>
           <a href="/editor/preset" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:border-foreground/30 hover:bg-muted active:bg-foreground/10">
