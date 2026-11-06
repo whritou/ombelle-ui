@@ -27,6 +27,35 @@
   margin-right: 0.5rem;
 }
 
+.componentNavigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.componentNavigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.componentNavigation a:hover,
+.componentNavigation a[aria-current='page'] {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.componentNavigation a[aria-current='page'] { font-weight: 600; }
+.componentNavigation a:active { background: var(--border); }
+
 .nameField {
   display: flex;
   align-items: center;

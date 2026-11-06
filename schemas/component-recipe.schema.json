@@ -1,0 +1,1513 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.example.com/schemas/component-recipe-2.0.json",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "component",
+    "id",
+    "revision",
+    "presetRef",
+    "props",
+    "content"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "2.0"
+    },
+    "component": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,79}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "presetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "catalogRelease",
+        "compilerVersion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,79}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "catalogRelease": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[a-zA-Z0-9.-]+)?$"
+        },
+        "compilerVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[a-zA-Z0-9.-]+)?$"
+        }
+      }
+    },
+    "props": {
+      "type": "object"
+    },
+    "content": {
+      "type": "object"
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "component": {
+          "const": "badge"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "enum": [
+                "default",
+                "secondary",
+                "outline",
+                "accent",
+                "destructive"
+              ],
+              "default": "default",
+              "title": "Variant"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Badge",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "alert"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "enum": [
+                "default",
+                "destructive"
+              ],
+              "default": "default",
+              "title": "Variant"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Preset saved",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000,
+              "default": "Your changes are ready."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "description"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "avatar"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "default": "default",
+              "title": "Size"
+            },
+            "variant": {
+              "enum": [
+                "default",
+                "primary",
+                "secondary"
+              ],
+              "default": "default",
+              "title": "Variant"
+            },
+            "status": {
+              "enum": [
+                "none",
+                "online",
+                "offline"
+              ],
+              "default": "none",
+              "title": "Status"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "initials": {
+              "type": "string",
+              "title": "Fallback initials",
+              "maxLength": 200,
+              "default": "AL",
+              "pattern": "\\S"
+            },
+            "label": {
+              "type": "string",
+              "title": "Accessible name",
+              "maxLength": 200,
+              "default": "Ada Lovelace",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "initials",
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "card"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "density": {
+              "enum": [
+                "default",
+                "dense"
+              ],
+              "default": "default",
+              "title": "Density"
+            },
+            "level": {
+              "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "default": 3,
+              "title": "Title level"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Project",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000,
+              "default": "Project overview"
+            },
+            "body": {
+              "type": "string",
+              "title": "Body",
+              "maxLength": 1000,
+              "default": "Review your project details."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "description",
+            "body"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "progress"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000,
+              "default": 25,
+              "title": "Value"
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 100,
+              "title": "Maximum"
+            },
+            "indeterminate": {
+              "type": "boolean",
+              "default": false,
+              "title": "Indeterminate"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Accessible label",
+              "maxLength": 200,
+              "default": "Upload progress",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "separator"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "orientation": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ],
+              "default": "horizontal",
+              "title": "Orientation"
+            },
+            "decorative": {
+              "type": "boolean",
+              "default": true,
+              "title": "Decorative"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": ""
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "skeleton"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "shape": {
+              "enum": [
+                "text",
+                "circle",
+                "block"
+              ],
+              "default": "block",
+              "title": "Shape"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Loading region label",
+              "maxLength": 200,
+              "default": "Loading",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "checkbox"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            },
+            "checked": {
+              "enum": [
+                "unchecked",
+                "checked",
+                "indeterminate"
+              ],
+              "default": "unchecked",
+              "title": "Initial state"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Accept terms",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "input"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            },
+            "invalid": {
+              "type": "boolean",
+              "default": false,
+              "title": "Invalid"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Email",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": ""
+            },
+            "initialText": {
+              "type": "string",
+              "title": "Initial text",
+              "maxLength": 1000,
+              "default": ""
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "placeholder",
+            "initialText"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "label"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Email",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "native-select"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default"
+              ],
+              "default": "default",
+              "title": "Size"
+            },
+            "selection": {
+              "type": "string",
+              "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
+              "default": "starter",
+              "title": "Item ID"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Plan",
+              "pattern": "\\S"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Option",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 12,
+              "default": [
+                {
+                  "id": "starter",
+                  "label": "Starter"
+                },
+                {
+                  "id": "team",
+                  "label": "Team"
+                }
+              ],
+              "title": "Options"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "options"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "radio-group"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            },
+            "orientation": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ],
+              "default": "horizontal",
+              "title": "Orientation"
+            },
+            "selection": {
+              "type": "string",
+              "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
+              "default": "starter",
+              "title": "Item ID"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Group label",
+              "maxLength": 200,
+              "default": "Plan",
+              "pattern": "\\S"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Option",
+                    "pattern": "\\S"
+                  },
+                  "description": {
+                    "type": "string",
+                    "title": "Description",
+                    "maxLength": 200,
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "description"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 12,
+              "default": [
+                {
+                  "id": "starter",
+                  "label": "Starter",
+                  "description": ""
+                },
+                {
+                  "id": "team",
+                  "label": "Team",
+                  "description": ""
+                }
+              ],
+              "title": "Options"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "options"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "select"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default"
+              ],
+              "default": "default",
+              "title": "Size"
+            },
+            "position": {
+              "enum": [
+                "item-aligned",
+                "popper"
+              ],
+              "default": "popper",
+              "title": "Content position"
+            },
+            "selection": {
+              "type": "string",
+              "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
+              "default": "starter",
+              "title": "Item ID"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Plan",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": "Choose a plan"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Option",
+                    "pattern": "\\S"
+                  },
+                  "hint": {
+                    "type": "string",
+                    "title": "Hint",
+                    "maxLength": 200,
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "hint"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 12,
+              "default": [
+                {
+                  "id": "starter",
+                  "label": "Starter",
+                  "hint": ""
+                },
+                {
+                  "id": "team",
+                  "label": "Team",
+                  "hint": ""
+                }
+              ],
+              "title": "Options"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "placeholder",
+            "options"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "switch"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "checked": {
+              "type": "boolean",
+              "default": false,
+              "title": "Initially checked"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Enable notifications",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "textarea"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            },
+            "invalid": {
+              "type": "boolean",
+              "default": false,
+              "title": "Invalid"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Notes",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": ""
+            },
+            "initialText": {
+              "type": "string",
+              "title": "Initial text",
+              "maxLength": 1000,
+              "default": ""
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "placeholder",
+            "initialText"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "accordion"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "single",
+                "multiple"
+              ],
+              "default": "single",
+              "title": "Expansion"
+            },
+            "collapsible": {
+              "type": "boolean",
+              "default": true,
+              "title": "Collapsible"
+            },
+            "expanded": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
+                "default": "",
+                "title": "Item ID"
+              },
+              "maxItems": 12,
+              "uniqueItems": true,
+              "default": [
+                "overview"
+              ],
+              "title": "Initially expanded"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Heading",
+                    "maxLength": 200,
+                    "default": "Section",
+                    "pattern": "\\S"
+                  },
+                  "body": {
+                    "type": "string",
+                    "title": "Body",
+                    "maxLength": 1000,
+                    "default": "Section details"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "body"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 12,
+              "default": [
+                {
+                  "id": "overview",
+                  "label": "Overview",
+                  "body": "Project details"
+                }
+              ],
+              "title": "Sections"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "table"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "numeric": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
+                "default": "",
+                "title": "Item ID"
+              },
+              "maxItems": 12,
+              "uniqueItems": true,
+              "default": [],
+              "title": "Numeric columns"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "caption": {
+              "type": "string",
+              "title": "Caption",
+              "maxLength": 200,
+              "default": "Projects",
+              "pattern": "\\S"
+            },
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Header",
+                    "maxLength": 200,
+                    "default": "Column",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 8,
+              "default": [
+                {
+                  "id": "name",
+                  "label": "Name"
+                }
+              ],
+              "title": "Columns"
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "cells": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "title": "Cell",
+                      "maxLength": 200,
+                      "default": ""
+                    },
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "default": [
+                      ""
+                    ],
+                    "title": "Cells"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "cells"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 12,
+              "default": [
+                {
+                  "id": "first",
+                  "cells": [
+                    "Ombelle"
+                  ]
+                }
+              ],
+              "title": "Rows"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "caption",
+            "columns",
+            "rows"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "tabs"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "orientation": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ],
+              "default": "horizontal",
+              "title": "Orientation"
+            },
+            "selection": {
+              "type": "string",
+              "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
+              "default": "overview",
+              "title": "Item ID"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Tab",
+                    "pattern": "\\S"
+                  },
+                  "body": {
+                    "type": "string",
+                    "title": "Body",
+                    "maxLength": 1000,
+                    "default": "Panel content"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "body"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 12,
+              "default": [
+                {
+                  "id": "overview",
+                  "label": "Overview",
+                  "body": "Project overview"
+                },
+                {
+                  "id": "activity",
+                  "label": "Activity",
+                  "body": "Recent activity"
+                }
+              ],
+              "title": "Tabs"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "dialog"
+        },
+        "props": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "trigger": {
+              "type": "string",
+              "title": "Trigger label",
+              "maxLength": 200,
+              "default": "Open dialog",
+              "pattern": "\\S"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Project details",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000,
+              "default": "Review the project details."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "title",
+            "description"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "dropdown-menu"
+        },
+        "props": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "trigger": {
+              "type": "string",
+              "title": "Trigger label",
+              "maxLength": 200,
+              "default": "Project actions",
+              "pattern": "\\S"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Action",
+                    "pattern": "\\S"
+                  },
+                  "variant": {
+                    "enum": [
+                      "default",
+                      "destructive"
+                    ],
+                    "default": "default",
+                    "title": "Variant"
+                  },
+                  "disabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "Disabled"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "variant",
+                  "disabled"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 12,
+              "default": [
+                {
+                  "id": "rename",
+                  "label": "Rename",
+                  "variant": "default",
+                  "disabled": false
+                }
+              ],
+              "title": "Menu items"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "popover"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "side": {
+              "enum": [
+                "top",
+                "right",
+                "bottom",
+                "left"
+              ],
+              "default": "bottom",
+              "title": "Side"
+            },
+            "align": {
+              "enum": [
+                "start",
+                "center",
+                "end"
+              ],
+              "default": "center",
+              "title": "Alignment"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "trigger": {
+              "type": "string",
+              "title": "Trigger label",
+              "maxLength": 200,
+              "default": "Details",
+              "pattern": "\\S"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Project details",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000,
+              "default": "Review the project."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "title",
+            "description"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "tooltip"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "side": {
+              "enum": [
+                "top",
+                "right",
+                "bottom",
+                "left"
+              ],
+              "default": "bottom",
+              "title": "Side"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "trigger": {
+              "type": "string",
+              "title": "Trigger label",
+              "maxLength": 200,
+              "default": "Details",
+              "pattern": "\\S"
+            },
+            "text": {
+              "type": "string",
+              "title": "Tooltip text",
+              "maxLength": 200,
+              "default": "View project details",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "text"
+          ]
+        }
+      }
+    }
+  ]
+}

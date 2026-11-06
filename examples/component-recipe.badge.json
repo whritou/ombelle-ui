@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "2.0",
+  "component": "badge",
+  "id": "catalog_badge",
+  "revision": 1,
+  "presetRef": {
+    "id": "builtin-flat",
+    "revision": 1,
+    "catalogRelease": "0.1.0",
+    "compilerVersion": "0.1.0"
+  },
+  "props": { "variant": "outline" },
+  "content": { "label": "Ready <now> & later" }
+}

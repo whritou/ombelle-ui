@@ -7,8 +7,8 @@ export const RECOVERY_STORAGE_KEY = 'ombelle.button-editor.recoveries'
 
 type RecoveryStorage = Pick<Storage, 'getItem' | 'setItem'>
 
-export function readRecoveries(storage: Pick<Storage, 'getItem'>): string[] {
-  const raw = storage.getItem(RECOVERY_STORAGE_KEY)
+export function readRecoveries(storage: Pick<Storage, 'getItem'>, key = RECOVERY_STORAGE_KEY): string[] {
+  const raw = storage.getItem(key)
   if (raw === null) return []
   const parsed: unknown = JSON.parse(raw)
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed) ||
@@ -20,13 +20,13 @@ export function readRecoveries(storage: Pick<Storage, 'getItem'>): string[] {
   return [...parsed.texts]
 }
 
-export function preserveRecovery(storage: RecoveryStorage, raw: string): string[] {
-  const texts = readRecoveries(storage)
+export function preserveRecovery(storage: RecoveryStorage, raw: string, key = RECOVERY_STORAGE_KEY): string[] {
+  const texts = readRecoveries(storage, key)
   if (texts.includes(raw)) return texts
   const next = [...texts, raw]
   const encoded = JSON.stringify({ storageVersion: 1, texts: next })
-  storage.setItem(RECOVERY_STORAGE_KEY, encoded)
-  if (storage.getItem(RECOVERY_STORAGE_KEY) !== encoded)
+  storage.setItem(key, encoded)
+  if (storage.getItem(key) !== encoded)
     throw new Error('Recovery archive could not be verified')
   return next
 }

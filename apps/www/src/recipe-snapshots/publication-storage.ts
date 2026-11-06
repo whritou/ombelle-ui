@@ -1,4 +1,4 @@
-import { validateRecipe } from '@ombelle/contracts'
+import { validateInstallableRecipe } from '@ombelle/contracts'
 import {
   publicationMaxAge,
   publicationMaxBytes,
@@ -32,9 +32,8 @@ function validateAttempt(input: unknown): PublishAttempt {
       for (const child of Object.values(next.value))
         stack.push({ value: child, depth: next.depth + 1 })
   }
-  const recipe = validateRecipe(value.recipe)
+  const recipe = validateInstallableRecipe(value.recipe)
   if (
-    recipe.schemaVersion !== '1.0' ||
     recipe.presetRef.catalogRelease !== '0.1.0' ||
     recipe.presetRef.compilerVersion !== '0.1.0' ||
     bytes(JSON.stringify(recipe)) > 65_536
@@ -51,8 +50,9 @@ function validateAttempt(input: unknown): PublishAttempt {
 export function readPublishAttempt(
   storage: Storage,
   now: number,
+  storageKey = publicationStorageKey,
 ): PublishAttempt | null {
-  const raw = storage.getItem(publicationStorageKey)
+  const raw = storage.getItem(storageKey)
   if (raw === null) return null
   try {
     if (bytes(raw) > publicationMaxBytes)
@@ -68,7 +68,7 @@ export function readPublishAttempt(
   } catch {
     // Discard only this retry record. Draft/history recovery uses separate keys.
     try {
-      storage.removeItem(publicationStorageKey)
+      storage.removeItem(storageKey)
     } catch {
       /* denied storage */
     }
@@ -78,10 +78,11 @@ export function readPublishAttempt(
 export function writePublishAttempt(
   storage: Storage,
   attempt: PublishAttempt,
+  storageKey = publicationStorageKey,
 ): void {
   const raw = JSON.stringify(attempt)
   if (bytes(raw) > publicationMaxBytes)
     throw new Error('Publication attempt is too large.')
   validateAttempt(attempt)
-  storage.setItem(publicationStorageKey, raw)
+  storage.setItem(storageKey, raw)
 }

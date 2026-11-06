@@ -1,6 +1,7 @@
 import type { FromSchema } from 'json-schema-to-ts'
 import { presetSchema } from './preset-schema.js'
 import type { NormalizedRecipe } from './recipe.js'
+import type { ComponentRecipe } from './component-recipe.js'
 import type { SnapshotSource } from './snapshot.js'
 import type { RecipeSnapshotSource } from './recipe-snapshot.js'
 export type Preset = FromSchema<typeof presetSchema>
@@ -44,6 +45,10 @@ export type RecipeCompileResult = {
   darkSelector: string
   provenance: CompileResult['provenance']
 }
+export type ComponentRecipeCompileResult = Omit<RecipeCompileResult, 'recipe'> & {
+  recipe: { data: ComponentRecipe; hash: string }
+}
+export type InstallableRecipeCompileResult = RecipeCompileResult | ComponentRecipeCompileResult
 export type ComponentPresetCompileResult = {
   artifacts: Artifact[]
   dependencies: Dependency[]
@@ -53,7 +58,7 @@ export type ComponentPresetCompileResult = {
   provenance: CompileResult['provenance']
 }
 export type InstalledRecipe = Omit<
-  RecipeCompileResult,
+  InstallableRecipeCompileResult,
   'dependencies' | 'artifacts'
 > & {
   artifacts: Record<string, InstalledArtifact>

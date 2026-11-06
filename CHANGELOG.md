@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.6.0 — 6 November 2026
+
+- Add dedicated editors and installable recipes for every catalog component. The 22 new editors use recipe format 2.0, with scoped styles and immutable install codes. Button continues to use recipe format 1.0. The new public routes and install commands require a compatible published CLI.
+
 ## 0.5.0 — 6 November 2026
 
 - Publish `@ombelle-ui/cli@0.5.0` to npm; website commands use `npx @ombelle-ui/cli@0.5.0`, and the website offers the liquid glass features gated on 0.5.0.

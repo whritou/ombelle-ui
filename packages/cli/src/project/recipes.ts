@@ -3,7 +3,7 @@ import {
   type InstalledRecipe,
   type ProjectLock,
 } from '@ombelle/contracts'
-import { canonicalize, compileRecipe } from '@ombelle/compiler'
+import { canonicalize, compileInstallableRecipe } from '@ombelle/compiler'
 import { safePath } from './paths.js'
 const object = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === 'object' && !Array.isArray(v)
@@ -32,7 +32,7 @@ export async function validateInstalledRecipes(
       throw bad()
     let canonical
     try {
-      canonical = await compileRecipe({
+      canonical = await compileInstallableRecipe({
         recipe: item.recipe.data,
         darkSelector: item.darkSelector,
       })

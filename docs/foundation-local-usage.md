@@ -48,12 +48,12 @@ The new components (Label, Textarea, Native Select) are installed only after the
 
 ## Complete gate and independent CI groups
 
-`pnpm check:foundation` remains the complete local gate: packages, all unit/integration tests, generated preview, all 40 consumer preparations and builds, typecheck, preview build, the full browser matrix (`playwright test --list` enumerates 534 tests across the seventeen specs at this commit when the consumer map lists all 40 rows, and 518 without the two Liquid glass consumers' extra cases; the per-spec counts are an explicit coverage contract in `scripts/foundation-evidence.mjs` that the gate requires to match exactly; this is an enumeration, and the gate was not run on this machine), and a fresh workspace audit. It uses the same evidence validators as CI. A successful command cannot reuse old group result files: owned JSON results are cleared before execution.
+`pnpm check:foundation` builds packages, runs unit and integration tests, generates and builds the preview, prepares and builds all 40 consumers, checks types, runs the full browser matrix, and audits the workspace. The browser matrix expects 561 cases across eighteen specs. The gate requires the exact per-spec counts in `scripts/foundation-evidence.mjs` and uses the same evidence validators as CI. It clears its previous result files before execution.
 
 CI runs two independent checkouts with separate setup/cache scopes:
 
 - `pnpm check:foundation:quality` builds packages, runs `pnpm test:unit` and `pnpm test:integration`, generates preview sources needed by typecheck, checks TypeScript, and runs `pnpm audit:workspace`. The integration command honors `OMBELLE_INTEGRATION_WORKERS`.
-- `pnpm check:foundation:consumers` builds packages, generates preview, prepares all consumers, builds preview and consumers, and runs the seventeen browser specs with the existing controlled workers. There is no browser file sharding.
+- `pnpm check:foundation:consumers` builds packages, generates preview, prepares all consumers, builds preview and consumers, and runs the eighteen browser specs with the existing controlled workers. There is no browser file sharding.
 - `pnpm check:foundation:aggregate DIRECTORY` rebuilds package reference helpers and validates the two stable core artifact directories inside DIRECTORY. It never prepares consumers, starts browser servers, or imports machine-local consumer root descriptors.
 
 Every push and pull request runs the fast `CI` workflow (`.github/workflows/ci.yml`): build, typecheck and unit tests in one job, and the integration suite split across four parallel shards. Its `verify` job is the required check. The full Foundation workflow below no longer runs on every push; it runs nightly on the default branch and on demand from the Actions tab, and release or evidence claims still require a passing Foundation run.

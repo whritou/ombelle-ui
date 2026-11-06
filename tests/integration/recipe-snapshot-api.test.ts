@@ -90,7 +90,7 @@ it.each([
 })
 it.each(['schemaVersion', 'catalogRelease', 'compilerVersion'])('reports unsupported recipe %s as 422', async field => {
   const { origin } = await fixture()
-  const recipe = field === 'schemaVersion' ? { ...example, schemaVersion: '2.0' }
+  const recipe = field === 'schemaVersion' ? { ...example, schemaVersion: '3.0' }
     : { ...example, presetRef: { ...example.presetRef, [field]: '9.0.0' } }
   await failure(await post(origin, { recipe }), 422, 'UNSUPPORTED_RELEASE')
 })

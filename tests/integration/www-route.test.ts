@@ -1,6 +1,6 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import ButtonEditorPage from '../../apps/www/src/app/editor/component/button/page.js'
 import PresetEditorPage from '../../apps/www/src/app/editor/preset/page.js'
 import PrivacyPage from '../../apps/www/src/app/privacy/page.js'
@@ -14,6 +14,13 @@ describe('Button editor route', () => {
     const html = renderToStaticMarkup(createElement(ButtonEditorPage))
 
     expect(html).toMatch(/<main\b[^>]*>[\s\S]*Breadcrumb[\s\S]*Components[\s\S]*<h1\b[^>]*>Button editor<\/h1>/)
+  })
+
+  it('marks Button as the current component and links to the catalog', () => {
+    const html = renderToStaticMarkup(createElement(ButtonEditorPage))
+    const navigation = html.match(/<nav\b[^>]*aria-label="Editable components"[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? ''
+    expect(navigation).toMatch(/<a\b(?=[^>]*href="\/editor\/component\/button")(?=[^>]*aria-current="page")[^>]*>Button<\/a>/)
+    expect(navigation).toMatch(/<a\b[^>]*href="\/components"[^>]*>Browse all components<\/a>/)
   })
 })
 
@@ -40,7 +47,7 @@ it('publishes privacy, support and security pages without exposing an email addr
 it('renders the public landing page with editor links and the published installer', () => {
   const html = renderToStaticMarkup(createElement(HomePage))
   expect(html).toMatch(/<main\b[^>]*>[\s\S]*<h1\b[^>]*>Your components\.<br\/>[\s\S]*Your style\.[\s\S]*<\/h1>/)
-  expect(html).toContain('href="/editor/component/button"')
+  expect(html).toContain('href="/editor/component"')
   expect(html).toContain('href="/editor/preset"')
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
   expect(html).toContain(`npx ${runner} init --preset PRESET --cwd APP --dry-run --json`)
@@ -89,10 +96,32 @@ it('lists the catalog and offers install commands only for components the publis
       expect(html).toContain(`Requires CLI ${doc.minimumCli}`)
     }
     expect(html).toContain('Liquid glass: experimental.')
-    // Only Button has a per-component editor.
-    expect(html.includes('href="/editor/component/button"')).toBe(id === 'button')
+    expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button')
     // Glass Button previews show the 0.5.0 restyle, so the Button page says so.
     expect(html.includes('Liquid glass Buttons were restyled to one ink in 0.5.0.')).toBe(id === 'button')
+  }
+})
+
+it('exposes every component editor and Customize link with the local opt-in', async () => {
+  vi.stubEnv('NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES', '1')
+  vi.resetModules()
+  try {
+    const { supportedComponentIds } = await import('@ombelle/contracts')
+    const { editableComponents } = await import('../../apps/www/src/editor/editable-components.js')
+    const { default: EditorPage } = await import('../../apps/www/src/app/editor/component/[id]/page.js')
+    const { default: ComponentPage } = await import('../../apps/www/src/app/components/[id]/page.js')
+    const { ComponentNavigation } = await import('../../apps/www/src/editor/components/component-navigation.js')
+    expect(editableComponents.map(({ id }) => id).sort()).toEqual([...supportedComponentIds].sort())
+    const chooser = renderToStaticMarkup(createElement(ComponentNavigation, { current: 'button' }))
+    for (const id of supportedComponentIds) {
+      const href = `href="/editor/component/${id}"`
+      expect(chooser).toContain(href)
+      expect(renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))).toContain(href)
+    }
+    await expect(EditorPage({ params: Promise.resolve({ id: 'missing' }) })).rejects.toMatchObject({ digest: 'NEXT_HTTP_ERROR_FALLBACK;404' })
+  } finally {
+    vi.unstubAllEnvs()
+    vi.resetModules()
   }
 })
 

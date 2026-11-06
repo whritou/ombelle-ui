@@ -1,12 +1,12 @@
 import {
-  validateRecipe,
-  type Recipe,
-  type RecipeSnapshot,
-  type RecipeCompileResult,
+  validateInstallableRecipe,
+  type InstallableRecipe,
+  type InstallableRecipeSnapshot,
+  type InstallableRecipeCompileResult,
 } from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
 
-type ResolvedRecipe = RecipeCompileResult['recipe']
+type ResolvedRecipe = InstallableRecipeCompileResult['recipe']
 
 export const publicationMaxBytes = 128 * 1024
 export const publicationMaxAge = 24 * 60 * 60 * 1000
@@ -14,11 +14,11 @@ export type PublishAttempt = {
   storageVersion: 1
   key: string
   createdAt: number
-  recipe: Recipe
+  recipe: InstallableRecipe
   recipeHash: string
 }
 type PublicationBase = {
-  lastPublished: RecipeSnapshot | null
+  lastPublished: InstallableRecipeSnapshot | null
   draftHash: string | null
   operationId: number
 }
@@ -44,7 +44,7 @@ export type PublicationAction =
       type: 'published'
       operationId: number
       draftHash: string
-      snapshot: RecipeSnapshot
+      snapshot: InstallableRecipeSnapshot
     }
   | { type: 'failed'; operationId: number; draftHash: string; error: string }
   | { type: 'withdrawn'; operationId: number; draftHash: string; error: string }
@@ -63,7 +63,7 @@ export function createPublishAttempt(
   recipe: ResolvedRecipe,
   now: number,
 ): PublishAttempt {
-  const data = validateRecipe(recipe.data)
+  const data = validateInstallableRecipe(recipe.data)
   if (
     !Number.isSafeInteger(now) ||
     now < 0 ||

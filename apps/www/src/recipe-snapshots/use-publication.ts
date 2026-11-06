@@ -2,11 +2,11 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   canonicalize,
-  normalizePublishedRecipe,
-  verifyRecipeSnapshot,
+  normalizePublishedInstallableRecipe,
+  verifyInstallableRecipeSnapshot,
 } from '@ombelle/compiler'
-import type { RecipeCompileResult } from '@ombelle/contracts'
-type ResolvedRecipe = RecipeCompileResult['recipe']
+import type { InstallableRecipeCompileResult } from '@ombelle/contracts'
+type ResolvedRecipe = InstallableRecipeCompileResult['recipe']
 import {
   createPublishAttempt,
   initialPublication,
@@ -23,13 +23,14 @@ import {
 } from './publication-storage'
 
 type PublicationOptions = {
+  storageKey?: string
   fetch?: typeof fetch
   storage?: () => Storage
   now?: () => number
   notify?: (state: PublicationState) => void
   announce?: (text: string) => void
   isCurrent?: (hash: string) => boolean
-  verify?: typeof verifyRecipeSnapshot
+  verify?: typeof verifyInstallableRecipeSnapshot
 }
 
 class WithdrawnPublicationError extends Error {}
@@ -104,15 +105,15 @@ export function createRecipePublicationController(options: PublicationOptions = 
     try {
       if (!options.storage) return
       if (state.attempt && state.status !== 'withdrawn')
-        writePublishAttempt(options.storage(), state.attempt)
-      else options.storage().removeItem(publicationStorageKey)
+        writePublishAttempt(options.storage(), state.attempt, options.storageKey)
+      else options.storage().removeItem(options.storageKey ?? publicationStorageKey)
     } catch {
       /* Memory retries remain available if storage is denied. */
     }
   }
   try {
     const attempt =
-      options.storage && readPublishAttempt(options.storage(), now())
+      options.storage && readPublishAttempt(options.storage(), now(), options.storageKey)
     if (attempt) state = reducePublication(state, { type: 'restore', attempt })
   } catch {
     /* Storage denial must not prevent local exports or memory retries. */
@@ -152,7 +153,7 @@ export function createRecipePublicationController(options: PublicationOptions = 
         throw new Error(
           'The 24-hour retry window expired. Cancel and confirm a new publication.',
         )
-      const normalized = (await normalizePublishedRecipe(attempt.recipe)).recipe
+      const normalized = (await normalizePublishedInstallableRecipe(attempt.recipe)).recipe
       if (!current()) return
       if (
         normalized.hash !== attempt.recipeHash ||
@@ -188,7 +189,7 @@ export function createRecipePublicationController(options: PublicationOptions = 
         }
         const input = await readResponse(response)
         if (!current()) return null
-        const snapshot = await (options.verify ?? verifyRecipeSnapshot)(input)
+        const snapshot = await (options.verify ?? verifyInstallableRecipeSnapshot)(input)
         // Verification hashes asynchronously too: fence after it, not just fetch.
         if (!current()) return null
         if (
@@ -286,6 +287,7 @@ export function createRecipePublicationController(options: PublicationOptions = 
 }
 
 export function useRecipePublication(input: {
+  storageKey?: string
   recipe: ResolvedRecipe | null
   current: boolean
   announce: (text: string) => void
@@ -300,6 +302,7 @@ export function useRecipePublication(input: {
   useEffect(() => {
     const handle = createRecipePublicationController({
       storage: () => window.sessionStorage,
+      storageKey: input.storageKey,
       notify: setState,
       announce: (text) => latest.current.announce(text),
       isCurrent: (expected) =>
@@ -312,7 +315,7 @@ export function useRecipePublication(input: {
       handle.dispose()
       controller.current = null
     }
-  }, [])
+  }, [input.storageKey])
   useEffect(() => {
     controller.current?.update(input.recipe, input.current)
   }, [hash, input.recipe, input.current])

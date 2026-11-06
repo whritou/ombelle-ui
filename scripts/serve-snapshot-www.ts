@@ -23,6 +23,7 @@ try {
       OMBELLE_SNAPSHOT_CLIENT_IP_HEADER: undefined,
       NEXT_TELEMETRY_DISABLED: '1',
       NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN: 'http://127.0.0.1:4173',
+      NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES: '1',
     },
   })
 } catch (error) {

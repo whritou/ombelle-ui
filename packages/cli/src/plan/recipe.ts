@@ -1,7 +1,7 @@
 import {
   FoundationError,
   type ProjectContext,
-  type RecipeCompileResult,
+  type InstallableRecipeCompileResult,
   type InstallPlan,
   type InstalledArtifact,
   type InstalledRecipe,
@@ -12,7 +12,7 @@ import { fileChange } from './components.js'
 import { transformRecipeArtifact } from '../project/recipe-transform.js'
 export async function planRecipe(
   context: ProjectContext,
-  result: RecipeCompileResult,
+  result: InstallableRecipeCompileResult,
 ): Promise<InstallPlan> {
   if (!context.config || !context.preset || !context.lock)
     throw new FoundationError(
@@ -50,13 +50,17 @@ export async function planRecipe(
       'Saved global preset does not match its lock provenance',
     )
   const { artifacts: unused, dependencies: ignored, ...identity } = result
-  const id = result.recipe.data.id,
-    revision = result.recipe.data.revision,
-    key = id + '@' + revision
-  const importPath =
-    context.uiAlias + '/recipes/' + id + '/r' + revision + '/button'
-  const usage = result.artifacts.find((a) => a.kind === 'usage')!
-  const examplePath = (await transformRecipeArtifact(context, usage)).path
+  const data = result.recipe.data
+  const { id, revision, component } = data
+  const key = id + '@' + revision
+  const entryPath = `recipes/${id}/r${revision}/${component}.tsx`
+  const usagePath = `examples/recipes/${id}/r${revision}.tsx`
+  const entries = result.artifacts.filter(artifact => artifact.kind === 'component' && artifact.logicalPath === entryPath)
+  const usages = result.artifacts.filter(artifact => artifact.kind === 'usage' && artifact.logicalPath === usagePath)
+  if (entries.length !== 1 || usages.length !== 1)
+    throw new FoundationError('INVALID_DATA', 'Recipe must contain one entry module and usage artifact')
+  const importPath = context.uiAlias + '/' + entries[0].logicalPath.slice(0, -4)
+  const examplePath = (await transformRecipeArtifact(context, usages[0], data)).path
   const plan: InstallPlan = {
     packageManager: context.manager,
     ...(context.bunLockfile ? { bunLockfile: context.bunLockfile } : {}),
@@ -90,7 +94,7 @@ export async function planRecipe(
   const owned: Record<string, InstalledArtifact> = {},
     seen = new Set<string>()
   for (const artifact of result.artifacts) {
-    const target = await transformRecipeArtifact(context, artifact),
+    const target = await transformRecipeArtifact(context, artifact, data),
       normalized = target.path.replace(/^\.\//, '').toLowerCase()
     if (seen.has(normalized))
       throw new FoundationError(

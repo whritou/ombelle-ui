@@ -2,7 +2,15 @@ import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { compileRecipe } from '@ombelle/compiler'
 import { createEditorDraft } from '../model.js'
+import { createCatalogDraft } from '../catalog-draft.js'
 import { ArtifactPanel, artifactMeta } from './artifact-panel'
+
+it('shows 2.0 install commands only for a compatible public CLI', async () => {
+  const { installText } = await import('./artifact-panel')
+  const badge = createCatalogDraft('badge').recipe
+  expect(installText(badge, { version: '0.5.0' })).not.toContain('add --recipe')
+  expect(installText(badge, { version: '0.6.0' })).toContain('add --recipe ./catalog_badge-r1.json')
+})
 
 async function compiled() {
   return compileRecipe({ recipe: createEditorDraft('flat').recipe })

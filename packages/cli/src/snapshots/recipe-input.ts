@@ -3,11 +3,11 @@ import {
   officialSnapshotOrigin,
   normalizeSnapshotOrigin,
   parseRecipeSnapshotReference,
-  type Recipe,
-  type RecipeSnapshot,
+  type InstallableRecipe,
+  type InstallableRecipeSnapshot,
   type RecipeSnapshotSource,
 } from '@ombelle/contracts'
-import { verifyRecipeSnapshot } from '@ombelle/compiler'
+import { verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
 import { readRecipeFile } from '../recipe-file.js'
 import { readRecipeSnapshotCache } from './recipe-cache.js'
 import { fetchPublication } from './transport.js'
@@ -19,8 +19,8 @@ export type RecipeInputOptions = {
   cacheRoot: string
 }
 export type ResolvedRecipeInput = {
-  recipe: Recipe
-  snapshot?: RecipeSnapshot
+  recipe: InstallableRecipe
+  snapshot?: InstallableRecipeSnapshot
   source?: RecipeSnapshotSource
   resolution: 'local' | 'network' | 'cache'
   networkAccess: boolean
@@ -70,7 +70,7 @@ export async function resolveRecipeInput(
     recipeHash: options.expectedHash ?? '',
   }
   if (options.offline) {
-    let snapshot: RecipeSnapshot | null
+    let snapshot: InstallableRecipeSnapshot | null
     try {
       snapshot = await readRecipeSnapshotCache(options.cacheRoot, source)
     } catch (error) {
@@ -96,7 +96,7 @@ export async function resolveRecipeInput(
   }
   const { id, revision } = parseRecipeSnapshotReference(value)
   const snapshot = await fetchPublication(new URL(`/api/v1/recipes/${id}/${revision}`, source.origin), value, async input => {
-    const verified = await verifyRecipeSnapshot(input, official ? undefined : source)
+    const verified = await verifyInstallableRecipeSnapshot(input, official ? undefined : source)
     if (verified.id !== id || verified.revision !== revision)
       throw new FoundationError('INVALID_DATA', 'Snapshot does not match the requested reference', '/id')
     return verified

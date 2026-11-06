@@ -3,14 +3,17 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { Menu, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { componentEditorLink } from '../editor/editable-components'
 import { GithubIcon, Logo } from './logo'
 import { primaryLinks, repository } from './links'
 import { ThemeToggle } from './theme'
 
 export function SiteHeader() {
   const pathname = usePathname()
-  const current = (href: string) =>
-    href === pathname || (href === '/components' && pathname.startsWith('/components/')) ? 'page' : undefined
+  const current = (href: string) => {
+    const section = href === '/components' || href === componentEditorLink.href
+    return href === pathname || (section && pathname.startsWith(`${href}/`)) ? 'page' : undefined
+  }
   // Pages that embed preview iframes scroll the header away: a pinned header
   // would cover iframe content and intercept clicks inside it.
   const pinned = !/^\/(editor|presets|recipes)\//.test(pathname)

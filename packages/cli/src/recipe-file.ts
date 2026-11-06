@@ -3,10 +3,10 @@ import { constants } from 'node:fs'
 import path from 'node:path'
 import {
   FoundationError,
-  validateRecipe,
-  type Recipe,
+  validateInstallableRecipe,
+  type InstallableRecipe,
 } from '@ombelle/contracts'
-export async function readRecipeFile(file: string): Promise<Recipe> {
+export async function readRecipeFile(file: string): Promise<InstallableRecipe> {
   const target = path.resolve(file)
   try {
     if (!(await fs.stat(target)).isFile())
@@ -32,7 +32,7 @@ export async function readRecipeFile(file: string): Promise<Recipe> {
         length += read.bytesRead
       }
       if (length > 65536) throw Error('Recipe exceeds 64 KiB')
-      return validateRecipe(
+      return validateInstallableRecipe(
         JSON.parse(
           new TextDecoder('utf-8', { fatal: true }).decode(
             bytes.subarray(0, length),

@@ -28,7 +28,8 @@ it('discards only corrupt, future, unsupported, deeply nested or oversized retry
   }
 })
 it('refuses oversized or malformed writes before storing any bytes', async () => {
-  const session = storage(), attempt = createPublishAttempt((await normalizePublishedRecipe(example)).recipe, 100)
-  expect(() => writePublishAttempt(session, { ...attempt, recipe: { ...attempt.recipe, content: 'é'.repeat(70_000) } })).toThrow()
+  const session = storage(), recipe = (await normalizePublishedRecipe(example)).recipe
+  const attempt = createPublishAttempt(recipe, 100)
+  expect(() => writePublishAttempt(session, { ...attempt, recipe: { ...recipe.data, content: 'é'.repeat(70_000) } })).toThrow()
   expect(session.length).toBe(0)
 })

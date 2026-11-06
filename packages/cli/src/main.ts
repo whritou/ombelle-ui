@@ -12,7 +12,7 @@ import {
   type Recipe,
   type InstallPlan,
 } from '@ombelle/contracts'
-import { compile, compileButtonPreset, compileRecipe, glassContrastWarning } from '@ombelle/compiler'
+import { compile, compileButtonPreset, compileInstallableRecipe, glassContrastWarning } from '@ombelle/compiler'
 import { resolveRecipeInput, type ResolvedRecipeInput } from './snapshots/recipe-input.js'
 import { applyRecipeSourceToPlan } from './snapshots/recipe-source.js'
 import { writeRecipeSnapshotCache } from './snapshots/recipe-cache.js'
@@ -183,9 +183,11 @@ export async function runCli(
           'Run init --preset <local.json>.',
         )
       const recipe = recipeInput!.recipe
-      const compiled = await compileRecipe({ recipe, darkSelector: context.darkSelector })
+      const compiled = await compileInstallableRecipe({ recipe, darkSelector: context.darkSelector })
       plan = await planRecipe(context, compiled)
-      plan.notices = glassNotices(compiled.preset.data, ['button'], false, compiled.recipe.data.overrides)
+      const data = compiled.recipe.data
+      plan.notices = glassNotices(compiled.preset.data, [data.component], false,
+        data.schemaVersion === '1.0' ? data.overrides : undefined)
     } else if (command === 'add' && flags['--preset']) {
       const preset = presetInput!.preset
       const compiled = await compileButtonPreset({

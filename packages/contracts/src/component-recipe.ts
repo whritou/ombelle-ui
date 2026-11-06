@@ -1,0 +1,102 @@
+import Ajv2020 from 'ajv/dist/2020.js'
+import type { FromSchema } from 'json-schema-to-ts'
+import { componentRecipeSchema } from './component-recipe-schema.js'
+import { FoundationError } from './diagnostics.js'
+import { validateRecipe, type Recipe } from './recipe.js'
+
+export type ComponentRecipe = FromSchema<typeof componentRecipeSchema>
+export type InstallableRecipe = Recipe | ComponentRecipe
+export type ComponentRecipeId = ComponentRecipe['component']
+
+export type RecipeField = {
+  title?: string
+  type?: 'string' | 'boolean' | 'integer' | 'array' | 'object'
+  default?: unknown
+  enum?: readonly (string | number)[]
+  minimum?: number
+  maximum?: number
+  maxLength?: number
+  minItems?: number
+  maxItems?: number
+  properties?: Readonly<Record<string, RecipeField>>
+  items?: RecipeField
+}
+
+export const componentRecipeComponents = componentRecipeSchema.oneOf.map(branch => branch.properties.component.const)
+export function componentRecipeFields(component: ComponentRecipeId): {
+  props: Readonly<Record<string, RecipeField>>
+  content: Readonly<Record<string, RecipeField>>
+} {
+  const branch = componentRecipeSchema.oneOf.find(item => item.properties.component.const === component)!
+  return { props: branch.properties.props.properties, content: branch.properties.content.properties }
+}
+
+export function defaultRecipeFields(fields: Readonly<Record<string, RecipeField>>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, structuredClone(field.default)]))
+}
+
+const check = new Ajv2020({ allErrors: true, strict: true }).compile(componentRecipeSchema)
+
+export function validateComponentRecipe(input: unknown): ComponentRecipe {
+  if (!check(input)) {
+    const component = input && typeof input === 'object' && 'component' in input ? input.component : null
+    const index = componentRecipeComponents.findIndex(id => id === component)
+    const error = check.errors!.find(issue => issue.schemaPath.startsWith(`#/oneOf/${index}/`)) ?? check.errors![0]
+    const field = error.keyword === 'additionalProperties' ? error.params.additionalProperty
+      : error.keyword === 'required' ? error.params.missingProperty : undefined
+    throw new FoundationError('INVALID_DATA', error.message ?? 'Invalid component recipe',
+      error.instancePath + (field ? '/' + field : ''))
+  }
+  const recipe = structuredClone(input as ComponentRecipe)
+  Object.assign(recipe, { props: { ...defaultRecipeFields(componentRecipeFields(recipe.component).props), ...recipe.props } })
+  validateComposition(recipe)
+  if (new TextEncoder().encode(JSON.stringify(recipe)).byteLength > 65_536)
+    throw new FoundationError('INVALID_DATA', 'Recipe exceeds 64 KiB', '/')
+  return recipe
+}
+
+function validateComposition(recipe: ComponentRecipe): void {
+  const reject = (message: string, path: string) => { throw new FoundationError('INVALID_DATA', message, path) }
+  function references(items: readonly { id: string }[], selected: readonly string[], path: string) {
+    const ids = new Set(items.map(item => item.id))
+    if (ids.size !== items.length) reject('Item IDs must be unique', '/content')
+    if (selected.some(id => !ids.has(id))) reject('Choose an item present in the recipe', path)
+  }
+  switch (recipe.component) {
+    case 'progress':
+      if (!recipe.props.indeterminate && recipe.props.value > recipe.props.max)
+        reject('Progress cannot exceed its maximum', '/props/value')
+      break
+    case 'native-select':
+    case 'radio-group':
+    case 'select':
+      references(recipe.content.options, recipe.props.selection ? [recipe.props.selection] : [], '/props/selection')
+      break
+    case 'tabs':
+      references(recipe.content.items, [recipe.props.selection], '/props/selection')
+      break
+    case 'accordion':
+      references(recipe.content.items, recipe.props.expanded, '/props/expanded')
+      if (recipe.props.type === 'single' && recipe.props.expanded.length > 1)
+        reject('Single expansion accepts at most one item', '/props/expanded')
+      break
+    case 'dropdown-menu':
+      references(recipe.content.items, [], '/content/items')
+      break
+    case 'table':
+      references(recipe.content.columns, recipe.props.numeric, '/props/numeric')
+      references(recipe.content.rows, [], '/content/rows')
+      if (recipe.content.rows.some(row => row.cells.length !== recipe.content.columns.length))
+        reject('Every row must have one cell per column', '/content/rows')
+      break
+  }
+}
+
+export function validateInstallableRecipe(input: unknown): InstallableRecipe {
+  const version = input && typeof input === 'object' && 'schemaVersion' in input
+    ? input.schemaVersion : undefined
+  if (version === '2.0') return validateComponentRecipe(input)
+  if (typeof version === 'string' && version !== '1.0')
+    throw new FoundationError('UNSUPPORTED_RELEASE', 'Unsupported recipe schema version', '/schemaVersion')
+  return validateRecipe(input)
+}

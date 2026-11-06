@@ -13,6 +13,7 @@ Begin with structured controls, not an unrestricted code playground. Users edit 
 | `/docs` | Installation, framework support, accessibility and customization guides |
 | `/components` | Searchable catalog with style and platform filters |
 | `/components/[slug]` | Component API, live states, dependencies and install options |
+| `/editor/component` | Open the component editor workspace at Button |
 | `/editor/component/[slug]` | Customize one component and export a recipe |
 | `/editor/preset` | Create a global preset and inspect a representative gallery |
 | `/presets/[id]/[revision]` | Read an immutable shared preset |
@@ -23,7 +24,11 @@ React Native examples get an explicit platform view when available. A browser pr
 
 ## Component editor layout
 
-On desktop, use a catalog navigation rail, a central preview and output area, and a labelled properties panel. On small screens, use Preview, Customize, and Code tabs while preserving the same draft. Do not shrink a three-column desktop layout into unusable mobile controls.
+The navigation above the workspace lists the available editors and links to the full catalog. Each enabled component has a Customize link from its documentation page and a separate draft at `/editor/component/[slug]`. Button keeps its existing draft, recovery, and recipe formats.
+
+The repository build supports all 23 editors. The 22 additional editors export component recipes 2.0 and use the chosen preset's theme tokens. Run `pnpm build:packages`, then set `NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES=1` before running `pnpm dev:www`. Use the built repository CLI for `add --recipe` with the downloaded JSON or the exact snapshot reference and its local origin and hash. Publishing locally requires an [initialized snapshot store](snapshot-service-operations.md). The public site enables the additional routes and commands when the configured published installer supports recipe 2.0.
+
+On desktop, the labelled properties panel sits beside the preview and output area. On small screens, Preview, Customize, and Code tabs share the same draft.
 
 The properties panel groups controls into style family, component props, colors, shape, spacing, type, effects, and motion. Only show options supported by the selected component and style. Disable unavailable combinations with a reason rather than generating broken output.
 

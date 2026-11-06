@@ -21,7 +21,7 @@ it('rewrites import specifiers without changing saved text or module-like Unicod
     for (const artifact of result.artifacts.filter(
       (a) => a.kind === 'component' || a.kind === 'usage',
     )) {
-      const output = await transformRecipeArtifact(context, artifact)
+      const output = await transformRecipeArtifact(context, artifact, result.recipe.data)
       expect(output.content).toContain('Open @/lib/utils and @/components/ui')
       expect(output.content).toContain('import { cn } from "@/lib/utils"')
       if (artifact.kind === 'component')

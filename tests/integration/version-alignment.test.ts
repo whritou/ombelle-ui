@@ -45,6 +45,8 @@ function run(args: string[]) {
 }
 
 const read = (dir: string, file: string) => fs.readFile(path.join(dir, file), 'utf8')
+const documentedPublishedVersion = (contracts: string) =>
+  /The published installer is version (\d+\.\d+\.\d+)\b/.exec(contracts)?.[1]
 // The tests follow the repository's current state: `current` is the workspace
 // version, `published` the version the website installs, `next` a later release.
 const current = (JSON.parse(readFileSync(path.join(repo, 'packages/cli/package.json'), 'utf8')) as { version: string }).version
@@ -85,7 +87,7 @@ it('sets a workspace release in a temp copy without touching history', async () 
   expect(await read(dir, 'README.md')).toContain('The six workspace packages are version **' + next + '**')
   expect(await read(dir, 'README.md')).toContain('`npx @ombelle-ui/cli@' + published + '`')
   expect(await read(dir, 'docs/04-presets-and-contracts.md')).toContain('Workspace packages are version ' + next + '.')
-  expect(await read(dir, 'docs/04-presets-and-contracts.md')).toContain('The published installer is version ' + published + ';')
+  expect(documentedPublishedVersion(await read(dir, 'docs/04-presets-and-contracts.md'))).toBe(published)
   expect((await run(['--check', '--root', dir])).code).toBe(0)
 })
 
@@ -101,7 +103,7 @@ it('--published only flips website commands', async () => {
   }
   for (const file of packageJsons) expect(JSON.parse(await read(dir, file)).version).toBe(current)
   const contracts = await read(dir, 'docs/04-presets-and-contracts.md')
-  expect(contracts).toContain('The published installer is version ' + next + ';')
+  expect(documentedPublishedVersion(contracts)).toBe(next)
   expect(contracts).toContain('Workspace packages are version ' + current + '.')
   expect(await read(dir, 'README.md')).toContain('The six workspace packages are version **' + current + '**')
 })

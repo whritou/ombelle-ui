@@ -5,8 +5,8 @@ import { pathToFileURL } from 'node:url'
 import { backup, DatabaseSync } from 'node:sqlite'
 import {
   parseSnapshotReference, validatePreset, validatePresetSnapshot,
-  parseRecipeSnapshotReference, validateRecipe, validateRecipeSnapshot,
-  type PresetSnapshot, type SnapshotReference, type RecipeSnapshot,
+  parseRecipeSnapshotReference, validateInstallableRecipe, validateInstallableRecipeSnapshot,
+  type PresetSnapshot, type SnapshotReference, type InstallableRecipeSnapshot,
 } from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
 import { SnapshotServiceError } from './errors'
@@ -323,10 +323,10 @@ export class SqliteSnapshotStore implements SnapshotStore {
     } catch (error) { return storageError(error) }
   }
 
-  publishRecipe(input: PublishRecipeSnapshotInput): { snapshot: RecipeSnapshot; replayed: boolean } {
+  publishRecipe(input: PublishRecipeSnapshotInput): { snapshot: InstallableRecipeSnapshot; replayed: boolean } {
     const { compiled } = input
     try {
-      validateRecipe(compiled.recipe.data)
+      validateInstallableRecipe(compiled.recipe.data)
       validatePreset(compiled.preset.data)
       if (Buffer.byteLength(canonicalize(compiled.recipe.data)) > 65_536)
         throw new SnapshotServiceError({ status: 413, code: 'PAYLOAD_TOO_LARGE' })
@@ -351,8 +351,8 @@ export class SqliteSnapshotStore implements SnapshotStore {
       for (let attempt = 0; attempt < 3; attempt++) {
         const id = this.randomRecipeId()
         if (this.db.prepare('SELECT 1 FROM recipe_snapshots WHERE id = ?').get(id)) continue
-        const snapshot = validateRecipeSnapshot({
-          snapshotVersion: '1.0', id, revision: 1,
+        const snapshot = validateInstallableRecipeSnapshot({
+          snapshotVersion: compiled.recipe.data.schemaVersion, id, revision: 1,
           recipe: compiled.recipe.data, recipeHash: compiled.recipe.hash, preset: compiled.preset.data, presetHash: compiled.preset.hash,
           catalogRelease: '0.1.0', compilerVersion: '0.1.0', createdAt: new Date(input.now).toISOString(), validationStatus: 'draft',
         })
@@ -375,7 +375,7 @@ export class SqliteSnapshotStore implements SnapshotStore {
     })
   }
 
-  lookupRecipe(ref: SnapshotReference): RecipeSnapshot {
+  lookupRecipe(ref: SnapshotReference): InstallableRecipeSnapshot {
     try {
       parseRecipeSnapshotReference(`${ref.id}@${ref.revision}`)
       const row = this.db.prepare(`SELECT recipe_snapshots.*, recipe_withdrawals.snapshot_id AS withdrawn
@@ -385,7 +385,7 @@ export class SqliteSnapshotStore implements SnapshotStore {
       if (row.withdrawn !== null) throw new SnapshotServiceError({ status: 410, code: 'SNAPSHOT_WITHDRAWN' })
       if (typeof row.response !== 'string' || Buffer.byteLength(row.response) !== row.bytes || (row.bytes as number) > maxResponseBytes)
         throw unavailable()
-      const snapshot = validateRecipeSnapshot(JSON.parse(row.response))
+      const snapshot = validateInstallableRecipeSnapshot(JSON.parse(row.response))
       if (snapshot.id !== ref.id || snapshot.revision !== ref.revision || snapshot.recipeHash !== row.recipe_hash ||
           canonicalize(snapshot) !== row.response || sha256(row.response) !== row.response_hash ||
           sha256(canonicalize(snapshot.recipe)) !== snapshot.recipeHash || sha256(canonicalize(snapshot.preset)) !== snapshot.presetHash)

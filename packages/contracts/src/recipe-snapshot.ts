@@ -3,6 +3,9 @@ import type { FromSchema } from 'json-schema-to-ts'
 import { FoundationError } from './diagnostics.js'
 import { presetSchema } from './preset-schema.js'
 import { recipeSchema } from './recipe-schema.js'
+import { componentRecipeSchema } from './component-recipe-schema.js'
+import { componentRecipeSnapshotSchema } from './component-recipe-snapshot-schema.js'
+import { validateComponentRecipe, type ComponentRecipe } from './component-recipe.js'
 import { recipeSnapshotSchema } from './recipe-snapshot-schema.js'
 import { recipeSnapshotSourceSchema } from './recipe-snapshot-source-schema.js'
 import { normalizeSnapshotOrigin, type AbsolutePresetReferences, type SnapshotReference } from './snapshot.js'
@@ -19,8 +22,15 @@ export type RecipeSnapshot = FromSchema<typeof recipeSnapshotSchema, {
   references: [AbsolutePresetReferences<typeof presetSchema>, AbsoluteRecipeReferences<typeof recipeSchema>]
 }>
 export type RecipeSnapshotSource = FromSchema<typeof recipeSnapshotSourceSchema>
-const ajv = new Ajv2020({ allErrors: true, strict: true }).addSchema(presetSchema).addSchema(recipeSchema)
+export type ComponentRecipeSnapshot = Omit<RecipeSnapshot, 'snapshotVersion' | 'recipe'> & {
+  snapshotVersion: '2.0'
+  recipe: ComponentRecipe
+}
+export type InstallableRecipeSnapshot = RecipeSnapshot | ComponentRecipeSnapshot
+const ajv = new Ajv2020({ allErrors: true, strict: true })
+  .addSchema(presetSchema).addSchema(recipeSchema).addSchema(componentRecipeSchema)
 const checkSnapshot = ajv.compile(recipeSnapshotSchema)
+const checkComponentSnapshot = ajv.compile(componentRecipeSnapshotSchema)
 const checkSource = ajv.compile(recipeSnapshotSourceSchema)
 
 function assertSchema(check: ValidateFunction, input: unknown): void {
@@ -41,6 +51,19 @@ export function validateRecipeSnapshot(input: unknown): RecipeSnapshot {
   assertSchema(checkSnapshot, input)
   const snapshot = input as RecipeSnapshot
   validateRecipe(snapshot.recipe)
+  return validateSnapshotProvenance(snapshot)
+}
+
+export function validateInstallableRecipeSnapshot(input: unknown): InstallableRecipeSnapshot {
+  if (!input || typeof input !== 'object' || !('snapshotVersion' in input) || input.snapshotVersion !== '2.0')
+    return validateRecipeSnapshot(input)
+  assertSchema(checkComponentSnapshot, input)
+  const snapshot = input as ComponentRecipeSnapshot
+  validateComponentRecipe(snapshot.recipe)
+  return validateSnapshotProvenance(snapshot)
+}
+
+function validateSnapshotProvenance<T extends InstallableRecipeSnapshot>(snapshot: T): T {
   validatePreset(snapshot.preset)
   for (const field of ['catalogRelease', 'compilerVersion'] as const)
     if (snapshot.preset[field] !== snapshot[field] || snapshot.recipe.presetRef[field] !== snapshot[field])

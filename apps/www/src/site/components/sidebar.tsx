@@ -1,12 +1,13 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { componentEditorLink } from '../../editor/editable-components'
 import { componentDocs } from './catalog'
 
 const groups = [
   { title: 'Getting started', links: [{ href: '/components', label: 'Overview' }, { href: '/#get-started', label: 'Installation' }] },
   { title: 'Components', links: componentDocs.map(doc => ({ href: `/components/${doc.id}`, label: doc.name })) },
-  { title: 'Editors', links: [{ href: '/editor/preset', label: 'Preset editor' }, { href: '/editor/component/button', label: 'Button editor' }] },
+  { title: 'Editors', links: [{ href: '/editor/preset', label: 'Preset editor' }, componentEditorLink] },
 ]
 
 export function ComponentsSidebar({ label = 'Components' }: { label?: string }) {

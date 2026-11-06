@@ -5,26 +5,26 @@ import os from 'node:os'
 import { createHash, randomUUID } from 'node:crypto'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { canonicalize, verifyPresetSnapshot, verifyRecipeSnapshot } from '@ombelle/compiler'
+import { canonicalize, verifyPresetSnapshot, verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
 import {
   validateSnapshotSource,
   validateRecipeSnapshotSource,
   type RecipeSnapshotSource,
-  type RecipeSnapshot,
+  type InstallableRecipeSnapshot,
   type PresetSnapshot,
   type SnapshotSource,
 } from '@ombelle/contracts'
 
 export type SnapshotCacheKey = SnapshotSource
 type PublicationCacheKey = SnapshotSource | RecipeSnapshotSource
-type PublicationSnapshot = PresetSnapshot | RecipeSnapshot
+type PublicationSnapshot = PresetSnapshot | InstallableRecipeSnapshot
 function validateKey(key: PublicationCacheKey): PublicationCacheKey {
   return 'recipeHash' in key ? validateRecipeSnapshotSource(key) : validateSnapshotSource(key)
 }
 async function verifyEnvelope(input: unknown, key?: PublicationCacheKey): Promise<PublicationSnapshot> {
   const recipe = key ? 'recipeHash' in key : !!input && typeof input === 'object' && 'id' in input && typeof input.id === 'string' && input.id.startsWith('rc_')
   return recipe
-    ? verifyRecipeSnapshot(input, key as RecipeSnapshotSource | undefined)
+    ? verifyInstallableRecipeSnapshot(input, key as RecipeSnapshotSource | undefined)
     : verifyPresetSnapshot(input, key as SnapshotSource | undefined)
 }
 const maxBytes = 128 * 1024
