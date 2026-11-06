@@ -10,6 +10,7 @@ writeFileAtomicSync(
 const recipe = JSON.parse(fs.readFileSync('schemas/recipe.schema.json', 'utf8'))
 writeFileAtomicSync('packages/contracts/src/recipe-schema.ts', '// Generated from schemas/recipe.schema.json; do not edit independently.\nexport const recipeSchema = ' + JSON.stringify(recipe, null, 2) + ' as const\n')
 for (const [name, binding] of [
+  ['component-recipe', 'componentRecipeSchema'],
   ['preset-snapshot', 'presetSnapshotSchema'],
   ['snapshot-source', 'snapshotSourceSchema'],
   ['recipe-snapshot', 'recipeSnapshotSchema'],
