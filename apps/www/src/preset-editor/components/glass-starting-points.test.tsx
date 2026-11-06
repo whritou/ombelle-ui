@@ -6,11 +6,11 @@ import { DesignControls } from './preset-controls'
 
 const noop = () => {}
 
-it('lists the eight starting points with Cristal as the default and presses the matching one', () => {
+it('lists the five offered starting points with Cristal as the default and presses the matching one', () => {
   const draft = applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-cristal')
   const html = renderToStaticMarkup(<GlassStartingPoints draft={draft} onPick={noop} onTint={noop} />)
   const labels = [...html.matchAll(/<button[^>]*data-preset="[^"]+"[^>]*>([^<]+)<\/button>/g)].map((m) => m[1])
-  expect(labels).toEqual(['Cristal (default)', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Liquid glass'])
+  expect(labels).toEqual(['Cristal (default)', 'Givré', 'Fumé', 'Relief', 'Liquid glass'])
   expect(html).toMatch(/data-preset="builtin-liquid-glass-cristal"[^>]*aria-pressed="true"/)
   expect(html).not.toContain('Custom')
   const custom = renderToStaticMarkup(
@@ -18,6 +18,14 @@ it('lists the eight starting points with Cristal as the default and presses the 
   )
   expect(custom).toContain('Custom')
   expect(custom).not.toContain('aria-pressed="true"')
+})
+
+it('names a retired preset that a draft still matches, with no button for it', () => {
+  const draft = applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-prism')
+  const html = renderToStaticMarkup(<GlassStartingPoints draft={draft} onPick={noop} onTint={noop} />)
+  expect(html).toContain(' · Prism')
+  expect(html).not.toContain('data-preset="builtin-liquid-glass-prism"')
+  expect(html).not.toContain('aria-pressed="true"')
 })
 
 it('offers the four tint chips', () => {

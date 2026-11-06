@@ -3,14 +3,13 @@
 import type { StartingPresetId } from '@ombelle/catalog'
 import { glassPresetId, glassPresetOptions } from './glass-presets'
 
-const options = glassPresetOptions()
-
 export function GlassPresetSelect({ value, onChange, label = 'Glass preview preset', allowNone = false }: {
   value: StartingPresetId | undefined
   onChange: (id: StartingPresetId | undefined) => void
   label?: string
   allowNone?: boolean
 }) {
+  const options = glassPresetOptions(value)
   return (
     <label className="inline-flex flex-wrap items-center gap-2 text-sm font-medium">
       <span>{label}</span>
