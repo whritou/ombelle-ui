@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { InstallableRecipe, InstallableRecipeCompileResult } from '@ombelle/contracts'
-import { glassContrastWarning } from '@ombelle/compiler'
+import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compiler'
 import { recipeFilename } from '../storage'
 import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
@@ -64,7 +64,9 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
   const [tab, setTab] = useState<Tab>('Usage')
   const content = result ? tabContent(tab, result, recipeJson ?? '') : ''
   const data = result?.recipe.data
-  const contrast = result && !stale ? glassContrastWarning(result.preset.data, data?.schemaVersion === '1.0' ? data.overrides : undefined) : undefined
+  const contrast = result && !stale ? data?.schemaVersion === '2.0'
+    ? glassContrastWarning(withComponentRecipeGlass(result.preset.data, data.appearance?.glass))
+    : glassContrastWarning(result.preset.data, data?.overrides) : undefined
   async function copy() {
     try {
       await navigator.clipboard.writeText(content)

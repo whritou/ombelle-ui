@@ -4,6 +4,7 @@ export * from './diagnostics.js'
 export * from './validate.js'
 export * from './recipe.js'
 export * from './component-recipe.js'
+export * from './component-recipe-appearance.js'
 export * from './snapshot.js'
 export * from './recipe-snapshot.js'
 export {

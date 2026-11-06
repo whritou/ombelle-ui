@@ -57,7 +57,10 @@ it('installs Badge through a custom alias and preserves the initialized host', a
   expect(await snapshotTree(root)).toEqual(conflict)
 })
 
-it.each(catalogRecipeFixtures())('installs $component from JSON and an immutable code', async recipe => {
+it.each(catalogRecipeFixtures())('installs $component from JSON and an immutable code', async fixture => {
+  const recipe = fixture.component === 'card' ? { ...fixture, appearance: { parts: {
+    card: { paddingXPx: 24, colors: { light: { background: '#123456' } } },
+  } } } : fixture
   const root = await createProject('vite')
   roots.push(root)
   const compiled = await compileComponentRecipe({ recipe })
@@ -75,6 +78,11 @@ it.each(catalogRecipeFixtures())('installs $component from JSON and an immutable
   await run('add', '--recipe', './recipe.json', '--dry-run')
   expect(await snapshotTree(root)).toEqual(before)
   await run('add', '--recipe', './recipe.json', '--yes')
+  if (recipe.component === 'card') {
+    const css = await fs.readFile(path.join(root, 'src/components/ui/recipes', recipe.id, 'r1/card.css'), 'utf8')
+    expect(css).toContain('padding-inline: 24px')
+    expect(css).toContain('background: #123456')
+  }
   const service = await startSnapshotService()
   try {
     const response = await fetch(service.origin + '/api/v1/recipes', {

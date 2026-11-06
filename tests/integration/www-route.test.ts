@@ -1,6 +1,6 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import ButtonEditorPage from '../../apps/www/src/app/editor/component/button/page.js'
 import PresetEditorPage from '../../apps/www/src/app/editor/preset/page.js'
 import PrivacyPage from '../../apps/www/src/app/privacy/page.js'
@@ -72,7 +72,7 @@ it('lists the catalog and offers install commands only for components the publis
   const { default: ComponentPage, generateStaticParams } = await import('../../apps/www/src/app/components/[id]/page.js')
   const { supportedComponentIds, styleSupport } = await import('@ombelle/contracts')
   const { componentDocs, componentInstallable, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
-  const { compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
+  const { catalogRecipeInstallerSupported, compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
   const listed = componentDocs.map((doc) => doc.id)
   expect([...listed].sort()).toEqual([...supportedComponentIds].sort())
   const overview = renderToStaticMarkup(createElement(ComponentsPage))
@@ -96,40 +96,32 @@ it('lists the catalog and offers install commands only for components the publis
       expect(html).toContain(`Requires CLI ${doc.minimumCli}`)
     }
     expect(html).toContain('Liquid glass: experimental.')
-    expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button')
+    expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button' || catalogRecipeInstallerSupported(publishedInstaller.version))
     // Glass Button previews show the 0.5.0 restyle, so the Button page says so.
     expect(html.includes('Liquid glass Buttons were restyled to one ink in 0.5.0.')).toBe(id === 'button')
   }
 })
 
-it('exposes every component editor and Customize link with the local opt-in', async () => {
-  vi.stubEnv('NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES', '1')
-  vi.resetModules()
-  try {
-    const { supportedComponentIds } = await import('@ombelle/contracts')
-    const { editableComponents } = await import('../../apps/www/src/editor/editable-components.js')
-    const { default: EditorPage } = await import('../../apps/www/src/app/editor/component/[id]/page.js')
-    const { default: ComponentPage } = await import('../../apps/www/src/app/components/[id]/page.js')
-    const { ComponentNavigation } = await import('../../apps/www/src/editor/components/component-navigation.js')
-    expect(editableComponents.map(({ id }) => id).sort()).toEqual([...supportedComponentIds].sort())
-    const chooser = renderToStaticMarkup(createElement(ComponentNavigation, { current: 'button' }))
-    for (const id of supportedComponentIds) {
-      const href = `href="/editor/component/${id}"`
-      expect(chooser).toContain(href)
-      expect(renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))).toContain(href)
-    }
-    await expect(EditorPage({ params: Promise.resolve({ id: 'missing' }) })).rejects.toMatchObject({ digest: 'NEXT_HTTP_ERROR_FALLBACK;404' })
-  } finally {
-    vi.unstubAllEnvs()
-    vi.resetModules()
+it('exposes every component editor and Customize link with the published installer', async () => {
+  const { supportedComponentIds } = await import('@ombelle/contracts')
+  const { editableComponents } = await import('../../apps/www/src/editor/editable-components.js')
+  const { default: EditorPage } = await import('../../apps/www/src/app/editor/component/[id]/page.js')
+  const { default: ComponentPage } = await import('../../apps/www/src/app/components/[id]/page.js')
+  const { ComponentNavigation } = await import('../../apps/www/src/editor/components/component-navigation.js')
+  expect(editableComponents.map(({ id }) => id).sort()).toEqual([...supportedComponentIds].sort())
+  const chooser = renderToStaticMarkup(createElement(ComponentNavigation, { current: 'button' }))
+  for (const id of supportedComponentIds) {
+    const href = `href="/editor/component/${id}"`
+    expect(chooser).toContain(href)
+    expect(renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))).toContain(href)
   }
+  await expect(EditorPage({ params: Promise.resolve({ id: 'missing' }) })).rejects.toMatchObject({ digest: 'NEXT_HTTP_ERROR_FALLBACK;404' })
 })
 
-it('offers form controls in Liquid Glass once the published installer is 0.5.0', async () => {
+it('offers form controls in Liquid Glass once the published installer meets the minimum', async () => {
   const { styleSupport } = await import('@ombelle/contracts')
   const { componentDoc, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
   const formControls = ['label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select'] as const
-  expect(publishedInstaller.version).toBe('0.5.0')
   for (const id of formControls) {
     expect(styleSupport(id, 'liquid-glass'), id).toBe('experimental')
     const doc = componentDoc(id)
@@ -147,6 +139,6 @@ it('offers the lab glass presets in the component directory and installs Select 
   expect(overview).toContain('href="/components/select"')
   const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
   expect(select).not.toContain('Requires CLI')
-  expect(select).toContain(`pnpm dlx ${publishedInstaller.packageName}@0.5.0 add select --cwd APP --dry-run`)
+  expect(select).toContain(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} add select --cwd APP --dry-run`)
   expect(select).toContain('Liquid glass: experimental.')
 })

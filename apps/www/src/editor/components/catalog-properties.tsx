@@ -4,6 +4,7 @@ import { GlassPresetSelect } from '../../site/glass-preset-select'
 import { glassPresetId } from '../../site/glass-presets'
 import { catalogPresetRef } from '../catalog-draft'
 import { FamilyPicker } from './family-picker'
+import { CatalogAppearance } from './catalog-appearance'
 
 export function CatalogProperties({ recipe, update }: { recipe: ComponentRecipe; update(recipe: ComponentRecipe): void }) {
   const family = resolveRecipePreset(recipe.presetRef).styleFamily
@@ -54,6 +55,7 @@ export function CatalogProperties({ recipe, update }: { recipe: ComponentRecipe;
       if (key === 'collapsible' && props.type === 'multiple') return null
       return <Field key={key} field={field} value={props[key]} update={value => change('props', key, value)} />
     })}
+    <CatalogAppearance recipe={recipe} glass={family === 'liquid-glass'} update={update} />
   </div>
 }
 
