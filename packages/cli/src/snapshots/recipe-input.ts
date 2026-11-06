@@ -3,7 +3,7 @@ import {
   officialSnapshotOrigin,
   normalizeSnapshotOrigin,
   parseRecipeSnapshotReference,
-  type Recipe,
+  type InstallableRecipe,
   type RecipeSnapshot,
   type RecipeSnapshotSource,
 } from '@ombelle/contracts'
@@ -19,7 +19,7 @@ export type RecipeInputOptions = {
   cacheRoot: string
 }
 export type ResolvedRecipeInput = {
-  recipe: Recipe
+  recipe: InstallableRecipe
   snapshot?: RecipeSnapshot
   source?: RecipeSnapshotSource
   resolution: 'local' | 'network' | 'cache'

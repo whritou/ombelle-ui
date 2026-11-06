@@ -58,7 +58,7 @@ export type ComponentPresetCompileResult = {
   provenance: CompileResult['provenance']
 }
 export type InstalledRecipe = Omit<
-  RecipeCompileResult,
+  InstallableRecipeCompileResult,
   'dependencies' | 'artifacts'
 > & {
   artifacts: Record<string, InstalledArtifact>
