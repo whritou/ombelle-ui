@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Recipe, RecipeCompileResult } from '@ombelle/contracts'
+import { glassContrastWarning } from '@ombelle/compiler'
 import { recipeFilename } from '../storage'
 import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
@@ -55,6 +56,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
 }) {
   const [tab, setTab] = useState<Tab>('Usage')
   const content = result ? tabContent(tab, result, recipeJson ?? '') : ''
+  const contrast = result && !stale ? glassContrastWarning(result.preset.data, result.recipe.data.overrides) : undefined
   async function copy() {
     try {
       await navigator.clipboard.writeText(content)
@@ -69,6 +71,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
         {stale && <span className="staleBadge">Output is out of date</span>}
       </div>
       {notice && <p className="artifactNote" data-testid="experimental-notice">{notice}</p>}
+      {contrast && <p className="artifactNote" role="status">{contrast}</p>}
       {result ? <>
         <div className="artifactTabs" role="tablist" aria-label="Generated artifacts">
           {tabs.map((item) => <button key={item} type="button" role="tab" id={`artifact-${item.replaceAll(' ', '-')}`}

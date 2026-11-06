@@ -73,6 +73,7 @@ export async function compileRecipe(input: {
         darkSelector,
         variant: data.props.variant,
         icon: data.icon,
+        glassContrast: 'report',
       }),
     },
     {

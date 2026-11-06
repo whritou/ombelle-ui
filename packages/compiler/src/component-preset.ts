@@ -23,6 +23,7 @@ import { renderScopedButton } from './recipe-source.js'
 export async function compileButtonPreset(input: {
   preset: unknown
   darkSelector?: string
+  glassContrast?: 'enforce' | 'report'
 }): Promise<ComponentPresetCompileResult> {
   const raw = validatePreset(input.preset)
   const catalog = getCatalog(raw.catalogRelease)
@@ -85,6 +86,7 @@ export async function compileButtonPreset(input: {
         slot: 'scoped-button',
         scopeAttribute: 'data-ombelle-scope',
         scopeLabel: 'component-preset',
+        glassContrast: input.glassContrast,
       }),
     },
     {

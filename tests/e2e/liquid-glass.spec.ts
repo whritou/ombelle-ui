@@ -661,6 +661,7 @@ for (const mode of modes) {
     await expect(readout).toContainText('You can still export or publish this preset.')
     await ready()
     await expect(page.getByRole('textbox', { name: 'Export text' })).toHaveValue(/"glassOpacity":0\.3,/)
+    await expect(page.getByTestId('preset-install-command')).toContainText('pnpm exec node packages/cli/dist/main.js')
     for (const action of actions) await expect(action).toBeEnabled()
     const expectMenuDownload = async () => {
       await page.getByRole('button', { name: 'More actions', exact: true }).click()
@@ -680,11 +681,12 @@ for (const mode of modes) {
     const code = page.getByRole('dialog', { name: 'Get code' })
     const published = code.getByTestId('get-code-reference')
     await expect(published).toBeVisible()
-    await expect(code.getByTestId('get-code-command')).toContainText('The CLI requires passing contrast to install this preset.')
+    await expect(code.getByTestId('get-code-command')).toContainText('Use the repository CLI to install it with a contrast warning.')
     const publishedPage = await page.context().newPage()
     await publishedPage.goto(new URL((await published.getAttribute('href'))!, page.url()).href)
     await expect(publishedPage.getByText('Contrast warning. Some Liquid Glass text falls below 4.5:1 in the contrast model.')).toBeVisible()
     await expect(publishedPage.getByText('Snapshot gallery ready.', { exact: true })).toBeVisible()
+    await expect(publishedPage.getByRole('textbox', { name: 'New setup dry-run command' })).toHaveValue(/^pnpm exec node packages\/cli\/dist\/main\.js init --preset ps_/)
     await publishedPage.close()
     await code.getByRole('button', { name: 'Close', exact: true }).click()
 

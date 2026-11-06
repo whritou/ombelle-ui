@@ -60,7 +60,7 @@
         "fontSizePx": {"type": "number", "minimum": 11, "maximum": 24},
         "letterSpacingEm": {"type": "number", "minimum": -0.05, "maximum": 0.2},
         "uppercase": {"type": "boolean"},
-        "glassOpacity": {"type": "number", "minimum": 0.25, "maximum": 1, "description": "Liquid glass only, like every glass* override: replaces the preset's value on this Button and is held to the same contrast bound. Ignored by other style families."},
+        "glassOpacity": {"type": "number", "minimum": 0.25, "maximum": 1, "description": "Liquid glass only, like every glass* override: replaces the preset's value on this Button and is checked for contrast warnings. Ignored by other style families."},
         "glassBlurPx": {"type": "number", "minimum": 0, "maximum": 40},
         "glassBackdropContrast": {"type": "number", "minimum": 0.3, "maximum": 1.6},
         "glassSheen": {"type": "number", "minimum": 0, "maximum": 1},

@@ -74,8 +74,8 @@ export async function compile(input: {
   compilerVersion: string
   /**
    * 'enforce' (default) rejects a glass preset below the contrast bound.
-   * 'report' compiles it anyway so the website can preview and export drafts
-   * with contrast warnings. Installers use the default.
+   * 'report' compiles it anyway so the website and CLI can report contrast
+   * warnings while preserving the chosen settings.
    */
   glassContrast?: 'enforce' | 'report'
 }): Promise<CompileResult> {

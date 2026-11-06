@@ -9,7 +9,8 @@ export const ombelleMinimumCli = '0.4.0'
 /** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
 export const glassMaterialMinimumCli = '0.5.0'
 export const glassMaterialInstallNotice = `Installing this Liquid Glass material requires CLI ${glassMaterialMinimumCli}.`
-export const glassContrastInstallNotice = 'The CLI requires passing contrast to install this preset.'
+export const glassContrastMinimumCli = '0.5.0'
+export const glassContrastInstallNotice = `The published installer needs CLI ${glassContrastMinimumCli} for this preset. Use the repository CLI to install it with a contrast warning.`
 const materialFields = ['glassRefraction', 'glassRefractionWidth', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion']
 
 /**
@@ -33,6 +34,10 @@ export function materialInstallBlocked(
 export function recipeInstallBlocked(recipe: Pick<Recipe, 'overrides' | 'presetRef'>, installer: { version: string } = publishedInstaller): boolean {
   return materialInstallBlocked(recipe, installer) ||
     (compareVersions(installer.version, glassMaterialMinimumCli) < 0 && recipe.presetRef.id.startsWith('builtin-liquid-glass-'))
+}
+
+export function contrastInstallBlocked(hasWarning: boolean, installer: { version: string } = publishedInstaller): boolean {
+  return hasWarning && compareVersions(installer.version, glassContrastMinimumCli) < 0
 }
 
 /** Compares two x.y.z versions numerically: negative, zero or positive. */

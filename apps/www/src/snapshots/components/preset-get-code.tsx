@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { ResolvedPreset } from '@ombelle/contracts'
 import { usePublication } from '../use-publication'
-import { codeInstallCommand, glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked } from '../install-command'
+import { codeInstallCommand, contrastInstallBlocked, glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked } from '../install-command'
 import { GetCodeDialog, type CodeStatus } from './get-code-dialog'
 
 const scopes = [
@@ -52,7 +52,7 @@ export function PresetGetCode({
   const publication = usePublication({ preset, current, announce })
   const { state } = publication
   const [open, setOpen] = useState(false)
-  const installUnavailable = contrastWarning
+  const installUnavailable = contrastInstallBlocked(contrastWarning)
     ? glassContrastInstallNotice
     : preset && materialInstallBlocked({ design: preset.data.design })
       ? glassMaterialInstallNotice

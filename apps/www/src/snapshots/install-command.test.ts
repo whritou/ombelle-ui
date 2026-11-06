@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
-import { codeInstallCommand, compareVersions, offeredStyleFamilies, ombelleMinimumCli, packageManagers, publishedInstaller, snapshotInstallCommand } from './install-command'
+import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, packageManagers, publishedInstaller, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
   reference: 'ps_' + 'a'.repeat(32) + '@1',
   presetHash: 'b'.repeat(64),
 }
+it('uses the repository CLI for contrast warnings until the compatible installer release', () => {
+  expect(contrastInstallBlocked(true, { version: '0.4.1' })).toBe(true)
+  expect(contrastInstallBlocked(true, { version: '0.5.0' })).toBe(false)
+  expect(contrastInstallBlocked(false, { version: '0.4.1' })).toBe(false)
+})
 it('all scopes use one immutable source and honest private repository invocation', () => {
   for (const scope of ['new', 'theme', 'button'] as const) {
     const command = snapshotInstallCommand(source, scope)

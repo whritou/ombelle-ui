@@ -6,7 +6,7 @@ import { PresetPreviewFrame } from '../../preset-editor/components/preset-previe
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
-import { glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, snapshotInstallCommand } from '../install-command'
+import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, snapshotInstallCommand } from '../install-command'
 import {
   createSnapshotPreviewSession,
   selectSnapshotPreview,
@@ -58,11 +58,7 @@ export function PublishedPreset({
     () => snapshot.preset.styleFamily === 'liquid-glass' && !glassContrastReport(snapshot.preset).passes,
     [snapshot.preset],
   )
-  const installUnavailable = contrastWarning
-    ? glassContrastInstallNotice
-    : materialInstallBlocked({ design: snapshot.preset.design })
-      ? glassMaterialInstallNotice
-      : undefined
+  const useLocalInstaller = contrastInstallBlocked(contrastWarning)
   const source = {
     origin,
     reference: `${snapshot.id}@${snapshot.revision}`,
@@ -209,18 +205,20 @@ export function PublishedPreset({
           {announcement}
         </p>
       </section>
-      {installUnavailable ? <p>{installUnavailable}</p> : (
+      {!useLocalInstaller && materialInstallBlocked({ design: snapshot.preset.design }) ? <p>{glassMaterialInstallNotice}</p> : (
       <section aria-labelledby="snapshot-install-heading">
         <h2 id="snapshot-install-heading">
           Install with the Ombelle CLI
         </h2>
-        <p>
+        {useLocalInstaller ? (
+          <p>From the Ombelle repository, run <code>pnpm build:packages</code> before using the commands below.</p>
+        ) : <p>
           These commands run the published{' '}
           <code>
             {publishedInstaller.packageName}@{publishedInstaller.version}
           </code>{' '}
           installer through npx and require Node 24.19.0 or newer Node 24.
-        </p>
+        </p>}
         <p>
           Replace <code>APP</code> with your app path (quote paths containing
           spaces). Run the selected command and review the JSON dry-run plan. To apply that plan, remove{' '}
@@ -244,7 +242,7 @@ export function PublishedPreset({
               id={`snapshot-command-${scope}`}
               readOnly
               rows={5}
-              value={snapshotInstallCommand(source, scope, publishedInstaller)}
+              value={snapshotInstallCommand(source, scope, useLocalInstaller ? undefined : publishedInstaller)}
               spellCheck={false}
             />
           </section>

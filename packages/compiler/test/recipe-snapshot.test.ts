@@ -17,6 +17,15 @@ it('normalizes publication through the existing recipe compiler with unchanged a
   expect(await normalizePublishedRecipe(example)).toEqual(await compileRecipe({ recipe: example }))
   expect(await verifyRecipeSnapshot(snapshot)).toEqual(snapshot)
 })
+it('normalizes a glass Button recipe with a low-contrast opacity override', async () => {
+  const compiled = await normalizePublishedRecipe({
+    ...example,
+    presetRef: { ...example.presetRef, id: 'builtin-liquid-glass' },
+    overrides: { glassOpacity: 0.3 },
+  })
+  expect(compiled.recipe.data.overrides.glassOpacity).toBe(0.3)
+  expect(compiled.artifacts.find(({ kind }) => kind === 'style')?.content).toContain('--glass-opacity: 0.3')
+})
 it('checks requested recipe distribution identity and pinned hash', async () => {
   const expected = { reference: snapshot.id + '@1', recipeHash: snapshot.recipeHash }
   expect(await verifyRecipeSnapshot(snapshot, expected)).toEqual(snapshot)

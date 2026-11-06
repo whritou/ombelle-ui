@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
-import { glassContrastInstallNotice, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller } from '../../snapshots/install-command'
+import { contrastInstallBlocked, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller } from '../../snapshots/install-command'
 import {
   canExportPreset,
   serializePresetExport,
@@ -37,6 +37,7 @@ export function PresetExportPanel({
   const [output, setOutput] = useState<'json' | 'tokens' | 'family'>('json'),
     [install, setInstall] = useState<'new' | 'existing'>('new')
   const enabled = canExportPreset(state, draft)
+  const useLocalInstaller = contrastInstallBlocked(contrastWarning)
   const text = enabled
     ? output === 'json'
       ? serializePresetExport(state, draft)
@@ -133,53 +134,53 @@ export function PresetExportPanel({
         </ul>
       </details>
       <h3>Install with the private local CLI</h3>
-      {contrastWarning ? (
-        <p>{glassContrastInstallNotice}</p>
-      ) : (
-        <>
-          <label htmlFor="preset-install">Installation path</label>
-          <select
-            id="preset-install"
-            value={install}
-            onChange={(e) => setInstall(e.target.value as typeof install)}
-          >
-            <option value="new">New setup</option>
-            <option value="existing">Already initialized shadcn</option>
-          </select>
-          {install === 'existing' && (
-            <p>
-              If you already initialized shadcn, add the styling to the project
-              instead. This command merges the palette and tokens into your
-              globals.css.
-            </p>
-          )}
-          <p>
-            Run this from the folder containing the downloaded{' '}
-            <code>project-preset.json</code>, with Node 24.19.0 or newer Node 24.
-            Replace <code>APP</code> with your target project directory. The CLI
-            uses its existing package manager.
-          </p>
-          {materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
-            <p data-testid="preset-install-held">
-              This preset uses liquid glass material settings, which need{' '}
-              {publishedInstaller.packageName} {glassMaterialMinimumCli}. That release
-              is not published yet: download the preset now, and the command appears
-              here once it is.
-            </p>
-          ) : (
-            <pre data-testid="preset-install-command">
-              {installerRunner(publishedInstaller)}{' '}
-              {install === 'new' ? 'init --preset' : 'theme add'}{' '}
-              ./project-preset.json --cwd APP --dry-run --json
-            </pre>
-          )}
-          <p>
-            Review the plan, then replace <code>--dry-run --json</code> with{' '}
-            <code>--yes</code> to apply. A theme merge preserves existing component
-            source; changing markup requires an explicit migration.
-          </p>
-        </>
+      <label htmlFor="preset-install">Installation path</label>
+      <select
+        id="preset-install"
+        value={install}
+        onChange={(e) => setInstall(e.target.value as typeof install)}
+      >
+        <option value="new">New setup</option>
+        <option value="existing">Already initialized shadcn</option>
+      </select>
+      {install === 'existing' && (
+        <p>
+          If you already initialized shadcn, add the styling to the project
+          instead. This command merges the palette and tokens into your
+          globals.css.
+        </p>
       )}
+      {useLocalInstaller ? (
+        <p>
+          Run <code>pnpm build:packages</code> from the Ombelle repository.
+          Save <code>project-preset.json</code> there and replace <code>APP</code>
+          with your target project directory.
+        </p>
+      ) : <p>
+        Run this from the folder containing the downloaded{' '}
+        <code>project-preset.json</code>, with Node 24.19.0 or newer Node 24.
+        Replace <code>APP</code> with your target project directory. The CLI
+        uses its existing package manager.
+      </p>}
+      {!useLocalInstaller && materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
+        <p data-testid="preset-install-held">
+          This preset uses liquid glass material settings, which need{' '}
+          {publishedInstaller.packageName} {glassMaterialMinimumCli}. That release
+          is not published yet: download the preset now, and the command appears
+          here once it is.
+        </p>
+      ) : (
+        <pre data-testid="preset-install-command">
+          {installerRunner(useLocalInstaller ? undefined : publishedInstaller)}{' '}
+          {install === 'new' ? 'init --preset' : 'theme add'}{' '}
+          ./project-preset.json --cwd APP --dry-run --json
+        </pre>
+      )}
+      <p>
+        Review the plan, then replace <code>--dry-run --json</code> with{' '}
+        <code>--yes</code> to apply. A theme merge preserves existing component
+        source; changing markup requires an explicit migration.
+      </p>
       </section>
     </div>
   )
