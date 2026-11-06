@@ -52,10 +52,10 @@ it('renders the public landing page with editor links and the published installe
   expect(html.match(/<h1\b/g)).toHaveLength(1)
   // The design's placeholder installer is gone.
   expect(html).toContain('React Native is not supported')
-  // Liquid glass is shipped as experimental for six components only.
-  expect(html).toContain('Experimental for Button, Badge, Card, Dialog, Tabs and Tooltip')
-  // Components newer than the published installer stay off the home page copy.
-  expect(html).not.toContain('Experimental for Alert')
+  // With 0.5.0 published, every catalog component is experimental in liquid glass.
+  expect(html).toContain('Experimental for Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea and Tooltip.')
+  expect(html).not.toContain('not available in glass')
+  expect(html).not.toContain('need a newer installer')
   expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')
 })
@@ -72,9 +72,9 @@ it('lists the catalog and offers install commands only for components the publis
   for (const id of listed) expect(overview).toContain(`href="/components/${id}"`)
   expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...listed].sort())
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
-  // Input is experimental in the catalog's glass family but needs a newer installer than the published one.
+  // Input is experimental in the catalog's glass family, and the published 0.5.0 installer accepts it.
   expect(styleSupport('input', 'liquid-glass')).toBe('experimental')
-  expect(glassOnSite('input')).toBe(false)
+  expect(glassOnSite('input')).toBe(true)
   for (const doc of componentDocs) {
     const { id } = doc
     const html = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))
@@ -96,20 +96,20 @@ it('lists the catalog and offers install commands only for components the publis
   }
 })
 
-it('previews form controls in Liquid Glass while gating installation on 0.5.0', async () => {
+it('offers form controls in Liquid Glass once the published installer is 0.5.0', async () => {
   const { styleSupport } = await import('@ombelle/contracts')
   const { componentDoc, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
   const formControls = ['label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select'] as const
-  expect(publishedInstaller.version).toBe('0.4.1')
+  expect(publishedInstaller.version).toBe('0.5.0')
   for (const id of formControls) {
     expect(styleSupport(id, 'liquid-glass'), id).toBe('experimental')
     const doc = componentDoc(id)
     expect(doc?.glassMinimumCli ?? doc?.minimumCli, id).toBe('0.5.0')
-    expect(glassOnSite(id), id).toBe(false)
+    expect(glassOnSite(id), id).toBe(true)
   }
 })
 
-it('offers the lab glass presets in the component directory and previews Select ahead of the published installer', async () => {
+it('offers the lab glass presets in the component directory and installs Select with the published installer', async () => {
   const { default: ComponentsPage } = await import('../../apps/www/src/app/components/page.js')
   const { default: ComponentPage } = await import('../../apps/www/src/app/components/[id]/page.js')
   const overview = renderToStaticMarkup(createElement(ComponentsPage))
@@ -117,6 +117,7 @@ it('offers the lab glass presets in the component directory and previews Select 
   for (const label of ['Cristal', 'Givré', 'Fumé', 'Relief']) expect(overview).toContain(label)
   expect(overview).toContain('href="/components/select"')
   const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
-  expect(select).toContain('Requires CLI 0.5.0')
-  expect(select).not.toContain('add select --cwd APP --dry-run')
+  expect(select).not.toContain('Requires CLI')
+  expect(select).toContain(`pnpm dlx ${publishedInstaller.packageName}@0.5.0 add select --cwd APP --dry-run`)
+  expect(select).toContain('Liquid glass: experimental.')
 })
