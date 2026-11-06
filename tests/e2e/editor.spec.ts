@@ -70,8 +70,8 @@ test('offers keyboard access to the catalog on mobile', async ({ page }) => {
   await expect(page).toHaveURL(`${origin}/components`)
 })
 
-test('returns 404 for catalog components without an editor', async ({ request }) => {
-  const response = await request.get('http://127.0.0.1:3000/editor/component/card')
+test('returns 404 for unknown component editors', async ({ request }) => {
+  const response = await request.get('http://127.0.0.1:3000/editor/component/unknown')
   expect(response.status()).toBe(404)
 })
 

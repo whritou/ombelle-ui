@@ -8,6 +8,9 @@ import button from '../../examples/recipe.example.json'
 import { runBuiltCli, jsonRecord } from '../helpers/cli-runtime.js'
 import { createProject } from '../helpers/projects.js'
 import { snapshotTree } from '../helpers/tree.js'
+import { catalogRecipeFixtures } from '../helpers/catalog-recipe-fixtures.js'
+import { startSnapshotService } from '../helpers/snapshot-service.js'
+import { randomUUID } from 'node:crypto'
 
 const roots: string[] = []
 afterEach(async () => {
@@ -52,4 +55,39 @@ it('installs Badge through a custom alias and preserves the initialized host', a
   const conflict = await snapshotTree(root)
   expect((await cli('add', '--recipe', './button.recipe.json', '--yes')).output).toContain('FILE_CONFLICT')
   expect(await snapshotTree(root)).toEqual(conflict)
+})
+
+it.each(catalogRecipeFixtures())('installs $component from JSON and an immutable code', async recipe => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const compiled = await compileComponentRecipe({ recipe })
+  const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'))
+  for (const dependency of compiled.dependencies) pkg.dependencies[dependency.name] = dependency.version
+  await fs.writeFile(path.join(root, 'package.json'), JSON.stringify(pkg))
+  const run = async (...args: string[]) => {
+    const result = await runBuiltCli('node', [...args, '--json'], root)
+    expect(result.code, result.output).toBe(0)
+    return jsonRecord(result.data)
+  }
+  await run('init', '--preset', path.resolve('packages/catalog/src/presets/flat.json'), '--yes')
+  await fs.writeFile(path.join(root, 'recipe.json'), JSON.stringify(recipe))
+  const before = await snapshotTree(root)
+  await run('add', '--recipe', './recipe.json', '--dry-run')
+  expect(await snapshotTree(root)).toEqual(before)
+  await run('add', '--recipe', './recipe.json', '--yes')
+  const service = await startSnapshotService()
+  try {
+    const response = await fetch(service.origin + '/api/v1/recipes', {
+      method: 'POST', headers: { Origin: service.origin, 'Content-Type': 'application/json', 'Idempotency-Key': randomUUID() },
+      body: JSON.stringify({ recipe }),
+    })
+    expect(response.status).toBe(201)
+    const snapshot = await response.json()
+    const installed = await run('add', '--recipe', snapshot.id + '@1', '--snapshot-origin', service.origin,
+      '--recipe-hash', snapshot.recipeHash, '--yes')
+    expect(installed.recipe).toMatchObject({ recipe: { hash: compiled.recipe.hash, data: { component: recipe.component } } })
+    const tree = await snapshotTree(root)
+    for (const [file, bytes] of Object.entries(before))
+      if (file !== 'ui-library.lock.json') expect(tree[file], file).toEqual(bytes)
+  } finally { await service.close() }
 })

@@ -1,8 +1,12 @@
 # Standalone CLI candidate
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.5.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.6.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
 Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
+
+## Catalog recipe release
+
+The component editor release uses recipe 2.0 for the 22 new editors and recipe 1.0 for Button. The website's minimum candidate for recipe 2.0 is CLI `0.6.0`. Verify the candidate can install both recipe formats from JSON and immutable codes. Run the catalog browser parity and foundation gates before updating the site's published installer version. Publish and smoke-test the compatible package before that website change.
 
 Install the exact candidate in an independent project with lifecycle scripts disabled. Replace TARBALL with its absolute path:
 
@@ -22,7 +26,7 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.5.0, which is published as `@ombelle-ui/cli@0.5.0`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
+All six workspace packages use software version 0.6.0. The published installer is `@ombelle-ui/cli@0.5.0`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. The installer continues to accept catalog/compiler compatibility release 0.1.0 and schema 1.0; package versions do not reinterpret saved presets, recipes, snapshots or lockfiles.
 
 Release 0.5.0 in this order:
 

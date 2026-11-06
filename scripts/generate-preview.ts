@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { compile, scopeRecipeTemplate, sha256 } from '@ombelle/compiler'
+import { compile, scopeRecipeGlassFilter, scopeRecipeTemplate, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import {
   supportedStyleFamilies,
@@ -121,6 +121,7 @@ const recipeComponents = supportedComponentIds.filter(id => id !== 'button')
 const recipeDirectory = 'apps/preview/src/generated/catalog-recipes'
 const recipeCatalog = getCatalog('0.1.0')
 await fs.mkdir(recipeDirectory, { recursive: true })
+await fs.writeFile(`${recipeDirectory}/liquid-glass-filter.tsx`, scopeRecipeGlassFilter(recipeCatalog.glassFilter))
 for (const id of recipeComponents)
   await fs.writeFile(`${recipeDirectory}/${id}.tsx`,
     scopeRecipeTemplate(recipeCatalog.templates[id], '../flat/lib/utils.js'))

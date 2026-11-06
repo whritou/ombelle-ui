@@ -19,7 +19,7 @@ export async function transformRecipeArtifact(
   if (artifact.logicalPath === 'lib/utils.ts' && artifact.kind === 'utility') target = context.utilsFile
   else if (
     (artifact.kind === 'component' && (filename === `${component}.tsx` ||
-      (recipe.schemaVersion === '2.0' && /^[a-z][a-z0-9-]*\.tsx$/.test(filename)))) ||
+      (recipe.schemaVersion === '2.0' && filename === 'liquid-glass-filter.tsx'))) ||
     (artifact.kind === 'style' && filename === `${component}.css`)
   )
     target = path.join(context.componentsDir, artifact.logicalPath)
@@ -43,8 +43,16 @@ export async function transformRecipeArtifact(
     content:
       artifact.kind === 'style'
         ? artifact.content
-        : await rewriteModuleSpecifiers(artifact.content, (specifier) =>
-            recipeImportAlias(specifier, context.utilsAlias, context.uiAlias),
-          ),
+        : await rewriteModuleSpecifiers(artifact.content, (specifier) => {
+            if (recipe.schemaVersion === '2.0') {
+              const approved = new Set([
+                '@/lib/utils', `@/components/ui/${base}${component}`,
+                `./${component}.css`, './liquid-glass-filter',
+              ])
+              if (/^(?:\.|\/|@\/)|\\/.test(specifier) && !approved.has(specifier))
+                throw new FoundationError('INVALID_DATA', 'Unexpected component recipe import', artifact.logicalPath)
+            }
+            return recipeImportAlias(specifier, context.utilsAlias, context.uiAlias)
+          }),
   }
 }

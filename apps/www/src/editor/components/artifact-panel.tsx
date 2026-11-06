@@ -4,7 +4,7 @@ import { glassContrastWarning } from '@ombelle/compiler'
 import { recipeFilename } from '../storage'
 import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
-import { catalogRecipeInstallNotice, catalogRecipeMinimumCli, compareVersions, glassMaterialMinimumCli, installerRunner, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
+import { catalogRecipeInstallNotice, catalogRecipeInstallerSupported, glassMaterialMinimumCli, installerRunner, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
 
 export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
 const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Recipe', 'Install']
@@ -22,7 +22,7 @@ export function artifactMeta(result: InstallableRecipeCompileResult): string[] {
 
 /** The Install tab: the command, or why there is none yet for glass material overrides. */
 export function installText(recipe: InstallableRecipe, installer: { version: string } = publishedInstaller): string {
-  if (recipe.schemaVersion === '2.0' && compareVersions(installer.version, catalogRecipeMinimumCli) < 0)
+  if (recipe.schemaVersion === '2.0' && !catalogRecipeInstallerSupported(installer.version))
     return '# ' + catalogRecipeInstallNotice
   if (recipe.schemaVersion === '1.0' && recipeInstallBlocked(recipe, installer))
     return `# Glass material needs ${publishedInstaller.packageName} ${glassMaterialMinimumCli}, which is not published yet.
@@ -30,11 +30,16 @@ export function installText(recipe: InstallableRecipe, installer: { version: str
   return `${installerRunner({ ...publishedInstaller, version: installer.version })} add --recipe ./${recipeFilename(recipe)} --cwd APP --yes`
 }
 
+function tabArtifact(tab: Tab, result: InstallableRecipeCompileResult) {
+  const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
+  return result.artifacts.find(artifact => artifact.kind === kind &&
+    (kind !== 'component' || artifact.logicalPath.endsWith(`/${result.recipe.data.component}.tsx`)))
+}
+
 function tabContent(tab: Tab, result: InstallableRecipeCompileResult, json: string): string {
   if (tab === 'Recipe') return json
   if (tab === 'Install') return installText(result.recipe.data)
-  const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
-  return result.artifacts.find((artifact) => artifact.kind === kind)?.content ?? ''
+  return tabArtifact(tab, result)?.content ?? ''
 }
 
 const languages: Record<Tab, CodeLanguage> = { Usage: 'tsx', Component: 'tsx', CSS: 'css', Recipe: 'json', Install: 'shell' }
@@ -44,8 +49,7 @@ const languageNames: Record<CodeLanguage, string> = { tsx: 'TSX', css: 'CSS', js
 function tabFile(tab: Tab, result: InstallableRecipeCompileResult): string {
   if (tab === 'Recipe') return recipeFilename(result.recipe.data)
   if (tab === 'Install') return 'Terminal'
-  const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
-  return result.artifacts.find((artifact) => artifact.kind === kind)?.logicalPath ?? tab
+  return tabArtifact(tab, result)?.logicalPath ?? tab
 }
 
 export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = null, componentName = 'Button' }: {

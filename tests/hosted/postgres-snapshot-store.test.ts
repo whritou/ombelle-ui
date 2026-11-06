@@ -1,8 +1,9 @@
 import { afterAll, expect, it } from 'vitest'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { normalizePublishedPreset, normalizePublishedRecipe } from '@ombelle/compiler'
+import { canonicalize, normalizePublishedInstallableRecipe, normalizePublishedPreset, normalizePublishedRecipe } from '@ombelle/compiler'
 import preset from '../../examples/preset.example.json'
 import recipe from '../../examples/recipe.example.json'
+import badgeRecipe from '../../examples/component-recipe.badge.json'
 import { publicationNow, publicationStoreContract } from '../helpers/publication-store-contract.js'
 import { openPostgresSnapshotStore, closePostgresPools } from '../../apps/www/src/snapshots/server/postgres-store.js'
 import { initializePostgresSnapshotStore } from '../../apps/www/src/snapshots/server/postgres-migrations.js'
@@ -34,6 +35,17 @@ async function fixture() {
   return { store, schema, reopen: () => openPostgresSnapshotStore(connection!, { schema }), close: async () => { await store.close() } }
 }
 publicationStoreContract('Neon Postgres publication contract', fixture)
+
+it('reads both recipe versions from the same store without changing Button bytes', async () => {
+  const context = await fixture()
+  const publish = (compiled: Awaited<ReturnType<typeof normalizePublishedInstallableRecipe>>) =>
+    context.store.publishRecipe({ compiled, clientKey: 'versions', idempotencyKey: randomUUID(), now: publicationNow })
+  const { snapshot: button } = await publish(await normalizePublishedRecipe(recipe))
+  const { snapshot: badge } = await publish(await normalizePublishedInstallableRecipe(badgeRecipe))
+  expect(badge.snapshotVersion).toBe('2.0')
+  expect(await context.store.lookupRecipe({ id: badge.id, revision: 1 })).toEqual(badge)
+  expect(canonicalize(await context.store.lookupRecipe({ id: button.id, revision: 1 }))).toBe(canonicalize(button))
+})
 
 it('does not create or migrate storage during an ordinary open', async () => {
   const schema = schemaName()

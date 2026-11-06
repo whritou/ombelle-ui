@@ -2,22 +2,120 @@ import type { ComponentRecipe } from '@ombelle/contracts'
 
 export type RecipeSpecimen = {
   tag: string
-  props: Record<string, string | number | boolean>
+  props: Record<string, string | number | boolean | null | undefined | readonly string[] | { localId: string }>
   children: readonly (RecipeSpecimen | string)[]
 }
 
+type Props = RecipeSpecimen['props']
+const node = (tag: string, props: Props = {}, ...children: RecipeSpecimen['children']): RecipeSpecimen => ({ tag, props, children })
+const localId = (suffix: string) => ({ localId: '-' + suffix })
+const label = (text: string) => node('label', { htmlFor: localId('control') }, text)
+const trigger = (tag: string, text: string) => node(tag, { type: 'button' }, text)
+
 export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen {
-  return {
-    tag: 'Badge',
-    props: { variant: recipe.props.variant ?? 'default' },
-    children: [recipe.content.label],
+  const { component, content, props } = recipe
+  switch (component) {
+    case 'badge':
+      return node('Badge', props, content.label)
+    case 'alert':
+      return node('Alert', props, node('AlertTitle', {}, content.title), node('AlertDescription', {}, content.description))
+    case 'avatar':
+      return node('Avatar', { size: props.size, variant: props.variant, role: 'img', 'aria-label': content.label },
+        node('AvatarFallback', {}, content.initials),
+        ...(props.status === 'none' ? [] : [node('AvatarStatus', { status: props.status })]))
+    case 'card':
+      return node('Card', { density: props.density }, node('CardHeader', {},
+        node('CardTitle', { level: props.level }, content.title), node('CardDescription', {}, content.description)),
+      node('CardContent', {}, content.body))
+    case 'progress':
+      return node('Progress', { value: props.indeterminate ? null : props.value, max: props.max, 'aria-label': content.label })
+    case 'separator':
+      return node('Separator', props, ...(!props.decorative && content.label ? [content.label] : []))
+    case 'skeleton':
+      return node('div', { role: 'status', 'aria-busy': true, 'aria-label': content.label }, node('Skeleton', props))
+    case 'input':
+    case 'textarea':
+      return node('div', {}, label(content.label), node(component === 'input' ? 'Input' : 'Textarea', {
+        id: localId('control'), placeholder: content.placeholder, defaultValue: content.initialText,
+        disabled: props.disabled, required: props.required, 'aria-invalid': props.invalid || undefined,
+      }))
+    case 'label':
+      return node('div', {}, node('Label', { htmlFor: localId('control') }, content.label,
+        ...(props.required ? [node('span', { 'aria-hidden': 'true' }, '*')] : [])),
+      node('input', { id: localId('control'), type: 'text', required: props.required }))
+    case 'checkbox':
+      return node('div', {}, node('Checkbox', { id: localId('control'), disabled: props.disabled, required: props.required,
+        defaultChecked: props.checked === 'indeterminate' ? 'indeterminate' : props.checked === 'checked' }), label(content.label))
+    case 'switch':
+      return node('div', {}, node('Switch', { id: localId('control'), disabled: props.disabled, defaultChecked: props.checked },
+        node('SwitchThumb')), label(content.label))
+    case 'native-select':
+      return node('div', {}, label(content.label), node('NativeSelect', {
+        id: localId('control'), defaultValue: props.selection, size: props.size, disabled: props.disabled, required: props.required,
+      }, ...(props.selection ? [] : [node('NativeSelectOption', { value: '' }, 'Choose an option')]),
+      ...content.options.map(item => node('NativeSelectOption', { value: item.id }, item.label))))
+    case 'radio-group':
+      return node('div', {}, node('p', { id: localId('group-label') }, content.label), node('RadioGroup', {
+        'aria-labelledby': localId('group-label'), defaultValue: props.selection || undefined,
+        orientation: props.orientation, disabled: props.disabled, required: props.required,
+      }, ...content.options.map(item => node('RadioGroupOption', {}, node('RadioGroupItem', { value: item.id }),
+        node('span', {}, node('RadioGroupOptionLabel', {}, item.label), ...(item.description
+          ? [node('RadioGroupOptionDescription', {}, item.description)] : []))))))
+    case 'select':
+      return node('div', {}, label(content.label), node('Select', {
+        defaultValue: props.selection || undefined, disabled: props.disabled, required: props.required,
+      }, node('SelectTrigger', { id: localId('control'), size: props.size }, node('SelectValue', { placeholder: content.placeholder })),
+      node('SelectContent', { position: props.position }, ...content.options.map(item =>
+        node('SelectItem', { value: item.id, hint: item.hint || undefined }, item.label)))))
+    case 'accordion':
+      return node('Accordion', props.type === 'single'
+        ? { type: 'single', collapsible: props.collapsible, defaultValue: props.expanded[0] }
+        : { type: 'multiple', defaultValue: props.expanded },
+      ...content.items.map(item => node('AccordionItem', { value: item.id },
+        node('AccordionTrigger', {}, item.label), node('AccordionContent', {}, item.body))))
+    case 'tabs':
+      return node('Tabs', { defaultValue: props.selection, orientation: props.orientation },
+        node('TabsList', { 'aria-label': 'Sections' }, ...content.items.map(item => node('TabsTrigger', { value: item.id }, item.label))),
+        ...content.items.map(item => node('TabsContent', { value: item.id }, item.body)))
+    case 'table': {
+      const numeric = new Set(props.numeric)
+      return node('Table', {}, node('TableCaption', {}, content.caption), node('TableHeader', {},
+        node('TableRow', {}, ...content.columns.map(column => node('TableHead', { numeric: numeric.has(column.id) }, column.label)))),
+      node('TableBody', {}, ...content.rows.map(row => node('TableRow', {}, ...row.cells.map((cell, index) =>
+        node('TableCell', { numeric: numeric.has(content.columns[index].id) }, cell))))))
+    }
+    case 'dialog':
+      return node('Dialog', {}, trigger('DialogTrigger', content.trigger), node('DialogContent', {},
+        node('DialogHeader', {}, node('DialogTitle', {}, content.title), node('DialogDescription', {}, content.description))))
+    case 'dropdown-menu':
+      return node('DropdownMenu', {}, trigger('DropdownMenuTrigger', content.trigger), node('DropdownMenuContent', {},
+        ...content.items.map(item => node('DropdownMenuItem', { variant: item.variant, disabled: item.disabled }, item.label))))
+    case 'popover':
+      return node('Popover', {}, trigger('PopoverTrigger', content.trigger), node('PopoverContent', {
+        ...props, 'aria-labelledby': localId('title'),
+      }, node('PopoverTitle', { id: localId('title') }, content.title), node('PopoverDescription', {}, content.description)))
+    case 'tooltip':
+      return node('TooltipProvider', { delayDuration: 300 }, node('Tooltip', {}, trigger('TooltipTrigger', content.trigger),
+        node('TooltipContent', props, content.text, node('TooltipArrow'))))
   }
+}
+
+export function specimenExports(specimen: RecipeSpecimen): string[] {
+  const names = new Set<string>()
+  const visit = (part: RecipeSpecimen) => {
+    if (/^[A-Z]/.test(part.tag)) names.add(part.tag)
+    for (const child of part.children) if (typeof child !== 'string') visit(child)
+  }
+  visit(specimen)
+  return [...names].sort()
 }
 
 export function renderRecipeSpecimen(specimen: RecipeSpecimen): string {
   const props = Object.entries(specimen.props)
+    .filter(([, value]) => value !== undefined)
     .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
-    .map(([name, value]) => ` ${name}={${JSON.stringify(value)}}`).join('')
+    .map(([name, value]) => ` ${name}={${value && typeof value === 'object' && 'localId' in value
+      ? 'instanceId + ' + JSON.stringify(value.localId) : JSON.stringify(value)}}`).join('')
   const children = specimen.children.map(child =>
     typeof child === 'string' ? `{${JSON.stringify(child)}}` : renderRecipeSpecimen(child)).join('')
   return children

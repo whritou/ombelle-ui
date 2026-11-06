@@ -6,7 +6,7 @@ import { PreviewFrame } from '../../editor/components/preview-frame'
 import { ArtifactPanel } from '../../editor/components/artifact-panel'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { recipeSnapshotInstallCommand } from '../install-command'
-import { catalogRecipeInstallNotice, catalogRecipeMinimumCli, compareVersions, glassMaterialInstallNotice, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
+import { catalogRecipeInstallNotice, catalogRecipeInstallerSupported, glassMaterialInstallNotice, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
 import styles from '../../preset-editor/components/preset-editor.module.css'
 
 export function PublishedRecipe({ snapshot, origin, name = 'Button' }: { snapshot: InstallableRecipeSnapshot; origin: string; name?: string }) {
@@ -18,7 +18,7 @@ export function PublishedRecipe({ snapshot, origin, name = 'Button' }: { snapsho
   const result = preview?.snapshot === snapshot ? preview.result : null
   const json = canonicalize(snapshot.recipe) + '\n'
   const unavailable = snapshot.snapshotVersion === '2.0'
-    ? compareVersions(publishedInstaller.version, catalogRecipeMinimumCli) < 0 ? catalogRecipeInstallNotice : null
+    ? !catalogRecipeInstallerSupported(publishedInstaller.version) ? catalogRecipeInstallNotice : null
     : recipeInstallBlocked(snapshot.recipe) ? glassMaterialInstallNotice : null
   const command = unavailable ? null
     : recipeSnapshotInstallCommand({ origin, reference: snapshot.id + '@' + snapshot.revision, recipeHash: snapshot.recipeHash }, publishedInstaller)

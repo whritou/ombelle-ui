@@ -9,7 +9,7 @@ import { EditorTopBar, SegmentedControl, previewModeOptions, previewWidthOptions
 import { catalogDraftKey, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { HISTORY_LIMIT } from '../history'
 import type { EditorView } from '../model'
-import { recipeFilename } from '../storage'
+import { preserveRecovery, readRecoveries, recipeFilename } from '../storage'
 import { useCatalogCompiler } from '../use-catalog-compiler'
 import { ArtifactPanel } from './artifact-panel'
 import { CatalogProperties } from './catalog-properties'
@@ -24,24 +24,32 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const [history, setHistory] = useState<History>(() => ({ past: [], present: createCatalogDraft(component).recipe, future: [] }))
   const [hydrated, setHydrated] = useState(false)
   const [recovery, setRecovery] = useState<string | null>(null)
+  const [recoveries, setRecoveries] = useState<string[]>([])
   const [status, setStatus] = useState('Loading draft…')
   const [view, setView] = useState<EditorView>({ mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' })
   const undoRef = useRef<HTMLButtonElement>(null)
   const redoRef = useRef<HTMLButtonElement>(null)
+  const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
   const recipe = history.present
   const { result, error, pending } = useCatalogCompiler(recipe)
   const key = catalogDraftKey(component)
+  const recoveryKey = `${key}.recoveries`
+  useEffect(() => {
+    focusAfterHistory.current?.focus()
+    focusAfterHistory.current = null
+  }, [history])
   useEffect(() => {
     try {
       const state = restoreCatalogDraft(component, localStorage.getItem(key))
       if (state.status === 'restored') setHistory({ past: [], present: state.draft.recipe, future: [] })
       if (state.status === 'recovery-required') setRecovery(state.recoveryText)
+      setRecoveries(readRecoveries(localStorage, recoveryKey))
       setStatus(state.status === 'restored' ? 'Draft restored.' : 'Draft ready.')
     } catch {
       setStatus('Draft storage unavailable.')
     }
     setHydrated(true)
-  }, [component, key])
+  }, [component, key, recoveryKey])
   useEffect(() => {
     if (!hydrated || recovery !== null) return
     let data: ComponentRecipe
@@ -73,12 +81,22 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   return <main className={styles.root} aria-label={`${name} editor`}>
     <EditorTopBar crumbs={['Components', name]} status={status} revision={`r${recipe.revision}`}
       nameField={{ id: `${component}-recipe-id`, label: 'Recipe ID', value: recipe.id, maxLength: 80, readOnly: true, onChange: () => {} }}
-      undo={{ buttonRef: undoRef, disabled: !history.past.length || recovery !== null, onClick: undo }}
-      redo={{ buttonRef: redoRef, disabled: !history.future.length || recovery !== null, onClick: redo }}
+      undo={{ buttonRef: undoRef, disabled: !history.past.length || recovery !== null, onClick: () => {
+        if (history.past.length === 1) focusAfterHistory.current = redoRef.current
+        undo()
+      } }}
+      redo={{ buttonRef: redoRef, disabled: !history.future.length || recovery !== null, onClick: () => {
+        if (history.future.length === 1) focusAfterHistory.current = undoRef.current
+        redo()
+      } }}
       menu={{ label: 'More actions', items: [
         { id: 'download-json', label: 'Download recipe JSON', disabled: !ready, onSelect: save },
         { id: 'reset-recipe', label: 'Reset recipe', destructive: true, disabled: recovery !== null,
           onSelect: () => edit(createCatalogDraft(component).recipe) },
+        ...recoveries.map((bytes, index) => ({
+          id: `recovery-${index}`, label: `Download preserved draft ${index + 1}`,
+          onSelect: () => downloadPresetText(bytes, `${component}-draft-recovery-${index + 1}.txt`),
+        })),
       ] }}
       primary={<RecipeGetCode className={styles.getCode} recipe={result?.recipe ?? null} current={ready}
         componentName={name} storageKey={`${key}.publication`} announce={setStatus}
@@ -92,7 +110,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
         <button type="button" onClick={() => downloadPresetText(recovery, `${component}-draft-recovery.txt`)}>Download recovery copy</button>
         <button type="button" onClick={() => {
           try {
-            localStorage.setItem(`${key}.recovery`, recovery)
+            setRecoveries(preserveRecovery(localStorage, recovery, recoveryKey))
             setRecovery(null)
           } catch { setStatus('Could not preserve the recovery copy.') }
         }}>Start new draft</button>

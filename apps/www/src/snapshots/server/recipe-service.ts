@@ -6,6 +6,7 @@ import { clientRateKey } from './client-key'
 import { SnapshotServiceError } from './errors'
 import type { SnapshotStore } from './store'
 import { openConfiguredSnapshotStore } from './store-factory'
+import { catalogRecipesAvailable } from '../install-command'
 
 export interface RecipeSnapshotService {
   publish(request: Request): Promise<{ snapshot: InstallableRecipeSnapshot; replayed: boolean }>
@@ -16,7 +17,7 @@ export function createRequestRecipeSnapshotService(): RecipeSnapshotService {
   async function use<T>(operation: (service: RecipeSnapshotService) => Promise<T>): Promise<T> {
     const config = readSnapshotConfig(process.env)
     const store = await openConfiguredSnapshotStore(config)
-    try { return await operation(createRecipeSnapshotService(config, store)) }
+    try { return await operation(createRecipeSnapshotService(config, store, catalogRecipesAvailable)) }
     finally { await store.close() }
   }
   return { publish: request => use(service => service.publish(request)), read: ref => use(service => service.read(ref)) }
@@ -25,7 +26,7 @@ async function verified(snapshot: InstallableRecipeSnapshot): Promise<Installabl
   try { return await verifyInstallableRecipeSnapshot(snapshot) }
   catch { throw new SnapshotServiceError({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' }) }
 }
-export function createRecipeSnapshotService(config: SnapshotConfig, store: SnapshotStore): RecipeSnapshotService {
+export function createRecipeSnapshotService(config: SnapshotConfig, store: SnapshotStore, allowCatalogRecipes = true): RecipeSnapshotService {
   return {
     async publish(request) {
       assertPublishOrigin(request.headers, config)
@@ -40,7 +41,8 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
       const input = (body as { recipe: unknown }).recipe
       if (input && typeof input === 'object' && !Array.isArray(input)) {
         const value = input as Record<string, unknown>
-        if (typeof value.schemaVersion === 'string' && !['1.0', '2.0'].includes(value.schemaVersion))
+        if (typeof value.schemaVersion === 'string' &&
+          value.schemaVersion !== '1.0' && (value.schemaVersion !== '2.0' || !allowCatalogRecipes))
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
         const ref = value.presetRef
         if (ref && typeof ref === 'object' && !Array.isArray(ref))
@@ -60,6 +62,11 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
       const result = await store.publishRecipe({ compiled, idempotencyKey: key.toLowerCase(), clientKey, now })
       return { snapshot: await verified(result.snapshot), replayed: result.replayed }
     },
-    async read(ref) { return verified(await store.lookupRecipe(ref)) },
+    async read(ref) {
+      const snapshot = await store.lookupRecipe(ref)
+      if (snapshot.snapshotVersion === '2.0' && !allowCatalogRecipes)
+        throw new SnapshotServiceError({ status: 404, code: 'SNAPSHOT_NOT_FOUND' })
+      return verified(snapshot)
+    },
   }
 }

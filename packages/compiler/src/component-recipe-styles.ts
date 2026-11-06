@@ -8,6 +8,7 @@ export function compileComponentRecipeStyles(input: {
   scope: string
   theme: ThemeData
   darkSelector: string
+  glass: boolean
 }): string {
   const root = postcss.parse(input.styles.join('\n'))
   const slots = new Set(input.slots)
@@ -59,7 +60,10 @@ export function compileComponentRecipeStyles(input: {
   const block = (selector: string, values: ThemeData['light']) =>
     `${selector}{${Object.entries(values).sort(([a], [b]) => a < b ? -1 : 1)
       .map(([key, value]) => `${key}:${value};`).join('')}}`
-  return block(scope, input.theme.light) +
+  const light = input.glass
+    ? { ...input.theme.light, '--glass-refraction': 'initial', '--glass-inner-filter': 'initial' }
+    : input.theme.light
+  return block(scope, light) +
     block(`${input.darkSelector} ${scope}, ${input.darkSelector}${scope}`, input.theme.dark) +
     root.toString()
 }
