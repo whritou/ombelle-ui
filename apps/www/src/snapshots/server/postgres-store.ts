@@ -1,9 +1,9 @@
 import { createHash, randomBytes } from 'node:crypto'
 import type { Pool, PoolClient } from 'pg'
 import {
-  parseSnapshotReference, parseRecipeSnapshotReference, validatePreset, validateRecipe,
-  validatePresetSnapshot, validateRecipeSnapshot,
-  type PresetSnapshot, type RecipeSnapshot, type SnapshotReference,
+  parseSnapshotReference, parseRecipeSnapshotReference, validatePreset, validateInstallableRecipe,
+  validatePresetSnapshot, validateInstallableRecipeSnapshot,
+  type PresetSnapshot, type InstallableRecipeSnapshot, type SnapshotReference,
 } from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
 import { SnapshotServiceError } from './errors'
@@ -15,7 +15,7 @@ import type { SnapshotStore, PublishSnapshotInput, PublishRecipeSnapshotInput, W
 const pools = new Map<string, Pool>()
 const minuteMs = 60_000, dayMs = 86_400_000
 type Kind = 'preset' | 'recipe'
-type Envelope = PresetSnapshot | RecipeSnapshot
+type Envelope = PresetSnapshot | InstallableRecipeSnapshot
 type InputMetadata = { clientKey: string; idempotencyKey: string; now: number }
 type StoreOptions = { schema?: string; randomId?: () => string; randomRecipeId?: () => string }
 const hash = (value: string) => createHash('sha256').update(value, 'utf8').digest('hex')
@@ -107,16 +107,16 @@ class PostgresSnapshotStore implements SnapshotStore {
       }))
     } catch (error) { return storageFailure(error) }
   }
-  async publishRecipe(input: PublishRecipeSnapshotInput): Promise<{ snapshot: RecipeSnapshot; replayed: boolean }> {
+  async publishRecipe(input: PublishRecipeSnapshotInput): Promise<{ snapshot: InstallableRecipeSnapshot; replayed: boolean }> {
     try {
       const { compiled } = input
-      validateRecipe(compiled.recipe.data)
+      validateInstallableRecipe(compiled.recipe.data)
       validatePreset(compiled.preset.data)
       const payload = canonicalize(compiled.recipe.data)
       if (Buffer.byteLength(payload) > 65_536) throw new SnapshotServiceError({ status: 413, code: 'PAYLOAD_TOO_LARGE' })
       if (hash(payload) !== compiled.recipe.hash || hash(canonicalize(compiled.preset.data)) !== compiled.preset.hash) storageFailure()
-      return await this.publishRecord('recipe', input, compiled.recipe.hash, id => validateRecipeSnapshot({
-        snapshotVersion: '1.0', id, revision: 1, recipe: compiled.recipe.data, recipeHash: compiled.recipe.hash,
+      return await this.publishRecord('recipe', input, compiled.recipe.hash, id => validateInstallableRecipeSnapshot({
+        snapshotVersion: compiled.recipe.data.schemaVersion, id, revision: 1, recipe: compiled.recipe.data, recipeHash: compiled.recipe.hash,
         preset: compiled.preset.data, presetHash: compiled.preset.hash, catalogRelease: '0.1.0', compilerVersion: '0.1.0',
         createdAt: new Date(input.now).toISOString(), validationStatus: 'draft',
       }))
@@ -130,7 +130,7 @@ class PostgresSnapshotStore implements SnapshotStore {
         if (prior.rows[0].kind !== kind || prior.rows[0].payload_hash !== payloadHash)
           throw new SnapshotServiceError({ status: 409, code: 'IDEMPOTENCY_CONFLICT' })
         const snapshot = await this.lookupRecord(kind, { id: prior.rows[0].snapshot_id, revision: 1 }, client) as S
-        if ((kind === 'preset' ? (snapshot as PresetSnapshot).presetHash : (snapshot as RecipeSnapshot).recipeHash) !== payloadHash) storageFailure()
+        if ((kind === 'preset' ? (snapshot as PresetSnapshot).presetHash : (snapshot as InstallableRecipeSnapshot).recipeHash) !== payloadHash) storageFailure()
         return { snapshot, replayed: true }
       }
       await this.cleanup(client, input.now)
@@ -156,7 +156,7 @@ class PostgresSnapshotStore implements SnapshotStore {
     })
   }
   async lookup(ref: SnapshotReference): Promise<PresetSnapshot> { return this.lookupRecord('preset', ref) as Promise<PresetSnapshot> }
-  async lookupRecipe(ref: SnapshotReference): Promise<RecipeSnapshot> { return this.lookupRecord('recipe', ref) as Promise<RecipeSnapshot> }
+  async lookupRecipe(ref: SnapshotReference): Promise<InstallableRecipeSnapshot> { return this.lookupRecord('recipe', ref) as Promise<InstallableRecipeSnapshot> }
   private async lookupRecord(kind: Kind, ref: SnapshotReference, runner: Pick<PoolClient, 'query'> = this.pool): Promise<Envelope> {
     try {
       (kind === 'preset' ? parseSnapshotReference : parseRecipeSnapshotReference)(`${ref.id}@${ref.revision}`)
@@ -165,11 +165,11 @@ class PostgresSnapshotStore implements SnapshotStore {
       if (!row) throw new SnapshotServiceError({ status: 404, code: 'SNAPSHOT_NOT_FOUND' })
       if (row.withdrawn) throw new SnapshotServiceError({ status: 410, code: 'SNAPSHOT_WITHDRAWN' })
       if (typeof row.response !== 'string' || row.bytes > 128 * 1024 || Buffer.byteLength(row.response) !== row.bytes || hash(row.response) !== row.response_hash) storageFailure()
-      const snapshot = kind === 'preset' ? validatePresetSnapshot(JSON.parse(row.response)) : validateRecipeSnapshot(JSON.parse(row.response))
+      const snapshot = kind === 'preset' ? validatePresetSnapshot(JSON.parse(row.response)) : validateInstallableRecipeSnapshot(JSON.parse(row.response))
       if (canonicalize(snapshot) !== row.response || snapshot.id !== ref.id || snapshot.revision !== ref.revision ||
           hash(canonicalize(snapshot.preset)) !== snapshot.presetHash ||
           (kind === 'preset' ? snapshot.presetHash !== row.payload_hash :
-            (snapshot as RecipeSnapshot).recipeHash !== row.payload_hash || hash(canonicalize((snapshot as RecipeSnapshot).recipe)) !== row.payload_hash)) storageFailure()
+            (snapshot as InstallableRecipeSnapshot).recipeHash !== row.payload_hash || hash(canonicalize((snapshot as InstallableRecipeSnapshot).recipe)) !== row.payload_hash)) storageFailure()
       return snapshot
     } catch (error) { return storageFailure(error) }
   }

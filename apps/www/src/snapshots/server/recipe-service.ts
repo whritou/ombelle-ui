@@ -1,5 +1,5 @@
-import { FoundationError, type RecipeSnapshot, type SnapshotReference } from '@ombelle/contracts'
-import { normalizePublishedRecipe, verifyRecipeSnapshot } from '@ombelle/compiler'
+import { FoundationError, type InstallableRecipeSnapshot, type SnapshotReference } from '@ombelle/contracts'
+import { normalizePublishedInstallableRecipe, verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
 import { clientRateKey } from './client-key'
@@ -8,8 +8,8 @@ import type { SnapshotStore } from './store'
 import { openConfiguredSnapshotStore } from './store-factory'
 
 export interface RecipeSnapshotService {
-  publish(request: Request): Promise<{ snapshot: RecipeSnapshot; replayed: boolean }>
-  read(ref: SnapshotReference): Promise<RecipeSnapshot>
+  publish(request: Request): Promise<{ snapshot: InstallableRecipeSnapshot; replayed: boolean }>
+  read(ref: SnapshotReference): Promise<InstallableRecipeSnapshot>
 }
 
 export function createRequestRecipeSnapshotService(): RecipeSnapshotService {
@@ -21,8 +21,8 @@ export function createRequestRecipeSnapshotService(): RecipeSnapshotService {
   }
   return { publish: request => use(service => service.publish(request)), read: ref => use(service => service.read(ref)) }
 }
-async function verified(snapshot: RecipeSnapshot): Promise<RecipeSnapshot> {
-  try { return await verifyRecipeSnapshot(snapshot) }
+async function verified(snapshot: InstallableRecipeSnapshot): Promise<InstallableRecipeSnapshot> {
+  try { return await verifyInstallableRecipeSnapshot(snapshot) }
   catch { throw new SnapshotServiceError({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' }) }
 }
 export function createRecipeSnapshotService(config: SnapshotConfig, store: SnapshotStore): RecipeSnapshotService {
@@ -40,7 +40,7 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
       const input = (body as { recipe: unknown }).recipe
       if (input && typeof input === 'object' && !Array.isArray(input)) {
         const value = input as Record<string, unknown>
-        if (typeof value.schemaVersion === 'string' && value.schemaVersion !== '1.0')
+        if (typeof value.schemaVersion === 'string' && !['1.0', '2.0'].includes(value.schemaVersion))
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
         const ref = value.presetRef
         if (ref && typeof ref === 'object' && !Array.isArray(ref))
@@ -51,7 +51,7 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
           }
       }
       let compiled
-      try { compiled = await normalizePublishedRecipe(input) }
+      try { compiled = await normalizePublishedInstallableRecipe(input) }
       catch (error) {
         if (error instanceof FoundationError && error.code === 'UNSUPPORTED_RELEASE')
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })

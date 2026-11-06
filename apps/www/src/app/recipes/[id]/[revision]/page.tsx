@@ -19,6 +19,8 @@ export default async function Page({
   try {
     const ref = parseRecipeSnapshotReference(`${id}@${revision}`)
     const snapshot = await createRequestRecipeSnapshotService().read(ref)
+    if (snapshot.snapshotVersion !== '1.0')
+      throw new SnapshotServiceError({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' })
     const { publicOrigin } = readSnapshotConfig(process.env)
     // Fail within the request boundary if an operator configured an authority
     // which cannot be shown safely in the private shell invocation.

@@ -2,7 +2,7 @@ import {
   FoundationError, validateRecipeSnapshotSource,
   type InstallPlan, type ProjectContext, type ProjectLock,
 } from '@ombelle/contracts'
-import { canonicalize, normalizePublishedRecipe } from '@ombelle/compiler'
+import { canonicalize, normalizePublishedInstallableRecipe } from '@ombelle/compiler'
 import { fileChange } from '../plan/components.js'
 import type { ResolvedRecipeInput } from './recipe-input.js'
 
@@ -16,7 +16,7 @@ export async function validateRecipeSnapshotSources(lock: ProjectLock): Promise<
       const source = validateRecipeSnapshotSource(value)
       const installed = Object.hasOwn(lock.recipes ?? {}, key) ? lock.recipes![key] : undefined
       if (!installed) throw new Error('Orphan source')
-      const compiled = await normalizePublishedRecipe(installed.recipe.data)
+      const compiled = await normalizePublishedInstallableRecipe(installed.recipe.data)
       if (key !== compiled.recipe.data.id + '@' + compiled.recipe.data.revision ||
         canonicalize(compiled.recipe.data) !== canonicalize(installed.recipe.data) ||
         source.recipeHash !== compiled.recipe.hash || source.recipeHash !== installed.recipe.hash)

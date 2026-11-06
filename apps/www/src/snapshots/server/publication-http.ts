@@ -1,9 +1,9 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { canonicalize } from '@ombelle/compiler'
-import type { PresetSnapshot, RecipeSnapshot, SnapshotReference } from '@ombelle/contracts'
+import type { PresetSnapshot, InstallableRecipeSnapshot, SnapshotReference } from '@ombelle/contracts'
 import { snapshotErrorResponse, SnapshotServiceError } from './errors'
 
-type Envelope = PresetSnapshot | RecipeSnapshot
+type Envelope = PresetSnapshot | InstallableRecipeSnapshot
 type PublicationService<S extends Envelope> = {
   publish(request: Request): Promise<{ snapshot: S; replayed: boolean }>
   read(ref: SnapshotReference): Promise<S>

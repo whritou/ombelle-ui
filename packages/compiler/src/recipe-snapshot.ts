@@ -1,9 +1,11 @@
 import {
   FoundationError, parseRecipeSnapshotReference, validateRecipe, validateRecipeSnapshot,
-  type RecipeSnapshot, type RecipeCompileResult,
+  validateInstallableRecipe, validateInstallableRecipeSnapshot,
+  type RecipeSnapshot, type RecipeCompileResult, type InstallableRecipeSnapshot, type InstallableRecipeCompileResult,
 } from '@ombelle/contracts'
 import { canonicalize } from './canonicalize.js'
 import { compileRecipe } from './recipe.js'
+import { compileInstallableRecipe } from './component-recipe.js'
 
 function assertPayloadSize(value: unknown, limit: number): void {
   if (new TextEncoder().encode(canonicalize(value)).byteLength > limit)
@@ -22,7 +24,28 @@ export async function verifyRecipeSnapshot(
   input: unknown,
   expected?: { reference: string; recipeHash: string },
 ): Promise<RecipeSnapshot> {
-  const snapshot = validateRecipeSnapshot(input)
+  return verifySnapshot(validateRecipeSnapshot(input), expected)
+}
+
+export async function normalizePublishedInstallableRecipe(input: unknown): Promise<InstallableRecipeCompileResult> {
+  const recipe = validateInstallableRecipe(input)
+  assertPayloadSize(recipe, 65_536)
+  const compiled = await compileInstallableRecipe({ recipe })
+  assertPayloadSize(compiled.recipe.data, 65_536)
+  return compiled
+}
+
+export async function verifyInstallableRecipeSnapshot(
+  input: unknown,
+  expected?: { reference: string; recipeHash: string },
+): Promise<InstallableRecipeSnapshot> {
+  return verifySnapshot(validateInstallableRecipeSnapshot(input), expected)
+}
+
+async function verifySnapshot<T extends InstallableRecipeSnapshot>(
+  snapshot: T,
+  expected?: { reference: string; recipeHash: string },
+): Promise<T> {
   assertPayloadSize(snapshot, 128 * 1024)
   if (expected) {
     const reference = parseRecipeSnapshotReference(expected.reference)
@@ -31,7 +54,7 @@ export async function verifyRecipeSnapshot(
     if (snapshot.recipeHash !== expected.recipeHash)
       throw new FoundationError('INVALID_DATA', 'Recipe snapshot does not match the expected recipe hash', '/recipeHash')
   }
-  const compiled = await normalizePublishedRecipe(snapshot.recipe)
+  const compiled = await normalizePublishedInstallableRecipe(snapshot.recipe)
   if (canonicalize(compiled.recipe.data) !== canonicalize(snapshot.recipe) || compiled.recipe.hash !== snapshot.recipeHash)
     throw new FoundationError('INVALID_DATA', 'Recipe snapshot must contain normalized recipe bytes with their canonical hash', '/recipe')
   if (canonicalize(compiled.preset.data) !== canonicalize(snapshot.preset) || compiled.preset.hash !== snapshot.presetHash)
