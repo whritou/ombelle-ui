@@ -1,8 +1,10 @@
 import Ajv2020 from 'ajv/dist/2020.js'
 import type { FromSchema } from 'json-schema-to-ts'
 import { componentRecipeSchema } from './component-recipe-schema.js'
+import { componentRecipeParts } from './component-recipe-appearance.js'
 import { FoundationError } from './diagnostics.js'
 import { validateRecipe, type Recipe } from './recipe.js'
+import { assertColorValue } from './validate.js'
 
 export type ComponentRecipe = FromSchema<typeof componentRecipeSchema>
 export type InstallableRecipe = Recipe | ComponentRecipe
@@ -41,7 +43,8 @@ export function validateComponentRecipe(input: unknown): ComponentRecipe {
   if (!check(input)) {
     const component = input && typeof input === 'object' && 'component' in input ? input.component : null
     const index = componentRecipeComponents.findIndex(id => id === component)
-    const error = check.errors!.find(issue => issue.schemaPath.startsWith(`#/oneOf/${index}/`)) ?? check.errors![0]
+    const error = check.errors!.find(issue => issue.instancePath.startsWith('/appearance')) ??
+      check.errors!.find(issue => issue.schemaPath.startsWith(`#/oneOf/${index}/`)) ?? check.errors![0]
     const field = error.keyword === 'additionalProperties' ? error.params.additionalProperty
       : error.keyword === 'required' ? error.params.missingProperty : undefined
     throw new FoundationError('INVALID_DATA', error.message ?? 'Invalid component recipe',
@@ -50,6 +53,14 @@ export function validateComponentRecipe(input: unknown): ComponentRecipe {
   const recipe = structuredClone(input as ComponentRecipe)
   Object.assign(recipe, { props: { ...defaultRecipeFields(componentRecipeFields(recipe.component).props), ...recipe.props } })
   validateComposition(recipe)
+  for (const [slot, part] of Object.entries(recipe.appearance?.parts ?? {})) {
+    const path = '/appearance/parts/' + slot
+    if (!componentRecipeParts[recipe.component].some(candidate => candidate.slot === slot))
+      throw new FoundationError('INVALID_DATA', 'This part does not belong to the component', path)
+    for (const [mode, colors] of Object.entries(part.colors ?? {}))
+      for (const [role, value] of Object.entries(colors))
+        assertColorValue(value, path + '/colors/' + mode + '/' + role)
+  }
   if (new TextEncoder().encode(JSON.stringify(recipe)).byteLength > 65_536)
     throw new FoundationError('INVALID_DATA', 'Recipe exceeds 64 KiB', '/')
   return recipe

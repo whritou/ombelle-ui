@@ -63,6 +63,99 @@ export const componentRecipeSchema = {
     },
     "content": {
       "type": "object"
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "parts": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9-]{0,39}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/partAppearance"
+          }
+        },
+        "glass": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "transparency": {
+              "enum": [
+                "auto",
+                "reduced"
+              ]
+            },
+            "glassOpacity": {
+              "type": "number",
+              "minimum": 0.25,
+              "maximum": 1
+            },
+            "glassBlurPx": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 40
+            },
+            "glassBackdropContrast": {
+              "type": "number",
+              "minimum": 0.3,
+              "maximum": 1.6
+            },
+            "glassSheen": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glassRefraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glassRefractionWidth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.3
+            },
+            "glassRim": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glassHalo": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glassDepth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glassMotion": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glassDispersion": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "glassSaturation": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 2
+            },
+            "glassBackdropTone": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.6
+            }
+          }
+        }
+      }
     }
   },
   "oneOf": [
@@ -1510,5 +1603,109 @@ export const componentRecipeSchema = {
         }
       }
     }
-  ]
+  ],
+  "$defs": {
+    "color": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Initial syntax filter only. A real color parser and semantic validation are mandatory.",
+      "anyOf": [
+        {
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        {
+          "pattern": "^oklch\\([0-9.]+%? [0-9.]+ [0-9.]+(?: / [0-9.]+%?)?\\)$"
+        }
+      ]
+    },
+    "partColors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "$ref": "#/$defs/color"
+        },
+        "foreground": {
+          "$ref": "#/$defs/color"
+        },
+        "border": {
+          "$ref": "#/$defs/color"
+        }
+      }
+    },
+    "partAppearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "radiusRem": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "borderWidthPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "minHeightPx": {
+          "type": "number",
+          "minimum": 24,
+          "maximum": 80
+        },
+        "paddingXPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "paddingYPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 24
+        },
+        "gapPx": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 24
+        },
+        "fontWeight": {
+          "type": "integer",
+          "minimum": 300,
+          "maximum": 800,
+          "multipleOf": 100
+        },
+        "fontSizePx": {
+          "type": "number",
+          "minimum": 11,
+          "maximum": 24
+        },
+        "letterSpacingEm": {
+          "type": "number",
+          "minimum": -0.05,
+          "maximum": 0.2
+        },
+        "shadowOffsetXPx": {
+          "type": "number",
+          "minimum": -16,
+          "maximum": 16
+        },
+        "shadowOffsetYPx": {
+          "type": "number",
+          "minimum": -16,
+          "maximum": 16
+        },
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "light": {
+              "$ref": "#/$defs/partColors"
+            },
+            "dark": {
+              "$ref": "#/$defs/partColors"
+            }
+          }
+        }
+      }
+    }
+  }
 } as const

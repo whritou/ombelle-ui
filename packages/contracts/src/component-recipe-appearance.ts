@@ -1,0 +1,45 @@
+import type { ComponentRecipe, ComponentRecipeId } from './component-recipe.js'
+import { componentRecipeSchema } from './component-recipe-schema.js'
+
+export type ComponentRecipeAppearance = NonNullable<ComponentRecipe['appearance']>
+export type ComponentRecipePart = NonNullable<ComponentRecipeAppearance['parts']>[string]
+
+type Part = {
+  slot: string
+  label: string
+  kind: 'surface' | 'text' | 'layout' | 'mark'
+  glassTint?: 'card' | 'popover' | 'background' | 'muted'
+}
+
+const surface = (slot: string, label: string, glassTint?: Part['glassTint']): Part =>
+  ({ slot, label, kind: 'surface', glassTint })
+const text = (slot: string, label: string): Part => ({ slot, label, kind: 'text' })
+const layout = (slot: string, label: string): Part => ({ slot, label, kind: 'layout' })
+const mark = (slot: string, label: string): Part => ({ slot, label, kind: 'mark' })
+
+export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = {
+  accordion: [surface('accordion', 'Container', 'card'), surface('accordion-trigger', 'Item heading', 'card'), surface('accordion-content-inner', 'Item content')],
+  alert: [surface('alert', 'Surface', 'card'), text('alert-title', 'Title'), text('alert-description', 'Description')],
+  avatar: [surface('avatar', 'Surface', 'card'), text('avatar-fallback', 'Initials')],
+  badge: [surface('badge', 'Badge')],
+  card: [surface('card', 'Surface', 'card'), layout('card-header', 'Header'), text('card-title', 'Title'), text('card-description', 'Description'), surface('card-content', 'Content')],
+  checkbox: [mark('checkbox', 'Checkbox'), mark('checkbox-indicator', 'Indicator')],
+  dialog: [surface('dialog-content', 'Dialog surface', 'popover'), text('dialog-title', 'Title'), text('dialog-description', 'Description')],
+  'dropdown-menu': [surface('dropdown-menu-content', 'Menu surface', 'popover'), surface('dropdown-menu-item', 'Menu item')],
+  input: [surface('input', 'Field', 'background')],
+  label: [text('label', 'Label')],
+  'native-select': [surface('native-select', 'Field', 'background')],
+  popover: [surface('popover-content', 'Popover surface', 'popover'), text('popover-title', 'Title'), text('popover-description', 'Description')],
+  progress: [mark('progress', 'Track'), mark('progress-indicator', 'Fill')],
+  'radio-group': [layout('radio-group', 'Group'), surface('radio-group-option', 'Option', 'background'), mark('radio-group-item', 'Radio'), text('radio-group-option-label', 'Option label')],
+  select: [surface('select-trigger', 'Trigger', 'background'), surface('select-content', 'Menu surface', 'popover'), surface('select-item', 'Option', 'popover')],
+  separator: [mark('separator', 'Separator')],
+  skeleton: [mark('skeleton', 'Skeleton')],
+  switch: [mark('switch', 'Track'), mark('switch-thumb', 'Thumb')],
+  table: [surface('table-container', 'Container', 'card'), surface('table-head', 'Header cell', 'muted'), surface('table-cell', 'Body cell', 'card')],
+  tabs: [layout('tabs', 'Layout'), surface('tabs-list', 'Tab list', 'muted'), surface('tabs-trigger', 'Tab'), surface('tabs-content', 'Panel')],
+  textarea: [surface('textarea', 'Field', 'background')],
+  tooltip: [surface('tooltip-content', 'Tooltip surface', 'popover'), surface('tooltip-trigger', 'Trigger')],
+}
+
+export const componentRecipePartFields = componentRecipeSchema.$defs.partAppearance.properties

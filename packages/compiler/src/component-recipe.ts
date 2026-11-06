@@ -1,6 +1,7 @@
 import {
   validateComponentRecipe, validateInstallableRecipe,
   type Artifact, type ComponentRecipeId, type ComponentRecipeCompileResult, type InstallableRecipeCompileResult,
+  type ComponentRecipeAppearance, type Preset,
 } from '@ombelle/contracts'
 import { getCatalog, getTemplate, resolveRecipePreset } from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
@@ -13,10 +14,17 @@ import { compileComponentRecipeStyles } from './component-recipe-styles.js'
 import { recipeTemplateSlots, scopeRecipeGlassFilter, scopeRecipeTemplate } from './component-recipe-source.js'
 import { sha256 } from './hash.js'
 import { compileRecipe } from './recipe.js'
+import { resolvePreset } from './resolve.js'
 import { describeComponentRecipe, renderRecipeSpecimen, specimenExports } from './recipe-specimen.js'
 import { validateRecipeDarkSelector } from './recipe-styles.js'
 
 type CompileInput = { recipe: unknown; darkSelector?: string }
+
+export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeAppearance['glass']): Preset {
+  return preset.styleFamily === 'liquid-glass' && glass && Object.keys(glass).length
+    ? { ...preset, design: { ...preset.design, ...glass } }
+    : preset
+}
 
 export function componentRecipeExportName(component: ComponentRecipeId): string {
   return 'Recipe' + component.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join('')
@@ -35,10 +43,12 @@ export async function compileComponentRecipe(input: CompileInput): Promise<Compo
   const { catalogRelease, compilerVersion } = data.presetRef
   const catalog = getCatalog(catalogRelease)
   const template = getTemplate(catalog, data.component)
+  const effectivePreset = withComponentRecipeGlass(builtin, data.appearance?.glass)
   const result = await compile({
-    preset: builtin, catalogRelease, compilerVersion, componentIds: [data.component], glassContrast: 'report',
+    preset: effectivePreset, catalogRelease, compilerVersion, componentIds: [data.component], glassContrast: 'report',
   })
-  const { preset, provenance } = result
+  const preset = effectivePreset === builtin ? result.preset : await resolvePreset(builtin, catalog)
+  const { provenance } = result
   const darkSelector = validateRecipeDarkSelector(input.darkSelector ?? '.dark')
   const recipe = { data, hash: await sha256(canonicalize(data)) }
   const scope = await sha256(canonicalize({ recipeHash: recipe.hash, presetHash: preset.hash, ...provenance }))
@@ -67,7 +77,7 @@ export function ${name}() {
       content: source + definition },
     { logicalPath: `${base}/${component}.css`, kind: 'style',
       content: compileComponentRecipeStyles({ styles: styles.map(artifact => artifact.content),
-        slots: recipeTemplateSlots(template), scope, theme: result.theme, darkSelector, glass }) },
+        slots: recipeTemplateSlots(template), scope, theme: result.theme, darkSelector, glass, recipe: data }) },
     { logicalPath: `examples/recipes/${data.id}/r${data.revision}.tsx`, kind: 'usage',
       content: `import { ${name} } from '@/components/ui/${base}/${component}'\nexport function Example() { return <${name} /> }` },
     { logicalPath: 'lib/utils.ts', kind: 'utility', content: catalog.utility },

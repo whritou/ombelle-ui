@@ -1,10 +1,43 @@
 import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
-import { styleFamilies } from '@ombelle/contracts'
+import { componentRecipeParts, styleFamilies } from '@ombelle/contracts'
+import { recipeTemplateSlots } from '../src/component-recipe-source.js'
 import { catalogRecipeFixtures } from '../../../tests/helpers/catalog-recipe-fixtures.js'
 import badge from '../../../examples/component-recipe.badge.json'
 import button from '../../../examples/recipe.example.json'
 import { compileComponentRecipe, compileInstallableRecipe, compileRecipe } from '../src/index.js'
+
+it('applies per-part colors and dimensions while keeping the pinned preset', async () => {
+  const recipe = catalogRecipeFixtures().find(item => item.component === 'card')!
+  const original = await compileComponentRecipe({ recipe })
+  const result = await compileComponentRecipe({ recipe: { ...recipe, appearance: { parts: {
+    card: { paddingXPx: 24, borderWidthPx: 2, colors: { light: { background: '#123456' }, dark: { background: '#234567' } } },
+    'card-title': { fontSizePx: 20 },
+  } } } })
+  const css = result.artifacts.find(artifact => artifact.kind === 'style')!.content
+  expect(result.preset).toEqual(original.preset)
+  expect(result.scope).not.toBe(original.scope)
+  expect(css).toMatch(/\[data-slot=['"]recipe-card['"]\][^{]*\{[^}]*padding-inline: 24px/)
+  expect(css).toContain('border-width: 2px')
+  expect(css).toContain('background: #123456')
+  expect(css).toContain('background: #234567')
+  expect(css).toMatch(/\[data-slot=['"]recipe-card-title['"]\][^{]*\{[^}]*font-size: 20px/)
+})
+
+it('compiles custom glass material and rejects an unrelated part', async () => {
+  const preset = getCatalog('0.1.0').presets['liquid-glass']
+  const recipe = { ...badge, presetRef: { id: preset.id, revision: preset.revision, catalogRelease: preset.catalogRelease, compilerVersion: preset.compilerVersion } }
+  const original = await compileComponentRecipe({ recipe })
+  const result = await compileComponentRecipe({ recipe: { ...recipe, appearance: { glass: { glassBlurPx: 17, glassHalo: 0.3, glassRefractionWidth: 0.1 } } } })
+  const css = result.artifacts.find(artifact => artifact.kind === 'style')!.content
+  expect(result.preset).toEqual(original.preset)
+  expect(css).toContain('--glass-blur: 17px')
+  expect(css).toContain('--glass-halo: 0.3')
+  expect(css).toContain('--glass-refraction-width: 0.1')
+  await expect(compileComponentRecipe({ recipe: { ...recipe, appearance: { parts: {
+    'card-title': { fontSizePx: 20 },
+  } } } })).rejects.toMatchObject({ path: '/appearance/parts/card-title' })
+})
 
 it('compiles an isolated Badge and its usage deterministically', async () => {
   const result = await compileComponentRecipe({ recipe: badge, darkSelector: '.night' })
@@ -38,6 +71,8 @@ it('compiles progress without accepting an out-of-range value', async () => {
 })
 
 it.each(catalogRecipeFixtures())('compiles $component in each supported family', async recipe => {
+  const template = getCatalog('0.1.0').templates[recipe.component]
+  expect(recipeTemplateSlots(template)).toEqual(expect.arrayContaining(componentRecipeParts[recipe.component].map(part => part.slot)))
   for (const family of styleFamilies) {
     const preset = getCatalog('0.1.0').presets[family]
     const result = await compileComponentRecipe({ recipe: { ...recipe, presetRef: {
