@@ -5,11 +5,13 @@ import type { InstallableRecipeCompileResult, ComponentRecipe } from '@ombelle/c
 import type { EditorView } from '../model'
 import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type PreviewRender } from '../preview-protocol'
 import { previewFrameUrl } from '../preview-url'
-import { verifyCatalogCompileResult, type CatalogPreviewRender } from '../catalog-preview-protocol'
+import { acceptCatalogMeasure, verifyCatalogCompileResult, type CatalogPreviewRender, type MeasuredParts } from '../catalog-preview-protocol'
 
-export function PreviewFrame({ result, view, component, componentName = 'Button' }: {
+export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure }: {
   result: InstallableRecipeCompileResult | null; view: EditorView
   component?: ComponentRecipe['component']; componentName?: string
+  /** Receives the rendered part dimensions of the latest catalog render. */
+  onMeasure?(parts: MeasuredParts): void
 }) {
   const iframe = useRef<HTMLIFrameElement>(null)
   const port = useRef<MessagePort | null>(null)
@@ -18,6 +20,8 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
   const sendEpoch = useRef(0)
   const lastAck = useRef(0)
   latest.current = { result, view }
+  const measured = useRef(onMeasure)
+  measured.current = onMeasure
 
   async function sendCurrent(targetPort: MessagePort) {
     const epoch = ++sendEpoch.current
@@ -54,6 +58,13 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
       port.current = channel.port1
       lastAck.current = 0
       channel.port1.onmessage = (ack: MessageEvent<unknown>) => {
+        if (port.current !== channel.port1) return
+        const measure = component ? acceptCatalogMeasure(ack.data, component) : null
+        if (measure) {
+          // Only the render the preview applied last describes the current recipe.
+          if (measure.requestId === lastAck.current) measured.current?.(measure.parts)
+          return
+        }
         if (port.current !== channel.port1 || !isPreviewAck(ack.data) || ack.data.requestId > nextRequestId.current ||
           ack.data.requestId <= lastAck.current) return
         if (ack.data.status === 'applied') lastAck.current = ack.data.requestId

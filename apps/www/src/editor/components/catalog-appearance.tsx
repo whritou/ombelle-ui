@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
+import { resolveRecipePreset } from '@ombelle/catalog'
 import {
   componentRecipePartFields, componentRecipeParts,
   type ComponentRecipe, type ComponentRecipeAppearance, type ComponentRecipePart,
@@ -7,6 +8,7 @@ import {
 } from '@ombelle/contracts'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { designControlLabel, glassDesignControls } from '../../preset-editor/model'
+import type { MeasuredParts } from '../catalog-preview-protocol'
 
 const spacing = [
   ['paddingXPx', 'Horizontal padding', 1, 'px'],
@@ -39,9 +41,19 @@ function setOptional<T, K extends keyof T>(record: T, key: K, value: T[K] | unde
   return next
 }
 
-function CatalogSlider({ id, label, min, max, step, unit, value, hint, change }: {
+/**
+ * The preset's value rounded to the slider's precision, as the empty field's placeholder.
+ * It is not clamped: a rendered 'auto' minimum height reads 0 even where an override must be at least 24.
+ */
+function shown(value: number | undefined, step: number): string | undefined {
+  if (value === undefined || !Number.isFinite(value)) return undefined
+  const decimals = step.toString().split('.')[1]?.length ?? 0
+  return String(Number(value.toFixed(decimals)))
+}
+
+function CatalogSlider({ id, label, min, max, step, unit, value, baseline, hint, change }: {
   id: string; label: string; min: number; max: number; step: number; unit: string
-  value?: number; hint?: string; change(value: number | undefined): void
+  value?: number; baseline?: number; hint?: string; change(value: number | undefined): void
 }) {
   const [typing, setTyping] = useState<{ raw: string; value: number | undefined }>()
   const raw = typing?.value === value ? typing?.raw ?? '' : value?.toString() ?? ''
@@ -50,7 +62,7 @@ function CatalogSlider({ id, label, min, max, step, unit, value, hint, change }:
   const invalid = raw !== '' && !valid(raw)
   return <div>
     <SliderRow id={id} label={label} min={min} max={max} step={step} unit={unit.trim()}
-      value={raw} edited={value !== undefined || invalid} invalid={invalid}
+      value={raw} placeholder={shown(baseline, step)} edited={value !== undefined || invalid} invalid={invalid}
       describedBy={invalid ? id + '-error' : hint ? id + '-hint' : undefined}
       onChange={text => {
         const next = text === '' ? undefined : valid(text) ? Number(text) : value
@@ -69,8 +81,8 @@ function CatalogSlider({ id, label, min, max, step, unit, value, hint, change }:
   </div>
 }
 
-export function CatalogAppearance({ recipe, glass, update }: {
-  recipe: ComponentRecipe; glass: boolean; update(recipe: ComponentRecipe): void
+export function CatalogAppearance({ recipe, glass, measured = {}, update }: {
+  recipe: ComponentRecipe; glass: boolean; measured?: MeasuredParts; update(recipe: ComponentRecipe): void
 }) {
   const parts = componentRecipeParts[recipe.component]
   const [slot, setSlot] = useState(parts[0].slot)
@@ -79,6 +91,10 @@ export function CatalogAppearance({ recipe, glass, update }: {
   const appearance = recipe.appearance ?? {}
   const values = appearance.parts?.[part.slot] ?? {}
   const material = appearance.glass ?? {}
+  const rendered = measured[part.slot] ?? {}
+  const presetDesign = useMemo(() => {
+    try { return resolveRecipePreset(recipe.presetRef).design as Record<string, unknown> } catch { return {} }
+  }, [recipe.presetRef])
   const updateAppearance = (next: ComponentRecipeAppearance) => {
     const nextRecipe = { ...recipe }
     if (Object.keys(next).length) nextRecipe.appearance = next
@@ -140,7 +156,7 @@ export function CatalogAppearance({ recipe, glass, update }: {
         const name = key === 'borderWidthPx' || key === 'shadowOffsetXPx' || key === 'shadowOffsetYPx'
           ? designControlLabel(key, glass ? 'liquid-glass' : 'flat') : label
         return <CatalogSlider key={part.slot + key} id={`catalog-part-${key}`} label={name}
-          min={minimum} max={maximum} step={step} unit={unit} value={values[key]}
+          min={minimum} max={maximum} step={step} unit={unit} value={values[key]} baseline={rendered[key]}
           change={value => updatePart(setOptional(values, key, value))} />
       })}
     </InspectorSection>
@@ -157,7 +173,9 @@ export function CatalogAppearance({ recipe, glass, update }: {
       {(Object.entries(glassSliders) as [Exclude<keyof Glass, 'transparency'>, (typeof glassSliders)[keyof typeof glassSliders]][])
         .map(([key, { label, min, max, step, unit, hint }]) => <CatalogSlider key={key}
           id={`catalog-glass-${key}`} label={label} min={min} max={max} step={step} unit={unit}
-          hint={hint} value={material[key]} change={value => updateGlass(key, value)} />)}
+          hint={hint} value={material[key]} change={value => updateGlass(key, value)}
+          // Material settings a preset leaves out read as 0.
+          baseline={typeof presetDesign[key] === 'number' ? presetDesign[key] : 0} />)}
     </InspectorSection>}
   </>
 }

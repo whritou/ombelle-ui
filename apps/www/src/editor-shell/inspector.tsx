@@ -56,6 +56,7 @@ export function SliderRow({
   edited,
   invalid,
   describedBy,
+  placeholder,
   onChange,
   onReset,
 }: {
@@ -69,12 +70,17 @@ export function SliderRow({
   edited: boolean
   invalid?: boolean
   describedBy?: string
+  /** The value in effect while the field is empty, such as the preset's. */
+  placeholder?: string
   onChange(value: string): void
   onReset(): void
 }) {
   // A half-typed or invalid value parks the thumb at the minimum, not the browser's midpoint.
   // Only the HTML valid-floating-point grammar counts: '1.', '+5' and ' 5' would snap to the midpoint.
-  const thumb = /^-?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/.test(value) ? value : String(min)
+  const number = /^-?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/
+  // An empty field shows the value in effect; only a half-typed or invalid one parks at the minimum.
+  const thumb = number.test(value) ? value
+    : value === '' && placeholder !== undefined && number.test(placeholder) ? placeholder : String(min)
   const shared = {
     value,
     'aria-invalid': invalid ? (true as const) : undefined,
@@ -88,7 +94,7 @@ export function SliderRow({
       </label>
       <span className={styles.sliderNumber}>
         {/* Text, not type="number": a half-typed or invalid value stays visible and is reported, not discarded. */}
-        <input id={`${id}-number`} type="text" inputMode="decimal" maxLength={80} {...shared} />
+        <input id={`${id}-number`} type="text" inputMode="decimal" maxLength={80} placeholder={placeholder} {...shared} />
         <span aria-hidden="true">{unit}</span>
       </span>
       {edited ? (

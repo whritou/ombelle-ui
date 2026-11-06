@@ -11,6 +11,7 @@ import { HISTORY_LIMIT } from '../history'
 import type { EditorView } from '../model'
 import { preserveRecovery, readRecoveries, recipeFilename } from '../storage'
 import { useCatalogCompiler } from '../use-catalog-compiler'
+import type { MeasuredParts } from '../catalog-preview-protocol'
 import { ArtifactPanel } from './artifact-panel'
 import { CatalogProperties } from './catalog-properties'
 import { ComponentNavigation } from './component-navigation'
@@ -26,6 +27,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const [recovery, setRecovery] = useState<string | null>(null)
   const [recoveries, setRecoveries] = useState<string[]>([])
   const [status, setStatus] = useState('Loading draft…')
+  const [measured, setMeasured] = useState<MeasuredParts>({})
   const [view, setView] = useState<EditorView>({ mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' })
   const undoRef = useRef<HTMLButtonElement>(null)
   const redoRef = useRef<HTMLButtonElement>(null)
@@ -119,7 +121,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
       <EditorTabs active={view.panel} onChange={panel => setView(previous => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label={`${name} inspector`}>
-          <CatalogProperties recipe={recipe} update={edit} />
+          <CatalogProperties recipe={recipe} measured={measured} update={edit} />
           {error && <p role="alert" className="fieldError">{error}</p>}
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
@@ -133,7 +135,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
                 {ready ? 'Matches current recipe' : result ? 'Showing the last valid recipe' : 'Compiling preview…'}
               </p>
             </div>
-            <div className={styles.specimen}><PreviewFrame result={result} view={view} component={component} componentName={name} /></div>
+            <div className={styles.specimen}><PreviewFrame result={result} view={view} component={component} componentName={name} onMeasure={setMeasured} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name} />

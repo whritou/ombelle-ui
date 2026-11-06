@@ -9,7 +9,7 @@ import { GlassBackdropArt, hasLabPreviewInk } from './glass-backdrop-art'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
-import { verifyCatalogPreviewRender, type CatalogPreviewRender } from '../../www/src/editor/catalog-preview-protocol'
+import { verifyCatalogPreviewRender, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
 import type { ComponentRecipe } from '@ombelle/contracts'
 import { CatalogRecipePreview } from './catalog-recipe-preview'
 import './editor-preview.css'
@@ -36,6 +36,10 @@ function EditorPreview() {
   const [message, setMessage] = React.useState<PreviewRender | CatalogPreviewRender | null>(null)
   const [buttonModule, setButtonModule] = React.useState<{ family: string; module: ButtonModule } | null>(null)
   const lastRequestId = React.useRef(0)
+  const activePort = React.useRef<MessagePort | null>(null)
+  const reportMeasure = React.useCallback((requestId: number, parts: MeasuredParts) => {
+    if (requestId === lastRequestId.current) activePort.current?.postMessage({ type: 'catalog-measure', requestId, parts })
+  }, [])
 
   React.useEffect(() => {
     const parentOrigin = document.referrer ? new URL(document.referrer).origin : null
@@ -50,6 +54,7 @@ function EditorPreview() {
       port?.close()
       const attachedPort = event.ports[0]
       port = attachedPort
+      activePort.current = attachedPort
       window.clearInterval(retry)
       attachedPort.onmessage = async (update: MessageEvent<unknown>) => {
         const data = update.data
@@ -77,6 +82,7 @@ function EditorPreview() {
       window.removeEventListener('message', initialize)
       window.clearInterval(retry)
       port?.close()
+      activePort.current = null
     }
   }, [])
 
@@ -127,7 +133,7 @@ function EditorPreview() {
       for (const token of filterTokens) root.style.removeProperty(token)
     }
   }, [Button, family, state?.css, state?.mode])
-  if (message?.type === 'catalog-render') return <CatalogRecipePreview message={message} />
+  if (message?.type === 'catalog-render') return <CatalogRecipePreview message={message} onMeasure={reportMeasure} />
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
     <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>

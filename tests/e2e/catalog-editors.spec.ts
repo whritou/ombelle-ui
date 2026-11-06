@@ -44,6 +44,13 @@ for (const [id, field] of Object.entries(fields)) test(`edits and restores ${id}
   if (id === 'card') {
     const appearance = page.getByRole('region', { name: 'Appearance' })
     const card = preview.locator('[data-slot="recipe-card"]')
+    // Unedited fields show what the preset renders instead of parking at the minimum.
+    const padding = appearance.getByLabel('Vertical padding', { exact: true })
+    const rendered = await card.evaluate(element => String(parseFloat(getComputedStyle(element).paddingBlockStart)))
+    expect(Number(rendered)).toBeGreaterThan(0)
+    await expect(padding).toHaveValue('')
+    await expect(padding).toHaveAttribute('placeholder', rendered)
+    await expect(appearance.getByLabel('Vertical padding slider')).toHaveValue(rendered)
     await appearance.getByLabel('Background', { exact: true }).fill('#123456')
     await appearance.getByLabel('Horizontal padding', { exact: true }).fill('24')
     await appearance.getByLabel('Border width', { exact: true }).fill('2')
@@ -56,6 +63,7 @@ for (const [id, field] of Object.entries(fields)) test(`edits and restores ${id}
     await appearance.getByLabel('Background', { exact: true }).fill('#234567')
     await expect(card).toHaveCSS('background-color', 'rgb(35, 69, 103)')
     await page.getByRole('button', { name: /Liquid glass/ }).click()
+    await expect(page.getByLabel('Glass blur', { exact: true })).toHaveAttribute('placeholder', /^\d+$/)
     await page.getByLabel('Glass blur', { exact: true }).fill('17')
     await expect.poll(() => card.evaluate(element => getComputedStyle(element).getPropertyValue('--glass-blur').trim())).toBe('17px')
     await page.getByRole('tab', { name: 'CSS', exact: true }).click()
