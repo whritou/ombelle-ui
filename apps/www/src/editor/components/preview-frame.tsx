@@ -1,12 +1,16 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { RecipeCompileResult } from '@ombelle/contracts'
+import type { InstallableRecipeCompileResult, ComponentRecipe } from '@ombelle/contracts'
 import type { EditorView } from '../model'
 import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type PreviewRender } from '../preview-protocol'
 import { previewFrameUrl } from '../preview-url'
+import { verifyCatalogCompileResult, type CatalogPreviewRender } from '../catalog-preview-protocol'
 
-export function PreviewFrame({ result, view }: { result: RecipeCompileResult | null; view: EditorView }) {
+export function PreviewFrame({ result, view, component, componentName = 'Button' }: {
+  result: InstallableRecipeCompileResult | null; view: EditorView
+  component?: ComponentRecipe['component']; componentName?: string
+}) {
   const iframe = useRef<HTMLIFrameElement>(null)
   const port = useRef<MessagePort | null>(null)
   const latest = useRef({ result, view })
@@ -18,6 +22,16 @@ export function PreviewFrame({ result, view }: { result: RecipeCompileResult | n
   async function sendCurrent(targetPort: MessagePort) {
     const epoch = ++sendEpoch.current
     const current = latest.current
+    if (component) {
+      const result = await verifyCatalogCompileResult(current.result, component)
+      if (epoch !== sendEpoch.current || targetPort !== port.current || !result) return
+      const message: CatalogPreviewRender = {
+        type: 'catalog-render', component, requestId: ++nextRequestId.current,
+        result, mode: current.view.mode, viewport: current.view.viewport,
+      }
+      targetPort.postMessage(message)
+      return
+    }
     const compiled = await verifyPreviewCompileResult(current.result)
     if (epoch !== sendEpoch.current || targetPort !== port.current || !compiled) return
     const css = compiled.artifacts.find((artifact) => artifact.kind === 'style')?.content
@@ -55,11 +69,13 @@ export function PreviewFrame({ result, view }: { result: RecipeCompileResult | n
       port.current?.close()
       port.current = null
     }
-  }, [])
+  }, [component])
 
   useEffect(() => {
     if (port.current) void sendCurrent(port.current)
   }, [result, view])
 
-  return <iframe ref={iframe} title="Button recipe preview" src={previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)} sandbox="allow-scripts" />
+  const url = previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)
+  return <iframe ref={iframe} title={`${componentName} recipe preview`}
+    src={component ? `${url}?component=${encodeURIComponent(component)}` : url} sandbox="allow-scripts" />
 }

@@ -1,16 +1,16 @@
 import { useState } from 'react'
-import type { Recipe, RecipeCompileResult } from '@ombelle/contracts'
+import type { InstallableRecipe, InstallableRecipeCompileResult } from '@ombelle/contracts'
 import { glassContrastWarning } from '@ombelle/compiler'
 import { recipeFilename } from '../storage'
 import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
-import { glassMaterialMinimumCli, installerRunner, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
+import { catalogRecipeInstallNotice, catalogRecipeMinimumCli, compareVersions, glassMaterialMinimumCli, installerRunner, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
 
 export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
 const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Recipe', 'Install']
 
 /** Metadata line: recipe hash, catalog/compiler provenance, then the dependency list. */
-export function artifactMeta(result: RecipeCompileResult): string[] {
+export function artifactMeta(result: InstallableRecipeCompileResult): string[] {
   return [
     result.recipe.hash,
     `Catalog ${result.provenance.catalogRelease} · Compiler ${result.provenance.compilerVersion}`,
@@ -21,14 +21,16 @@ export function artifactMeta(result: RecipeCompileResult): string[] {
 }
 
 /** The Install tab: the command, or why there is none yet for glass material overrides. */
-export function installText(recipe: Recipe, installer: { version: string } = publishedInstaller): string {
-  if (recipeInstallBlocked(recipe, installer))
+export function installText(recipe: InstallableRecipe, installer: { version: string } = publishedInstaller): string {
+  if (recipe.schemaVersion === '2.0' && compareVersions(installer.version, catalogRecipeMinimumCli) < 0)
+    return '# ' + catalogRecipeInstallNotice
+  if (recipe.schemaVersion === '1.0' && recipeInstallBlocked(recipe, installer))
     return `# Glass material needs ${publishedInstaller.packageName} ${glassMaterialMinimumCli}, which is not published yet.
 # Download the recipe now; the install command appears here once ${glassMaterialMinimumCli} is released.`
   return `${installerRunner({ ...publishedInstaller, version: installer.version })} add --recipe ./${recipeFilename(recipe)} --cwd APP --yes`
 }
 
-function tabContent(tab: Tab, result: RecipeCompileResult, json: string): string {
+function tabContent(tab: Tab, result: InstallableRecipeCompileResult, json: string): string {
   if (tab === 'Recipe') return json
   if (tab === 'Install') return installText(result.recipe.data)
   const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
@@ -39,24 +41,26 @@ const languages: Record<Tab, CodeLanguage> = { Usage: 'tsx', Component: 'tsx', C
 const languageNames: Record<CodeLanguage, string> = { tsx: 'TSX', css: 'CSS', json: 'JSON', shell: 'Shell' }
 
 /** The file name shown on the editor tab: the artifact path where there is one. */
-function tabFile(tab: Tab, result: RecipeCompileResult): string {
+function tabFile(tab: Tab, result: InstallableRecipeCompileResult): string {
   if (tab === 'Recipe') return recipeFilename(result.recipe.data)
   if (tab === 'Install') return 'Terminal'
   const kind = tab === 'CSS' ? 'style' : tab.toLowerCase()
   return result.artifacts.find((artifact) => artifact.kind === kind)?.logicalPath ?? tab
 }
 
-export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = null }: {
-  result: RecipeCompileResult | null
+export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = null, componentName = 'Button' }: {
+  result: InstallableRecipeCompileResult | null
   recipeJson: string | null
   stale: boolean
   onStatus: (message: string) => void
   /** Experimental-family notice shown beside the export and CLI command. */
   notice?: string | null
+  componentName?: string
 }) {
   const [tab, setTab] = useState<Tab>('Usage')
   const content = result ? tabContent(tab, result, recipeJson ?? '') : ''
-  const contrast = result && !stale ? glassContrastWarning(result.preset.data, result.recipe.data.overrides) : undefined
+  const data = result?.recipe.data
+  const contrast = result && !stale ? glassContrastWarning(result.preset.data, data?.schemaVersion === '1.0' ? data.overrides : undefined) : undefined
   async function copy() {
     try {
       await navigator.clipboard.writeText(content)
@@ -67,7 +71,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
   }
   return (
     <section className="artifacts" aria-labelledby="artifacts-title">
-      <div className="sectionTitle"><div><h2 id="artifacts-title">Generated output</h2><p>Compiled from this Button recipe.</p></div>
+      <div className="sectionTitle"><div><h2 id="artifacts-title">Generated output</h2><p>Compiled from this {componentName} recipe.</p></div>
         {stale && <span className="staleBadge">Output is out of date</span>}
       </div>
       {notice && <p className="artifactNote" data-testid="experimental-notice">{notice}</p>}

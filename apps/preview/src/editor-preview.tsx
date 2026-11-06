@@ -9,6 +9,9 @@ import { GlassBackdropArt, hasLabPreviewInk } from './glass-backdrop-art'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
+import { verifyCatalogPreviewRender, type CatalogPreviewRender } from '../../www/src/editor/catalog-preview-protocol'
+import type { ComponentRecipe } from '@ombelle/contracts'
+import { CatalogRecipePreview } from './catalog-recipe-preview'
 import './editor-preview.css'
 
 /**
@@ -30,7 +33,7 @@ type ButtonModule = Awaited<ReturnType<(typeof editorButtons)[keyof typeof edito
 const filterTokens = ['--glass-refraction-width', '--glass-refraction-strength', '--glass-halo', '--glass-motion']
 
 function EditorPreview() {
-  const [message, setMessage] = React.useState<PreviewRender | null>(null)
+  const [message, setMessage] = React.useState<PreviewRender | CatalogPreviewRender | null>(null)
   const [buttonModule, setButtonModule] = React.useState<{ family: string; module: ButtonModule } | null>(null)
   const lastRequestId = React.useRef(0)
 
@@ -53,7 +56,10 @@ function EditorPreview() {
         const id = typeof data === 'object' && data !== null && 'requestId' in data &&
           typeof data.requestId === 'number' && Number.isSafeInteger(data.requestId) && data.requestId > 0
             ? data.requestId : null
-        const accepted = await verifyPreviewRender(data, lastRequestId.current)
+        const component = new URLSearchParams(window.location.search).get('component')
+        const accepted = component
+          ? await verifyCatalogPreviewRender(data, component as ComponentRecipe['component'], lastRequestId.current)
+          : await verifyPreviewRender(data, lastRequestId.current)
         if (attachedPort !== port) return
         if (!accepted || accepted.requestId <= lastRequestId.current) {
           if (id !== null) attachedPort.postMessage({ type: 'render-ack', requestId: id, status: 'rejected' })
@@ -74,7 +80,8 @@ function EditorPreview() {
     }
   }, [])
 
-  const state = message?.state
+  const buttonMessage = message?.type === 'render' ? message : null
+  const state = buttonMessage?.state
   const family = state && draftFamily(state.recipe)
   const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
   const glassBackdrop = glassPreset && glassPresetBackdrop(glassPreset)
@@ -120,6 +127,7 @@ function EditorPreview() {
       for (const token of filterTokens) root.style.removeProperty(token)
     }
   }, [Button, family, state?.css, state?.mode])
+  if (message?.type === 'catalog-render') return <CatalogRecipePreview message={message} />
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
     <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>
@@ -133,7 +141,7 @@ function EditorPreview() {
       <button
         ref={specimen}
         data-slot="recipe-button"
-        data-ombelle-recipe={message.scope}
+        data-ombelle-recipe={buttonMessage?.scope}
         type={state.recipe.props.type}
         disabled={state.recipe.props.disabled || state.recipe.props.loading || state.forcedState === 'disabled' || state.forcedState === 'loading'}
         aria-busy={state.recipe.props.loading || state.forcedState === 'loading' || undefined}

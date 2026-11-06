@@ -10,6 +10,7 @@ import postcss from 'prettier/plugins/postcss'
 import { canonicalize } from './canonicalize.js'
 import { compile } from './compile.js'
 import { compileComponentRecipeStyles } from './component-recipe-styles.js'
+import { scopeRecipeTemplate } from './component-recipe-source.js'
 import { sha256 } from './hash.js'
 import { compileRecipe } from './recipe.js'
 import { describeComponentRecipe, renderRecipeSpecimen } from './recipe-specimen.js'
@@ -39,12 +40,12 @@ export async function compileComponentRecipe(input: CompileInput): Promise<Compo
   const scope = await sha256(canonicalize({ recipeHash: recipe.hash, presetHash: preset.hash, ...provenance }))
   const base = `recipes/${data.id}/r${data.revision}`
   const specimen = renderRecipeSpecimen(describeComponentRecipe(data))
-  const source = template.content.replace("'./utils.js'", "'@/lib/utils'")
-    .replace('data-slot="badge"', `data-slot="recipe-badge" data-ombelle-recipe="${scope}"`)
+  const source = scopeRecipeTemplate(template, '@/lib/utils')
+  const definition = `\nimport './badge.css'\nconst { Badge } = createScopedPrimitives(${JSON.stringify(scope)})\nexport function RecipeBadge() { return ${specimen} }\n`
   const styles = result.artifacts.filter(artifact => artifact.kind === 'style' && artifact.logicalPath !== 'styles/ui-tokens.css')
   const drafts: Omit<Artifact, 'sha256'>[] = [
     { logicalPath: `${base}/badge.tsx`, kind: 'component',
-      content: source + `\nexport function RecipeBadge() { return ${specimen} }\n` },
+      content: source + definition },
     { logicalPath: `${base}/badge.css`, kind: 'style',
       content: compileComponentRecipeStyles({ styles: styles.map(artifact => artifact.content),
         slots: template.slots, scope, theme: result.theme, darkSelector }) },

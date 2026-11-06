@@ -5,6 +5,8 @@ import { readSnapshotConfig } from '../../../../snapshots/server/config'
 import { SnapshotServiceError } from '../../../../snapshots/server/errors'
 import { createRequestRecipeSnapshotService } from '../../../../snapshots/server/recipe-service'
 import { DocPage } from '../../../../site/doc-page'
+import { componentDoc } from '../../../../site/components/catalog'
+import { catalogRecipesAvailable } from '../../../../snapshots/install-command'
 
 // Availability, including withdrawal, must be checked on every request.
 export const dynamic = 'force-dynamic'
@@ -19,7 +21,7 @@ export default async function Page({
   try {
     const ref = parseRecipeSnapshotReference(`${id}@${revision}`)
     const snapshot = await createRequestRecipeSnapshotService().read(ref)
-    if (snapshot.snapshotVersion !== '1.0')
+    if (snapshot.snapshotVersion === '2.0' && !catalogRecipesAvailable)
       throw new SnapshotServiceError({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' })
     const { publicOrigin } = readSnapshotConfig(process.env)
     // Fail within the request boundary if an operator configured an authority
@@ -31,7 +33,7 @@ export default async function Page({
         recipeHash: snapshot.recipeHash,
       },
     )
-    return <PublishedRecipe snapshot={snapshot} origin={publicOrigin} />
+    return <PublishedRecipe snapshot={snapshot} origin={publicOrigin} name={componentDoc(snapshot.recipe.component)?.name} />
   } catch (error) {
     const code = error instanceof SnapshotServiceError ? error.code : undefined
     const withdrawn = code === 'SNAPSHOT_WITHDRAWN'

@@ -2,6 +2,10 @@ import { officialSnapshotOrigin, publicCliPackageName, styleFamilies, validateRe
 
 /** Verified public npm release shown on code pages. */
 export const publishedInstaller = { packageName: publicCliPackageName, version: '0.5.0' } as const
+export const catalogRecipeMinimumCli = '0.6.0'
+export const catalogRecipesAvailable = compareVersions(publishedInstaller.version, catalogRecipeMinimumCli) >= 0 ||
+  (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES === '1')
+export const catalogRecipeInstallNotice = 'Install this recipe with the repository CLI until a compatible public release is available.'
 
 /** First published installer that accepts `ombelle` presets and codes. */
 export const ombelleMinimumCli = '0.4.0'
