@@ -12,7 +12,7 @@ import { LiquidGlassFilter } from './generated/preset-gallery/components/ui/liqu
 import manifest from './generated/preset-gallery/manifest'
 import { gallerySources } from './generated/preset-gallery/sources'
 import { PresetScenePage } from './scenes'
-import { GlassBackdropArt, hasLabPreviewInk } from './glass-backdrop-art'
+import { GlassBackdropArt, hasLabPreviewInk, setGlassBackdrop } from './glass-backdrop-art'
 import { GlassControlHalo } from './glass-control-halo'
 import './preset-preview.css'
 import { supportedComponentIds } from '../../../packages/contracts/src/component-ids.js'
@@ -124,16 +124,9 @@ function PresetPreview() {
     const scene = current.message.view.scene ?? 'gallery'
     document.documentElement.dataset.scene = scene
     const backdrop = current.message.view.backdrop ?? 'kit'
-    if (current.message.result.preset.data.styleFamily === 'liquid-glass') {
-      document.documentElement.dataset.backdrop = 'glass'
-      if (backdrop === 'kit') delete document.documentElement.dataset.glassBackdrop
-      else document.documentElement.dataset.glassBackdrop = backdrop
-      document.documentElement.toggleAttribute('data-glass-lab-ink', hasLabPreviewInk(current.message.result.preset.data, backdrop))
-    } else {
-      delete document.documentElement.dataset.backdrop
-      delete document.documentElement.dataset.glassBackdrop
-      document.documentElement.removeAttribute('data-glass-lab-ink')
-    }
+    if (current.message.result.preset.data.styleFamily === 'liquid-glass')
+      setGlassBackdrop(document.documentElement, backdrop, hasLabPreviewInk(current.message.result.preset.data, backdrop))
+    else setGlassBackdrop(document.documentElement, undefined)
     if (focus) document.documentElement.dataset.focus = focus
     else delete document.documentElement.dataset.focus
     document.documentElement.dataset.presetHash =
