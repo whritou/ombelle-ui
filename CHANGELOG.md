@@ -4,6 +4,7 @@
 
 ## 0.5.0 — 6 November 2026
 
+- Publish `@ombelle-ui/cli@0.5.0` to npm; website commands use `npx @ombelle-ui/cli@0.5.0`, and the website offers the liquid glass features gated on 0.5.0.
 - Liquid Glass text uses a thinner outline in generated styles and a softer glow in lab previews. The preset editor reports contrast warnings while allowing JSON and CSS export and publication. The repository CLI reports low contrast in its plan and installs the chosen settings.
 - Liquid Glass materials now use the lab's rounded Card edges, two-layer reflections, bevel and cast shadows, translucent controls and cursor halos in generated CSS. Website and editor previews use the original lab backdrops.
 - Component previews now offer the Liquid Glass starting presets, with Cristal as the default glass material and Relief shown over Pêche. The component directory lists the full preview catalog and labels components that need a newer installer. The Button editor can pin the same presets in recipes; existing Liquid Glass recipe references still resolve. Website exports keep their JSON and previews available while withholding install commands that require CLI 0.5.0.
