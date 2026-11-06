@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
-import { glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller } from '../../snapshots/install-command'
+import { glassContrastInstallNotice, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller } from '../../snapshots/install-command'
 import {
   canExportPreset,
   serializePresetExport,
@@ -24,20 +24,19 @@ export function PresetExportPanel({
   draft,
   state,
   announce,
-  blocked = false,
+  contrastWarning,
   describedBy,
 }: {
   draft: PresetEditorDraft
   state: PresetCompilerState
   announce: (message: string) => void
-  /** True while the liquid-glass contrast bound fails. */
-  blocked?: boolean
-  /** Id of the contrast readout explaining why export is disabled. */
+  contrastWarning: boolean
+  /** Id of the live contrast readout. */
   describedBy?: string
 }) {
   const [output, setOutput] = useState<'json' | 'tokens' | 'family'>('json'),
     [install, setInstall] = useState<'new' | 'existing'>('new')
-  const enabled = canExportPreset(state, draft) && !blocked
+  const enabled = canExportPreset(state, draft)
   const text = enabled
     ? output === 'json'
       ? serializePresetExport(state, draft)
@@ -59,8 +58,8 @@ export function PresetExportPanel({
       <section aria-labelledby="preset-export-heading">
       <h2 id="preset-export-heading">Preset JSON and local export</h2>
       <p>
-        Prefer <strong>Get code</strong> for a one-line install. Download the
-        JSON to keep a local copy or install offline.
+        Use <strong>Get code</strong> to publish a shareable preset. Download the
+        JSON to keep a local copy.
       </p>
       <p>Catalog 0.1.0 · Compiler 0.1.0 · Preset schema 1.0</p>
       <p>
@@ -119,8 +118,7 @@ export function PresetExportPanel({
       />
       <p>
         Token CSS provides palette and design variables. Family CSS supplies
-        reviewed style rules. Use the CLI to merge these into your project;
-        copying token CSS alone does not apply the complete family.
+        reviewed style rules. Use both to apply the complete family in your project.
       </p>
       <details>
         <summary>Dependencies</summary>
@@ -135,47 +133,53 @@ export function PresetExportPanel({
         </ul>
       </details>
       <h3>Install with the private local CLI</h3>
-      <label htmlFor="preset-install">Installation path</label>
-      <select
-        id="preset-install"
-        value={install}
-        onChange={(e) => setInstall(e.target.value as typeof install)}
-      >
-        <option value="new">New setup</option>
-        <option value="existing">Already initialized shadcn</option>
-      </select>
-      {install === 'existing' && (
-        <p>
-          If you already initialized shadcn, add the styling to the project
-          instead. This command merges the palette and tokens into your
-          globals.css.
-        </p>
-      )}
-      <p>
-        Run this from the folder containing the downloaded{' '}
-        <code>project-preset.json</code>, with Node 24.19.0 or newer Node 24.
-        Replace <code>APP</code> with your target project directory. The CLI
-        uses its existing package manager.
-      </p>
-      {materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
-        <p data-testid="preset-install-held">
-          This preset uses liquid glass material settings, which need{' '}
-          {publishedInstaller.packageName} {glassMaterialMinimumCli}. That release
-          is not published yet: download the preset now, and the command appears
-          here once it is.
-        </p>
+      {contrastWarning ? (
+        <p>{glassContrastInstallNotice}</p>
       ) : (
-        <pre data-testid="preset-install-command">
-          {installerRunner(publishedInstaller)}{' '}
-          {install === 'new' ? 'init --preset' : 'theme add'}{' '}
-          ./project-preset.json --cwd APP --dry-run --json
-        </pre>
+        <>
+          <label htmlFor="preset-install">Installation path</label>
+          <select
+            id="preset-install"
+            value={install}
+            onChange={(e) => setInstall(e.target.value as typeof install)}
+          >
+            <option value="new">New setup</option>
+            <option value="existing">Already initialized shadcn</option>
+          </select>
+          {install === 'existing' && (
+            <p>
+              If you already initialized shadcn, add the styling to the project
+              instead. This command merges the palette and tokens into your
+              globals.css.
+            </p>
+          )}
+          <p>
+            Run this from the folder containing the downloaded{' '}
+            <code>project-preset.json</code>, with Node 24.19.0 or newer Node 24.
+            Replace <code>APP</code> with your target project directory. The CLI
+            uses its existing package manager.
+          </p>
+          {materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
+            <p data-testid="preset-install-held">
+              This preset uses liquid glass material settings, which need{' '}
+              {publishedInstaller.packageName} {glassMaterialMinimumCli}. That release
+              is not published yet: download the preset now, and the command appears
+              here once it is.
+            </p>
+          ) : (
+            <pre data-testid="preset-install-command">
+              {installerRunner(publishedInstaller)}{' '}
+              {install === 'new' ? 'init --preset' : 'theme add'}{' '}
+              ./project-preset.json --cwd APP --dry-run --json
+            </pre>
+          )}
+          <p>
+            Review the plan, then replace <code>--dry-run --json</code> with{' '}
+            <code>--yes</code> to apply. A theme merge preserves existing component
+            source; changing markup requires an explicit migration.
+          </p>
+        </>
       )}
-      <p>
-        Review the plan, then replace <code>--dry-run --json</code> with{' '}
-        <code>--yes</code> to apply. A theme merge preserves existing component
-        source; changing markup requires an explicit migration.
-      </p>
       </section>
     </div>
   )

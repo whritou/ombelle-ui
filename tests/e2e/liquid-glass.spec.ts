@@ -642,7 +642,7 @@ for (const mode of modes) {
     if (await confirm.isVisible()) await confirm.click()
     await expect(limitations).toBeVisible()
     await expect(page.getByRole('button', { name: 'Cristal (default)', exact: true })).toHaveAttribute('aria-pressed', 'true')
-    // The original material still exercises the export guard when its veil is too thin.
+    // The original material reports a contrast warning when its veil is too thin.
     await page.locator('[data-preset="builtin-liquid-glass"]').click()
     await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()
     await ready()
@@ -658,28 +658,41 @@ for (const mode of modes) {
 
     await page.getByLabel('Glass opacity', { exact: true }).fill('0.3')
     await expect(readout).toContainText('Contrast bound fails at glass opacity 0.3')
-    for (const action of actions) await expect(action).toBeDisabled()
-    // The top bar's Download JSON follows the same export gate.
-    const menuDownload = async (state: 'enabled' | 'disabled') => {
+    await expect(readout).toContainText('You can still export or publish this preset.')
+    await ready()
+    await expect(page.getByRole('textbox', { name: 'Export text' })).toHaveValue(/"glassOpacity":0\.3,/)
+    for (const action of actions) await expect(action).toBeEnabled()
+    const expectMenuDownload = async () => {
       await page.getByRole('button', { name: 'More actions', exact: true }).click()
       const item = page.getByRole('menuitem', { name: 'Download JSON', exact: true })
-      if (state === 'enabled') await expect(item).toBeEnabled()
-      else await expect(item).toBeDisabled()
+      await expect(item).toBeEnabled()
       await page.keyboard.press('Escape')
       await expect(page.getByRole('menu', { name: 'More actions' })).toBeHidden()
     }
-    await menuDownload('disabled')
+    await expectMenuDownload()
     await expect(readout.locator('li')).toHaveCount(0)
     const failing = await page.locator('#glass-contrast-pairs li').allInnerTexts()
     expect(failing.length).toBeGreaterThan(0)
     for (const pair of failing)
       expect(pair).toMatch(glassFailingPairLine)
 
+    await page.getByRole('button', { name: 'Get code', exact: true }).click()
+    const code = page.getByRole('dialog', { name: 'Get code' })
+    const published = code.getByTestId('get-code-reference')
+    await expect(published).toBeVisible()
+    await expect(code.getByTestId('get-code-command')).toContainText('The CLI requires passing contrast to install this preset.')
+    const publishedPage = await page.context().newPage()
+    await publishedPage.goto(new URL((await published.getAttribute('href'))!, page.url()).href)
+    await expect(publishedPage.getByText('Contrast warning. Some Liquid Glass text falls below 4.5:1 in the contrast model.')).toBeVisible()
+    await expect(publishedPage.getByText('Snapshot gallery ready.', { exact: true })).toBeVisible()
+    await publishedPage.close()
+    await code.getByRole('button', { name: 'Close', exact: true }).click()
+
     await page.getByRole('button', { name: 'Reset glass opacity' }).click()
     await expect(readout).toContainText('Contrast bound passes at glass opacity 0.57:')
     await ready()
     for (const action of actions) await expect(action).toBeEnabled()
-    await menuDownload('enabled')
+    await expectMenuDownload()
 
     const gallery = page.locator('iframe[title="Global preset gallery"]').contentFrame()
     // The gallery's placeholders follow the support table too; no glass component is unavailable now.

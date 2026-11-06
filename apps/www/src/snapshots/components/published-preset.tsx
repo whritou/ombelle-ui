@@ -1,12 +1,12 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
-import { canonicalize } from '@ombelle/compiler'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { canonicalize, glassContrastReport } from '@ombelle/compiler'
 import type { PresetSnapshot } from '@ombelle/contracts'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
-import { glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, snapshotInstallCommand } from '../install-command'
+import { glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, snapshotInstallCommand } from '../install-command'
 import {
   createSnapshotPreviewSession,
   selectSnapshotPreview,
@@ -54,6 +54,15 @@ export function PublishedPreset({
   })
   const output = useRef<HTMLTextAreaElement>(null)
   const json = canonicalize(snapshot.preset) + '\n'
+  const contrastWarning = useMemo(
+    () => snapshot.preset.styleFamily === 'liquid-glass' && !glassContrastReport(snapshot.preset).passes,
+    [snapshot.preset],
+  )
+  const installUnavailable = contrastWarning
+    ? glassContrastInstallNotice
+    : materialInstallBlocked({ design: snapshot.preset.design })
+      ? glassMaterialInstallNotice
+      : undefined
   const source = {
     origin,
     reference: `${snapshot.id}@${snapshot.revision}`,
@@ -88,6 +97,7 @@ export function PublishedPreset({
           Draft — automated token contrast only. Publication does not certify
           accessibility or production readiness.
         </p>
+        {contrastWarning && <p>Contrast warning. Some Liquid Glass text falls below 4.5:1 in the contrast model.</p>}
         <p>
           Exact reference: <code>{source.reference}</code>
         </p>
@@ -199,7 +209,7 @@ export function PublishedPreset({
           {announcement}
         </p>
       </section>
-      {materialInstallBlocked({ design: snapshot.preset.design }) ? <p>{glassMaterialInstallNotice}</p> : (
+      {installUnavailable ? <p>{installUnavailable}</p> : (
       <section aria-labelledby="snapshot-install-heading">
         <h2 id="snapshot-install-heading">
           Install with the Ombelle CLI

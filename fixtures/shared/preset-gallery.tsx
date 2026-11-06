@@ -575,7 +575,7 @@ export function PresetGallery({
         'Skeleton',
         <section aria-label="Loading" data-component="skeleton">
           <h2>Loading</h2>
-          <div className="preset-stack" aria-busy="true" aria-label="Loading project">
+          <div className="preset-stack" role="group" aria-busy="true" aria-label="Loading project">
             <div className="preset-row preset-skeleton-card">
               <Skeleton shape="circle" />
               <div className="preset-stack preset-grow">

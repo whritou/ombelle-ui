@@ -50,8 +50,8 @@ export async function handlePresetCompileMessage(
         componentIds: previewComponentIds(preset.styleFamily),
         catalogRelease: '0.1.0',
         compilerVersion: '0.1.0',
-        // Preview a glass draft below the contrast bound so its settings stay
-        // editable; the editor blocks export and Get code until it passes.
+        // Keep schema-valid glass drafts previewable and exportable while the
+        // editor reports any contrast warnings.
         glassContrast: 'report',
       }),
     }

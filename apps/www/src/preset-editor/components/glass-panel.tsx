@@ -5,7 +5,7 @@ import { glassComponentList } from '../../site/components/catalog'
 export const glassLimitations = [
   'no mid-range mobile scrolling measurement',
   'no human visual, keyboard or screen-reader review',
-  'the contrast guarantee covers the declared text pairs, not consumer content placed on glass',
+  'contrast is estimated for the declared text pairs; consumer content needs its own checks',
   'browsers outside the recorded run were not tested',
   'the hosted snapshot service must be redeployed before glass codes resolve publicly',
 ] as const
@@ -19,13 +19,13 @@ export function glassReadoutSummary(report: GlassContrastReport | null): string 
   if (report === null)
     return 'Contrast bound not evaluated. Fix the draft errors to check it.'
   if (report.passes)
-    return `Contrast bound passes at glass opacity ${report.opacity}: every declared text pair reaches 4.5:1 over any backdrop the glass filter can produce.${minimums(report)}`
+    return `Contrast bound passes at glass opacity ${report.opacity}: every declared text pair reaches 4.5:1 in the contrast model.${minimums(report)}`
   const count = report.pairs.filter((pair) => !pair.passes).length
   const minimum =
     report.minimumOpacity === null
       ? 'No glass opacity passes; raise the contrast of the failing colors.'
       : `Minimum passing glass opacity: ${report.minimumOpacity}.`
-  return `Contrast bound fails at glass opacity ${report.opacity}: ${count} ${count === 1 ? 'pair is' : 'pairs are'} below 4.5:1. ${minimum} The preview shows your settings; Get code and export stay disabled until every pair passes.`
+  return `Contrast bound fails at glass opacity ${report.opacity}: ${count} ${count === 1 ? 'pair is' : 'pairs are'} below 4.5:1. ${minimum} You can still export or publish this preset.`
 }
 const minimums = ({ minimumOpacityByMode: m, transparency }: GlassContrastReport) =>
   transparency === 'reduced' || m.light === null || m.dark === null

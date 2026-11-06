@@ -59,6 +59,7 @@ export function createSnapshotPreviewSession(
             ),
             catalogRelease: snapshot.catalogRelease,
             compilerVersion: snapshot.compilerVersion,
+            glassContrast: 'report',
           }))
         if (result.preset.hash !== snapshot.presetHash)
           throw new Error('Snapshot hash mismatch')

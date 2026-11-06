@@ -9,6 +9,7 @@ export const ombelleMinimumCli = '0.4.0'
 /** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
 export const glassMaterialMinimumCli = '0.5.0'
 export const glassMaterialInstallNotice = `Installing this Liquid Glass material requires CLI ${glassMaterialMinimumCli}.`
+export const glassContrastInstallNotice = 'The CLI requires passing contrast to install this preset.'
 const materialFields = ['glassRefraction', 'glassRefractionWidth', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion']
 
 /**
