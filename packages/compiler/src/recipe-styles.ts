@@ -13,7 +13,7 @@ import {
   type RecipeColorRole,
   type ResolvedPreset,
 } from '@ombelle/contracts'
-import { assertGlassContrast, glassTokens } from './glass.js'
+import { assertGlassContrast, glassTokens, withGlassOverrides } from './glass.js'
 import { glassMaterialActive } from './glass-contrast.js'
 import { normalizeColor } from './resolve.js'
 
@@ -79,27 +79,6 @@ function pruneEmptyAtRules(container: postcss.Container) {
   }
 }
 
-/** The material settings a Button recipe may override on liquid glass. */
-const glassOverrideKeys = [
-  'glassOpacity',
-  'glassBlurPx',
-  'glassBackdropContrast',
-  'glassSheen',
-  'glassRim',
-  'glassHalo',
-  'glassDepth',
-  'glassMotion',
-  'glassDispersion',
-] as const
-
-/** The preset with the recipe's glass overrides applied; other families ignore them. */
-function withGlassOverrides(data: ResolvedPreset['data'], overrides: Recipe['overrides']): ResolvedPreset['data'] {
-  if (data.styleFamily !== 'liquid-glass') return data
-  const design = { ...data.design }
-  for (const key of glassOverrideKeys) if (overrides[key] !== undefined) design[key] = overrides[key]
-  return { ...data, design }
-}
-
 export function compileScopedButtonStyles(input: {
   familyCss: string
   glassLabCss?: string
@@ -110,6 +89,7 @@ export function compileScopedButtonStyles(input: {
   slot: string
   scopeAttribute: string
   scopeLabel?: 'recipe' | 'component-preset'
+  glassContrast?: 'enforce' | 'report'
   /** Variant whose tokens `overrides.colors` replaces; defaults to 'default'. */
   variant?: RecipeButtonVariant
   /** The recipe's normalized icon, which adds icon sizing and the icon-only shape. */
@@ -140,7 +120,7 @@ export function compileScopedButtonStyles(input: {
     input.scope +
     '"]'
   const data = withGlassOverrides(input.preset.data, input.overrides)
-  if (data.styleFamily === 'liquid-glass') assertGlassContrast(data)
+  if (input.glassContrast !== 'report') assertGlassContrast(data)
   const lab = data.styleFamily === 'liquid-glass' && glassMaterialActive(data.design)
   const root = postcss.parse(input.familyCss + (lab ? input.glassLabCss ?? '' : ''))
   root.walkAtRules((rule) => {
@@ -485,6 +465,7 @@ export function compileRecipeStyles(input: {
   darkSelector: string
   variant?: RecipeButtonVariant
   icon?: Required<RecipeIcon>
+  glassContrast?: 'enforce' | 'report'
 }): string {
   return compileScopedButtonStyles({
     ...input,

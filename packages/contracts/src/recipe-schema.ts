@@ -205,7 +205,7 @@ export const recipeSchema = {
           "type": "number",
           "minimum": 0.25,
           "maximum": 1,
-          "description": "Liquid glass only, like every glass* override: replaces the preset's value on this Button and is held to the same contrast bound. Ignored by other style families."
+          "description": "Liquid glass only, like every glass* override: replaces the preset's value on this Button and is checked for contrast warnings. Ignored by other style families."
         },
         "glassBlurPx": {
           "type": "number",

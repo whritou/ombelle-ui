@@ -153,14 +153,17 @@ it.each(['schemaVersion', 'catalogRelease', 'compilerVersion', 'styleFamily'])('
   await failure(await post(origin, randomUUID(), { preset: { ...preset, [field]: value } }), 422, 'UNSUPPORTED_RELEASE')
 })
 
-it('publishes an experimental liquid-glass preset and refuses one below the contrast bound', async () => {
+it('publishes and retrieves a liquid-glass draft below the contrast bound', async () => {
   const { origin } = await fixture()
   const glass = JSON.parse(await readFile('packages/catalog/src/presets/liquid-glass.json', 'utf8'))
-  const published = await post(origin, randomUUID(), { preset: glass })
-  expect(published.status).toBe(201)
-  expect((await published.json() as PresetSnapshot).preset.styleFamily).toBe('liquid-glass')
   const failing = { ...glass, design: { ...glass.design, glassOpacity: 0.3 } }
-  await failure(await post(origin, randomUUID(), { preset: failing }), 400, 'INVALID_DATA')
+  const published = await post(origin, randomUUID(), { preset: failing })
+  expect(published.status).toBe(201)
+  const snapshot = await published.json() as PresetSnapshot
+  expect(snapshot).toMatchObject({ validationStatus: 'draft', preset: { styleFamily: 'liquid-glass', design: { glassOpacity: 0.3 } } })
+  const read = await fetch(origin + published.headers.get('location'))
+  expect(read.status).toBe(200)
+  expect(await read.json()).toEqual(snapshot)
 })
 
 it('maps conflict, payload, minute quota and storage capacity to bounded safe responses', async () => {

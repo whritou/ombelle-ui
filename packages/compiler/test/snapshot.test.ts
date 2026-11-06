@@ -113,15 +113,13 @@ it('accepts the experimental liquid-glass family for publication', async () => {
     styleFamily: 'liquid-glass',
   })
 })
-it('rejects a liquid-glass preset below the contrast bound like compile does', async () => {
+it('normalizes and verifies a liquid-glass draft below the contrast bound', async () => {
   const glass = structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
   glass.design = { ...glass.design, glassOpacity: 0.3 }
-  await expect(normalizePublishedPreset(glass)).rejects.toThrow(
-    expect.objectContaining({
-      code: 'INVALID_DATA',
-      path: '/design/glassOpacity',
-    }),
-  )
+  const normalized = await normalizePublishedPreset(glass)
+  expect(normalized.data.design.glassOpacity).toBe(0.3)
+  const snapshot = { ...envelope, preset: normalized.data, presetHash: normalized.hash }
+  await expect(verifyPresetSnapshot(snapshot)).resolves.toEqual(snapshot)
 })
 it('does not include timestamp or snapshot identity in the preset hash', async () => {
   const other = {

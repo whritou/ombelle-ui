@@ -367,8 +367,8 @@ export const glassEffectiveSheen = (design: Preset['design'] | undefined, mode: 
   withPointerShine(glassBackdrop(design, mode), design).sheen
 
 /**
- * With the material on, glass text is drawn over an opaque 1px ring in its surface colour (-webkit-text-stroke under
- * the fill), the adjacent background WCAG measures the glyph against: 4.5:1 holds within 1px of every glyph.
+ * The model uses the plate colour next to the glyph when the material is on.
+ * This is the plate's opacity multiplier. The CSS sets the width of the stroke under the fill.
  */
 export const glassTextPlate = 1
 

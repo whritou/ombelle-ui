@@ -200,10 +200,9 @@ export default function PresetEditor() {
   const diagnostic = compiled.diagnostic
   const glass = draft.family === 'liquid-glass'
   const glassReport = glass ? presetGlassReport(draft) : null
-  // A glass draft below the contrast bound cannot be exported or published.
-  const glassBlocked = glassReport !== null && !glassReport.passes
-  // Download JSON and Get code share one gate: a current, unblocked draft.
-  const exportable = canExportPreset(compiled, draft) && !glassBlocked
+  const glassContrastWarning = glassReport?.passes === false
+  // Download JSON and Get code both require a current compile result.
+  const exportable = canExportPreset(compiled, draft)
   const warnedTokens = new Set(
     contrast
       .filter((pair) => pair.status === 'warning')
@@ -299,6 +298,7 @@ export default function PresetEditor() {
             className={styles.getCode}
             preset={compiled.result?.preset ?? null}
             current={exportable}
+            contrastWarning={glassContrastWarning}
             announce={setNotice}
             describedBy={glass ? glassReadoutId : undefined}
           />
@@ -511,7 +511,7 @@ export default function PresetEditor() {
                     draft={draft}
                     state={compiled}
                     announce={setNotice}
-                    blocked={glassBlocked}
+                    contrastWarning={glassContrastWarning}
                     describedBy={glass ? glassReadoutId : undefined}
                   />
                 ),

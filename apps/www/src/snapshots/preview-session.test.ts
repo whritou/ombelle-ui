@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
-import { compile, normalizePublishedPreset } from '@ombelle/compiler'
+import { compile, normalizePublishedPreset, resolvePreset } from '@ombelle/compiler'
 import {
   supportedComponentIds,
   type CompileResult,
@@ -127,6 +127,16 @@ it('rejects a compiled result for a different preset hash without exposing a fra
   expect(selectSnapshotPreview(b.snapshot, session.state).frame).toBeNull()
   expect(selectSnapshotPreview(b.snapshot, session.state).status).toBe('failed')
   session.dispose()
+})
+it('previews a published glass preset below the contrast bound', async () => {
+  const { snapshot } = await fixture('a')
+  const catalog = getCatalog('0.1.0')
+  const glass = catalog.presets['liquid-glass']
+  const preset = await resolvePreset({ ...glass, design: { ...glass.design, glassOpacity: 0.3 } }, catalog)
+  const session = createSnapshotPreviewSession({ ...snapshot, preset: preset.data, presetHash: preset.hash })
+  await session.start()
+  expect(session.state.status).toBe('connecting')
+  expect(session.state.result?.preset.data.design.glassOpacity).toBe(0.3)
 })
 it.each([
   ['liquid-glass', ['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip']],

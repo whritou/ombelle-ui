@@ -43,6 +43,7 @@ test('previews the lab materials from the component directory and Button editor'
   await expect(card).toHaveCSS('background-image', 'none')
   await expect.poll(() => card.evaluate((el) => getComputedStyle(el, '::before').backgroundImage)).toMatch(/radial-gradient.*linear-gradient/)
   await expect(card).toHaveCSS('-webkit-text-stroke-width', '0px')
+  await expect(card).toHaveCSS('text-shadow', /0px 0px 3px$/)
   await picker.selectOption({ label: 'Givré' })
   await expect.poll(() => card.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-blur').trim())).toBe('26px')
 
@@ -101,6 +102,8 @@ test('lab paint survives consumer stylesheet order and keeps scoped recipe color
     await expect(element).toHaveCSS('background-image', /^linear-gradient\(140deg/)
     await expect(element).toHaveCSS('border-top-color', /^rgba\(232, 250, 255,/)
   }
+  await expect(page.locator('[data-slot="badge"]')).toHaveCSS('-webkit-text-stroke-width', '1px')
+  await expect(page.locator('[data-slot="select-trigger"]')).toHaveCSS('-webkit-text-stroke-width', '1px')
 
   const recipe = createEditorDraft('liquid-glass').recipe
   const original = await compileRecipe({ recipe })

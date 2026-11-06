@@ -64,7 +64,7 @@ it('announces a one-line summary and keeps the pair list outside the live region
   expect(live?.[1]).toBe(
     `Contrast bound fails at glass opacity 0.3: ${failing} pairs are below 4.5:1. ` +
       `Minimum passing glass opacity: ${report.minimumOpacity}. ` +
-      'The preview shows your settings; Get code and export stay disabled until every pair passes.',
+      'You can still export or publish this preset.',
   )
   expect(html).toContain(`<ul id="${glassPairsId}" aria-label="Failing contrast pairs">`)
   expect(html.match(/<li>light: |<li>dark: /g)).toHaveLength(failing)
@@ -101,8 +101,9 @@ it('renders the glass material controls only for glass drafts', () => {
   expect(flat).not.toContain('>Transparency</label>')
 })
 
-it('disables otherwise-ready export and publish with a description while blocked', async () => {
-  const draft = createPresetDraft('liquid-glass')
+it('keeps exports available for a compiled draft with a contrast warning', async () => {
+  const draft = setPresetEdit(createPresetDraft('liquid-glass'), '/design/glassOpacity', '0.3')
+  expect(presetGlassReport(draft)?.passes).toBe(false)
   const state: PresetCompilerState = {
     status: 'compiled',
     result: await compile({
@@ -110,31 +111,18 @@ it('disables otherwise-ready export and publish with a description while blocked
       componentIds: previewComponentIds('liquid-glass'),
       catalogRelease: '0.1.0',
       compilerVersion: '0.1.0',
+      glassContrast: 'report',
     }),
     draftKey: canonicalize(draft),
     diagnostic: null,
     stale: false,
   }
-  const render = (blocked: boolean) =>
-    renderToStaticMarkup(
-      <PresetExportPanel
-        draft={draft}
-        state={state}
-        announce={noop}
-        blocked={blocked}
-        describedBy={glassReadoutId}
-      />,
-    )
-  const names = ['Download preset JSON', 'Copy export']
-  const button = (name: string, disabled: boolean) =>
-    new RegExp(
-      `<button type="button"${disabled ? ' disabled=""' : ''} aria-describedby="${glassReadoutId}"[^>]*>${name}</button>`,
-    )
-  const ready = render(false), blocked = render(true)
-  for (const name of names) {
-    expect(ready).toMatch(button(name, false))
-    expect(blocked).toMatch(button(name, true))
-  }
+  const html = renderToStaticMarkup(
+    <PresetExportPanel draft={draft} state={state} announce={noop} contrastWarning describedBy={glassReadoutId} />,
+  )
+  for (const name of ['Download preset JSON', 'Copy export'])
+    expect(html).toContain(`<button type="button" aria-describedby="${glassReadoutId}">${name}</button>`)
+  expect(html).toContain('pnpm exec node packages/cli/dist/main.js init --preset ./project-preset.json --cwd APP --dry-run --json')
 })
 
 it('lists the tint in a failing tinted pair', () => {

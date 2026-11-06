@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { ResolvedPreset } from '@ombelle/contracts'
 import { usePublication } from '../use-publication'
-import { codeInstallCommand, glassMaterialInstallNotice, materialInstallBlocked } from '../install-command'
+import { codeInstallCommand, contrastInstallBlocked, glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked } from '../install-command'
 import { GetCodeDialog, type CodeStatus } from './get-code-dialog'
 
 const scopes = [
@@ -34,6 +34,7 @@ const scopes = [
 export function PresetGetCode({
   preset,
   current,
+  contrastWarning,
   announce,
   describedBy,
   className,
@@ -41,6 +42,7 @@ export function PresetGetCode({
 }: {
   preset: ResolvedPreset | null
   current: boolean
+  contrastWarning: boolean
   announce: (text: string) => void
   describedBy?: string
   className?: string
@@ -50,6 +52,11 @@ export function PresetGetCode({
   const publication = usePublication({ preset, current, announce })
   const { state } = publication
   const [open, setOpen] = useState(false)
+  const installUnavailable = contrastInstallBlocked(contrastWarning)
+    ? glassContrastInstallNotice
+    : preset && materialInstallBlocked({ design: preset.data.design })
+      ? glassMaterialInstallNotice
+      : undefined
   const last = state.lastPublished
   const matches =
     current && preset !== null && last?.presetHash === preset.hash
@@ -86,7 +93,7 @@ export function PresetGetCode({
         subject="preset"
         code={code}
         scopes={scopes}
-        installUnavailable={preset && materialInstallBlocked({ design: preset.data.design }) ? glassMaterialInstallNotice : undefined}
+        installUnavailable={installUnavailable}
         announce={announce}
         onRetry={() => void publication.generate()}
         commandFor={(scope, manager) =>

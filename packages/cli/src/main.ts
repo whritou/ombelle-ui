@@ -9,9 +9,10 @@ import {
   componentsWithStyleSupport,
   type ComponentId,
   type Preset,
+  type Recipe,
   type InstallPlan,
 } from '@ombelle/contracts'
-import { compile, compileButtonPreset, compileRecipe } from '@ombelle/compiler'
+import { compile, compileButtonPreset, compileRecipe, glassContrastWarning } from '@ombelle/compiler'
 import { resolveRecipeInput, type ResolvedRecipeInput } from './snapshots/recipe-input.js'
 import { applyRecipeSourceToPlan } from './snapshots/recipe-source.js'
 import { writeRecipeSnapshotCache } from './snapshots/recipe-cache.js'
@@ -41,8 +42,13 @@ const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
   '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
-function glassNotices(family: string, ids: readonly ComponentId[] | undefined, installsFilter = false): string[] {
-  if (family !== 'liquid-glass') return []
+function glassNotices(
+  preset: Preset,
+  ids: readonly ComponentId[] | undefined,
+  installsFilter = false,
+  overrides?: Recipe['overrides'],
+): string[] {
+  if (preset.styleFamily !== 'liquid-glass') return []
   const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
   const listed = ids ? experimental.filter((id) => ids.includes(id)) : experimental
   if (!listed.length) return []
@@ -51,6 +57,8 @@ function glassNotices(family: string, ids: readonly ComponentId[] | undefined, i
   // Only `add` writes the filter component; other commands have none to mount.
   if (installsFilter)
     notices.push('mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers')
+  const contrast = glassContrastWarning(preset, overrides)
+  if (contrast) notices.push(contrast)
   return notices
 }
 export async function runCli(
@@ -177,15 +185,16 @@ export async function runCli(
       const recipe = recipeInput!.recipe
       const compiled = await compileRecipe({ recipe, darkSelector: context.darkSelector })
       plan = await planRecipe(context, compiled)
-      plan.notices = glassNotices(compiled.preset.data.styleFamily, ['button'])
+      plan.notices = glassNotices(compiled.preset.data, ['button'], false, compiled.recipe.data.overrides)
     } else if (command === 'add' && flags['--preset']) {
       const preset = presetInput!.preset
       const compiled = await compileButtonPreset({
         preset,
         darkSelector: context.darkSelector,
+        glassContrast: 'report',
       })
       plan = await planComponentPreset(context, compiled)
-      plan.notices = glassNotices(compiled.preset.data.styleFamily, ['button'])
+      plan.notices = glassNotices(compiled.preset.data, ['button'])
     } else {
       let preset: Preset | undefined = context.preset
       if (command !== 'add') {
@@ -208,13 +217,14 @@ export async function runCli(
         componentIds: ids as ComponentId[],
         catalogRelease: preset.catalogRelease,
         compilerVersion: preset.compilerVersion,
+        glassContrast: 'report',
       })
       plan =
         command === 'add'
           ? await planAdd(context, result)
           : await planTheme(context, result)
       plan.notices = glassNotices(
-        result.preset.data.styleFamily,
+        result.preset.data,
         command === 'add' ? (ids as ComponentId[]) : undefined,
         command === 'add',
       )

@@ -8,7 +8,6 @@ import {
   type ResolvedPreset,
 } from '@ombelle/contracts'
 import { canonicalize } from './canonicalize.js'
-import { assertGlassContrast } from './glass.js'
 import { resolvePreset } from './resolve.js'
 
 const maxPresetBytes = 65_536
@@ -35,10 +34,6 @@ export async function normalizePublishedPreset(
       'Style family is not available in the foundation',
       '/styleFamily',
     )
-  // A glass preset below the contrast bound could never compile; refuse it
-  // with the same INVALID_DATA error compile raises.
-  if (normalized.data.styleFamily === 'liquid-glass')
-    assertGlassContrast(normalized.data)
   assertPresetSize(input)
   assertPresetSize(normalized.data)
   return normalized

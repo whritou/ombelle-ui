@@ -23,6 +23,7 @@ const mountNotice =
 const notice = (ids: readonly string[]) =>
   'liquid-glass is experimental for ' + ids.join(', ') +
   '; see docs/components/liquid-glass.md for limitations'
+const contrastNotice = expect.stringContaining('Liquid glass text contrast fails in')
 const installOrder = [
   'button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input',
   'label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select', 'avatar', 'separator',
@@ -154,7 +155,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(Object.keys(after).some((f) => f.endsWith('/button.tsx'))).toBe(false)
   }, 180000)
 
-  it(`switches a flat project with theme add and rejects low opacity (${manager})`, async () => {
+  it(`plans and applies a low-contrast glass theme with a warning (${manager})`, async () => {
     const root = await make()
     roots.push(root)
     const { glass, lowFile } = await writePresets()
@@ -162,18 +163,47 @@ for (const manager of ['pnpm', 'npm'] as const) {
     await seed(root, ['button'])
 
     const flatBefore = await snapshotTree(root)
-    const low = await command(['theme', 'add', lowFile, '--yes'])
-    expect(low.code, low.output).toBe(2)
-    expect(jsonRecord(jsonRecord(low.data).error)).toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
+    const low = await command(['theme', 'add', lowFile, '--dry-run'])
+    expect(low.code, low.output).toBe(0)
+    expect(jsonRecord(low.data).notices).toEqual([notice(glassIds), contrastNotice])
     expect(await snapshotTree(root)).toEqual(flatBefore)
 
-    const human = await humanOutput(root, ['theme', 'add', glass, '--dry-run', '--cwd', root])
-    expect(human).toContain('\nNotice: ' + notice(glassIds))
+    const human = await humanOutput(root, ['theme', 'add', lowFile, '--dry-run', '--cwd', root])
+    expect(human).toContain('\nNotice: Liquid glass text contrast fails in')
+
+    const applied = await command(['theme', 'add', lowFile, '--yes'])
+    expect(applied.code, applied.output).toBe(0)
+    expect(await fs.readFile(path.join(root, 'src/index.css'), 'utf8')).toContain('--glass-opacity: 0.3')
 
     const theme = await command(['theme', 'add', glass, '--yes'])
     expect(theme.code, theme.output).toBe(0)
     expect(jsonRecord(theme.data).notices).toEqual([notice(glassIds)])
     expect(await fs.readFile(path.join(root, 'src/index.css'), 'utf8')).toContain('--unrelated')
+  }, 180000)
+
+  it(`initializes and installs with low-contrast global and scoped presets (${manager})`, async () => {
+    const root = await make()
+    roots.push(root)
+    const { lowFile } = await writePresets()
+    const command = (args: string[]) => runBuiltCli('node', [...args, '--cwd', root, '--json'], root)
+    await seed(root, ['button'])
+    const recipe = JSON.parse(await fs.readFile('examples/recipe.example.json', 'utf8'))
+    recipe.presetRef.id = 'builtin-liquid-glass'
+    recipe.overrides = { glassOpacity: 0.3 }
+    const recipeFile = path.join(path.dirname(lowFile), 'button.recipe.json')
+    await fs.writeFile(recipeFile, JSON.stringify(recipe))
+    for (const args of [
+      ['init', '--preset', lowFile],
+      ['add', 'button'],
+      ['add', 'button', '--preset', lowFile],
+      ['add', '--recipe', recipeFile],
+      // A subsequent CLI process recompiles installed scoped presets and recipes.
+      ['add', '--recipe', recipeFile],
+    ]) {
+      const result = await command([...args, '--yes'])
+      expect(result.code, result.output).toBe(0)
+      expect(jsonRecord(result.data).notices).toContainEqual(contrastNotice)
+    }
   }, 180000)
 
   it(`installs a scoped Button from a glass preset (${manager})`, async () => {

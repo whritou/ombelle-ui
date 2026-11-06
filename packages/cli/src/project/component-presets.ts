@@ -54,6 +54,7 @@ export async function validateInstalledComponentPresets(
       canonical = await compileButtonPreset({
         preset: item.preset.data,
         darkSelector: item.darkSelector,
+        glassContrast: 'report',
       })
     } catch {
       throw bad()

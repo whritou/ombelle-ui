@@ -1,4 +1,4 @@
-import { FoundationError, type Preset } from '@ombelle/contracts'
+import { FoundationError, type Preset, type Recipe } from '@ombelle/contracts'
 import { normalizeColor } from './resolve.js'
 import {
   glassBackdrop,
@@ -14,10 +14,22 @@ const originalGlassEdges = new Set([
   'oklch(20.8% 0.040 265.8 / 14%)',
   'oklch(96.8% 0.007 247.9 / 14%)',
 ].map(normalizeColor))
-export function assertGlassContrast(
-  data: Parameters<typeof glassContrastReport>[0],
-) {
-  const report = glassContrastReport(data)
+const glassOverrideKeys = [
+  'glassOpacity', 'glassBlurPx', 'glassBackdropContrast', 'glassSheen',
+  'glassRim', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion',
+] as const
+
+/** Applies the material settings a Button recipe can override. */
+export function withGlassOverrides(data: Preset, overrides: Recipe['overrides']): Preset {
+  if (data.styleFamily !== 'liquid-glass') return data
+  const design = { ...data.design }
+  for (const key of glassOverrideKeys) if (overrides[key] !== undefined) design[key] = overrides[key]
+  return { ...data, design }
+}
+
+export function glassContrastWarning(data: Preset, overrides?: Recipe['overrides']): string | undefined {
+  if (data.styleFamily !== 'liquid-glass') return
+  const report = glassContrastReport(overrides ? withGlassOverrides(data, overrides) : data)
   const failing = report.pairs.find((pair) => !pair.passes)
   if (!failing) return
   const [worst, where] = [
@@ -25,8 +37,7 @@ export function assertGlassContrast(
     [failing.ratioOverWhite, 'over the brightest filtered backdrop'],
     [failing.ratioOpaque, 'on the opaque fallback surface'],
   ].sort((a, b) => (a[0] as number) - (b[0] as number))[0] as [number, string]
-  throw new FoundationError(
-    'INVALID_DATA',
+  return (
     'Liquid glass text contrast fails in ' +
       failing.mode +
       ' for ' +
@@ -52,9 +63,13 @@ export function assertGlassContrast(
           '; no glassOpacity passes.'
         : 'Minimum passing glassOpacity is ' + report.minimumOpacity + '.') +
       // A 0.4.x init saved the whole built-in preset, which fails the pairs 0.5.0 adds.
-      ' See "Upgrading from 0.4.x" in docs/components/liquid-glass.md.',
-    '/design/glassOpacity',
+      ' See "Upgrading from 0.4.x" in docs/components/liquid-glass.md.'
   )
+}
+
+export function assertGlassContrast(data: Preset) {
+  const warning = glassContrastWarning(data)
+  if (warning) throw new FoundationError('INVALID_DATA', warning, '/design/glassOpacity')
 }
 
 export function glassTokens(data: Preset): {
@@ -65,8 +80,8 @@ export function glassTokens(data: Preset): {
   const d = { ...glassDesignDefaults, ...design }
   const opaque = design.transparency === 'reduced'
   const lab = glassMaterialActive(design)
-  // Nested glass gets the coverage that holds over a raw backdrop. A preset
-  // without one fails assertGlassContrast before tokens are written.
+  // Nested glass gets the coverage that holds over a raw backdrop when possible.
+  // Use an opaque nested surface when the report finds no passing coverage.
   const nested = glassContrastReport(data).nestedOpacity ?? { light: 1, dark: 1 }
   const mode = (m: 'light' | 'dark') => {
     const backdrop = glassBackdrop(design, m)
