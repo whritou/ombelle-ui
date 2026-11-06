@@ -1,4 +1,5 @@
 import { ArrowRight, MousePointerClick, Palette, Sparkles } from 'lucide-react'
+import { componentEditorLink } from '../editor/editable-components'
 import { HeroSection } from '../site/home/hero'
 import { JourneySection } from '../site/home/journey'
 import { CascadeSection, MatrixSection, PresetSection, TerminalSection } from '../site/home/sections'
@@ -43,9 +44,9 @@ const editors = [
     text: 'Choose a style family, palette and tokens for the whole project, then publish a preset code or download its JSON.',
   },
   {
-    href: '/editor/component/button',
+    href: componentEditorLink.href,
     icon: MousePointerClick,
-    title: 'Button editor',
+    title: componentEditorLink.label,
     text: 'Customize one Button and export it as a recipe that installs next to your existing components.',
   },
 ]

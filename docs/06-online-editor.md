@@ -13,6 +13,7 @@ Begin with structured controls, not an unrestricted code playground. Users edit 
 | `/docs` | Installation, framework support, accessibility and customization guides |
 | `/components` | Searchable catalog with style and platform filters |
 | `/components/[slug]` | Component API, live states, dependencies and install options |
+| `/editor/component` | Open the component editor workspace. The entry point currently opens Button. |
 | `/editor/component/[slug]` | Customize one component and export a recipe |
 | `/editor/preset` | Create a global preset and inspect a representative gallery |
 | `/presets/[id]/[revision]` | Read an immutable shared preset |
@@ -23,7 +24,9 @@ React Native examples get an explicit platform view when available. A browser pr
 
 ## Component editor layout
 
-On desktop, use a catalog navigation rail, a central preview and output area, and a labelled properties panel. On small screens, use Preview, Customize, and Code tabs while preserving the same draft. Do not shrink a three-column desktop layout into unusable mobile controls.
+The navigation above the workspace lists editable components and links to the full catalog. Button is the only editable component today, so its documentation page is the only one with a Customize link. Both entry points open `/editor/component/button` and restore the same browser draft.
+
+On desktop, the labelled properties panel sits beside the preview and output area. On small screens, Preview, Customize, and Code tabs share the same draft.
 
 The properties panel groups controls into style family, component props, colors, shape, spacing, type, effects, and motion. Only show options supported by the selected component and style. Disable unavailable combinations with a reason rather than generating broken output.
 

@@ -4,7 +4,7 @@
   --code-bar: #1d1f26;
   --code-line: #2a2d36;
   --code-text: #e4e6eb;
-  --code-muted: #8b919d;
+  --code-muted: #9ba2ae;
   --code-gutter: #5d6370;
   overflow: hidden;
   border: 1px solid var(--code-line);

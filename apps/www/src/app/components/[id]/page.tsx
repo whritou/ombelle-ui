@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, SlidersHorizontal } from 'lucide-react'
 import { getCatalog } from '@ombelle/catalog'
 import { styleSupport } from '@ombelle/contracts'
+import { editableComponents } from '../../../editor/editable-components'
 import { componentDoc, componentDocs, componentInstallable, glassOnSite } from '../../../site/components/catalog'
 import { CodeBlock, CommandTabs } from '../../../site/components/code-block'
 import { ComponentPlayground } from '../../../site/components/playground'
@@ -33,6 +34,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
   const index = componentDocs.indexOf(doc)
   const glass = styleSupport(doc.id, 'liquid-glass')
   const installable = componentInstallable(doc)
+  const editor = editableComponents.find(component => component.id === doc.id)
   const previous = componentDocs[index - 1], next = componentDocs[index + 1]
   return (
     <div className="grid gap-10 py-10 xl:grid-cols-[minmax(0,1fr)_11rem]">
@@ -43,8 +45,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
             <h1 className="text-4xl font-black md:text-5xl">{doc.name}</h1>
             <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{doc.description}</p>
           </div>
-          {doc.id === 'button' && (
-            <a href="/editor/component/button" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 font-semibold text-primary-foreground transition-[filter] hover:brightness-110 active:brightness-95">
+          {editor && (
+            <a href={editor.href} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 font-semibold text-primary-foreground transition-[filter] hover:brightness-110 active:brightness-95">
               <SlidersHorizontal className="size-4" aria-hidden /> Customize
             </a>
           )}

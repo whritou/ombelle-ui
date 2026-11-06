@@ -12,6 +12,7 @@ import type { CompileDiagnostic } from '../compile-protocol'
 import { PreviewFrame } from './preview-frame'
 import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
+import { ComponentNavigation } from './component-navigation'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import { EditorTopBar, SegmentedControl, previewModeOptions, previewWidthOptions, type OverflowItem } from '../../editor-shell'
@@ -207,6 +208,7 @@ export function ButtonEditor() {
         secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
     />
     <h1 className={styles.srOnly}>Button editor</h1>
+    <ComponentNavigation current="button" />
 
     {recovery !== null ? <section className={styles.recovery} role="alert" aria-labelledby="recovery-title">
       <h2 id="recovery-title">Your saved draft needs recovery</h2>

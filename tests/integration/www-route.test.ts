@@ -15,6 +15,13 @@ describe('Button editor route', () => {
 
     expect(html).toMatch(/<main\b[^>]*>[\s\S]*Breadcrumb[\s\S]*Components[\s\S]*<h1\b[^>]*>Button editor<\/h1>/)
   })
+
+  it('marks Button as the current component and links to the catalog', () => {
+    const html = renderToStaticMarkup(createElement(ButtonEditorPage))
+    const navigation = html.match(/<nav\b[^>]*aria-label="Editable components"[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? ''
+    expect(navigation).toMatch(/<a\b(?=[^>]*href="\/editor\/component\/button")(?=[^>]*aria-current="page")[^>]*>Button<\/a>/)
+    expect(navigation).toMatch(/<a\b[^>]*href="\/components"[^>]*>Browse all components<\/a>/)
+  })
 })
 
 it('renders the preset editor heading in the main landmark', () => {
@@ -40,7 +47,7 @@ it('publishes privacy, support and security pages without exposing an email addr
 it('renders the public landing page with editor links and the published installer', () => {
   const html = renderToStaticMarkup(createElement(HomePage))
   expect(html).toMatch(/<main\b[^>]*>[\s\S]*<h1\b[^>]*>Your components\.<br\/>[\s\S]*Your style\.[\s\S]*<\/h1>/)
-  expect(html).toContain('href="/editor/component/button"')
+  expect(html).toContain('href="/editor/component"')
   expect(html).toContain('href="/editor/preset"')
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
   expect(html).toContain(`npx ${runner} init --preset PRESET --cwd APP --dry-run --json`)

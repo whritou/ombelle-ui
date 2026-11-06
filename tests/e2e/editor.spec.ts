@@ -43,6 +43,38 @@ async function buttonSnapshot(button: import('@playwright/test').Locator) {
   }
 }
 
+test('opens the saved Button draft from the component editor entry point', async ({ page }) => {
+  const origin = 'http://127.0.0.1:3000'
+  await page.goto(`${origin}/components/button`)
+  await page.getByRole('link', { name: 'Customize' }).click()
+  await expect(page).toHaveURL(`${origin}/editor/component/button`)
+  await page.getByLabel('Button text').fill('Saved from Button docs')
+  await expect(page.getByRole('status')).toContainText('Draft saved locally.')
+
+  await page.goto(`${origin}/editor/component`)
+  await expect(page).toHaveURL(`${origin}/editor/component/button`)
+  await expect(page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Component editor' }))
+    .toHaveAttribute('aria-current', 'page')
+  await expect(page.getByLabel('Button text')).toHaveValue('Saved from Button docs')
+})
+
+test('offers keyboard access to the catalog on mobile', async ({ page }) => {
+  const origin = 'http://127.0.0.1:3000'
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(`${origin}/editor/component/button`)
+  const navigation = page.getByRole('navigation', { name: 'Editable components' })
+  await expect(navigation.getByRole('link', { name: 'Button', exact: true })).toHaveAttribute('aria-current', 'page')
+  const browse = navigation.getByRole('link', { name: 'Browse all components' })
+  await tabTo(page, browse)
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(`${origin}/components`)
+})
+
+test('returns 404 for catalog components without an editor', async ({ request }) => {
+  const response = await request.get('http://127.0.0.1:3000/editor/component/card')
+  expect(response.status()).toBe(404)
+})
+
 test('edits Button family, props, and bounded overrides', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByLabel('Corner radius', { exact: true }).fill('3')
@@ -417,11 +449,19 @@ test('sandboxed preview receives validated recipe updates only over its port', a
     expect(await frame.locator('style').last().textContent()).toBe(css)
   }
 
-  // Each forced state is a validated render that styles the same specimen with its own class.
-  const forcedRecipe = createEditorDraft('flat').recipe
+  // Validated renders apply the recipe's interaction colors to the same specimen.
+  const forcedRecipe = {
+    ...createEditorDraft('flat').recipe,
+    overrides: { colors: { light: { background: '#123456', hoverBackground: '#234567', pressedBackground: '#345678' } } },
+  }
   const forced = await compileRecipe({ recipe: forcedRecipe })
   const forcedCss = forced.artifacts.find((artifact) => artifact.kind === 'style')!.content
-  for (const [index, [forcedState, className]] of ([['hover', 'editor-force-hover'], ['active', 'editor-force-active'], ['none', '']] as const).entries()) {
+  const states = [
+    ['hover', 'rgb(35, 69, 103)'],
+    ['active', 'rgb(52, 86, 120)'],
+    ['none', 'rgb(18, 52, 86)'],
+  ] as const
+  for (const [index, [forcedState, background]] of states.entries()) {
     const requestId = index + 1500
     await page.evaluate((payload) => {
       const port = (window as typeof window & { __previewTestPort?: MessagePort }).__previewTestPort!
@@ -431,8 +471,7 @@ test('sandboxed preview receives validated recipe updates only over its port', a
       state: { recipe: forced.recipe.data, css: forcedCss, mode: 'light', viewport: 'wide', forcedState, requestId },
     })
     await expect(button).toHaveAttribute('data-forced-state', forcedState)
-    if (className) await expect(button).toHaveClass(new RegExp(className))
-    else await expect(button).not.toHaveClass(/editor-force-/)
+    await expect(button).toHaveCSS('background-color', background)
   }
 
   await iframe.evaluate((element: HTMLIFrameElement) => { element.src = element.src })

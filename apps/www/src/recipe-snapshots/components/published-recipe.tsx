@@ -32,7 +32,7 @@ export function PublishedRecipe({ snapshot, origin }: { snapshot: RecipeSnapshot
     })()
     return () => { active = false }
   }, [snapshot])
-  return <main className={styles.editor}>
+  return <main className={`${styles.editor} wrap-anywhere`}>
     <h1>Published Button recipe</h1>
     <p><code>{snapshot.id}@{snapshot.revision}</code></p>
     <p>This immutable public snapshot is a draft. Publishing verifies schema and compilation; it does not imply accessibility or quality review.</p>
