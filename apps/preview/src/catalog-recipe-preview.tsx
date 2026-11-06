@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { describeComponentRecipe, type RecipeSpecimen } from '@ombelle/compiler'
-import type { CatalogPreviewRender } from '../../www/src/editor/catalog-preview-protocol'
+import { measureCatalogParts, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
 import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
 import { scopedCatalogComponents } from './generated/catalog-recipes'
 import { LiquidGlassFilter } from './generated/catalog-recipes/liquid-glass-filter'
@@ -14,7 +14,9 @@ function renderSpecimen(specimen: RecipeSpecimen, primitives: Primitives, instan
     typeof child === 'string' ? child : renderSpecimen(child, primitives, instanceId)))
 }
 
-export function CatalogRecipePreview({ message }: { message: CatalogPreviewRender }) {
+export function CatalogRecipePreview({ message, onMeasure }: {
+  message: CatalogPreviewRender; onMeasure?(requestId: number, parts: MeasuredParts): void
+}) {
   const { component, result, mode, viewport } = message
   const [loaded, setLoaded] = React.useState<{ scope: string; primitives: Primitives }>()
   const instanceId = React.useId()
@@ -41,11 +43,17 @@ export function CatalogRecipePreview({ message }: { message: CatalogPreviewRende
       delete root.dataset.glassBackdrop
     }
   }, [mode, scene])
+  const frame = React.useRef<HTMLDivElement>(null)
+  const rendered = loaded?.scope === result.scope
+  // Report what the preset renders so the editor's empty fields can show it.
+  React.useEffect(() => {
+    if (rendered && frame.current) onMeasure?.(message.requestId, measureCatalogParts(frame.current, component))
+  }, [rendered, message.requestId, component, onMeasure])
   const css = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${component}.css`))?.content
-  return <div className={mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={viewport}>
+  return <div ref={frame} className={mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={viewport}>
     <style>{css}</style>
     {instance && <LiquidGlassFilter key={result.scope} scope={result.scope} instance={instance} />}
     {scene && <GlassBackdropArt scene={scene} />}
-    {loaded?.scope === result.scope && renderSpecimen(describeComponentRecipe(result.recipe.data), loaded.primitives, instanceId)}
+    {rendered && renderSpecimen(describeComponentRecipe(result.recipe.data), loaded.primitives, instanceId)}
   </div>
 }

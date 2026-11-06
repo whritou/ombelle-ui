@@ -30,7 +30,7 @@ The editor supports all 23 catalog components. The 22 additional editors export 
 
 On desktop, the labelled properties panel sits beside the preview and output area. On small screens, Preview, Customize, and Code tabs share the same draft.
 
-In the additional editors, Appearance targets the selected part, such as a Card surface, title, or body. Choose light and dark colors separately, and adjust spacing, borders, shape, and typography where the part supports them. The Liquid Glass material section appears for that family. These edits are saved in the recipe and included in its preview and installed styles.
+In the additional editors, Appearance targets the selected part, such as a Card surface, title, or body. Choose light and dark colors separately, and adjust spacing, borders, shape, and typography where the part supports them. The Liquid Glass material section appears for that family. Until a number field is edited, its placeholder and slider show the value the preset renders: part dimensions are measured from the live preview, and material settings come from the selected glass preset. These edits are saved in the recipe and included in its preview and installed styles.
 
 The properties panel groups controls into style family, component props, colors, shape, spacing, type, effects, and motion. Only show options supported by the selected component and style. Disable unavailable combinations with a reason rather than generating broken output.
 
