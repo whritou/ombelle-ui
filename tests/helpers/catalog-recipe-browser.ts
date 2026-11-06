@@ -25,15 +25,16 @@ export async function withCatalogRecipeConsumer<T>(framework: 'vite' | 'next', r
     await fs.writeFile(manifest, JSON.stringify(pkg))
     const npm = await managerEntry('npm')
     const run = (entry: string, args: string[]) => execute(process.execPath, [entry, ...args], {
-      cwd: root, windowsHide: true, timeout: 120_000,
+      cwd: root, windowsHide: true, timeout: 180_000,
       env: { ...process.env, NEXT_TELEMETRY_DISABLED: '1' },
     })
-    await run(npm, ['ci', '--ignore-scripts', '--no-audit', '--no-fund'])
+    const installFlags = ['--ignore-scripts', '--no-audit', '--no-fund', '--prefer-offline']
+    await run(npm, ['ci', ...installFlags])
     const compiled = await Promise.all(recipes.map(recipe => compileComponentRecipe({ recipe })))
     const missing = new Map<string, string>()
     for (const result of compiled) for (const dependency of result.dependencies)
       if (pkg.dependencies[dependency.name] !== dependency.version) missing.set(dependency.name, dependency.version)
-    if (missing.size) await run(npm, ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--save-exact',
+    if (missing.size) await run(npm, ['install', ...installFlags, '--save-exact',
       ...[...missing].map(([name, version]) => `${name}@${version}`)])
     const cliEnv = { NO_COLOR: undefined, FORCE_COLOR: undefined }
     const cli = async (...args: string[]) => {
