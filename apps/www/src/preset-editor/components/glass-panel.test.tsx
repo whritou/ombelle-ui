@@ -18,6 +18,7 @@ import type { PresetCompilerState } from '../use-preset-compiler'
 import { GlassPanel, glassLimitations, glassPairsId, glassReadoutId } from './glass-panel'
 import { DesignControls } from './preset-controls'
 import { PresetExportPanel } from './preset-export-panel'
+import { publishedInstaller } from '../../snapshots/install-command'
 
 const noop = () => {}
 
@@ -122,7 +123,7 @@ it('keeps exports available for a compiled draft with a contrast warning', async
   )
   for (const name of ['Download preset JSON', 'Copy export'])
     expect(html).toContain(`<button type="button" aria-describedby="${glassReadoutId}">${name}</button>`)
-  expect(html).toContain('npx @ombelle-ui/cli@0.5.0 init --preset ./project-preset.json --cwd APP --dry-run --json')
+  expect(html).toContain(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ./project-preset.json --cwd APP --dry-run --json`)
 })
 
 it('lists the tint in a failing tinted pair', () => {
