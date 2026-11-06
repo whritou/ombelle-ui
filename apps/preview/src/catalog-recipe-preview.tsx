@@ -4,7 +4,7 @@ import { measureCatalogParts, type CatalogPreviewRender, type MeasuredParts } fr
 import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
 import { scopedCatalogComponents } from './generated/catalog-recipes'
 import { LiquidGlassFilter } from './generated/catalog-recipes/liquid-glass-filter'
-import { GlassBackdropArt } from './glass-backdrop-art'
+import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 
 type Primitives = Record<string, React.ElementType>
 function renderSpecimen(specimen: RecipeSpecimen, primitives: Primitives, instanceId: string): React.ReactElement {
@@ -33,14 +33,10 @@ export function CatalogRecipePreview({ message, onMeasure }: {
   React.useLayoutEffect(() => {
     const root = document.documentElement
     root.classList.toggle('dark', mode === 'dark')
-    if (scene) {
-      root.dataset.backdrop = 'glass'
-      root.dataset.glassBackdrop = scene
-    }
+    setGlassBackdrop(root, scene || undefined)
     return () => {
       root.classList.remove('dark')
-      delete root.dataset.backdrop
-      delete root.dataset.glassBackdrop
+      setGlassBackdrop(root, undefined)
     }
   }, [mode, scene])
   const frame = React.useRef<HTMLDivElement>(null)

@@ -1,11 +1,12 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Download, ShieldCheck } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
 import {
   applyGlassTint,
   applyStartingPreset,
   createPresetDraft,
+  matchingStartingPreset,
   presetGlassReport,
   setPresetEdit,
   setPresetIdentity,
@@ -53,7 +54,9 @@ import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { PresetGetCode } from '../../snapshots/components/preset-get-code'
 import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
-import { GlassStartingPoints, previewBackdropFor } from './glass-starting-points'
+import { GlassStartingPoints } from './glass-starting-points'
+import { defaultGlassPresetId } from '@ombelle/catalog'
+import { glassPresetBackdrop } from '../../site/glass-presets'
 
 const backdropOptions: { value: PresetBackdrop; label: string }[] = [
   { value: 'kit', label: 'Kit' },
@@ -99,7 +102,11 @@ export default function PresetEditor() {
   const [mode, setMode] = useState<'light' | 'dark'>('light'),
     [viewport, setViewport] = useState<'wide' | 'narrow'>('wide'),
     [scene, setScene] = useState<PresetScene>('dashboard'),
-    [backdrop, setBackdrop] = useState<PresetBackdrop>('prism')
+    // The backdrop follows the starting preset, as in the component pages and editors.
+    // The picker overrides it for this preview until another starting preset matches.
+    [presetBackdrop, setPresetBackdrop] = useState<PresetBackdrop>(glassPresetBackdrop(defaultGlassPresetId)),
+    [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
+  const backdrop = backdropOverride ?? presetBackdrop
   // ?page= opens a preview page directly, including the component gallery,
   // which the page picker no longer offers.
   useEffect(() => {
@@ -199,6 +206,13 @@ export default function PresetEditor() {
   }
   const diagnostic = compiled.diagnostic
   const glass = draft.family === 'liquid-glass'
+  const startingPreset = useMemo(() => (glass ? matchingStartingPreset(draft) : null), [glass, draft])
+  // A custom draft keeps the backdrop of the preset it was started from.
+  useEffect(() => {
+    if (!startingPreset) return
+    setPresetBackdrop(glassPresetBackdrop(startingPreset))
+    setBackdropOverride(null)
+  }, [startingPreset])
   const glassReport = glass ? presetGlassReport(draft) : null
   const glassContrastWarning = glassReport?.passes === false
   // Download JSON and Get code both require a current compile result.
@@ -393,7 +407,8 @@ export default function PresetEditor() {
                 draft={draft}
                 onPick={(id) => {
                   commit(applyStartingPreset(draft, id), 'glass:preset')
-                  setBackdrop((current) => previewBackdropFor(id, current))
+                  setPresetBackdrop(glassPresetBackdrop(id))
+                  setBackdropOverride(null)
                 }}
                 onTint={(tint) => commit(applyGlassTint(draft, tint), 'glass:tint')}
               />
@@ -448,7 +463,7 @@ export default function PresetEditor() {
                   label="Preview backdrop"
                   value={backdrop}
                   options={backdropOptions}
-                  onChange={setBackdrop}
+                  onChange={setBackdropOverride}
                 />
               )}
               <SegmentedControl<typeof viewport>

@@ -1,11 +1,5 @@
 import { defaultGlassPresetId, getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { matchingStartingPreset, type PresetEditorDraft } from '../model'
-import type { PresetBackdrop } from '../preview-protocol'
-
-/** Relief is drawn for the warm Pêche backdrop, as in the material lab; other picks keep the current one. */
-export function previewBackdropFor(id: StartingPresetId, current: PresetBackdrop): PresetBackdrop {
-  return id === 'builtin-liquid-glass-relief' ? 'peach' : current
-}
 
 const tints: readonly { id: GlassTintId | 'white'; label: string; swatch: string }[] = [
   { id: 'clear', label: 'Claire', swatch: glassTintPalettes.clear.light.card },
