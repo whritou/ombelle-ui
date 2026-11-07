@@ -10,11 +10,19 @@ import {
 } from '../helpers/edition-parity.js'
 
 type Edition = 'radix' | 'base'
+// Each load gets its own URL: reloading the same URL lets Chromium restore
+// form controls (such as hidden radio inputs) from the previous state.
+let load = 0
 const url = (family: string, edition: Edition, mode: string) =>
-  'http://127.0.0.1:4173/editions/' + family + '/' + edition + '/?mode=' + mode
+  'http://127.0.0.1:4173/editions/' + family + '/' + edition + '/?mode=' + mode + '&load=' + ++load
 async function open(page: Page, family: string, edition: Edition, mode: string) {
+  // Both editions share a context; act on the foreground page so focus
+  // behaves like a real window.
+  await page.bringToFront()
   await page.goto(url(family, edition, mode))
   await expect(page.locator('main[data-ready="true"]')).toBeVisible()
+  // States start from a clean pointer: a hover from the previous state lingers.
+  await page.mouse.move(0, 0)
 }
 
 for (const family of supportedStyleFamilies)

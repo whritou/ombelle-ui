@@ -20,6 +20,15 @@ export const focusFirst =
           throw new Error('Tab did not reach ' + el.outerHTML.slice(0, 80))
       })
   }
+/**
+ * A held key press: Radix moves roving focus in a timeout after keydown and
+ * only selects while the arrow key is still down, as with a real keystroke.
+ */
+export async function holdKey(page: Page, key: string) {
+  await page.keyboard.down(key)
+  await page.waitForTimeout(50)
+  await page.keyboard.up(key)
+}
 export const hoverFirst =
   (selector: string): ParityState['act'] =>
   async (_page, section) => {
@@ -47,6 +56,16 @@ export const portedComponents: readonly {
   { id: 'separator', states: [{ name: 'default' }] },
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
+  {
+    id: 'radio-group',
+    states: [
+      { name: 'default' },
+      { name: 'select first', act: clickFirst("[data-slot='radio-group-item']") },
+      { name: 'hover', act: hoverFirst("[data-slot='radio-group-option']") },
+      { name: 'focus-visible', act: async (page, section) => { await section.locator('[data-parity-start]').focus(); await page.keyboard.press('Tab') } },
+      { name: 'arrow key', act: async (page, section) => { await section.locator('[data-parity-start]').focus(); await page.keyboard.press('Tab'); await holdKey(page, 'ArrowUp') } },
+    ],
+  },
   {
     id: 'checkbox',
     states: [
@@ -116,6 +135,14 @@ export type SlotStyles = { slot: string; styles: Record<string, string> }[]
 
 /** Computed styles of every [data-slot] element inside a parity section, in DOM order. */
 export async function slotStyles(section: Locator): Promise<SlotStyles> {
+  // Read settled styles: the editions update state on different ticks, so a
+  // running transition would compare intermediate values.
+  await section.page().evaluate(async () => {
+    await new Promise(requestAnimationFrame)
+    await Promise.all(
+      document.getAnimations().map((a) => a.finished.catch(() => undefined)),
+    )
+  })
   return section.locator('[data-slot]').evaluateAll(
     (elements, properties) =>
       elements.map((el) => {
@@ -156,6 +183,7 @@ export function compareSlotStyles(
 
 /** Data-slot (or tag) of the focused element after each Tab from the section start. */
 export async function focusOrder(page: Page, section: Locator, steps = 30) {
+  await page.bringToFront()
   await section.locator('[data-parity-start]').focus()
   const order: string[] = []
   for (let i = 0; i < steps; i++) {

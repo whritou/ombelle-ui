@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarStatus } from '@/components/ui/avatar'
@@ -109,6 +110,32 @@ export default function EditionScenario() {
         <Checkbox id="selection" defaultChecked="indeterminate" />
         <label htmlFor="locked">Locked</label>
         <Checkbox id="locked" disabled defaultChecked />
+      </Parity>
+      <Parity id="radio-group">
+        <p id="plan-label">Plan</p>
+        <RadioGroup defaultValue="team" aria-labelledby="plan-label">
+          <RadioGroupOption>
+            <RadioGroupItem value="starter" />
+            <span>
+              <RadioGroupOptionLabel>Starter</RadioGroupOptionLabel>
+              <RadioGroupOptionDescription>One project</RadioGroupOptionDescription>
+            </span>
+          </RadioGroupOption>
+          <RadioGroupOption>
+            <RadioGroupItem value="team" />
+            <span>
+              <RadioGroupOptionLabel>Team</RadioGroupOptionLabel>
+              <RadioGroupOptionDescription>Unlimited projects</RadioGroupOptionDescription>
+            </span>
+          </RadioGroupOption>
+          <RadioGroupOption>
+            <RadioGroupItem value="enterprise" disabled />
+            <span>
+              <RadioGroupOptionLabel>Enterprise</RadioGroupOptionLabel>
+              <RadioGroupOptionDescription>Contact sales to enable</RadioGroupOptionDescription>
+            </span>
+          </RadioGroupOption>
+        </RadioGroup>
       </Parity>
     </main>
   )
