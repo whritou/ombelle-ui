@@ -7,6 +7,7 @@ import {
   type ProjectContext,
 } from '@ombelle/contracts'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
+import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
 import { fileChange } from './components.js'
 import { transformComponentPresetArtifact } from '../project/component-preset-transform.js'
@@ -37,15 +38,7 @@ export async function planComponentPreset(
       context.root,
       'Run init --preset <local.json>.',
     )
-  if (
-    context.upstream &&
-    !['radix-nova', 'new-york'].includes(context.upstream.style)
-  )
-    throw new FoundationError(
-      'UNSUPPORTED_PROJECT',
-      'Component primitive edition is not supported',
-      'components.json',
-    )
+  assertEdition(context, 'recipes')
   const savedPreset = await resolvePreset(
     context.preset,
     getCatalog(context.lock.catalogRelease),

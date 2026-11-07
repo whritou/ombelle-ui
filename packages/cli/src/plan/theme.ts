@@ -1,5 +1,6 @@
 import path from 'node:path'
 import postcss, { type Container, type Rule, type AtRule } from 'postcss'
+import { assertLockedEdition } from '../project/edition.js'
 import {
   FoundationError,
   componentsWithStyleSupport,
@@ -188,9 +189,8 @@ export async function planTheme(
       }
     }
   }
-  const fullStyle =
-    !context.upstream ||
-    ['radix-nova', 'new-york'].includes(context.upstream.style)
+  if (context.upstreamStyleSupported) assertLockedEdition(context, context.edition)
+  const fullStyle = context.upstreamStyleSupported
   if (fullStyle) {
     const style = result.artifacts.find(
       (a) => a.logicalPath === 'styles/ui-style.css',

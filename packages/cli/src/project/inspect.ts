@@ -12,6 +12,7 @@ import {
 } from '@ombelle/contracts'
 import { safePath, portable } from './paths.js'
 import { fingerprintFile } from './fingerprint.js'
+import { detectEdition } from './edition.js'
 import { assertStandaloneProject } from './workspace.js'
 import { validateInstalledRecipes } from './recipes.js'
 import { validateInstalledComponentPresets } from './component-presets.js'
@@ -237,6 +238,8 @@ export async function inspectProject(
     sourceDir,
     packageJson: pkg,
     upstream,
+    edition: detectEdition(upstream?.style) ?? 'radix',
+    upstreamStyleSupported: detectEdition(upstream?.style) !== undefined,
     config,
     preset,
     lock,

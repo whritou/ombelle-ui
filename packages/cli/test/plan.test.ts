@@ -86,7 +86,7 @@ it('rejects case-insensitive destination collisions and incompatible component e
     code: 'FILE_CONFLICT',
   })
   const c = JSON.parse(await fs.readFile(root + '/components.json', 'utf8'))
-  c.style = 'base-nova'
+  c.style = 'radix-lyra'
   await fs.writeFile(root + '/components.json', JSON.stringify(c))
   await expect(
     planAdd(await inspectProject(root), await generate()),

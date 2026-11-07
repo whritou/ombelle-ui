@@ -105,6 +105,10 @@ export type ProjectConfig = {
   registryBase?: string
 }
 export type ProjectContext = {
+  /** Detected from components.json; 'radix' without one or for unknown styles. */
+  edition: Edition
+  /** False when components.json names a style Ombelle doesn't support. */
+  upstreamStyleSupported: boolean
   bunLockfile?: BunLockfile
   preconditions: Record<string, string | null>
   root: string

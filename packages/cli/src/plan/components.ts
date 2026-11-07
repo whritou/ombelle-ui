@@ -8,6 +8,7 @@ import {
   type ProjectConfig,
 } from '@ombelle/contracts'
 import { sha256, canonicalize, resolvePreset } from '@ombelle/compiler'
+import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
 import path from 'node:path'
 import { safePath } from '../project/paths.js'
@@ -52,6 +53,7 @@ export function baseLock(
 ): ProjectLock {
   return {
     lockVersion: 1,
+    edition: context.edition,
     ...result.provenance,
     presetHash: result.preset.hash,
     artifacts: { ...context.lock?.artifacts },
@@ -93,15 +95,7 @@ export async function planAdd(
   context: ProjectContext,
   result: CompileResult,
 ): Promise<InstallPlan> {
-  if (
-    context.upstream &&
-    !['radix-nova', 'new-york'].includes(context.upstream.style)
-  )
-    throw new FoundationError(
-      'UNSUPPORTED_PROJECT',
-      'Component primitive edition is not supported',
-      'components.json',
-    )
+  assertEdition(context)
   if (context.preset && context.lock) {
     const savedPreset = await resolvePreset(
       context.preset,

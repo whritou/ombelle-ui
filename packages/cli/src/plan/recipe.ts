@@ -7,6 +7,7 @@ import {
   type InstalledRecipe,
 } from '@ombelle/contracts'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
+import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
 import { fileChange } from './components.js'
 import { transformRecipeArtifact } from '../project/recipe-transform.js'
@@ -28,15 +29,7 @@ export async function planRecipe(
       '/paths/recipeOutput',
       'Remove paths.recipeOutput to use the supported UI alias layout.',
     )
-  if (
-    context.upstream &&
-    !['radix-nova', 'new-york'].includes(context.upstream.style)
-  )
-    throw new FoundationError(
-      'UNSUPPORTED_PROJECT',
-      'Component primitive edition is not supported',
-      'components.json',
-    )
+  assertEdition(context, 'recipes')
   const preset = await resolvePreset(
     context.preset,
     getCatalog(context.lock.catalogRelease),
