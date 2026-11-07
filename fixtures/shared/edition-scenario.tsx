@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarStatus } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
@@ -97,6 +98,17 @@ export default function EditionScenario() {
           Locked on
           <Switch disabled defaultChecked name="locked-on" />
         </label>
+      </Parity>
+      <Parity id="checkbox">
+        <label htmlFor="terms">Accept terms</label>
+        <Checkbox id="terms" name="terms" value="accepted" required aria-invalid="true" aria-describedby="terms-error" />
+        <p id="terms-error">Accept the terms to continue.</p>
+        <label htmlFor="news">Newsletter</label>
+        <Checkbox id="news" defaultChecked />
+        <label htmlFor="selection">Select all items</label>
+        <Checkbox id="selection" defaultChecked="indeterminate" />
+        <label htmlFor="locked">Locked</label>
+        <Checkbox id="locked" disabled defaultChecked />
       </Parity>
     </main>
   )

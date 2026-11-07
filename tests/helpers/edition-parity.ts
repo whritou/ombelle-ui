@@ -48,6 +48,16 @@ export const portedComponents: readonly {
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
   {
+    id: 'checkbox',
+    states: [
+      { name: 'default' },
+      { name: 'checked', act: clickFirst("[data-slot='checkbox']") },
+      { name: 'indeterminate cleared', act: async (_page, section) => { await section.locator("[data-slot='checkbox']").nth(2).click() } },
+      { name: 'hover', act: hoverFirst("[data-slot='checkbox']") },
+      { name: 'focus-visible', act: focusFirst("[data-slot='checkbox']") },
+    ],
+  },
+  {
     id: 'switch',
     states: [
       { name: 'default' },
