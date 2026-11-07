@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
@@ -136,6 +137,25 @@ export default function EditionScenario() {
             </span>
           </RadioGroupOption>
         </RadioGroup>
+      </Parity>
+      <Parity id="tabs">
+        <Tabs defaultValue="overview">
+          <TabsList aria-label="Project sections">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="settings" disabled>Settings</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">Project overview.</TabsContent>
+          <TabsContent value="activity">Recent activity.</TabsContent>
+        </Tabs>
+        <Tabs defaultValue="general" orientation="vertical">
+          <TabsList aria-label="Settings sections">
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="billing">Billing</TabsTrigger>
+          </TabsList>
+          <TabsContent value="general">General settings.</TabsContent>
+          <TabsContent value="billing">Billing settings.</TabsContent>
+        </Tabs>
       </Parity>
     </main>
   )

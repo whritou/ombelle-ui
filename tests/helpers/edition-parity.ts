@@ -57,6 +57,19 @@ export const portedComponents: readonly {
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
   {
+    id: 'tabs',
+    states: [
+      { name: 'default' },
+      // Radix focuses a clicked tab programmatically, which Chromium shows as
+      // :focus-visible; Base UI does not. Blur to compare the selected styling;
+      // docs/components/tabs.md records the focus-ring difference.
+      { name: 'click second', act: async (page, section) => { await section.locator("[data-slot='tabs-trigger']").nth(1).click(); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()) } },
+      { name: 'hover', act: async (_page, section) => { await section.locator("[data-slot='tabs-trigger']").nth(1).hover() } },
+      { name: 'focus-visible', act: focusFirst("[data-slot='tabs-trigger']") },
+      { name: 'arrow key', act: async (page, section) => { await focusFirst("[data-slot='tabs-trigger']")!(page, section); await holdKey(page, 'ArrowRight') } },
+    ],
+  },
+  {
     id: 'radio-group',
     states: [
       { name: 'default' },
