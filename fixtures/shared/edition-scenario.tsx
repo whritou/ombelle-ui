@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -195,6 +196,22 @@ export default function EditionScenario() {
             <PopoverDescription>Anyone with the link can install this preset.</PopoverDescription>
           </PopoverContent>
         </Popover>
+      </Parity>
+      <Parity id="dialog">
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline">Open dialog</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Example dialog</DialogTitle>
+            <DialogDescription>Review this example.</DialogDescription>
+          </DialogHeader>
+          <DialogClose asChild>
+            <Button>Done</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
       </Parity>
     </main>
   )

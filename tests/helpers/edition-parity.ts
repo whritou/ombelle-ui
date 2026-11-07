@@ -59,6 +59,17 @@ export const portedComponents: readonly {
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
   {
+    id: 'dialog',
+    portal: "[data-slot='dialog-overlay'], [data-slot='dialog-content'], [data-slot='dialog-content'] [data-slot]",
+    states: [
+      { name: 'closed' },
+      { name: 'click open', act: async (page, section) => { await section.locator("[data-slot='button']").click(); await page.locator("[data-slot='dialog-content']").waitFor() } },
+      { name: 'keyboard open', act: async (page, section) => { await focusFirst("[data-slot='button']")!(page, section); await page.keyboard.press('Enter'); await page.locator("[data-slot='dialog-content']").waitFor() } },
+      { name: 'tab inside', act: async (page, section) => { await section.locator("[data-slot='button']").click(); await page.locator("[data-slot='dialog-content']").waitFor(); await page.keyboard.press('Tab') } },
+      { name: 'escape closes', act: async (page, section) => { await section.locator("[data-slot='button']").click(); await page.locator("[data-slot='dialog-content']").waitFor(); await page.keyboard.press('Escape'); await page.locator("[data-slot='dialog-content']").waitFor({ state: 'detached' }) } },
+    ],
+  },
+  {
     id: 'popover',
     portal: "[data-slot='popover-content'], [data-slot='popover-content'] [data-slot]",
     states: [
