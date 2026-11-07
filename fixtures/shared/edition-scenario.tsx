@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
@@ -173,6 +174,17 @@ export default function EditionScenario() {
             <AccordionContent>Unavailable.</AccordionContent>
           </AccordionItem>
         </Accordion>
+      </Parity>
+      <Parity id="tooltip">
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger type="button">Project details</TooltipTrigger>
+            <TooltipContent>
+              View the project summary.
+              <TooltipArrow />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </Parity>
     </main>
   )

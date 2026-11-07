@@ -27,7 +27,7 @@ async function open(page: Page, family: string, edition: Edition, mode: string) 
 
 for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'] as const)
-    for (const { id, states } of portedComponents)
+    for (const { id, states, portal } of portedComponents)
       test(`${family} ${mode} ${id} renders identically in both editions`, async ({ context }) => {
         const pages: Record<Edition, Page> = {
           radix: await context.newPage(),
@@ -40,7 +40,7 @@ for (const family of supportedStyleFamilies)
           for (const edition of ['radix', 'base'] as const) {
             await open(pages[edition], family, edition, mode)
             await state.act?.(pages[edition], section(edition))
-            styles[edition] = await slotStyles(section(edition))
+            styles[edition] = await slotStyles(section(edition), portal)
           }
           expect(styles.radix.length, state.name).toBeGreaterThan(0)
           expect(compareSlotStyles(id, styles.radix, styles.base), state.name).toEqual([])

@@ -44,6 +44,8 @@ export const clickFirst =
 export const portedComponents: readonly {
   id: ComponentId
   states: readonly ParityState[]
+  /** Slots rendered in a portal, outside the section, compared after it. */
+  portal?: string
 }[] = [
   {
     id: 'button',
@@ -56,6 +58,18 @@ export const portedComponents: readonly {
   { id: 'separator', states: [{ name: 'default' }] },
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
+  {
+    id: 'tooltip',
+    portal: "[data-slot='tooltip-content'], [data-slot='tooltip-arrow']",
+    states: [
+      { name: 'closed' },
+      // Scroll first, then focus, as tests/e2e/tooltip.spec.ts does: Radix closes
+      // a tooltip when the page scrolls, so focusing an off-screen trigger would
+      // open and immediately close it.
+      { name: 'focus open', act: async (page, section) => { const trigger = section.locator("[data-slot='tooltip-trigger']"); await trigger.scrollIntoViewIfNeeded(); await page.evaluate(() => new Promise(requestAnimationFrame)); await trigger.focus(); await page.locator("[data-slot='tooltip-content']").waitFor() } },
+      { name: 'hover open', act: async (page, section) => { await hoverFirst("[data-slot='tooltip-trigger']")!(page, section); await page.locator("[data-slot='tooltip-content']").waitFor() } },
+    ],
+  },
   {
     id: 'accordion',
     states: [
@@ -158,7 +172,10 @@ export const comparedProperties = [
 export type SlotStyles = { slot: string; styles: Record<string, string> }[]
 
 /** Computed styles of every [data-slot] element inside a parity section, in DOM order. */
-export async function slotStyles(section: Locator): Promise<SlotStyles> {
+export async function slotStyles(
+  section: Locator,
+  portal?: string,
+): Promise<SlotStyles> {
   // Read settled styles: the editions update state on different ticks, so a
   // running transition would compare intermediate values.
   await section.page().evaluate(async () => {
@@ -167,7 +184,7 @@ export async function slotStyles(section: Locator): Promise<SlotStyles> {
       document.getAnimations().map((a) => a.finished.catch(() => undefined)),
     )
   })
-  return section.locator('[data-slot]').evaluateAll(
+  const read = (locator: Locator) => locator.evaluateAll(
     (elements, properties) =>
       elements.map((el) => {
         const style = getComputedStyle(el)
@@ -180,6 +197,15 @@ export async function slotStyles(section: Locator): Promise<SlotStyles> {
       }),
     [...comparedProperties] as string[],
   )
+  const inside = await read(section.locator('[data-slot]'))
+  if (!portal) return inside
+  // Portal content lives under body, outside every parity section.
+  return [
+    ...inside,
+    ...(await read(
+      section.page().locator(':is(' + portal + '):not([data-parity] *)'),
+    )),
+  ]
 }
 
 /** Differences between editions as `<index>:<slot>:<property> radix → base` lines. */
