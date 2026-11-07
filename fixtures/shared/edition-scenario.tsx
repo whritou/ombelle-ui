@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
@@ -245,6 +246,33 @@ export default function EditionScenario() {
             <DropdownMenuItem variant="destructive">Archive</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </Parity>
+      <Parity id="select">
+        <label id="role-label">Role</label>
+        <Select defaultValue="designer">
+          <SelectTrigger aria-labelledby="role-label">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Team</SelectLabel>
+              <SelectItem value="designer">Designer</SelectItem>
+              <SelectItem value="engineer">Engineer</SelectItem>
+            </SelectGroup>
+            <SelectSeparator />
+            <SelectItem value="researcher" disabled hint="Seat limit">Researcher</SelectItem>
+          </SelectContent>
+        </Select>
+        <label id="region-label">Region</label>
+        <Select>
+          <SelectTrigger size="sm" aria-labelledby="region-label">
+            <SelectValue placeholder="Choose a region" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="eu">Europe</SelectItem>
+            <SelectItem value="us">United States</SelectItem>
+          </SelectContent>
+        </Select>
       </Parity>
     </main>
   )

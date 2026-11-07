@@ -59,6 +59,18 @@ export const portedComponents: readonly {
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
   {
+    id: 'select',
+    portal: "[data-slot='select-content'], [data-slot='select-content'] [data-slot]",
+    states: [
+      { name: 'closed' },
+      { name: 'hover', act: hoverFirst("[data-slot='select-trigger']") },
+      { name: 'focus-visible', act: focusFirst("[data-slot='select-trigger']") },
+      { name: 'click open', act: async (page, section) => { await section.locator("[data-slot='select-trigger']").first().click(); await page.locator("[data-slot='select-content']").waitFor() } },
+      { name: 'highlight item', act: async (page, section) => { await section.locator("[data-slot='select-trigger']").first().click(); await page.locator("[data-slot='select-content']").waitFor(); await page.locator("[data-slot='select-item']").nth(1).hover() } },
+      { name: 'choose item', act: async (page, section) => { await section.locator("[data-slot='select-trigger']").first().click(); await page.locator("[data-slot='select-content']").waitFor(); await page.locator("[data-slot='select-item']").nth(1).click(); await page.locator("[data-slot='select-content']").waitFor({ state: 'hidden' }); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()) } },
+    ],
+  },
+  {
     id: 'dropdown-menu',
     portal: "[data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content'], :is([data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content']) [data-slot]",
     states: [
@@ -239,7 +251,9 @@ export async function slotStyles(
   return [
     ...inside,
     ...(await read(
-      section.page().locator(':is(' + portal + '):not([data-parity] *)'),
+      // Base UI may prerender a closed popup inside a hidden container;
+      // only displayed portal content is compared.
+      section.page().locator(':is(' + portal + '):not([data-parity] *):not([hidden] *)'),
     )),
   ]
 }

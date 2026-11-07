@@ -20,13 +20,16 @@ it('shares templates without primitive imports across editions', () => {
   expect(componentEditions('badge')).toEqual(['radix', 'base'])
 })
 
-it('rejects components that have no Base UI template yet', () => {
-  expect(componentEditions('select')).toEqual(['radix'])
-  expect(() => getTemplate(catalog, 'select', 'base')).toThrow(
+it('offers every component in both editions', () => {
+  for (const id of supportedComponentIds) expect(componentEditions(id), id).toEqual(['radix', 'base'])
+})
+
+it('rejects a component whose Base UI template is missing', () => {
+  const withoutSelect = { ...catalog, baseTemplates: { ...catalog.baseTemplates, select: undefined } }
+  expect(() => getTemplate(withoutSelect, 'select', 'base')).toThrow(
     expect.objectContaining({
       code: 'UNSUPPORTED_PROJECT',
-      message:
-        "Component `select` isn't available for Base UI yet; available: " + baseIds().join(', '),
+      message: expect.stringContaining("Component `select` isn't available for Base UI yet; available: "),
     }),
   )
 })
