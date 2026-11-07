@@ -37,3 +37,15 @@ it('rejects components without a Base UI template', async () => {
   if (!unported) return
   await expect(run('flat', [unported], 'base')).rejects.toMatchObject({ code: 'UNSUPPORTED_PROJECT' })
 })
+
+it('compiles the Base UI Button with project imports and Base UI dependencies', async () => {
+  const preset = structuredClone(catalog.presets.flat)
+  const result = await run('flat', ['button'], 'base')
+  const button = result.artifacts.find((a) => a.logicalPath === 'components/ui/button.tsx')!
+  expect(button.content).toContain("from '@base-ui/react/button'")
+  expect(button.content).toContain("from '@/lib/utils'")
+  expect(button.content).toContain("variant = '" + preset.componentDefaults!.button!.variant + "'")
+  const names = result.dependencies.map((d) => d.name)
+  expect(names).toContain('@base-ui/react')
+  expect(names.filter((n) => n.startsWith('@radix-ui/'))).toEqual([])
+})
