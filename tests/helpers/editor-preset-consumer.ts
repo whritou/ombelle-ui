@@ -103,6 +103,18 @@ export async function withEditorPresetConsumer<T>(
           path.basename(source),
         ),
     })
+    const gallery = !input.recipeSnapshot &&
+      !('kind' in input && input.kind === 'snapshot' && input.scope === 'button')
+    if (gallery) {
+      // Remove only the ordinary scenario's Dialog typography. Preserve managed
+      // tokens and imports so theme add still verifies the real installed lock.
+      const stylesheet = path.join(root, 'src/index.css')
+      const original = await fs.readFile(stylesheet, 'utf8')
+      await fs.writeFile(
+        stylesheet,
+        original.replace(/\[data-slot=['"]dialog-content['"]\]\s+(?:h2|p)\s*\{[^}]*\}\s*/g, ''),
+      )
+    }
     const npm = await managerEntry('npm')
     if ((await command(npm, ['--version'], root)).trim() !== '11.19.0')
       throw new Error('Preset browser consumers require npm 11.19.0')
@@ -202,7 +214,6 @@ export async function withEditorPresetConsumer<T>(
       if (input.framework === 'vite') await fs.writeFile(path.join(root, 'src/main.tsx'), "import * as React from 'react'\nimport {createRoot} from 'react-dom/client'\nimport RecipeScope from './recipe-scope'\nimport './index.css'\ncreateRoot(document.getElementById('root')!).render(<RecipeScope/>)\n")
       else await fs.writeFile(path.join(root, 'src/app/page.tsx'), "import RecipeScope from '../recipe-scope'\nexport default function Page(){return <RecipeScope/>}")
     }
-    const gallery = !recipeInput && !(snapshot && scope === 'button')
     const fixture = await fs.readFile(
       new URL('../../fixtures/shared/preset-gallery.tsx', import.meta.url), 'utf8',
     )

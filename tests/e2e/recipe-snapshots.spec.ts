@@ -7,6 +7,7 @@ import { supportedStyleFamilies, type RecipeSnapshot } from '@ombelle/contracts'
 import { createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { resetSnapshotBrowserQuota } from '../helpers/snapshot-browser.js'
 import { expectRecipeDownloadEnabled } from '../helpers/button-editor-ui.js'
 const url = 'http://127.0.0.1:3000/editor/component/button'
@@ -109,7 +110,7 @@ for (const family of supportedStyleFamilies) test(`published ${family} recipe ma
           await installed.evaluate(dark => document.documentElement.classList.toggle('dark', dark), mode === 'dark')
           const button = installed.getByTestId('published-recipe-button')
           await expect(button).toHaveText(recipe.content)
-          expect(await recipeStyles(button)).toEqual(await recipeStyles(previewButton))
+          expectColorParity(await recipeStyles(button), await recipeStyles(previewButton))
           expect(await button.evaluate(element => ({ tag: element.tagName, type: element.getAttribute('type'), scope: element.getAttribute('data-ombelle-recipe'), variant: element.getAttribute('data-variant'), size: element.getAttribute('data-size') }))).toEqual(await previewButton.evaluate(element => ({ tag: element.tagName, type: element.getAttribute('type'), scope: element.getAttribute('data-ombelle-recipe'), variant: element.getAttribute('data-variant'), size: element.getAttribute('data-size') })))
         }
       } finally { await installed.close() }

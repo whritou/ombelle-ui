@@ -251,6 +251,10 @@ export function compileScopedButtonStyles(input: {
     if (mapped) overrides[mapped[0]] = value + mapped[1]
   }
   const o = input.overrides
+  // Ombelle's authored pill shape does not read the radius token. An explicit
+  // recipe radius still wins, while recipes without one retain the family pill.
+  if (o.radiusRem !== undefined && data.styleFamily === 'ombelle')
+    overrides['border-radius'] = 'var(--radius)'
   if (o.gapPx !== undefined) overrides.gap = o.gapPx + 'px'
   if (o.fontWeight !== undefined) overrides['font-weight'] = String(o.fontWeight)
   if (o.fontSizePx !== undefined) overrides['font-size'] = o.fontSizePx + 'px'

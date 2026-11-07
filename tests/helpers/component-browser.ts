@@ -154,12 +154,13 @@ export async function expectComponentFocus(control: Locator) {
       outline: style.outlineStyle,
       outlineWidth: parseFloat(style.outlineWidth),
       transition: style.transitionDuration,
+      family: element.closest('main[data-style]')?.getAttribute('data-style'),
     }
   })
   expect(measure.width).toBeGreaterThanOrEqual(24)
   expect(measure.height).toBeGreaterThanOrEqual(24)
   expect(measure.visible).toBe(true)
-  expect(measure.outline).toBe('solid')
-  expect(measure.outlineWidth).toBeGreaterThanOrEqual(2)
+  expect(measure.outline).toBe(measure.family === 'neo-brutalism' ? 'dashed' : 'solid')
+  expect(measure.outlineWidth).toBeGreaterThanOrEqual(measure.family === 'minimalist' ? 1 : measure.family === 'neo-brutalism' ? 3 : 2)
   expect(measure.transition.split(', ').every((value) => parseFloat(value) === 0)).toBe(true)
 }

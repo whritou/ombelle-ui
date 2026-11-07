@@ -259,6 +259,14 @@ for (const family of supportedStyleFamilies)
         frame(page).getByRole('heading', { name: scene.heading, exact: true, level: 1 }),
       ).toBeVisible()
       await expect(page.getByText('Components in this page: ' + scene.components)).toBeVisible()
+      if (scene.option === 'Settings') {
+        const option = frame(page).locator('[data-slot="radio-group-option"]')
+          .filter({ hasText: 'Real time' })
+        await expect(option).toHaveAttribute('aria-disabled', 'true')
+        await expect(option.getByRole('radio')).toBeDisabled()
+        await expect(frame(page).locator('[data-slot="radio-group-option"]').first())
+          .not.toHaveAttribute('aria-disabled', 'true')
+      }
       const violations = (
         await new AxeBuilder({ page })
           .include('iframe[title="Global preset gallery"]')
@@ -862,11 +870,15 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expect(dialog).toHaveCount(0)
   await expect(getCode).toBeFocused()
   await expectVisibleFocus(page)
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBe(true)
+  const layout = await page.evaluate(() => ({
+    width: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    overflowing: Array.from(document.querySelectorAll('body *'))
+      .filter((node) => node.getBoundingClientRect().right > window.innerWidth + 1)
+      .slice(0, 8)
+      .map((node) => ({ tag: node.tagName, class: node.className, text: node.textContent?.slice(0, 60) })),
+  }))
+  expect(layout.scrollWidth, JSON.stringify(layout)).toBeLessThanOrEqual(layout.width)
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
   await segment(page, 'Preview width', '320 px').click()

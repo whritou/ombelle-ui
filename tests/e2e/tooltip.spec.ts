@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { createBrowserReferenceCache } from '../helpers/browser-references.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import {
   browserApps,
   componentReferenceKey,
@@ -51,10 +52,10 @@ for (const family of supportedStyleFamilies)
         })
         await page.goto(componentUrl(app, family, query))
         const actual = await sample(page)
-        expect(actual).toEqual(reference)
+        expectColorParity(actual, reference)
         expectComponentSources('tooltip', family, app)
         await expect(page.locator('html')).toHaveClass(mode === 'dark' ? /dark/ : '')
-        expect(actual.portalStyles.shadow === 'none').toBe(family === 'minimalist')
+        expect(actual.portalStyles.shadow).not.toBe('none')
         const fixture = page.getByTestId('tooltip-fixture')
         const help = fixture.getByRole('button', { name: 'About review windows' })
         const content = page.getByTestId('tooltip-content')

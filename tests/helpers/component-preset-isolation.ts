@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import { colorParityDiff } from './color-compare.js'
 import {
   browserReferenceKey,
   createBrowserReferenceCache,
@@ -77,7 +78,7 @@ export async function assertComponentPresetHostIsolation(
   baseline: Awaited<ReturnType<typeof componentPresetHostStyles>>,
 ) {
   expect(
-    await componentPresetHostStyles(page),
+    colorParityDiff(await componentPresetHostStyles(page), baseline),
     'Component preset changed ordinary host styles',
-  ).toEqual(baseline)
+  ).toEqual([])
 }

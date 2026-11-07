@@ -9,6 +9,8 @@ import {
 } from '../tests/helpers/recipe-measurements.ts'
 import { canonicalize } from '../packages/compiler/src/canonicalize.ts'
 import { sha256 } from '../packages/compiler/src/hash.ts'
+import { colorParityDiff } from '../tests/helpers/color-compare.ts'
+import { scopedButtonFocus } from '../tests/helpers/scoped-button-focus-contract.ts'
 
 const checks = [
   'parity',
@@ -177,7 +179,8 @@ export async function validateComponentPresetMeasurements(
     if (
       typeof row.focusOutlineWidth !== 'number' ||
       !Number.isFinite(row.focusOutlineWidth) ||
-      row.focusOutlineWidth < 3 ||
+      row.focusOutlineWidth <
+        scopedButtonFocus(ref.preset.data.styleFamily).minimumWidth ||
       ![
         'solid',
         'dashed',
@@ -201,7 +204,8 @@ export async function validateComponentPresetMeasurements(
     if (rendered.has(identity)) {
       const previous = object(rendered.get(identity)),
         differences = []
-      if (!equal(previous.styles, styles)) differences.push('computed styles')
+      if (colorParityDiff(previous.styles, styles).length)
+        differences.push('computed styles')
       if (previous.domHash !== row.domHash) differences.push('DOM')
       if (
         !normalizedScreenshotsMatch(

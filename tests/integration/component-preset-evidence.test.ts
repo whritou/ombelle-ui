@@ -34,6 +34,19 @@ it('loads the foundation evidence validator through native Node without loader a
 })
 
 // Structural fixtures only; synthetic success records never enter retained run evidence.
+it('accepts authored family focus widths and equivalent CSS colors but rejects thinner focus', async () => {
+  const rows = await measurements()
+  const widths: Record<string, number> = { 'builtin-flat': 2, 'builtin-minimalist': 1, 'builtin-neo-brutalism': 3, 'builtin-ombelle': 2 }
+  for (const row of rows) row.focusOutlineWidth = widths[row.presetId]
+  rows[0].computedStyles.color = 'color(srgb 0.0039215686 0.0078431373 0.0117647059)'
+  await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(160)
+  for (const presetId of Object.keys(widths)) {
+    const altered = structuredClone(rows)
+    altered.find(row => row.presetId === presetId)!.focusOutlineWidth = widths[presetId] - 1
+    await expect(validateComponentPresetMeasurements(altered)).rejects.toThrow('Failed component preset accessibility state')
+  }
+})
+
 it('requires all 152 descriptor/preset installs and 160 app/host/preset/mode measurements', async () => {
   const { matrix, consumers } = await fixtures()
   await expect(

@@ -3,6 +3,8 @@ import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { enlargeFixtureText } from '../helpers/text-enlargement.js'
+import { expectColorParity } from '../helpers/color-compare.js'
+import { renderedTextContrast } from '../helpers/rendered-contrast.js'
 import {
   browserReferenceKey,
   createBrowserReferenceCache,
@@ -44,16 +46,6 @@ const badgeReferences = createBrowserReferenceCache<{
   html: string
   image: string
 }>()
-function luminance(color: string) {
-  const channels = color
-    .match(/[\d.]+/g)!
-    .slice(0, 3)
-    .map(Number)
-    .map((n) => n / 255)
-    .map((n) => (n <= 0.04045 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4))
-  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
-}
-
 for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'])
     for (const app of ['preview', 'vite', 'next', 'npm-vite', 'npm-next'])
@@ -92,7 +84,7 @@ for (const family of supportedStyleFamilies)
           )
         const actual =
           app === 'preview' && captured ? captured : await specimen(page)
-        expect(actual.styles).toEqual(reference.styles)
+        expectColorParity(actual.styles, reference.styles)
         expect(actual.html).toBe(reference.html)
         expect(actual.image.equals(Buffer.from(reference.image, 'base64'))).toBe(
           true,
@@ -120,13 +112,11 @@ for (const family of supportedStyleFamilies)
         await expect(
           actual.fixture.getByText('Label <script> & text', { exact: true }),
         ).toBeVisible()
-        for (const sample of actual.styles) {
-          const a = luminance(sample.color),
-            b = luminance(sample.background)
-          expect(
-            (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05),
-          ).toBeGreaterThanOrEqual(4.5)
-        }
+        const contrast = await Promise.all(
+          (await badges.all()).map(renderedTextContrast),
+        )
+        for (const sample of contrast)
+          expect(sample.ratio).toBeGreaterThanOrEqual(4.5)
         expect(
           (
             await new AxeBuilder({ page })
@@ -184,11 +174,7 @@ for (const family of supportedStyleFamilies)
                 mode,
                 app,
                 styles: actual.styles,
-                contrastRatios: actual.styles.map((sample) => {
-                  const a = luminance(sample.color),
-                    b = luminance(sample.background)
-                  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
-                }),
+                contrast,
                 enlargedText: samples.filter((sample) =>
                   sample.selector.startsWith('span'),
                 ),

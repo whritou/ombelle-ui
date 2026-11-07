@@ -13,7 +13,15 @@ const field = {
   gap: 8,
   minWidth: 0,
 }
-const error = { margin: 0, color: 'var(--destructive)', fontSize: 14 }
+// Destructive is a surface token in some families. Keep the message readable
+// and use that token for its accent, beside the associated invalid control.
+const error = {
+  margin: 0,
+  color: 'var(--foreground)',
+  borderInlineStart: '2px solid var(--destructive)',
+  paddingInlineStart: 8,
+  fontSize: 14,
+}
 const longLabel =
   'Describe how this shared component library should be reviewed, approved and announced to every team before it ships soon'
 const longOption =

@@ -83,8 +83,10 @@ for(const mode of ['light','dark']){
   const input=page.getByTestId('empty-input');await input.scrollIntoViewIfNeeded()
   expect(await input.evaluate(el=>el.matches(':placeholder-shown'))).toBe(true)
   ratios.placeholder=await textContrast(input,'::placeholder');await input.focus();ratios.placeholderFocus=await textContrast(input,'::placeholder')
-  const c=await colors(input);ratios.inputBoundary=Math.min(pair(c.borderBottom,c.background),pair(c.borderBottom,c.outside));ratios.focus=pair(c.outline,c.outside)
-  expect(ratios.inputBoundary).toBeGreaterThanOrEqual(3);expect(ratios.focus).toBeGreaterThanOrEqual(3);expect(c.outlineWidth).toBeGreaterThanOrEqual(1);expect(c.outlineOffset).toBeGreaterThanOrEqual(4);await expect(input).toHaveCSS('border-bottom-width','2px');await unclipped(input)
+  // Single-line minimalist fields focus with a 2px ink underline; the normal
+  // outline is reserved for invalid fields and forced colors.
+  const c=await colors(input);ratios.inputBoundary=Math.min(pair(c.borderBottom,c.background),pair(c.borderBottom,c.outside));ratios.focus=pair(c.borderBottom,c.outside)
+  expect(ratios.inputBoundary).toBeGreaterThanOrEqual(3);expect(ratios.focus).toBeGreaterThanOrEqual(3);expect(c.outlineWidth).toBe(0);await expect(input).toHaveCSS('border-bottom-width','2px');expect(await input.evaluate(el=>el.matches(':focus-visible'))).toBe(true);await unclipped(input)
   ratios.muted=await textContrast(page.locator('.note'))
   expect((await new AxeBuilder({page}).analyze()).violations).toEqual([])
   await page.getByTestId('state-dialog-trigger').focus();await page.getByTestId('state-dialog-trigger').press('Enter');await expect(page.getByTestId('state-dialog-accept')).toBeFocused();expect((await colors(page.getByRole('dialog'))).bgRaw[3]).toBe(255)

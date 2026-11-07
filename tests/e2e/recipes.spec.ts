@@ -5,6 +5,7 @@ import { getCatalog } from '@ombelle/catalog'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { recipeStyles, recipeDom } from '../helpers/recipe-measurements.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import {
   assertRecipeIsolation,
   assertRecipeStates,
@@ -69,7 +70,7 @@ for (const hostFamily of supportedStyleFamilies)
           expect(styles.borderRadius).toBe('0px')
           expect(styles.border).toContain('2px')
           if (referenceImage) {
-            expect(styles).toEqual(referenceStyles)
+            expectColorParity(styles, referenceStyles)
             expect(dom).toEqual(referenceDom)
             expect(image.equals(referenceImage)).toBe(true)
           } else {
@@ -90,7 +91,7 @@ for (const hostFamily of supportedStyleFamilies)
             compiled,
             consumers: map,
           })
-          await assertRecipeStates(page, button)
+          await assertRecipeStates(page, button, compiled.preset.data.styleFamily)
           const textEvidence = await measureRecipeTextLayouts(page, button, {
             base,
             mode,
@@ -178,5 +179,5 @@ test('a compatible host theme change preserves the rendered recipe', async ({
   expect(
     await neighbor.evaluate((el) => getComputedStyle(el).backgroundColor),
   ).not.toBe(oldHost)
-  expect(await recipeStyles(button)).toEqual(before)
+  expectColorParity(await recipeStyles(button), before)
 })

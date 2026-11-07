@@ -135,7 +135,7 @@ export default function EditionScenario() {
               <RadioGroupOptionDescription>Unlimited projects</RadioGroupOptionDescription>
             </span>
           </RadioGroupOption>
-          <RadioGroupOption>
+          <RadioGroupOption aria-disabled="true">
             <RadioGroupItem value="enterprise" disabled />
             <span>
               <RadioGroupOptionLabel>Enterprise</RadioGroupOptionLabel>

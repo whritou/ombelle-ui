@@ -7,7 +7,8 @@ import {
   browserReferenceKey,
   createBrowserReferenceCache,
 } from '../helpers/browser-references.js'
-import { contrastRatio } from '../helpers/contrast.js'
+import { expectColorParity, resolveColor } from '../helpers/color-compare.js'
+import { renderedTextContrast } from '../helpers/rendered-contrast.js'
 
 const consumers = JSON.parse(
   fs.readFileSync('.artifacts/consumers.json', 'utf8'),
@@ -57,37 +58,17 @@ async function focusRing(control: Locator) {
     return {
       focusVisible: el.matches(':focus-visible'),
       borderTopWidth: s.borderTopWidth,
+      borderBottomWidth: s.borderBottomWidth,
+      borderBottomColor: s.borderBottomColor,
       borderRadius: s.borderRadius,
       outlineStyle: s.outlineStyle,
       outlineWidth: s.outlineWidth,
       outlineColor: s.outlineColor,
       outlineOffset: s.outlineOffset,
+      shadow: s.boxShadow,
     }
   })
 }
-const rgb = (value: string) => {
-  const channels = /^rgba?\(([^)]+)\)$/.exec(value)?.[1].split(/[\s,/]+/)
-  if (!channels || (channels[3] !== undefined && Number(channels[3]) !== 1))
-    throw new Error('Expected an opaque rgb() color, received ' + value)
-  return channels.slice(0, 3).map(Number) as [number, number, number]
-}
-async function textContrast(locator: Locator) {
-  const sample = await locator.evaluate((el) => {
-    let node: Element | null = el,
-      background = 'rgba(0, 0, 0, 0)'
-    while (node) {
-      const value = getComputedStyle(node).backgroundColor
-      if (value !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(value)) {
-        background = value
-        break
-      }
-      node = node.parentElement
-    }
-    return { color: getComputedStyle(el).color, background }
-  })
-  return { ...sample, ratio: contrastRatio(rgb(sample.color), rgb(sample.background)) }
-}
-
 for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'])
     for (const app of ['preview', 'vite', 'next', 'npm-vite', 'npm-next'])
@@ -161,7 +142,7 @@ for (const family of supportedStyleFamilies)
             .locator('html')
             .evaluate((el) => el.classList.contains('dark')),
         ).toBe(mode === 'dark')
-        expect(actual.styles).toEqual(reference.styles)
+        expectColorParity(actual.styles, reference.styles)
         expect(actual.html).toBe(reference.html)
         const fixture = actual.fixture
         const byId = (id: string) => fixture.getByTestId(id)
@@ -206,17 +187,38 @@ for (const family of supportedStyleFamilies)
             ),
         ).toBe(90)
 
-        // Textarea and Native Select share Input's border, radius and focus ring.
+        // Each family keeps its focus treatment across fields; minimalist Textarea
+        // has a complete outline while its single-line fields use an ink underline.
         const inputRing = await focusRing(input)
         const textareaRing = await focusRing(byId('forms-textarea-filled'))
         const selectRing = await focusRing(byId('forms-select-default'))
-        expect(inputRing.focusVisible).toBe(true)
-        expect(inputRing.outlineStyle).toBe('solid')
-        expect(textareaRing).toEqual(inputRing)
-        expect(selectRing).toEqual(inputRing)
+        const ringColor = await input.evaluate((el) => {
+          const probe = document.createElement('div')
+          probe.style.color = 'var(--ring)'
+          el.parentElement!.append(probe)
+          const color = getComputedStyle(probe).color
+          probe.remove()
+          return color
+        })
+        for (const [index, ring] of [inputRing, textareaRing, selectRing].entries()) {
+          expect(ring.focusVisible).toBe(true)
+          if (family === 'minimalist' && index !== 1) {
+            expect(ring.outlineStyle).toBe('none')
+            expect(parseFloat(ring.borderBottomWidth)).toBeGreaterThanOrEqual(2)
+            expectColorParity(ring.borderBottomColor, ringColor)
+          } else if (family === 'flat') {
+            expect(ring.shadow).toContain('inset')
+            expect(resolveColor(ring.outlineColor).alpha).toBe(0)
+            expectColorParity(ring.borderBottomColor, ringColor)
+          } else {
+            expect(ring.outlineStyle).toBe(family === 'neo-brutalism' ? 'dashed' : 'solid')
+            expect(parseFloat(ring.outlineWidth)).toBeGreaterThanOrEqual(1)
+            expectColorParity(ring.outlineColor, ringColor)
+          }
+        }
         await page.evaluate(() => (document.activeElement as HTMLElement)?.blur())
 
-        // Invalid controls use the destructive token at 2px or more.
+        // Invalid controls show destructive ink on the visible rule or shadow.
         const destructive = await page.evaluate(() => {
           const probe = document.createElement('div')
           probe.style.cssText = 'border:1px solid var(--destructive)'
@@ -233,6 +235,11 @@ for (const family of supportedStyleFamilies)
         for (const id of invalid) {
           const border = await byId(id).evaluate((el) => {
             const s = getComputedStyle(el)
+            const probe = document.createElement('div')
+            probe.style.boxShadow = 'var(--shadow-x) var(--shadow-y) 0 var(--destructive)'
+            el.parentElement!.append(probe)
+            const destructiveShadow = getComputedStyle(probe).boxShadow
+            probe.remove()
             return {
               colors: [
                 s.borderTopColor,
@@ -240,11 +247,20 @@ for (const family of supportedStyleFamilies)
                 s.borderBottomColor,
                 s.borderLeftColor,
               ],
-              width: parseFloat(s.borderTopWidth),
+              widths: [s.borderTopWidth, s.borderRightWidth, s.borderBottomWidth, s.borderLeftWidth].map(parseFloat),
+              shadow: s.boxShadow,
+              destructiveShadow,
             }
           })
-          expect(border.colors).toEqual(Array(4).fill(destructive))
-          expect(border.width).toBeGreaterThanOrEqual(2)
+          expect(Math.max(...border.widths)).toBeGreaterThanOrEqual(2)
+          if (family === 'neo-brutalism') {
+            expect(border.shadow).not.toBe('none')
+            expectColorParity(border.shadow, border.destructiveShadow)
+          } else {
+            const visibleColors = border.colors.filter((_, index) => border.widths[index] > 0)
+            expect(visibleColors.length).toBeGreaterThan(0)
+            expectColorParity(visibleColors, visibleColors.map(() => destructive))
+          }
         }
         await expect(byId('forms-textarea-invalid')).toHaveAttribute(
           'aria-describedby',
@@ -303,10 +319,13 @@ for (const family of supportedStyleFamilies)
         }
         await expect(iconOf('forms-select-multiple')).toBeHidden()
 
-        // Disabled selects dim the select and icon together.
+        // Disabled treatments are family-specific: dimmed wrappers/fields or dotted ink.
         for (const id of ['forms-select-disabled', 'forms-select-fieldset']) {
           await expect(byId(id)).toBeDisabled()
-          await expect(wrapperOf(id)).toHaveCSS('opacity', '0.5')
+          await expect(wrapperOf(id)).toHaveCSS('opacity', family === 'ombelle' ? '0.7' : '1')
+          await expect(byId(id)).toHaveCSS('opacity', family === 'flat' ? '0.55' : '1')
+          await expect(byId(id)).toHaveCSS('border-bottom-style',
+            family === 'flat' || family === 'minimalist' ? 'dotted' : 'dashed')
         }
         await expect(wrapperOf('forms-select-default')).toHaveCSS('opacity', '1')
 
@@ -333,11 +352,11 @@ for (const family of supportedStyleFamilies)
 
         // Required marker and error text keep readable contrast.
         const contrast = {
-          requiredMarker: await textContrast(
+          requiredMarker: await renderedTextContrast(
             requiredLabel.locator('[aria-hidden="true"]'),
           ),
-          textareaError: await textContrast(byId('forms-textarea-error')),
-          selectError: await textContrast(byId('forms-select-error')),
+          textareaError: await renderedTextContrast(byId('forms-textarea-error')),
+          selectError: await renderedTextContrast(byId('forms-select-error')),
         }
         for (const sample of Object.values(contrast))
           expect(sample.ratio).toBeGreaterThanOrEqual(4.5)
@@ -349,7 +368,7 @@ for (const family of supportedStyleFamilies)
         // Forced colors: invalid borders become double and shadows are removed.
         await page.emulateMedia({ forcedColors: 'active' })
         for (const id of invalid)
-          await expect(byId(id)).toHaveCSS('border-top-style', 'double')
+          await expect(byId(id)).toHaveCSS('border-bottom-style', 'double')
         expect(
           await fixture
             .locator('input, textarea, select')

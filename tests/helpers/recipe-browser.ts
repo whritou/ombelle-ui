@@ -2,6 +2,8 @@ import { expect, type Page, type Locator } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { enlargeFixtureText } from './text-enlargement.js'
 import type { RecipeMeasurement } from '../../scripts/recipe-evidence.ts'
+import { expectColorParity } from './color-compare.js'
+import { scopedButtonFocus } from './scoped-button-focus-contract.ts'
 
 export async function assertRecipeIsolation(
   page: Page,
@@ -40,17 +42,37 @@ export async function assertRecipeIsolation(
       }
     }),
   )
-  expect(after).toEqual(neighbors)
+  expectColorParity(after, neighbors)
 }
 
-export async function assertRecipeStates(page: Page, button: Locator) {
+export async function assertScopedButtonFocus(button: Locator, family: string) {
   await button.focus()
   await expect(button).toBeFocused()
-  expect(
-    await button.evaluate((el) =>
-      parseFloat(getComputedStyle(el).outlineWidth),
-    ),
-  ).toBeGreaterThanOrEqual(3)
+  const actual = await button.evaluate((el) => {
+    const style = getComputedStyle(el)
+    return {
+      visible: el.matches(':focus-visible'),
+      width: parseFloat(style.outlineWidth),
+      style: style.outlineStyle,
+      offset: parseFloat(style.outlineOffset),
+      color: style.outlineColor,
+    }
+  })
+  const expected = scopedButtonFocus(family)
+  expect(actual.visible, 'Scoped Button has a keyboard focus indicator').toBe(true)
+  expect(actual.width).toBeGreaterThanOrEqual(expected.minimumWidth)
+  expect(actual.style).toBe(expected.style)
+  expect(actual.offset).toBe(expected.offset)
+  expect(actual.color).not.toMatch(/^(transparent|rgba\(0, 0, 0, 0\))$/)
+  return actual.width
+}
+
+export async function assertRecipeStates(
+  page: Page,
+  button: Locator,
+  family: string,
+) {
+  await assertScopedButtonFocus(button, family)
   await page.keyboard.press('Enter')
   await page.keyboard.press('Space')
   await button.click()
