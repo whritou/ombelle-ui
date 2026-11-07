@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -212,6 +213,38 @@ export default function EditionScenario() {
           </DialogClose>
         </DialogContent>
       </Dialog>
+      </Parity>
+      <Parity id="dropdown-menu">
+        <DropdownMenu>
+          <DropdownMenuTrigger>Project actions</DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Project</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                Rename
+                <DropdownMenuShortcut>F2</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled>Duplicate</DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem checked>Show grid</DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem checked={false}>Show rulers</DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value="comfortable">
+              <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="comfortable">Comfortable</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Share</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem>Copy link</DropdownMenuItem>
+                <DropdownMenuItem>Email</DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuItem variant="destructive">Archive</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </Parity>
     </main>
   )

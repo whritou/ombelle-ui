@@ -59,6 +59,20 @@ export const portedComponents: readonly {
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
   {
+    id: 'dropdown-menu',
+    portal: "[data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content'], :is([data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content']) [data-slot]",
+    states: [
+      { name: 'closed' },
+      { name: 'click open', act: async (page, section) => { await section.locator("[data-slot='dropdown-menu-trigger']").click(); await page.locator("[data-slot='dropdown-menu-content']").waitFor() } },
+      { name: 'highlight item', act: async (page, section) => { await section.locator("[data-slot='dropdown-menu-trigger']").click(); await page.locator("[data-slot='dropdown-menu-content']").waitFor(); await page.locator("[data-slot='dropdown-menu-item']").first().hover() } },
+      // Base UI keeps disabled items focusable, Radix skips them: End reaches the
+      // same last item in both (docs/components/dropdown-menu.md).
+      { name: 'keyboard', act: async (page, section) => { await focusFirst("[data-slot='dropdown-menu-trigger']")!(page, section); await page.keyboard.press('Enter'); await page.locator("[data-slot='dropdown-menu-content']").waitFor(); await holdKey(page, 'End') } },
+      { name: 'submenu open', act: async (page, section) => { await section.locator("[data-slot='dropdown-menu-trigger']").click(); await page.locator("[data-slot='dropdown-menu-content']").waitFor(); await page.locator("[data-slot='dropdown-menu-sub-trigger']").hover(); await page.locator("[data-slot='dropdown-menu-sub-content']").waitFor() } },
+      { name: 'escape closes', act: async (page, section) => { await section.locator("[data-slot='dropdown-menu-trigger']").click(); await page.locator("[data-slot='dropdown-menu-content']").waitFor(); await page.keyboard.press('Escape'); await page.locator("[data-slot='dropdown-menu-content']").waitFor({ state: 'detached' }) } },
+    ],
+  },
+  {
     id: 'dialog',
     portal: "[data-slot='dialog-overlay'], [data-slot='dialog-content'], [data-slot='dialog-content'] [data-slot]",
     states: [
