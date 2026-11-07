@@ -686,7 +686,7 @@ for (const mode of modes) {
     await publishedPage.goto(new URL((await published.getAttribute('href'))!, page.url()).href)
     await expect(publishedPage.getByText('Contrast warning. Some Liquid Glass text falls below 4.5:1 in the contrast model.')).toBeVisible()
     await expect(publishedPage.getByText('Snapshot gallery ready.', { exact: true })).toBeVisible()
-    await expect(publishedPage.getByRole('textbox', { name: 'New setup dry-run command' })).toHaveValue(/^pnpm exec node packages\/cli\/dist\/main\.js init --preset ps_/)
+    await expect(publishedPage.getByRole('textbox', { name: 'New setup install command' })).toHaveValue(/^pnpm exec node packages\/cli\/dist\/main\.js init --preset ps_/)
     await publishedPage.close()
     await code.getByRole('button', { name: 'Close', exact: true }).click()
 

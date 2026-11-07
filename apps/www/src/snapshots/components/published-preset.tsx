@@ -220,9 +220,8 @@ export function PublishedPreset({
           installer through npx and require Node 24.19.0 or newer Node 24.
         </p>}
         <p>
-          Replace <code>APP</code> with your app path (quote paths containing
-          spaces). Run the selected command and review the JSON dry-run plan. To apply that plan, remove{' '}
-          <code>--dry-run</code> and add <code>--yes</code>. Validation,
+          Run the selected command from your app folder. It shows every file
+          and dependency change and asks before writing. Validation,
           compatibility and modified-file conflicts still apply; dependency
           lifecycle scripts stay disabled.
         </p>
@@ -236,7 +235,7 @@ export function PublishedPreset({
             <h3>{title}</h3>
             <p>{description}</p>
             <label htmlFor={`snapshot-command-${scope}`}>
-              {title} dry-run command
+              {title} install command
             </label>
             <textarea
               id={`snapshot-command-${scope}`}

@@ -1,7 +1,7 @@
-import { officialSnapshotOrigin, publicCliPackageName, styleFamilies, validateRecipeSnapshotSource, validateSnapshotSource, type Recipe, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type Recipe, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
-export const publishedInstaller = { packageName: publicCliPackageName, version: '0.6.0' } as const
+export const publishedInstaller = { packageName: publicCliPackageName, version: '0.7.0' } as const
 export const catalogRecipeMinimumCli = '0.6.0'
 export const catalogRecipesAvailable = catalogRecipeInstallerSupported(publishedInstaller.version) ||
   (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES === '1')
@@ -61,6 +61,18 @@ export function compareVersions(a: string, b: string): number {
 }
 
 /**
+ * Order in which the website lists style families, in every picker and list.
+ * The shared catalog order (contracts styleFamilies) is unchanged.
+ */
+export const siteFamilyOrder: readonly StyleFamily[] = [
+  'ombelle',
+  'minimalist',
+  'neo-brutalism',
+  'flat',
+  'liquid-glass',
+]
+
+/**
  * Style families the website offers for new choices. A family the published
  * installer cannot install stays hidden until that installer is released, so
  * every command the site shows works. `current` keeps an already-selected
@@ -71,7 +83,7 @@ export function offeredStyleFamilies(
   installer: { version: string } = publishedInstaller,
 ): readonly StyleFamily[] {
   const ombelle = compareVersions(installer.version, ombelleMinimumCli) >= 0
-  return styleFamilies.filter((family) => family !== 'ombelle' || ombelle || family === current)
+  return siteFamilyOrder.filter((family) => family !== 'ombelle' || ombelle || family === current)
 }
 
 export function installerRunner(release?: { packageName: string; version: string }): string {
@@ -102,7 +114,7 @@ export function snapshotInstallCommand(
   }[scope]
   if (!operation) throw new Error('Unknown installation scope.')
   const pins = origin === officialSnapshotOrigin ? '' : ` --snapshot-origin '${origin}' --preset-hash ${presetHash}`
-  return `${installerRunner(release)} ${operation}${pins} --cwd APP --dry-run --json`
+  return `${installerRunner(release)} ${operation}${pins}`
 }
 
 export const packageManagers = ['pnpm', 'npm', 'yarn', 'bun'] as const

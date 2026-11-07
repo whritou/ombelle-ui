@@ -24,9 +24,9 @@ it('offers ombelle only once the published installer supports it, keeping a sele
   const families = (html: string) => [...html.matchAll(/class="be-family" data-family="([^"]+)"/g)].map((match) => match[1])
   const render = (value: 'flat' | 'ombelle', version: string) =>
     families(renderToStaticMarkup(<FamilyPicker value={value} onChange={noop} families={offeredStyleFamilies(value, { version })} />))
-  expect(render('flat', '0.3.0')).toEqual(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])
-  expect(render('flat', ombelleMinimumCli)).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
-  expect(render('ombelle', '0.3.0')).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
+  expect(render('flat', '0.3.0')).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+  expect(render('flat', ombelleMinimumCli)).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+  expect(render('ombelle', '0.3.0')).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
   expect(families(renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />))).toEqual([
     ...offeredStyleFamilies('flat', publishedInstaller),
   ])

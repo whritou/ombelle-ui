@@ -27,7 +27,7 @@ export function installText(recipe: InstallableRecipe, installer: { version: str
   if (recipe.schemaVersion === '1.0' && recipeInstallBlocked(recipe, installer))
     return `# Glass material needs ${publishedInstaller.packageName} ${glassMaterialMinimumCli}, which is not published yet.
 # Download the recipe now; the install command appears here once ${glassMaterialMinimumCli} is released.`
-  return `${installerRunner({ ...publishedInstaller, version: installer.version })} add --recipe ./${recipeFilename(recipe)} --cwd APP --yes`
+  return `${installerRunner({ ...publishedInstaller, version: installer.version })} add --recipe ./${recipeFilename(recipe)}`
 }
 
 function tabArtifact(tab: Tab, result: InstallableRecipeCompileResult) {

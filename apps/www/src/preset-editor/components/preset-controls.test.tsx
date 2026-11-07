@@ -25,11 +25,11 @@ it('FamilyPicker offers ombelle only once the published installer supports it', 
   const gated = renderToStaticMarkup(
     <FamilyPicker value="flat" onChange={noop} families={offeredStyleFamilies('flat', { version: '0.3.0' })} />,
   )
-  expect(families(gated)).toEqual(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])
+  expect(families(gated)).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
   const offered = renderToStaticMarkup(
     <FamilyPicker value="flat" onChange={noop} families={offeredStyleFamilies('flat', { version: ombelleMinimumCli })} />,
   )
-  expect(families(offered)).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
+  expect(families(offered)).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
   // The default follows the website's published installer.
   const defaults = renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />)
   expect(families(defaults)).toEqual([...offeredStyleFamilies('flat', publishedInstaller)])

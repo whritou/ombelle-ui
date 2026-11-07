@@ -173,12 +173,12 @@ export function PresetExportPanel({
         <pre data-testid="preset-install-command">
           {installerRunner(useLocalInstaller ? undefined : publishedInstaller)}{' '}
           {install === 'new' ? 'init --preset' : 'theme add'}{' '}
-          ./project-preset.json --cwd APP --dry-run --json
+          ./project-preset.json
         </pre>
       )}
       <p>
-        Review the plan, then replace <code>--dry-run --json</code> with{' '}
-        <code>--yes</code> to apply. A theme merge preserves existing component
+        Run it from your app folder; the installer shows the changes and asks
+        before writing. A theme merge preserves existing component
         source; changing markup requires an explicit migration.
       </p>
       </section>

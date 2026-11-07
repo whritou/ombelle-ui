@@ -1,5 +1,6 @@
 import { defaultGlassPresetId, resolveRecipePreset } from '@ombelle/catalog'
-import { componentRecipeFields, defaultRecipeFields, styleFamilies, styleSupport, type ComponentRecipe, type RecipeField } from '@ombelle/contracts'
+import { componentRecipeFields, defaultRecipeFields, styleSupport, type ComponentRecipe, type RecipeField } from '@ombelle/contracts'
+import { siteFamilyOrder } from '../../snapshots/install-command'
 import { GlassPresetSelect } from '../../site/glass-preset-select'
 import { glassPresetId } from '../../site/glass-presets'
 import { catalogPresetRef } from '../catalog-draft'
@@ -27,7 +28,7 @@ export function CatalogProperties({ recipe, measured = {}, update }: {
     update({ ...recipe, [group]: values } as ComponentRecipe)
   }
   return <div className="properties gap-4 py-4">
-    <FamilyPicker value={family} families={styleFamilies.filter(style => styleSupport(recipe.component, style) !== 'unavailable')}
+    <FamilyPicker value={family} families={siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable')}
       onChange={style => update({ ...recipe, presetRef: catalogPresetRef(style) })} />
     {family === 'liquid-glass' && <GlassPresetSelect value={glassPresetId(recipe.presetRef.id)}
       onChange={id => update({ ...recipe, presetRef: catalogPresetRef(family, id ?? defaultGlassPresetId) })} />}
