@@ -81,12 +81,16 @@ export type ProjectLock = {
   componentPresets?: Record<string, InstalledComponentPreset>
   recipes?: Record<string, InstalledRecipe>
   lockVersion: 1
+  /** Absent in older locks, which always mean 'radix'. */
+  edition?: Edition
   catalogRelease: string
   compilerVersion: string
   presetHash: string
   artifacts: Record<string, InstalledArtifact>
   managedDeclarations: ManagedDeclaration[]
 }
+/** Primitive library the project's shadcn components use. */
+export type Edition = 'radix' | 'base'
 export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun'
 export type BunLockfile = 'bun.lock' | 'bun.lockb'
 export type ProjectConfig = {
