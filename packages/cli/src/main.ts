@@ -22,6 +22,7 @@ import { applyPresetSourceToPlan } from './snapshots/source.js'
 import { planRecipe } from './plan/recipe.js'
 import { planComponentPreset } from './plan/component-preset.js'
 import { inspectProject } from './project/inspect.js'
+import { besideComponents } from './project/beside.js'
 import { planAdd } from './plan/components.js'
 import { planTheme } from './plan/theme.js'
 import { applyPlan } from './apply/transaction.js'
@@ -221,6 +222,7 @@ export async function runCli(
         compilerVersion: preset.compilerVersion,
         glassContrast: 'report',
         edition: context.edition,
+        prefixedComponents: besideComponents(context),
       })
       plan =
         command === 'add'

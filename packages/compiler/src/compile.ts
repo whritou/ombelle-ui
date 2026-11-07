@@ -14,6 +14,7 @@ import typescript from 'prettier/plugins/typescript'
 import estree from 'prettier/plugins/estree'
 import postcss from 'prettier/plugins/postcss'
 import { resolvePreset } from './resolve.js'
+import { duplicatePrefixedRules, prefixSlots, templateSlots } from './prefix-slots.js'
 import { sha256 } from './hash.js'
 import { assertGlassContrast, glassTokens } from './glass.js'
 import { glassMaterialActive } from './glass-contrast.js'
@@ -81,6 +82,11 @@ export async function compile(input: {
   glassContrast?: 'enforce' | 'report'
   /** Primitive library of the target project; the preset hash does not depend on it. */
   edition?: Edition
+  /**
+   * Components installed beside an app-owned file: their slots get the
+   * `ombelle-` prefix and shared rules for those slots are duplicated.
+   */
+  prefixedComponents?: readonly ComponentId[]
 }): Promise<CompileResult> {
   if (input.compilerVersion !== '0.1.0')
     throw new FoundationError(
@@ -101,6 +107,12 @@ export async function compile(input: {
   assertStyleAvailable(ids, family)
   if (family === 'liquid-glass' && input.glassContrast !== 'report')
     assertGlassContrast(preset.data)
+  const prefixedSlots = new Map(
+    [...new Set(input.prefixedComponents ?? [])].map((id) => [
+      id,
+      templateSlots(getTemplate(catalog, id, input.edition ?? 'radix').content),
+    ]),
+  )
   const theme: ThemeData = { light: {}, dark: {}, theme: {} }
   for (const mode of ['light', 'dark'] as const)
     for (const [key, value] of Object.entries(preset.data.modes[mode]))
@@ -152,7 +164,10 @@ export async function compile(input: {
     {
       logicalPath: 'styles/ui-style.css',
       kind: 'style',
-      content: catalog.styles[family] + (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : ''),
+      content: duplicatePrefixedRules(
+        catalog.styles[family] + (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : ''),
+        [...prefixedSlots.values()].flat(),
+      ),
     },
   ]
   const dependencies = new Map<string, string>()
@@ -169,16 +184,19 @@ export async function compile(input: {
           "size = 'default'",
           "size = '" + preset.data.componentDefaults!.button!.size + "'",
         )
+    const slots = prefixedSlots.get(id)
     drafts.push({
       logicalPath: template.logicalPath,
       kind: 'component',
-      content,
+      content: slots ? prefixSlots(content, 'tsx', slots) : content,
     })
     if (template.styles)
       drafts.push({
         logicalPath: template.logicalPath.replace(/\.tsx$/, '.css'),
         kind: 'style',
-        content: template.styles[family]!,
+        content: slots
+          ? prefixSlots(template.styles[family]!, 'css', slots)
+          : template.styles[family]!,
       })
     const usage = usageExamples[id] ?? defaultUsage
     drafts.push({

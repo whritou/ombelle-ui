@@ -5,6 +5,7 @@ import type { ComponentRecipe } from './component-recipe.js'
 import type { SnapshotSource } from './snapshot.js'
 import type { RecipeSnapshotSource } from './recipe-snapshot.js'
 export type Preset = FromSchema<typeof presetSchema>
+import type { ComponentId } from './component-ids.js'
 export type { ComponentId } from './component-ids.js'
 export type { StyleFamily } from './style-families.js'
 
@@ -83,6 +84,8 @@ export type ProjectLock = {
   lockVersion: 1
   /** Absent in older locks, which always mean 'radix'. */
   edition?: Edition
+  /** Components installed beside an app-owned file, under <components>/ombelle/. */
+  placements?: Partial<Record<ComponentId, 'beside'>>
   catalogRelease: string
   compilerVersion: string
   presetHash: string
@@ -164,7 +167,13 @@ export type InstallPlan = {
   changes: FileChange[]
   managedDeclarations: ManagedDeclaration[]
   dependencyPlan: Dependency[]
-  diagnostics: { code: string; message: string; path?: string }[]
+  diagnostics: {
+    code: string
+    message: string
+    path?: string
+    /** Explicit choices that resolve an unowned-file conflict. */
+    resolutions?: ('overwrite' | 'beside')[]
+  }[]
   notices: string[]
   networkAccess: boolean
 }
