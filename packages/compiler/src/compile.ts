@@ -1,6 +1,7 @@
 import {
   FoundationError,
   type ComponentId,
+  type Edition,
   type CompileResult,
   type Artifact,
   type ThemeData,
@@ -78,6 +79,8 @@ export async function compile(input: {
    * warnings while preserving the chosen settings.
    */
   glassContrast?: 'enforce' | 'report'
+  /** Primitive library of the target project; the preset hash does not depend on it. */
+  edition?: Edition
 }): Promise<CompileResult> {
   if (input.compilerVersion !== '0.1.0')
     throw new FoundationError(
@@ -154,7 +157,7 @@ export async function compile(input: {
   ]
   const dependencies = new Map<string, string>()
   for (const id of ids) {
-    const template = getTemplate(catalog, id)
+    const template = getTemplate(catalog, id, input.edition ?? 'radix')
     let content = template.content.replaceAll("'./utils.js'", "'@/lib/utils'")
     if (id === 'button')
       content = content

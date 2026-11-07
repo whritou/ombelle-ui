@@ -220,6 +220,7 @@ export async function runCli(
         catalogRelease: preset.catalogRelease,
         compilerVersion: preset.compilerVersion,
         glassContrast: 'report',
+        edition: context.edition,
       })
       plan =
         command === 'add'
