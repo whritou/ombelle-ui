@@ -41,7 +41,7 @@ const navigationKeys = ['ArrowDown', 'ArrowUp', 'Home', 'End']
 function moveTriggerFocus(event: React.KeyboardEvent<HTMLDivElement>) {
   const root = event.currentTarget
   const target = event.target as HTMLElement
-  if (!navigationKeys.includes(event.key) || target.dataset.slot !== 'accordion-trigger') return
+  if (!navigationKeys.includes(event.key) || !target.matches('[data-slot="accordion-trigger"]')) return
   const triggers = [
     ...root.querySelectorAll<HTMLElement>('[data-slot="accordion-trigger"]'),
   ].filter(

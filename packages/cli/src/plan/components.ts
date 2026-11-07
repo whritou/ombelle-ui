@@ -60,7 +60,11 @@ export function baseLock(
 ): ProjectLock {
   return {
     lockVersion: 1,
-    edition: context.edition,
+    // An unsupported style only takes the palette; it never changes the edition
+    // that installed components were built for.
+    edition: context.upstreamStyleSupported
+      ? context.edition
+      : (context.lock?.edition ?? context.edition),
     ...result.provenance,
     presetHash: result.preset.hash,
     artifacts: { ...context.lock?.artifacts },

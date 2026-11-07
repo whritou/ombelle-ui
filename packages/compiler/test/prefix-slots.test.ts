@@ -58,3 +58,45 @@ it('leaves output byte for byte unchanged without beside components', async () =
   const a = await run(), b = await run([])
   expect(b.artifacts.map((x) => x.sha256)).toEqual(a.artifacts.map((x) => x.sha256))
 })
+
+it('leaves no unprefixed slot name behind in beside Base UI components', async () => {
+  const catalog = getCatalog('0.1.0')
+  const ids = Object.keys(catalog.baseTemplates) as ('accordion' | 'button')[]
+  const result = await compile({
+    preset: catalog.presets.flat,
+    componentIds: ids,
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+    edition: 'base',
+    prefixedComponents: ids,
+  })
+  for (const artifact of result.artifacts.filter((a) => a.kind === 'component' && a.logicalPath !== 'components/ui/liquid-glass-filter.tsx')) {
+    const slots = templateSlots(catalog.baseTemplates[artifact.logicalPath.slice(14, -4) as 'button']!.content)
+    for (const slot of slots)
+      expect(artifact.content, artifact.logicalPath + ' still names ' + slot).not.toMatch(
+        // Slot names used in code (dataset.slot, [data-slot=...]) must be prefixed too.
+        new RegExp("slot[^\\n]{0,40}(?<!ombelle-)['\"]" + slot + "['\"]"),
+      )
+  }
+})
+
+it('points the liquid-glass halo at beside components instead of the app ones', async () => {
+  const catalog = getCatalog('0.1.0')
+  const run = (prefixedComponents?: 'button'[]) =>
+    compile({
+      preset: catalog.presets['liquid-glass'],
+      componentIds: ['button'],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+      glassContrast: 'report',
+      ...(prefixedComponents ? { prefixedComponents } : {}),
+    })
+  const filter = (r: Awaited<ReturnType<typeof run>>) =>
+    r.artifacts.find((a) => a.logicalPath === 'components/ui/liquid-glass-filter.tsx')!.content
+  const plain = filter(await run()),
+    beside = filter(await run(['button']))
+  expect(plain).toContain('[data-slot="button"]')
+  expect(beside).not.toContain('[data-slot="button"]')
+  expect(beside).toContain('[data-slot="ombelle-button"]')
+  expect(beside).toContain('[data-slot="card"]')
+})

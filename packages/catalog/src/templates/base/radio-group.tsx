@@ -13,9 +13,16 @@ type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'classNam
 // so the shared stylesheet applies. A custom render prop replaces this bridge.
 const checkedState = (checked: boolean) => (checked ? 'checked' : 'unchecked')
 
-export type RadioGroupProps = Part<typeof RadioGroupPrimitive>
+/** Generic over the value type, like Base UI's RadioGroup. */
+export type RadioGroupProps<Value = string> = Omit<
+  RadioGroupPrimitive.Props<Value>,
+  'className'
+> & { className?: string }
 
-export function RadioGroup({ className, ...props }: RadioGroupProps) {
+export function RadioGroup<Value = string>({
+  className,
+  ...props
+}: RadioGroupProps<Value>) {
   return (
     <RadioGroupPrimitive
       data-slot="radio-group"

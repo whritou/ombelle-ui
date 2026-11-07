@@ -126,3 +126,23 @@ it('keeps recipes and component presets Radix-only', async () => {
       message: "Recipes and component presets aren't available for Base UI yet",
     })
 })
+
+it('keeps the locked edition when an unsupported style only takes the palette', async () => {
+  const root = await project('base-nova')
+  const { applyPlan } = await import('../src/apply/transaction.js')
+  await applyPlan(await planAdd(await inspectProject(root), await build(['badge'])), { dependencies: async () => {} })
+  const file = root + '/components.json'
+  const setStyle = async (style: string) => {
+    const c = JSON.parse(await fs.readFile(file, 'utf8'))
+    c.style = style
+    await fs.writeFile(file, JSON.stringify(c))
+  }
+  await setStyle('radix-lyra')
+  const theme = await planTheme(await inspectProject(root), await build([]))
+  expect(lockOf(theme).edition).toBe('base')
+  await applyPlan(theme, { dependencies: async () => {} })
+  await setStyle('radix-nova')
+  await expect(planAdd(await inspectProject(root), await build(['card']))).rejects.toMatchObject({
+    code: 'FILE_CONFLICT',
+  })
+})

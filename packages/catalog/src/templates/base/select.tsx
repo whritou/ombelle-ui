@@ -14,7 +14,11 @@ type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'classNam
 const openState = (open: boolean) => (open ? 'open' : 'closed')
 const checkedState = (checked: boolean) => (checked ? 'checked' : 'unchecked')
 
-export type SelectProps = React.ComponentProps<typeof SelectPrimitive.Root>
+/** Generic over the value type, like Base UI's Select.Root. */
+export type SelectProps<
+  Value = string,
+  Multiple extends boolean | undefined = false,
+> = SelectPrimitive.Root.Props<Value, Multiple>
 
 /**
  * Base UI only knows item labels once its popup has opened. Collect them from
@@ -31,7 +35,10 @@ function collectItems(node: React.ReactNode, items: Record<string, React.ReactNo
   return items
 }
 
-export function Select({ items, children, ...props }: SelectProps) {
+export function Select<
+  Value = string,
+  Multiple extends boolean | undefined = false,
+>({ items, children, ...props }: SelectProps<Value, Multiple>) {
   return (
     <SelectPrimitive.Root
       data-slot="select"

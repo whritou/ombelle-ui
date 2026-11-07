@@ -212,7 +212,8 @@ export async function compile(input: {
     drafts.push({
       logicalPath: 'components/ui/liquid-glass-filter.tsx',
       kind: 'component',
-      content: catalog.glassFilter,
+      // The halo selector must reach beside components, never the app's own.
+      content: prefixSlots(catalog.glassFilter, 'css', [...prefixedSlots.values()].flat()),
     })
   if (ids.length)
     drafts.push({
