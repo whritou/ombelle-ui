@@ -1,11 +1,5 @@
-import { defaultGlassPresetId, getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalog, glassTintPalettes, offeredGlassPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { matchingStartingPreset, type PresetEditorDraft } from '../model'
-import type { PresetBackdrop } from '../preview-protocol'
-
-/** Relief is drawn for the warm Pêche backdrop, as in the material lab; other picks keep the current one. */
-export function previewBackdropFor(id: StartingPresetId, current: PresetBackdrop): PresetBackdrop {
-  return id === 'builtin-liquid-glass-relief' ? 'peach' : current
-}
 
 const tints: readonly { id: GlassTintId | 'white'; label: string; swatch: string }[] = [
   { id: 'clear', label: 'Claire', swatch: glassTintPalettes.clear.light.card },
@@ -26,13 +20,16 @@ export function GlassStartingPoints({
 }) {
   const presets = getCatalog('0.1.0').startingPresets
   const current = matchingStartingPreset(draft)
+  // A draft still on a retired preset names it, since it has no button.
+  const retired = current !== null && !(offeredGlassPresetOrder as readonly StartingPresetId[]).includes(current)
   return (
     <div className="preset-glass-material">
       <div role="group" aria-labelledby="preset-starting-label" className="preset-starting-points">
         <span id="preset-starting-label" className="preset-glass-label">
-          Starting preset{current === null ? <span className="preset-glass-custom"> · Custom</span> : null}
+          Starting preset{current === null ? <span className="preset-glass-custom"> · Custom</span>
+            : retired ? <span className="preset-glass-custom"> · {presets[current].name}</span> : null}
         </span>
-        {startingPresetOrder.map((id) => (
+        {offeredGlassPresetOrder.map((id) => (
           <button key={id} type="button" data-preset={id} aria-pressed={current === id} onClick={() => onPick(id)}>
             {presets[id].name + (id === defaultGlassPresetId ? ' (default)' : '')}
           </button>

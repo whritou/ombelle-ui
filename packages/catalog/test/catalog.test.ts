@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { getCatalog, getTemplate, startingPresetOrder } from '../src/index.js'
+import { getCatalog, getTemplate, offeredGlassPresetOrder, startingPresetOrder } from '../src/index.js'
 import { catalogData } from '../src/generated.js'
+import { resolveRecipePreset } from '../src/recipe-preset.js'
 import {
   supportedComponentIds,
   supportedStyleFamilies,
@@ -731,6 +732,16 @@ describe('liquid glass starting presets', () => {
     expect(c.startingPresets['builtin-liquid-glass-cristal'].modes.light.primary).toBe('#0B6AA8')
     expect(c.startingPresets['builtin-liquid-glass-fume'].modes.light.cardForeground).toBe('#F0F7FF')
     expect(c.startingPresets['builtin-liquid-glass'].design.glassOpacity).toBe(0.57)
+  })
+  it('offers six starting presets and keeps the retired ones resolvable', () => {
+    const c = getCatalog('0.1.0')
+    expect(offeredGlassPresetOrder.map((id) => c.startingPresets[id].name)).toEqual([
+      'Cristal', 'Givré', 'Fumé', 'Relief', 'Voile', 'Liquid glass',
+    ])
+    for (const id of ['builtin-liquid-glass-clear', 'builtin-liquid-glass-prism', 'builtin-liquid-glass-liquid'] as const) {
+      const { revision, catalogRelease } = c.startingPresets[id]
+      expect(resolveRecipePreset({ id, revision, catalogRelease, compilerVersion: '0.1.0' }).id).toBe(id)
+    }
   })
   it('lists exactly the starting preset files, each under its own id', () => {
     expect(Object.keys(catalogData.startingPresets).sort()).toEqual([...startingPresetOrder].sort())

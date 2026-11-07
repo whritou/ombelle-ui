@@ -31,6 +31,19 @@ export const startingPresetOrder = [
   'builtin-liquid-glass',
 ] as const
 export type StartingPresetId = (typeof startingPresetOrder)[number]
+/**
+ * The starting presets the editors and component pages offer, in picker order. Clear, Prism
+ * and Liquid shipped in 0.5.0 and stay in the catalog, so recipes, snapshots and projects
+ * pinned to them still resolve; they are no longer offered.
+ */
+export const offeredGlassPresetOrder = [
+  defaultGlassPresetId,
+  'builtin-liquid-glass-givre',
+  'builtin-liquid-glass-fume',
+  'builtin-liquid-glass-relief',
+  'builtin-liquid-glass-voile',
+  'builtin-liquid-glass',
+] as const satisfies readonly StartingPresetId[]
 
 export type ComponentTemplate = {
   id: ComponentId

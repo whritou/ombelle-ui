@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add Voile, a liquid glass starting preset: a clean white veil (opacity 0.37, blur 16) with a light pointer halo, rim refraction and dispersion. It uses the White tint and passes the contrast bound at the 0.25 floor.
+- The editors and component pages offer six Liquid Glass starting presets: Cristal (default), Givré, Fumé, Relief, Voile and Liquid glass. Clear, Prism and Liquid are no longer offered. They stay in the catalog, so recipes, snapshots and projects pinned to them still resolve, and a recipe pinned to one still shows it in its glass preset select.
+
 ## 0.6.0 — 6 November 2026
 
 - Add dedicated editors and installable recipes for every catalog component. The 22 new editors use recipe format 2.0, with scoped styles and immutable install codes. Button continues to use recipe format 1.0. The new public routes and install commands require a compatible published CLI.
