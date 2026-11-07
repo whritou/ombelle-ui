@@ -19,7 +19,7 @@ html[data-backdrop='glass'] body {
 html[data-backdrop='glass'][data-glass-backdrop] {
   background-image: none;
   --glass-preview-ink: #f8fcff;
-  --glass-preview-text-shadow: 0 0 1px #08172d, 0 1px 3px #08172d;
+  --glass-preview-text-shadow: 0 1px 2px rgb(8 23 45 / 35%);
 }
 .glass-backdrop-art {
   position: fixed;
@@ -31,7 +31,7 @@ html[data-backdrop='glass'][data-glass-backdrop] {
 }
 html[data-backdrop='glass'][data-glass-backdrop='peach'] {
   --glass-preview-ink: #301b22;
-  --glass-preview-text-shadow: 0 0 6px #ffe6e6;
+  --glass-preview-text-shadow: 0 0 2px rgb(255 230 230 / 40%);
   --glass-lab-rim-color: 255 234 229;
   --glass-lab-shadow-color: 76 27 32;
   --glass-lab-bounce-color: 255 195 155;
@@ -44,7 +44,7 @@ html[data-glass-lab-ink]:not(.dark) :is(
   [data-slot='select-content'], [data-slot='select-item'], [data-slot='tabs-list'], [data-slot='tabs-trigger']
 ):not([data-variant='outline']) {
   -webkit-text-stroke-width: 0;
-  text-shadow: 0 0 3px color-mix(in srgb, var(--glass-lab-veil, var(--card)) 45%, transparent);
+  text-shadow: 0 0 2px color-mix(in srgb, var(--glass-lab-veil, var(--card)) 12%, transparent);
 }
 html[data-glass-lab-ink]:not(.dark) :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='link'],
 html[data-glass-lab-ink]:not(.dark) :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='ghost'] {

@@ -121,7 +121,7 @@
         color: var(--foreground);
       }
       [data-slot="badge"][data-variant] {
-        -webkit-text-stroke: 1px var(--glass-plate);
+        -webkit-text-stroke: 0.25px var(--glass-plate);
         paint-order: stroke fill;
       }
       [data-slot="button"][data-variant]:not([data-variant="link"]):not(:disabled):hover {

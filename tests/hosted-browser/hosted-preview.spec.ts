@@ -43,7 +43,7 @@ test('previews the lab materials from the component directory and Button editor'
   await expect(card).toHaveCSS('background-image', 'none')
   await expect.poll(() => card.evaluate((el) => getComputedStyle(el, '::before').backgroundImage)).toMatch(/radial-gradient.*linear-gradient/)
   await expect(card).toHaveCSS('-webkit-text-stroke-width', '0px')
-  await expect(card).toHaveCSS('text-shadow', /0px 0px 3px$/)
+  await expect(card).toHaveCSS('text-shadow', /0px 0px 2px$/)
   await picker.selectOption({ label: 'Givré' })
   await expect.poll(() => card.evaluate((el) => getComputedStyle(el).getPropertyValue('--glass-blur').trim())).toBe('26px')
 
