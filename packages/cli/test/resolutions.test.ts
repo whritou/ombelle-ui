@@ -144,3 +144,13 @@ it('adds prefixed shared rules to an unedited themed stylesheet when installing 
   expect(p.changes.find((c) => c.path === 'src/styles/ui-style.css')!.action).toBe('update')
   expect(p.changes.filter((c) => c.action === 'conflict')).toEqual([])
 })
+
+it('matches resolution paths regardless of separators and case', async () => {
+  const { resolutionKey, componentForPath } = await import('../src/project/beside.js')
+  expect(resolutionKey('Src\\Components\\UI\\Button.tsx')).toBe(resolutionKey('src/components/ui/button.tsx'))
+  expect(resolutionKey('./src/components/ui/button.tsx')).toBe('src/components/ui/button.tsx')
+  const context = await inspectProject(await project('radix-nova'))
+  expect(componentForPath(context, 'SRC\\components\\ui\\Button.tsx')).toBe('button')
+  expect(componentForPath(context, 'src/components/ui/select.css')).toBe('select')
+  expect(componentForPath(context, 'src/lib/utils.ts')).toBeUndefined()
+})

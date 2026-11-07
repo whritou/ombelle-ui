@@ -22,7 +22,11 @@ import { applyPresetSourceToPlan } from './snapshots/source.js'
 import { planRecipe } from './plan/recipe.js'
 import { planComponentPreset } from './plan/component-preset.js'
 import { inspectProject } from './project/inspect.js'
-import { besideComponents } from './project/beside.js'
+import {
+  besideComponents,
+  resolutionKey,
+  type Resolution,
+} from './project/beside.js'
 import { planAdd } from './plan/components.js'
 import { planTheme } from './plan/theme.js'
 import { applyPlan } from './apply/transaction.js'
@@ -42,7 +46,7 @@ const exits: Record<string, number> = {
 const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
-  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
+  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--overwrite <path>] [--beside <path>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
 function glassNotices(
   preset: Preset,
   ids: readonly ComponentId[] | undefined,
@@ -64,7 +68,12 @@ function glassNotices(
 }
 export async function runCli(
   args: string[],
-  io: { stdout(text: string): void; stderr(text: string): void },
+  io: {
+    stdout(text: string): void
+    stderr(text: string): void
+    /** Answers prompts; when absent, prompts read a TTY stdin. */
+    question?(text: string): Promise<string>
+  },
 ): Promise<number> {
   const json = args.includes('--json')
   let command = args[0] ?? ''
@@ -74,10 +83,15 @@ export async function runCli(
       return 0
     }
     const flags: Record<string, string | boolean> = {},
-      positional: string[] = []
+      positional: string[] = [],
+      resolutionFlags: [Resolution, string][] = []
     for (let i = 0; i < args.length; i++) {
       const a = args[i]
-      if (a.startsWith('--')) {
+      if (a === '--overwrite' || a === '--beside') {
+        if (!args[i + 1] || args[i + 1].startsWith('--'))
+          throw new FoundationError('INVALID_DATA', 'Missing flag value', a)
+        resolutionFlags.push([a.slice(2) as Resolution, args[++i]])
+      } else if (a.startsWith('--')) {
         if (Object.hasOwn(flags, a))
           throw new FoundationError('INVALID_DATA', 'Repeated flag', a)
         if (['--json', '--yes', '--dry-run', '--offline'].includes(a))
@@ -117,6 +131,14 @@ export async function runCli(
       throw new FoundationError(
         'INVALID_DATA',
         'Use add button --preset <local.json> to select a component-only preset',
+      )
+    if (
+      resolutionFlags.length &&
+      (command !== 'add' || flags['--recipe'] || flags['--preset'])
+    )
+      throw new FoundationError(
+        'INVALID_DATA',
+        'Use --overwrite and --beside only with add <components>',
       )
     const presetValue = command === 'theme' ? positional[2] : flags['--preset']
     if (
@@ -174,6 +196,35 @@ export async function runCli(
       path.resolve(String(flags['--cwd'] ?? process.cwd())),
       selected as 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined,
     )
+    const resolutions: Record<string, Resolution> = {}
+    for (const [resolution, given] of resolutionFlags) {
+      const file = path.isAbsolute(given)
+        ? path.relative(context.root, given)
+        : given
+      const existing = Object.keys(resolutions).find(
+        (other) => resolutionKey(other) === resolutionKey(file),
+      )
+      if (existing)
+        throw new FoundationError(
+          'INVALID_DATA',
+          'Choose one resolution for ' + given,
+          given,
+        )
+      resolutions[file] = resolution
+    }
+    const interactive = io.question !== undefined || process.stdin.isTTY === true
+    const ask = async (text: string) => {
+      if (io.question) return io.question(text)
+      const prompt = createInterface({
+        input: process.stdin,
+        output: process.stderr,
+      })
+      try {
+        return await prompt.question(text)
+      } finally {
+        prompt.close()
+      }
+    }
     let plan: InstallPlan
     if (flags['--recipe']) {
       if (!context.preset || !context.config || !context.lock)
@@ -215,24 +266,60 @@ export async function runCli(
           'INVALID_DATA',
           'Choose at least one component',
         )
-      const result = await compile({
-        preset,
-        componentIds: ids as ComponentId[],
-        catalogRelease: preset.catalogRelease,
-        compilerVersion: preset.compilerVersion,
-        glassContrast: 'report',
-        edition: context.edition,
-        prefixedComponents: besideComponents(context),
-      })
-      plan =
-        command === 'add'
-          ? await planAdd(context, result)
-          : await planTheme(context, result)
-      plan.notices = [...plan.notices, ...glassNotices(
-        result.preset.data,
-        command === 'add' ? (ids as ComponentId[]) : undefined,
-        command === 'add',
-      )]
+      const savedPreset = preset
+      const planWith = async (chosen: Record<string, Resolution>) => {
+        const result = await compile({
+          preset: savedPreset,
+          componentIds: ids as ComponentId[],
+          catalogRelease: savedPreset.catalogRelease,
+          compilerVersion: savedPreset.compilerVersion,
+          glassContrast: 'report',
+          edition: context.edition,
+          prefixedComponents: besideComponents(context, chosen),
+        })
+        const planned =
+          command === 'add'
+            ? await planAdd(context, result, chosen)
+            : await planTheme(context, result)
+        planned.notices = [...planned.notices, ...glassNotices(
+          result.preset.data,
+          command === 'add' ? (ids as ComponentId[]) : undefined,
+          command === 'add',
+        )]
+        return planned
+      }
+      plan = await planWith(resolutions)
+      // Interactively choose how to resolve files Ombelle doesn't own, then
+      // re-plan with those choices before the usual apply prompt.
+      const unowned = plan.diagnostics.filter((d) => d.resolutions && d.path)
+      if (
+        command === 'add' &&
+        interactive &&
+        !json &&
+        !flags['--yes'] &&
+        !flags['--dry-run'] &&
+        unowned.length &&
+        unowned.length === plan.diagnostics.length
+      ) {
+        const chosen = { ...resolutions }
+        for (const d of unowned) {
+          const choices = d.resolutions!
+          const answer = (
+            await ask(
+              d.path + ' exists and is not managed by Ombelle: ' +
+                choices.map((c) => '[' + c[0] + ']' + c.slice(1)).join(', ') +
+                ', [c]ancel ',
+            )
+          ).trim().toLowerCase()
+          const picked = choices.find((c) => answer === c[0] || answer === c)
+          if (!picked) {
+            io.stdout(formatPlan(command, 'cancelled', plan))
+            return 0
+          }
+          chosen[d.path!] = picked
+        }
+        plan = await planWith(chosen)
+      }
     }
     if (presetInput)
       await applyPresetSourceToPlan(
@@ -267,22 +354,13 @@ export async function runCli(
       return 0
     }
     if (!flags['--yes']) {
-      if (!process.stdin.isTTY)
+      if (!interactive)
         throw new FoundationError(
           'INVALID_DATA',
           'Noninteractive writes require --yes after reviewing --dry-run',
         )
       io.stderr(formatPlan(command, 'planned', plan))
-      const prompt = createInterface({
-        input: process.stdin,
-        output: process.stderr,
-      })
-      let answer: string
-      try {
-        answer = await prompt.question('Apply these changes? [y/N] ')
-      } finally {
-        prompt.close()
-      }
+      const answer = await ask('Apply these changes? [y/N] ')
       if (!/^y(?:es)?$/i.test(answer.trim())) {
         emit('cancelled')
         return 0
