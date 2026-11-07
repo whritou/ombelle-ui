@@ -59,6 +59,17 @@ export const portedComponents: readonly {
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
   {
+    id: 'popover',
+    portal: "[data-slot='popover-content'], [data-slot='popover-content'] [data-slot]",
+    states: [
+      { name: 'closed' },
+      { name: 'hover', act: hoverFirst("[data-slot='popover-trigger']") },
+      { name: 'click open', act: async (page, section) => { await section.locator("[data-slot='popover-trigger']").click(); await page.locator("[data-slot='popover-content']").waitFor() } },
+      { name: 'keyboard open', act: async (page, section) => { await focusFirst("[data-slot='popover-trigger']")!(page, section); await page.keyboard.press('Enter'); await page.locator("[data-slot='popover-content']").waitFor() } },
+      { name: 'escape closes', act: async (page, section) => { await section.locator("[data-slot='popover-trigger']").click(); await page.locator("[data-slot='popover-content']").waitFor(); await page.keyboard.press('Escape'); await page.locator("[data-slot='popover-content']").waitFor({ state: 'detached' }) } },
+    ],
+  },
+  {
     id: 'tooltip',
     portal: "[data-slot='tooltip-content'], [data-slot='tooltip-arrow']",
     states: [

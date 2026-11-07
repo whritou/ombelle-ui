@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -185,6 +186,15 @@ export default function EditionScenario() {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      </Parity>
+      <Parity id="popover">
+        <Popover>
+          <PopoverTrigger>Share preset</PopoverTrigger>
+          <PopoverContent aria-labelledby="share-title">
+            <PopoverTitle id="share-title">Share preset</PopoverTitle>
+            <PopoverDescription>Anyone with the link can install this preset.</PopoverDescription>
+          </PopoverContent>
+        </Popover>
       </Parity>
     </main>
   )
