@@ -57,6 +57,17 @@ export const portedComponents: readonly {
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
   {
+    id: 'accordion',
+    states: [
+      { name: 'default' },
+      { name: 'open second', act: async (page, section) => { await section.locator("[data-slot='accordion-trigger']").nth(1).click(); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()) } },
+      { name: 'collapse first', act: async (page, section) => { await section.locator("[data-slot='accordion-trigger']").first().click(); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()) } },
+      { name: 'hover', act: hoverFirst("[data-slot='accordion-trigger']") },
+      { name: 'focus-visible', act: focusFirst("[data-slot='accordion-trigger']") },
+      { name: 'keyboard', act: async (page, section) => { await focusFirst("[data-slot='accordion-trigger']")!(page, section); await holdKey(page, 'ArrowDown'); await page.keyboard.press('Enter') } },
+    ],
+  },
+  {
     id: 'tabs',
     states: [
       { name: 'default' },

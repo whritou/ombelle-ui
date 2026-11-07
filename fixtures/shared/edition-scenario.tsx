@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -156,6 +157,22 @@ export default function EditionScenario() {
           <TabsContent value="general">General settings.</TabsContent>
           <TabsContent value="billing">Billing settings.</TabsContent>
         </Tabs>
+      </Parity>
+      <Parity id="accordion">
+        <Accordion type="single" collapsible defaultValue="preset">
+          <AccordionItem value="preset">
+            <AccordionTrigger>What does a preset change?</AccordionTrigger>
+            <AccordionContent>Colors, radius, borders, shadows and type.</AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="edit">
+            <AccordionTrigger>Can I edit installed components?</AccordionTrigger>
+            <AccordionContent>Yes. Installed source stays yours to edit.</AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="locked" disabled>
+            <AccordionTrigger>Locked question</AccordionTrigger>
+            <AccordionContent>Unavailable.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </Parity>
     </main>
   )

@@ -61,3 +61,11 @@ See [the batch 3 verification record](../evidence/next-components-batch-3.md).
 ## Liquid glass
 
 In liquid glass, the accordion is one card glass container with hairlines between items. Triggers are `foreground` at 15px / 600; the open trigger mixes 12% `primary` into the card at the nested glass coverage, the same declared pair as a selected Table row, and its chevron turns. Content is `mutedForeground`. Reduced transparency and missing backdrop filters paint the surfaces opaque. In forced colours the open trigger keeps a `CanvasText` bar at its start edge beside the turned chevron, and its padding gives up the bar's width so the title stays in place. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive an Accordion built on `Accordion.Root`, `Item`, `Header`, `Trigger` and `Panel` from `@base-ui/react/accordion` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-accordion`. The Radix API is kept: `type="single"` (with `collapsible`) or `type="multiple"`, and a string or string-array `value`, `defaultValue` and `onValueChange`; the template maps them to Base UI's array value and `multiple` flag. A single, non-collapsible accordion keeps one item open. `level`, the chevron and plus icons, and every `data-slot` match the Radix edition.
+
+State bridge: the item, header, trigger and panel carry `data-state="open"` or `"closed"` through each part's `render` function, next to Base UI's `data-open`; a custom `render` replaces it. The panel maps Base UI's `--accordion-panel-height` to `--radix-accordion-content-height` for the shared open and close animation. Closed panels stay in the DOM, hidden and empty (`keepMounted`), as Radix renders them.
+
+Base UI 1.9 has no arrow-key navigation between accordion triggers, so the template adds ArrowUp, ArrowDown, Home and End between enabled triggers, as Radix provides. The parity test covers default, opening, collapsing, hover, focus-visible and keyboard states. The Base UI edition has no allowed styling differences.
