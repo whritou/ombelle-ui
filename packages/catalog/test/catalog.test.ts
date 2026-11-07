@@ -715,10 +715,11 @@ describe('liquid glass starting presets', () => {
       'builtin-liquid-glass-clear',
       'builtin-liquid-glass-prism',
       'builtin-liquid-glass-liquid',
+      'builtin-liquid-glass-voile',
       'builtin-liquid-glass',
     ])
     expect(startingPresetOrder.map((id) => c.startingPresets[id].name)).toEqual([
-      'Cristal', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Liquid glass',
+      'Cristal', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Voile', 'Liquid glass',
     ])
     for (const id of startingPresetOrder) {
       expect(validatePreset(c.startingPresets[id])).toEqual(c.startingPresets[id])

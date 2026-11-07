@@ -953,6 +953,7 @@ describe('liquid glass starting presets and the bound', () => {
       'builtin-liquid-glass-clear': 0.25,
       'builtin-liquid-glass-prism': 0.25,
       'builtin-liquid-glass-liquid': 0.25,
+      'builtin-liquid-glass-voile': 0.25,
       'builtin-liquid-glass': 0.57,
     }
     for (const [id, minimumOpacity] of Object.entries(expected)) {

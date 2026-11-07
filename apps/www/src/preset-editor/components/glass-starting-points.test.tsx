@@ -6,11 +6,11 @@ import { DesignControls } from './preset-controls'
 
 const noop = () => {}
 
-it('lists the eight starting points with Cristal as the default and presses the matching one', () => {
+it('lists the nine starting points with Cristal as the default and presses the matching one', () => {
   const draft = applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-cristal')
   const html = renderToStaticMarkup(<GlassStartingPoints draft={draft} onPick={noop} onTint={noop} />)
   const labels = [...html.matchAll(/<button[^>]*data-preset="[^"]+"[^>]*>([^<]+)<\/button>/g)].map((m) => m[1])
-  expect(labels).toEqual(['Cristal (default)', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Liquid glass'])
+  expect(labels).toEqual(['Cristal (default)', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Voile', 'Liquid glass'])
   expect(html).toMatch(/data-preset="builtin-liquid-glass-cristal"[^>]*aria-pressed="true"/)
   expect(html).not.toContain('Custom')
   const custom = renderToStaticMarkup(

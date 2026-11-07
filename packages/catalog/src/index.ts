@@ -27,6 +27,7 @@ export const startingPresetOrder = [
   'builtin-liquid-glass-clear',
   'builtin-liquid-glass-prism',
   'builtin-liquid-glass-liquid',
+  'builtin-liquid-glass-voile',
   'builtin-liquid-glass',
 ] as const
 export type StartingPresetId = (typeof startingPresetOrder)[number]
