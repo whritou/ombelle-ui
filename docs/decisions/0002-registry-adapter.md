@@ -4,7 +4,7 @@
 
 Decision: keep the upstream schema and source/theme transport, but implement the narrow Vite/Next path/alias transformation and reviewed CSS merge in Ombelle. Production CLI code must not import the upstream probe. The probe remains a development integration check with only local reviewed registry payloads.
 
-The selected primitive edition is Radix; the fixture upstream style identifier is radix-nova, accepted by the pinned API. Ombelle's styleFamily remains separate and never replaces components.json.style.
+The selected primitive edition is Radix; the fixture upstream style identifier is radix-nova, accepted by the pinned API. Superseded for component editions by [0005](0005-base-ui-edition.md), which adds shadcn's Base UI styles. Ombelle's styleFamily remains separate and never replaces components.json.style.
 
 Audit update, 24 October 2026: the development-only shadcn toolchain still resolves braces 3.0.3 through fast-glob/micromatch. [GHSA-vfj7-8cjw-p6xm / CVE-2026-93687](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) was withdrawn on 23 October 2026 because it was not considered practically exploitable. It is no longer an active finding; no advisory is suppressed. The production CLI does not depend on shadcn/braces.
 
