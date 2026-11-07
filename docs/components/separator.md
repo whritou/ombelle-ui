@@ -51,3 +51,7 @@ See [the batch 2 verification record](../evidence/next-components-batch-2.md).
 ## Liquid glass
 
 In liquid glass, a separator is an etched hairline: a `var(--border-width)` line in the `border` colour with the glass highlight 1px beside it, below a horizontal rule and at the end side of a vertical one. The highlight is a logical border, so vertical rules follow the text direction. The label is `mutedForeground` at 12px / 600 with no surface of its own, as in the design kit: inside a Card or other glass panel the `mutedForeground` on `card` contrast pair covers it, and on a bare backdrop its contrast depends on that backdrop. Forced colours draw the rule in `CanvasText` without the highlight. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive a Separator built on `Separator` from `@base-ui/react/separator` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-separator`. `orientation`, `decorative`, children labels, `data-slot` and `data-labelled` match the Radix edition. Base UI sets `data-orientation` itself, so no state bridge is needed. Base UI always renders `role="separator"`; the template sets `role="none"` and drops `aria-orientation` while `decorative` is true, as Radix does. The Base UI edition has no allowed styling differences.

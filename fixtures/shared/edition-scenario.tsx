@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 // Ported components rendered identically in both editions; the parity test
 // compares computed styles of every [data-slot] element per section.
@@ -40,6 +41,16 @@ export default function EditionScenario() {
           <Button disabled>Disabled</Button>
           <Button loading>Saving</Button>
         </div>
+      </Parity>
+      <Parity id="separator">
+        <Separator />
+        <Separator decorative={false} />
+        <Separator>or</Separator>
+        <nav aria-label="Footer" className="actions">
+          <a href="#docs">Docs</a>
+          <Separator orientation="vertical" />
+          <a href="#changelog">Changelog</a>
+        </nav>
       </Parity>
     </main>
   )

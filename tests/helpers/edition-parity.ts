@@ -44,6 +44,7 @@ export const portedComponents: readonly {
       { name: 'focus-visible', act: focusFirst("[data-slot='button']") },
     ],
   },
+  { id: 'separator', states: [{ name: 'default' }] },
 ]
 
 /**
