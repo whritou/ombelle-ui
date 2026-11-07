@@ -52,3 +52,9 @@ Forced colors use `Canvas` with a `CanvasText` border, remove shadows, and use `
 Compilation emits `components/ui/popover.tsx`, `components/ui/popover.css` and `examples/popover.tsx`. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-popover 1.3.1 (MIT), clsx 2.1.1 and tailwind-merge 3.7.0.
 
 See [the batch 2 verification record](../evidence/next-components-batch-2.md). Consumer-matrix rows, the browser e2e suite, and human screen-reader review are pending.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive a Popover built on `Popover.Root`, `Trigger`, `Portal`, `Positioner` and `Popup` from `@base-ui/react/popover` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-popover`. Part names and `data-slot` values match the Radix edition. `PopoverContent` renders in a portal and keeps `side` (bottom by default), `align` (center), `sideOffset` (6px), `alignOffset`, `collisionPadding` and `sticky`, passed to Base UI's positioner. Base UI has no Anchor part: `PopoverAnchor` renders a `div` that the content positions against, through Base UI's `anchor` option. Use `render` on `PopoverTrigger` where the Radix edition uses `asChild`.
+
+State bridge: the trigger and popup carry `data-state="open"` or `"closed"`, and the popup `data-side` and `data-align`, through each part's `render` function; a custom `render` replaces it. The popup maps Base UI's `--available-height` and `--available-width` to the `--radix-popover-content-available-*` variables. The parity test covers the closed trigger, hover, opening by click and by keyboard, and closing with Escape. The Base UI edition has no allowed styling differences.

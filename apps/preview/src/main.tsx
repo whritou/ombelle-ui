@@ -9,6 +9,16 @@ if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
 } else if (previewPath === '/editor-preview/' || previewPath === '/editor-preview') {
   const { mountEditorPreview } = await import('./editor-preview')
   mountEditorPreview(document.getElementById('root')!)
+} else if (/^\/editions\/[^/]+\/(?:radix|base)\/?$/.test(previewPath)) {
+  // Edition parity pages: /editions/<family>/<radix|base>/
+  const [, , family, edition] = previewPath.split('/')
+  const pages = import.meta.glob<{ default: React.ComponentType }>('./generated/editions/*/entry.tsx')
+  const load = pages['./generated/editions/' + family + '-' + edition + '/entry.tsx']
+  const root = createRoot(document.getElementById('root')!)
+  if (load) {
+    const { default: Scenario } = await load()
+    root.render(<Scenario />)
+  } else root.render(<main><h1>Unknown edition page</h1></main>)
 } else {
   const family = selectFamily(window.location.pathname)
   const entries: Record<StyleFamily, () => Promise<{ default: React.ComponentType }>> = {

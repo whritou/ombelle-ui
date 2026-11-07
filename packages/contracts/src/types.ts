@@ -5,6 +5,7 @@ import type { ComponentRecipe } from './component-recipe.js'
 import type { SnapshotSource } from './snapshot.js'
 import type { RecipeSnapshotSource } from './recipe-snapshot.js'
 export type Preset = FromSchema<typeof presetSchema>
+import type { ComponentId } from './component-ids.js'
 export type { ComponentId } from './component-ids.js'
 export type { StyleFamily } from './style-families.js'
 
@@ -81,12 +82,18 @@ export type ProjectLock = {
   componentPresets?: Record<string, InstalledComponentPreset>
   recipes?: Record<string, InstalledRecipe>
   lockVersion: 1
+  /** Absent in older locks, which always mean 'radix'. */
+  edition?: Edition
+  /** Components installed beside an app-owned file, under <components>/ombelle/. */
+  placements?: Partial<Record<ComponentId, 'beside'>>
   catalogRelease: string
   compilerVersion: string
   presetHash: string
   artifacts: Record<string, InstalledArtifact>
   managedDeclarations: ManagedDeclaration[]
 }
+/** Primitive library the project's shadcn components use. */
+export type Edition = 'radix' | 'base'
 export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun'
 export type BunLockfile = 'bun.lock' | 'bun.lockb'
 export type ProjectConfig = {
@@ -101,6 +108,10 @@ export type ProjectConfig = {
   registryBase?: string
 }
 export type ProjectContext = {
+  /** Detected from components.json; 'radix' without one or for unknown styles. */
+  edition: Edition
+  /** False when components.json names a style Ombelle doesn't support. */
+  upstreamStyleSupported: boolean
   bunLockfile?: BunLockfile
   preconditions: Record<string, string | null>
   root: string
@@ -156,7 +167,13 @@ export type InstallPlan = {
   changes: FileChange[]
   managedDeclarations: ManagedDeclaration[]
   dependencyPlan: Dependency[]
-  diagnostics: { code: string; message: string; path?: string }[]
+  diagnostics: {
+    code: string
+    message: string
+    path?: string
+    /** Explicit choices that resolve an unowned-file conflict. */
+    resolutions?: ('overwrite' | 'beside')[]
+  }[]
   notices: string[]
   networkAccess: boolean
 }

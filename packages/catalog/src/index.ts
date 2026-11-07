@@ -2,6 +2,7 @@ import {
   FoundationError,
   validatePreset,
   type ComponentId,
+  type Edition,
   type Preset,
   type StyleFamily,
   styleFamilies,
@@ -9,6 +10,7 @@ import {
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
+export { knownShadcnUtilityHashes, shadcnBaseStyles, shadcnRadixStyles } from './shadcn.js'
 export { resolveRecipePreset } from './recipe-preset.js'
 export { glassTintPalettes, type GlassTintId, type GlassTintPalette } from './glass-tints.js'
 export { glassControlSlots, glassHaloSelector, glassHostedSlots, glassMarkSlots, glassSurfaceSlots } from './glass-recipes.js'
@@ -59,6 +61,8 @@ export type Catalog = {
   release: string
   presets: Record<StyleFamily, Preset>
   templates: Record<ComponentId, ComponentTemplate>
+  /** Base UI templates; components without primitive imports share their Radix template. */
+  baseTemplates: Partial<Record<ComponentId, ComponentTemplate>>
   styles: Record<StyleFamily, string>
   /** Lab paint rules used by Liquid Glass presets with material settings. */
   glassLabStyle: string
@@ -203,6 +207,29 @@ export function getCatalog(release: string): Catalog {
       'Unsupported catalog release',
       '/catalogRelease',
     )
+  const entry = (id: ComponentId, content: string, edition: Edition) => ({
+    id,
+    content,
+    logicalPath: 'components/ui/' + id + '.tsx',
+    dependencies: Object.entries(runtimeDependencies)
+      .filter(([name]) => editionDependencies(id, edition).includes(name))
+      .map(([name, version]) => ({ name, version })),
+    slots: [...(componentSlots[id] ?? [id])],
+    ...(Object.hasOwn(catalogData.componentStyles, id)
+      ? {
+          styles:
+            catalogData.componentStyles[
+              id as keyof typeof catalogData.componentStyles
+            ],
+        }
+      : {}),
+  })
+  const baseTemplates = Object.fromEntries(
+    Object.entries(catalogData.baseTemplates).map(([id, content]) => [
+      id,
+      entry(id as ComponentId, content as string, 'base'),
+    ]),
+  ) as Partial<Record<ComponentId, ComponentTemplate>>
   const templates = Object.fromEntries(
     supportedComponentIds.map((id) => [
       id,
@@ -244,16 +271,44 @@ export function getCatalog(release: string): Catalog {
       ]),
     ) as Record<StartingPresetId, Preset>,
     templates,
+    baseTemplates,
     styles: { ...catalogData.styles },
     glassLabStyle: catalogData.glassLabStyle,
     utility: catalogData.utility,
     glassFilter: catalogData.glassFilter,
   }
 }
+const usesRadix = (id: ComponentId) =>
+  catalogData.templates[id].includes('@radix-ui/')
+/** Dependencies of a component in an edition: Base UI replaces every Radix package. */
+function editionDependencies(id: ComponentId, edition: Edition): string[] {
+  const names = [...baseDependencies, ...(extraDependencies[id] ?? [])]
+  if (edition === 'radix') return names
+  const kept = names.filter((name) => !name.startsWith('@radix-ui/'))
+  return kept.length < names.length ? [...kept, '@base-ui/react'] : kept
+}
+/** Editions a component can be installed in. */
+export function componentEditions(id: ComponentId): readonly Edition[] {
+  return !usesRadix(id) || Object.hasOwn(catalogData.baseTemplates, id)
+    ? ['radix', 'base']
+    : ['radix']
+}
 export function getTemplate(
   catalog: Catalog,
   id: ComponentId,
+  edition: Edition = 'radix',
 ): ComponentTemplate {
+  if (edition === 'base' && Object.hasOwn(catalog.templates, id)) {
+    const base = catalog.baseTemplates[id]
+    if (base) return base
+    if (usesRadix(id))
+      throw new FoundationError(
+        'UNSUPPORTED_PROJECT',
+        'Component `' + id + "` isn't available for Base UI yet; available: " +
+          supportedComponentIds.filter((c) => componentEditions(c).includes('base')).join(', '),
+        '/componentIds',
+      )
+  }
   if (!Object.hasOwn(catalog.templates, id))
     throw new FoundationError(
       'INVALID_DATA',

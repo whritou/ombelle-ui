@@ -66,3 +66,11 @@ Highlighted rows and open submenu triggers use `Highlight` in forced colors, and
 Compilation emits `components/ui/dropdown-menu.tsx`, `components/ui/dropdown-menu.css` and `examples/dropdown-menu.tsx`. Runtime dependencies are exactly React 19.3.1, @radix-ui/react-dropdown-menu 2.2.1 (MIT), clsx 2.1.1, tailwind-merge 3.7.0 and lucide-react 1.55.0.
 
 See [the batch 1 verification record](../evidence/next-components-batch-1.md). Consumer-matrix rows, the browser e2e suite, and human screen-reader review are pending.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive a Dropdown Menu built on Base UI's Menu (`Menu.Root`, `Trigger`, `Portal`, `Positioner`, `Popup`, `Group`, `Item`, `CheckboxItem`, `RadioGroup`, `RadioItem`, their indicators, `Separator`, `SubmenuRoot` and `SubmenuTrigger` from `@base-ui/react/menu`, `@base-ui/react` 1.9.0) instead of `@radix-ui/react-dropdown-menu`. Every exported part keeps its name and `data-slot`, along with `inset`, the destructive `variant`, shortcuts, check and dot indicators and the submenu chevron. `DropdownMenuContent` and `DropdownMenuSubContent` render in a portal; the content keeps `sideOffset` (6px), `side`, `align`, `alignOffset`, `collisionPadding` and `sticky`, and submenus open to the right. `DropdownMenuLabel` renders a plain `div`, so it may stand outside a group, as in Radix. Items take Base UI's `onClick` and `closeOnClick` instead of Radix's `onSelect`; use `render` where the Radix edition uses `asChild`.
+
+State bridge: the trigger, popups and submenu trigger carry `data-state="open"` or `"closed"`, and checkbox and radio items `data-state="checked"` or `"unchecked"`, through each part's `render` function; a custom `render` replaces it. Base UI sets `data-highlighted` and `data-disabled` itself. The popup maps Base UI's `--available-height` to `--radix-dropdown-menu-content-available-height`.
+
+Known differences: Base UI keeps disabled items focusable during arrow-key navigation, as WAI-ARIA's menu guidance recommends, and its menus loop from the last item to the first; Radix skips disabled items and does not loop by default. Styling is identical in every state the parity test covers: closed, opened by click, highlighted item, keyboard open with End, submenu open and closed with Escape.

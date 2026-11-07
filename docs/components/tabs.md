@@ -49,3 +49,11 @@ Compilation emits components/ui/tabs.tsx, components/ui/tabs.css, and examples/t
 Runtime dependencies are exactly React 19.3.1, @radix-ui/react-tabs 1.2.1 (MIT), clsx 2.1.1, and tailwind-merge 3.7.0. Generated Tabs dependencies include only its own primitive and shared utilities.
 
 Focused catalog/compiler checks and a local agent-operated Chromium probe cover this implementation. Shared preview and generated consumer matrix evidence belongs to the final M2 verification task. Human NVDA and VoiceOver review remains pending.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive Tabs built on `Tabs.Root`, `Tabs.List`, `Tabs.Tab` and `Tabs.Panel` from `@base-ui/react/tabs` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-tabs`. `Tabs`, `TabsList`, `TabsTrigger` and `TabsContent` keep their names and `data-slot` values. Two defaults are set to match Radix: `TabsList` activates a tab when it receives focus (`activateOnFocus`, Radix's automatic mode), and `TabsContent` keeps inactive panels mounted and hidden (`keepMounted`). Pass `false` to either for Base UI's own defaults.
+
+State bridge: triggers carry `data-state="active"` or `"inactive"` and panels `data-state="active"` or `"inactive"` (from Base UI's `hidden` state), plus `data-orientation`, through each part's `render` function, next to Base UI's own attributes; a custom `render` replaces it.
+
+Known difference: after a mouse click, Chromium shows the focus ring on a Radix tab, because Radix focuses it programmatically, but not on a Base UI tab. Keyboard focus rings are identical. The parity test covers default, clicked (compared after blur), hover, focus-visible and arrow-key states in both orientations.

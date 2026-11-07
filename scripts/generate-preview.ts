@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { compile, scopeRecipeGlassFilter, scopeRecipeTemplate, sha256 } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
+import type { Edition } from '@ombelle/contracts'
 import {
   supportedStyleFamilies,
   supportedComponentIds,
@@ -111,6 +112,43 @@ async function writeFamily(family: PreviewFamily) {
   )
 }
 for (const family of supportedStyleFamilies) await writeFamily(family)
+// Components with a Base UI template, rendered per edition for the parity test.
+async function writeEdition(family: (typeof supportedStyleFamilies)[number], edition: Edition) {
+  const catalog = getCatalog('0.1.0')
+  const ported = supportedComponentIds.filter((id) => catalog.baseTemplates[id])
+  const result = await compile({
+    preset: JSON.parse(await fs.readFile('packages/catalog/src/presets/' + family + '.json', 'utf8')),
+    componentIds: ported,
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+    edition,
+  })
+  const root = 'apps/preview/src/generated/editions/' + family + '-' + edition
+  await fs.rm(root, { recursive: true, force: true })
+  for (const artifact of result.artifacts) {
+    if (artifact.kind === 'usage') continue
+    const dest = path.join(root, artifact.logicalPath)
+    await fs.mkdir(path.dirname(dest), { recursive: true })
+    await fs.writeFile(
+      dest,
+      artifact.kind === 'component'
+        ? artifact.content.replaceAll('@/lib/utils', '../../lib/utils')
+        : artifact.content,
+    )
+  }
+  const scenario = 'fixtures/shared/edition-scenario' + (edition === 'base' ? '-base' : '') + '.tsx'
+  await fs.writeFile(
+    root + '/scenario.tsx',
+    (await fs.readFile(scenario, 'utf8')).replaceAll('@/components/ui', './components/ui'),
+  )
+  await fs.writeFile(
+    root + '/preview.css',
+    '@import "../../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n',
+  )
+  await fs.writeFile(root + '/entry.tsx', "import './preview.css'\nexport { default } from './scenario'\n")
+}
+for (const family of supportedStyleFamilies)
+  for (const edition of ['radix', 'base'] as const) await writeEdition(family, edition)
 await writeFamily('liquid-glass')
 await fs.writeFile(
   'apps/preview/src/generated/editor-buttons.ts',

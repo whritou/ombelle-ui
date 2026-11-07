@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 export const shadcnFixtures = {
   vite: { css: 'src/index.css', source: 'src' },
   next: { css: 'app/globals.css', source: '.' },
+  'vite-base': { css: 'src/index.css', source: 'src' },
+  'next-base': { css: 'app/globals.css', source: '.' },
 } as const
 export type ShadcnFixture = keyof typeof shadcnFixtures
 export function shadcnFixtureDir(kind: ShadcnFixture) {

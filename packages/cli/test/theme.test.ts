@@ -88,7 +88,7 @@ it('uses a configured dark selector and permits palette-only application to anot
   const config = JSON.parse(
     await fs.readFile(root + '/components.json', 'utf8'),
   )
-  config.style = 'base-nova'
+  config.style = 'radix-lyra'
   await fs.writeFile(root + '/components.json', JSON.stringify(config))
   await fs.writeFile(
     root + '/ui-library.config.json',

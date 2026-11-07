@@ -49,3 +49,11 @@ The content uses semantic popover colors for both modes, readable text, logical 
 Compilation emits components/ui/tooltip.tsx, components/ui/tooltip.css and examples/tooltip.tsx plus shared utility/theme files. Keep the colocated CSS import. The example has a visibly labelled button and descriptive text with an optional arrow. Installer dry-run, file ownership, alias rewriting and conflict safeguards apply; --yes accepts a safe plan.
 
 Runtime dependencies are exactly React 19.3.1, @radix-ui/react-tooltip 1.4.1 (MIT), clsx 2.1.1 and tailwind-merge 3.7.0. Generated Tooltip dependencies include only its own primitive and shared utilities. Focused checks cover catalog contracts and deterministic compiler artifacts. Shared preview and generated consumer matrix evidence belongs to the final M2 verification task. Human NVDA and VoiceOver review remains pending.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive a Tooltip built on `Tooltip.Provider`, `Root`, `Trigger`, `Portal`, `Positioner`, `Popup` and `Arrow` from `@base-ui/react/tooltip` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-tooltip`. Part names and `data-slot` values match the Radix edition. `TooltipProvider` keeps Radix's `delayDuration` (700ms by default) and `skipDelayDuration` (300ms), mapped to Base UI's `delay` and `timeout`. `TooltipContent` renders in a portal and keeps `side` (top by default), `sideOffset` (6px), `align`, `alignOffset`, `collisionPadding` and `sticky`, passed to Base UI's positioner. Use `render` on `TooltipTrigger` where the Radix edition uses `asChild`.
+
+State bridge: the trigger and popup carry `data-state` `delayed-open` or `closed`, and the popup `data-side` and `data-align`, through each part's `render` function; a custom `render` replaces it. The popup maps Base UI's `--available-width` to `--radix-tooltip-content-available-width`. `TooltipArrow` renders the same SVG triangle as Radix, so the stylesheet's `fill` and `stroke` apply. Radix also distinguishes `instant-open`; the Base UI edition reports `delayed-open` for every open tooltip, which the stylesheet does not distinguish.
+
+The parity test covers the closed tooltip and the popup opened by focus and by hover, including the portal content and arrow. The Base UI edition has no allowed styling differences.

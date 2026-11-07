@@ -6,6 +6,8 @@ const fixtures = JSON.parse(
 ) as Record<string, { port: number }>
 export default defineConfig({
   testDir: 'tests/e2e',
+  // Base UI consumers run against their own servers: pnpm test:base-consumers.
+  testIgnore: ['base-consumers.spec.ts'],
   timeout: 60000,
   expect: { timeout: 10000 },
   workers: workerBudget('OMBELLE_E2E_WORKERS', process.env.OMBELLE_E2E_WORKERS, 2),
