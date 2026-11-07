@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarGroup, AvatarStatus } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 
@@ -59,6 +60,24 @@ export default function EditionScenario() {
         <Progress value={100} aria-label="Installed" />
         <Progress value={0} aria-label="Queued" />
         <Progress aria-label="Checking contrast" />
+      </Parity>
+      <Parity id="avatar">
+        <Avatar size="lg" variant="primary" role="img" aria-label="Ada Lovelace, online">
+          <AvatarFallback>AL</AvatarFallback>
+          <AvatarStatus />
+        </Avatar>
+        <Avatar size="sm" role="img" aria-label="Grace Hopper, offline">
+          <AvatarFallback>GH</AvatarFallback>
+          <AvatarStatus status="offline" />
+        </Avatar>
+        <AvatarGroup aria-label="Reviewers">
+          <Avatar role="img" aria-label="Grace Hopper">
+            <AvatarFallback>GH</AvatarFallback>
+          </Avatar>
+          <Avatar variant="secondary" role="img" aria-label="3 more reviewers">
+            <AvatarFallback>+3</AvatarFallback>
+          </Avatar>
+        </AvatarGroup>
       </Parity>
     </main>
   )
