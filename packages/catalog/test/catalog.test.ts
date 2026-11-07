@@ -716,10 +716,11 @@ describe('liquid glass starting presets', () => {
       'builtin-liquid-glass-clear',
       'builtin-liquid-glass-prism',
       'builtin-liquid-glass-liquid',
+      'builtin-liquid-glass-voile',
       'builtin-liquid-glass',
     ])
     expect(startingPresetOrder.map((id) => c.startingPresets[id].name)).toEqual([
-      'Cristal', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Liquid glass',
+      'Cristal', 'Givré', 'Fumé', 'Relief', 'Clear', 'Prism', 'Liquid', 'Voile', 'Liquid glass',
     ])
     for (const id of startingPresetOrder) {
       expect(validatePreset(c.startingPresets[id])).toEqual(c.startingPresets[id])
@@ -732,10 +733,10 @@ describe('liquid glass starting presets', () => {
     expect(c.startingPresets['builtin-liquid-glass-fume'].modes.light.cardForeground).toBe('#F0F7FF')
     expect(c.startingPresets['builtin-liquid-glass'].design.glassOpacity).toBe(0.57)
   })
-  it('offers five starting presets and keeps the retired ones resolvable', () => {
+  it('offers six starting presets and keeps the retired ones resolvable', () => {
     const c = getCatalog('0.1.0')
     expect(offeredGlassPresetOrder.map((id) => c.startingPresets[id].name)).toEqual([
-      'Cristal', 'Givré', 'Fumé', 'Relief', 'Liquid glass',
+      'Cristal', 'Givré', 'Fumé', 'Relief', 'Voile', 'Liquid glass',
     ])
     for (const id of ['builtin-liquid-glass-clear', 'builtin-liquid-glass-prism', 'builtin-liquid-glass-liquid'] as const) {
       const { revision, catalogRelease } = c.startingPresets[id]
