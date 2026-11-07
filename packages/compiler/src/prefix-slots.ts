@@ -24,24 +24,19 @@ export function prefixSlots(
   )
 }
 /**
- * Keeps every rule and inserts a prefixed copy after each rule whose selector
- * targets a listed slot, so shared styles reach beside components too.
+ * Moves shared rules that target a listed slot to its prefixed slot. Once a
+ * component is installed beside an app-owned file, the unprefixed slot belongs
+ * to the app (for example shadcn's own Button), so no Ombelle rule may match it.
  */
-export function duplicatePrefixedRules(
+export function prefixSharedRules(
   css: string,
   slots: readonly string[],
   prefix = besideSlotPrefix,
 ): string {
   if (!slots.length) return css
   const root = postcss.parse(css)
-  const rules: postcss.Rule[] = []
   root.walkRules((rule) => {
-    if (prefixSlots(rule.selector, 'css', slots, prefix) !== rule.selector)
-      rules.push(rule)
+    rule.selector = prefixSlots(rule.selector, 'css', slots, prefix)
   })
-  for (const rule of rules)
-    rule.after(
-      rule.clone({ selector: prefixSlots(rule.selector, 'css', slots, prefix) }),
-    )
   return root.toString()
 }

@@ -25,6 +25,8 @@
     "build:www": "pnpm --filter @ombelle/www build",
     "test:e2e": "playwright test",
     "test:editions": "playwright test -c playwright.edition.config.ts",
+    "prepare:base-consumers": "tsx scripts/prepare-base-consumers.ts",
+    "test:base-consumers": "playwright test -c playwright.base-consumers.config.ts",
     "dev:preview": "vite apps/preview --config apps/preview/vite.config.ts",
     "dev:www": "pnpm --filter @ombelle/www dev",
     "snapshots:init": "tsx scripts/snapshot-store.ts init",

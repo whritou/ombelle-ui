@@ -14,7 +14,7 @@ import typescript from 'prettier/plugins/typescript'
 import estree from 'prettier/plugins/estree'
 import postcss from 'prettier/plugins/postcss'
 import { resolvePreset } from './resolve.js'
-import { duplicatePrefixedRules, prefixSlots, templateSlots } from './prefix-slots.js'
+import { prefixSharedRules, prefixSlots, templateSlots } from './prefix-slots.js'
 import { sha256 } from './hash.js'
 import { assertGlassContrast, glassTokens } from './glass.js'
 import { glassMaterialActive } from './glass-contrast.js'
@@ -83,8 +83,8 @@ export async function compile(input: {
   /** Primitive library of the target project; the preset hash does not depend on it. */
   edition?: Edition
   /**
-   * Components installed beside an app-owned file: their slots get the
-   * `ombelle-` prefix and shared rules for those slots are duplicated.
+   * Components installed beside an app-owned file: their slots, and the
+   * shared rules for those slots, get the `ombelle-` prefix.
    */
   prefixedComponents?: readonly ComponentId[]
 }): Promise<CompileResult> {
@@ -164,7 +164,7 @@ export async function compile(input: {
     {
       logicalPath: 'styles/ui-style.css',
       kind: 'style',
-      content: duplicatePrefixedRules(
+      content: prefixSharedRules(
         catalog.styles[family] + (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : ''),
         [...prefixedSlots.values()].flat(),
       ),
