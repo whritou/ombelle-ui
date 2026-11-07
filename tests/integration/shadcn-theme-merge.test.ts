@@ -44,7 +44,7 @@ function unrelated(css: string) {
     .trim()
 }
 
-it.each(['vite', 'next'] as const)(
+it.each(['vite', 'next', 'vite-base', 'next-base'] as const)(
   'merges a theme into a genuine shadcn init %s project without Ombelle init',
   async (kind: ShadcnFixture) => {
     const root = await createShadcnProject(kind)
@@ -54,7 +54,7 @@ it.each(['vite', 'next'] as const)(
     for (const selector of [':root', '.dark', '@theme inline'] as const)
       expect(blocks(original, selector)).toHaveLength(1)
 
-    if (kind === 'vite') {
+    if (kind.startsWith('vite')) {
       // The Vite template declares react ^19.3.1; the documented foundation
       // baseline rejects ranges before any write.
       const pristine = await snapshotTree(root)
@@ -201,4 +201,75 @@ it.each(['vite', 'next'] as const)(
       expect(final[file], file).toBe(after[file])
   },
   180000,
+)
+
+// Pins the Vite template's React range, as documented, and applies the theme.
+async function themedShadcn(kind: ShadcnFixture) {
+  const root = await createShadcnProject(kind)
+  roots.push(root)
+  if (kind.startsWith('vite')) {
+    const file = path.join(root, 'package.json')
+    const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+    pkg.dependencies.react = pkg.dependencies['react-dom'] = '19.3.1'
+    await fs.writeFile(file, JSON.stringify(pkg, null, 2) + '\n')
+  }
+  const theme = await runBuiltCli('node', ['theme', 'add', preset, '--yes', '--json'], root)
+  expect(theme.code, theme.output).toBe(0)
+  return root
+}
+async function applyAdd(root: string, resolutions: Record<string, 'overwrite' | 'beside'>) {
+  const { besideComponents } = await import('../../packages/cli/src/project/beside.js')
+  const context = await inspectProject(root)
+  const result = await compile({
+    preset: context.preset!,
+    componentIds: ['button'],
+    catalogRelease: context.preset!.catalogRelease,
+    compilerVersion: context.preset!.compilerVersion,
+    edition: context.edition,
+    prefixedComponents: besideComponents(context, resolutions),
+  })
+  await applyPlan(await planAdd(context, result, resolutions), { dependencies: async () => {} })
+}
+
+it.each(['vite', 'next', 'vite-base', 'next-base'] as const)(
+  'resolves shadcn button.tsx by overwriting or installing beside in %s',
+  async (kind: ShadcnFixture) => {
+    const { source } = shadcnFixtures[kind]
+    const button = path.posix.join(source, 'components/ui/button.tsx'),
+      besideButton = path.posix.join(source, 'components/ui/ombelle/button.tsx'),
+      styleFile = path.posix.join(source, 'styles/ui-style.css')
+
+    // Without a choice, --yes still stops on the app's own button.
+    const root = await themedShadcn(kind)
+    const before = await snapshotTree(root)
+    const stopped = await runBuiltCli('node', ['add', 'button', '--yes', '--json'], root)
+    expect(stopped.code, stopped.output).toBe(4)
+    expect(stopped.output).toContain('--beside ' + button)
+    expect(await snapshotTree(root)).toEqual(before)
+
+    // Beside: shadcn's file stays, Ombelle's goes under ombelle/ and keeps it.
+    const planned = await runBuiltCli('node', ['add', 'button', '--beside', button, '--dry-run', '--json'], root)
+    expect(planned.code, planned.output).toBe(0)
+    expect((jsonRecord(planned.data).changes as Change[]).find((c) => c.path === besideButton)?.action).toBe('create')
+    await applyAdd(root, { [button]: 'beside' })
+    const shadcnButton = before[button]
+    expect((await snapshotTree(root))[button]).toBe(shadcnButton)
+    expect(await fs.readFile(path.join(root, besideButton), 'utf8')).toContain('data-slot="ombelle-button"')
+    expect(await fs.readFile(path.join(root, besideButton), 'utf8')).toContain(
+      kind.endsWith('-base') ? "'@base-ui/react/button'" : "'@radix-ui/react-slot'",
+    )
+    const rethemed = await runBuiltCli('node', ['theme', 'add', preset, '--yes', '--json'], root)
+    expect(rethemed.code, rethemed.output).toBe(0)
+    expect((await snapshotTree(root))[button]).toBe(shadcnButton)
+    expect(await fs.readFile(path.join(root, styleFile), 'utf8')).toContain("[data-slot='ombelle-button']")
+
+    // Overwrite: a fresh copy replaces shadcn's button and owns it.
+    const other = await themedShadcn(kind)
+    await applyAdd(other, { [button]: 'overwrite' })
+    const lock = JSON.parse(await fs.readFile(path.join(other, 'ui-library.lock.json'), 'utf8'))
+    expect(lock.artifacts[button]).toBeDefined()
+    expect(lock.edition).toBe(kind.endsWith('-base') ? 'base' : 'radix')
+    expect(await fs.readFile(path.join(other, button), 'utf8')).toContain('data-slot="button"')
+  },
+  240000,
 )
