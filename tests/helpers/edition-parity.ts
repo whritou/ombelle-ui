@@ -45,6 +45,7 @@ export const portedComponents: readonly {
     ],
   },
   { id: 'separator', states: [{ name: 'default' }] },
+  { id: 'progress', states: [{ name: 'default' }] },
 ]
 
 /**

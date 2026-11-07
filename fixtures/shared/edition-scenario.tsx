@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 
 // Ported components rendered identically in both editions; the parity test
@@ -51,6 +52,13 @@ export default function EditionScenario() {
           <Separator orientation="vertical" />
           <a href="#changelog">Changelog</a>
         </nav>
+      </Parity>
+      <Parity id="progress">
+        <p id="install-label">Installing components</p>
+        <Progress value={64} aria-labelledby="install-label" />
+        <Progress value={100} aria-label="Installed" />
+        <Progress value={0} aria-label="Queued" />
+        <Progress aria-label="Checking contrast" />
       </Parity>
     </main>
   )

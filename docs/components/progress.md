@@ -47,3 +47,9 @@ See [the batch 4 verification record](../evidence/next-components-batch-4.md).
 ## Liquid glass
 
 In liquid glass, the track is a 10px pill of `card` with 10% `foreground` at the glass opacity, as in the kit, with the glass edge and an inner shadow. The fill is solid `primary` with a gloss and a glow, complete is `#16A34A`, and indeterminate is a faded full fill with a sweep that stops under reduced motion. No text sits on the bar, so it adds no contrast pair. Reduced transparency and missing backdrop filters paint the track opaque; forced colours fill with `Highlight`. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass display evidence](../evidence/glass-display.md) for screenshots.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive a Progress built on `Progress.Root` and `Progress.Indicator` from `@base-ui/react/progress` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-progress`. `value`, `max`, labelling and `data-slot` values match the Radix edition; the indicator renders directly in the root, without Base UI's optional `Progress.Track`.
+
+State bridge: the root and indicator carry `data-state` `loading`, `complete` or `indeterminate`, plus `data-value` and `data-max`, computed from `value` and `max` as Radix does. Base UI's own `data-progressing`, `data-complete` and `data-indeterminate` attributes remain. The template clears the inline `height: inherit` Base UI puts on the indicator, so the stylesheet sizes it. The Base UI edition has no allowed styling differences.
