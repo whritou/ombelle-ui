@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarStatus } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
@@ -78,6 +79,24 @@ export default function EditionScenario() {
             <AvatarFallback>+3</AvatarFallback>
           </Avatar>
         </AvatarGroup>
+      </Parity>
+      <Parity id="switch">
+        <label className="field">
+          Notifications
+          <Switch name="notifications" />
+        </label>
+        <label className="field">
+          Sync
+          <Switch defaultChecked name="sync" />
+        </label>
+        <label className="field">
+          Locked off
+          <Switch disabled name="locked-off" />
+        </label>
+        <label className="field">
+          Locked on
+          <Switch disabled defaultChecked name="locked-on" />
+        </label>
       </Parity>
     </main>
   )

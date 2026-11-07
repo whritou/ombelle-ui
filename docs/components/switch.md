@@ -50,3 +50,9 @@ Focused catalog/compiler checks and a local Chromium behavior probe cover this i
 ## Liquid glass
 
 In liquid glass, the track is `card` + `foreground` 10% at 55% coverage with the `input` border. On is `card` + `primary` 26% light / 30% dark at 85% with a `primary` rim at 60% and a glow; the kit tile draws 34%, but the selection rule is the resting tint + 8 points. The thumb is solid white with a shadow, so its position reads over any backdrop. Disabled is dashed at 50% opacity. The switch carries no text, so it adds no contrast pair. In forced colours the thumb is `CanvasText` and on adds a `Highlight` border. Installing it in a glass project needs `@ombelle-ui/cli` 0.5.0 or later. See [liquid glass](liquid-glass.md) for the contrast bound and fallbacks, and [glass form controls evidence](../evidence/glass-form-controls.md) for screenshots.
+
+## Base UI edition
+
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive a Switch built on `Switch.Root` and `Switch.Thumb` from `@base-ui/react/switch` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-switch`. Props follow Base UI (`checked`, `defaultChecked`, `onCheckedChange`, `disabled`, `name`, `value`); `data-slot` values match the Radix edition. Base UI renders the root as a `span` with `role="switch"` plus a hidden input, instead of Radix's `button`.
+
+State bridge: the root and thumb carry `data-state="checked"` or `"unchecked"` from Base UI's state, next to Base UI's `data-checked`/`data-unchecked`, through each part's `render` function. Passing your own `render` replaces that bridge, so keep `data-state` on the element you render. `data-disabled` is set by Base UI itself. The parity test covers default, toggled, hover, focus-visible and Space-key states. The Base UI edition has no allowed styling differences.

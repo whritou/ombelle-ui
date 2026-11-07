@@ -47,6 +47,16 @@ export const portedComponents: readonly {
   { id: 'separator', states: [{ name: 'default' }] },
   { id: 'progress', states: [{ name: 'default' }] },
   { id: 'avatar', states: [{ name: 'default' }] },
+  {
+    id: 'switch',
+    states: [
+      { name: 'default' },
+      { name: 'toggled', act: clickFirst("[data-slot='switch']") },
+      { name: 'hover', act: hoverFirst("[data-slot='switch']") },
+      { name: 'focus-visible', act: focusFirst("[data-slot='switch']") },
+      { name: 'keyboard toggle', act: async (page, section) => { await focusFirst("[data-slot='switch']")!(page, section); await page.keyboard.press('Space') } },
+    ],
+  },
 ]
 
 /**
