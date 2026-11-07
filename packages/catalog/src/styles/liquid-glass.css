@@ -179,7 +179,7 @@
 [data-slot="avatar"][data-variant="primary"] { --glass-plate: color-mix(in srgb, var(--primary) var(--glass-primary-tint, 18%), var(--card)); }
 [data-slot="radio-group-option"]:has([data-state="checked"]) { --glass-plate: color-mix(in srgb, var(--primary) var(--glass-primary-tint, 18%), var(--card)); }
 [data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="table-cell"], [data-slot="table-head"], [data-slot="table-footer"], [data-slot="accordion"], [data-slot="accordion-trigger"], [data-slot="avatar"], [data-slot="tabs-list"], [data-slot="tabs-trigger"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-slot="button"], [data-slot="radio-group-option"], [data-slot="select-item"] {
-  -webkit-text-stroke: calc(var(--glass-material, 0) * 1px) var(--glass-plate);
+  -webkit-text-stroke: calc(var(--glass-material, 0) * 0.25px) var(--glass-plate);
   paint-order: stroke fill;
 }
 [data-slot="badge"] { -webkit-text-stroke: 0; }

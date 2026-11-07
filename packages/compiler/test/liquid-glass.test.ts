@@ -811,7 +811,7 @@ describe('liquid glass material review fixes', () => {
       if (decl.value.includes('--glass-plate')) strokes.push(squash((decl.parent as postcss.Rule).selector) + ' ' + squash(decl.value))
     })
     expect(strokes.length).toBe(1)
-    expect(strokes[0]).toContain('calc(var(--glass-material,0)*1px)var(--glass-plate)')
+    expect(strokes[0]).toContain('calc(var(--glass-material,0)*0.25px)var(--glass-plate)')
     for (const slot of ['card', 'button', 'popover-content', 'table-head', 'table-cell', 'tabs-trigger', 'radio-group-option', 'select-item', 'input'])
       expect(strokes[0], slot).toContain('[data-slot="' + slot + '"]')
     expect(strokes[0]).not.toContain('[data-slot="badge"]')
