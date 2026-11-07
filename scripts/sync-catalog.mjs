@@ -13,6 +13,12 @@ const templates = Object.fromEntries(
     readText(base + 'templates/' + id + '.tsx'),
   ]),
 )
+// Base UI editions of components whose Radix template imports a primitive.
+const baseTemplates = Object.fromEntries(
+  supportedComponentIds
+    .filter((id) => fs.existsSync(base + 'templates/base/' + id + '.tsx'))
+    .map((id) => [id, readText(base + 'templates/base/' + id + '.tsx')]),
+)
 const styles = Object.fromEntries(
   styleFamilies.map((id) => [
     id,
@@ -54,6 +60,7 @@ writeFileAtomicSync(
   '// Generated from reviewed catalog files.\nexport const catalogData = ' +
     JSON.stringify({
       templates,
+      baseTemplates,
       styles,
       glassLabStyle: readText(base + 'styles/liquid-glass-lab.css'),
       componentStyles,
