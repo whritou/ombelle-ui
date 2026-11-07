@@ -50,10 +50,10 @@ it('renders the public landing page with editor links and the published installe
   expect(html).toContain('href="/editor/component"')
   expect(html).toContain('href="/editor/preset"')
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
-  expect(html).toContain(`npx ${runner} init --preset PRESET --cwd APP --dry-run --json`)
-  expect(html).toContain(`npx ${runner} init --preset PRESET --cwd APP --yes`)
-  expect(html).toContain(`npx ${runner} add button --cwd APP --yes`)
-  expect(html).toContain(`npx ${runner} theme add PRESET --cwd APP --dry-run --json`)
+  expect(html).toContain(`npx ${runner} init --preset PRESET<`)
+  expect(html).toContain(`npx ${runner} add button<`)
+  expect(html).toContain(`npx ${runner} theme add PRESET<`)
+  expect(html).not.toMatch(/--cwd APP|--dry-run --json/)
   for (const prefix of ['pnpm dlx', 'bunx', 'yarn dlx --quiet']) expect(html).toContain(`${prefix} ${runner}`)
   expect(html).toContain('24 hours')
   expect(html.match(/<h1\b/g)).toHaveLength(1)
@@ -86,7 +86,7 @@ it('lists the catalog and offers install commands only for components the publis
     const { id } = doc
     const html = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id }) }))
     expect(html.match(/<h1\b/g)).toHaveLength(1)
-    const command = `pnpm dlx ${runner} add ${id} --cwd APP --dry-run`
+    const command = `pnpm dlx ${runner} add ${id}`
     if (componentInstallable(doc)) {
       if (doc.minimumCli) expect(compareVersions(publishedInstaller.version, doc.minimumCli)).toBeGreaterThanOrEqual(0)
       expect(html).toContain(command)
@@ -139,6 +139,6 @@ it('offers the lab glass presets in the component directory and installs Select 
   expect(overview).toContain('href="/components/select"')
   const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
   expect(select).not.toContain('Requires CLI')
-  expect(select).toContain(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} add select --cwd APP --dry-run`)
+  expect(select).toContain(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} add select`)
   expect(select).toContain('Liquid glass: experimental.')
 })

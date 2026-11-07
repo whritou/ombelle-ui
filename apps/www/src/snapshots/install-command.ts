@@ -102,7 +102,7 @@ export function snapshotInstallCommand(
   }[scope]
   if (!operation) throw new Error('Unknown installation scope.')
   const pins = origin === officialSnapshotOrigin ? '' : ` --snapshot-origin '${origin}' --preset-hash ${presetHash}`
-  return `${installerRunner(release)} ${operation}${pins} --cwd APP --dry-run --json`
+  return `${installerRunner(release)} ${operation}${pins}`
 }
 
 export const packageManagers = ['pnpm', 'npm', 'yarn', 'bun'] as const

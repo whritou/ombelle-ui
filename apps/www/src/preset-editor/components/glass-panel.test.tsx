@@ -123,7 +123,7 @@ it('keeps exports available for a compiled draft with a contrast warning', async
   )
   for (const name of ['Download preset JSON', 'Copy export'])
     expect(html).toContain(`<button type="button" aria-describedby="${glassReadoutId}">${name}</button>`)
-  expect(html).toContain(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ./project-preset.json --cwd APP --dry-run --json`)
+  expect(html).toContain(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ./project-preset.json`)
 })
 
 it('lists the tint in a failing tinted pair', () => {

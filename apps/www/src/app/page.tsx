@@ -20,19 +20,14 @@ const npx = installerRunner(publishedInstaller)
 
 const steps = [
   {
-    title: 'Review the setup plan',
-    text: 'Point the installer at your app and a preset. A dry run reports every file and dependency change as JSON and writes nothing.',
-    command: `${npx} init --preset PRESET --cwd APP --dry-run --json`,
-  },
-  {
-    title: 'Apply it',
-    text: 'Accept the reviewed plan. --yes never bypasses schema, compatibility or modified-file conflicts, and dependency installs run with lifecycle scripts disabled.',
-    command: `${npx} init --preset PRESET --cwd APP --yes`,
+    title: 'Set up your project',
+    text: 'Run it from your app folder with your preset code. The installer shows every file and dependency change and asks before writing anything. Dependency installs run with lifecycle scripts disabled.',
+    command: `${npx} init --preset PRESET`,
   },
   {
     title: 'Add components',
     text: 'Components use the saved project preset. Add several at once, for example button dialog input.',
-    command: `${npx} add button --cwd APP --yes`,
+    command: `${npx} add button`,
   },
 ]
 
@@ -129,10 +124,9 @@ export default function HomePage() {
             <div className="min-w-0">
               <h3 className="text-2xl font-black">Already using shadcn?</h3>
               <p className="mt-3 text-muted-foreground">
-                If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css and saves the preset for later installs, without reinstalling your existing component source. Review the plan, then run it again with{' '}
-                <code className="font-mono text-foreground">--yes</code>.
+                If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css and saves the preset for later installs, without reinstalling your existing component source. It shows the changes and asks before writing.
               </p>
-              <pre className={`mt-4 ${codeBlock}`}><code>{`${npx} theme add PRESET --cwd APP --dry-run --json`}</code></pre>
+              <pre className={`mt-4 ${codeBlock}`}><code>{`${npx} theme add PRESET`}</code></pre>
             </div>
             <div className="min-w-0">
               <h3 className="text-2xl font-black">Other package runners</h3>

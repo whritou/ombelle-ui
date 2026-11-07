@@ -20,7 +20,8 @@ it('all scopes use one immutable source and honest private repository invocation
     expect(command).toContain(source.reference)
     expect(command).toContain('--snapshot-origin ' + "'" + source.origin + "'")
     expect(command).toContain('--preset-hash ' + source.presetHash)
-    expect(command).toContain('--cwd APP --dry-run --json')
+    // Plain commands: run from the app folder, the CLI asks before writing.
+    expect(command).not.toMatch(/--cwd|--dry-run|--json|--yes/)
     expect(command).not.toMatch(/npx|pnpm dlx|@ombelle\/cli/)
   }
   expect(snapshotInstallCommand(source, 'new')).toContain(
@@ -72,7 +73,7 @@ it('code pages show the verified public npx release with bare official codes', (
   expect(publishedInstaller).toEqual({ packageName: '@ombelle-ui/cli', version: expect.stringMatching(/^\d+\.\d+\.\d+$/) })
   const official = { ...source, origin: officialSnapshotOrigin }
   expect(snapshotInstallCommand(official, 'new', publishedInstaller)).toBe(
-    `npx @ombelle-ui/cli@${publishedInstaller.version} init --preset ${source.reference} --cwd APP --dry-run --json`,
+    `npx @ombelle-ui/cli@${publishedInstaller.version} init --preset ${source.reference}`,
   )
 })
 

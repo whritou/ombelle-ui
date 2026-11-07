@@ -3,8 +3,8 @@ import { recipeSnapshotInstallCommand } from './install-command'
 import { snapshotInstallCommand } from '../snapshots/install-command'
 const source = { origin: 'https://ombelle-ui.vercel.app', reference: 'rc_' + 'a'.repeat(32) + '@1', recipeHash: 'b'.repeat(64) }
 it('shows code-only private official commands until an actual release is supplied', () => {
-  expect(recipeSnapshotInstallCommand(source)).toBe(`pnpm exec node packages/cli/dist/main.js add --recipe ${source.reference} --cwd APP --dry-run --json`)
-  expect(recipeSnapshotInstallCommand(source, { packageName: '@ombelle-ui/cli', version: '0.2.0' })).toBe(`npx @ombelle-ui/cli@0.2.0 add --recipe ${source.reference} --cwd APP --dry-run --json`)
+  expect(recipeSnapshotInstallCommand(source)).toBe(`pnpm exec node packages/cli/dist/main.js add --recipe ${source.reference}`)
+  expect(recipeSnapshotInstallCommand(source, { packageName: '@ombelle-ui/cli', version: '0.2.0' })).toBe(`npx @ombelle-ui/cli@0.2.0 add --recipe ${source.reference}`)
 })
 it('rejects the old unowned public namespace', () => {
   expect(() => recipeSnapshotInstallCommand(source, { packageName: '@ombelle/cli', version: '0.2.0' })).toThrow('Unsupported published installer release.')
