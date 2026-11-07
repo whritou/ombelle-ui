@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import type { CompileResult } from '@ombelle/contracts'
-import { sha256 } from '@ombelle/compiler'
+import { collectModuleSpecifiers, sha256 } from '@ombelle/compiler'
 import { createProject } from '../tests/helpers/projects.js'
 import { createNpmProject } from '../tests/helpers/npm-project.js'
 import { createYarnProject } from '../tests/helpers/yarn-project.js'
@@ -20,6 +19,10 @@ import { prepareRecipeConsumer } from './prepare-recipe-consumer.js'
 import { recipeReferenceBank } from '../tests/helpers/recipe-fixture.js'
 import { prepareComponentPresetConsumer } from './prepare-component-preset-consumer.js'
 import { componentPresetReferenceBank } from '../tests/helpers/component-preset-fixture.js'
+import {
+  consumerAddBatches,
+  compileConsumerReference,
+} from './consumer-components.js'
 export type ArtifactProof = {
   path: string
   logicalPath: string
@@ -34,12 +37,6 @@ export const glassConsumerComponents = [
   'tabs',
   'tooltip',
 ] as const
-const glassAddBatches = [
-  ['add', 'button', 'dialog'],
-  ['add', 'badge'],
-  ['add', 'card'],
-  ['add', 'tabs', 'tooltip'],
-]
 export async function prepareNodeConsumer(spec: ConsumerCase) {
   const glass = spec.family === 'liquid-glass'
   if (
@@ -154,16 +151,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
     let presetHash: unknown
     for (const args of [
       ['init', '--preset', preset],
-      ...(glass
-        ? glassAddBatches
-        : [
-            ['add', 'button', 'dialog'],
-            ['add', 'input'],
-            ['add', 'badge'],
-            ['add', 'card'],
-            ['add', 'label', 'textarea', 'native-select'],
-            ['add', 'checkbox', 'switch', 'tabs', 'tooltip'],
-          ]),
+      ...consumerAddBatches(spec.family).map((ids) => ['add', ...ids]),
     ]) {
       const result = await runBuiltCli(
         'node',
@@ -202,12 +190,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       componentPresetBank = glass
         ? undefined
         : await componentPresetReferenceBank()
-    const canonical = JSON.parse(
-      await fs.readFile(
-        'apps/preview/src/generated/' + spec.family + '/manifest.json',
-        'utf8',
-      ),
-    ) as CompileResult
+    const canonical = await compileConsumerReference(spec.family)
     const installed = jsonRecord(
       JSON.parse(
         await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'),
@@ -238,7 +221,10 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         !reference ||
         content !== reference.content ||
         hash !== meta.sha256 ||
-        content.includes('@ombelle/')
+        (meta.kind !== 'style' &&
+          (await collectModuleSpecifiers(content)).some((s) =>
+            s.startsWith('@ombelle/'),
+          ))
       )
         throw new Error(
           'Consumer source differs from canonical artifact: ' + file,
@@ -252,7 +238,11 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
     if (glass) {
       const installedComponents = Object.values(installedArtifacts)
         .map((record) => jsonRecord(record))
-        .filter((meta) => meta.kind === 'component')
+        .filter(
+          (meta) =>
+            meta.kind === 'component' &&
+            meta.logicalPath !== 'components/ui/liquid-glass-filter.tsx',
+        )
         .map((meta) => path.basename(String(meta.logicalPath), '.tsx'))
         .sort()
       if (

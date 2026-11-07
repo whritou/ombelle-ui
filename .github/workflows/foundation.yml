@@ -50,7 +50,7 @@ jobs:
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
-      # Preparing 34 consumers with their own node_modules can exhaust the
+      # Preparing 40 consumers with their own node_modules can exhaust the
       # runner disk (EDQUOT during bun install). Drop preinstalled toolchains
       # this repository never uses.
       - name: Free runner disk space
