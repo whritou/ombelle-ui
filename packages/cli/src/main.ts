@@ -226,11 +226,11 @@ export async function runCli(
         command === 'add'
           ? await planAdd(context, result)
           : await planTheme(context, result)
-      plan.notices = glassNotices(
+      plan.notices = [...plan.notices, ...glassNotices(
         result.preset.data,
         command === 'add' ? (ids as ComponentId[]) : undefined,
         command === 'add',
-      )
+      )]
     }
     if (presetInput)
       await applyPresetSourceToPlan(

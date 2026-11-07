@@ -10,7 +10,7 @@ import {
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
-export { shadcnBaseStyles, shadcnRadixStyles } from './shadcn.js'
+export { knownShadcnUtilityHashes, shadcnBaseStyles, shadcnRadixStyles } from './shadcn.js'
 export { resolveRecipePreset } from './recipe-preset.js'
 export { glassTintPalettes, type GlassTintId, type GlassTintPalette } from './glass-tints.js'
 export { glassControlSlots, glassHaloSelector, glassHostedSlots, glassMarkSlots, glassSurfaceSlots } from './glass-recipes.js'

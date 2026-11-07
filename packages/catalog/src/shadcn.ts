@@ -12,3 +12,10 @@ export const shadcnBaseStyles = [
   'base-sera',
   'base-rhea',
 ] as const
+/**
+ * sha256 of utility files the pinned shadcn generates, which Ombelle may
+ * replace without a conflict: `export { cn } from "cn"` (4.22.1 templates).
+ */
+export const knownShadcnUtilityHashes = [
+  '14300d758170c270c75b057f38fedb3793a5920ea872f0477e29fb131185e8a7',
+] as const
