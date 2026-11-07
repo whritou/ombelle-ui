@@ -1,4 +1,5 @@
 import { recipeFixtures } from '../fixtures/shared/recipes.ts'
+import { colorParityDiff } from '../tests/helpers/color-compare.ts'
 import { supportedStyleFamilies } from '../packages/contracts/src/style-families.ts'
 import { stableConsumerCases } from './consumer-matrix.ts'
 import type { RecipeCompileResult } from '@ombelle/contracts'
@@ -154,7 +155,10 @@ export async function validateRecipeMeasurements(
       Object.values(measured).some((v) => typeof v !== 'string')
     )
       throw Error('Missing rendered recipe styles')
-    if (styles.has(styleKey) && !equal(styles.get(styleKey), measured))
+    if (
+      styles.has(styleKey) &&
+      colorParityDiff(styles.get(styleKey), measured).length
+    )
       throw Error('Recipe style differs across host/apps ' + key)
     styles.set(styleKey, measured)
     if (!Array.isArray(row.textEvidence) || row.textEvidence.length !== 2)

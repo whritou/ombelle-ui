@@ -46,11 +46,11 @@ jobs:
           path: .artifacts/upload/browser
   consumers:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 80
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
-      # Preparing 34 consumers with their own node_modules can exhaust the
+      # Preparing 40 consumers with their own node_modules can exhaust the
       # runner disk (EDQUOT during bun install). Drop preinstalled toolchains
       # this repository never uses.
       - name: Free runner disk space
@@ -73,7 +73,8 @@ jobs:
         timeout-minutes: 15
         run: pnpm exec playwright install --with-deps chromium
       - name: Verify all consumers and browser checks
-        timeout-minutes: 40
+        # The expanded 676-case browser matrix follows 40 cold consumer installs.
+        timeout-minutes: 60
         run: pnpm check:foundation:consumers
       - name: Stage finalized evidence after process teardown
         if: always()

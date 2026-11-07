@@ -3,6 +3,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { sha256 } from '@ombelle/compiler'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
+import { expectColorParity } from '../helpers/color-compare.js'
+import { assertScopedButtonFocus } from '../helpers/recipe-browser.js'
 import {
   componentPresetReferences,
   componentPresetArtifact,
@@ -104,7 +106,7 @@ for (const hostFamily of supportedStyleFamilies)
             image = await specimen.screenshot({ animations: 'disabled' }),
             normalizedScreenshot = await recipeScreenshotEvidence(page, image)
           if (referenceImage) {
-            expect(computedStyles).toEqual(referenceStyles)
+            expectColorParity(computedStyles, referenceStyles)
             expect(dom).toEqual(referenceDom)
             expect(image.equals(referenceImage)).toBe(true)
           } else {
@@ -135,12 +137,7 @@ for (const hostFamily of supportedStyleFamilies)
             expect(content).toBe(expected.content)
             transformedHashes[a.logicalPath] = await sha256(content)
           }
-          await button.focus()
-          await expect(button).toBeFocused()
-          const focusOutlineWidth = await button.evaluate((el) =>
-            parseFloat(getComputedStyle(el).outlineWidth),
-          )
-          expect(focusOutlineWidth).toBeGreaterThanOrEqual(3)
+          const focusOutlineWidth = await assertScopedButtonFocus(button, selectedFamily)
           await page.keyboard.press('Enter')
           await page.keyboard.press('Space')
           await button.click()

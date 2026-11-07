@@ -3,6 +3,7 @@
 .state-fixture label { font-size: 0.875rem; }
 .state-fixture .state-error { color: var(--destructive); }
 .state-dialog { overflow-wrap: anywhere; }
+.state-dialog > [data-slot="button"] { flex-shrink: 0; }
 .state-dialog p { line-height: 1.5; }
 @media (max-width: 480px) {
   [data-states="true"] main { padding: 1.5rem 1rem; }

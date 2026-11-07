@@ -349,7 +349,7 @@ export function PresetGallery({
                   </RadioGroupOptionDescription>
                 </span>
               </RadioGroupOption>
-              <RadioGroupOption>
+              <RadioGroupOption aria-disabled="true">
                 <RadioGroupItem value="enterprise" disabled />
                 <span>
                   <RadioGroupOptionLabel>Enterprise</RadioGroupOptionLabel>
@@ -450,7 +450,7 @@ export function PresetGallery({
             <Separator>or</Separator>
             <Button>Continue with email</Button>
             <Separator />
-            <nav aria-label="Footer" className="preset-row preset-inline-nav">
+            <nav aria-label="Gallery links" className="preset-row preset-inline-nav">
               <a href="#docs">Docs</a>
               <Separator orientation="vertical" />
               <a href="#components">Components</a>

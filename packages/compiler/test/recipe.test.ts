@@ -2,14 +2,47 @@ import { expect, it } from 'vitest'
 import { build, transform } from 'esbuild'
 import { compile, compileRecipe, sha256 } from '../src/index.js'
 import { getCatalog } from '@ombelle/catalog'
+import postcss from 'postcss'
 import example from '../../../examples/recipe.example.json'
+
+it.each([0, 1.25])(
+  'honors the explicit Ombelle recipe radius %s over the family pill shape',
+  async (radiusRem) => {
+    const compileRadius = async (overrides: Record<string, number>) => {
+      const result = await compileRecipe({
+        recipe: {
+          ...example,
+          presetRef: { ...example.presetRef, id: 'builtin-ombelle' },
+          overrides,
+        },
+      })
+      const radii: string[] = []
+      postcss
+        .parse(result.artifacts.find((a) => a.kind === 'style')!.content)
+        .walkDecls('border-radius', (declaration) => {
+          const selectors = (declaration.parent as postcss.Rule).selectors
+          if (
+            selectors.some(
+              (selector) =>
+                selector.replaceAll("'", '"') ===
+                `[data-slot="recipe-button"][data-ombelle-recipe="${result.scope}"]`,
+            )
+          )
+            radii.push(declaration.value)
+        })
+      return radii.at(-1)
+    }
+    expect(await compileRadius({})).toBe('999px')
+    expect(await compileRadius({ radiusRem })).toBe('var(--radius)')
+  },
+)
 const scopedArtifactHashes: Record<string, readonly string[]> = {
   flat: [
     'febe72ab5c88cf83e76060473786bc81df8de8f2018b550b3606866700d301d8',
     '51b699ec580af1a171d685f53fad6426cb45aeeb708917a8cd2a7adbb87f1fc5',
   ],
   minimalist: [
-    'eb4f2cbf1ddef55b25ff6adab0bb75480e7161d13c397fd236ef1e82d47d82e6',
+    'f1e320d8b0083bf8fd29475604380f6b38d060632c7323e5fcbd553bce352d8a',
     '8a0fd18bd6c205cfa39aab34c28e9e01d8c8a5ec6612476e8a093238515e560f',
   ],
   'neo-brutalism': [

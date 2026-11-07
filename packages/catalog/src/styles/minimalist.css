@@ -14,7 +14,7 @@
 [data-slot="button"]:not(:disabled):active { background: color-mix(in oklab, var(--primary) 70%, var(--background)); }
 [data-slot="button"][data-variant="default"]:not(:disabled):hover,
 [data-slot="button"][data-variant="default"]:not(:disabled):active { border-color: transparent; }
-[data-slot="button"][data-variant="secondary"] { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--secondary); }
+[data-slot="button"][data-variant="secondary"] { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--input); }
 [data-slot="button"][data-variant="outline"] { background: transparent; color: var(--foreground); border-color: var(--input); }
 [data-slot="button"][data-variant="ghost"], [data-slot="button"][data-variant="link"] { background: transparent; color: var(--foreground); border-color: transparent; }
 [data-slot="button"][data-variant="secondary"]:not(:disabled):hover,

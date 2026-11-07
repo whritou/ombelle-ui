@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
 for (const family of supportedStyleFamilies)
@@ -43,12 +44,21 @@ for (const family of supportedStyleFamilies)
           await expect(
             page.getByRole('button', { name: 'Close', exact: true }),
           ).toBeFocused()
-          const background = await page
+          const surface = await page
             .getByRole('dialog')
-            .evaluate((el) => getComputedStyle(el).backgroundColor)
-          expect(background).toBe(
-            mode === 'dark' ? (family === 'minimalist' ? 'rgb(31, 41, 55)' : 'rgb(39, 39, 42)') : 'rgb(255, 255, 255)',
-          )
+            .evaluate((el) => {
+              const probe = document.createElement('div')
+              probe.style.cssText = 'background:var(--popover);color:var(--popover-foreground)'
+              el.append(probe)
+              const actual = getComputedStyle(el), expected = getComputedStyle(probe)
+              const result = {
+                actual: { background: actual.backgroundColor, color: actual.color },
+                expected: { background: expected.backgroundColor, color: expected.color },
+              }
+              probe.remove()
+              return result
+            })
+          expectColorParity(surface.actual, surface.expected)
           const close = page.getByRole('button', { name: 'Close', exact: true })
           await expect(close.locator('svg[aria-hidden="true"]')).toHaveCount(1)
           const closeLabel = await close
@@ -74,18 +84,28 @@ for (const family of supportedStyleFamilies)
           const viewport = page.viewportSize()!
           await page.setViewportSize({ width: 320, height: 800 })
           const narrowClose = (await close.boundingBox())!
-          const heading = (await page
+          const headingText = await page
             .getByRole('dialog')
             .getByRole('heading', { name: 'Confirm changes' })
-            .boundingBox())!
+            .evaluate((element) => {
+              // A title can paint a full-width header while reserving padded space
+              // for Close. Check text line boxes rather than the decorative shell.
+              const range = document.createRange()
+              range.selectNodeContents(element)
+              return Array.from(range.getClientRects()).map((rect) => ({
+                x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+              }))
+            })
           expect(narrowClose.width).toBeGreaterThanOrEqual(24)
           expect(narrowClose.height).toBeGreaterThanOrEqual(24)
-          expect(
-            heading.x + heading.width <= narrowClose.x ||
-              narrowClose.x + narrowClose.width <= heading.x ||
-              heading.y + heading.height <= narrowClose.y ||
-              narrowClose.y + narrowClose.height <= heading.y,
-          ).toBe(true)
+          expect(headingText.length).toBeGreaterThan(0)
+          for (const line of headingText)
+            expect(
+              line.x + line.width <= narrowClose.x ||
+                narrowClose.x + narrowClose.width <= line.x ||
+                line.y + line.height <= narrowClose.y ||
+                narrowClose.y + narrowClose.height <= line.y,
+            ).toBe(true)
           await page.setViewportSize(viewport)
           expect((await new AxeBuilder({ page }).analyze()).violations).toEqual(
             [],

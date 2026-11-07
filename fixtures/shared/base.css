@@ -12,6 +12,7 @@ nav a { text-decoration:underline; }
 .specimen { box-sizing:border-box; width:440px; max-width:100%; padding:24px; display:flex; flex-direction:column; gap:16px; background:var(--card); color:var(--card-foreground); border:1px solid var(--border); }
 .specimen h2 { font-size:20px; line-height:28px; font-weight:600; }
 .actions { display:flex; flex-wrap:wrap; gap:12px; }
+.actions [data-slot="button"] { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
 .field { display:flex; flex-direction:column; gap:8px; font-size:14px; font-weight:500; }
 [data-slot="dialog-content"] h2 { font-size:20px; font-weight:600; }
 [data-slot="dialog-content"] p { margin:12px 0 20px; }

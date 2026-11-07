@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { createBrowserReferenceCache } from '../helpers/browser-references.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import {
   browserApps,
   componentReferenceKey,
@@ -28,7 +29,7 @@ for (const family of supportedStyleFamilies)
         })
         await page.goto(componentUrl(app, family, query))
         const actual = await sample(page)
-        expect(actual).toEqual(reference)
+        expectColorParity(actual, reference)
         expectComponentSources('checkbox', family, app)
         await expect(page.locator('html')).toHaveClass(mode === 'dark' ? /dark/ : '')
         const fixture = page.getByTestId('checkbox-fixture')
@@ -39,7 +40,10 @@ for (const family of supportedStyleFamilies)
         await expect(checkbox).not.toBeChecked()
         await expect(mixed).toHaveAttribute('aria-checked', 'mixed')
         await expect(disabled).toBeDisabled()
-        await expect(disabled).toHaveCSS('opacity', '0.5')
+        await expect(disabled).toHaveCSS('opacity', {
+          flat: '0.45', minimalist: '0.4', 'neo-brutalism': '1',
+          ombelle: '0.45', 'liquid-glass': '0.5',
+        }[family])
         await expect(invalid).toHaveAttribute('aria-invalid', 'true')
         const invalidStyle = await invalid.evaluate((element) => {
           const style = getComputedStyle(element)
@@ -50,7 +54,7 @@ for (const family of supportedStyleFamilies)
           await checkbox.evaluate((element) => getComputedStyle(element).borderTopColor),
         )
         expect(await checkbox.evaluate((element) => getComputedStyle(element).boxShadow) === 'none')
-          .toBe(family !== 'neo-brutalism')
+          .toBe(family !== 'neo-brutalism' && family !== 'ombelle')
         await expectComponentTargets(fixture, '[data-slot="checkbox"]', 4)
 
         const submit = () => fixture.getByRole('button', { name: 'Submit preferences' }).click()

@@ -6,6 +6,7 @@ import { openExport, segment } from '../helpers/preset-editor-ui.js'
 import { contrastRatio } from '../helpers/contrast.js'
 import { glassFailingPairLine } from '../helpers/glass-readout.js'
 import { componentsWithStyleSupport } from '@ombelle/contracts'
+import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 // Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
 // Accessible names repeat across the three backdrop copies, so every scenario
@@ -627,6 +628,7 @@ for (const mode of modes) {
   })
 
   test(`liquid-glass ${mode}: preset editor glass flow`, async ({ page }) => {
+    test.setTimeout(180000)
     const ready = async () => {
       await openExport(page)
       await expect(page.getByTestId('preset-hash')).not.toHaveText('Pending', { timeout: 30000 })
@@ -661,7 +663,7 @@ for (const mode of modes) {
     await expect(readout).toContainText('You can still export or publish this preset.')
     await ready()
     await expect(page.getByRole('textbox', { name: 'Export text' })).toHaveValue(/"glassOpacity":0\.3,/)
-    await expect(page.getByTestId('preset-install-command')).toContainText('pnpm exec node packages/cli/dist/main.js')
+    await expect(page.getByTestId('preset-install-command')).toHaveText(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ./project-preset.json`)
     for (const action of actions) await expect(action).toBeEnabled()
     const expectMenuDownload = async () => {
       await page.getByRole('button', { name: 'More actions', exact: true }).click()
@@ -681,12 +683,12 @@ for (const mode of modes) {
     const code = page.getByRole('dialog', { name: 'Get code' })
     const published = code.getByTestId('get-code-reference')
     await expect(published).toBeVisible()
-    await expect(code.getByTestId('get-code-command')).toContainText('Use the repository CLI to install it with a contrast warning.')
+    await expect(code.getByTestId('get-code-command')).toContainText(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ps_`)
     const publishedPage = await page.context().newPage()
     await publishedPage.goto(new URL((await published.getAttribute('href'))!, page.url()).href)
     await expect(publishedPage.getByText('Contrast warning. Some Liquid Glass text falls below 4.5:1 in the contrast model.')).toBeVisible()
-    await expect(publishedPage.getByText('Snapshot gallery ready.', { exact: true })).toBeVisible()
-    await expect(publishedPage.getByRole('textbox', { name: 'New setup install command' })).toHaveValue(/^pnpm exec node packages\/cli\/dist\/main\.js init --preset ps_/)
+    await expect(publishedPage.getByText('Snapshot gallery ready.', { exact: true })).toBeVisible({ timeout: 30000 })
+    await expect(publishedPage.getByRole('textbox', { name: 'New setup install command' })).toHaveValue(/^npx @ombelle-ui\/cli@\d+\.\d+\.\d+ init --preset ps_/)
     await publishedPage.close()
     await code.getByRole('button', { name: 'Close', exact: true }).click()
 

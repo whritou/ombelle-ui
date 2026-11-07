@@ -9,6 +9,13 @@ import {
 } from '../../scripts/recipe-evidence.ts'
 // 4 hosts x 4 recipes x 2 modes x 5 apps.
 const expected = recipeMeasurementKeys().length
+it('accepts equivalent CSS color serializations while retaining dimensional and color parity', async () => {
+  const data = await rows()
+  data[0].computedStyles.color = 'color(srgb 0.0039215686 0.0078431373 0.0117647059)'
+  await expect(validateRecipeMeasurements(data)).resolves.toHaveLength(160)
+  data[0].computedStyles.color = 'rgb(100, 2, 3)'
+  await expect(validateRecipeMeasurements(data)).rejects.toThrow('Recipe style differs across host/apps')
+})
 it('requires all attributable app/host/recipe/mode outcomes', async () => {
   const data = await rows()
   expect(expected).toBe(160)

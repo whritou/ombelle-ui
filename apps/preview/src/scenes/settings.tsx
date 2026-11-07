@@ -178,7 +178,7 @@ export function SettingsScene(props: SceneProps) {
                           <RadioGroupOptionDescription>Mondays, with a summary of reviews</RadioGroupOptionDescription>
                         </span>
                       </RadioGroupOption>
-                      <RadioGroupOption>
+                      <RadioGroupOption aria-disabled="true">
                         <RadioGroupItem value="realtime" disabled />
                         <span>
                           <RadioGroupOptionLabel>Real time</RadioGroupOptionLabel>

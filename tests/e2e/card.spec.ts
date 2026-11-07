@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import path from 'node:path'
+import { expectColorParity } from '../helpers/color-compare.js'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import {
   browserReferenceKey,
@@ -114,7 +115,7 @@ for (const family of supportedStyleFamilies)
             .locator('html')
             .evaluate((el) => el.classList.contains('dark')),
         ).toBe(mode === 'dark')
-        expect(actual.styles).toEqual(reference.styles)
+        expectColorParity(actual.styles, reference.styles)
         expect(actual.html).toBe(reference.html)
         const cards = actual.fixture.locator('[data-slot="card"]')
         await expect(cards).toHaveCount(2)
@@ -149,13 +150,20 @@ for (const family of supportedStyleFamilies)
           actual.fixture.locator('img, button, a, [tabindex]'),
         ).toHaveCount(0)
         const rootStyles = actual.styles.filter((s) => s.slot === 'card')
-        expect(parseFloat(rootStyles[0].paddingBlock)).toBeGreaterThan(
-          parseFloat(rootStyles[1].paddingBlock),
+        // Density is shared by section padding even when the shell has no padding.
+        const headers = actual.styles.filter((s) => s.slot === 'card-header')
+        expect(parseFloat(headers[0].paddingInline)).toBeGreaterThan(
+          parseFloat(headers[1].paddingInline),
         )
         for (const s of rootStyles) {
-          expect(parseFloat(s.border)).toBeGreaterThan(0)
-          expect(s.borderStyle).toBe('solid')
-          expect(s.shadow === 'none').toBe(family !== 'neo-brutalism')
+          if (family === 'flat') {
+            expect(parseFloat(s.border)).toBe(0)
+            expect(s.shadow).toContain('inset')
+          } else {
+            expect(parseFloat(s.border)).toBeGreaterThan(0)
+            expect(s.borderStyle).toBe('solid')
+          }
+          expect(s.shadow === 'none').toBe(family === 'minimalist')
           expect(s.color).not.toBe(s.background)
         }
         const axe = await new AxeBuilder({ page }).analyze()

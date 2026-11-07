@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { createBrowserReferenceCache } from '../helpers/browser-references.js'
+import { expectColorParity } from '../helpers/color-compare.js'
 import {
   browserApps,
   componentReferenceKey,
@@ -28,7 +29,7 @@ for (const family of supportedStyleFamilies)
         })
         await page.goto(componentUrl(app, family, query))
         const actual = await sample(page)
-        expect(actual).toEqual(reference)
+        expectColorParity(actual, reference)
         expectComponentSources('switch', family, app)
         await expect(page.locator('html')).toHaveClass(mode === 'dark' ? /dark/ : '')
         const fixture = page.getByTestId('switch-fixture')
@@ -38,7 +39,7 @@ for (const family of supportedStyleFamilies)
         await expect(off).not.toBeChecked()
         await expect(on).toBeChecked()
         await expect(disabled).toBeDisabled()
-        await expect(disabled).toHaveCSS('opacity', '0.5')
+        await expect(disabled).toHaveCSS('opacity', family === 'neo-brutalism' ? '0.6' : family === 'minimalist' ? '0.4' : '0.45')
         await expectComponentTargets(fixture, '[data-slot="switch"]', 3)
         const submit = () => fixture.getByRole('button', { name: 'Submit preferences' }).click()
         const result = fixture.getByTestId('switch-form-result')
