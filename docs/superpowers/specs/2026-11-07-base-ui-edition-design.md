@@ -53,7 +53,7 @@ Out of scope: porting the other 13 Radix components; accepting React version ran
 - `radix-nova`, `new-york` → `radix`
 - each `base-*` style listed by the pinned `shadcn` 4.22.1 → `base` (the exact list is recorded in the catalog alongside the pin and covered by a test that reads it from the pinned package)
 - no `components.json` → `radix` (unchanged default for Ombelle-initialized projects)
-- any other style → `UNSUPPORTED_PROJECT`: ``Style `<style>` isn't supported; Ombelle supports `radix-nova`, `new-york` and shadcn's `base-*` styles``
+- any other style → `UNSUPPORTED_PROJECT` for component commands: ``Style `<style>` isn't supported; Ombelle supports `radix-nova`, `new-york` and shadcn's `base-*` styles``
 
 The three duplicated style checks in `plan/components.ts`, `plan/component-preset.ts` and `plan/recipe.ts` are replaced by the single detected edition. `plan/theme.ts` writes the full theme for `base` projects. For unknown styles, `theme add` keeps today's palette-only behaviour, because it writes only CSS; component commands reject them as above.
 
@@ -102,7 +102,7 @@ A beside component is compiled with prefixed slots (`data-slot="ombelle-button"`
 
 | Situation | Code | Message |
 | --- | --- | --- |
-| Unknown `components.json` style | `UNSUPPORTED_PROJECT` | Names the style and the supported ones |
+| Unknown `components.json` style (component commands; `theme add` stays palette-only) | `UNSUPPORTED_PROJECT` | Names the style and the supported ones |
 | Unported component on `base` | `UNSUPPORTED_PROJECT` | Names the component and lists available ones |
 | Edition differs from lock | `FILE_CONFLICT` | Names both editions |
 | Unowned file without resolution | `FILE_CONFLICT` (exit 4) | Names `--overwrite` and `--beside` |
