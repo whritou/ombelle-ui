@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
-import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, packageManagers, publishedInstaller, snapshotInstallCommand } from './install-command'
+import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, packageManagers, publishedInstaller, siteFamilyOrder, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
@@ -115,7 +115,7 @@ it('offers ombelle only from the minimum published installer', () => {
   // A restored ombelle draft keeps its own family visible.
   expect(offeredStyleFamilies('ombelle', { version: '0.3.0' })).toContain('ombelle')
   expect(offeredStyleFamilies()).toEqual(offeredStyleFamilies(undefined, publishedInstaller))
-  expect(offeredStyleFamilies(undefined, { version: '0.3.0' })).toEqual(['flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])
+  expect(offeredStyleFamilies(undefined, { version: '0.3.0' })).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
 })
 
 it('holds back commands for glass material settings until the installer that accepts them is published', async () => {
@@ -133,4 +133,9 @@ it('holds back commands for glass material settings until the installer that acc
   expect(materialInstallBlocked({ overrides: { radiusRem: 1 } }, old)).toBe(false)
   expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, old)).toBe(true)
   expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, next)).toBe(false)
+})
+
+it('the site lists style families as Ombelle, Minimalist, Neo-Brutalism, Flat, Liquid Glass', () => {
+  expect(offeredStyleFamilies()).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+  expect(siteFamilyOrder).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
 })
