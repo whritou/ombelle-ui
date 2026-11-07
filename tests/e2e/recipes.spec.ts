@@ -21,7 +21,7 @@ test.beforeAll(() =>
   fs.rmSync('.artifacts/recipe-measurements.json', { force: true }),
 )
 test.afterAll(async () => {
-  if (rows.length === 90) {
+  if (process.env.OMBELLE_RECIPE_PREVIEW_ONLY !== '1') {
     await validateRecipeMeasurements(rows)
     fs.writeFileSync(
       '.artifacts/recipe-measurements.json',

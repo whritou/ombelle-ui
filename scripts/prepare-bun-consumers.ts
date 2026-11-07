@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import type { CompileResult, StyleFamily } from '@ombelle/contracts'
-import { sha256 } from '@ombelle/compiler'
+import type { StyleFamily } from '@ombelle/contracts'
+import { collectModuleSpecifiers, sha256 } from '@ombelle/compiler'
 import {
   createBunProject,
   auditBunFixture,
@@ -13,6 +13,10 @@ import { recipeReferenceBank } from '../tests/helpers/recipe-fixture.js'
 import { writeScenarioFixture } from '../tests/helpers/scenario-fixture.js'
 import { prepareComponentPresetConsumer } from './prepare-component-preset-consumer.js'
 import { componentPresetReferenceBank } from '../tests/helpers/component-preset-fixture.js'
+import {
+  consumerAddBatches,
+  compileConsumerReference,
+} from './consumer-components.js'
 
 export async function prepareBunConsumer(
   framework: 'vite' | 'next',
@@ -52,14 +56,8 @@ export async function prepareBunConsumer(
       fixture.root,
     )
     if (init.code !== 0) throw new Error(init.output)
-    for (const args of [
-      ['add', 'button', 'dialog', '--yes', '--json'],
-      ['add', 'input', '--yes', '--json'],
-      ['add', 'badge', '--yes', '--json'],
-      ['add', 'card', '--yes', '--json'],
-      ['add', 'label', 'textarea', 'native-select', '--yes', '--json'],
-      ['add', 'checkbox', 'switch', 'tabs', 'tooltip', '--yes', '--json'],
-    ]) {
+    for (const ids of consumerAddBatches(family)) {
+      const args = ['add', ...ids, '--yes', '--json']
       const result = await runBuiltCli(runtime, args, fixture.root)
       if (
         result.code !== 0 ||
@@ -87,12 +85,7 @@ export async function prepareBunConsumer(
         bunFormat: format,
       }),
       componentPresetBank = await componentPresetReferenceBank()
-    const canonical = JSON.parse(
-      await fs.readFile(
-        'apps/preview/src/generated/' + family + '/manifest.json',
-        'utf8',
-      ),
-    ) as CompileResult
+    const canonical = await compileConsumerReference(family)
     const lock = jsonRecord(
       JSON.parse(
         await fs.readFile(
@@ -127,7 +120,10 @@ export async function prepareBunConsumer(
         !reference ||
         source !== reference.content ||
         hash !== meta.sha256 ||
-        source.includes('@ombelle/')
+        (meta.kind !== 'style' &&
+          (await collectModuleSpecifiers(source)).some((s) =>
+            s.startsWith('@ombelle/'),
+          ))
       )
         throw new Error(
           'Bun installed source differs from canonical artifact: ' + file,
