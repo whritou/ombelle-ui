@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.7.1 — 8 November 2026
+
+- Generated editor recipes pass Vite's default unused-binding checks: instance IDs are emitted only for specimens that need them, and scoped glass filters no longer retain an unused document-root variable.
+- Remove the unused React namespace import from the Base UI Button so ordinary Base UI components pass Vite's default TypeScript production build.
+- Reapplying an unchanged preset to an import-only stylesheet is a no-op. Parser-retained trailing whitespace no longer causes false managed-token conflicts; real token and priority edits still conflict.
+
 ## 0.7.0 — 7 November 2026
 
 - Support shadcn's Base UI styles (`base-*`). The CLI detects the edition from `components.json`, records it in the lock and applies the full theme. All 24 components install in Base UI projects; the 14 that use Radix have reviewed Base UI templates built on `@base-ui/react` 1.9.0 that keep Ombelle's API and styling. A browser parity test compares both editions. See [decision 0005](docs/decisions/0005-base-ui-edition.md).
