@@ -110,6 +110,11 @@ export function specimenExports(specimen: RecipeSpecimen): string[] {
   return [...names].sort()
 }
 
+export function specimenUsesLocalIds(specimen: RecipeSpecimen): boolean {
+  return Object.values(specimen.props).some(value => value && typeof value === 'object' && 'localId' in value) ||
+    specimen.children.some(child => typeof child !== 'string' && specimenUsesLocalIds(child))
+}
+
 export function renderRecipeSpecimen(specimen: RecipeSpecimen): string {
   const props = Object.entries(specimen.props)
     .filter(([, value]) => value !== undefined)

@@ -15,7 +15,7 @@ import { recipeTemplateSlots, scopeRecipeGlassFilter, scopeRecipeTemplate } from
 import { sha256 } from './hash.js'
 import { compileRecipe } from './recipe.js'
 import { resolvePreset } from './resolve.js'
-import { describeComponentRecipe, renderRecipeSpecimen, specimenExports } from './recipe-specimen.js'
+import { describeComponentRecipe, renderRecipeSpecimen, specimenExports, specimenUsesLocalIds } from './recipe-specimen.js'
 import { validateRecipeDarkSelector } from './recipe-styles.js'
 
 type CompileInput = { recipe: unknown; darkSelector?: string }
@@ -60,6 +60,7 @@ export async function compileComponentRecipe(input: CompileInput): Promise<Compo
   const glass = preset.data.styleFamily === 'liquid-glass'
   const primitiveNames = specimenExports(specimen).join(', ')
   const jsx = renderRecipeSpecimen(specimen)
+  const localIds = specimenUsesLocalIds(specimen) ? 'const instanceId = React.useId(); ' : ''
   const definition = glass
     ? `\nimport './${component}.css'
 import { LiquidGlassFilter } from './liquid-glass-filter'
@@ -70,7 +71,7 @@ export function ${name}() {
   const { ${primitiveNames} } = React.useMemo(() => createScopedPrimitives(scope, instance), [instance])
   return <><LiquidGlassFilter scope={scope} instance={instance} />${jsx}</>
 }\n`
-    : `\nimport './${component}.css'\nconst { ${primitiveNames} } = createScopedPrimitives(${JSON.stringify(scope)})\nexport function ${name}() { const instanceId = React.useId(); return ${jsx} }\n`
+    : `\nimport './${component}.css'\nconst { ${primitiveNames} } = createScopedPrimitives(${JSON.stringify(scope)})\nexport function ${name}() { ${localIds}return ${jsx} }\n`
   const styles = result.artifacts.filter(artifact => artifact.kind === 'style' && artifact.logicalPath !== 'styles/ui-tokens.css')
   const drafts: Omit<Artifact, 'sha256'>[] = [
     { logicalPath: `${base}/${component}.tsx`, kind: 'component',

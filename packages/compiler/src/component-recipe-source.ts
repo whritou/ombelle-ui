@@ -44,6 +44,7 @@ export function scopeRecipeGlassFilter(source: string): string {
     .replace('const tokens = getComputedStyle(document.documentElement)', 'const tokens = getComputedStyle(surfaceRef.current!)')
     .replace('glassSurfaceFor(last.target)', 'glassSurfaceFor(last.target, pointerSelector)')
     .replace('const next = readMaterial()', 'const next = readMaterial(surfaceRef.current!)')
+    .replace('const root = document.documentElement\n    setChromium(true)', 'setChromium(true)')
     .replace("observer.observe(root, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] })",
       "for (let element: Element | null = surfaceRef.current; element; element = element.parentElement)\n      observer.observe(element, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] })")
     .replace("      root.style.removeProperty('--glass-refraction')\n", '')

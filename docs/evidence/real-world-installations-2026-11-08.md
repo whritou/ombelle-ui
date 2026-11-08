@@ -2,7 +2,9 @@
 
 The published Ombelle CLI successfully installed presets and ordinary components in six fresh Vite and Next.js projects after React versions were aligned. All 92 editor-recipe installations succeeded across the four Radix projects. All three Next.js production builds passed. All three Vite production builds failed on unused bindings in generated source. Reapplying a preset also produced a false ownership conflict in a plain Vite project.
 
-This was a test and investigation task. No application or compiler fixes were made.
+The initial run was a test and investigation task. The later local fixes and their verification are recorded under "Follow-up fixes" below; the original published-package results remain unchanged.
+
+**Local follow-up:** the three Vite consumers now pass their normal production builds with the fixes in this checkout. The published 0.7.0 results below describe the original run.
 
 **Base UI is supported in 0.7.0.** All 23 ordinary catalog components tested here installed successfully in both Base UI projects, and their browser checks passed. The Next.js Base UI production build also passed. The Vite Base UI build failure is an unused-import defect in the generated Button, not an edition rejection. Only the separate editor-recipe (`add --recipe`) and scoped component-preset (`add button --preset`) paths remain Radix-only in the tested release. This distinction is explicit in `docs/decisions/0005-base-ui-edition.md` and enforced by `packages/cli/src/project/edition.ts`.
 
@@ -139,6 +141,27 @@ C:\Users\whrit\.codex\visualizations\2026\11\08\01a1bbd4-18c5-73e0-ba99-6b0cad85
 | `next-shadcn-base` | `4420c1a65d19919986ed588bd627d43038821cfc` |
 
 The additional `vite-theme-repro` directory contains the minimal theme-conflict reproduction. No GitHub repositories or deployments were created.
+
+## Follow-up fixes
+
+The three reported defects are fixed in the local source checkout:
+
+- Stable editor recipes generate an instance ID only when their specimen needs local control or label IDs. Glass recipes retain their instance isolation; their scoped filter also drops a root variable whose uses had already been removed by the transform.
+- The Base UI Button template no longer imports an unused React namespace. The generated catalog was rebuilt from that reviewed template.
+- Theme planning accepts trailing whitespace retained by the CSS parser when comparing managed values, without rewriting unchanged declarations. Existing managed-value and priority edits still produce conflicts.
+
+Regression tests were first observed failing on the original defects, then passing after the fixes. The new source checks invoke the actual TypeScript compiler with `noUnusedLocals` and `noUnusedParameters`, covering all ordinary Base UI components, every stable catalog editor recipe, and glass recipes with and without labeled controls. Theme regression cases cover import-only stylesheets with LF and CRLF input, no-op reapplication, and genuine token edits.
+
+Local verification:
+
+- The 13 focused regression and theme tests passed.
+- Repository typechecking passed.
+- All 1,354 unit tests passed with four workers. The initial default-concurrency run had one snapshot-cache timeout; that existing test also passed in isolation.
+- The complete integration run finished with 594 passes and six failures across 600 cases. Three Yarn cases (`bun-cross-runner`, `minimalist-cli`, and Classic Vite in `yarn-consumers`) and the `upstream` registry case failed certificate verification. The Textarea and Accordion immutable-code cases in `component-recipe-cli` failed with loopback `connect EACCES`. All six passed targeted reruns: the three Yarn-dependent files passed all 11 tests with `NODE_USE_SYSTEM_CA=1`, and the upstream case plus the two snapshot cases passed a separate three-test rerun. TLS verification stayed enabled. These are combined results across runs, not a claim that one full integration invocation was clean.
+- Three clean Vite consumer copies passed their default `tsc -b && vite build`: plain, shadcn Radix, and shadcn Base UI. The two Radix consumers each installed all 23 downloaded recipes. All three consumers reapplied the same preset as a no-op.
+- All 39 browser assertions passed against those actual production builds, with no page exceptions. These follow-up browser runs did not bypass TypeScript.
+
+Follow-up artifacts are retained beside the original evidence: `fixed-consumers.json`, `fixed-browser.json`, `fix-test.log`, `fix-unit.log`, `fix-cache-retry.log`, `fix-integration-configured.log`, `fix-yarn-retries.log`, `fix-integration-last-retries.json`, and the `*-fixed-*` logs and screenshots. Consumer directories use the original names with a `-fixed` suffix. These checks used the rebuilt local CLI; the published `@ombelle-ui/cli@0.7.0` package was not changed or republished.
 
 ## Limits
 
