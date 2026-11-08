@@ -149,7 +149,7 @@ This is local M4 editing, export, explicit snapshot publishing, read-only sharin
 
 ## Hosted install-code inputs
 
-The built private CLI accepts preset codes `ps_<32 lowercase hexadecimal digits>@1` for `init --preset`, `theme add`, and `add button --preset`. It accepts recipe codes `rc_<32 lowercase hexadecimal digits>@1` for `add --recipe`. Bare codes resolve only at `https://ombelle-ui.vercel.app`. The published installer runs the same commands as `npx @ombelle-ui/cli@0.7.0 …` (see the [CLI release](cli-release.md) for verified runners); from a checkout:
+The built private CLI accepts preset codes `ps_<32 lowercase hexadecimal digits>@1` for `init --preset`, `theme add`, and `add button --preset`. It accepts recipe codes `rc_<32 lowercase hexadecimal digits>@1` for `add --recipe`. Bare codes resolve only at `https://ombelle-ui.vercel.app`. The published installer runs the same commands as `npx @ombelle-ui/cli@0.7.1 …` (see the [CLI release](cli-release.md) for verified runners); from a checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js init --preset PRESET_CODE --cwd APP --dry-run --json
@@ -168,7 +168,7 @@ The Button editor offers **Publish recipe…** only after the current draft comp
 
 Successful publication links to `/recipes/rc_<32 lowercase hexadecimal digits>/1`. This read-only page checks current availability, displays both hashes and pinned releases, previews the verified recipe, and offers selectable code commands and recipe JSON. It does not replace local drafts. Clipboard failures leave selectable text; downloads contain validated normalized recipe bytes. Published snapshots remain drafts with no automatic expiry while the service operates, no anonymous edit/delete action, and operator withdrawal that cannot recall downloaded copies or installed source.
 
-The page shows the published `npx @ombelle-ui/cli@0.7.0` command. The official origin uses code-only inputs; alternate origins retain explicit hash pins. A recipe installs one isolated Button and preserves saved project defaults. Changing the embedded recipe's content requires a new revision before installing it under an existing identity.
+The page shows the published `npx @ombelle-ui/cli@0.7.1` command. The official origin uses code-only inputs; alternate origins retain explicit hash pins. A recipe installs one isolated Button and preserves saved project defaults. Changing the embedded recipe's content requires a new revision before installing it under an existing identity.
 
 ## Base UI and shadcn projects
 

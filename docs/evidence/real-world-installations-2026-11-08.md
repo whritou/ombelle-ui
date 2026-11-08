@@ -4,7 +4,7 @@ The published Ombelle CLI successfully installed presets and ordinary components
 
 The initial run was a test and investigation task. The later local fixes and their verification are recorded under "Follow-up fixes" below; the original published-package results remain unchanged.
 
-**Local follow-up:** the three Vite consumers now pass their normal production builds with the fixes in this checkout. The published 0.7.0 results below describe the original run.
+**Release follow-up:** these fixes are now published as `@ombelle-ui/cli@0.7.1`. All three Vite consumers also pass their normal production builds using the exact release tarball. The 0.7.0 results below describe the original run.
 
 **Base UI is supported in 0.7.0.** All 23 ordinary catalog components tested here installed successfully in both Base UI projects, and their browser checks passed. The Next.js Base UI production build also passed. The Vite Base UI build failure is an unused-import defect in the generated Button, not an edition rejection. Only the separate editor-recipe (`add --recipe`) and scoped component-preset (`add button --preset`) paths remain Radix-only in the tested release. This distinction is explicit in `docs/decisions/0005-base-ui-edition.md` and enforced by `packages/cli/src/project/edition.ts`.
 
@@ -162,6 +162,12 @@ Local verification:
 - All 39 browser assertions passed against those actual production builds, with no page exceptions. These follow-up browser runs did not bypass TypeScript.
 
 Follow-up artifacts are retained beside the original evidence: `fixed-consumers.json`, `fixed-browser.json`, `fix-test.log`, `fix-unit.log`, `fix-cache-retry.log`, `fix-integration-configured.log`, `fix-yarn-retries.log`, `fix-integration-last-retries.json`, and the `*-fixed-*` logs and screenshots. Consumer directories use the original names with a `-fixed` suffix. These checks used the rebuilt local CLI; the published `@ombelle-ui/cli@0.7.0` package was not changed or republished.
+
+## Publication follow-up
+
+CLI 0.7.1 was published on 8 November 2026 from `2d0510b` and verified as npm's `latest` version. All six workspace packages were bumped to 0.7.1; compatibility and recipe format versions were retained. The exact candidate passed 29 focused release checks and all three Vite production builds, including 46 downloaded recipe installations across the two Radix consumers and no-op preset reapplication in all three. A separately downloaded registry tarball matched the candidate's SHA-512 integrity, and the public npm command printed help successfully. Only after those checks were the advertised installer version references updated.
+
+Release evidence is retained under the original artifact directory in `release-0.7.1-tests.log`, `release-0.7.1-consumers.json`, `published-0.7.1.json`, and `registry-0.7.1-help.log`. The npm package is published; deployment of the website's updated install commands follows the release PR merge.
 
 ## Limits
 
