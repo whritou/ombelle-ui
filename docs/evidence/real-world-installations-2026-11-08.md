@@ -4,6 +4,8 @@ The published Ombelle CLI successfully installed presets and ordinary components
 
 This was a test and investigation task. No application or compiler fixes were made.
 
+**Base UI is supported in 0.7.0.** All 23 ordinary catalog components tested here installed successfully in both Base UI projects, and their browser checks passed. The Next.js Base UI production build also passed. The Vite Base UI build failure is an unused-import defect in the generated Button, not an edition rejection. Only the separate editor-recipe (`add --recipe`) and scoped component-preset (`add button --preset`) paths remain Radix-only in the tested release. This distinction is explicit in `docs/decisions/0005-base-ui-edition.md` and enforced by `packages/cli/src/project/edition.ts`.
+
 ## Results
 
 | Fresh project | Preset install | Ordinary components | Editor recipes | Default production build |
