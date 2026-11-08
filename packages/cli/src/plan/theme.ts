@@ -158,7 +158,7 @@ export async function planTheme(
       if (
         previous &&
         (!existing ||
-          existing.value !== previous.value ||
+          existing.value.trimEnd() !== previous.value ||
           Boolean(existing.important) !== (previous.important ?? false))
       ) {
         plan.diagnostics.push({
@@ -176,7 +176,9 @@ export async function planTheme(
         existedBefore: previous?.existedBefore ?? Boolean(existing),
       })
       if (existing) {
-        if (existing.value !== values[property])
+        // PostCSS retains trailing whitespace in custom properties without a
+        // final semicolon. Leave those bytes intact when the token is unchanged.
+        if (existing.value.trimEnd() !== values[property])
           existing.value = values[property]
       } else {
         const declaration = postcss.decl({

@@ -70,6 +70,27 @@ it('allows unrelated stylesheet edits but conflicts on modified managed tokens',
   const conflict = await planTheme(await inspectProject(root), await result())
   expect(conflict.changes.some((c: any) => c.action === 'conflict')).toBe(true)
 })
+it.each(['\n', '\r\n'])('reapplies a preset to import-only CSS with %j newlines without writes', async newline => {
+  const root = await createProject('vite')
+  roots.push(root)
+  await fs.rm(path.join(root, 'components.json'))
+  const file = path.join(root, 'src/index.css')
+  await fs.writeFile(file, '@import "tailwindcss";' + newline)
+  const compiled = await result()
+  await materialize(await planTheme(await inspectProject(root), compiled))
+  const original = await fs.readFile(file, 'utf8')
+  const repeated = await planTheme(await inspectProject(root), compiled)
+  expect(repeated.diagnostics).toEqual([])
+  expect(repeated.changes.every(change => change.action === 'noop')).toBe(true)
+  expect(await fs.readFile(file, 'utf8')).toBe(original)
+
+  // The last declaration still belongs to Ombelle: a real edit must conflict.
+  await fs.writeFile(file, original.replace('--shadow-y: 4px', '--shadow-y: 9px'))
+  const conflict = await planTheme(await inspectProject(root), compiled)
+  expect(conflict.diagnostics).toContainEqual(expect.objectContaining({
+    code: 'FILE_CONFLICT', path: ':root/--shadow-y',
+  }))
+})
 it.each([
   ':root { --primary:red; --primary:blue; }',
   ':root { --primary:red; } :root { --other:blue; }',
