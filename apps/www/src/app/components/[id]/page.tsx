@@ -59,7 +59,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         <section aria-labelledby="installation" className="mt-14 scroll-mt-24">
           <h2 id="installation" className="text-2xl font-black">Installation</h2>
           <p className="mt-2 text-muted-foreground">
-            Run in a project initialized with an Ombelle preset (see <a href="/#get-started" className="font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Get started</a>). The component uses the saved project preset. Run the command from your app folder; it shows the changes and asks before writing.
+            Run in a project initialized with an Ombelle preset (see <a href="/docs/getting-started" className="font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Get started</a>). The component uses the saved project preset. Run the command from your app folder; it shows the changes and asks before writing.
           </p>
           {installable ? (
             <>

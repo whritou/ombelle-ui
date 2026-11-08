@@ -26,7 +26,7 @@ export const familyOptions: { value: StyleFamily; label: string }[] = offeredSty
   value,
   label: familyLabels[value],
 }))
-const glassDocs = 'https://github.com/whritou/ombelle-ui/blob/main/docs/components/liquid-glass.md'
+const glassDocs = '/docs/style-families#liquid-glass'
 const modeOptions = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
@@ -45,7 +45,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
   source: string
   styles: Partial<Record<StyleFamily, string>>
 }) {
-  const [family, setFamily] = useState<StyleFamily>('flat')
+  const [family, setFamily] = useState<StyleFamily>(familyOptions[0]!.value)
   const [glassPreset, setGlassPreset] = useState<StartingPresetId>(defaultGlassPresetId)
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const [status, setStatus] = useState<'connecting' | 'ready' | 'failed'>('connecting')

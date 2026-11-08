@@ -5,7 +5,7 @@ import { componentEditorLink } from '../../editor/editable-components'
 import { componentDocs } from './catalog'
 
 const groups = [
-  { title: 'Getting started', links: [{ href: '/components', label: 'Overview' }, { href: '/#get-started', label: 'Installation' }] },
+  { title: 'Getting started', links: [{ href: '/components', label: 'Overview' }, { href: '/docs/getting-started', label: 'Installation' }, { href: '/docs', label: 'Documentation' }] },
   { title: 'Components', links: componentDocs.map(doc => ({ href: `/components/${doc.id}`, label: doc.name })) },
   { title: 'Editors', links: [{ href: '/editor/preset', label: 'Preset editor' }, componentEditorLink] },
 ]

@@ -11,7 +11,7 @@ import { ThemeToggle } from './theme'
 export function SiteHeader() {
   const pathname = usePathname()
   const current = (href: string) => {
-    const section = href === '/components' || href === componentEditorLink.href
+    const section = href === '/docs' || href === '/components' || href === componentEditorLink.href
     return href === pathname || (section && pathname.startsWith(`${href}/`)) ? 'page' : undefined
   }
   // Pages that embed preview iframes scroll the header away: a pinned header

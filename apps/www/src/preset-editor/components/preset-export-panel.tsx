@@ -133,7 +133,7 @@ export function PresetExportPanel({
           ))}
         </ul>
       </details>
-      <h3>Install with the private local CLI</h3>
+      <h3>Install with the CLI</h3>
       <label htmlFor="preset-install">Installation path</label>
       <select
         id="preset-install"

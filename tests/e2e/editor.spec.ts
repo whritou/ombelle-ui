@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { compileRecipe } from '@ombelle/compiler'
-import { createEditorDraft } from '../../apps/www/src/editor/model.js'
+import { validateRecipe } from '@ombelle/contracts'
+import { changeDraftFamily, createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
 import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
@@ -384,7 +385,7 @@ test('sandboxed preview receives validated recipe updates only over its port', a
   const frame = iframe.contentFrame()
   const button = frame.locator('[data-slot="recipe-button"]')
   await expect(button).toHaveText('Create project')
-  const initial = await compileRecipe({ recipe: exampleRecipe })
+  const initial = await compileRecipe({ recipe: changeDraftFamily({ storageVersion: 1, recipe: validateRecipe(exampleRecipe) }, 'ombelle').recipe })
   expect(exampleRecipe.presetRef.id).toBe('builtin-neo-brutalism')
   const scope = await button.getAttribute('data-ombelle-recipe')
   expect(scope).toBe(initial.scope)

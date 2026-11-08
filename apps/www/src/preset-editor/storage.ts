@@ -1,4 +1,5 @@
 import { canonicalize } from '@ombelle/compiler'
+import { defaultSiteFamily } from '../snapshots/install-command'
 import { createPresetDraft, validateDraftEnvelope } from './model'
 import { createPresetHistory, type PresetHistory } from './history'
 
@@ -46,7 +47,7 @@ export function loadPresetSession(storage: PresetStorage): {
   recoveryRaw: string | null
   warning: string | null
 } {
-  const fallback = createPresetHistory(createPresetDraft('flat'))
+  const fallback = createPresetHistory(createPresetDraft(defaultSiteFamily))
   let raw: string | null
   try {
     raw = storage.getItem(draftStorageKey)

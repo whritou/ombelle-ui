@@ -331,9 +331,9 @@ test('restores raw draft and history after refresh', async ({ page }) => {
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
     .click()
-  // Reset returns to the built-in flat preset's border width.
+  // Reset returns to the fresh draft's Ombelle family border width.
   await expect(page.getByLabel('Border width', { exact: true })).toHaveValue(
-    String(getCatalog('0.1.0').presets.flat.design.borderWidthPx),
+    String(getCatalog('0.1.0').presets.ombelle.design.borderWidthPx),
   )
 })
 test('preserves explicit edits through confirmed and cancelled family changes', async ({
@@ -351,7 +351,7 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
   await page.keyboard.press('Escape')
   await familyButton(page, 'Neo-brutalism').click()
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
+  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-pressed', 'true')
   await familyButton(page, 'Neo-brutalism').click()
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
@@ -366,7 +366,7 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
     'project_preset',
   )
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
-  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
+  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-pressed', 'true')
 })
 test('downloads corrupt and unknown-version recovery before reset', async ({
   page,
@@ -773,7 +773,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
   await page.keyboard.press('Escape')
   await expect(confirmDialog).toBeHidden()
-  await expect(familyButton(page, 'Flat')).toHaveAttribute('aria-pressed', 'true')
+  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-pressed', 'true')
   await expect(family).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeVisible()

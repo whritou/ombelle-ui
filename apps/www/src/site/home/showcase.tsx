@@ -4,13 +4,12 @@ import * as SwitchPrimitive from '@radix-ui/react-switch'
 import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import { useId, useState } from 'react'
 import { ToggleGroup } from '../toggle-group'
+import { familyHeadings, siteStableFamilies } from '../families'
 
-export type StyleKey = 'flat' | 'minimal' | 'brutal'
-export const STYLES: { value: StyleKey; label: string }[] = [
-  { value: 'flat', label: 'Flat' },
-  { value: 'minimal', label: 'Minimalist' },
-  { value: 'brutal', label: 'Neo-Brutalism' },
-]
+export type StyleKey = 'ombelle' | 'flat' | 'minimal' | 'brutal'
+const styleKeys = { ombelle: 'ombelle', flat: 'flat', minimalist: 'minimal', 'neo-brutalism': 'brutal' } as const
+export const STYLES: { value: StyleKey; label: string }[] = siteStableFamilies.map(family => ({ value: styleKeys[family], label: familyHeadings[family] }))
+export const defaultShowcaseStyle = STYLES[0]!.value
 
 export function StyleSelector({ value, onChange }: { value: StyleKey; onChange: (v: StyleKey) => void }) {
   return (
@@ -20,7 +19,7 @@ export function StyleSelector({ value, onChange }: { value: StyleKey; onChange: 
         value={value}
         options={STYLES}
         onValueChange={onChange}
-        className="inline-flex rounded-full border border-border bg-card p-1 shadow-soft"
+        className="inline-flex max-w-full flex-wrap rounded-2xl border border-border bg-card p-1 shadow-soft sm:rounded-full"
         itemClassName="min-h-10 rounded-full px-3 text-sm font-semibold sm:px-4 text-muted-foreground transition-colors hover:text-foreground data-[state=on]:bg-foreground data-[state=on]:text-background"
       />
       <a href="/editor/preset" className="o-glass inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-muted-foreground hover:text-foreground">

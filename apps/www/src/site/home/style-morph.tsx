@@ -1,11 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { HeroComposition, STYLES, type StyleKey } from './showcase'
+import { defaultShowcaseStyle, HeroComposition, STYLES, type StyleKey } from './showcase'
 
 const COPY: Record<StyleKey, { tag: string; title: string; body: string }> = {
-  flat: {
+  ombelle: {
     tag: 'Style 01',
+    title: 'Ombelle',
+    body: 'Pill buttons, rounded cards, fine ink outlines, and crisp offset shadows. A playful signature with pink accents and clear structure.',
+  },
+  flat: {
+    tag: 'Style 04',
     title: 'Flat',
     body: 'Color blocks and zero noise. Soft surfaces, generous radius, no borders — everything reads at a glance.',
   },
@@ -22,6 +27,7 @@ const COPY: Record<StyleKey, { tag: string; title: string; body: string }> = {
 }
 
 const SECTION_TONE: Record<StyleKey, { section: string; heading: string; sub: string }> = {
+  ombelle: { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
   flat: { section: 'bg-muted', heading: 'text-foreground', sub: 'text-muted-foreground' },
   minimal: { section: 'bg-background', heading: 'text-foreground', sub: 'text-muted-foreground' },
   brutal: { section: 'bg-primary', heading: 'text-primary-foreground', sub: 'text-primary-foreground' },
@@ -29,11 +35,11 @@ const SECTION_TONE: Record<StyleKey, { section: string; heading: string; sub: st
 
 /**
  * Full-height pinned section: the page scrolls through a tall track while the
- * visible panel stays fixed, morphing Flat → Minimalist → Neo-Brutalism.
+ * visible panel stays fixed, stepping through every offered stable family.
  */
 export function StyleMorphSection() {
   const trackRef = useRef<HTMLElement>(null)
-  const [style, setStyle] = useState<StyleKey>('flat')
+  const [style, setStyle] = useState<StyleKey>(defaultShowcaseStyle)
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
@@ -45,7 +51,7 @@ export function StyleMorphSection() {
       const total = el.offsetHeight - (window.innerHeight - 64)
       const p = total > 0 ? Math.min(1, Math.max(0, -el.getBoundingClientRect().top / total)) : 0
       setProgress(p)
-      setStyle(STYLES[Math.min(2, Math.floor(p * 3))]?.value ?? 'flat')
+      setStyle(STYLES[Math.min(STYLES.length - 1, Math.floor(p * STYLES.length))]?.value ?? defaultShowcaseStyle)
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update)
@@ -66,7 +72,7 @@ export function StyleMorphSection() {
     const total = el.offsetHeight - (window.innerHeight - 64)
     const top = el.getBoundingClientRect().top + window.scrollY
     const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches
-    window.scrollTo({ top: top - 64 + (total * (i + 0.5)) / 3, behavior: smooth ? 'smooth' : 'auto' })
+    window.scrollTo({ top: top - 64 + (total * (i + 0.5)) / STYLES.length, behavior: smooth ? 'smooth' : 'auto' })
   }
 
   const tone = SECTION_TONE[style]
@@ -74,14 +80,14 @@ export function StyleMorphSection() {
   const brutal = style === 'brutal'
 
   return (
-    <section aria-labelledby="compare" ref={trackRef} className="relative h-[340svh]">
+    <section aria-labelledby="compare" ref={trackRef} className="relative" style={{ height: `${STYLES.length * 100 + 40}svh` }}>
       <div
         data-style={style}
         className={`o-kit sticky top-16 flex h-[calc(100dvh-4rem)] flex-col justify-center overflow-hidden transition-colors duration-500 ${tone.section}`}
       >
         <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 sm:gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-center">
           <div>
-            <p className={`font-mono text-xs uppercase tracking-[0.2em] ${brutal ? tone.sub : 'text-primary'}`}>One component. Three characters.</p>
+            <p className={`font-mono text-xs uppercase tracking-[0.2em] ${brutal ? tone.sub : 'text-primary'}`}>One component. {STYLES.length} style families.</p>
             <div key={style} className="animate-morph-in">
               <p className={`mt-4 font-mono text-xs uppercase tracking-[0.2em] sm:mt-6 ${tone.sub}`}>{copy.tag}</p>
               <h2 id="compare" className={`mt-2 text-4xl font-black leading-[0.95] sm:text-5xl md:text-7xl ${tone.heading}`}>

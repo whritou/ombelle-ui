@@ -3,7 +3,7 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { Check, Copy, FlaskConical, Minus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { glassOnSite } from '../components/catalog'
+import { componentDocs, glassOnSite } from '../components/catalog'
 import { ToggleGroup } from '../toggle-group'
 import { familyHeadings, siteStableFamilies } from '../families'
 
@@ -26,23 +26,8 @@ export function useCopy() {
 /* Component × style matrix                                            */
 /* ------------------------------------------------------------------ */
 type Status = 'stable' | 'experimental' | 'unavailable'
-// Rows follow docs/03-components-styles-accessibility.md; the glass column
-// reads the contracts' compatibility table (docs/components/liquid-glass.md),
-// limited to what the published installer accepts.
-const COMPONENTS = [
-  { id: 'button', name: 'Button', api: 'variant, size, loading', states: 'Default, hover, focus, pressed, disabled, loading', basis: '<button> or valid link' },
-  { id: 'badge', name: 'Badge', api: 'variant, className', states: 'Default, destructive', basis: '<span>' },
-  { id: 'card', name: 'Card', api: 'Root, Header, Title, Description, Content, Footer', states: 'Default, dense', basis: '<section> or <div> with headings' },
-  { id: 'input', name: 'Input', api: 'Native input props, invalid, disabled', states: 'Empty, filled, focus, invalid, disabled', basis: '<input>' },
-  { id: 'textarea', name: 'Textarea', api: 'Native textarea props', states: 'Empty, filled, focus, invalid, disabled', basis: '<textarea>' },
-  { id: 'label', name: 'Label', api: 'Association, native label props', states: 'Default, required', basis: '<label>' },
-  { id: 'checkbox', name: 'Checkbox', api: 'checked, mixed, disabled, onChange', states: 'Unchecked, checked, mixed, focus, invalid', basis: 'Primitive with form behavior' },
-  { id: 'switch', name: 'Switch', api: 'checked, onCheckedChange', states: 'Off, on, focus, disabled', basis: 'Primitive with switch role' },
-  { id: 'native-select', name: 'Native Select', api: 'Native select props, options', states: 'Default, selected, focus, invalid, disabled', basis: '<select>' },
-  { id: 'dialog', name: 'Dialog', api: 'Trigger, Content, Title, Description, Close', states: 'Open, closed, scroll, focus return', basis: 'Reviewed dialog primitive' },
-  { id: 'tabs', name: 'Tabs', api: 'Root, List, Trigger, Content, orientation', states: 'Active, inactive, focus, disabled', basis: 'Reviewed tabs primitive' },
-  { id: 'tooltip', name: 'Tooltip', api: 'Provider, Trigger, Content', states: 'Keyboard, hover, dismissal', basis: 'Reviewed tooltip primitive' },
-] as const
+// A short sample of the same contracts shown in the full component directory.
+const COMPONENTS = componentDocs.filter(doc => ['button', 'card', 'input', 'dialog', 'select', 'tabs'].includes(doc.id))
 const COLS = [...siteStableFamilies.map((family) => familyHeadings[family]), 'Liquid Glass']
 
 function StatusDot({ s }: { s: Status }) {
@@ -59,7 +44,8 @@ export function MatrixSection() {
       <div className="grid gap-6 md:grid-cols-[1fr_1fr] md:items-end">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">The alpha catalogue</p>
-          <h2 id="matrix" className="mt-3 text-4xl font-black md:text-5xl">12 components.<br />An honest matrix.</h2>
+          <h2 id="matrix" className="mt-3 text-4xl font-black md:text-5xl">{componentDocs.length} components.<br />Find your starting point.</h2>
+          <p className="mt-4 text-muted-foreground">A few essentials from the catalog, with the same API across style families.</p>
         </div>
       </div>
       <div className="mt-12 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -86,6 +72,10 @@ export function MatrixSection() {
               ))}
             </tbody>
           </table>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-4 text-sm">
+            <span className="text-muted-foreground">{componentDocs.length - COMPONENTS.length} more available</span>
+            <a href="/components" className="font-semibold text-primary underline-offset-4 hover:underline">Explore all {componentDocs.length} components →</a>
+          </div>
         </div>
         <aside aria-live="polite" aria-label="Component contract" className="flex flex-col rounded-2xl border border-border bg-background p-6 lg:sticky lg:top-24 lg:self-start">
           <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Component contract</p>
@@ -199,7 +189,7 @@ const SCENARIOS = [
   },
   {
     id: 'glass', label: 'Liquid glass',
-    blurb: 'In a liquid glass project, experimental components install with a notice. Form controls are refused before anything is written.',
+    blurb: 'Liquid Glass is experimental for every catalog component, including form controls. The plan includes a notice before installation.',
     cmd: 'add card tabs',
     out: ['~ would create components/ui/card.tsx + card.css', '~ would create components/ui/tabs.tsx + tabs.css', '! Notice: liquid-glass is experimental for card, tabs; see docs/components/liquid-glass.md for limitations', '? Apply these changes? [y/N]'],
   },

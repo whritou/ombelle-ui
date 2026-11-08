@@ -10,7 +10,7 @@ export function SiteFooter() {
         <div className="space-y-2">
           <Logo />
           <p className="max-w-sm text-sm text-muted-foreground">
-            Alpha release. APIs and styles may change. Built on shadcn and Radix UI.
+            Alpha release. APIs and styles may change. Components for Radix UI and Base UI projects.
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
