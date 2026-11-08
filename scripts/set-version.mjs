@@ -31,6 +31,7 @@ const publishedSites = [
   { file: 'apps/www/src/snapshots/install-command.ts', pattern: /publishedInstaller = \{ packageName: publicCliPackageName, version: '(?<v>\d+\.\d+\.\d+)' \}/g },
   { file: 'README.md', pattern: /is published as `@ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)`/g },
   { file: 'README.md', pattern: /run it with `npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)`/g },
+  { file: 'README.md', pattern: /The installer is published on npm as `@ombelle-ui\/cli` \(run `npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)`/g },
   { file: 'docs/foundation-local-usage.md', pattern: /runs the same commands as `npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)/g },
   { file: 'docs/foundation-local-usage.md', pattern: /The page shows the published `npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)`/g },
   { file: 'docs/snapshot-service-operations.md', pattern: /`npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)` resolves bare codes/g },
