@@ -185,6 +185,26 @@
   .o-switch[data-state="checked"] > span { transform: translateX(1.1rem); }
 
   /* Flat */
+  /* Ombelle: catalog radius 0.75rem, 1.5px edges, and 3px offset shadows. */
+  [data-style="ombelle"] { --o-r: 0.75rem; --o-edge: var(--foreground); --o-shadow: var(--foreground); }
+  .dark [data-style="ombelle"] { --o-edge: color-mix(in oklab, var(--foreground) 80%, transparent); --o-shadow: color-mix(in oklab, var(--primary) 70%, transparent); }
+  [data-style="ombelle"] .o-card { border: 1.5px solid var(--o-edge); border-radius: calc(var(--o-r) + 8px); box-shadow: 5px 5px 0 var(--o-shadow); }
+  [data-style="ombelle"] .o-btn { border: 1.5px solid var(--o-edge); border-radius: 999px; font-weight: 700; letter-spacing: -.01em; box-shadow: 3px 3px 0 var(--o-shadow); }
+  [data-style="ombelle"] .o-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--o-shadow); }
+  [data-style="ombelle"] .o-btn:active { transform: translate(3px, 3px); box-shadow: none; }
+  [data-style="ombelle"] .o-btn-ghost { background: var(--accent); color: var(--accent-foreground); }
+  [data-style="ombelle"] .o-input { border: 1.5px solid var(--o-edge); background: var(--card); box-shadow: inset 0 2px 0 color-mix(in oklab, var(--foreground) 7%, transparent); }
+  [data-style="ombelle"] .o-input:focus-visible { border-color: var(--ring); outline: 2.5px solid var(--ring); outline-offset: 3px; box-shadow: 3px 3px 0 var(--ring); }
+  [data-style="ombelle"] .o-badge { border: 1.5px solid var(--o-edge); background: var(--primary); color: var(--primary-foreground); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+  [data-style="ombelle"] .o-badge-muted { background: var(--accent); color: var(--accent-foreground); }
+  [data-style="ombelle"] .o-tabs { border: 1.5px solid var(--o-edge); border-radius: 999px; background: var(--card); box-shadow: 2px 2px 0 var(--o-shadow); }
+  [data-style="ombelle"] .o-tab { border-radius: 999px; }
+  [data-style="ombelle"] .o-tab[data-state="active"] { background: var(--primary); color: var(--primary-foreground); }
+  [data-style="ombelle"] .o-switch { width: 3rem; height: 1.75rem; border: 1.5px solid var(--o-edge); background: var(--card); box-shadow: 2px 2px 0 var(--o-shadow); }
+  [data-style="ombelle"] .o-switch[data-state="checked"] { background: var(--primary); }
+  [data-style="ombelle"] .o-switch > span { top: .1875rem; left: .1875rem; width: 1.1875rem; height: 1.1875rem; background: var(--foreground); }
+  [data-style="ombelle"] .o-switch[data-state="checked"] > span { transform: translateX(1.25rem); background: var(--primary-foreground); }
+
   [data-style="flat"] { --o-r: 0.6rem; }
   [data-style="flat"] .o-card { background: var(--muted); }
   [data-style="flat"] .o-input { background: var(--card); border: 0; }
@@ -242,12 +262,16 @@
   /* Long-form pages (privacy, security, snapshot states). */
   .prose-doc { color: var(--muted-foreground); line-height: 1.7; }
   .prose-doc h2 { margin-top: 2.75rem; color: var(--foreground); font-size: 1.5rem; font-weight: 800; line-height: 1.2; }
-  .prose-doc p, .prose-doc ul { margin-top: 1rem; }
+  .prose-doc p, .prose-doc ul, .prose-doc ol, .prose-doc dl { margin-top: 1rem; }
   .prose-doc ul { list-style: disc; padding-left: 1.25rem; }
+  .prose-doc ol { list-style: decimal; padding-left: 1.5rem; }
+  .prose-doc dt { margin-top: 1rem; color: var(--foreground); font-weight: 700; }
+  .prose-doc dd { margin-top: .25rem; }
   .prose-doc li + li { margin-top: .5rem; }
   .prose-doc a { color: var(--foreground); font-weight: 600; text-decoration: underline; text-decoration-color: var(--primary); text-underline-offset: 4px; }
   .prose-doc a:hover { color: var(--primary); }
   .prose-doc code { border-radius: .375rem; background: var(--muted); padding: .1rem .35rem; color: var(--foreground); font-family: var(--font-mono); font-size: .85em; overflow-wrap: anywhere; }
+  .prose-doc pre code { border-radius: 0; background: transparent; padding: 0; font-size: inherit; overflow-wrap: normal; }
   .prose-doc strong { color: var(--foreground); }
 }
 

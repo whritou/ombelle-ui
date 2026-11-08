@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
+import { defaultSiteFamily } from '../../snapshots/install-command'
 import { changeDraftFamily, draftFamily, experimentalNotice, resetDraftRecipe, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
 import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
@@ -18,7 +19,7 @@ import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code
 import { EditorTopBar, SegmentedControl, previewModeOptions, previewWidthOptions, type OverflowItem } from '../../editor-shell'
 import styles from './button-editor.module.css'
 
-const initialDraft: EditorDraft = { storageVersion: 1, recipe: validateRecipe(exampleRecipe) }
+const initialDraft: EditorDraft = changeDraftFamily({ storageVersion: 1, recipe: validateRecipe(exampleRecipe) }, defaultSiteFamily)
 const initialRecipeJson = serializeRecipe(initialDraft)
 const initialView: EditorView = { mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' }
 const initialHistory: EditorHistory = { past: [], present: initialDraft, future: [] }

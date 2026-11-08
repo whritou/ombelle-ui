@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Download, ShieldCheck } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
+import { defaultSiteFamily } from '../../snapshots/install-command'
 import {
   applyGlassTint,
   applyStartingPreset,
@@ -92,7 +93,7 @@ const isColor = (value: string) => /^#|^oklch\(/i.test(value)
 
 export default function PresetEditor() {
   const [history, setHistory] = useState(() =>
-    createPresetHistory(createPresetDraft('flat')),
+    createPresetHistory(createPresetDraft(defaultSiteFamily)),
   )
   const [hydrated, setHydrated] = useState(false),
     [recovery, setRecovery] = useState<string | null>(null)
@@ -317,7 +318,7 @@ export default function PresetEditor() {
             describedBy={glass ? glassReadoutId : undefined}
           />
         }
-        extra={<span className={styles.draftNote} title="Draft — automated token contrast only">Draft — automated token contrast only</span>}
+        extra={<><span className={styles.draftNote} title="Draft — automated token contrast only">Draft — automated token contrast only</span><a href="/docs/preset-editor" className="text-sm font-semibold underline underline-offset-4">Preset editor guide</a></>}
       />
       <h1 className={styles.srOnly}>Preset editor</h1>
       {warning && <p role="alert">{warning}</p>}
@@ -358,7 +359,7 @@ export default function PresetEditor() {
                 localStorage.removeItem(historyStorageKey)
                 setRecovery(null)
                 setRestoreWarning(null)
-                setHistory(createPresetHistory(createPresetDraft('flat')))
+                setHistory(createPresetHistory(createPresetDraft(defaultSiteFamily)))
               } catch {
                 setWarning(
                   'Storage could not be reset. Your recovery data is retained.',

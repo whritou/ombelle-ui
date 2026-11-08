@@ -15,6 +15,7 @@ export function ComponentNavigation({ current }: { current: ComponentId }) {
         </ul>
       </details>}
       <a href="/components">Browse all components</a>
+      <a href="/docs/component-editor">Component editor guide</a>
     </nav>
   )
 }

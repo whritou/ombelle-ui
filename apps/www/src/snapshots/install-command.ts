@@ -72,6 +72,9 @@ export const siteFamilyOrder: readonly StyleFamily[] = [
   'liquid-glass',
 ]
 
+/** Fresh website sessions start with the first family shown in the pickers. */
+export const defaultSiteFamily = siteFamilyOrder[0]!
+
 /**
  * Style families the website offers for new choices. A family the published
  * installer cannot install stays hidden until that installer is released, so

@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { supportedComponentIds } from '@ombelle/contracts'
 import ButtonEditorPage from '../../apps/www/src/app/editor/component/button/page.js'
 import PresetEditorPage from '../../apps/www/src/app/editor/preset/page.js'
 import PrivacyPage from '../../apps/www/src/app/privacy/page.js'
@@ -59,8 +60,8 @@ it('renders the public landing page with editor links and the published installe
   expect(html.match(/<h1\b/g)).toHaveLength(1)
   // The design's placeholder installer is gone.
   expect(html).toContain('React Native is not supported')
-  // With 0.5.0 published, every catalog component is experimental in liquid glass.
-  expect(html).toContain('Experimental for Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea and Tooltip.')
+  // The compact landing summary counts every catalog component available in glass.
+  expect(html).toContain(`Experimental for ${supportedComponentIds.length} components.`)
   expect(html).not.toContain('not available in glass')
   expect(html).not.toContain('need a newer installer')
   expect(html).not.toMatch(/coming soon/i)

@@ -1,5 +1,6 @@
 import { defaultGlassPresetId, getCatalog, resolveRecipePreset, type StartingPresetId } from '@ombelle/catalog'
 import { componentRecipeFields, defaultRecipeFields, validateComponentRecipe, type ComponentRecipe, type StyleFamily } from '@ombelle/contracts'
+import { defaultSiteFamily } from '../snapshots/install-command'
 
 export type CatalogDraft = { storageVersion: 1; recipe: ComponentRecipe }
 
@@ -18,7 +19,7 @@ export function createCatalogDraft(component: ComponentRecipe['component']): Cat
   const fields = componentRecipeFields(component)
   return { storageVersion: 1, recipe: validateComponentRecipe({
     schemaVersion: '2.0', component, id: `catalog_${component.replaceAll('-', '_')}`,
-    revision: 1, presetRef: catalogPresetRef('flat'), props: {}, content: defaultRecipeFields(fields.content),
+    revision: 1, presetRef: catalogPresetRef(defaultSiteFamily), props: {}, content: defaultRecipeFields(fields.content),
   }) }
 }
 

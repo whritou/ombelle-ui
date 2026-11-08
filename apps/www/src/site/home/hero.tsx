@@ -3,23 +3,23 @@
 import { ArrowRight, Palette } from 'lucide-react'
 import { useState } from 'react'
 import { CursorHalo } from './cursor-halo'
-import { HeroComposition, STYLES, StyleSelector, type StyleKey } from './showcase'
+import { defaultShowcaseStyle, HeroComposition, STYLES, StyleSelector, type StyleKey } from './showcase'
 
 export function HeroSection() {
-  const [style, setStyle] = useState<StyleKey>('flat')
+  const [style, setStyle] = useState<StyleKey>(defaultShowcaseStyle)
   return (
     <section aria-labelledby="hero" className="relative overflow-hidden border-b border-border">
       <div aria-hidden className="bg-grid absolute inset-0 [mask-image:radial-gradient(ellipse_at_top,black,transparent_75%)]" />
       <CursorHalo />
       <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 md:py-24 lg:grid-cols-[1fr_1.1fr] lg:items-center">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">React · shadcn · Radix UI · Tailwind v4</p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">React · shadcn · Radix UI / Base UI · Tailwind v4</p>
           <h1 id="hero" className="mt-5 text-5xl font-black leading-[0.95] md:text-7xl">
             Your components.<br />
             <span className="text-primary">Your style.</span>
           </h1>
           <p className="mt-6 max-w-md text-lg text-muted-foreground">
-            Ombelle installs editable, accessible React component source built on shadcn and Radix into your Vite or Next.js app — in distinct visual families you can switch, tune and own.
+            Ombelle installs editable React component source into your Vite or Next.js app, with Radix UI and Base UI editions, shared project presets, and scoped component recipes.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#get-started" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 font-semibold text-primary-foreground shadow-soft transition-[transform,filter] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95">

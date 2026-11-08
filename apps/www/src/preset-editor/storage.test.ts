@@ -25,6 +25,13 @@ function memory() {
   }
   return { values, storage }
 }
+it('starts fresh and unavailable-storage sessions in Ombelle without replacing saved families', () => {
+  const { storage } = memory()
+  expect(loadPresetSession(storage).history.present.family).toBe('ombelle')
+  expect(loadPresetSession({ ...storage, getItem: () => { throw new Error('unavailable') } }).history.present.family).toBe('ombelle')
+  savePresetSession(storage, createPresetHistory(createPresetDraft('flat')))
+  expect(loadPresetSession(storage).history.present.family).toBe('flat')
+})
 it('round-trips raw draft and history independently of the recipe editor', () => {
   const { storage, values } = memory()
   const first = createPresetHistory(createPresetDraft('flat'))

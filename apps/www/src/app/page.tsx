@@ -6,7 +6,7 @@ import { CascadeSection, MatrixSection, PresetSection, TerminalSection } from '.
 import { StyleMorphSection } from '../site/home/style-morph'
 import { repository } from '../site/links'
 import { familyList } from '../site/families'
-import { glassComponentList, glassGatedOnSite } from '../site/components/catalog'
+import { componentDocs, glassGatedOnSite, glassOnSite } from '../site/components/catalog'
 import { installerRunner, publishedInstaller } from '../snapshots/install-command'
 
 export const metadata = {
@@ -42,7 +42,7 @@ const editors = [
     href: componentEditorLink.href,
     icon: MousePointerClick,
     title: componentEditorLink.label,
-    text: 'Customize one Button and export it as a recipe that installs next to your existing components.',
+    text: `Customize any of the ${componentDocs.length} catalog components and export a scoped recipe that installs next to your existing components.`,
   },
 ]
 
@@ -62,7 +62,7 @@ export default function HomePage() {
             <Sparkles className="size-5 text-primary" aria-hidden />
             <div>
               <p className="font-display font-bold">Liquid Glass</p>
-              <p className="text-sm text-muted-foreground">Translucent surfaces with blur, an opaque fallback, and contrast checked for their text pairs over any backdrop. Experimental for {glassComponentList({ published: true })}{glassGatedOnSite() ? '; the other components need a newer installer.' : '.'}</p>
+              <p className="text-sm text-muted-foreground">Translucent surfaces with blur, an opaque fallback, and contrast checks for text pairs. Experimental for {componentDocs.filter(doc => glassOnSite(doc.id)).length} components{glassGatedOnSite() ? '; the other components need a newer installer.' : '.'} Check your final backdrop and states in your app.</p>
             </div>
           </div>
           <a href="/editor/preset" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:border-foreground/30 hover:bg-muted active:bg-foreground/10">
@@ -99,14 +99,14 @@ export default function HomePage() {
       <section aria-labelledby="get-started" className="scroll-mt-20 border-y border-border bg-card">
         <div className="mx-auto max-w-6xl px-5 py-20 md:py-28">
           <p className={eyebrow}>Get started</p>
-          <h2 id="get-started" className="mt-3 text-4xl font-black md:text-5xl">Three commands.<br />Nothing hidden.</h2>
+          <h2 id="get-started" className="mt-3 text-4xl font-black md:text-5xl">Two commands.<br />Nothing hidden.</h2>
           <p className="mt-5 max-w-2xl text-muted-foreground">
-            You need Node 24 and an existing Vite React TSX or Next.js App Router TSX app with Tailwind v4. Replace{' '}
-            <code className="font-mono text-foreground">APP</code> with its directory and{' '}
+            You need Node 24.19.0 or newer Node 24 and an existing Vite React TSX or Next.js App Router TSX app with Tailwind v4. Run commands from your app folder. Replace{' '}
             <code className="font-mono text-foreground">PRESET</code> with a published preset code (such as{' '}
             <code className="font-mono text-foreground">ps_…@1</code>) or the path to a downloaded{' '}
             <code className="font-mono text-foreground">project-preset.json</code>. React Native is not supported.
           </p>
+          <p className="mt-4"><a href="/docs/getting-started" className="font-semibold text-primary underline underline-offset-4">Follow the step-by-step installation guide</a></p>
           <ol className="mt-10 space-y-6">
             {steps.map((step, i) => (
               <li key={step.title} className="grid gap-3 md:grid-cols-[3rem_1fr]">

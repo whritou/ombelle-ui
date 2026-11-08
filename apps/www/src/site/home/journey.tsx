@@ -3,7 +3,7 @@
 import { Check, Copy, FileCode2, MousePointerClick, Pause, Play, SlidersHorizontal, TerminalSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useCopy } from './sections'
-import { STYLES, type StyleKey } from './showcase'
+import { defaultShowcaseStyle, STYLES, type StyleKey } from './showcase'
 
 const RADIUS = [0, 6, 14, 28, 999]
 const DENSITY = [10, 14, 18, 24]
@@ -29,7 +29,7 @@ function useReducedMotion() {
 function StageChoose({ style, onPick }: { style: StyleKey; onPick: (s: StyleKey) => void }) {
   return (
     <div className="flex h-full flex-col">
-      <div role="group" aria-label="Style family" className="grid flex-1 gap-4 sm:grid-cols-3">
+      <div role="group" aria-label="Style family" className="grid flex-1 gap-4 sm:grid-cols-2">
         {STYLES.map(s => {
           const active = s.value === style
           return (
@@ -57,7 +57,7 @@ function StageChoose({ style, onPick }: { style: StyleKey; onPick: (s: StyleKey)
         })}
       </div>
       <p className="mt-5 rounded-xl bg-muted px-4 py-2.5 font-mono text-xs text-muted-foreground">
-        preset · <span className="text-foreground">styleFamily: &quot;{style === 'brutal' ? 'neo-brutalism' : style === 'minimal' ? 'minimalist' : 'flat'}&quot;</span>
+        preset · <span className="text-foreground">styleFamily: &quot;{style === 'brutal' ? 'neo-brutalism' : style === 'minimal' ? 'minimalist' : style}&quot;</span>
       </p>
     </div>
   )
@@ -200,7 +200,7 @@ export function JourneySection({ release }: { release: string }) {
   const reduce = useReducedMotion()
   const [stage, setStage] = useState(0)
   const [paused, setPaused] = useState(false)
-  const [style, setStyle] = useState<StyleKey>('flat')
+  const [style, setStyle] = useState<StyleKey>(defaultShowcaseStyle)
   const [radius, setRadius] = useState(2)
   const [density, setDensity] = useState(1)
   const auto = !paused && !reduce
