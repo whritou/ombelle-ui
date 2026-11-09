@@ -4,6 +4,7 @@ import type { ComponentId } from '@ombelle/contracts'
 export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   spinner: ['spinner'],
   kbd: ['kbd', 'kbd-group'],
+  field: ['field', 'field-label', 'field-description', 'field-error'],
   empty: ['empty', 'empty-header', 'empty-media', 'empty-title', 'empty-description', 'empty-content'],
   badge: ['badge', 'badge-dot'],
   toast: ['toast-viewport', 'toast', 'toast-content', 'toast-title', 'toast-description', 'toast-action', 'toast-close'],

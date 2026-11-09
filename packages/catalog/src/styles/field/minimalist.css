@@ -1,0 +1,54 @@
+/* minimalist Field */
+[data-slot='field'] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-inline-size: 0;
+  font-family: var(--font-family);
+}
+[data-slot='field'][data-orientation='horizontal'] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+}
+[data-slot='field-label'] {
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+[data-slot='field-label'] > span[aria-hidden='true'] {
+  margin-inline-start: 2px;
+  color: var(--destructive);
+}
+[data-slot='field'][data-disabled] [data-slot='field-label'] {
+  opacity: 0.6;
+}
+[data-slot='field-description'] {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.4;
+}
+[data-slot='field-error'] {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--destructive);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+[data-slot='field-error'] > svg {
+  flex-shrink: 0;
+  inline-size: 14px;
+  block-size: 14px;
+}
+@media (forced-colors: active) {
+  [data-slot='field-label'] > span[aria-hidden='true'],
+  [data-slot='field-error'] {
+    color: CanvasText;
+  }
+}

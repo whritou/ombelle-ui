@@ -1,5 +1,8 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  field: `import { Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+export function Example(){return <Field required><FieldLabel>Project name</FieldLabel><FieldControl><Input placeholder="acme-dashboard" /></FieldControl><FieldDescription>Shown in the CLI and the editor header.</FieldDescription><FieldError>Use lower case letters and dashes only.</FieldError></Field>}`,
   empty: `import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
 import { Button } from '@/components/ui/button'
 export function Example(){return <Empty><EmptyHeader><EmptyMedia variant="icon">+</EmptyMedia><EmptyTitle asChild><h2>No presets yet</h2></EmptyTitle><EmptyDescription>Start from a built-in family or import a preset file.</EmptyDescription></EmptyHeader><EmptyContent><Button>New preset</Button></EmptyContent></Empty>}`,

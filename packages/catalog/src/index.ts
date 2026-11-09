@@ -79,6 +79,7 @@ const baseDependencies: readonly string[] = [
 ]
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   empty: ['@radix-ui/react-slot'],
+  field: ['lucide-react'],
   sheet: ['@radix-ui/react-dialog', 'lucide-react'],
   'alert-dialog': ['@radix-ui/react-alert-dialog'],
   toast: ['@radix-ui/react-toast'],
@@ -183,7 +184,8 @@ function editionDependencies(id: ComponentId, edition: Edition): string[] {
   const names = [...baseDependencies, ...(extraDependencies[id] ?? [])]
   if (edition === 'radix') return names
   const kept = names.filter((name) => !name.startsWith('@radix-ui/'))
-  return kept.length < names.length ? [...kept, '@base-ui/react'] : kept
+  const baseUi = kept.length < names.length || /from '@base-ui\/react/.test(catalogData.baseTemplates[id as keyof typeof catalogData.baseTemplates] ?? '')
+  return baseUi ? [...kept, '@base-ui/react'] : kept
 }
 /** Editions a component can be installed in. */
 export function componentEditions(id: ComponentId): readonly Edition[] {
