@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep the neo-brutalism focus rings visible in dark mode: the Accordion trigger's inset ring takes the trigger's text colour (it was near-white on the open yellow trigger), and the Dialog close ring takes the dialog's text colour.
+- Let the flat and minimalist Toast viewports hold the toast shadow instead of cutting it; the toast keeps its 1.5rem inset and width, and sits 1rem higher.
+- Draw the liquid-glass Progress light inside the indicator: the clipped track always cut the outer glow.
+
 ## 0.7.2 — 9 November 2026
 
 - Add Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination and Toast in all five style families, with Radix and Base UI editions, recipe editors, source exports and CLI installation. Base UI Toast retains its native manager API.

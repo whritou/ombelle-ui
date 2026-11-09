@@ -42,8 +42,9 @@
   background: var(--primary);
   color: var(--primary-foreground);
 }
+/* The ring is drawn inside the trigger, over its own background (yellow when open): use its text colour. */
 [data-slot='accordion-trigger']:focus-visible {
-  outline: 3px dashed var(--ring);
+  outline: 3px dashed currentColor;
   outline-offset: -6px;
 }
 [data-slot='accordion-trigger']:disabled {

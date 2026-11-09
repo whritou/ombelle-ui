@@ -12,6 +12,7 @@
 [data-slot="input"]{background:var(--card);color:var(--card-foreground);padding:0 0.75rem;font-size:0.9375rem;font-weight:600}
 [data-slot="input"]::placeholder{color:var(--muted-foreground);font-weight:500;opacity:1}
 [data-slot="button"]:focus-visible,[data-slot="input"]:focus-visible,[data-slot="dialog-close"]:focus-visible{outline:3px dashed var(--ring);outline-offset:4px}
+[data-slot="dialog-close"]:focus-visible{outline-color:var(--popover-foreground)}
 [data-slot="dialog-overlay"]{position:fixed;inset:0;z-index:40;background-color:var(--secondary);background-image:repeating-linear-gradient(45deg,oklch(0 0 0 / 12%) 0 2px,transparent 2px 12px)}
 [data-slot="dialog-content"]{--dialog-padding:1.125rem;--dialog-padding-end:calc(var(--control-height) + 1.5rem);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;width:min(28.75rem,calc(100vw - 2rem));padding:var(--dialog-padding);padding-inline-end:var(--dialog-padding-end);border:var(--border-width) solid var(--border);border-radius:var(--radius);background:var(--popover);color:var(--popover-foreground);font-family:var(--font-family)}
 [data-slot="dialog-content"]:has(h2){--dialog-padding-end:var(--dialog-padding)}

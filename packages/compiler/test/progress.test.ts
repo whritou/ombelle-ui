@@ -20,7 +20,7 @@ it.each(supportedStyleFamilies)(
   },
 )
 
-it('compiles Progress in liquid glass: a glass track, a glossy solid primary fill with a glow, a green complete state and a faded full indeterminate rest', async () => {
+it('compiles Progress in liquid glass: a glass track, a glossy solid primary fill with an inner sheen, a green complete state and a faded full indeterminate rest', async () => {
   const preset = getCatalog('0.1.0').presets['liquid-glass']
   const result = await compile({ preset, componentIds: ['progress'], catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
   const css = result.artifacts.find((a) => a.logicalPath === 'components/ui/progress.css')!.content
@@ -38,15 +38,15 @@ it('compiles Progress in liquid glass: a glass track, a glossy solid primary fil
   )
   expect(at(track, 'supports')['backdrop-filter']).toContain('blur(var(--glass-blur))')
   expect(at(track, 'reduced')).toMatchObject({ background: 'color-mix(insrgb,var(--foreground)10%,var(--card))', 'backdrop-filter': 'none' })
-  // The fill is solid primary with a white gloss and a primary glow; no text sits on it.
+  // The fill is solid primary with a white gloss and an inner sheen (the track clips any outer glow); no text sits on it.
   expect(at(fill).background).toBe(
     'linear-gradient(tobottom,rgb(255255255/35%),transparent60%),var(--primary)',
   )
-  expect(at(fill)['box-shadow']).toBe('0010px-2pxcolor-mix(insrgb,var(--primary)80%,transparent)')
+  expect(at(fill)['box-shadow']).toBe('inset006px-1pxrgb(255255255/55%)')
   expect(at(fill + '[data-state="complete"]').background).toBe(
     'linear-gradient(tobottom,rgb(255255255/35%),transparent60%),#16a34a',
   )
-  expect(at(fill + '[data-state="complete"]')['box-shadow']).toBe('0010px-2pxrgb(2216374/80%)')
+  expect(at(fill + '[data-state="complete"]')['box-shadow']).toBe('inset006px-1pxrgb(255255255/55%)')
   // Indeterminate: a sweeping segment over the preset motion duration; at rest a faded full fill.
   expect(at(fill + '[data-state="indeterminate"]')).toMatchObject({
     'inline-size': '100%',
