@@ -54,9 +54,11 @@ the lint lands passing and compiler output does not change.
 ### Recipe source shadowing lint
 
 A unit test in `packages/compiler/test/` compiles the default catalog draft of
-every component in all five families and both editions, then parses each
-generated `.tsx` component artifact with the TypeScript compiler API (the root
-`typescript` dev dependency). It fails when:
+every recipe component in all five families (component recipes are
+Radix-only, per `docs/05-cli-specification.md`), then parses each generated
+`.tsx` component artifact with `@babel/parser` 7.29.9 (`typescript` and `jsx`
+plugins), added as a pinned root dev dependency. TypeScript 7.0.2 has no
+JavaScript compiler API. It fails when:
 
 - a declaration inside `createScopedPrimitives` (parameter, destructured
   binding, variable or function) reuses one of the factory's own names: its
@@ -81,12 +83,21 @@ so the compiler gains no runtime error and keeps its deterministic output.
 
 - Families: flat, minimalist, neo-brutalism, ombelle, liquid-glass. Editions:
   radix, base. Each page renders all 29 catalog components.
-- Each specimen is the catalog's default draft for that component (the draft
-  `createCatalogDraft` gives the component editor), compiled with
-  `compileComponentRecipe` against the family's built-in preset. The page
-  loads only the recipe artifacts: no editor stage CSS.
-- Glass pages draw the backdrop that `glassPresetBackdrop` returns for the
-  built-in liquid glass preset in that mode, as the editors do.
+- Every page starts from the project an `init` produces: the edition's
+  generated `preview.css` (base, `ui-tokens.css`, `ui-style.css`). No editor
+  stage CSS is loaded and overlay triggers get no editor class.
+- Radix pages audit what `add --recipe` installs. Each of the 28 recipe
+  components is the catalog's default draft (the draft `createCatalogDraft`
+  gives the component editor) with its preset reference set to the family's
+  built-in preset (`builtin-liquid-glass` for glass), compiled with
+  `compileComponentRecipe`, and rendered from its scoped primitives and recipe
+  CSS. Button has no catalog recipe and renders from the ordinary Radix
+  edition.
+- Base pages audit what `add` installs in a Base UI project, since recipes are
+  Radix-only: all 29 ordinary Base UI components from the generated edition,
+  rendered with the same specimen content as the Radix page.
+- Glass pages draw the backdrop that `glassPresetBackdrop` returns for
+  `builtin-liquid-glass` in that mode, as the editors do.
 - Each specimen sits in a `section[data-audit="<component>"]` with a heading
   naming it and enough width for its real layout. `main` gets
   `data-ready="true"` once fonts and specimens have loaded.
