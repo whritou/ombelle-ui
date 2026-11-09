@@ -1,5 +1,6 @@
 /* liquid-glass Stepper */
 [data-slot='stepper'] {
+  display: block;
   font-family: var(--font-family);
 }
 [data-slot='stepper-list'] {
@@ -40,7 +41,6 @@
   block-size: 16px;
 }
 [data-slot='stepper-indicator'][data-status='complete'] {
-  border-color: var(--primary);
   background: var(--primary);
   color: var(--primary-foreground);
 }
@@ -48,8 +48,8 @@
   border-color: var(--primary);
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
 }
-[data-slot='stepper-title'][data-status='current'] {
-  font-weight: 600;
+[data-slot='stepper-title'] {
+  font-weight: 700;
 }
 [data-slot='stepper-item'][data-status='upcoming'] {
   color: var(--muted-foreground);

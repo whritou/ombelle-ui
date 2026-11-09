@@ -35,7 +35,8 @@
 [data-slot='empty-title'] {
   margin: 0;
   font-size: 20px;
-  font-weight: 800;
+  text-transform: uppercase;
+  font-weight: 900;
   line-height: 1.25;
 }
 [data-slot='empty-description'] {
@@ -66,17 +67,19 @@
   box-sizing: border-box;
   min-block-size: 2.25rem;
   padding-inline: 1rem;
-  border: max(1px, var(--border-width)) solid var(--primary);
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
   background: var(--primary);
   color: var(--primary-foreground);
-  font: 600 14px var(--font-family);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow-color, var(--border));
+  font: 800 13px var(--font-family);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 [data-slot='empty-content'] [data-empty-action='secondary'] {
-  border-color: var(--input);
   background: var(--card);
-  color: var(--foreground);
+  color: var(--card-foreground);
 }
 [data-slot='empty-content'] [data-empty-action]:focus-visible {
   outline: 3px dashed var(--ring);

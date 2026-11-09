@@ -1,8 +1,9 @@
 /* flat Meter */
 [data-slot='meter'] {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px 12px;
   min-inline-size: 0;
   font-family: var(--font-family);
 }
@@ -11,7 +12,13 @@
   font-size: 14px;
   font-weight: 600;
 }
+[data-slot='meter-value'] {
+  justify-self: end;
+  color: var(--foreground);
+  font: 500 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
 [data-slot='meter-track'] {
+  grid-column: 1 / -1;
   display: flex;
   block-size: 12px;
   border-radius: 8px;
@@ -69,6 +76,7 @@
   background: var(--muted);
 }
 [data-slot='meter-legend'] {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;

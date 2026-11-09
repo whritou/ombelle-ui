@@ -14,8 +14,8 @@ const attr = (html: string, name: string) => new RegExp(`role="meter"[^>]*${name
 
 describe('Meter', () => {
   it('provides the Meter parts, and Base UI for the Base edition', () => {
-    expectComponentContract('meter', { client: true, parts: ['Meter', 'MeterLabel', 'MeterSegment', 'MeterLegend', 'MeterLegendItem'],
-      slots: ['meter', 'meter-label', 'meter-track', 'meter-cell', 'meter-segment', 'meter-legend', 'meter-legend-item'],
+    expectComponentContract('meter', { client: true, parts: ['Meter', 'MeterLabel', 'MeterValue', 'MeterSegment', 'MeterLegend', 'MeterLegendItem'],
+      slots: ['meter', 'meter-label', 'meter-value', 'meter-track', 'meter-cell', 'meter-segment', 'meter-legend', 'meter-legend-item'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
       selectors: ["[data-slot='meter']", "[data-slot='meter-track']", "[data-slot='meter-cell']", "[data-slot='meter-segment']"], glass: 'experimental' })
     expect(getTemplate(getCatalog('0.1.0'), 'meter', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
@@ -32,10 +32,16 @@ describe('Meter', () => {
   })
 
   it.each(editions)('%s fills discrete cells and warns past the threshold', (_, ui) => {
+    // A cell lights once any part of it is reached, as on the boards: 128 of 200 lights 7, the 7th past 60%.
     const at128 = renderToStaticMarkup(h(ui.Meter, { value: 128, max: 200, segments: 10, warningAt: 0.6 }))
-    expect([cells(at128), filled(at128), warnings(at128)]).toEqual([10, 6, 0])
+    expect([cells(at128), filled(at128), warnings(at128)]).toEqual([10, 7, 1])
     const at150 = renderToStaticMarkup(h(ui.Meter, { value: 150, max: 200, segments: 10, warningAt: 0.6 }))
     expect([filled(at150), warnings(at150)]).toEqual([8, 2])
+  })
+
+  it.each(editions)('%s shows the value beside the label', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.Meter, { value: 128, max: 200, segments: 10 }, h(ui.MeterLabel, null, 'Deploys'), h(ui.MeterValue)))
+    expect(html).toMatch(/data-slot="meter-value"[^>]*>128 \/ 200</)
   })
 
   it.each(editions)('%s draws labelled parts and the remainder', (_, ui) => {

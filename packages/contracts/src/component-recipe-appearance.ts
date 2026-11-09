@@ -22,7 +22,7 @@ export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = 
   kbd: [surface('kbd', 'Key', 'muted')],
   empty: [surface('empty', 'Panel', 'muted'), surface('empty-media', 'Icon tile'), text('empty-title', 'Title'), text('empty-description', 'Description')],
   field: [text('field-label', 'Label'), text('field-description', 'Hint'), text('field-error', 'Error')],
-  meter: [layout('meter-track', 'Track'), mark('meter-cell', 'Cell'), text('meter-label', 'Label')],
+  meter: [layout('meter-track', 'Track'), mark('meter-cell', 'Cell'), text('meter-label', 'Label'), text('meter-value', 'Value')],
   stepper: [mark('stepper-indicator', 'Indicator'), text('stepper-title', 'Title'), text('stepper-description', 'Description'), mark('stepper-separator', 'Connector')],
   'input-group': [surface('input-group', 'Group', 'background'), text('input-group-input', 'Input'), text('input-group-textarea', 'Textarea'), layout('input-group-addon', 'Addon'), text('input-group-text', 'Addon text'), surface('input-group-button', 'Action')],
   sheet: [surface('sheet-content', 'Sheet', 'popover'), text('sheet-title', 'Title'), text('sheet-description', 'Description'), layout('sheet-header', 'Header'), layout('sheet-footer', 'Footer')],

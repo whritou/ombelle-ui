@@ -66,15 +66,15 @@
   box-sizing: border-box;
   min-block-size: 2.25rem;
   padding-inline: 1rem;
-  border: max(1px, var(--border-width)) solid var(--primary);
-  border-radius: var(--radius);
+  border: var(--border-width) solid var(--border);
+  border-radius: 999px;
   background: var(--primary);
   color: var(--primary-foreground);
-  font: 600 14px var(--font-family);
+  box-shadow: 2px 2px 0 var(--border);
+  font: 700 14px var(--font-family);
   cursor: pointer;
 }
 [data-slot='empty-content'] [data-empty-action='secondary'] {
-  border-color: var(--input);
   background: var(--card);
   color: var(--foreground);
 }

@@ -58,14 +58,16 @@
 [data-slot='field'] [data-field-input] {
   box-sizing: border-box;
   inline-size: 100%;
-  min-block-size: var(--control-height, 2.5rem);
-  padding: 0.5rem 0.75rem;
-  border: max(1px, var(--border-width)) solid var(--input);
+  min-block-size: calc(var(--control-height, 2.5rem) + 0.25rem);
+  padding: 0 0.75rem;
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow-color, var(--border));
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--foreground);
-  font: inherit;
-  font-size: 14px;
+  font-family: inherit;
 }
 [data-slot='field'] textarea[data-field-input] {
   min-block-size: 5rem;
@@ -87,6 +89,6 @@
     border-color: CanvasText;
   }
   [data-slot='field'] [data-field-input]:focus-visible {
-    outline-color: Highlight;
+    outline: 2px solid Highlight;
   }
 }

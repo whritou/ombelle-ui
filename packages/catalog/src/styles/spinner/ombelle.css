@@ -16,7 +16,7 @@
   block-size: 2rem;
 }
 [data-slot='spinner'] [data-spinner-track] {
-  stroke: var(--border);
+  stroke: color-mix(in oklab, var(--foreground) 12%, var(--card));
   stroke-width: 3;
 }
 [data-slot='spinner'] [data-spinner-arc] {

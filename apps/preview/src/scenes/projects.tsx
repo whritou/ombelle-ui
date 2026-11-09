@@ -52,7 +52,7 @@ import {
   TabsTrigger,
 } from '../generated/preset-gallery/components/ui/tabs'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../generated/preset-gallery/components/ui/empty'
-import { Meter, MeterLabel } from '../generated/preset-gallery/components/ui/meter'
+import { Meter, MeterLabel, MeterValue } from '../generated/preset-gallery/components/ui/meter'
 import { gate, type SceneProps } from './shared'
 
 const rows = [
@@ -229,6 +229,7 @@ export function ProjectsScene(props: SceneProps) {
             <CardContent className="scene-fields">
               <Meter value={128} max={200} segments={10} warningAt={0.6}>
                 <MeterLabel>Deploys this month</MeterLabel>
+                <MeterValue />
               </Meter>
               <p className="scene-muted">Steps past 60% switch to the warning colour.</p>
             </CardContent>

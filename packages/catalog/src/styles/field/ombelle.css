@@ -57,21 +57,21 @@
   box-sizing: border-box;
   inline-size: 100%;
   min-block-size: var(--control-height, 2.5rem);
-  padding: 0.5rem 0.75rem;
-  border: max(1px, var(--border-width)) solid var(--input);
+  padding: 0 0.875rem;
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
+  font-size: 0.875rem;
   color: var(--foreground);
-  font: inherit;
-  font-size: 14px;
+  font-family: inherit;
 }
 [data-slot='field'] textarea[data-field-input] {
   min-block-size: 5rem;
   resize: vertical;
 }
 [data-slot='field'] [data-field-input]:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: 2.5px solid var(--ring);
+  outline-offset: 3px;
 }
 [data-slot='field'][data-invalid] [data-field-input] {
   border-color: var(--destructive);
@@ -85,6 +85,6 @@
     border-color: CanvasText;
   }
   [data-slot='field'] [data-field-input]:focus-visible {
-    outline-color: Highlight;
+    outline: 2px solid Highlight;
   }
 }

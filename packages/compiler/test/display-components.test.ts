@@ -6,7 +6,7 @@ import { findShadowedNames } from './recipe-shadowing.js'
 
 const parts = {
   spinner: ['Spinner'], kbd: ['Kbd', 'KbdGroup'], empty: ['Empty', 'EmptyContent', 'EmptyDescription', 'EmptyHeader', 'EmptyMedia', 'EmptyTitle'],
-  field: ['Field', 'FieldControl', 'FieldDescription', 'FieldError', 'FieldLabel'], meter: ['Meter', 'MeterLabel'],
+  field: ['Field', 'FieldControl', 'FieldDescription', 'FieldError', 'FieldLabel'], meter: ['Meter', 'MeterLabel', 'MeterValue'],
   stepper: ['Stepper', 'StepperDescription', 'StepperIndicator', 'StepperItem', 'StepperSeparator', 'StepperTitle'],
 } as const
 type Id = keyof typeof parts
@@ -37,8 +37,8 @@ describe.each(styleFamilies)('%s display recipes', family => {
 describe('display specimens', () => {
   const describe_ = (component: Id, props: Record<string, unknown> = {}) => describeComponentRecipe(recipe(component, 'ombelle', props) as ComponentRecipe)
   it('describes each recipe with the parts the board shows', () => {
-    expect(exports(describe_('meter'))).toEqual(['Meter', 'MeterLabel'])
-    expect(exports(describe_('meter', { mode: 'labelled' }))).toEqual(['Meter', 'MeterLabel', 'MeterLegend', 'MeterLegendItem', 'MeterSegment'])
+    expect(exports(describe_('meter'))).toEqual(['Meter', 'MeterLabel', 'MeterValue'])
+    expect(exports(describe_('meter', { mode: 'labelled' }))).toEqual(['Meter', 'MeterLabel', 'MeterLegend', 'MeterLegendItem', 'MeterSegment', 'MeterValue'])
     expect(exports(describe_('stepper'))).toEqual([...parts.stepper].sort())
     expect(exports(describe_('field'))).toEqual([...parts.field].sort())
     expect(exports(describe_('empty', { media: 'none' }))).not.toContain('EmptyMedia')

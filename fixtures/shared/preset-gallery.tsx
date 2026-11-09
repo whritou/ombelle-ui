@@ -98,7 +98,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
 import { Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
-import { Meter, MeterLabel, MeterSegment, MeterLegend, MeterLegendItem } from '@/components/ui/meter'
+import { Meter, MeterLabel, MeterValue, MeterSegment, MeterLegend, MeterLegendItem } from '@/components/ui/meter'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 
 // Family-independent: callers pass the component ids their family cannot
@@ -220,7 +220,7 @@ export function PresetGallery({
         <Empty><EmptyHeader><EmptyMedia variant="icon" aria-hidden="true">+</EmptyMedia>
           <EmptyTitle asChild><h3>No presets yet</h3></EmptyTitle>
           <EmptyDescription>Start from a built-in family or import a preset file.</EmptyDescription></EmptyHeader>
-          <EmptyContent><Button>New preset</Button><Button variant="outline">Import file</Button></EmptyContent></Empty>
+          <EmptyContent><Button variant="outline">Import file</Button><Button>New preset</Button></EmptyContent></Empty>
       </section>)}
       {gate('field', 'Field', <section aria-label="Field" data-component="field">
         <h2>Field</h2>
@@ -231,8 +231,8 @@ export function PresetGallery({
       </section>)}
       {gate('meter', 'Meter', <section aria-label="Meter" data-component="meter">
         <h2>Meter</h2>
-        <Meter value={128} max={200} segments={10} warningAt={0.6}><MeterLabel>Deploys this month</MeterLabel></Meter>
-        <Meter max={10}><MeterLabel>Storage</MeterLabel><MeterSegment value={4} tone="primary" /><MeterSegment value={2} tone="info" /><MeterSegment value={1} tone="success" />
+        <Meter value={128} max={200} segments={10} warningAt={0.6}><MeterLabel>Deploys this month</MeterLabel><MeterValue /></Meter>
+        <Meter max={10}><MeterLabel>Storage</MeterLabel><MeterValue>7 / 10 GB</MeterValue><MeterSegment value={4} tone="primary" /><MeterSegment value={2} tone="info" /><MeterSegment value={1} tone="success" />
           <MeterLegend><MeterLegendItem tone="primary">Builds</MeterLegendItem><MeterLegendItem tone="info">Assets</MeterLegendItem><MeterLegendItem tone="success">Logs</MeterLegendItem></MeterLegend></Meter>
       </section>)}
       {gate('stepper', 'Stepper', <section aria-label="Stepper" data-component="stepper">

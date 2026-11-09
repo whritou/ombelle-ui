@@ -5,6 +5,7 @@ import './meter.css'
 
 type Tone = 'primary' | 'info' | 'success' | 'warning'
 const MeterLabelId = React.createContext<string | undefined>(undefined)
+const MeterReading = React.createContext({ now: 0, max: 0 })
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
 
 export type MeterProps = Omit<React.ComponentProps<'div'>, 'children'> & {
@@ -48,6 +49,7 @@ export function Meter({
   // A meter's children are presentational, so the label and legend sit beside the role="meter" track.
   return (
     <MeterLabelId.Provider value={labelId}>
+      <MeterReading.Provider value={{ now, max }}>
       <div {...props} data-slot="meter" data-mode={parts.length ? 'labelled' : segments ? 'discrete' : 'bar'} className={cn(className)}>
         {rest}
         <div
@@ -65,6 +67,7 @@ export function Meter({
         </div>
         {legend}
       </div>
+      </MeterReading.Provider>
     </MeterLabelId.Provider>
   )
 }
@@ -85,7 +88,8 @@ function MeterFill({ now, min, span, segments, warningAt, parts }: {
   }
   const count = segments ? clamp(Math.round(segments), 2, 20) : 0
   if (!count) return <span data-slot="meter-cell" data-state="filled" style={{ inlineSize: `${((now - min) / span) * 100}%` }} />
-  const lit = Math.round(((now - min) / span) * count)
+  // A cell lights once any part of it is reached.
+  const lit = Math.ceil(((now - min) / span) * count)
   return (
     <>
       {Array.from({ length: count }, (_, index) => (
@@ -102,6 +106,16 @@ function MeterFill({ now, min, span, segments, warningAt, parts }: {
 
 export function MeterLabel({ className, ...props }: React.ComponentProps<'span'>) {
   return <span id={React.useContext(MeterLabelId)} {...props} data-slot="meter-label" className={cn(className)} />
+}
+
+/** The reading shown beside the label, "128 / 200" unless you pass children. */
+export function MeterValue({ className, children, ...props }: React.ComponentProps<'span'>) {
+  const { now, max } = React.useContext(MeterReading)
+  return (
+    <span {...props} data-slot="meter-value" className={cn(className)}>
+      {children ?? `${now} / ${max}`}
+    </span>
+  )
 }
 
 export type MeterSegmentProps = React.ComponentProps<'span'> & { value: number; tone?: Tone }

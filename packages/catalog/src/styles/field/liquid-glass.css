@@ -61,9 +61,9 @@
   border: max(1px, var(--border-width)) solid var(--input);
   border-radius: var(--radius);
   background: var(--card);
+  font-size: 0.875rem;
   color: var(--foreground);
-  font: inherit;
-  font-size: 14px;
+  font-family: inherit;
 }
 [data-slot='field'] textarea[data-field-input] {
   min-block-size: 5rem;
@@ -85,6 +85,6 @@
     border-color: CanvasText;
   }
   [data-slot='field'] [data-field-input]:focus-visible {
-    outline-color: Highlight;
+    outline: 2px solid Highlight;
   }
 }

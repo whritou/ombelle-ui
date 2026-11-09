@@ -27,8 +27,9 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('Empty', {}, node('EmptyHeader', {},
         ...(props.media === 'icon' ? [node('EmptyMedia', { variant: 'icon', 'aria-hidden': 'true' }, '+')] : []),
         node('EmptyTitle', {}, content.title), ...(content.description.trim() ? [node('EmptyDescription', {}, content.description)] : [])),
-      node('EmptyContent', {}, node('button', { type: 'button', 'data-empty-action': 'primary' }, content.primaryAction),
-        ...(content.secondaryAction.trim() ? [node('button', { type: 'button', 'data-empty-action': 'secondary' }, content.secondaryAction)] : [])))
+      node('EmptyContent', {},
+        ...(content.secondaryAction.trim() ? [node('button', { type: 'button', 'data-empty-action': 'secondary' }, content.secondaryAction)] : []),
+        node('button', { type: 'button', 'data-empty-action': 'primary' }, content.primaryAction)))
     case 'field': {
       // A native control marked for the Field styles: a recipe compiles only its own component.
       const control = props.control === 'textarea' ? node('textarea', { placeholder: content.placeholder || undefined, 'data-field-input': '' })
@@ -41,11 +42,11 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     case 'meter': {
       const tones = ['primary', 'info', 'success', 'warning'] as const
       if (props.mode === 'labelled')
-        return node('Meter', { max: props.max }, node('MeterLabel', {}, content.label),
+        return node('Meter', { max: props.max }, node('MeterLabel', {}, content.label), node('MeterValue'),
           ...content.parts.map((part, index) => node('MeterSegment', { value: part.value, tone: tones[index] })),
           node('MeterLegend', {}, ...content.parts.map((part, index) => node('MeterLegendItem', { tone: tones[index] }, part.label))))
       return node('Meter', { value: props.value, max: props.max, segments: props.segments,
-        warningAt: props.warningPercent === undefined ? undefined : props.warningPercent / 100 }, node('MeterLabel', {}, content.label))
+        warningAt: props.warningPercent === undefined ? undefined : props.warningPercent / 100 }, node('MeterLabel', {}, content.label), node('MeterValue'))
     }
     case 'stepper':
       return node('Stepper', { orientation: props.orientation, 'aria-label': 'Progress' }, ...content.steps.map((step, index) =>
