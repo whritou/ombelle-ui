@@ -10,8 +10,8 @@ const slots = ['empty', 'empty-header', 'empty-media', 'empty-title', 'empty-des
 describe('Empty State', () => {
   it('provides the Empty parts with their slots', () => {
     expectComponentContract('empty', { client: false, parts: ['Empty', 'EmptyHeader', 'EmptyMedia', 'EmptyTitle', 'EmptyDescription', 'EmptyContent'],
-      slots, dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' },
-        { name: '@radix-ui/react-slot', version: '1.5.0' }],
+      slots, dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-slot', version: '1.5.0' },
+        { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
       selectors: slots.map(slot => `[data-slot='${slot}']`), glass: 'experimental' })
   })
 

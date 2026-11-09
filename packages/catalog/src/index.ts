@@ -80,6 +80,7 @@ const baseDependencies: readonly string[] = [
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   empty: ['@radix-ui/react-slot'],
   field: ['lucide-react'],
+  stepper: ['lucide-react'],
   sheet: ['@radix-ui/react-dialog', 'lucide-react'],
   'alert-dialog': ['@radix-ui/react-alert-dialog'],
   toast: ['@radix-ui/react-toast'],

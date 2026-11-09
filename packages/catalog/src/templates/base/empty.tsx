@@ -1,3 +1,4 @@
+'use client'
 import * as React from 'react'
 import { useRender } from '@base-ui/react/use-render'
 import { cn } from './utils.js'
@@ -21,7 +22,7 @@ export function EmptyMedia({ className, variant = 'default', ...props }: EmptyMe
 
 /** Not a heading by default: pass render={<h2 />} with the heading level your page needs. */
 export function EmptyTitle({ className, render, ...props }: useRender.ComponentProps<'div'>) {
-  return useRender({ defaultTagName: 'div', render, props: { ...props, 'data-slot': 'empty-title', className: cn(className) } })
+  return useRender({ render: render ?? <div data-slot="empty-title" />, props: { ...props, 'data-slot': 'empty-title', className: cn(className) } })
 }
 
 export function EmptyDescription({ className, ...props }: React.ComponentProps<'p'>) {
