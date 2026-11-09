@@ -14,17 +14,38 @@ export function glassPresetOptions(current?: StartingPresetId) {
     .map((value) => ({ value, label: startingPresets[value].name }))
 }
 
-/** The lab uses Prisme for its main specimens and Pêche to show Relief's warm bevel. */
-export function glassPresetBackdrop(id: StartingPresetId): 'kit' | 'prism' | 'peach' {
-  if (id === 'builtin-liquid-glass-relief') return 'peach'
-  return id === 'builtin-liquid-glass' ? 'kit' : 'prism'
+type GlassPreviewMode = 'light' | 'dark'
+
+/**
+ * Each starting preset's default preview backdrop per mode, picked so its text
+ * reads without a heavy halo: light scenes behind dark ink, dark scenes behind
+ * light ink. Fumé keeps light ink in both modes, so it stays on dark scenes;
+ * Relief keeps Pêche, which shows its warm bevel. The family base keeps the kit.
+ */
+const presetBackdropsByMode: Record<StartingPresetId, Record<GlassPreviewMode, PresetBackdrop>> = {
+  'builtin-liquid-glass-cristal': { light: 'mist', dark: 'prism' },
+  'builtin-liquid-glass-givre': { light: 'dawn', dark: 'night' },
+  'builtin-liquid-glass-fume': { light: 'prism', dark: 'night' },
+  'builtin-liquid-glass-relief': { light: 'peach', dark: 'night' },
+  'builtin-liquid-glass-voile': { light: 'grid', dark: 'prism' },
+  'builtin-liquid-glass-clear': { light: 'mist', dark: 'prism' },
+  'builtin-liquid-glass-prism': { light: 'mist', dark: 'prism' },
+  'builtin-liquid-glass-liquid': { light: 'mist', dark: 'prism' },
+  'builtin-liquid-glass': { light: 'kit', dark: 'kit' },
+}
+
+/** The default preview backdrop for a starting preset in one colour mode. */
+export function glassPresetBackdrop(id: StartingPresetId, mode: GlassPreviewMode): PresetBackdrop {
+  return presetBackdropsByMode[id][mode]
 }
 
 /** Liquid glass preview backdrops, shared by the preset editor and the component pages. Preview only, never saved. */
 export const glassBackdropOptions: { value: PresetBackdrop; label: string }[] = [
   { value: 'kit', label: 'Kit' },
-  { value: 'prism', label: 'Prisme' },
+  { value: 'mist', label: 'Brume' },
+  { value: 'dawn', label: 'Aube' },
   { value: 'grid', label: 'Trame' },
-  { value: 'night', label: 'Nuit' },
   { value: 'peach', label: 'Pêche' },
+  { value: 'prism', label: 'Prisme' },
+  { value: 'night', label: 'Nuit' },
 ]

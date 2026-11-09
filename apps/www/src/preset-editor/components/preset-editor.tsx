@@ -56,7 +56,7 @@ import { PresetGetCode } from '../../snapshots/components/preset-get-code'
 import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import { GlassStartingPoints } from './glass-starting-points'
-import { defaultGlassPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
 import { glassBackdropOptions as backdropOptions, glassPresetBackdrop } from '../../site/glass-presets'
 import {
   EditorTopBar,
@@ -95,11 +95,11 @@ export default function PresetEditor() {
   const [mode, setMode] = useState<'light' | 'dark'>('light'),
     [viewport, setViewport] = useState<'wide' | 'narrow'>('wide'),
     [scene, setScene] = useState<PresetScene>('dashboard'),
-    // The backdrop follows the starting preset, as in the component pages and editors.
+    // The backdrop follows the starting preset and mode, as in the component pages and editors.
     // The picker overrides it for this preview until another starting preset matches.
-    [presetBackdrop, setPresetBackdrop] = useState<PresetBackdrop>(glassPresetBackdrop(defaultGlassPresetId)),
+    [backdropPreset, setBackdropPreset] = useState<StartingPresetId>(defaultGlassPresetId),
     [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
-  const backdrop = backdropOverride ?? presetBackdrop
+  const backdrop = backdropOverride ?? glassPresetBackdrop(backdropPreset, mode)
   // ?page= opens a preview page directly, including the component gallery,
   // which the page picker no longer offers.
   useEffect(() => {
@@ -203,7 +203,7 @@ export default function PresetEditor() {
   // A custom draft keeps the backdrop of the preset it was started from.
   useEffect(() => {
     if (!startingPreset) return
-    setPresetBackdrop(glassPresetBackdrop(startingPreset))
+    setBackdropPreset(startingPreset)
     setBackdropOverride(null)
   }, [startingPreset])
   const glassReport = glass ? presetGlassReport(draft) : null
@@ -400,7 +400,7 @@ export default function PresetEditor() {
                 draft={draft}
                 onPick={(id) => {
                   commit(applyStartingPreset(draft, id), 'glass:preset')
-                  setPresetBackdrop(glassPresetBackdrop(id))
+                  setBackdropPreset(id)
                   setBackdropOverride(null)
                 }}
                 onTint={(tint) => commit(applyGlassTint(draft, tint), 'glass:tint')}

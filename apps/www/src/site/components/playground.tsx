@@ -48,10 +48,10 @@ export function ComponentPlayground({ id, name, source, styles }: {
 }) {
   const [family, setFamily] = useState<StyleFamily>(familyOptions[0]!.value)
   const [glassPreset, setGlassPreset] = useState<StartingPresetId>(defaultGlassPresetId)
-  // The backdrop follows the glass preset until the reader picks one; changing preset resets it.
-  const [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
-  const backdrop = backdropOverride ?? glassPresetBackdrop(glassPreset)
   const [mode, setMode] = useState<'light' | 'dark'>('light')
+  // The backdrop follows the glass preset and mode until the reader picks one; changing preset resets it.
+  const [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
+  const backdrop = backdropOverride ?? glassPresetBackdrop(glassPreset, mode)
   const [status, setStatus] = useState<'connecting' | 'ready' | 'failed'>('connecting')
   const glass = styleSupport(id, 'liquid-glass')
   useEffect(() => {

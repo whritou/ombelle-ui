@@ -29,6 +29,14 @@ html[data-backdrop='glass'][data-glass-backdrop] {
   pointer-events: none;
   z-index: -1;
 }
+/* Light scenes carry dark ink with a faint light edge instead of a dark shadow. */
+html[data-backdrop='glass']:is([data-glass-backdrop='mist'], [data-glass-backdrop='dawn'], [data-glass-backdrop='grid']) {
+  --glass-preview-ink: #102038;
+  --glass-preview-text-shadow: 0 0 2px rgb(255 255 255 / 45%);
+}
+html[data-backdrop='glass'][data-glass-backdrop='dawn'] {
+  --glass-preview-ink: #2a1b2e;
+}
 html[data-backdrop='glass'][data-glass-backdrop='peach'] {
   --glass-preview-ink: #301b22;
   --glass-preview-text-shadow: 0 0 2px rgb(255 230 230 / 40%);

@@ -90,7 +90,7 @@ function EditorPreview() {
   const state = buttonMessage?.state
   const family = state && draftFamily(state.recipe)
   const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
-  const glassBackdrop = glassPreset && glassPresetBackdrop(glassPreset)
+  const glassBackdrop = glassPreset && glassPresetBackdrop(glassPreset, state.mode)
   const overrides = state?.recipe.overrides
   const useLabInk = Boolean(state && state.mode === 'light' && glassBackdrop
     && !Object.keys(overrides ?? {}).some((key) => key === 'colors' || key.startsWith('glass'))
