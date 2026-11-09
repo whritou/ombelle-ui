@@ -188,13 +188,13 @@ export function PresetGallery({
         </PaginationContent></Pagination>
       </section>)}
       {gate('sheet', 'Sheet', <section aria-label="Sheet" data-component="sheet">
-        <h2>Sheet</h2><Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent>
+        <h2>Sheet</h2><Sheet><SheetTrigger asChild><Button variant="outline">Open details</Button></SheetTrigger><SheetContent>
           <SheetHeader><SheetTitle>Project details</SheetTitle><SheetDescription>Review the current project.</SheetDescription></SheetHeader>
-          <p>Your project is ready to review.</p><SheetFooter><SheetClose>Done</SheetClose></SheetFooter>
+          <p>Your project is ready to review.</p><SheetFooter><SheetClose asChild><Button>Done</Button></SheetClose></SheetFooter>
         </SheetContent></Sheet>
       </section>)}
       {gate('alert-dialog', 'Alert Dialog', <section aria-label="Alert Dialog" data-component="alert-dialog">
-        <h2>Alert Dialog</h2><AlertDialog><AlertDialogTrigger>Delete project</AlertDialogTrigger><AlertDialogContent>
+        <h2>Alert Dialog</h2><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive">Delete project</Button></AlertDialogTrigger><AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Delete this project?</AlertDialogTitle><AlertDialogDescription>This preview does not delete any data.</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Delete project</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent></AlertDialog>

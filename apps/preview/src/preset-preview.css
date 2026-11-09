@@ -3,6 +3,37 @@
 @import './scenes.css';
 @import './glass-backdrop.css';
 
+/* Shown before the first valid preset arrives, so no preset tokens exist yet:
+   the colours follow the system scheme instead of the preset's mode. */
+.preset-preview-waiting {
+  color-scheme: light dark;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  background: light-dark(#fafafa, #0a0a0a);
+  color: light-dark(#71717a, #a1a1aa);
+  font: 500 13px/1.4 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  letter-spacing: 0.01em;
+}
+.preset-preview-waiting__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid light-dark(#e4e4e7, #27272a);
+  border-top-color: light-dark(#52525b, #d4d4d8);
+  border-radius: 50%;
+  animation: preset-preview-spin 0.8s linear infinite;
+}
+@keyframes preset-preview-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .preset-preview-waiting__spinner { animation-duration: 2.4s; }
+}
+
 /* Liquid glass previews sit over the kit backdrop (glass-backdrop.css), so the
    translucency shows. Gallery text outside the glass surfaces gets a halo in
    the page colour; text on glass is covered by the compiler's contrast bound. */
@@ -36,4 +67,15 @@ html[data-focus] .preset-gallery {
   display: grid;
   align-content: center;
   justify-items: center;
+}
+/* A focused preview shows the component as an app would, without the gallery's
+   section headings; sections keep their aria-label for assistive technology. */
+html[data-focus] .preset-gallery :is(section, form) > h2 {
+  display: none;
+}
+/* Centring shrinks a section to its content; stacked examples (progress bars,
+   skeletons, grouped fields) need a readable width to keep their layout. */
+html[data-focus] .preset-gallery > section > .preset-stack,
+html[data-focus] .preset-gallery > .preset-form {
+  inline-size: min(360px, calc(100vw - 48px));
 }

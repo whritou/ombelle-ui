@@ -116,10 +116,16 @@ function PresetPreview() {
     for (const child of Array.from(gallery?.children ?? []) as HTMLElement[]) {
       const own = child.dataset.component
       child.hidden = Boolean(focus) && own !== focus && !child.querySelector(`[data-component="${focus}"]`)
-      if (!own)
-        for (const part of Array.from(child.querySelectorAll<HTMLElement>(':scope > [data-component]')))
-          // Labels stay so focused form controls keep their accessible names.
-          part.hidden = Boolean(focus) && part.dataset.component !== focus && part.dataset.component !== 'label'
+      if (!own) {
+        const parts = Array.from(child.querySelectorAll<HTMLElement>(':scope > [data-component]'))
+        const shown = parts.find((part) => part.dataset.component === focus)
+        for (const part of parts)
+          // A standalone label stays only when it names the focused control, so
+          // that control keeps its accessible name without orphan labels around it.
+          part.hidden = Boolean(focus) && part !== shown && !(
+            part.dataset.component === 'label' && (focus === 'label' || labelsInside(part, shown))
+          )
+      }
     }
     const scene = current.message.view.scene ?? 'gallery'
     document.documentElement.dataset.scene = scene
@@ -171,7 +177,16 @@ function PresetPreview() {
       )}
     </>
   ) : (
-    <p role="status">Waiting for a valid preset…</p>
+    <div className="preset-preview-waiting" role="status">
+      <span className="preset-preview-waiting__spinner" aria-hidden="true" />
+      <span>Loading preview…</span>
+    </div>
+  )
+}
+function labelsInside(part: HTMLElement, shown: HTMLElement | undefined) {
+  if (!shown) return false
+  return Array.from(part.querySelectorAll('label')).some(
+    (label) => label.htmlFor !== '' && shown.querySelector(`#${CSS.escape(label.htmlFor)}`) !== null,
   )
 }
 export function mountPresetPreview(element: HTMLElement) {

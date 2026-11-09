@@ -57,15 +57,7 @@ import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import { GlassStartingPoints } from './glass-starting-points'
 import { defaultGlassPresetId } from '@ombelle/catalog'
-import { glassPresetBackdrop } from '../../site/glass-presets'
-
-const backdropOptions: { value: PresetBackdrop; label: string }[] = [
-  { value: 'kit', label: 'Kit' },
-  { value: 'prism', label: 'Prisme' },
-  { value: 'grid', label: 'Trame' },
-  { value: 'night', label: 'Nuit' },
-  { value: 'peach', label: 'Pêche' },
-]
+import { glassBackdropOptions as backdropOptions, glassPresetBackdrop } from '../../site/glass-presets'
 import {
   EditorTopBar,
   InspectorSection,

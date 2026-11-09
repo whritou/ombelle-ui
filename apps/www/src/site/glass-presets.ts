@@ -1,3 +1,4 @@
+import type { PresetBackdrop } from '../preset-editor/preview-protocol'
 import { getCatalog, offeredGlassPresetOrder, startingPresetOrder, type StartingPresetId } from '@ombelle/catalog'
 
 /** Any starting preset, offered or retired, so pinned recipes and shared links keep their material. */
@@ -18,3 +19,12 @@ export function glassPresetBackdrop(id: StartingPresetId): 'kit' | 'prism' | 'pe
   if (id === 'builtin-liquid-glass-relief') return 'peach'
   return id === 'builtin-liquid-glass' ? 'kit' : 'prism'
 }
+
+/** Liquid glass preview backdrops, shared by the preset editor and the component pages. Preview only, never saved. */
+export const glassBackdropOptions: { value: PresetBackdrop; label: string }[] = [
+  { value: 'kit', label: 'Kit' },
+  { value: 'prism', label: 'Prisme' },
+  { value: 'grid', label: 'Trame' },
+  { value: 'night', label: 'Nuit' },
+  { value: 'peach', label: 'Pêche' },
+]
