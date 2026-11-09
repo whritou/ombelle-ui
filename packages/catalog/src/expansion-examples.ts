@@ -1,5 +1,7 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  meter: `import { Meter, MeterLabel } from '@/components/ui/meter'
+export function Example(){return <Meter value={128} max={200} segments={10} warningAt={0.6}><MeterLabel>Deploys this month</MeterLabel></Meter>}`,
   field: `import { Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 export function Example(){return <Field required><FieldLabel>Project name</FieldLabel><FieldControl><Input placeholder="acme-dashboard" /></FieldControl><FieldDescription>Shown in the CLI and the editor header.</FieldDescription><FieldError>Use lower case letters and dashes only.</FieldError></Field>}`,
