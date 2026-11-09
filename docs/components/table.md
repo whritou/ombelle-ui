@@ -43,12 +43,28 @@ Name every table with `TableCaption` or an `aria-label` on `Table`. Native table
 ## API
 
 - `Table` renders `<div data-slot="table-container"><table>`. Props, including `aria-label`, `className` and the ref, go to the `table`.
+- `TableProps` adds `density?: 'default' | 'compact'` (default `default`) and `striped?: boolean` (default `false`). These become `data-density` and the optional presence marker `data-striped` on the native table, not the scroll container.
 - `TableCaption`, `TableHeader`, `TableBody`, `TableFooter` and `TableCell` forward native `caption`, `thead`, `tbody`, `tfoot` and `td` props.
 - `TableHead` renders a `th` with `scope="col"` by default. Pass `scope="row"` for row headers.
 - `numeric` on `TableHead` and `TableCell` right-aligns the cell in tabular, monospaced digits.
 - `selected` on `TableRow` sets `data-state="selected"` and highlights the row. It is visual only: pair it with a visible control such as a Checkbox so the selection is perceivable without colour and operable by keyboard.
 
 ## Styles and artifacts
+
+Use `<Table density="compact" striped>` for a denser data view. Compact reduces
+header and body/footer cell padding to `0.375rem` vertically and `0.625rem`
+logically inline, keeping native table semantics and the existing typography.
+Striping fills alternating body rows with the muted surface. It does not affect
+the header, footer or selected rows, so the selected treatment retains priority.
+The options work independently in every family and do not change the default
+table appearance. When rows contain interactive controls, preserve adequate
+target sizes for those controls in the consuming application.
+
+In forced colors, optional stripes become the system canvas while selected rows
+retain `Highlight` and `HighlightText`. Experimental glass stripes use an opaque
+muted fill; the container retains its existing opaque and reduced-transparency
+fallbacks. These props require the planned CLI 0.7.2 source; published CLI 0.7.1
+does not include them.
 
 - Ombelle: an outlined card with a muted uppercase header, hairline row dividers and an accent selected row.
 - Flat: a 1px inset frame, a filled header and a secondary selected row.

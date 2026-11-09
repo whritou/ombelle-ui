@@ -15,8 +15,47 @@ const trigger = (tag: string, text: string) => node(tag, { type: 'button' }, tex
 export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen {
   const { component, content, props } = recipe
   switch (component) {
+    case 'toast':
+      return node('ToastProvider', { duration: props.duration }, node('Toast', { variant: props.variant, defaultOpen: true },
+        node('ToastTitle', {}, content.title), node('ToastDescription', {}, content.description),
+        ...(content.action ? [node('ToastAction', { altText: content.actionAltText }, content.action)] : []),
+        node('ToastClose', {}, content.close)), node('ToastViewport'))
+    case 'input-group': {
+      const control = node(props.multiline ? 'InputGroupTextarea' : 'InputGroupInput', {
+          id: localId('control'), placeholder: content.placeholder, defaultValue: content.initialText,
+          disabled: props.disabled, required: props.required, 'aria-invalid': props.invalid || undefined,
+        })
+      const addons = content.addon || content.action ? [node('InputGroupAddon', { align: props.align },
+          ...(content.addon ? [node('InputGroupText', {}, content.addon)] : []),
+          ...(content.action ? [node('InputGroupButton', { disabled: props.disabled }, content.action)] : []))] : []
+      const leading = props.align === 'inline-start' || props.align === 'block-start'
+      return node('div', {}, label(content.label), node('InputGroup', {},
+        ...(leading ? [...addons, control] : [control, ...addons])))
+    }
+    case 'sheet':
+      return node('Sheet', {}, trigger('SheetTrigger', content.trigger), node('SheetContent', props,
+        node('SheetHeader', {}, node('SheetTitle', {}, content.title), node('SheetDescription', {}, content.description)),
+        node('p', {}, content.body)))
+    case 'alert-dialog':
+      return node('AlertDialog', {}, trigger('AlertDialogTrigger', content.trigger), node('AlertDialogContent', {},
+        node('AlertDialogHeader', {}, node('AlertDialogTitle', {}, content.title), node('AlertDialogDescription', {}, content.description)),
+        node('AlertDialogFooter', {}, node('AlertDialogCancel', {}, content.cancel), node('AlertDialogAction', {}, content.action))))
+    case 'breadcrumb':
+      return node('Breadcrumb', { 'aria-label': content.label }, node('BreadcrumbList', {},
+        ...content.items.flatMap((item, index) => [
+          ...(index ? [node('BreadcrumbSeparator')] : []),
+          node('BreadcrumbItem', {}, index === content.items.length - 1
+            ? node('BreadcrumbPage', {}, item.label) : node('BreadcrumbLink', { href: item.href }, item.label)),
+        ])))
+    case 'pagination':
+      return node('Pagination', { 'aria-label': content.label }, node('PaginationContent', {},
+        node('PaginationItem', {}, node('PaginationPrevious', { href: '#page-' + (props.page - 1), disabled: props.page === 1 }, content.previous)),
+        ...Array.from({ length: props.totalPages }, (_, index) => node('PaginationItem', {}, node('PaginationLink', {
+          href: '#page-' + (index + 1), isActive: props.page === index + 1, 'aria-label': 'Page ' + (index + 1),
+        }, String(index + 1)))),
+        node('PaginationItem', {}, node('PaginationNext', { href: '#page-' + (props.page + 1), disabled: props.page === props.totalPages }, content.next))))
     case 'badge':
-      return node('Badge', props, content.label)
+      return node('Badge', { variant: props.variant, size: props.size }, ...(props.dot ? [node('BadgeDot')] : []), content.label)
     case 'alert':
       return node('Alert', props, node('AlertTitle', {}, content.title), node('AlertDescription', {}, content.description))
     case 'avatar':
@@ -24,7 +63,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('AvatarFallback', {}, content.initials),
         ...(props.status === 'none' ? [] : [node('AvatarStatus', { status: props.status })]))
     case 'card':
-      return node('Card', { density: props.density }, node('CardHeader', {},
+      return node('Card', { density: props.density, appearance: props.appearance }, node('CardHeader', {},
         node('CardTitle', { level: props.level }, content.title), node('CardDescription', {}, content.description)),
       node('CardContent', {}, content.body))
     case 'progress':
@@ -75,11 +114,11 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('AccordionTrigger', {}, item.label), node('AccordionContent', {}, item.body))))
     case 'tabs':
       return node('Tabs', { defaultValue: props.selection, orientation: props.orientation },
-        node('TabsList', { 'aria-label': 'Sections' }, ...content.items.map(item => node('TabsTrigger', { value: item.id }, item.label))),
+        node('TabsList', { 'aria-label': 'Sections', appearance: props.appearance }, ...content.items.map(item => node('TabsTrigger', { value: item.id }, item.label))),
         ...content.items.map(item => node('TabsContent', { value: item.id }, item.body)))
     case 'table': {
       const numeric = new Set(props.numeric)
-      return node('Table', {}, node('TableCaption', {}, content.caption), node('TableHeader', {},
+      return node('Table', { density: props.density, striped: props.striped }, node('TableCaption', {}, content.caption), node('TableHeader', {},
         node('TableRow', {}, ...content.columns.map(column => node('TableHead', { numeric: numeric.has(column.id) }, column.label)))),
       node('TableBody', {}, ...content.rows.map(row => node('TableRow', {}, ...row.cells.map((cell, index) =>
         node('TableCell', { numeric: numeric.has(content.columns[index].id) }, cell))))))

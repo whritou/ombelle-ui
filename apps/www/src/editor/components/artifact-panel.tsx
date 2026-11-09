@@ -4,7 +4,7 @@ import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compile
 import { recipeFilename } from '../storage'
 import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
-import { catalogRecipeInstallNotice, catalogRecipeInstallerSupported, glassMaterialMinimumCli, installerRunner, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
+import { installableRecipeInstallNotice, installerRunner, publishedInstaller } from '../../snapshots/install-command'
 
 export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
 const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Recipe', 'Install']
@@ -20,13 +20,10 @@ export function artifactMeta(result: InstallableRecipeCompileResult): string[] {
   ]
 }
 
-/** The Install tab: the command, or why there is none yet for glass material overrides. */
+/** The Install tab: a compatible public command, or a notice while JSON export remains available. */
 export function installText(recipe: InstallableRecipe, installer: { version: string } = publishedInstaller): string {
-  if (recipe.schemaVersion === '2.0' && !catalogRecipeInstallerSupported(installer.version))
-    return '# ' + catalogRecipeInstallNotice
-  if (recipe.schemaVersion === '1.0' && recipeInstallBlocked(recipe, installer))
-    return `# Glass material needs ${publishedInstaller.packageName} ${glassMaterialMinimumCli}, which is not published yet.
-# Download the recipe now; the install command appears here once ${glassMaterialMinimumCli} is released.`
+  const unavailable = installableRecipeInstallNotice(recipe, installer)
+  if (unavailable) return '# ' + unavailable
   return `${installerRunner({ ...publishedInstaller, version: installer.version })} add --recipe ./${recipeFilename(recipe)}`
 }
 

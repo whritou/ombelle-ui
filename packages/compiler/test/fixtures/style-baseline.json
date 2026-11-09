@@ -251,6 +251,30 @@
       ],
       "spec": "fix/kit-followups",
       "reason": "Button icon-sm size and DialogHeader part with per-family styles (neo-brutalism title band no longer depends on child order); Ombelle outline Button on the card surface; outline recipe colour overrides map to card and cardForeground and are painted in every family"
+    },
+    {
+      "families": [
+        "flat",
+        "minimalist",
+        "neo-brutalism",
+        "ombelle",
+        "liquid-glass"
+      ],
+      "logicalPaths": [
+        "components/ui/alert.tsx",
+        "components/ui/alert.css",
+        "components/ui/badge.tsx",
+        "components/ui/badge.css",
+        "components/ui/card.tsx",
+        "components/ui/card.css",
+        "components/ui/table.tsx",
+        "components/ui/table.css",
+        "components/ui/tabs.tsx",
+        "components/ui/tabs.css",
+        "styles/ui-style.css (liquid-glass only)"
+      ],
+      "spec": "2026-11-08-forms-navigation-overlays",
+      "reason": "Adds opt-in component appearances, size/dot composition, density/striping and status intents, plus shared glass contrast plates for six new components. Existing preset inputs and normalized recipes without new options retain their identities. Newly added components have independent artifacts."
     }
   ]
 }

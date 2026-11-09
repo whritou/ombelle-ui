@@ -1,7 +1,13 @@
 'use client'
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon, InputGroupText, InputGroupButton } from '@/components/ui/input-group'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet'
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
+import { Badge, BadgeDot } from '@/components/ui/badge'
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@/components/ui/toast'
 import {
   Card,
   CardHeader,
@@ -95,6 +101,15 @@ export type PresetGalleryProps = {
   familyLabel?: string
 }
 
+function ToastExample() {
+  const [open, setOpen] = React.useState(false)
+  return <><Button variant="outline" onClick={() => setOpen(true)}>Show notification</Button>
+    <Toast open={open} onOpenChange={setOpen} variant="success">
+      <ToastTitle>Changes saved</ToastTitle><ToastDescription>Your project is up to date.</ToastDescription>
+      <ToastAction altText="Undo the last change">Undo</ToastAction><ToastClose />
+    </Toast><ToastViewport /></>
+}
+
 function Unavailable({
   id,
   name,
@@ -137,6 +152,69 @@ export function PresetGallery({
         <h1>Your design system</h1>
         <p>A working collection of components in your project theme.</p>
       </header>
+      {gate('input-group', 'Input Group', <section aria-label="Input Group" data-component="input-group">
+        <h2>Input Group</h2>
+        <div className="preset-stack">
+          <label htmlFor="preset-website">Website</label>
+          <InputGroup>
+            <InputGroupAddon><InputGroupText>https://</InputGroupText></InputGroupAddon>
+            <InputGroupInput id="preset-website" placeholder="example.com" />
+            <InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon>
+          </InputGroup>
+          <label htmlFor="preset-group-invalid">Project slug</label>
+          <InputGroup><InputGroupInput id="preset-group-invalid" defaultValue="already-taken" aria-invalid="true" aria-describedby="preset-group-error" /></InputGroup>
+          <p id="preset-group-error">Choose another slug.</p>
+          <label htmlFor="preset-group-disabled">Managed domain</label>
+          <InputGroup><InputGroupInput id="preset-group-disabled" defaultValue="acme.app" disabled /></InputGroup>
+          <label htmlFor="preset-group-notes">Notes</label>
+          <InputGroup><InputGroupTextarea id="preset-group-notes" placeholder="Add a note" /><InputGroupAddon align="block-end"><InputGroupText>Optional</InputGroupText></InputGroupAddon></InputGroup>
+        </div>
+      </section>)}
+      {gate('breadcrumb', 'Breadcrumb', <section aria-label="Breadcrumb" data-component="breadcrumb">
+        <h2>Breadcrumb</h2>
+        <Breadcrumb><BreadcrumbList>
+          <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList></Breadcrumb>
+      </section>)}
+      {gate('pagination', 'Pagination', <section aria-label="Pagination" data-component="pagination">
+        <h2>Pagination</h2><Pagination><PaginationContent>
+          <PaginationItem><PaginationPrevious disabled /></PaginationItem>
+          <PaginationItem><PaginationLink href="#page-1" isActive aria-label="Page 1">1</PaginationLink></PaginationItem>
+          <PaginationItem><PaginationLink href="#page-2" aria-label="Page 2">2</PaginationLink></PaginationItem>
+          <PaginationItem><PaginationEllipsis /></PaginationItem>
+          <PaginationItem><PaginationNext href="#page-2" /></PaginationItem>
+        </PaginationContent></Pagination>
+      </section>)}
+      {gate('sheet', 'Sheet', <section aria-label="Sheet" data-component="sheet">
+        <h2>Sheet</h2><Sheet><SheetTrigger>Open details</SheetTrigger><SheetContent>
+          <SheetHeader><SheetTitle>Project details</SheetTitle><SheetDescription>Review the current project.</SheetDescription></SheetHeader>
+          <p>Your project is ready to review.</p><SheetFooter><SheetClose>Done</SheetClose></SheetFooter>
+        </SheetContent></Sheet>
+      </section>)}
+      {gate('alert-dialog', 'Alert Dialog', <section aria-label="Alert Dialog" data-component="alert-dialog">
+        <h2>Alert Dialog</h2><AlertDialog><AlertDialogTrigger>Delete project</AlertDialogTrigger><AlertDialogContent>
+          <AlertDialogHeader><AlertDialogTitle>Delete this project?</AlertDialogTitle><AlertDialogDescription>This preview does not delete any data.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Delete project</AlertDialogAction></AlertDialogFooter>
+        </AlertDialogContent></AlertDialog>
+      </section>)}
+      {gate('toast', 'Toast', <section aria-label="Toast" data-component="toast">
+        <h2>Toast</h2><ToastProvider><ToastExample /></ToastProvider>
+      </section>)}
+      <section aria-label="Additional appearances" data-component="appearance-variants">
+        <h2>Additional appearances</h2>
+        <div className="preset-stack">
+          <div className="preset-row"><Badge size="sm"><BadgeDot />Active</Badge><Badge><BadgeDot />Default</Badge></div>
+          <Alert variant="success"><AlertTitle>Saved</AlertTitle><AlertDescription>Your changes are ready.</AlertDescription></Alert>
+          <Alert variant="warning"><AlertTitle>Review needed</AlertTitle><AlertDescription>Two items need your attention.</AlertDescription></Alert>
+          <Alert variant="info"><AlertTitle>New version</AlertTitle><AlertDescription>A component update is available.</AlertDescription></Alert>
+          <Card appearance="outlined"><CardHeader><CardTitle>Outlined card</CardTitle></CardHeader><CardContent>Project summary.</CardContent></Card>
+          <Card appearance="subtle" density="dense"><CardHeader><CardTitle>Subtle card</CardTitle></CardHeader><CardContent>Recent activity.</CardContent></Card>
+          <Tabs defaultValue="overview"><TabsList appearance="underline" aria-label="Underline sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList><TabsContent value="overview">Project overview.</TabsContent><TabsContent value="activity">Recent activity.</TabsContent></Tabs>
+          <Table density="compact" striped><TableCaption>Compact project list</TableCaption><TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow><TableRow><TableCell>Mobile</TableCell><TableCell>Review</TableCell></TableRow><TableRow selected><TableCell>Billing</TableCell><TableCell>Selected</TableCell></TableRow></TableBody></Table>
+        </div>
+      </section>
       <section aria-label="Actions" data-component="button">
         <h2>Actions</h2>
         <div className="preset-row">

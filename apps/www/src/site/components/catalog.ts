@@ -1,5 +1,6 @@
 import { componentsWithStyleSupport, styleSupport, supportedComponentIds, type ComponentId } from '@ombelle/contracts'
 import { compareVersions, publishedInstaller } from '../../snapshots/install-command'
+import { expansionDocs } from './expansion'
 
 export type ComponentDoc = {
   id: ComponentId
@@ -22,6 +23,7 @@ export type ComponentDoc = {
 // Usage mirrors docs/components/*.md where a page exists; API and states follow
 // the templates in packages/catalog and docs/03-components-styles-accessibility.md.
 const docs: Record<ComponentId, Omit<ComponentDoc, 'id'>> = {
+  ...expansionDocs,
   button: {
     name: 'Button',
     description: 'Triggers an action, or renders a link that looks like a button.',
@@ -45,8 +47,8 @@ export function Actions() {
   badge: {
     name: 'Badge',
     description: 'Shows a short status or category as a native span.',
-    api: 'variant (default, destructive), className',
-    states: 'Default, destructive',
+    api: 'variant (default, secondary, outline, accent, destructive), className',
+    states: 'Default, secondary, outline, accent, destructive',
     basis: '<span>; interactive tags need a real button or link',
     client: false,
     usage: `import { Badge } from '@/components/ui/badge'
@@ -218,7 +220,7 @@ export function NotificationSetting() {
   tabs: {
     name: 'Tabs',
     description: 'Radix tabs for switching between related panels.',
-    api: 'Tabs (defaultValue, orientation), TabsList, TabsTrigger, TabsContent',
+    api: 'Tabs (defaultValue, orientation), TabsList (appearance: contained, underline), TabsTrigger, TabsContent',
     states: 'Active, inactive, focus, disabled',
     basis: 'Reviewed Radix tabs primitive',
     client: true,

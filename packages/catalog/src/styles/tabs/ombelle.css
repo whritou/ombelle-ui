@@ -129,3 +129,57 @@
     transition: none;
   }
 }
+
+/* Underline appearance preserves the contained default and uses logical edges. */
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation] {
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  border-block-end: var(--border-width) solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'] {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  box-shadow: none;
+  transform: none;
+}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-state='active'] {
+  color: var(--foreground);
+}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-state='active']::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0.5rem;
+  inset-block-end: 0;
+  block-size: max(2px, var(--border-width));
+  background: currentColor;
+}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation][data-orientation='vertical'] {
+  border-block-end: 0;
+  border-inline-end: var(--border-width) solid var(--border);
+}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation][data-orientation='vertical'] > [role='tab'][data-state='active']::after {
+  inset-inline: auto 0;
+  inset-block: 0.5rem;
+  inline-size: max(2px, var(--border-width));
+  block-size: auto;
+}
+@media (forced-colors: active) {
+  [data-slot='tabs-list'][data-appearance='underline'][data-orientation] { border-color: CanvasText; }
+  [data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'] {
+    color: CanvasText;
+    background: Canvas;
+    forced-color-adjust: auto;
+  }
+  [data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-state='active'] { color: Highlight; }
+  [data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab']:disabled,
+  [data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-disabled] { color: GrayText; }
+}

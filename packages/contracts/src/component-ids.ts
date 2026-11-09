@@ -22,5 +22,11 @@ export const supportedComponentIds = [
   'table',
   'textarea',
   'tooltip',
+  'input-group',
+  'sheet',
+  'alert-dialog',
+  'breadcrumb',
+  'pagination',
+  'toast',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

@@ -1,6 +1,8 @@
 export const runtimeDependencies = {
   react: '19.3.1',
   '@base-ui/react': '1.9.0',
+  '@radix-ui/react-alert-dialog': '1.2.1',
+  '@radix-ui/react-toast': '1.3.1',
   '@radix-ui/react-accordion': '1.3.1',
   '@radix-ui/react-avatar': '1.3.1',
   '@radix-ui/react-checkbox': '1.4.1',

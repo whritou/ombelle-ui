@@ -288,6 +288,24 @@ export const presetSchema = {
         "destructiveForeground": {
           "$ref": "#/$defs/color"
         },
+        "success": {
+          "$ref": "#/$defs/color"
+        },
+        "successForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "warning": {
+          "$ref": "#/$defs/color"
+        },
+        "warningForeground": {
+          "$ref": "#/$defs/color"
+        },
+        "info": {
+          "$ref": "#/$defs/color"
+        },
+        "infoForeground": {
+          "$ref": "#/$defs/color"
+        },
         "border": {
           "$ref": "#/$defs/color"
         },

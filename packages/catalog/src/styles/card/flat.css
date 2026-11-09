@@ -62,3 +62,33 @@
     color: CanvasText;
   }
 }
+
+/* Opt-in appearances preserve each family's default composition and density. */
+[data-slot='card'][data-density][data-appearance='outlined'] {
+  border: max(var(--border-width), 1px) solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+[data-slot='card'][data-density][data-appearance='subtle'] {
+  border: 0;
+  background: var(--muted);
+  color: var(--foreground);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+[data-slot='card'][data-density]:is([data-appearance='outlined'], [data-appearance='subtle']) > [data-slot='card-header'] {
+  background: transparent;
+  color: inherit;
+}
+@media (forced-colors: active) {
+  [data-slot='card'][data-density]:is([data-appearance='outlined'], [data-appearance='subtle']) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+}

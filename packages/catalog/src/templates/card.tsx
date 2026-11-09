@@ -4,14 +4,21 @@ import './card.css'
 
 export type CardProps = React.ComponentProps<'div'> & {
   density?: 'default' | 'dense'
+  appearance?: 'default' | 'outlined' | 'subtle'
 }
 
-export function Card({ className, density = 'default', ...props }: CardProps) {
+export function Card({
+  className,
+  density = 'default',
+  appearance = 'default',
+  ...props
+}: CardProps) {
   return (
     <div
       {...props}
       data-slot="card"
       data-density={density}
+      data-appearance={appearance}
       className={cn(className)}
     />
   )

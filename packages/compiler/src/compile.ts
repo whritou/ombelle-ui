@@ -8,7 +8,7 @@ import {
   assertStyleAvailable,
   isStyleFamily,
 } from '@ombelle/contracts'
-import { getCatalog, getTemplate } from '@ombelle/catalog'
+import { getCatalog, getTemplate, expansionExamples, baseToastExample } from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
 import typescript from 'prettier/plugins/typescript'
 import estree from 'prettier/plugins/estree'
@@ -22,6 +22,7 @@ const variable = (key: string) =>
   '--' + key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
 // Usage examples emitted as examples/<id>.tsx; Input uses the fallback.
 const usageExamples: Partial<Record<ComponentId, string>> = {
+  ...expansionExamples,
   tooltip:
     'import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent, TooltipArrow } from \'@/components/ui/tooltip\'\nexport function Example(){return <TooltipProvider delayDuration={300}><Tooltip><TooltipTrigger type="button">Project details</TooltipTrigger><TooltipContent>View the project summary.<TooltipArrow /></TooltipContent></Tooltip></TooltipProvider>}',
   tabs:
@@ -198,7 +199,7 @@ export async function compile(input: {
           ? prefixSlots(template.styles[family]!, 'css', slots)
           : template.styles[family]!,
       })
-    const usage = usageExamples[id] ?? defaultUsage
+    const usage = id === 'toast' && input.edition === 'base' ? baseToastExample : usageExamples[id] ?? defaultUsage
     drafts.push({
       logicalPath: 'examples/' + id + '.tsx',
       kind: 'usage',

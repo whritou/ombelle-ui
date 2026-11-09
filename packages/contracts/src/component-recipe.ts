@@ -34,7 +34,8 @@ export function componentRecipeFields(component: ComponentRecipeId): {
 }
 
 export function defaultRecipeFields(fields: Readonly<Record<string, RecipeField>>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, structuredClone(field.default)]))
+  return Object.fromEntries(Object.entries(fields).filter(([, field]) => field.default !== undefined)
+    .map(([key, field]) => [key, structuredClone(field.default)]))
 }
 
 const check = new Ajv2020({ allErrors: true, strict: true }).compile(componentRecipeSchema)
@@ -74,6 +75,19 @@ function validateComposition(recipe: ComponentRecipe): void {
     if (selected.some(id => !ids.has(id))) reject('Choose an item present in the recipe', path)
   }
   switch (recipe.component) {
+    case 'toast':
+      if (recipe.content.action && !recipe.content.actionAltText.trim())
+        reject('Toast actions require an alternative description', '/content/actionAltText')
+      break
+    case 'pagination':
+      if (recipe.props.page > recipe.props.totalPages)
+        reject('Current page must not exceed total pages', '/props/page')
+      break
+    case 'breadcrumb':
+      references(recipe.content.items, [], '/content/items')
+      if (recipe.content.items.slice(0, -1).some(item => !item.href))
+        reject('Ancestor pages require a link', '/content/items')
+      break
     case 'progress':
       if (!recipe.props.indeterminate && recipe.props.value > recipe.props.max)
         reject('Progress cannot exceed its maximum', '/props/value')

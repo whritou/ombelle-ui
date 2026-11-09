@@ -1,4 +1,19 @@
 /* neo-brutalism Table */
+/* Density and striping are independent opt-ins on the native table. */
+[data-slot='table'][data-density='compact'] > :is(thead, tbody, tfoot) > tr > :is(th, td) {
+  padding-block: 0.375rem;
+  padding-inline: 0.625rem;
+}
+[data-slot='table'][data-striped] > tbody > tr:nth-child(even):not([data-state='selected']) > :is(th, td) {
+  background: var(--muted);
+  color: var(--foreground);
+}
+@media (forced-colors: active) {
+  [data-slot='table'][data-striped] > tbody > tr:nth-child(even):not([data-state='selected']) > :is(th, td) {
+    background: Canvas;
+    color: CanvasText;
+  }
+}
 [data-slot='table-container'] {
   position: relative;
   inline-size: 100%;

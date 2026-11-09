@@ -1,5 +1,6 @@
 /* neo-brutalism Alert */
 [data-slot='alert'] {
+  --alert-intent-text: initial;
   box-sizing: border-box;
   position: relative;
   display: grid;
@@ -47,7 +48,39 @@
   background: var(--destructive);
   color: var(--destructive-foreground);
 }
+[data-slot='alert'][data-variant='success'] {
+  background: var(--success, #dcfce7);
+  color: var(--success-foreground, #14532d);
+  --alert-intent-text: var(--success-foreground, #14532d);
+}
+[data-slot='alert'][data-variant='warning'] {
+  background: var(--warning, #fef3c7);
+  color: var(--warning-foreground, #78350f);
+  --alert-intent-text: var(--warning-foreground, #78350f);
+}
+[data-slot='alert'][data-variant='info'] {
+  background: var(--info, #dbeafe);
+  color: var(--info-foreground, #1e3a8a);
+  --alert-intent-text: var(--info-foreground, #1e3a8a);
+}
+[data-slot='alert'] > svg {
+  color: var(--alert-intent-text, currentColor);
+}
+[data-slot='alert-title'] {
+  color: var(--alert-intent-text, currentColor);
+}
+[data-slot='alert-description'] {
+  color: var(--alert-intent-text, currentColor);
+}
 @media (forced-colors: active) {
+  [data-slot='alert'][data-variant='success'],
+  [data-slot='alert'][data-variant='warning'],
+  [data-slot='alert'][data-variant='info'] {
+    --alert-intent-text: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
   [data-slot='alert'] {
     background: Canvas;
     color: CanvasText;

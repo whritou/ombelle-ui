@@ -26,7 +26,17 @@ function appearanceCss(recipe: ComponentRecipe, scope: string, darkSelector: str
   for (const part of componentRecipeParts[recipe.component]) {
     const values = recipe.appearance?.parts?.[part.slot]
     if (!values) continue
-    const selector = `[data-slot="recipe-${part.slot}"]${scope}[data-slot]`
+    // Opt-in appearances have stronger defaults than the legacy component rules.
+    // Match their native attributes so explicit part values still win the cascade.
+    let selector = `[data-slot="recipe-${part.slot}"]${scope}[data-slot]`
+    if (recipe.component === 'card' && part.slot === 'card' && ['outlined', 'subtle'].includes(String(recipe.props.appearance)))
+      selector += '[data-density]'
+    if (recipe.component === 'tabs' && recipe.props.appearance === 'underline') {
+      if (part.slot === 'tabs-list') selector += '[data-appearance][data-orientation]'
+      if (part.slot === 'tabs-trigger') selector += '[role="tab"][data-state][data-orientation][data-slot]'
+    }
+    if (recipe.component === 'table' && recipe.props.density === 'compact' && ['table-head', 'table-cell'].includes(part.slot))
+      selector += '[data-slot]'
     const layout: Record<string, string> = {}
     for (const key of Object.keys(dimensions) as (keyof typeof dimensions)[]) {
       const value = values[key]
@@ -42,10 +52,22 @@ function appearanceCss(recipe: ComponentRecipe, scope: string, darkSelector: str
       if (!colors) continue
       const paint: Record<string, string> = {}
       if (colors.background) {
-        const property = glass && part.glassTint ? '--' + part.glassTint : 'background'
+        let property = glass && part.glassTint ? '--' + part.glassTint : 'background'
+        if (glass && recipe.component === 'card' && part.slot === 'card') {
+          if (recipe.props.appearance === 'outlined') property = '--background'
+          if (recipe.props.appearance === 'subtle') property = '--muted'
+        }
+        if (glass && recipe.component === 'alert' && part.slot === 'alert' && ['success', 'warning', 'info'].includes(String(recipe.props.variant)))
+          property = '--' + recipe.props.variant
+        if (glass && recipe.component === 'toast' && part.slot === 'toast') property = '--toast-bg'
         paint[property] = normalizeColor(colors.background)
       }
-      if (colors.foreground) paint.color = normalizeColor(colors.foreground)
+      if (colors.foreground) {
+        paint.color = normalizeColor(colors.foreground)
+        if (recipe.component === 'alert' && part.slot === 'alert' && ['success', 'warning', 'info'].includes(String(recipe.props.variant)))
+          paint[`--${recipe.props.variant}-foreground`] = paint.color
+        if (recipe.component === 'toast' && part.slot === 'toast') paint['--toast-fg'] = paint.color
+      }
       if (colors.border) {
         paint['border-color'] = paint['--border'] = normalizeColor(colors.border)
         if (glass) paint['--glass-lab-custom-edge'] = paint['--border']

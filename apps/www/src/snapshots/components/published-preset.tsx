@@ -6,7 +6,7 @@ import { PresetPreviewFrame } from '../../preset-editor/components/preset-previe
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
-import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, snapshotInstallCommand } from '../install-command'
+import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, semanticPaletteInstallBlocked, semanticPaletteInstallNotice, snapshotInstallCommand } from '../install-command'
 import {
   createSnapshotPreviewSession,
   selectSnapshotPreview,
@@ -59,6 +59,9 @@ export function PublishedPreset({
     [snapshot.preset],
   )
   const useLocalInstaller = contrastInstallBlocked(contrastWarning)
+  const installUnavailable = semanticPaletteInstallBlocked(snapshot.preset)
+    ? semanticPaletteInstallNotice
+    : !useLocalInstaller && materialInstallBlocked({ design: snapshot.preset.design }) ? glassMaterialInstallNotice : undefined
   const source = {
     origin,
     reference: `${snapshot.id}@${snapshot.revision}`,
@@ -205,7 +208,7 @@ export function PublishedPreset({
           {announcement}
         </p>
       </section>
-      {!useLocalInstaller && materialInstallBlocked({ design: snapshot.preset.design }) ? <p>{glassMaterialInstallNotice}</p> : (
+      {installUnavailable ? <p>{installUnavailable}</p> : (
       <section aria-labelledby="snapshot-install-heading">
         <h2 id="snapshot-install-heading">
           Install with the Ombelle CLI

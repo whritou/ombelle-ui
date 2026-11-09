@@ -177,6 +177,17 @@ export const componentRecipeSchema = {
               ],
               "default": "default",
               "title": "Variant"
+            },
+            "size": {
+              "enum": [
+                "default",
+                "sm"
+              ],
+              "title": "Size"
+            },
+            "dot": {
+              "type": "boolean",
+              "title": "Status dot"
             }
           },
           "additionalProperties": false,
@@ -211,7 +222,10 @@ export const componentRecipeSchema = {
             "variant": {
               "enum": [
                 "default",
-                "destructive"
+                "destructive",
+                "success",
+                "warning",
+                "info"
               ],
               "default": "default",
               "title": "Variant"
@@ -337,6 +351,14 @@ export const componentRecipeSchema = {
               ],
               "default": 3,
               "title": "Title level"
+            },
+            "appearance": {
+              "enum": [
+                "default",
+                "outlined",
+                "subtle"
+              ],
+              "title": "Appearance"
             }
           },
           "additionalProperties": false,
@@ -1175,6 +1197,17 @@ export const componentRecipeSchema = {
               "uniqueItems": true,
               "default": [],
               "title": "Numeric columns"
+            },
+            "density": {
+              "enum": [
+                "default",
+                "compact"
+              ],
+              "title": "Density"
+            },
+            "striped": {
+              "type": "boolean",
+              "title": "Striped rows"
             }
           },
           "additionalProperties": false,
@@ -1301,6 +1334,13 @@ export const componentRecipeSchema = {
               "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
               "default": "overview",
               "title": "Item ID"
+            },
+            "appearance": {
+              "enum": [
+                "contained",
+                "underline"
+              ],
+              "title": "Appearance"
             }
           },
           "additionalProperties": false,
@@ -1599,6 +1639,449 @@ export const componentRecipeSchema = {
           "required": [
             "trigger",
             "text"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "input-group"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "align": {
+              "enum": [
+                "inline-start",
+                "inline-end",
+                "block-start",
+                "block-end"
+              ],
+              "default": "inline-start",
+              "title": "Addon alignment"
+            },
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "invalid": {
+              "type": "boolean",
+              "default": false,
+              "title": "Invalid"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "title": "Required"
+            },
+            "multiline": {
+              "type": "boolean",
+              "default": false,
+              "title": "Multiline"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Website",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": "example.com"
+            },
+            "initialText": {
+              "type": "string",
+              "title": "Initial text",
+              "maxLength": 200,
+              "default": ""
+            },
+            "addon": {
+              "type": "string",
+              "title": "Addon text",
+              "maxLength": 200,
+              "default": "https://"
+            },
+            "action": {
+              "type": "string",
+              "title": "Action label",
+              "maxLength": 200,
+              "default": "",
+              "pattern": "(?:\\S|^$)"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "placeholder",
+            "initialText",
+            "addon",
+            "action"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "sheet"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "side": {
+              "enum": [
+                "inline-start",
+                "inline-end",
+                "top",
+                "bottom"
+              ],
+              "default": "inline-end",
+              "title": "Side"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "default": "default",
+              "title": "Size"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "trigger": {
+              "type": "string",
+              "title": "Trigger label",
+              "maxLength": 200,
+              "default": "Open details",
+              "pattern": "\\S"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Project details",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000,
+              "default": "Review the project details."
+            },
+            "body": {
+              "type": "string",
+              "title": "Body",
+              "maxLength": 4000,
+              "default": "Your project is ready to review."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "title",
+            "description",
+            "body"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "alert-dialog"
+        },
+        "props": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "trigger": {
+              "type": "string",
+              "title": "Trigger label",
+              "maxLength": 200,
+              "default": "Delete project",
+              "pattern": "\\S"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Delete this project?",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000,
+              "default": "This action cannot be undone.",
+              "pattern": "\\S"
+            },
+            "cancel": {
+              "type": "string",
+              "title": "Cancel label",
+              "maxLength": 200,
+              "default": "Cancel",
+              "pattern": "\\S"
+            },
+            "action": {
+              "type": "string",
+              "title": "Action label",
+              "maxLength": 200,
+              "default": "Delete project",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "title",
+            "description",
+            "cancel",
+            "action"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "breadcrumb"
+        },
+        "props": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Navigation label",
+              "maxLength": 200,
+              "default": "Breadcrumb",
+              "pattern": "\\S"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 1,
+              "maxItems": 12,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Page",
+                    "pattern": "\\S"
+                  },
+                  "href": {
+                    "type": "string",
+                    "title": "Link",
+                    "maxLength": 1000,
+                    "default": "",
+                    "pattern": "^(?:$|/(?!/)|#[A-Za-z0-9_-]|https://)"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "href"
+                ]
+              },
+              "default": [
+                {
+                  "id": "home",
+                  "label": "Home",
+                  "href": "/"
+                },
+                {
+                  "id": "projects",
+                  "label": "Projects",
+                  "href": "/projects"
+                },
+                {
+                  "id": "current",
+                  "label": "Website refresh",
+                  "href": ""
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "pagination"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "title": "Current page",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 2
+            },
+            "totalPages": {
+              "type": "integer",
+              "title": "Total pages",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 5
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Navigation label",
+              "maxLength": 200,
+              "default": "Pagination",
+              "pattern": "\\S"
+            },
+            "previous": {
+              "type": "string",
+              "title": "Previous label",
+              "maxLength": 200,
+              "default": "Previous",
+              "pattern": "\\S"
+            },
+            "next": {
+              "type": "string",
+              "title": "Next label",
+              "maxLength": 200,
+              "default": "Next",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "previous",
+            "next"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "toast"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "enum": [
+                "default",
+                "success",
+                "warning",
+                "info",
+                "destructive"
+              ],
+              "default": "default",
+              "title": "Intent"
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 60000,
+              "default": 60000,
+              "title": "Duration (ms)"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "default": "Changes saved",
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "default": "Your project is up to date.",
+              "maxLength": 1000
+            },
+            "action": {
+              "type": "string",
+              "title": "Action label",
+              "default": "",
+              "maxLength": 200,
+              "pattern": "(?:\\S|^$)"
+            },
+            "actionAltText": {
+              "type": "string",
+              "title": "Action alternative description",
+              "default": "",
+              "maxLength": 200
+            },
+            "close": {
+              "type": "string",
+              "title": "Dismiss label",
+              "default": "Dismiss",
+              "maxLength": 200,
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "description",
+            "action",
+            "actionAltText",
+            "close"
           ]
         }
       }

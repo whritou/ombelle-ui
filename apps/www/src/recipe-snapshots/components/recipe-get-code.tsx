@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { InstallableRecipeCompileResult } from '@ombelle/contracts'
 import { useRecipePublication } from '../use-publication'
-import { catalogRecipeInstallNotice, catalogRecipeInstallerSupported, codeInstallCommand, glassMaterialInstallNotice, publishedInstaller, recipeInstallBlocked } from '../../snapshots/install-command'
+import { codeInstallCommand, installableRecipeInstallNotice } from '../../snapshots/install-command'
 import {
   GetCodeDialog,
   type CodeStatus,
@@ -36,9 +36,7 @@ export function RecipeGetCode({
   const publication = useRecipePublication({ recipe, current, announce, storageKey })
   const scopes = [{ id: 'recipe', label: componentName,
     description: `Run in an initialized app folder to add this ${componentName} recipe. The CLI shows its plan and asks before writing.` }] as const
-  const installUnavailable = recipe?.data.schemaVersion === '2.0'
-    ? !catalogRecipeInstallerSupported(publishedInstaller.version) ? catalogRecipeInstallNotice : undefined
-    : recipe && recipeInstallBlocked(recipe.data) ? glassMaterialInstallNotice : undefined
+  const installUnavailable = recipe ? installableRecipeInstallNotice(recipe.data) : undefined
   const { state } = publication
   const [open, setOpen] = useState(false)
   const last = state.lastPublished

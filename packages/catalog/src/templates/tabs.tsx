@@ -14,11 +14,13 @@ export function Tabs({ className, ...props }: TabsProps) {
 
 export function TabsList({
   className,
+  appearance = 'contained',
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+}: React.ComponentProps<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' }) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
+      data-appearance={appearance}
       className={cn(className)}
       {...props}
     />

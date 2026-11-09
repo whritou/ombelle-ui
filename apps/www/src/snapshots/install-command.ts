@@ -1,4 +1,4 @@
-import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type Recipe, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type ComponentRecipe, type InstallableRecipe, type Recipe, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
 export const publishedInstaller = { packageName: publicCliPackageName, version: '0.7.1' } as const
@@ -9,6 +9,49 @@ export const catalogRecipeInstallNotice = 'Install this recipe with the reposito
 
 export function catalogRecipeInstallerSupported(version: string): boolean {
   return compareVersions(version, catalogRecipeMinimumCli) >= 0
+}
+
+export const expandedCatalogMinimumCli = '0.7.2'
+export const expandedCatalogInstallNotice = `This recipe requires CLI ${expandedCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+export const semanticPaletteInstallNotice = `This preset uses semantic status colors and requires CLI ${expandedCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+
+const expandedComponents = new Set(['input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast'])
+const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {
+  badge: ['size', 'dot'], card: ['appearance'], table: ['density', 'striped'], tabs: ['appearance'],
+}
+const semanticPaletteFields = ['success', 'successForeground', 'warning', 'warningForeground', 'info', 'infoForeground']
+
+/** Older recipe schemas reject added keys even when their value is false or a component default. */
+export function componentRecipeInstallBlocked(
+  recipe: Pick<ComponentRecipe, 'component' | 'props'>,
+  installer: { version: string } = publishedInstaller,
+): boolean {
+  if (!catalogRecipeInstallerSupported(installer.version)) return true
+  if (compareVersions(installer.version, expandedCatalogMinimumCli) >= 0) return false
+  if (expandedComponents.has(recipe.component)) return true
+  if (expandedRecipeFields[recipe.component]?.some(key => Object.hasOwn(recipe.props, key))) return true
+  return recipe.component === 'alert' && ['success', 'warning', 'info'].includes(String((recipe.props as Record<string, unknown>).variant))
+}
+
+/** Optional semantic palette fields are unknown properties to the published 0.7.1 preset schema. */
+export function semanticPaletteInstallBlocked(
+  preset: { modes?: Record<string, Record<string, unknown>> },
+  installer: { version: string } = publishedInstaller,
+): boolean {
+  return compareVersions(installer.version, expandedCatalogMinimumCli) < 0 &&
+    Object.values(preset.modes ?? {}).some(colors => semanticPaletteFields.some(key => Object.hasOwn(colors, key)))
+}
+
+/** A shared notice keeps local artifacts, Get code and published snapshots on the same compatibility rule. */
+export function installableRecipeInstallNotice(
+  recipe: InstallableRecipe,
+  installer: { version: string } = publishedInstaller,
+): string | undefined {
+  if (recipe.schemaVersion === '2.0') {
+    if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
+    return componentRecipeInstallBlocked(recipe, installer) ? expandedCatalogInstallNotice : undefined
+  }
+  return recipeInstallBlocked(recipe, installer) ? glassMaterialInstallNotice : undefined
 }
 
 /** First published installer that accepts `ombelle` presets and codes. */

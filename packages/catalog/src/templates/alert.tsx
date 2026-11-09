@@ -3,14 +3,18 @@ import { cn } from './utils.js'
 import './alert.css'
 
 export type AlertProps = React.ComponentProps<'div'> & {
-  variant?: 'default' | 'destructive'
+  variant?: 'default' | 'destructive' | 'success' | 'warning' | 'info'
 }
 
 /**
- * A default Alert is a polite status message; a destructive Alert is
- * announced immediately. Pass role to override.
+ * Alerts announce polite status updates; only a destructive Alert is
+ * announced immediately by default. Pass role to override.
  */
-export function Alert({ className, variant = 'default', ...props }: AlertProps) {
+export function Alert({
+  className,
+  variant = 'default',
+  ...props
+}: AlertProps) {
   return (
     <div
       role={variant === 'destructive' ? 'alert' : 'status'}
@@ -22,10 +26,11 @@ export function Alert({ className, variant = 'default', ...props }: AlertProps) 
   )
 }
 
-export function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
-    <div {...props} data-slot="alert-title" className={cn(className)} />
-  )
+export function AlertTitle({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
+  return <div {...props} data-slot="alert-title" className={cn(className)} />
 }
 
 export function AlertDescription({

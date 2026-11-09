@@ -37,32 +37,38 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the twenty-three experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'avatar', 'badge', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip'])
+  it('compiles the twenty-nine experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'input-group', 'label', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'select', 'separator', 'sheet', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'toast', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
       result.artifacts.filter((a) => a.kind === 'style').map((a) => a.logicalPath),
     ).toEqual([
       'components/ui/accordion.css',
+      'components/ui/alert-dialog.css',
       'components/ui/alert.css',
       'components/ui/avatar.css',
       'components/ui/badge.css',
+      'components/ui/breadcrumb.css',
       'components/ui/card.css',
       'components/ui/checkbox.css',
       'components/ui/dropdown-menu.css',
+      'components/ui/input-group.css',
       'components/ui/label.css',
       'components/ui/native-select.css',
+      'components/ui/pagination.css',
       'components/ui/popover.css',
       'components/ui/progress.css',
       'components/ui/radio-group.css',
       'components/ui/select.css',
       'components/ui/separator.css',
+      'components/ui/sheet.css',
       'components/ui/skeleton.css',
       'components/ui/switch.css',
       'components/ui/table.css',
       'components/ui/tabs.css',
       'components/ui/textarea.css',
+      'components/ui/toast.css',
       'components/ui/tooltip.css',
       'styles/ui-style.css',
       'styles/ui-tokens.css',
@@ -810,11 +816,11 @@ describe('liquid glass material review fixes', () => {
     root.walkDecls('-webkit-text-stroke', (decl) => {
       if (decl.value.includes('--glass-plate')) strokes.push(squash((decl.parent as postcss.Rule).selector) + ' ' + squash(decl.value))
     })
-    expect(strokes.length).toBe(1)
+    const strokeSelectors = strokes.join(',')
     expect(strokes[0]).toContain('calc(var(--glass-material,0)*0.25px)var(--glass-plate)')
     for (const slot of ['card', 'button', 'popover-content', 'table-head', 'table-cell', 'tabs-trigger', 'radio-group-option', 'select-item', 'input'])
-      expect(strokes[0], slot).toContain('[data-slot="' + slot + '"]')
-    expect(strokes[0]).not.toContain('[data-slot="badge"]')
+      expect(strokeSelectors, slot).toContain('[data-slot="' + slot + '"]')
+    expect(strokeSelectors).not.toContain('[data-slot="badge"]')
     let paintOrder = false
     let badgeClear = false
     let forced = false

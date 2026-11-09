@@ -13,6 +13,16 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarStatus } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
+import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge, BadgeDot } from '@/components/ui/badge'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, useToastManager } from '@/components/ui/toast'
 
 // Ported components rendered identically in both editions; the parity test
 // compares computed styles of every [data-slot] element per section.
@@ -27,6 +37,186 @@ function Parity({ id, children }: { id: string; children: React.ReactNode }) {
       {children}
     </section>
   )
+}
+
+// Browser coverage for newly added catalog contracts lives outside the parity
+// sections, so the existing edition comparisons keep their original contents.
+function CatalogExpansionScenario() {
+  const [submits, setSubmits] = React.useState(0)
+  const [checks, setChecks] = React.useState(0)
+  const [pages, setPages] = React.useState(0)
+  const [archives, setArchives] = React.useState(0)
+  return (
+    <>
+      <section data-expansion="input-group" className="specimen">
+        <h2>Composed form controls</h2>
+        <form onSubmit={(event) => { event.preventDefault(); setSubmits((count) => count + 1) }}>
+          <label htmlFor="expansion-search">Expansion search</label>
+          <InputGroup>
+            <InputGroupAddon><InputGroupText aria-hidden="true">@</InputGroupText></InputGroupAddon>
+            <InputGroupInput id="expansion-search" name="search" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton onClick={() => setChecks((count) => count + 1)}>Check</InputGroupButton>
+              <InputGroupButton type="submit">Go</InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+          <p>Checks: <span data-check-count>{checks}</span>. Submissions: <span data-submit-count>{submits}</span>.</p>
+        </form>
+        <label htmlFor="expansion-email">Expansion email</label>
+        <InputGroup>
+          <InputGroupInput id="expansion-email" type="email" defaultValue="invalid" required aria-invalid="true" aria-describedby="expansion-email-error" />
+          <InputGroupAddon align="inline-end"><InputGroupText aria-hidden="true">!</InputGroupText></InputGroupAddon>
+        </InputGroup>
+        <p id="expansion-email-error">Enter a complete email address.</p>
+        <label htmlFor="expansion-disabled">Expansion disabled field</label>
+        <InputGroup><InputGroupInput id="expansion-disabled" disabled defaultValue="Locked value" /></InputGroup>
+        <label htmlFor="expansion-message">Expansion message</label>
+        <InputGroup>
+          <InputGroupAddon align="block-start"><InputGroupText>Message details</InputGroupText></InputGroupAddon>
+          <InputGroupTextarea id="expansion-message" name="message" rows={3} />
+          <InputGroupAddon align="block-end"><InputGroupText>No attachment</InputGroupText></InputGroupAddon>
+        </InputGroup>
+      </section>
+      <section data-expansion="navigation" className="specimen">
+        <h2>Project navigation</h2>
+        <Breadcrumb aria-label="Project breadcrumb">
+          <BreadcrumbList>
+            <BreadcrumbItem><BreadcrumbLink href="#workspace">Workspace</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbPage>Component review</BreadcrumbPage></BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <button type="button">Before pagination</button>
+        <Pagination aria-label="Project pagination">
+          <PaginationContent>
+            <PaginationItem><PaginationPrevious disabled href="#disabled-page" onClick={() => setPages((count) => count + 1)} /></PaginationItem>
+            <PaginationItem><PaginationLink aria-label="Page 1" href="#page-1">1</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationLink aria-label="Page 2" href="#page-2" isActive>2</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationEllipsis /></PaginationItem>
+            <PaginationItem><PaginationNext href="#page-3" onClick={(event) => { event.preventDefault(); setPages((count) => count + 1) }} /></PaginationItem>
+          </PaginationContent>
+        </Pagination>
+        <button type="button">After pagination</button>
+        <p>Page actions: <span data-page-count>{pages}</span>.</p>
+      </section>
+      <section data-expansion="surfaces" className="specimen">
+        <h2>Surface appearances</h2>
+        {(['default', 'outlined', 'subtle'] as const).map((appearance) => (
+          <Card key={appearance} appearance={appearance}>
+            <CardHeader><CardTitle level={3}>{appearance} project card</CardTitle><CardDescription>Review project progress.</CardDescription></CardHeader>
+            <CardContent>Three milestones remain.</CardContent>
+          </Card>
+        ))}
+        <Table aria-label="Default density projects">
+          <TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+          <TableBody><TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow></TableBody>
+          <TableCaption>Default spacing</TableCaption>
+        </Table>
+        <Table aria-label="Compact projects" density="compact" striped>
+          <TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+          <TableBody>
+            <TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow>
+            <TableRow><TableCell>API</TableCell><TableCell>Draft</TableCell></TableRow>
+            <TableRow selected><TableCell>CLI</TableCell><TableCell>Selected</TableCell></TableRow>
+            <TableRow selected><TableCell>Docs</TableCell><TableCell>Selected</TableCell></TableRow>
+          </TableBody>
+          <TableCaption>Compact spacing with alternating body rows</TableCaption>
+        </Table>
+        <div className="actions">
+          <Badge><BadgeDot />Default status</Badge>
+          <Badge size="sm" variant="secondary"><BadgeDot />Small status</Badge>
+        </div>
+      </section>
+      <section data-expansion="alerts" className="specimen">
+        <h2>Alert variants</h2>
+        {(['default', 'success', 'warning', 'info', 'destructive'] as const).map((variant) => (
+          <Alert key={variant} variant={variant}>
+            <AlertTitle>{variant} project notice</AlertTitle>
+            <AlertDescription>Review the project settings before continuing.</AlertDescription>
+          </Alert>
+        ))}
+      </section>
+      <section data-expansion="tabs" className="specimen">
+        <h2>Underline tabs</h2>
+        {(['horizontal', 'vertical'] as const).map((orientation) => (
+          <Tabs key={orientation} defaultValue="summary" orientation={orientation}>
+            <TabsList appearance="underline" aria-label={'Expansion ' + orientation + ' tabs'}>
+              <TabsTrigger value="summary">Summary</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="unavailable" disabled>Unavailable</TabsTrigger>
+            </TabsList>
+            <TabsContent value="summary">Current project summary.</TabsContent>
+            <TabsContent value="history">Previous project changes.</TabsContent>
+          </Tabs>
+        ))}
+      </section>
+      <section data-expansion="sheet" className="specimen">
+        <h2>Project sheet</h2>
+        <Sheet>
+          <SheetTrigger type="button">Open expansion sheet</SheetTrigger>
+          <SheetContent data-expansion="sheet-content" side="inline-end" size="default">
+            <SheetHeader>
+              <SheetTitle>Expansion project details</SheetTitle>
+              <SheetDescription>Review the project and its recent changes.</SheetDescription>
+            </SheetHeader>
+            <label htmlFor="expansion-sheet-name">Sheet project name</label>
+            <input id="expansion-sheet-name" defaultValue="Component library" />
+            <div style={{ display: 'grid', gap: '1rem', flexShrink: 0 }}>
+              {Array.from({ length: 40 }, (_, index) => <p key={index}>Project update {index + 1}: Review the installed source and keep the approved settings.</p>)}
+            </div>
+            <SheetFooter><SheetClose type="button">Done reviewing</SheetClose></SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </section>
+      <section data-expansion="alert-dialog" className="specimen">
+        <h2>Protected confirmation</h2>
+        <AlertDialog>
+          <AlertDialogTrigger type="button">Open expansion confirmation</AlertDialogTrigger>
+          <AlertDialogContent data-expansion="alert-dialog-content">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Archive expansion project?</AlertDialogTitle>
+              <AlertDialogDescription>The project will leave your active workspace. You can restore it later.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel type="button">Keep project</AlertDialogCancel>
+              <AlertDialogAction type="button" onClick={() => setArchives((count) => count + 1)}>Archive project</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <p>Archived: <span data-archive-count>{archives}</span>.</p>
+      </section>
+      <section data-expansion="toast" className="specimen">
+        <h2>Project notifications</h2>
+        <ExpansionToast />
+      </section>
+    </>
+  )
+}
+
+function ExpansionToastNotifications() {
+  const manager = useToastManager()
+  return (
+    <>
+      <button type="button" onClick={() => manager.add({
+        title: 'Expansion saved', description: 'Your project changes are available.', type: 'success',
+      })}>Show expansion notification</button>
+      <ToastViewport data-expansion="toast-viewport">
+        {manager.toasts.map((toast) => (
+          <Toast key={toast.id} toast={toast} data-expansion="toast-content">
+            <ToastTitle>{toast.title}</ToastTitle>
+            <ToastDescription>{toast.description}</ToastDescription>
+            <ToastClose />
+          </Toast>
+        ))}
+      </ToastViewport>
+    </>
+  )
+}
+
+function ExpansionToast() {
+  return <ToastProvider duration={1200}><ExpansionToastNotifications /></ToastProvider>
 }
 
 export default function EditionScenario() {
@@ -270,6 +460,7 @@ export default function EditionScenario() {
           </SelectContent>
         </Select>
       </Parity>
+      <CatalogExpansionScenario />
     </main>
   )
 }

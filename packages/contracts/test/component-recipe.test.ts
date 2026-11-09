@@ -42,3 +42,25 @@ it('rejects multiple starting items in single expansion mode and nonrectangular 
     content: { caption: 'Projects', columns: [{ id: 'name', label: 'Name' }, { id: 'owner', label: 'Owner' }],
       rows: [{ id: 'one', cells: ['First'] }] } })).toThrow('Every row must have one cell per column')
 })
+
+it('rejects invalid paging, unsafe breadcrumb links and undescribed toast actions', () => {
+  expect(() => validateComponentRecipe({ ...badge, component: 'pagination', props: { page: 3, totalPages: 2 },
+    content: { label: 'Pages', previous: 'Previous', next: 'Next' } })).toThrow('Current page must not exceed total pages')
+  expect(() => validateComponentRecipe({ ...badge, component: 'breadcrumb', props: {}, content: { label: 'Location', items: [
+    { id: 'home', label: 'Home', href: 'javascript:alert(1)' }, { id: 'current', label: 'Current', href: '' },
+  ] } })).toThrow()
+  expect(() => validateComponentRecipe({ ...badge, component: 'breadcrumb', props: {}, content: { label: 'Location', items: [
+    { id: 'home', label: 'Home', href: '' }, { id: 'current', label: 'Current', href: '' },
+  ] } })).toThrow('Ancestor pages require a link')
+  expect(() => validateComponentRecipe({ ...badge, component: 'toast', props: {}, content: {
+    title: 'Saved', description: '', action: 'Undo', actionAltText: '', close: 'Dismiss',
+  } })).toThrow('Toast actions require an alternative description')
+})
+
+it.each([
+  ['input-group', { label: 'Website', placeholder: '', initialText: '', addon: '', action: '   ' }],
+  ['toast', { title: 'Saved', description: '', action: '   ', actionAltText: 'Undo saving', close: 'Dismiss' }],
+])('rejects whitespace-only optional action labels in %s', (component, content) => {
+  expect(() => validateComponentRecipe({ ...badge, component, props: {}, content }))
+    .toThrow(expect.objectContaining({ path: '/content/action' }))
+})
