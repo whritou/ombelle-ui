@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { checkFocusVisible, findClipping, findForcedColors, findOverflow, findTargetSize, listFocusables, markBorders, runAxe } from '../helpers/specimen-audit.js'
+import { checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, listFocusables, markBorders, runAxe } from '../helpers/specimen-audit.js'
 
 // Each check must report its planted defect and stay silent on the clean twin,
 // so a check that passes everything fails here first.
@@ -116,4 +116,16 @@ test('listFocusables: keyboard-reachable controls, including arrow-key list item
     <div tabindex="-1">Programmatic only</div>`)
   const list = await listFocusables(both(page)[1], 'case')
   expect(await Promise.all(list.map(item => item.textContent()))).toEqual(['Open', 'Starter', 'Team'])
+})
+
+test('spacing: a label flush against its control is reported, beside it or above it', async ({ page }) => {
+  const box = '<span style="display:inline-block;inline-size:16px;block-size:16px;border:1px solid #333"'
+  await fixture(page, `<div>${box} id="a" role="checkbox" aria-checked="false" tabindex="0"></span><label for="a">Accept terms</label></div>
+    <div><label for="b" style="display:block">Email</label><input id="b" style="display:block;margin:0"></div>`,
+    `<div style="display:flex;gap:8px">${box} id="c" role="checkbox" aria-checked="false" tabindex="0"></span><label for="c">Accept terms</label></div>
+    <div style="display:grid;gap:6px"><label for="d">Email</label><input id="d"></div>
+    <label><input type="checkbox"> Wrapped</label>`)
+  const [defect, clean] = both(page)
+  expect((await findSpacing([defect])).map(f => f.check)).toEqual(['spacing', 'spacing'])
+  expect(await findSpacing([clean])).toEqual([])
 })

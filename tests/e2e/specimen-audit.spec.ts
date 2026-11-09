@@ -3,13 +3,13 @@ import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { styleFamilies } from '../../packages/contracts/src/index.js'
 import {
-  checkFocusVisible, findClipping, findForcedColors, findOverflow, findTargetSize, listFocusables, markBorders, runAxe,
+  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, listFocusables, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
 
 const editions = ['radix', 'base'] as const
 const modes = ['light', 'dark'] as const
-const checks: AuditCheck[] = ['overflow', 'clipping', 'focus-visible', 'target-size', 'forced-colors', 'axe']
+const checks: AuditCheck[] = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
 const artifacts = '.artifacts/specimen-audit'
 
 /** How each overlay opens, and where its content appears once open (outside the section when portalled). */
@@ -26,8 +26,8 @@ const overlays: Record<string, { open: 'click' | 'focus'; content: (page: Page, 
 }
 
 async function measure(page: Page, roots: Locator[], stop: Locator, prefix: string, counts: Record<AuditCheck, number>) {
-  const findings: Finding[] = [...await findOverflow(roots), ...await findClipping(roots, stop), ...await findTargetSize(roots)]
-  counts.overflow += roots.length; counts.clipping += roots.length; counts['target-size'] += roots.length
+  const findings: Finding[] = [...await findOverflow(roots), ...await findClipping(roots, stop), ...await findSpacing(roots), ...await findTargetSize(roots)]
+  counts.overflow += roots.length; counts.clipping += roots.length; counts.spacing += roots.length; counts['target-size'] += roots.length
   for (const [index, root] of roots.entries())
     for (const control of await listFocusables(root, `${prefix}-${index}`)) {
       findings.push(...await checkFocusVisible(page, control))

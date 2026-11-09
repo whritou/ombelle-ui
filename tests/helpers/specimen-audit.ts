@@ -3,7 +3,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Locator, Page } from '@playwright/test'
 
-export type AuditCheck = 'overflow' | 'clipping' | 'focus-visible' | 'target-size' | 'forced-colors' | 'axe'
+export type AuditCheck = 'overflow' | 'clipping' | 'spacing' | 'focus-visible' | 'target-size' | 'forced-colors' | 'axe'
 export type Finding = { check: AuditCheck; target: string; detail: string }
 
 /** Interactive elements that need a target size and a visible focus indicator. */
@@ -70,6 +70,23 @@ export function findOverflow(roots: Locator[]): Promise<Finding[]> {
     }
     return findings
   }, [describeSource, hiddenSource] as const))
+}
+
+/** A label and its control must not touch: at least 4px apart, beside or above it. Labels wrapping their control are exempt. */
+export function findSpacing(roots: Locator[]): Promise<Finding[]> {
+  return each(roots, root => root.evaluate((root, describeSource) => {
+    const describe = new Function('return ' + describeSource)() as (element: Element) => string
+    const findings: { check: 'spacing'; target: string; detail: string }[] = []
+    for (const label of root.querySelectorAll('label[for]')) {
+      const control = document.getElementById(label.getAttribute('for')!)
+      if (!control || label.contains(control) || control.getClientRects().length === 0 || label.getClientRects().length === 0) continue
+      const a = label.getBoundingClientRect(), b = control.getBoundingClientRect()
+      const gap = Math.max(b.left - a.right, a.left - b.right, b.top - a.bottom, a.top - b.bottom)
+      if (gap < 4)
+        findings.push({ check: 'spacing', target: describe(label), detail: `${Math.max(0, Math.round(gap))}px from ${describe(control)}, 4px needed` })
+    }
+    return findings
+  }, describeSource))
 }
 
 /** Shadows and outlines cut by an ancestor that clips (overflow, clip-path, contain: paint), up to `stop`. */
