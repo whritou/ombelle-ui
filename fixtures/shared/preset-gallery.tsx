@@ -202,19 +202,6 @@ export function PresetGallery({
       {gate('toast', 'Toast', <section aria-label="Toast" data-component="toast">
         <h2>Toast</h2><ToastProvider><ToastExample /></ToastProvider>
       </section>)}
-      <section aria-label="Additional appearances" data-component="appearance-variants">
-        <h2>Additional appearances</h2>
-        <div className="preset-stack">
-          <div className="preset-row"><Badge size="sm"><BadgeDot />Active</Badge><Badge><BadgeDot />Default</Badge></div>
-          <Alert variant="success"><AlertTitle>Saved</AlertTitle><AlertDescription>Your changes are ready.</AlertDescription></Alert>
-          <Alert variant="warning"><AlertTitle>Review needed</AlertTitle><AlertDescription>Two items need your attention.</AlertDescription></Alert>
-          <Alert variant="info"><AlertTitle>New version</AlertTitle><AlertDescription>A component update is available.</AlertDescription></Alert>
-          <Card appearance="outlined"><CardHeader><CardTitle>Outlined card</CardTitle></CardHeader><CardContent>Project summary.</CardContent></Card>
-          <Card appearance="subtle" density="dense"><CardHeader><CardTitle>Subtle card</CardTitle></CardHeader><CardContent>Recent activity.</CardContent></Card>
-          <Tabs defaultValue="overview"><TabsList appearance="underline" aria-label="Underline sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList><TabsContent value="overview">Project overview.</TabsContent><TabsContent value="activity">Recent activity.</TabsContent></Tabs>
-          <Table density="compact" striped><TableCaption>Compact project list</TableCaption><TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow><TableRow><TableCell>Mobile</TableCell><TableCell>Review</TableCell></TableRow><TableRow selected><TableCell>Billing</TableCell><TableCell>Selected</TableCell></TableRow></TableBody></Table>
-        </div>
-      </section>
       <section aria-label="Actions" data-component="button">
         <h2>Actions</h2>
         <div className="preset-row">
@@ -231,6 +218,10 @@ export function PresetGallery({
         <div className="preset-row">
           <Badge>Up to date</Badge>
           <Badge variant="destructive">Needs attention</Badge>
+        </div>
+        <div className="preset-row preset-variant">
+          <Badge size="sm"><BadgeDot />Active</Badge>
+          <Badge><BadgeDot />Default</Badge>
         </div>
       </section>
       {gate(
@@ -260,6 +251,9 @@ export function PresetGallery({
                 it.
               </AlertDescription>
             </Alert>
+            <Alert variant="success"><AlertTitle>Saved</AlertTitle><AlertDescription>Your changes are ready.</AlertDescription></Alert>
+            <Alert variant="warning"><AlertTitle>Review needed</AlertTitle><AlertDescription>Two items need your attention.</AlertDescription></Alert>
+            <Alert variant="info"><AlertTitle>New version</AlertTitle><AlertDescription>A component update is available.</AlertDescription></Alert>
           </div>
         </section>,
       )}
@@ -313,6 +307,10 @@ export function PresetGallery({
           </CardContent>
           <CardFooter>Updated today</CardFooter>
         </Card>
+        <div className="preset-variants">
+          <Card appearance="outlined"><CardHeader><CardTitle level={3}>Outlined card</CardTitle></CardHeader><CardContent>Project summary.</CardContent></Card>
+          <Card appearance="subtle" density="dense"><CardHeader><CardTitle level={3}>Subtle card</CardTitle></CardHeader><CardContent>Recent activity.</CardContent></Card>
+        </div>
       </section>
       <form
         className="preset-form"
@@ -457,6 +455,11 @@ export function PresetGallery({
             Your latest changes are saved.
           </TabsContent>
         </Tabs>
+        <Tabs defaultValue="overview" className="preset-variant">
+          <TabsList appearance="underline" aria-label="Underline sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList>
+          <TabsContent value="overview">Project overview.</TabsContent>
+          <TabsContent value="activity">Recent activity.</TabsContent>
+        </Tabs>
       </section>
       <section aria-label="Help" data-component="tooltip">
         <h2>Help</h2>
@@ -594,6 +597,7 @@ export function PresetGallery({
               ))}
             </TableBody>
           </Table>
+          <div className="preset-variant"><Table density="compact" striped><TableCaption>Compact project list</TableCaption><TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow><TableRow><TableCell>Mobile</TableCell><TableCell>Review</TableCell></TableRow><TableRow selected><TableCell>Billing</TableCell><TableCell>Selected</TableCell></TableRow></TableBody></Table></div>
         </section>,
       )}
       {gate(
