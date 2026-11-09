@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { styleFamilies } from '../../packages/contracts/src/index.js'
+import { styleFamilies, supportedComponentIds } from '../../packages/contracts/src/index.js'
 import {
   checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
@@ -144,7 +144,7 @@ for (const family of styleFamilies)
         await fs.mkdir(path.join(artifacts, 'parts'), { recursive: true })
         await fs.writeFile(path.join(artifacts, 'parts', `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
         await fs.writeFile(path.join(artifacts, 'parts', `${family}-${edition}-${mode}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
-        expect(components).toHaveLength(29)
+        expect(components).toHaveLength(supportedComponentIds.length)
         expect(errors, 'page errors').toEqual([])
         expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])
       })

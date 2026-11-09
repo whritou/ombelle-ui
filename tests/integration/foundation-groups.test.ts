@@ -3,6 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { afterEach, expect, test } from 'vitest'
+import { supportedComponentIds } from '@ombelle/contracts'
 // @ts-expect-error JavaScript gate entry point
 import { aggregateFoundationEvidence, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
@@ -28,7 +29,7 @@ function specimenAudit() {
   return {
     schemaVersion: 1, node: 'v24.19.0', browser: { engine: 'chromium', version: '148.0.0.0', channel: 'bundled' },
     configurations: ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
-      ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: 29, checks: checks(mode) })))),
+      ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: supportedComponentIds.length, checks: checks(mode) })))),
     failures: 0,
   }
 }
@@ -106,11 +107,11 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
 test('accepts a complete specimen audit', () => {
-  expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 20, specimens: 580 })
+  expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 20, specimens: 20 * supportedComponentIds.length })
 })
 test.each([
   ['19 configurations', (audit: any) => { audit.configurations.pop() }],
-  ['28 specimens in one configuration', (audit: any) => { audit.configurations[3].specimens = 28 }],
+  ['one specimen missing in one configuration', (audit: any) => { audit.configurations[3].specimens -= 1 }],
   ['a failure', (audit: any) => { audit.failures = 1 }],
   ['a duplicated configuration', (audit: any) => { audit.configurations[1] = { ...audit.configurations[0] } }],
   ['a check that measured nothing', (audit: any) => { audit.configurations[0].checks['focus-visible'] = 0 }],

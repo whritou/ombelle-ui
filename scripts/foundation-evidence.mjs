@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
 import path from 'node:path'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
@@ -132,7 +133,7 @@ export function validateSpecimenAudit(result) {
   const seen = rows.map(row => row.family + '/' + row.edition + '/' + row.mode)
   if (rows.length !== expected.length || new Set(seen).size !== seen.length || expected.some(key => !seen.includes(key))) incomplete()
   for (const row of rows) {
-    if (row.specimens !== 29) incomplete()
+    if (row.specimens !== supportedComponentIds.length) incomplete()
     for (const check of auditChecks) {
       const count = row.checks?.[check]
       if (!Number.isInteger(count) || (check === 'forced-colors' && row.mode === 'dark' ? count !== 0 : count < 1)) incomplete()
