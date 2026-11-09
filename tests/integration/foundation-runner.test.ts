@@ -170,6 +170,7 @@ test('stages stable core and browser evidence separately and records missing can
     '.artifacts/component-preset-measurements.json': '{"checks":[]}',
     '.artifacts/component-preset-consumers.json': '{"cases":[]}',
     '.artifacts/component-preset-browser-version.json': '{"browser":"chromium"}',
+    '.artifacts/specimen-audit.json': '{"failures":0}',
     '.artifacts/logs/test-e2e.log': 'interrupted',
     'playwright-report/index.html': 'final html',
     'playwright-report/data/trace.zip': 'trace',
@@ -187,6 +188,7 @@ test('stages stable core and browser evidence separately and records missing can
   expect(await read(path.join(output, 'core/component-preset-measurements.json'))).toBe('{"checks":[]}')
   expect(await read(path.join(output, 'core/component-preset-consumers.json'))).toBe('{"cases":[]}')
   expect(await read(path.join(output, 'core/component-preset-browser-version.json'))).toBe('{"browser":"chromium"}')
+  expect(await read(path.join(output, 'core/specimen-audit.json'))).toBe('{"failures":0}')
   expect(await read(path.join(output, 'core/logs/test-e2e.log'))).toBe('interrupted')
   expect(await read(path.join(output, 'browser/playwright-report/index.html'))).toBe('final html')
   expect(await read(path.join(output, 'browser/test-results/failure/screenshot.png'))).toBe('screenshot')

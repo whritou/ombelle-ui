@@ -10,12 +10,12 @@ import { finalizeComponentPresetEvidence } from './component-preset-evidence.ts'
 
 export const foundationSteps = {
   quality: ['build:packages', 'test:unit', 'test:integration', 'generate:preview', 'typecheck', 'audit:workspace'],
-  consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'build:consumers', 'test:e2e'],
-  all: ['build:packages', 'test:unit', 'test:integration', 'generate:preview', 'prepare:consumers', 'typecheck', 'build:preview', 'build:consumers', 'test:e2e', 'audit:workspace'],
+  consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'test:specimen-audit', 'build:consumers', 'test:e2e'],
+  all: ['build:packages', 'test:unit', 'test:integration', 'generate:preview', 'prepare:consumers', 'typecheck', 'build:preview', 'build:consumers', 'test:specimen-audit', 'test:e2e', 'audit:workspace'],
 }
 export const evidenceFiles = {
   quality: ['unit-results.json', 'integration-results.json'],
-  consumers: ['browser-results.json', 'browser-version.json', 'consumer-matrix.json', 'minimalist-measurements.json', 'recipe-measurements.json', 'recipe-consumers.json', 'component-preset-measurements.json', 'component-preset-consumers.json', 'npm-version.json', 'yarn-versions.json', 'yarn-matrix.json', 'bun-version.json', 'bun-matrix.json'],
+  consumers: ['browser-results.json', 'browser-version.json', 'consumer-matrix.json', 'minimalist-measurements.json', 'recipe-measurements.json', 'recipe-consumers.json', 'component-preset-measurements.json', 'component-preset-consumers.json', 'npm-version.json', 'yarn-versions.json', 'yarn-matrix.json', 'bun-version.json', 'bun-matrix.json', 'specimen-audit.json'],
 }
 const repo = fileURLToPath(new URL('../', import.meta.url))
 const read = async (directory, file) => JSON.parse(await fs.readFile(path.join(directory, file), 'utf8'))
@@ -121,6 +121,25 @@ export function validateBrowserResults(result) {
   return result.stats
 }
 
+const auditFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const auditChecks = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
+/** The specimen audit must cover every family, edition and mode, measure every check, and record no failure. */
+export function validateSpecimenAudit(result) {
+  const incomplete = () => fail('Incomplete specimen audit')
+  if (result?.schemaVersion !== 1 || result.browser?.engine !== 'chromium' || !result.browser.version || result.failures !== 0) incomplete()
+  const expected = auditFamilies.flatMap(family => ['radix', 'base'].flatMap(edition => ['light', 'dark'].map(mode => family + '/' + edition + '/' + mode)))
+  const rows = Array.isArray(result.configurations) ? result.configurations : []
+  const seen = rows.map(row => row.family + '/' + row.edition + '/' + row.mode)
+  if (rows.length !== expected.length || new Set(seen).size !== seen.length || expected.some(key => !seen.includes(key))) incomplete()
+  for (const row of rows) {
+    if (row.specimens !== 29) incomplete()
+    for (const check of auditChecks) {
+      const count = row.checks?.[check]
+      if (!Number.isInteger(count) || (check === 'forced-colors' && row.mode === 'dark' ? count !== 0 : count < 1)) incomplete()
+    }
+  }
+  return { configurations: rows.length, specimens: rows.reduce((sum, row) => sum + row.specimens, 0) }
+}
 export async function validateGroupEvidence(directory, group) {
   if (group === 'quality') {
     return { counts: {
@@ -134,10 +153,11 @@ export async function validateGroupEvidence(directory, group) {
   const minimalistMeasurements = validateMinimalistMeasurements(await read(directory, 'minimalist-measurements.json'))
   const recipeEvidence = await finalizeRecipeEvidence({ measurements: await read(directory, 'recipe-measurements.json'), consumers: await read(directory, 'recipe-consumers.json') }, consumerMatrix)
   const componentPresetEvidence = await finalizeComponentPresetEvidence({ measurements: await read(directory, 'component-preset-measurements.json'), consumers: await read(directory, 'component-preset-consumers.json') }, consumerMatrix)
+  const specimenAudit = validateSpecimenAudit(await read(directory, 'specimen-audit.json'))
   const browserVersion = await read(directory, 'browser-version.json')
   if (browserVersion.engine !== 'chromium' || !browserVersion.version || !browserVersion.channel) fail('Missing measured browser identity')
   return {
-    counts: { browser }, browserVersion, consumerCases: consumerCases(), consumerMatrix, minimalistMeasurements, recipeEvidence, componentPresetEvidence,
+    counts: { browser }, specimenAudit, browserVersion, consumerCases: consumerCases(), consumerMatrix, minimalistMeasurements, recipeEvidence, componentPresetEvidence,
     npmVersion: await read(directory, 'npm-version.json'), yarnVersions: await read(directory, 'yarn-versions.json'), yarnMatrix: await read(directory, 'yarn-matrix.json'), bunVersion: await read(directory, 'bun-version.json'), bunMatrix: await read(directory, 'bun-matrix.json'),
   }
 }

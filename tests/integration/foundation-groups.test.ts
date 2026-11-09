@@ -4,14 +4,14 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { afterEach, expect, test } from 'vitest'
 // @ts-expect-error JavaScript gate entry point
-import { aggregateFoundationEvidence, validateBrowserResults, validateTestResults } from '../../scripts/foundation-evidence.mjs'
+import { aggregateFoundationEvidence, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
 
 const roots: string[] = []
 const commit = 'a'.repeat(40)
 const stages = {
   quality: ['build:packages', 'test:unit', 'test:integration', 'generate:preview', 'typecheck', 'audit:workspace'],
-  consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'build:consumers', 'test:e2e'],
+  consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'test:specimen-audit', 'build:consumers', 'test:e2e'],
 }
 let base: Promise<Record<string, Record<string, any>>> | undefined
 const collectedDefinitions = new Map<string, { name: string; file: string }[]>()
@@ -21,6 +21,15 @@ function browserResults() {
     suites: Object.entries({ 'badge.spec.ts': 40, 'card.spec.ts': 40, 'checkbox.spec.ts': 40, 'component-presets.spec.ts': 34, 'editor.spec.ts': 14, 'catalog-editors.spec.ts': 24, 'forms.spec.ts': 40, 'keyboard.spec.ts': 40, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 8, 'preset-editor.spec.ts': 42, 'recipes.spec.ts': 34, 'snapshot-presets.spec.ts': 26, 'recipe-snapshots.spec.ts': 7, 'switch.spec.ts': 40, 'tabs.spec.ts': 40, 'tooltip.spec.ts': 40, 'liquid-glass.spec.ts': 40, 'edition-parity.spec.ts': 112, 'glass-backdrops.spec.ts': 3 }).map(([file, count]) => ({
       file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
     })),
+  }
+}
+function specimenAudit() {
+  const checks = (mode: string) => ({ overflow: 36, clipping: 36, spacing: 36, 'focus-visible': 40, 'target-size': 36, 'forced-colors': mode === 'light' ? 29 : 0, axe: 36 })
+  return {
+    schemaVersion: 1, node: 'v24.19.0', browser: { engine: 'chromium', version: '148.0.0.0', channel: 'bundled' },
+    configurations: ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
+      ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: 29, checks: checks(mode) })))),
+    failures: 0,
   }
 }
 async function testResults(prefix: string | string[]) {
@@ -68,6 +77,7 @@ async function data() {
       'browser-version.json': { engine: 'chromium', version: '155.0.0.0', channel: 'bundled Chromium' },
       'npm-version.json': '11.19.0', 'yarn-versions.json': {}, 'yarn-matrix.json': {}, 'bun-version.json': '1.4.3', 'bun-matrix.json': {},
       'browser-results.json': browserResults(),
+      'specimen-audit.json': specimenAudit(),
     },
   }
 }
@@ -94,6 +104,23 @@ async function patch(root: string, group: string, file: string, mutate: (report:
   await write(root, group, file, report)
 }
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
+
+test('accepts a complete specimen audit', () => {
+  expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 20, specimens: 580 })
+})
+test.each([
+  ['19 configurations', (audit: any) => { audit.configurations.pop() }],
+  ['28 specimens in one configuration', (audit: any) => { audit.configurations[3].specimens = 28 }],
+  ['a failure', (audit: any) => { audit.failures = 1 }],
+  ['a duplicated configuration', (audit: any) => { audit.configurations[1] = { ...audit.configurations[0] } }],
+  ['a check that measured nothing', (audit: any) => { audit.configurations[0].checks['focus-visible'] = 0 }],
+  ['a missing browser version', (audit: any) => { audit.browser.version = '' }],
+  ['no spacing measurement', (audit: any) => { delete audit.configurations[2].checks.spacing }],
+])('rejects a specimen audit with %s', (_, mutate) => {
+  const audit = specimenAudit()
+  mutate(audit)
+  expect(() => validateSpecimenAudit(audit)).toThrow('Incomplete specimen audit')
+})
 
 test('accepts complete browser evidence including edition parity and glass backdrops', () => {
   expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 676 })

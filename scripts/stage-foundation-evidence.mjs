@@ -9,7 +9,7 @@ const coreFiles = [
   'consumer-pending.json', 'consumer-matrix.json', 'minimalist-measurements.json',
   'recipe-measurements.json', 'recipe-consumers.json',
   'component-preset-measurements.json', 'component-preset-consumers.json',
-  'component-preset-browser-version.json',
+  'component-preset-browser-version.json', 'specimen-audit.json',
 ]
 
 async function copyStable(source, destination) {
