@@ -15,7 +15,7 @@ html[data-backdrop="glass"] .editor-preview { background: none; }
    Inline components (badges, triggers, breadcrumbs…) keep their own size. */
 .recipe-stage { box-sizing: border-box; inline-size: min(440px, 100%); font-family: var(--font-family, system-ui, sans-serif); color: var(--foreground); }
 .recipe-stage:is([data-component='table'], [data-component='tabs'], [data-component='card'], [data-component='alert'], [data-component='accordion']) { inline-size: min(560px, 100%); }
-.recipe-stage:is([data-component='badge'], [data-component='avatar'], [data-component='breadcrumb'], [data-component='pagination'], [data-component='dialog'], [data-component='sheet'], [data-component='alert-dialog'], [data-component='popover'], [data-component='tooltip'], [data-component='dropdown-menu'], [data-component='toast']) { inline-size: auto; }
+.recipe-stage:is([data-component='badge'], [data-component='avatar'], [data-component='breadcrumb'], [data-component='pagination'], [data-component='dialog'], [data-component='sheet'], [data-component='alert-dialog'], [data-component='popover'], [data-component='tooltip'], [data-component='dropdown-menu'], [data-component='toast'], [data-component='checkbox'], [data-component='switch']) { inline-size: auto; }
 /* A field: its label above the control. A checkbox or switch sits beside its label. */
 .recipe-stage > div:not([role]) { display: grid; gap: 0.5rem; }
 .recipe-stage > div:has(> [role='checkbox'], > [role='switch']) { display: flex; align-items: center; gap: 0.625rem; }
