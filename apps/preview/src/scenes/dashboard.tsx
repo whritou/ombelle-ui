@@ -5,7 +5,7 @@ import {
   AvatarGroup,
   AvatarStatus,
 } from '../generated/preset-gallery/components/ui/avatar'
-import { Badge } from '../generated/preset-gallery/components/ui/badge'
+import { Badge, BadgeDot } from '../generated/preset-gallery/components/ui/badge'
 import { Button } from '../generated/preset-gallery/components/ui/button'
 import {
   Card,
@@ -23,7 +23,17 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '../generated/preset-gallery/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../generated/preset-gallery/components/ui/dialog'
 import { Input } from '../generated/preset-gallery/components/ui/input'
+import { Label } from '../generated/preset-gallery/components/ui/label'
 import {
   Popover,
   PopoverContent,
@@ -92,7 +102,37 @@ export function DashboardScene(props: SceneProps) {
               </PopoverContent>
             </Popover>,
           )}
-          <Button>New project</Button>
+          {show(
+            'dialog',
+            'Dialog',
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>New project</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>New project</DialogTitle>
+                  <DialogDescription>Projects group the work your team ships together.</DialogDescription>
+                </DialogHeader>
+                <form className="scene-form" aria-label="New project" onSubmit={(event) => event.preventDefault()}>
+                  {show(
+                    'input',
+                    'Input',
+                    <div className="scene-field">
+                      <Label htmlFor="scene-project-name">Project name</Label>
+                      <Input id="scene-project-name" placeholder="Website refresh" />
+                    </div>,
+                  )}
+                  <div className="scene-actions scene-actions-end">
+                    <DialogClose asChild>
+                      <Button type="button" variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit">Create project</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>,
+          )}
         </div>
       </header>
       {show(
@@ -166,7 +206,8 @@ export function DashboardScene(props: SceneProps) {
                         <strong>{project.name}</strong>
                         <span className="scene-muted">{project.detail}</span>
                       </span>
-                      <Badge variant={project.alert ? 'destructive' : 'default'}>
+                      <Badge size="sm" variant={project.alert ? 'destructive' : 'default'}>
+                        <BadgeDot />
                         {project.status}
                       </Badge>
                       {show(

@@ -203,3 +203,58 @@ html[data-backdrop='glass'] .preset-scene :is(h1, .scene-header p) {
 .preset-scene [data-slot="card-header"] > [data-slot="avatar-group"] {
   margin-block-start: 8px;
 }
+
+/* The projects page: breadcrumb above the title, a search field, a table footer. */
+.preset-scene .scene-heading {
+  display: grid;
+  gap: 12px;
+}
+.preset-scene .scene-search {
+  inline-size: 240px;
+  max-inline-size: 100%;
+}
+[role='dialog'] .scene-form {
+  margin-block-start: 8px;
+}
+.preset-scene .scene-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.preset-scene .scene-footer [data-slot='pagination'] {
+  margin: 0;
+  inline-size: auto;
+}
+.scene-fieldset {
+  margin: 0;
+  padding: 0 0 16px;
+  border: 0;
+  display: grid;
+  gap: 12px;
+}
+.scene-fieldset legend {
+  padding: 0;
+  margin-block-end: 12px;
+}
+/* Dialogs and sheets render outside the page, so their layout classes are not scoped to it. */
+[role='dialog'] .scene-form {
+  display: grid;
+  gap: 16px;
+}
+[role='dialog'] .scene-field {
+  display: grid;
+  gap: 8px;
+}
+[role='dialog'] .scene-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+[role='dialog'] .scene-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}

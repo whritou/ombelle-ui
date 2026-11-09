@@ -1,4 +1,16 @@
+import * as React from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../generated/preset-gallery/components/ui/alert-dialog'
 import {
   Accordion,
   AccordionContent,
@@ -17,6 +29,12 @@ import {
 } from '../generated/preset-gallery/components/ui/card'
 import { Checkbox } from '../generated/preset-gallery/components/ui/checkbox'
 import { Input } from '../generated/preset-gallery/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '../generated/preset-gallery/components/ui/input-group'
 import { Label } from '../generated/preset-gallery/components/ui/label'
 import {
   NativeSelect,
@@ -45,11 +63,21 @@ import {
   TabsTrigger,
 } from '../generated/preset-gallery/components/ui/tabs'
 import { Textarea } from '../generated/preset-gallery/components/ui/textarea'
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from '../generated/preset-gallery/components/ui/toast'
 import { gate, type SceneProps } from './shared'
 
 export function SettingsScene(props: SceneProps) {
   const show = gate(props)
+  const [saved, setSaved] = React.useState(false)
   return (
+    <ToastProvider>
     <main className="preset-scene" data-testid="preset-scene" data-scene="settings">
       <header className="scene-header">
         <div>
@@ -132,7 +160,7 @@ export function SettingsScene(props: SceneProps) {
                 </CardContent>
                 <CardFooter className="scene-actions scene-actions-end">
                   <Button type="button" variant="outline">Cancel</Button>
-                  <Button type="submit">Save profile</Button>
+                  <Button type="submit" onClick={() => setSaved(true)}>Save profile</Button>
                 </CardFooter>
               </form>
             </Card>
@@ -208,14 +236,46 @@ export function SettingsScene(props: SceneProps) {
                 </CardContent>,
               )}
               <CardFooter>
-                <Button variant="destructive">Delete workspace</Button>
+                {show(
+                  'alert-dialog',
+                  'Alert Dialog',
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">Delete workspace</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete the Acme workspace?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Every project and member is removed. This preview does not delete any data.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction>Delete workspace</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>,
+                )}
               </CardFooter>
             </Card>
           </div>
         </TabsContent>
         <TabsContent value="members">
           <div className="scene-stack">
-            Invite people from the members page.
+            {show(
+              'input-group',
+              'Input Group',
+              <form className="scene-field" aria-label="Invite" onSubmit={(event) => event.preventDefault()}>
+                <Label htmlFor="scene-invite">Invite by email</Label>
+                <InputGroup>
+                  <InputGroupInput id="scene-invite" type="email" placeholder="name@acme.test" />
+                  <InputGroupAddon align="inline-end">
+                    <InputGroupButton type="submit">Invite</InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
+              </form>,
+            )}
             {show('separator', 'Separator', <Separator />)}
             Members you remove keep access until the end of the day.
             {show(
@@ -249,5 +309,18 @@ export function SettingsScene(props: SceneProps) {
         </TabsContent>
       </Tabs>
     </main>
+    {show(
+      'toast',
+      'Toast',
+      <>
+        <Toast open={saved} onOpenChange={setSaved} variant="success">
+          <ToastTitle>Profile saved</ToastTitle>
+          <ToastDescription>Your team sees the new details.</ToastDescription>
+          <ToastClose />
+        </Toast>
+        <ToastViewport />
+      </>,
+    )}
+    </ToastProvider>
   )
 }
