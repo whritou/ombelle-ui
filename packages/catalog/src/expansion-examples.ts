@@ -1,5 +1,8 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  empty: `import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
+import { Button } from '@/components/ui/button'
+export function Example(){return <Empty><EmptyHeader><EmptyMedia variant="icon">+</EmptyMedia><EmptyTitle asChild><h2>No presets yet</h2></EmptyTitle><EmptyDescription>Start from a built-in family or import a preset file.</EmptyDescription></EmptyHeader><EmptyContent><Button>New preset</Button></EmptyContent></Empty>}`,
   spinner: `import { Spinner } from '@/components/ui/spinner'
 export function Example(){return <p><Spinner size="sm" /> Saving…</p>}`,
   kbd: `import { Kbd, KbdGroup } from '@/components/ui/kbd'

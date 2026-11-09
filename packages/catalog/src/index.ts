@@ -78,6 +78,7 @@ const baseDependencies: readonly string[] = [
   'tailwind-merge',
 ]
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
+  empty: ['@radix-ui/react-slot'],
   sheet: ['@radix-ui/react-dialog', 'lucide-react'],
   'alert-dialog': ['@radix-ui/react-alert-dialog'],
   toast: ['@radix-ui/react-toast'],

@@ -1,0 +1,83 @@
+/* liquid-glass Empty State */
+[data-slot='empty'] {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 24px;
+  border: 1.5px dashed var(--border);
+  border-radius: 28px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  text-align: center;
+}
+[data-slot='empty-header'] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+[data-slot='empty-media'][data-variant='icon'] {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: 64px;
+  block-size: 64px;
+  margin-block-end: 6px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: 0 6px 16px rgb(16 32 56 / 12%);
+}
+[data-slot='empty-title'] {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+[data-slot='empty-description'] {
+  max-inline-size: 380px;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.5;
+}
+[data-slot='empty-content'] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-block-start: 8px;
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  [data-slot='empty'] {
+    background: color-mix(in srgb, var(--card) calc(var(--glass-inner-opacity, var(--glass-opacity, 0.7)) * 40%), transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    backdrop-filter: blur(16px) saturate(1.5);
+  }
+  [data-slot='empty-media'][data-variant='icon'] {
+    background: color-mix(in srgb, var(--accent) 72%, transparent);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  [data-slot='empty'] {
+    background: var(--muted);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  [data-slot='empty-media'][data-variant='icon'] {
+    background: var(--accent);
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='empty'],
+  [data-slot='empty-media'][data-variant='icon'] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+}
