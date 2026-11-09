@@ -1,0 +1,45 @@
+/* flat Spinner */
+[data-slot='spinner'] {
+  display: inline-block;
+  flex-shrink: 0;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  vertical-align: middle;
+  animation: ombelle-spinner-turn 0.9s linear infinite;
+}
+[data-slot='spinner'][data-size='sm'] {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+[data-slot='spinner'][data-size='lg'] {
+  inline-size: 2rem;
+  block-size: 2rem;
+}
+[data-slot='spinner'] [data-spinner-track] {
+  stroke: var(--border);
+  stroke-width: 3;
+}
+[data-slot='spinner'] [data-spinner-arc] {
+  stroke: var(--primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+@keyframes ombelle-spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Still busy under reduced motion: a slow turn rather than none. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='spinner'] {
+    animation-duration: 3s;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='spinner'] [data-spinner-track] {
+    stroke: GrayText;
+  }
+  [data-slot='spinner'] [data-spinner-arc] {
+    stroke: CanvasText;
+  }
+}

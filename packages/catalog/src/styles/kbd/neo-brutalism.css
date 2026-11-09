@@ -1,0 +1,27 @@
+/* neo-brutalism Kbd */
+[data-slot='kbd-group'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+[data-slot='kbd'] {
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 22px;
+  block-size: 22px;
+  padding-inline: 6px;
+  border: 2.5px solid var(--input);
+  border-block-end-width: 4px;
+  border-radius: 0;
+  background: var(--card);
+  color: var(--foreground);
+  font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (forced-colors: active) {
+  [data-slot='kbd'] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}

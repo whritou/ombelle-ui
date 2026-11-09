@@ -1,5 +1,9 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  spinner: `import { Spinner } from '@/components/ui/spinner'
+export function Example(){return <p><Spinner size="sm" /> Saving…</p>}`,
+  kbd: `import { Kbd, KbdGroup } from '@/components/ui/kbd'
+export function Example(){return <p>Search with <KbdGroup><Kbd>Ctrl</Kbd><Kbd>K</Kbd></KbdGroup></p>}`,
   toast: `import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from '@/components/ui/toast'
 export function Example(){return <ToastProvider><Toast defaultOpen><ToastTitle>Changes saved</ToastTitle><ToastDescription>Your project is up to date.</ToastDescription><ToastClose>Dismiss</ToastClose></Toast><ToastViewport /></ToastProvider>}`,
   'input-group': `import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText, InputGroupButton } from '@/components/ui/input-group'

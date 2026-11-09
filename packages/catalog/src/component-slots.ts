@@ -2,6 +2,8 @@ import type { ComponentId } from '@ombelle/contracts'
 
 /** Slots each catalog component declares, beyond the data-slot literals in its templates. */
 export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
+  spinner: ['spinner'],
+  kbd: ['kbd', 'kbd-group'],
   badge: ['badge', 'badge-dot'],
   toast: ['toast-viewport', 'toast', 'toast-content', 'toast-title', 'toast-description', 'toast-action', 'toast-close'],
   'input-group': ['input-group', 'input-group-input', 'input-group-textarea', 'input-group-addon', 'input-group-text', 'input-group-button'],
