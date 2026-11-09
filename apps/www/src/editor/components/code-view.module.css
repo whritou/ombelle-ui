@@ -119,15 +119,24 @@
   user-select: none;
 }
 
-.code :global(.tok-comment) { color: #7f8696; font-style: italic; }
-.code :global(.tok-string) { color: #a5d6a7; }
-.code :global(.tok-keyword) { color: #d0a3f5; }
-.code :global(.tok-tag) { color: #f28b9b; }
-.code :global(.tok-attr) { color: #f5c08a; }
-.code :global(.tok-number) { color: #f5c08a; }
-.code :global(.tok-property) { color: #8cc8ff; }
-.code :global(.tok-flag) { color: #8cc8ff; }
-.code :global(.tok-punct) { color: #a3a9b5; }
+:is(.code, .command) :global(.tok-comment) { color: #7f8696; font-style: italic; }
+:is(.code, .command) :global(.tok-string) { color: #a5d6a7; }
+:is(.code, .command) :global(.tok-keyword) { color: #d0a3f5; }
+:is(.code, .command) :global(.tok-tag) { color: #f28b9b; }
+:is(.code, .command) :global(.tok-attr) { color: #f5c08a; }
+:is(.code, .command) :global(.tok-number) { color: #f5c08a; }
+:is(.code, .command) :global(.tok-property) { color: #8cc8ff; }
+:is(.code, .command) :global(.tok-flag) { color: #8cc8ff; }
+:is(.code, .command) :global(.tok-punct) { color: #a3a9b5; }
+
+/* A one-line command beside the bar, highlighted like the code but without line numbers. */
+.command {
+  flex: 1;
+  min-width: 0;
+  color: var(--code-text);
+  font: 400 13px/1.7 var(--font-mono);
+  overflow-wrap: anywhere;
+}
 
 @media (forced-colors: active) {
   .file { box-shadow: none; border-bottom: 2px solid Highlight; }
