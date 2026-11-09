@@ -7,7 +7,7 @@ import {
   type ComponentId,
 } from '@ombelle/contracts'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
-export const presetScenes = ['gallery', 'dashboard', 'settings', 'sign-in'] as const
+export const presetScenes = ['gallery', 'dashboard', 'projects', 'settings', 'sign-in'] as const
 export type PresetScene = (typeof presetScenes)[number]
 /** Liquid glass preview backdrops: the design kit's, light scenes, then dark and warm ones. Preview only, never saved. */
 export const presetBackdrops = ['kit', 'mist', 'dawn', 'grid', 'peach', 'prism', 'night'] as const

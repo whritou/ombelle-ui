@@ -350,10 +350,12 @@ export function planPresetFamilyChange(
   family: StyleFamily,
 ): FamilyChange {
   const before = validateDraftEnvelope(input)
+  // Leaving glass drops the starting preset's values: only the user's own edits travel.
+  const own = before.family === 'liquid-glass' && family !== 'liquid-glass' ? ownGlassEdits(before) : before.edits
   // Glass-only edits cannot follow the draft into a stable family.
   const allowed = editablePathsFor(family)
   const edits = Object.fromEntries(
-    Object.entries(before.edits).filter(([path]) =>
+    Object.entries(own).filter(([path]) =>
       allowed.includes(path as PresetEditablePath),
     ),
   )
@@ -367,7 +369,7 @@ export function planPresetFamilyChange(
     allowed.includes(path),
   )
   const changes = shared
-    .filter((path) => !Object.hasOwn(before.edits, path))
+    .filter((path) => !Object.hasOwn(own, path))
     .map((path) => ({
       path,
       before: presetFieldValue(before, path),
@@ -375,4 +377,21 @@ export function planPresetFamilyChange(
     }))
     .filter((change) => change.before !== change.after)
   return { draft, changes }
+}
+
+/**
+ * A glass draft's edits without those its starting preset set: the starting
+ * point is the one the draft shares the most values with.
+ */
+function ownGlassEdits(draft: PresetEditorDraft): PresetEditorDraft['edits'] {
+  const paths = editablePathsFor('liquid-glass')
+  const base = createPresetDraft('liquid-glass')
+  let origin: PresetEditorDraft['edits'] = {}
+  let best = -1
+  for (const id of startingPresetOrder) {
+    const start = applyStartingPreset(base, id).edits
+    const shared = paths.filter((path) => presetFieldValue(draft, path) === presetFieldValue({ ...base, edits: start }, path)).length
+    if (shared > best) [origin, best] = [start, shared]
+  }
+  return Object.fromEntries(Object.entries(draft.edits).filter(([path, value]) => origin[path as PresetEditablePath] !== value))
 }

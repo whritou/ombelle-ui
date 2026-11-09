@@ -10,3 +10,28 @@ body { font-family: Arial, sans-serif; }
 .editor-preview[data-viewport="narrow"] { max-width: 360px; margin: auto; }
 /* Liquid glass shows over the kit backdrop instead of the dotted stage. */
 html[data-backdrop="glass"] .editor-preview { background: none; }
+
+/* Catalog recipes: the component at a readable width, with the preset's type and colours.
+   Inline components (badges, triggers, breadcrumbs…) keep their own size. */
+.recipe-stage { box-sizing: border-box; inline-size: min(440px, 100%); font-family: var(--font-family, system-ui, sans-serif); color: var(--foreground); }
+.recipe-stage:is([data-component='table'], [data-component='tabs'], [data-component='card'], [data-component='alert'], [data-component='accordion']) { inline-size: min(560px, 100%); }
+.recipe-stage:is([data-component='badge'], [data-component='avatar'], [data-component='breadcrumb'], [data-component='pagination'], [data-component='dialog'], [data-component='sheet'], [data-component='alert-dialog'], [data-component='popover'], [data-component='tooltip'], [data-component='dropdown-menu'], [data-component='toast'], [data-component='checkbox'], [data-component='switch']) { inline-size: auto; }
+/* A field: its label above the control. A checkbox or switch sits beside its label. */
+.recipe-stage > div:not([role]) { display: grid; gap: 0.5rem; }
+.recipe-stage > div:has(> [role='checkbox'], > [role='switch']) { display: flex; align-items: center; gap: 0.625rem; }
+.recipe-stage > div > :is(label, p) { margin: 0; font-size: 0.875rem; font-weight: 500; line-height: 1.4; }
+/* Label's own specimen pairs it with a plain input, drawn as a field. */
+.recipe-stage > div > input { box-sizing: border-box; block-size: var(--control-height, 2.5rem); padding: 0 0.75rem; border: var(--border-width, 1px) solid var(--input, var(--border)); border-radius: var(--radius, 0.5rem); background: var(--background); color: var(--foreground); font: inherit; }
+.recipe-stage > div > input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* Overlay triggers as the preset's outline button; Alert Dialog's as its destructive one. */
+.recipe-preview-trigger { display: inline-flex; align-items: center; justify-content: center; block-size: var(--control-height, 2.5rem); padding: 0 1.125rem; border: var(--border-width, 1px) solid var(--border); border-radius: var(--radius, 0.5rem); background: var(--card, var(--background)); color: var(--foreground); font: 600 0.875rem/1 var(--font-family, system-ui, sans-serif); cursor: pointer; box-shadow: var(--shadow-x, 0) var(--shadow-y, 0) 0 var(--shadow-color, transparent); transition: background-color 120ms ease, transform 120ms ease; }
+.recipe-preview-trigger:hover { background: var(--muted); }
+.recipe-preview-trigger:active { transform: translate(1px, 1px); }
+.recipe-preview-trigger:focus-visible { outline: 2.5px solid var(--ring); outline-offset: 2px; }
+.recipe-preview-trigger-destructive { border-color: transparent; background: var(--destructive); color: var(--destructive-foreground); }
+.recipe-preview-trigger-destructive:hover { background: color-mix(in oklab, var(--destructive) 88%, black); }
+/* Over a glass backdrop the trigger is a frosted plate. */
+html[data-backdrop='glass'] .recipe-preview-trigger:not(.recipe-preview-trigger-destructive) { border-color: color-mix(in oklab, white 55%, transparent); background: color-mix(in oklab, var(--card, white) 60%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 4px 16px -6px rgb(0 0 0 / 0.25); }
+@media (prefers-reduced-motion: reduce) { .recipe-preview-trigger { transition: none; } .recipe-preview-trigger:active { transform: none; } }
+html[data-backdrop='glass'] .recipe-stage > div > input { background: color-mix(in oklab, var(--card, white) 55%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); }

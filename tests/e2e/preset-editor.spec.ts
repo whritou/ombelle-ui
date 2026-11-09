@@ -21,6 +21,7 @@ import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { expectColorParity } from '../helpers/color-compare.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
+import { sceneComponents } from '../../apps/www/src/preset-editor/preview-scenes.js'
 import {
   presetRuntimeStyles,
   type PresetRender,
@@ -235,12 +236,13 @@ for (const family of supportedStyleFamilies)
   }
 
 const scenes = [
-  { option: 'Dashboard', heading: 'Overview', components: 'Alert, Popover, Input, Avatar, Progress, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu, Table' },
-  { option: 'Settings', heading: 'Settings', components: 'Tabs, Card, Label, Input, Select, Native Select, Textarea, Checkbox, Switch, Radio Group, Alert, Separator, Skeleton, Accordion, Button' },
+  { option: 'Dashboard', heading: 'Overview', components: sceneComponents.dashboard },
+  { option: 'Projects', heading: 'Projects', components: sceneComponents.projects },
+  { option: 'Settings', heading: 'Settings', components: sceneComponents.settings },
   { option: 'Sign in', heading: 'Sign in to Acme', components: 'Card, Alert, Label, Input, Checkbox, Button, Separator' },
 ] as const
 for (const family of supportedStyleFamilies)
-  test(`opens on the dashboard and shows the dashboard, settings and sign-in pages in ${family}`, async ({ page }) => {
+  test(`opens on the dashboard and shows the dashboard, projects, settings and sign-in pages in ${family}`, async ({ page }) => {
     await page.addInitScript(
       (draft) =>
         localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),

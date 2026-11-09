@@ -19,7 +19,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('ToastProvider', { duration: props.duration }, node('Toast', { variant: props.variant, defaultOpen: true },
         node('ToastTitle', {}, content.title), node('ToastDescription', {}, content.description),
         ...(content.action ? [node('ToastAction', { altText: content.actionAltText }, content.action)] : []),
-        node('ToastClose', {}, content.close)), node('ToastViewport'))
+        node('ToastClose', { 'aria-label': content.close })), node('ToastViewport'))
     case 'input-group': {
       const control = node(props.multiline ? 'InputGroupTextarea' : 'InputGroupInput', {
           id: localId('control'), placeholder: content.placeholder, defaultValue: content.initialText,

@@ -82,6 +82,18 @@ function appearanceCss(recipe: ComponentRecipe, scope: string, darkSelector: str
   return rules.join('')
 }
 
+/** Whether a selector names only a component's own data marker, such as `[data-accordion-icon]`. */
+function ownsMarker(selector: selectorParser.Selector, component: string): boolean {
+  let owned = false
+  let other = false
+  selector.walk(node => {
+    if (node.type === 'attribute' && node.attribute.startsWith(`data-${component}-`)) owned = true
+    else if (node.type === 'tag' || node.type === 'class' || node.type === 'id' || node.type === 'nesting' ||
+      (node.type === 'pseudo' && /^::?(root|host)$/.test(node.value))) other = true
+  })
+  return owned && !other
+}
+
 export function compileComponentRecipeStyles(input: {
   styles: readonly string[]
   slots: readonly string[]
@@ -130,6 +142,10 @@ export function compileComponentRecipeStyles(input: {
           }))
         })
         if (found && supported) selectors.push(selector.toString().trim())
+        // Component-owned markers inside a slot (the accordion's chevron and plus icons, the
+        // dropdown menu's radio dot) have no slot of their own: scope them under the recipe.
+        else if (!found && supported && ownsMarker(selector, input.recipe.component))
+          selectors.push(`${scope} ${selector.toString().trim()}`)
       })
     }).processSync(rule.selector)
     if (selectors.length) rule.selector = selectors.join(', ')

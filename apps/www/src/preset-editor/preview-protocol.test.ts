@@ -74,7 +74,7 @@ it('accepts a focused view only for a catalog component', async () => {
     ).toBeNull()
 })
 it('accepts a named scene, treats a missing scene as the gallery and rejects unknown scenes', async () => {
-  for (const scene of ['gallery', 'dashboard', 'settings', 'sign-in']) {
+  for (const scene of ['gallery', 'dashboard', 'projects', 'settings', 'sign-in']) {
     const scened = { ...message(), view: { mode: 'light', viewport: 'wide', scene } }
     expect(await verifyPresetRender(scened, 0, manifest)).toEqual(scened)
   }

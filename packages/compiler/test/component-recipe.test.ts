@@ -80,9 +80,21 @@ it.each(catalogRecipeFixtures())('compiles $component in each supported family',
     } } })
     const entry = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${recipe.component}.tsx`))
     expect(entry?.content).toContain('createScopedPrimitives')
+    // Template props (Table Head's `scope`) must not shadow the recipe scope the slots carry.
+    const primitives = result.artifacts.filter(artifact => artifact.content.includes('export function createScopedPrimitives('))
+    expect(primitives.length).toBeGreaterThan(0)
+    for (const source of primitives.map(artifact => artifact.content)) {
+      expect(source).toContain('data-ombelle-recipe={recipeScope}')
+      expect(source).not.toContain('data-ombelle-recipe={scope}')
+      expect(source).not.toMatch(/recipe(?:Scope|Instance)\s*=(?!=)/)
+    }
     const css = result.artifacts.find(artifact => artifact.kind === 'style')!.content
     expect(css).toContain(result.scope)
     expect(css).not.toMatch(/\[data-slot=['"](?!recipe-)/)
+    // The family's icon and dot rules survive, scoped under the recipe.
+    const scoped = (marker: string) => new RegExp(`\\[data-ombelle-recipe=['"]${result.scope}['"]\\]\\s+\\[${marker}`)
+    if (recipe.component === 'accordion') expect(css).toMatch(scoped('data-accordion-icon='))
+    if (recipe.component === 'dropdown-menu') expect(css).toMatch(scoped('data-dropdown-menu-dot\\]'))
     if (family === 'liquid-glass') {
       const filter = result.artifacts.find(artifact => artifact.logicalPath.endsWith('/liquid-glass-filter.tsx'))
       expect(filter?.content).toContain('data-ombelle-recipe-instance')
