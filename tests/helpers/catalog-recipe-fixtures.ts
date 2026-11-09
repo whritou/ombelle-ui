@@ -2,6 +2,8 @@ import { componentRecipeComponents, validateComponentRecipe, type ComponentRecip
 import { createCatalogDraft } from '../../apps/www/src/editor/catalog-draft.js'
 
 const editedFields = {
+  'input-group': 'label', sheet: 'trigger', 'alert-dialog': 'trigger', breadcrumb: 'label', pagination: 'label',
+  toast: 'title',
   alert: 'title', avatar: 'initials', badge: 'label', card: 'title',
   checkbox: 'label', dialog: 'trigger', 'dropdown-menu': 'trigger', input: 'label',
   label: 'label', 'native-select': 'label', popover: 'trigger', progress: 'label',

@@ -1,5 +1,6 @@
 /* liquid-glass Alert (experimental): solid tint with glass identity */
 [data-slot='alert'] {
+  --alert-intent-text: initial;
   box-sizing: border-box;
   position: relative;
   display: grid;
@@ -15,7 +16,8 @@
   font-size: 0.875rem;
   line-height: 1.45;
   box-shadow:
-    inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
+    inset 0 1px 0
+      var(--glass-highlight, color-mix(in srgb, white 35%, transparent)),
     0 0.5rem 1.5rem -0.75rem rgb(0 0 0 / 0.25);
 }
 [data-slot='alert']:has(> svg) {
@@ -49,7 +51,39 @@
 [data-variant='destructive'] > [data-slot='alert-title'] {
   color: var(--destructive);
 }
+[data-slot='alert'][data-variant='success'] {
+  background: var(--success, #dcfce7);
+  color: var(--success-foreground, #14532d);
+  --alert-intent-text: var(--success-foreground, #14532d);
+}
+[data-slot='alert'][data-variant='warning'] {
+  background: var(--warning, #fef3c7);
+  color: var(--warning-foreground, #78350f);
+  --alert-intent-text: var(--warning-foreground, #78350f);
+}
+[data-slot='alert'][data-variant='info'] {
+  background: var(--info, #dbeafe);
+  color: var(--info-foreground, #1e3a8a);
+  --alert-intent-text: var(--info-foreground, #1e3a8a);
+}
+[data-slot='alert'] > svg {
+  color: var(--alert-intent-text, var(--primary));
+}
+[data-slot='alert-title'] {
+  color: var(--alert-intent-text, currentColor);
+}
+[data-slot='alert-description'] {
+  color: var(--alert-intent-text, var(--muted-foreground));
+}
 @media (forced-colors: active) {
+  [data-slot='alert'][data-variant='success'],
+  [data-slot='alert'][data-variant='warning'],
+  [data-slot='alert'][data-variant='info'] {
+    --alert-intent-text: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
   [data-slot='alert'] {
     background: Canvas;
     color: CanvasText;

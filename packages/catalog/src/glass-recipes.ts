@@ -13,9 +13,12 @@ export const glassSurfaceSlots = [
   'alert',
   'table-container',
   'accordion',
+  'sheet-content',
+  'alert-dialog-content',
+  'toast',
 ] as const
 
-export const glassControlSlots = ['button', 'badge', 'tabs-list', 'select-trigger'] as const
+export const glassControlSlots = ['button', 'badge', 'tabs-list', 'select-trigger', 'breadcrumb-list', 'pagination-content'] as const
 
 export const glassMarkSlots = [
   'input',
@@ -27,6 +30,7 @@ export const glassMarkSlots = [
   'avatar',
   'progress',
   'skeleton',
+  'input-group',
 ] as const
 
 /** Surfaces that scroll or clip carry the material on their own box-shadow and have no halo. */
@@ -38,13 +42,18 @@ export const glassHostedSlots = [
   'select-content',
   'table-container',
   'accordion',
+  'sheet-content',
+  'alert-dialog-content',
+  'toast',
+  'breadcrumb-list',
+  'pagination-content',
 ] as const
 
 /** Every surface the pointer halo can light: LiquidGlassFilter finds the hovered one with closest(). Recipe and
  * scoped Buttons carry the same material under their own slot names. */
 export const glassHaloSelector = [
   ...glassSurfaceSlots.filter((slot) => !(glassHostedSlots as readonly string[]).includes(slot)),
-  ...glassControlSlots,
+  ...glassControlSlots.filter((slot) => !(glassHostedSlots as readonly string[]).includes(slot)),
   'recipe-button',
   'scoped-button',
 ]

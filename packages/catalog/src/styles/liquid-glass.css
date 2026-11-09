@@ -186,3 +186,47 @@
 @media (forced-colors: active) {
   [data-slot="card"], [data-slot="alert"], [data-slot="table-container"], [data-slot="table-cell"], [data-slot="table-head"], [data-slot="table-footer"], [data-slot="accordion"], [data-slot="accordion-trigger"], [data-slot="avatar"], [data-slot="tabs-list"], [data-slot="tabs-trigger"], [data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="tooltip-content"], [data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-slot="button"], [data-slot="radio-group-option"], [data-slot="select-item"] { -webkit-text-stroke: 0; }
 }
+
+/* Expanded component plates use the same under-fill stroke as the reviewed
+   surfaces above. Native fields and buttons receive it explicitly; their own
+   sheets retain ownership of layout, paint, focus and disabled states. */
+[data-slot="input-group"], [data-slot="input-group-input"], [data-slot="input-group-textarea"], [data-slot="input-group-addon"], [data-slot="input-group-text"], [data-slot="input-group-button"], [data-slot="breadcrumb-page"] { --glass-plate: var(--background); }
+[data-slot="breadcrumb-list"], [data-slot="breadcrumb-link"], [data-slot="breadcrumb-separator"], [data-slot="breadcrumb-ellipsis"], [data-slot="pagination-content"], [data-slot="pagination-link"], [data-slot="pagination-ellipsis"] { --glass-plate: var(--muted); }
+[data-slot="sheet-content"], [data-slot="sheet-header"], [data-slot="sheet-footer"], [data-slot="sheet-title"], [data-slot="sheet-description"], [data-slot="sheet-close"], [data-slot="sheet-dismiss"], [data-slot="alert-dialog-content"], [data-slot="alert-dialog-header"], [data-slot="alert-dialog-footer"], [data-slot="alert-dialog-title"], [data-slot="alert-dialog-description"], [data-slot="alert-dialog-cancel"] { --glass-plate: var(--popover); }
+[data-slot="alert-dialog-action"], [data-slot="pagination-link"][aria-current="page"] { --glass-plate: var(--primary); }
+[data-slot="input-group-button"]:hover:not(:disabled) { --glass-plate: var(--accent); }
+[data-slot="pagination-link"][data-disabled] { --glass-plate: var(--muted); }
+/* Toast status variants paint opaque semantic fills; default Toast uses card
+   glass. Match each notification's actual fill rather than its ancestor. */
+[data-slot="toast"], [data-slot="toast-content"], [data-slot="toast-title"], [data-slot="toast-description"], [data-slot="toast-action"], [data-slot="toast-close"] { --glass-plate: var(--toast-bg, var(--card)); }
+[data-slot="sheet-dismiss"]:hover, [data-slot="alert-dialog-cancel"]:hover { --glass-plate: var(--muted); }
+[data-slot="toast-action"]:hover, [data-slot="toast-close"]:hover { --glass-plate: color-mix(in oklab, currentColor 10%, var(--toast-bg, var(--card))); }
+[data-slot="input-group"], [data-slot="input-group-input"], [data-slot="input-group-textarea"], [data-slot="input-group-addon"], [data-slot="input-group-text"], [data-slot="input-group-button"], [data-slot="input-group-input"]::placeholder, [data-slot="input-group-textarea"]::placeholder,
+[data-slot="breadcrumb-list"], [data-slot="breadcrumb-link"], [data-slot="breadcrumb-page"], [data-slot="breadcrumb-separator"], [data-slot="breadcrumb-ellipsis"], [data-slot="pagination-content"], [data-slot="pagination-link"], [data-slot="pagination-ellipsis"],
+[data-slot="sheet-content"], [data-slot="sheet-header"], [data-slot="sheet-footer"], [data-slot="sheet-title"], [data-slot="sheet-description"], [data-slot="sheet-close"], [data-slot="sheet-dismiss"],
+[data-slot="alert-dialog-content"], [data-slot="alert-dialog-header"], [data-slot="alert-dialog-footer"], [data-slot="alert-dialog-title"], [data-slot="alert-dialog-description"], [data-slot="alert-dialog-cancel"], [data-slot="alert-dialog-action"],
+[data-slot="toast"], [data-slot="toast-content"], [data-slot="toast-title"], [data-slot="toast-description"], [data-slot="toast-action"], [data-slot="toast-close"] {
+  -webkit-text-stroke: calc(var(--glass-material, 0) * 0.25px) var(--glass-plate);
+  paint-order: stroke fill;
+}
+/* These scrolling surfaces host the bounded material shadows their component
+   sheets already consume. No pseudo-elements or pointer halos are added. */
+[data-slot="sheet-content"], [data-slot="alert-dialog-content"], [data-slot="toast"] {
+  --glass-material-shadow:
+    inset 1px 1px 2px rgb(255 255 255 / calc(var(--glass-depth, 0) * 0.85)),
+    inset -1px -1px 2px rgb(232 250 255 / calc(var(--glass-depth, 0) * 0.74)),
+    inset 0 -2px 2px rgb(204 244 255 / calc(var(--glass-depth, 0) * 0.74)),
+    inset 1px 0 2px rgb(255 80 170 / calc(var(--glass-dispersion, 0) * 0.75)),
+    inset -1px 0 2px rgb(60 200 255 / calc(var(--glass-dispersion, 0) * 0.75)),
+    inset 0 1px 2px rgb(255 214 110 / calc(var(--glass-dispersion, 0) * 0.5)),
+    4px 7px 13px rgb(0 10 37 / calc(var(--glass-depth, 0) * 0.16)),
+    12px 28px 44px rgb(0 10 37 / calc(var(--glass-depth, 0) * 0.38)),
+    0 16px 38px rgb(0 10 37 / var(--glass-drop, 0));
+}
+@media (forced-colors: active) {
+  [data-slot="input-group"], [data-slot="input-group-input"], [data-slot="input-group-textarea"], [data-slot="input-group-addon"], [data-slot="input-group-text"], [data-slot="input-group-button"], [data-slot="input-group-input"]::placeholder, [data-slot="input-group-textarea"]::placeholder,
+  [data-slot="breadcrumb-list"], [data-slot="breadcrumb-link"], [data-slot="breadcrumb-page"], [data-slot="breadcrumb-separator"], [data-slot="breadcrumb-ellipsis"], [data-slot="pagination-content"], [data-slot="pagination-link"], [data-slot="pagination-ellipsis"],
+  [data-slot="sheet-content"], [data-slot="sheet-header"], [data-slot="sheet-footer"], [data-slot="sheet-title"], [data-slot="sheet-description"], [data-slot="sheet-close"], [data-slot="sheet-dismiss"],
+  [data-slot="alert-dialog-content"], [data-slot="alert-dialog-header"], [data-slot="alert-dialog-footer"], [data-slot="alert-dialog-title"], [data-slot="alert-dialog-description"], [data-slot="alert-dialog-cancel"], [data-slot="alert-dialog-action"],
+  [data-slot="toast"], [data-slot="toast-content"], [data-slot="toast-title"], [data-slot="toast-description"], [data-slot="toast-action"], [data-slot="toast-close"] { -webkit-text-stroke: 0; }
+}

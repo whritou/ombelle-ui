@@ -60,10 +60,11 @@ it('renders the public landing page with editor links and the published installe
   expect(html.match(/<h1\b/g)).toHaveLength(1)
   // The design's placeholder installer is gone.
   expect(html).toContain('React Native is not supported')
-  // The compact landing summary counts every catalog component available in glass.
-  expect(html).toContain(`Experimental for ${supportedComponentIds.length} components.`)
+  // The landing matrix links to the whole current catalog, including preview-only additions.
+  expect(html).toContain(`Explore all ${supportedComponentIds.length} components`)
   expect(html).not.toContain('not available in glass')
-  expect(html).not.toContain('need a newer installer')
+  // Preview-only catalog additions must not be advertised as installable by 0.7.1.
+  expect(html).toContain('need a newer installer')
   expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')
 })

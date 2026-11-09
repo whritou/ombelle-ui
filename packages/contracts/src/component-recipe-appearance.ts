@@ -18,10 +18,16 @@ const layout = (slot: string, label: string): Part => ({ slot, label, kind: 'lay
 const mark = (slot: string, label: string): Part => ({ slot, label, kind: 'mark' })
 
 export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = {
+  'input-group': [surface('input-group', 'Group', 'background'), text('input-group-input', 'Input'), text('input-group-textarea', 'Textarea'), layout('input-group-addon', 'Addon'), text('input-group-text', 'Addon text'), surface('input-group-button', 'Action')],
+  sheet: [surface('sheet-content', 'Sheet', 'popover'), text('sheet-title', 'Title'), text('sheet-description', 'Description'), layout('sheet-header', 'Header'), layout('sheet-footer', 'Footer')],
+  'alert-dialog': [surface('alert-dialog-content', 'Dialog', 'popover'), text('alert-dialog-title', 'Title'), text('alert-dialog-description', 'Description'), surface('alert-dialog-cancel', 'Cancel'), surface('alert-dialog-action', 'Action')],
+  breadcrumb: [layout('breadcrumb-list', 'Items'), text('breadcrumb-link', 'Link'), text('breadcrumb-page', 'Current page')],
+  pagination: [layout('pagination-content', 'Items'), surface('pagination-link', 'Page')],
+  toast: [surface('toast', 'Toast', 'popover'), text('toast-title', 'Title'), text('toast-description', 'Description'), surface('toast-action', 'Action'), surface('toast-close', 'Dismiss')],
   accordion: [surface('accordion', 'Container', 'card'), surface('accordion-trigger', 'Item heading', 'card'), surface('accordion-content-inner', 'Item content')],
   alert: [surface('alert', 'Surface', 'card'), text('alert-title', 'Title'), text('alert-description', 'Description')],
   avatar: [surface('avatar', 'Surface', 'card'), text('avatar-fallback', 'Initials')],
-  badge: [surface('badge', 'Badge')],
+  badge: [surface('badge', 'Badge'), mark('badge-dot', 'Status dot')],
   card: [surface('card', 'Surface', 'card'), layout('card-header', 'Header'), text('card-title', 'Title'), text('card-description', 'Description'), surface('card-content', 'Content')],
   checkbox: [mark('checkbox', 'Checkbox'), mark('checkbox-indicator', 'Indicator')],
   dialog: [surface('dialog-content', 'Dialog surface', 'popover'), text('dialog-title', 'Title'), text('dialog-description', 'Description')],

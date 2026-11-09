@@ -42,6 +42,14 @@ Automatic activation is the default: moving focus to a trigger selects its panel
 
 ## Styles and artifacts
 
+`TabsList` accepts `appearance="contained"` (the existing default) or
+`appearance="underline"`. The underline follows the bottom edge in horizontal
+lists and the inline end edge in vertical lists, including RTL. It preserves
+selection, keyboard navigation, disabled behavior and visible focus in both
+primitive editions. The component editor exports this option as a recipe prop.
+Installing the new appearance requires the repository CLI until 0.7.2 is
+published; existing recipes without the option keep their normalized identity.
+
 Triggers have a preferred 44 by 44 CSS pixel minimum target. Semantic tokens distinguish inactive and active triggers across both modes. Flat uses a muted list and background active trigger, minimalist removes the list fill, neo-brutalism uses a primary active trigger with preset offset shadow, and ombelle uses a pill list with the preset offset shadow. Logical dimensions and padding support both text directions. Root and list orientation selectors provide horizontal and vertical layouts. Trigger and panel focus rings use a visible 3px outline with 3px offset; component styling does not clip focus. Disabled triggers, forced colors, and reduced motion are covered. Inactive content is hidden even when forceMount preserves its DOM.
 
 Compilation emits components/ui/tabs.tsx, components/ui/tabs.css, and examples/tabs.tsx plus shared utility/theme files. Keep the colocated CSS import. The example includes a labelled list and disabled trigger. Installer dry-run, file ownership, alias rewriting, and conflict safeguards apply; --yes accepts a safe plan.
@@ -57,3 +65,9 @@ Projects whose `components.json` uses one of shadcn's `base-*` styles receive Ta
 State bridge: triggers carry `data-state="active"` or `"inactive"` and panels `data-state="active"` or `"inactive"` (from Base UI's `hidden` state), plus `data-orientation`, through each part's `render` function, next to Base UI's own attributes; a custom `render` replaces it.
 
 Known difference: after a mouse click, Chromium shows the focus ring on a Radix tab, because Radix focuses it programmatically, but not on a Base UI tab. Keyboard focus rings are identical. The parity test covers default, clicked (compared after blur), hover, focus-visible and arrow-key states in both orientations.
+
+Base UI arrow navigation can focus a disabled tab while keeping the previous
+enabled tab selected; another arrow continues through the list. Radix skips
+disabled tabs. The expansion browser gate checks each edition's native behavior
+in horizontal and vertical underline lists. An omitted horizontal
+`aria-orientation` in Base UI retains ARIA's default horizontal meaning.

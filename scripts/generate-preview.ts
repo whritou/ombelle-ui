@@ -5,6 +5,7 @@ import { getCatalog } from '@ombelle/catalog'
 import type { Edition } from '@ombelle/contracts'
 import {
   supportedStyleFamilies,
+  styleFamilies,
   supportedComponentIds,
   componentsWithStyleSupport,
 } from '@ombelle/contracts'
@@ -113,9 +114,9 @@ async function writeFamily(family: PreviewFamily) {
 }
 for (const family of supportedStyleFamilies) await writeFamily(family)
 // Components with a Base UI template, rendered per edition for the parity test.
-async function writeEdition(family: (typeof supportedStyleFamilies)[number], edition: Edition) {
+async function writeEdition(family: (typeof styleFamilies)[number], edition: Edition) {
   const catalog = getCatalog('0.1.0')
-  const ported = supportedComponentIds.filter((id) => catalog.baseTemplates[id])
+  const ported = supportedComponentIds
   const result = await compile({
     preset: JSON.parse(await fs.readFile('packages/catalog/src/presets/' + family + '.json', 'utf8')),
     componentIds: ported,
@@ -147,7 +148,7 @@ async function writeEdition(family: (typeof supportedStyleFamilies)[number], edi
   )
   await fs.writeFile(root + '/entry.tsx', "import './preview.css'\nexport { default } from './scenario'\n")
 }
-for (const family of supportedStyleFamilies)
+for (const family of styleFamilies)
   for (const edition of ['radix', 'base'] as const) await writeEdition(family, edition)
 await writeFamily('liquid-glass')
 await fs.writeFile(

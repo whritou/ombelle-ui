@@ -85,7 +85,7 @@ describe('Table catalog contract', () => {
       ),
     )
     for (const text of [
-      '<div data-slot="table-container"><table aria-label="Projects" data-slot="table" class="custom">',
+      '<div data-slot="table-container"><table aria-label="Projects" data-slot="table" data-density="default" class="custom">',
       '<caption data-slot="table-caption"',
       '<th scope="col" data-slot="table-head"',
       'data-numeric=""',

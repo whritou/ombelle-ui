@@ -6,10 +6,26 @@ import './table.css'
  * A native table in a scroll container, so wide tables scroll instead of
  * overflowing. Give the table a caption or an aria-label.
  */
-export function Table({ className, ...props }: React.ComponentProps<'table'>) {
+export type TableProps = React.ComponentProps<'table'> & {
+  density?: 'default' | 'compact'
+  striped?: boolean
+}
+
+export function Table({
+  className,
+  density = 'default',
+  striped = false,
+  ...props
+}: TableProps) {
   return (
     <div data-slot="table-container">
-      <table {...props} data-slot="table" className={cn(className)} />
+      <table
+        {...props}
+        data-slot="table"
+        data-density={density}
+        data-striped={striped ? '' : undefined}
+        className={cn(className)}
+      />
     </div>
   )
 }

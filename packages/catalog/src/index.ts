@@ -10,6 +10,7 @@ import {
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
 import { runtimeDependencies } from './manifest.js'
+export { expansionExamples, baseToastExample } from './expansion-examples.js'
 export { knownShadcnUtilityHashes, shadcnBaseStyles, shadcnRadixStyles } from './shadcn.js'
 export { resolveRecipePreset } from './recipe-preset.js'
 export { glassTintPalettes, type GlassTintId, type GlassTintPalette } from './glass-tints.js'
@@ -76,6 +77,9 @@ const baseDependencies: readonly string[] = [
   'tailwind-merge',
 ]
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
+  sheet: ['@radix-ui/react-dialog', 'lucide-react'],
+  'alert-dialog': ['@radix-ui/react-alert-dialog'],
+  toast: ['@radix-ui/react-toast'],
   button: ['@radix-ui/react-slot', 'class-variance-authority'],
   checkbox: ['@radix-ui/react-checkbox', 'lucide-react'],
   switch: ['@radix-ui/react-switch'],
@@ -93,6 +97,13 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   progress: ['@radix-ui/react-progress'],
 }
 const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
+  badge: ['badge', 'badge-dot'],
+  toast: ['toast-viewport', 'toast', 'toast-content', 'toast-title', 'toast-description', 'toast-action', 'toast-close'],
+  'input-group': ['input-group', 'input-group-input', 'input-group-textarea', 'input-group-addon', 'input-group-text', 'input-group-button'],
+  sheet: ['sheet', 'sheet-trigger', 'sheet-close', 'sheet-dismiss', 'sheet-overlay', 'sheet-content', 'sheet-header', 'sheet-footer', 'sheet-title', 'sheet-description'],
+  'alert-dialog': ['alert-dialog', 'alert-dialog-trigger', 'alert-dialog-overlay', 'alert-dialog-content', 'alert-dialog-header', 'alert-dialog-footer', 'alert-dialog-title', 'alert-dialog-description', 'alert-dialog-cancel', 'alert-dialog-action'],
+  breadcrumb: ['breadcrumb', 'breadcrumb-list', 'breadcrumb-item', 'breadcrumb-link', 'breadcrumb-page', 'breadcrumb-separator', 'breadcrumb-ellipsis'],
+  pagination: ['pagination', 'pagination-content', 'pagination-item', 'pagination-link', 'pagination-ellipsis'],
   checkbox: ['checkbox', 'checkbox-indicator'],
   switch: ['switch', 'switch-thumb'],
   tabs: ['tabs', 'tabs-list', 'tabs-trigger', 'tabs-content'],

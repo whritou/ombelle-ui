@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import type { PresetCompilerState } from '../use-preset-compiler'
-import { contrastInstallBlocked, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller } from '../../snapshots/install-command'
+import { contrastInstallBlocked, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller, semanticPaletteInstallBlocked, semanticPaletteInstallNotice } from '../../snapshots/install-command'
 import {
   canExportPreset,
   serializePresetExport,
@@ -162,7 +162,9 @@ export function PresetExportPanel({
         Replace <code>APP</code> with your target project directory. The CLI
         uses its existing package manager.
       </p>}
-      {!useLocalInstaller && materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
+      {semanticPaletteInstallBlocked({ modes: state.result?.preset.data.modes }) ? (
+        <p data-testid="preset-install-held">{semanticPaletteInstallNotice}</p>
+      ) : !useLocalInstaller && materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
         <p data-testid="preset-install-held">
           This preset uses liquid glass material settings, which need{' '}
           {publishedInstaller.packageName} {glassMaterialMinimumCli}. That release

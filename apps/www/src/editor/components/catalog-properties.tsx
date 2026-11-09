@@ -109,7 +109,7 @@ function Field({ field, value, update, protectedIds = [], createItem }: {
     </div>
   }
   if (field.enum) return <label className="be-stack">{field.title}
-    <select value={String(value)} onChange={event => update(field.enum?.find(option => String(option) === event.target.value))}>
+    <select value={String(value ?? field.default ?? field.enum[0])} onChange={event => update(field.enum?.find(option => String(option) === event.target.value))}>
       {field.enum.map(option => <option key={option} value={String(option)}>{String(option)}</option>)}
     </select>
   </label>

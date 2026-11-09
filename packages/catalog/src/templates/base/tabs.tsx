@@ -24,11 +24,13 @@ export function Tabs({ className, ...props }: TabsProps) {
 export function TabsList({
   className,
   activateOnFocus = true,
+  appearance = 'contained',
   ...props
-}: Part<typeof TabsPrimitive.List>) {
+}: Part<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' }) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
+      data-appearance={appearance}
       className={cn(className)}
       activateOnFocus={activateOnFocus}
       {...props}
