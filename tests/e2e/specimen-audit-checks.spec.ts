@@ -100,3 +100,11 @@ test('clipping: a fully transparent shadow is not judged', async ({ page }) => {
   const clean = both(page)[1]
   expect(await findClipping([clean], clean)).toEqual([])
 })
+
+test('focus-visible: a control flush with the viewport edge is measured with its whole ring in view', async ({ page }) => {
+  await fixture(page, '', '<div style="block-size:900px"></div><button id="edge" style="inline-size:600px;block-size:24px">Edge</button><div style="block-size:1200px"></div>',
+    '#edge:focus-visible{outline:1px solid #1a56db;outline-offset:2px}')
+  // Fully visible, bottom edge on the viewport's bottom edge: nothing asks the page to scroll.
+  await page.locator('#edge').evaluate(element => window.scrollBy(0, element.getBoundingClientRect().bottom - innerHeight))
+  expect(await checkFocusVisible(page, page.locator('#edge'))).toEqual([])
+})

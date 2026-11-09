@@ -178,7 +178,8 @@ const contrastSource = `(before, after) => {
  * 1 CSS px perimeter (WCAG 2.4.7 and 1.4.11), measured on the real backdrop at deviceScaleFactor 1.
  */
 export async function checkFocusVisible(page: Page, target: Locator): Promise<Finding[]> {
-  await target.scrollIntoViewIfNeeded()
+  // Centre it: a box flush with the viewport edge counts as visible, but its ring would fall outside the shot.
+  await target.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'nearest' }))
   // List and menu items are reached with arrow keys, and some primitives highlight them only then:
   // "before" shows a neighbour highlighted, "after" the target. Other controls are compared blurred vs focused.
   const keys = await target.evaluate(element => {
