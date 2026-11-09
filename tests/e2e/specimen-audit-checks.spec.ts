@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, listFocusables, markBorders, runAxe } from '../helpers/specimen-audit.js'
+import { checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, withFrozenClock, markBorders, runAxe } from '../helpers/specimen-audit.js'
 
 // Each check must report its planted defect and stay silent on the clean twin,
 // so a check that passes everything fails here first.
@@ -128,4 +128,44 @@ test('spacing: a label flush against its control is reported, beside it or above
   const [defect, clean] = both(page)
   expect((await findSpacing([defect])).map(f => f.check)).toEqual(['spacing', 'spacing'])
   expect(await findSpacing([clean])).toEqual([])
+})
+
+test('focus-visible: an item that receives focus from its roving container is judged itself', async ({ page }) => {
+  const group = (id: string) => `<div id="${id}" role="radiogroup" aria-label="${id}" tabindex="0"><span role="radio" aria-checked="true" tabindex="-1">One</span></div>`
+  await fixture(page, group('plain'), group('ringed'), '[role=radio]{display:inline-block;padding:4px}#ringed [role=radio]:focus-visible{outline:2px solid #1a56db}[role=radio]:focus{outline:none}#ringed [role=radio]:focus-visible{outline:2px solid #1a56db}')
+  await page.evaluate(() => document.querySelectorAll('[role=radiogroup]').forEach(box =>
+    box.addEventListener('focus', () => (box.firstElementChild as HTMLElement).focus({ focusVisible: true } as FocusOptions))))
+  expect((await checkFocusVisible(page, page.locator('#plain'))).map(f => f.check)).toEqual(['focus-visible'])
+  expect(await checkFocusVisible(page, page.locator('#ringed'))).toEqual([])
+})
+
+test('listFocusables: tab and radio items reached with arrow keys are listed', async ({ page }) => {
+  await fixture(page, '', `<div role="tablist" aria-label="Sections"><button role="tab" tabindex="-1">Overview</button><button role="tab" tabindex="-1">Activity</button></div>
+    <div role="radiogroup" aria-label="Plan"><button role="radio" aria-checked="false" tabindex="-1">Starter</button></div>`)
+  const list = await listFocusables(both(page)[1], 'roving')
+  expect(await Promise.all(list.map(item => item.textContent()))).toEqual(['Overview', 'Activity', 'Starter'])
+})
+
+test('withFrozenClock: page time stands still while measuring, and runs again after', async ({ page }) => {
+  await installClock(page)
+  await page.setContent('<p>clock</p>')
+  await withFrozenClock(page, async () => {
+    const before = await page.evaluate(() => Date.now())
+    await page.waitForTimeout(1500)
+    expect(await page.evaluate(() => Date.now())).toBe(before)
+  })
+  const after = await page.evaluate(() => Date.now())
+  await page.waitForTimeout(500)
+  expect(await page.evaluate(() => Date.now())).toBeGreaterThan(after)
+})
+
+test('axe completes on a page whose clock is frozen', async ({ page }) => {
+  test.setTimeout(20000)
+  await installClock(page)
+  await fixture(page, '<button></button>', '<button>Save</button>')
+  await withFrozenClock(page, async () => {
+    const start = await page.evaluate(() => Date.now())
+    expect((await runAxe(page, ['[data-case="defect"]'])).map(f => f.check)).toContain('axe')
+    expect(await page.evaluate(() => Date.now()) - start).toBeLessThan(5000)
+  })
 })

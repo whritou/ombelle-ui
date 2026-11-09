@@ -5,6 +5,8 @@ import type { AuditData, AuditEdition, AuditSpecimen } from '../../../scripts/ge
 import { auditData } from './generated/audit'
 import { scopedCatalogComponents } from './generated/catalog-recipes'
 import { LiquidGlassFilter as RecipeGlassFilter } from './generated/catalog-recipes/liquid-glass-filter'
+// The glass scenes are page backdrop, not editor stage CSS: the kit scene exists only in this stylesheet.
+import './glass-backdrop.css'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 import { renderSpecimen, type Primitives } from './render-specimen'
 
@@ -83,9 +85,12 @@ function AuditPage({ data, mode, ordinary, factories }: {
     {data.specimens.map(item => <section key={item.component} data-audit={item.component}
       style={{ display: 'grid', gap: '0.75rem', inlineSize: 'min(100%, 40rem)', position: 'relative' }}>
       <h2>{item.component}</h2>
-      {item.scope
-        ? <RecipeSpecimen item={item} factory={factories[item.component]} glass={glass} />
-        : <OrdinarySpecimen item={item} primitives={ordinary} edition={data.edition} />}
+      {/* Normal flow, as in an app: grid items would stretch inline components such as Badge to the full width. */}
+      <div>
+        {item.scope
+          ? <RecipeSpecimen item={item} factory={factories[item.component]} glass={glass} />
+          : <OrdinarySpecimen item={item} primitives={ordinary} edition={data.edition} />}
+      </div>
     </section>)}
   </main>
 }

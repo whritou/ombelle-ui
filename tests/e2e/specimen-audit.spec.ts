@@ -3,7 +3,7 @@ import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { styleFamilies } from '../../packages/contracts/src/index.js'
 import {
-  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, listFocusables, markBorders, runAxe,
+  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
 
@@ -46,19 +46,29 @@ for (const family of styleFamilies)
         const findings: (Finding & { component: string })[] = []
         const errors: string[] = []
         page.on('pageerror', error => errors.push(error.message))
-        // Toasts stay open while measured: their dismissal timers never advance.
-        await page.clock.install()
+        // Time runs normally; it is paused only while a toast is measured, so the toast stays open.
+        await installClock(page)
         await page.goto(`/audit/${family}/${edition}/?mode=${mode}`)
         await expect(page.locator('main[data-audit-page]')).toHaveAttribute('data-ready', 'true', { timeout: 60000 })
         const sections = page.locator('section[data-audit]')
-        const components = await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!))
+        // Toast first: the Radix toast is open from page load and its timer must not run out before it is measured.
+        const components = (await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!)))
+          .sort((a, b) => Number(b === 'toast') - Number(a === 'toast'))
         const shots = path.join(artifacts, family, edition, mode)
         await fs.mkdir(shots, { recursive: true })
         const body = page.locator('body')
         for (const component of components) {
           const section = page.locator(`section[data-audit="${component}"]`)
           const record = (list: Finding[]) => findings.push(...list.map(finding => ({ ...finding, component })))
+          let paused = false
+          try {
           await section.scrollIntoViewIfNeeded()
+          // Radix Toast is open from the start; a closed toast would leave nothing to measure.
+          if (component === 'toast' && edition === 'radix') {
+            await expect(section.locator('[data-slot$="toast"]').first(), 'toast is still open').toBeVisible()
+            await pauseClock(page)
+            paused = true
+          }
           await section.screenshot({ path: path.join(shots, `${component}.png`), animations: 'disabled' })
           record(await measure(page, [section], section, component, counts))
           record(await runAxe(page, [`section[data-audit="${component}"]`]))
@@ -87,18 +97,30 @@ for (const family of styleFamilies)
               document.getElementById(element.getAttribute('aria-controls')!)?.setAttribute('data-audit-accordion-panel', ''))
             const content = isBaseToast ? page.locator('[data-slot$="toast"]').first() : overlay!.content(page, section).first()
             await expect(content, `${component} opens`).toBeVisible()
+            if (isBaseToast) { await pauseClock(page); paused = true }
             await content.evaluate((element, name) => element.setAttribute('data-audit-open', name), component)
             await page.screenshot({ path: path.join(shots, `${component}-open.png`), animations: 'disabled' })
             const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, component)
             record(await measure(page, [content], inside ? section : body, `${component}-open`, counts))
             record(await runAxe(page, [`[data-audit-open="${component}"]`]))
             counts.axe++
+            // Overlays are the surfaces that carry backdrop filters: check them under forced colors while they are open.
+            if (mode === 'light') {
+              await markBorders([content])
+              await page.emulateMedia({ forcedColors: 'active' })
+              record(await findForcedColors([content], await listFocusables(content, `${component}-open-forced`)))
+              counts['forced-colors']++
+              await page.emulateMedia({ forcedColors: 'none' })
+            }
             if (overlay && component !== 'accordion') {
               await page.keyboard.press('Escape')
+              // Closing and focus return run on timers, which the frozen clock only fires when advanced.
+              await page.clock.runFor(500)
               await expect(content, `${component} closes on Escape`).toBeHidden()
               if (overlay.returnsFocus) await expect(trigger, `${component} returns focus to its trigger`).toBeFocused()
             }
           }
+          } finally { if (paused) await page.clock.resume() }
         }
         if (mode === 'light') {
           await markBorders([sections])
@@ -136,4 +158,17 @@ test.afterAll(async () => {
     failures: parts.reduce((sum, part) => sum + part.failures, 0),
   }
   await fs.writeFile('.artifacts/specimen-audit.json', JSON.stringify(evidence, null, 2) + '\n')
+})
+
+// The page is the measurement surface: it must match what an install renders.
+test('audit pages draw the glass backdrop and lay specimens out in normal flow', async ({ page }) => {
+  for (const mode of modes) {
+    await page.goto(`/audit/liquid-glass/radix/?mode=${mode}`)
+    await expect(page.locator('main[data-audit-page]')).toHaveAttribute('data-ready', 'true', { timeout: 60000 })
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundImage), `${mode} backdrop`).not.toBe('none')
+  }
+  await page.goto('/audit/ombelle/radix/?mode=light')
+  await expect(page.locator('main[data-audit-page]')).toHaveAttribute('data-ready', 'true', { timeout: 60000 })
+  const badge = await page.locator('section[data-audit="badge"] [data-slot$="badge"]').first().boundingBox()
+  expect(badge!.width, 'Badge keeps its intrinsic width').toBeLessThan(200)
 })

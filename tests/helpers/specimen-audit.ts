@@ -194,7 +194,7 @@ const contrastSource = `(before, after) => {
  * The focused state must differ from the unfocused one by a 3:1 change covering at least the element's
  * 1 CSS px perimeter (WCAG 2.4.7 and 1.4.11), measured on the real backdrop at deviceScaleFactor 1.
  */
-export async function checkFocusVisible(page: Page, target: Locator): Promise<Finding[]> {
+export async function checkFocusVisible(page: Page, target: Locator, delegated = false): Promise<Finding[]> {
   // Centre it: a box flush with the viewport edge counts as visible, but its ring would fall outside the shot.
   await target.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'nearest' }))
   // List and menu items are reached with arrow keys, and some primitives highlight them only then:
@@ -212,7 +212,8 @@ export async function checkFocusVisible(page: Page, target: Locator): Promise<Fi
   } else await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
   const box = await target.boundingBox()
   const description = await target.evaluate((element, source) => (new Function('return ' + source)() as (e: Element) => string)(element), describeSource)
-  if (!box) return [{ check: 'focus-visible', target: description, detail: 'element has no box' }]
+  // An earlier interaction can hide it (focusing a Radix tab selects it and hides the previous panel).
+  if (!box) return []
   const viewport = page.viewportSize()!
   const x = Math.max(0, Math.floor(box.x - 8)), y = Math.max(0, Math.floor(box.y - 8))
   const clip = { x, y, width: Math.min(viewport.width, Math.ceil(box.x + box.width + 8)) - x, height: Math.min(viewport.height, Math.ceil(box.y + box.height + 8)) - y }
@@ -225,8 +226,15 @@ export async function checkFocusVisible(page: Page, target: Locator): Promise<Fi
   const after = await page.screenshot({ clip, animations: 'disabled' })
   const focus = await target.evaluate(element => element === document.activeElement || element.hasAttribute('data-highlighted') ? 'self'
     : element.contains(document.activeElement) ? 'moved' : 'none')
-  // A container that hands focus to an item (roving radiogroup, tablist) is not judged; the item is measured itself.
-  if (focus === 'moved') return []
+  // A container that hands focus to an item (roving radiogroup, tablist) is not judged: the item that took focus is.
+  if (focus === 'moved') {
+    if (delegated) return [{ check: 'focus-visible', target: description, detail: 'focus moved on again from a delegated item' }]
+    await page.evaluate(() => {
+      document.querySelectorAll('[data-audit-focus-moved]').forEach(element => element.removeAttribute('data-audit-focus-moved'))
+      document.activeElement?.setAttribute('data-audit-focus-moved', '')
+    })
+    return checkFocusVisible(page, page.locator('[data-audit-focus-moved]'), true)
+  }
   const focused = focus === 'self'
   const { changed, strong } = await page.evaluate(async ([before, after, source]) => {
     const pixels = async (base64: string) => {
@@ -245,7 +253,8 @@ export async function checkFocusVisible(page: Page, target: Locator): Promise<Fi
     detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed` }]
 }
 
-const itemRoles = '[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]'
+// Items reached with arrow keys: primitives give all but the current one tabindex -1.
+const itemRoles = '[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio], [role=tab], [role=radio]'
 
 /**
  * Keyboard-reachable controls inside `root`, in document order: tabbable controls, plus list and menu items,
@@ -270,6 +279,25 @@ export async function listFocusables(root: Locator, prefix: string): Promise<Loc
     for (let n = 0; n < count; n++) out.push(root.page().locator(`[data-audit-focus="${prefix}-${index}-${n}"]`))
   }
   return out
+}
+
+/** Control page timers (installed before navigation); time keeps running until withFrozenClock pauses it. */
+export async function installClock(page: Page): Promise<void> {
+  await page.clock.install()
+}
+
+/**
+ * Run `measure` with page time paused, so a toast stays open while it is measured. install() alone keeps time running;
+ * a paused clock also stops requestAnimationFrame, so only this short stretch is frozen.
+ */
+export async function withFrozenClock<T>(page: Page, measure: () => Promise<T>): Promise<T> {
+  await pauseClock(page)
+  try { return await measure() } finally { await page.clock.resume() }
+}
+
+/** Pause page time about a second from now (pauseAt cannot target the past); resume with page.clock.resume(). */
+export async function pauseClock(page: Page): Promise<void> {
+  await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now()) + 1000))
 }
 
 /** Tag elements that have a border now, so the forced-colors pass knows which borders must survive. */
@@ -329,7 +357,11 @@ export async function findForcedColors(roots: Locator[], focused: Locator[]): Pr
 export async function runAxe(page: Page, include: string[]): Promise<Finding[]> {
   let builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
   for (const selector of include) builder = builder.include(selector)
-  const { violations } = await builder.analyze()
+  // axe schedules its work on timers: under a frozen clock, step fake time until it finishes.
+  let done = false
+  const analysis = builder.analyze().finally(() => { done = true })
+  while (!done) await page.clock.runFor(16).catch(() => undefined)
+  const { violations } = await analysis
   return violations.flatMap(violation => violation.nodes.map(node => ({
     check: 'axe' as const, target: node.target.join(' '), detail: `${violation.id}: ${violation.help}` })))
 }
