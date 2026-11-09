@@ -11,6 +11,9 @@ const node = (tag: string, props: Props = {}, ...children: RecipeSpecimen['child
 const localId = (suffix: string) => ({ localId: '-' + suffix })
 const label = (text: string) => node('label', { htmlFor: localId('control') }, text)
 const trigger = (tag: string, text: string) => node(tag, { type: 'button' }, text)
+// The installed recipe lays out its label and control itself, so the label never touches the control.
+const stacked = { className: 'grid gap-2' }
+const inline = { className: 'flex items-center gap-2' }
 
 export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen {
   const { component, content, props } = recipe
@@ -29,7 +32,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
           ...(content.addon ? [node('InputGroupText', {}, content.addon)] : []),
           ...(content.action ? [node('InputGroupButton', { disabled: props.disabled }, content.action)] : []))] : []
       const leading = props.align === 'inline-start' || props.align === 'block-start'
-      return node('div', {}, label(content.label), node('InputGroup', {},
+      return node('div', stacked, label(content.label), node('InputGroup', {},
         ...(leading ? [...addons, control] : [control, ...addons])))
     }
     case 'sheet':
@@ -74,34 +77,34 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('div', { role: 'status', 'aria-busy': true, 'aria-label': content.label }, node('Skeleton', props))
     case 'input':
     case 'textarea':
-      return node('div', {}, label(content.label), node(component === 'input' ? 'Input' : 'Textarea', {
+      return node('div', stacked, label(content.label), node(component === 'input' ? 'Input' : 'Textarea', {
         id: localId('control'), placeholder: content.placeholder, defaultValue: content.initialText,
         disabled: props.disabled, required: props.required, 'aria-invalid': props.invalid || undefined,
       }))
     case 'label':
-      return node('div', {}, node('Label', { htmlFor: localId('control') }, content.label,
+      return node('div', stacked, node('Label', { htmlFor: localId('control') }, content.label,
         ...(props.required ? [node('span', { 'aria-hidden': 'true' }, '*')] : [])),
       node('input', { id: localId('control'), type: 'text', required: props.required }))
     case 'checkbox':
-      return node('div', {}, node('Checkbox', { id: localId('control'), disabled: props.disabled, required: props.required,
+      return node('div', inline, node('Checkbox', { id: localId('control'), disabled: props.disabled, required: props.required,
         defaultChecked: props.checked === 'indeterminate' ? 'indeterminate' : props.checked === 'checked' }), label(content.label))
     case 'switch':
-      return node('div', {}, node('Switch', { id: localId('control'), disabled: props.disabled, defaultChecked: props.checked },
+      return node('div', inline, node('Switch', { id: localId('control'), disabled: props.disabled, defaultChecked: props.checked },
         node('SwitchThumb')), label(content.label))
     case 'native-select':
-      return node('div', {}, label(content.label), node('NativeSelect', {
+      return node('div', stacked, label(content.label), node('NativeSelect', {
         id: localId('control'), defaultValue: props.selection, size: props.size, disabled: props.disabled, required: props.required,
       }, ...(props.selection ? [] : [node('NativeSelectOption', { value: '' }, 'Choose an option')]),
       ...content.options.map(item => node('NativeSelectOption', { value: item.id }, item.label))))
     case 'radio-group':
-      return node('div', {}, node('p', { id: localId('group-label') }, content.label), node('RadioGroup', {
+      return node('div', stacked, node('p', { id: localId('group-label') }, content.label), node('RadioGroup', {
         'aria-labelledby': localId('group-label'), defaultValue: props.selection || undefined,
         orientation: props.orientation, disabled: props.disabled, required: props.required,
       }, ...content.options.map(item => node('RadioGroupOption', {}, node('RadioGroupItem', { value: item.id }),
         node('span', {}, node('RadioGroupOptionLabel', {}, item.label), ...(item.description
           ? [node('RadioGroupOptionDescription', {}, item.description)] : []))))))
     case 'select':
-      return node('div', {}, label(content.label), node('Select', {
+      return node('div', stacked, label(content.label), node('Select', {
         defaultValue: props.selection || undefined, disabled: props.disabled, required: props.required,
       }, node('SelectTrigger', { id: localId('control'), size: props.size }, node('SelectValue', { placeholder: content.placeholder })),
       node('SelectContent', { position: props.position }, ...content.options.map(item =>
