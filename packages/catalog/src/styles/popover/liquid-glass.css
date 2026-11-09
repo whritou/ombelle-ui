@@ -26,8 +26,8 @@
   --glass-inner-opacity: var(--glass-nested-opacity);
 }
 [data-slot='popover-content']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
 }
 [data-slot='popover-title'] {
   margin: 0;

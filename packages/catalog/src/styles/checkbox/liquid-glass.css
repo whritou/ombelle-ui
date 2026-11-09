@@ -45,8 +45,8 @@
   display: none;
 }
 [data-slot='checkbox']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 2px;
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
 }
 [data-slot='checkbox'][aria-invalid='true'] {
   border-color: var(--destructive);

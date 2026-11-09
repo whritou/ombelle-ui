@@ -71,8 +71,8 @@
 }
 [data-slot='tabs-trigger']:focus-visible,
 [data-slot='tabs-content']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
 }
 [data-slot='tabs-trigger']:disabled,
 [data-slot='tabs-trigger'][data-disabled] {

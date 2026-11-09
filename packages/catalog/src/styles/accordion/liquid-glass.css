@@ -51,7 +51,7 @@
 }
 /* The container clips overflow, so the focus ring sits inside the trigger. */
 [data-slot='accordion-trigger']:focus-visible {
-  outline: 3px solid var(--ring);
+  outline: 2px solid var(--foreground);
   outline-offset: -4px;
 }
 [data-slot='accordion-trigger']:disabled {

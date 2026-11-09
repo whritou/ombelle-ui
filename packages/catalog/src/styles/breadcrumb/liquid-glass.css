@@ -46,8 +46,8 @@
   text-decoration: underline;
 }
 [data-slot='breadcrumb-link']:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
 }
 [data-slot='breadcrumb-page'] {
   color: var(--foreground);

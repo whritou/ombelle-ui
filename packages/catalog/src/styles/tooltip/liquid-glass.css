@@ -1,7 +1,7 @@
 /* liquid-glass Tooltip (experimental) */
 [data-slot='tooltip-trigger']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
 }
 [data-slot='tooltip-content'] {
   z-index: 50;

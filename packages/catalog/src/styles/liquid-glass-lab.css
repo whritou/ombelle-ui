@@ -135,7 +135,6 @@
       }
       [data-slot="input"]:focus-visible,
       [data-slot="select-trigger"]:focus-visible {
-        border-color: var(--ring);
       }
       [data-slot="input"][aria-invalid="true"],
       [data-slot="select-trigger"][aria-invalid="true"] {

@@ -63,8 +63,25 @@ describe('highlighted list and menu items show a 3:1 indicator', () => {
   it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s Select and Dropdown Menu items carry an inset ring', family => {
     for (const [file, selector] of [['select', "[data-slot='select-item'][data-highlighted]"], ['dropdown-menu', "[data-slot='dropdown-menu-item'][data-highlighted]"]]) {
       const rule = declarations(read(`${file}/${family}.css`), selector)
-      expect(rule.outline, `${file}/${family}`).toBe('2px solid var(--ring)')
+      // Liquid glass draws every focus indicator in ink rather than the blue ring.
+      expect(rule.outline, `${file}/${family}`).toBe(family === 'liquid-glass' ? '2px solid var(--foreground)' : '2px solid var(--ring)')
       expect(rule['outline-offset'], `${file}/${family}`).toBe('-2px')
     }
+  })
+})
+
+describe('liquid glass focus', () => {
+  // A thin ink ring that hugs the control: no blue, no gap (user decision, 9 November 2026).
+  const files = [...fs.readdirSync('packages/catalog/src/styles', { recursive: true }) as string[]]
+    .map(file => file.replaceAll('\\', '/')).filter(file => /(^|\/)liquid-glass(-lab)?\.css$/.test(file))
+  it.each(files)('%s draws focus as a 2px ink ring with no gap', file => {
+    const css = read(file)
+    expect(css).not.toContain('var(--ring)')
+    postcss.parse(css).walkRules(rule => {
+      if (!rule.selector.includes(':focus-visible') || rule.parent?.type === 'atrule' && (rule.parent as postcss.AtRule).params.includes('forced-colors')) return
+      // `none` is allowed where a wrapper draws the ring through :focus-within (Input Group).
+      rule.walkDecls('outline', decl => expect(['2px solid var(--foreground)', 'none'], `${file} ${rule.selector}`).toContain(decl.value))
+      rule.walkDecls('outline-offset', decl => expect(Number.parseFloat(decl.value), `${file} ${rule.selector}`).toBeLessThanOrEqual(0))
+    })
   })
 })
