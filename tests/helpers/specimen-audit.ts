@@ -83,7 +83,8 @@ export async function findClipping(roots: Locator[], stop: Locator): Promise<Fin
       const out = { top: 0, right: 0, bottom: 0, left: 0 }
       if (style.boxShadow && style.boxShadow !== 'none')
         for (const shadow of style.boxShadow.split(/,(?![^(]*\))/)) {
-          if (/\binset\b/.test(shadow)) continue
+          // Inset shadows stay inside the box; a shadow with alpha 0 paints nothing.
+          if (/\binset\b/.test(shadow) || /rgba\([^)]*,\s*0\)|\/\s*0\)|transparent/.test(shadow)) continue
           const [x = 0, y = 0, blur = 0, spread = 0] = (shadow.replace(/rgba?\([^)]*\)|#[0-9a-f]+|oklch\([^)]*\)|color\([^)]*\)/gi, '').match(/-?[\d.]+px/g) ?? []).map(px)
           out.left = Math.max(out.left, blur + spread - x); out.right = Math.max(out.right, blur + spread + x)
           out.top = Math.max(out.top, blur + spread - y); out.bottom = Math.max(out.bottom, blur + spread + y)

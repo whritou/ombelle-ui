@@ -94,3 +94,9 @@ test('focus-visible: a 1px ring around a rounded control passes despite anti-ali
     '#field:focus{outline:1px solid #1a56db;outline-offset:1px}')
   expect(await checkFocusVisible(page, page.locator('#field'))).toEqual([])
 })
+
+test('clipping: a fully transparent shadow is not judged', async ({ page }) => {
+  await fixture(page, '', '<div style="overflow:auto;padding:32px"><div style="block-size:40px;box-shadow:0 0 24px #000, rgba(0, 10, 37, 0) 12px 28px 44px 0px">x</div></div>')
+  const clean = both(page)[1]
+  expect(await findClipping([clean], clean)).toEqual([])
+})
