@@ -32,12 +32,24 @@ test('focus-visible: a control with no ring or an invisible ring is reported', a
   expect(await checkFocusVisible(page, page.locator('#ring'))).toEqual([])
 })
 
-test('target-size: a 16px target is reported', async ({ page }) => {
-  await fixture(page, '<button style="inline-size:16px;block-size:16px;padding:0" aria-label="Small"></button>',
-    '<button style="inline-size:24px;block-size:24px;padding:0" aria-label="Large"></button>')
+test('target-size: crowded 16px targets are reported, spaced or 24px ones are not', async ({ page }) => {
+  const small = (label: string) => `<button style="inline-size:16px;block-size:16px;padding:0;margin:0 2px" aria-label="${label}"></button>`
+  await fixture(page, small('One') + small('Two'),
+    '<button style="inline-size:24px;block-size:24px;padding:0" aria-label="Large"></button><p>' + small('Alone') + '</p>')
   const [defect, clean] = both(page)
-  expect((await findTargetSize([defect])).map(f => f.check)).toEqual(['target-size'])
+  expect((await findTargetSize([defect])).map(f => f.check)).toEqual(['target-size', 'target-size'])
   expect(await findTargetSize([clean])).toEqual([])
+})
+
+test('visually hidden helpers and focus-delegating containers are not judged', async ({ page }) => {
+  await fixture(page, '', `<span tabindex="0" style="position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0)">Skip</span>
+    <div id="group" tabindex="0"><button id="item" style="outline-offset:2px">Item</button></div>`,
+    '#item:focus-visible{outline:2px solid #1a56db}')
+  await page.locator('#group').evaluate(group => group.addEventListener('focus', () => (group.firstElementChild as HTMLElement).focus({ focusVisible: true } as FocusOptions)))
+  const [, clean] = both(page)
+  expect(await findTargetSize([clean])).toEqual([])
+  expect(await findOverflow([clean])).toEqual([])
+  expect(await checkFocusVisible(page, page.locator('#group'))).toEqual([])
 })
 
 test('forced-colors: a surface losing its border is reported', async ({ page }) => {
@@ -54,4 +66,25 @@ test('axe: an unnamed button is reported', async ({ page }) => {
   await fixture(page, '<button></button>', '<button>Save</button>')
   expect((await runAxe(page, ['[data-case="defect"]'])).map(f => f.check)).toContain('axe')
   expect(await runAxe(page, ['[data-case="clean"]'])).toEqual([])
+})
+
+test('focus-visible: list items are judged by keyboard highlight', async ({ page }) => {
+  const list = (id: string) => `<div role="listbox" id="${id}" aria-label="${id}"><div role="option" tabindex="0">One</div><div role="option" tabindex="0">Two</div></div>`
+  await fixture(page, list('plain'), list('styled'), '#styled [data-highlighted]{outline:2px solid #1a56db;outline-offset:-2px}[role=option]:focus{outline:none}')
+  await page.evaluate(() => document.querySelectorAll('[role=listbox]').forEach(box => box.addEventListener('keydown', event => {
+    const items = [...box.querySelectorAll<HTMLElement>('[role=option]')]
+    const index = items.indexOf(document.activeElement as HTMLElement)
+    const next = items[(index + ((event as KeyboardEvent).key === 'ArrowDown' ? 1 : items.length - 1)) % items.length]!
+    items.forEach(item => item.removeAttribute('data-highlighted'))
+    next.setAttribute('data-highlighted', '')
+    next.focus()
+  })))
+  expect((await checkFocusVisible(page, page.locator('#plain [role=option]').first())).map(f => f.check)).toEqual(['focus-visible'])
+  expect(await checkFocusVisible(page, page.locator('#styled [role=option]').first())).toEqual([])
+  expect(await checkFocusVisible(page, page.locator('#styled [role=option]').last())).toEqual([])
+})
+
+test('overflow: text inside an svg is never painted and is not judged', async ({ page }) => {
+  await fixture(page, '', '<span style="display:inline-block;inline-size:16px"><svg width="16" height="16" aria-hidden="true">▼▼▼▼▼▼</svg></span>')
+  expect(await findOverflow([both(page)[1]])).toEqual([])
 })

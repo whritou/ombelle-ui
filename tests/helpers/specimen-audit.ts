@@ -20,6 +20,15 @@ const describeSource = `(element) => {
   return element.tagName.toLowerCase() + (slot ? '[data-slot="' + slot + '"]' : '') + (role ? '[role="' + role + '"]' : '') + (name ? ' "' + name + '"' : '')
 }`
 
+// Runs in the page: sr-only labels and focus proxies are 1×1 boxes that are never drawn as targets.
+const hiddenSource = `(element) => {
+  for (let current = element; current; current = current.parentElement) {
+    const box = current.getBoundingClientRect()
+    if (box.width <= 1 && box.height <= 1) return true
+  }
+  return false
+}`
+
 async function each(roots: Locator[], check: (root: Locator) => Promise<Finding[]>): Promise<Finding[]> {
   const findings: Finding[] = []
   for (const root of roots) for (const handle of await root.all()) findings.push(...await check(handle))
@@ -28,10 +37,11 @@ async function each(roots: Locator[], check: (root: Locator) => Promise<Finding[
 
 /** Text pushed out of its slot, or content wider or taller than the box that holds it (the squeezed "Dismiss"). */
 export function findOverflow(roots: Locator[]): Promise<Finding[]> {
-  return each(roots, root => root.evaluate((root, describeSource) => {
+  return each(roots, root => root.evaluate((root, [describeSource, hiddenSource]) => {
     const describe = new Function('return ' + describeSource)() as (element: Element) => string
+    const hidden = new Function('return ' + hiddenSource)() as (element: Element) => boolean
     const findings: { check: 'overflow'; target: string; detail: string }[] = []
-    const visible = (element: Element) => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden'
+    const visible = (element: Element) => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden' && !hidden(element)
     const ellipsis = (element: Element | null) => {
       for (let current = element; current && current !== root.parentElement; current = current.parentElement)
         if (getComputedStyle(current).textOverflow === 'ellipsis') return true
@@ -40,8 +50,9 @@ export function findOverflow(roots: Locator[]): Promise<Finding[]> {
     for (const element of [root, ...root.querySelectorAll('*')]) {
       if (!(element instanceof HTMLElement) || !visible(element) || ellipsis(element)) continue
       const style = getComputedStyle(element)
-      const scrolls = [style.overflowX, style.overflowY].some(value => value === 'auto' || value === 'scroll')
-      if (!scrolls && (element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1)
+      // Only a box that cuts its content can squeeze it; visible spill is judged by the text test below.
+      const cuts = [style.overflowX, style.overflowY].some(value => value === 'hidden' || value === 'clip')
+      if (cuts && (element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1)
         && element.clientWidth > 0 && style.display !== 'inline')
         findings.push({ check: 'overflow', target: describe(element),
           detail: `content ${element.scrollWidth}×${element.scrollHeight} exceeds box ${element.clientWidth}×${element.clientHeight}` })
@@ -49,7 +60,8 @@ export function findOverflow(roots: Locator[]): Promise<Finding[]> {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const parent = node.parentElement
-      if (!parent || !node.textContent?.trim() || !visible(parent) || ellipsis(parent)) continue
+      // Text nodes inside SVG are never painted.
+      if (!parent || parent.closest('svg') || !node.textContent?.trim() || !visible(parent) || ellipsis(parent)) continue
       const range = document.createRange()
       range.selectNodeContents(node)
       const text = range.getBoundingClientRect(), box = parent.getBoundingClientRect()
@@ -57,7 +69,7 @@ export function findOverflow(roots: Locator[]): Promise<Finding[]> {
         findings.push({ check: 'overflow', target: describe(parent), detail: `text "${node.textContent.trim().slice(0, 30)}" extends past its box` })
     }
     return findings
-  }, describeSource))
+  }, [describeSource, hiddenSource] as const))
 }
 
 /** Shadows and outlines cut by an ancestor that clips (overflow, clip-path, contain: paint), up to `stop`. */
@@ -87,7 +99,7 @@ export async function findClipping(roots: Locator[], stop: Locator): Promise<Fin
       const reach = extents(getComputedStyle(element))
       if (!reach.top && !reach.right && !reach.bottom && !reach.left) continue
       const box = element.getBoundingClientRect()
-      for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      for (let ancestor = element.parentElement; ancestor && ancestor !== document.body && ancestor !== document.documentElement; ancestor = ancestor.parentElement) {
         const style = getComputedStyle(ancestor)
         const clips = style.overflowX !== 'visible' || style.overflowY !== 'visible' || style.clipPath !== 'none' || /\b(paint|strict|content)\b/.test(style.contain)
         if (clips) {
@@ -109,25 +121,42 @@ export async function findClipping(roots: Locator[], stop: Locator): Promise<Fin
   }, [stopHandle, describeSource] as const))
 }
 
-/** Interactive targets under 24×24 CSS px (WCAG 2.5.8), except links inside running text. */
+/**
+ * Interactive targets under 24×24 CSS px (WCAG 2.5.8), except links inside running text and undersized targets
+ * that meet the spacing exception: a 24px circle centred on each intersects no other target or undersized circle.
+ */
 export function findTargetSize(roots: Locator[]): Promise<Finding[]> {
-  return each(roots, root => root.evaluate((root, [selector, describeSource]) => {
+  return each(roots, root => root.evaluate((root, [selector, describeSource, hiddenSource]) => {
     const describe = new Function('return ' + describeSource)() as (element: Element) => string
+    const hidden = new Function('return ' + hiddenSource)() as (element: Element) => boolean
     const findings: { check: 'target-size'; target: string; detail: string }[] = []
-    for (const element of [root, ...root.querySelectorAll(selector)]) {
-      if (!element.matches(selector) || element.getClientRects().length === 0) continue
+    const targets: { element: Element; box: DOMRect }[] = []
+    for (const element of document.querySelectorAll(selector)) {
+      if (element.getClientRects().length === 0 || hidden(element)) continue
       const style = getComputedStyle(element)
       if (style.visibility === 'hidden' || style.pointerEvents === 'none' || element.closest('[aria-hidden="true"]')
         || element.matches(':disabled, [aria-disabled="true"]')) continue
       const inText = element.tagName === 'A' && element.parentElement?.tagName === 'P'
         && [...element.parentElement.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())
-      if (inText) continue
-      const box = element.getBoundingClientRect()
-      if (box.width < 24 - 0.5 || box.height < 24 - 0.5)
-        findings.push({ check: 'target-size', target: describe(element), detail: `${Math.round(box.width)}×${Math.round(box.height)} is under 24×24` })
+      if (!inText) targets.push({ element, box: element.getBoundingClientRect() })
+    }
+    const small = (box: DOMRect) => box.width < 24 - 0.5 || box.height < 24 - 0.5
+    const centre = (box: DOMRect) => [box.left + box.width / 2, box.top + box.height / 2] as const
+    const circleHitsBox = (c: readonly [number, number], box: DOMRect) => {
+      const dx = Math.max(box.left - c[0], 0, c[0] - box.right), dy = Math.max(box.top - c[1], 0, c[1] - box.bottom)
+      return dx * dx + dy * dy < 12 * 12
+    }
+    for (const target of targets) {
+      if (!root.contains(target.element) || !small(target.box)) continue
+      const c = centre(target.box)
+      const crowded = targets.some(other => other !== target && !other.element.contains(target.element) && !target.element.contains(other.element)
+        && (circleHitsBox(c, other.box) || (small(other.box) && Math.hypot(c[0] - centre(other.box)[0], c[1] - centre(other.box)[1]) < 24)))
+      if (crowded)
+        findings.push({ check: 'target-size', target: describe(target.element),
+          detail: `${Math.round(target.box.width)}×${Math.round(target.box.height)} is under 24×24 and too close to another target` })
     }
     return findings
-  }, [interactiveSelector, describeSource] as const))
+  }, [interactiveSelector, describeSource, hiddenSource] as const))
 }
 
 const contrastSource = `(before, after) => {
@@ -149,18 +178,37 @@ const contrastSource = `(before, after) => {
  */
 export async function checkFocusVisible(page: Page, target: Locator): Promise<Finding[]> {
   await target.scrollIntoViewIfNeeded()
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  // List and menu items are reached with arrow keys, and some primitives highlight them only then:
+  // "before" shows a neighbour highlighted, "after" the target. Other controls are compared blurred vs focused.
+  const keys = await target.evaluate(element => {
+    if (!element.matches('[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]')) return null
+    const items = [...(element.closest('[role=listbox], [role=menu]') ?? document).querySelectorAll(
+      '[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]')].filter(item => item.getClientRects().length)
+    if (items.length < 2) return null
+    return items.indexOf(element) === items.length - 1 ? ['ArrowUp', 'ArrowDown'] : ['ArrowDown', 'ArrowUp']
+  })
+  if (keys) {
+    await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
+    await page.keyboard.press(keys[0]!)
+  } else await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
   const box = await target.boundingBox()
   const description = await target.evaluate((element, source) => (new Function('return ' + source)() as (e: Element) => string)(element), describeSource)
   if (!box) return [{ check: 'focus-visible', target: description, detail: 'element has no box' }]
   const viewport = page.viewportSize()!
   const x = Math.max(0, Math.floor(box.x - 8)), y = Math.max(0, Math.floor(box.y - 8))
   const clip = { x, y, width: Math.min(viewport.width, Math.ceil(box.x + box.width + 8)) - x, height: Math.min(viewport.height, Math.ceil(box.y + box.height + 8)) - y }
+  if (clip.width <= 0 || clip.height <= 0)
+    return [{ check: 'focus-visible', target: description, detail: `element at ${Math.round(box.x)},${Math.round(box.y)} is outside the viewport after scrolling` }]
   const before = await page.screenshot({ clip, animations: 'disabled' })
   // focusVisible: true gives the keyboard-modality indicator without walking the tab order past neighbours.
-  await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
+  if (keys) await page.keyboard.press(keys[1]!)
+  else await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
   const after = await page.screenshot({ clip, animations: 'disabled' })
-  const focused = await target.evaluate(element => element === document.activeElement || element.contains(document.activeElement))
+  const focus = await target.evaluate(element => element === document.activeElement || element.hasAttribute('data-highlighted') ? 'self'
+    : element.contains(document.activeElement) ? 'moved' : 'none')
+  // A container that hands focus to an item (roving radiogroup, tablist) is not judged; the item is measured itself.
+  if (focus === 'moved') return []
+  const focused = focus === 'self'
   const { changed, strong } = await page.evaluate(async ([before, after, source]) => {
     const pixels = async (base64: string) => {
       const bitmap = await createImageBitmap(await (await fetch('data:image/png;base64,' + base64)).blob())
@@ -195,10 +243,18 @@ export async function findForcedColors(roots: Locator[], focused: Locator[]): Pr
   for (const target of focused) {
     await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
     const outline = await target.evaluate((element, source) => {
+      const describe = (new Function('return ' + source)() as (e: Element) => string)
+      if (element !== document.activeElement) return { delegated: true, style: '', width: 0, target: describe(element) }
+      // The ring may be drawn on a wrapper through :focus-within (Input Group), inside the specimen only.
+      for (let current: Element | null = element; current && !current.matches('section[data-audit], [data-audit-open], body'); current = current.parentElement) {
+        const style = getComputedStyle(current)
+        if (style.outlineStyle !== 'none' && (Number.parseFloat(style.outlineWidth) || 0) >= 1)
+          return { delegated: false, style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), target: describe(element) }
+      }
       const style = getComputedStyle(element)
-      return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) || 0,
-        target: (new Function('return ' + source)() as (e: Element) => string)(element) }
+      return { delegated: false, style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) || 0, target: describe(element) }
     }, describeSource)
+    if (outline.delegated) continue
     if (outline.style === 'none' || outline.width < 1)
       findings.push({ check: 'forced-colors', target: outline.target, detail: `focused outline is ${outline.style} ${outline.width}px` })
   }
