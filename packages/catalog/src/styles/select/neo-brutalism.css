@@ -173,6 +173,11 @@
   inline-size: 1rem;
   block-size: 1rem;
 }
+[data-slot='select-item'][data-highlighted] {
+  /* The highlight tint alone is below 3:1 against the menu: a ring marks the item reached with the keyboard. */
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
 @media (forced-colors: active) {
   [data-slot='select-trigger'] {
     background: Field;

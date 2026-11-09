@@ -26,9 +26,18 @@ describe('focus rings contrast with the surface they are drawn on', () => {
       .toBe('3px dashed currentColor')
   })
 
-  it('neo-brutalism Dialog close draws its ring in the dialog text colour', () => {
-    expect(declarations(read('neo-brutalism.css'), "[data-slot='dialog-close']:focus-visible")['outline-color'])
-      .toBe('var(--popover-foreground)')
+  it('neo-brutalism Dialog close draws its ring inside itself, in its own text colour', () => {
+    // The surface behind the button varies (the yellow title bar or the dialog body), so the ring stays on the button.
+    const rule = declarations(read('neo-brutalism.css'), "[data-slot='dialog-close']:focus-visible")
+    expect(rule['outline-color']).toBe('currentColor')
+    expect(rule['outline-offset']).toBe('-6px')
+  })
+})
+
+describe('neo-brutalism Radio Group', () => {
+  it('draws the item ring in the option text colour, over the option background', () => {
+    expect(declarations(read('radio-group/neo-brutalism.css'), "[data-slot='radio-group-item']:focus-visible").outline)
+      .toBe('3px dashed currentColor')
   })
 })
 
@@ -51,7 +60,7 @@ describe('liquid glass Progress', () => {
 })
 
 describe('highlighted list and menu items show a 3:1 indicator', () => {
-  it.each(['flat', 'minimalist', 'ombelle', 'liquid-glass'])('%s Select and Dropdown Menu items carry an inset ring', family => {
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s Select and Dropdown Menu items carry an inset ring', family => {
     for (const [file, selector] of [['select', "[data-slot='select-item'][data-highlighted]"], ['dropdown-menu', "[data-slot='dropdown-menu-item'][data-highlighted]"]]) {
       const rule = declarations(read(`${file}/${family}.css`), selector)
       expect(rule.outline, `${file}/${family}`).toBe('2px solid var(--ring)')

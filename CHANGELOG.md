@@ -2,10 +2,10 @@
 
 ## Unreleased
 
-- Keep the neo-brutalism focus rings visible in dark mode: the Accordion trigger's inset ring takes the trigger's text colour (it was near-white on the open yellow trigger), and the Dialog close ring takes the dialog's text colour.
+- Keep the neo-brutalism focus rings visible: the Accordion trigger and Dialog close draw their ring inside the control in its own text colour (it was near-white on yellow in dark mode), and the Radio item's ring takes the option's text colour (it matched the checked option's background in dark mode).
 - Let the flat and minimalist Toast viewports hold the toast shadow instead of cutting it; the toast keeps its 1.5rem inset and width, and sits 1rem higher.
 - Draw the liquid-glass Progress light inside the indicator: the clipped track always cut the outer glow.
-- Mark the highlighted Select option and Dropdown Menu item with an inset ring in flat, minimalist, ombelle and liquid glass; the background tint alone was below 3:1 against the menu.
+- Mark the highlighted Select option and Dropdown Menu item with an inset ring in every family; the background tint alone was below 3:1 against the menu.
 - Space installed recipe labels from their controls: Checkbox and Switch sit beside their label with a gap, and Input, Textarea, Label, Native Select, Select, Input Group and Radio Group stack the label above the control. They rendered flush before.
 - The neo-brutalism focus-ring fix changes that family's shared `ui-style.css`; existing neo-brutalism projects are asked to run `theme add` on their next `add`.
 
