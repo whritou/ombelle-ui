@@ -131,6 +131,17 @@ Apply these in every pass, then the component-specific checks.
 - Escape dismisses it while focus stays on the trigger. Blur closes it.
 - The tooltip holds no essential or interactive content and never receives focus.
 
+**Display components (0.7.3)**
+
+Spinner, Kbd, Empty, Field, Meter and Stepper are not part of the 36 PR5 entries. Review them with the same passes on the preview `projects`, `settings` and `dashboard` scenes, and record them in their own rows below.
+
+- **Spinner**: a standalone spinner is announced once as a status named "Loading" (or its label); one marked `aria-hidden` inside a labelled button is not announced at all. It takes no tab stop.
+- **Kbd**: keys are read as written text and take no tab stop.
+- **Empty**: the title is read at the heading level the page gave it, then the description, then the actions in visual order (secondary, then primary).
+- **Field**: focusing the control announces the label, the required state and the hint; while invalid it also announces "invalid" and the error text. The `*` is not read.
+- **Meter**: the meter is announced with its label and value text ("128 of 200"); the visible "128 / 200" is not read twice as part of the meter. Labelled parts are understandable from the legend without colour.
+- **Stepper**: the steps are read as an ordered list inside a navigation landmark named "Progress"; the current step is announced as current, and completed steps say "Completed". No step takes a tab stop.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -159,6 +170,17 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Dialog | | | | | | | | | | |
 | Tabs | | | | | | | | | | |
 | Tooltip | | | | | | | | | | |
+
+#### Display components (0.7.3)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Spinner | | | | | | | | | | |
+| Kbd | | | | | | | | | | |
+| Empty | | | | | | | | | | |
+| Field | | | | | | | | | | |
+| Meter | | | | | | | | | | |
+| Stepper | | | | | | | | | | |
 
 ### Findings
 

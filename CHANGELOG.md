@@ -2,8 +2,9 @@
 
 ## Unreleased
 
+- Add Spinner, Kbd, Empty, Field, Meter and Stepper in all five style families, with Radix and Base UI editions, recipe editors, source exports and preview scenes. Field wires a label, hint and error to an existing control; Meter draws a bar, segmented cells with a warning threshold, or labelled parts with a legend, and `MeterValue` shows the reading beside its label. Installing them needs CLI 0.7.3. Liquid glass remains experimental.
 - Add the specimen audit (`pnpm test:specimen-audit`), part of the foundation gate: every catalog component, as installed, is measured in all families, editions and modes for focus visibility, clipped shadows and rings, overflow, label spacing, target size, forced colors and axe rules. `pnpm build:packages` now fails on a catalog style rule that names no slot or marker, and a unit test fails when recipe primitives shadow the names that scope them.
-- Keep the neo-brutalism focus rings visible: the Accordion trigger and Dialog close draw their ring inside the control in its own text colour (it was near-white on yellow in dark mode), and the Radio item's ring takes the option's text colour (it matched the checked option's background in dark mode).
+- Keep the neo-brutalism focus rings visible: the Accordion trigger and Dialog close draw their ring inside the control in its own text colour (it was near-white on yellow in dark mode), and the Radio item's ring is a 3px dashed `foreground` outline, `secondary-foreground` on a checked option (it matched the checked option's background in dark mode).
 - Let the flat and minimalist Toast viewports hold the toast shadow instead of cutting it; the toast keeps its 1.5rem inset and width, and sits 1rem higher.
 - Draw every liquid-glass focus indicator as a 2px `foreground` ring that hugs the control, instead of the blue 3px `ring` offset from it. Highlighted Select options and Dropdown Menu items use the same ink. Liquid glass remains experimental.
 - Draw the liquid-glass Progress light inside the indicator: the clipped track always cut the outer glow.
