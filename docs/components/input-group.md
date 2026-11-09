@@ -5,9 +5,8 @@ buttons inside one field surface. It uses the same source for Radix and Base UI
 editions, with no primitive dependency or imports from other components. All five
 style families are available; liquid glass is experimental.
 
-This component requires the planned CLI 0.7.2 release. Published CLI 0.7.1 does
-not install it. To try the private local implementation, build the packages,
-initialize a consumer project, then run:
+This component requires CLI 0.7.2 or later. Initialize a consumer project, then
+run `npx @ombelle-ui/cli@0.7.2 add input-group`. For a built local checkout:
 
 ```powershell
 pnpm build:packages

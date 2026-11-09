@@ -4,7 +4,7 @@ Toast provides temporary notifications with optional actions and an explicit dis
 
 ## Install
 
-Toast is available in the current private local CLI. Published CLI 0.7.1 does not include it; the website minimum is 0.7.2 pending a separate release.
+Toast requires CLI 0.7.2 or later: `npx @ombelle-ui/cli@0.7.2 add toast`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add toast --cwd APP --dry-run --json

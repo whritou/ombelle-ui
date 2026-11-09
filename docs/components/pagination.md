@@ -5,9 +5,8 @@ list and links. It does not fetch data or calculate page ranges. The same
 template serves both primitive editions and does not require a client boundary
 or a navigation runtime.
 
-This component is implemented in the local source catalog. Its website minimum
-CLI is **0.7.2**, pending a separate release; published CLI 0.7.1 does not install
-it. For a built local checkout:
+This component requires CLI **0.7.2** or later:
+`npx @ombelle-ui/cli@0.7.2 add pagination`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add pagination --cwd APP --dry-run --json

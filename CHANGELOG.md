@@ -8,7 +8,7 @@
 - Add Tabs underline/contained appearances, compact and striped Tables, success/warning/info Alerts, outlined/subtle Cards, and small Badges with decorative dot composition.
 - Preserve the identity of existing presets and recipes that omit the new options. Add optional semantic palette pairs with reviewed fallback colors.
 - Extend liquid-glass contrast plates to the new surfaces and keep explicit Card/Tabs appearances intact under material presets. Liquid glass remains experimental.
-- Gate the new public install commands on CLI 0.7.2. The advertised published installer remains 0.7.1 until a separate publication is verified.
+- Require CLI 0.7.2 for the new public install commands. The published 0.7.2 registry tarball matches the tested candidate, and a fresh registry installation runs successfully.
 
 ## 0.7.1 — 8 November 2026
 

@@ -4,7 +4,7 @@ Sheet opens a modal panel from a viewport edge. It uses Dialog primitives with a
 
 ## Install and use
 
-This component is available in the current private local CLI. Published CLI 0.7.1 does not include it; the website minimum is 0.7.2 pending a separate release.
+This component requires CLI 0.7.2 or later: `npx @ombelle-ui/cli@0.7.2 add sheet`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add sheet --cwd APP --dry-run --json

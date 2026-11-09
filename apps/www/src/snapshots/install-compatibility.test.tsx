@@ -158,7 +158,7 @@ describe('published installer compatibility', () => {
     ).toBe(false)
   })
 
-  it('withholds a published recipe command while preserving JSON export and editor navigation', () => {
+  it('offers a new published recipe command alongside JSON export and editor navigation', () => {
     const recipe = createCatalogDraft('breadcrumb').recipe
     const html = renderToStaticMarkup(
       <PublishedRecipe
@@ -167,9 +167,8 @@ describe('published installer compatibility', () => {
         name="Breadcrumb"
       />,
     )
-    expect(html).not.toContain('npx @ombelle-ui/cli@0.7.1')
-    expect(html).not.toContain('Copy install command')
-    expect(html).toContain('0.7.2')
+    expect(html).toContain('npx @ombelle-ui/cli@0.7.2 add --recipe')
+    expect(html).toContain('Copy install command')
     expect(html).toContain('Download recipe JSON')
     expect(html).toContain('aria-label="Recipe JSON"')
     expect(html).toContain('href="/editor/component/breadcrumb"')
@@ -184,11 +183,11 @@ describe('published installer compatibility', () => {
         name="Input"
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.1 add --recipe')
+    expect(html).toContain(`npx @ombelle-ui/cli@${compatibility.publishedInstaller.version} add --recipe`)
     expect(html).toContain('Copy install command')
   })
 
-  it('withholds published semantic-palette preset commands and keeps the JSON download', () => {
+  it('offers published semantic-palette preset commands and the JSON download', () => {
     const preset = structuredClone(getCatalog('0.1.0').presets.flat)
     preset.modes.dark.success = '#DCFCE7'
     preset.modes.dark.successForeground = '#14532D'
@@ -209,13 +208,12 @@ describe('published installer compatibility', () => {
         origin="https://presets.example.test"
       />,
     )
-    expect(html).not.toContain('npx @ombelle-ui/cli@0.7.1')
-    expect(html).toContain('0.7.2')
+    expect(html).toContain('npx @ombelle-ui/cli@0.7.2')
     expect(html).toContain('Download preset JSON')
     expect(html).toContain('id="snapshot-json"')
   })
 
-  it('keeps local semantic-palette exports available while withholding the public install command', async () => {
+  it('offers public install commands alongside local semantic-palette exports', async () => {
     const preset = structuredClone(getCatalog('0.1.0').presets.flat)
     preset.modes.light.info = '#DBEAFE'
     preset.modes.light.infoForeground = '#1E3A8A'
@@ -240,8 +238,8 @@ describe('published installer compatibility', () => {
         contrastWarning={false}
       />,
     )
-    expect(html).not.toContain('data-testid="preset-install-command"')
-    expect(html).toContain('data-testid="preset-install-held"')
+    expect(html).toContain('data-testid="preset-install-command"')
+    expect(html).not.toContain('data-testid="preset-install-held"')
     expect(html).toContain('0.7.2')
     expect(html).toContain(
       '<button type="button">Download preset JSON</button>',

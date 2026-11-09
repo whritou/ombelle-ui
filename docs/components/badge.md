@@ -31,8 +31,7 @@ siblings when composed as a direct child. Keep meaningful status text visible:
 the dot adds no status role, live region, interaction or automatic semantics.
 It accepts native span props, classes and React 19 refs; its decorative ARIA
 marker remains owned by the component. Forced colors paint it with `CanvasText`.
-Size and dot composition require the planned CLI 0.7.2 source; published CLI
-0.7.1 does not include them.
+Size and dot composition require CLI 0.7.2 or later.
 
 The default variant uses each family's existing primary or secondary color pair; destructive uses the destructive treatment. Radius, border width, font, and neo brutalist shadows use the saved preset's design tokens. Long text wraps within its container. Forced colors use system colors and a double border for the destructive variant. Liquid glass is experimental and keeps its solid badge fills; the small size and dot add no backdrop filtering.
 

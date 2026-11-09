@@ -63,8 +63,8 @@ it('renders the public landing page with editor links and the published installe
   // The landing matrix links to the whole current catalog, including preview-only additions.
   expect(html).toContain(`Explore all ${supportedComponentIds.length} components`)
   expect(html).not.toContain('not available in glass')
-  // Preview-only catalog additions must not be advertised as installable by 0.7.1.
-  expect(html).toContain('need a newer installer')
+  // The published 0.7.2 installer accepts the complete current catalog.
+  expect(html).not.toContain('need a newer installer')
   expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')
 })

@@ -63,8 +63,7 @@ target sizes for those controls in the consuming application.
 In forced colors, optional stripes become the system canvas while selected rows
 retain `Highlight` and `HighlightText`. Experimental glass stripes use an opaque
 muted fill; the container retains its existing opaque and reduced-transparency
-fallbacks. These props require the planned CLI 0.7.2 source; published CLI 0.7.1
-does not include them.
+fallbacks. These props require CLI 0.7.2 or later.
 
 - Ombelle: an outlined card with a muted uppercase header, hairline row dividers and an accent selected row.
 - Flat: a 1px inset frame, a filled header and a secondary selected row.

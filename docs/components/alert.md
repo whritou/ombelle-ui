@@ -2,9 +2,7 @@
 
 Alert shows a status, error, success, warning or information message with an optional icon, a title and a description. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode, and as an experimental liquid glass style. It has no client boundary and no dependency beyond the shared utility.
 
-The `success`, `warning` and `info` variants are implemented in the local source
-catalog for CLI 0.7.2, pending a separate release. Published CLI 0.7.1 does not
-include those new variants; use a freshly built local checkout to install them.
+The `success`, `warning` and `info` variants require CLI 0.7.2 or later.
 
 ## Install and compose
 
