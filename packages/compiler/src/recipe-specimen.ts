@@ -18,6 +18,41 @@ const inline = { className: 'flex items-center gap-2' }
 export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen {
   const { component, content, props } = recipe
   switch (component) {
+    case 'spinner':
+      return node('Spinner', { size: props.size, 'aria-label': content.label })
+    case 'kbd':
+      return node('KbdGroup', {}, ...content.keys.split(/\s+/).filter(Boolean).map(key => node('Kbd', {}, key)))
+    case 'empty':
+      // Native buttons marked for the Empty styles: a recipe compiles only its own component.
+      return node('Empty', {}, node('EmptyHeader', {},
+        ...(props.media === 'icon' ? [node('EmptyMedia', { variant: 'icon', 'aria-hidden': 'true' }, '+')] : []),
+        node('EmptyTitle', {}, content.title), ...(content.description.trim() ? [node('EmptyDescription', {}, content.description)] : [])),
+      node('EmptyContent', {}, node('button', { type: 'button', 'data-empty-action': 'primary' }, content.primaryAction),
+        ...(content.secondaryAction.trim() ? [node('button', { type: 'button', 'data-empty-action': 'secondary' }, content.secondaryAction)] : [])))
+    case 'field': {
+      // A native control marked for the Field styles: a recipe compiles only its own component.
+      const control = props.control === 'textarea' ? node('textarea', { placeholder: content.placeholder || undefined, 'data-field-input': '' })
+        : props.control === 'native-select' ? node('select', { 'data-field-input': '' }, node('option', { value: '' }, content.placeholder || 'Choose an option'))
+        : node('input', { type: 'text', placeholder: content.placeholder || undefined, 'data-field-input': '' })
+      return node('Field', { required: props.required, invalid: props.invalid, disabled: props.disabled, orientation: props.orientation },
+        node('FieldLabel', {}, content.label), node('FieldControl', {}, control),
+        ...(content.description.trim() ? [node('FieldDescription', {}, content.description)] : []), node('FieldError', {}, content.error))
+    }
+    case 'meter': {
+      const tones = ['primary', 'info', 'success', 'warning'] as const
+      if (props.mode === 'labelled')
+        return node('Meter', { max: props.max }, node('MeterLabel', {}, content.label),
+          ...content.parts.map((part, index) => node('MeterSegment', { value: part.value, tone: tones[index] })),
+          node('MeterLegend', {}, ...content.parts.map((part, index) => node('MeterLegendItem', { tone: tones[index] }, part.label))))
+      return node('Meter', { value: props.value, max: props.max, segments: props.segments,
+        warningAt: props.warningPercent === undefined ? undefined : props.warningPercent / 100 }, node('MeterLabel', {}, content.label))
+    }
+    case 'stepper':
+      return node('Stepper', { orientation: props.orientation, 'aria-label': 'Progress' }, ...content.steps.map((step, index) =>
+        node('StepperItem', { status: index < (props.current ?? 0) ? 'complete' : index === (props.current ?? 0) ? 'current' : 'upcoming' },
+          node('StepperIndicator', {}, String(index + 1)), node('StepperTitle', {}, step.title),
+          ...(step.description.trim() ? [node('StepperDescription', {}, step.description)] : []),
+          ...(index < content.steps.length - 1 ? [node('StepperSeparator')] : []))))
     case 'toast':
       return node('ToastProvider', { duration: props.duration }, node('Toast', { variant: props.variant, defaultOpen: true },
         node('ToastTitle', {}, content.title), node('ToastDescription', {}, content.description),

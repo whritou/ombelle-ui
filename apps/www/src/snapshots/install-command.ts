@@ -15,6 +15,10 @@ export const expandedCatalogMinimumCli = '0.7.2'
 export const expandedCatalogInstallNotice = `This recipe requires CLI ${expandedCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
 export const semanticPaletteInstallNotice = `This preset uses semantic status colors and requires CLI ${expandedCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
 
+export const displayCatalogMinimumCli = '0.7.3'
+export const displayCatalogInstallNotice = `This recipe requires CLI ${displayCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+const displayComponents = new Set(['spinner', 'kbd', 'empty', 'field', 'meter', 'stepper'])
+
 const expandedComponents = new Set(['input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast'])
 const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {
   badge: ['size', 'dot'], card: ['appearance'], table: ['density', 'striped'], tabs: ['appearance'],
@@ -27,6 +31,7 @@ export function componentRecipeInstallBlocked(
   installer: { version: string } = publishedInstaller,
 ): boolean {
   if (!catalogRecipeInstallerSupported(installer.version)) return true
+  if (displayComponents.has(recipe.component)) return compareVersions(installer.version, displayCatalogMinimumCli) < 0
   if (compareVersions(installer.version, expandedCatalogMinimumCli) >= 0) return false
   if (expandedComponents.has(recipe.component)) return true
   if (expandedRecipeFields[recipe.component]?.some(key => Object.hasOwn(recipe.props, key))) return true
@@ -49,7 +54,8 @@ export function installableRecipeInstallNotice(
 ): string | undefined {
   if (recipe.schemaVersion === '2.0') {
     if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
-    return componentRecipeInstallBlocked(recipe, installer) ? expandedCatalogInstallNotice : undefined
+    if (!componentRecipeInstallBlocked(recipe, installer)) return undefined
+    return displayComponents.has(recipe.component) ? displayCatalogInstallNotice : expandedCatalogInstallNotice
   }
   return recipeInstallBlocked(recipe, installer) ? glassMaterialInstallNotice : undefined
 }
