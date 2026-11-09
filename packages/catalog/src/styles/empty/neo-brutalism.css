@@ -61,3 +61,32 @@
     box-shadow: none;
   }
 }
+/* Recipe previews render native buttons marked data-empty-action; a consumer's own Button keeps its styles. */
+[data-slot='empty-content'] [data-empty-action] {
+  box-sizing: border-box;
+  min-block-size: 2.25rem;
+  padding-inline: 1rem;
+  border: max(1px, var(--border-width)) solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: 600 14px var(--font-family);
+  cursor: pointer;
+}
+[data-slot='empty-content'] [data-empty-action='secondary'] {
+  border-color: var(--input);
+  background: var(--card);
+  color: var(--foreground);
+}
+[data-slot='empty-content'] [data-empty-action]:focus-visible {
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
+}
+@media (forced-colors: active) {
+  [data-slot='empty-content'] [data-empty-action] {
+    border-color: ButtonText;
+  }
+  [data-slot='empty-content'] [data-empty-action]:focus-visible {
+    outline-color: Highlight;
+  }
+}

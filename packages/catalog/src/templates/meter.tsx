@@ -59,6 +59,7 @@ export function Meter({
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy ?? (hasLabel ? labelId : undefined)}
           data-slot="meter-track"
+          data-mode={parts.length ? 'labelled' : segments ? 'discrete' : 'bar'}
         >
           <MeterFill now={now} min={min} span={max - min || 1} segments={segments} warningAt={warningAt} parts={parts} />
         </div>

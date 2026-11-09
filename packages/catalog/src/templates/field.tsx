@@ -77,7 +77,7 @@ export function Field({
 export function FieldLabel({ className, children, ...props }: React.ComponentProps<'label'>) {
   const field = useField('FieldLabel')
   return (
-    <label {...props} htmlFor={field.controlId} data-slot="field-label" className={cn(className)}>
+    <label {...props} htmlFor={field.controlId} data-slot="field-label" data-disabled={field.disabled || undefined} className={cn(className)}>
       {children}
       {field.required && <span aria-hidden="true">*</span>}
     </label>

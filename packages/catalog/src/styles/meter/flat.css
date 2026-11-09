@@ -17,14 +17,14 @@
   border-radius: 8px;
   background: var(--muted);
 }
-[data-slot='meter'][data-mode='discrete'] [data-slot='meter-track'] {
+[data-slot='meter-track'][data-mode='discrete'] {
   display: grid;
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
   gap: 4px;
   background: transparent;
 }
-[data-slot='meter'][data-mode='labelled'] [data-slot='meter-track'] {
+[data-slot='meter-track'][data-mode='labelled'] {
   gap: 3px;
   block-size: 14px;
   background: transparent;

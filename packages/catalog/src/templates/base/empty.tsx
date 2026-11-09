@@ -20,9 +20,12 @@ export function EmptyMedia({ className, variant = 'default', ...props }: EmptyMe
   return <div {...props} data-slot="empty-media" data-variant={variant} className={cn(className)} />
 }
 
+// Written as a JSX attribute so the slot is renamed with the others when installed beside app-owned components.
+const titleElement = <div data-slot="empty-title" /> as React.ReactElement<{ 'data-slot': string }>
+
 /** Not a heading by default: pass render={<h2 />} with the heading level your page needs. */
 export function EmptyTitle({ className, render, ...props }: useRender.ComponentProps<'div'>) {
-  return useRender({ render: render ?? <div data-slot="empty-title" />, props: { ...props, 'data-slot': 'empty-title', className: cn(className) } })
+  return useRender({ render: render ?? titleElement, props: { ...props, 'data-slot': titleElement.props['data-slot'], className: cn(className) } })
 }
 
 export function EmptyDescription({ className, ...props }: React.ComponentProps<'p'>) {

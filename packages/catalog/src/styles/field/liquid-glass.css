@@ -22,7 +22,7 @@
   margin-inline-start: 2px;
   color: var(--destructive);
 }
-[data-slot='field'][data-disabled] [data-slot='field-label'] {
+[data-slot='field-label'][data-disabled] {
   opacity: 0.6;
 }
 [data-slot='field-description'] {
@@ -50,5 +50,41 @@
   [data-slot='field-label'] > span[aria-hidden='true'],
   [data-slot='field-error'] {
     color: CanvasText;
+  }
+}
+/* Recipe previews render a native control marked data-field-input; a consumer's own Input keeps its styles. */
+[data-slot='field'] [data-field-input] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: var(--control-height, 2.5rem);
+  padding: 0.5rem 0.75rem;
+  border: max(1px, var(--border-width)) solid var(--input);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 14px;
+}
+[data-slot='field'] textarea[data-field-input] {
+  min-block-size: 5rem;
+  resize: vertical;
+}
+[data-slot='field'] [data-field-input]:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
+}
+[data-slot='field'][data-invalid] [data-field-input] {
+  border-color: var(--destructive);
+}
+[data-slot='field'] [data-field-input]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (forced-colors: active) {
+  [data-slot='field'] [data-field-input] {
+    border-color: CanvasText;
+  }
+  [data-slot='field'] [data-field-input]:focus-visible {
+    outline-color: Highlight;
   }
 }

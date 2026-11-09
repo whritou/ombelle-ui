@@ -52,14 +52,14 @@
   gap: 8px;
   margin-block-start: 8px;
 }
-@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot='empty'] {
-    background: color-mix(in srgb, var(--card) calc(var(--glass-inner-opacity, var(--glass-opacity, 0.7)) * 40%), transparent);
+    background: color-mix(in srgb, var(--muted) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
     -webkit-backdrop-filter: blur(16px) saturate(1.5);
     backdrop-filter: blur(16px) saturate(1.5);
   }
   [data-slot='empty-media'][data-variant='icon'] {
-    background: color-mix(in srgb, var(--accent) 72%, transparent);
+    background: color-mix(in srgb, var(--accent) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
   }
 }
 @media (prefers-reduced-transparency: reduce) {
@@ -79,5 +79,34 @@
     background: Canvas;
     color: CanvasText;
     box-shadow: none;
+  }
+}
+/* Recipe previews render native buttons marked data-empty-action; a consumer's own Button keeps its styles. */
+[data-slot='empty-content'] [data-empty-action] {
+  box-sizing: border-box;
+  min-block-size: 2.25rem;
+  padding-inline: 1rem;
+  border: max(1px, var(--border-width)) solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: 600 14px var(--font-family);
+  cursor: pointer;
+}
+[data-slot='empty-content'] [data-empty-action='secondary'] {
+  border-color: var(--input);
+  background: var(--card);
+  color: var(--foreground);
+}
+[data-slot='empty-content'] [data-empty-action]:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
+}
+@media (forced-colors: active) {
+  [data-slot='empty-content'] [data-empty-action] {
+    border-color: ButtonText;
+  }
+  [data-slot='empty-content'] [data-empty-action]:focus-visible {
+    outline-color: Highlight;
   }
 }

@@ -5,7 +5,7 @@ import { CircleAlertIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './field.css'
 
-const FieldFlags = React.createContext({ invalid: false, required: false })
+const FieldFlags = React.createContext({ invalid: false, required: false, disabled: false })
 
 export type FieldProps = Omit<FieldPrimitive.Root.Props, 'className'> & {
   className?: string
@@ -20,7 +20,7 @@ export type FieldProps = Omit<FieldPrimitive.Root.Props, 'className'> & {
  */
 export function Field({ className, orientation = 'vertical', invalid = false, required = false, disabled = false, ...props }: FieldProps) {
   return (
-    <FieldFlags.Provider value={{ invalid, required }}>
+    <FieldFlags.Provider value={{ invalid, required, disabled }}>
       <FieldPrimitive.Root
         {...props}
         invalid={invalid}
@@ -36,9 +36,9 @@ export function Field({ className, orientation = 'vertical', invalid = false, re
 }
 
 export function FieldLabel({ className, children, ...props }: Omit<FieldPrimitive.Label.Props, 'className'> & { className?: string }) {
-  const { required } = React.useContext(FieldFlags)
+  const { required, disabled } = React.useContext(FieldFlags)
   return (
-    <FieldPrimitive.Label {...props} data-slot="field-label" className={cn(className)}>
+    <FieldPrimitive.Label {...props} data-slot="field-label" data-disabled={disabled || undefined} className={cn(className)}>
       {children}
       {required && <span aria-hidden="true">*</span>}
     </FieldPrimitive.Label>
