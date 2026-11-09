@@ -75,6 +75,10 @@ function validateComposition(recipe: ComponentRecipe): void {
     if (selected.some(id => !ids.has(id))) reject('Choose an item present in the recipe', path)
   }
   switch (recipe.component) {
+    case 'stepper':
+      if (recipe.props.current !== undefined && recipe.props.current >= recipe.content.steps.length)
+        reject('Choose a step present in the recipe', '/props/current')
+      break
     case 'toast':
       if (recipe.content.action && !recipe.content.actionAltText.trim())
         reject('Toast actions require an alternative description', '/content/actionAltText')

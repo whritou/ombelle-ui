@@ -28,5 +28,11 @@ export const supportedComponentIds = [
   'breadcrumb',
   'pagination',
   'toast',
+  'spinner',
+  'kbd',
+  'empty',
+  'field',
+  'meter',
+  'stepper',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

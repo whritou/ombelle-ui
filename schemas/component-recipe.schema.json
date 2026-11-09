@@ -2084,6 +2084,409 @@
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "spinner"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "default": "default",
+              "title": "Size"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Accessible label",
+              "maxLength": 200,
+              "default": "Loading",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "kbd"
+        },
+        "props": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "keys": {
+              "type": "string",
+              "title": "Keys",
+              "maxLength": 200,
+              "default": "Ctrl K",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "keys"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "empty"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "media": {
+              "enum": [
+                "icon",
+                "none"
+              ],
+              "default": "icon",
+              "title": "Media"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "No presets yet",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000,
+              "default": "Start from a built-in family or import a preset file. You can change everything later in the editor."
+            },
+            "primaryAction": {
+              "type": "string",
+              "title": "Primary action",
+              "maxLength": 200,
+              "default": "New preset",
+              "pattern": "\\S"
+            },
+            "secondaryAction": {
+              "type": "string",
+              "title": "Secondary action",
+              "maxLength": 200,
+              "default": "Import file"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "description",
+            "primaryAction",
+            "secondaryAction"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "field"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "control": {
+              "enum": [
+                "input",
+                "textarea",
+                "native-select"
+              ],
+              "default": "input",
+              "title": "Control"
+            },
+            "required": {
+              "type": "boolean",
+              "default": true,
+              "title": "Required"
+            },
+            "invalid": {
+              "type": "boolean",
+              "default": false,
+              "title": "Invalid"
+            },
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disabled"
+            },
+            "orientation": {
+              "enum": [
+                "vertical",
+                "horizontal"
+              ],
+              "default": "vertical",
+              "title": "Orientation"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Project name",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Hint",
+              "maxLength": 500,
+              "default": "Shown in the CLI and the editor header."
+            },
+            "error": {
+              "type": "string",
+              "title": "Error message",
+              "maxLength": 500,
+              "default": "Use lower case letters and dashes only.",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": "acme-dashboard"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "description",
+            "error",
+            "placeholder"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "meter"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "discrete",
+                "labelled"
+              ],
+              "default": "discrete",
+              "title": "Mode"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "default": 128,
+              "title": "Value"
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 200,
+              "title": "Maximum"
+            },
+            "segments": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 20,
+              "default": 10,
+              "title": "Segments"
+            },
+            "warningPercent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 60,
+              "title": "Warning from (%)"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Deploys this month",
+              "pattern": "\\S"
+            },
+            "parts": {
+              "type": "array",
+              "title": "Labelled parts",
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "title": "Part label",
+                    "maxLength": 200,
+                    "default": "Part",
+                    "pattern": "\\S"
+                  },
+                  "value": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "default": 10,
+                    "title": "Part value"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "label",
+                  "value"
+                ]
+              },
+              "default": [
+                {
+                  "label": "Builds",
+                  "value": 42
+                },
+                {
+                  "label": "Assets",
+                  "value": 22
+                },
+                {
+                  "label": "Logs",
+                  "value": 10
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "parts"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "stepper"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "orientation": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ],
+              "default": "horizontal",
+              "title": "Orientation"
+            },
+            "current": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5,
+              "default": 1,
+              "title": "Current step"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "steps": {
+              "type": "array",
+              "title": "Steps",
+              "minItems": 2,
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "title": "Title",
+                    "maxLength": 200,
+                    "default": "Step",
+                    "pattern": "\\S"
+                  },
+                  "description": {
+                    "type": "string",
+                    "title": "Description",
+                    "maxLength": 200,
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "title",
+                  "description"
+                ]
+              },
+              "default": [
+                {
+                  "title": "Preset",
+                  "description": "Ombelle"
+                },
+                {
+                  "title": "Components",
+                  "description": "Choose 4"
+                },
+                {
+                  "title": "Install CLI",
+                  "description": ""
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "steps"
+          ]
+        }
+      }
     }
   ],
   "$defs": {
