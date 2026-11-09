@@ -219,7 +219,8 @@ export async function checkFocusVisible(page: Page, target: Locator): Promise<Fi
     }
     return (new Function('return ' + source)() as (a: Uint8ClampedArray, b: Uint8ClampedArray) => { changed: number; strong: number })(await pixels(before), await pixels(after))
   }, [before.toString('base64'), after.toString('base64'), contrastSource] as const)
-  const needed = Math.round(2 * (box.width + box.height))
+  // 90% of a 1px perimeter: anti-aliased corners of a rounded 1px ring fall below 3:1.
+  const needed = Math.round(0.9 * 2 * (box.width + box.height))
   if (!focused) return [{ check: 'focus-visible', target: description, detail: 'element could not take focus' }]
   return strong >= needed ? [] : [{ check: 'focus-visible', target: description,
     detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed` }]

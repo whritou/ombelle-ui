@@ -88,3 +88,9 @@ test('overflow: text inside an svg is never painted and is not judged', async ({
   await fixture(page, '', '<span style="display:inline-block;inline-size:16px"><svg width="16" height="16" aria-hidden="true">▼▼▼▼▼▼</svg></span>')
   expect(await findOverflow([both(page)[1]])).toEqual([])
 })
+
+test('focus-visible: a 1px ring around a rounded control passes despite anti-aliased corners', async ({ page }) => {
+  await fixture(page, '', '<input id="field" aria-label="Field" style="inline-size:240px;block-size:36px;border:1px solid #767676;border-radius:8px;padding:0 8px">',
+    '#field:focus{outline:1px solid #1a56db;outline-offset:1px}')
+  expect(await checkFocusVisible(page, page.locator('#field'))).toEqual([])
+})
