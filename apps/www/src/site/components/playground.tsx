@@ -10,7 +10,8 @@ import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { ToggleGroup } from '../toggle-group'
 import { GlassPresetSelect } from '../glass-preset-select'
-import { glassPresetBackdrop, glassPresetId } from '../glass-presets'
+import { glassBackdropOptions, glassPresetBackdrop, glassPresetId } from '../glass-presets'
+import type { PresetBackdrop } from '../../preset-editor/preview-protocol'
 import { CodeBlock } from './code-block'
 
 // Exhaustive by type: adding a style family fails the typecheck until it has a label.
@@ -27,6 +28,8 @@ export const familyOptions: { value: StyleFamily; label: string }[] = offeredSty
   label: familyLabels[value],
 }))
 const glassDocs = '/docs/style-families#liquid-glass'
+// Previews whose examples (and their extra appearances) need more room than the default frame.
+const tallPreviews: Partial<Record<ComponentId, number>> = { alert: 620, card: 560, table: 600, 'input-group': 520 }
 const modeOptions = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
@@ -48,6 +51,9 @@ export function ComponentPlayground({ id, name, source, styles }: {
   const [family, setFamily] = useState<StyleFamily>(familyOptions[0]!.value)
   const [glassPreset, setGlassPreset] = useState<StartingPresetId>(defaultGlassPresetId)
   const [mode, setMode] = useState<'light' | 'dark'>('light')
+  // The backdrop follows the glass preset and mode until the reader picks one; changing preset resets it.
+  const [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
+  const backdrop = backdropOverride ?? glassPresetBackdrop(glassPreset, mode)
   const [status, setStatus] = useState<'connecting' | 'ready' | 'failed'>('connecting')
   const glass = styleSupport(id, 'liquid-glass')
   useEffect(() => {
@@ -86,7 +92,9 @@ export function ComponentPlayground({ id, name, source, styles }: {
       </div>
       {family === 'liquid-glass' && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2">
-          <GlassPresetSelect value={glassPreset} onChange={(id) => { if (id) setGlassPreset(id) }} />
+          <GlassPresetSelect value={glassPreset} onChange={(id) => { if (id) { setGlassPreset(id); setBackdropOverride(null) } }} />
+          <ToggleGroup label="Preview backdrop" value={backdrop} options={glassBackdropOptions} onValueChange={setBackdropOverride}
+            className="inline-flex flex-wrap rounded-lg bg-background/60 p-1" itemClassName={toggleItem} />
           <a href={glassDocs} className="text-sm font-medium text-foreground underline decoration-primary underline-offset-4 transition-colors hover:text-primary hover:decoration-2">Liquid Glass limitations</a>
         </div>
       )}
@@ -102,11 +110,11 @@ export function ComponentPlayground({ id, name, source, styles }: {
           <div className="overflow-hidden rounded-xl border border-border bg-card">
             <PresetPreviewFrame
               result={compiled.result}
-              view={{ mode, viewport: 'wide', focus: id, backdrop: family === 'liquid-glass' ? glassPresetBackdrop(glassPreset) : undefined }}
+              view={{ mode, viewport: 'wide', focus: id, backdrop: family === 'liquid-glass' ? backdrop : undefined }}
               stale={compiled.stale}
               onStatus={setStatus}
               title={`${name} preview`}
-              height={420}
+              height={tallPreviews[id] ?? 420}
               caption={false}
             />
           </div>

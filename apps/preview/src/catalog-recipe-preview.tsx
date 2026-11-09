@@ -29,7 +29,7 @@ export function CatalogRecipePreview({ message, onMeasure }: {
     })
     return () => { active = false }
   }, [component, result.scope, instance])
-  const scene = glass && glassPresetBackdrop(glass)
+  const scene = glass && glassPresetBackdrop(glass, mode)
   React.useLayoutEffect(() => {
     const root = document.documentElement
     root.classList.toggle('dark', mode === 'dark')

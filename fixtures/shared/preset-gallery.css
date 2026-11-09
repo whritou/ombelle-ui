@@ -52,6 +52,15 @@ body {
   flex-wrap: wrap;
   gap: 12px;
 }
+/* A component's extra appearances sit under its main example. */
+.preset-variant {
+  margin-top: 16px;
+}
+.preset-variants {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
 .preset-stack {
   display: grid;
   gap: 12px;

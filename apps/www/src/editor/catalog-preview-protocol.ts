@@ -31,31 +31,48 @@ function shadowOffsets(style: CSSStyleDeclaration): [number, number] {
 
 /** Reads each part's computed style in the preview so the editor can show the preset's values. */
 export function measureCatalogParts(root: ParentNode, component: ComponentRecipe['component']): MeasuredParts {
-  const rem = px(getComputedStyle(document.documentElement).fontSize) || 16
   const parts: MeasuredParts = {}
   for (const part of componentRecipeParts[component]) {
     const element = root.querySelector(`[data-slot="recipe-${part.slot}"]`)
-    if (!element) continue
-    const style = getComputedStyle(element)
-    const fontSize = px(style.fontSize)
-    const [shadowX, shadowY] = shadowOffsets(style)
-    const values: Partial<Record<PartDimension, number>> = {
-      paddingXPx: px(style.paddingInlineStart || style.paddingLeft),
-      paddingYPx: px(style.paddingBlockStart || style.paddingTop),
-      gapPx: px(style.columnGap) || px(style.rowGap),
-      minHeightPx: px(style.minHeight),
-      borderWidthPx: style.borderTopStyle === 'none' ? 0 : px(style.borderTopWidth),
-      shadowOffsetXPx: shadowX,
-      shadowOffsetYPx: shadowY,
-      fontSizePx: fontSize,
-      fontWeight: px(style.fontWeight),
-      letterSpacingEm: style.letterSpacing === 'normal' || !fontSize ? 0 : px(style.letterSpacing) / fontSize,
-    }
-    // A percentage radius has no rem equivalent.
-    if (!style.borderTopLeftRadius.includes('%')) values.radiusRem = px(style.borderTopLeftRadius) / rem
-    parts[part.slot] = values
+    if (element) parts[part.slot] = measurePart(element)
   }
   return parts
+}
+
+/** One rendered element's dimensions, in the units the recipe stores. */
+export function measurePart(element: Element): Partial<Record<PartDimension, number>> {
+  const rem = px(getComputedStyle(document.documentElement).fontSize) || 16
+  const style = getComputedStyle(element)
+  const fontSize = px(style.fontSize)
+  const [shadowX, shadowY] = shadowOffsets(style)
+  const values: Partial<Record<PartDimension, number>> = {
+    paddingXPx: px(style.paddingInlineStart || style.paddingLeft),
+    paddingYPx: px(style.paddingBlockStart || style.paddingTop),
+    gapPx: px(style.columnGap) || px(style.rowGap),
+    minHeightPx: px(style.minHeight),
+    borderWidthPx: style.borderTopStyle === 'none' ? 0 : px(style.borderTopWidth),
+    shadowOffsetXPx: shadowX,
+    shadowOffsetYPx: shadowY,
+    fontSizePx: fontSize,
+    fontWeight: px(style.fontWeight),
+    letterSpacingEm: style.letterSpacing === 'normal' || !fontSize ? 0 : px(style.letterSpacing) / fontSize,
+  }
+  // A percentage radius has no rem equivalent.
+  if (!style.borderTopLeftRadius.includes('%')) values.radiusRem = px(style.borderTopLeftRadius) / rem
+  return values
+}
+
+/** The Button preview reports its specimen under the 'button' slot, in the catalog measure shape. */
+export function acceptButtonMeasure(input: unknown): { requestId: number; values: Partial<Record<PartDimension, number>> } | null {
+  if (!record(input) || input.type !== 'catalog-measure' || Object.keys(input).length !== 3 ||
+    typeof input.requestId !== 'number' || !Number.isSafeInteger(input.requestId) || input.requestId <= 0 ||
+    !record(input.parts) || Object.keys(input.parts).length !== 1 || !record(input.parts.button)) return null
+  const values: Partial<Record<PartDimension, number>> = {}
+  for (const [key, value] of Object.entries(input.parts.button)) {
+    if (!partDimensions.includes(key as PartDimension) || typeof value !== 'number' || !Number.isFinite(value)) return null
+    values[key as PartDimension] = value
+  }
+  return { requestId: input.requestId, values }
 }
 
 export function acceptCatalogMeasure(input: unknown, component: ComponentRecipe['component']): CatalogPreviewMeasure | null {

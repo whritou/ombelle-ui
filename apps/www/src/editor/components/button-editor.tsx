@@ -11,6 +11,7 @@ import { resultMatchesDraft } from '../result-match'
 import { useCompiler } from '../use-compiler'
 import type { CompileDiagnostic } from '../compile-protocol'
 import { PreviewFrame } from './preview-frame'
+import type { MeasuredParts } from '../catalog-preview-protocol'
 import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
 import { ComponentNavigation } from './component-navigation'
@@ -46,6 +47,7 @@ export function ButtonEditor() {
   const [preservedRecoveries, setPreservedRecoveries] = useState<string[]>([])
   const [diagnostic, setDiagnostic] = useState<CompileDiagnostic | null>(null)
   const [status, setStatus] = useState('Loading local draft…')
+  const [measured, setMeasured] = useState<MeasuredParts>({})
   const draft = history.present
   const compilation = useCompiler(draft.recipe)
   const undoButton = useRef<HTMLButtonElement>(null)
@@ -225,7 +227,7 @@ export function ButtonEditor() {
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
-          <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit}
+          <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit} measured={measured.button}
             onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
@@ -245,7 +247,7 @@ export function ButtonEditor() {
                 {previewCurrent ? 'Matches current recipe' : compilation.result ? 'Showing the last valid recipe' : 'Compiling preview…'}
               </p>
             </div>
-            <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} /></div>
+            <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} onMeasure={setMeasured} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}

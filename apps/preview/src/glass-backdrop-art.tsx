@@ -2,19 +2,23 @@ import type { PresetBackdrop } from '../../www/src/preset-editor/preview-protoco
 import type { Preset } from '@ombelle/contracts'
 import { defaultGlassPresetId, getCatalog } from '@ombelle/catalog'
 import { normalizeColor } from '@ombelle/compiler'
+import { glassPresetBackdrop } from '../../www/src/site/glass-presets'
 
-const labDefaults = [
-  [defaultGlassPresetId, 'prism'],
-  ['builtin-liquid-glass-givre', 'prism'],
-  ['builtin-liquid-glass-fume', 'prism'],
-  ['builtin-liquid-glass-relief', 'peach'],
+const labPresets = [
+  defaultGlassPresetId,
+  'builtin-liquid-glass-givre',
+  'builtin-liquid-glass-fume',
+  'builtin-liquid-glass-relief',
 ] as const
 
-/** The lab's ink is for the default material and its paired backdrop. Custom edits keep the text plate. */
+/**
+ * The lab's ink is for an unedited lab material over its own light-mode backdrop (the
+ * scene its text was tuned against). Custom edits and other scenes keep the text plate.
+ */
 export function hasLabPreviewInk(preset: Preset, scene: PresetBackdrop): boolean {
   const catalog = getCatalog(preset.catalogRelease)
-  return labDefaults.some(([id, backdrop]) => {
-    if (backdrop !== scene) return false
+  return labPresets.some((id) => {
+    if (glassPresetBackdrop(id, 'light') !== scene) return false
     const reference = catalog.startingPresets[id]
     const designKeys = Object.keys(reference.design) as (keyof Preset['design'])[]
     return designKeys.every((key) => (preset.design[key] ?? 0) === (reference.design[key] ?? 0))
@@ -41,6 +45,7 @@ export function setGlassBackdrop(root: HTMLElement, scene: PresetBackdrop | unde
 /** The lab's optical test backgrounds, kept as vector art so the same lines refract at any size. */
 export function GlassBackdropArt({ scene }: { scene: PresetBackdrop }) {
   if (scene === 'kit') return null
+  if (scene === 'mist' || scene === 'dawn' || scene === 'grid') return <LightBackdropArt scene={scene} />
   if (scene === 'peach') {
     return (
       <svg className="glass-backdrop-art" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -61,8 +66,7 @@ export function GlassBackdropArt({ scene }: { scene: PresetBackdrop }) {
     )
   }
   const night = scene === 'night'
-  const grid = scene === 'grid'
-  const [skyTop, skyBottom] = grid ? ['#101b3b', '#214b87'] : night ? ['#060b20', '#1b1445'] : ['#15265e', '#053d6f']
+  const [skyTop, skyBottom] = night ? ['#0b0614', '#2b0f3a'] : ['#15265e', '#053d6f']
   return (
     <svg className="glass-backdrop-art" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
@@ -72,13 +76,13 @@ export function GlassBackdropArt({ scene }: { scene: PresetBackdrop }) {
         </linearGradient>
         <linearGradient id="glass-ribbon" x2=".78" y2="1">
           <stop stopColor="#e6ffef" />
-          <stop offset=".4" stopColor={night ? '#9774ef' : '#55e5c7'} />
-          <stop offset="1" stopColor={night ? '#4c25b9' : '#3d8cec'} />
+          <stop offset=".4" stopColor={night ? '#e07ad0' : '#55e5c7'} />
+          <stop offset="1" stopColor={night ? '#6a2bb8' : '#3d8cec'} />
         </linearGradient>
         <linearGradient id="glass-ribbon-fold" x2="1" y2=".4">
-          <stop stopColor="#010d37" />
-          <stop offset=".55" stopColor="#2167c5" />
-          <stop offset="1" stopColor="#84f3d4" />
+          <stop stopColor={night ? '#14051f' : '#010d37'} />
+          <stop offset=".55" stopColor={night ? '#5a2a9e' : '#2167c5'} />
+          <stop offset="1" stopColor={night ? '#f1a7e6' : '#84f3d4'} />
         </linearGradient>
         <pattern id="glass-grid" width="30" height="30" patternUnits="userSpaceOnUse">
           <path d="M30 0H0V30" fill="none" stroke="white" strokeOpacity=".26" />
@@ -89,25 +93,77 @@ export function GlassBackdropArt({ scene }: { scene: PresetBackdrop }) {
         <path id="glass-ribbon-line" d="M-90 490C140 590 281 105 466 240S671 535 1050 40" />
       </defs>
       <rect width="960" height="600" fill="url(#glass-sky)" />
-      {!grid && (
-        <>
-          <circle cx="715" cy="225" r="177" fill="none" stroke="#c5fff6" strokeOpacity=".25" />
-          <circle cx="715" cy="225" r="152" fill="none" stroke="#c5fff6" strokeOpacity=".18" />
-          <use href="#glass-ribbon-line" fill="none" stroke="url(#glass-ribbon-fold)" strokeWidth="162" transform="translate(0 49)" opacity=".8" />
-          <use href="#glass-ribbon-line" fill="none" stroke="url(#glass-ribbon)" strokeWidth="110" opacity={night ? '.6' : '.96'} />
-          {Array.from({ length: 15 }, (_, index) => (
-            <use key={index} href="#glass-ribbon-line" transform={`translate(0 ${index * 7 - 52})`}
-              fill="none" stroke="#effffa" strokeWidth="1" opacity={index % 3 === 0 ? '.42' : '.2'} />
-          ))}
-        </>
-      )}
-      <rect width="960" height="600" fill="url(#glass-grid)" opacity={grid ? '1' : '.23'} />
+      <circle cx="715" cy="225" r="177" fill="none" stroke="#c5fff6" strokeOpacity=".25" />
+      <circle cx="715" cy="225" r="152" fill="none" stroke="#c5fff6" strokeOpacity=".18" />
+      <use href="#glass-ribbon-line" fill="none" stroke="url(#glass-ribbon-fold)" strokeWidth="162" transform="translate(0 49)" opacity=".8" />
+      <use href="#glass-ribbon-line" fill="none" stroke="url(#glass-ribbon)" strokeWidth="110" opacity={night ? '.6' : '.96'} />
+      {Array.from({ length: 15 }, (_, index) => (
+        <use key={index} href="#glass-ribbon-line" transform={`translate(0 ${index * 7 - 52})`}
+          fill="none" stroke="#effffa" strokeWidth="1" opacity={index % 3 === 0 ? '.42' : '.2'} />
+      ))}
+      <rect width="960" height="600" fill="url(#glass-grid)" opacity=".23" />
       <rect width="960" height="600" fill="url(#glass-grain)" />
-      {grid && (
-        <g fill="none" stroke="#81f4d5" strokeWidth="2" opacity=".78">
-          <path d="M-20 454H131L345 130H569L862 455H984M-20 481H161L374 157H541L834 482H984M-20 508H190L405 185H514L804 509H984" />
-          <path d="M160 80V545M480 80V545M800 80V545M75 300H885" strokeDasharray="5 7" />
-        </g>
+    </svg>
+  )
+}
+
+const lightScenes = {
+  // Brume: a cool, pale sky with soft blue, lilac and mint light.
+  mist: { sky: ['#f3f6fb', '#dfe7f2'], blobs: ['#a9c9f2', '#cdbff2', '#bfe9dc'], ribbon: ['#ffffff', '#b8d2f3', '#8fb0e6'], line: '#5b7bb0' },
+  // Aube: a warm pastel dawn, peach into lilac.
+  dawn: { sky: ['#fdf0e8', '#ece2f7'], blobs: ['#f8bfa8', '#f3b3cf', '#c8b8f0'], ribbon: ['#fffaf6', '#f5bccb', '#b7a3ec'], line: '#9a6a8e' },
+  // Trame: a blueprint on paper, for light text-on-glass checks.
+  grid: { sky: ['#f6f8fc', '#e8eef8'], blobs: ['#b5cdf5', '#d7e3f8', '#c3e6f0'], ribbon: ['#ffffff', '#c9dbf6', '#9dbbeb'], line: '#3c64b4' },
+} as const
+
+/** Light scenes: dark preset ink reads on them without a halo, and the glass still has colour to bend. */
+function LightBackdropArt({ scene }: { scene: keyof typeof lightScenes }) {
+  const { sky, blobs, ribbon, line } = lightScenes[scene]
+  const id = (name: string) => `glass-${scene}-${name}`
+  const grid = scene === 'grid'
+  return (
+    <svg className="glass-backdrop-art" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id={id('sky')} x2=".84" y2="1">
+          <stop stopColor={sky[0]} />
+          <stop offset="1" stopColor={sky[1]} />
+        </linearGradient>
+        <linearGradient id={id('ribbon')} x2=".78" y2="1">
+          <stop stopColor={ribbon[0]} />
+          <stop offset=".45" stopColor={ribbon[1]} />
+          <stop offset="1" stopColor={ribbon[2]} />
+        </linearGradient>
+        <filter id={id('blur')} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="60" />
+        </filter>
+        <pattern id={id('grid')} width="30" height="30" patternUnits="userSpaceOnUse">
+          <path d="M30 0H0V30" fill="none" stroke={line} strokeOpacity=".14" />
+        </pattern>
+        <path id={id('line')} d="M-90 490C140 590 281 105 466 240S671 535 1050 40" />
+      </defs>
+      <rect width="960" height="600" fill={`url(#${id('sky')})`} />
+      <g filter={`url(#${id('blur')})`}>
+        <circle cx="180" cy="170" r="170" fill={blobs[0]} opacity=".75" />
+        <circle cx="760" cy="150" r="150" fill={blobs[1]} opacity=".7" />
+        <circle cx="620" cy="500" r="190" fill={blobs[2]} opacity=".7" />
+      </g>
+      {grid ? (
+        <>
+          <rect width="960" height="600" fill={`url(#${id('grid')})`} />
+          <g fill="none" stroke={line} strokeWidth="2" opacity=".45">
+            <path d="M-20 454H131L345 130H569L862 455H984M-20 481H161L374 157H541L834 482H984M-20 508H190L405 185H514L804 509H984" />
+            <path d="M160 80V545M480 80V545M800 80V545M75 300H885" strokeDasharray="5 7" />
+          </g>
+        </>
+      ) : (
+        <>
+          <use href={`#${id('line')}`} fill="none" stroke={`url(#${id('ribbon')})`} strokeWidth="120" opacity=".85" />
+          {Array.from({ length: 12 }, (_, index) => (
+            <use key={index} href={`#${id('line')}`} transform={`translate(0 ${index * 8 - 44})`}
+              fill="none" stroke={line} strokeWidth="1" opacity={index % 3 === 0 ? '.22' : '.1'} />
+          ))}
+          <rect width="960" height="600" fill={`url(#${id('grid')})`} opacity=".35" />
+        </>
       )}
     </svg>
   )

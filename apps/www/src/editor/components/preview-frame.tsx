@@ -5,12 +5,12 @@ import type { InstallableRecipeCompileResult, ComponentRecipe } from '@ombelle/c
 import type { EditorView } from '../model'
 import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type PreviewRender } from '../preview-protocol'
 import { previewFrameUrl } from '../preview-url'
-import { acceptCatalogMeasure, verifyCatalogCompileResult, type CatalogPreviewRender, type MeasuredParts } from '../catalog-preview-protocol'
+import { acceptButtonMeasure, acceptCatalogMeasure, verifyCatalogCompileResult, type CatalogPreviewRender, type MeasuredParts } from '../catalog-preview-protocol'
 
 export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure }: {
   result: InstallableRecipeCompileResult | null; view: EditorView
   component?: ComponentRecipe['component']; componentName?: string
-  /** Receives the rendered part dimensions of the latest catalog render. */
+  /** Receives the rendered part dimensions of the latest render; the Button reports its 'button' slot. */
   onMeasure?(parts: MeasuredParts): void
 }) {
   const iframe = useRef<HTMLIFrameElement>(null)
@@ -63,6 +63,11 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
         if (measure) {
           // Only the render the preview applied last describes the current recipe.
           if (measure.requestId === lastAck.current) measured.current?.(measure.parts)
+          return
+        }
+        const button = component ? null : acceptButtonMeasure(ack.data)
+        if (button) {
+          if (button.requestId === lastAck.current) measured.current?.({ button: button.values })
           return
         }
         if (port.current !== channel.port1 || !isPreviewAck(ack.data) || ack.data.requestId > nextRequestId.current ||

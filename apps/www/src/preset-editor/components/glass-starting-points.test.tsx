@@ -46,8 +46,15 @@ it('shows a one-line hint under every material slider', () => {
   expect(html).toContain('How far the backdrop bends along the rim. Chromium only.')
 })
 
-it('gives every starting preset one backdrop, shared by the editors and component pages', () => {
-  expect(glassPresetBackdrop('builtin-liquid-glass-relief')).toBe('peach')
-  expect(glassPresetBackdrop('builtin-liquid-glass-cristal')).toBe('prism')
-  expect(glassPresetBackdrop('builtin-liquid-glass')).toBe('kit')
+it('gives every starting preset a backdrop per mode, shared by the editors and component pages', () => {
+  expect(glassPresetBackdrop('builtin-liquid-glass-cristal', 'light')).toBe('mist')
+  expect(glassPresetBackdrop('builtin-liquid-glass-cristal', 'dark')).toBe('prism')
+  expect(glassPresetBackdrop('builtin-liquid-glass-givre', 'light')).toBe('dawn')
+  expect(glassPresetBackdrop('builtin-liquid-glass-relief', 'light')).toBe('peach')
+  expect(glassPresetBackdrop('builtin-liquid-glass-relief', 'dark')).toBe('night')
+  expect(glassPresetBackdrop('builtin-liquid-glass-voile', 'light')).toBe('grid')
+  expect(glassPresetBackdrop('builtin-liquid-glass', 'light')).toBe('kit')
+  expect(glassPresetBackdrop('builtin-liquid-glass', 'dark')).toBe('kit')
+  // Fumé keeps light ink in light mode, so its light preview stays on a dark scene.
+  expect(glassPresetBackdrop('builtin-liquid-glass-fume', 'light')).toBe('prism')
 })

@@ -9,7 +9,7 @@ import { GlassBackdropArt, hasLabPreviewInk, setGlassBackdrop } from './glass-ba
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
-import { verifyCatalogPreviewRender, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
+import { measurePart, verifyCatalogPreviewRender, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
 import type { ComponentRecipe } from '@ombelle/contracts'
 import { CatalogRecipePreview } from './catalog-recipe-preview'
 import './editor-preview.css'
@@ -90,7 +90,7 @@ function EditorPreview() {
   const state = buttonMessage?.state
   const family = state && draftFamily(state.recipe)
   const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
-  const glassBackdrop = glassPreset && glassPresetBackdrop(glassPreset)
+  const glassBackdrop = glassPreset && glassPresetBackdrop(glassPreset, state.mode)
   const overrides = state?.recipe.overrides
   const useLabInk = Boolean(state && state.mode === 'light' && glassBackdrop
     && !Object.keys(overrides ?? {}).some((key) => key === 'colors' || key.startsWith('glass'))
@@ -127,6 +127,11 @@ function EditorPreview() {
       for (const token of filterTokens) root.style.removeProperty(token)
     }
   }, [Button, family, state?.css, state?.mode])
+  // Report the specimen's rendered values so the editor's empty fields show what the preset draws.
+  React.useEffect(() => {
+    if (!buttonMessage || !Button || !specimen.current) return
+    reportMeasure(buttonMessage.requestId, { button: measurePart(specimen.current) })
+  }, [Button, buttonMessage, reportMeasure])
   if (message?.type === 'catalog-render') return <CatalogRecipePreview message={message} onMeasure={reportMeasure} />
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}

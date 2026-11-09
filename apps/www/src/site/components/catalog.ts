@@ -47,24 +47,25 @@ export function Actions() {
   badge: {
     name: 'Badge',
     description: 'Shows a short status or category as a native span.',
-    api: 'variant (default, secondary, outline, accent, destructive), className',
-    states: 'Default, secondary, outline, accent, destructive',
+    api: 'variant (default, secondary, outline, accent, destructive), size (sm, default), BadgeDot, className',
+    states: 'Default, secondary, outline, accent, destructive; small and default sizes; optional status dot',
     basis: '<span>; interactive tags need a real button or link',
     client: false,
-    usage: `import { Badge } from '@/components/ui/badge'
+    usage: `import { Badge, BadgeDot } from '@/components/ui/badge'
 
 export function Status() {
   return <>
     <Badge>Synced</Badge>
     <Badge variant="destructive">Needs attention</Badge>
+    <Badge size="sm"><BadgeDot />Active</Badge>
   </>
 }`,
   },
   card: {
     name: 'Card',
     description: 'Groups related content with a header, body and footer.',
-    api: 'Card (density), CardHeader, CardTitle (level), CardDescription, CardContent, CardFooter',
-    states: 'Default, dense',
+    api: 'Card (density: default, dense; appearance: default, outlined, subtle), CardHeader, CardTitle (level), CardDescription, CardContent, CardFooter',
+    states: 'Default, dense, outlined, subtle',
     basis: '<section> or <div> with deliberate headings',
     client: false,
     usage: `import {
@@ -81,6 +82,15 @@ export function ProjectSummary() {
       <CardContent><p>Three milestones remain.</p></CardContent>
       <CardFooter>Updated today</CardFooter>
     </Card>
+  )
+}
+
+export function Surfaces() {
+  return (
+    <>
+      <Card appearance="outlined"><CardHeader><CardTitle>Outlined card</CardTitle></CardHeader><CardContent>Project summary.</CardContent></Card>
+      <Card appearance="subtle"><CardHeader><CardTitle>Subtle card</CardTitle></CardHeader><CardContent>Recent activity.</CardContent></Card>
+    </>
   )
 }`,
   },
@@ -237,6 +247,20 @@ export function ProjectSections() {
       <TabsContent value="activity">Recent activity.</TabsContent>
     </Tabs>
   )
+}
+
+// appearance="underline" draws a line under the active tab instead of a container.
+export function UnderlineSections() {
+  return (
+    <Tabs defaultValue="overview">
+      <TabsList appearance="underline" aria-label="Underline sections">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="activity">Activity</TabsTrigger>
+      </TabsList>
+      <TabsContent value="overview">Project overview.</TabsContent>
+      <TabsContent value="activity">Recent activity.</TabsContent>
+    </Tabs>
+  )
 }`,
   },
   textarea: {
@@ -370,8 +394,8 @@ export function ProjectActions() {
   alert: {
     name: 'Alert',
     description: 'A status or error message with an optional icon, title and description.',
-    api: 'variant (default, destructive), AlertTitle, AlertDescription',
-    states: 'Default (role status), destructive (role alert)',
+    api: 'variant (default, destructive, success, warning, info), AlertTitle, AlertDescription',
+    states: 'Default, success, warning and info (role status); destructive (role alert)',
     basis: '<div> with a live-region role',
     client: false,
     minimumCli: '0.5.0',
@@ -383,6 +407,16 @@ export function SaveStatus() {
       <AlertTitle>Preset saved</AlertTitle>
       <AlertDescription>New components now install with this preset.</AlertDescription>
     </Alert>
+  )
+}
+
+export function Intents() {
+  return (
+    <>
+      <Alert variant="success"><AlertTitle>Saved</AlertTitle><AlertDescription>Your changes are ready.</AlertDescription></Alert>
+      <Alert variant="warning"><AlertTitle>Review needed</AlertTitle><AlertDescription>Two items need your attention.</AlertDescription></Alert>
+      <Alert variant="info"><AlertTitle>New version</AlertTitle><AlertDescription>A component update is available.</AlertDescription></Alert>
+    </>
   )
 }`,
   },
@@ -451,8 +485,8 @@ export function SignInOptions() {
     name: 'Table',
     glassMinimumCli: '0.5.0',
     description: 'A native data table with header, footer, caption, numeric columns and selected rows.',
-    api: 'Table, TableCaption, TableHeader, TableBody, TableFooter, TableRow (selected), TableHead (numeric, scope), TableCell (numeric)',
-    states: 'Default, selected row, numeric column',
+    api: 'Table (density: default, compact; striped), TableCaption, TableHeader, TableBody, TableFooter, TableRow (selected), TableHead (numeric, scope), TableCell (numeric)',
+    states: 'Default, compact, striped rows, selected row, numeric column',
     basis: 'Native <table> in a horizontal scroll container',
     client: false,
     minimumCli: '0.5.0',
@@ -469,6 +503,22 @@ export function Projects() {
       </TableHeader>
       <TableBody>
         <TableRow><TableCell>Website refresh</TableCell><TableCell numeric>12</TableCell></TableRow>
+      </TableBody>
+    </Table>
+  )
+}
+
+// A denser list for application screens.
+export function CompactProjects() {
+  return (
+    <Table density="compact" striped>
+      <TableCaption>Compact project list</TableCaption>
+      <TableHeader>
+        <TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow>
+        <TableRow><TableCell>Mobile</TableCell><TableCell>Review</TableCell></TableRow>
       </TableBody>
     </Table>
   )

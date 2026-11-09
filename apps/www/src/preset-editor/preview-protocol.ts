@@ -9,8 +9,8 @@ import {
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 export const presetScenes = ['gallery', 'dashboard', 'settings', 'sign-in'] as const
 export type PresetScene = (typeof presetScenes)[number]
-/** Liquid glass preview backdrops: the design kit's, then the material lab's four. Preview only, never saved. */
-export const presetBackdrops = ['kit', 'prism', 'grid', 'night', 'peach'] as const
+/** Liquid glass preview backdrops: the design kit's, light scenes, then dark and warm ones. Preview only, never saved. */
+export const presetBackdrops = ['kit', 'mist', 'dawn', 'grid', 'peach', 'prism', 'night'] as const
 export type PresetBackdrop = (typeof presetBackdrops)[number]
 /**
  * `focus` shows only that component's section of the gallery. `scene` picks a

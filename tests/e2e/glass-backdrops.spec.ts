@@ -4,7 +4,7 @@ import { catalogDraftKey, catalogPresetRef, createCatalogDraft } from '../../app
 import { applyStartingPreset, createPresetDraft } from '../../apps/www/src/preset-editor/model.js'
 import { glassPresetBackdrop } from '../../apps/www/src/site/glass-presets.js'
 
-// One preset per scene: Prisme, Pêche and the kit gradient.
+// One preset per kind of light-mode scene: Brume, Pêche and the kit gradient.
 const presets: StartingPresetId[] = ['builtin-liquid-glass-cristal', 'builtin-liquid-glass-relief', 'builtin-liquid-glass']
 
 const previewRoot = (page: Page, title: string) =>
@@ -18,7 +18,8 @@ async function expectScene(root: Locator, scene: ReturnType<typeof glassPresetBa
 }
 
 for (const id of presets) test(`${id} shows the same backdrop in the preset editor, component page and component editor`, async ({ page }) => {
-  const scene = glassPresetBackdrop(id)
+  // The pages open in light mode, so each shows the preset's light backdrop.
+  const scene = glassPresetBackdrop(id, 'light')
   const recipe = { ...createCatalogDraft('card').recipe, presetRef: catalogPresetRef('liquid-glass', id) }
   await page.addInitScript(drafts => {
     if (location.origin !== 'http://127.0.0.1:3000') return

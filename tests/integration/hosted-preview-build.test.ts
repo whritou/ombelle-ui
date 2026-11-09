@@ -45,7 +45,7 @@ it('builds nested static runtime HTML/assets and workers without touching unrela
       name => fs.readFile(`apps/www/public/ombelle-preview/assets/${name}`, 'utf8'),
     ))).join('\n').toLowerCase()
     expect(runtime).toContain('m-90 490c140 590 281 105 466 240s671 535 1050 40')
-    for (const color of ['#15265e', '#101b3b', '#060b20', '#db8170'])
+    for (const color of ['#15265e', '#0b0614', '#f3f6fb', '#fdf0e8', '#f6f8fc', '#db8170'])
       expect(runtime).toContain(color)
     for (const worker of ['editor', 'preset']) {
       const bytes = await fs.readFile(`apps/www/public/${worker}-compiler.worker.js`, 'utf8')

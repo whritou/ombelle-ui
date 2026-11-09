@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { resolveRecipePreset } from '@ombelle/catalog'
 import { RotateCcw } from 'lucide-react'
 import {
   recipeIcons, recipeStateColorKey,
@@ -7,6 +8,7 @@ import {
   type RecipeIconName, type StyleFamily,
 } from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
+import type { PartDimension } from '../catalog-preview-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { RECIPE_COLOR_PATTERN, recipeColor, withGlassPreset, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
@@ -21,6 +23,8 @@ type Props = {
   diagnostic: CompileDiagnostic | null
   onChange: (recipe: Recipe, key: string) => void
   onDiagnostic: (path: string, message: string) => void
+  /** The specimen's rendered values, shown in empty fields as the preset's. */
+  measured?: Partial<Record<PartDimension, number>>
 }
 
 type OverrideKey = 'radiusRem' | 'borderWidthPx' | 'minHeightPx' | 'shadowOffsetXPx' | 'shadowOffsetYPx' |
@@ -243,7 +247,14 @@ export function shownNumber(text: string | undefined, current: number | undefine
   return current === undefined ? '' : String(current)
 }
 
-export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange, onDiagnostic }: Props) {
+/** A value rounded to the field's step, as an empty field's placeholder. */
+export function baselineText(value: number | undefined, step: number): string | undefined {
+  if (value === undefined || !Number.isFinite(value)) return undefined
+  const decimals = step.toString().split('.')[1]?.length ?? 0
+  return String(Number(value.toFixed(decimals)))
+}
+
+export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange, onDiagnostic, measured = {} }: Props) {
   // Text being typed in a number field stays local until it is a valid value in range.
   const [typing, setTyping] = useState<Partial<Record<OverrideKey, string>>>({})
   const changeProp = (key: keyof Recipe['props'], value: string | boolean) =>
@@ -274,6 +285,14 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
     onChange({ ...recipe, overrides }, `overrides.${key}`)
   }
   const glass = family === 'liquid-glass'
+  const presetDesign = useMemo(() => {
+    try { return resolveRecipePreset(recipe.presetRef).design as Record<string, unknown> } catch { return {} }
+  }, [recipe.presetRef])
+  // Empty fields show the value in effect: the preset's glass material, or what the specimen renders.
+  const baseline = (key: OverrideKey, step: number) => {
+    const value = (glassOverrideKeys as readonly string[]).includes(key) ? presetDesign[key] : measured[key as PartDimension]
+    return baselineText(typeof value === 'number' ? value : undefined, step)
+  }
   const slider = ({ key, label: plain, min, max, step, unit, hint: materialHint }: Slider) => {
     const id = `button-${key}`, path = `/overrides/${key}`
     const label = key === 'borderWidthPx' ? designControlLabel(key, family) : plain
@@ -282,6 +301,7 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
     return (
       <div key={key}>
         <SliderRow id={id} label={label} value={display(key, min, max)} min={min} max={max} step={step} unit={unit}
+          placeholder={baseline(key, step)}
           edited={recipe.overrides[key] !== undefined} invalid={diagnostic?.path === path}
           describedBy={[error, hint ? `${id}-glass-hint` : undefined].filter(Boolean).join(' ') || undefined}
           onChange={(raw) => update(key, raw, min, max, unit)} onReset={() => reset(key, `${id}-number`)} />
@@ -403,7 +423,7 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
               <div className="be-shadow-field" key={key}>
                 <span aria-hidden="true">{axis}</span>
                 <input id={id} type="text" inputMode="decimal" maxLength={80} spellCheck={false}
-                  aria-label={designControlLabel(key, family)} value={display(key, min, max)} placeholder="Preset"
+                  aria-label={designControlLabel(key, family)} value={display(key, min, max)} placeholder={baseline(key, 1) ?? 'Preset'}
                   aria-invalid={diagnostic?.path === path || undefined}
                   aria-describedby={[diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined, glass ? 'button-shadow-hint' : undefined].filter(Boolean).join(' ') || undefined}
                   onChange={(event) => update(key, event.target.value, min, max, 'px')} />
