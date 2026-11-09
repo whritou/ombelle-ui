@@ -93,7 +93,8 @@ export function CommandTabs({ release, args, label = 'Package runner' }: { relea
         const command = `${runner.prefix} ${release} ${args}`
         return (
           <Tabs.Content key={runner.value} value={runner.value} className="flex items-center gap-3 px-4 py-3">
-            <code className={code.command}>{highlightCode(command, 'shell')}</code>
+            {/* Plain text, so the whole command stays one string to select and to search. */}
+            <code className={code.command}>{command}</code>
             <CopyButton text={command} label="Copy command" />
           </Tabs.Content>
         )
