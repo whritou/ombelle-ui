@@ -2,14 +2,14 @@
 
 ## Component authoring contract
 
-The local catalog expansion for 0.8.0 adds Input Group, Sheet, Alert Dialog,
+The catalog expansion in 0.7.2 adds Input Group, Sheet, Alert Dialog,
 Breadcrumb, Pagination and Toast in all five families. Liquid glass remains
 experimental. Both Radix and Base UI editions are supported; Base UI Toast uses
 its native manager API. Tabs appearances, Table density/striping, Card surfaces,
 Badge size/dot composition and Alert success/warning/info intents are also
 implemented. See the individual [component references](components/) and the
 [batch design](superpowers/specs/2026-11-08-forms-navigation-overlays-design.md).
-The public CLI remains 0.7.1; new APIs require the repository CLI pending release.
+The public CLI 0.7.2 includes these additions and their new API options.
 
 Every component must ship its source, dependencies, prop and composition reference, editor metadata, preview fixtures, supported style matrix, keyboard behavior, and accessibility evidence. Follow the selected shadcn edition's composition model and preserve familiar names wherever they mean the same thing.
 

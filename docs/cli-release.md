@@ -4,11 +4,11 @@
 
 Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
 
-The 0.7.2 candidate adds six catalog components (29 total), their recipe editors,
+The 0.7.2 release adds six catalog components (29 total), their recipe editors,
 and the new Tabs/Table/Alert/Card/Badge options. New APIs require CLI 0.7.2;
 existing recipe format 1.0/2.0 and catalog/compiler compatibility 0.1.0 remain.
-The advertised public installer stays at 0.7.1 until publication and registry
-verification are completed separately.
+The public installer is 0.7.2; its registry tarball and a fresh registry install
+were verified after publication.
 
 ## Catalog recipe release
 
@@ -32,7 +32,7 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.7.2. The published installer is `@ombelle-ui/cli@0.7.1`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
+All six workspace packages use software version 0.7.2. The published installer is `@ombelle-ui/cli@0.7.2`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
 
 Release 0.5.0 in this order:
 
@@ -81,7 +81,9 @@ Post-publication checks on 2026-11-02:
 
 `@ombelle-ui/cli@0.7.1` was published on 2026-11-08 from `2d0510b` with the npm `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-piZhdP/5TFjMXlckqaMiL7WNV96i72/YGxqNrdoqTd/kRsxAcBOF3z5Brs6s6OR1HLi/4z7eXFDpQ5V/wzxbQg==`). The candidate passed 29 release checks and default production builds in plain Vite, shadcn Radix Vite, and shadcn Base UI Vite consumers; both Radix consumers installed all 23 downloaded recipes, and all three reapplied their preset as a no-op. A fresh registry-backed `npm exec --package=@ombelle-ui/cli@0.7.1 -- ombelle --help` succeeded after publication. The pack manifest reports a dirty working tree only because of a preexisting untracked local directory; tracked sources matched the release commit. Catalog/compiler compatibility remains 0.1.0 and recipe formats remain 1.0/2.0. The full foundation gate was not run for this patch; see [the original investigation and follow-up checks](evidence/real-world-installations-2026-11-08.md).
 
-Code pages and Get code use `@ombelle-ui/cli@0.7.1` commands for all catalog editors. The runner table below records the 0.2.1 verification. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
+`@ombelle-ui/cli@0.7.2` was published on 2026-11-09 from `79dce7d` (the merge of PR #97) by npm identity `ombelle` with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-gsdc34nEygMawVplPylcqC7r5Z3NJ4fuRu2RvMwCzlDlAWymUrL1s8G757zlAEfOK9rqez+sAt1NNLzyfvVFfA==`). The candidate passed all 10 standalone release checks and 22 expansion scenarios: the six new components and five variant APIs installed in both editions, with recipe installs verified for Radix and the documented Base UI recipe guard preserved. A fresh script-disabled registry install ran `npm exec --offline -- ombelle --help` successfully. Tracked sources matched the merge commit; the pack manifest reports a dirty tree only because of the preexisting untracked `.claude/` directory. See [release verification](evidence/npm-0.7.2-2026-11-09.md).
+
+Code pages and Get code use `@ombelle-ui/cli@0.7.2` commands for all catalog editors. The runner table below records the 0.2.1 verification. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
 
 ## Verified public runners
 

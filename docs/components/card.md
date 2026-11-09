@@ -62,8 +62,8 @@ retain a visible system-color border for both appearances.
 <Card appearance="subtle" density="dense"><CardContent>Last saved today</CardContent></Card>
 ```
 
-These appearance props require the planned CLI 0.7.2 source; published CLI 0.7.1
-does not include them. The default appearance is visually unchanged.
+These appearance props require CLI 0.7.2 or later. The default appearance is
+visually unchanged.
 
 Default spacing uses `1.5rem` for root vertical padding and gaps, and for header/content/footer horizontal padding. Dense uses `1rem` for those values. Both use the preset's card surface, card foreground, muted foreground, border width/color, radius, and font tokens. Flat and minimalist use no decorative shadow; neo-brutalism uses the preset's offset shadow, and ombelle uses a larger offset shadow with a rounder radius. Long words wrap, and footers can wrap their contents. Forced colors use system colors and remove the shadow; Card introduces no animation or transition.
 

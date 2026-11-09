@@ -4,7 +4,7 @@ Alert Dialog requests confirmation before an important action. Both editions use
 
 ## Install and use
 
-This component is available in the current private local CLI. Published CLI 0.7.1 does not include it; the website minimum is 0.7.2 pending a separate release.
+This component requires CLI 0.7.2 or later: `npx @ombelle-ui/cli@0.7.2 add alert-dialog`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add alert-dialog --cwd APP --dry-run --json
