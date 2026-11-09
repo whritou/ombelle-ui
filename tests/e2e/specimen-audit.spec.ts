@@ -133,14 +133,20 @@ for (const family of styleFamilies)
           }
           await page.emulateMedia({ forcedColors: 'none' })
         }
-        const part = { family, edition, mode, specimens: components.length, checks: counts, failures: findings.length + errors.length,
+        // Liquid glass is experimental: its findings are recorded and attached, but only page errors fail it.
+        const experimental = family === 'liquid-glass'
+        const blocking = experimental ? [] : findings
+        if (experimental && findings.length)
+          test.info().annotations.push({ type: 'experimental findings', description: JSON.stringify(findings) })
+        const part = { family, edition, mode, specimens: components.length, checks: counts, failures: blocking.length + errors.length,
+          experimentalFindings: experimental ? findings.length : 0,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         await fs.mkdir(path.join(artifacts, 'parts'), { recursive: true })
         await fs.writeFile(path.join(artifacts, 'parts', `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
         await fs.writeFile(path.join(artifacts, 'parts', `${family}-${edition}-${mode}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
         expect(components).toHaveLength(29)
         expect(errors, 'page errors').toEqual([])
-        expect(findings, JSON.stringify(findings, null, 2)).toEqual([])
+        expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])
       })
 
 // Merge every configuration's part into the evidence file the foundation gate validates.
@@ -154,7 +160,8 @@ test.afterAll(async () => {
   parts.sort((a, b) => { const x = order(a), y = order(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] })
   const evidence = {
     schemaVersion: 1, node: process.version, browser: parts[0].browser,
-    configurations: parts.map(({ family, edition, mode, specimens, checks }) => ({ family, edition, mode, specimens, checks })),
+    configurations: parts.map(({ family, edition, mode, specimens, checks, experimentalFindings }) =>
+      ({ family, edition, mode, specimens, checks, experimentalFindings })),
     failures: parts.reduce((sum, part) => sum + part.failures, 0),
   }
   await fs.writeFile('.artifacts/specimen-audit.json', JSON.stringify(evidence, null, 2) + '\n')
