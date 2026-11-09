@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalog, startingPresetOrder } from '@ombelle/catalog'
 import { styleFamilies } from '@ombelle/contracts'
 import {
   createPresetDraft,
@@ -336,4 +336,15 @@ it('every tint chip keeps every starting preset inside the contrast bound', asyn
   // Known, on the base preset only, which has no material and so no text outline plate: its 0.57 is just short
   // for the Rosée veil (the readout asks for 0.6), and the dark Fumée veil cannot pass without the plate.
   expect(failing).toEqual(['builtin-liquid-glass rose (needs 0.6)', 'builtin-liquid-glass smoke (needs no opacity)'])
+})
+
+it.each(startingPresetOrder)('leaving liquid glass from %s returns to Ombelle defaults and keeps own edits', (id) => {
+  const glass = setPresetEdit(applyStartingPreset(createPresetDraft('liquid-glass'), id), '/design/radiusRem', '1.5')
+  const { draft, changes } = planPresetFamilyChange(glass, 'ombelle')
+  expect(draft.edits).toEqual({ '/design/radiusRem': '1.5' })
+  expect(materializePreset(draft).modes).toEqual(getCatalog('0.1.0').presets.ombelle.modes)
+  expect(changes.some((change) => change.path === '/design/radiusRem')).toBe(false)
+  // A colour the user picked on top of the starting preset travels.
+  const tinted = setPresetEdit(glass, '/modes/light/primary', '#123456')
+  expect(planPresetFamilyChange(tinted, 'ombelle').draft.edits['/modes/light/primary']).toBe('#123456')
 })
