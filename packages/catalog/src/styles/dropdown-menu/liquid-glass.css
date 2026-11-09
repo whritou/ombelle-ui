@@ -137,6 +137,14 @@
     opacity: 1;
   }
 }
+[data-slot='dropdown-menu-item'][data-highlighted],
+[data-slot='dropdown-menu-checkbox-item'][data-highlighted],
+[data-slot='dropdown-menu-radio-item'][data-highlighted],
+[data-slot='dropdown-menu-sub-trigger'][data-highlighted] {
+  /* The highlight tint alone is below 3:1 against the menu: a ring marks the item reached with the keyboard. */
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot='dropdown-menu-content'],
   [data-slot='dropdown-menu-sub-content'] {

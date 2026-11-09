@@ -49,3 +49,13 @@ describe('liquid glass Progress', () => {
       expect(declarations(css, selector)['box-shadow']).toMatch(/^inset /)
   })
 })
+
+describe('highlighted list and menu items show a 3:1 indicator', () => {
+  it.each(['flat', 'minimalist', 'ombelle', 'liquid-glass'])('%s Select and Dropdown Menu items carry an inset ring', family => {
+    for (const [file, selector] of [['select', "[data-slot='select-item'][data-highlighted]"], ['dropdown-menu', "[data-slot='dropdown-menu-item'][data-highlighted]"]]) {
+      const rule = declarations(read(`${file}/${family}.css`), selector)
+      expect(rule.outline, `${file}/${family}`).toBe('2px solid var(--ring)')
+      expect(rule['outline-offset'], `${file}/${family}`).toBe('-2px')
+    }
+  })
+})
