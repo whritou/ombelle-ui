@@ -71,6 +71,9 @@ import {
   ToastTitle,
   ToastViewport,
 } from '../generated/preset-gallery/components/ui/toast'
+import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '../generated/preset-gallery/components/ui/field'
+import { Kbd, KbdGroup } from '../generated/preset-gallery/components/ui/kbd'
+import { Spinner } from '../generated/preset-gallery/components/ui/spinner'
 import { gate, type SceneProps } from './shared'
 
 export function SettingsScene(props: SceneProps) {
@@ -84,6 +87,17 @@ export function SettingsScene(props: SceneProps) {
           <h1>Settings</h1>
           <p className="scene-muted">Manage your profile and workspace.</p>
         </div>
+        {show(
+          'kbd',
+          'Kbd',
+          <p className="scene-muted">
+            Search settings with{' '}
+            <KbdGroup>
+              <Kbd>Ctrl</Kbd>
+              <Kbd>K</Kbd>
+            </KbdGroup>
+          </p>,
+        )}
       </header>
       <Tabs defaultValue="general" className="scene-tabs">
         <TabsList aria-label="Settings sections">
@@ -117,6 +131,18 @@ export function SettingsScene(props: SceneProps) {
                         <Input id="scene-email" type="email" defaultValue="ada@acme.test" autoComplete="email" />
                       </div>
                     </div>,
+                  )}
+                  {show(
+                    'field',
+                    'Field',
+                    <Field required>
+                      <FieldLabel>Username</FieldLabel>
+                      <FieldControl>
+                        <Input defaultValue="ada" autoComplete="username" />
+                      </FieldControl>
+                      <FieldDescription>Shown on your profile and in mentions.</FieldDescription>
+                      <FieldError>Use lower case letters and dashes only.</FieldError>
+                    </Field>,
                   )}
                   {show(
                     'select',
@@ -159,6 +185,13 @@ export function SettingsScene(props: SceneProps) {
                   )}
                 </CardContent>
                 <CardFooter className="scene-actions scene-actions-end">
+                  {show(
+                    'spinner',
+                    'Spinner',
+                    <span className="scene-muted scene-inline">
+                      <Spinner size="sm" aria-label="Syncing" /> Syncing profile…
+                    </span>,
+                  )}
                   <Button type="button" variant="outline">Cancel</Button>
                   <Button type="submit" onClick={() => setSaved(true)}>Save profile</Button>
                 </CardFooter>

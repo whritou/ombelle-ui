@@ -64,6 +64,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../generated/preset-gallery/components/ui/tooltip'
+import { Stepper, StepperDescription, StepperIndicator, StepperItem, StepperSeparator, StepperTitle } from '../generated/preset-gallery/components/ui/stepper'
 import { gate, type SceneProps } from './shared'
 
 const stats = [
@@ -135,6 +136,28 @@ export function DashboardScene(props: SceneProps) {
           )}
         </div>
       </header>
+      {show(
+        'stepper',
+        'Stepper',
+        <Stepper aria-label="Getting started">
+          <StepperItem status="complete">
+            <StepperIndicator>1</StepperIndicator>
+            <StepperTitle>Preset</StepperTitle>
+            <StepperDescription>Ombelle</StepperDescription>
+            <StepperSeparator />
+          </StepperItem>
+          <StepperItem status="current">
+            <StepperIndicator>2</StepperIndicator>
+            <StepperTitle>Components</StepperTitle>
+            <StepperDescription>Choose 4</StepperDescription>
+            <StepperSeparator />
+          </StepperItem>
+          <StepperItem status="upcoming">
+            <StepperIndicator>3</StepperIndicator>
+            <StepperTitle>Install CLI</StepperTitle>
+          </StepperItem>
+        </Stepper>,
+      )}
       {show(
         'alert',
         'Alert',

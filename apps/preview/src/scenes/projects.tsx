@@ -51,6 +51,8 @@ import {
   TabsList,
   TabsTrigger,
 } from '../generated/preset-gallery/components/ui/tabs'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../generated/preset-gallery/components/ui/empty'
+import { Meter, MeterLabel } from '../generated/preset-gallery/components/ui/meter'
 import { gate, type SceneProps } from './shared'
 
 const rows = [
@@ -219,6 +221,36 @@ export function ProjectsScene(props: SceneProps) {
           )}
         </CardFooter>
       </Card>
+      <div className="scene-columns">
+        {show(
+          'meter',
+          'Meter',
+          <Card>
+            <CardContent className="scene-fields">
+              <Meter value={128} max={200} segments={10} warningAt={0.6}>
+                <MeterLabel>Deploys this month</MeterLabel>
+              </Meter>
+              <p className="scene-muted">Steps past 60% switch to the warning colour.</p>
+            </CardContent>
+          </Card>,
+        )}
+        {show(
+          'empty',
+          'Empty State',
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon" aria-hidden="true">+</EmptyMedia>
+              <EmptyTitle asChild>
+                <h2>No archived projects</h2>
+              </EmptyTitle>
+              <EmptyDescription>Archived projects appear here, ready to restore.</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="outline">Archive a project</Button>
+            </EmptyContent>
+          </Empty>,
+        )}
+      </div>
     </main>
   )
 }

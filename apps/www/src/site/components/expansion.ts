@@ -2,6 +2,41 @@ import { expansionExamples } from '@ombelle/catalog'
 import type { ComponentDoc } from './catalog'
 
 export const expansionDocs = {
+  spinner: {
+    name: 'Spinner', description: 'A busy indicator announced as a status.',
+    api: 'Spinner (size, aria-label)', states: 'Spinning, slowed under reduced motion, hidden inside a labelled control',
+    basis: 'SVG with role="status"', client: false, usage: expansionExamples.spinner, minimumCli: '0.7.3',
+  },
+  kbd: {
+    name: 'Kbd', description: 'Keyboard keys and shortcuts in text.',
+    api: 'Kbd, KbdGroup', states: 'Single key, combination', basis: 'Native kbd element', client: false,
+    usage: expansionExamples.kbd, minimumCli: '0.7.3',
+  },
+  empty: {
+    name: 'Empty State', description: 'A consistent zero-data screen with a title, description and actions.',
+    api: 'Empty, EmptyHeader, EmptyMedia (variant), EmptyTitle (asChild), EmptyDescription, EmptyContent',
+    states: 'With icon, without media, one or two actions', basis: 'Divs with an app-chosen heading', client: false,
+    usage: expansionExamples.empty, minimumCli: '0.7.3',
+  },
+  field: {
+    name: 'Field', description: 'Wires a label, hint and error to one control.',
+    api: 'Field (orientation, invalid, required, disabled), FieldLabel, FieldControl, FieldDescription, FieldError',
+    states: 'Default, required, invalid, disabled, horizontal', basis: 'Native label and aria-describedby; Base UI uses its Field', client: true,
+    usage: expansionExamples.field, minimumCli: '0.7.3',
+    note: 'FieldControl wraps one control, such as Input, Textarea, Native Select or a Select trigger, and keeps its own styles.',
+  },
+  meter: {
+    name: 'Meter', description: 'A measurement within a known range, such as a quota, in cells or labelled parts.',
+    api: 'Meter (value, min, max, segments, warningAt), MeterLabel, MeterSegment (value, tone), MeterLegend, MeterLegendItem (tone)',
+    states: 'Discrete, warning, labelled parts, clamped values', basis: 'role="meter" with value text; Base UI uses its Meter', client: true,
+    usage: expansionExamples.meter, minimumCli: '0.7.3',
+  },
+  stepper: {
+    name: 'Stepper', description: 'Ordered steps with done, current and upcoming states.',
+    api: 'Stepper (orientation), StepperItem (status), StepperIndicator, StepperTitle, StepperDescription, StepperSeparator',
+    states: 'Complete, current, upcoming, horizontal, vertical', basis: 'Native nav and ordered list with aria-current="step"', client: false,
+    usage: expansionExamples.stepper, minimumCli: '0.7.3',
+  },
   toast: {
     name: 'Toast', description: 'Transient feedback with optional actions, pausing and keyboard dismissal.',
     api: 'ToastProvider (duration), ToastViewport, Toast (variant), ToastTitle, ToastDescription, ToastAction (altText), ToastClose',

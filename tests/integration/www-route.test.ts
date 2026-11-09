@@ -8,7 +8,7 @@ import PrivacyPage from '../../apps/www/src/app/privacy/page.js'
 import SecurityPage from '../../apps/www/src/app/security/page.js'
 import HomePage from '../../apps/www/src/app/page.js'
 import { SiteFooter } from '../../apps/www/src/site/footer.js'
-import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
+import { compareVersions, displayCatalogMinimumCli, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 describe('Button editor route', () => {
   it('renders the Button editor heading and breadcrumb context in the main landmark', () => {
@@ -63,8 +63,9 @@ it('renders the public landing page with editor links and the published installe
   // The landing matrix links to the whole current catalog, including preview-only additions.
   expect(html).toContain(`Explore all ${supportedComponentIds.length} components`)
   expect(html).not.toContain('not available in glass')
-  // The published 0.7.2 installer accepts the complete current catalog.
-  expect(html).not.toContain('need a newer installer')
+  // The display components need CLI 0.7.3: until it is published, the glass note says some components need it.
+  if (compareVersions(publishedInstaller.version, displayCatalogMinimumCli) < 0) expect(html).toContain('need a newer installer')
+  else expect(html).not.toContain('need a newer installer')
   expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')
 })

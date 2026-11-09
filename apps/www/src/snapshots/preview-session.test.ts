@@ -139,7 +139,7 @@ it('previews a published glass preset below the contrast bound', async () => {
   expect(session.state.result?.preset.data.design.glassOpacity).toBe(0.3)
 })
 it.each([
-  ['liquid-glass', ['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast']],
+  ['liquid-glass', ['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper']],
   ['flat', supportedComponentIds],
 ] as const)(
   'compiles the components a %s snapshot supports for its preview',
