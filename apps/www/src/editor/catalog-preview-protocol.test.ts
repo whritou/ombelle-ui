@@ -1,7 +1,8 @@
 import { expect, it } from 'vitest'
 import { compileComponentRecipe } from '@ombelle/compiler'
 import badge from '../../../../examples/component-recipe.badge.json'
-import { acceptCatalogMeasure, verifyCatalogPreviewRender } from './catalog-preview-protocol'
+import { acceptButtonMeasure, acceptCatalogMeasure, verifyCatalogPreviewRender } from './catalog-preview-protocol'
+import { baselineText } from './components/properties-panel'
 
 it('rejects stale and mismatched renders and revalidates the stylesheet', async () => {
   const result = await compileComponentRecipe({ recipe: badge })
@@ -20,4 +21,20 @@ it('accepts only finite dimensions for the parts of the component', () => {
   expect(acceptCatalogMeasure({ ...message, parts: { badge: { gapPx: Number.NaN } } }, 'badge')).toBeNull()
   expect(acceptCatalogMeasure({ ...message, requestId: 0 }, 'badge')).toBeNull()
   expect(acceptCatalogMeasure({ ...message, extra: true }, 'badge')).toBeNull()
+})
+
+it('accepts the Button specimen measure only under its button slot', () => {
+  const message = { type: 'catalog-measure', requestId: 2, parts: { button: { paddingXPx: 22, radiusRem: 0.6 } } }
+  expect(acceptButtonMeasure(message)).toEqual({ requestId: 2, values: { paddingXPx: 22, radiusRem: 0.6 } })
+  expect(acceptButtonMeasure({ ...message, parts: { badge: { paddingXPx: 8 } } })).toBeNull()
+  expect(acceptButtonMeasure({ ...message, parts: { button: {}, badge: {} } })).toBeNull()
+  expect(acceptButtonMeasure({ ...message, parts: { button: { gapPx: Number.POSITIVE_INFINITY } } })).toBeNull()
+  expect(acceptButtonMeasure({ ...message, requestId: 0 })).toBeNull()
+})
+
+it('rounds a baseline to the field step for the empty field', () => {
+  expect(baselineText(0.6000001, 0.1)).toBe('0.6')
+  expect(baselineText(-0.0125, 0.01)).toBe('-0.01')
+  expect(baselineText(600, 100)).toBe('600')
+  expect(baselineText(undefined, 1)).toBeUndefined()
 })
