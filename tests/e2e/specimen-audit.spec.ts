@@ -3,7 +3,7 @@ import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { styleFamilies } from '../../packages/contracts/src/index.js'
 import {
-  checkFocusVisible, findClipping, findForcedColors, findOverflow, findTargetSize, interactiveSelector, markBorders, runAxe,
+  checkFocusVisible, findClipping, findForcedColors, findOverflow, findTargetSize, listFocusables, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
 
@@ -25,32 +25,11 @@ const overlays: Record<string, { open: 'click' | 'focus'; content: (page: Page, 
   accordion: { open: 'click', content: page => page.locator('[data-audit-accordion-panel]'), returnsFocus: false },
 }
 
-/** Mark the keyboard-reachable controls inside `root` and return locators for them, in document order. */
-async function focusables(root: Locator, prefix: string): Promise<Locator[]> {
-  const out: Locator[] = []
-  for (const [index, handle] of (await root.all()).entries()) {
-    const count = await handle.evaluate((root, [selector, key]) => {
-      let n = 0
-      for (const element of [root, ...root.querySelectorAll(selector)]) {
-        if (!element.matches(selector) || !(element instanceof HTMLElement) || element.tabIndex < 0) continue
-        if (element.closest('[aria-hidden="true"], [inert]') || element.matches(':disabled') || element.getClientRects().length === 0) continue
-        // Visually hidden focus proxies (1×1) only redirect focus; they are never drawn.
-        const box = element.getBoundingClientRect()
-        if (box.width <= 1 && box.height <= 1) continue
-        element.setAttribute('data-audit-focus', `${key}-${n++}`)
-      }
-      return n
-    }, [interactiveSelector, `${prefix}-${index}`] as const)
-    for (let n = 0; n < count; n++) out.push(root.page().locator(`[data-audit-focus="${prefix}-${index}-${n}"]`))
-  }
-  return out
-}
-
 async function measure(page: Page, roots: Locator[], stop: Locator, prefix: string, counts: Record<AuditCheck, number>) {
   const findings: Finding[] = [...await findOverflow(roots), ...await findClipping(roots, stop), ...await findTargetSize(roots)]
   counts.overflow += roots.length; counts.clipping += roots.length; counts['target-size'] += roots.length
   for (const [index, root] of roots.entries())
-    for (const control of await focusables(root, `${prefix}-${index}`)) {
+    for (const control of await listFocusables(root, `${prefix}-${index}`)) {
       findings.push(...await checkFocusVisible(page, control))
       // The ring is drawn now: it must not be cut either.
       findings.push(...await findClipping([control], stop))
@@ -126,7 +105,7 @@ for (const family of styleFamilies)
           await page.emulateMedia({ forcedColors: 'active' })
           for (const component of components) {
             const section = page.locator(`section[data-audit="${component}"]`)
-            const list = await findForcedColors([section], await focusables(section, `${component}-forced`))
+            const list = await findForcedColors([section], await listFocusables(section, `${component}-forced`))
             findings.push(...list.map(finding => ({ ...finding, component })))
             counts['forced-colors']++
           }

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { checkFocusVisible, findClipping, findForcedColors, findOverflow, findTargetSize, markBorders, runAxe } from '../helpers/specimen-audit.js'
+import { checkFocusVisible, findClipping, findForcedColors, findOverflow, findTargetSize, listFocusables, markBorders, runAxe } from '../helpers/specimen-audit.js'
 
 // Each check must report its planted defect and stay silent on the clean twin,
 // so a check that passes everything fails here first.
@@ -107,4 +107,13 @@ test('focus-visible: a control flush with the viewport edge is measured with its
   // Fully visible, bottom edge on the viewport's bottom edge: nothing asks the page to scroll.
   await page.locator('#edge').evaluate(element => window.scrollBy(0, element.getBoundingClientRect().bottom - innerHeight))
   expect(await checkFocusVisible(page, page.locator('#edge'))).toEqual([])
+})
+
+test('listFocusables: keyboard-reachable controls, including arrow-key list items, and nothing hidden or disabled', async ({ page }) => {
+  await fixture(page, '', `<button>Open</button><button disabled>Off</button><span aria-hidden="true"><button>Hidden</button></span>
+    <span tabindex="0" style="position:absolute;inline-size:1px;block-size:1px;overflow:hidden">Proxy</span>
+    <div role="listbox" aria-label="Plans"><div role="option" tabindex="-1">Starter</div><div role="option" tabindex="-1">Team</div></div>
+    <div tabindex="-1">Programmatic only</div>`)
+  const list = await listFocusables(both(page)[1], 'case')
+  expect(await Promise.all(list.map(item => item.textContent()))).toEqual(['Open', 'Starter', 'Team'])
 })

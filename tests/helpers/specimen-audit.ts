@@ -228,6 +228,33 @@ export async function checkFocusVisible(page: Page, target: Locator): Promise<Fi
     detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed` }]
 }
 
+const itemRoles = '[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]'
+
+/**
+ * Keyboard-reachable controls inside `root`, in document order: tabbable controls, plus list and menu items,
+ * which primitives reach with arrow keys (Radix gives them tabindex -1). Hidden, inert, disabled and 1×1 proxies are skipped.
+ */
+export async function listFocusables(root: Locator, prefix: string): Promise<Locator[]> {
+  const out: Locator[] = []
+  for (const [index, handle] of (await root.all()).entries()) {
+    const count = await handle.evaluate((root, [selector, items, key]) => {
+      let n = 0
+      for (const element of [root, ...root.querySelectorAll(`${selector}, ${items}`)]) {
+        if (!(element instanceof HTMLElement) || !element.matches(`${selector}, ${items}`)) continue
+        if (element.tabIndex < 0 && !element.matches(items)) continue
+        if (element.closest('[aria-hidden="true"], [inert]') || element.matches(':disabled, [aria-disabled="true"], [data-disabled]')
+          || element.getClientRects().length === 0) continue
+        const box = element.getBoundingClientRect()
+        if (box.width <= 1 && box.height <= 1) continue
+        element.setAttribute('data-audit-focus', `${key}-${n++}`)
+      }
+      return n
+    }, [interactiveSelector, itemRoles, `${prefix}-${index}`] as const)
+    for (let n = 0; n < count; n++) out.push(root.page().locator(`[data-audit-focus="${prefix}-${index}-${n}"]`))
+  }
+  return out
+}
+
 /** Tag elements that have a border now, so the forced-colors pass knows which borders must survive. */
 export async function markBorders(roots: Locator[]): Promise<void> {
   for (const root of roots) for (const handle of await root.all()) await handle.evaluate(root => {
