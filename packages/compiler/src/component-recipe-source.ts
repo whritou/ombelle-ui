@@ -6,7 +6,10 @@ export function recipeTemplateSlots(template: ComponentTemplate): string[] {
   ])]
 }
 
-/** Transform reviewed template sources, with scope carried through portal closures. */
+/**
+ * Transform reviewed template sources, with scope carried through portal closures.
+ * The closure names avoid template props such as Table Head's `scope`, which would shadow them.
+ */
 export function scopeRecipeTemplate(template: ComponentTemplate, utilsImport: string): string {
   const imports: string[] = []
   const exports: string[] = []
@@ -23,8 +26,8 @@ export function scopeRecipeTemplate(template: ComponentTemplate, utilsImport: st
     })
     .replace(/^export (?=(?:type|interface) )/gm, '')
     .replace(/data-slot=(["'])([a-z][a-z0-9-]*)\1/g, (attribute, _, slot: string) =>
-      slots.has(slot) ? `data-slot="recipe-${slot}" data-ombelle-recipe={scope} data-ombelle-recipe-instance={instance}` : attribute)
-  return `'use client'\n${imports.join('\n')}\nexport function createScopedPrimitives(scope: string, instance?: string) {\n${body}\nreturn { ${exports.join(', ')} }\n}\n`
+      slots.has(slot) ? `data-slot="recipe-${slot}" data-ombelle-recipe={recipeScope} data-ombelle-recipe-instance={recipeInstance}` : attribute)
+  return `'use client'\n${imports.join('\n')}\nexport function createScopedPrimitives(recipeScope: string, recipeInstance?: string) {\n${body}\nreturn { ${exports.join(', ')} }\n}\n`
 }
 
 /** Keep the reviewed glass algorithm while moving its effects off the document root. */
