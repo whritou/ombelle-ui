@@ -225,7 +225,7 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
 })
 
 it('requests only components the family supports', () => {
-  expect(previewComponentIds('flat')).toHaveLength(35)
+  expect(previewComponentIds('flat')).toHaveLength(40)
   expect(previewComponentIds('liquid-glass')).toEqual([
     'alert',
     'accordion',
@@ -262,6 +262,11 @@ it('requests only components the family supports', () => {
     'field',
     'meter',
     'stepper',
+    'slider',
+    'toggle-group',
+    'chip',
+    'tag-input',
+    'input-otp',
   ])
 })
 

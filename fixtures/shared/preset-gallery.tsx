@@ -99,6 +99,11 @@ import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
 import { Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
 import { Meter, MeterLabel, MeterValue, MeterSegment, MeterLegend, MeterLegendItem } from '@/components/ui/meter'
+import { Slider, SliderTicks } from '@/components/ui/slider'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Chip, ChipGroup, ChipRemove } from '@/components/ui/chip'
+import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 
 // Family-independent: callers pass the component ids their family cannot
@@ -242,6 +247,31 @@ export function PresetGallery({
           <StepperItem status="current"><StepperIndicator>2</StepperIndicator><StepperTitle>Components</StepperTitle><StepperDescription>Choose 4</StepperDescription><StepperSeparator /></StepperItem>
           <StepperItem status="upcoming"><StepperIndicator>3</StepperIndicator><StepperTitle>Install CLI</StepperTitle></StepperItem>
         </Stepper>
+      </section>)}
+      {gate('slider', 'Slider', <section aria-label="Slider" data-component="slider">
+        <h2>Slider</h2>
+        <Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => `${value} pixels`} />
+        <Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} />
+        <SliderTicks values={[0, 25, 50, 75, 100]} />
+      </section>)}
+      {gate('toggle-group', 'Toggle Group', <section aria-label="Toggle Group" data-component="toggle-group">
+        <h2>Toggle Group</h2>
+        <ToggleGroup type="single" defaultValue="week" aria-label="Calendar view"><ToggleGroupItem value="day">Day</ToggleGroupItem><ToggleGroupItem value="week">Week</ToggleGroupItem><ToggleGroupItem value="month">Month</ToggleGroupItem></ToggleGroup>
+        <ToggleGroup type="multiple" variant="toolbar" defaultValue={['bold']} aria-label="Text formatting"><ToggleGroupItem value="bold" aria-label="Bold"><b aria-hidden="true">B</b></ToggleGroupItem><ToggleGroupItem value="italic" aria-label="Italic"><i aria-hidden="true">I</i></ToggleGroupItem><ToggleGroupItem value="underline" aria-label="Underline"><u aria-hidden="true">U</u></ToggleGroupItem></ToggleGroup>
+      </section>)}
+      {gate('chip', 'Chip', <section aria-label="Chip" data-component="chip">
+        <h2>Chip</h2>
+        <ChipGroup aria-label="Status filter"><Chip defaultPressed>On track</Chip><Chip defaultPressed={false}>Needs attention</Chip><Chip defaultPressed={false}>Shipped</Chip></ChipGroup>
+        <p><Chip>glass<ChipRemove /></Chip></p>
+      </section>)}
+      {gate('tag-input', 'Tag Input', <section aria-label="Tag Input" data-component="tag-input">
+        <h2>Tag Input</h2>
+        <label id="gallery-topics">Topics</label>
+        <TagInput defaultValue={['design-tokens', 'glass']}><TagInputList /><TagInputInput aria-labelledby="gallery-topics" placeholder="Add a topic" /></TagInput>
+      </section>)}
+      {gate('input-otp', 'Input OTP', <section aria-label="Input OTP" data-component="input-otp">
+        <h2>Input OTP</h2>
+        <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>
       </section>)}
       <section aria-label="Actions" data-component="button">
         <h2>Actions</h2>

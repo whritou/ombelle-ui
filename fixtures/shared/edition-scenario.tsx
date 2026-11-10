@@ -23,6 +23,10 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
+import { Slider } from '@/components/ui/slider'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from '@/components/ui/toast'
 
 // Ported components rendered identically in both editions; the parity test
@@ -69,6 +73,38 @@ function CatalogExpansionScenario() {
           <InputGroupAddon align="inline-end"><InputGroupText aria-hidden="true">!</InputGroupText></InputGroupAddon>
         </InputGroup>
         <p id="expansion-email-error">Enter a complete email address.</p>
+        <section aria-label="Form controls" data-testid="form-controls">
+          <p id="fc-radius-label">Border radius</p>
+          <Slider data-testid="slider-single" defaultValue={[12]} max={24} aria-labelledby="fc-radius-label" getValueText={(value) => `${value} pixels`} />
+          <Slider data-testid="slider-range" defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} />
+          <ToggleGroup data-testid="toggle-single" type="single" defaultValue="week" aria-label="Calendar view">
+            <ToggleGroupItem value="day">Day</ToggleGroupItem>
+            <ToggleGroupItem value="week">Week</ToggleGroupItem>
+            <ToggleGroupItem value="month">Month</ToggleGroupItem>
+          </ToggleGroup>
+          <Field>
+            <FieldLabel>Topics</FieldLabel>
+            <TagInput data-testid="tag-input" defaultValue={['glass']}>
+              <TagInputList />
+              <FieldControl><TagInputInput /></FieldControl>
+            </TagInput>
+            <FieldDescription>Enter or comma adds a topic.</FieldDescription>
+          </Field>
+          <p id="fc-otp-label">Verification code</p>
+          <InputOTP data-testid="input-otp" maxLength={6} aria-labelledby="fc-otp-label">
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator />
+            <InputOTPGroup>
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </section>
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

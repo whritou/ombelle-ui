@@ -13,12 +13,14 @@ export type InputOTPProps = Omit<React.ComponentProps<typeof OTPInput>, 'render'
  * and pasting a code fills them all. Digits only unless you pass another pattern. Name it with
  * aria-label or aria-labelledby, or wrap it in a Field.
  */
-export function InputOTP({ className, pattern = REGEXP_ONLY_DIGITS, autoComplete = 'one-time-code', disabled, ...props }: InputOTPProps) {
+export function InputOTP({ className, pattern = REGEXP_ONLY_DIGITS, autoComplete = 'one-time-code', disabled, pasteTransformer, ...props }: InputOTPProps) {
   return (
     <div data-slot="input-otp" data-disabled={disabled || undefined} className={cn(className)}>
       <OTPInput
         {...(props as React.ComponentProps<typeof OTPInput>)}
         pattern={pattern}
+        // A pasted "12-34 56" keeps its digits, as Base UI's OTP Field does.
+        pasteTransformer={pasteTransformer ?? (pattern === REGEXP_ONLY_DIGITS ? (pasted) => pasted.replace(/\D/g, '').slice(0, props.maxLength) : undefined)}
         inputMode={pattern === REGEXP_ONLY_DIGITS ? 'numeric' : 'text'}
         autoComplete={autoComplete}
         disabled={disabled}

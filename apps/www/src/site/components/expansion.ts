@@ -31,6 +31,36 @@ export const expansionDocs = {
     states: 'Discrete, warning, labelled parts, clamped values', basis: 'role="meter" with value text; Base UI uses its Meter', client: true,
     usage: expansionExamples.meter, minimumCli: '0.7.3',
   },
+  slider: {
+    name: 'Slider', description: 'A value or a range chosen along a track, with optional ticks.',
+    api: 'Slider (value, defaultValue, min, max, step, orientation, thumbLabels, getValueText), SliderTicks (values, min, max)',
+    states: 'Single, range, disabled, vertical, focus', basis: 'Reviewed Radix Slider; Base UI Slider in the Base UI edition', client: true,
+    usage: expansionExamples.slider, minimumCli: '0.7.3',
+  },
+  'toggle-group': {
+    name: 'Toggle Group', description: 'A segmented single choice or a toolbar of pressed buttons, with one Tab stop.',
+    api: 'ToggleGroup (type, value, defaultValue, variant, orientation), ToggleGroupItem (value)',
+    states: 'Checked, pressed, disabled, segmented, toolbar, focus', basis: 'Reviewed Radix Toggle Group; Base UI Toggle Group in the Base UI edition', client: true,
+    usage: expansionExamples['toggle-group'], minimumCli: '0.7.3',
+  },
+  chip: {
+    name: 'Chip', description: 'Pressable filter chips and removable tokens.',
+    api: 'Chip (pressed, defaultPressed, onPressedChange), ChipRemove (label, onRemove), ChipGroup',
+    states: 'Pressed, static, removable, disabled, focus', basis: 'Native button with aria-pressed, and a span with a remove button', client: true,
+    usage: expansionExamples.chip, minimumCli: '0.7.3',
+  },
+  'tag-input': {
+    name: 'Tag Input', description: 'A field of removable tags: Enter or comma adds one, Backspace removes the last.',
+    api: 'TagInput (value, defaultValue, separators, max, allowDuplicates, name), TagInputList, TagInputInput',
+    states: 'Empty, tags, duplicate, at maximum, disabled, focus within', basis: 'Native input and list with a polite live region', client: true,
+    usage: expansionExamples['tag-input'], minimumCli: '0.7.3',
+  },
+  'input-otp': {
+    name: 'Input OTP', description: 'A one-time code in separate slots; pasting a code fills them all.',
+    api: 'InputOTP (maxLength, value, onChange, onComplete, pattern, name), InputOTPGroup, InputOTPSlot (index), InputOTPSeparator',
+    states: 'Empty, active, filled, disabled', basis: 'input-otp; Base UI OTP Field in the Base UI edition', client: true,
+    usage: expansionExamples['input-otp'], minimumCli: '0.7.3',
+  },
   stepper: {
     name: 'Stepper', description: 'Ordered steps with done, current and upcoming states.',
     api: 'Stepper (orientation), StepperItem (status), StepperIndicator, StepperTitle, StepperDescription, StepperSeparator',
