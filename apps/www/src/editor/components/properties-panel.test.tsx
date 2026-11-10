@@ -11,15 +11,15 @@ const recipe = validateRecipe(exampleRecipe)
 const panel = (value = recipe) =>
   renderToStaticMarkup(<PropertiesPanel recipe={value} family="flat" onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
 
-it('VariantPicker presses default for the example recipe and offers all six variants', () => {
+it('VariantPicker presses default for the example recipe and offers all seven variants', () => {
   const html = renderToStaticMarkup(<VariantPicker value={recipe.props.variant ?? 'default'} onChange={noop} />)
   const buttons = html.split('<button').slice(1)
-  expect(buttons).toHaveLength(6)
+  expect(buttons).toHaveLength(7)
   expect(html).toMatch(/role="radiogroup"[^>]*aria-label="Variant"|aria-label="Variant"[^>]*role="radiogroup"/)
   const pressed = buttons.filter((button) => /^[^>]*aria-checked="true"/.test(button))
   expect(pressed).toHaveLength(1)
   expect(pressed[0]).toContain('data-variant="default"')
-  for (const variant of ['default', 'secondary', 'outline', 'ghost', 'link', 'destructive'])
+  for (const variant of ['default', 'secondary', 'outline', 'ghost', 'link', 'destructive', 'link-destructive'])
     expect(html).toContain(`data-variant="${variant}"`)
 })
 

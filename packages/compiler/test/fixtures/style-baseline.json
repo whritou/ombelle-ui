@@ -6,7 +6,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "1d114e0acca0898dbe5db559dada84732e1618ae0a91c20f4c74d5be34a49af0"
+          "sha256": "e77894453f7e18a65e1d0bd7609b302eed1e80cc28e37d5f0173d5c9f6e88128"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -34,7 +34,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "23f0836d4e53b00f077e629ab2f14ff3f927932a4be255e9b58af232e849569c"
+          "sha256": "af233d4fd83763e553995543d2dd405e5cf3770719f3c005c770f4bde3170cd4"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -47,7 +47,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "1d114e0acca0898dbe5db559dada84732e1618ae0a91c20f4c74d5be34a49af0"
+          "sha256": "e77894453f7e18a65e1d0bd7609b302eed1e80cc28e37d5f0173d5c9f6e88128"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -75,7 +75,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "90fdf994d13b473d72acb83ce76d80c39bfea364c4c09095535b043190afe2ee"
+          "sha256": "8b48f9e464bce2e391a1871a6f613dcacb1b87a0c93d3e0c9babbea0e7a1a70b"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -88,7 +88,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "1d114e0acca0898dbe5db559dada84732e1618ae0a91c20f4c74d5be34a49af0"
+          "sha256": "e77894453f7e18a65e1d0bd7609b302eed1e80cc28e37d5f0173d5c9f6e88128"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -116,7 +116,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "d9c775c983347c8c49a7b163a831efc3cca871c93b0a1bf3cc2474d5ad2e7629"
+          "sha256": "0dc701809ec13aa9fe90f921f4eb21bae1821795657e90eaa5e39e60653016f5"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -275,6 +275,22 @@
       ],
       "spec": "2026-11-08-forms-navigation-overlays",
       "reason": "Adds opt-in component appearances, size/dot composition, density/striping and status intents, plus shared glass contrast plates for six new components. Existing preset inputs and normalized recipes without new options retain their identities. Newly added components have independent artifacts."
+    },
+    {
+      "families": [
+        "flat",
+        "minimalist",
+        "neo-brutalism",
+        "ombelle",
+        "liquid-glass"
+      ],
+      "logicalPaths": [
+        "styles/ui-style.css",
+        "components/ui/button.tsx",
+        "scoped Button preset and recipe button.css and button.tsx"
+      ],
+      "spec": "feat/variants-basics-073",
+      "reason": "Button keeps its resting width while loading and gains the link-destructive variant (0.7.3 variants, batch 6a)"
     }
   ]
 }

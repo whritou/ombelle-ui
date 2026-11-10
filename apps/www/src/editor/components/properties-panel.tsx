@@ -83,6 +83,7 @@ const variants: readonly { value: RecipeButtonVariant; label: string }[] = [
   { value: 'ghost', label: 'Ghost' },
   { value: 'link', label: 'Link' },
   { value: 'destructive', label: 'Destructive' },
+  { value: 'link-destructive', label: 'Destructive link' },
 ]
 const sizes = [
   { value: 'sm', label: 'S' },
@@ -124,7 +125,7 @@ function FieldError({ diagnostic, path }: { diagnostic: CompileDiagnostic | null
     : null
 }
 
-/** Six options in a radio group, each with a small sample of the variant's look. */
+/** Seven options in a radio group, each with a small sample of the variant's look. */
 export function VariantPicker({ value, onChange }: { value: RecipeButtonVariant; onChange(variant: RecipeButtonVariant): void }) {
   return (
     <ToggleGroup type="single" aria-label="Variant" className="be-variants" value={value} onValueChange={keepChoice(onChange)}>
