@@ -39,5 +39,9 @@ export const supportedComponentIds = [
   'chip',
   'tag-input',
   'input-otp',
+  'combobox',
+  'command',
+  'hover-card',
+  'context-menu',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

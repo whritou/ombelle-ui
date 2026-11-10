@@ -2942,6 +2942,462 @@
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "combobox"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "single",
+                "multiple"
+              ],
+              "default": "single",
+              "title": "Selection"
+            },
+            "creatable": {
+              "type": "boolean",
+              "default": true,
+              "title": "Offer to create"
+            },
+            "selection": {
+              "type": "array",
+              "title": "Selected item IDs",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]{0,39}$"
+              },
+              "maxItems": 12,
+              "default": []
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Preset",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": "Search presets",
+              "pattern": "\\S"
+            },
+            "emptyText": {
+              "type": "string",
+              "title": "Empty text",
+              "maxLength": 200,
+              "default": "No presets found.",
+              "pattern": "\\S"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 1,
+              "maxItems": 12,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Item",
+                    "pattern": "\\S"
+                  },
+                  "group": {
+                    "type": "string",
+                    "title": "Group",
+                    "maxLength": 40,
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "group"
+                ]
+              },
+              "default": [
+                {
+                  "id": "liquid-glass",
+                  "label": "Liquid glass",
+                  "group": ""
+                },
+                {
+                  "id": "liquid-glass-givre",
+                  "label": "Liquid glass — Givre",
+                  "group": ""
+                },
+                {
+                  "id": "liquid-glass-prism",
+                  "label": "Liquid glass — Prism",
+                  "group": ""
+                },
+                {
+                  "id": "ombelle",
+                  "label": "Ombelle",
+                  "group": ""
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "placeholder",
+            "emptyText",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "command"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "presentation": {
+              "enum": [
+                "inline",
+                "dialog"
+              ],
+              "default": "inline",
+              "title": "Presentation"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": "Search commands",
+              "pattern": "\\S"
+            },
+            "emptyText": {
+              "type": "string",
+              "title": "Empty text",
+              "maxLength": 200,
+              "default": "No results.",
+              "pattern": "\\S"
+            },
+            "groups": {
+              "type": "array",
+              "title": "Groups",
+              "minItems": 1,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "heading": {
+                    "type": "string",
+                    "title": "Heading",
+                    "maxLength": 200,
+                    "default": "Group",
+                    "pattern": "\\S"
+                  },
+                  "items": {
+                    "type": "array",
+                    "title": "Commands",
+                    "minItems": 0,
+                    "maxItems": 6,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                          "default": "",
+                          "title": "Item ID"
+                        },
+                        "label": {
+                          "type": "string",
+                          "title": "Label",
+                          "maxLength": 200,
+                          "default": "Command",
+                          "pattern": "\\S"
+                        },
+                        "shortcut": {
+                          "type": "string",
+                          "title": "Shortcut",
+                          "maxLength": 40,
+                          "default": ""
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "label",
+                        "shortcut"
+                      ]
+                    },
+                    "default": []
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "heading",
+                  "items"
+                ]
+              },
+              "default": [
+                {
+                  "id": "components",
+                  "heading": "Components",
+                  "items": [
+                    {
+                      "id": "add-button",
+                      "label": "Add Button",
+                      "shortcut": "↵"
+                    },
+                    {
+                      "id": "add-dialog",
+                      "label": "Add Dialog",
+                      "shortcut": ""
+                    }
+                  ]
+                },
+                {
+                  "id": "theme",
+                  "heading": "Theme",
+                  "items": [
+                    {
+                      "id": "add-theme",
+                      "label": "Add theme from preset",
+                      "shortcut": "Ctrl+T"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "placeholder",
+            "emptyText",
+            "groups"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "hover-card"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "side": {
+              "enum": [
+                "top",
+                "bottom"
+              ],
+              "default": "bottom",
+              "title": "Side"
+            },
+            "arrow": {
+              "type": "boolean",
+              "default": true,
+              "title": "Arrow"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "triggerText": {
+              "type": "string",
+              "title": "Link text",
+              "maxLength": 200,
+              "default": "@ombelle",
+              "pattern": "\\S"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Ombelle UI",
+              "pattern": "\\S"
+            },
+            "handle": {
+              "type": "string",
+              "title": "Handle",
+              "maxLength": 200,
+              "default": "@ombelle",
+              "pattern": "\\S"
+            },
+            "body": {
+              "type": "string",
+              "title": "Body",
+              "maxLength": 400,
+              "default": "Reviewed React components with deterministic presets.",
+              "pattern": "\\S"
+            },
+            "initials": {
+              "type": "string",
+              "title": "Initials",
+              "minLength": 1,
+              "maxLength": 2,
+              "default": "OU",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "triggerText",
+            "title",
+            "handle",
+            "body",
+            "initials"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "context-menu"
+        },
+        "props": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "zoneText": {
+              "type": "string",
+              "title": "Zone text",
+              "maxLength": 200,
+              "default": "Right-click or Shift+F10 on a layer",
+              "pattern": "\\S"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 1,
+              "maxItems": 10,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Item",
+                    "pattern": "\\S"
+                  },
+                  "shortcut": {
+                    "type": "string",
+                    "title": "Shortcut",
+                    "maxLength": 40,
+                    "default": ""
+                  },
+                  "kind": {
+                    "enum": [
+                      "item",
+                      "submenu",
+                      "separator",
+                      "destructive"
+                    ],
+                    "default": "item",
+                    "title": "Kind"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "shortcut",
+                  "kind"
+                ]
+              },
+              "default": [
+                {
+                  "id": "duplicate",
+                  "label": "Duplicate",
+                  "shortcut": "Ctrl+D",
+                  "kind": "item"
+                },
+                {
+                  "id": "apply-preset",
+                  "label": "Apply preset",
+                  "shortcut": "",
+                  "kind": "submenu"
+                },
+                {
+                  "id": "copy-jsx",
+                  "label": "Copy as JSX",
+                  "shortcut": "",
+                  "kind": "item"
+                },
+                {
+                  "id": "divider",
+                  "label": "Separator",
+                  "shortcut": "",
+                  "kind": "separator"
+                },
+                {
+                  "id": "delete",
+                  "label": "Delete",
+                  "shortcut": "Del",
+                  "kind": "destructive"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "zoneText",
+            "items"
+          ]
+        }
+      }
     }
   ],
   "$defs": {
