@@ -23,16 +23,31 @@ export function ContextMenuPortal({
 
 /**
  * The area that opens the menu on right-click, or with Shift+F10 or the context-menu key while
- * focused. Give it tabIndex={0} and a name when it is not already focusable.
+ * focused. Give it tabIndex={0} and a name when it is not already focusable. variant="zone"
+ * draws it as a dashed drop area; by default it keeps the look of what it wraps.
  */
 export function ContextMenuTrigger({
   className,
+  variant,
+  onKeyDown,
   ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.Trigger>) {
+}: React.ComponentProps<typeof ContextMenuPrimitive.Trigger> & { variant?: 'zone' }) {
   return (
     <ContextMenuPrimitive.Trigger
       data-slot="context-menu-trigger"
+      data-variant={variant}
       className={cn(className)}
+      onKeyDown={(event) => {
+        onKeyDown?.(event)
+        // Radix opens on the browser's contextmenu event, which not every browser or input
+        // method sends for the keyboard: open it at the trigger's corner instead.
+        if (event.defaultPrevented || !((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu')) return
+        event.preventDefault()
+        const box = event.currentTarget.getBoundingClientRect()
+        event.currentTarget.dispatchEvent(new MouseEvent('contextmenu', {
+          bubbles: true, cancelable: true, button: 2, clientX: box.left + 8, clientY: box.top + 8,
+        }))
+      }}
       {...props}
     />
   )

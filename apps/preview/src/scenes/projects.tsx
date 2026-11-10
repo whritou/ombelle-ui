@@ -1,4 +1,8 @@
+import * as React from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../generated/preset-gallery/components/ui/combobox'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '../generated/preset-gallery/components/ui/context-menu'
+import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '../generated/preset-gallery/components/ui/hover-card'
 import { Badge, BadgeDot } from '../generated/preset-gallery/components/ui/badge'
 import {
   Breadcrumb,
@@ -64,9 +68,12 @@ const rows = [
 ] as const
 
 const filters = ['On track', 'Needs attention', 'Shipped'] as const
+const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
 export function ProjectsScene(props: SceneProps) {
   const show = gate(props)
+  const [owners, setOwners] = React.useState<string[]>([])
+  const shown = owners.length ? rows.filter((row) => owners.includes(slug(row.owner))) : rows
   return (
     <main className="preset-scene" data-testid="preset-scene" data-scene="projects">
       <div className="scene-heading">
@@ -129,6 +136,22 @@ export function ProjectsScene(props: SceneProps) {
                       ))}
                     </ChipGroup>,
                   )}
+                  {show(
+                    'combobox',
+                    'Combobox',
+                    <div className="scene-field">
+                      <p id="scene-owner-label">Owner</p>
+                      <Combobox multiple value={owners} onValueChange={setOwners}>
+                        <ComboboxInput aria-labelledby="scene-owner-label" placeholder="Search people" />
+                        <ComboboxContent>
+                          <ComboboxList>
+                            {rows.map((row) => <ComboboxItem key={row.owner} value={slug(row.owner)}>{row.owner}</ComboboxItem>)}
+                          </ComboboxList>
+                          <ComboboxEmpty>No one matches.</ComboboxEmpty>
+                        </ComboboxContent>
+                      </Combobox>
+                    </div>,
+                  )}
                   <SheetFooter>
                     <SheetClose asChild>
                       <Button>Apply filters</Button>
@@ -170,10 +193,21 @@ export function ProjectsScene(props: SceneProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.name}>
+                    {shown.map((row) => (
+                      <ContextMenu key={row.name}>
+                      <ContextMenuTrigger asChild>
+                      <TableRow tabIndex={0}>
                         <TableCell>{row.name}</TableCell>
-                        <TableCell>{row.owner}</TableCell>
+                        <TableCell>
+                          <HoverCard>
+                            <HoverCardTrigger href={`#people-${slug(row.owner)}`}>{row.owner}</HoverCardTrigger>
+                            <HoverCardContent>
+                              <strong>{row.owner}</strong>
+                              <p className="scene-muted">Owns {row.name}. Updated {row.updated}.</p>
+                              <HoverCardArrow />
+                            </HoverCardContent>
+                          </HoverCard>
+                        </TableCell>
                         <TableCell>
                           <Badge size="sm" variant={row.alert ? 'destructive' : 'default'}>
                             <BadgeDot />
@@ -182,6 +216,15 @@ export function ProjectsScene(props: SceneProps) {
                         </TableCell>
                         <TableCell numeric>{row.updated}</TableCell>
                       </TableRow>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        <ContextMenuItem>Open</ContextMenuItem>
+                        <ContextMenuItem>Duplicate<ContextMenuShortcut>Ctrl+D</ContextMenuShortcut></ContextMenuItem>
+                        <ContextMenuItem>Archive</ContextMenuItem>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem variant="destructive">Delete<ContextMenuShortcut>Del</ContextMenuShortcut></ContextMenuItem>
+                      </ContextMenuContent>
+                      </ContextMenu>
                     ))}
                   </TableBody>
                 </Table>,

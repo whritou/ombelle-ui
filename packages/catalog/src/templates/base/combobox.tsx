@@ -47,12 +47,17 @@ function textOf(children: React.ReactNode): string {
  * filters the elements themselves so the parts match the Radix edition.
  */
 function labelsIn(children: React.ReactNode, labels = new Map<string, string>()): Map<string, string> {
+  return scan(children, { labels, create: false }).labels
+}
+type Scan = { labels: Map<string, string>; create: boolean }
+function scan(children: React.ReactNode, found: Scan = { labels: new Map(), create: false }): Scan {
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode; value?: string }>(child)) return
-    if (child.type === ComboboxItem) labels.set(child.props.value!, textOf(child.props.children))
-    else labelsIn(child.props.children, labels)
+    if (child.type === ComboboxItem) found.labels.set(child.props.value!, textOf(child.props.children))
+    else if (child.type === ComboboxCreate) found.create = true
+    else scan(child.props.children, found)
   })
-  return labels
+  return found
 }
 const matches = (query: string, label: string) => !query.trim() || label.toLowerCase().includes(query.trim().toLowerCase())
 const CREATE = '__combobox-create__'
@@ -99,12 +104,13 @@ export type ComboboxProps = Common & (
 export function Combobox(props: ComboboxProps) {
   const { disabled = false, name, onCreate, defaultQuery, className, children } = props
   const multiple = props.multiple === true
-  const labels = labelsIn(children)
+  const { labels, create: hasCreate } = scan(children)
   const [own, setOwn] = React.useState<string | string[]>(props.defaultValue ?? (multiple ? [] : ''))
   const current = props.value ?? own
   const values = Array.isArray(current) ? current : current ? [current] : []
   const [query, setQuery] = React.useState(defaultQuery ?? (!multiple && values[0] ? labels.get(values[0]) ?? values[0] : ''))
   const fieldRef = React.useRef<HTMLDivElement>(null)
+  const [open, setOpen] = React.useState(false)
   const commit = (next: string[]) => {
     const value = multiple ? next : next[0] ?? ''
     if (props.value === undefined) setOwn(value)
@@ -123,6 +129,12 @@ export function Combobox(props: ComboboxProps) {
         <ComboboxPrimitive.Root
           multiple={multiple}
           disabled={disabled}
+          // Base UI navigates the list it is given: the options that match, in the order they
+          // render, then the create row when it is offered.
+          items={[
+            ...[...labels].filter(([, label]) => matches(query, label)).map(([value]) => value),
+            ...(hasCreate && shouldOfferCreate(query, [...labels.values()]) ? [CREATE] : []),
+          ]}
           filter={null}
           autoHighlight
           value={(multiple ? values : values[0] ?? null) as never}
@@ -134,6 +146,12 @@ export function Combobox(props: ComboboxProps) {
           }}
           inputValue={query}
           onInputValueChange={(text) => setQuery(text)}
+          open={open}
+          onOpenChange={(next, details) => {
+            // A multiple combobox stays open while the person picks several options.
+            if (!next && multiple && details.reason === 'item-press') return
+            setOpen(next)
+          }}
           itemToStringLabel={(value: string) => value === CREATE ? query.trim() : labels.get(value) ?? value}
         >
           {children}

@@ -133,7 +133,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
           node('ContextMenuSubContent', {}, node('ContextMenuItem', {}, 'Ombelle'), node('ContextMenuItem', {}, 'Liquid glass')))
         : node('ContextMenuItem', entry.kind === 'destructive' ? { variant: 'destructive' } : {}, entry.label,
           ...(entry.shortcut.trim() ? [node('ContextMenuShortcut', {}, entry.shortcut.trim())] : [])))
-      return node('ContextMenu', {}, node('ContextMenuTrigger', { tabIndex: 0, 'aria-label': content.zoneText }, content.zoneText),
+      return node('ContextMenu', {}, node('ContextMenuTrigger', { variant: 'zone', tabIndex: 0, 'aria-label': content.zoneText }, content.zoneText),
         node('ContextMenuContent', {}, ...entries))
     }
     case 'toast':

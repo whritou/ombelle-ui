@@ -37,12 +37,12 @@ describe('shouldOfferCreate', () => {
 })
 
 describe('Combobox', () => {
-  it('provides its parts, with cmdk and the Radix popover in the Radix edition only', () => {
+  it('provides its parts, with the Radix popover in the Radix edition only', () => {
     expectComponentContract('combobox', { client: true,
       parts: ['Combobox', 'ComboboxInput', 'ComboboxContent', 'ComboboxList', 'ComboboxItem', 'ComboboxGroup', 'ComboboxEmpty', 'ComboboxCreate', 'ComboboxChips'],
       slots: ['combobox', 'combobox-field', 'combobox-input', 'combobox-content', 'combobox-list', 'combobox-group', 'combobox-group-heading', 'combobox-item',
         'combobox-match', 'combobox-empty', 'combobox-create', 'combobox-chips', 'combobox-chip', 'combobox-chip-remove'],
-      dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-popover', version: '1.3.1' }, { name: 'cmdk', version: '1.1.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
+      dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-popover', version: '1.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='combobox-field']", "[data-slot='combobox-input']", "[data-slot='combobox-content']", "[data-slot='combobox-item']", "[data-slot='combobox-match']", "[data-slot='combobox-create']", "[data-slot='combobox-chip']", "[data-slot='combobox-chip-remove']"], glass: 'experimental' })
     const baseDependencies = getTemplate(getCatalog('0.1.0'), 'combobox', 'base').dependencies.map(d => d.name)
     expect(baseDependencies).toContain('@base-ui/react')

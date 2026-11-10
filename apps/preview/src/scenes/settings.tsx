@@ -78,11 +78,53 @@ import { Slider } from '../generated/preset-gallery/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '../generated/preset-gallery/components/ui/toggle-group'
 import { TagInput, TagInputInput, TagInputList } from '../generated/preset-gallery/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../generated/preset-gallery/components/ui/input-otp'
+import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../generated/preset-gallery/components/ui/combobox'
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '../generated/preset-gallery/components/ui/command'
 import { gate, type SceneProps } from './shared'
+
+const startingPresets = ['Ombelle', 'Liquid glass', 'Liquid glass — Givre', 'Liquid glass — Prism', 'Flat', 'Minimalist', 'Neo-brutalism']
+
+/** The workspace's quick actions, shown inline and in the Ctrl+K dialog. */
+function QuickActions({ onRun }: { onRun(action: string): void }) {
+  return (
+    <>
+      <CommandInput placeholder="Search actions" />
+      <CommandList>
+        <CommandGroup heading="Workspace">
+          <CommandItem onSelect={() => onRun('Invite a teammate')}>Invite a teammate<CommandShortcut>Ctrl+I</CommandShortcut></CommandItem>
+          <CommandItem onSelect={() => onRun('Export settings')}>Export settings</CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Appearance">
+          <CommandItem keywords={['theme']} onSelect={() => onRun('Switch to dark mode')}>Switch to dark mode<CommandShortcut>Ctrl+D</CommandShortcut></CommandItem>
+        </CommandGroup>
+      </CommandList>
+      <CommandEmpty>No actions found.</CommandEmpty>
+    </>
+  )
+}
 
 export function SettingsScene(props: SceneProps) {
   const show = gate(props)
   const [saved, setSaved] = React.useState(false)
+  const [presets, setPresets] = React.useState(startingPresets)
+  const [preset, setPreset] = React.useState('Ombelle')
+  const [palette, setPalette] = React.useState(false)
+  const [ran, setRan] = React.useState('')
+  React.useEffect(() => {
+    const toggle = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setPalette((open) => !open)
+      }
+    }
+    window.addEventListener('keydown', toggle)
+    return () => window.removeEventListener('keydown', toggle)
+  }, [])
+  const run = (action: string) => {
+    setRan(action)
+    setPalette(false)
+  }
   return (
     <ToastProvider>
     <main className="preset-scene" data-testid="preset-scene" data-scene="settings">
@@ -250,8 +292,54 @@ export function SettingsScene(props: SceneProps) {
                     <Slider defaultValue={[12]} max={24} aria-labelledby="scene-radius-label" getValueText={(value) => `${value} pixels`} />
                   </div>,
                 )}
+                {show(
+                  'combobox',
+                  'Combobox',
+                  <div className="scene-field">
+                    <Label id="scene-preset-label">Default preset</Label>
+                    <Combobox value={preset} onValueChange={setPreset} onCreate={(name) => {
+                      setPresets((list) => [...list, name])
+                      setPreset(name)
+                    }}>
+                      <ComboboxInput aria-labelledby="scene-preset-label" placeholder="Search presets" />
+                      <ComboboxContent>
+                        <ComboboxList>
+                          {presets.map((name) => <ComboboxItem key={name} value={name}>{name}</ComboboxItem>)}
+                          <ComboboxCreate />
+                        </ComboboxList>
+                        <ComboboxEmpty>No presets found.</ComboboxEmpty>
+                      </ComboboxContent>
+                    </Combobox>
+                  </div>,
+                )}
               </CardContent>
             </Card>
+            {show(
+              'command',
+              'Command',
+              <Card>
+                <CardHeader>
+                  <CardTitle level={2}>Quick actions</CardTitle>
+                  <CardDescription>Search what you can do in this workspace.</CardDescription>
+                </CardHeader>
+                <CardContent className="scene-fields">
+                  <Command label="Quick actions">
+                    <QuickActions onRun={run} />
+                  </Command>
+                  <div className="scene-actions">
+                    <Button variant="outline" onClick={() => setPalette(true)}>
+                      Open with <KbdGroup><Kbd>Ctrl</Kbd><Kbd>K</Kbd></KbdGroup>
+                    </Button>
+                    {ran && <p className="scene-muted" role="status">Ran: {ran}</p>}
+                  </div>
+                  <CommandDialog open={palette} onOpenChange={setPalette} title="Quick actions">
+                    <Command label="Quick actions">
+                      <QuickActions onRun={run} />
+                    </Command>
+                  </CommandDialog>
+                </CardContent>
+              </Card>,
+            )}
             <Card>
               <CardHeader>
                 <CardTitle level={2}>Two-step sign-in</CardTitle>

@@ -160,6 +160,9 @@
   outline-offset: -2px;
 }
 [data-slot='context-menu-trigger'] {
+  -webkit-touch-callout: none;
+}
+[data-slot='context-menu-trigger'][data-variant='zone'] {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -171,14 +174,13 @@
   color: var(--foreground);
   font-family: var(--font-family);
   font-size: 0.875rem;
-  -webkit-touch-callout: none;
 }
 [data-slot='context-menu-trigger']:focus-visible {
   outline: 2.5px solid var(--ring);
   outline-offset: 3px;
 }
 @media (forced-colors: active) {
-  [data-slot='context-menu-trigger'] {
+  [data-slot='context-menu-trigger'][data-variant='zone'] {
     background: Canvas;
     color: CanvasText;
     border-color: CanvasText;

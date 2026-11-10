@@ -58,12 +58,25 @@ export function CommandDialogTrigger({ className, ...props }: React.ComponentPro
 export function CommandDialog({ title = 'Command menu', className, children, ...props }: CommandDialogProps) {
   const all = React.Children.toArray(children)
   const triggers = all.filter(child => React.isValidElement(child) && child.type === CommandDialogTrigger)
+  // Radix Dialog returns focus only to its own trigger; a dialog opened from a shortcut returns
+  // it to whatever had focus before.
+  const returnTo = React.useRef<HTMLElement | null>(null)
   return (
     <DialogPrimitive.Root {...props}>
       {triggers}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay data-slot="command-dialog-overlay" />
-        <DialogPrimitive.Content data-slot="command-dialog" aria-describedby={undefined} className={cn(className)}>
+        <DialogPrimitive.Content
+          data-slot="command-dialog"
+          aria-describedby={undefined}
+          className={cn(className)}
+          onOpenAutoFocus={() => { returnTo.current = document.activeElement as HTMLElement | null }}
+          onCloseAutoFocus={(event) => {
+            if (triggers.length || !returnTo.current?.isConnected) return
+            event.preventDefault()
+            returnTo.current.focus()
+          }}
+        >
           <DialogPrimitive.Title data-slot="command-dialog-title">{title}</DialogPrimitive.Title>
           <DialogContext.Provider value={true}>{all.filter(child => !triggers.includes(child))}</DialogContext.Provider>
         </DialogPrimitive.Content>

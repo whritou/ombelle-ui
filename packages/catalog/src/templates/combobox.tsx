@@ -1,6 +1,5 @@
 'use client'
 import * as React from 'react'
-import { Command as CommandPrimitive, useCommandState } from 'cmdk'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { CheckIcon, ChevronDownIcon, PlusIcon, XIcon } from 'lucide-react'
 import { cn } from './utils.js'
@@ -35,15 +34,22 @@ function textOf(children: React.ReactNode): string {
   }).join('').trim()
 }
 
-/** The items written as elements below `children`, so labels are known before the list opens. */
-function labelsIn(children: React.ReactNode, labels = new Map<string, string>()): Map<string, string> {
+type Scan = { labels: Map<string, string>; create: boolean }
+/**
+ * The options written as elements below `children`, in order, and whether a create row is
+ * present, so the field knows them before the list opens and on the server.
+ */
+function scan(children: React.ReactNode, found: Scan = { labels: new Map(), create: false }): Scan {
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode; value?: string }>(child)) return
-    if (child.type === ComboboxItem) labels.set(child.props.value!, textOf(child.props.children))
-    else labelsIn(child.props.children, labels)
+    if (child.type === ComboboxItem) found.labels.set(child.props.value!, textOf(child.props.children))
+    else if (child.type === ComboboxCreate) found.create = true
+    else scan(child.props.children, found)
   })
-  return labels
+  return found
 }
+const matches = (query: string, label: string) => !query.trim() || label.toLowerCase().includes(query.trim().toLowerCase())
+const CREATE = '__combobox-create__'
 
 type ComboboxState = {
   multiple: boolean
@@ -53,9 +59,14 @@ type ComboboxState = {
   setQuery(query: string): void
   open: boolean
   setOpen(open: boolean): void
-  select(value: string): void
+  /** The options that match the query, in order, then the create row when it is offered. */
+  visible: string[]
+  highlight: string | undefined
+  setHighlight(key: string): void
+  optionId(key: string): string
+  listId: string
+  choose(key: string): void
   remove(value: string): void
-  create(query: string): void
   disabled: boolean
   inputRef: React.RefObject<HTMLInputElement | null>
   fieldRef: React.RefObject<HTMLDivElement | null>
@@ -94,61 +105,69 @@ export type ComboboxProps = Common & (
 export function Combobox(props: ComboboxProps) {
   const { disabled = false, name, onCreate, defaultQuery, className, children } = props
   const multiple = props.multiple === true
-  const labels = labelsIn(children)
+  const { labels, create: hasCreate } = scan(children)
   const [own, setOwn] = React.useState<string | string[]>(props.defaultValue ?? (multiple ? [] : ''))
   const current = props.value ?? own
   const values = Array.isArray(current) ? current : current ? [current] : []
-  const [query, setQuery] = React.useState(defaultQuery ?? (!multiple && values[0] ? labels.get(values[0]) ?? values[0] : ''))
+  const [query, setQueryState] = React.useState(defaultQuery ?? (!multiple && values[0] ? labels.get(values[0]) ?? values[0] : ''))
   const [open, setOpen] = React.useState(false)
+  const [picked, setHighlight] = React.useState<string>()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const fieldRef = React.useRef<HTMLDivElement>(null)
+  const baseId = React.useId()
+  const order = [...labels.keys()]
+  const visible = [
+    ...order.filter(value => matches(query, labels.get(value)!)),
+    ...(hasCreate && shouldOfferCreate(query, [...labels.values()]) ? [CREATE] : []),
+  ]
+  // The first option is highlighted until the person moves, as in a native list.
+  const highlight = picked !== undefined && visible.includes(picked) ? picked : visible[0]
+  const setQuery = (next: string) => {
+    setQueryState(next)
+    setHighlight(undefined)
+  }
   const commit = (next: string[]) => {
     const value = multiple ? next : next[0] ?? ''
     if (props.value === undefined) setOwn(value)
     ;(props.onValueChange as ((value: string | string[]) => void) | undefined)?.(value)
   }
+  const finish = (text: string) => {
+    if (multiple) setQuery('')
+    else {
+      setQuery(text)
+      setOpen(false)
+    }
+  }
   const state: ComboboxState = {
-    multiple, values, labels, query, setQuery, open, setOpen, disabled, inputRef, fieldRef,
-    select(value) {
-      if (multiple) {
-        commit(values.includes(value) ? values.filter(item => item !== value) : [...values, value])
-        setQuery('')
+    multiple, values, labels, query, setQuery, open, setOpen, visible, highlight, setHighlight, disabled, inputRef, fieldRef,
+    listId: baseId + '-list',
+    optionId: (key) => key === CREATE ? baseId + '-create' : `${baseId}-option-${order.indexOf(key)}`,
+    choose(key) {
+      if (key === CREATE) {
+        const text = query.trim()
+        // Without onCreate, the typed name itself becomes a value.
+        if (onCreate) onCreate(text)
+        else commit(multiple ? (values.includes(text) ? values : [...values, text]) : [text])
+        finish(text)
+      } else if (multiple) {
+        commit(values.includes(key) ? values.filter(item => item !== key) : [...values, key])
+        finish('')
       } else {
-        commit([value])
-        setQuery(labels.get(value) ?? value)
-        setOpen(false)
+        commit([key])
+        finish(labels.get(key) ?? key)
       }
     },
     remove(value) {
       commit(values.filter(item => item !== value))
       inputRef.current?.focus()
     },
-    create(text) {
-      const name = text.trim()
-      // Without onCreate, the typed name itself becomes a value.
-      if (onCreate) onCreate(name)
-      else commit(multiple ? (values.includes(name) ? values : [...values, name]) : [name])
-      if (multiple) setQuery('')
-      else {
-        setQuery(name)
-        setOpen(false)
-      }
-    },
   }
   return (
     <ComboboxContext.Provider value={state}>
-      <CommandPrimitive
-        data-slot="combobox"
-        data-disabled={disabled || undefined}
-        className={cn(className)}
-        // Plain substring matching, so the filter agrees with highlightMatch.
-        filter={(_, search, keywords) => (keywords ?? []).some(text => text.toLowerCase().includes(search.trim().toLowerCase())) ? 1 : 0}
-        // Arrow keys move through the list only while it is open.
-        onKeyDown={(event) => { if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) event.preventDefault() }}
-      >
+      <div data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
         <PopoverPrimitive.Root open={open && !disabled} onOpenChange={setOpen}>{children}</PopoverPrimitive.Root>
         {name && values.map(value => <input key={value} type="hidden" name={name} value={value} />)}
-      </CommandPrimitive>
+      </div>
     </ComboboxContext.Provider>
   )
 }
@@ -177,50 +196,60 @@ export function ComboboxChips({ className, ...props }: React.ComponentProps<'ul'
 /** The text field. It takes the label and description, for example from FieldControl. */
 export function ComboboxInput({ className, onKeyDown, onClick, onChange, ...props }: Omit<React.ComponentProps<'input'>, 'value'>) {
   const state = useCombobox('ComboboxInput')
+  const move = (step: number) => {
+    const at = state.highlight === undefined ? -1 : state.visible.indexOf(state.highlight)
+    const next = state.visible[Math.min(Math.max(at + step, 0), state.visible.length - 1)]
+    if (next !== undefined) state.setHighlight(next)
+  }
+  const expanded = state.open && !state.disabled
   return (
     <PopoverPrimitive.Anchor asChild>
       <div ref={state.fieldRef} data-slot="combobox-field" data-disabled={state.disabled || undefined} onClick={(event) => {
         if (event.target === event.currentTarget) state.inputRef.current?.focus()
       }}>
         {state.multiple && <ComboboxChips />}
-        {/* cmdk sets its own id, name and expanded state after the props it is given; as a child,
-            this input's attributes win instead. */}
-        <CommandPrimitive.Input
-          asChild
-          value={state.query}
-          onValueChange={(query) => {
-            state.setQuery(query)
-            state.setOpen(true)
-          }}
-        >
-          <input
+        <input
+          type="text"
+          autoComplete="off"
           {...props}
           ref={state.inputRef}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={expanded}
+          aria-controls={expanded ? state.listId : undefined}
+          aria-activedescendant={expanded && state.highlight !== undefined ? state.optionId(state.highlight) : undefined}
           data-slot="combobox-input"
-          aria-labelledby={props['aria-labelledby']}
-          aria-expanded={state.open}
-          id={props.id}
           disabled={state.disabled}
           value={state.query}
           className={cn(className)}
-          onChange={onChange}
+          onChange={(event) => {
+            onChange?.(event)
+            state.setQuery(event.target.value)
+            state.setOpen(true)
+          }}
           onClick={(event) => {
             onClick?.(event)
             if (!event.defaultPrevented) state.setOpen(true)
           }}
           onKeyDown={(event) => {
             onKeyDown?.(event)
-            if (event.defaultPrevented) return
-            if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && !state.open) state.setOpen(true)
-            else if (event.key === 'Escape' && state.open) {
+            if (event.defaultPrevented || event.nativeEvent.isComposing) return
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+              event.preventDefault()
+              if (!state.open) state.setOpen(true)
+              else move(event.key === 'ArrowDown' ? 1 : -1)
+            } else if (event.key === 'Enter' && state.open && state.highlight !== undefined) {
+              event.preventDefault()
+              state.choose(state.highlight)
+            } else if (event.key === 'Escape' && state.open) {
               event.preventDefault()
               state.setOpen(false)
-            } else if (event.key === 'Backspace' && state.multiple && !state.query && state.values.length)
+            } else if (event.key === 'Backspace' && state.multiple && !state.query && state.values.length) {
+              event.preventDefault()
               state.remove(state.values.at(-1)!)
-            else if (event.key === 'Tab') state.setOpen(false)
+            } else if (event.key === 'Tab') state.setOpen(false)
           }}
-          />
-        </CommandPrimitive.Input>
+        />
         <ChevronDownIcon aria-hidden="true" data-slot="combobox-chevron" />
       </div>
     </PopoverPrimitive.Anchor>
@@ -249,58 +278,95 @@ export function ComboboxContent({ className, align = 'start', sideOffset = 6, ..
   )
 }
 
-export function ComboboxList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
-  return <CommandPrimitive.List data-slot="combobox-list" className={cn(className)} {...props} />
-}
-
-export function ComboboxGroup({ className, heading, ...props }: React.ComponentProps<typeof CommandPrimitive.Group>) {
+export function ComboboxList({ className, ...props }: React.ComponentProps<'div'>) {
+  const state = useCombobox('ComboboxList')
   return (
-    <CommandPrimitive.Group
-      data-slot="combobox-group"
-      heading={heading === undefined ? undefined : <span data-slot="combobox-group-heading">{heading}</span>}
-      className={cn(className)}
+    <div
+      role="listbox"
+      id={state.listId}
+      aria-multiselectable={state.multiple || undefined}
       {...props}
+      data-slot="combobox-list"
+      className={cn(className)}
     />
   )
 }
 
-export type ComboboxItemProps = Omit<React.ComponentProps<typeof CommandPrimitive.Item>, 'value' | 'onSelect'> & {
-  value: string
+export type ComboboxGroupProps = Omit<React.ComponentProps<'div'>, 'children'> & {
+  heading?: React.ReactNode
+  children?: React.ReactNode
 }
 
-/** One option. Its text is matched against the query and the match is marked. */
-export function ComboboxItem({ className, value, children, ...props }: ComboboxItemProps) {
-  const state = useCombobox('ComboboxItem')
-  const selected = state.values.includes(value)
+/** A named group of options. It hides itself when none of its options match. */
+export function ComboboxGroup({ className, heading, children, ...props }: ComboboxGroupProps) {
+  const state = useCombobox('ComboboxGroup')
+  const headingId = React.useId()
+  if (![...scan(children).labels.values()].some(label => matches(state.query, label))) return null
   return (
-    <CommandPrimitive.Item asChild value={value} keywords={[textOf(children)]} onSelect={() => state.select(value)} {...props}>
-      {/* aria-selected tells whether the option is chosen; cmdk would set it for the highlight,
-          which data-selected already shows. */}
-      <div data-slot="combobox-item" aria-selected={selected} data-checked={selected || undefined} className={cn(className)}>
-        {typeof children === 'string' ? highlightMatch(children, state.query) : children}
-        {selected && <CheckIcon aria-hidden="true" data-slot="combobox-item-indicator" />}
-      </div>
-    </CommandPrimitive.Item>
+    <div role="group" aria-labelledby={heading === undefined ? undefined : headingId} {...props} data-slot="combobox-group" className={cn(className)}>
+      {heading !== undefined && <div id={headingId}><span data-slot="combobox-group-heading">{heading}</span></div>}
+      {children}
+    </div>
+  )
+}
+
+/** Shared option markup for items and the create row. */
+function Option({ optionKey, className, children, checked, ...props }: React.ComponentProps<'div'> & {
+  optionKey: string
+  checked?: boolean
+  'data-slot': string
+}) {
+  const state = useCombobox('ComboboxItem')
+  const ref = React.useRef<HTMLDivElement>(null)
+  const highlighted = state.highlight === optionKey
+  React.useEffect(() => {
+    if (highlighted) ref.current?.scrollIntoView?.({ block: 'nearest' })
+  }, [highlighted])
+  return (
+    <div
+      ref={ref}
+      role="option"
+      id={state.optionId(optionKey)}
+      aria-selected={highlighted}
+      aria-checked={state.multiple ? checked : undefined}
+      data-highlighted={highlighted || undefined}
+      data-checked={checked || undefined}
+      {...props}
+      className={cn(className)}
+      // Keep focus in the field while choosing with the pointer.
+      onMouseDown={(event) => event.preventDefault()}
+      onMouseMove={() => { if (!highlighted) state.setHighlight(optionKey) }}
+      onClick={() => state.choose(optionKey)}
+    >
+      {children}
+    </div>
+  )
+}
+
+export type ComboboxItemProps = Omit<React.ComponentProps<'div'>, 'onSelect'> & { value: string }
+
+/** One option. Its text is matched against the query and the match is marked. */
+export function ComboboxItem({ value, children, ...props }: ComboboxItemProps) {
+  const state = useCombobox('ComboboxItem')
+  if (!matches(state.query, textOf(children))) return null
+  const checked = state.values.includes(value)
+  return (
+    <Option optionKey={value} data-slot="combobox-item" checked={checked} {...props}>
+      {typeof children === 'string' ? highlightMatch(children, state.query) : children}
+      {checked && <CheckIcon aria-hidden="true" data-slot="combobox-item-indicator" />}
+    </Option>
   )
 }
 
 /** Offers the typed name when no option has it; see onCreate on Combobox. */
-export function ComboboxCreate({ className, ...props }: Omit<React.ComponentProps<typeof CommandPrimitive.Item>, 'value' | 'onSelect' | 'children'>) {
+export function ComboboxCreate(props: Omit<React.ComponentProps<'div'>, 'children'>) {
   const state = useCombobox('ComboboxCreate')
-  if (!shouldOfferCreate(state.query, [...state.labels.values()])) return null
-  const name = state.query.trim()
+  if (!state.visible.includes(CREATE)) return null
   return (
-    <CommandPrimitive.Item
-      data-slot="combobox-create"
-      value="__combobox-create__"
-      forceMount
-      onSelect={() => state.create(name)}
-      className={cn(className)}
-      {...props}
-    >
+    <Option optionKey={CREATE} data-slot="combobox-create" {...props}>
       <PlusIcon aria-hidden="true" />
-      {`Create “${name}”`}
-    </CommandPrimitive.Item>
+      {`Create “${state.query.trim()}”`}
+    </Option>
   )
 }
 
@@ -309,10 +375,8 @@ export function ComboboxCreate({ className, ...props }: Omit<React.ComponentProp
  * is announced. Place it after ComboboxList, inside ComboboxContent.
  */
 export function ComboboxEmpty({ className, children, ...props }: React.ComponentProps<'div'>) {
-  const none = useCommandState(state => state.filtered.count === 0)
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => setMounted(true), [])
-  const empty = mounted && none
+  const { labels, query } = useCombobox('ComboboxEmpty')
+  const empty = ![...labels.values()].some(label => matches(query, label))
   return (
     <div role="status" aria-live="polite" {...props} data-slot="combobox-empty" data-empty={empty || undefined} className={cn(className)}>
       {empty ? children : null}

@@ -78,15 +78,18 @@ export function ContextMenuPortal({
 
 /**
  * The area that opens the menu on right-click, or with Shift+F10 or the context-menu key while
- * focused. Give it tabIndex={0} and a name when it is not already focusable.
+ * focused. Give it tabIndex={0} and a name when it is not already focusable. variant="zone"
+ * draws it as a dashed drop area; by default it keeps the look of what it wraps.
  */
 export function ContextMenuTrigger({
   className,
+  variant,
   ...props
-}: Part<typeof ContextMenuPrimitive.Trigger>) {
+}: Part<typeof ContextMenuPrimitive.Trigger> & { variant?: 'zone' }) {
   return (
     <ContextMenuPrimitive.Trigger
       data-slot="context-menu-trigger"
+      data-variant={variant}
       className={cn(className)}
       render={(triggerProps, state) => (
         <div {...triggerProps} data-state={openState(state.open)} />

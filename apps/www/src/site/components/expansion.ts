@@ -61,6 +61,30 @@ export const expansionDocs = {
     states: 'Empty, active, filled, disabled', basis: 'input-otp; Base UI OTP Field in the Base UI edition', client: true,
     usage: expansionExamples['input-otp'], minimumCli: '0.7.3',
   },
+  combobox: {
+    name: 'Combobox', description: 'A text field that filters a list of options, with an optional create row and chips for several values.',
+    api: 'Combobox (value, onValueChange, multiple, onCreate, name, disabled), ComboboxInput, ComboboxContent, ComboboxList, ComboboxGroup (heading), ComboboxItem (value), ComboboxCreate, ComboboxEmpty, highlightMatch',
+    states: 'Closed, open, filtered, empty, create offered, chips, disabled', basis: 'cmdk in Radix Popover; Base UI Combobox in the Base UI edition', client: true,
+    usage: expansionExamples.combobox, minimumCli: '0.7.3',
+  },
+  command: {
+    name: 'Command', description: 'A keyboard-first command menu, inline or in a dialog.',
+    api: 'Command (label, filter, defaultSearch), CommandDialog (open, onOpenChange, title), CommandDialogTrigger, CommandInput, CommandList, CommandGroup (heading), CommandItem (value, keywords, onSelect, disabled), CommandShortcut, CommandSeparator, CommandEmpty',
+    states: 'Filtered, highlighted, empty, disabled item, dialog', basis: 'cmdk and Radix Dialog; Base UI Autocomplete and Dialog in the Base UI edition', client: true,
+    usage: expansionExamples.command, minimumCli: '0.7.3',
+  },
+  'hover-card': {
+    name: 'Hover Card', description: 'A preview card for a link, shown on hover and keyboard focus.',
+    api: 'HoverCard (open, onOpenChange, openDelay, closeDelay), HoverCardTrigger (href), HoverCardContent (side, align), HoverCardArrow',
+    states: 'Closed, open on hover, open on focus', basis: 'Radix Hover Card; Base UI Preview Card in the Base UI edition', client: true,
+    usage: expansionExamples['hover-card'], minimumCli: '0.7.3',
+  },
+  'context-menu': {
+    name: 'Context Menu', description: 'A menu that opens at the pointer on right-click, or with Shift+F10.',
+    api: 'ContextMenu, ContextMenuTrigger (variant zone), ContextMenuContent, ContextMenuItem (variant destructive), ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuRadioItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent',
+    states: 'Closed, open, highlighted, submenu, destructive, disabled', basis: 'Radix Context Menu; Base UI Context Menu in the Base UI edition', client: true,
+    usage: expansionExamples['context-menu'], minimumCli: '0.7.3',
+  },
   stepper: {
     name: 'Stepper', description: 'Ordered steps with done, current and upcoming states.',
     api: 'Stepper (orientation), StepperItem (status), StepperIndicator, StepperTitle, StepperDescription, StepperSeparator',

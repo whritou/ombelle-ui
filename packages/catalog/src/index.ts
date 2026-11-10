@@ -81,7 +81,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   chip: ['lucide-react'],
   'input-otp': ['input-otp'],
   'hover-card': ['@radix-ui/react-hover-card'],
-  combobox: ['cmdk', '@radix-ui/react-popover', 'lucide-react'],
+  combobox: ['@radix-ui/react-popover', 'lucide-react'],
   command: ['cmdk', '@radix-ui/react-dialog', 'lucide-react'],
   'context-menu': ['@radix-ui/react-context-menu', 'lucide-react'],
   slider: ['@radix-ui/react-slider'],
