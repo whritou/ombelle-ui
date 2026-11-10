@@ -1,5 +1,5 @@
-// Compiles the catalog components the website editor uses, once per build (build-hosted-www.mjs
-// and predev), into apps/www/src/generated/ui. Pages load the compiled source like any other code;
+// Compiles the catalog components the website editor uses into apps/www/src/generated/ui, once per
+// `pnpm generate:preview` (which predev, the hosted build and the CI gate run). Pages load the compiled source like any other code;
 // nothing compiles at request time. The site's own tokens in apps/www/src/app/globals.css style them.
 import fs from 'node:fs/promises'
 import path from 'node:path'

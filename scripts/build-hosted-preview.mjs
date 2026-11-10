@@ -11,8 +11,6 @@ function run(args) {
   if (result.status !== 0) throw new Error('Hosted preview prerequisite failed: ' + args.join(' '))
 }
 run(['--import', 'tsx', 'scripts/generate-preview.ts'])
-// The catalog components the website editor uses, compiled once per build.
-run(['--import', 'tsx', 'scripts/generate-www-ui.ts'])
 run(['scripts/build-editor-worker.mjs'])
 const artifacts = path.resolve(repo, '.artifacts')
 await fs.mkdir(artifacts, { recursive: true })
