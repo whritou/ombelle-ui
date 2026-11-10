@@ -45,6 +45,18 @@ Each trigger is a button inside a heading. Radix supplies `aria-expanded`, `aria
 
 Tab moves between triggers, and Enter or Space toggles the focused item. Up and Down arrows move between triggers, and Home and End jump to the first or last.
 
+## Variants (0.7.3)
+
+These variants need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`appearance`:**
+  - `bordered` is each family's own look, and the default.
+  - `flush` drops the outer border, radius and background. It keeps a divider under each item and aligns the triggers and content with the surrounding text.
+- **`icon="chevron"` or `icon="plus"`** renders that one icon in every trigger, whatever the family shows by default.
+  - The chevron turns when its item opens.
+  - The plus becomes a minus, through CSS on the trigger's `data-state`, so an item open on first render shows the minus at once.
+  - Without `icon`, the family chooses as before.
+
 ## Styles and artifacts
 
 - Ombelle: an outlined card with rules between items. The open trigger takes the accent fill, and the chevron turns.

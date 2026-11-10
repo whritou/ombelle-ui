@@ -46,6 +46,16 @@ How to name avatars:
 - `AvatarStatus` draws a presence dot. `status` is `online` (the default) or `offline`. The dot is `aria-hidden`; put the status in the avatar's name.
 - `AvatarGroup` is a `div` with `role="group"`. It overlaps its avatars and outlines each one in the surface colour.
 
+## Variants (0.7.3)
+
+These variants need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`shape="square"`** suits workspaces and teams, and uses the family's small radius. The default, `circle`, suits people.
+- **`AvatarOverflow`** shows the count of avatars not shown, such as "+4", in the family's avatar size.
+  - It is named "4 more" by default; `label` replaces the name, for example "4 more reviewers".
+  - Inside `AvatarGroup`, it overlaps like the avatars.
+- **`AvatarFallback` waits 600 ms by default** (`delayMs`), so an image that loads quickly never flashes the initials. Pass `delayMs={0}` when there is no image. The Base UI edition maps `delayMs` to Base UI's `delay`.
+
 ## Styles and artifacts
 
 - Ombelle: an outlined circle; the large size casts an offset shadow.

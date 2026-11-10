@@ -69,6 +69,40 @@ Default spacing uses `1.5rem` for root vertical padding and gaps, and for header
 
 Card uses the saved global preset. A later theme operation can change semantic tokens; it does not rewrite the installed family's `card.css`. Changing the family of installed source requires an explicit migration. Appearance and density are component props and can be recorded in component recipes.
 
+## Variants (0.7.3)
+
+These variants need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+Card stays a server component with no new dependency, and both editions use the same template.
+
+- **`CardLink` makes the whole card a link.**
+  - Put it in `CardTitle`. Its `::after` covers the card, so a click anywhere on the card follows the link, and the link's name stays the title.
+  - Buttons, links and form controls inside the card stay above that layer and keep their own clicks.
+  - Description text is under the link layer, so it cannot be selected by dragging.
+  - The card lifts by 2px on hover, unless reduced motion is set, and shows the family's focus ring when the link has keyboard focus.
+- **`CardGroup` and `CardOption` make a group of cards to pick one of.**
+  - Each option holds a native radio, and the radios share the group's `name`. The group therefore has one Tab stop, the arrow keys move and choose, and a form submits the value without script.
+  - Each radio is named by its option's `title` and described by its `description`.
+  - `CardGroup` takes `name` (required), `value` or `defaultValue`, `onValueChange`, `disabled`, `required` and `orientation`.
+  - Name the group with `aria-label` or `aria-labelledby`.
+  - The chosen card shows a `--primary` edge, a halo and a check mark. In forced colours it uses `Highlight`.
+- **`CardMedia` adds an image or cover above the content.**
+  - It takes `src` and `alt` for an image, where `alt` is required (use `alt=""` when the image is decorative), or `children` for a custom cover, which is hidden from assistive technology.
+  - A card with media drops its top padding.
+
+```tsx
+<CardGroup name="plan" aria-label="Plan" defaultValue="team">
+  <CardOption value="starter" title="Starter" description="One project." />
+  <CardOption value="team" title="Team" description="Ten seats." />
+</CardGroup>
+<Card>
+  <CardHeader>
+    <CardTitle><CardLink href="/projects/website">Website refresh</CardLink></CardTitle>
+    <CardDescription>Reviews close on Friday.</CardDescription>
+  </CardHeader>
+</Card>
+```
+
 ## Generated files and ownership
 
 Compilation emits `components/ui/card.tsx`, colocated `components/ui/card.css`, and `examples/card.tsx`, together with the existing shared utility and theme artifacts. The installer honors configured aliases and destination paths; the ordinary default usage destination is `src/ombelle-examples/card.tsx`. Importing the generated Card loads `./card.css`; retain that import if moving the component. The standard registry item includes the exact component, utility, and Card CSS bytes.

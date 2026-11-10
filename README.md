@@ -6,6 +6,10 @@ Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card,
 Context Menu and Calendar (with a Date Picker), with
 recipe editors and both editions; installing them needs CLI 0.7.3, which is not
 yet published. See the [display components design](docs/superpowers/specs/2026-11-09-display-components-design.md).
+It also adds variants to existing components, every default unchanged: Button
+`link-destructive`, soft and outline Badges, dismissible and compact Alerts,
+link, option and media Cards, square Avatars with an overflow count, and flush
+Accordions with one chosen icon. See the [batch 6a design](docs/superpowers/specs/2026-11-10-variants-basics-design.md).
 Release 0.7.2 adds
 Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination and Toast, plus Tabs
 underline/contained appearances, compact/striped Tables, semantic Alert intents,
