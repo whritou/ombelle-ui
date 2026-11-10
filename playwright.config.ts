@@ -7,7 +7,7 @@ const fixtures = JSON.parse(
 export default defineConfig({
   testDir: 'tests/e2e',
   // Base UI consumers run against their own servers: pnpm test:base-consumers.
-  testIgnore: ['base-consumers.spec.ts', 'catalog-expansion.spec.ts', 'catalog-recipe-appearances.spec.ts', 'specimen-audit-checks.spec.ts', 'specimen-audit.spec.ts', 'display-components.spec.ts', 'form-controls.spec.ts', 'overlays-search.spec.ts', 'calendar.spec.ts'],
+  testIgnore: ['base-consumers.spec.ts', 'catalog-expansion.spec.ts', 'catalog-recipe-appearances.spec.ts', 'specimen-audit-checks.spec.ts', 'specimen-audit.spec.ts', 'display-components.spec.ts', 'form-controls.spec.ts', 'overlays-search.spec.ts', 'calendar.spec.ts', 'variants-basics.spec.ts'],
   timeout: 60000,
   expect: { timeout: 10000 },
   workers: workerBudget('OMBELLE_E2E_WORKERS', process.env.OMBELLE_E2E_WORKERS, 2),

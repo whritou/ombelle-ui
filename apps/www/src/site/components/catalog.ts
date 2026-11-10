@@ -27,8 +27,8 @@ const docs: Record<ComponentId, Omit<ComponentDoc, 'id'>> = {
   button: {
     name: 'Button',
     description: 'Triggers an action, or renders a link that looks like a button.',
-    api: 'variant (default, secondary, destructive, outline, ghost, link), size (sm, default, lg, icon), asChild',
-    states: 'Default, hover, focus, pressed, disabled',
+    api: 'variant (default, secondary, destructive, outline, ghost, link, link-destructive), size (sm, default, lg, icon, icon-sm), loading, asChild',
+    states: 'Default, hover, focus, pressed, disabled, loading (keeps its width)',
     basis: '<button>, or a valid link through asChild',
     client: true,
     usage: `import { Button } from '@/components/ui/button'
@@ -47,8 +47,8 @@ export function Actions() {
   badge: {
     name: 'Badge',
     description: 'Shows a short status or category as a native span.',
-    api: 'variant (default, secondary, outline, accent, destructive), size (sm, default), BadgeDot, className',
-    states: 'Default, secondary, outline, accent, destructive; small and default sizes; optional status dot',
+    api: 'variant (default, secondary, outline, accent, destructive, success, warning, info), appearance (solid, soft, outline), size (sm, default), BadgeDot, className',
+    states: 'Default, secondary, outline, accent, destructive, success, warning, info; soft and outline appearances; small and default sizes; optional status dot',
     basis: '<span>; interactive tags need a real button or link',
     client: false,
     usage: `import { Badge, BadgeDot } from '@/components/ui/badge'
@@ -64,8 +64,8 @@ export function Status() {
   card: {
     name: 'Card',
     description: 'Groups related content with a header, body and footer.',
-    api: 'Card (density: default, dense; appearance: default, outlined, subtle), CardHeader, CardTitle (level), CardDescription, CardContent, CardFooter',
-    states: 'Default, dense, outlined, subtle',
+    api: 'Card (density: default, dense; appearance: default, outlined, subtle), CardHeader, CardTitle (level), CardDescription, CardContent, CardFooter, CardLink, CardMedia, CardGroup (name, value, defaultValue, onValueChange), CardOption (value, title, description, disabled)',
+    states: 'Default, dense, outlined, subtle; link card with hover lift; option selected, focused and disabled; media header',
     basis: '<section> or <div> with deliberate headings',
     client: false,
     usage: `import {
@@ -394,8 +394,8 @@ export function ProjectActions() {
   alert: {
     name: 'Alert',
     description: 'A status or error message with an optional icon, title and description.',
-    api: 'variant (default, destructive, success, warning, info), AlertTitle, AlertDescription',
-    states: 'Default, success, warning and info (role status); destructive (role alert)',
+    api: 'variant (default, destructive, success, warning, info), layout (default, compact), onDismiss, dismissLabel, AlertTitle, AlertDescription, AlertActions, AlertDismiss',
+    states: 'Default, success, warning and info (role status); destructive (role alert); dismissible; compact',
     basis: '<div> with a live-region role',
     client: false,
     minimumCli: '0.5.0',
@@ -449,8 +449,8 @@ export function SharePreset() {
     name: 'Avatar',
     glassMinimumCli: '0.5.0',
     description: 'A person\'s image with initials as a fallback, a presence dot and overlapping groups.',
-    api: 'Avatar (size, variant), AvatarImage, AvatarFallback, AvatarStatus (status), AvatarGroup',
-    states: 'Image, fallback, online, offline',
+    api: 'Avatar (size, variant, shape), AvatarImage, AvatarFallback (delayMs, 600 by default), AvatarStatus (status), AvatarGroup, AvatarOverflow (count, label)',
+    states: 'Image, fallback after the delay, online, offline, circle and square, overflow count',
     basis: 'Reviewed Radix avatar primitive',
     client: true,
     minimumCli: '0.5.0',
@@ -528,8 +528,8 @@ export function CompactProjects() {
     name: 'Accordion',
     glassMinimumCli: '0.5.0',
     description: 'Stacked headings that each show or hide a section of content.',
-    api: 'Accordion (type, collapsible, value), AccordionItem, AccordionTrigger (level), AccordionContent',
-    states: 'Open, closed, disabled, focus',
+    api: 'Accordion (type, collapsible, value, appearance: bordered, flush; icon: chevron, plus), AccordionItem, AccordionTrigger (level), AccordionContent',
+    states: 'Open, closed, disabled, focus; bordered or flush; one chevron or plus icon',
     basis: 'Reviewed Radix accordion primitive',
     client: true,
     minimumCli: '0.5.0',
