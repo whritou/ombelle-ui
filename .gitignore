@@ -5,6 +5,7 @@ coverage/
 playwright-report/
 test-results/
 apps/preview/src/generated/
+apps/www/src/generated/
 .artifacts/
 .env*
 !.env.example
