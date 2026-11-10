@@ -1,0 +1,242 @@
+/* neo-brutalism Context Menu */
+[data-slot='context-menu-content'],
+[data-slot='context-menu-sub-content'] {
+  box-sizing: border-box;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 13rem;
+  max-block-size: var(--radix-context-menu-content-available-height);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  box-shadow: calc(var(--shadow-x) * 1.5) calc(var(--shadow-y) * 1.5) 0
+    var(--shadow-color, var(--border));
+}
+[data-slot='context-menu-label'] {
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
+  border-block-end: var(--border-width) solid var(--border);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 0.6875rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+[data-slot='context-menu-item'],
+[data-slot='context-menu-checkbox-item'],
+[data-slot='context-menu-radio-item'],
+[data-slot='context-menu-sub-trigger'] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-block-size: 2.5rem;
+  padding-block: 0.375rem;
+  padding-inline: 0.75rem;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+}
+[data-slot='context-menu-label'][data-inset],
+[data-slot='context-menu-item'][data-inset],
+[data-slot='context-menu-sub-trigger'][data-inset],
+[data-slot='context-menu-checkbox-item'],
+[data-slot='context-menu-radio-item'] {
+  padding-inline-start: 2.5rem;
+}
+[data-slot='context-menu-item'] svg,
+[data-slot='context-menu-sub-trigger'] svg {
+  flex-shrink: 0;
+  inline-size: 1rem;
+  block-size: 1rem;
+  stroke-width: 2.5;
+}
+[data-slot='context-menu-item'][data-highlighted],
+[data-slot='context-menu-checkbox-item'][data-highlighted],
+[data-slot='context-menu-radio-item'][data-highlighted],
+[data-slot='context-menu-sub-trigger'][data-highlighted],
+[data-slot='context-menu-sub-trigger'][data-state='open'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='context-menu-item'][data-variant='destructive'] {
+  background: color-mix(in oklab, var(--destructive) 22%, var(--popover));
+  color: color-mix(in oklab, var(--destructive) 62%, var(--popover-foreground));
+}
+[data-slot='context-menu-item'][data-variant='destructive'][data-highlighted] {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+[data-slot='context-menu-item'][data-disabled],
+[data-slot='context-menu-checkbox-item'][data-disabled],
+[data-slot='context-menu-radio-item'][data-disabled],
+[data-slot='context-menu-sub-trigger'][data-disabled] {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--muted) 0 6px,
+    var(--popover) 6px 12px
+  );
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+/* Indicators follow the kit Checkbox (square) and Radio Group (circle and dot). */
+[data-slot='context-menu-item-indicator'] {
+  box-sizing: border-box;
+  position: absolute;
+  inset-inline-start: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--primary-foreground);
+}
+[data-slot='context-menu-radio-item'] > [data-slot='context-menu-item-indicator'] {
+  border-radius: 50%;
+  color: var(--primary-foreground);
+}
+[data-state='checked'] > [data-slot='context-menu-item-indicator'] {
+  background: var(--primary);
+}
+[data-highlighted][data-state='checked'] > [data-slot='context-menu-item-indicator'] {
+  background: var(--card);
+  color: var(--card-foreground);
+}
+[data-disabled] > [data-slot='context-menu-item-indicator'] {
+  border-style: dashed;
+  background: var(--muted);
+}
+[data-slot='context-menu-item-indicator'] svg {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  stroke-width: 4;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+[data-context-menu-dot] {
+  display: block;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+[data-slot='context-menu-shortcut'] {
+  margin-inline-start: auto;
+  padding-block: 1px;
+  padding-inline: 0.375rem;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+[data-slot='context-menu-sub-icon'] {
+  margin-inline-start: auto;
+}
+[data-slot='context-menu-sub-icon']:dir(rtl) {
+  scale: -1 1;
+}
+[data-slot='context-menu-separator'] {
+  block-size: 0;
+  border-block-start: var(--border-width) solid var(--border);
+}
+[data-slot='context-menu-item'][data-highlighted],
+[data-slot='context-menu-checkbox-item'][data-highlighted],
+[data-slot='context-menu-radio-item'][data-highlighted],
+[data-slot='context-menu-sub-trigger'][data-highlighted] {
+  /* The highlight tint alone is below 3:1 against the menu: a ring marks the item reached with the keyboard. */
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+[data-slot='context-menu-trigger'] {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  border: var(--border-width) dashed var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  -webkit-touch-callout: none;
+}
+[data-slot='context-menu-trigger']:focus-visible {
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
+}
+@media (forced-colors: active) {
+  [data-slot='context-menu-trigger'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  [data-slot='context-menu-trigger']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='context-menu-content'],
+  [data-slot='context-menu-sub-content'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='context-menu-label'] {
+    background: Canvas;
+    color: CanvasText;
+    border-block-end-color: CanvasText;
+  }
+  [data-slot='context-menu-item'][data-variant='destructive'] {
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='context-menu-item'][data-highlighted],
+  [data-slot='context-menu-checkbox-item'][data-highlighted],
+  [data-slot='context-menu-radio-item'][data-highlighted],
+  [data-slot='context-menu-sub-trigger'][data-highlighted],
+  [data-slot='context-menu-sub-trigger'][data-state='open'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='context-menu-item'][data-disabled],
+  [data-slot='context-menu-checkbox-item'][data-disabled],
+  [data-slot='context-menu-radio-item'][data-disabled],
+  [data-slot='context-menu-sub-trigger'][data-disabled] {
+    background: Canvas;
+    color: GrayText;
+  }
+  [data-slot='context-menu-item-indicator'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    forced-color-adjust: none;
+  }
+  [data-state='checked'] > [data-slot='context-menu-item-indicator'] {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  [data-slot='context-menu-shortcut'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  [data-slot='context-menu-separator'] {
+    border-block-start-color: CanvasText;
+  }
+}

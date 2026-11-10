@@ -4,6 +4,7 @@ import type { ComponentId } from '@ombelle/contracts'
 export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   chip: ['chip', 'chip-remove', 'chip-group'],
   'input-otp': ['input-otp', 'input-otp-group', 'input-otp-slot', 'input-otp-separator'],
+  'context-menu': ['context-menu', 'context-menu-portal', 'context-menu-trigger', 'context-menu-content', 'context-menu-group', 'context-menu-label', 'context-menu-item', 'context-menu-checkbox-item', 'context-menu-radio-group', 'context-menu-radio-item', 'context-menu-item-indicator', 'context-menu-separator', 'context-menu-shortcut', 'context-menu-sub', 'context-menu-sub-trigger', 'context-menu-sub-icon', 'context-menu-sub-content'],
   'hover-card': ['hover-card', 'hover-card-trigger', 'hover-card-content', 'hover-card-arrow'],
   slider: ['slider', 'slider-track', 'slider-range', 'slider-thumb', 'slider-ticks', 'slider-tick'],
   'toggle-group': ['toggle-group', 'toggle-group-item'],
