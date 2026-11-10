@@ -67,7 +67,7 @@
 }
 /* The toolbar clips its items, so the ring sits inside them, in their own text colour. */
 [data-slot='toggle-group-item']:focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--foreground);
   outline-offset: -4px;
 }
 [data-slot='toggle-group-item']:disabled,

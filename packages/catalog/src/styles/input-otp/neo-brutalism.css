@@ -1,0 +1,85 @@
+/* neo-brutalism Input OTP */
+[data-slot='input-otp'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* input-otp's own container, inside the Radix edition's wrapper. */
+[data-slot='input-otp'] > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+[data-slot='input-otp'][data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+[data-slot='input-otp-group'] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+[data-slot='input-otp-slot'] {
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 46px;
+  block-size: 54px;
+  margin: 0;
+  padding: 0;
+  border: 2.5px solid var(--input);
+  border-radius: 0;
+  background: var(--card);
+  box-shadow: var(--shadow-x, 3px) var(--shadow-y, 3px) 0 var(--shadow-color, var(--foreground));
+  color: var(--foreground);
+  font: 700 22px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-align: center;
+}
+/* Radix marks the slot under the caret; Base UI slots are inputs that take focus. */
+[data-slot='input-otp-slot'][data-active],
+[data-slot='input-otp-slot']:focus {
+  background: color-mix(in oklab, var(--primary) 22%, var(--card));
+  outline: 3px solid var(--foreground);
+  outline-offset: 0;
+}
+/* Radix draws a caret in the active empty slot; Base UI inputs show their own. */
+[data-slot='input-otp-slot'][data-caret]::after {
+  content: '';
+  position: absolute;
+  inline-size: 1.5px;
+  block-size: 24px;
+  background: var(--foreground);
+  animation: ombelle-otp-caret 1s steps(1) infinite;
+}
+[data-slot='input-otp-separator'] {
+  inline-size: 12px;
+  border-block-start: 3px solid var(--input);
+}
+@keyframes ombelle-otp-caret {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='input-otp-slot'][data-caret]::after {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='input-otp-slot'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='input-otp-slot'][data-active],
+  [data-slot='input-otp-slot']:focus {
+    outline: 2px solid Highlight;
+  }
+  [data-slot='input-otp-slot'][data-caret]::after {
+    background: CanvasText;
+  }
+  [data-slot='input-otp-separator'] {
+    border-color: CanvasText;
+  }
+}

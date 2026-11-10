@@ -1,5 +1,7 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  'input-otp': `import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@/components/ui/input-otp'
+export function Example(){return <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>}`,
   slider: `import { Slider, SliderTicks } from '@/components/ui/slider'
 export function Example(){return <><Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => value + ' pixels'} /><Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} /><SliderTicks values={[0, 25, 50, 75, 100]} /></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
