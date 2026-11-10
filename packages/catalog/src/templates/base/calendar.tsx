@@ -1,9 +1,6 @@
 'use client'
 import * as React from 'react'
-import {
-  Day, DayButton, DayPicker, Month, MonthCaption, MonthGrid, Months, Nav, NextMonthButton, PreviousMonthButton, Root, Week, Weekday, Weekdays,
-  type DateRange, type DayPickerProps,
-} from 'react-day-picker'
+import { Day, DayButton, DayPicker, Month, MonthCaption, MonthGrid, Months, Nav, NextMonthButton, PreviousMonthButton, Root, Week, Weekday, Weekdays, type DateRange, type DayPickerProps } from 'react-day-picker'
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from './utils.js'

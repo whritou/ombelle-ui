@@ -2,7 +2,9 @@ import type { ComponentRecipe } from '@ombelle/contracts'
 
 export type RecipeSpecimen = {
   tag: string
-  props: Record<string, string | number | boolean | null | undefined | readonly (string | number)[] | { localId: string }>
+  props: Record<string, string | number | boolean | null | undefined | readonly (string | number)[] | { localId: string }
+    // A flat object of plain values, such as a date range or a part's options.
+    | { readonly [key: string]: string | number | boolean | undefined }>
   children: readonly (RecipeSpecimen | string)[]
 }
 
@@ -88,6 +90,16 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       const slots = (from: number, to: number) => node('InputOTPGroup', {}, ...Array.from({ length: to - from }, (_, offset) => node('InputOTPSlot', { index: from + offset })))
       return node('InputOTP', { maxLength: length, 'aria-label': content.label },
         ...(after > 0 ? [slots(0, after), node('InputOTPSeparator'), slots(after, length)] : [slots(0, length)]))
+    }
+    case 'calendar': {
+      // today is fixed, so the specimen, the audit and the stable hashes do not change day to day.
+      const mode = props.mode ?? 'single', from = props.selectedFrom ?? '2026-11-12'
+      const shown = { today: '2026-11-10', defaultMonth: `${props.month ?? '2026-11'}-01`, weekStartsOn: props.weekStartsOn ?? 0 }
+      const past = props.disablePast ? { disablePast: true } : {}
+      if (mode === 'picker')
+        return node('DatePicker', { defaultValue: from, placeholder: content.placeholder, 'aria-label': content.label, calendar: { ...shown, ...past } })
+      return node('Calendar', { mode, ...shown, ...past, 'aria-label': content.label,
+        selected: mode === 'range' ? { from, to: props.selectedTo ?? '2026-11-18' } : from })
     }
     case 'combobox': {
       const multiple = props.mode === 'multiple'
