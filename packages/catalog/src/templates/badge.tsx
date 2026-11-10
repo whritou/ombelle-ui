@@ -3,14 +3,17 @@ import { cn } from './utils.js'
 import './badge.css'
 
 export type BadgeProps = React.ComponentProps<'span'> & {
-  variant?: 'default' | 'secondary' | 'outline' | 'accent' | 'destructive'
+  variant?: 'default' | 'secondary' | 'outline' | 'accent' | 'destructive' | 'success' | 'warning' | 'info'
   size?: 'sm' | 'default'
+  /** soft tints the intent, as Alert does; outline draws only its edge and text. */
+  appearance?: 'solid' | 'soft' | 'outline'
 }
 
 export function Badge({
   className,
   variant = 'default',
   size = 'default',
+  appearance,
   ...props
 }: BadgeProps) {
   return (
@@ -19,6 +22,7 @@ export function Badge({
       data-slot="badge"
       data-variant={variant}
       data-size={size}
+      data-appearance={appearance}
       className={cn(className)}
     />
   )

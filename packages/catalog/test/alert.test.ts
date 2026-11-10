@@ -5,15 +5,16 @@ import { Alert, AlertDescription, AlertTitle } from '../src/templates/alert.js'
 import { expectComponentContract } from './new-component-contract.js'
 
 describe('Alert catalog contract', () => {
-  it('provides Alert parts without client code or extra dependencies', () => {
+  it('provides Alert parts without client code, with lucide-react for the Dismiss icon', () => {
     expectComponentContract('alert', {
       client: false,
-      parts: ['Alert', 'AlertTitle', 'AlertDescription'],
-      slots: ['alert', 'alert-title', 'alert-description'],
+      parts: ['Alert', 'AlertTitle', 'AlertDescription', 'AlertActions', 'AlertDismiss'],
+      slots: ['alert', 'alert-title', 'alert-description', 'alert-actions', 'alert-dismiss'],
       dependencies: [
         { name: 'react', version: '19.3.1' },
         { name: 'clsx', version: '2.1.1' },
         { name: 'tailwind-merge', version: '3.7.0' },
+        { name: 'lucide-react', version: '1.55.0' },
       ],
       selectors: [
         "[data-slot='alert']",

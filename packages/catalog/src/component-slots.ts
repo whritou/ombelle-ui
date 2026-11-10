@@ -93,7 +93,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'dropdown-menu-sub-icon',
     'dropdown-menu-sub-content',
   ],
-  alert: ['alert', 'alert-title', 'alert-description'],
+  alert: ['alert', 'alert-title', 'alert-description', 'alert-actions', 'alert-dismiss'],
   popover: [
     'popover',
     'popover-trigger',

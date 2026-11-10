@@ -66,3 +66,66 @@
     border-width: 3px;
   }
 }
+/* 0.7.3 variants */
+[data-slot='badge'][data-variant='success']:not(:root) {
+  background: var(--success-foreground, #14532d);
+  color: var(--success, #dcfce7);
+}
+[data-slot='badge'][data-variant='warning']:not(:root) {
+  background: var(--warning-foreground, #78350f);
+  color: var(--warning, #fef3c7);
+}
+[data-slot='badge'][data-variant='info']:not(:root) {
+  background: var(--info-foreground, #1e3a8a);
+  color: var(--info, #dbeafe);
+}
+[data-slot='badge'][data-appearance='soft']:not(:root) {
+  border-color: transparent;
+  background: color-mix(in oklab, var(--primary) 14%, var(--card));
+  color: color-mix(in oklab, var(--primary) 70%, var(--foreground));
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='destructive']:not(:root) {
+  background: color-mix(in oklab, var(--destructive) 14%, var(--card));
+  color: color-mix(in oklab, var(--destructive) 75%, var(--foreground));
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='success']:not(:root) {
+  background: var(--success, #dcfce7);
+  color: var(--success-foreground, #14532d);
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='warning']:not(:root) {
+  background: var(--warning, #fef3c7);
+  color: var(--warning-foreground, #78350f);
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='info']:not(:root) {
+  background: var(--info, #dbeafe);
+  color: var(--info-foreground, #1e3a8a);
+}
+[data-slot='badge'][data-appearance='outline']:not(:root) {
+  background: transparent;
+  color: var(--foreground);
+  border-color: var(--border);
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='destructive']:not(:root) {
+  color: var(--destructive);
+  border-color: var(--destructive);
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='success']:not(:root) {
+  color: var(--success-foreground, #14532d);
+  border-color: currentColor;
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='warning']:not(:root) {
+  color: var(--warning-foreground, #78350f);
+  border-color: currentColor;
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='info']:not(:root) {
+  color: var(--info-foreground, #1e3a8a);
+  border-color: currentColor;
+}
+@media (forced-colors: active) {
+  [data-slot='badge'][data-appearance] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+/* end 0.7.3 variants */
