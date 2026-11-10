@@ -79,6 +79,7 @@ const baseDependencies: readonly string[] = [
 ]
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   chip: ['lucide-react'],
+  'tag-input': ['lucide-react'],
   empty: ['@radix-ui/react-slot'],
   field: ['lucide-react'],
   stepper: ['lucide-react'],

@@ -1,0 +1,114 @@
+/* neo-brutalism Tag Input */
+[data-slot='tag-input'] {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 42px;
+  padding: 6px 8px;
+  border: 2.5px solid var(--input);
+  border-radius: 0;
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  cursor: text;
+}
+[data-slot='tag-input']:focus-within {
+  outline: 3px dashed var(--foreground);
+  outline-offset: 4px;
+}
+[data-slot='tag-input']:has([aria-invalid='true']) {
+  border-color: var(--destructive);
+}
+[data-slot='tag-input'][data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+[data-slot='tag-input-list'] {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+[data-slot='tag-input-tag'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 28px;
+  padding: 0 2px 0 10px;
+  border: 2.5px solid var(--input);
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font: 600 13px/1.2 var(--font-family);
+  white-space: nowrap;
+}
+/* 24px keeps the remove button a full target inside the 28px tag. */
+[data-slot='tag-input-remove'] {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+[data-slot='tag-input-remove'] > svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+[data-slot='tag-input-remove']:hover {
+  background: color-mix(in oklab, currentColor 12%, transparent);
+}
+[data-slot='tag-input-remove']:focus-visible {
+  outline: 3px dashed var(--foreground);
+  outline-offset: 1px;
+}
+[data-slot='tag-input-input'] {
+  flex: 1 1 90px;
+  min-inline-size: 90px;
+  block-size: 28px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font: 500 14px var(--font-family);
+  outline: none;
+}
+[data-slot='tag-input-input']::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+/* The live region is read, not shown. */
+[data-slot='tag-input-status'] {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (forced-colors: active) {
+  [data-slot='tag-input'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+  [data-slot='tag-input']:focus-within {
+    outline-color: Highlight;
+  }
+  [data-slot='tag-input-tag'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='tag-input-remove']:focus-visible {
+    outline-color: Highlight;
+  }
+}
