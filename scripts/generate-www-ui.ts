@@ -6,7 +6,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { compile } from '@ombelle/compiler'
 
-export const wwwUiComponents = ['slider', 'toggle-group', 'chip'] as const
+export const wwwUiComponents = ['slider', 'toggle-group', 'chip', 'combobox', 'command'] as const
 
 const repo = fileURLToPath(new URL('../', import.meta.url))
 

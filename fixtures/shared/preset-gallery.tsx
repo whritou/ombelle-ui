@@ -188,7 +188,7 @@ export function PresetGallery({
       </section>)}
       {gate('breadcrumb', 'Breadcrumb', <section aria-label="Breadcrumb" data-component="breadcrumb">
         <h2>Breadcrumb</h2>
-        <Breadcrumb><BreadcrumbList>
+        <Breadcrumb aria-label="Gallery path"><BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>

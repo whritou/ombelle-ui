@@ -132,8 +132,16 @@ export function CommandShortcut({ className, children, ...props }: React.Compone
   )
 }
 
+/**
+ * Separates groups; hidden while searching. It is drawn only: a list box may hold options and
+ * groups, not separators.
+ */
 export function CommandSeparator({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Separator>) {
-  return <CommandPrimitive.Separator data-slot="command-separator" className={cn(className)} {...props} />
+  return (
+    <CommandPrimitive.Separator asChild {...props}>
+      <div role="none" data-slot="command-separator" className={cn(className)} />
+    </CommandPrimitive.Separator>
+  )
 }
 
 /**

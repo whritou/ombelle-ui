@@ -80,7 +80,7 @@ export function ProjectsScene(props: SceneProps) {
         {show(
           'breadcrumb',
           'Breadcrumb',
-          <Breadcrumb>
+          <Breadcrumb aria-label="Project path">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink href="#overview">Overview</BreadcrumbLink>

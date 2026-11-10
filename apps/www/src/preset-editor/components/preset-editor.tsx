@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Download, ShieldCheck } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
-import { defaultSiteFamily } from '../../snapshots/install-command'
+import { defaultSiteFamily, offeredStyleFamilies } from '../../snapshots/install-command'
 import {
   applyGlassTint,
   applyStartingPreset,
@@ -60,6 +60,7 @@ import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
 import { glassBackdropOptions as backdropOptions, glassPresetBackdrop } from '../../site/glass-presets'
 import {
   EditorTopBar,
+  familyCommands,
   InspectorSection,
   ReviewDrawer,
   SegmentedControl,
@@ -226,6 +227,7 @@ export default function PresetEditor() {
   return (
     <main className={styles.editor} aria-label="Preset editor">
       <EditorTopBar
+        commands={[familyCommands(offeredStyleFamilies(draft.family), draft.family, familyNames, family)]}
         crumbs={['Presets']}
         nameField={{
           id: fieldId('/name'),

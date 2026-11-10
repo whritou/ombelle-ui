@@ -56,6 +56,8 @@ type ComboboxState = {
   values: string[]
   labels: Map<string, string>
   query: string
+  /** The text the options are filtered by: the query once the person types, else nothing. */
+  search: string
   setQuery(query: string): void
   open: boolean
   setOpen(open: boolean): void
@@ -110,20 +112,28 @@ export function Combobox(props: ComboboxProps) {
   const current = props.value ?? own
   const values = Array.isArray(current) ? current : current ? [current] : []
   const [query, setQueryState] = React.useState(defaultQuery ?? (!multiple && values[0] ? labels.get(values[0]) ?? values[0] : ''))
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpenState] = React.useState(false)
+  // Opening shows every option; typing filters them. A starting query filters at once.
+  const [typing, setTyping] = React.useState(defaultQuery !== undefined)
+  const search = typing ? query : ''
+  const setOpen = (next: boolean) => {
+    if (next && !open) setTyping(false)
+    setOpenState(next)
+  }
   const [picked, setHighlight] = React.useState<string>()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const fieldRef = React.useRef<HTMLDivElement>(null)
   const baseId = React.useId()
   const order = [...labels.keys()]
   const visible = [
-    ...order.filter(value => matches(query, labels.get(value)!)),
-    ...(hasCreate && shouldOfferCreate(query, [...labels.values()]) ? [CREATE] : []),
+    ...order.filter(value => matches(search, labels.get(value)!)),
+    ...(hasCreate && shouldOfferCreate(search, [...labels.values()]) ? [CREATE] : []),
   ]
   // The first option is highlighted until the person moves, as in a native list.
   const highlight = picked !== undefined && visible.includes(picked) ? picked : visible[0]
   const setQuery = (next: string) => {
     setQueryState(next)
+    setTyping(true)
     setHighlight(undefined)
   }
   const commit = (next: string[]) => {
@@ -132,14 +142,13 @@ export function Combobox(props: ComboboxProps) {
     ;(props.onValueChange as ((value: string | string[]) => void) | undefined)?.(value)
   }
   const finish = (text: string) => {
-    if (multiple) setQuery('')
-    else {
-      setQuery(text)
-      setOpen(false)
-    }
+    setQueryState(multiple ? '' : text)
+    setTyping(false)
+    setHighlight(undefined)
+    if (!multiple) setOpen(false)
   }
   const state: ComboboxState = {
-    multiple, values, labels, query, setQuery, open, setOpen, visible, highlight, setHighlight, disabled, inputRef, fieldRef,
+    multiple, values, labels, query, search, setQuery, open, setOpen, visible, highlight, setHighlight, disabled, inputRef, fieldRef,
     listId: baseId + '-list',
     optionId: (key) => key === CREATE ? baseId + '-create' : `${baseId}-option-${order.indexOf(key)}`,
     choose(key) {
@@ -301,7 +310,7 @@ export type ComboboxGroupProps = Omit<React.ComponentProps<'div'>, 'children'> &
 export function ComboboxGroup({ className, heading, children, ...props }: ComboboxGroupProps) {
   const state = useCombobox('ComboboxGroup')
   const headingId = React.useId()
-  if (![...scan(children).labels.values()].some(label => matches(state.query, label))) return null
+  if (![...scan(children).labels.values()].some(label => matches(state.search, label))) return null
   return (
     <div role="group" aria-labelledby={heading === undefined ? undefined : headingId} {...props} data-slot="combobox-group" className={cn(className)}>
       {heading !== undefined && <div id={headingId}><span data-slot="combobox-group-heading">{heading}</span></div>}
@@ -348,11 +357,12 @@ export type ComboboxItemProps = Omit<React.ComponentProps<'div'>, 'onSelect'> & 
 /** One option. Its text is matched against the query and the match is marked. */
 export function ComboboxItem({ value, children, ...props }: ComboboxItemProps) {
   const state = useCombobox('ComboboxItem')
-  if (!matches(state.query, textOf(children))) return null
+  if (!matches(state.search, textOf(children))) return null
   const checked = state.values.includes(value)
   return (
     <Option optionKey={value} data-slot="combobox-item" checked={checked} {...props}>
-      {typeof children === 'string' ? highlightMatch(children, state.query) : children}
+      {/* One span, so the option's flex layout keeps the mark inline and the name whole. */}
+      {typeof children === 'string' ? <span>{highlightMatch(children, state.search)}</span> : children}
       {checked && <CheckIcon aria-hidden="true" data-slot="combobox-item-indicator" />}
     </Option>
   )
@@ -375,8 +385,8 @@ export function ComboboxCreate(props: Omit<React.ComponentProps<'div'>, 'childre
  * is announced. Place it after ComboboxList, inside ComboboxContent.
  */
 export function ComboboxEmpty({ className, children, ...props }: React.ComponentProps<'div'>) {
-  const { labels, query } = useCombobox('ComboboxEmpty')
-  const empty = ![...labels.values()].some(label => matches(query, label))
+  const { labels, search } = useCombobox('ComboboxEmpty')
+  const empty = ![...labels.values()].some(label => matches(search, label))
   return (
     <div role="status" aria-live="polite" {...props} data-slot="combobox-empty" data-empty={empty || undefined} className={cn(className)}>
       {empty ? children : null}

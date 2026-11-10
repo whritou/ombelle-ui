@@ -183,11 +183,14 @@ export function CommandShortcut({ className, children, ...props }: React.Compone
   )
 }
 
-/** Separates groups; hidden while searching, as in the Radix edition. */
-export function CommandSeparator({ className, ...props }: Part<typeof Autocomplete.Separator>) {
+/**
+ * Separates groups; hidden while searching, as in the Radix edition. It is drawn only: a list
+ * box may hold options and groups, not separators.
+ */
+export function CommandSeparator({ className, ...props }: React.ComponentProps<'div'>) {
   const { query } = React.useContext(SearchContext)
   if (query) return null
-  return <Autocomplete.Separator data-slot="command-separator" className={cn(className)} {...props} />
+  return <div role="none" {...props} data-slot="command-separator" className={cn(className)} />
 }
 
 /**

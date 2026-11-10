@@ -66,6 +66,11 @@ describe('Combobox', () => {
     expect(html).toMatch(/<input[^>]*type="hidden"[^>]*name="presets"[^>]*value="ombelle"|<input[^>]*name="presets"[^>]*type="hidden"[^>]*value="ombelle"|<input[^>]*type="hidden"[^>]*value="ombelle"[^>]*name="presets"/)
   })
 
+  it.each(editions)('%s keeps a marked option text in one inline run, so its name stays whole', (_, ui) => {
+    const html = markup(h(ui.Combobox, { defaultQuery: 'gla' } as never, h(ui.ComboboxItem, { value: 'liquid-glass' }, 'Liquid glass')))
+    expect(html).toContain('<span>Liquid <mark data-slot="combobox-match">gla</mark>ss</span>')
+  })
+
   it.each(editions)('%s puts the selected label in the input in single mode', (_, ui) => {
     expect(/<input[^>]*data-slot="combobox-input"[^>]*>/.exec(presets(ui, { defaultValue: 'ombelle' }))![0]).toContain('value="Ombelle"')
   })

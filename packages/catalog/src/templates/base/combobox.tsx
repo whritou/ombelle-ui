@@ -66,6 +66,7 @@ type ComboboxState = {
   multiple: boolean
   values: string[]
   labels: Map<string, string>
+  /** The text the options are filtered by: the query once the person types, else nothing. */
   query: string
   disabled: boolean
   fieldRef: React.RefObject<HTMLDivElement | null>
@@ -111,6 +112,9 @@ export function Combobox(props: ComboboxProps) {
   const [query, setQuery] = React.useState(defaultQuery ?? (!multiple && values[0] ? labels.get(values[0]) ?? values[0] : ''))
   const fieldRef = React.useRef<HTMLDivElement>(null)
   const [open, setOpen] = React.useState(false)
+  // Opening shows every option; typing filters them. A starting query filters at once.
+  const [typing, setTyping] = React.useState(defaultQuery !== undefined)
+  const search = typing ? query : ''
   const commit = (next: string[]) => {
     const value = multiple ? next : next[0] ?? ''
     if (props.value === undefined) setOwn(value)
@@ -122,9 +126,10 @@ export function Combobox(props: ComboboxProps) {
     if (onCreate) onCreate(name)
     else commit(multiple ? (values.includes(name) ? values : [...values, name]) : [name])
     setQuery(multiple ? '' : name)
+    setTyping(false)
   }
   return (
-    <ComboboxContext.Provider value={{ multiple, values, labels, query, disabled, fieldRef }}>
+    <ComboboxContext.Provider value={{ multiple, values, labels, query: search, disabled, fieldRef }}>
       <div data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
         <ComboboxPrimitive.Root
           multiple={multiple}
@@ -132,8 +137,8 @@ export function Combobox(props: ComboboxProps) {
           // Base UI navigates the list it is given: the options that match, in the order they
           // render, then the create row when it is offered.
           items={[
-            ...[...labels].filter(([, label]) => matches(query, label)).map(([value]) => value),
-            ...(hasCreate && shouldOfferCreate(query, [...labels.values()]) ? [CREATE] : []),
+            ...[...labels].filter(([, label]) => matches(search, label)).map(([value]) => value),
+            ...(hasCreate && shouldOfferCreate(search, [...labels.values()]) ? [CREATE] : []),
           ]}
           filter={null}
           autoHighlight
@@ -145,11 +150,15 @@ export function Combobox(props: ComboboxProps) {
             else commit(list)
           }}
           inputValue={query}
-          onInputValueChange={(text) => setQuery(text)}
+          onInputValueChange={(text, details) => {
+            setQuery(text)
+            setTyping(details.reason === 'input-change')
+          }}
           open={open}
           onOpenChange={(next, details) => {
             // A multiple combobox stays open while the person picks several options.
             if (!next && multiple && details.reason === 'item-press') return
+            if (next && !open && details.reason !== 'input-change') setTyping(false)
             setOpen(next)
           }}
           itemToStringLabel={(value: string) => value === CREATE ? query.trim() : labels.get(value) ?? value}
@@ -265,7 +274,8 @@ export function ComboboxItem({ className, value, children, ...props }: ComboboxI
   const selected = state.values.includes(value)
   return (
     <ComboboxPrimitive.Item data-slot="combobox-item" value={value} data-checked={selected || undefined} className={cn(className)} {...props}>
-      {typeof children === 'string' ? highlightMatch(children, state.query) : children}
+      {/* One span, so the option's flex layout keeps the mark inline and the name whole. */}
+      {typeof children === 'string' ? <span>{highlightMatch(children, state.query)}</span> : children}
       {selected && <CheckIcon aria-hidden="true" data-slot="combobox-item-indicator" />}
     </ComboboxPrimitive.Item>
   )

@@ -106,7 +106,7 @@
   display: flex;
   flex-direction: column;
   min-inline-size: max(12rem, var(--radix-popover-trigger-width, 0px));
-  max-block-size: var(--radix-popover-content-available-height);
+  max-block-size: var(--radix-popover-content-available-height, 24rem);
   overflow-x: hidden;
   overflow-y: auto;
   padding: 0.25rem;

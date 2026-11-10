@@ -30,7 +30,9 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(page.getByTestId('combobox-value')).toHaveText(/Value: liquid-glass(-givre)?$/)
       const chosen = await input.inputValue()
       expect(chosen).toMatch(/^Liquid glass/)
+      // Reopening a chosen combobox shows every option, not only the chosen one.
       await input.click()
+      await expect(visibleOptions(page)).toHaveCount(4)
       await page.keyboard.press('Escape')
       await expect(input).toHaveAttribute('aria-expanded', 'false')
       await expect(input).toHaveValue(chosen)

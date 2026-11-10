@@ -43,6 +43,11 @@
   --radius: 0.75rem;
   /* Read by the catalog components compiled for the editor (scripts/generate-www-ui.ts). */
   --font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  /* The Ombelle preset's border, shadow and motion, for the compiled Combobox and Command. */
+  --border-width: 1.5px;
+  --shadow-x: 3px;
+  --shadow-y: 3px;
+  --motion-duration: 150ms;
   --ink: oklch(0.22 0.012 275);
   --paper: oklch(0.985 0.004 350);
   --background: var(--paper);
@@ -299,3 +304,9 @@
 
 @keyframes grow-x { from { transform: scaleX(0) } to { transform: scaleX(1) } }
 @utility animate-grow { animation: grow-x linear both; transform-origin: left; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration: 0ms;
+  }
+}

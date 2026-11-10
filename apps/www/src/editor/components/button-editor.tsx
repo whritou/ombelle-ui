@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
-import { defaultSiteFamily } from '../../snapshots/install-command'
+import { defaultSiteFamily, siteFamilyOrder } from '../../snapshots/install-command'
 import { changeDraftFamily, draftFamily, experimentalNotice, resetDraftRecipe, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
 import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
@@ -17,7 +17,8 @@ import { ArtifactPanel } from './artifact-panel'
 import { ComponentNavigation } from './component-navigation'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, SegmentedControl, previewModeOptions, previewWidthOptions, type OverflowItem } from '../../editor-shell'
+import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewWidthOptions, type OverflowItem } from '../../editor-shell'
+import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = changeDraftFamily({ storageVersion: 1, recipe: validateRecipe(exampleRecipe) }, defaultSiteFamily)
@@ -184,6 +185,7 @@ export function ButtonEditor() {
 
   return <main className={styles.root} aria-label="Button editor">
     <EditorTopBar
+      commands={[familyCommands(siteFamilyOrder, draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={['Components', 'Button']}
       nameField={{
         id: 'button-recipe-id', label: 'Recipe ID', value: draft.recipe.id, maxLength: 80, readOnly: true,

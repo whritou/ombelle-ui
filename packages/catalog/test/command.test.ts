@@ -43,6 +43,11 @@ describe('Command', () => {
     expect(html).toMatch(/role="status"[^>]*aria-live="polite"|aria-live="polite"[^>]*role="status"/)
   })
 
+  it.each(editions)('%s draws the separator without a separator role inside the list box', (_, ui) => {
+    expect(menu(ui)).toMatch(/<div[^>]*role="none"[^>]*data-slot="command-separator"|<div[^>]*data-slot="command-separator"[^>]*role="none"/)
+    expect(menu(ui)).not.toContain('role="separator"')
+  })
+
   it('base filters on the first render and hides groups with no match', () => {
     const html = menu(base as unknown as Ui, 'button')
     expect(html).toContain('Add Button')
