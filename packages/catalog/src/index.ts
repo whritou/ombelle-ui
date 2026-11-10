@@ -82,6 +82,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   'input-otp': ['input-otp'],
   'hover-card': ['@radix-ui/react-hover-card'],
   combobox: ['@radix-ui/react-popover', 'lucide-react'],
+  calendar: ['react-day-picker', 'date-fns', '@date-fns/tz', 'lucide-react', '@radix-ui/react-popover'],
   command: ['cmdk', '@radix-ui/react-dialog', 'lucide-react'],
   'context-menu': ['@radix-ui/react-context-menu', 'lucide-react'],
   slider: ['@radix-ui/react-slider'],

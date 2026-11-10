@@ -2,6 +2,8 @@
 export const expansionExamples = {
   'input-otp': `import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@/components/ui/input-otp'
 export function Example(){return <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>}`,
+  calendar: `import { Calendar, DatePicker } from '@/components/ui/calendar'
+export function Example(){return <><Calendar mode="range" defaultMonth="2026-11-01" selected={{ from: '2026-11-12', to: '2026-11-18' }} aria-label="Stay" /><DatePicker aria-label="Due date" name="due" calendar={{ disablePast: true }} /></>}`,
   combobox: `import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxCreate, ComboboxEmpty } from '@/components/ui/combobox'
 export function Example(){return <Combobox defaultValue="ombelle" onCreate={name => console.log('Create', name)}><ComboboxInput aria-label="Preset" placeholder="Search presets" /><ComboboxContent><ComboboxList><ComboboxItem value="liquid-glass">Liquid glass</ComboboxItem><ComboboxItem value="ombelle">Ombelle</ComboboxItem><ComboboxCreate /></ComboboxList><ComboboxEmpty>No presets found.</ComboboxEmpty></ComboboxContent></Combobox>}`,
   command: `import { Command, CommandInput, CommandList, CommandGroup, CommandItem, CommandShortcut, CommandSeparator, CommandEmpty } from '@/components/ui/command'
