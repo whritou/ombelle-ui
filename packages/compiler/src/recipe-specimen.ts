@@ -92,9 +92,10 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ...(after > 0 ? [slots(0, after), node('InputOTPSeparator'), slots(after, length)] : [slots(0, length)]))
     }
     case 'calendar': {
-      // today is fixed, so the specimen, the audit and the stable hashes do not change day to day.
+      // The installed component keeps the real today, so disablePast keeps working; the shown month
+      // and selection are fixed, so the source and the stable hashes do not change day to day.
       const mode = props.mode ?? 'single', from = props.selectedFrom ?? '2026-11-12'
-      const shown = { today: '2026-11-10', defaultMonth: `${props.month ?? '2026-11'}-01`, weekStartsOn: props.weekStartsOn ?? 0 }
+      const shown = { defaultMonth: `${props.month ?? '2026-11'}-01`, weekStartsOn: props.weekStartsOn ?? 0 }
       const past = props.disablePast ? { disablePast: true } : {}
       if (mode === 'picker')
         return node('DatePicker', { defaultValue: from, placeholder: content.placeholder, 'aria-label': content.label, calendar: { ...shown, ...past } })

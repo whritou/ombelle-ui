@@ -79,6 +79,10 @@ function CalendarScenario() {
         <DatePicker aria-labelledby="calendar-due-label" name="due" locale="en-US" value={due ?? null} onValueChange={setDue} calendar={shown} />
       </form>
       <button type="button" data-testid="calendar-clear" onClick={() => setDue(undefined)}>Clear</button>
+      <form data-testid="calendar-stay-form">
+        <p id="calendar-stay-label">Stay</p>
+        <DatePicker mode="range" aria-labelledby="calendar-stay-label" name="stay" locale="en-US" calendar={shown} />
+      </form>
       <button type="button" data-testid="calendar-schedule" onClick={() => setScheduling(true)}>Schedule</button>
       <Dialog open={scheduling} onOpenChange={setScheduling}>
         <DialogContent>

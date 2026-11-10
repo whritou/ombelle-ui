@@ -72,6 +72,13 @@ describe('DatePicker', () => {
     expect(empty).toMatch(/data-slot="date-picker-trigger"[^>]*data-placeholder|data-placeholder[^>]*data-slot="date-picker-trigger"/)
   })
 
+  it.each(editions)('%s is controlled by a value prop even when it is undefined', (_, ui) => {
+    // A reset to undefined must not show, or submit, an earlier date.
+    const html = renderToStaticMarkup(h(ui.DatePicker, { value: undefined, defaultValue: '2026-11-12', name: 'due', 'aria-label': 'Due date' } as never))
+    expect(html).toContain('Choose a date')
+    expect(html).toMatch(/name="due"[^>]*value=""|value=""[^>]*name="due"/)
+  })
+
   it.each(editions)('%s submits a range as two dates', (_, ui) => {
     const html = renderToStaticMarkup(h(ui.DatePicker, { mode: 'range', defaultValue: { from: new Date(2026, 10, 12), to: new Date(2026, 10, 18) }, name: 'away', locale: 'en-US' } as never))
     expect(html).toMatch(/name="away-from"[^>]*value="2026-11-12"|value="2026-11-12"[^>]*name="away-from"/)

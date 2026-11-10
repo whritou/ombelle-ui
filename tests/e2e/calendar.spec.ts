@@ -58,8 +58,9 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(grid.locator('[data-day="2026-11-12"]')).toHaveAttribute('data-range-start', 'true')
       await expect(grid.locator('[data-day="2026-11-15"]')).toHaveAttribute('data-range-middle', 'true')
       await expect(grid.locator('[data-day="2026-11-18"]')).toHaveAttribute('data-range-end', 'true')
+      // A full range is replaced: the third click starts a new range at that day.
       await dayButton(grid, '2026-11-25').click()
-      await expect(page.getByTestId('calendar-range-value')).not.toHaveText('Range: 2026-11-12–2026-11-18')
+      await expect(page.getByTestId('calendar-range-value')).toHaveText('Range: 2026-11-25–')
     })
 
     test('the Date Picker opens on its date, closes on Enter or Escape, and follows a value set from outside', async ({ page }) => {
@@ -84,6 +85,32 @@ for (const edition of ['radix', 'base'] as const) {
       await page.getByTestId('calendar-clear').click()
       await expect(trigger).toContainText('Choose a date')
       await expect(page.locator('[data-testid="calendar-form"] input[name="due"]')).toHaveValue('')
+    })
+
+    test('a range Date Picker stays open after the first day and closes once the range is complete', async ({ page }) => {
+      await open(page, edition)
+      const trigger = page.getByRole('button', { name: /Stay/ })
+      await trigger.click()
+      const content = page.locator('[data-slot$="date-picker-content"]')
+      await content.locator('[data-day="2026-11-18"] button').click()
+      await expect(content).toBeVisible()
+      await content.locator('[data-day="2026-11-12"] button').click()
+      await expect(content).toHaveCount(0)
+      await expect(trigger).toContainText('Nov 12')
+      await expect(trigger).toContainText('18, 2026')
+      const form = page.getByTestId('calendar-stay-form')
+      await expect(form.locator('input[name="stay-from"]')).toHaveValue('2026-11-12')
+      await expect(form.locator('input[name="stay-to"]')).toHaveValue('2026-11-18')
+    })
+
+    test('choosing the date a Date Picker already holds keeps it', async ({ page }) => {
+      await open(page, edition)
+      const trigger = page.getByRole('button', { name: /Due date/ })
+      await trigger.click()
+      await page.locator('[data-slot$="date-picker-content"] [data-day="2026-11-12"] button').click()
+      await expect(page.locator('[data-slot$="date-picker-content"]')).toHaveCount(0)
+      await expect(trigger).toContainText('Nov 12, 2026')
+      await expect(page.locator('[data-testid="calendar-form"] input[name="due"]')).toHaveValue('2026-11-12')
     })
 
     test('Escape in a Date Picker inside a dialog closes only the picker', async ({ page }) => {

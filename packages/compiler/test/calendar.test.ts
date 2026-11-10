@@ -25,8 +25,10 @@ describe.each(styleFamilies)('%s calendar recipe', family => {
 describe('calendar specimen', () => {
   const specimen = (props: Record<string, unknown> = {}) => describeComponentRecipe(recipe('ombelle', props) as ComponentRecipe)
 
-  it('draws November 2026 with today fixed and the 12th chosen', () => {
-    expect(specimen()).toMatchObject({ tag: 'Calendar', props: { mode: 'single', defaultMonth: '2026-11-01', today: '2026-11-10', selected: '2026-11-12', weekStartsOn: 0, 'aria-label': 'Pick a date' } })
+  it('draws November 2026 with the 12th chosen', () => {
+    expect(specimen()).toMatchObject({ tag: 'Calendar', props: { mode: 'single', defaultMonth: '2026-11-01', selected: '2026-11-12', weekStartsOn: 0, 'aria-label': 'Pick a date' } })
+    // The installed component keeps the real today, so disablePast keeps working after 2026.
+    expect(specimen().props).not.toHaveProperty('today')
   })
 
   it('draws a range, ending on the 18th unless told otherwise', () => {
@@ -38,6 +40,6 @@ describe('calendar specimen', () => {
     const picker = specimen({ mode: 'picker', disablePast: true, weekStartsOn: 1 })
     expect(picker.tag).toBe('DatePicker')
     expect(picker.props).toMatchObject({ defaultValue: '2026-11-12', placeholder: 'Choose a date', 'aria-label': 'Pick a date' })
-    expect(picker.props.calendar).toEqual({ today: '2026-11-10', defaultMonth: '2026-11-01', weekStartsOn: 1, disablePast: true })
+    expect(picker.props.calendar).toEqual({ defaultMonth: '2026-11-01', weekStartsOn: 1, disablePast: true })
   })
 })

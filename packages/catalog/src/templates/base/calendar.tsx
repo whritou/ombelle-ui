@@ -76,10 +76,10 @@ const parts: DayPickerProps['components'] = {
  * Day names with the day number as its own word ("Sunday, November 1, 2026"), so the visible
  * number is part of the button's name; react-day-picker's default says "1st".
  */
-function dayName(date: Date, modifiers: { today?: boolean; selected?: boolean }, options?: { locale?: { code?: string } }) {
+function dayName(date: Date, modifiers?: { today?: boolean; selected?: boolean }, options?: { locale?: { code?: string } }) {
   let label = new Intl.DateTimeFormat(options?.locale?.code, { dateStyle: 'full' }).format(date)
-  if (modifiers.today) label = `Today, ${label}`
-  if (modifiers.selected) label = `${label}, selected`
+  if (modifiers?.today) label = `Today, ${label}`
+  if (modifiers?.selected) label = `${label}, selected`
   return label
 }
 
@@ -88,6 +88,8 @@ function dayName(date: Date, modifiers: { today?: boolean; selected?: boolean },
  * month (with Shift, by year), Home and End to the ends of the week; Enter or Space chooses.
  */
 export function Calendar({ className, selected, defaultMonth, month, today, disablePast, disabled, components, labels, showOutsideDays = true, weekStartsOn = 0, ...props }: CalendarProps) {
+  // In a range, a click after a full range starts a new one, and the first click leaves the end open.
+  const reset = props.mode === 'range' && !('resetOnSelect' in props) ? { resetOnSelect: true } : {}
   const now = asDate(today)
   const chosen = selected === undefined || typeof selected === 'string' || selected instanceof Date
     ? asDate(selected as DateInput | undefined)
@@ -97,6 +99,7 @@ export function Calendar({ className, selected, defaultMonth, month, today, disa
   return (
     <DayPicker
       {...(props as DayPickerProps)}
+      {...reset}
       {...(selected === undefined ? {} : { selected: chosen as never })}
       defaultMonth={asDate(defaultMonth) ?? (chosen instanceof Date ? chosen : (chosen as Range | undefined)?.from)}
       {...(month === undefined ? {} : { month: asDate(month) })}
@@ -141,11 +144,13 @@ export function DatePicker(props: DatePickerProps) {
     : range ? { from: asDate((props.defaultValue as Range).from), to: asDate((props.defaultValue as Range).to) } as DateRange
     : asDate(props.defaultValue as DateInput)
   const [own, setOwn] = React.useState<Date | DateRange | undefined>(initial)
+  // A value prop makes the picker controlled, even when it is undefined, so a reset clears it.
   // The trigger always reads the current value, so a change from outside shows at once.
-  const value = props.value === undefined ? own : props.value ?? undefined
+  const controlled = 'value' in props
+  const value = controlled ? props.value ?? undefined : own
   const [open, setOpen] = React.useState(false)
   const commit = (next: Date | DateRange | undefined) => {
-    if (props.value === undefined) setOwn(next)
+    if (!controlled) setOwn(next)
     ;(props.onValueChange as ((value: Date | DateRange | undefined) => void) | undefined)?.(next)
   }
   const text = formatDate(value, format, locale)
@@ -189,7 +194,8 @@ export function DatePicker(props: DatePickerProps) {
                 defaultMonth={calendar?.defaultMonth ?? focusDay}
                 selected={value as Date | undefined}
                 onSelect={(next: Date | undefined) => {
-                  commit(next)
+                  // Choosing the date it already holds confirms it rather than clearing it.
+                  if (next) commit(next)
                   setOpen(false)
                 }}
               />
