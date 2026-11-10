@@ -179,3 +179,43 @@ it.each([
 ] as const)('rejects the calendar recipe %o at %s', (props, path) => {
   expect(() => validateComponentRecipe(calendarDraft(props))).toThrow(expect.objectContaining({ path }))
 })
+
+const variantDraft = (component: string, props: Record<string, unknown> = {}) => ({
+  ...badge, component, props,
+  content: defaultRecipeFields(componentRecipeFields(component as 'badge').content),
+})
+
+it.each([
+  ['badge', { appearance: 'soft', variant: 'warning' }],
+  ['badge', { appearance: 'outline', variant: 'destructive' }],
+  ['badge', { variant: 'success' }],
+  ['badge', { variant: 'info' }],
+  ['alert', { dismissible: true, actions: true, layout: 'compact' }],
+  ['card', { mode: 'link' }],
+  ['card', { mode: 'options' }],
+  ['card', { mode: 'media' }],
+  ['avatar', { shape: 'square', overflow: 99 }],
+  ['accordion', { appearance: 'flush', icon: 'plus' }],
+  ['accordion', { icon: 'family' }],
+] as const)('accepts the 0.7.3 %s variant %o', (component, props) => {
+  expect(validateComponentRecipe(variantDraft(component, props)).props).toMatchObject(props)
+})
+
+it.each([
+  ['badge', { appearance: 'raised' }, '/props/appearance'],
+  ['avatar', { overflow: 100 }, '/props/overflow'],
+  ['avatar', { overflow: -1 }, '/props/overflow'],
+  ['card', { mode: 'grid' }, '/props/mode'],
+  ['accordion', { icon: 'arrow' }, '/props/icon'],
+  ['alert', { layout: 'wide' }, '/props/layout'],
+] as const)('rejects the %s variant %o at %s', (component, props, path) => {
+  expect(() => validateComponentRecipe(variantDraft(component, props))).toThrow(expect.objectContaining({ path }))
+})
+
+it('keeps existing recipes free of the 0.7.3 variant fields', () => {
+  for (const component of ['badge', 'alert', 'card', 'avatar', 'accordion'] as const) {
+    const props = validateComponentRecipe(variantDraft(component)).props as Record<string, unknown>
+    for (const key of ['appearance', 'dismissible', 'actions', 'layout', 'mode', 'shape', 'overflow', 'icon'])
+      if (!(component === 'card' && key === 'appearance')) expect(props).not.toHaveProperty(key)
+  }
+})
