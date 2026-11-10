@@ -56,6 +56,8 @@ type ComboboxState = {
   values: string[]
   labels: Map<string, string>
   query: string
+  /** The field's text: the query while the person types, else the chosen option's label. */
+  text: string
   /** The text the options are filtered by: the query once the person types, else nothing. */
   search: string
   setQuery(query: string): void
@@ -117,7 +119,8 @@ export function Combobox(props: ComboboxProps) {
   const [typing, setTyping] = React.useState(defaultQuery !== undefined)
   const search = typing ? query : ''
   const setOpen = (next: boolean) => {
-    if (next && !open) setTyping(false)
+    // Opening shows every option; closing a single combobox without a choice shows its value again.
+    if ((next && !open) || (!next && !multiple)) setTyping(false)
     setOpenState(next)
   }
   const [picked, setHighlight] = React.useState<string>()
@@ -130,7 +133,10 @@ export function Combobox(props: ComboboxProps) {
     ...(hasCreate && shouldOfferCreate(search, [...labels.values()]) ? [CREATE] : []),
   ]
   // The first option is highlighted until the person moves, as in a native list.
-  const highlight = picked !== undefined && visible.includes(picked) ? picked : visible[0]
+  // The current value is highlighted until the person types or moves, so Enter keeps it.
+  const resting = !typing && !multiple && values[0] !== undefined && visible.includes(values[0]) ? values[0] : visible[0]
+  const highlight = picked !== undefined && visible.includes(picked) ? picked : resting
+  const text = typing ? query : multiple || values[0] === undefined ? '' : labels.get(values[0]) ?? values[0]
   const setQuery = (next: string) => {
     setQueryState(next)
     setTyping(true)
@@ -148,7 +154,7 @@ export function Combobox(props: ComboboxProps) {
     if (!multiple) setOpen(false)
   }
   const state: ComboboxState = {
-    multiple, values, labels, query, search, setQuery, open, setOpen, visible, highlight, setHighlight, disabled, inputRef, fieldRef,
+    multiple, values, labels, query, text, search, setQuery, open, setOpen, visible, highlight, setHighlight, disabled, inputRef, fieldRef,
     listId: baseId + '-list',
     optionId: (key) => key === CREATE ? baseId + '-create' : `${baseId}-option-${order.indexOf(key)}`,
     choose(key) {
@@ -229,7 +235,7 @@ export function ComboboxInput({ className, onKeyDown, onClick, onChange, ...prop
           aria-activedescendant={expanded && state.highlight !== undefined ? state.optionId(state.highlight) : undefined}
           data-slot="combobox-input"
           disabled={state.disabled}
-          value={state.query}
+          value={state.text}
           className={cn(className)}
           onChange={(event) => {
             onChange?.(event)
@@ -253,7 +259,7 @@ export function ComboboxInput({ className, onKeyDown, onClick, onChange, ...prop
             } else if (event.key === 'Escape' && state.open) {
               event.preventDefault()
               state.setOpen(false)
-            } else if (event.key === 'Backspace' && state.multiple && !state.query && state.values.length) {
+            } else if (event.key === 'Backspace' && state.multiple && !state.text && state.values.length) {
               event.preventDefault()
               state.remove(state.values.at(-1)!)
             } else if (event.key === 'Tab') state.setOpen(false)

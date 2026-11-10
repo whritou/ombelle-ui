@@ -35,9 +35,10 @@ export function PresetPicker({ presets, onAdd }: { presets: string[]; onAdd(name
 ## API and accessibility
 
 - `Combobox` takes `value` or `defaultValue`, `onValueChange`, `multiple`, `disabled`, `name` (one hidden input per value) and `defaultQuery`. The value is a string, or an array of strings with `multiple`.
+- Write the options as `ComboboxItem` elements below `Combobox`; arrays and fragments are fine. The field reads them to know the labels, the order and the create row before the list opens, so options rendered inside your own component are not reached by the arrow keys and show their value instead of their label once chosen.
 - `ComboboxItem` takes its `value`; its text is the label, and the part of it that matches the query is wrapped in `<mark>`. `ComboboxGroup` takes a `heading` and hides itself when none of its options match.
 - `ComboboxCreate` offers `Create “query”` when the trimmed query is not blank and no option label equals it, ignoring case. Choosing it calls `onCreate(query)`; without `onCreate`, the typed name becomes the value.
-- Opening the list shows every option; typing filters them. Arrow keys move the highlight, Enter chooses, Escape closes and keeps the value, and Tab leaves.
+- Opening the list shows every option with the current one highlighted; typing filters them. Arrow keys move the highlight, Enter chooses, Escape closes and keeps the value, and Tab leaves. The field shows the chosen option's label whenever the person is not typing, including after the value changes from outside.
 - In multiple mode, choosing an option toggles it and keeps the list open. Backspace in the empty field removes the last chip, and each chip has a "Remove …" button.
 - The input is a `combobox` with `aria-expanded`, `aria-controls` and `aria-activedescendant`; focus stays in it while the list is open. Options are `option`s, and chosen ones show a check; in the Radix edition `aria-checked` also tells which are chosen in multiple mode.
 - `ComboboxEmpty` is a polite live region that is always present, so "No presets found." is announced. Place it after `ComboboxList`.

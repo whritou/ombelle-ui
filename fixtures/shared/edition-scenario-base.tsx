@@ -91,6 +91,7 @@ function OverlaysScenario() {
         </Combobox>
       </div>
       <p data-testid="combobox-value">Value: {preset}</p>
+      <button type="button" data-testid="combobox-set-ombelle" onClick={() => setPreset('ombelle')}>Use Ombelle</button>
       <p data-testid="combobox-created">Created: {created}</p>
       <p id="os-presets-label">Presets</p>
       <div data-testid="combobox-multiple">

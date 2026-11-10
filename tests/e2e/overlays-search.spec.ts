@@ -39,6 +39,28 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(input).toBeFocused()
     })
 
+    test('single Combobox text follows its value: after outside changes, Escape, Tab and Enter on open', async ({ page }) => {
+      await open(page, edition)
+      const input = page.getByTestId('combobox-single').getByRole('combobox')
+      await page.getByTestId('combobox-set-ombelle').click()
+      await expect(input).toHaveValue('Ombelle')
+      // Typed text that is not chosen gives way to the value's label when the list closes.
+      await input.click()
+      await input.pressSequentially('zz')
+      await page.keyboard.press('Escape')
+      await expect(input).toHaveValue('Ombelle')
+      await input.click()
+      await input.pressSequentially('gla')
+      await page.keyboard.press('Tab')
+      await expect(input).toHaveValue('Ombelle')
+      // Opening highlights the current value, so Enter keeps it.
+      await input.click()
+      await expect(page.getByRole('option', { name: 'Ombelle' })).toHaveAttribute('data-highlighted', /.*/)
+      await page.keyboard.press('Enter')
+      await expect(page.getByTestId('combobox-value')).toHaveText('Value: ombelle')
+      await expect(input).toHaveValue('Ombelle')
+    })
+
     test('Combobox Create hands the trimmed query to onCreate, and hides for an existing name', async ({ page }) => {
       await open(page, edition)
       const input = page.getByTestId('combobox-single').getByRole('combobox')

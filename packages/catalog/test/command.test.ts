@@ -55,6 +55,14 @@ describe('Command', () => {
     expect(html).not.toContain('>Theme<')
   })
 
+  it('base does not call a list empty when its commands come from your own component', () => {
+    const ui = base as unknown as Ui
+    const Actions = () => h(ui.CommandList, null, h(ui.CommandGroup, { heading: 'Workspace' }, h(ui.CommandItem, null, 'Invite a teammate')))
+    const html = renderToStaticMarkup(h(ui.Command, { label: 'Actions' }, h(ui.CommandInput), h(Actions), h(ui.CommandEmpty, null, 'No actions found.')))
+    expect(html).toContain('Invite a teammate')
+    expect(html).not.toContain('No actions found.')
+  })
+
   it('base shows the empty text once nothing matches', () => {
     expect(menu(base as unknown as Ui, 'zzz')).toContain('No results.')
     expect(menu(base as unknown as Ui)).not.toContain('No results.')

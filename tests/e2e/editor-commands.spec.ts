@@ -51,4 +51,7 @@ test('the icon picker is a searchable combobox that sets the icon', async ({ pag
   await expect(picker).toHaveValue('Arrow right')
   await expect(page.getByRole('button', { name: 'Remove icon' })).toBeVisible()
   await expect(page.getByRole('group', { name: 'Icon position' }).or(page.getByRole('radiogroup', { name: 'Icon position' }))).toBeVisible()
+  // Removing the icon from outside the picker updates its text.
+  await page.getByRole('button', { name: 'Remove icon' }).click()
+  await expect(picker).toHaveValue('None')
 })

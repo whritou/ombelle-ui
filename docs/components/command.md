@@ -66,7 +66,7 @@ Runtime dependencies of the Radix edition are React 19.3.1, cmdk 1.1.1 (MIT), @r
 ## Editions
 
 - **Radix edition (cmdk):** cmdk filters, scores and moves the highlight; Radix Dialog holds the dialog.
-- **Base UI edition (Autocomplete):** an inline, always-open Base UI Autocomplete keeps the list box semantics and the highlight; the template filters the commands written as elements. Commands that your own component renders still hide themselves, but do not count for group headings or the empty text.
+- **Base UI edition (Autocomplete):** an inline, always-open Base UI Autocomplete keeps the list box semantics and the highlight; the template filters the commands written as elements. Commands that your own component renders count for the empty text; a group heading hides only when the commands written directly inside it do not match.
 
 Part names and `data-slot` values are the same in both editions.
 

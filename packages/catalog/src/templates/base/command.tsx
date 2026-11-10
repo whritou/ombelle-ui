@@ -11,8 +11,17 @@ type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'classNam
   className?: string
 }
 
-type SearchState = { search: string; query: string; label: string; inDialog: boolean; count: number }
-const SearchContext = React.createContext<SearchState>({ search: '', query: '', label: 'Commands', inDialog: false, count: 0 })
+type SearchState = {
+  search: string
+  query: string
+  label: string
+  inDialog: boolean
+  /** How many commands match, or null while it is not known. */
+  count: number | null
+  register(id: string, matched: boolean): () => void
+}
+const SearchContext = React.createContext<SearchState>({ search: '', query: '', label: 'Commands', inDialog: false, count: null, register: () => () => {} })
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect
 const DialogContext = React.createContext(false)
 
 /** The visible text of an item, without its shortcut. */
@@ -56,9 +65,26 @@ export function Command({ className, filter = true, defaultSearch = '', label = 
   const [search, setSearch] = React.useState(defaultSearch)
   const inDialog = React.useContext(DialogContext)
   const query = filter ? search.trim().toLowerCase() : ''
-  const count = entriesIn(children).filter(entry => matches(query, entry)).length
+  // Each command registers whether it matches, so commands inside your own components count too.
+  // Before that (on the server), the commands written as elements stand in; with none, the count
+  // is not known and the list is not called empty.
+  const registry = React.useRef(new Map<string, boolean>())
+  const [mounted, setMounted] = React.useState(false)
+  const [, refresh] = React.useReducer((value: number) => value + 1, 0)
+  useIsomorphicLayoutEffect(() => setMounted(true), [])
+  const register = React.useCallback((id: string, matched: boolean) => {
+    registry.current.set(id, matched)
+    refresh()
+    return () => {
+      registry.current.delete(id)
+      refresh()
+    }
+  }, [])
+  const written = entriesIn(children)
+  const count = mounted ? [...registry.current.values()].filter(Boolean).length
+    : written.length ? written.filter(entry => matches(query, entry)).length : null
   return (
-    <SearchContext.Provider value={{ search, query, label, inDialog, count }}>
+    <SearchContext.Provider value={{ search, query, label, inDialog, count, register }}>
       <Autocomplete.Root
         inline
         open
@@ -154,9 +180,12 @@ export type CommandItemProps = Omit<Part<typeof Autocomplete.Item>, 'value' | 'o
 
 /** One command. onSelect runs on Enter or click; the search matches its text and keywords. */
 export function CommandItem({ className, value, keywords, onSelect, onClick, children, ...props }: CommandItemProps) {
-  const { query } = React.useContext(SearchContext)
+  const { query, register } = React.useContext(SearchContext)
   const entry = entryOf({ value, keywords, children })
-  if (!matches(query, entry)) return null
+  const matched = matches(query, entry)
+  const id = React.useId()
+  useIsomorphicLayoutEffect(() => register(id, matched), [id, matched, register])
+  if (!matched) return null
   return (
     <Autocomplete.Item
       data-slot="command-item"

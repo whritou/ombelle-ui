@@ -115,6 +115,8 @@ export function Combobox(props: ComboboxProps) {
   // Opening shows every option; typing filters them. A starting query filters at once.
   const [typing, setTyping] = React.useState(defaultQuery !== undefined)
   const search = typing ? query : ''
+  // The field's text: the query while the person types, else the chosen option's label.
+  const text = typing ? query : multiple || values[0] === undefined ? '' : labels.get(values[0]) ?? values[0]
   const commit = (next: string[]) => {
     const value = multiple ? next : next[0] ?? ''
     if (props.value === undefined) setOwn(value)
@@ -149,7 +151,7 @@ export function Combobox(props: ComboboxProps) {
             if (list.includes(CREATE)) create(query)
             else commit(list)
           }}
-          inputValue={query}
+          inputValue={text}
           onInputValueChange={(text, details) => {
             setQuery(text)
             setTyping(details.reason === 'input-change')
@@ -159,6 +161,8 @@ export function Combobox(props: ComboboxProps) {
             // A multiple combobox stays open while the person picks several options.
             if (!next && multiple && details.reason === 'item-press') return
             if (next && !open && details.reason !== 'input-change') setTyping(false)
+            // Closing a single combobox without a choice shows its value again.
+            if (!next && !multiple) setTyping(false)
             setOpen(next)
           }}
           itemToStringLabel={(value: string) => value === CREATE ? query.trim() : labels.get(value) ?? value}
