@@ -22,8 +22,8 @@ const menu = (ui: Ui, defaultSearch?: string) => renderToStaticMarkup(h(ui.Comma
 describe('Command', () => {
   it('provides its parts, with cmdk and the Radix dialog in the Radix edition only', () => {
     expectComponentContract('command', { client: true,
-      parts: ['Command', 'CommandDialog', 'CommandInput', 'CommandList', 'CommandGroup', 'CommandItem', 'CommandShortcut', 'CommandSeparator', 'CommandEmpty'],
-      slots: ['command', 'command-dialog-overlay', 'command-dialog', 'command-dialog-title', 'command-search', 'command-input', 'command-list', 'command-group',
+      parts: ['Command', 'CommandDialog', 'CommandDialogTrigger', 'CommandInput', 'CommandList', 'CommandGroup', 'CommandItem', 'CommandShortcut', 'CommandSeparator', 'CommandEmpty'],
+      slots: ['command', 'command-dialog-trigger', 'command-dialog-overlay', 'command-dialog', 'command-dialog-title', 'command-search', 'command-input', 'command-list', 'command-group',
         'command-group-heading', 'command-item', 'command-shortcut', 'command-separator', 'command-empty'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-dialog', version: '1.3.1' }, { name: 'cmdk', version: '1.1.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='command']", "[data-slot='command-search']", "[data-slot='command-item']", "[data-slot='command-shortcut']", "[data-slot='command-group-heading']", "[data-slot='command-empty']"], glass: 'experimental' })

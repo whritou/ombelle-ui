@@ -82,15 +82,26 @@ export type CommandDialogProps = React.ComponentProps<typeof DialogPrimitive.Roo
   className?: string
 }
 
-/** Command inside a modal dialog. Open it from your own shortcut, such as Ctrl+K. */
+/** A button that opens the dialog. Place it inside CommandDialog, next to the Command. */
+export function CommandDialogTrigger({ className, ...props }: Part<typeof DialogPrimitive.Trigger>) {
+  return <DialogPrimitive.Trigger data-slot="command-dialog-trigger" className={cn(className)} {...props} />
+}
+
+/**
+ * Command inside a modal dialog. Open it with CommandDialogTrigger or from your own shortcut,
+ * such as Ctrl+K, through open and onOpenChange.
+ */
 export function CommandDialog({ title = 'Command menu', className, children, ...props }: CommandDialogProps) {
+  const all = React.Children.toArray(children as React.ReactNode)
+  const triggers = all.filter(child => React.isValidElement(child) && child.type === CommandDialogTrigger)
   return (
     <DialogPrimitive.Root {...props}>
+      {triggers}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop data-slot="command-dialog-overlay" />
         <DialogPrimitive.Popup data-slot="command-dialog" className={cn(className)}>
           <DialogPrimitive.Title data-slot="command-dialog-title">{title}</DialogPrimitive.Title>
-          <DialogContext.Provider value={true}>{children as React.ReactNode}</DialogContext.Provider>
+          <DialogContext.Provider value={true}>{all.filter(child => !triggers.includes(child))}</DialogContext.Provider>
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

@@ -37,8 +37,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the forty experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'card', 'checkbox', 'chip', 'dialog', 'dropdown-menu', 'empty', 'field', 'input', 'input-group', 'input-otp', 'kbd', 'label', 'meter', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle-group', 'tooltip'])
+  it('compiles the forty-four experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'card', 'checkbox', 'chip', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'kbd', 'label', 'meter', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle-group', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -53,9 +53,13 @@ describe('liquid-glass compile', () => {
       'components/ui/card.css',
       'components/ui/checkbox.css',
       'components/ui/chip.css',
+      'components/ui/combobox.css',
+      'components/ui/command.css',
+      'components/ui/context-menu.css',
       'components/ui/dropdown-menu.css',
       'components/ui/empty.css',
       'components/ui/field.css',
+      'components/ui/hover-card.css',
       'components/ui/input-group.css',
       'components/ui/input-otp.css',
       'components/ui/kbd.css',

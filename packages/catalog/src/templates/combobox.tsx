@@ -55,7 +55,7 @@ type ComboboxState = {
   setOpen(open: boolean): void
   select(value: string): void
   remove(value: string): void
-  create?(query: string): void
+  create(query: string): void
   disabled: boolean
   inputRef: React.RefObject<HTMLInputElement | null>
   fieldRef: React.RefObject<HTMLDivElement | null>
@@ -72,7 +72,10 @@ type Common = {
   disabled?: boolean
   /** Submits each value as a hidden input with this name. */
   name?: string
-  /** Called with the trimmed query when the person chooses ComboboxCreate. */
+  /**
+   * Called with the trimmed query when the person chooses ComboboxCreate. Without it, the typed
+   * name becomes the value.
+   */
   onCreate?(query: string): void
   /** The search text on the first render. */
   defaultQuery?: string
@@ -120,11 +123,17 @@ export function Combobox(props: ComboboxProps) {
       commit(values.filter(item => item !== value))
       inputRef.current?.focus()
     },
-    create: onCreate && ((text) => {
-      onCreate(text.trim())
+    create(text) {
+      const name = text.trim()
+      // Without onCreate, the typed name itself becomes a value.
+      if (onCreate) onCreate(name)
+      else commit(multiple ? (values.includes(name) ? values : [...values, name]) : [name])
       if (multiple) setQuery('')
-      else setOpen(false)
-    }),
+      else {
+        setQuery(name)
+        setOpen(false)
+      }
+    },
   }
   return (
     <ComboboxContext.Provider value={state}>
@@ -275,17 +284,17 @@ export function ComboboxItem({ className, value, children, ...props }: ComboboxI
   )
 }
 
-/** Offers to create the typed name when no option has it. Needs onCreate on Combobox. */
+/** Offers the typed name when no option has it; see onCreate on Combobox. */
 export function ComboboxCreate({ className, ...props }: Omit<React.ComponentProps<typeof CommandPrimitive.Item>, 'value' | 'onSelect' | 'children'>) {
   const state = useCombobox('ComboboxCreate')
-  if (!state.create || !shouldOfferCreate(state.query, [...state.labels.values()])) return null
+  if (!shouldOfferCreate(state.query, [...state.labels.values()])) return null
   const name = state.query.trim()
   return (
     <CommandPrimitive.Item
       data-slot="combobox-create"
       value="__combobox-create__"
       forceMount
-      onSelect={() => state.create!(name)}
+      onSelect={() => state.create(name)}
       className={cn(className)}
       {...props}
     >

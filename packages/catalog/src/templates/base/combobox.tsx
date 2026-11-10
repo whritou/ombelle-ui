@@ -62,7 +62,6 @@ type ComboboxState = {
   values: string[]
   labels: Map<string, string>
   query: string
-  creatable: boolean
   disabled: boolean
   fieldRef: React.RefObject<HTMLDivElement | null>
 }
@@ -78,7 +77,10 @@ type Common = {
   disabled?: boolean
   /** Submits each value as a hidden input with this name. */
   name?: string
-  /** Called with the trimmed query when the person chooses ComboboxCreate. */
+  /**
+   * Called with the trimmed query when the person chooses ComboboxCreate. Without it, the typed
+   * name becomes the value.
+   */
   onCreate?(query: string): void
   /** The search text on the first render. */
   defaultQuery?: string
@@ -109,11 +111,14 @@ export function Combobox(props: ComboboxProps) {
     ;(props.onValueChange as ((value: string | string[]) => void) | undefined)?.(value)
   }
   const create = (text: string) => {
-    onCreate?.(text.trim())
-    if (multiple) setQuery('')
+    const name = text.trim()
+    // Without onCreate, the typed name itself becomes a value.
+    if (onCreate) onCreate(name)
+    else commit(multiple ? (values.includes(name) ? values : [...values, name]) : [name])
+    setQuery(multiple ? '' : name)
   }
   return (
-    <ComboboxContext.Provider value={{ multiple, values, labels, query, creatable: !!onCreate, disabled, fieldRef }}>
+    <ComboboxContext.Provider value={{ multiple, values, labels, query, disabled, fieldRef }}>
       <div data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
         <ComboboxPrimitive.Root
           multiple={multiple}
@@ -248,10 +253,10 @@ export function ComboboxItem({ className, value, children, ...props }: ComboboxI
   )
 }
 
-/** Offers to create the typed name when no option has it. Needs onCreate on Combobox. */
+/** Offers the typed name when no option has it; see onCreate on Combobox. */
 export function ComboboxCreate({ className, ...props }: Omit<Part<typeof ComboboxPrimitive.Item>, 'value' | 'children'>) {
   const state = useCombobox('ComboboxCreate')
-  if (!state.creatable || !shouldOfferCreate(state.query, [...state.labels.values()])) return null
+  if (!shouldOfferCreate(state.query, [...state.labels.values()])) return null
   return (
     <ComboboxPrimitive.Item data-slot="combobox-create" value={CREATE} className={cn(className)} {...props}>
       <PlusIcon aria-hidden="true" />
