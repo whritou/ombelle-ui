@@ -32,6 +32,7 @@ export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = 
   combobox: [surface('combobox-input', 'Field'), surface('combobox-content', 'List', 'popover'), surface('combobox-item', 'Option')],
   command: [surface('command', 'Panel', 'popover'), surface('command-item', 'Command')],
   'hover-card': [surface('hover-card-content', 'Card', 'popover')],
+  calendar: [surface('calendar', 'Calendar', 'popover'), surface('calendar-day-button', 'Day')],
   'context-menu': [surface('context-menu-content', 'Menu', 'popover'), surface('context-menu-item', 'Item')],
   'input-group': [surface('input-group', 'Group', 'background'), text('input-group-input', 'Input'), text('input-group-textarea', 'Textarea'), layout('input-group-addon', 'Addon'), text('input-group-text', 'Addon text'), surface('input-group-button', 'Action')],
   sheet: [surface('sheet-content', 'Sheet', 'popover'), text('sheet-title', 'Title'), text('sheet-description', 'Description'), layout('sheet-header', 'Header'), layout('sheet-footer', 'Footer')],

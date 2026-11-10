@@ -3398,6 +3398,83 @@
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "calendar"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "single",
+                "range",
+                "picker"
+              ],
+              "default": "single",
+              "title": "Mode"
+            },
+            "weekStartsOn": {
+              "enum": [
+                0,
+                1
+              ],
+              "default": 0,
+              "title": "Week starts on"
+            },
+            "month": {
+              "type": "string",
+              "title": "Month shown",
+              "pattern": "^\\d{4}-\\d{2}$",
+              "default": "2026-11"
+            },
+            "selectedFrom": {
+              "type": "string",
+              "title": "Selected date or range start",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "default": "2026-11-12"
+            },
+            "selectedTo": {
+              "type": "string",
+              "title": "Range end",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "disablePast": {
+              "type": "boolean",
+              "default": false,
+              "title": "Disable past days"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Pick a date",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": "Choose a date",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "placeholder"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

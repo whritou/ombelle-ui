@@ -118,6 +118,22 @@ function validateComposition(recipe: ComponentRecipe): void {
       references(items, [], '/content/items')
       break
     }
+    case 'calendar': {
+      // A real calendar date: 2026-02-30 matches the pattern but is not a day.
+      const real = (text: string) => {
+        const [year, month, day] = text.split('-').map(Number)
+        const date = new Date(Date.UTC(year!, month! - 1, day!))
+        return date.getUTCFullYear() === year && date.getUTCMonth() === month! - 1 && date.getUTCDate() === day
+      }
+      const { mode = 'single', selectedFrom = '2026-11-12', selectedTo } = recipe.props
+      if (!real(selectedFrom)) reject('Choose a real date', '/props/selectedFrom')
+      if (selectedTo !== undefined) {
+        if (mode !== 'range') reject('Only a range has an end date', '/props/selectedTo')
+        if (!real(selectedTo)) reject('Choose a real date', '/props/selectedTo')
+        if (selectedTo < selectedFrom) reject('The range must not end before it starts', '/props/selectedTo')
+      }
+      break
+    }
     case 'stepper':
       if (recipe.props.current !== undefined && recipe.props.current >= recipe.content.steps.length)
         reject('Choose a step present in the recipe', '/props/current')

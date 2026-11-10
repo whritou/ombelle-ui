@@ -27,6 +27,7 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'command',
   'hover-card',
   'context-menu',
+  'calendar',
   'input-group',
   'sheet',
   'alert-dialog',
