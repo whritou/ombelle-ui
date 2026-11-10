@@ -45,10 +45,25 @@ export function FieldLabel({ className, children, ...props }: Omit<FieldPrimitiv
   )
 }
 
-/** Renders the wrapped control through Field.Control, which supplies its id and description ids. */
-export function FieldControl({ children }: { children: React.ReactElement }) {
+type ControlProps = { id?: string; 'aria-describedby'?: string }
+
+/**
+ * Renders the wrapped control through Field.Control, which supplies its id and description ids.
+ * Field.Control lets the rendered element's own props win, so the control's id and description
+ * move onto Field.Control: the label then follows that id, and the hint and error ids are added
+ * after the control's own description.
+ */
+export function FieldControl({ children }: { children: React.ReactElement<ControlProps> }) {
   const { required } = React.useContext(FieldFlags)
-  return <FieldPrimitive.Control render={children} required={required || undefined} />
+  const { id, 'aria-describedby': describedBy, ...rest } = children.props
+  return (
+    <FieldPrimitive.Control
+      render={React.createElement(children.type, { ...rest, key: children.key })}
+      id={id}
+      aria-describedby={describedBy}
+      required={required || undefined}
+    />
+  )
 }
 
 export function FieldDescription({ className, ...props }: Omit<FieldPrimitive.Description.Props, 'className'> & { className?: string }) {

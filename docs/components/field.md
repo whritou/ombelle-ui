@@ -34,7 +34,7 @@ export function ProjectName({ error }: { error?: string }) {
 - `FieldLabel` points at that control and adds a decorative `*` when the field is required; assistive technology announces the control's own `required` state.
 - `FieldError` renders only while the field is invalid, with a decorative alert icon.
 - The Radix edition is a `div` with `role="group"`. It assigns ids during the server render, so the HTML is correct before hydration.
-- The Base UI edition is built on `Field.Root`, `Field.Label`, `Field.Control`, `Field.Description` and `Field.Error` from `@base-ui/react/field`. Base UI links the hint after hydration. `tests/e2e/display-components.spec.ts` checks both editions in a browser.
+- The Base UI edition is built on `Field.Root`, `Field.Label`, `Field.Control`, `Field.Description` and `Field.Error` from `@base-ui/react/field`. Base UI links the hint after hydration. `FieldControl` moves the control's own `id` and `aria-describedby` onto `Field.Control`, so a control's own description is kept. One difference from the Radix edition: in Base UI the label points at the control's own `id` when it has one, while the Radix edition always replaces it with the field's id. `tests/e2e/display-components.spec.ts` checks both editions in a browser.
 
 ## Recipe
 

@@ -38,8 +38,10 @@ describe('neo-brutalism Radio Group', () => {
   it('draws the item ring in the text colour of the option under it', () => {
     const css = read('radio-group/neo-brutalism.css')
     expect(declarations(css, "[data-slot='radio-group-item']:focus-visible").outline).toBe('3px dashed var(--foreground)')
-    // A checked option is filled with --secondary, so the ring takes its foreground.
-    expect(declarations(css, "[data-slot='radio-group-item'][data-state='checked']:focus-visible")['outline-color'])
+    // Only a checked option is filled with --secondary, so only there does the ring take its foreground;
+    // a bare checked item sits on the page and keeps the foreground ring.
+    expect(declarations(css, "[data-slot='radio-group-item'][data-state='checked']:focus-visible")['outline-color']).toBeUndefined()
+    expect(declarations(css, "[data-slot='radio-group-option']:has([data-slot='radio-group-item'][data-state='checked']) [data-slot='radio-group-item']:focus-visible")['outline-color'])
       .toBe('var(--secondary-foreground)')
   })
 })

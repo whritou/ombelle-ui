@@ -32,12 +32,13 @@
   border-radius: 50%;
   background: currentColor;
 }
-/* The ring falls on the option, whose checked background can be close to --ring: use the option's text colour. */
+/* The ring falls on the option, whose checked background can be close to --ring: use the option's text colour.
+   A bare item sits on the page, so it keeps the foreground ring. */
 [data-slot='radio-group-item']:focus-visible {
   outline: 3px dashed var(--foreground);
   outline-offset: 4px;
 }
-[data-slot='radio-group-item'][data-state='checked']:focus-visible {
+[data-slot='radio-group-option']:has([data-slot='radio-group-item'][data-state='checked']) [data-slot='radio-group-item']:focus-visible {
   outline-color: var(--secondary-foreground);
 }
 [data-slot='radio-group-item']:disabled,
