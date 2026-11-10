@@ -183,3 +183,69 @@
   [data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab']:disabled,
   [data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-disabled] { color: GrayText; }
 }
+/* 0.7.3 variants */
+[data-slot='tabs-list'][data-appearance='pills'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+[data-slot='tabs-trigger']:is([data-appearance='pills'] > *) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-block-size: 2rem;
+  padding-block: 0;
+  padding-inline: 0.875rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: none;
+}
+[data-slot='tabs-trigger']:is([data-appearance='pills'] > *)[data-state='active'] {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='tabs-trigger']:is([data-appearance='pills'] > *)::after {
+  content: none;
+}
+[data-slot='tabs-count'] {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.25rem;
+  block-size: 1.125rem;
+  padding-inline: 0.3125rem;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 0.625rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+[data-slot='tabs-count']:is([data-state='active'] > *) {
+  background: color-mix(in oklab, var(--primary-foreground) 25%, transparent);
+  color: inherit;
+}
+@media (forced-colors: active) {
+  [data-slot='tabs-trigger']:is([data-appearance='pills'] > *) {
+    border: 1px solid ButtonText;
+  }
+  [data-slot='tabs-trigger']:is([data-appearance='pills'] > *)[data-state='active'] {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='tabs-count'] {
+    border: 1px solid currentColor;
+  }
+}
+/* end 0.7.3 variants */

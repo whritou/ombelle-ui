@@ -6,7 +6,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
@@ -15,7 +15,7 @@ import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
@@ -93,6 +93,43 @@ function CalendarScenario() {
           <DatePicker aria-label="Publish date" locale="en-US" calendar={shown} />
         </DialogContent>
       </Dialog>
+    </section>
+  )
+}
+
+// Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
+function VariantsMoreScenario() {
+  const [page, setPage] = React.useState(1)
+  const [rows, setRows] = React.useState(25)
+  return (
+    <section aria-label="More variants" data-testid="variants-more">
+      <Tabs defaultValue="general" orientation="vertical" data-testid="vm-vertical-tabs">
+        <TabsList aria-label="Settings sections">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general">Profile, language and theme.</TabsContent>
+        <TabsContent value="members">People in this workspace.</TabsContent>
+        <TabsContent value="billing">Plan and invoices.</TabsContent>
+      </Tabs>
+      <Tabs defaultValue="all">
+        <TabsList appearance="pills" aria-label="Project lists">
+          <TabsTrigger value="all">All<TabsCount>12</TabsCount></TabsTrigger>
+          <TabsTrigger value="review">Review<TabsCount>3</TabsCount></TabsTrigger>
+          <TabsTrigger value="archived">Archived<TabsCount>0</TabsCount></TabsTrigger>
+        </TabsList>
+        <TabsContent value="all">All projects.</TabsContent>
+        <TabsContent value="review">Projects in review.</TabsContent>
+        <TabsContent value="archived">Archived projects.</TabsContent>
+      </Tabs>
+      <Pagination aria-label="Project pages" data-testid="vm-compact">
+        <PaginationCompact page={page} pageCount={3} previousHref="#vm-page" nextHref="#vm-page"
+          onPrevious={event => { event.preventDefault(); setPage(value => value - 1) }}
+          onNext={event => { event.preventDefault(); setPage(value => value + 1) }} />
+      </Pagination>
+      <PaginationPageSize data-testid="vm-page-size" value={rows} onValueChange={setRows}
+        range={<output data-testid="vm-range">1–{rows} of 290</output>} />
     </section>
   )
 }
@@ -337,6 +374,7 @@ function CatalogExpansionScenario() {
         <OverlaysScenario />
         <CalendarScenario />
         <VariantsBasicsScenario />
+        <VariantsMoreScenario />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

@@ -142,3 +142,74 @@ export function PaginationEllipsis({
     </span>
   )
 }
+
+export type PaginationCompactProps = Omit<React.ComponentProps<'div'>, 'children'> & {
+  page: number
+  pageCount: number
+  previousHref?: string
+  nextHref?: string
+  /** Called on a click of the previous link, as well as or instead of following previousHref. */
+  onPrevious?: React.MouseEventHandler<HTMLAnchorElement>
+  onNext?: React.MouseEventHandler<HTMLAnchorElement>
+}
+
+/** Previous, "Page 2 of 12" and next: for narrow tables and phones. Put it in a Pagination. */
+export function PaginationCompact({
+  className,
+  page,
+  pageCount,
+  previousHref,
+  nextHref,
+  onPrevious,
+  onNext,
+  ...props
+}: PaginationCompactProps) {
+  return (
+    <div {...props} data-slot="pagination-compact" className={cn(className)}>
+      <PaginationLink href={previousHref} onClick={onPrevious} disabled={page <= 1} aria-label="Previous page" data-direction="previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true" focusable="false">
+          <path d="m15 5-7 7 7 7" />
+        </svg>
+      </PaginationLink>
+      <strong>Page {page} of {pageCount}</strong>
+      <PaginationLink href={nextHref} onClick={onNext} disabled={page >= pageCount} aria-label="Next page" data-direction="next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true" focusable="false">
+          <path d="m9 5 7 7-7 7" />
+        </svg>
+      </PaginationLink>
+    </div>
+  )
+}
+
+export type PaginationPageSizeProps = Omit<React.ComponentProps<'div'>, 'onChange'> & {
+  value: number
+  options?: readonly number[]
+  onValueChange?: (value: number) => void
+  label?: React.ReactNode
+  /** A text such as "1–25 of 290". */
+  range?: React.ReactNode
+}
+
+/** A labelled native select for the number of rows per page, with an optional range text. */
+export function PaginationPageSize({
+  className,
+  value,
+  options = [10, 25, 50, 100],
+  onValueChange,
+  label = 'Rows per page',
+  range,
+  id,
+  ...props
+}: PaginationPageSizeProps) {
+  const own = React.useId()
+  const select = id ?? own
+  return (
+    <div {...props} data-slot="pagination-page-size" className={cn(className)}>
+      <label htmlFor={select}>{label}</label>
+      <select id={select} value={value} onChange={event => onValueChange?.(Number(event.target.value))}>
+        {options.map(option => <option key={option} value={option}>{option}</option>)}
+      </select>
+      {range ? <span>{range}</span> : null}
+    </div>
+  )
+}
