@@ -122,3 +122,52 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} select`, () => {
+    test('a multiple Select chooses by keyboard and pointer, stays open, submits every value and resets', async ({ page }) => {
+      await open(page, edition)
+      const form = page.getByTestId('vm-select')
+      const trigger = form.getByRole('combobox', { name: 'Roles' })
+      await expect(trigger).toContainText('Choose roles')
+      await trigger.focus()
+      await page.keyboard.press('ArrowDown')
+      const list = page.getByRole('listbox')
+      await expect(list).toBeVisible()
+      await expect(list).toHaveAttribute('aria-multiselectable', 'true')
+      // Choose Designer and Engineer with the keyboard.
+      const choose = async (name: string) => {
+        for (let step = 0; step < 6; step++) {
+          const active = await page.evaluate(() => {
+            const id = document.activeElement?.getAttribute('aria-activedescendant')
+            const option = id ? document.getElementById(id) : document.activeElement?.closest('[role=option]') ?? document.querySelector('[role=option][data-highlighted]')
+            return option?.textContent ?? ''
+          })
+          if (active.includes(name)) break
+          await page.keyboard.press('ArrowDown')
+        }
+        await page.keyboard.press(edition === 'radix' ? 'Space' : 'Enter')
+      }
+      await choose('Designer')
+      await choose('Engineer')
+      await expect(list).toBeVisible()
+      await list.getByRole('option', { name: 'Researcher' }).click()
+      await expect(list).toBeVisible()
+      for (const name of ['Designer', 'Engineer', 'Researcher'])
+        await expect(list.getByRole('option', { name })).toHaveAttribute('aria-selected', 'true')
+      await page.keyboard.press('Escape')
+      await expect(list).toBeHidden()
+      await expect(trigger).toBeFocused()
+      const chips = form.locator('[data-slot$="select-chip"]')
+      await expect(chips).toHaveText(['Designer', 'Engineer', 'Researcher'])
+      await form.getByTestId('vm-select-submit').click()
+      await expect(form.getByTestId('vm-select-output')).toHaveText('designer,engineer,researcher')
+      // A value changed from outside updates the chips at once.
+      await form.getByTestId('vm-select-reset').click()
+      await expect(chips).toHaveCount(0)
+      await expect(trigger).toContainText('Choose roles')
+      await trigger.click()
+      await expect(page.getByRole('listbox').getByRole('option', { name: 'Designer' })).toHaveAttribute('aria-selected', 'false')
+    })
+  })
+}

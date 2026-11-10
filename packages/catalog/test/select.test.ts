@@ -39,9 +39,13 @@ describe('Select catalog contract', () => {
         'select-separator',
         'select-scroll-up-button',
         'select-scroll-down-button',
+        'select-chip',
+        'select-item-icon',
+        'select-listbox',
       ],
       dependencies: [
         { name: 'react', version: '19.3.1' },
+        { name: '@radix-ui/react-popover', version: '1.3.1' },
         { name: '@radix-ui/react-select', version: '2.4.1' },
         { name: 'clsx', version: '2.1.1' },
         { name: 'tailwind-merge', version: '3.7.0' },

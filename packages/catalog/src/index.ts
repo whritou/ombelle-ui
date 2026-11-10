@@ -104,7 +104,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   tooltip: ['@radix-ui/react-tooltip'],
   dialog: ['@radix-ui/react-dialog', 'lucide-react'],
   'native-select': ['lucide-react'],
-  select: ['@radix-ui/react-select', 'lucide-react'],
+  select: ['@radix-ui/react-select', '@radix-ui/react-popover', 'lucide-react'],
   'radio-group': ['@radix-ui/react-radio-group'],
   'dropdown-menu': ['@radix-ui/react-dropdown-menu', 'lucide-react'],
   popover: ['@radix-ui/react-popover'],

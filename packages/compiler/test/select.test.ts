@@ -14,6 +14,7 @@ it.each(supportedStyleFamilies)(
     const { css } = await expectStandaloneArtifacts(family, 'select', {
       importLine: "from '@/components/ui/select'",
       dependencies: [
+        '@radix-ui/react-popover',
         '@radix-ui/react-select',
         'clsx',
         'lucide-react',
@@ -101,7 +102,7 @@ it('offset-shadow families cast Select shadows in the preset shadow colour', asy
   for (const family of ['ombelle', 'neo-brutalism'] as const) {
     const { css } = await expectStandaloneArtifacts(family, 'select', {
       importLine: "from '@/components/ui/select'",
-      dependencies: ['@radix-ui/react-select', 'clsx', 'lucide-react', 'react', 'tailwind-merge'],
+      dependencies: ['@radix-ui/react-popover', '@radix-ui/react-select', 'clsx', 'lucide-react', 'react', 'tailwind-merge'],
     })
     expect(squash(css)).toMatch(
       /\[data-slot="select-content"\]\{[^}]*box-shadow:[^;]*var\(--shadow-color,var\(--border\)\)/,

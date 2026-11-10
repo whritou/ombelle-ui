@@ -154,6 +154,35 @@ function VariantsMoreFields() {
   )
 }
 
+const dot = <svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="5" fill="currentColor" /></svg>
+function VariantsMoreSelect() {
+  const [roles, setRoles] = React.useState<string[]>([])
+  const [sent, setSent] = React.useState('')
+  return (
+    <form data-testid="vm-select" onSubmit={event => { event.preventDefault(); setSent(new FormData(event.currentTarget).getAll('roles').join(',')) }}>
+      <p id="vm-roles-label">Roles</p>
+      <Select multiple name="roles" value={roles} onValueChange={setRoles}>
+        <SelectTrigger aria-labelledby="vm-roles-label"><SelectValue placeholder="Choose roles" /></SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Team</SelectLabel>
+            <SelectItem value="designer" icon={dot}>Designer</SelectItem>
+            <SelectItem value="engineer" icon={dot}>Engineer</SelectItem>
+          </SelectGroup>
+          <SelectSeparator />
+          <SelectGroup>
+            <SelectLabel>Guests</SelectLabel>
+            <SelectItem value="researcher" icon={dot}>Researcher</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <button type="submit" data-testid="vm-select-submit">Save roles</button>
+      <button type="button" data-testid="vm-select-reset" onClick={() => setRoles([])}>Reset roles</button>
+      <output data-testid="vm-select-output">{sent}</output>
+    </form>
+  )
+}
+
 // Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
 function VariantsMoreScenario() {
   const [page, setPage] = React.useState(1)
@@ -189,6 +218,7 @@ function VariantsMoreScenario() {
         range={<output data-testid="vm-range">1–{rows} of 290</output>} />
       <VariantsMoreTable />
       <VariantsMoreFields />
+      <VariantsMoreSelect />
     </section>
   )
 }
