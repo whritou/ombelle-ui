@@ -170,9 +170,9 @@
   flex-direction: column;
   gap: 0.625rem;
   padding: 0.875rem;
-  border: var(--border-width) dashed var(--border);
+  border: 2.5px dashed var(--border);
   border-radius: calc(var(--radius) + 4px);
-  background: var(--muted);
+  background: var(--card);
   color: var(--foreground);
   font-family: var(--font-family);
   font-size: 0.875rem;

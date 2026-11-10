@@ -162,7 +162,16 @@
       backdrop-filter: none;
     }
   }
-  [data-slot='context-menu-trigger'] {
+  @media (forced-colors: active) {
+    [data-slot='context-menu-content'],
+    [data-slot='context-menu-sub-content'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+[data-slot='context-menu-trigger'] {
   -webkit-touch-callout: none;
 }
 [data-slot='context-menu-trigger'][data-variant='zone'] {
@@ -173,7 +182,7 @@
   padding: 0.875rem;
   border: var(--border-width) dashed var(--border);
   border-radius: calc(var(--radius) + 4px);
-  background: var(--muted);
+  background: rgb(255 255 255 / 0.06);
   color: var(--foreground);
   font-family: var(--font-family);
   font-size: 0.875rem;
@@ -191,15 +200,6 @@
   [data-slot='context-menu-trigger']:focus-visible {
     outline-color: Highlight;
   }
-    [data-slot='context-menu-content'],
-    [data-slot='context-menu-sub-content'] {
-      background: Canvas;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-  }
-}
-@media (forced-colors: active) {
   [data-slot='context-menu-content'],
   [data-slot='context-menu-sub-content'] {
     background: Canvas;

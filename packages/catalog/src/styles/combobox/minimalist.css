@@ -179,7 +179,8 @@
   color: inherit;
   font-weight: 800;
   text-decoration-line: underline;
-  text-decoration-thickness: 2px;
+  text-decoration-color: var(--foreground);
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 [data-slot='combobox-create'] {
@@ -191,8 +192,8 @@
   padding-block: 0.375rem;
   padding-inline: 0.75rem;
   border-block-start: 1px dashed var(--border);
-  color: var(--primary);
-  font-weight: 700;
+  color: var(--accent-foreground);
+  font-weight: 600;
   cursor: pointer;
   outline: none;
 }

@@ -182,3 +182,32 @@ describe('minimalist round remove buttons', () => {
     expect(declarations(read('chip/minimalist.css'), "[data-slot='chip-remove']:focus-visible").outline).toBe('2px solid currentColor')
   })
 })
+
+describe('the 0.7.3 overlays match their boards', () => {
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'] as const
+  it.each(families)('%s marks the matched text with an underline in the board colour', family => {
+    const mark = declarations(read(`combobox/${family}.css`), "[data-slot='combobox-match']")
+    expect(mark['text-decoration-color']).toBe(family === 'minimalist' ? 'var(--foreground)' : 'var(--primary)')
+    expect(mark['text-decoration-thickness']).toBe(family === 'minimalist' ? '1px' : '2px')
+  })
+
+  it.each(families)('%s draws the create row in the board colour and weight', family => {
+    const create = declarations(read(`combobox/${family}.css`), "[data-slot='combobox-create']")
+    expect([create.color, create['font-weight']]).toEqual(family === 'neo-brutalism' ? ['var(--foreground)', '800'] : ['var(--accent-foreground)', '600'])
+  })
+
+  it.each(families)('%s rounds the command like its popover and pads the hover card 16px', family => {
+    expect(declarations(read(`command/${family}.css`), "[data-slot='command']")['border-radius'])
+      .toBe(declarations(read(`popover/${family}.css`), "[data-slot='popover-content']")['border-radius'])
+    const card = declarations(read(`hover-card/${family}.css`), "[data-slot='hover-card-content']")
+    expect([card.padding, card.gap]).toEqual(['1rem', '0.625rem'])
+  })
+
+  it('draws the context menu zone per family', () => {
+    const zone = (family: string) => declarations(read(`context-menu/${family}.css`), "[data-slot='context-menu-trigger'][data-variant='zone']")
+    expect(zone('neo-brutalism')).toMatchObject({ border: '2.5px dashed var(--border)', background: 'var(--card)' })
+    expect(zone('minimalist').background).toBe('transparent')
+    expect(zone('liquid-glass').background).toBe('rgb(255 255 255 / 0.06)')
+    expect(zone('ombelle').background).toBe('var(--muted)')
+  })
+})

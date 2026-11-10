@@ -167,7 +167,7 @@
   padding: 0.875rem;
   border: var(--border-width) dashed var(--border);
   border-radius: calc(var(--radius) + 4px);
-  background: var(--muted);
+  background: transparent;
   color: var(--foreground);
   font-family: var(--font-family);
   font-size: 0.875rem;

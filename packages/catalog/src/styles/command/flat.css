@@ -6,7 +6,7 @@
   gap: 1px;
   padding: 0;
   border: 0;
-  border-radius: calc(var(--radius) + 2px);
+  border-radius: calc(var(--radius) + 4px);
   background: var(--popover);
   color: var(--popover-foreground);
   font-family: var(--font-family);
