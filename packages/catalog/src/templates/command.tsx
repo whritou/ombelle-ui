@@ -22,7 +22,7 @@ function textOf(children: React.ReactNode): string {
   }).join('').trim()
 }
 
-export type CommandProps = Omit<React.ComponentProps<typeof CommandPrimitive>, 'shouldFilter'> & {
+export type CommandProps = Omit<React.ComponentProps<typeof CommandPrimitive>, 'shouldFilter' | 'filter'> & {
   /** Set false when the items are already filtered, for example by a server. */
   filter?: boolean
   /** The search text on the first render. */

@@ -581,6 +581,10 @@ describe('catalog contract', () => {
       'chip',
       'tag-input',
       'input-otp',
+      'combobox',
+      'command',
+      'hover-card',
+      'context-menu',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

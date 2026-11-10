@@ -12,7 +12,7 @@ describe('Hover Card', () => {
   it('provides its parts, with the Radix hover card in the Radix edition only', () => {
     expectComponentContract('hover-card', { client: true, parts: ['HoverCard', 'HoverCardTrigger', 'HoverCardContent', 'HoverCardArrow'],
       slots: ['hover-card', 'hover-card-trigger', 'hover-card-content', 'hover-card-arrow'],
-      dependencies: [{ name: '@radix-ui/react-hover-card', version: '1.2.1' }, { name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
+      dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-hover-card', version: '1.2.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
       selectors: ["[data-slot='hover-card-trigger']", "[data-slot='hover-card-content']", "[data-slot='hover-card-arrow']"], glass: 'experimental' })
     const baseDependencies = getTemplate(getCatalog('0.1.0'), 'hover-card', 'base').dependencies.map(d => d.name)
     expect(baseDependencies).toContain('@base-ui/react')

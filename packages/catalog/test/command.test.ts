@@ -25,7 +25,7 @@ describe('Command', () => {
       parts: ['Command', 'CommandDialog', 'CommandInput', 'CommandList', 'CommandGroup', 'CommandItem', 'CommandShortcut', 'CommandSeparator', 'CommandEmpty'],
       slots: ['command', 'command-dialog-overlay', 'command-dialog', 'command-dialog-title', 'command-search', 'command-input', 'command-list', 'command-group',
         'command-group-heading', 'command-item', 'command-shortcut', 'command-separator', 'command-empty'],
-      dependencies: [{ name: '@radix-ui/react-dialog', version: '1.3.1' }, { name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'cmdk', version: '1.1.1' }, { name: 'lucide-react', version: '1.55.0' }],
+      dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-dialog', version: '1.3.1' }, { name: 'cmdk', version: '1.1.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='command']", "[data-slot='command-search']", "[data-slot='command-item']", "[data-slot='command-shortcut']", "[data-slot='command-group-heading']", "[data-slot='command-empty']"], glass: 'experimental' })
     const baseDependencies = getTemplate(getCatalog('0.1.0'), 'command', 'base').dependencies.map(d => d.name)
     expect(baseDependencies).toContain('@base-ui/react')
