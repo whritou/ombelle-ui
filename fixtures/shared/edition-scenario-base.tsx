@@ -29,6 +29,7 @@ import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
+import { Calendar, DatePicker, toIsoDate } from '@/components/ui/calendar'
 import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, useToastManager } from '@/components/ui/toast'
@@ -54,6 +55,43 @@ const overlayPresets = [
   ['liquid-glass-prism', 'Liquid glass — Prism'],
   ['ombelle', 'Ombelle'],
 ] as const
+
+// Browser coverage for Calendar and Date Picker; the same in both editions. Today is fixed.
+function CalendarScenario() {
+  const [single, setSingle] = React.useState<Date>()
+  const [range, setRange] = React.useState<{ from?: Date; to?: Date }>()
+  const [due, setDue] = React.useState<Date | undefined>(new Date(2026, 10, 12, 12))
+  const [scheduling, setScheduling] = React.useState(false)
+  const shown = { today: '2026-11-10', defaultMonth: '2026-11-01' }
+  return (
+    <section aria-label="Calendar" data-testid="calendar">
+      <button type="button" data-testid="calendar-before">Before the calendar</button>
+      <div data-testid="calendar-single">
+        <Calendar mode="single" {...shown} disablePast aria-label="Delivery day" selected={single} onSelect={setSingle} />
+      </div>
+      <p data-testid="calendar-single-value">Chosen: {single ? toIsoDate(single) : ''}</p>
+      <div data-testid="calendar-range">
+        <Calendar mode="range" {...shown} aria-label="Stay" selected={range} onSelect={setRange} />
+      </div>
+      <p data-testid="calendar-range-value">Range: {range?.from ? toIsoDate(range.from) : ''}–{range?.to ? toIsoDate(range.to) : ''}</p>
+      <form data-testid="calendar-form">
+        <p id="calendar-due-label">Due date</p>
+        <DatePicker aria-labelledby="calendar-due-label" name="due" locale="en-US" value={due ?? null} onValueChange={setDue} calendar={shown} />
+      </form>
+      <button type="button" data-testid="calendar-clear" onClick={() => setDue(undefined)}>Clear</button>
+      <button type="button" data-testid="calendar-schedule" onClick={() => setScheduling(true)}>Schedule</button>
+      <Dialog open={scheduling} onOpenChange={setScheduling}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule</DialogTitle>
+            <DialogDescription>Pick the day the post goes out.</DialogDescription>
+          </DialogHeader>
+          <DatePicker aria-label="Publish date" locale="en-US" calendar={shown} />
+        </DialogContent>
+      </Dialog>
+    </section>
+  )
+}
 
 // Browser coverage for Combobox, Command, Hover Card and Context Menu; the same in both editions.
 function OverlaysScenario() {
@@ -218,6 +256,7 @@ function CatalogExpansionScenario() {
           </InputOTP>
         </section>
         <OverlaysScenario />
+        <CalendarScenario />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

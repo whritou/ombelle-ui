@@ -78,6 +78,7 @@ import { Slider } from '../generated/preset-gallery/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '../generated/preset-gallery/components/ui/toggle-group'
 import { TagInput, TagInputInput, TagInputList } from '../generated/preset-gallery/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../generated/preset-gallery/components/ui/input-otp'
+import { Calendar, formatDate } from '../generated/preset-gallery/components/ui/calendar'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../generated/preset-gallery/components/ui/combobox'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '../generated/preset-gallery/components/ui/command'
 import { gate, type SceneProps } from './shared'
@@ -110,6 +111,7 @@ export function SettingsScene(props: SceneProps) {
   const [presets, setPresets] = React.useState(startingPresets)
   const [preset, setPreset] = React.useState('Ombelle')
   const [palette, setPalette] = React.useState(false)
+  const [away, setAway] = React.useState<{ from?: Date; to?: Date } | undefined>({ from: new Date(2026, 10, 12), to: new Date(2026, 10, 18) })
   const [ran, setRan] = React.useState('')
   React.useEffect(() => {
     const toggle = (event: KeyboardEvent) => {
@@ -314,6 +316,21 @@ export function SettingsScene(props: SceneProps) {
                 )}
               </CardContent>
             </Card>
+            {show(
+              'calendar',
+              'Calendar',
+              <Card>
+                <CardHeader>
+                  <CardTitle level={2}>Out of office</CardTitle>
+                  <CardDescription>Choose the days you are away; teammates see them on your profile.</CardDescription>
+                </CardHeader>
+                <CardContent className="scene-fields">
+                  <Calendar mode="range" numberOfMonths={2} today="2026-11-10" defaultMonth="2026-11-01" disablePast
+                    aria-label="Days away" selected={away} onSelect={setAway} />
+                  <p className="scene-muted" role="status">{away?.from ? `Away ${formatDate(away, { dateStyle: 'medium' }, 'en-US')}` : 'No days away'}</p>
+                </CardContent>
+              </Card>,
+            )}
             {show(
               'command',
               'Command',

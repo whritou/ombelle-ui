@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../generated/preset-gallery/components/ui/alert'
+import { DatePicker, fromIsoDate } from '../generated/preset-gallery/components/ui/calendar'
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../generated/preset-gallery/components/ui/combobox'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '../generated/preset-gallery/components/ui/context-menu'
 import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '../generated/preset-gallery/components/ui/hover-card'
@@ -59,12 +60,12 @@ import { Meter, MeterLabel, MeterValue } from '../generated/preset-gallery/compo
 import { gate, type SceneProps } from './shared'
 
 const rows = [
-  { name: 'Website refresh', owner: 'Ada Lovelace', status: 'On track', alert: false, updated: '2 h ago' },
-  { name: 'Mobile onboarding', owner: 'Grace Hopper', status: 'Needs attention', alert: true, updated: 'Yesterday' },
-  { name: 'Billing migration', owner: 'Margaret Knight', status: 'Shipped', alert: false, updated: '10 min ago' },
-  { name: 'Design tokens', owner: 'Hedy Lamarr', status: 'On track', alert: false, updated: '3 days ago' },
-  { name: 'Help center', owner: 'Katherine Johnson', status: 'On track', alert: false, updated: 'Last week' },
-  { name: 'Status page', owner: 'Radia Perlman', status: 'Needs attention', alert: true, updated: 'Last week' },
+  { name: 'Website refresh', owner: 'Ada Lovelace', status: 'On track', alert: false, updated: '2 h ago', due: '2026-11-14' },
+  { name: 'Mobile onboarding', owner: 'Grace Hopper', status: 'Needs attention', alert: true, updated: 'Yesterday', due: '2026-11-12' },
+  { name: 'Billing migration', owner: 'Margaret Knight', status: 'Shipped', alert: false, updated: '10 min ago', due: '2026-11-11' },
+  { name: 'Design tokens', owner: 'Hedy Lamarr', status: 'On track', alert: false, updated: '3 days ago', due: '2026-11-20' },
+  { name: 'Help center', owner: 'Katherine Johnson', status: 'On track', alert: false, updated: 'Last week', due: '2026-11-27' },
+  { name: 'Status page', owner: 'Radia Perlman', status: 'Needs attention', alert: true, updated: 'Last week', due: '2026-11-30' },
 ] as const
 
 const filters = ['On track', 'Needs attention', 'Shipped'] as const
@@ -73,7 +74,10 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 export function ProjectsScene(props: SceneProps) {
   const show = gate(props)
   const [owners, setOwners] = React.useState<string[]>([])
-  const shown = owners.length ? rows.filter((row) => owners.includes(slug(row.owner))) : rows
+  const [dueBy, setDueBy] = React.useState<Date>()
+  const shown = rows
+    .filter((row) => !owners.length || owners.includes(slug(row.owner)))
+    .filter((row) => !dueBy || fromIsoDate(row.due)! <= dueBy)
   return (
     <main className="preset-scene" data-testid="preset-scene" data-scene="projects">
       <div className="scene-heading">
@@ -150,6 +154,15 @@ export function ProjectsScene(props: SceneProps) {
                           <ComboboxEmpty>No one matches.</ComboboxEmpty>
                         </ComboboxContent>
                       </Combobox>
+                    </div>,
+                  )}
+                  {show(
+                    'calendar',
+                    'Calendar',
+                    <div className="scene-field">
+                      <p id="scene-due-label">Due by</p>
+                      <DatePicker aria-labelledby="scene-due-label" value={dueBy ?? null} onValueChange={setDueBy}
+                        calendar={{ today: '2026-11-10', defaultMonth: '2026-11-01' }} />
                     </div>,
                   )}
                   <SheetFooter>

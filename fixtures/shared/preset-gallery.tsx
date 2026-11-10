@@ -106,6 +106,7 @@ import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
+import { Calendar, DatePicker } from '@/components/ui/calendar'
 import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
@@ -310,6 +311,12 @@ export function PresetGallery({
           </CommandList>
           <CommandEmpty>No results.</CommandEmpty>
         </Command>
+      </section>)}
+      {gate('calendar', 'Calendar', <section aria-label="Calendar" data-component="calendar">
+        <h2>Calendar</h2>
+        <Calendar mode="range" today="2026-11-10" defaultMonth="2026-11-01" aria-label="Stay" selected={{ from: '2026-11-12', to: '2026-11-18' }} />
+        <p id="gallery-due">Due date</p>
+        <DatePicker aria-labelledby="gallery-due" defaultValue="2026-11-12" calendar={{ today: '2026-11-10' }} />
       </section>)}
       {gate('hover-card', 'Hover Card', <section aria-label="Hover Card" data-component="hover-card">
         <h2>Hover Card</h2>
