@@ -142,6 +142,16 @@ Spinner, Kbd, Empty, Field, Meter and Stepper are not part of the 36 PR5 entries
 - **Meter**: the meter is announced with its label and value text ("128 of 200"); the visible "128 / 200" is not read twice as part of the meter. Labelled parts are understandable from the legend without colour.
 - **Stepper**: the steps are read as an ordered list inside a navigation landmark named "Progress"; the current step is announced as current, and completed steps say "Completed". No step takes a tab stop.
 
+**Form controls (0.7.3)**
+
+Slider, Toggle Group, Chip, Tag Input and Input OTP are not part of the 36 PR5 entries either. Review them on the preview `settings` and `projects` scenes and in the website editor, and record them in their own rows below.
+
+- **Slider**: each thumb is announced as a slider with its name and value text ("Border radius, 12 pixels"); the arrow keys, Page Up, Page Down, Home and End change it; range thumbs have distinct names and do not pass each other.
+- **Toggle Group**: a single choice is announced as a radio group with one Tab stop, the arrow keys move between options, and Space selects; a multiple choice is a toolbar of toggle buttons announced as pressed or not.
+- **Chip**: a filter chip is announced as a toggle button, pressed or not; a remove button is announced as "Remove" plus the chip's text.
+- **Tag Input**: the input is announced with its label and hint; adding, removing, a duplicate and the maximum are announced politely; each tag's remove button is reachable by Tab and returns focus to the input.
+- **Input OTP**: the code is announced as one named field in the Radix edition, or as named inputs ("Digit 2 of 6") in the Base UI edition; a pasted code fills every slot.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -181,6 +191,16 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Field | | | | | | | | | | |
 | Meter | | | | | | | | | | |
 | Stepper | | | | | | | | | | |
+
+#### Form controls (0.7.3)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Slider | | | | | | | | | | |
+| Toggle Group | | | | | | | | | | |
+| Chip | | | | | | | | | | |
+| Tag Input | | | | | | | | | | |
+| Input OTP | | | | | | | | | | |
 
 ### Findings
 
