@@ -154,11 +154,12 @@ Slider, Toggle Group, Chip, Tag Input and Input OTP are not part of the 36 PR5 e
 
 **Overlays and search (0.7.3)**
 
-Combobox, Command, Hover Card and Context Menu are not part of the 36 PR5 entries either. Review them on the preview `projects` and `settings` scenes and in the website editor (the Ctrl+K palette and the icon and glass preset pickers), and record them in their own rows below.
+Combobox, Command, Hover Card, Context Menu and Calendar are not part of the 36 PR5 entries either. Review them on the preview `projects` and `settings` scenes and in the website editor (the Ctrl+K palette and the icon and glass preset pickers), and record them in their own rows below.
 
 - **Combobox**: the field is announced as a combobox with its label, collapsed or expanded; the highlighted option is announced as the arrow keys move while focus stays in the field; "No presets found." is announced; each chip's remove button is named "Remove" plus its label.
 - **Command**: Ctrl+K opens a dialog named "Command menu" with focus in the search box; group headings name their groups; the highlighted command is announced; Escape returns focus to where it was.
 - **Hover Card**: the link reads and works on its own; the card appears on keyboard focus as on hover and closes on Escape.
+- **Calendar**: one Tab enters the grid, named by its month; the arrow keys, Page Up, Page Down, Home and End move by day, month and week end; each day is announced with its full date, "Today" and "selected"; a disabled day cannot be chosen; the Date Picker button announces its date or "Choose a date", and choosing or Escape returns focus to it.
 - **Context Menu**: Shift+F10 or the context-menu key on the focused area opens the menu; items, the submenu and the destructive item are announced; Escape returns focus to the area.
 
 ## Results
@@ -219,6 +220,7 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Command | | | | | | | | | | |
 | Hover Card | | | | | | | | | | |
 | Context Menu | | | | | | | | | | |
+| Calendar | | | | | | | | | | |
 
 ### Findings
 
