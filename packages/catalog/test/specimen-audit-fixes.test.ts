@@ -175,3 +175,10 @@ describe('form controls match the 0.7.3 boards', () => {
     expect(declarations(read('slider/minimalist.css'), "[data-slot='slider-range']")['border-radius']).toBe('4px')
   })
 })
+
+describe('minimalist round remove buttons', () => {
+  it('draw a 2px ring: a 1px ring on a round 24px button falls below 3:1 at the edges', () => {
+    expect(declarations(read('tag-input/minimalist.css'), "[data-slot='tag-input-remove']:focus-visible").outline).toBe('2px solid currentColor')
+    expect(declarations(read('chip/minimalist.css'), "[data-slot='chip-remove']:focus-visible").outline).toBe('2px solid currentColor')
+  })
+})

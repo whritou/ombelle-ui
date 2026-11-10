@@ -65,7 +65,7 @@
   background: color-mix(in oklab, currentColor 12%, transparent);
 }
 [data-slot='chip-remove']:focus-visible {
-  outline: 1px solid currentColor;
+  outline: 2px solid currentColor;
   outline-offset: 1px;
 }
 @media (forced-colors: active) {

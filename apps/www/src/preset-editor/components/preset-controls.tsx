@@ -356,7 +356,8 @@ export function DesignControls({
               onChange={(next) => onEdit(path, next)}
               onReset={() => {
                 onReset(path)
-                document.getElementById(fieldId(path))?.focus()
+                // The reset button goes away, so focus moves to the row's exact field.
+                document.getElementById(fieldId(path) + '-number')?.focus()
               }}
             />
             {glassHint && (

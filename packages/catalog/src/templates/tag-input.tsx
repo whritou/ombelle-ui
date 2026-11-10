@@ -148,9 +148,15 @@ export function TagInputList({ className, ...props }: React.ComponentProps<'ul'>
 }
 
 /** The text input that adds tags. It takes the label and description, for example from FieldControl. */
-export function TagInputInput({ className, onKeyDown, onPaste, disabled, ...props }: React.ComponentProps<'input'>) {
+export function TagInputInput({ className, onKeyDown, onPaste, onChange, disabled, required, ref, ...props }: React.ComponentProps<'input'>) {
   const state = useTagInput('TagInputInput')
   const [text, setText] = React.useState('')
+  // The field's own ref (a Base UI Field registers the control through it) and the caller's.
+  const setRef = React.useCallback((element: HTMLInputElement | null) => {
+    state.inputRef.current = element
+    if (typeof ref === 'function') ref(element)
+    else if (ref) ref.current = element
+  }, [ref, state.inputRef])
   const submit = (raw: string) => {
     const rejected = state.add(raw)
     setText(rejected.map(item => item.tag).join(', '))
@@ -160,12 +166,18 @@ export function TagInputInput({ className, onKeyDown, onPaste, disabled, ...prop
       type="text"
       autoComplete="off"
       {...props}
-      ref={state.inputRef}
+      ref={setRef}
       value={text}
       disabled={disabled ?? state.disabled}
+      // A field with tags is filled: only an empty one must have text typed in it.
+      required={required && state.value.length === 0}
+      aria-required={required || undefined}
       data-slot="tag-input-input"
       className={cn(className)}
-      onChange={(event) => setText(event.target.value)}
+      onChange={(event) => {
+        onChange?.(event)
+        setText(event.target.value)
+      }}
       onKeyDown={(event) => {
         onKeyDown?.(event)
         if (event.defaultPrevented || event.nativeEvent.isComposing) return
@@ -184,7 +196,10 @@ export function TagInputInput({ className, onKeyDown, onPaste, disabled, ...prop
         const characters = state.separators.filter(separator => separator.length === 1)
         if (event.defaultPrevented || !(/[\r\n]/.test(pasted) || characters.some(character => pasted.includes(character)))) return
         event.preventDefault()
-        submit(text + pasted)
+        // The paste replaces the selection, as it would in a plain input.
+        const input = event.currentTarget
+        const start = input.selectionStart ?? text.length, end = input.selectionEnd ?? text.length
+        submit(text.slice(0, start) + pasted + text.slice(end))
       }}
     />
   )

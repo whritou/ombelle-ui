@@ -38,3 +38,9 @@ describe('Chip', () => {
     expect(renderToStaticMarkup(h(ChipGroup, { 'aria-label': 'Status filter' }))).toMatch(/role="group"[^>]*aria-label="Status filter"|aria-label="Status filter"[^>]*role="group"/)
   })
 })
+
+describe('a disabled Chip', () => {
+  it('disables its remove button too', () => {
+    expect(renderToStaticMarkup(h(Chip, { disabled: true }, 'glass', h(ChipRemove)))).toMatch(/<button[^>]*disabled=""[^>]*aria-label="Remove glass"|<button[^>]*aria-label="Remove glass"[^>]*disabled=""/)
+  })
+})

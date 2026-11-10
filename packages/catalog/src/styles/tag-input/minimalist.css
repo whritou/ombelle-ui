@@ -66,7 +66,7 @@
   background: color-mix(in oklab, currentColor 12%, transparent);
 }
 [data-slot='tag-input-remove']:focus-visible {
-  outline: 1px solid currentColor;
+  outline: 2px solid currentColor;
   outline-offset: 1px;
 }
 [data-slot='tag-input-input'] {

@@ -4,7 +4,7 @@ import { CheckIcon, XIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './chip.css'
 
-const ChipText = React.createContext('')
+const ChipText = React.createContext({ text: '', disabled: false })
 
 /** The visible text of a chip, without its remove button. */
 function textOf(children: React.ReactNode): string {
@@ -34,7 +34,7 @@ export function Chip({ className, pressed, defaultPressed, onPressedChange, disa
   const text = textOf(children)
   if (!pressable)
     return (
-      <ChipText.Provider value={text}>
+      <ChipText.Provider value={{ text, disabled: disabled ?? false }}>
         <span {...props} data-slot="chip" data-mode="static" data-disabled={disabled || undefined} className={cn(className)}>
           {children}
         </span>
@@ -70,12 +70,13 @@ export type ChipRemoveProps = React.ComponentProps<'button'> & {
 }
 
 /** Removes its chip. Place it last inside a static Chip. */
-export function ChipRemove({ className, label, onRemove, onClick, ...props }: ChipRemoveProps) {
-  const text = React.useContext(ChipText)
+export function ChipRemove({ className, label, onRemove, onClick, disabled, ...props }: ChipRemoveProps) {
+  const chip = React.useContext(ChipText)
   return (
     <button
       type="button"
-      aria-label={label ?? (text ? `Remove ${text}` : 'Remove')}
+      aria-label={label ?? (chip.text ? `Remove ${chip.text}` : 'Remove')}
+      disabled={disabled ?? chip.disabled}
       {...props}
       data-slot="chip-remove"
       className={cn(className)}

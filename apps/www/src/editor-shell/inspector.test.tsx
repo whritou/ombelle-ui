@@ -86,10 +86,13 @@ it('ControlRow ties the label to its control and marks edited rows', () => {
 
 it('SliderRow parks the slider thumb at the minimum for partial or invalid text', () => {
   for (const value of ['-', 'invalid', '', '1.', '+5', ' 5'])
-    expect(sliderThumbValue(value, undefined, 0)).toBe(0)
-  expect(sliderThumbValue('1.25', undefined, 0)).toBe(1.25)
+    expect(sliderThumbValue(value, undefined, 0, 2)).toBe(0)
+  expect(sliderThumbValue('1.25', undefined, 0, 2)).toBe(1.25)
   // An empty field shows the value in effect.
-  expect(sliderThumbValue('', '0.5', 0)).toBe(0.5)
+  expect(sliderThumbValue('', '0.5', 0, 2)).toBe(0.5)
+  // A value past the bounds sits at the nearer end, as a native range input does.
+  expect(sliderThumbValue('500', undefined, 0, 48)).toBe(48)
+  expect(sliderThumbValue('-3', undefined, 0, 48)).toBe(0)
   // The text field keeps what was typed.
   expect(renderToStaticMarkup(<SliderRow {...slider} value="-" />)).toContain('value="-"')
 })

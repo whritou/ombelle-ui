@@ -52,11 +52,13 @@ const decimal = /^-?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/
 
 /**
  * Where the slider thumb sits for the text in the number field: the typed number, or for an empty
- * field the value in effect; a half-typed or invalid value parks it at the minimum.
+ * field the value in effect, kept within the bounds as a native range input does; a half-typed or
+ * invalid value parks it at the minimum.
  */
-export function sliderThumbValue(value: string, placeholder: string | undefined, min: number): number {
-  if (decimal.test(value)) return Number(value)
-  if (value === '' && placeholder !== undefined && decimal.test(placeholder)) return Number(placeholder)
+export function sliderThumbValue(value: string, placeholder: string | undefined, min: number, max = Infinity): number {
+  const clamp = (number: number) => Math.min(max, Math.max(min, number))
+  if (decimal.test(value)) return clamp(Number(value))
+  if (value === '' && placeholder !== undefined && decimal.test(placeholder)) return clamp(Number(placeholder))
   return min
 }
 
@@ -130,7 +132,7 @@ export function SliderRow({
         max={max}
         step={step}
         {...shared}
-        value={[sliderThumbValue(value, placeholder, min)]}
+        value={[sliderThumbValue(value, placeholder, min, max)]}
         onValueChange={([next]) => onChange(String(next))}
       />
     </div>

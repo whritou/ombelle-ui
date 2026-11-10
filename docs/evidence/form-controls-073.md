@@ -30,6 +30,8 @@ The swap exceeded the 10 kB limit. The work stopped for review, and the user acc
 | All 20 configurations, before the fixes | 4 passed (liquid glass); 16 failed, all on the new components |
 | The 16 failing configurations and the audit self-tests, after the fixes | Radix and self-tests passed; the 8 Base UI configurations failed on Dropdown Menu items (caused by the first version of the wrapper-ring change below) |
 | The 8 Base UI configurations and the self-tests, after correcting that change | 27 passed |
+| All 20 configurations, after the board fixes and the review fixes | 16 passed; the 4 minimalist configurations failed on the round Tag Input remove buttons (a 1px ring, 80–84 of 86 pixels at 3:1) |
+| The 4 minimalist configurations, with a 2px ring on minimalist remove buttons | 4 passed: all 20 configurations pass |
 
 Findings and fixes:
 
@@ -40,7 +42,7 @@ Findings and fixes:
 - **Input OTP, minimalist, Base UI:** an underline from 1px to 2px was not enough change. The slots now also draw a 1px ring.
 - **Slider, minimalist, Base UI:** the range input (16 by 15 pixels) overflowed the thumb's 14-pixel content box. The thumb now draws its edge as an inset shadow.
 
-Each fix is pinned in `packages/catalog/test/specimen-audit-fixes.test.ts`. The board-match fixes below changed corner radii after these runs; the final verification reruns the audit.
+Each fix is pinned in `packages/catalog/test/specimen-audit-fixes.test.ts`, including the 2px ring on the round minimalist remove buttons found by the final run.
 
 ## Board comparison
 

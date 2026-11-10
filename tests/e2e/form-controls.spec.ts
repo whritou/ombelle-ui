@@ -79,6 +79,29 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(input).toHaveValue('glass')
     })
 
+    test('Tag Input pastes over the selected text, not after it', async ({ page }) => {
+      await open(page, edition)
+      const box = page.getByTestId('tag-input')
+      const input = box.getByRole('textbox')
+      await input.fill('desgn')
+      await input.selectText()
+      await input.evaluate((element, text) => {
+        const data = new DataTransfer()
+        data.setData('text/plain', text)
+        element.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+      }, 'design, tokens')
+      await expect(box.getByRole('listitem')).toHaveText(['glass', 'design', 'tokens'])
+    })
+
+    if (edition === 'base')
+      test('Tag Input reports typing to its Base UI Field', async ({ page }) => {
+        await open(page, edition)
+        const input = page.getByTestId('tag-input').getByRole('textbox')
+        const field = page.locator('[data-slot$="field"]').filter({ has: input })
+        await input.pressSequentially('x')
+        await expect(field).toHaveAttribute('data-dirty', '')
+      })
+
     test('Input OTP is named and a pasted code keeps only its digits', async ({ page }) => {
       await open(page, edition)
       const field = page.getByRole('textbox', { name: 'Verification code' })

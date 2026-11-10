@@ -942,6 +942,14 @@ test('edits numeric design values with a slider and keeps the exact field in syn
   await page.getByLabel('Corner radius', { exact: true }).fill('1.25')
   await expect(slider).toHaveAttribute('aria-valuenow', '1.25')
 })
+test('keeps focus on the number field after resetting a slider row', async ({ page }) => {
+  await page.goto(url)
+  await ready(page)
+  const field = page.getByLabel('Corner radius', { exact: true })
+  await field.fill('1')
+  await page.getByRole('button', { name: 'Reset corner radius', exact: true }).click()
+  await expect(field).toBeFocused()
+})
 test('keeps focus on a non-core token field after resetting it', async ({ page }) => {
   await page.goto(url)
   await ready(page)

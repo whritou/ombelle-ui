@@ -46,3 +46,16 @@ describe('Tag Input', () => {
     expect(input).toContain('required')
   })
 })
+
+describe('Tag Input in a required Field', () => {
+  const required = (tags: string[]) => {
+    const html = renderToStaticMarkup(h(Field, { required: true }, h(FieldLabel, null, 'Topics'),
+      h(TagInput, { defaultValue: tags }, h(TagInputList), h(FieldControl, null, h(TagInputInput)))))
+    return /<input[^>]*data-slot="tag-input-input"[^>]*>/.exec(html)![0]
+  }
+  it('requires typed text only while there are no tags, so a filled field can submit', () => {
+    expect(required([])).toMatch(/\srequired=""/)
+    expect(required(['glass'])).not.toMatch(/\srequired=""/)
+    expect(required(['glass'])).toContain('aria-required="true"')
+  })
+})
