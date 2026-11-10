@@ -54,7 +54,7 @@ These variants need CLI **0.7.3** or later, including in component recipes. Leav
 - **`AvatarOverflow`** shows the count of avatars not shown, such as "+4", in the family's avatar size.
   - It is named "4 more" by default; `label` replaces the name, for example "4 more reviewers".
   - Inside `AvatarGroup`, it overlaps like the avatars.
-- **`AvatarFallback` waits 600 ms by default** (`delayMs`), so an image that loads quickly never flashes the initials. Pass `delayMs={0}` when there is no image. The Base UI edition maps `delayMs` to Base UI's `delay`.
+- **Beside an `AvatarImage`, `AvatarFallback` waits 600 ms by default** (`delayMs`), so an image that loads quickly never flashes the initials. An Avatar without an image shows its initials at once, server-rendered too, as before. `delayMs={0}` shows them at once beside an image as well. The Avatar detects an `AvatarImage` among its direct children. The Base UI edition takes `delayMs` or Base UI's own `delay`.
 
 ## Styles and artifacts
 
@@ -75,4 +75,4 @@ In liquid glass, avatars are card glass discs with `foreground` initials at weig
 
 ## Base UI edition
 
-Projects whose `components.json` uses one of shadcn's `base-*` styles receive an Avatar built on `Avatar.Root`, `Avatar.Image` and `Avatar.Fallback` from `@base-ui/react/avatar` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-avatar`. `size`, `variant`, `AvatarStatus`, `AvatarGroup` and every `data-slot` match the Radix edition, and the stylesheet needs no state bridge. Base UI's fallback delay prop is `delay` instead of Radix's `delayMs`. The parity test covers fallbacks, status dots and groups; image loading follows Base UI's behaviour. The Base UI edition has no allowed styling differences.
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive an Avatar built on `Avatar.Root`, `Avatar.Image` and `Avatar.Fallback` from `@base-ui/react/avatar` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-avatar`. `size`, `variant`, `AvatarStatus`, `AvatarGroup` and every `data-slot` match the Radix edition, and the stylesheet needs no state bridge. The fallback takes `delayMs`, as in the Radix edition, or Base UI's own `delay`. The parity test covers fallbacks, status dots and groups; image loading follows Base UI's behaviour. The Base UI edition has no allowed styling differences.

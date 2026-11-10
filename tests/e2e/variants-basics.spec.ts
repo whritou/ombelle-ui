@@ -69,10 +69,20 @@ for (const edition of ['radix', 'base'] as const) {
       await page.getByTestId('vb-toggle-loading').click()
       await expect(save).toHaveAttribute('aria-busy', 'true')
       expect((await save.boundingBox())!.width).toBeGreaterThanOrEqual(before - 0.5)
-      expect(parseFloat(await save.evaluate(element => element.style.minInlineSize))).toBeCloseTo(before, 1)
+      // The kept width never exceeds the container: min(<width>px, 100%).
+      const kept = () => save.evaluate(element => Number(/([\d.]+)px/.exec(element.style.minInlineSize)?.[1] ?? NaN))
+      expect(await kept()).toBeCloseTo(before, 1)
+      expect(await save.evaluate(element => element.style.minInlineSize)).toMatch(/^min\(.*100%\)$/)
       await page.getByTestId('vb-toggle-loading').click()
       await expect(save).not.toHaveAttribute('aria-busy', 'true')
       expect(await save.evaluate(element => element.style.minInlineSize)).toBe('')
+      // A label that grows at rest is measured again before the next load.
+      await page.getByTestId('vb-longer-label').click()
+      const longer = (await save.boundingBox())!.width
+      expect(longer).toBeGreaterThan(before)
+      await page.getByTestId('vb-toggle-loading').click()
+      await expect(save).toHaveAttribute('aria-busy', 'true')
+      expect(await kept()).toBeCloseTo(longer, 1)
     })
 
     test('avatar initials wait 600 ms for a broken image and never show for a fast one', async ({ page }) => {

@@ -27,3 +27,10 @@ describe('Badge 0.7.3 variants', () => {
     expect(text).toMatch(/@media \(forced-colors: active\)\s*\{[^@]*data-appearance[^}]*CanvasText/)
   })
 })
+
+describe('Badge outline intents in dark mode (final review)', () => {
+  it.each(families)('%s writes outline success, warning and info in the foreground, which no preset leaves light-only', family => {
+    for (const intent of ['success', 'warning', 'info'])
+      expect(css(family)).toMatch(new RegExp(String.raw`\[data-slot='badge'\]\[data-appearance='outline'\]\[data-variant='${intent}'\][^{]*\{\s*color: var\(--foreground\)`))
+  })
+})

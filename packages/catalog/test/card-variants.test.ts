@@ -88,3 +88,11 @@ describe('Card 0.7.3 variants', () => {
         expect((selector.match(/data-slot=/g) ?? []).length, selector).toBeLessThanOrEqual(1)
   })
 })
+
+describe('CardOption outside a direct CardGroup child (final review)', () => {
+  it('takes its own name when a wrapper hides it from the group', () => {
+    const Wrapped = () => h(CardOption, { value: 'team', title: 'Team', name: 'plan' })
+    const html = renderToStaticMarkup(h(CardGroup, { name: 'plan', 'aria-label': 'Plan' }, h(Wrapped)))
+    expect(inputs(html)[0]).toContain('name="plan"')
+  })
+})

@@ -110,16 +110,16 @@
   border-color: var(--destructive);
 }
 [data-slot='badge'][data-appearance='outline'][data-variant='success']:not(:root) {
-  color: var(--success-foreground, #14532d);
-  border-color: currentColor;
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--success-foreground, #14532d) 70%, var(--foreground));
 }
 [data-slot='badge'][data-appearance='outline'][data-variant='warning']:not(:root) {
-  color: var(--warning-foreground, #78350f);
-  border-color: currentColor;
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--warning-foreground, #78350f) 70%, var(--foreground));
 }
 [data-slot='badge'][data-appearance='outline'][data-variant='info']:not(:root) {
-  color: var(--info-foreground, #1e3a8a);
-  border-color: currentColor;
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--info-foreground, #1e3a8a) 70%, var(--foreground));
 }
 @media (forced-colors: active) {
   [data-slot='badge'][data-appearance] {

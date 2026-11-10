@@ -85,6 +85,7 @@ Card stays a server component with no new dependency, and both editions use the 
   - Each radio is named by its option's `title` and described by its `description`.
   - `CardGroup` takes `name` (required), `value` or `defaultValue`, `onValueChange`, `disabled`, `required` and `orientation`.
   - Name the group with `aria-label` or `aria-labelledby`.
+  - `CardGroup` wires its direct `CardOption` children. An option rendered by another component, such as a `PlanCard` wrapper, needs the group's `name` passed to it, or its radio stays out of the group.
   - The chosen card shows a `--primary` edge, a halo and a check mark. In forced colours it uses `Highlight`.
 - **`CardMedia` adds an image or cover above the content.**
   - It takes `src` and `alt` for an image, where `alt` is required (use `alt=""` when the image is decorative), or `children` for a custom cover, which is hidden from assistive technology.

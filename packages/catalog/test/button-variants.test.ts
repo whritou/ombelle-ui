@@ -26,7 +26,7 @@ describe('Button 0.7.3 variants', () => {
   it.each(editions)('%s locks the resting width while loading and only removes its own', (_, ui) => {
     const source = readFileSync(new URL(`../src/templates/${ui === radix ? '' : 'base/'}button.tsx`, import.meta.url), 'utf8')
     expect(source).toMatch(/useLayoutEffect\(/)
-    expect(source).toMatch(/setProperty\('min-inline-size'/)
+    expect(source).toMatch(/setProperty\('min-inline-size', `min\(/)
     expect(source).toMatch(/return \(\) => \{ element\.style\.removeProperty\('min-inline-size'\) \}/)
   })
 

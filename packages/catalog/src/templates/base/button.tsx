@@ -50,16 +50,16 @@ export function Button({
   const ownRef = React.useRef<HTMLButtonElement | null>(null)
   const restingWidth = React.useRef<number | undefined>(undefined)
   // Loading keeps the width measured at rest, so the spinner never makes the button grow.
+  // Every render at rest measures again, so a label or size changed since is kept too.
+  React.useLayoutEffect(() => {
+    if (!busy && ownRef.current) restingWidth.current = ownRef.current.getBoundingClientRect().width
+  })
   React.useLayoutEffect(() => {
     const element = ownRef.current
-    if (!element) return
-    if (busy) {
-      if (restingWidth.current === undefined) return
-      element.style.setProperty('min-inline-size', `${restingWidth.current}px`)
-      // Only the width set here is removed, never one the consumer set.
-      return () => { element.style.removeProperty('min-inline-size') }
-    }
-    restingWidth.current = element.getBoundingClientRect().width
+    if (!busy || !element || restingWidth.current === undefined) return
+    // Never wider than its container, which may have narrowed since the last render.
+    element.style.setProperty('min-inline-size', `min(${restingWidth.current}px, 100%)`)
+    return () => { element.style.removeProperty('min-inline-size') }
   }, [busy])
   const setRef = React.useCallback((element: HTMLButtonElement | null) => {
     ownRef.current = element

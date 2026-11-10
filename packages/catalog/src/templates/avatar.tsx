@@ -12,14 +12,20 @@ export type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root> & {
   shape?: 'circle' | 'square'
 }
 
+/** True when the Avatar holds an AvatarImage, so its fallback waits for the image. */
+const AvatarHasImage = React.createContext(false)
+
 export function Avatar({
   className,
   size = 'default',
   variant = 'default',
   shape,
+  children,
   ...props
 }: AvatarProps) {
+  const hasImage = React.Children.toArray(children).some(child => React.isValidElement(child) && child.type === AvatarImage)
   return (
+    <AvatarHasImage.Provider value={hasImage}>
     <AvatarPrimitive.Root
       data-slot="avatar"
       data-size={size}
@@ -27,7 +33,10 @@ export function Avatar({
       data-shape={shape === 'square' ? 'square' : undefined}
       className={cn(className)}
       {...props}
-    />
+    >
+      {children}
+    </AvatarPrimitive.Root>
+    </AvatarHasImage.Provider>
   )
 }
 
@@ -44,17 +53,22 @@ export function AvatarImage({
   )
 }
 
-/** The fallback waits 600 ms by default, so an image that loads quickly never flashes initials. */
+/**
+ * Beside an AvatarImage, the fallback waits 600 ms by default, so an image that loads quickly never
+ * flashes initials. Without an image it shows at once, server-rendered too. delayMs={0} shows it at once.
+ */
 export function AvatarFallback({
   className,
-  delayMs = 600,
+  delayMs,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+  const hasImage = React.useContext(AvatarHasImage)
+  const wait = delayMs ?? (hasImage ? 600 : undefined)
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(className)}
-      delayMs={delayMs}
+      delayMs={wait || undefined}
       {...props}
     />
   )

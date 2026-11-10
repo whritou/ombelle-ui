@@ -30,7 +30,8 @@ const buttonVariants: Record<string, RecipeSpecimen> = {
 /** The 0.7.3 variants measured beside each component's default specimen, as recipe props. */
 const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, unknown>>>> = {
   badge: { soft: { appearance: 'soft', variant: 'warning' }, 'soft-success': { appearance: 'soft', variant: 'success', size: 'sm', dot: true },
-    outline: { appearance: 'outline', variant: 'destructive' } },
+    outline: { appearance: 'outline', variant: 'destructive' }, 'outline-success': { appearance: 'outline', variant: 'success' },
+    'outline-warning': { appearance: 'outline', variant: 'warning' }, 'outline-info': { appearance: 'outline', variant: 'info' } },
   alert: { dismissible: { dismissible: true, actions: true, variant: 'info' }, compact: { layout: 'compact', variant: 'warning' } },
   card: { link: { mode: 'link' }, options: { mode: 'options' }, media: { mode: 'media' } },
   avatar: { square: { shape: 'square' }, overflow: { overflow: 4 } },
@@ -56,7 +57,9 @@ async function familyData(family: StyleFamily): Promise<Record<AuditEdition, Aud
   const base: AuditSpecimen[] = []
   for (const component of [...supportedComponentIds].sort()) {
     if (!recipes.has(component)) {
-      for (const [id, specimen] of [[component, buttonSpecimen], ...Object.entries(buttonVariants).map(([name, value]) => [`${component}~${name}`, value])] as const) {
+      const sections: [string, RecipeSpecimen][] = [[component, buttonSpecimen],
+        ...Object.entries(buttonVariants).map(([name, value]): [string, RecipeSpecimen] => [`${component}~${name}`, value])]
+      for (const [id, specimen] of sections) {
         radix.push({ id, component, scope: null, css: null, specimen })
         base.push({ id, component, scope: null, css: null, specimen })
       }

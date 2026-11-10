@@ -101,6 +101,7 @@ function CalendarScenario() {
 const pixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQBYkfQ8AAAAAElFTkSuQmCC'
 function VariantsBasicsScenario() {
   const [saving, setSaving] = React.useState(false)
+  const [longLabel, setLongLabel] = React.useState(false)
   const [notice, setNotice] = React.useState(true)
   const [shared, setShared] = React.useState(false)
   const [submitted, setSubmitted] = React.useState('')
@@ -108,8 +109,9 @@ function VariantsBasicsScenario() {
   return (
     <section aria-label="Variants" data-testid="variants">
       <div className="specimen-row">
-        <Button data-testid="vb-save" loading={saving}>Save changes</Button>
+        <Button data-testid="vb-save" loading={saving}>{longLabel ? 'Save all twelve changes' : 'Save changes'}</Button>
         <button type="button" data-testid="vb-toggle-loading" onClick={() => setSaving(value => !value)}>Toggle saving</button>
+        <button type="button" data-testid="vb-longer-label" onClick={() => setLongLabel(true)}>Longer label</button>
         <Button variant="link-destructive">Remove member</Button>
       </div>
       <div className="specimen-row">

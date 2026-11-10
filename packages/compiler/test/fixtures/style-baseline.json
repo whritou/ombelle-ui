@@ -6,7 +6,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "e77894453f7e18a65e1d0bd7609b302eed1e80cc28e37d5f0173d5c9f6e88128"
+          "sha256": "cad9230c9228728a948257317cafc675565bafb7db1e22855bfa2a7039c25d0a"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -47,7 +47,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "e77894453f7e18a65e1d0bd7609b302eed1e80cc28e37d5f0173d5c9f6e88128"
+          "sha256": "cad9230c9228728a948257317cafc675565bafb7db1e22855bfa2a7039c25d0a"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -88,7 +88,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "e77894453f7e18a65e1d0bd7609b302eed1e80cc28e37d5f0173d5c9f6e88128"
+          "sha256": "cad9230c9228728a948257317cafc675565bafb7db1e22855bfa2a7039c25d0a"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -306,6 +306,21 @@
       ],
       "spec": "feat/variants-basics-073",
       "reason": "Destructive link text mixes the destructive colour with the foreground to pass 4.5:1 in neo-brutalism light (specimen audit, batch 6a)"
+    },
+    {
+      "families": [
+        "flat",
+        "minimalist",
+        "neo-brutalism",
+        "ombelle",
+        "liquid-glass"
+      ],
+      "logicalPaths": [
+        "components/ui/button.tsx",
+        "scoped Button preset and recipe button.tsx"
+      ],
+      "spec": "feat/variants-basics-073",
+      "reason": "A loading Button measures its resting width on every render at rest and caps the kept width at its container (final review, batch 6a)"
     }
   ]
 }

@@ -27,9 +27,10 @@ describe('Avatar 0.7.3 variants', () => {
       .toMatch(/aria-label="4 more reviewers"[^>]*data-size="sm"|data-size="sm"[^>]*aria-label="4 more reviewers"/)
   })
 
-  it.each(editions)('%s delays the fallback by 600 ms unless told otherwise', edition => {
-    const text = source(edition)
-    expect(text).toMatch(edition === 'radix' ? /delayMs = 600/ : /delayMs = 600[^]*delay=\{delayMs\}/)
+  it.each(editions)('%s delays the fallback by 600 ms beside an image, unless told otherwise', (edition, ui) => {
+    expect(source(edition)).toMatch(/hasImage \? 600 : undefined/)
+    if (edition === 'radix')
+      expect(renderToStaticMarkup(h(ui.Avatar, {}, h(ui.AvatarImage, { src: '/a.png', alt: '' }), h(ui.AvatarFallback, {}, 'AL')))).not.toContain('>AL<')
   })
 
   it.each(families)('%s styles the square shape and the overflow count', family => {
@@ -38,5 +39,18 @@ describe('Avatar 0.7.3 variants', () => {
     expect(text).toMatch(/\[data-slot='avatar-overflow'\]\[data-size\]\s*\{[^}]*background: var\(--muted\)/)
     expect(text).toMatch(/\[data-slot='avatar-overflow'\]:not\(:first-child\)\s*\{[^}]*margin-inline-start/)
     expect(text).toMatch(/@media \(forced-colors: active\)\s*\{[^@]*\[data-slot='avatar-overflow'\][^}]*CanvasText/)
+  })
+})
+
+describe('Avatar fallback delay (final review)', () => {
+  it.each(editions)('%s renders initials on the server when there is no image', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.Avatar, {}, h(ui.AvatarFallback, {}, 'AL')))
+    expect(html).toContain('>AL<')
+  })
+
+  it('base still accepts Base UI\'s own delay prop', () => {
+    const html = renderToStaticMarkup(h(base.Avatar, {}, h(base.AvatarFallback, { delay: 0 } as never, 'AL')))
+    expect(html).toContain('>AL<')
+    expect(readFileSync(new URL('../src/templates/base/avatar.tsx', import.meta.url), 'utf8')).not.toMatch(/, 'delay'>/)
   })
 })

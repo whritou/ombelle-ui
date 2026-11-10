@@ -146,12 +146,17 @@ export function CardGroup({
 
 export type CardOptionProps = Omit<React.ComponentProps<'label'>, 'title'> & {
   value: string
+  /** Set by CardGroup for its direct children; pass it yourself when a wrapper renders the option. */
+  name?: string
   title: React.ReactNode
   description?: React.ReactNode
   disabled?: boolean
 }
 
-/** One choice in a CardGroup, drawn as a card. */
+/**
+ * One choice in a CardGroup, drawn as a card. CardGroup wires its direct CardOption children;
+ * an option rendered by another component needs the group's name passed to it.
+ */
 export function CardOption({
   className,
   value,
@@ -161,7 +166,7 @@ export function CardOption({
   children,
   ...props
 }: CardOptionProps) {
-  const { name, checked, defaultChecked, onValueChange, groupDisabled, required, ...rest } = props as typeof props & CardOptionGroupProps
+  const { name, checked, defaultChecked, onValueChange, groupDisabled, required, ...rest } = props as Omit<typeof props, 'name'> & CardOptionGroupProps
   const id = React.useId()
   return (
     <label {...rest} data-slot="card-option" className={cn(className)}>

@@ -23,6 +23,7 @@ The harness filters and counts by component, so `OMBELLE_AUDIT_COMPONENTS=button
 | Second run | Three findings in the stable families. The Card link's ring is drawn on the card, but the harness looked for it on the link. The Alert Dismiss ring was below 3:1 on the dark intent surfaces. In neo-brutalism light, the destructive link text and the outline destructive Badge failed axe `color-contrast` |
 | After the fixes, all 20 configurations | 18 of 20 passed. Neo-brutalism light, both editions, still had the two contrast findings: a 75 % mix measured 4.49:1 on `--background` |
 | After a 65 % mix, neo-brutalism only | 4 of 4 passed. No blocking findings remain in any stable configuration |
+| After the final review, Badge and Avatar only | 20 of 20 passed with no findings, liquid glass included. These runs add the outline success, warning and info Badge sections, and measure the Avatar fallback, which now shows at once without an image |
 
 Fixes, pinned in tests:
 
@@ -32,9 +33,15 @@ Fixes, pinned in tests:
 
 **Liquid glass (experimental, non-blocking):** the four glass configurations pass. Their remaining findings are the Card link ring (615 of the 1,422 focus pixels needed) and the Card option rings (157 and 55 of the 543 needed). The glass card surface is translucent, so the 2px foreground ring partly falls below 3:1 against the backdrop.
 
+**Final review fixes:**
+
+- **Outline success, warning and info Badges:** they were unreadable in dark mode, at about 1.9:1. The intent tokens are light surfaces that no preset redefines for dark, so outline intents now write their text in `--foreground` and keep the intent on the edge. The audit now measures all three.
+- **Avatar fallback:** it now waits 600 ms only beside an `AvatarImage`. An initials-only Avatar renders at once, server-rendered too, as before. The Base UI edition accepts `delay` again.
+- **Loading Button:** it measures its resting width on every render at rest, and keeps at most its container's width.
+
 ## Browser tests
 
-`tests/e2e/variants-basics.spec.ts` runs under `playwright.specimen-audit.config.ts`, as `calendar.spec.ts` does, and passes 12 of 12 in both editions:
+`tests/e2e/variants-basics.spec.ts` runs under `playwright.specimen-audit.config.ts`, as `calendar.spec.ts` does, and passes 12 of 12 in both editions. The loading test also covers a label that grows at rest:
 
 - **CardGroup:** one Tab stop, the arrow keys to move and choose, the name and description of each option, the value submitted under `name`, and the focus ring on the option card.
 - **Card link:** a click anywhere on the card follows the link, its own Share button keeps its click, and the keyboard ring is on the card.
