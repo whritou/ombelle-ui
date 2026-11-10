@@ -2,6 +2,9 @@
 import * as React from 'react'
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
 import { ChevronDownIcon, PlusIcon } from 'lucide-react'
+
+/** The icon chosen on Accordion; undefined keeps the family's own. */
+const AccordionIcon = React.createContext<'chevron' | 'plus' | undefined>(undefined)
 import { cn } from './utils.js'
 import './accordion.css'
 
@@ -17,6 +20,13 @@ type RootProps = Omit<
   Part<typeof AccordionPrimitive.Root>,
   'value' | 'defaultValue' | 'onValueChange' | 'multiple'
 >
+type AccordionStyleProps = {
+  /** flush drops the outer border and background, leaving dividers. */
+  appearance?: 'bordered' | 'flush'
+  /** Shows only this icon; leave it out for the family's own. */
+  icon?: 'chevron' | 'plus'
+}
+
 /** The Radix edition's API: one open item (optionally collapsible) or many. */
 export type AccordionProps = RootProps &
   (
@@ -33,7 +43,7 @@ export type AccordionProps = RootProps &
         defaultValue?: string[]
         onValueChange?: (value: string[]) => void
       }
-  )
+  ) & AccordionStyleProps
 
 // Base UI's Accordion has no arrow-key navigation; this keeps the Radix
 // edition's ArrowUp, ArrowDown, Home and End between enabled triggers.
@@ -62,7 +72,7 @@ function moveTriggerFocus(event: React.KeyboardEvent<HTMLDivElement>) {
   triggers[next]?.focus()
 }
 
-export function Accordion({ className, ...props }: AccordionProps) {
+export function Accordion({ className, appearance, icon, ...props }: AccordionProps) {
   const { type, value, defaultValue, onValueChange, onKeyDown, ...rest } = props
   const collapsible = 'collapsible' in rest ? rest.collapsible : undefined
   if ('collapsible' in rest) delete rest.collapsible
@@ -74,6 +84,7 @@ export function Accordion({ className, ...props }: AccordionProps) {
   )
   const controlled = value !== undefined
   return (
+    <AccordionIcon.Provider value={icon}>
     <AccordionPrimitive.Root
       data-slot="accordion"
       className={cn(className)}
@@ -92,7 +103,10 @@ export function Accordion({ className, ...props }: AccordionProps) {
         )
       }}
       {...rest}
+      data-appearance={appearance}
+      data-icon={icon}
     />
+    </AccordionIcon.Provider>
   )
 }
 
@@ -125,6 +139,7 @@ export function AccordionTrigger({
   level?: 2 | 3 | 4 | 5 | 6
 }) {
   const Heading = `h${level}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  const icon = React.useContext(AccordionIcon)
   return (
     <AccordionPrimitive.Header
       data-slot="accordion-header"
@@ -142,8 +157,17 @@ export function AccordionTrigger({
       >
         {children}
         <span data-slot="accordion-icon" aria-hidden="true">
-          <ChevronDownIcon data-accordion-icon="chevron" />
-          <PlusIcon data-accordion-icon="plus" />
+          {icon === 'chevron' ? (
+            <ChevronDownIcon data-accordion-glyph="chevron" />
+          ) : icon === 'plus' ? (
+            // One plus; CSS hides its vertical stroke when open, leaving a minus.
+            <PlusIcon data-accordion-glyph="plus" />
+          ) : (
+            <>
+              <ChevronDownIcon data-accordion-icon="chevron" />
+              <PlusIcon data-accordion-icon="plus" />
+            </>
+          )}
         </span>
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>

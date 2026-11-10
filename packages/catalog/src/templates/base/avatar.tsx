@@ -13,12 +13,15 @@ export type AvatarProps = Part<typeof AvatarPrimitive.Root> & {
   size?: 'sm' | 'default' | 'lg'
   /** Fallback colours: accent (default), primary or secondary. */
   variant?: 'default' | 'primary' | 'secondary'
+  /** square suits workspaces and teams; circle (default) suits people. */
+  shape?: 'circle' | 'square'
 }
 
 export function Avatar({
   className,
   size = 'default',
   variant = 'default',
+  shape,
   ...props
 }: AvatarProps) {
   return (
@@ -26,6 +29,7 @@ export function Avatar({
       data-slot="avatar"
       data-size={size}
       data-variant={variant}
+      data-shape={shape === 'square' ? 'square' : undefined}
       className={cn(className)}
       {...props}
     />
@@ -45,14 +49,17 @@ export function AvatarImage({
   )
 }
 
+/** The fallback waits 600 ms by default, so an image that loads quickly never flashes initials. */
 export function AvatarFallback({
   className,
+  delayMs = 600,
   ...props
-}: Part<typeof AvatarPrimitive.Fallback>) {
+}: Omit<Part<typeof AvatarPrimitive.Fallback>, 'delay'> & { delayMs?: number }) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(className)}
+      delay={delayMs}
       {...props}
     />
   )
@@ -90,5 +97,27 @@ export function AvatarGroup({
       data-slot="avatar-group"
       className={cn(className)}
     />
+  )
+}
+
+/** The count of avatars not shown, such as +4. Its name defaults to "4 more". */
+export function AvatarOverflow({
+  className,
+  count,
+  label,
+  size = 'default',
+  ...props
+}: React.ComponentProps<'span'> & { count: number; label?: string; size?: 'sm' | 'default' | 'lg' }) {
+  return (
+    <span
+      role="img"
+      aria-label={label ?? `${count} more`}
+      {...props}
+      data-slot="avatar-overflow"
+      data-size={size}
+      className={cn(className)}
+    >
+      +{count}
+    </span>
   )
 }

@@ -95,13 +95,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'popover-title',
     'popover-description',
   ],
-  avatar: [
-    'avatar',
-    'avatar-image',
-    'avatar-fallback',
-    'avatar-status',
-    'avatar-group',
-  ],
+  avatar: ['avatar', 'avatar-image', 'avatar-fallback', 'avatar-status', 'avatar-group', 'avatar-overflow'],
   separator: ['separator', 'separator-label'],
   accordion: [
     'accordion',

@@ -19,6 +19,7 @@ describe('Avatar catalog contract', () => {
         'AvatarFallback',
         'AvatarStatus',
         'AvatarGroup',
+        'AvatarOverflow',
       ],
       slots: [
         'avatar',
@@ -26,6 +27,7 @@ describe('Avatar catalog contract', () => {
         'avatar-fallback',
         'avatar-status',
         'avatar-group',
+        'avatar-overflow',
       ],
       dependencies: [
         { name: 'react', version: '19.3.1' },

@@ -2,20 +2,32 @@
 import * as React from 'react'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronDownIcon, PlusIcon } from 'lucide-react'
+
+/** The icon chosen on Accordion; undefined keeps the family's own. */
+const AccordionIcon = React.createContext<'chevron' | 'plus' | undefined>(undefined)
 import { cn } from './utils.js'
 import './accordion.css'
 
 export type AccordionProps = React.ComponentProps<
   typeof AccordionPrimitive.Root
->
+> & {
+  /** flush drops the outer border and background, leaving dividers. */
+  appearance?: 'bordered' | 'flush'
+  /** Shows only this icon; leave it out for the family's own. */
+  icon?: 'chevron' | 'plus'
+}
 
-export function Accordion({ className, ...props }: AccordionProps) {
+export function Accordion({ className, appearance, icon, ...props }: AccordionProps) {
   return (
-    <AccordionPrimitive.Root
-      data-slot="accordion"
-      className={cn(className)}
-      {...props}
-    />
+    <AccordionIcon.Provider value={icon}>
+      <AccordionPrimitive.Root
+        data-slot="accordion"
+        data-appearance={appearance}
+        data-icon={icon}
+        className={cn(className)}
+        {...props}
+      />
+    </AccordionIcon.Provider>
   )
 }
 
@@ -45,6 +57,7 @@ export function AccordionTrigger({
   level?: 2 | 3 | 4 | 5 | 6
 }) {
   const Heading = `h${level}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  const icon = React.useContext(AccordionIcon)
   return (
     <AccordionPrimitive.Header data-slot="accordion-header" asChild>
       <Heading>
@@ -55,8 +68,17 @@ export function AccordionTrigger({
         >
           {children}
           <span data-slot="accordion-icon" aria-hidden="true">
-            <ChevronDownIcon data-accordion-icon="chevron" />
-            <PlusIcon data-accordion-icon="plus" />
+            {icon === 'chevron' ? (
+              <ChevronDownIcon data-accordion-glyph="chevron" />
+            ) : icon === 'plus' ? (
+              // One plus; CSS hides its vertical stroke when open, leaving a minus.
+              <PlusIcon data-accordion-glyph="plus" />
+            ) : (
+              <>
+                <ChevronDownIcon data-accordion-icon="chevron" />
+                <PlusIcon data-accordion-icon="plus" />
+              </>
+            )}
           </span>
         </AccordionPrimitive.Trigger>
       </Heading>
