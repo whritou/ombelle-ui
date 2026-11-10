@@ -186,3 +186,51 @@
     transition: none;
   }
 }
+/* 0.7.3 variants */
+[data-slot='input-group-clear'] {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+[data-slot='input-group-clear'] svg {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
+[data-slot='input-group-clear']:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+[data-slot='input-group-clear']:focus-visible {
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
+}
+/* Only the Clear button's own group: its field is a direct child, and Clear sits in an addon or beside it. */
+[data-slot='input-group-clear']:is([role='group']:has(> :placeholder-shown) > *, [role='group']:has(> :placeholder-shown) > * > *) {
+  display: none;
+}
+[data-slot='input-group-count'] {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+[data-slot='input-group-count'][data-over] {
+  color: color-mix(in oklab, var(--destructive) 65%, var(--foreground));
+  font-weight: 700;
+}
+@media (forced-colors: active) {
+  [data-slot='input-group-clear'] {
+    color: ButtonText;
+  }
+  [data-slot='input-group-count'][data-over] {
+    color: CanvasText;
+    text-decoration-line: underline;
+  }
+}
+/* end 0.7.3 variants */

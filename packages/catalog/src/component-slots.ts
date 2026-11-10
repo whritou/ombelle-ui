@@ -20,7 +20,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   empty: ['empty', 'empty-header', 'empty-media', 'empty-title', 'empty-description', 'empty-content'],
   badge: ['badge', 'badge-dot'],
   toast: ['toast-viewport', 'toast', 'toast-content', 'toast-title', 'toast-description', 'toast-action', 'toast-close'],
-  'input-group': ['input-group', 'input-group-input', 'input-group-textarea', 'input-group-addon', 'input-group-text', 'input-group-button'],
+  'input-group': ['input-group', 'input-group-input', 'input-group-textarea', 'input-group-addon', 'input-group-text', 'input-group-button', 'input-group-clear', 'input-group-count'],
   sheet: ['sheet', 'sheet-trigger', 'sheet-close', 'sheet-dismiss', 'sheet-overlay', 'sheet-content', 'sheet-header', 'sheet-footer', 'sheet-title', 'sheet-description'],
   'alert-dialog': ['alert-dialog', 'alert-dialog-trigger', 'alert-dialog-overlay', 'alert-dialog-content', 'alert-dialog-header', 'alert-dialog-footer', 'alert-dialog-title', 'alert-dialog-description', 'alert-dialog-cancel', 'alert-dialog-action'],
   breadcrumb: ['breadcrumb', 'breadcrumb-list', 'breadcrumb-item', 'breadcrumb-link', 'breadcrumb-page', 'breadcrumb-separator', 'breadcrumb-ellipsis'],

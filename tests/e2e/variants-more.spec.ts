@@ -83,3 +83,42 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} fields`, () => {
+    test('Clear empties a controlled field and returns focus to it, and hides on an empty field', async ({ page }) => {
+      await open(page, edition)
+      const fields = page.getByTestId('vm-fields')
+      const search = fields.getByRole('textbox', { name: 'Search projects' })
+      await expect(fields.getByRole('button', { name: 'Clear search' })).toBeHidden()
+      await search.fill('glass toast')
+      await fields.getByRole('button', { name: 'Clear search' }).click()
+      await expect(search).toHaveValue('')
+      await expect(search).toBeFocused()
+      await expect(fields.getByRole('button', { name: 'Clear search' })).toBeHidden()
+    })
+
+    test('the counter turns live near the limit and destructive past it', async ({ page }) => {
+      await open(page, edition)
+      const fields = page.getByTestId('vm-fields')
+      const count = fields.locator('#vm-bio-count')
+      await expect(count).not.toHaveAttribute('aria-live')
+      await fields.getByRole('textbox', { name: 'Bio' }).fill('x'.repeat(150))
+      await expect(count).toHaveAttribute('aria-live', 'polite')
+      await fields.getByRole('textbox', { name: 'Bio' }).fill('x'.repeat(170))
+      await expect(count).toHaveText('170 / 160')
+      await expect(count).toHaveAttribute('data-over', '')
+      await expect(fields.getByRole('textbox', { name: 'Bio' })).toHaveAccessibleDescription('170 / 160')
+    })
+
+    test('small and large inputs are shorter and taller than the default', async ({ page }) => {
+      await open(page, edition)
+      const fields = page.getByTestId('vm-fields')
+      const height = (name: string) => fields.getByRole('textbox', { name }).evaluate(element => element.getBoundingClientRect().height)
+      const [small, normal, large] = [await height('Small input'), await height('Default input'), await height('Large input')]
+      expect(small).toBeLessThan(normal)
+      expect(large).toBeGreaterThan(normal)
+      expect(small).toBeGreaterThanOrEqual(24)
+    })
+  })
+}

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -13,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, AvatarOverflow, AvatarStatus } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGroupCount, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -127,6 +128,32 @@ function VariantsMoreTable() {
   )
 }
 
+function VariantsMoreFields() {
+  const [query, setQuery] = React.useState('')
+  const [bio, setBio] = React.useState('Designing systems that stay calm under change.')
+  return (
+    <div data-testid="vm-fields">
+      <Input size="sm" aria-label="Small input" placeholder="Small" />
+      <Input aria-label="Default input" placeholder="Default" />
+      <Input size="lg" aria-label="Large input" placeholder="Large" />
+      <InputGroup>
+        <InputGroupInput aria-label="Search projects" placeholder="Search" value={query} onChange={event => setQuery(event.target.value)} />
+        <InputGroupAddon align="inline-end">
+          {/* The consumer empties the field after a tick, as an async store would. */}
+          <InputGroupClear label="Clear search" onClear={() => setTimeout(() => setQuery(''), 0)} />
+        </InputGroupAddon>
+      </InputGroup>
+      <InputGroup>
+        <InputGroupTextarea aria-label="Bio" aria-describedby="vm-bio-count" value={bio} onChange={event => setBio(event.target.value)} />
+        <InputGroupAddon align="block-end">
+          <InputGroupText>Shown on your profile</InputGroupText>
+          <InputGroupCount id="vm-bio-count" value={bio.length} max={160} />
+        </InputGroupAddon>
+      </InputGroup>
+    </div>
+  )
+}
+
 // Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
 function VariantsMoreScenario() {
   const [page, setPage] = React.useState(1)
@@ -161,6 +188,7 @@ function VariantsMoreScenario() {
       <PaginationPageSize data-testid="vm-page-size" value={rows} onValueChange={setRows}
         range={<output data-testid="vm-range">1–{rows} of 290</output>} />
       <VariantsMoreTable />
+      <VariantsMoreFields />
     </section>
   )
 }
