@@ -32,6 +32,9 @@ const overlays: Record<string, {
   combobox: { open: 'click', content: page => page.locator('[data-slot$="combobox-content"]'), returnsFocus: true },
   'hover-card': { open: 'focus', content: page => page.locator('[data-slot$="hover-card-content"]'), returnsFocus: true,
     trigger: section => section.locator('[data-slot$="hover-card-trigger"]') },
+  // Only the picker specimen has a trigger; a plain calendar is measured in place.
+  calendar: { open: 'click', content: page => page.locator('[data-slot$="date-picker-content"]'), returnsFocus: true,
+    trigger: section => section.locator('[data-slot$="date-picker-trigger"]') },
   'context-menu': { open: 'contextmenu', content: page => page.getByRole('menu'), returnsFocus: true,
     trigger: section => section.locator('[data-slot$="context-menu-trigger"]') },
 }
@@ -87,8 +90,10 @@ for (const family of styleFamilies)
           record(await measure(page, [section], section, component, counts))
           record(await runAxe(page, [`section[data-audit="${component}"]`]))
           counts.axe++
+          const listed = overlays[component]
           const overlay = component === 'accordion' && !await section.locator('[aria-expanded="false"][aria-controls]').count()
-            ? undefined : overlays[component]
+            ? undefined
+            : listed?.trigger && !await listed.trigger(section).count() ? undefined : listed
           const isBaseToast = component === 'toast' && edition === 'base'
           if (overlay || isBaseToast) {
             const trigger = isBaseToast ? section.getByRole('button', { name: 'Show notification' })

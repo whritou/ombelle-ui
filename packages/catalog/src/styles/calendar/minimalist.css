@@ -116,8 +116,8 @@
   background: var(--muted);
 }
 [data-slot='calendar-day-button']:focus-visible {
-  outline: 1px solid var(--ring);
-  outline-offset: 4px;
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
 }
 [data-slot='calendar-day'][data-today] {
   font-weight: 700;

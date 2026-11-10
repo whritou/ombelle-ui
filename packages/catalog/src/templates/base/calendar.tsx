@@ -73,10 +73,21 @@ const parts: DayPickerProps['components'] = {
 }
 
 /**
+ * Day names with the day number as its own word ("Sunday, November 1, 2026"), so the visible
+ * number is part of the button's name; react-day-picker's default says "1st".
+ */
+function dayName(date: Date, modifiers: { today?: boolean; selected?: boolean }, options?: { locale?: { code?: string } }) {
+  let label = new Intl.DateTimeFormat(options?.locale?.code, { dateStyle: 'full' }).format(date)
+  if (modifiers.today) label = `Today, ${label}`
+  if (modifiers.selected) label = `${label}, selected`
+  return label
+}
+
+/**
  * A month grid for choosing a date or a range. Arrow keys move by day, Page Up and Page Down by
  * month (with Shift, by year), Home and End to the ends of the week; Enter or Space chooses.
  */
-export function Calendar({ className, selected, defaultMonth, month, today, disablePast, disabled, components, showOutsideDays = true, weekStartsOn = 0, ...props }: CalendarProps) {
+export function Calendar({ className, selected, defaultMonth, month, today, disablePast, disabled, components, labels, showOutsideDays = true, weekStartsOn = 0, ...props }: CalendarProps) {
   const now = asDate(today)
   const chosen = selected === undefined || typeof selected === 'string' || selected instanceof Date
     ? asDate(selected as DateInput | undefined)
@@ -95,6 +106,7 @@ export function Calendar({ className, selected, defaultMonth, month, today, disa
       weekStartsOn={weekStartsOn}
       className={cn(className)}
       components={{ ...parts, ...components }}
+      labels={{ labelDayButton: dayName, labelGridcell: dayName, ...labels }}
     />
   )
 }

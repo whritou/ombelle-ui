@@ -39,6 +39,13 @@ describe('Calendar', () => {
     expect(html).toContain('data-slot="calendar-day-button"')
   })
 
+  it.each(editions)('%s names each day with its number as a word, so the visible text is part of the name', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.Calendar, { mode: 'single', defaultMonth: today, today, selected: new Date(2026, 10, 12) }))
+    expect(html).toMatch(/<button[^>]*aria-label="Sunday, November 1, 2026"/)
+    expect(html).toMatch(/<button[^>]*aria-label="Today, Tuesday, November 10, 2026"/)
+    expect(html).toMatch(/<button[^>]*aria-label="Thursday, November 12, 2026, selected"/)
+  })
+
   it.each(editions)('%s marks the start, middle and end of a range', (_, ui) => {
     const html = renderToStaticMarkup(h(ui.Calendar, { mode: 'range', defaultMonth: today, today, selected: { from: new Date(2026, 10, 12), to: new Date(2026, 10, 18) } }))
     expect(day(html, '2026-11-12')).toContain('data-range-start')

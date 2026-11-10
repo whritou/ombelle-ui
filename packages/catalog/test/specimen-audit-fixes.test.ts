@@ -211,3 +211,10 @@ describe('the 0.7.3 overlays match their boards', () => {
     expect(zone('ombelle').background).toBe('var(--muted)')
   })
 })
+
+describe('the 0.7.3 calendar', () => {
+  it('minimalist draws a 2px day ring close to the day, so neighbouring days do not hide it', () => {
+    const ring = declarations(read('calendar/minimalist.css'), "[data-slot='calendar-day-button']:focus-visible")
+    expect([ring.outline, ring['outline-offset']]).toEqual(['2px solid var(--ring)', '1px'])
+  })
+})
