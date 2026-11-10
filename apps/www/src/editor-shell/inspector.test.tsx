@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { ControlRow, InspectorSection, SegmentedControl, SliderRow } from './inspector'
+import { ControlRow, InspectorSection, keepChoice, SegmentedControl, SliderRow, sliderThumbValue } from './inspector'
 
 const noop = () => {}
 const slider = {
@@ -16,10 +16,10 @@ const slider = {
   onReset: noop,
 }
 
-it('SliderRow puts the range on its own line and shows reset only when edited', () => {
+it('SliderRow puts the catalog slider on its own line and shows reset only when edited', () => {
   const html = renderToStaticMarkup(<SliderRow {...slider} />)
   expect(html).toContain('data-row="slider"')
-  expect(html).toContain('type="range"')
+  expect(html).toMatch(/role="slider"[^>]*aria-label="Corner radius slider"|aria-label="Corner radius slider"[^>]*role="slider"/)
   expect(html).toContain('inputMode="decimal"')
   expect(html).not.toContain('type="number"')
   expect(html).toContain('aria-label="Reset corner radius"')
@@ -34,7 +34,7 @@ it('SliderRow links invalid state and description to both inputs', () => {
   expect(html.match(/aria-describedby="why"/g)).toHaveLength(2)
 })
 
-it('SegmentedControl exposes one pressed option in a labelled group', () => {
+it('SegmentedControl is a labelled radio group with one checked option', () => {
   const html = renderToStaticMarkup(
     <SegmentedControl
       label="Preview mode"
@@ -46,9 +46,19 @@ it('SegmentedControl exposes one pressed option in a labelled group', () => {
       onChange={noop}
     />,
   )
-  expect(html).toContain('role="group" aria-label="Preview mode"')
-  expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
-  expect(html.match(/aria-pressed="false"/g)).toHaveLength(1)
+  expect(html).toMatch(/role="radiogroup"[^>]*aria-label="Preview mode"|aria-label="Preview mode"[^>]*role="radiogroup"/)
+  expect(html.match(/role="radio"/g)).toHaveLength(2)
+  expect(html.match(/aria-checked="true"/g)).toHaveLength(1)
+  expect(html.match(/aria-checked="false"/g)).toHaveLength(1)
+  expect(html).not.toContain('aria-pressed')
+})
+
+it('SegmentedControl keeps its choice when the checked option is activated again', () => {
+  const calls: string[] = []
+  const change = keepChoice((value: string) => calls.push(value))
+  change('')
+  change('dark')
+  expect(calls).toEqual(['dark'])
 })
 
 it('InspectorSection labels its section with the heading', () => {
@@ -74,14 +84,12 @@ it('ControlRow ties the label to its control and marks edited rows', () => {
   expect(html).toContain('data-edited="true"')
 })
 
-it('SliderRow parks the range thumb at the minimum for partial or invalid text', () => {
-  const range = (value: string) => {
-    const html = renderToStaticMarkup(<SliderRow {...slider} value={value} />)
-    return /<input[^>]*type="range"[^>]*>/.exec(html)![0]
-  }
+it('SliderRow parks the slider thumb at the minimum for partial or invalid text', () => {
   for (const value of ['-', 'invalid', '', '1.', '+5', ' 5'])
-    expect(range(value)).toContain('value="0"')
-  expect(range('1.25')).toContain('value="1.25"')
+    expect(sliderThumbValue(value, undefined, 0)).toBe(0)
+  expect(sliderThumbValue('1.25', undefined, 0)).toBe(1.25)
+  // An empty field shows the value in effect.
+  expect(sliderThumbValue('', '0.5', 0)).toBe(0.5)
   // The text field keeps what was typed.
   expect(renderToStaticMarkup(<SliderRow {...slider} value="-" />)).toContain('value="-"')
 })

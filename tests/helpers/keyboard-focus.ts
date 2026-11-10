@@ -37,3 +37,25 @@ export async function tabTo(page: Page, target: Locator, { backward = false, max
   }
   throw new Error(`Focus did not reach the target within ${max} ${backward ? 'Shift+Tab' : 'Tab'} presses.`)
 }
+
+/**
+ * Reaches an option of a radio group by keyboard: Tab to the group's one stop, then the arrow keys,
+ * as roving focus moves within the group.
+ */
+export async function arrowTo(page: Page, option: Locator, { max = 12, tabs = 120 } = {}) {
+  const group = option.locator('xpath=ancestor::*[@role="radiogroup"][1]')
+  // The group is one Tab stop: focus lands on the group, which moves it to the checked option.
+  const inside = () => group.evaluate((element) => element.contains(document.activeElement))
+  for (let presses = 0; !(await inside()); presses++) {
+    if (presses >= tabs) throw new Error('The radio group was not reached with Tab')
+    await page.keyboard.press('Tab')
+  }
+  for (let presses = 0; presses < max; presses++) {
+    if (await option.evaluate((element) => element === document.activeElement)) {
+      await expectVisibleFocus(page)
+      return
+    }
+    await page.keyboard.press('ArrowRight')
+  }
+  throw new Error('The option was not reached with the arrow keys')
+}

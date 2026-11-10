@@ -137,7 +137,6 @@
 
 .iconButton:focus-visible,
 .menuItem:focus-visible,
-.segmented button:focus-visible,
 .sliderReset:focus-visible,
 .railButton:focus-visible,
 .tabs button:focus-visible {
@@ -313,54 +312,6 @@
   background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
 }
 
-.sliderRange {
-  grid-area: s;
-  width: 100%;
-  accent-color: var(--primary);
-}
-
-.segmented {
-  display: inline-flex;
-  max-width: 100%;
-  flex-wrap: wrap;
-  padding: 2px;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--muted);
-}
-
-.segmented button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  min-width: 0;
-  min-height: 32px;
-  padding: 0 0.75rem;
-  border: 0;
-  border-radius: 0.375rem;
-  background: transparent;
-  color: var(--muted-foreground);
-  font: inherit;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.segmented button:hover:not(:disabled):not([aria-pressed='true']) {
-  background: color-mix(in oklab, var(--card) 60%, transparent);
-  color: var(--foreground);
-}
-
-.segmented button:hover:active:not(:disabled) {
-  background: var(--card);
-}
-
-.segmented button[aria-pressed='true'] {
-  background: var(--card);
-  color: var(--foreground);
-  box-shadow: 0 1px 2px oklch(0 0 0 / 15%);
-}
-
 /* Review drawer */
 
 .rail {
@@ -511,7 +462,6 @@
   .iconButton,
   .menuItem,
   .sliderReset,
-  .segmented button,
   .railButton,
   .tabs button {
     transition: background-color 0.12s, border-color 0.12s, color 0.12s;
@@ -523,4 +473,10 @@
   min-height: 0;
   padding: 0.75rem;
   overflow: auto;
+}
+
+/* The slider is the catalog Slider (apps/www/src/generated/ui), on the row's second line. */
+.sliderRange {
+  grid-area: s;
+  width: 100%;
 }

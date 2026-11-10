@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test'
 
 /** One option of a segmented control or the family picker, e.g. ('Preview mode', 'Dark'). */
 export const segment = (page: Page, group: string, option: string) =>
-  page.getByRole('group', { name: group, exact: true }).getByRole('button', { name: option, exact: true })
+  page.getByRole('radiogroup', { name: group, exact: true }).getByRole('radio', { name: option, exact: true })
 
 /**
  * Opens the review drawer on its Export tab. Idempotent: works whether the

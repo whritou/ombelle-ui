@@ -26,7 +26,8 @@ const asList = (value: number | readonly number[]) => (Array.isArray(value) ? [.
 /**
  * A value, or a range with two thumbs, chosen along a track, on Base UI Slider. Each thumb is a
  * native range input with its own name: a single thumb takes the Slider's aria-label or
- * aria-labelledby; give a range thumbLabels. Thumbs do not pass each other.
+ * aria-labelledby; give a range thumbLabels. aria-describedby reaches every thumb (Base UI thumbs take
+ * no aria-invalid; inside a Base UI Field the field sets it). Thumbs do not pass each other.
  */
 export function Slider({
   className,
@@ -44,6 +45,8 @@ export function Slider({
   getValueText,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': _ariaInvalid,
   ...props
 }: SliderProps) {
   const [own, setOwn] = React.useState<number[]>(defaultValue ?? [min])
@@ -80,6 +83,7 @@ export function Slider({
               aria-label={thumbLabels?.[index] ?? (values.length === 1 ? ariaLabel : undefined)}
               aria-labelledby={!thumbLabels?.[index] && values.length === 1 ? ariaLabelledBy : undefined}
               aria-valuetext={getValueText?.(thumbValue, index)}
+          aria-describedby={ariaDescribedBy}
             />
           ))}
         </SliderPrimitive.Track>

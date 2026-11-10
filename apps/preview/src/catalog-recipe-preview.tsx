@@ -23,7 +23,8 @@ export function CatalogRecipePreview({ message, onMeasure }: {
   React.useEffect(() => {
     let active = true
     scopedCatalogComponents[component]().then(module => {
-      if (active) setLoaded({ scope: result.scope, primitives: module.createScopedPrimitives(result.scope, instance) })
+      // A module may also export helpers (Tag Input's addTags); a specimen renders only the parts it names.
+      if (active) setLoaded({ scope: result.scope, primitives: module.createScopedPrimitives(result.scope, instance) as Primitives })
     })
     return () => { active = false }
   }, [component, result.scope, instance])

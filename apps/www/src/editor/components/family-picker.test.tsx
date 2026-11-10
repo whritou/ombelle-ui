@@ -8,20 +8,21 @@ const noop = () => {}
 
 it('shows the families as a labelled group with the current one pressed', () => {
   const html = renderToStaticMarkup(<FamilyPicker value="minimalist" onChange={noop} />)
-  expect(html).toContain('role="group" aria-label="Style family"')
-  expect(html).toMatch(/data-family="minimalist" aria-pressed="true"/)
-  expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
+  expect(html).toContain('role="radiogroup" aria-label="Style family"')
+  expect(/<button[^>]*data-family="minimalist"[^>]*>/.exec(html)![0]).toContain('aria-checked="true"')
+  expect(html.match(/aria-checked="true"/g)).toHaveLength(1)
+  expect(html).toContain('role="radiogroup"')
 })
 
 it('offers every family and marks liquid glass experimental', () => {
   const html = renderToStaticMarkup(<FamilyPicker value="liquid-glass" onChange={noop} families={styleFamilies} />)
   for (const name of ['Flat', 'Minimalist', 'Neo-brutalism', 'Ombelle', 'Liquid glass']) expect(html).toContain(name)
-  expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
+  expect(html.match(/aria-checked="true"/g)).toHaveLength(1)
   expect(html).toContain('Experimental')
 })
 
 it('offers ombelle only once the published installer supports it, keeping a selected ombelle visible', () => {
-  const families = (html: string) => [...html.matchAll(/class="be-family" data-family="([^"]+)"/g)].map((match) => match[1])
+  const families = (html: string) => [...html.matchAll(/<button[^>]*data-family="([^"]+)"[^>]*class="be-family"/g)].map((match) => match[1])
   const render = (value: 'flat' | 'ombelle', version: string) =>
     families(renderToStaticMarkup(<FamilyPicker value={value} onChange={noop} families={offeredStyleFamilies(value, { version })} />))
   expect(render('flat', '0.3.0')).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])

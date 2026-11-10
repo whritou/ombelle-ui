@@ -10,6 +10,8 @@ import {
 import type { CompileDiagnostic } from '../compile-protocol'
 import type { PartDimension } from '../catalog-preview-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
+import { keepChoice } from '../../editor-shell/inspector'
+import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
 import { RECIPE_COLOR_PATTERN, recipeColor, withGlassPreset, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
 import { designControlLabel, glassControlHints, glassDesignControls } from '../../preset-editor/model'
@@ -120,18 +122,17 @@ function FieldError({ diagnostic, path }: { diagnostic: CompileDiagnostic | null
     : null
 }
 
-/** Six pressed buttons, each with a small sample of the variant's look. */
+/** Six options in a radio group, each with a small sample of the variant's look. */
 export function VariantPicker({ value, onChange }: { value: RecipeButtonVariant; onChange(variant: RecipeButtonVariant): void }) {
   return (
-    <div role="group" aria-label="Variant" className="be-variants">
+    <ToggleGroup type="single" aria-label="Variant" className="be-variants" value={value} onValueChange={keepChoice(onChange)}>
       {variants.map((variant) => (
-        <button key={variant.value} type="button" className="be-variant" data-variant={variant.value}
-          aria-pressed={variant.value === value} onClick={() => onChange(variant.value)}>
+        <ToggleGroupItem key={variant.value} value={variant.value} className="be-variant" data-variant={variant.value}>
           <span className="be-variant-sample" data-variant={variant.value} aria-hidden="true">Aa</span>
           <span>{variant.label}</span>
-        </button>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   )
 }
 

@@ -5,7 +5,7 @@ import { validateRecipe } from '@ombelle/contracts'
 import { changeDraftFamily, createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
 import { recipeStyles } from '../helpers/recipe-measurements.js'
-import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
+import { expectVisibleFocus, arrowTo, tabTo } from '../helpers/keyboard-focus.js'
 import exampleRecipe from '../../examples/recipe.example.json' with { type: 'json' }
 import {
   chooseFamily, closeMoreActions, expectRecipeDownloadEnabled, familyOption, menuItem, moreActions, openMenuItem, segment, toggle,
@@ -114,7 +114,7 @@ test('view mode does not change recipe hash and a draft restores after reload', 
   await segment(page, 'Preview width', 'Narrow').click()
   for (const state of ['Hover', 'Focus', 'Active']) {
     await segment(page, 'Preview state', state).click()
-    await expect(segment(page, 'Preview state', state)).toHaveAttribute('aria-pressed', 'true')
+    await expect(segment(page, 'Preview state', state)).toHaveAttribute('aria-checked', 'true')
     await expect(page.getByTestId('recipe-hash')).toHaveText(before!)
   }
   await expect(page.getByTestId('recipe-hash')).toHaveText(before!)
@@ -126,9 +126,9 @@ test('undo and redo preserve meaningful text edits', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByLabel('Button text').fill('First edit')
   await segment(page, 'Variant', 'Secondary').click()
-  await expect(segment(page, 'Variant', 'Secondary')).toHaveAttribute('aria-pressed', 'true')
+  await expect(segment(page, 'Variant', 'Secondary')).toHaveAttribute('aria-checked', 'true')
   await page.getByRole('button', { name: 'Undo' }).click()
-  await expect(segment(page, 'Variant', 'Default')).toHaveAttribute('aria-pressed', 'true')
+  await expect(segment(page, 'Variant', 'Default')).toHaveAttribute('aria-checked', 'true')
   await page.getByRole('button', { name: 'Undo' }).click()
   await expect(page.getByLabel('Button text')).toHaveValue('Create project')
   await page.getByRole('button', { name: 'Redo' }).click()
@@ -255,7 +255,7 @@ test('mobile workspace tabs retain the draft and preview mode', async ({ page })
   await page.getByRole('button', { name: 'Customize', exact: true }).click()
   await expect(page.getByLabel('Button text')).toHaveValue('Mobile draft')
   await page.getByRole('button', { name: 'Preview', exact: true }).click()
-  await expect(segment(page, 'Preview mode', 'Dark')).toHaveAttribute('aria-pressed', 'true')
+  await expect(segment(page, 'Preview mode', 'Dark')).toHaveAttribute('aria-checked', 'true')
 })
 
 test('editor and CLI-installed Button recipe have matching DOM and computed styles', async ({ context }) => {
@@ -503,17 +503,17 @@ test('operates every Button editor control, artifact tab, download and publish d
 
   // The top bar comes first, then the inspector (style family first), the preview controls and generated output.
   const minimalist = familyOption(page, 'minimalist')
-  await tabTo(page, minimalist)
+  await arrowTo(page, minimalist)
   await page.keyboard.press('Enter')
-  await expect(minimalist).toHaveAttribute('aria-pressed', 'true')
+  await expect(minimalist).toHaveAttribute('aria-checked', 'true')
   await expect(minimalist).toBeFocused()
   await tabTo(page, page.getByLabel('Button text'))
   await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('Keyboard ship')
   for (const [group, option] of [['Variant', 'Secondary'], ['Size', 'M'], ['Button type', 'submit']] as const) {
-    await tabTo(page, segment(page, group, option))
+    await arrowTo(page, segment(page, group, option))
     await page.keyboard.press('Enter')
-    await expect(segment(page, group, option)).toHaveAttribute('aria-pressed', 'true')
+    await expect(segment(page, group, option)).toHaveAttribute('aria-checked', 'true')
   }
   for (const name of ['Disabled', 'Loading'] as const) {
     await tabTo(page, toggle(page, name))
@@ -525,7 +525,9 @@ test('operates every Button editor control, artifact tab, download and publish d
     await tabTo(page, page.getByLabel(label, { exact: true }))
     await page.keyboard.press('ControlOrMeta+A')
     await page.keyboard.type(typed)
-    await tabTo(page, page.locator(`#button-${id}`))
+    // The slider's thumb is the focusable control, named after its row.
+    void id
+    await tabTo(page, page.getByLabel(`${label} slider`, { exact: true }))
     await page.keyboard.press('ArrowRight')
   }
   for (const label of ['Shadow X offset', 'Shadow Y offset']) {
@@ -534,9 +536,9 @@ test('operates every Button editor control, artifact tab, download and publish d
     await page.keyboard.type('8')
   }
   for (const [group, option] of [['Preview mode', 'Dark'], ['Preview width', 'Narrow'], ['Preview state', 'Active']] as const) {
-    await tabTo(page, segment(page, group, option))
+    await arrowTo(page, segment(page, group, option))
     await page.keyboard.press('Enter')
-    await expect(segment(page, group, option)).toHaveAttribute('aria-pressed', 'true')
+    await expect(segment(page, group, option)).toHaveAttribute('aria-checked', 'true')
   }
 
   await tabTo(page, page.getByRole('tab', { name: 'Usage' }))

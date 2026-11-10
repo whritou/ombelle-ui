@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import * as React from 'react'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as radix from '../src/templates/input-otp.js'
@@ -6,7 +7,8 @@ import * as base from '../src/templates/base/input-otp.js'
 import { getCatalog, getTemplate } from '../src/index.js'
 import { expectComponentContract } from './new-component-contract.js'
 
-type Ui = typeof radix | typeof base
+type Part = React.FC<Record<string, unknown>>
+type Ui = { InputOTP: Part; InputOTPGroup: Part; InputOTPSlot: Part; InputOTPSeparator: Part }
 const code = (ui: Ui, label = 'Verification code') => h(ui.InputOTP, { maxLength: 6, 'aria-label': label },
   h(ui.InputOTPGroup, null, h(ui.InputOTPSlot, { index: 0 }), h(ui.InputOTPSlot, { index: 1 }), h(ui.InputOTPSlot, { index: 2 })),
   h(ui.InputOTPSeparator),
@@ -28,7 +30,7 @@ describe('Input OTP', () => {
   })
 
   it('radix exposes one named input for the whole code', () => {
-    const [input, extra] = inputs(renderToStaticMarkup(code(radix)))
+    const [input, extra] = inputs(renderToStaticMarkup(code(radix as unknown as Ui)))
     expect(extra).toBeUndefined()
     expect(attr(input!, 'aria-label')).toBe('Verification code')
     expect(attr(input!, 'maxlength')).toBe('6')
@@ -37,7 +39,7 @@ describe('Input OTP', () => {
   })
 
   it('base names the first input after the field and the others by position', () => {
-    const html = renderToStaticMarkup(code(base))
+    const html = renderToStaticMarkup(code(base as unknown as Ui))
     const fields = inputs(html)
     expect(fields).toHaveLength(6)
     const labelId = attr(fields[0]!, 'aria-labelledby')!
@@ -46,7 +48,7 @@ describe('Input OTP', () => {
     expect(attr(fields[0]!, 'autocomplete')).toBe('one-time-code')
   })
 
-  it.each([['radix', radix], ['base', base]] as const)('%s renders a decorative separator between the groups', (_, ui) => {
+  it.each([['radix', radix as unknown as Ui], ['base', base as unknown as Ui]] as const)('%s renders a decorative separator between the groups', (_, ui) => {
     const html = renderToStaticMarkup(code(ui))
     expect((html.match(/data-slot="input-otp-group"/g) ?? []).length).toBe(2)
     expect(html).toMatch(/data-slot="input-otp-separator"[^>]*aria-hidden="true"|aria-hidden="true"[^>]*data-slot="input-otp-separator"/)

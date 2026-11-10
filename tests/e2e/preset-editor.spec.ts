@@ -17,7 +17,7 @@ import {
   setPresetEdit,
 } from '../../apps/www/src/preset-editor/model.js'
 import { openExport, segment, waitForCompiled } from '../helpers/preset-editor-ui.js'
-import { expectVisibleFocus, tabTo } from '../helpers/keyboard-focus.js'
+import { expectVisibleFocus, arrowTo, tabTo } from '../helpers/keyboard-focus.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { expectColorParity } from '../helpers/color-compare.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
@@ -250,9 +250,9 @@ for (const family of supportedStyleFamilies)
     )
     await page.goto('http://127.0.0.1:3000/editor/preset')
     await ready(page)
-    await expect(segment(page, 'Preview page', 'Dashboard')).toHaveAttribute('aria-pressed', 'true')
+    await expect(segment(page, 'Preview page', 'Dashboard')).toHaveAttribute('aria-checked', 'true')
     await expect(
-      page.getByRole('group', { name: 'Preview page' }).getByRole('button', { name: 'Gallery' }),
+      page.getByRole('radiogroup', { name: 'Preview page' }).getByRole('radio', { name: 'Gallery' }),
     ).toHaveCount(0)
     for (const scene of scenes) {
       await segment(page, 'Preview page', scene.option).click()
@@ -353,7 +353,7 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
   await page.keyboard.press('Escape')
   await familyButton(page, 'Neo-brutalism').click()
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-pressed', 'true')
+  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-checked', 'true')
   await familyButton(page, 'Neo-brutalism').click()
   await page
     .getByRole('button', { name: 'Confirm change', exact: true })
@@ -368,7 +368,7 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
     'project_preset',
   )
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
-  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-pressed', 'true')
+  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-checked', 'true')
 })
 test('downloads corrupt and unknown-version recovery before reset', async ({
   page,
@@ -766,7 +766,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   const confirmDialog = page.getByRole('dialog', {
     name: 'Change style family?',
   })
-  await tabTo(page, family)
+  await arrowTo(page, family)
   await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeVisible()
   await expect(
@@ -775,7 +775,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
   await page.keyboard.press('Escape')
   await expect(confirmDialog).toBeHidden()
-  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-pressed', 'true')
+  await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-checked', 'true')
   await expect(family).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeVisible()
@@ -786,7 +786,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
   await page.keyboard.press('Enter')
   await expect(confirmDialog).toBeHidden()
-  await expect(family).toHaveAttribute('aria-pressed', 'true')
+  await expect(family).toHaveAttribute('aria-checked', 'true')
   await expect(family).toBeFocused()
 
   const lightPrimary = page.getByLabel('Light primary', { exact: true })
@@ -940,7 +940,7 @@ test('edits numeric design values with a slider and keeps the exact field in syn
   await page.keyboard.press('ArrowRight')
   await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue('0.55')
   await page.getByLabel('Corner radius', { exact: true }).fill('1.25')
-  await expect(slider).toHaveValue('1.25')
+  await expect(slider).toHaveAttribute('aria-valuenow', '1.25')
 })
 test('keeps focus on a non-core token field after resetting it', async ({ page }) => {
   await page.goto(url)

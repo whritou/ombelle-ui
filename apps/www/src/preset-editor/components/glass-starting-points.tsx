@@ -1,4 +1,6 @@
 import { defaultGlassPresetId, getCatalog, glassTintPalettes, offeredGlassPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
+import { keepChoice } from '../../editor-shell/inspector'
+import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
 import { matchingStartingPreset, type PresetEditorDraft } from '../model'
 
 const tints: readonly { id: GlassTintId | 'white'; label: string; swatch: string }[] = [
@@ -24,16 +26,20 @@ export function GlassStartingPoints({
   const retired = current !== null && !(offeredGlassPresetOrder as readonly StartingPresetId[]).includes(current)
   return (
     <div className="preset-glass-material">
-      <div role="group" aria-labelledby="preset-starting-label" className="preset-starting-points">
+      <div className="preset-starting-points">
         <span id="preset-starting-label" className="preset-glass-label">
           Starting preset{current === null ? <span className="preset-glass-custom"> · Custom</span>
             : retired ? <span className="preset-glass-custom"> · {presets[current].name}</span> : null}
         </span>
-        {offeredGlassPresetOrder.map((id) => (
-          <button key={id} type="button" data-preset={id} aria-pressed={current === id} onClick={() => onPick(id)}>
-            {presets[id].name + (id === defaultGlassPresetId ? ' (default)' : '')}
-          </button>
-        ))}
+        {/* A draft on a custom or retired preset has no checked option; picking one replaces every value. */}
+        <ToggleGroup type="single" aria-labelledby="preset-starting-label" className="preset-starting-options"
+          value={current ?? ''} onValueChange={keepChoice((id: string) => onPick(id as StartingPresetId))}>
+          {offeredGlassPresetOrder.map((id) => (
+            <ToggleGroupItem key={id} value={id} data-preset={id}>
+              {presets[id].name + (id === defaultGlassPresetId ? ' (default)' : '')}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
       </div>
       <div role="group" aria-labelledby="preset-tint-label" className="preset-tint-chips">
         <span id="preset-tint-label" className="preset-glass-label">

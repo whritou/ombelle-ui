@@ -10,9 +10,9 @@ const handlers = { onEdit: noop, onReset: noop }
 
 it('FamilyPicker marks only the current family pressed and tags liquid glass as Beta', () => {
   const html = renderToStaticMarkup(<FamilyPicker value="minimalist" onChange={noop} families={styleFamilies} />)
-  expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
-  expect(html).toMatch(/aria-pressed="true"[^>]*>(?:(?!<\/button>).)*Minimalist/)
-  expect(html.match(/aria-pressed="false"/g)).toHaveLength(4)
+  expect(html.match(/aria-checked="true"/g)).toHaveLength(1)
+  expect(html).toMatch(/aria-checked="true"[^>]*>(?:(?!<\/button>).)*Minimalist/)
+  expect(html.match(/aria-checked="false"/g)).toHaveLength(4)
   for (const name of ['Flat', 'Neo-brutalism', 'Ombelle', 'Liquid glass']) expect(html).toContain(name)
   expect(html.match(/>Beta</g)).toHaveLength(1)
   expect(html).toMatch(/data-family="liquid-glass"(?:(?!<\/button>).)*>Beta</)
@@ -62,11 +62,11 @@ it('DesignControls renders density as a labelled segmented group', () => {
   const html = renderToStaticMarkup(
     <DesignControls draft={createPresetDraft('flat')} {...handlers} />,
   )
-  expect(html).toContain('role="group" aria-label="Density"')
-  expect(html).toContain('>Comfortable</button>')
-  expect(html).toContain('>Compact</button>')
+  expect(html).toMatch(/role="radiogroup"[^>]*aria-label="Density"|aria-label="Density"[^>]*role="radiogroup"/)
+  expect(html).toMatch(/>Comfortable<\/button>/)
+  expect(html).toMatch(/>Compact<\/button>/)
   expect(html).toContain('aria-label="Font family"')
-  expect(html).toContain('>Mono</button>')
+  expect(html).toMatch(/>Mono<\/button>/)
   expect(html).toContain('aria-label="Shadow offset"')
   expect(html).toContain('aria-label="Corner radius slider"')
 })

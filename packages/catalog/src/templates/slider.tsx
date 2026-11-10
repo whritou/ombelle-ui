@@ -14,6 +14,7 @@ export type SliderProps = Omit<React.ComponentProps<typeof SliderPrimitive.Root>
 /**
  * A value, or a range with two thumbs, chosen along a track. Each thumb is a slider with its own
  * name: a single thumb takes the Slider's aria-label or aria-labelledby; give a range thumbLabels.
+ * aria-describedby and aria-invalid reach every thumb.
  * Thumbs keep their order and do not pass each other.
  */
 export function Slider({
@@ -27,6 +28,8 @@ export function Slider({
   getValueText,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
   ...props
 }: SliderProps) {
   const [own, setOwn] = React.useState<number[]>(defaultValue ?? [min])
@@ -55,6 +58,8 @@ export function Slider({
           aria-label={thumbLabels?.[index] ?? (values.length === 1 ? ariaLabel : undefined)}
           aria-labelledby={!thumbLabels?.[index] && values.length === 1 ? ariaLabelledBy : undefined}
           aria-valuetext={getValueText?.(thumbValue, index)}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
         />
       ))}
     </SliderPrimitive.Root>

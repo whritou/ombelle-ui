@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import * as React from 'react'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as radix from '../src/templates/slider.js'
@@ -6,7 +7,8 @@ import * as base from '../src/templates/base/slider.js'
 import { getCatalog, getTemplate } from '../src/index.js'
 import { expectComponentContract } from './new-component-contract.js'
 
-const editions = [['radix', radix], ['base', base]] as const
+// The two editions' props differ in detail; each test passes props both accept.
+const editions = [['radix', radix], ['base', base]] as unknown as readonly (readonly ['radix' | 'base', { Slider: React.FC<Record<string, unknown>>; SliderTicks: React.FC<Record<string, unknown>> }])[]
 // Radix thumbs are span role="slider"; Base UI thumbs wrap a native range input.
 const thumbs = (html: string) => [...html.matchAll(/<span[^>]*role="slider"[^>]*>|<input[^>]*type="range"[^>]*>/g)].map(match => match[0])
 const attr = (tag: string, name: string) => new RegExp(`${name}="([^"]*)"`).exec(tag)?.[1]
@@ -36,6 +38,13 @@ describe('Slider', () => {
   it.each(editions)('%s names each thumb of a range', (_, ui) => {
     const html = renderToStaticMarkup(h(ui.Slider, { defaultValue: [20, 80], thumbLabels: ['Minimum price', 'Maximum price'] }))
     expect(thumbs(html).map(thumb => attr(thumb, 'aria-label'))).toEqual(['Minimum price', 'Maximum price'])
+  })
+
+  it.each(editions)('%s passes its description, and in Radix its invalid state, to every thumb', (edition, ui) => {
+    const html = renderToStaticMarkup(h(ui.Slider, { defaultValue: [20, 80], thumbLabels: ['Minimum', 'Maximum'], 'aria-describedby': 'hint', 'aria-invalid': true }))
+    expect(thumbs(html).map(thumb => attr(thumb, 'aria-describedby'))).toEqual(['hint', 'hint'])
+    // Base UI's thumb input takes no aria-invalid; inside a Base UI Field the field sets it.
+    if (edition === 'radix') expect(thumbs(html).map(thumb => attr(thumb, 'aria-invalid'))).toEqual(['true', 'true'])
   })
 
   it.each(editions)('%s hides the tick labels from assistive technology', (_, ui) => {

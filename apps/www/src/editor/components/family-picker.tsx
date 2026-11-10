@@ -2,6 +2,8 @@
 
 import { type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
+import { keepChoice } from '../../editor-shell/inspector'
+import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
 
 export const familyNames: Record<StyleFamily, string> = {
   flat: 'Flat',
@@ -23,24 +25,17 @@ export function FamilyPicker({
   families?: readonly StyleFamily[]
 }) {
   return (
-    <div role="group" aria-label="Style family" className="be-families">
+    <ToggleGroup type="single" aria-label="Style family" className="be-families" value={value} onValueChange={keepChoice(onChange)}>
       {families.map((family) => (
-        <button
-          key={family}
-          type="button"
-          className="be-family"
-          data-family={family}
-          aria-pressed={family === value}
-          onClick={() => onChange(family)}
-        >
+        <ToggleGroupItem key={family} value={family} className="be-family" data-family={family}>
           <span className="be-family-sample" aria-hidden="true">
             <i />
             <i />
           </span>
           <span>{familyNames[family]}</span>
           {family === 'liquid-glass' && <span className="be-family-tag">Experimental</span>}
-        </button>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   )
 }

@@ -15,8 +15,8 @@ it('VariantPicker presses default for the example recipe and offers all six vari
   const html = renderToStaticMarkup(<VariantPicker value={recipe.props.variant ?? 'default'} onChange={noop} />)
   const buttons = html.split('<button').slice(1)
   expect(buttons).toHaveLength(6)
-  expect(html).toContain('role="group" aria-label="Variant"')
-  const pressed = buttons.filter((button) => button.includes('aria-pressed="true"'))
+  expect(html).toMatch(/role="radiogroup"[^>]*aria-label="Variant"|aria-label="Variant"[^>]*role="radiogroup"/)
+  const pressed = buttons.filter((button) => /^[^>]*aria-checked="true"/.test(button))
   expect(pressed).toHaveLength(1)
   expect(pressed[0]).toContain('data-variant="default"')
   for (const variant of ['default', 'secondary', 'outline', 'ghost', 'link', 'destructive'])
@@ -40,8 +40,8 @@ it('offers a reset only for an overridden color value', () => {
 
 it('labels the button type group and switches', () => {
   const html = panel()
-  expect(html).toContain('role="group" aria-label="Button type"')
-  expect(html).toContain('role="group" aria-label="Size"')
+  expect(html).toContain('role="radiogroup" aria-label="Button type"')
+  expect(html).toContain('role="radiogroup" aria-label="Size"')
   // Disabled, Loading and Uppercase; Icon only appears once an icon is chosen.
   expect(html.match(/role="switch"/g)).toHaveLength(3)
   expect(html).toContain('aria-checked="false"')
@@ -77,7 +77,9 @@ it('offers bounded padding, gap and typography sliders with resets once edited',
     ['fontWeight', 300, 800, 100], ['fontSizePx', 11, 24, 1], ['letterSpacingEm', -0.05, 0.2, 0.01],
   ] as const) {
     expect(html).toContain(`id="button-${id}-number"`)
-    expect(html).toMatch(new RegExp(`id="button-${id}"[^>]*min="${min}" max="${max}" step="${step}"`))
+    // The catalog Slider's thumb carries the bounds; Radix exposes no step attribute.
+    void step
+    expect(html).toMatch(new RegExp(`id="button-${id}"[^>]*>(?:(?!data-slot="slider").)*?role="slider"[^>]*aria-valuemin="${min}" aria-valuemax="${max}"`))
   }
   expect(html).not.toContain('aria-label="Reset horizontal padding"')
   const edited = panel(withRecipeOverride(withRecipeOverride(recipe, 'paddingXPx', 20), 'uppercase', true))
@@ -102,7 +104,7 @@ it('offers icons, a position and an icon-only mode that relabels the content fie
 
 it('switches the color fields between base, hover and pressed states', () => {
   const html = panel()
-  expect(html).toContain('role="group" aria-label="Color state"')
+  expect(html).toContain('role="radiogroup" aria-label="Color state"')
   expect(html).toContain('aria-label="Light background"')
 })
 
