@@ -2,6 +2,8 @@
 export const expansionExamples = {
   'input-otp': `import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@/components/ui/input-otp'
 export function Example(){return <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>}`,
+  'hover-card': `import { HoverCard, HoverCardTrigger, HoverCardContent, HoverCardArrow } from '@/components/ui/hover-card'
+export function Example(){return <p>Built with <HoverCard><HoverCardTrigger href="https://github.com/ombelle">@ombelle</HoverCardTrigger><HoverCardContent><strong>Ombelle UI</strong><p>Reviewed React components with deterministic presets.</p><HoverCardArrow /></HoverCardContent></HoverCard> presets.</p>}`,
   slider: `import { Slider, SliderTicks } from '@/components/ui/slider'
 export function Example(){return <><Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => value + ' pixels'} /><Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} /><SliderTicks values={[0, 25, 50, 75, 100]} /></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'

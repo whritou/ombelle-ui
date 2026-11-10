@@ -80,6 +80,7 @@ const baseDependencies: readonly string[] = [
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   chip: ['lucide-react'],
   'input-otp': ['input-otp'],
+  'hover-card': ['@radix-ui/react-hover-card'],
   slider: ['@radix-ui/react-slider'],
   'toggle-group': ['@radix-ui/react-toggle-group'],
   'tag-input': ['lucide-react'],
