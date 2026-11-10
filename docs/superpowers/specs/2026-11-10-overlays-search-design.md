@@ -145,7 +145,7 @@ Compiler specimens in `recipe-specimen.ts` match the boards:
 - **Hover Card:** open, with the Ombelle UI card.
 - **Context Menu:** open on the layer zone, with Duplicate, Apply preset ▸, Copy as JSX, a separator and Delete.
 
-The open specimens render without a portal, so the audit measures them in place. `install-command.ts` adds the four ids to the 0.7.3 gate.
+The overlay specimens are closed, like the existing Popover and Dropdown Menu specimens. The specimen audit's `overlays` map opens each one: a click for Combobox, focus for Hover Card, a right-click for Context Menu. The inline Command needs nothing opened. `install-command.ts` adds the four ids to the 0.7.3 gate.
 
 ## Website editor chrome
 
@@ -156,7 +156,7 @@ The open specimens render without a portal, so the audit measures them in place.
     - *Families*: switch the family.
     - *Actions*: reset, copy the install command, toggle the dark preview.
   - The palette loads with `next/dynamic` on the first open, so cmdk and the dialog stay out of First Load JS.
-- **Combobox:** single mode without create replaces the Button icon `<select>` in `properties-panel.tsx` and the preset picker in `preset-controls.tsx`.
+- **Combobox:** single mode without create replaces the Button icon `<select>` in `properties-panel.tsx` and the glass preset `<select>` in `apps/www/src/site/glass-preset-select.tsx`.
 - **Compilation:** the editor uses the Radix edition. `scripts/generate-www-ui.ts` compiles it into the gitignored `apps/www/src/generated/ui` at build time.
 - Hover Card and Context Menu stay out of the editor.
 - **Size:** `scripts/measure-www-first-load.mjs` measures before and after, and the catalog growth is reported apart from the editor change. The editor change has a budget of **+20 kB gzip**. If the measurement exceeds it, the work stops and the result is reported before going on.
