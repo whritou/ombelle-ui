@@ -645,6 +645,14 @@ export const componentRecipeSchema = {
               "type": "boolean",
               "default": false,
               "title": "Invalid"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "title": "Size"
             }
           },
           "additionalProperties": false,
@@ -953,6 +961,14 @@ export const componentRecipeSchema = {
               "pattern": "^(?:[a-z][a-z0-9_-]{0,39})?$",
               "default": "starter",
               "title": "Item ID"
+            },
+            "multiple": {
+              "type": "boolean",
+              "title": "Multiple"
+            },
+            "icons": {
+              "type": "boolean",
+              "title": "Item icons"
             }
           },
           "additionalProperties": false,
@@ -1094,6 +1110,14 @@ export const componentRecipeSchema = {
               "type": "boolean",
               "default": false,
               "title": "Invalid"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "title": "Size"
             }
           },
           "additionalProperties": false,
@@ -1271,6 +1295,22 @@ export const componentRecipeSchema = {
             "striped": {
               "type": "boolean",
               "title": "Striped rows"
+            },
+            "stickyHeader": {
+              "type": "boolean",
+              "title": "Sticky header"
+            },
+            "sortable": {
+              "type": "boolean",
+              "title": "Sortable"
+            },
+            "actions": {
+              "type": "boolean",
+              "title": "Row actions"
+            },
+            "loading": {
+              "type": "boolean",
+              "title": "Loading"
             }
           },
           "additionalProperties": false,
@@ -1401,9 +1441,14 @@ export const componentRecipeSchema = {
             "appearance": {
               "enum": [
                 "contained",
-                "underline"
+                "underline",
+                "pills"
               ],
               "title": "Appearance"
+            },
+            "counts": {
+              "type": "boolean",
+              "title": "Counts"
             }
           },
           "additionalProperties": false,
@@ -1743,6 +1788,14 @@ export const componentRecipeSchema = {
               "type": "boolean",
               "default": false,
               "title": "Multiline"
+            },
+            "clearable": {
+              "type": "boolean",
+              "title": "Clear button"
+            },
+            "counter": {
+              "type": "boolean",
+              "title": "Character counter"
             }
           },
           "additionalProperties": false,
@@ -1821,6 +1874,14 @@ export const componentRecipeSchema = {
               ],
               "default": "default",
               "title": "Size"
+            },
+            "handle": {
+              "type": "boolean",
+              "title": "Drag handle"
+            },
+            "resizable": {
+              "type": "boolean",
+              "title": "Resizable"
             }
           },
           "additionalProperties": false,
@@ -2032,6 +2093,17 @@ export const componentRecipeSchema = {
               "minimum": 1,
               "maximum": 20,
               "default": 5
+            },
+            "layout": {
+              "enum": [
+                "default",
+                "compact"
+              ],
+              "title": "Layout"
+            },
+            "pageSize": {
+              "type": "boolean",
+              "title": "Page size"
             }
           },
           "additionalProperties": false,
@@ -2096,6 +2168,14 @@ export const componentRecipeSchema = {
               "maximum": 60000,
               "default": 60000,
               "title": "Duration (ms)"
+            },
+            "mode": {
+              "enum": [
+                "default",
+                "promise",
+                "stack"
+              ],
+              "title": "Mode"
             }
           },
           "additionalProperties": false,

@@ -280,3 +280,27 @@ describe('0.7.3 variant recipes', () => {
     expect(compatibility.buttonRecipeInstallBlocked({ props: { variant: 'link' } }, v072)).toBe(false)
   })
 })
+
+
+describe('0.7.3 variant recipes, batches 6b and 6c', () => {
+  const v072 = { version: '0.7.2' }
+  const v073 = { version: '0.7.3' }
+  it.each([
+    ['tabs', { appearance: 'pills' }], ['tabs', { counts: false }],
+    ['table', { stickyHeader: true }], ['table', { sortable: false }], ['table', { actions: true }], ['table', { loading: true }],
+    ['input', { size: 'sm' }], ['textarea', { size: 'default' }],
+    ['input-group', { clearable: true }], ['input-group', { counter: true }],
+    ['pagination', { layout: 'compact' }], ['pagination', { pageSize: true }],
+    ['select', { multiple: true }], ['select', { icons: true }],
+    ['toast', { mode: 'default' }], ['sheet', { handle: true }], ['sheet', { resizable: true }],
+  ] as const)('gates a %s recipe using %o at CLI 0.7.3', (component, props) => {
+    const recipe = { component, props } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(true)
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v073)).toBe(false)
+  })
+
+  it('leaves underline Tabs installable at 0.7.2', () => {
+    const recipe = { component: 'tabs', props: { appearance: 'underline' } } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(false)
+  })
+})
