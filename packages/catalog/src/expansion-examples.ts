@@ -1,5 +1,7 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+export function Example(){return <ToggleGroup type="single" defaultValue="week" aria-label="Calendar view"><ToggleGroupItem value="day">Day</ToggleGroupItem><ToggleGroupItem value="week">Week</ToggleGroupItem><ToggleGroupItem value="month">Month</ToggleGroupItem></ToggleGroup>}`,
   'tag-input': `import { TagInput, TagInputList, TagInputInput } from '@/components/ui/tag-input'
 export function Example(){return <><label id="topics-label">Topics</label><TagInput defaultValue={['design-tokens', 'glass']} name="topics"><TagInputList /><TagInputInput aria-labelledby="topics-label" placeholder="Add a topic" /></TagInput></>}`,
   chip: `import { Chip, ChipGroup, ChipRemove } from '@/components/ui/chip'
