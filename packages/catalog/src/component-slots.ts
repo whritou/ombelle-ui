@@ -2,6 +2,7 @@ import type { ComponentId } from '@ombelle/contracts'
 
 /** Slots each catalog component declares, beyond the data-slot literals in its templates. */
 export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
+  chip: ['chip', 'chip-remove', 'chip-group'],
   spinner: ['spinner'],
   kbd: ['kbd', 'kbd-group'],
   stepper: ['stepper', 'stepper-list', 'stepper-item', 'stepper-indicator', 'stepper-title', 'stepper-description', 'stepper-separator'],

@@ -78,6 +78,7 @@ const baseDependencies: readonly string[] = [
   'tailwind-merge',
 ]
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
+  chip: ['lucide-react'],
   empty: ['@radix-ui/react-slot'],
   field: ['lucide-react'],
   stepper: ['lucide-react'],

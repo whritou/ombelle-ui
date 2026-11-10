@@ -1,0 +1,85 @@
+/* flat Chip */
+[data-slot='chip-group'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+[data-slot='chip'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 28px;
+  padding: 0 4px 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font: 600 13px/1.2 var(--font-family);
+  white-space: nowrap;
+}
+[data-slot='chip'][data-mode='pressable'] {
+  padding-inline: 12px;
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+}
+[data-slot='chip'][data-state='on'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='chip'] > svg {
+  inline-size: 14px;
+  block-size: 14px;
+  margin-inline-start: -2px;
+}
+[data-slot='chip']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='chip']:disabled,
+[data-slot='chip'][data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* 24px keeps the remove button a full target inside the 28px chip. */
+[data-slot='chip-remove'] {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+[data-slot='chip-remove'] > svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+[data-slot='chip-remove']:hover {
+  background: color-mix(in oklab, currentColor 12%, transparent);
+}
+[data-slot='chip-remove']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+@media (forced-colors: active) {
+  [data-slot='chip'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='chip'][data-state='on'] {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+  [data-slot='chip']:focus-visible,
+  [data-slot='chip-remove']:focus-visible {
+    outline-color: Highlight;
+  }
+}

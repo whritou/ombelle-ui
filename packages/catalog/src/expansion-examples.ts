@@ -1,5 +1,7 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  chip: `import { Chip, ChipGroup, ChipRemove } from '@/components/ui/chip'
+export function Example(){return <><ChipGroup aria-label="Status filter"><Chip defaultPressed>On track</Chip><Chip defaultPressed={false}>Shipped</Chip></ChipGroup><Chip>glass<ChipRemove /></Chip></>}`,
   stepper: `import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 export function Example(){return <Stepper aria-label="Setup"><StepperItem status="complete"><StepperIndicator>1</StepperIndicator><StepperTitle>Preset</StepperTitle><StepperDescription>Ombelle</StepperDescription><StepperSeparator /></StepperItem><StepperItem status="current"><StepperIndicator>2</StepperIndicator><StepperTitle>Components</StepperTitle><StepperSeparator /></StepperItem><StepperItem status="upcoming"><StepperIndicator>3</StepperIndicator><StepperTitle>Install CLI</StepperTitle></StepperItem></Stepper>}`,
   meter: `import { Meter, MeterLabel } from '@/components/ui/meter'
