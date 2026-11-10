@@ -1,5 +1,7 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  slider: `import { Slider, SliderTicks } from '@/components/ui/slider'
+export function Example(){return <><Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => value + ' pixels'} /><Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} /><SliderTicks values={[0, 25, 50, 75, 100]} /></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 export function Example(){return <ToggleGroup type="single" defaultValue="week" aria-label="Calendar view"><ToggleGroupItem value="day">Day</ToggleGroupItem><ToggleGroupItem value="week">Week</ToggleGroupItem><ToggleGroupItem value="month">Month</ToggleGroupItem></ToggleGroup>}`,
   'tag-input': `import { TagInput, TagInputList, TagInputInput } from '@/components/ui/tag-input'
