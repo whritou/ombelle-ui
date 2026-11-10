@@ -106,16 +106,6 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'accordion-content',
     'accordion-content-inner',
   ],
-  table: [
-    'table-container',
-    'table',
-    'table-caption',
-    'table-header',
-    'table-body',
-    'table-footer',
-    'table-row',
-    'table-head',
-    'table-cell',
-  ],
+  table: ['table-container', 'table', 'table-caption', 'table-header', 'table-body', 'table-footer', 'table-row', 'table-head', 'table-cell', 'table-sort', 'table-skeleton'],
   progress: ['progress', 'progress-indicator'],
 }

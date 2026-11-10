@@ -19,7 +19,7 @@ import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, P
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
@@ -97,6 +97,36 @@ function CalendarScenario() {
   )
 }
 
+const deploys = Array.from({ length: 12 }, (_, index) => ({ name: `Project ${String.fromCharCode(65 + index)}`, minutes: (index * 37) % 120 + 5 }))
+function VariantsMoreTable() {
+  const [sort, setSort] = React.useState<'ascending' | 'descending'>('descending')
+  const [loading, setLoading] = React.useState(false)
+  const rows = [...deploys].sort((a, b) => sort === 'ascending' ? a.minutes - b.minutes : b.minutes - a.minutes)
+  return (
+    <div data-testid="vm-table">
+      <button type="button" data-testid="vm-table-loading" onClick={() => setLoading(value => !value)}>Toggle loading</button>
+      <Table stickyHeader maxBlockSize="12rem" loading={loading} aria-label="Deploys">
+        <TableHeader>
+          <TableRow>
+            <TableHead sort={sort} onSort={() => setSort(value => value === 'descending' ? 'ascending' : 'descending')}>Updated</TableHead>
+            <TableHead>Project</TableHead>
+            <TableHead actions />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? <TableSkeletonRows rows={3} columns={3} /> : rows.map(row => (
+            <TableRow key={row.name}>
+              <TableCell>{row.minutes} min ago</TableCell>
+              <TableCell>{row.name}</TableCell>
+              <TableCell actions><button type="button" aria-label={`Actions for ${row.name}`}>…</button></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
 // Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
 function VariantsMoreScenario() {
   const [page, setPage] = React.useState(1)
@@ -130,6 +160,7 @@ function VariantsMoreScenario() {
       </Pagination>
       <PaginationPageSize data-testid="vm-page-size" value={rows} onValueChange={setRows}
         range={<output data-testid="vm-range">1–{rows} of 290</output>} />
+      <VariantsMoreTable />
     </section>
   )
 }

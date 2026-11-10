@@ -45,3 +45,41 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} table`, () => {
+    test('sorting cycles aria-sort, and the header stays in view as the rows scroll', async ({ page }) => {
+      await open(page, edition)
+      const table = page.getByTestId('vm-table')
+      const updated = table.getByRole('columnheader', { name: /Updated/ })
+      await expect(updated).toHaveAttribute('aria-sort', 'descending')
+      await updated.getByRole('button').click()
+      await expect(updated).toHaveAttribute('aria-sort', 'ascending')
+      await expect(table.getByRole('row').nth(1)).toContainText('5 min ago')
+      const container = table.locator('[data-slot$="table-container"]')
+      await container.evaluate(element => { element.scrollTop = 200 })
+      const [box, head] = await Promise.all([container.boundingBox(), updated.boundingBox()])
+      expect(Math.abs(head!.y - box!.y)).toBeLessThan(2)
+      // The sort button keeps a visible ring above the scrolled rows.
+      await table.getByTestId('vm-table-loading').focus()
+      await page.keyboard.press('Tab')
+      await expect(updated.getByRole('button')).toBeFocused()
+      const ring = await updated.getByRole('button').evaluate(element => parseFloat(getComputedStyle(element).outlineWidth))
+      expect(ring).toBeGreaterThanOrEqual(2)
+      const covered = await updated.getByRole('button').evaluate(element => {
+        const rect = element.getBoundingClientRect()
+        return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) !== element && !element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2))
+      })
+      expect(covered).toBe(false)
+    })
+
+    test('the actions column is named, and loading marks the table busy with skeleton rows', async ({ page }) => {
+      await open(page, edition)
+      const table = page.getByTestId('vm-table')
+      await expect(table.getByRole('columnheader', { name: 'Actions' })).toHaveCount(1)
+      await table.getByTestId('vm-table-loading').click()
+      await expect(table.getByRole('table', { name: 'Deploys' })).toHaveAttribute('aria-busy', 'true')
+      await expect(table.locator('[data-slot$="table-skeleton"]')).toHaveCount(9)
+    })
+  })
+}
