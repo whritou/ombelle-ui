@@ -35,14 +35,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'tooltip-content',
     'tooltip-arrow',
   ],
-  card: [
-    'card',
-    'card-header',
-    'card-title',
-    'card-description',
-    'card-content',
-    'card-footer',
-  ],
+  card: ['card', 'card-header', 'card-title', 'card-description', 'card-content', 'card-footer', 'card-link', 'card-media', 'card-group', 'card-option', 'card-option-check'],
   'native-select': [
     'native-select-wrapper',
     'native-select',

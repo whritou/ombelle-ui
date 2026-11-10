@@ -369,6 +369,11 @@ describe('catalog contract', () => {
       'card-description',
       'card-content',
       'card-footer',
+      'card-link',
+      'card-media',
+      'card-group',
+      'card-option',
+      'card-option-check',
     ])
     for (const part of [
       'Card',
