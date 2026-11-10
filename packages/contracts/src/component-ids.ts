@@ -34,5 +34,10 @@ export const supportedComponentIds = [
   'field',
   'meter',
   'stepper',
+  'slider',
+  'toggle-group',
+  'chip',
+  'tag-input',
+  'input-otp',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

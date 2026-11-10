@@ -87,8 +87,47 @@ it.each([
 })
 
 it('rejects a stepper with seven steps or a current step past the last', () => {
-  const step = { title: 'Step', description: '' }
-  expect(() => validateComponentRecipe(draft('stepper', {}, { steps: Array(7).fill(step) }))).toThrow()
-  expect(() => validateComponentRecipe(draft('stepper', { current: 3 }, { steps: [step, step, step] })))
+  const steps = (count: number) => Array.from({ length: count }, (_, index) => ({ id: `step-${index}`, title: 'Step', description: '' }))
+  expect(() => validateComponentRecipe(draft('stepper', {}, { steps: steps(7) }))).toThrow()
+  expect(() => validateComponentRecipe(draft('stepper', { current: 3 }, { steps: steps(3) })))
     .toThrow('Choose a step present in the recipe')
+})
+
+const formControls = ['slider', 'toggle-group', 'chip', 'tag-input', 'input-otp'] as const
+const formDraft = (component: (typeof formControls)[number], props: Record<string, unknown> = {}, content?: Record<string, unknown>) => ({
+  ...badge, component, props,
+  content: content ?? defaultRecipeFields(componentRecipeFields(component).content),
+})
+
+it.each(formControls)('accepts the default %s recipe', component => {
+  expect(componentRecipeComponents).toContain(component)
+  expect(validateComponentRecipe(formDraft(component)).component).toBe(component)
+})
+
+it.each([
+  ['slider', { value: 101 }, '/props/value'],
+  ['slider', { min: 50, max: 50 }, '/props/max'],
+  ['slider', { mode: 'range', rangeStart: 90, rangeEnd: 10 }, '/props/rangeStart'],
+  ['slider', { mode: 'range', rangeEnd: 120 }, '/props/rangeEnd'],
+  ['toggle-group', { selection: ['year'] }, '/props/selection'],
+  ['toggle-group', { type: 'single', selection: ['day', 'week'] }, '/props/selection'],
+  ['chip', { selection: ['archived'] }, '/props/selection'],
+  ['tag-input', { max: 1 }, '/content/tags'],
+  ['input-otp', { length: 4, separatorAfter: 4 }, '/props/separatorAfter'],
+] as const)('rejects %s with %o at %s', (component, props, path) => {
+  expect(() => validateComponentRecipe(formDraft(component, props))).toThrow(expect.objectContaining({ path }))
+})
+
+it.each([
+  ['input-otp', { length: 9 }],
+  ['toggle-group', { variant: 'pill' }],
+] as const)('rejects %s with %o by schema', (component, props) => {
+  expect(() => validateComponentRecipe(formDraft(component, props))).toThrow()
+})
+
+it('gives every editable item list an id, as the editor adds one to each new item', () => {
+  for (const component of componentRecipeComponents)
+    for (const [key, field] of Object.entries(componentRecipeFields(component).content))
+      if (field.type === 'array' && field.items?.properties)
+        expect(Object.keys(field.items.properties), `${component} ${key}`).toContain('id')
 })

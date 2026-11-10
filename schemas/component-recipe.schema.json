@@ -2362,6 +2362,12 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
                   "label": {
                     "type": "string",
                     "title": "Part label",
@@ -2379,20 +2385,24 @@
                 },
                 "additionalProperties": false,
                 "required": [
+                  "id",
                   "label",
                   "value"
                 ]
               },
               "default": [
                 {
+                  "id": "builds",
                   "label": "Builds",
                   "value": 42
                 },
                 {
+                  "id": "assets",
                   "label": "Assets",
                   "value": 22
                 },
                 {
+                  "id": "logs",
                   "label": "Logs",
                   "value": 10
                 }
@@ -2445,6 +2455,12 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
                   "title": {
                     "type": "string",
                     "title": "Title",
@@ -2461,20 +2477,24 @@
                 },
                 "additionalProperties": false,
                 "required": [
+                  "id",
                   "title",
                   "description"
                 ]
               },
               "default": [
                 {
+                  "id": "preset",
                   "title": "Preset",
                   "description": "Ombelle"
                 },
                 {
+                  "id": "components",
                   "title": "Components",
                   "description": "Choose 4"
                 },
                 {
+                  "id": "install-cli",
                   "title": "Install CLI",
                   "description": ""
                 }
@@ -2484,6 +2504,441 @@
           "additionalProperties": false,
           "required": [
             "steps"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "slider"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "single",
+                "range"
+              ],
+              "default": "single",
+              "title": "Mode"
+            },
+            "min": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000,
+              "default": 0,
+              "title": "Minimum"
+            },
+            "max": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000,
+              "default": 100,
+              "title": "Maximum"
+            },
+            "step": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "title": "Step"
+            },
+            "ticks": {
+              "type": "boolean",
+              "default": false,
+              "title": "Ticks"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000,
+              "default": 12,
+              "title": "Value"
+            },
+            "rangeStart": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000,
+              "default": 20,
+              "title": "Range start"
+            },
+            "rangeEnd": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000,
+              "default": 80,
+              "title": "Range end"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Border radius",
+              "pattern": "\\S"
+            },
+            "minLabel": {
+              "type": "string",
+              "title": "Minimum thumb label",
+              "maxLength": 200,
+              "default": "Minimum price",
+              "pattern": "\\S"
+            },
+            "maxLabel": {
+              "type": "string",
+              "title": "Maximum thumb label",
+              "maxLength": 200,
+              "default": "Maximum price",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "minLabel",
+            "maxLabel"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "toggle-group"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "single",
+                "multiple"
+              ],
+              "default": "single",
+              "title": "Selection"
+            },
+            "variant": {
+              "enum": [
+                "segmented",
+                "toolbar"
+              ],
+              "default": "segmented",
+              "title": "Look"
+            },
+            "selection": {
+              "type": "array",
+              "title": "Selected item IDs",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]{0,39}$"
+              },
+              "maxItems": 12,
+              "default": [
+                "week"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Group label",
+              "maxLength": 200,
+              "default": "Calendar view",
+              "pattern": "\\S"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 2,
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Item",
+                    "pattern": "\\S"
+                  },
+                  "iconOnly": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "Icon only"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "iconOnly"
+                ]
+              },
+              "default": [
+                {
+                  "id": "day",
+                  "label": "Day",
+                  "iconOnly": false
+                },
+                {
+                  "id": "week",
+                  "label": "Week",
+                  "iconOnly": false
+                },
+                {
+                  "id": "month",
+                  "label": "Month",
+                  "iconOnly": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "chip"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "pressable",
+                "removable"
+              ],
+              "default": "pressable",
+              "title": "Mode"
+            },
+            "selection": {
+              "type": "array",
+              "title": "Selected item IDs",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]{0,39}$"
+              },
+              "maxItems": 12,
+              "default": [
+                "on-track",
+                "needs-attention"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Group label",
+              "maxLength": 200,
+              "default": "Status filter",
+              "pattern": "\\S"
+            },
+            "chips": {
+              "type": "array",
+              "title": "Chips",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Chip",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label"
+                ]
+              },
+              "default": [
+                {
+                  "id": "on-track",
+                  "label": "On track"
+                },
+                {
+                  "id": "needs-attention",
+                  "label": "Needs attention"
+                },
+                {
+                  "id": "shipped",
+                  "label": "Shipped"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "chips"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "tag-input"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "max": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 8,
+              "title": "Maximum tags"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Topics",
+              "pattern": "\\S"
+            },
+            "placeholder": {
+              "type": "string",
+              "title": "Placeholder",
+              "maxLength": 200,
+              "default": "Add a topic"
+            },
+            "tags": {
+              "type": "array",
+              "title": "Tags",
+              "minItems": 0,
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Tag",
+                    "maxLength": 200,
+                    "default": "tag",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label"
+                ]
+              },
+              "default": [
+                {
+                  "id": "design-tokens",
+                  "label": "design-tokens"
+                },
+                {
+                  "id": "glass",
+                  "label": "glass"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "placeholder",
+            "tags"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "input-otp"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "length": {
+              "type": "integer",
+              "minimum": 4,
+              "maximum": 8,
+              "default": 6,
+              "title": "Length"
+            },
+            "separatorAfter": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7,
+              "default": 3,
+              "title": "Separator after slot"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Verification code",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
           ]
         }
       }

@@ -65,7 +65,7 @@
   - `packages/contracts/src/component-recipe.ts` (`validateComposition`, next to the Stepper rule): add the new rules.
   - `packages/catalog/src/manifest.ts`: pin the three new dependencies in `runtimeDependencies`.
   - `packages/catalog/package.json` and `pnpm-lock.yaml`: add them as dev dependencies, the same way the existing Radix packages appear.
-- Create: `docs/evidence/form-controls.md`, holding only the size baseline at this step.
+- Create: `docs/evidence/form-controls-073.md`, holding only the size baseline at this step.
 - Test: `packages/contracts/test/component-recipe.test.ts` and `style-support.test.ts`.
 
 **Interfaces (recipe fields, exact names and defaults):**
@@ -91,7 +91,7 @@
   - a single `toggle-group` whose `defaultValue` is not an item value;
   - `separatorAfter >= length`.
 
-- [ ] **Step 0: Record the size baseline before anything changes.** Run `cd apps/www && corepack pnpm run build`. Copy the First Load JS of the `/editor/*` and `/preset-editor` routes from the route table into `docs/evidence/form-controls.md`, under "Website size, before". Also record the commit.
+- [ ] **Step 0: Record the size baseline before anything changes.** Run `cd apps/www && corepack pnpm run build`. Copy the First Load JS of the `/editor/*` and `/preset-editor` routes from the route table into `docs/evidence/form-controls-073.md`, under "Website size, before". Also record the commit.
 - [ ] **Step 1: Write the failing contract tests.**
   - All five ids are in `componentRecipeComponents`.
   - `styleSupport(id, 'liquid-glass') === 'experimental'`, and the other four families are `supported`.
@@ -371,7 +371,7 @@
 - [ ] **Step 4: Run** the same tests. Expected: PASS. Then update and run the three e2e files with the project's default Playwright config. Expected: PASS.
 - [ ] **Step 5: Measure the size.**
   - Run `cd apps/www && corepack pnpm run build`.
-  - Record the after values next to the baseline in `docs/evidence/form-controls.md`.
+  - Record the after values next to the baseline in `docs/evidence/form-controls-073.md`.
   - If any route grows by more than 10 kB gzipped, stop and report to the user before going on.
 - [ ] **Step 6: Commit** with `git commit -m "feat(www): use catalog Toggle Group, Slider and Chip in the editor"`.
 
@@ -380,7 +380,7 @@
 **Files:**
 - Modify: the family CSS that the audit or the board comparison flags.
 - Modify: `packages/catalog/test/specimen-audit-fixes.test.ts`, one pinned declaration per fix.
-- Modify: `docs/evidence/form-controls.md`.
+- Modify: `docs/evidence/form-controls-073.md`.
 - Create: `docs/evidence/images/form-controls/board-<family>-<section>.png`.
 
 - [ ] **Step 1: Audit.** Run `pnpm generate:preview` and `pnpm test:specimen-audit`. Expected: no findings in the four stable families. Fix each finding with a test that fails first. Rerun only the configurations a fix affects.
