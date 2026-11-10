@@ -208,11 +208,12 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   })
   // A text field that draws no ring of its own may be ringed by a :focus-within wrapper inside the specimen
   // (Input Group, Tag Input): the ring is then measured around that wrapper, as findForcedColors accepts it.
-  // Only text fields are probed: focusing other controls first can leave state behind (a Base UI menu
-  // item stays highlighted after blur), which would spoil the unfocused screenshot.
+  // A link that draws no ring may be ringed by its card (a stretched Card link): measured the same way.
+  // Only text fields and links are probed: focusing other controls first can leave state behind (a Base UI
+  // menu item stays highlighted after blur), which would spoil the unfocused screenshot.
   const ringOwner = keys ? false : await target.evaluate(element => {
     document.querySelectorAll('[data-audit-ring-owner]').forEach(owner => owner.removeAttribute('data-audit-ring-owner'))
-    if (!element.matches('input, textarea')) return false
+    if (!element.matches('input, textarea, a[href]')) return false
     ;(element as HTMLElement).focus({ focusVisible: true } as FocusOptions)
     if (element !== document.activeElement) return false
     const ring = (style: CSSStyleDeclaration) => style.outlineStyle !== 'none' && (Number.parseFloat(style.outlineWidth) || 0) >= 1

@@ -131,8 +131,8 @@
   background: color-mix(in oklab, currentColor 10%, transparent);
 }
 [data-slot='alert-dismiss']:focus-visible {
-  outline: 2.5px solid var(--ring);
-  outline-offset: 3px;
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
 }
 [data-slot='alert-actions'] {
   grid-column-start: -2;

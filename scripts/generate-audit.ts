@@ -11,7 +11,8 @@ import { glassPresetBackdrop } from '../apps/www/src/site/glass-presets.js'
 import type { PresetBackdrop } from '../apps/www/src/preset-editor/preview-protocol.js'
 
 export type AuditEdition = 'radix' | 'base'
-export type AuditSpecimen = { component: ComponentId; scope: string | null; css: string | null; specimen: RecipeSpecimen }
+/** id is the component, or component~variant for a variant specimen of it. */
+export type AuditSpecimen = { id: string; component: ComponentId; scope: string | null; css: string | null; specimen: RecipeSpecimen }
 export type AuditData = {
   family: StyleFamily
   edition: AuditEdition
@@ -21,6 +22,20 @@ export type AuditData = {
 
 /** Button has no catalog recipe; its audit specimen is the ordinary component with the default variant. */
 const buttonSpecimen: RecipeSpecimen = { tag: 'Button', props: {}, children: ['Save changes'] }
+const buttonVariants: Record<string, RecipeSpecimen> = {
+  'link-destructive': { tag: 'Button', props: { variant: 'link-destructive' }, children: ['Remove member'] },
+  loading: { tag: 'Button', props: { loading: true }, children: ['Saving…'] },
+}
+
+/** The 0.7.3 variants measured beside each component's default specimen, as recipe props. */
+const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, unknown>>>> = {
+  badge: { soft: { appearance: 'soft', variant: 'warning' }, 'soft-success': { appearance: 'soft', variant: 'success', size: 'sm', dot: true },
+    outline: { appearance: 'outline', variant: 'destructive' } },
+  alert: { dismissible: { dismissible: true, actions: true, variant: 'info' }, compact: { layout: 'compact', variant: 'warning' } },
+  card: { link: { mode: 'link' }, options: { mode: 'options' }, media: { mode: 'media' } },
+  avatar: { square: { shape: 'square' }, overflow: { overflow: 4 } },
+  accordion: { flush: { appearance: 'flush', icon: 'plus' }, chevron: { icon: 'chevron' } },
+}
 
 function presetRef(family: StyleFamily): ComponentRecipe['presetRef'] {
   const catalog = getCatalog('0.1.0')
@@ -30,9 +45,9 @@ function presetRef(family: StyleFamily): ComponentRecipe['presetRef'] {
 }
 
 /** The component editor's starting draft for a component, pinned to the family's built-in preset. */
-function draft(component: ComponentRecipe['component'], family: StyleFamily): ComponentRecipe {
+function draft(component: ComponentRecipe['component'], family: StyleFamily, props: Record<string, unknown> = {}): ComponentRecipe {
   return validateComponentRecipe({ schemaVersion: '2.0', component, id: `catalog_${component.replaceAll('-', '_')}`,
-    revision: 1, presetRef: presetRef(family), props: {}, content: defaultRecipeFields(componentRecipeFields(component).content) })
+    revision: 1, presetRef: presetRef(family), props, content: defaultRecipeFields(componentRecipeFields(component).content) })
 }
 
 async function familyData(family: StyleFamily): Promise<Record<AuditEdition, AuditData>> {
@@ -41,16 +56,21 @@ async function familyData(family: StyleFamily): Promise<Record<AuditEdition, Aud
   const base: AuditSpecimen[] = []
   for (const component of [...supportedComponentIds].sort()) {
     if (!recipes.has(component)) {
-      radix.push({ component, scope: null, css: null, specimen: buttonSpecimen })
-      base.push({ component, scope: null, css: null, specimen: buttonSpecimen })
+      for (const [id, specimen] of [[component, buttonSpecimen], ...Object.entries(buttonVariants).map(([name, value]) => [`${component}~${name}`, value])] as const) {
+        radix.push({ id, component, scope: null, css: null, specimen })
+        base.push({ id, component, scope: null, css: null, specimen })
+      }
       continue
     }
-    const recipe = draft(component as ComponentRecipe['component'], family)
-    const result = await compileComponentRecipe({ recipe })
-    const specimen = describeComponentRecipe(recipe)
-    const css = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${component}.css`))!.content
-    radix.push({ component, scope: result.scope, css, specimen })
-    base.push({ component, scope: null, css: null, specimen })
+    for (const [name, props] of [['', {}], ...Object.entries(recipeVariants[component] ?? {})] as const) {
+      const id = name ? `${component}~${name}` : component
+      const recipe = draft(component as ComponentRecipe['component'], family, props)
+      const result = await compileComponentRecipe({ recipe })
+      const specimen = describeComponentRecipe(recipe)
+      const css = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${component}.css`))!.content
+      radix.push({ id, component, scope: result.scope, css, specimen })
+      base.push({ id, component, scope: null, css: null, specimen })
+    }
   }
   const backdrop = family === 'liquid-glass'
     ? { light: glassPresetBackdrop('builtin-liquid-glass', 'light'), dark: glassPresetBackdrop('builtin-liquid-glass', 'dark') }

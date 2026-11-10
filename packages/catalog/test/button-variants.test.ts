@@ -32,7 +32,7 @@ describe('Button 0.7.3 variants', () => {
 
   it.each(families)('%s styles link-destructive with the destructive colour and a forced-colours rule', family => {
     const css = familyCss(family)
-    expect(css).toMatch(/\[data-slot="button"\]\[data-variant="link-destructive"\]\s*\{[^}]*color:\s*var\(--destructive\)/)
+    expect(css).toMatch(/\[data-slot="button"\]\[data-variant="link-destructive"\]\s*\{[^}]*color:\s*color-mix\(in oklab, var\(--destructive\) 65%, var\(--foreground\)\)/)
     expect(css).toMatch(/@media \(forced-colors: active\)\s*\{[^@]*\[data-variant="link-destructive"\][^}]*LinkText/)
   })
 })

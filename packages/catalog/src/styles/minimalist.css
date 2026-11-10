@@ -75,7 +75,7 @@
   background: transparent;
   border-color: transparent;
   box-shadow: none;
-  color: var(--destructive);
+  color: color-mix(in oklab, var(--destructive) 65%, var(--foreground));
   padding: 0 4px;
   text-decoration-line: underline;
   text-underline-offset: 4px;
