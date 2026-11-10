@@ -17,7 +17,8 @@ export const semanticPaletteInstallNotice = `This preset uses semantic status co
 
 export const displayCatalogMinimumCli = '0.7.3'
 export const displayCatalogInstallNotice = `This recipe requires CLI ${displayCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-const displayComponents = new Set(['spinner', 'kbd', 'empty', 'field', 'meter', 'stepper'])
+// The 0.7.3 additions: display components and form controls.
+const displayComponents = new Set(['spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp'])
 
 const expandedComponents = new Set(['input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast'])
 const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {

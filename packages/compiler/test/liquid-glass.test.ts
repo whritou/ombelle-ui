@@ -37,8 +37,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the thirty-five experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'empty', 'field', 'input', 'input-group', 'kbd', 'label', 'meter', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'select', 'separator', 'sheet', 'skeleton', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'textarea', 'toast', 'tooltip'])
+  it('compiles the forty experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'card', 'checkbox', 'chip', 'dialog', 'dropdown-menu', 'empty', 'field', 'input', 'input-group', 'input-otp', 'kbd', 'label', 'meter', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle-group', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -52,10 +52,12 @@ describe('liquid-glass compile', () => {
       'components/ui/breadcrumb.css',
       'components/ui/card.css',
       'components/ui/checkbox.css',
+      'components/ui/chip.css',
       'components/ui/dropdown-menu.css',
       'components/ui/empty.css',
       'components/ui/field.css',
       'components/ui/input-group.css',
+      'components/ui/input-otp.css',
       'components/ui/kbd.css',
       'components/ui/label.css',
       'components/ui/meter.css',
@@ -68,13 +70,16 @@ describe('liquid-glass compile', () => {
       'components/ui/separator.css',
       'components/ui/sheet.css',
       'components/ui/skeleton.css',
+      'components/ui/slider.css',
       'components/ui/spinner.css',
       'components/ui/stepper.css',
       'components/ui/switch.css',
       'components/ui/table.css',
       'components/ui/tabs.css',
+      'components/ui/tag-input.css',
       'components/ui/textarea.css',
       'components/ui/toast.css',
+      'components/ui/toggle-group.css',
       'components/ui/tooltip.css',
       'styles/ui-style.css',
       'styles/ui-tokens.css',
