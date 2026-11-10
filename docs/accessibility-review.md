@@ -152,6 +152,15 @@ Slider, Toggle Group, Chip, Tag Input and Input OTP are not part of the 36 PR5 e
 - **Tag Input**: the input is announced with its label and hint; adding, removing, a duplicate and the maximum are announced politely; each tag's remove button is reachable by Tab and returns focus to the input.
 - **Input OTP**: the code is announced as one named field in the Radix edition, or as named inputs ("Digit 2 of 6") in the Base UI edition; a pasted code fills every slot.
 
+**Overlays and search (0.7.3)**
+
+Combobox, Command, Hover Card and Context Menu are not part of the 36 PR5 entries either. Review them on the preview `projects` and `settings` scenes and in the website editor (the Ctrl+K palette and the icon and glass preset pickers), and record them in their own rows below.
+
+- **Combobox**: the field is announced as a combobox with its label, collapsed or expanded; the highlighted option is announced as the arrow keys move while focus stays in the field; "No presets found." is announced; each chip's remove button is named "Remove" plus its label.
+- **Command**: Ctrl+K opens a dialog named "Command menu" with focus in the search box; group headings name their groups; the highlighted command is announced; Escape returns focus to where it was.
+- **Hover Card**: the link reads and works on its own; the card appears on keyboard focus as on hover and closes on Escape.
+- **Context Menu**: Shift+F10 or the context-menu key on the focused area opens the menu; items, the submenu and the destructive item are announced; Escape returns focus to the area.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -201,6 +210,15 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Chip | | | | | | | | | | |
 | Tag Input | | | | | | | | | | |
 | Input OTP | | | | | | | | | | |
+
+#### Overlays and search (0.7.3)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Combobox | | | | | | | | | | |
+| Command | | | | | | | | | | |
+| Hover Card | | | | | | | | | | |
+| Context Menu | | | | | | | | | | |
 
 ### Findings
 

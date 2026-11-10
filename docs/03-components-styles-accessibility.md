@@ -30,6 +30,15 @@ build time, so its single choices are radio groups with one Tab stop. See the
 [form controls design](superpowers/specs/2026-11-10-form-controls-design.md)
 and the [evidence](evidence/form-controls-073.md).
 
+The 0.7.3 overlays add [Combobox](components/combobox.md),
+[Command](components/command.md), [Hover Card](components/hover-card.md) and
+[Context Menu](components/context-menu.md) in all five families, with Radix and
+Base UI editions and recipe editors. The website editor gains a Ctrl+K command
+palette, loaded on first open, and searchable Combobox pickers for the Button
+icon and the glass preset. See the
+[overlays and search design](superpowers/specs/2026-11-10-overlays-search-design.md)
+and the [evidence](evidence/overlays-search-073.md).
+
 Every component must ship its source, dependencies, prop and composition reference, editor metadata, preview fixtures, supported style matrix, keyboard behavior, and accessibility evidence. Follow the selected shadcn edition's composition model and preserve familiar names wherever they mean the same thing.
 
 Use semantic elements and existing accessible primitives for interaction. Public props should forward the relevant native attributes, events, refs, `className`, and `style` without erasing useful types. Interactive state supports controlled and uncontrolled usage when the primitive supports both. Keep server-compatible presentation components free of unnecessary client boundaries.
