@@ -39,7 +39,7 @@ describe('Card 0.7.3 variants', () => {
     const labelledby = /aria-labelledby="([^"]+)"/.exec(team)![1]
     const describedby = /aria-describedby="([^"]+)"/.exec(team)![1]
     expect(html).toContain(`id="${labelledby}">Team</span>`)
-    expect(html).toContain(`id="${describedby}">Selected option.</p>`)
+    expect(html).toContain(`id="${describedby}">Selected option.</span>`)
     expect(radios.find(radio => radio.includes('value="enterprise"'))).toContain('disabled=""')
     expect(radios.find(radio => radio.includes('value="enterprise"'))).not.toContain('aria-describedby')
     expect(html).toMatch(/data-slot="card-option-check"[^>]*aria-hidden="true"|aria-hidden="true"[^>]*data-slot="card-option-check"/)

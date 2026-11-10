@@ -6,7 +6,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "cad9230c9228728a948257317cafc675565bafb7db1e22855bfa2a7039c25d0a"
+          "sha256": "e5b1c073577305cb3f4e8e380436296646a1e34d2c02f1ce5729fd4d20e51f8e"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -47,7 +47,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "cad9230c9228728a948257317cafc675565bafb7db1e22855bfa2a7039c25d0a"
+          "sha256": "e5b1c073577305cb3f4e8e380436296646a1e34d2c02f1ce5729fd4d20e51f8e"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -88,7 +88,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "cad9230c9228728a948257317cafc675565bafb7db1e22855bfa2a7039c25d0a"
+          "sha256": "e5b1c073577305cb3f4e8e380436296646a1e34d2c02f1ce5729fd4d20e51f8e"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -321,6 +321,20 @@
       ],
       "spec": "feat/variants-basics-073",
       "reason": "A loading Button measures its resting width on every render at rest and caps the kept width at its container (final review, batch 6a)"
+    },
+    {
+      "families": [
+        "flat",
+        "minimalist",
+        "neo-brutalism",
+        "ombelle",
+        "liquid-glass"
+      ],
+      "logicalPaths": [
+        "components/ui/button.tsx"
+      ],
+      "spec": "feat/variants-basics-073",
+      "reason": "A loading Button restores a min-inline-size the consumer set and returns a callback-ref cleanup (batch 6a minors)"
     }
   ]
 }

@@ -28,8 +28,8 @@ export function Alert({
   ...props
 }: AlertProps) {
   // A Dismiss button, given by onDismiss or as a child, reserves room in the corner.
-  const dismissible = onDismiss !== undefined ||
-    React.Children.toArray(children).some(child => React.isValidElement(child) && child.type === AlertDismiss)
+  const hasOwnDismiss = React.Children.toArray(children).some(child => React.isValidElement(child) && child.type === AlertDismiss)
+  const dismissible = onDismiss !== undefined || hasOwnDismiss
   return (
     <div
       role={variant === 'destructive' ? 'alert' : 'status'}
@@ -41,7 +41,8 @@ export function Alert({
       className={cn(className)}
     >
       {children}
-      {onDismiss ? <AlertDismiss label={dismissLabel} onClick={onDismiss} /> : null}
+      {/* A child AlertDismiss takes the place of the one onDismiss adds. */}
+      {onDismiss && !hasOwnDismiss ? <AlertDismiss label={dismissLabel} onClick={onDismiss} /> : null}
     </div>
   )
 }
@@ -82,6 +83,7 @@ export function AlertDismiss({
       aria-label={label ?? 'Dismiss'}
       {...props}
       data-slot="alert-dismiss"
+      data-alert-dismiss=""
       className={cn(className)}
     >
       <XIcon aria-hidden="true" />

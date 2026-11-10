@@ -58,13 +58,20 @@ export function Button({
     const element = ownRef.current
     if (!busy || !element || restingWidth.current === undefined) return
     // Never wider than its container, which may have narrowed since the last render.
+    const own = element.style.getPropertyValue('min-inline-size')
     element.style.setProperty('min-inline-size', `min(${restingWidth.current}px, 100%)`)
-    return () => { element.style.removeProperty('min-inline-size') }
+    // Put back a min width the consumer set, rather than clearing it.
+    return () => {
+      if (own) element.style.setProperty('min-inline-size', own)
+      else element.style.removeProperty('min-inline-size')
+    }
   }, [busy])
   const setRef = React.useCallback((element: HTMLButtonElement | null) => {
     ownRef.current = element
-    if (typeof ref === 'function') ref(element)
-    else if (ref) ref.current = element
+    const cleanup = typeof ref === 'function' ? ref(element) : undefined
+    if (ref && typeof ref !== 'function') ref.current = element
+    // A React 19 callback ref may return a cleanup, which React then calls instead of ref(null).
+    if (typeof cleanup === 'function') return () => { ownRef.current = null; cleanup() }
   }, [ref])
   return (
     <ButtonPrimitive

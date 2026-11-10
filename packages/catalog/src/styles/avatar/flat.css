@@ -132,7 +132,7 @@
   background: var(--muted);
   color: var(--foreground);
 }
-[data-slot='avatar-overflow']:not(:first-child) {
+[data-slot='avatar-overflow']:not(:first-child):is([role='group'] > *) {
   margin-inline-start: -0.625rem;
 }
 @media (forced-colors: active) {

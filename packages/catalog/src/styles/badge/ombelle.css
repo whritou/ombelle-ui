@@ -125,10 +125,14 @@
   border-color: color-mix(in oklab, var(--info-foreground, #1e3a8a) 70%, var(--foreground));
 }
 @media (forced-colors: active) {
-  [data-slot='badge'][data-appearance] {
+  [data-slot='badge']:is([data-appearance='soft'], [data-appearance='outline']) {
     border: 1px solid CanvasText;
     background: Canvas;
     color: CanvasText;
+  }
+  [data-slot='badge']:is([data-appearance='soft'], [data-appearance='outline'])[data-variant='destructive'] {
+    border-style: double;
+    border-width: max(var(--border-width), 3px);
   }
 }
 /* end 0.7.3 variants */

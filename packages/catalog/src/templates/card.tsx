@@ -61,7 +61,8 @@ export type CardLinkProps = React.ComponentProps<'a'>
 
 /**
  * Makes the whole card a link: put it in CardTitle. The link's name stays the
- * title, text stays selectable, and other buttons and links in the card still work.
+ * title. Its layer covers the description, so a click anywhere follows it; buttons, links and
+ * form controls in the card sit above that layer and keep their own clicks.
  */
 export function CardLink({ className, ...props }: CardLinkProps) {
   return <a {...props} data-slot="card-link" data-card-link="" className={cn(className)} />
@@ -185,7 +186,8 @@ export function CardOption({
         aria-describedby={description ? id + 'description' : undefined}
       />
       <span data-slot="card-title" id={id + 'title'}>{title}</span>
-      {description ? <p data-slot="card-description" id={id + 'description'}>{description}</p> : null}
+      {/* A label holds phrasing content only, so the description is a span. */}
+      {description ? <span data-slot="card-description" id={id + 'description'}>{description}</span> : null}
       {children}
       <span data-slot="card-option-check" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

@@ -2,11 +2,11 @@
 import * as React from 'react'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronDownIcon, PlusIcon } from 'lucide-react'
+import { cn } from './utils.js'
+import './accordion.css'
 
 /** The icon chosen on Accordion; undefined keeps the family's own. */
 const AccordionIcon = React.createContext<'chevron' | 'plus' | undefined>(undefined)
-import { cn } from './utils.js'
-import './accordion.css'
 
 export type AccordionProps = React.ComponentProps<
   typeof AccordionPrimitive.Root
@@ -22,10 +22,10 @@ export function Accordion({ className, appearance, icon, ...props }: AccordionPr
     <AccordionIcon.Provider value={icon}>
       <AccordionPrimitive.Root
         data-slot="accordion"
-        data-appearance={appearance}
-        data-icon={icon}
         className={cn(className)}
         {...props}
+        data-appearance={appearance}
+        data-icon={icon}
       />
     </AccordionIcon.Provider>
   )

@@ -233,3 +233,10 @@ describe('the 0.7.3 batch 6a variants', () => {
     expect(declarations(read(`alert/${family}.css`), "[data-slot='alert-dismiss']:focus-visible").outline).toBe('2px solid currentColor')
   })
 })
+
+describe('the 0.7.3 card options', () => {
+  it('neo-brutalism rings a focused option with a solid line close to it, which its drop shadow cannot break up', () => {
+    const ring = declarations(read('card/neo-brutalism.css'), "[data-slot='card-option']:has(:focus-visible)")
+    expect([ring.outline, ring['outline-offset']]).toEqual(['3px solid var(--ring)', '2px'])
+  })
+})

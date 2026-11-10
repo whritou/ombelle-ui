@@ -27,7 +27,7 @@ describe('Button 0.7.3 variants', () => {
     const source = readFileSync(new URL(`../src/templates/${ui === radix ? '' : 'base/'}button.tsx`, import.meta.url), 'utf8')
     expect(source).toMatch(/useLayoutEffect\(/)
     expect(source).toMatch(/setProperty\('min-inline-size', `min\(/)
-    expect(source).toMatch(/return \(\) => \{ element\.style\.removeProperty\('min-inline-size'\) \}/)
+    expect(source).toMatch(/else element\.style\.removeProperty\('min-inline-size'\)/)
   })
 
   it.each(families)('%s styles link-destructive with the destructive colour and a forced-colours rule', family => {

@@ -88,7 +88,7 @@ These variants need CLI **0.7.3** or later, including in component recipes. Leav
 - **Dismiss:**
   - `onDismiss` adds a Dismiss button in the corner, 28px square and named "Dismiss". `dismissLabel` renames it.
   - Alert does not remove itself: remove it in `onDismiss`, then move focus somewhere sensible, such as the next heading. Otherwise focus is lost with the button.
-  - `AlertDismiss` is the same button as a part, for when you wire it yourself. A child `AlertDismiss` reserves the same corner space.
+  - `AlertDismiss` is the same button as a part, for when you wire it yourself. An `AlertDismiss` anywhere inside the Alert reserves the same corner space, and a direct child `AlertDismiss` takes the place of the one `onDismiss` adds, so the Alert never shows two.
 - **`AlertActions`:** holds buttons or links under the description.
 - **`layout="compact"`:** puts the icon, the text and a trailing link or button on one line.
 - **Dependency:** the Dismiss icon is lucide-react's `X`, so Alert now depends on lucide-react 1.55.0.

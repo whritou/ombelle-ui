@@ -133,7 +133,7 @@
   text-decoration-line: underline;
   text-underline-offset: 3px;
 }
-[data-slot='card']:has([data-card-link]) :is(a:not([data-card-link]), button, input, select, textarea, summary) {
+:where([data-slot='card']:has([data-card-link]) :is(a:not([data-card-link]), button, input, select, textarea, summary)) {
   position: relative;
   z-index: 1;
 }
@@ -184,8 +184,8 @@
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
 }
 [data-slot='card-option']:has(:focus-visible) {
-  outline: 3px dashed var(--ring);
-  outline-offset: 4px;
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
 }
 [data-slot='card-option']:has(:disabled) {
   opacity: 0.6;
@@ -206,6 +206,10 @@
 [data-slot='card-option-check'] svg {
   inline-size: 0.875rem;
   block-size: 0.875rem;
+}
+[data-slot='card-option'] :is(a, button, select, textarea, input:not([data-card-option-input])) {
+  position: relative;
+  z-index: 1;
 }
 :checked ~ [data-slot='card-option-check'] {
   display: grid;

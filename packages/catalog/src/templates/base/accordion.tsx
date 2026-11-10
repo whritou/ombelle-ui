@@ -2,11 +2,11 @@
 import * as React from 'react'
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
 import { ChevronDownIcon, PlusIcon } from 'lucide-react'
+import { cn } from './utils.js'
+import './accordion.css'
 
 /** The icon chosen on Accordion; undefined keeps the family's own. */
 const AccordionIcon = React.createContext<'chevron' | 'plus' | undefined>(undefined)
-import { cn } from './utils.js'
-import './accordion.css'
 
 /** Base UI parts accept a className function; these components take a string. */
 type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'className'> & {

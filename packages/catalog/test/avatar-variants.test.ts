@@ -37,7 +37,7 @@ describe('Avatar 0.7.3 variants', () => {
     const text = css(family)
     expect(text).toMatch(/\[data-slot='avatar'\]\[data-shape='square'\]\s*\{[^}]*border-radius: calc\(var\(--radius\) \* 0\.5\)/)
     expect(text).toMatch(/\[data-slot='avatar-overflow'\]\[data-size\]\s*\{[^}]*background: var\(--muted\)/)
-    expect(text).toMatch(/\[data-slot='avatar-overflow'\]:not\(:first-child\)\s*\{[^}]*margin-inline-start/)
+    expect(text).toMatch(/\[data-slot='avatar-overflow'\]:not\(:first-child\):is\(\[role='group'\] > \*\)\s*\{[^}]*margin-inline-start/)
     expect(text).toMatch(/@media \(forced-colors: active\)\s*\{[^@]*\[data-slot='avatar-overflow'\][^}]*CanvasText/)
   })
 })

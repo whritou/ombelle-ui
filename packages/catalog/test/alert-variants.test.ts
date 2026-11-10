@@ -46,6 +46,6 @@ describe('Alert 0.7.3 variants', () => {
     expect(text).toMatch(/\[data-slot='alert-dismiss'\]\s*\{[^}]*inline-size: 1\.75rem/)
     expect(text).toContain("[data-slot='alert-actions']")
     expect(text).toContain("[data-slot='alert'][data-layout='compact']")
-    expect(text).toMatch(/\[data-slot='alert'\]\[data-dismissible\]\s*\{[^}]*padding-inline-end/)
+    expect(text).toMatch(/\[data-slot='alert'\]:is\(\[data-dismissible\], :has\(\[data-alert-dismiss\]\)\)\s*\{[^}]*padding-inline-end/)
   })
 })

@@ -90,7 +90,7 @@
   }
 }
 /* 0.7.3 variants */
-[data-slot='alert'][data-dismissible] {
+[data-slot='alert']:is([data-dismissible], :has([data-alert-dismiss])) {
   padding-inline-end: 2.75rem;
 }
 [data-slot='alert-dismiss'] {

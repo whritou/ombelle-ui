@@ -22,7 +22,7 @@ export function Save() {
 These variants need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
 
 - **`variant="link-destructive"`** is a link-styled button in the destructive colour, for actions such as "Remove member". In forced colours it uses `LinkText`.
-- **`loading` keeps the width** the button had at rest. When loading starts, Button sets `min-inline-size` to that width, so the spinner never makes it grow. A longer label such as "Saving…" can still widen it. The style is removed when loading ends, and a `min-inline-size` you set yourself is left alone until then. A button that is loading from its first render has no resting width to keep.
+- **`loading` keeps the width** the button had at rest. Button measures that width on every render at rest. When loading starts, it sets `min-inline-size` to that width, capped at its container, so the spinner never makes it grow. A longer label such as "Saving…" can still widen it. When loading ends, a `min-inline-size` you set yourself comes back, and otherwise the style is removed. A button that is loading from its first render has no resting width to keep.
 - **Icon-only buttons** use `size="icon"` or `size="icon-sm"` and need an `aria-label`. Pair them with a Tooltip that shows the same words:
 
 ```tsx

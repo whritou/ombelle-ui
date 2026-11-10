@@ -28,7 +28,8 @@ const overlays: Record<string, {
   select: { open: 'click', content: page => page.getByRole('listbox'), returnsFocus: true },
   tooltip: { open: 'focus', content: page => page.locator('[data-slot$="tooltip-content"]'), returnsFocus: true },
   // The trigger is the first collapsed item; its panel is found through aria-controls (both editions).
-  accordion: { open: 'click', content: page => page.locator('[data-audit-accordion-panel]'), returnsFocus: false },
+  // The panel is looked up in its own section: variant sections of the same component are on the page too.
+  accordion: { open: 'click', content: (_page, section) => section.locator('[data-audit-accordion-panel]'), returnsFocus: false },
   combobox: { open: 'click', content: page => page.locator('[data-slot$="combobox-content"]'), returnsFocus: true },
   'hover-card': { open: 'focus', content: page => page.locator('[data-slot$="hover-card-content"]'), returnsFocus: true,
     trigger: section => section.locator('[data-slot$="hover-card-trigger"]') },
@@ -121,11 +122,11 @@ for (const family of styleFamilies)
             const content = isBaseToast ? page.locator('[data-slot$="toast"]').first() : overlay!.content(page, section).first()
             await expect(content, `${component} opens`).toBeVisible()
             if (isBaseToast) { await pauseClock(page); paused = true }
-            await content.evaluate((element, name) => element.setAttribute('data-audit-open', name), component)
-            await page.screenshot({ path: path.join(shots, `${component}-open.png`), animations: 'disabled' })
-            const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, component)
+            await content.evaluate((element, name) => element.setAttribute('data-audit-open', name), id)
+            await page.screenshot({ path: path.join(shots, `${id}-open.png`), animations: 'disabled' })
+            const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, id)
             record(await measure(page, [content], inside ? section : body, `${id}-open`, counts))
-            record(await runAxe(page, [`[data-audit-open="${component}"]`]))
+            record(await runAxe(page, [`[data-audit-open="${id}"]`]))
             counts.axe++
             // Overlays are the surfaces that carry backdrop filters: check them under forced colors while they are open.
             if (mode === 'light') {
