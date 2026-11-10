@@ -52,7 +52,7 @@
   block-size: 24px;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 50%;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -65,7 +65,7 @@
   background: color-mix(in oklab, currentColor 12%, transparent);
 }
 [data-slot='chip-remove']:focus-visible {
-  outline: 3px dashed var(--foreground);
+  outline: 3px dashed currentColor;
   outline-offset: 1px;
 }
 @media (forced-colors: active) {

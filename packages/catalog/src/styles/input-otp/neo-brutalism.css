@@ -43,6 +43,12 @@
   outline: 3px solid var(--foreground);
   outline-offset: 0;
 }
+/* Radix types into one input laid over the whole code, so the code is ringed while it has focus. */
+[data-slot='input-otp']:has([data-input-otp]:focus-visible) {
+  outline: 3px dashed var(--foreground);
+  outline-offset: 4px;
+  border-radius: 0;
+}
 /* Radix draws a caret in the active empty slot; Base UI inputs show their own. */
 [data-slot='input-otp-slot'][data-caret]::after {
   content: '';
@@ -67,6 +73,9 @@
   }
 }
 @media (forced-colors: active) {
+  [data-slot='input-otp']:has([data-input-otp]:focus-visible) {
+    outline: 2px solid Highlight;
+  }
   [data-slot='input-otp-slot'] {
     border: 1px solid CanvasText;
     background: Canvas;

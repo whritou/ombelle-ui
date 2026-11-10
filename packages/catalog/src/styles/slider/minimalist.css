@@ -29,7 +29,7 @@
   flex-grow: 1;
   block-size: 2px;
   border: 0;
-  border-radius: 0;
+  border-radius: 4px;
   background: var(--border);
 }
 [data-slot='slider-track'][data-orientation='vertical'] {
@@ -41,7 +41,7 @@
   position: absolute;
   inset-block: calc(0px * -1);
   border: 0;
-  border-radius: 0;
+  border-radius: 4px;
   background: var(--foreground);
 }
 [data-slot='slider-range'][data-orientation='vertical'] {
@@ -53,10 +53,11 @@
   display: block;
   inline-size: 16px;
   block-size: 16px;
-  border: 1px solid var(--foreground);
+  border: 0;
   border-radius: 50%;
   background: var(--card);
-  box-shadow: none;
+  /* The edge is drawn inside, so Base UI's 16px range input fits the thumb. */
+  box-shadow: inset 0 0 0 1px var(--foreground);
   cursor: grab;
 }
 /* Radix focuses the thumb; Base UI focuses the range input inside it. */

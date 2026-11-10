@@ -32,6 +32,16 @@ test('focus-visible: a control with no ring or an invisible ring is reported', a
   expect(await checkFocusVisible(page, page.locator('#ring'))).toEqual([])
 })
 
+test('focus-visible: a ring on a :focus-within wrapper is measured around the wrapper', async ({ page }) => {
+  // Tag Input: the input sits among tags, and the field box draws the ring.
+  const field = (id: string) => `<div class="box" id="${id}-box"><span class="tag">glass</span><span class="tag">design-tokens</span><input id="${id}" aria-label="Topics" style="border:0;outline:none"></div>`
+  await fixture(page, field('bare'), field('ringed'),
+    '.box{display:flex;flex-wrap:wrap;gap:6px;padding:10px;inline-size:360px;border:1px solid #888}.tag{padding:4px 8px;background:#eee}' +
+    '#ringed-box:focus-within{outline:2px solid #1a56db;outline-offset:3px}')
+  expect((await checkFocusVisible(page, page.locator('#bare'))).map(f => f.check)).toEqual(['focus-visible'])
+  expect(await checkFocusVisible(page, page.locator('#ringed'))).toEqual([])
+})
+
 test('target-size: crowded 16px targets are reported, spaced or 24px ones are not', async ({ page }) => {
   const small = (label: string) => `<button style="inline-size:16px;block-size:16px;padding:0;margin:0 2px" aria-label="${label}"></button>`
   await fixture(page, small('One') + small('Two'),

@@ -131,3 +131,47 @@ describe('display components match the 0.7.3 boards', () => {
     expect([rule['text-transform'], rule['letter-spacing']]).toEqual(['uppercase', '0.05em'])
   })
 })
+
+describe('form controls show focus where the audit measures it', () => {
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  const forcedRule = (css: string, selector: string) => {
+    let outline: string | undefined
+    postcss.parse(css).walkAtRules('media', media => {
+      if (!media.params.includes('forced-colors')) return
+      media.walkRules(rule => { if (rule.selectors.map(item => item.replaceAll('"', "'")).includes(selector)) rule.walkDecls('outline', decl => { outline = decl.value }) })
+    })
+    return outline
+  }
+  const ringed = "[data-slot='input-otp']:has([data-input-otp]:focus-visible)"
+  it.each(families)('%s rings the whole Radix code while its shared input has focus', family => {
+    const css = read(`input-otp/${family}.css`)
+    expect(declarations(css, ringed).outline).toMatch(/^[1-9][\d.]*px (solid|dashed) /)
+    expect(forcedRule(css, ringed)).toBe('2px solid Highlight')
+  })
+  it('minimalist Base UI code slots draw a ring, not only a thicker underline', () => {
+    expect(declarations(read('input-otp/minimalist.css'), "[data-slot='input-otp-slot']:focus").outline).toMatch(/^[1-9][\d.]*px solid /)
+  })
+  it('minimalist Toggle Group items draw a 2px ring', () => {
+    expect(declarations(read('toggle-group/minimalist.css'), "[data-slot='toggle-group-item']:focus-visible").outline).toBe('2px solid currentColor')
+  })
+  it.each(families.filter(family => family !== 'liquid-glass'))('%s remove buttons ring in the tag text colour', family => {
+    expect(declarations(read(`tag-input/${family}.css`), "[data-slot='tag-input-remove']:focus-visible").outline).toMatch(/currentColor$/)
+    expect(declarations(read(`chip/${family}.css`), "[data-slot='chip-remove']:focus-visible").outline).toMatch(/currentColor$/)
+  })
+  it('minimalist Slider thumb draws its edge inside, so Base UI\'s range input fits', () => {
+    const thumb = declarations(read('slider/minimalist.css'), "[data-slot='slider-thumb']")
+    expect([thumb.border, thumb['box-shadow']]).toEqual(['0', 'inset 0 0 0 1px var(--foreground)'])
+  })
+})
+
+describe('form controls match the 0.7.3 boards', () => {
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  it.each(families)('%s remove buttons are round', family => {
+    expect(declarations(read(`tag-input/${family}.css`), "[data-slot='tag-input-remove']")['border-radius']).toBe('50%')
+    expect(declarations(read(`chip/${family}.css`), "[data-slot='chip-remove']")['border-radius']).toBe('50%')
+  })
+  it('minimalist Slider track and range keep the board radius', () => {
+    expect(declarations(read('slider/minimalist.css'), "[data-slot='slider-track']")['border-radius']).toBe('4px')
+    expect(declarations(read('slider/minimalist.css'), "[data-slot='slider-range']")['border-radius']).toBe('4px')
+  })
+})
