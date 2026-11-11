@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.7.4 — 11 November 2026
+
 - Fit narrow screens, in all five style families: Calendar day buttons share the width and its padding gives way below 350px; Input OTP slots shrink from 46px to 1.5rem before the code overflows, including inside grid and flex forms; Kbd and Command shortcuts stay on one line; Badge text breaks between words only; a Table keeps whole words in its cells and scrolls sideways instead of breaking them letter by letter; and the neo-brutalism Tabs list wraps. Projects get these with their next `add` or `theme add`.
 - Show the Avatar status dot above the next avatar in an Avatar Group; it was hidden behind it in every family.
 - Match the Input Group and Pagination to the 0.7.2 design in every family: a text or icon addon is a muted cell with a divider toward the field, the inline button is a filled primary pill (icon toggles with an accessible name stay quiet), and Pagination links are 38px with the current page filled in primary.
