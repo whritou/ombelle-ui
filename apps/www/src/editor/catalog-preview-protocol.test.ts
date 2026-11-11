@@ -47,3 +47,17 @@ it('accepts the reduced-transparency flag only as true', async () => {
     expect(await verifyCatalogPreviewRender({ ...message, reducedTransparency }, 'badge', 2)).toBeNull()
   expect(await verifyCatalogPreviewRender(message, 'badge', 2)).toEqual(message)
 })
+
+it('the catalog measure accepts measured colours as hex only', () => {
+  const ok = { type: 'catalog-measure', requestId: 4, parts: { badge: { paddingXPx: 8, backgroundColor: '#1D4ED8', color: '#FFFFFF80' } } }
+  expect(acceptCatalogMeasure(ok, 'badge')?.parts.badge).toEqual({ paddingXPx: 8, backgroundColor: '#1D4ED8', color: '#FFFFFF80' })
+  expect(acceptCatalogMeasure({ ...ok, parts: { badge: { backgroundColor: 'red' } } }, 'badge')).toBeNull()
+  expect(acceptCatalogMeasure({ ...ok, parts: { badge: { backgroundColor: 1 } } }, 'badge')).toBeNull()
+  expect(acceptCatalogMeasure({ ...ok, parts: { badge: { paddingXPx: 4 } } }, 'badge')).not.toBeNull()
+})
+
+it('the Button measure accepts measured colours as hex only', () => {
+  const ok = { type: 'catalog-measure', requestId: 2, parts: { button: { paddingXPx: 22, backgroundColor: '#1D4ED8' } } }
+  expect(acceptButtonMeasure(ok)?.values).toEqual({ paddingXPx: 22, backgroundColor: '#1D4ED8' })
+  expect(acceptButtonMeasure({ ...ok, parts: { button: { borderColor: 'oklch(0.5 0 0)' } } })).toBeNull()
+})

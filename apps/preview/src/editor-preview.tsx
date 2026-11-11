@@ -13,6 +13,7 @@ import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
 import { measurePart, verifyCatalogPreviewRender, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
 import type { ComponentRecipe } from '@ombelle/contracts'
+import { colorDimensions } from '../../www/src/editor/measured-color'
 import { CatalogRecipePreview } from './catalog-recipe-preview'
 import './editor-preview.css'
 
@@ -140,7 +141,10 @@ function EditorPreview() {
   // Report the specimen's rendered values so the editor's empty fields show what the preset draws.
   React.useEffect(() => {
     if (!buttonMessage || !Button || !specimen.current) return
-    reportMeasure(buttonMessage.requestId, { button: measurePart(specimen.current) })
+    const button = measurePart(specimen.current)
+    // Colour placeholders show the Button at rest: a forced hover or press would report its own colours.
+    if (buttonMessage.state.forcedState !== 'none') for (const key of colorDimensions) delete button[key]
+    reportMeasure(buttonMessage.requestId, { button })
   }, [Button, buttonMessage, reportMeasure])
   if (message?.type === 'catalog-render') return <CatalogRecipePreview message={message} onMeasure={reportMeasure} />
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>

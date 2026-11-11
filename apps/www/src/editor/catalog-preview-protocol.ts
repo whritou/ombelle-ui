@@ -1,18 +1,28 @@
 import { canonicalize, compileComponentRecipe } from '@ombelle/compiler'
+import { colorDimensions, hexFromComputedColor, measuredColorPattern, type ColorDimension } from './measured-color'
 import {
   componentRecipeParts, validateComponentRecipe,
   type ComponentRecipe, type ComponentRecipeCompileResult, type ComponentRecipePart,
 } from '@ombelle/contracts'
 
 export type PartDimension = Exclude<keyof ComponentRecipePart, 'colors'>
-/** The rendered value of each part dimension, keyed by slot, in the units the recipe stores. */
-export type MeasuredParts = Record<string, Partial<Record<PartDimension, number>>>
+/** One part's rendered dimensions, in the units the recipe stores, and its computed colours in hex. */
+export type MeasuredPart = Partial<Record<PartDimension, number>> & Partial<Record<ColorDimension, string>>
+/** The rendered value of each part, keyed by slot. */
+export type MeasuredParts = Record<string, MeasuredPart>
 export type CatalogPreviewMeasure = { type: 'catalog-measure'; requestId: number; parts: MeasuredParts }
 
 const partDimensions: readonly PartDimension[] = [
   'paddingXPx', 'paddingYPx', 'gapPx', 'minHeightPx', 'radiusRem', 'borderWidthPx',
   'shadowOffsetXPx', 'shadowOffsetYPx', 'fontSizePx', 'fontWeight', 'letterSpacingEm',
 ]
+
+/** One measured value: a finite number for a dimension, an uppercase hex for a colour. */
+function acceptValue(key: string, value: unknown): boolean {
+  if (partDimensions.includes(key as PartDimension)) return typeof value === 'number' && Number.isFinite(value)
+  if (colorDimensions.includes(key as ColorDimension)) return typeof value === 'string' && measuredColorPattern.test(value)
+  return false
+}
 
 const px = (text: string) => {
   const value = parseFloat(text)
@@ -40,12 +50,25 @@ export function measureCatalogParts(root: ParentNode, component: ComponentRecipe
 }
 
 /** One rendered element's dimensions, in the units the recipe stores. */
-export function measurePart(element: Element): Partial<Record<PartDimension, number>> {
+/** A computed colour in hex, through a 1 × 1 canvas for syntaxes other than sRGB. */
+function measuredHex(value: string): string | undefined {
+  const parsed = hexFromComputedColor(value)
+  if (parsed) return parsed
+  const context = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
+  if (!context) return undefined
+  context.clearRect(0, 0, 1, 1)
+  context.fillStyle = value
+  context.fillRect(0, 0, 1, 1)
+  const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data
+  return hexFromComputedColor(`rgba(${red}, ${green}, ${blue}, ${alpha! / 255})`) ?? undefined
+}
+
+export function measurePart(element: Element): MeasuredPart {
   const rem = px(getComputedStyle(document.documentElement).fontSize) || 16
   const style = getComputedStyle(element)
   const fontSize = px(style.fontSize)
   const [shadowX, shadowY] = shadowOffsets(style)
-  const values: Partial<Record<PartDimension, number>> = {
+  const values: MeasuredPart = {
     paddingXPx: px(style.paddingInlineStart || style.paddingLeft),
     paddingYPx: px(style.paddingBlockStart || style.paddingTop),
     gapPx: px(style.columnGap) || px(style.rowGap),
@@ -59,18 +82,23 @@ export function measurePart(element: Element): Partial<Record<PartDimension, num
   }
   // A percentage radius has no rem equivalent.
   if (!style.borderTopLeftRadius.includes('%')) values.radiusRem = px(style.borderTopLeftRadius) / rem
+  const colors: Record<ColorDimension, string> = { backgroundColor: style.backgroundColor, color: style.color, borderColor: style.borderTopColor }
+  for (const key of colorDimensions) {
+    const hex = measuredHex(colors[key])
+    if (hex) values[key] = hex
+  }
   return values
 }
 
 /** The Button preview reports its specimen under the 'button' slot, in the catalog measure shape. */
-export function acceptButtonMeasure(input: unknown): { requestId: number; values: Partial<Record<PartDimension, number>> } | null {
+export function acceptButtonMeasure(input: unknown): { requestId: number; values: MeasuredPart } | null {
   if (!record(input) || input.type !== 'catalog-measure' || Object.keys(input).length !== 3 ||
     typeof input.requestId !== 'number' || !Number.isSafeInteger(input.requestId) || input.requestId <= 0 ||
     !record(input.parts) || Object.keys(input.parts).length !== 1 || !record(input.parts.button)) return null
-  const values: Partial<Record<PartDimension, number>> = {}
+  const values: MeasuredPart = {}
   for (const [key, value] of Object.entries(input.parts.button)) {
-    if (!partDimensions.includes(key as PartDimension) || typeof value !== 'number' || !Number.isFinite(value)) return null
-    values[key as PartDimension] = value
+    if (!acceptValue(key, value)) return null
+    ;(values as Record<string, unknown>)[key] = value
   }
   return { requestId: input.requestId, values }
 }
@@ -83,10 +111,10 @@ export function acceptCatalogMeasure(input: unknown, component: ComponentRecipe[
   const parts: MeasuredParts = {}
   for (const [slot, values] of Object.entries(input.parts)) {
     if (!slots.has(slot) || !record(values)) return null
-    const accepted: Partial<Record<PartDimension, number>> = {}
+    const accepted: MeasuredPart = {}
     for (const [key, value] of Object.entries(values)) {
-      if (!partDimensions.includes(key as PartDimension) || typeof value !== 'number' || !Number.isFinite(value)) return null
-      accepted[key as PartDimension] = value
+      if (!acceptValue(key, value)) return null
+      ;(accepted as Record<string, unknown>)[key] = value
     }
     parts[slot] = accepted
   }

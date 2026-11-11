@@ -9,6 +9,7 @@ import {
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { designControlLabel, glassDesignControls } from '../../preset-editor/model'
 import type { MeasuredParts } from '../catalog-preview-protocol'
+import { colorDimensionFor, colorPlaceholder } from '../measured-color'
 
 const spacing = [
   ['paddingXPx', 'Horizontal padding', 1, 'px'],
@@ -81,8 +82,11 @@ function CatalogSlider({ id, label, min, max, step, unit, value, baseline, hint,
   </div>
 }
 
-export function CatalogAppearance({ recipe, glass, measured = {}, update }: {
-  recipe: ComponentRecipe; glass: boolean; measured?: MeasuredParts; update(recipe: ComponentRecipe): void
+export function CatalogAppearance({ recipe, glass, measured = {}, previewMode = 'light', update }: {
+  recipe: ComponentRecipe; glass: boolean; measured?: MeasuredParts
+  /** The preview's mode: measured colours fill only that mode's empty fields. */
+  previewMode?: RecipeColorMode
+  update(recipe: ComponentRecipe): void
 }) {
   const parts = componentRecipeParts[recipe.component]
   const [slot, setSlot] = useState(parts[0].slot)
@@ -141,7 +145,7 @@ export function CatalogAppearance({ recipe, glass, measured = {}, update }: {
                   value={/^#[0-9a-f]{6}$/i.test(value) ? value : '#000000'}
                   onChange={event => updateColor(role, event.target.value)} />
               </span>
-              <input id={id} type="text" className="colorText" value={value} placeholder="Preset"
+              <input id={id} type="text" className="colorText" value={value} placeholder={colorPlaceholder(rendered[colorDimensionFor[role]], mode, previewMode, 'Preset')}
                 spellCheck={false} maxLength={80} onChange={event => updateColor(role, event.target.value.trim())} />
               {value && <button type="button" className="colorReset" aria-label={`Reset ${label.toLowerCase()} color`}
                 onClick={() => { document.getElementById(id)?.focus(); updateColor(role, '') }}>

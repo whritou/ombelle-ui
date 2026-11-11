@@ -139,7 +139,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
       <EditorTabs active={view.panel} onChange={panel => setView(previous => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label={`${name} inspector`}>
-          <CatalogProperties recipe={recipe} measured={measured} update={edit} />
+          <CatalogProperties recipe={recipe} measured={measured} previewMode={view.mode} update={edit} />
           {error && <p role="alert" className="fieldError">{error}</p>}
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
