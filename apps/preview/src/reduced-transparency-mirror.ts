@@ -1,62 +1,110 @@
-import { mirrorReducedTransparency, type MirrorRule } from '../../www/src/site/reduced-transparency'
+import { mirrorReducedTransparency, prefixReducedTransparency, reducedTransparencyState, type MirrorRule } from '../../www/src/site/reduced-transparency'
 
-const marker = 'data-reduced-transparency-mirror'
+/** Marks the copies so a sheet is never mirrored twice. */
+export const mirrorMarker = ':where(html[data-reduced-transparency])'
+const feature = /prefers-reduced-transparency/i
 
 function toMirrorRules(list: CSSRuleList): MirrorRule[] {
   const out: MirrorRule[] = []
   for (const rule of Array.from(list)) {
-    if (rule instanceof CSSStyleRule) out.push({ kind: 'style', selector: rule.selectorText, body: rule.style.cssText })
-    else if (rule instanceof CSSMediaRule) out.push({ kind: 'media', condition: rule.conditionText, rules: toMirrorRules(rule.cssRules) })
-    else if (rule instanceof CSSSupportsRule) out.push({ kind: 'supports', condition: rule.conditionText, rules: toMirrorRules(rule.cssRules) })
-    else if (typeof CSSLayerBlockRule !== 'undefined' && rule instanceof CSSLayerBlockRule)
-      out.push({ kind: 'layer', condition: rule.name, rules: toMirrorRules(rule.cssRules) })
+    const mirrored = toMirrorRule(rule)
+    if (mirrored) out.push(mirrored)
   }
   return out
 }
 
+function toMirrorRule(rule: CSSRule): MirrorRule | null {
+  // CSS nesting: a style rule keeps its nested rules, and bare declarations inside a
+  // nested group rule apply to the parent selector ('&').
+  if (rule instanceof CSSStyleRule) return { kind: 'style', selector: rule.selectorText, body: rule.style.cssText,
+    ...(rule.cssRules.length ? { rules: toMirrorRules(rule.cssRules) } : {}) }
+  if (rule.constructor.name === 'CSSNestedDeclarations')
+    return { kind: 'style', selector: '&', body: (rule as CSSRule & { style: CSSStyleDeclaration }).style.cssText }
+  if (rule instanceof CSSMediaRule) return { kind: 'media', condition: rule.conditionText, rules: toMirrorRules(rule.cssRules) }
+  if (rule instanceof CSSSupportsRule) return { kind: 'supports', condition: rule.conditionText, rules: toMirrorRules(rule.cssRules) }
+  if (typeof CSSLayerBlockRule !== 'undefined' && rule instanceof CSSLayerBlockRule)
+    return { kind: 'layer', condition: rule.name, rules: toMirrorRules(rule.cssRules) }
+  return null
+}
+
+type RuleOwner = { cssRules: CSSRuleList; insertRule(rule: string, index: number): number }
+
 /**
- * Keeps one <style data-reduced-transparency-mirror> in the preview's head holding every
- * prefers-reduced-transparency rule copied under html[data-reduced-transparency]. It
- * rebuilds when the editor injects or replaces styles, and when a linked sheet loads.
+ * Inserts each rule's copy right after it, in the same list: a media rule beats or loses
+ * to the equally specific rules around it by source order, and its copy keeps that order.
+ * A style rule with the media feature nested inside it gets its copy after the whole rule.
+ */
+/**
+ * A rule under "not reduce" cannot be switched off by adding rules, so its selectors are
+ * gated in place: it still follows the real preference, and also the attribute. Nested
+ * rules inherit the gate through their parent selector.
+ */
+function gateInPlace(owner: { cssRules: CSSRuleList }) {
+  for (const rule of Array.from(owner.cssRules)) {
+    if (rule instanceof CSSStyleRule) rule.selectorText = prefixReducedTransparency(rule.selectorText, 'off')
+    else if ('cssRules' in rule) gateInPlace(rule as CSSGroupingRule)
+  }
+}
+
+function mirrorList(owner: RuleOwner) {
+  for (let i = 0; i < owner.cssRules.length; i++) {
+    const rule = owner.cssRules[i]!
+    if (!feature.test(rule.cssText) || rule.cssText.includes(mirrorMarker)) continue
+    const guarded = rule instanceof CSSMediaRule && feature.test(rule.conditionText)
+    if (guarded && reducedTransparencyState((rule as CSSMediaRule).conditionText) === 'off') {
+      gateInPlace(rule as CSSMediaRule)
+      continue
+    }
+    if (!guarded && (rule instanceof CSSSupportsRule || rule instanceof CSSMediaRule
+      || (typeof CSSLayerBlockRule !== 'undefined' && rule instanceof CSSLayerBlockRule))) {
+      mirrorList(rule as unknown as RuleOwner)
+      continue
+    }
+    const mirrored = toMirrorRule(rule)
+    const css = mirrored ? mirrorReducedTransparency([mirrored]) : ''
+    if (!css) continue
+    try {
+      owner.insertRule(`@media all { ${css} }`, i + 1)
+      i++
+    } catch {
+      // A copy the browser cannot parse is skipped; the rest of the sheet still mirrors.
+    }
+  }
+}
+
+/**
+ * Copies every prefers-reduced-transparency rule of the preview's stylesheets under
+ * html[data-reduced-transparency], next to its original. It mirrors each new sheet once:
+ * when the editor injects or replaces a style element, and when a linked sheet loads.
  * Returns the cleanup.
  */
 export function startReducedTransparencyMirror(doc: Document): () => void {
-  let mirror: HTMLStyleElement | null = null
+  const done = new WeakSet<CSSStyleSheet>()
   let queued = false
   const rebuild = () => {
     queued = false
-    const rules: MirrorRule[] = []
     for (const sheet of Array.from(doc.styleSheets)) {
-      if (sheet.ownerNode === mirror) continue
-      let list: CSSRuleList
-      try { list = sheet.cssRules } catch { continue }
-      rules.push(...toMirrorRules(list))
+      if (done.has(sheet)) continue
+      try {
+        void sheet.cssRules
+      } catch {
+        continue
+      }
+      done.add(sheet)
+      mirrorList(sheet)
     }
-    const css = mirrorReducedTransparency(rules)
-    if (!mirror?.isConnected) {
-      mirror = doc.createElement('style')
-      mirror.setAttribute(marker, '')
-      doc.head.append(mirror)
-    }
-    if (mirror.textContent !== css) mirror.textContent = css
   }
   const schedule = () => {
     if (queued) return
     queued = true
     queueMicrotask(rebuild)
   }
-  // The mirror's own writes come back as mutations; skip them so it never loops.
-  const own = (node: Node) => mirror !== null && (node === mirror || mirror.contains(node))
-  const observer = new MutationObserver((records) => {
-    if (records.some((record) => !own(record.target)
-      && ![...record.addedNodes, ...record.removedNodes].every(own))) schedule()
-  })
+  const observer = new MutationObserver(schedule)
   for (const root of [doc.head, doc.body]) observer.observe(root, { childList: true, subtree: true, characterData: true })
   doc.addEventListener('load', schedule, true)
   schedule()
   return () => {
     observer.disconnect()
     doc.removeEventListener('load', schedule, true)
-    mirror?.remove()
   }
 }
