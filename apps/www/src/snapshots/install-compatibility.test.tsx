@@ -167,7 +167,7 @@ describe('published installer compatibility', () => {
         name="Breadcrumb"
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.3 add --recipe')
+    expect(html).toContain('npx @ombelle-ui/cli@0.7.4 add --recipe')
     expect(html).toContain('Copy install command')
     expect(html).toContain('Download recipe JSON')
     expect(html).toContain('aria-label="Recipe JSON"')
@@ -208,7 +208,7 @@ describe('published installer compatibility', () => {
         origin="https://presets.example.test"
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.3')
+    expect(html).toContain('npx @ombelle-ui/cli@0.7.4')
     expect(html).toContain('Download preset JSON')
     expect(html).toContain('id="snapshot-json"')
   })
@@ -240,7 +240,7 @@ describe('published installer compatibility', () => {
     )
     expect(html).toContain('data-testid="preset-install-command"')
     expect(html).not.toContain('data-testid="preset-install-held"')
-    expect(html).toContain('0.7.3')
+    expect(html).toContain('0.7.4')
     expect(html).toContain(
       '<button type="button">Download preset JSON</button>',
     )
