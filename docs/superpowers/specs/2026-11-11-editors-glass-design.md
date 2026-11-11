@@ -121,14 +121,15 @@ The `state.mode === 'light'` condition in `editor-preview.tsx` and the light-onl
 - It walks `doc.styleSheets`, skipping cross-origin sheets, and handles each sheet once.
 - **A `(prefers-reduced-transparency: reduce)` rule:**
   - It gets a copy inserted right after it in the same rule list, inside `@media all`.
-  - Each copied selector is prefixed with `:where(html[data-reduced-transparency])`, which adds no specificity, so the copy keeps the original rule's specificity and source order.
+  - Each copied selector's subject is gated with `:where(html[data-reduced-transparency], html[data-reduced-transparency] *)`, before any pseudo-element. It adds no specificity, so the copy keeps the original rule's specificity and source order, and selectors that start from a class on `html` still match.
   - The copy keeps the other conditions of the query, and the `@supports`, `@media` and `@layer` blocks around it.
 - **A rule under `not (prefers-reduced-transparency: reduce)` or `(prefers-reduced-transparency: no-preference)`:**
-  - Adding rules cannot switch it off, so its selectors are gated in place with `:where(html:not([data-reduced-transparency]))`.
+  - Adding rules cannot switch it off, so its selectors are gated in place with `:where(html:not([data-reduced-transparency]), html:not([data-reduced-transparency]) *)`.
   - It keeps following the real preference too.
 - **CSS nesting:** nested rules are resolved against their parent selector with `:is()`. A style rule with the media feature nested inside gets its copy after the whole rule.
 - It runs when the preview mounts, on every style mutation in the document, and on capture-phase `load` events of linked sheets.
 - The toggle sets or removes `data-reduced-transparency` on the preview's `html`.
+- The editors show the toggle only when the browser recognises the media feature: in Safari, and in Firefox without its flag, the query reads `not all` and the mirror would find nothing to copy.
 - The editor's own page, outside the iframe, is not affected.
 - **Parity:** on the top-level audit page, every `[data-slot]` element's backdrop filter, background colour and background image under the mirror equal those under CDP-emulated `prefers-reduced-transparency: reduce`. In the sandboxed editor preview, the emulation reaches `matchMedia` but not the cascade, so the editor test checks that the toggle makes the Card opaque and restores it.
 
