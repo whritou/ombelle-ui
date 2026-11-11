@@ -17,6 +17,8 @@ body {
   margin: auto;
   padding: 24px;
   display: grid;
+  /* One column that follows the page width, not the widest section. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
 }
 .preset-gallery > header {

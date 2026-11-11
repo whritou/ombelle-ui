@@ -65,11 +65,18 @@ describe('liquid glass Progress', () => {
 })
 
 describe('highlighted list and menu items show a 3:1 indicator', () => {
-  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s Select and Dropdown Menu items carry an inset ring', family => {
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s Select and Dropdown Menu items carry a 3:1 indicator', family => {
     for (const [file, selector] of [['select', "[data-slot='select-item'][data-highlighted]"], ['dropdown-menu', "[data-slot='dropdown-menu-item'][data-highlighted]"]]) {
       const rule = declarations(read(`${file}/${family}.css`), selector)
-      // Liquid glass draws every focus indicator in ink rather than the blue ring.
-      expect(rule.outline, `${file}/${family}`).toBe(family === 'liquid-glass' ? '2px solid var(--foreground)' : '2px solid var(--ring)')
+      if (family === 'ombelle') {
+        // Ombelle fills the item with its primary pink, which reaches 3:1 against the menu on its own; the
+        // transparent outline only shows in forced colors, where the fill is gone.
+        expect(rule.background, `${file}/${family}`).toBe('var(--primary)')
+        expect(rule.outline, `${file}/${family}`).toBe('2px solid transparent')
+      } else {
+        // Liquid glass draws every focus indicator in ink rather than the blue ring.
+        expect(rule.outline, `${file}/${family}`).toBe(family === 'liquid-glass' ? '2px solid var(--foreground)' : '2px solid var(--ring)')
+      }
       expect(rule['outline-offset'], `${file}/${family}`).toBe('-2px')
     }
   })

@@ -247,3 +247,24 @@
     forced-color-adjust: none;
   }
 }
+
+/* Narrow containers: the calendar fits its container and its days share the width. */
+[data-slot='calendar'] {
+  max-inline-size: 100%;
+  /* The padding gives way first in a narrow container: 4% is 0.875rem at 350px. */
+  padding: min(0.875rem, 4%);
+}
+/* The month name stays between the previous and next buttons. */
+[data-slot='calendar-caption'] {
+  padding-inline: 2.25rem;
+}
+[data-slot='calendar-months'],
+[data-slot='calendar-month'] {
+  min-inline-size: 0;
+}
+[data-slot='calendar-day-button'] {
+  inline-size: 100%;
+  max-inline-size: 2.25rem;
+  block-size: auto;
+  aspect-ratio: 1;
+}

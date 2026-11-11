@@ -40,7 +40,8 @@
 [data-slot='input-otp-slot'][data-active],
 [data-slot='input-otp-slot']:focus {
   outline: 2px solid var(--foreground);
-  outline-offset: 0;
+  /* Inside the slot, so it never meets the ring around the whole code. */
+  outline-offset: -2px;
 }
 /* Radix types into one input laid over the whole code, so the code is ringed while it has focus. */
 [data-slot='input-otp']:has([data-input-otp]:focus-visible) {
@@ -104,4 +105,25 @@
   [data-slot='input-otp-separator'] {
     border-color: CanvasText;
   }
+}
+
+/* Narrow containers: each slot keeps 46px when there is room and shrinks to 1.5rem
+   before the code overflows. The grid tracks also keep the code's minimum width small
+   inside grid and flex layouts. The code is as wide as its slots, so the focus ring hugs them. */
+[data-slot='input-otp'] {
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+[data-slot='input-otp'] > div {
+  min-inline-size: 0;
+}
+[data-slot='input-otp-group'] {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(1.5rem, 46px);
+  min-inline-size: 0;
+}
+[data-slot='input-otp-slot'] {
+  inline-size: auto;
+  min-inline-size: 0;
 }

@@ -38,7 +38,8 @@ html[data-backdrop='glass'] .recipe-stage > div > input { background: color-mix(
 
 /* Variant matrix: a real table, scrolling sideways in the narrow width with the row headers pinned. */
 .editor-preview[data-layout="matrix"] { align-items: flex-start; justify-content: flex-start; }
-.recipe-matrix-scroll { max-width: 100%; overflow-x: auto; }
+/* Auto margins centre a matrix narrower than the stage; a wider one still scrolls from its start. */
+.recipe-matrix-scroll { max-width: 100%; overflow-x: auto; margin-inline: auto; }
 .recipe-matrix { border-collapse: separate; border-spacing: 12px; font: 500 12px/1.4 ui-sans-serif, system-ui, sans-serif; color: #3f3f46; }
 .editor-preview.dark .recipe-matrix { color: #d4d4d8; }
 .recipe-matrix caption { text-align: start; font-weight: 600; padding-block-end: 4px; }
@@ -50,3 +51,11 @@ html[data-backdrop='glass'] .recipe-stage > div > input { background: color-mix(
 .recipe-matrix-states { display: flex; flex-wrap: wrap; gap: 16px; }
 .recipe-matrix-state { display: flex; flex-direction: column; gap: 6px; margin: 0; }
 .recipe-matrix-state figcaption { font-size: 11px; }
+/* A table cell would shrink a block component to its narrowest: matrix cells give it a width.
+   Wide components get room for their content; inline ones keep their own size. */
+.recipe-matrix .recipe-stage { inline-size: 16rem; }
+.recipe-matrix .recipe-stage:is([data-component='table'], [data-component='tabs'], [data-component='card'], [data-component='alert'], [data-component='accordion'], [data-component='command'], [data-component='calendar'], [data-component='stepper'], [data-component='meter']) { inline-size: 26rem; }
+.recipe-matrix .recipe-stage:is([data-component='badge'], [data-component='avatar'], [data-component='breadcrumb'], [data-component='pagination'], [data-component='dialog'], [data-component='sheet'], [data-component='alert-dialog'], [data-component='popover'], [data-component='tooltip'], [data-component='dropdown-menu'], [data-component='checkbox'], [data-component='switch']) { inline-size: auto; }
+/* Toasts are fixed to a corner of the page: in the matrix each one stays in its own cell. */
+.recipe-matrix .recipe-stage[data-component='toast'] { inline-size: 22rem; }
+.recipe-matrix [data-slot$='toast-viewport'] { position: relative !important; inset: auto !important; transform: none !important; inline-size: 100% !important; max-inline-size: 100% !important; }

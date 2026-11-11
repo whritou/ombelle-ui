@@ -56,6 +56,7 @@
 [data-slot='avatar-status'] {
   box-sizing: border-box;
   position: absolute;
+  z-index: 1;
   inset-block-end: 1px;
   inset-inline-end: 1px;
   inline-size: 0.6875rem;

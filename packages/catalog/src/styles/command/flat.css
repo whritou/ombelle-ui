@@ -138,6 +138,8 @@
 }
 [data-slot='command-shortcut'] {
   display: inline-flex;
+  flex-shrink: 0;
+  white-space: nowrap;
   gap: 3px;
 }
 [data-slot='command-list'] {

@@ -8,6 +8,7 @@
   box-sizing: border-box;
   display: inline-grid;
   place-items: center;
+  white-space: nowrap;
   min-inline-size: 22px;
   block-size: 22px;
   padding-inline: 6px;
