@@ -30,7 +30,7 @@ const sceneLabels: Record<PresetScene, string> = { gallery: 'Gallery', dashboard
 /** Every page the demo shows: the preset scenes, then every component editor in alphabetical order. */
 export const demoPages: readonly Page[] = [
   ...presetScenes.map((id) => ({ kind: 'scene' as const, id, label: sceneLabels[id] })),
-  ...[...editableComponents].sort((a, b) => a.label.localeCompare(b.label, 'en'))
+  ...editableComponents
     .map((entry): Page => ({ kind: 'component', id: entry.id, label: entry.label })),
 ]
 const pageKey = (page: Page) => `${page.kind}:${page.id}`

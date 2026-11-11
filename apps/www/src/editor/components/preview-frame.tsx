@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { InstallableRecipeCompileResult, ComponentRecipe, ComponentRecipeCompileResult, Recipe } from '@ombelle/contracts'
 import type { EditorView } from '../model'
 import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type ButtonMatrixRender, type PreviewRender } from '../preview-protocol'
 import { previewFrameUrl } from '../preview-url'
+import { acceptPreviewSize, previewFrameHeight } from '../preview-size'
 import { acceptButtonMeasure, acceptCatalogMeasure, verifyCatalogCompileResult, type CatalogMatrixRender, type CatalogPreviewRender, type MeasuredParts } from '../catalog-preview-protocol'
 
 /** The Matrix layout's cells, compiled; sent in place of the single render while set. */
@@ -29,6 +30,8 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
   const iframe = useRef<HTMLIFrameElement>(null)
   const port = useRef<MessagePort | null>(null)
   const latest = useRef({ result, view, reducedTransparency, matrix })
+  // The preview's content height, reported by the sandbox; null until it reports.
+  const [contentSize, setContentSize] = useState<number | null>(null)
   const nextRequestId = useRef(0)
   const sendEpoch = useRef(0)
   const lastAck = useRef(0)
@@ -106,6 +109,11 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
       lastAck.current = 0
       channel.port1.onmessage = (ack: MessageEvent<unknown>) => {
         if (port.current !== channel.port1) return
+        const size = acceptPreviewSize(ack.data)
+        if (size !== null) {
+          setContentSize(size)
+          return
+        }
         const measure = component ? acceptCatalogMeasure(ack.data, component) : null
         if (measure) {
           // Only the render the preview applied last describes the current recipe.
@@ -140,5 +148,5 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
 
   const url = previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)
   return <iframe ref={iframe} title={`${componentName} recipe preview`}
-    src={component ? `${url}?component=${encodeURIComponent(component)}` : url} sandbox="allow-scripts" />
+    src={component ? `${url}?component=${encodeURIComponent(component)}` : url} sandbox="allow-scripts" style={{ height: previewFrameHeight(contentSize) }} />
 }

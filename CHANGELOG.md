@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fit narrow screens, in all five style families: Calendar day buttons share the width and its padding gives way below 350px; Input OTP slots shrink from 46px to 1.5rem before the code overflows, including inside grid and flex forms; Kbd and Command shortcuts stay on one line; Badge text breaks between words only; a Table keeps whole words in its cells and scrolls sideways instead of breaking them letter by letter; and the neo-brutalism Tabs list wraps. Projects get these with their next `add` or `theme add`.
+- Show the Avatar status dot above the next avatar in an Avatar Group; it was hidden behind it in every family.
+- The component editors size the preview to its content instead of scrolling inside a 20rem frame; matrix cells give block components such as Table and Slider a readable width; each Toast in a matrix stays in its own cell; and the component list is in alphabetical order. A `/demo` page shows every preset scene and component matrix with each family's default preset, in light or dark and at 320px or wide.
+
 ## 0.7.3 — 11 November 2026
 
 - Publish CLI 0.7.3: the website install commands now use it, so the 0.7.3 components, variants and recipe fields install from npm. The registry tarball matches the tested candidate, and a fresh registry installation runs successfully.

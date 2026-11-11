@@ -18,6 +18,7 @@ import { CatalogMatrixPreview, MatrixTable } from './matrix-preview'
 import type { ComponentRecipe } from '@ombelle/contracts'
 import { colorDimensions } from '../../www/src/editor/measured-color'
 import { CatalogRecipePreview } from './catalog-recipe-preview'
+import { previewSizeMessage, stageContentBlockSize } from '../../www/src/editor/preview-size'
 import './editor-preview.css'
 
 /**
@@ -96,6 +97,23 @@ function EditorPreview() {
       activePort.current = null
     }
   }, [])
+
+  // The page sizes the frame to the content, so a matrix or a tall component does not scroll inside it.
+  React.useEffect(() => {
+    const stage = document.querySelector<HTMLElement>('.editor-preview')
+    if (!stage) return
+    let sent = 0
+    const report = () => {
+      const size = Math.ceil(stageContentBlockSize(stage))
+      if (size === sent || size <= 0) return
+      sent = size
+      activePort.current?.postMessage(previewSizeMessage(size))
+    }
+    const observer = new ResizeObserver(report)
+    for (const child of Array.from(stage.children)) observer.observe(child)
+    report()
+    return () => observer.disconnect()
+  }, [message, buttonModule])
 
   const buttonMessage = message?.type === 'render' ? message : null
   // The editors' "Preview transparency" toggle; the mirror holds the rules it switches on.
