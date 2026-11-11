@@ -25,7 +25,9 @@ const overlays: Record<string, {
   sheet: { open: 'click', content: page => page.getByRole('dialog'), returnsFocus: true },
   popover: { open: 'click', content: page => page.locator('[data-slot$="popover-content"]'), returnsFocus: true },
   'dropdown-menu': { open: 'click', content: page => page.getByRole('menu'), returnsFocus: true },
-  select: { open: 'click', content: page => page.getByRole('listbox'), returnsFocus: true },
+  // Its own content: a Command list elsewhere on the page is a listbox too.
+  // Base UI keeps a closed list in the DOM, so the open one is the visible one.
+  select: { open: 'click', content: page => page.locator('[data-slot$="select-content"]').filter({ visible: true }), returnsFocus: true },
   tooltip: { open: 'focus', content: page => page.locator('[data-slot$="tooltip-content"]'), returnsFocus: true },
   // The trigger is the first collapsed item; its panel is found through aria-controls (both editions).
   // The panel is looked up in its own section: variant sections of the same component are on the page too.
@@ -72,7 +74,7 @@ for (const family of styleFamilies)
         const components = (await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!)))
           // A variant section is component~variant; the filter and the count go by component.
           .filter(id => !onlyComponents?.length || onlyComponents.includes(id.split('~')[0]!))
-          .sort((a, b) => Number(b === 'toast') - Number(a === 'toast'))
+          .sort((a, b) => Number(b.split('~')[0] === 'toast') - Number(a.split('~')[0] === 'toast'))
         const shots = path.join(artifacts, family, edition, mode)
         await fs.mkdir(shots, { recursive: true })
         const body = page.locator('body')
@@ -89,6 +91,9 @@ for (const family of styleFamilies)
             await pauseClock(page)
             paused = true
           }
+          // A toast stack spreads out while focus is inside it: measure it spread, as a keyboard user sees it,
+          // so focusing an older toast does not move it away from where its ring is measured.
+          await section.locator('[data-stack]').evaluateAll(list => list.forEach(element => element.setAttribute('data-expanded', '')))
           await section.screenshot({ path: path.join(shots, `${id}.png`), animations: 'disabled' })
           record(await measure(page, [section], section, id, counts))
           record(await runAxe(page, [`section[data-audit="${id}"]`]))
@@ -119,7 +124,8 @@ for (const family of styleFamilies)
             else await trigger.click()
             if (component === 'accordion') await trigger.evaluate(element =>
               document.getElementById(element.getAttribute('aria-controls')!)?.setAttribute('data-audit-accordion-panel', ''))
-            const content = isBaseToast ? page.locator('[data-slot$="toast"]').first() : overlay!.content(page, section).first()
+            // The Base toast this section opened: earlier sections' toasts may still be on screen.
+            const content = isBaseToast ? section.locator('[data-slot$="toast"]').first() : overlay!.content(page, section).first()
             await expect(content, `${component} opens`).toBeVisible()
             if (isBaseToast) { await pauseClock(page); paused = true }
             await content.evaluate((element, name) => element.setAttribute('data-audit-open', name), id)

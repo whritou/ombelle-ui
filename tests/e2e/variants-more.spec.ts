@@ -265,11 +265,22 @@ for (const edition of ['radix', 'base'] as const) {
       const tops = () => viewport.locator('[data-slot$="toast"]').filter({ hasText: 'notification' }).evaluateAll(list => list.map(item => Math.round(item.getBoundingClientRect().top)))
       await expect.poll(async () => (await tops()).length).toBe(3)
       const collapsed = await tops()
-      expect(Math.max(...collapsed) - Math.min(...collapsed)).toBeLessThan(24)
+      // Collapsed, the layers sit inside the front toast's height: the spread is far taller.
+      expect(Math.max(...collapsed) - Math.min(...collapsed)).toBeLessThan(48)
       await pointAt(page, viewport.locator('[data-slot$="toast"]').filter({ hasText: 'Third notification' }))
       await page.clock.runFor(500)
       const spread = await tops()
       expect(Math.max(...spread) - Math.min(...spread)).toBeGreaterThan(60)
+      // The newest is in front and at the bottom in both editions, and the layers behind it stay below its top.
+      const order = await viewport.locator('[data-slot$="toast"]').evaluateAll(list => list.map(item => item.textContent ?? ''))
+      expect(order.at(-1)).toContain('Third notification')
+      await page.mouse.move(0, 0)
+      await page.clock.runFor(500)
+      const boxes = await viewport.locator('[data-slot$="toast"]').evaluateAll(list => list.map(item => { const r = item.getBoundingClientRect(); return { top: r.top, bottom: r.bottom } }))
+      const front = boxes.at(-1)!
+      for (const layer of boxes.slice(0, -1)) expect(layer.top).toBeGreaterThanOrEqual(front.top)
+      expect(Math.round(boxes.at(-2)!.bottom - front.bottom)).toBe(10)
+      expect(Math.round(boxes.at(-3)!.bottom - front.bottom)).toBe(20)
     })
   })
 }

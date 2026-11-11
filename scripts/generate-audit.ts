@@ -36,6 +36,15 @@ const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, 
   card: { link: { mode: 'link' }, options: { mode: 'options' }, media: { mode: 'media' } },
   avatar: { square: { shape: 'square' }, overflow: { overflow: 4 } },
   accordion: { flush: { appearance: 'flush', icon: 'plus' }, chevron: { icon: 'chevron' } },
+  tabs: { pills: { appearance: 'pills', counts: true } },
+  table: { sticky: { stickyHeader: true, sortable: true, actions: true }, loading: { loading: true } },
+  input: { sm: { size: 'sm' }, lg: { size: 'lg' } },
+  textarea: { sm: { size: 'sm' } },
+  'input-group': { clearable: { clearable: true, counter: true } },
+  pagination: { compact: { layout: 'compact', pageSize: true } },
+  select: { multiple: { multiple: true, icons: true } },
+  toast: { promise: { mode: 'promise' }, stack: { mode: 'stack' } },
+  sheet: { handle: { side: 'bottom', handle: true }, resizable: { resizable: true } },
 }
 
 function presetRef(family: StyleFamily): ComponentRecipe['presetRef'] {

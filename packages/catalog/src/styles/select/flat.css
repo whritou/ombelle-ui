@@ -244,7 +244,10 @@
   flex-shrink: 0;
   inline-size: 1rem;
   block-size: 1rem;
+  overflow: hidden;
   color: var(--muted-foreground);
+  font-size: 0.625rem;
+  line-height: 1;
 }
 [data-slot='select-item-icon'] svg {
   inline-size: 1rem;

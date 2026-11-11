@@ -153,32 +153,45 @@
   display: grid;
   gap: 0;
   padding-block-end: 1.5rem;
+  /* Overlapping toasts need no scrolling, and a scroll box would cut their shadows and the spread stack. */
+  overflow: visible;
 }
-[data-slot='toast']:is([data-stack] > *) {
+/* Collapsed, the newest toast is in front and the older ones are plain layers behind it, as on the board:
+   2.5rem high whatever their content, so they never show above it, narrower, fainter, and peeking out
+   below it by a fixed 10px and 20px. */
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *) {
   grid-area: 1 / 1;
   align-self: end;
 }
-[data-slot='toast']:is([data-stack] > *):nth-last-child(2) {
-  transform: translateY(0.5rem) scale(0.96);
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):not(:last-child) {
+  max-block-size: 2.5rem;
+  overflow: hidden;
+  box-shadow: none;
 }
-[data-slot='toast']:is([data-stack] > *):nth-last-child(3) {
-  transform: translateY(1rem) scale(0.92);
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):not(:last-child) > * {
+  visibility: hidden;
 }
-[data-slot='toast']:is([data-stack] > *):nth-last-child(n + 4) {
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):nth-last-child(2) {
+  margin-inline: 0.625rem;
+  transform: translateY(0.625rem);
+  opacity: 0.8;
+}
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):nth-last-child(3) {
+  margin-inline: 1.25rem;
+  transform: translateY(1.25rem);
+  opacity: 0.55;
+}
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):nth-last-child(n + 4) {
   opacity: 0;
   pointer-events: none;
 }
-/* Spreading moves only the older toasts, upwards: the newest stays under the pointer, so hovering it
-   never makes it leave and resume its timer. */
-[data-slot='toast']:is([data-stack]:is(:hover, :focus-within, [data-expanded]) > *):nth-last-child(2) {
-  transform: translateY(calc(-100% - 0.75rem));
-}
-[data-slot='toast']:is([data-stack]:is(:hover, :focus-within, [data-expanded]) > *):nth-last-child(3) {
-  transform: translateY(calc(-200% - 1.5rem));
-}
-[data-slot='toast']:is([data-stack]:is(:hover, :focus-within, [data-expanded]) > *):nth-last-child(n + 4) {
-  opacity: 1;
-  pointer-events: auto;
+/* Spread, the toasts form a column. The viewport stays anchored at the bottom with the same padding,
+   so the newest toast does not move from under the pointer and its timer stays paused. */
+[data-slot='toast-viewport'][data-stack]:is(:hover, :focus-within, [data-expanded]) {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 [data-slot='toast-spinner'] {
   display: inline-block;

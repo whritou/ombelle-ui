@@ -240,3 +240,21 @@ describe('the 0.7.3 card options', () => {
     expect([ring.outline, ring['outline-offset']]).toEqual(['3px solid var(--ring)', '2px'])
   })
 })
+
+describe('the 0.7.3 batch 6b and 6c variants', () => {
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+  it.each(families)('%s lets a toast stack overflow its viewport, so peeking toasts keep their shadows', family => {
+    expect(declarations(read(`toast/${family}.css`), "[data-slot='toast-viewport'][data-stack]").overflow).toBe('visible')
+  })
+  it.each(families)('%s keeps a text item icon inside its box', family => {
+    expect(declarations(read(`select/${family}.css`), "[data-slot='select-item-icon']")).toMatchObject({ overflow: 'hidden', 'font-size': '0.625rem' })
+  })
+  it.each(families)('%s rings a focused resize grip inside its edge', family => {
+    const ring = declarations(read(`sheet/${family}.css`), "[data-slot='sheet-resize-handle']:focus-visible")
+    expect(ring.outline).toMatch(/^2(\.5)?px /)
+    expect(ring['outline-offset']).toBe('-2px')
+  })
+  it.each(families)('%s casts the sticky header shadow downwards only', family => {
+    expect(declarations(read(`table/${family}.css`), "[data-slot='table-head']:is([data-table-sticky] *)")['box-shadow']).toMatch(/^0 6px 6px -6px /)
+  })
+})

@@ -56,8 +56,12 @@ export type ToastViewportProps = Part<typeof ToastPrimitive.Viewport> & {
   /** Overlap the toasts; hovering or focusing the stack spreads them out. */
   stack?: boolean
 }
-export function ToastViewport({ className, stack, ...props }: ToastViewportProps) {
-  return <ToastPrimitive.Viewport data-slot="toast-viewport" data-stack={stack ? '' : undefined} aria-label="Notifications" className={cn(className)} {...props} />
+export function ToastViewport({ className, stack, children, ...props }: ToastViewportProps) {
+  // The manager lists the newest toast first; a stack puts the newest last, in front, as the Radix edition does.
+  const ordered = stack ? React.Children.toArray(children).reverse() : children
+  return <ToastPrimitive.Viewport data-slot="toast-viewport" data-stack={stack ? '' : undefined} aria-label="Notifications" className={cn(className)} {...props}>
+    {ordered}
+  </ToastPrimitive.Viewport>
 }
 export type ToastProps = Part<typeof ToastPrimitive.Root> & { variant?: ToastVariant }
 export function Toast({ className, children, variant, toast, swipeDirection, ...props }: ToastProps) {

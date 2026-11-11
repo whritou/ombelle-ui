@@ -174,7 +174,8 @@
   position: sticky;
   inset-block-start: 0;
   z-index: 1;
-  box-shadow: 0 6px 10px -8px color-mix(in oklab, var(--foreground) 40%, transparent);
+  /* Spread equals blur, so the shadow falls only below the header and the container does not cut it. */
+  box-shadow: 0 6px 6px -6px color-mix(in oklab, var(--foreground) 40%, transparent);
 }
 [data-slot='table-sort'] {
   display: inline-flex;
