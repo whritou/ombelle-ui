@@ -10,6 +10,9 @@ It also adds variants to existing components, every default unchanged: Button
 `link-destructive`, soft and outline Badges, dismissible and compact Alerts,
 link, option and media Cards, square Avatars with an overflow count, and flush
 Accordions with one chosen icon. See the [batch 6a design](docs/superpowers/specs/2026-11-10-variants-basics-design.md).
+Batches 6b and 6c add pill Tabs, sticky and sortable Tables, Input sizes, Clear and
+counter, compact Pagination, a multiple Select, promise and stacked Toasts, and
+resizable Sheets. See the [batch 6b and 6c design](docs/superpowers/specs/2026-11-11-variants-more-design.md).
 Release 0.7.2 adds
 Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination and Toast, plus Tabs
 underline/contained appearances, compact/striped Tables, semantic Alert intents,

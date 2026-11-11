@@ -48,6 +48,24 @@ Give the trigger an accessible name with `aria-labelledby` or `aria-label`. Radi
 
 Space, Enter and the arrow keys open the list; arrows, Home and End move the highlight; typing jumps to a matching option; Enter or Space selects; Escape closes and returns focus to the trigger. Disabled options are skipped.
 
+## Variants (0.7.3)
+
+These need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`multiple`**: choose several options.
+  - `value` and `defaultValue` are arrays, and `onValueChange` receives the new array.
+  - The list stays open while you choose, and the trigger shows a chip for each choice, or the placeholder.
+  - With `name`, a form submits one entry per value.
+  - **Base UI edition:** Base UI's own multiple Select.
+  - **Radix edition:** a listbox in a Radix Popover, because Radix Select chooses one value only.
+    - The trigger is a combobox that keeps focus and names the highlighted option.
+    - The arrow keys, Home, End and typing move.
+    - Space or Enter chooses.
+    - Escape closes, with focus on the trigger.
+  - Single selection is unchanged.
+- **`SelectItem icon`**: a decorative icon before the label.
+- **Dependency**: the Radix edition now depends on @radix-ui/react-popover, for the multiple listbox.
+
 ## Styles and artifacts
 
 Each family follows its UI kit and the "next 10 components" sheet:

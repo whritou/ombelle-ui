@@ -13,7 +13,7 @@ pnpm exec node packages/cli/dist/main.js add toast --cwd APP --yes
 
 ## Radix edition
 
-The Radix edition uses `@radix-ui/react-toast` 1.3.1. `Toast` forwards native `open`, `defaultOpen`, `onOpenChange`, `duration`, `type`, swipe handlers, DOM props and refs. `ToastProvider` defaults to a 5000ms duration and rightward swipe dismissal. Set `duration={Infinity}` for notifications that require explicit dismissal. Radix defaults to foreground announcement priority; use `type="background"` for passive updates.
+The Radix edition uses `@radix-ui/react-toast` 1.3.1. `Toast` forwards native `open`, `defaultOpen`, `onOpenChange`, `duration`, `type`, swipe handlers, DOM props and refs. `ToastProvider` defaults to rightward swipe dismissal, and each toast's duration follows its content (see Variants and timing). Set `duration={Infinity}` for notifications that require explicit dismissal. Radix defaults to foreground announcement priority; use `type="background"` for passive updates.
 
 ```tsx
 import * as React from 'react'
@@ -45,7 +45,7 @@ The application supplies `undoSave` and owns persistence. Radix actions close th
 
 The Base UI edition uses the native manager API from `@base-ui/react/toast` 1.9.0. It exports `useToastManager` and `createToastManager`. It intentionally preserves Base UI's manager-owned lifecycle: `Toast` takes a required `toast` object from `manager.toasts`, while `manager.add`, `manager.update` and `manager.close` control notifications. It does not accept Radix's `open`, `defaultOpen`, `onOpenChange` or per-toast `duration` props.
 
-`ToastProvider duration={5000}` maps to Base UI's native `timeout`; `Infinity` maps to `0` (persistent). Supply per-toast `timeout` to `manager.add`. The provider also forwards native `limit` and `toastManager` props and supplies the default rightward `swipeDirection` to each `Toast`. Base UI accepts per-toast swipe overrides, including multiple directions. Base UI uses low announcement priority by default; set `priority: 'high'` when an urgent interruption is appropriate.
+`ToastProvider duration` maps to Base UI's native `timeout` (6000 by default); `Infinity` maps to `0` (persistent). Supply per-toast `timeout` to `manager.add`. The provider also forwards native `limit` and `toastManager` props and supplies the default rightward `swipeDirection` to each `Toast`. Base UI accepts per-toast swipe overrides, including multiple directions. Base UI uses low announcement priority by default; set `priority: 'high'` when an urgent interruption is appropriate.
 
 ```tsx
 import {
@@ -87,6 +87,28 @@ function Notifications() {
 ```
 
 `ToastTitle` and `ToastDescription` read the manager object's content when children are omitted. `Toast` derives `variant` from `toast.type`, with an explicit `variant` prop taking precedence. Base UI actions retain native behavior: the application performs the action and closes the notification through the manager when appropriate. `ToastAction` requires meaningful `altText` and uses it as the accessible button label unless an explicit `aria-label` is supplied. Base UI parts use native `render` composition and React 19 refs. Its viewport shortcut is F6. Custom root `render` replaces the default `data-state` bridge.
+
+## Variants and timing (0.7.3)
+
+These need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **Duration**:
+  - Without a `duration`, a toast stays 6000 ms, plus 60 ms for each character of title and description beyond 80, up to 10000 ms.
+  - A toast with a `ToastAction` stays until dismissed, because an action must not vanish on a timer (WCAG 2.2.1).
+  - A `duration` on the provider or the toast still wins.
+  - `toastDuration(content, explicit?)` computes the same value, and the Base UI edition's `useToastManager().add` uses it when you pass no `timeout`.
+  - The old provider default was 5000 ms.
+- **Pause**:
+  - Both editions pause a toast's timer while the pointer is over the notifications or keyboard focus is inside them, and resume it after.
+  - The Base UI edition pauses for keyboard focus, as Base UI does, not for a mouse click.
+- **Announcement**: each toast is announced once, through a single live region, in both editions.
+- **`ToastPromise`**: one toast that follows a task.
+  - Props: `promise`, `loading`, and `success` and `error` (content, or a function of the result).
+  - While the promise is pending, it shows a spinner and stays open; it then turns `success` or `destructive` and takes the usual duration.
+  - A promise that settles after the component is gone changes nothing.
+- **`ToastViewport stack`**: overlaps the toasts, with the older ones peeking out behind the newest.
+  - Hovering or focusing the stack spreads them out upwards, while the newest stays where it is.
+  - There is no animation under reduced motion.
 
 ## Styling and placement
 
