@@ -79,3 +79,10 @@ it('reduced transparency shows one shared ratio', () => {
   const menu = glassBackdropMenu(preset('builtin-liquid-glass-cristal'), 'dark', 'prism', true)
   expect(new Set(menu.map((option) => /, (\d+\.\d):1/.exec(option.label)![1])).size).toBe(1)
 })
+
+it('never rounds a ratio up past 4.5:1 in a label', () => {
+  const relief = preset('builtin-liquid-glass-relief')
+  expect(glassSceneRatios(relief, 'light').peach).toBe(4.47)
+  const peach = glassBackdropMenu(relief, 'light', 'peach', false).find((option) => option.value === 'peach')!
+  expect(peach.label).toBe('Pêche, 4.4:1 (auto), below 4.5:1')
+})

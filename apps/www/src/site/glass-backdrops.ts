@@ -90,6 +90,7 @@ export function glassBackdropMenu(data: Preset, mode: GlassPreviewMode, auto: Pr
   const ratios = glassSceneRatios(rated, mode)
   return glassBackdropOptions.map(({ value, label }) => ({
     value,
-    label: `${label}, ${ratios[value].toFixed(1)}:1${value === auto ? ' (auto)' : ''}${ratios[value] < 4.5 ? ', below 4.5:1' : ''}`,
+    // Truncated, never rounded up: 4.47 must not read as 4.5:1.
+    label: `${label}, ${(Math.floor(ratios[value] * 10) / 10).toFixed(1)}:1${value === auto ? ' (auto)' : ''}${ratios[value] < 4.5 ? ', below 4.5:1' : ''}`,
   }))
 }

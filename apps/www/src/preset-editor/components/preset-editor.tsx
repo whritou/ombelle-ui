@@ -68,6 +68,7 @@ import {
   SegmentedControl,
   previewModeOptions,
   previewTransparencyOptions,
+  useReducedTransparencySupport,
   previewWidthOptions,
   useDrawerState,
 } from '../../editor-shell'
@@ -105,6 +106,7 @@ export default function PresetEditor() {
     [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null),
     // Preview state only: simulates prefers-reduced-transparency, never saved.
     [transparency, setTransparency] = useState<'auto' | 'reduced'>('auto')
+  const transparencySupported = useReducedTransparencySupport()
   // ?page= opens a preview page directly, including the component gallery,
   // which the page picker no longer offers.
   useEffect(() => {
@@ -206,8 +208,10 @@ export default function PresetEditor() {
   const glass = draft.family === 'liquid-glass'
   const startingPreset = useMemo(() => (glass ? matchingStartingPreset(draft) : null), [glass, draft])
   // A custom draft keeps the backdrop of the preset it was started from.
+  // Only a different starting preset clears the picker: an undo or reset that matches the
+  // same preset again keeps the reader's chosen backdrop.
   useEffect(() => {
-    if (!startingPreset) return
+    if (!startingPreset || startingPreset === backdropPreset) return
     setBackdropPreset(startingPreset)
     setBackdropOverride(null)
   }, [startingPreset])
@@ -219,7 +223,8 @@ export default function PresetEditor() {
   }, [glass, draft])
   const autoBackdrop = glassPreset ? pickGlassScene(glassPreset, mode, backdropPreset) : glassPresetBackdrop(backdropPreset, mode)
   const backdrop = backdropOverride ?? autoBackdrop
-  const backdropOptions = glassPreset ? glassBackdropMenu(glassPreset, mode, autoBackdrop, transparency === 'reduced') : glassBackdropOptions
+  const reduced = transparencySupported && transparency === 'reduced'
+  const backdropOptions = glassPreset ? glassBackdropMenu(glassPreset, mode, autoBackdrop, reduced) : glassBackdropOptions
   const labInk = glassPreset ? labInkFor(glassPreset, mode, backdrop) : null
   const glassReport = glass ? presetGlassReport(draft) : null
   const glassContrastWarning = glassReport?.passes === false
@@ -461,7 +466,7 @@ export default function PresetEditor() {
                 options={previewModeOptions}
                 onChange={setMode}
               />
-              {glass && (
+              {glass && transparencySupported && (
                 <SegmentedControl<'auto' | 'reduced'>
                   label="Preview transparency"
                   value={transparency}
@@ -504,8 +509,8 @@ export default function PresetEditor() {
                 viewport,
                 ...(scene === 'gallery' ? {} : { scene }),
                 ...(glass && backdrop !== 'kit' ? { backdrop } : {}),
-                ...(glass && labInk && transparency === 'auto' ? { labInk } : {}),
-                ...(glass && transparency === 'reduced' ? { reducedTransparency: true as const } : {}),
+                ...(glass && labInk && !reduced ? { labInk } : {}),
+                ...(glass && reduced ? { reducedTransparency: true as const } : {}),
               }}
               stale={compiled.stale}
               onStatus={setPreviewStatus}

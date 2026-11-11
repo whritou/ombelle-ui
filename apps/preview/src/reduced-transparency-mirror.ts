@@ -1,7 +1,7 @@
 import { mirrorReducedTransparency, prefixReducedTransparency, reducedTransparencyState, type MirrorRule } from '../../www/src/site/reduced-transparency'
 
-/** Marks the copies so a sheet is never mirrored twice. */
-export const mirrorMarker = ':where(html[data-reduced-transparency])'
+/** Every copy and every gated rule names the attribute, so neither is mirrored again. */
+export const mirrorMarker = 'data-reduced-transparency]'
 const feature = /prefers-reduced-transparency/i
 
 function toMirrorRules(list: CSSRuleList): MirrorRule[] {
@@ -30,11 +30,6 @@ function toMirrorRule(rule: CSSRule): MirrorRule | null {
 type RuleOwner = { cssRules: CSSRuleList; insertRule(rule: string, index: number): number }
 
 /**
- * Inserts each rule's copy right after it, in the same list: a media rule beats or loses
- * to the equally specific rules around it by source order, and its copy keeps that order.
- * A style rule with the media feature nested inside it gets its copy after the whole rule.
- */
-/**
  * A rule under "not reduce" cannot be switched off by adding rules, so its selectors are
  * gated in place: it still follows the real preference, and also the attribute. Nested
  * rules inherit the gate through their parent selector.
@@ -46,6 +41,11 @@ function gateInPlace(owner: { cssRules: CSSRuleList }) {
   }
 }
 
+/**
+ * Inserts each rule's copy right after it, in the same list: a media rule beats or loses
+ * to the equally specific rules around it by source order, and its copy keeps that order.
+ * A style rule with the media feature nested inside it gets its copy after the whole rule.
+ */
 function mirrorList(owner: RuleOwner) {
   for (let i = 0; i < owner.cssRules.length; i++) {
     const rule = owner.cssRules[i]!
@@ -62,7 +62,12 @@ function mirrorList(owner: RuleOwner) {
     }
     const mirrored = toMirrorRule(rule)
     const css = mirrored ? mirrorReducedTransparency([mirrored]) : ''
-    if (!css) continue
+    if (!css) {
+      // A form the mirror does not read (an "or" query, a nested "not reduce"): say so in
+      // development rather than let the toggle silently show the transparent look.
+      if (import.meta.env.DEV) console.warn('Preview transparency: this rule is not mirrored', rule.cssText.slice(0, 200))
+      continue
+    }
     try {
       owner.insertRule(`@media all { ${css} }`, i + 1)
       i++

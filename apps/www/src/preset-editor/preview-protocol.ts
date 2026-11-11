@@ -100,7 +100,8 @@ export async function verifyPresetRender(
       !record(input.view) ||
       (Object.hasOwn(input.view, 'backdrop') &&
         !(presetBackdrops as readonly unknown[]).includes(input.view.backdrop)) ||
-      (Object.hasOwn(input.view, 'labInk') && input.view.labInk !== 'light' && input.view.labInk !== 'dark') ||
+      // The lab ink names how text reads over a scene, so it never comes without one.
+      (Object.hasOwn(input.view, 'labInk') && ((input.view.labInk !== 'light' && input.view.labInk !== 'dark') || !Object.hasOwn(input.view, 'backdrop'))) ||
       (Object.hasOwn(input.view, 'reducedTransparency') && input.view.reducedTransparency !== true) ||
       !((view) =>
         exact(view, ['mode', 'viewport']) ||

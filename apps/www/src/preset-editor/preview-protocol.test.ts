@@ -245,3 +245,6 @@ it('accepts the reduced-transparency flag only as true, and sends it', async () 
     expect(await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', reducedTransparency } }, 0, manifest)).toBeNull()
   expect(sentPresetView({ mode: 'light', viewport: 'wide', reducedTransparency: true })).toEqual({ mode: 'light', viewport: 'wide', reducedTransparency: true })
 })
+it('rejects a lab ink without a backdrop', async () => {
+  expect(await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', labInk: 'light' } }, 0, manifest)).toBeNull()
+})

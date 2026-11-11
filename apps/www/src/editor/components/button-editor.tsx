@@ -17,7 +17,7 @@ import { ArtifactPanel } from './artifact-panel'
 import { ComponentNavigation } from './component-navigation'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, type OverflowItem } from '../../editor-shell'
+import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
@@ -45,6 +45,7 @@ export function ButtonEditor() {
   const [view, setView] = useState<EditorView>(initialView)
   // Preview state only: not part of the view that is stored or the recipe.
   const [transparency, setTransparency] = useState<'auto' | 'reduced'>('auto')
+  const transparencySupported = useReducedTransparencySupport()
   const [hydrated, setHydrated] = useState(false)
   const [recovery, setRecovery] = useState<string | null>(null)
   const [preservedRecoveries, setPreservedRecoveries] = useState<string[]>([])
@@ -242,7 +243,7 @@ export function ButtonEditor() {
               <SegmentedControl<EditorView['mode']> label="Preview mode" value={view.mode}
                 options={previewModeOptions}
                 onChange={(mode) => setView((previous) => ({ ...previous, mode }))} />
-              {glassFamily && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
+              {glassFamily && transparencySupported && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
                 options={previewTransparencyOptions} onChange={setTransparency} />}
               <SegmentedControl<EditorView['viewport']> label="Preview width" value={view.viewport}
                 options={previewWidthOptions('Narrow')}
@@ -255,7 +256,7 @@ export function ButtonEditor() {
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparency === 'reduced'} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}

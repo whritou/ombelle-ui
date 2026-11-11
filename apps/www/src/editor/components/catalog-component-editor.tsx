@@ -7,7 +7,7 @@ import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@om
 import { siteFamilyOrder } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions } from '../../editor-shell'
+import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
 import { catalogDraftKey, catalogPresetRef, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
@@ -34,6 +34,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const [view, setView] = useState<EditorView>({ mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' })
   // Preview state only: never saved with the recipe.
   const [transparency, setTransparency] = useState<'auto' | 'reduced'>('auto')
+  const transparencySupported = useReducedTransparencySupport()
   const undoRef = useRef<HTMLButtonElement>(null)
   const redoRef = useRef<HTMLButtonElement>(null)
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
@@ -137,7 +138,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
             <div className={styles.viewControls}>
               <SegmentedControl label="Preview mode" value={view.mode} options={previewModeOptions}
                 onChange={mode => setView(previous => ({ ...previous, mode }))} />
-              {glassFamily && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
+              {glassFamily && transparencySupported && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
                 options={previewTransparencyOptions} onChange={setTransparency} />}
               <SegmentedControl label="Preview width" value={view.viewport} options={previewWidthOptions('Narrow')}
                 onChange={viewport => setView(previous => ({ ...previous, viewport }))} />
@@ -146,7 +147,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={result} view={view} component={component} componentName={name} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparency === 'reduced'} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name} />

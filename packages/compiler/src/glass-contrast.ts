@@ -470,8 +470,8 @@ export function glassContrastOnScene(
   const ratios = resolve(data, glassContrastPairs, range)
     .filter((r) => r.mode === mode)
     .map((r) => {
-      // Rated without the outline plate: the plate reads on any scene, and the lab
-      // ink, which this rating gates, is the text with its plate removed.
+      // Rated without the outline plate: the plate reads on any scene, so with it
+      // every scene would rate the same.
       const painted = filtered({ ...r, plate: 0 }, opacity)
       return !opaqueText(r) || painted.inside ? 1 : Math.min(painted.overDarkest, painted.overBrightest)
     })

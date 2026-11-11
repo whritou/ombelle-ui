@@ -58,6 +58,10 @@ test('a manual choice survives an edit and resets on a new starting preset', asy
   await backdropRadios(page).filter({ hasText: /^Nuit,/ }).click()
   await page.getByLabel('Corner radius', { exact: true }).fill('0.25')
   await expect(backdropRadios(page).filter({ hasText: /^Nuit,/ })).toHaveAttribute('aria-checked', 'true')
+  // Undoing the edit matches Cristal again, but the starting preset never changed.
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(page.getByLabel('Corner radius', { exact: true })).not.toHaveValue('0.25')
+  await expect(backdropRadios(page).filter({ hasText: /^Nuit,/ })).toHaveAttribute('aria-checked', 'true')
   await page.locator('[data-preset="builtin-liquid-glass-givre"]').click()
   await expect(autoRadio(page)).toHaveAttribute('aria-checked', 'true')
 })
@@ -94,8 +98,8 @@ test('the transparency toggle makes the glass opaque and back', async ({ page })
 // Chromium's CDP media emulation reaches matchMedia in the sandboxed editor preview but not
 // its cascade, so the parity check runs on the top-level audit page: the mirror on one page,
 // the emulated preference on another, compared on every slot.
-test('the mirror matches the emulated preference on every glass slot', async ({ browser }) => {
-  const url = 'http://127.0.0.1:4173/audit/liquid-glass/radix/?mode=light'
+for (const mode of ['light', 'dark'] as const) test(`the mirror matches the emulated preference on every glass slot in ${mode} mode`, async ({ browser }) => {
+  const url = `http://127.0.0.1:4173/audit/liquid-glass/radix/?mode=${mode}`
   const slots = (page: Page) => page.locator('[data-slot]').evaluateAll((elements) => elements.map((element) => {
     const style = getComputedStyle(element)
     return [element.getAttribute('data-slot'), style.backdropFilter, style.backgroundColor, style.backgroundImage].join(' | ')
@@ -121,13 +125,13 @@ test('the mirror matches the emulated preference on every glass slot', async ({ 
   expect(await slots(mirrored)).toEqual(expected)
 })
 
-// Every copy carries the :where(html[data-reduced-transparency]) prefix; the same CSS
+// Every copy sits in an @media all block and names the attribute; the same CSS
 // recompiled must hold the same number of copies, never one more per recompile.
 const mirrorCopies = (page: Page) => gallery(page).locator('html').evaluate(() => {
   let count = 0
   const walk = (list: CSSRuleList) => {
     for (const rule of Array.from(list)) {
-      if (rule instanceof CSSMediaRule && rule.conditionText === 'all' && rule.cssText.includes(':where(html[data-reduced-transparency])')) count++
+      if (rule instanceof CSSMediaRule && rule.conditionText === 'all' && rule.cssText.includes('data-reduced-transparency]')) count++
       else if ('cssRules' in rule) walk((rule as CSSGroupingRule).cssRules)
     }
   }
@@ -172,7 +176,9 @@ for (const [path, title] of [['card', 'Card recipe preview'], ['button', 'Button
     const toggle = page.getByRole('radiogroup', { name: 'Preview transparency', exact: true })
     await expect(toggle).toHaveCount(1)
     await toggle.getByRole('radio', { name: 'Reduced', exact: true }).click()
-    await expect(page.locator(`iframe[title="${title}"]`).contentFrame().locator('html')).toHaveAttribute('data-reduced-transparency', '')
+    const root = page.locator(`iframe[title="${title}"]`).contentFrame().locator('html')
+    await expect(root).toHaveAttribute('data-reduced-transparency', '')
     await family(/^Flat/).click()
     await expect(toggle).toHaveCount(0)
+    await expect(root).not.toHaveAttribute('data-reduced-transparency', /.*/)
   })

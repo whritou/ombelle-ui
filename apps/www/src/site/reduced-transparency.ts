@@ -10,7 +10,8 @@ export type MirrorRule =
   | { kind: 'media' | 'supports' | 'layer'; condition: string; rules: MirrorRule[] }
 
 const attribute = '[data-reduced-transparency]'
-const reduce = /^\(\s*prefers-reduced-transparency\s*:\s*reduce\s*\)$/i
+// The boolean form (prefers-reduced-transparency) is true for any value but no-preference.
+const reduce = /^\(\s*prefers-reduced-transparency\s*(?::\s*reduce\s*)?\)$/i
 const notReduce = /^(?:not\s*\(\s*prefers-reduced-transparency\s*:\s*reduce\s*\)|\(\s*prefers-reduced-transparency\s*:\s*no-preference\s*\))$/i
 
 type State = 'on' | 'off'
@@ -58,16 +59,30 @@ function resolve(selector: string, parent: string | undefined): string {
     : part.includes('&') ? part.replaceAll('&', `:is(${parent})`) : `:is(${parent}) ${part}`).join(', ')
 }
 
+/** Where a trailing pseudo-element (::after, or legacy :before) starts, outside brackets. */
+function pseudoElementStart(selector: string): number {
+  let depth = 0
+  for (let i = 0; i < selector.length; i++) {
+    const c = selector[i]
+    if (c === '(' || c === '[') depth++
+    else if (c === ')' || c === ']') depth--
+    else if (depth === 0 && c === ':' && (selector[i + 1] === ':' || /^:(?:before|after|first-line|first-letter)(?![\w-])/i.test(selector.slice(i))))
+      return i
+  }
+  return -1
+}
+
 /**
- * Puts a selector under the attribute without changing its specificity: :where() adds none,
- * so the copy wins and loses against other rules where the media rule did.
+ * Puts a selector under the attribute by gating its subject: the element must be html with
+ * the attribute, or inside it. So :root, html.dark x and .dark x keep matching when the class
+ * sits on html. :where() adds no specificity, so the copy wins and loses where the media rule did.
  */
 function prefix(selectorList: string, state: State): string {
-  const condition = state === 'on' ? attribute : `:not(${attribute})`
+  const root = state === 'on' ? `html${attribute}` : `html:not(${attribute})`
+  const gate = `:where(${root}, ${root} *)`
   return splitTopLevel(selectorList, ',').map((selector) => {
-    if (/^:root(?![\w-])/.test(selector)) return `:root:where(${condition})` + selector.slice(5)
-    if (/^html(?![\w-])/.test(selector)) return `html:where(${condition})` + selector.slice(4)
-    return `:where(html${condition}) ${selector}`
+    const at = pseudoElementStart(selector)
+    return at === -1 ? selector + gate : selector.slice(0, at) + gate + selector.slice(at)
   }).join(', ')
 }
 
@@ -108,4 +123,13 @@ export function reducedTransparencyState(condition: string): 'on' | 'off' | unde
 /** A selector list put under the attribute ('on') or its absence ('off'), specificity unchanged. */
 export function prefixReducedTransparency(selectorList: string, state: 'on' | 'off'): string {
   return prefix(selectorList, state)
+}
+
+/**
+ * Whether this browser parses prefers-reduced-transparency. An unknown media feature turns
+ * the query into "not all", the mirror then finds no rule to copy, and a toggle would claim
+ * a look it cannot show; the editors hide it instead.
+ */
+export function reducedTransparencySupported(match: ((query: string) => Pick<MediaQueryList, 'media'>) | undefined): boolean {
+  return !!match && match('(prefers-reduced-transparency: reduce)').media !== 'not all'
 }
