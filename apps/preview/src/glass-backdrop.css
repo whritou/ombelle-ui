@@ -44,9 +44,9 @@ html[data-backdrop='glass'][data-glass-backdrop='peach'] {
   --glass-lab-shadow-color: 76 27 32;
   --glass-lab-bounce-color: 255 195 155;
 }
-/* The lab scenes have known backdrops. Use the lab's soft text glow here;
+/* An unedited lab preset over its own scene (labInkFor). Use the lab's soft text glow here;
    compiled components keep their contrast plate for unknown backdrops. */
-html[data-glass-lab-ink]:not(.dark) :is(
+html[data-glass-lab-ink='light']:not(.dark) :is(
   [data-slot='card'], [data-slot='button'], [data-slot='recipe-button'],
   [data-slot='badge'], [data-slot='input'], [data-slot='select-trigger'],
   [data-slot='select-content'], [data-slot='select-item'], [data-slot='tabs-list'], [data-slot='tabs-trigger']
@@ -54,12 +54,29 @@ html[data-glass-lab-ink]:not(.dark) :is(
   -webkit-text-stroke-width: 0;
   text-shadow: 0 0 2px color-mix(in srgb, var(--glass-lab-veil, var(--card)) 12%, transparent);
 }
-html[data-glass-lab-ink]:not(.dark) :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='link'],
-html[data-glass-lab-ink]:not(.dark) :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='ghost'] {
+html[data-glass-lab-ink='light']:not(.dark) :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='link'],
+html[data-glass-lab-ink='light']:not(.dark) :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='ghost'] {
   color: var(--glass-preview-ink);
   text-shadow: var(--glass-preview-text-shadow);
 }
-html[data-glass-lab-ink]:not(.dark) [data-slot='card-description'] {
+html[data-glass-lab-ink='light']:not(.dark) [data-slot='card-description'] {
+  color: var(--card-foreground);
+}
+/* The same ink in dark mode: the lab's light text with a glow from its dark veil. */
+html.dark[data-glass-lab-ink='dark'] :is(
+  [data-slot='card'], [data-slot='button'], [data-slot='recipe-button'],
+  [data-slot='badge'], [data-slot='input'], [data-slot='select-trigger'],
+  [data-slot='select-content'], [data-slot='select-item'], [data-slot='tabs-list'], [data-slot='tabs-trigger']
+):not([data-variant='outline']) {
+  -webkit-text-stroke-width: 0;
+  text-shadow: 0 0 2px color-mix(in srgb, var(--glass-lab-veil, var(--card)) 12%, transparent);
+}
+html.dark[data-glass-lab-ink='dark'] :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='link'],
+html.dark[data-glass-lab-ink='dark'] :is([data-slot='button'], [data-slot='recipe-button'])[data-variant='ghost'] {
+  color: var(--glass-preview-ink);
+  text-shadow: var(--glass-preview-text-shadow);
+}
+html.dark[data-glass-lab-ink='dark'] [data-slot='card-description'] {
   color: var(--card-foreground);
 }
 /* The preview adds halos on controls that the portable filter treats as part of their parent. */

@@ -4,8 +4,9 @@ import { resolveRecipePreset } from '@ombelle/catalog'
 import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
 import { forcedStateSelector } from '../../www/src/editor/forced-states'
 import { draftFamily } from '../../www/src/editor/model'
-import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
-import { GlassBackdropArt, hasLabPreviewInk, setGlassBackdrop } from './glass-backdrop-art'
+import { glassPresetId } from '../../www/src/site/glass-presets'
+import { labInkFor, pickGlassScene } from '../../www/src/site/glass-backdrops'
+import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
@@ -90,11 +91,14 @@ function EditorPreview() {
   const state = buttonMessage?.state
   const family = state && draftFamily(state.recipe)
   const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
-  const glassBackdrop = glassPreset && glassPresetBackdrop(glassPreset, state.mode)
+  const recipePreset = React.useMemo(() => glassPreset && state ? resolveRecipePreset(state.recipe.presetRef) : undefined,
+    [glassPreset, state?.recipe.presetRef])
+  const glassBackdrop = glassPreset && state && recipePreset ? pickGlassScene(recipePreset, state.mode, glassPreset) : undefined
   const overrides = state?.recipe.overrides
-  const useLabInk = Boolean(state && state.mode === 'light' && glassBackdrop
+  // Colour and glass overrides change the ink the lab tuned, so they keep the plate.
+  const labInk = state && glassBackdrop && recipePreset
     && !Object.keys(overrides ?? {}).some((key) => key === 'colors' || key.startsWith('glass'))
-    && hasLabPreviewInk(resolveRecipePreset(state.recipe.presetRef), glassBackdrop))
+    ? labInkFor(recipePreset, state.mode, glassBackdrop) : null
   React.useEffect(() => {
     if (!family || !(family in editorButtons)) return
     let active = true
@@ -106,9 +110,9 @@ function EditorPreview() {
   React.useEffect(() => {
     if (!glassBackdrop) return
     const root = document.documentElement
-    setGlassBackdrop(root, glassBackdrop, useLabInk)
+    setGlassBackdrop(root, glassBackdrop, labInk)
     return () => setGlassBackdrop(root, undefined)
-  }, [glassBackdrop, useLabInk])
+  }, [glassBackdrop, labInk])
 
   const recipeStyle = React.useRef<HTMLStyleElement>(null)
   const specimen = React.useRef<HTMLButtonElement>(null)
