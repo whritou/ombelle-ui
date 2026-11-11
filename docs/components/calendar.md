@@ -2,7 +2,7 @@
 
 Calendar is a month grid for choosing a date or a range of dates. The same component provides a Date Picker: a button that shows the chosen date and opens the Calendar in a popover. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
-This component requires CLI **0.7.3** or later. Until 0.7.3 is published, install it from a built local checkout:
+This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add calendar`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add calendar --cwd APP --dry-run --json

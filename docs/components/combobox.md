@@ -2,7 +2,7 @@
 
 Combobox is a text field that filters a list of options. It can offer to create a name that no option has, and in multiple mode the chosen options show as chips in the field. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
-This component requires CLI **0.7.3** or later. Until 0.7.3 is published, install it from a built local checkout:
+This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add combobox`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add combobox --cwd APP --dry-run --json

@@ -17,8 +17,7 @@ The 0.7.3 display components add [Spinner](components/spinner.md),
 [Stepper](components/stepper.md) in all five families, with Radix and Base UI
 editions and recipe editors. Field is a composition that wires a label, hint and
 error to the control you already use. Meter covers segmented progress. Liquid
-glass remains experimental. Installing them needs CLI 0.7.3, which is not yet
-published. See the [display components design](superpowers/specs/2026-11-09-display-components-design.md)
+glass remains experimental. Installing them needs CLI 0.7.3 or later. See the [display components design](superpowers/specs/2026-11-09-display-components-design.md)
 and the [evidence](evidence/display-components.md).
 
 The 0.7.3 form controls add [Slider](components/slider.md),
