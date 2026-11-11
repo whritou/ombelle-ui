@@ -158,3 +158,42 @@ export async function verifyCatalogPreviewRender(input: unknown, activeComponent
   return result ? { type: 'catalog-render', component: activeComponent, requestId: input.requestId,
     mode: input.mode, viewport: input.viewport, result, ...(input.reducedTransparency === true ? { reducedTransparency: true as const } : {}) } : null
 }
+
+/** One matrix cell: its axis values and the compile of the recipe with those props. */
+export type CatalogMatrixCell = { row: string | number; column: string | number | null; current: boolean; result: ComponentRecipeCompileResult }
+export type CatalogMatrixRender = {
+  type: 'catalog-matrix-render'
+  component: ComponentRecipe['component']
+  requestId: number
+  rows: string
+  columns: string | null
+  cells: CatalogMatrixCell[]
+  mode: 'light' | 'dark'
+  viewport: 'wide' | 'narrow'
+  reducedTransparency?: true
+}
+
+const axisValue = (value: unknown): value is string | number => typeof value === 'string' || (typeof value === 'number' && Number.isFinite(value))
+const exactKeys = (value: Record<string, unknown>, keys: string[]) => Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key))
+
+/** The matrix message, with every cell's compile verified as a single render is: 1 to 48 cells, one current. */
+export async function verifyCatalogMatrixRender(input: unknown, activeComponent: ComponentRecipe['component'], previousRequestId: number): Promise<CatalogMatrixRender | null> {
+  const keys = ['type', 'component', 'requestId', 'rows', 'columns', 'cells', 'mode', 'viewport']
+  if (!record(input) || !(exactKeys(input, keys) || (exactKeys(input, [...keys, 'reducedTransparency']) && input.reducedTransparency === true)) ||
+    input.type !== 'catalog-matrix-render' || input.component !== activeComponent ||
+    typeof input.requestId !== 'number' || !Number.isSafeInteger(input.requestId) || input.requestId <= previousRequestId ||
+    typeof input.rows !== 'string' || (input.columns !== null && typeof input.columns !== 'string') ||
+    (input.mode !== 'light' && input.mode !== 'dark') || (input.viewport !== 'wide' && input.viewport !== 'narrow') ||
+    !Array.isArray(input.cells) || input.cells.length < 1 || input.cells.length > 48) return null
+  const cells: CatalogMatrixCell[] = []
+  for (const cell of input.cells as unknown[]) {
+    if (!record(cell) || !exactKeys(cell, ['row', 'column', 'current', 'result']) || !axisValue(cell.row) ||
+      (cell.column !== null && !axisValue(cell.column)) || typeof cell.current !== 'boolean') return null
+    const result = await verifyCatalogCompileResult(cell.result, activeComponent)
+    if (!result) return null
+    cells.push({ row: cell.row, column: cell.column as string | number | null, current: cell.current, result })
+  }
+  if (cells.filter((cell) => cell.current).length !== 1) return null
+  return { type: 'catalog-matrix-render', component: activeComponent, requestId: input.requestId, rows: input.rows, columns: input.columns as string | null,
+    cells, mode: input.mode, viewport: input.viewport, ...(input.reducedTransparency === true ? { reducedTransparency: true as const } : {}) }
+}

@@ -123,3 +123,46 @@ export async function verifyPreviewRender(input: unknown, previousRequestId: num
     return null
   }
 }
+
+/** One Button matrix cell: its variant and size, and the recipe compiled for them. */
+export type ButtonMatrixCell = { row: string; column: string; current: boolean; scope: string; css: string; recipe: Recipe }
+export type ButtonMatrixRender = {
+  type: 'matrix-render'
+  requestId: number
+  rows: 'variant'
+  columns: 'size'
+  cells: ButtonMatrixCell[]
+  /** Whether to add the row of forced states for the current cell. */
+  states: boolean
+  mode: 'light' | 'dark'
+  viewport: 'wide' | 'narrow'
+  reducedTransparency?: true
+}
+
+/** The Button matrix, each cell recompiled and compared as verifyPreviewRender does: 1 to 48 cells, one current. */
+export async function verifyButtonMatrixRender(input: unknown, previousRequestId: number): Promise<ButtonMatrixRender | null> {
+  const keys = ['type', 'requestId', 'rows', 'columns', 'cells', 'states', 'mode', 'viewport']
+  if (!record(input) || !(exactKeys(input, keys) || (exactKeys(input, [...keys, 'reducedTransparency']) && input.reducedTransparency === true)) ||
+    input.type !== 'matrix-render' || !requestId(input.requestId) || input.requestId <= previousRequestId ||
+    input.rows !== 'variant' || input.columns !== 'size' || typeof input.states !== 'boolean' ||
+    !['light', 'dark'].includes(input.mode as string) || !['wide', 'narrow'].includes(input.viewport as string) ||
+    !Array.isArray(input.cells) || input.cells.length < 1 || input.cells.length > 48) return null
+  const cells: ButtonMatrixCell[] = []
+  for (const cell of input.cells as unknown[]) {
+    if (!record(cell) || !exactKeys(cell, ['row', 'column', 'current', 'scope', 'css', 'recipe']) ||
+      typeof cell.row !== 'string' || typeof cell.column !== 'string' || typeof cell.current !== 'boolean' ||
+      !hash(cell.scope) || typeof cell.css !== 'string' || cell.css.length === 0 || cell.css.length > 100_000) return null
+    try {
+      const recipe = validateRecipe(cell.recipe)
+      const expected = await compileRecipe({ recipe })
+      const css = expected.artifacts.find((artifact) => artifact.kind === 'style')?.content
+      if (expected.scope !== cell.scope || css !== cell.css || canonicalize(recipe) !== canonicalize(expected.recipe.data)) return null
+      cells.push({ row: cell.row, column: cell.column, current: cell.current, scope: cell.scope, css: cell.css, recipe })
+    } catch {
+      return null
+    }
+  }
+  if (cells.filter((cell) => cell.current).length !== 1) return null
+  return { type: 'matrix-render', requestId: input.requestId, rows: 'variant', columns: 'size', cells, states: input.states,
+    mode: input.mode as 'light' | 'dark', viewport: input.viewport as 'wide' | 'narrow', ...(input.reducedTransparency === true ? { reducedTransparency: true as const } : {}) }
+}

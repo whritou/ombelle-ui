@@ -8,6 +8,7 @@ import {
   validatePreviewCompileResult,
   verifyPreviewCompileResult,
   verifyPreviewRender,
+  verifyButtonMatrixRender,
   isPreviewAck,
 } from './preview-protocol.js'
 
@@ -105,4 +106,28 @@ it('accepts the reduced-transparency flag only as true', async () => {
   for (const reducedTransparency of [false, 'yes', 1])
     expect(acceptPreviewRender({ ...message, state: { ...message.state, reducedTransparency } }, 0)).toBeNull()
   expect(acceptPreviewRender(message, 0)).toEqual(message)
+})
+
+async function matrixMessage() {
+  const draft = createEditorDraft('flat')
+  const cell = async (variant: string, current: boolean) => {
+    const recipe = { ...draft.recipe, props: { ...draft.recipe.props, variant } } as typeof draft.recipe
+    const result = await compileRecipe({ recipe })
+    return { row: variant, column: 'default', current, scope: result.scope, css: result.artifacts.find((a) => a.kind === 'style')!.content, recipe: result.recipe.data }
+  }
+  return { type: 'matrix-render', requestId: 1, rows: 'variant', columns: 'size', cells: [await cell('default', true), await cell('outline', false)],
+    states: true, mode: 'light', viewport: 'wide' }
+}
+
+it('verifies a Button matrix and rejects malformed ones', async () => {
+  const message = await matrixMessage()
+  expect(await verifyButtonMatrixRender(message, 0)).toEqual(message)
+  expect(await verifyButtonMatrixRender({ ...message, cells: [] }, 0)).toBeNull()
+  expect(await verifyButtonMatrixRender({ ...message, cells: Array(49).fill(message.cells[0]) }, 0)).toBeNull()
+  expect(await verifyButtonMatrixRender({ ...message, cells: message.cells.map((cell) => ({ ...cell, current: true })) }, 0)).toBeNull()
+  expect(await verifyButtonMatrixRender({ ...message, extra: 1 }, 0)).toBeNull()
+  expect(await verifyButtonMatrixRender({ ...message, cells: [{ ...message.cells[0]!, css: message.cells[0]!.css + ' ' }, message.cells[1]] }, 0)).toBeNull()
+  expect(await verifyButtonMatrixRender({ ...message, reducedTransparency: true }, 0)).not.toBeNull()
+  expect(await verifyButtonMatrixRender({ ...message, reducedTransparency: false }, 0)).toBeNull()
+  expect(await verifyButtonMatrixRender(message, 1)).toBeNull()
 })
