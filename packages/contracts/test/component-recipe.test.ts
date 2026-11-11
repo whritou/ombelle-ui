@@ -158,3 +158,24 @@ it.each([
 it('accepts a multiple combobox with several selections', () => {
   expect(validateComponentRecipe(overlayDraft('combobox', { mode: 'multiple', selection: ['liquid-glass', 'ombelle'] })).component).toBe('combobox')
 })
+
+const calendarDraft = (props: Record<string, unknown> = {}) => ({
+  ...badge, component: 'calendar', props,
+  content: defaultRecipeFields(componentRecipeFields('calendar').content),
+})
+
+it('accepts the default calendar recipe and a range with an end date', () => {
+  expect(componentRecipeComponents).toContain('calendar')
+  expect(validateComponentRecipe(calendarDraft()).component).toBe('calendar')
+  expect(validateComponentRecipe(calendarDraft({ mode: 'range', selectedFrom: '2026-11-12', selectedTo: '2026-11-18' })).component).toBe('calendar')
+})
+
+it.each([
+  [{ selectedFrom: '2026-02-30' }, '/props/selectedFrom'],
+  [{ mode: 'range', selectedTo: '2026-13-01' }, '/props/selectedTo'],
+  [{ mode: 'range', selectedFrom: '2026-11-18', selectedTo: '2026-11-12' }, '/props/selectedTo'],
+  [{ mode: 'single', selectedTo: '2026-11-18' }, '/props/selectedTo'],
+  [{ mode: 'picker', selectedTo: '2026-11-18' }, '/props/selectedTo'],
+] as const)('rejects the calendar recipe %o at %s', (props, path) => {
+  expect(() => validateComponentRecipe(calendarDraft(props))).toThrow(expect.objectContaining({ path }))
+})

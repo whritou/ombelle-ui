@@ -585,6 +585,7 @@ describe('catalog contract', () => {
       'command',
       'hover-card',
       'context-menu',
+      'calendar',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

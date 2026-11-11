@@ -22,9 +22,12 @@ export const runtimeDependencies = {
   '@radix-ui/react-toggle-group': '1.2.1',
   '@radix-ui/react-tooltip': '1.4.1',
   'cmdk': '1.1.1',
+  'date-fns': '4.4.0',
+  '@date-fns/tz': '1.5.0',
   'input-otp': '1.5.0',
   'class-variance-authority': '0.7.1',
   clsx: '2.1.1',
   'tailwind-merge': '3.7.0',
+  'react-day-picker': '10.0.2',
   'lucide-react': '1.55.0',
 } as const

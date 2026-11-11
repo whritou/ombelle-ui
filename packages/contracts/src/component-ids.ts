@@ -43,5 +43,6 @@ export const supportedComponentIds = [
   'command',
   'hover-card',
   'context-menu',
+  'calendar',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

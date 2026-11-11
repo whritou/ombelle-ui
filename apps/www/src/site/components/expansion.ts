@@ -61,6 +61,12 @@ export const expansionDocs = {
     states: 'Empty, active, filled, disabled', basis: 'input-otp; Base UI OTP Field in the Base UI edition', client: true,
     usage: expansionExamples['input-otp'], minimumCli: '0.7.3',
   },
+  calendar: {
+    name: 'Calendar', description: 'A month grid for a date or a range, and a Date Picker that opens it from a button.',
+    api: 'Calendar (mode single or range, selected, onSelect, defaultMonth, disabled, disablePast, weekStartsOn, locale, numberOfMonths, today), DatePicker (value, defaultValue, onValueChange, mode, placeholder, format, locale, name, calendar), toIsoDate, fromIsoDate, formatDate',
+    states: 'Today, selected, range start, middle and end, outside the month, disabled, picker open', basis: 'react-day-picker; Radix Popover, or Base UI Popover in the Base UI edition, for the Date Picker', client: true,
+    usage: expansionExamples.calendar, minimumCli: '0.7.3',
+  },
   combobox: {
     name: 'Combobox', description: 'A text field that filters a list of options, with an optional create row and chips for several values.',
     api: 'Combobox (value, onValueChange, multiple, onCreate, name, disabled), ComboboxInput, ComboboxContent, ComboboxList, ComboboxGroup (heading), ComboboxItem (value), ComboboxCreate, ComboboxEmpty, highlightMatch',

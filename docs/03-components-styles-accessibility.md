@@ -39,6 +39,13 @@ icon and the glass preset. See the
 [overlays and search design](superpowers/specs/2026-11-10-overlays-search-design.md)
 and the [evidence](evidence/overlays-search-073.md).
 
+The 0.7.3 [Calendar](components/calendar.md) chooses a date or a range in all
+five families, with Radix and Base UI editions and a recipe editor. Both
+editions use react-day-picker 10.0.2 for the grid; its Date Picker opens the
+Calendar in the edition's popover. The preview scenes use it; the website
+editor does not. See the [Calendar design](superpowers/specs/2026-11-10-calendar-design.md)
+and the [evidence](evidence/calendar-073.md).
+
 Every component must ship its source, dependencies, prop and composition reference, editor metadata, preview fixtures, supported style matrix, keyboard behavior, and accessibility evidence. Follow the selected shadcn edition's composition model and preserve familiar names wherever they mean the same thing.
 
 Use semantic elements and existing accessible primitives for interaction. Public props should forward the relevant native attributes, events, refs, `className`, and `style` without erasing useful types. Interactive state supports controlled and uncontrolled usage when the primitive supports both. Keep server-compatible presentation components free of unnecessary client boundaries.
