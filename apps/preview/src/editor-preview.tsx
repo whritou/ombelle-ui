@@ -136,13 +136,17 @@ function EditorPreview() {
     return () => setGlassBackdrop(root, undefined)
   }, [glassBackdrop, labInk])
 
-  const recipeStyle = React.useRef<HTMLStyleElement>(null)
   const specimen = React.useRef<HTMLButtonElement>(null)
   const Button = buttonModule && buttonModule.family === family ? buttonModule.module.Button : null
-  React.useLayoutEffect(() => {
-    const sheet = recipeStyle.current?.sheet
-    if (sheet) mirrorForcedStates(sheet)
-  }, [state?.css])
+  // Every recipe sheet gets its forced-state copies once, when its element mounts: switching
+  // between Single and Matrix mounts a new sheet even when the CSS text is the same.
+  const mirrored = React.useRef(new WeakSet<CSSStyleSheet>())
+  const recipeStyle = React.useCallback((element: HTMLStyleElement | null) => {
+    const sheet = element?.sheet
+    if (!sheet || mirrored.current.has(sheet)) return
+    mirrored.current.add(sheet)
+    mirrorForcedStates(sheet)
+  }, [])
   React.useLayoutEffect(() => {
     if (family !== 'liquid-glass' || !specimen.current) return
     const root = document.documentElement
@@ -163,14 +167,14 @@ function EditorPreview() {
   }, [Button, message, reportMeasure])
   if (message?.type === 'catalog-render') return <CatalogRecipePreview message={message} onMeasure={reportMeasure} />
   if (message?.type === 'catalog-matrix-render') return <CatalogMatrixPreview message={message} onMeasure={reportMeasure} />
-  if (matrixMessage && matrixCurrent) return <div className={matrixMessage.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={matrixMessage.viewport} data-layout="matrix">
+  if (matrixMessage && matrixCurrent) return <div className={matrixMessage.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={matrixMessage.viewport} data-layout="matrix" data-request={matrixMessage.requestId}>
     {/* Each cell keeps its own sheet; the current one also gets the forced-state copies for the state row. */}
     {matrixMessage.cells.map((cell) => cell.current
       ? <style key={cell.css} ref={recipeStyle}>{cell.css}</style>
       : <style key={cell.css}>{cell.css}</style>)}
     {glassPreset && Button && <LiquidGlassFilter key={`${glassPreset}:${overrides?.glassHalo}:${overrides?.glassMotion}`} />}
     {glassBackdrop && <GlassBackdropArt scene={glassBackdrop} />}
-    {Button && <MatrixTable name="Button" rows="variant" columns="size" cells={matrixMessage.cells}
+    {Button && <MatrixTable name="Button" rows={matrixMessage.rows} columns={matrixMessage.columns} cells={matrixMessage.cells}
       render={(cell) => <ButtonSpecimen Button={Button} recipe={cell.recipe} scope={cell.scope} forcedState="none" ref={cell.current ? specimen : undefined} />}
       extra={matrixMessage.states ? { label: 'States', cells: buttonStateRow.map((forced) => ({ key: forced, label: forced,
         node: <ButtonSpecimen Button={Button} recipe={matrixCurrent.recipe} scope={matrixCurrent.scope} forcedState={forced} /> })) } : undefined} />}

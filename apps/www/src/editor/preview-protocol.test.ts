@@ -131,3 +131,12 @@ it('verifies a Button matrix and rejects malformed ones', async () => {
   expect(await verifyButtonMatrixRender({ ...message, reducedTransparency: false }, 0)).toBeNull()
   expect(await verifyButtonMatrixRender(message, 1)).toBeNull()
 })
+
+it('a Button matrix carries the axes the reader chose, including no columns', async () => {
+  const message = await matrixMessage()
+  const swapped = { ...message, rows: 'size', columns: 'variant' }
+  expect(await verifyButtonMatrixRender(swapped, 0)).toEqual(swapped)
+  const single = { ...message, columns: null, cells: message.cells.map((cell) => ({ ...cell, column: null })) }
+  expect(await verifyButtonMatrixRender(single, 0)).toEqual(single)
+  expect(await verifyButtonMatrixRender({ ...message, rows: 'loading' }, 0)).toBeNull()
+})

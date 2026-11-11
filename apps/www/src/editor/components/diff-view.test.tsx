@@ -20,3 +20,9 @@ it('says when a file has no change', () => {
   expect(renderToStaticMarkup(<DiffView rows={[{ kind: 'same', text: 'a', before: 1, after: 1 }]} added={0} removed={0} />))
     .toContain('No change from the catalog default.')
 })
+
+it('names the changes on a region, not on the pre', () => {
+  const html = renderToStaticMarkup(<DiffView rows={[{ kind: 'add', text: 'x', after: 1 }]} added={1} removed={0} id="changes" />)
+  expect(html).toMatch(/<div[^>]*role="region"[^>]*aria-label="Changes: 1 added, 0 removed"/)
+  expect(html).not.toMatch(/<pre[^>]*aria-label/)
+})

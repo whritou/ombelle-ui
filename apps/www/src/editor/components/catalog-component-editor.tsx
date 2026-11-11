@@ -83,6 +83,8 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const ready = hydrated && recovery === null && !pending && !error && result !== null &&
     canonicalize(result.recipe.data) === canonicalize(recipe)
   const json = ready ? canonicalize(result.recipe.data) + '\n' : null
+  // The summary diffs every file, so it is worked out once per result, not on every render.
+  const changes = useMemo(() => changesSummaryFor(ready ? result : null, reference, () => setShowChanges(count => count + 1)), [ready, result, reference])
   const save = () => {
     if (!json) return
     downloadPresetText(json, recipeFilename(recipe))
@@ -121,7 +123,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
         })),
       ] }}
       primary={<RecipeGetCode className={styles.getCode} recipe={result?.recipe ?? null} current={ready}
-        summary={changesSummaryFor(ready ? result : null, reference, () => setShowChanges(count => count + 1))}
+        summary={changes}
         componentName={name} storageKey={`${key}.publication`} announce={setStatus}
         secondary={<button type="button" onClick={save} disabled={!ready}>Download JSON instead</button>} />}
     />

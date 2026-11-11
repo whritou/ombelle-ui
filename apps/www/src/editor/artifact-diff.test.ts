@@ -53,3 +53,14 @@ it('a preset edit shows in the preset files, a renamed preset does not', async (
   const edited = await run({ ...flat, design: { ...flat.design, radiusRem: 0.25 } })
   expect(changesSummary(presetChanges(edited, reference))).toMatch(/^Changes from the catalog default: /)
 })
+
+it('an id or a preset name that is a common word does not rewrite the files', async () => {
+  const reference = await compileBadge(base)
+  const plain = await compileBadge({ ...base, id: 'badge' })
+  expect(changesSummary(artifactChanges(plain, reference))).toBe('Same as the catalog default.')
+  const { compile } = await import('@ombelle/compiler')
+  const { getCatalog } = await import('@ombelle/catalog')
+  const flat = getCatalog('0.1.0').presets.flat
+  const run = (preset: typeof flat) => compile({ preset, componentIds: ['card'], catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
+  expect(changesSummary(presetChanges(await run({ ...flat, name: 'card' }), await run(flat)))).toBe('Same as the catalog default.')
+})

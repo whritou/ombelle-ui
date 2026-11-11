@@ -55,14 +55,19 @@ Environment for every run below:
   - again in the page, which verifies the worker's result as the single-specimen editor already does;
   - again in the sandboxed preview, which verifies what it renders.
 - **Why the checks stay:** the preview's check is its security boundary.
-- **While it waits:** the editor shows "Compiling the matrix…" as a status until every cell verified, and the single specimen stays in view.
+- **While it waits:** the editor shows "Compiling the matrix…" as a status until every cell of the latest batch compiled and verified in the page. The sandboxed preview then verifies again before it draws.
+  - On the first batch, the single specimen stays in view.
+  - After an edit, the previous matrix stays in view with the status, as long as it has the same cells.
+  - New axes drop it, so no cell is shown under another cell's label.
 - **Not measured:** a production build. These are development-server timings.
 
 ## The diff on Get code
 
 **How the reference is built:**
 - **The comparison:** each editor compiles its catalog default for the same family and preset, through the same worker. That default is the catalog recipe with the current `presetRef`, the Button reset to its starting recipe, or the preset editor's starting or base preset.
-- **Normalisation:** before a line diff (Myers), the 64-character scope, the recipe id and the revision are replaced by fixed tokens. A probe of the Badge and Button outputs found only the scope inside the CSS and component files. The id and revision appear only in the usage file's import path, which is not diffed.
+- **Normalisation:** before a line diff (Myers), the 64-character scope is replaced by a fixed token, and the recipe's id and revision in its JSON.
+  - A probe of the Badge and Button outputs found only the scope inside the CSS and component files. The id and revision appear only in the usage file's import path, which is not diffed.
+  - A preset's id, name and revision appear in none of its files, so preset files are compared as they are.
 
 **How the diff is shown:**
 - **Generated output:** the Component, CSS and Recipe tabs gain "File / Changes".
@@ -75,20 +80,26 @@ Environment for every run below:
 
 ## Tests
 
-**Unit:**
+**Unit, after the final review fixes:** 474 tests over the website's editor, editor-shell, snapshots, recipe-snapshots and site folders, and 104 over preset-editor, run separately. All pass.
+
+**Unit, before the fixes:**
 - **The new 7b suites,** `line-diff`, `artifact-diff`, `compile-protocol` (batch), `measured-color`, the catalog and Button preview protocols, `matrix` and `diff-view`, all pass.
 - **A combined run** of the website's editor, editor-shell, snapshots, recipe-snapshots, preset-editor and site folders passes 550 tests.
   - Its exception is `preset-editor/preview-protocol.test.ts`, whose setup hook exceeds its 10-second timeout under that parallel load: 22 tests skipped.
   - Run on its own, it passes 22 of 22. This branch does not change it.
 - **Typecheck:** clean.
 
-**Browser:** under `playwright.editors.config.ts`, 17 tests pass and 1 is skipped, across the 7a glass spec and the new `tests/e2e/editors-matrix.spec.ts`. The new spec covers:
+**Browser:** under `playwright.editors.config.ts`, 22 tests pass and 1 is skipped, across the 7a glass spec and the new `tests/e2e/editors-matrix.spec.ts`. The new spec covers:
 - the colour placeholder against the preview's computed colour, in light and dark;
 - the Button matrix: 4 size columns, 7 variant rows plus the state row, 5 forced states, one current cell, the colour edit in the default row, and the pending status;
 - the Badge matrix changing columns to `appearance`, the current cell's row, an axe run on the matrix, and the Card matrix;
 - the Changes view and the Get code summary after an override, focus moving to Changes, an axe run on the dialog, and "Same as the catalog default." after Reset recipe;
 - the preset editor's summary after a radius edit;
-- every Card in a liquid glass matrix opaque with "Preview transparency: Reduced".
+- every Card in a liquid glass matrix opaque with "Preview transparency: Reduced";
+- forced states surviving a switch between Single and Matrix;
+- a matrix that is not sent again while nothing changes;
+- the status and the new cells after an edit;
+- the Button matrix following the Rows and Columns the reader chose.
 
 The cap test is skipped with its reason. The foundation inventory test passes, since both editor specs are in `playwright.config.ts` `testIgnore`.
 
@@ -101,3 +112,31 @@ Measured with `node scripts/measure-www-first-load.mjs` (gzip) after a fresh `pn
 | `/editor/preset` | 813.6 kB | 818.3 kB | +4.7 kB |
 | `/editor/component` | 239.4 kB | 239.4 kB | 0 kB |
 | `/editor/component/button` | 817.9 kB | 824.3 kB | +6.4 kB |
+
+## Final review fixes
+
+A fresh review of the whole branch found 1 Critical issue, 4 Important ones and 7 Minor ones. All are fixed. Each fix has a test that failed first, except two tests written after their fix, noted below.
+
+**Critical:**
+- **The matrix re-sent itself in a loop:** a new matrix object on every render made the preview re-verify every cell, which re-measured, which re-rendered the editor.
+  - Fixed: the matrix is memoised, and an identical measurement is no longer passed on.
+  - Test: "the badge/button matrix stays still while nothing changes". With the memoisation broken, the request id climbed from 3 to 8 in 4 seconds.
+
+**Important:**
+- **The rows axis could repeat as columns:** axes are now resolved by prop name. Test: `resolveMatrixAxes` unit.
+- **The Button matrix ignored Rows and Columns:** the message and the table now carry the chosen axes, including no columns.
+  - Protocol unit test: failed first.
+  - E2E: written after the fix.
+- **Forced states were lost when switching between Single and Matrix:** a new sheet with the same CSS text skipped the forced-state copies. Each sheet is now mirrored once when its element mounts. E2E: "forced states survive switching between Single and Matrix".
+- **After an edit, the matrix paired old compiles with new cells, silently:** batch results now answer only the recipes they were compiled for, and the status shows during every batch.
+  - Unit test: `currentBatch`.
+  - E2E: "an edit shows the matrix is recompiling". It failed with the old status rule.
+
+**Minor:**
+- **Id and preset-name normalisation could rewrite a common word:** for example a recipe id "badge" or a preset named "card". It is removed, since those values do not appear in the diffed files. Unit test: failed first.
+- **The diff's `aria-label` sat on a `<pre>`:** it now names a `region`. Unit test: failed first.
+- **The Get code summary was recomputed on every render:** it is now memoised.
+- **The family's reference stayed stale for one batch after a switch:** fixed by the batch change above.
+- **An orphaned comment:** moved back to its function.
+- **The cap could drop the current cell:** the current cell now takes the last place. Unit test: failed first.
+- **The pending-status wording in this file:** corrected.

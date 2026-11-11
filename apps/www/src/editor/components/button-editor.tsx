@@ -111,6 +111,9 @@ export function ButtonEditor() {
 
   const exportReady = compilation.status === 'compiled' && !compilation.stale &&
     diagnostic === null && resultMatchesDraft(compilation.result, draft.recipe)
+  // The summary diffs every file, so it is worked out once per result, not on every render.
+  const changes = useMemo(() => changesSummaryFor(exportReady ? compilation.result : null, reference, () => setShowChanges(count => count + 1)),
+    [exportReady, compilation.result, reference])
   const recipeJson = useMemo(() => {
     if (!exportReady) return null
     try { return serializeRecipe(draft) } catch { return null }
@@ -226,7 +229,7 @@ export function ButtonEditor() {
       }}
       menu={{ label: 'More actions', items: menuItems }}
       primary={<RecipeGetCode className={styles.getCode} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
-        summary={changesSummaryFor(exportReady ? compilation.result : null, reference, () => setShowChanges(count => count + 1))}
+        summary={changes}
         secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
     />
     <h1 className={styles.srOnly}>Button editor</h1>

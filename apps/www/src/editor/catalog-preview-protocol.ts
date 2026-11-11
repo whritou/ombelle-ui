@@ -49,7 +49,6 @@ export function measureCatalogParts(root: ParentNode, component: ComponentRecipe
   return parts
 }
 
-/** One rendered element's dimensions, in the units the recipe stores. */
 /** A computed colour in hex, through a 1 × 1 canvas for syntaxes other than sRGB. */
 function measuredHex(value: string): string | undefined {
   const parsed = hexFromComputedColor(value)
@@ -63,6 +62,7 @@ function measuredHex(value: string): string | undefined {
   return hexFromComputedColor(`rgba(${red}, ${green}, ${blue}, ${alpha! / 255})`) ?? undefined
 }
 
+/** One rendered element's dimensions, in the units the recipe stores, and its colours in hex. */
 export function measurePart(element: Element): MeasuredPart {
   const rem = px(getComputedStyle(document.documentElement).fontSize) || 16
   const style = getComputedStyle(element)

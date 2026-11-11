@@ -16,15 +16,15 @@ export function MatrixControls({ matrix }: { matrix: MatrixLayout }) {
       <span className="be-matrix-axis"><label htmlFor="matrix-columns">Columns</label>
         <select id="matrix-columns" value={matrix.columns?.prop ?? ''} onChange={(event) => matrix.setColumns(event.target.value || null)}>
           <option value="">None</option>
-          {matrix.enums.filter((axis) => axis !== matrix.rows).map((axis) => <option key={axis.prop} value={axis.prop}>{axis.prop}</option>)}
+          {matrix.enums.filter((axis) => axis.prop !== matrix.rows?.prop).map((axis) => <option key={axis.prop} value={axis.prop}>{axis.prop}</option>)}
         </select>
       </span>
       {matrix.capped !== null && <p role="status" className="be-matrix-cap">
         {`This matrix has ${matrix.capped} cells; showing the first ${matrixCellLimit}. Choose other axes to see the rest.`}
       </p>}
       {matrix.error && <p role="alert" className="be-matrix-cap">{matrix.error}</p>}
-      {/* Every cell compiles and is verified before the matrix replaces the single preview. */}
-      {!matrix.matrix && !matrix.error && <p role="status" className="be-matrix-cap" data-testid="matrix-pending">Compiling the matrix…</p>}
+      {/* Shown until every cell of the latest batch compiled and verified in the page. */}
+      {(matrix.pending || !matrix.matrix) && !matrix.error && <p role="status" className="be-matrix-cap" data-testid="matrix-pending">Compiling the matrix…</p>}
     </>}
   </>
 }

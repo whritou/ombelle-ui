@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { componentRecipeComponents } from '@ombelle/contracts'
 import { createCatalogDraft } from './catalog-draft'
 import { createEditorDraft } from './model'
-import { matrixAxes, matrixCellLimit, matrixCells, matrixEnums, propValue } from './matrix'
+import { matrixAxes, matrixCellLimit, matrixCells, matrixEnums, propValue, resolveMatrixAxes } from './matrix'
 
 it('every component gets axes or none', () => {
   for (const component of componentRecipeComponents) {
@@ -62,4 +62,22 @@ it('the cap', () => {
   const { cells, total } = matrixCells(createCatalogDraft('badge').recipe, rows, columns, 'badge')
   expect(cells).toHaveLength(matrixCellLimit)
   expect(total).toBe(56)
+})
+
+it('resolved axes never repeat the rows axis as columns', () => {
+  const enums = matrixEnums('badge')
+  const axes = resolveMatrixAxes(enums, matrixAxes('badge'), 'size', undefined)
+  expect(axes.rows!.prop).toBe('size')
+  expect(axes.columns?.prop).not.toBe('size')
+  expect(resolveMatrixAxes(enums, matrixAxes('badge'), null, null).columns).toBeNull()
+  expect(resolveMatrixAxes(enums, matrixAxes('badge'), null, 'appearance').columns!.prop).toBe('appearance')
+})
+
+it('a capped matrix keeps the current cell', () => {
+  const rows = { prop: 'variant', values: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] }
+  const columns = { prop: 'size', values: ['1', '2', '3', '4', '5', '6', '7'] }
+  const recipe = { ...createCatalogDraft('badge').recipe, props: { variant: 'h', size: '7' } } as unknown as { props: Record<string, unknown> }
+  const { cells } = matrixCells(recipe, rows, columns, 'badge')
+  expect(cells).toHaveLength(matrixCellLimit)
+  expect(cells.filter((cell) => cell.current)).toEqual([expect.objectContaining({ row: 'h', column: '7' })])
 })

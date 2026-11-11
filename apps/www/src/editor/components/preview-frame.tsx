@@ -35,6 +35,14 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
   latest.current = { result, view, reducedTransparency, matrix }
   const measured = useRef(onMeasure)
   measured.current = onMeasure
+  // The same measurement again changes nothing in the editor, so it is not passed on.
+  const lastMeasure = useRef('')
+  const report = (parts: MeasuredParts) => {
+    const key = JSON.stringify(parts)
+    if (key === lastMeasure.current) return
+    lastMeasure.current = key
+    measured.current?.(parts)
+  }
 
   async function sendCurrent(targetPort: MessagePort) {
     const epoch = ++sendEpoch.current
@@ -53,9 +61,9 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
     }
     if (current.matrix) {
       const message: ButtonMatrixRender = {
-        type: 'matrix-render', requestId: ++nextRequestId.current, rows: 'variant', columns: 'size', states: current.matrix.states,
+        type: 'matrix-render', requestId: ++nextRequestId.current, rows: current.matrix.rows, columns: current.matrix.columns, states: current.matrix.states,
         cells: current.matrix.cells.map(({ row, column, current: isCurrent, result: cell }) => ({
-          row: String(row), column: String(column), current: isCurrent, scope: cell.scope,
+          row: String(row), column: column === null ? null : String(column), current: isCurrent, scope: cell.scope,
           css: cell.artifacts.find((artifact) => artifact.kind === 'style')?.content ?? '', recipe: cell.recipe.data as Recipe,
         })),
         mode: current.view.mode, viewport: current.view.viewport, ...flag,
@@ -101,12 +109,12 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
         const measure = component ? acceptCatalogMeasure(ack.data, component) : null
         if (measure) {
           // Only the render the preview applied last describes the current recipe.
-          if (measure.requestId === lastAck.current) measured.current?.(measure.parts)
+          if (measure.requestId === lastAck.current) report(measure.parts)
           return
         }
         const button = component ? null : acceptButtonMeasure(ack.data)
         if (button) {
-          if (button.requestId === lastAck.current) measured.current?.({ button: button.values })
+          if (button.requestId === lastAck.current) report({ button: button.values })
           return
         }
         if (port.current !== channel.port1 || !isPreviewAck(ack.data) || ack.data.requestId > nextRequestId.current ||

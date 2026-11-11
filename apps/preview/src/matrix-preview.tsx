@@ -60,7 +60,7 @@ export function CatalogMatrixPreview({ message, onMeasure }: {
   // The current cell is the inspector's recipe, so its rendered values fill the empty fields.
   const measure = React.useCallback((stage: HTMLElement) => onMeasure?.(message.requestId, measureCatalogParts(stage, component)),
     [onMeasure, message.requestId, component])
-  return <div className={mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={viewport} data-layout="matrix">
+  return <div className={mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={viewport} data-layout="matrix" data-request={message.requestId}>
     {scene && <GlassBackdropArt scene={scene} />}
     <MatrixTable name={component} rows={message.rows} columns={message.columns} cells={cells}
       render={(cell) => <CatalogSpecimenCell component={component} result={cell.result} onRendered={cell.current ? measure : undefined} />} />

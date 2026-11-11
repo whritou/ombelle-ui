@@ -137,3 +137,69 @@ test('the matrix with reduced transparency', async ({ page }) => {
   expect(filters.length).toBeGreaterThan(1)
   expect(new Set(filters)).toEqual(new Set(['none']))
 })
+
+test('forced states survive switching between Single and Matrix', async ({ page }) => {
+  await page.goto(`${site}/editor/component/button`)
+  const preview = frame(page, 'Button recipe preview')
+  const single = preview.locator("[data-slot='recipe-button']").first()
+  // Hover may change the colour, shadow, filter or offset, depending on the family.
+  const look = (element: Element) => { const style = getComputedStyle(element); return [style.backgroundColor, style.color, style.boxShadow, style.filter, style.opacity, style.transform].join(' | ') }
+  const background = () => single.evaluate(look)
+  await expect(single).toBeVisible({ timeout: 60000 })
+  const rest = await background()
+  await segment(page, 'Preview state', 'Hover').click()
+  await expect.poll(background).not.toBe(rest)
+  const hover = await background()
+  await segment(page, 'Preview state', 'Rest').click()
+  await segment(page, 'Preview layout', 'Matrix').click()
+  const table = matrix(page, 'Button recipe preview')
+  await expect(table).toBeVisible({ timeout: 60000 })
+  // The States row's hover cell is drawn with the hover rules.
+  const hoverCell = table.locator(".recipe-matrix-state").filter({ hasText: 'hover' }).locator("[data-slot='recipe-button']")
+  expect(await hoverCell.evaluate(look)).toBe(hover)
+  await segment(page, 'Preview layout', 'Single').click()
+  await expect(table).toHaveCount(0)
+  await segment(page, 'Preview state', 'Hover').click()
+  await expect.poll(background).toBe(hover)
+})
+
+for (const [path, title] of [['badge', 'Badge recipe preview'], ['button', 'Button recipe preview']] as const)
+  test(`the ${path} matrix stays still while nothing changes`, async ({ page }) => {
+    await page.goto(`${site}/editor/component/${path}`)
+    await segment(page, 'Preview layout', 'Matrix').click()
+    const root = frame(page, title).locator('[data-layout="matrix"]')
+    await expect(root).toBeVisible({ timeout: 60000 })
+    await expect(page.getByTestId('matrix-pending')).toHaveCount(0, { timeout: 60000 })
+    const first = await root.getAttribute('data-request')
+    // No edit, no new render: the matrix is not sent again.
+    await page.waitForTimeout(4000)
+    expect(await root.getAttribute('data-request')).toBe(first)
+  })
+
+test('an edit shows the matrix is recompiling, then the new cells', async ({ page }) => {
+  await page.goto(`${site}/editor/component/badge`)
+  await segment(page, 'Preview layout', 'Matrix').click()
+  const table = matrix(page, 'Badge recipe preview')
+  await expect(table).toBeVisible({ timeout: 60000 })
+  await expect(page.getByTestId('matrix-pending')).toHaveCount(0, { timeout: 60000 })
+  await page.getByLabel('Label', { exact: true }).fill('Recompiled')
+  // The previous cells stay in view while the edit compiles, and the status says so.
+  await expect(page.getByTestId('matrix-pending')).toBeVisible()
+  await expect(table).toBeVisible()
+  await expect(page.getByTestId('matrix-pending')).toHaveCount(0, { timeout: 60000 })
+  await expect(table.locator("[data-slot='recipe-badge']").first()).toHaveText('Recompiled')
+})
+
+test('the Button matrix follows the Rows and Columns the reader chose', async ({ page }) => {
+  await page.goto(`${site}/editor/component/button`)
+  await segment(page, 'Preview layout', 'Matrix').click()
+  const table = matrix(page, 'Button recipe preview')
+  await expect(table).toBeVisible({ timeout: 60000 })
+  await page.getByLabel('Rows', { exact: true }).selectOption('size')
+  await expect(table.locator('caption')).toHaveText('Button variants by size and variant', { timeout: 60000 })
+  await expect(table.locator('thead th[scope="col"]')).toHaveCount(7)
+  await page.getByLabel('Columns', { exact: true }).selectOption('')
+  await expect(table.locator('caption')).toHaveText('Button variants by size', { timeout: 60000 })
+  await expect(table.locator('thead')).toHaveCount(0)
+  await expect(table).not.toContainText('null')
+})

@@ -3,18 +3,13 @@ import { diffSummary, lineDiff, type DiffLine } from './line-diff'
 
 export type FileChange = { kind: Artifact['kind'] | 'recipe'; name: string; lines: DiffLine[]; added: number; removed: number }
 
-const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
 /**
- * The parts of a generated file that only name this compile: the 64-character scope, the
- * recipe id and its revision. Both sides of a diff get the same tokens, so only real edits differ.
+ * The part of a generated file that only names this compile: its 64-character scope. The recipe
+ * id and revision appear only in paths and in the usage file, which is not diffed, so they are
+ * left alone: rewriting a common word such as "badge" would change real lines.
  */
 export function normalizeArtifact(content: string, result: InstallableRecipeCompileResult): string {
-  const { id, revision } = result.recipe.data
-  return content
-    .replaceAll(result.scope, '<scope>')
-    .replace(new RegExp(`(^|[^\\w-])${escape(id)}(?![\\w-])`, 'g'), '$1<recipe>')
-    .replace(new RegExp(`(^|[^\\w])r${revision}(?!\\d)`, 'g'), '$1r<n>')
+  return content.replaceAll(result.scope, '<scope>')
 }
 
 function recipeJson(result: InstallableRecipeCompileResult): string {
@@ -56,21 +51,14 @@ export function changesSummary(changes: FileChange[]): string {
 
 /**
  * A preset's generated files against its starting or base preset's, paired by kind and file
- * name. The preset's own id, name and revision are normalized, so renaming it changes nothing.
+ * name. A preset's id, name and revision appear in none of them, so they are compared as they are.
  */
 export function presetChanges(result: CompileResult, reference: CompileResult): FileChange[] {
-  const normalize = (content: string, compiled: CompileResult) => {
-    const { id, name, revision } = compiled.preset.data
-    return content
-      .replace(new RegExp(`(^|[^\\w-])${escape(id)}(?![\\w-])`, 'g'), '$1<preset>')
-      .replace(new RegExp(escape(name), 'g'), '<name>')
-      .replace(new RegExp(`(^|[^\\w])r${revision}(?!\\d)`, 'g'), '$1r<n>')
-  }
   return result.artifacts
     .filter((artifact) => artifact.kind !== 'usage' && artifact.kind !== 'utility')
     .map((artifact) => {
       const name = fileName(artifact.logicalPath)
       const other = reference.artifacts.find((candidate) => candidate.kind === artifact.kind && fileName(candidate.logicalPath) === name)
-      return change(artifact.kind, name, other ? normalize(other.content, reference) : '', normalize(artifact.content, result))
+      return change(artifact.kind, name, other?.content ?? '', artifact.content)
     })
 }
