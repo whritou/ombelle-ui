@@ -258,7 +258,21 @@ describe('the 0.7.3 batch 6b and 6c variants', () => {
     const ring = declarations(read('sheet/minimalist.css'), "[data-slot='sheet-dismiss']:is([data-side='bottom'] > *, [data-side='top'] > *):focus-visible")
     expect(ring['outline-width']).toBe('2px')
   })
+  it('neo-brutalism writes a sorted header and its ring in the yellow header\'s own text colour', () => {
+    const css = read('table/neo-brutalism.css')
+    expect(declarations(css, "[data-slot='table-sort']:is([aria-sort] > *)").color).toBe('inherit')
+    expect(declarations(css, "[data-slot='table-sort']:focus-visible").outline).toContain('var(--primary-foreground)')
+  })
+  it('minimalist rings a sort button inside itself, since its first column has no inline padding and the container clips', () => {
+    const ring = declarations(read('table/minimalist.css'), "[data-slot='table-sort']:focus-visible")
+    expect([ring.outline, ring['outline-offset']]).toEqual(['1px solid var(--ring)', '-1px'])
+  })
+  it('minimalist gives a sticky header a surface and keeps its rule while the rows scroll', () => {
+    const sticky = declarations(read('table/minimalist.css'), "[data-slot='table-head']:is([data-table-sticky] *)")
+    expect(sticky.background).toBe('var(--card)')
+    expect(sticky['box-shadow']).toMatch(/^inset 0 -1px 0 var\(--foreground\), 0 6px 6px -6px /)
+  })
   it.each(families)('%s casts the sticky header shadow downwards only', family => {
-    expect(declarations(read(`table/${family}.css`), "[data-slot='table-head']:is([data-table-sticky] *)")['box-shadow']).toMatch(/^0 6px 6px -6px /)
+    expect(declarations(read(`table/${family}.css`), "[data-slot='table-head']:is([data-table-sticky] *)")['box-shadow']).toMatch(/(^|, )0 6px 6px -6px /)
   })
 })

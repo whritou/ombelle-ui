@@ -36,6 +36,7 @@ type Multi = {
   optionId: (value: string) => string
   listboxId: string
   disabled: boolean
+  required: boolean
 }
 /** Set by a multiple Select; its parts then render a listbox instead of Radix Select's single list. */
 const MultiContext = React.createContext<Multi | null>(null)
@@ -67,25 +68,41 @@ function MultipleSelect({ value, defaultValue, onValueChange, open, defaultOpen,
   const options = React.useMemo(() => collectOptions(children, []), [children])
   const setOpen = React.useCallback((next: boolean) => {
     if (open === undefined) setOwnOpen(next)
+    // However it opens, by key or by click, an option is highlighted: the first chosen one, or the first.
+    if (next) setHighlighted(current => {
+      const enabled = options.filter(option => !option.disabled)
+      return current ?? enabled.find(option => values.includes(option.value))?.value ?? enabled[0]?.value
+    })
     onOpenChange?.(next)
-  }, [open, onOpenChange])
+  }, [open, onOpenChange, options, values])
   const toggle = React.useCallback((item: string) => {
     const next = values.includes(item) ? values.filter(entry => entry !== item) : [...values, item]
     if (value === undefined) setOwn(next)
     onValueChange?.(next)
   }, [values, value, onValueChange])
   const context: Multi = {
-    values, toggle, options, open: isOpen, setOpen, highlighted, setHighlighted, disabled,
-    optionId: item => `${base}-option-${options.findIndex(option => option.value === item)}`,
+    values, toggle, options, open: isOpen, setOpen, highlighted, setHighlighted, disabled, required: !!required,
+    // An item the Select could not collect (rendered by a wrapper component) still gets an id of its own.
+    optionId: item => { const at = options.findIndex(option => option.value === item); return `${base}-option-${at === -1 ? `v-${encodeURIComponent(item)}` : at}` },
     listboxId: `${base}-listbox`,
   }
+  // Focus stays on the trigger, so the browser does not scroll the list to the highlighted option: this does.
+  React.useEffect(() => {
+    if (isOpen && highlighted !== undefined) document.getElementById(context.optionId(highlighted))?.scrollIntoView({ block: 'nearest' })
+  }, [isOpen, highlighted])
   return (
     <MultiContext.Provider value={context}>
       <PopoverPrimitive.Root open={isOpen} onOpenChange={setOpen}>
         {children}
       </PopoverPrimitive.Root>
-      {name ? values.map(item => <input key={item} type="hidden" name={name} value={item} />) : null}
-      {name && required && !values.length ? <input type="hidden" name={name} value="" required /> : null}
+      {/* A hidden native select submits the values and takes part in validation, as Radix Select's own bubble select does. */}
+      {name || required ? (
+        <select multiple aria-hidden="true" tabIndex={-1} name={name} required={required} disabled={disabled} value={values} onChange={() => {}}
+          style={{ position: 'absolute', inlineSize: 1, blockSize: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0, opacity: 0, pointerEvents: 'none' }}>
+          {options.map(option => <option key={option.value} value={option.value}>{option.text}</option>)}
+          {values.filter(item => !options.some(option => option.value === item)).map(item => <option key={item} value={item}>{item}</option>)}
+        </select>
+      ) : null}
     </MultiContext.Provider>
   )
 }
@@ -141,10 +158,7 @@ function MultipleTrigger({ className, size, children, onKeyDown, ...props }: Rea
   const typed = React.useRef({ text: '', at: 0 })
   const enabled = multi.options.filter(option => !option.disabled)
   const move = (to: string | undefined) => { if (to !== undefined) multi.setHighlighted(to) }
-  const open = () => {
-    multi.setOpen(true)
-    multi.setHighlighted(multi.highlighted ?? enabled.find(option => multi.values.includes(option.value))?.value ?? enabled[0]?.value)
-  }
+  const open = () => multi.setOpen(true)
   return (
     <PopoverPrimitive.Trigger asChild>
       <button
@@ -154,6 +168,7 @@ function MultipleTrigger({ className, size, children, onKeyDown, ...props }: Rea
         aria-expanded={multi.open}
         aria-controls={multi.open ? multi.listboxId : undefined}
         aria-activedescendant={multi.open && multi.highlighted !== undefined ? multi.optionId(multi.highlighted) : undefined}
+        aria-required={multi.required || undefined}
         disabled={multi.disabled || undefined}
         {...props}
         data-slot="select-trigger"

@@ -38,6 +38,19 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(next).toHaveAttribute('aria-disabled', 'true')
     })
 
+    test('compact pagination without hrefs is made of buttons the keyboard can use', async ({ page }) => {
+      await open(page, edition)
+      const nav = page.getByTestId('vm-compact-buttons')
+      await expect(nav.getByRole('button', { name: 'Previous page' })).toBeDisabled()
+      const next = nav.getByRole('button', { name: 'Next page' })
+      await next.focus()
+      await page.keyboard.press('Enter')
+      await expect(nav).toContainText('Page 2 of 2')
+      await expect(next).toBeDisabled()
+      await nav.getByRole('button', { name: 'Previous page' }).press('Space')
+      await expect(nav).toContainText('Page 1 of 2')
+    })
+
     test('the page size select updates the range', async ({ page }) => {
       await open(page, edition)
       await page.getByTestId('variants-more').getByLabel('Rows per page').selectOption('50')
@@ -125,6 +138,30 @@ for (const edition of ['radix', 'base'] as const) {
 
 for (const edition of ['radix', 'base'] as const) {
   test.describe(`${edition} select`, () => {
+    test('a required multiple Select blocks an empty form, and the highlighted option scrolls into view', async ({ page }) => {
+      await open(page, edition)
+      const form = page.getByTestId('vm-select-required')
+      const output = form.getByTestId('vm-cities-output')
+      await form.getByRole('button', { name: 'Save cities' }).click()
+      await expect(output).toHaveText('')
+      const trigger = form.getByRole('combobox', { name: 'Cities' })
+      if (edition === 'radix') await expect(trigger).toHaveAttribute('aria-required', 'true')
+      // A click opens the list with an option highlighted.
+      await trigger.click()
+      const list = page.getByRole('listbox')
+      await expect(list).toBeVisible()
+      if (edition === 'radix') await expect(trigger).toHaveAttribute('aria-activedescendant', /.+/)
+      await page.keyboard.press('End')
+      const last = list.getByRole('option', { name: 'Prague' })
+      await expect(last).toHaveAttribute('data-highlighted', /.*/)
+      const [option, box] = await Promise.all([last.boundingBox(), list.boundingBox()])
+      expect(option!.y + option!.height).toBeLessThanOrEqual(box!.y + box!.height + 1)
+      await page.keyboard.press(edition === 'radix' ? 'Space' : 'Enter')
+      await page.keyboard.press('Escape')
+      await form.getByRole('button', { name: 'Save cities' }).click()
+      await expect(output).toHaveText('prague')
+    })
+
     test('a multiple Select chooses by keyboard and pointer, stays open, submits every value and resets', async ({ page }) => {
       await open(page, edition)
       const form = page.getByTestId('vm-select')

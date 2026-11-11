@@ -124,6 +124,13 @@
   }
 }
 /* 0.7.3 variants */
+/* A compact end without an href is a button: it takes the link's pointer and hover. */
+[data-slot='pagination-link']:is(button) {
+  cursor: pointer;
+}
+[data-slot='pagination-link']:is(button):not(:disabled):hover {
+  background: var(--muted);
+}
 [data-slot='pagination-compact'] {
   display: flex;
   align-items: center;

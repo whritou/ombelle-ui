@@ -210,6 +210,24 @@ function VariantsMoreToastList() {
     </ToastViewport>
   )
 }
+const vmCities = ['Amsterdam', 'Berlin', 'Copenhagen', 'Dublin', 'Edinburgh', 'Florence', 'Geneva', 'Helsinki', 'Istanbul', 'Jena', 'Kyiv', 'Lisbon', 'Madrid', 'Naples', 'Oslo', 'Prague']
+function VariantsMoreRequiredSelect() {
+  const [sent, setSent] = React.useState('')
+  return (
+    <form data-testid="vm-select-required" onSubmit={event => { event.preventDefault(); setSent(new FormData(event.currentTarget).getAll('cities').join(',') || 'none') }}>
+      <p id="vm-cities-label">Cities</p>
+      <Select multiple required name="cities" defaultValue={[]}>
+        <SelectTrigger aria-labelledby="vm-cities-label"><SelectValue placeholder="Choose cities" /></SelectTrigger>
+        <SelectContent>
+          {vmCities.map(city => <SelectItem key={city} value={city.toLowerCase()}>{city}</SelectItem>)}
+        </SelectContent>
+      </Select>
+      <button type="submit">Save cities</button>
+      <output data-testid="vm-cities-output">{sent}</output>
+    </form>
+  )
+}
+
 function VariantsMoreToasts() {
   const [promise, setPromise] = React.useState<Promise<string> | null>(null)
   const [pending, setPending] = React.useState(false)
@@ -256,6 +274,7 @@ function VariantsMoreSheets() {
 // Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
 function VariantsMoreScenario() {
   const [page, setPage] = React.useState(1)
+  const [report, setReport] = React.useState(1)
   const [rows, setRows] = React.useState(25)
   return (
     <section aria-label="More variants" data-testid="variants-more">
@@ -284,11 +303,15 @@ function VariantsMoreScenario() {
           onPrevious={event => { event.preventDefault(); setPage(value => value - 1) }}
           onNext={event => { event.preventDefault(); setPage(value => value + 1) }} />
       </Pagination>
+      <Pagination aria-label="Report pages" data-testid="vm-compact-buttons">
+        <PaginationCompact page={report} pageCount={2} onPrevious={() => setReport(value => value - 1)} onNext={() => setReport(value => value + 1)} />
+      </Pagination>
       <PaginationPageSize data-testid="vm-page-size" value={rows} onValueChange={setRows}
         range={<output data-testid="vm-range">1–{rows} of 290</output>} />
       <VariantsMoreTable />
       <VariantsMoreFields />
       <VariantsMoreSelect />
+      <VariantsMoreRequiredSelect />
       <VariantsMoreToasts />
       <VariantsMoreSheets />
     </section>

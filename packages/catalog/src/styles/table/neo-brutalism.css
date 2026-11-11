@@ -143,10 +143,11 @@
   block-size: 0.75rem;
 }
 [data-slot='table-sort']:is([aria-sort] > *) {
-  color: var(--foreground);
+  color: inherit;
 }
 [data-slot='table-sort']:focus-visible {
-  outline: 3px dashed var(--ring);
+  /* The head is on --primary: the ring takes its text colour. */
+  outline: 3px dashed var(--primary-foreground);
   outline-offset: 4px;
 }
 [data-slot='table-head'][data-actions],
