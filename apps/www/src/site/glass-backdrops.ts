@@ -79,3 +79,17 @@ export function labInkFor(data: Preset, mode: GlassPreviewMode, scene: PresetBac
   const lab = uneditedLabPreset(data)
   return lab && glassPresetBackdrop(lab, mode) === scene ? mode : null
 }
+
+/**
+ * The "Preview backdrop" options with each scene's ratio in its name: "Brume, 6.8:1",
+ * "(auto)" on the automatic scene and ", below 4.5:1" in words on a failing one. With
+ * reduced transparency the surfaces are opaque, so every scene shows the same ratio.
+ */
+export function glassBackdropMenu(data: Preset, mode: GlassPreviewMode, auto: PresetBackdrop, reduced: boolean): { value: PresetBackdrop; label: string }[] {
+  const rated = reduced ? { ...data, design: { ...data.design, transparency: 'reduced' } } as Preset : data
+  const ratios = glassSceneRatios(rated, mode)
+  return glassBackdropOptions.map(({ value, label }) => ({
+    value,
+    label: `${label}, ${ratios[value].toFixed(1)}:1${value === auto ? ' (auto)' : ''}${ratios[value] < 4.5 ? ', below 4.5:1' : ''}`,
+  }))
+}

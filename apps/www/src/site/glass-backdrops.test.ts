@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { getCatalog, startingPresetOrder, type StartingPresetId } from '@ombelle/catalog'
 import type { Preset } from '@ombelle/contracts'
 import { glassBackdropOptions, glassPresetBackdrop } from './glass-presets'
-import { glassSceneRatios, labInkFor, pickGlassScene } from './glass-backdrops'
+import { glassBackdropMenu, glassSceneRatios, labInkFor, pickGlassScene } from './glass-backdrops'
 
 const preset = (id: StartingPresetId): Preset => structuredClone(getCatalog('0.1.0').startingPresets[id])
 const modes = ['light', 'dark'] as const
@@ -58,4 +58,24 @@ it('keeps the plate on other scenes, edited presets, other presets and reduced t
   const reduced = preset('builtin-liquid-glass-givre')
   reduced.design = { ...reduced.design, transparency: 'reduced' } as Preset['design']
   expect(labInkFor(reduced, 'light', 'dawn')).toBeNull()
+})
+
+it('menu labels carry the ratio and the automatic choice', () => {
+  const data = preset('builtin-liquid-glass-cristal')
+  const menu = glassBackdropMenu(data, 'light', 'mist', false)
+  expect(menu.map((option) => option.value)).toEqual(glassBackdropOptions.map((option) => option.value))
+  expect(menu.find((option) => option.value === 'mist')!.label).toMatch(/^Brume, \d+\.\d:1 \(auto\)$/)
+  expect(menu.filter((option) => option.label.includes('(auto)'))).toHaveLength(1)
+})
+
+it('a scene below 4.5:1 says so in words', () => {
+  const menu = glassBackdropMenu(preset('builtin-liquid-glass-cristal'), 'light', 'mist', false)
+  const night = menu.find((option) => option.value === 'night')!
+  expect(glassSceneRatios(preset('builtin-liquid-glass-cristal'), 'light').night).toBeLessThan(4.5)
+  expect(night.label).toMatch(/^Nuit, \d+\.\d:1, below 4\.5:1$/)
+})
+
+it('reduced transparency shows one shared ratio', () => {
+  const menu = glassBackdropMenu(preset('builtin-liquid-glass-cristal'), 'dark', 'prism', true)
+  expect(new Set(menu.map((option) => /, (\d+\.\d):1/.exec(option.label)![1])).size).toBe(1)
 })

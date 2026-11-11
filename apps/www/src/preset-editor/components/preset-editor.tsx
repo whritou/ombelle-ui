@@ -8,6 +8,7 @@ import {
   applyStartingPreset,
   createPresetDraft,
   matchingStartingPreset,
+  materializePreset,
   presetGlassReport,
   setPresetEdit,
   setPresetIdentity,
@@ -57,7 +58,8 @@ import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import { GlassStartingPoints } from './glass-starting-points'
 import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
-import { glassBackdropOptions as backdropOptions, glassPresetBackdrop } from '../../site/glass-presets'
+import { glassBackdropOptions, glassPresetBackdrop } from '../../site/glass-presets'
+import { glassBackdropMenu, labInkFor, pickGlassScene } from '../../site/glass-backdrops'
 import {
   EditorTopBar,
   familyCommands,
@@ -100,7 +102,6 @@ export default function PresetEditor() {
     // The picker overrides it for this preview until another starting preset matches.
     [backdropPreset, setBackdropPreset] = useState<StartingPresetId>(defaultGlassPresetId),
     [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
-  const backdrop = backdropOverride ?? glassPresetBackdrop(backdropPreset, mode)
   // ?page= opens a preview page directly, including the component gallery,
   // which the page picker no longer offers.
   useEffect(() => {
@@ -207,6 +208,16 @@ export default function PresetEditor() {
     setBackdropPreset(startingPreset)
     setBackdropOverride(null)
   }, [startingPreset])
+  // The scene the draft's glass text reads best on, kept on the starting preset's own
+  // scene while an edit leaves it as readable; the picker still overrides it.
+  const glassPreset = useMemo(() => {
+    if (!glass) return null
+    try { return materializePreset(draft) } catch { return null }
+  }, [glass, draft])
+  const autoBackdrop = glassPreset ? pickGlassScene(glassPreset, mode, backdropPreset) : glassPresetBackdrop(backdropPreset, mode)
+  const backdrop = backdropOverride ?? autoBackdrop
+  const backdropOptions = glassPreset ? glassBackdropMenu(glassPreset, mode, autoBackdrop, false) : glassBackdropOptions
+  const labInk = glassPreset ? labInkFor(glassPreset, mode, backdrop) : null
   const glassReport = glass ? presetGlassReport(draft) : null
   const glassContrastWarning = glassReport?.passes === false
   // Download JSON and Get code both require a current compile result.
@@ -482,6 +493,7 @@ export default function PresetEditor() {
                 viewport,
                 ...(scene === 'gallery' ? {} : { scene }),
                 ...(glass && backdrop !== 'kit' ? { backdrop } : {}),
+                ...(glass && labInk ? { labInk } : {}),
               }}
               stale={compiled.stale}
               onStatus={setPreviewStatus}
