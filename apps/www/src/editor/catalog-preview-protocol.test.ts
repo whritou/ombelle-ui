@@ -75,5 +75,5 @@ it('verifies a catalog matrix and rejects malformed ones', async () => {
   expect(await verifyCatalogMatrixRender({ ...message, cells: [{ ...message.cells[0]!, result: { ...message.cells[0]!.result, scope: '0'.repeat(64) } }, message.cells[1]] }, 'badge', 2)).toBeNull()
   expect(await verifyCatalogMatrixRender({ ...message, reducedTransparency: true }, 'badge', 2)).not.toBeNull()
   expect(await verifyCatalogMatrixRender({ ...message, reducedTransparency: 'yes' }, 'badge', 2)).toBeNull()
-  expect(await verifyCatalogMatrixRender(message, 'button', 2)).toBeNull()
+  expect(await verifyCatalogMatrixRender(message, 'card', 2)).toBeNull()
 })
