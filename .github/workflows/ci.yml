@@ -38,7 +38,9 @@ jobs:
         run: pnpm exec vitest run packages apps/www/src
   integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Shard 4 holds the hosted preview build and the foundation evidence
+    # collection, which together outgrew ten minutes as the catalog grew.
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
