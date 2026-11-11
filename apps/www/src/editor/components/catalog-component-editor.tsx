@@ -16,6 +16,8 @@ import { preserveRecovery, readRecoveries, recipeFilename } from '../storage'
 import { useCatalogCompiler } from '../use-catalog-compiler'
 import { useRecipeBatch } from '../use-recipe-batch'
 import { changesSummaryFor } from './changes-summary'
+import { MatrixControls } from './matrix-controls'
+import { useMatrixLayout } from '../use-matrix-layout'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 import { ArtifactPanel } from './artifact-panel'
 import { CatalogProperties } from './catalog-properties'
@@ -41,6 +43,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const redoRef = useRef<HTMLButtonElement>(null)
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
   const recipe = history.present
+  const matrix = useMatrixLayout(component, recipe)
   const glassFamily = resolveRecipePreset(recipe.presetRef).styleFamily === 'liquid-glass'
   const { result, error, pending } = useCatalogCompiler(recipe)
   // The catalog default for the same family and preset: what Changes and Get code compare to.
@@ -149,6 +152,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
                 onChange={mode => setView(previous => ({ ...previous, mode }))} />
               {glassFamily && transparencySupported && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
                 options={previewTransparencyOptions} onChange={setTransparency} />}
+              <MatrixControls matrix={matrix} />
               <SegmentedControl label="Preview width" value={view.viewport} options={previewWidthOptions('Narrow')}
                 onChange={viewport => setView(previous => ({ ...previous, viewport }))} />
               <p className={styles.previewStatus} data-status={ready ? 'current' : 'pending'}>
@@ -156,7 +160,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={result} view={view} component={component} componentName={name} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name}

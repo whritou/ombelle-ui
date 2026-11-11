@@ -11,7 +11,10 @@ import { startReducedTransparencyMirror } from './reduced-transparency-mirror'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
-import { measurePart, verifyCatalogPreviewRender, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
+import { measurePart, verifyCatalogMatrixRender, verifyCatalogPreviewRender, type CatalogMatrixRender, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
+import { verifyButtonMatrixRender, type ButtonMatrixRender } from '../../www/src/editor/preview-protocol'
+import { buttonStateRow } from '../../www/src/editor/matrix'
+import { CatalogMatrixPreview, MatrixTable } from './matrix-preview'
 import type { ComponentRecipe } from '@ombelle/contracts'
 import { colorDimensions } from '../../www/src/editor/measured-color'
 import { CatalogRecipePreview } from './catalog-recipe-preview'
@@ -36,7 +39,7 @@ type ButtonModule = Awaited<ReturnType<(typeof editorButtons)[keyof typeof edito
 const filterTokens = ['--glass-refraction-width', '--glass-refraction-strength', '--glass-halo', '--glass-motion']
 
 function EditorPreview() {
-  const [message, setMessage] = React.useState<PreviewRender | CatalogPreviewRender | null>(null)
+  const [message, setMessage] = React.useState<PreviewRender | CatalogPreviewRender | CatalogMatrixRender | ButtonMatrixRender | null>(null)
   const [buttonModule, setButtonModule] = React.useState<{ family: string; module: ButtonModule } | null>(null)
   const lastRequestId = React.useRef(0)
   const activePort = React.useRef<MessagePort | null>(null)
@@ -65,9 +68,14 @@ function EditorPreview() {
           typeof data.requestId === 'number' && Number.isSafeInteger(data.requestId) && data.requestId > 0
             ? data.requestId : null
         const component = new URLSearchParams(window.location.search).get('component')
+        const type = typeof data === 'object' && data !== null && 'type' in data ? data.type : null
         const accepted = component
-          ? await verifyCatalogPreviewRender(data, component as ComponentRecipe['component'], lastRequestId.current)
-          : await verifyPreviewRender(data, lastRequestId.current)
+          ? type === 'catalog-matrix-render'
+            ? await verifyCatalogMatrixRender(data, component as ComponentRecipe['component'], lastRequestId.current)
+            : await verifyCatalogPreviewRender(data, component as ComponentRecipe['component'], lastRequestId.current)
+          : type === 'matrix-render'
+            ? await verifyButtonMatrixRender(data, lastRequestId.current)
+            : await verifyPreviewRender(data, lastRequestId.current)
         if (attachedPort !== port) return
         if (!accepted || accepted.requestId <= lastRequestId.current) {
           if (id !== null) attachedPort.postMessage({ type: 'render-ack', requestId: id, status: 'rejected' })
@@ -95,7 +103,14 @@ function EditorPreview() {
   React.useEffect(() => {
     document.documentElement.toggleAttribute('data-reduced-transparency', reducedTransparency)
   }, [reducedTransparency])
-  const state = buttonMessage?.state
+  // In a Button matrix the current cell stands in for the single specimen: its family, glass
+  // scene, filter tokens and measurements drive the whole preview.
+  const matrixMessage = message?.type === 'matrix-render' ? message : null
+  const matrixCurrent = matrixMessage?.cells.find((cell) => cell.current)
+  const state: PreviewRender['state'] | undefined = buttonMessage?.state ?? (matrixMessage && matrixCurrent
+    ? { recipe: matrixCurrent.recipe, css: matrixCurrent.css, mode: matrixMessage.mode, viewport: matrixMessage.viewport, forcedState: 'none', requestId: matrixMessage.requestId }
+    : undefined)
+  const specimenScope = buttonMessage?.scope ?? matrixCurrent?.scope
   const family = state && draftFamily(state.recipe)
   const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
   const recipePreset = React.useMemo(() => glassPreset && state ? resolveRecipePreset(state.recipe.presetRef) : undefined,
@@ -140,36 +155,57 @@ function EditorPreview() {
   }, [Button, family, state?.css, state?.mode])
   // Report the specimen's rendered values so the editor's empty fields show what the preset draws.
   React.useEffect(() => {
-    if (!buttonMessage || !Button || !specimen.current) return
+    if (!state || !Button || !specimen.current) return
     const button = measurePart(specimen.current)
     // Colour placeholders show the Button at rest: a forced hover or press would report its own colours.
-    if (buttonMessage.state.forcedState !== 'none') for (const key of colorDimensions) delete button[key]
-    reportMeasure(buttonMessage.requestId, { button })
-  }, [Button, buttonMessage, reportMeasure])
+    if (state.forcedState !== 'none') for (const key of colorDimensions) delete button[key]
+    reportMeasure(state.requestId, { button })
+  }, [Button, message, reportMeasure])
   if (message?.type === 'catalog-render') return <CatalogRecipePreview message={message} onMeasure={reportMeasure} />
+  if (message?.type === 'catalog-matrix-render') return <CatalogMatrixPreview message={message} onMeasure={reportMeasure} />
+  if (matrixMessage && matrixCurrent) return <div className={matrixMessage.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={matrixMessage.viewport} data-layout="matrix">
+    {/* Each cell keeps its own sheet; the current one also gets the forced-state copies for the state row. */}
+    {matrixMessage.cells.map((cell) => cell.current
+      ? <style key={cell.css} ref={recipeStyle}>{cell.css}</style>
+      : <style key={cell.css}>{cell.css}</style>)}
+    {glassPreset && Button && <LiquidGlassFilter key={`${glassPreset}:${overrides?.glassHalo}:${overrides?.glassMotion}`} />}
+    {glassBackdrop && <GlassBackdropArt scene={glassBackdrop} />}
+    {Button && <MatrixTable name="Button" rows="variant" columns="size" cells={matrixMessage.cells}
+      render={(cell) => <ButtonSpecimen Button={Button} recipe={cell.recipe} scope={cell.scope} forcedState="none" ref={cell.current ? specimen : undefined} />}
+      extra={matrixMessage.states ? { label: 'States', cells: buttonStateRow.map((forced) => ({ key: forced, label: forced,
+        node: <ButtonSpecimen Button={Button} recipe={matrixCurrent.recipe} scope={matrixCurrent.scope} forcedState={forced} /> })) } : undefined} />}
+  </div>
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
     <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>
     {glassPreset && Button && <LiquidGlassFilter key={`${glassPreset}:${overrides?.glassHalo}:${overrides?.glassMotion}`} />}
     {glassBackdrop && <GlassBackdropArt scene={glassBackdrop} />}
-    {/* Button always sets data-slot="button" on itself, but the recipe CSS targets
-        data-slot="recipe-button", as the installed RecipeButton renders it. As a Slot
-        parent it only lends variant classes and data attributes; the child's own
-        data-slot wins the Slot merge. */}
-    {state && Button && <Button asChild variant={state.recipe.props.variant} size={state.recipe.props.size}>
-      <button
-        ref={specimen}
-        data-slot="recipe-button"
-        data-ombelle-recipe={buttonMessage?.scope}
-        type={state.recipe.props.type}
-        disabled={state.recipe.props.disabled || state.recipe.props.loading || state.forcedState === 'disabled' || state.forcedState === 'loading'}
-        aria-busy={state.recipe.props.loading || state.forcedState === 'loading' || undefined}
-        data-forced-state={state.forcedState}
-        {...recipeIconAttributes(state.recipe)}
-      >{(state.recipe.props.loading || state.forcedState === 'loading') && <span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />}{recipeChildren(state.recipe)}</button>
-    </Button>}
+    {state && Button && <ButtonSpecimen Button={Button} recipe={state.recipe} scope={specimenScope} forcedState={state.forcedState} ref={specimen} />}
   </div>
 }
+
+/**
+ * One Button as the installed RecipeButton renders it. Button always sets data-slot="button" on
+ * itself, but the recipe CSS targets data-slot="recipe-button". As a Slot parent it only lends
+ * variant classes and data attributes; the child's own data-slot wins the Slot merge.
+ */
+const ButtonSpecimen = React.forwardRef<HTMLButtonElement, {
+  Button: ButtonModule['Button']; recipe: PreviewRecipe; scope: string | undefined; forcedState: PreviewRender['state']['forcedState']
+}>(function ButtonSpecimen({ Button, recipe, scope, forcedState }, ref) {
+  const loading = recipe.props.loading || forcedState === 'loading'
+  return <Button asChild variant={recipe.props.variant} size={recipe.props.size}>
+    <button
+      ref={ref}
+      data-slot="recipe-button"
+      data-ombelle-recipe={scope}
+      type={recipe.props.type}
+      disabled={recipe.props.disabled || loading || forcedState === 'disabled'}
+      aria-busy={loading || undefined}
+      data-forced-state={forcedState}
+      {...recipeIconAttributes(recipe)}
+    >{loading && <span data-slot="button-spinner" aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />}{recipeChildren(recipe)}</button>
+  </Button>
+})
 
 type PreviewRecipe = PreviewRender['state']['recipe']
 

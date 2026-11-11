@@ -1,33 +1,68 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { InstallableRecipeCompileResult, ComponentRecipe } from '@ombelle/contracts'
+import type { InstallableRecipeCompileResult, ComponentRecipe, ComponentRecipeCompileResult, Recipe } from '@ombelle/contracts'
 import type { EditorView } from '../model'
-import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type PreviewRender } from '../preview-protocol'
+import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type ButtonMatrixRender, type PreviewRender } from '../preview-protocol'
 import { previewFrameUrl } from '../preview-url'
-import { acceptButtonMeasure, acceptCatalogMeasure, verifyCatalogCompileResult, type CatalogPreviewRender, type MeasuredParts } from '../catalog-preview-protocol'
+import { acceptButtonMeasure, acceptCatalogMeasure, verifyCatalogCompileResult, type CatalogMatrixRender, type CatalogPreviewRender, type MeasuredParts } from '../catalog-preview-protocol'
 
-export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure, reducedTransparency = false }: {
+/** The Matrix layout's cells, compiled; sent in place of the single render while set. */
+export type PreviewMatrix = {
+  rows: string
+  columns: string | null
+  /** The Button's row of forced states for the current cell. */
+  states: boolean
+  cells: { row: string | number; column: string | number | null; current: boolean; result: InstallableRecipeCompileResult }[]
+}
+
+export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure, reducedTransparency = false, matrix = null }: {
   result: InstallableRecipeCompileResult | null; view: EditorView
   /** Simulates prefers-reduced-transparency in the preview. Preview state only, never saved. */
   reducedTransparency?: boolean
+  /** The Matrix layout, compiled; the single render is sent while it is null. */
+  matrix?: PreviewMatrix | null
   component?: ComponentRecipe['component']; componentName?: string
   /** Receives the rendered part dimensions of the latest render; the Button reports its 'button' slot. */
   onMeasure?(parts: MeasuredParts): void
 }) {
   const iframe = useRef<HTMLIFrameElement>(null)
   const port = useRef<MessagePort | null>(null)
-  const latest = useRef({ result, view, reducedTransparency })
+  const latest = useRef({ result, view, reducedTransparency, matrix })
   const nextRequestId = useRef(0)
   const sendEpoch = useRef(0)
   const lastAck = useRef(0)
-  latest.current = { result, view, reducedTransparency }
+  latest.current = { result, view, reducedTransparency, matrix }
   const measured = useRef(onMeasure)
   measured.current = onMeasure
 
   async function sendCurrent(targetPort: MessagePort) {
     const epoch = ++sendEpoch.current
     const current = latest.current
+    const flag = current.reducedTransparency ? { reducedTransparency: true as const } : {}
+    if (current.matrix && component) {
+      const message: CatalogMatrixRender = {
+        type: 'catalog-matrix-render', component, requestId: ++nextRequestId.current,
+        rows: current.matrix.rows, columns: current.matrix.columns,
+        cells: current.matrix.cells.map(({ row, column, current: isCurrent, result: cell }) =>
+          ({ row, column, current: isCurrent, result: cell as ComponentRecipeCompileResult })),
+        mode: current.view.mode, viewport: current.view.viewport, ...flag,
+      }
+      targetPort.postMessage(message)
+      return
+    }
+    if (current.matrix) {
+      const message: ButtonMatrixRender = {
+        type: 'matrix-render', requestId: ++nextRequestId.current, rows: 'variant', columns: 'size', states: current.matrix.states,
+        cells: current.matrix.cells.map(({ row, column, current: isCurrent, result: cell }) => ({
+          row: String(row), column: String(column), current: isCurrent, scope: cell.scope,
+          css: cell.artifacts.find((artifact) => artifact.kind === 'style')?.content ?? '', recipe: cell.recipe.data as Recipe,
+        })),
+        mode: current.view.mode, viewport: current.view.viewport, ...flag,
+      }
+      targetPort.postMessage(message)
+      return
+    }
     if (component) {
       const result = await verifyCatalogCompileResult(current.result, component)
       if (epoch !== sendEpoch.current || targetPort !== port.current || !result) return
@@ -93,7 +128,7 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
 
   useEffect(() => {
     if (port.current) void sendCurrent(port.current)
-  }, [result, view, reducedTransparency])
+  }, [result, view, reducedTransparency, matrix])
 
   const url = previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)
   return <iframe ref={iframe} title={`${componentName} recipe preview`}

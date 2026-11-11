@@ -21,6 +21,12 @@ export const previewTransparencyOptions = [
   { value: 'reduced', label: 'Reduced' },
 ] as const
 
+/** One specimen, or the recipe across its variants; preview only, never saved. */
+export const previewLayoutOptions = [
+  { value: 'single', label: 'Single' },
+  { value: 'matrix', label: 'Matrix' },
+] as const
+
 /** Wide and narrow preview options; each editor names its narrow width. */
 export function previewWidthOptions(narrowLabel: string) {
   return [

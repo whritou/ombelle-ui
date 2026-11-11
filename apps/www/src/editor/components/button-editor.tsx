@@ -19,6 +19,8 @@ import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import { useRecipeBatch } from '../use-recipe-batch'
 import { changesSummaryFor } from './changes-summary'
+import { MatrixControls } from './matrix-controls'
+import { useMatrixLayout } from '../use-matrix-layout'
 import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
@@ -55,6 +57,7 @@ export function ButtonEditor() {
   const [status, setStatus] = useState('Loading local draft…')
   const [measured, setMeasured] = useState<MeasuredParts>({})
   const draft = history.present
+  const matrix = useMatrixLayout('button', draft.recipe)
   const glassFamily = draftFamily(draft.recipe) === 'liquid-glass'
   const compilation = useCompiler(draft.recipe)
   // The catalog default for the same family and preset: what Changes and Get code compare to.
@@ -255,6 +258,7 @@ export function ButtonEditor() {
                 onChange={(mode) => setView((previous) => ({ ...previous, mode }))} />
               {glassFamily && transparencySupported && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
                 options={previewTransparencyOptions} onChange={setTransparency} />}
+              <MatrixControls matrix={matrix} />
               <SegmentedControl<EditorView['viewport']> label="Preview width" value={view.viewport}
                 options={previewWidthOptions('Narrow')}
                 onChange={(viewport) => setView((previous) => ({ ...previous, viewport }))} />
@@ -266,7 +270,7 @@ export function ButtonEditor() {
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
