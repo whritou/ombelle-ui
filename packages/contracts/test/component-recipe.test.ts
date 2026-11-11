@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import badge from '../../../examples/component-recipe.badge.json'
 import button from '../../../examples/recipe.example.json'
-import { componentRecipeComponents, supportedComponentIds, validateComponentRecipe, validateInstallableRecipe } from '../src/index.js'
+import { componentRecipeComponents, componentRecipeFields, defaultRecipeFields, supportedComponentIds, validateComponentRecipe, validateInstallableRecipe } from '../src/index.js'
 
 it('validates Badge and fills its omitted variant', () => {
   expect(validateComponentRecipe({ ...badge, props: {} })).toEqual({
@@ -63,4 +63,32 @@ it.each([
 ])('rejects whitespace-only optional action labels in %s', (component, content) => {
   expect(() => validateComponentRecipe({ ...badge, component, props: {}, content }))
     .toThrow(expect.objectContaining({ path: '/content/action' }))
+})
+
+const displayComponents = ['spinner', 'kbd', 'empty', 'field', 'meter', 'stepper'] as const
+const draft = (component: (typeof displayComponents)[number], props: Record<string, unknown> = {}, content?: Record<string, unknown>) => ({
+  ...badge, component, props,
+  content: content ?? defaultRecipeFields(componentRecipeFields(component).content),
+})
+
+it.each(displayComponents)('accepts the default %s recipe', component => {
+  expect(componentRecipeComponents).toContain(component)
+  expect(validateComponentRecipe(draft(component)).component).toBe(component)
+})
+
+it.each([
+  ['meter', { segments: 1 }],
+  ['meter', { warningPercent: 150 }],
+  ['meter', { max: 0 }],
+  ['stepper', { current: 6 }],
+  ['field', { control: 'select' }],
+] as const)('rejects %s with %o', (component, props) => {
+  expect(() => validateComponentRecipe(draft(component, props))).toThrow()
+})
+
+it('rejects a stepper with seven steps or a current step past the last', () => {
+  const step = { title: 'Step', description: '' }
+  expect(() => validateComponentRecipe(draft('stepper', {}, { steps: Array(7).fill(step) }))).toThrow()
+  expect(() => validateComponentRecipe(draft('stepper', { current: 3 }, { steps: [step, step, step] })))
+    .toThrow('Choose a step present in the recipe')
 })

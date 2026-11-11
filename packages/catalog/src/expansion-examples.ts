@@ -1,5 +1,19 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  stepper: `import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
+export function Example(){return <Stepper aria-label="Setup"><StepperItem status="complete"><StepperIndicator>1</StepperIndicator><StepperTitle>Preset</StepperTitle><StepperDescription>Ombelle</StepperDescription><StepperSeparator /></StepperItem><StepperItem status="current"><StepperIndicator>2</StepperIndicator><StepperTitle>Components</StepperTitle><StepperSeparator /></StepperItem><StepperItem status="upcoming"><StepperIndicator>3</StepperIndicator><StepperTitle>Install CLI</StepperTitle></StepperItem></Stepper>}`,
+  meter: `import { Meter, MeterLabel } from '@/components/ui/meter'
+export function Example(){return <Meter value={128} max={200} segments={10} warningAt={0.6}><MeterLabel>Deploys this month</MeterLabel></Meter>}`,
+  field: `import { Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+export function Example(){return <Field required><FieldLabel>Project name</FieldLabel><FieldControl><Input placeholder="acme-dashboard" /></FieldControl><FieldDescription>Shown in the CLI and the editor header.</FieldDescription><FieldError>Use lower case letters and dashes only.</FieldError></Field>}`,
+  empty: `import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
+import { Button } from '@/components/ui/button'
+export function Example(){return <Empty><EmptyHeader><EmptyMedia variant="icon">+</EmptyMedia><EmptyTitle asChild><h2>No presets yet</h2></EmptyTitle><EmptyDescription>Start from a built-in family or import a preset file.</EmptyDescription></EmptyHeader><EmptyContent><Button>New preset</Button></EmptyContent></Empty>}`,
+  spinner: `import { Spinner } from '@/components/ui/spinner'
+export function Example(){return <p><Spinner size="sm" /> Saving…</p>}`,
+  kbd: `import { Kbd, KbdGroup } from '@/components/ui/kbd'
+export function Example(){return <p>Search with <KbdGroup><Kbd>Ctrl</Kbd><Kbd>K</Kbd></KbdGroup></p>}`,
   toast: `import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from '@/components/ui/toast'
 export function Example(){return <ToastProvider><Toast defaultOpen><ToastTitle>Changes saved</ToastTitle><ToastDescription>Your project is up to date.</ToastDescription><ToastClose>Dismiss</ToastClose></Toast><ToastViewport /></ToastProvider>}`,
   'input-group': `import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText, InputGroupButton } from '@/components/ui/input-group'

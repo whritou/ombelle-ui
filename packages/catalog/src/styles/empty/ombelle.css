@@ -1,0 +1,92 @@
+/* ombelle Empty State */
+[data-slot='empty'] {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 24px;
+  border: 1.5px dashed var(--input);
+  border-radius: 20px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  text-align: center;
+}
+[data-slot='empty-header'] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+[data-slot='empty-media'][data-variant='icon'] {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: 64px;
+  block-size: 64px;
+  margin-block-end: 6px;
+  border: 1.5px solid var(--input);
+  border-radius: 20px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: 3px 3px 0 var(--input);
+}
+[data-slot='empty-title'] {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+[data-slot='empty-description'] {
+  max-inline-size: 380px;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.5;
+}
+[data-slot='empty-content'] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-block-start: 8px;
+}
+@media (forced-colors: active) {
+  [data-slot='empty'],
+  [data-slot='empty-media'][data-variant='icon'] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+}
+/* Recipe previews render native buttons marked data-empty-action; a consumer's own Button keeps its styles. */
+[data-slot='empty-content'] [data-empty-action] {
+  box-sizing: border-box;
+  min-block-size: 2.25rem;
+  padding-inline: 1rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 2px 2px 0 var(--border);
+  font: 700 14px var(--font-family);
+  cursor: pointer;
+}
+[data-slot='empty-content'] [data-empty-action='secondary'] {
+  background: var(--card);
+  color: var(--foreground);
+}
+[data-slot='empty-content'] [data-empty-action]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  [data-slot='empty-content'] [data-empty-action] {
+    border-color: ButtonText;
+  }
+  [data-slot='empty-content'] [data-empty-action]:focus-visible {
+    outline-color: Highlight;
+  }
+}

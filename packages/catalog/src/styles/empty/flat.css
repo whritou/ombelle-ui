@@ -1,0 +1,91 @@
+/* flat Empty State */
+[data-slot='empty'] {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 24px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  text-align: center;
+}
+[data-slot='empty-header'] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+[data-slot='empty-media'][data-variant='icon'] {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: 64px;
+  block-size: 64px;
+  margin-block-end: 6px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  box-shadow: none;
+}
+[data-slot='empty-title'] {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+[data-slot='empty-description'] {
+  max-inline-size: 380px;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.5;
+}
+[data-slot='empty-content'] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-block-start: 8px;
+}
+@media (forced-colors: active) {
+  [data-slot='empty'],
+  [data-slot='empty-media'][data-variant='icon'] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+}
+/* Recipe previews render native buttons marked data-empty-action; a consumer's own Button keeps its styles. */
+[data-slot='empty-content'] [data-empty-action] {
+  box-sizing: border-box;
+  min-block-size: 2.25rem;
+  padding-inline: 1rem;
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: 600 14px var(--font-family);
+  cursor: pointer;
+}
+[data-slot='empty-content'] [data-empty-action='secondary'] {
+  background: transparent;
+  color: var(--primary);
+}
+[data-slot='empty-content'] [data-empty-action]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  [data-slot='empty-content'] [data-empty-action] {
+    border-color: ButtonText;
+  }
+  [data-slot='empty-content'] [data-empty-action]:focus-visible {
+    outline-color: Highlight;
+  }
+}

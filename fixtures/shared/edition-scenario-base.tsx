@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, useToastManager } from '@/components/ui/toast'
 
 // Ported components rendered identically in both editions; the parity test
@@ -68,6 +69,13 @@ function CatalogExpansionScenario() {
           <InputGroupAddon align="inline-end"><InputGroupText aria-hidden="true">!</InputGroupText></InputGroupAddon>
         </InputGroup>
         <p id="expansion-email-error">Enter a complete email address.</p>
+        <p id="field-own-note">Visible to your team.</p>
+        <Field invalid>
+          <FieldLabel>Display name</FieldLabel>
+          <FieldControl><input id="field-own-input" data-testid="field-own" aria-describedby="field-own-note" defaultValue="A very long display name" /></FieldControl>
+          <FieldDescription>Shown on your profile.</FieldDescription>
+          <FieldError>Use 20 characters or fewer.</FieldError>
+        </Field>
         <label htmlFor="expansion-disabled">Expansion disabled field</label>
         <InputGroup><InputGroupInput id="expansion-disabled" disabled defaultValue="Locked value" /></InputGroup>
         <label htmlFor="expansion-message">Expansion message</label>

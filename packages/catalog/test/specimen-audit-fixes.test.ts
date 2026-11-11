@@ -35,9 +35,14 @@ describe('focus rings contrast with the surface they are drawn on', () => {
 })
 
 describe('neo-brutalism Radio Group', () => {
-  it('draws the item ring in the option text colour, over the option background', () => {
-    expect(declarations(read('radio-group/neo-brutalism.css'), "[data-slot='radio-group-item']:focus-visible").outline)
-      .toBe('3px dashed currentColor')
+  it('draws the item ring in the text colour of the option under it', () => {
+    const css = read('radio-group/neo-brutalism.css')
+    expect(declarations(css, "[data-slot='radio-group-item']:focus-visible").outline).toBe('3px dashed var(--foreground)')
+    // Only a checked option is filled with --secondary, so only there does the ring take its foreground;
+    // a bare checked item sits on the page and keeps the foreground ring.
+    expect(declarations(css, "[data-slot='radio-group-item'][data-state='checked']:focus-visible")['outline-color']).toBeUndefined()
+    expect(declarations(css, "[data-slot='radio-group-option']:has([data-slot='radio-group-item'][data-state='checked']) [data-slot='radio-group-item']:focus-visible")['outline-color'])
+      .toBe('var(--secondary-foreground)')
   })
 })
 
@@ -83,5 +88,46 @@ describe('liquid glass focus', () => {
       rule.walkDecls('outline', decl => expect(['2px solid var(--foreground)', 'none'], `${file} ${rule.selector}`).toContain(decl.value))
       rule.walkDecls('outline-offset', decl => expect(Number.parseFloat(decl.value), `${file} ${rule.selector}`).toBeLessThanOrEqual(0))
     })
+  })
+})
+
+describe('Field preview control in forced colors', () => {
+  // A family whose focus style removes the outline must draw one back in forced colors, where borders lose their colour.
+  it.each(['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle'])('%s draws a visible focus outline', family => {
+    let outline = ''
+    postcss.parse(read(`field/${family}.css`)).walkAtRules('media', media => {
+      if (!media.params.includes('forced-colors')) return
+      media.walkRules(rule => {
+        if (rule.selector.replaceAll('"', "'") === "[data-slot='field'] [data-field-input]:focus-visible")
+          rule.walkDecls('outline', decl => { outline = decl.value })
+      })
+    })
+    expect(outline).toMatch(/^[1-9]\d*px solid Highlight$/)
+  })
+})
+
+describe('Field preview control matches the board', () => {
+  it('flat draws the filled Input: muted fill, underline, square bottom corners', () => {
+    const rule = declarations(read('field/flat.css'), "[data-slot='field'] [data-field-input]")
+    expect([rule.background, rule.border, rule['border-bottom'], rule['border-radius']])
+      .toEqual(['var(--muted)', '0', '2px solid var(--input)', 'var(--radius) var(--radius) 0 0'])
+  })
+})
+
+describe('display components match the 0.7.3 boards', () => {
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  it.each(families)('%s Stepper titles are bold in every state', family => {
+    expect(declarations(read(`stepper/${family}.css`), "[data-slot='stepper-title']")['font-weight']).toBe('700')
+    expect(declarations(read(`stepper/${family}.css`), "[data-slot='stepper-title'][data-status='current']")['font-weight']).toBeUndefined()
+  })
+  it.each(families)('%s complete Stepper indicator keeps the line border', family => {
+    expect(declarations(read(`stepper/${family}.css`), "[data-slot='stepper-indicator'][data-status='complete']")['border-color']).toBeUndefined()
+  })
+  it('neo-brutalism Empty title is black weight', () => {
+    expect(declarations(read('empty/neo-brutalism.css'), "[data-slot='empty-title']")['font-weight']).toBe('900')
+  })
+  it('neo-brutalism Meter value is uppercase and tracked like its label', () => {
+    const rule = declarations(read('meter/neo-brutalism.css'), "[data-slot='meter-value']")
+    expect([rule['text-transform'], rule['letter-spacing']]).toEqual(['uppercase', '0.05em'])
   })
 })

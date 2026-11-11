@@ -570,6 +570,12 @@ describe('catalog contract', () => {
       'breadcrumb',
       'pagination',
       'toast',
+      'spinner',
+      'kbd',
+      'empty',
+      'field',
+      'meter',
+      'stepper',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

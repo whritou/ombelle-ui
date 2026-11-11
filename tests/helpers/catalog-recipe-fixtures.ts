@@ -9,11 +9,16 @@ const editedFields = {
   label: 'label', 'native-select': 'label', popover: 'trigger', progress: 'label',
   'radio-group': 'label', select: 'label', separator: 'label', skeleton: 'label',
   switch: 'label', table: 'caption', textarea: 'label', tooltip: 'trigger',
-} as const satisfies Record<Exclude<ComponentRecipe['component'], 'accordion' | 'tabs'>, string>
+  spinner: 'label', kbd: 'keys', empty: 'title', field: 'label', meter: 'label',
+} as const satisfies Record<Exclude<ComponentRecipe['component'], 'accordion' | 'tabs' | 'stepper'>, string>
 
 export function catalogRecipeFixtures(): readonly ComponentRecipe[] {
   return componentRecipeComponents.map(id => {
     const recipe = createCatalogDraft(id).recipe
+    if (recipe.component === 'stepper') {
+      const [first, ...steps] = recipe.content.steps
+      return validateComponentRecipe({ ...recipe, content: { steps: [{ ...first, title: `Edited ${id}` }, ...steps] } })
+    }
     if (recipe.component === 'accordion' || recipe.component === 'tabs') {
       const [first, ...items] = recipe.content.items
       return validateComponentRecipe({ ...recipe, content: { items: [{ ...first, label: `Edited ${id}` }, ...items] } })

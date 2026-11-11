@@ -1,0 +1,94 @@
+/* neo-brutalism Field */
+[data-slot='field'] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-inline-size: 0;
+  font-family: var(--font-family);
+}
+[data-slot='field'][data-orientation='horizontal'] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+}
+[data-slot='field-label'] {
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+[data-slot='field-label'] > span[aria-hidden='true'] {
+  margin-inline-start: 2px;
+  color: color-mix(in oklab, var(--destructive) 60%, var(--foreground));
+}
+[data-slot='field-label'][data-disabled] {
+  opacity: 0.6;
+}
+[data-slot='field-description'] {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.4;
+}
+[data-slot='field-error'] {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: color-mix(in oklab, var(--destructive) 60%, var(--foreground));
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+[data-slot='field-error'] > svg {
+  flex-shrink: 0;
+  inline-size: 14px;
+  block-size: 14px;
+}
+@media (forced-colors: active) {
+  [data-slot='field-label'] > span[aria-hidden='true'],
+  [data-slot='field-error'] {
+    color: CanvasText;
+  }
+}
+/* Recipe previews render a native control marked data-field-input; a consumer's own Input keeps its styles. */
+[data-slot='field'] [data-field-input] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: calc(var(--control-height, 2.5rem) + 0.25rem);
+  padding: 0 0.75rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow-color, var(--border));
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--foreground);
+  font-family: inherit;
+}
+[data-slot='field'] textarea[data-field-input] {
+  min-block-size: 5rem;
+  resize: vertical;
+}
+[data-slot='field'] [data-field-input]:focus-visible {
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
+}
+[data-slot='field'][data-invalid] [data-field-input] {
+  border-color: var(--destructive);
+}
+[data-slot='field'] [data-field-input]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (forced-colors: active) {
+  [data-slot='field'] [data-field-input] {
+    border-color: CanvasText;
+  }
+  [data-slot='field'] [data-field-input]:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}

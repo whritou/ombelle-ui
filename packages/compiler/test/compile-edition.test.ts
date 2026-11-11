@@ -12,7 +12,8 @@ const run = (family: (typeof supportedStyleFamilies)[number], componentIds: read
     ...(edition ? { edition } : {}),
   })
 const baseIds = supportedComponentIds.filter((id) => componentEditions(id).includes('base'))
-const sharedIds = baseIds.filter((id) => !catalog.templates[id].content.includes('@radix-ui/'))
+// Components with their own Base UI template (Field, Meter) differ by design even without a Radix import.
+const sharedIds = baseIds.filter((id) => !catalog.templates[id].content.includes('@radix-ui/') && !catalog.baseTemplates[id])
 const hashes = (r: Awaited<ReturnType<typeof compile>>) => r.artifacts.map((a) => [a.logicalPath, a.sha256])
 
 it.each(supportedStyleFamilies)('defaults %s to the Radix edition byte for byte', async (family) => {
