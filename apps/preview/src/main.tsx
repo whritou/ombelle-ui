@@ -9,6 +9,9 @@ if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
 } else if (previewPath === '/editor-preview/' || previewPath === '/editor-preview') {
   const { mountEditorPreview } = await import('./editor-preview')
   mountEditorPreview(document.getElementById('root')!)
+} else if (previewPath === '/glass-scene/' || previewPath === '/glass-scene') {
+  const { mountGlassScenePage } = await import('./glass-scene-page')
+  mountGlassScenePage(document.getElementById('root')!)
 } else if (/^\/audit\/[^/]+\/(?:radix|base)\/?$/.test(previewPath)) {
   // Specimen audit pages: /audit/<family>/<radix|base>/?mode=light|dark
   const [, , family, edition] = previewPath.split('/')
