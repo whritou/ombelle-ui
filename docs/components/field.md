@@ -2,7 +2,7 @@
 
 Field connects a label, a hint and an error to one control. The label names the control, the hint and error describe it, and the required, invalid and disabled states reach it. Field is a composition around the control you already use (Input, Textarea, Native Select). It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
-This component requires CLI **0.7.3** or later. Until 0.7.3 is published, install it from a built local checkout:
+This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add field`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add field --cwd APP --dry-run --json

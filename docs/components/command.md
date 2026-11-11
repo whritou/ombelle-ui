@@ -2,7 +2,7 @@
 
 Command is a keyboard-first command menu: a search box over a filtered list of grouped commands, shown inline or in a dialog. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
-This component requires CLI **0.7.3** or later. Until 0.7.3 is published, install it from a built local checkout:
+This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add command`. For a built local checkout:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add command --cwd APP --dry-run --json
