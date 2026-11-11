@@ -136,6 +136,8 @@ export function PresetPreviewFrame({
           // metrics would put it at a fractional offset.
           display: 'block',
           width: view.viewport === 'narrow' ? '320px' : '100%',
+          // The 320 px preview sits in the middle of the preview column, like the component editors'.
+          marginInline: 'auto',
           maxWidth: '100%',
           height: height + 'px',
           border: '1px solid var(--border)',

@@ -38,7 +38,8 @@ html[data-backdrop='glass'] .recipe-stage > div > input { background: color-mix(
 
 /* Variant matrix: a real table, scrolling sideways in the narrow width with the row headers pinned. */
 .editor-preview[data-layout="matrix"] { align-items: flex-start; justify-content: flex-start; }
-.recipe-matrix-scroll { max-width: 100%; overflow-x: auto; }
+/* Auto margins centre a matrix narrower than the stage; a wider one still scrolls from its start. */
+.recipe-matrix-scroll { max-width: 100%; overflow-x: auto; margin-inline: auto; }
 .recipe-matrix { border-collapse: separate; border-spacing: 12px; font: 500 12px/1.4 ui-sans-serif, system-ui, sans-serif; color: #3f3f46; }
 .editor-preview.dark .recipe-matrix { color: #d4d4d8; }
 .recipe-matrix caption { text-align: start; font-weight: 600; padding-block-end: 4px; }
