@@ -1,5 +1,15 @@
 /** Standalone examples shared by the compiler and component reference pages. */
 export const expansionExamples = {
+  'input-otp': `import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@/components/ui/input-otp'
+export function Example(){return <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>}`,
+  slider: `import { Slider, SliderTicks } from '@/components/ui/slider'
+export function Example(){return <><Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => value + ' pixels'} /><Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} /><SliderTicks values={[0, 25, 50, 75, 100]} /></>}`,
+  'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+export function Example(){return <ToggleGroup type="single" defaultValue="week" aria-label="Calendar view"><ToggleGroupItem value="day">Day</ToggleGroupItem><ToggleGroupItem value="week">Week</ToggleGroupItem><ToggleGroupItem value="month">Month</ToggleGroupItem></ToggleGroup>}`,
+  'tag-input': `import { TagInput, TagInputList, TagInputInput } from '@/components/ui/tag-input'
+export function Example(){return <><label id="topics-label">Topics</label><TagInput defaultValue={['design-tokens', 'glass']} name="topics"><TagInputList /><TagInputInput aria-labelledby="topics-label" placeholder="Add a topic" /></TagInput></>}`,
+  chip: `import { Chip, ChipGroup, ChipRemove } from '@/components/ui/chip'
+export function Example(){return <><ChipGroup aria-label="Status filter"><Chip defaultPressed>On track</Chip><Chip defaultPressed={false}>Shipped</Chip></ChipGroup><Chip>glass<ChipRemove /></Chip></>}`,
   stepper: `import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 export function Example(){return <Stepper aria-label="Setup"><StepperItem status="complete"><StepperIndicator>1</StepperIndicator><StepperTitle>Preset</StepperTitle><StepperDescription>Ombelle</StepperDescription><StepperSeparator /></StepperItem><StepperItem status="current"><StepperIndicator>2</StepperIndicator><StepperTitle>Components</StepperTitle><StepperSeparator /></StepperItem><StepperItem status="upcoming"><StepperIndicator>3</StepperIndicator><StepperTitle>Install CLI</StepperTitle></StepperItem></Stepper>}`,
   meter: `import { Meter, MeterLabel } from '@/components/ui/meter'

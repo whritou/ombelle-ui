@@ -10,7 +10,7 @@ const noop = () => {}
 it('offers liquid glass and shows the experimental notice beside the export', async () => {
   const draft = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
   const picker = renderToStaticMarkup(<FamilyPicker value="liquid-glass" onChange={noop} />)
-  expect(picker).toMatch(/data-family="liquid-glass" aria-pressed="true"/)
+  expect(/<button[^>]*data-family="liquid-glass"[^>]*>/.exec(picker)![0]).toContain('aria-checked="true"')
   expect(picker).toContain('Experimental')
   const result = await compileRecipe({ recipe: draft.recipe })
   const notice = experimentalNotice('liquid-glass')

@@ -41,6 +41,8 @@
 :root {
   color-scheme: light;
   --radius: 0.75rem;
+  /* Read by the catalog components compiled for the editor (scripts/generate-www-ui.ts). */
+  --font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
   --ink: oklch(0.22 0.012 275);
   --paper: oklch(0.985 0.004 350);
   --background: var(--paper);

@@ -12,13 +12,13 @@ it('lists the six offered starting points with Cristal as the default and presse
   const html = renderToStaticMarkup(<GlassStartingPoints draft={draft} onPick={noop} onTint={noop} />)
   const labels = [...html.matchAll(/<button[^>]*data-preset="[^"]+"[^>]*>([^<]+)<\/button>/g)].map((m) => m[1])
   expect(labels).toEqual(['Cristal (default)', 'Givré', 'Fumé', 'Relief', 'Voile', 'Liquid glass'])
-  expect(html).toMatch(/data-preset="builtin-liquid-glass-cristal"[^>]*aria-pressed="true"/)
+  expect(/<button[^>]*data-preset="builtin-liquid-glass-cristal"[^>]*>/.exec(html)![0]).toContain('aria-checked="true"')
   expect(html).not.toContain('Custom')
   const custom = renderToStaticMarkup(
     <GlassStartingPoints draft={setPresetEdit(draft, '/design/glassHalo', '0.1')} onPick={noop} onTint={noop} />,
   )
   expect(custom).toContain('Custom')
-  expect(custom).not.toContain('aria-pressed="true"')
+  expect(custom).not.toContain('aria-checked="true"')
 })
 
 it('names a retired preset that a draft still matches, with no button for it', () => {
@@ -26,7 +26,7 @@ it('names a retired preset that a draft still matches, with no button for it', (
   const html = renderToStaticMarkup(<GlassStartingPoints draft={draft} onPick={noop} onTint={noop} />)
   expect(html).toContain(' · Prism')
   expect(html).not.toContain('data-preset="builtin-liquid-glass-prism"')
-  expect(html).not.toContain('aria-pressed="true"')
+  expect(html).not.toContain('aria-checked="true"')
 })
 
 it('offers the four tint chips', () => {

@@ -3,6 +3,8 @@ import { CircleAlert, RotateCcw } from 'lucide-react'
 import { type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
+import { keepChoice } from '../../editor-shell/inspector'
+import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
 import type { PresetEditorDraft, PresetEditablePath } from '../model'
 import {
   colorKeys,
@@ -99,25 +101,18 @@ export function FamilyPicker({
   families?: readonly StyleFamily[]
 }) {
   return (
-    <div role="group" aria-label="Style family" className="preset-families">
+    <ToggleGroup type="single" aria-label="Style family" className="preset-families" value={value} onValueChange={keepChoice(onChange)}>
       {families.map((family) => (
-        <button
-          key={family}
-          type="button"
-          className="preset-family"
-          data-family={family}
-          aria-pressed={family === value}
-          onClick={() => onChange(family)}
-        >
+        <ToggleGroupItem key={family} value={family} className="preset-family" data-family={family}>
           <span className="preset-family-sample" aria-hidden="true">
             <i />
             <i />
           </span>
           <span className="preset-family-name">{familyNames[family]}</span>
           {family === 'liquid-glass' && <span className="preset-family-tag">Beta</span>}
-        </button>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   )
 }
 const baseTokens: readonly string[] = ['background', 'foreground', 'primary', 'mutedForeground', 'border']
@@ -361,7 +356,8 @@ export function DesignControls({
               onChange={(next) => onEdit(path, next)}
               onReset={() => {
                 onReset(path)
-                document.getElementById(fieldId(path))?.focus()
+                // The reset button goes away, so focus moves to the row's exact field.
+                document.getElementById(fieldId(path) + '-number')?.focus()
               }}
             />
             {glassHint && (

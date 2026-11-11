@@ -2,7 +2,7 @@ import type { ComponentRecipe } from '@ombelle/contracts'
 
 export type RecipeSpecimen = {
   tag: string
-  props: Record<string, string | number | boolean | null | undefined | readonly string[] | { localId: string }>
+  props: Record<string, string | number | boolean | null | undefined | readonly (string | number)[] | { localId: string }>
   children: readonly (RecipeSpecimen | string)[]
 }
 
@@ -54,6 +54,41 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
           node('StepperIndicator', {}, String(index + 1)), node('StepperTitle', {}, step.title),
           ...(step.description.trim() ? [node('StepperDescription', {}, step.description)] : []),
           ...(index < content.steps.length - 1 ? [node('StepperSeparator')] : []))))
+    case 'slider': {
+      const min = props.min ?? 0, max = props.max ?? 100
+      const range = props.mode === 'range'
+      const slider = node('Slider', range
+        ? { defaultValue: [props.rangeStart ?? 20, props.rangeEnd ?? 80], min, max, step: props.step ?? 1, thumbLabels: [content.minLabel, content.maxLabel] }
+        : { defaultValue: [props.value ?? 12], min, max, step: props.step ?? 1, 'aria-label': content.label })
+      if (!props.ticks) return slider
+      const ticks = [0, 0.25, 0.5, 0.75, 1].map(share => Math.round(min + (max - min) * share))
+      return node('div', stacked, slider, node('SliderTicks', { values: ticks, min, max }))
+    }
+    case 'toggle-group': {
+      const type = props.type ?? 'single'
+      const selection = props.selection ?? ['week']
+      return node('ToggleGroup', { type, variant: props.variant ?? 'segmented', defaultValue: type === 'single' ? selection[0] ?? '' : selection, 'aria-label': content.label },
+        ...content.items.map(item => item.iconOnly
+          // Recipes carry no icon set, so an icon-only item shows its initial and keeps its label as its name.
+          ? node('ToggleGroupItem', { value: item.id, 'aria-label': item.label }, node('span', { 'aria-hidden': 'true' }, item.label.slice(0, 1)))
+          : node('ToggleGroupItem', { value: item.id }, item.label)))
+    }
+    case 'chip': {
+      const selection = props.selection ?? []
+      return node('ChipGroup', { 'aria-label': content.label }, ...content.chips.map(chip => props.mode === 'removable'
+        ? node('Chip', {}, chip.label, node('ChipRemove'))
+        : node('Chip', { defaultPressed: selection.includes(chip.id) }, chip.label)))
+    }
+    case 'tag-input':
+      return node('div', stacked, label(content.label),
+        node('TagInput', { defaultValue: content.tags.map(tag => tag.label), max: props.max ?? 8 },
+          node('TagInputList'), node('TagInputInput', { id: localId('control'), placeholder: content.placeholder || undefined })))
+    case 'input-otp': {
+      const length = props.length ?? 6, after = props.separatorAfter ?? 3
+      const slots = (from: number, to: number) => node('InputOTPGroup', {}, ...Array.from({ length: to - from }, (_, offset) => node('InputOTPSlot', { index: from + offset })))
+      return node('InputOTP', { maxLength: length, 'aria-label': content.label },
+        ...(after > 0 ? [slots(0, after), node('InputOTPSeparator'), slots(after, length)] : [slots(0, length)]))
+    }
     case 'toast':
       return node('ToastProvider', { duration: props.duration }, node('Toast', { variant: props.variant, defaultOpen: true },
         node('ToastTitle', {}, content.title), node('ToastDescription', {}, content.description),

@@ -3,6 +3,8 @@
 import { RotateCcw } from 'lucide-react'
 import type { ReactNode } from 'react'
 import styles from './editor-shell.module.css'
+import { Slider } from '../generated/ui/components/ui/slider'
+import { ToggleGroup, ToggleGroupItem } from '../generated/ui/components/ui/toggle-group'
 
 export function InspectorSection({
   id,
@@ -45,6 +47,28 @@ export function ControlRow({
   )
 }
 
+// Only the HTML valid-floating-point grammar counts: '1.', '+5' and ' 5' are half-typed.
+const decimal = /^-?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/
+
+/**
+ * Where the slider thumb sits for the text in the number field: the typed number, or for an empty
+ * field the value in effect, kept within the bounds as a native range input does; a half-typed or
+ * invalid value parks it at the minimum.
+ */
+export function sliderThumbValue(value: string, placeholder: string | undefined, min: number, max = Infinity): number {
+  const clamp = (number: number) => Math.min(max, Math.max(min, number))
+  if (decimal.test(value)) return clamp(Number(value))
+  if (value === '' && placeholder !== undefined && decimal.test(placeholder)) return clamp(Number(placeholder))
+  return min
+}
+
+/** A single-choice change handler that ignores the empty value both primitives send when the checked option is activated again. */
+export function keepChoice<T extends string>(onChange: (value: T) => void): (value: string) => void {
+  return (value) => {
+    if (value) onChange(value as T)
+  }
+}
+
 export function SliderRow({
   id,
   label,
@@ -75,17 +99,9 @@ export function SliderRow({
   onChange(value: string): void
   onReset(): void
 }) {
-  // A half-typed or invalid value parks the thumb at the minimum, not the browser's midpoint.
-  // Only the HTML valid-floating-point grammar counts: '1.', '+5' and ' 5' would snap to the midpoint.
-  const number = /^-?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/
-  // An empty field shows the value in effect; only a half-typed or invalid one parks at the minimum.
-  const thumb = number.test(value) ? value
-    : value === '' && placeholder !== undefined && number.test(placeholder) ? placeholder : String(min)
   const shared = {
-    value,
     'aria-invalid': invalid ? (true as const) : undefined,
     'aria-describedby': describedBy,
-    onChange: (event: { target: { value: string } }) => onChange(event.target.value),
   }
   return (
     <div className={styles.sliderRow} data-row="slider" data-edited={edited ? 'true' : undefined}>
@@ -94,7 +110,8 @@ export function SliderRow({
       </label>
       <span className={styles.sliderNumber}>
         {/* Text, not type="number": a half-typed or invalid value stays visible and is reported, not discarded. */}
-        <input id={`${id}-number`} type="text" inputMode="decimal" maxLength={80} placeholder={placeholder} {...shared} />
+        <input id={`${id}-number`} type="text" inputMode="decimal" maxLength={80} placeholder={placeholder} value={value}
+          onChange={(event) => onChange(event.target.value)} {...shared} />
         <span aria-hidden="true">{unit}</span>
       </span>
       {edited ? (
@@ -107,16 +124,16 @@ export function SliderRow({
           <RotateCcw aria-hidden="true" size={14} />
         </button>
       ) : null}
-      <input
+      <Slider
         id={id}
-        type="range"
         className={styles.sliderRange}
         aria-label={`${label} slider`}
         min={min}
         max={max}
         step={step}
         {...shared}
-        value={thumb}
+        value={[sliderThumbValue(value, placeholder, min, max)]}
+        onValueChange={([next]) => onChange(String(next))}
       />
     </div>
   )
@@ -134,18 +151,13 @@ export function SegmentedControl<T extends string>({
   onChange(value: T): void
 }) {
   return (
-    <div role="group" aria-label={label} className={styles.segmented}>
+    <ToggleGroup type="single" variant="segmented" aria-label={label} value={value} onValueChange={keepChoice(onChange)}>
       {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          aria-pressed={option.value === value}
-          onClick={() => onChange(option.value)}
-        >
+        <ToggleGroupItem key={option.value} value={option.value}>
           {option.icon}
           {option.label}
-        </button>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   )
 }

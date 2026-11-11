@@ -576,6 +576,11 @@ describe('catalog contract', () => {
       'field',
       'meter',
       'stepper',
+      'slider',
+      'toggle-group',
+      'chip',
+      'tag-input',
+      'input-otp',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

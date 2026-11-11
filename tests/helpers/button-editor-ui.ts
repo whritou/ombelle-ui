@@ -12,7 +12,7 @@ const familyNames = {
 
 export const moreActions = (page: Page) => page.getByRole('button', { name: 'More actions', exact: true })
 export const familyOption = (page: Page, family: keyof typeof familyNames) =>
-  page.getByRole('group', { name: 'Style family', exact: true }).getByRole('button', { name: new RegExp('^' + familyNames[family]) })
+  page.getByRole('radiogroup', { name: 'Style family', exact: true }).getByRole('radio', { name: new RegExp('^' + familyNames[family]) })
 export const menuItem = (page: Page, name: string) => page.getByRole('menuitem', { name, exact: true })
 /** A Disabled or Loading switch of the inspector. */
 export const toggle = (page: Page, name: 'Disabled' | 'Loading') => page.getByRole('switch', { name, exact: true })
@@ -45,5 +45,5 @@ export async function expectRecipeDownloadEnabled(page: Page) {
 /** Chooses a recipe style family from the inspector cards. */
 export async function chooseFamily(page: Page, family: keyof typeof familyNames) {
   await familyOption(page, family).click()
-  await expect(familyOption(page, family)).toHaveAttribute('aria-pressed', 'true')
+  await expect(familyOption(page, family)).toHaveAttribute('aria-checked', 'true')
 }

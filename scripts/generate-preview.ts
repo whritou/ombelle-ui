@@ -13,6 +13,7 @@ import { writePreviewRecipes } from '../tests/helpers/recipe-fixture.js'
 import { writePreviewComponentPresets } from '../tests/helpers/component-preset-fixture.js'
 import { writePresetGallery } from './generate-preset-gallery.js'
 import { writeAuditPages } from './generate-audit.js'
+import { generateWwwUi } from './generate-www-ui.js'
 type PreviewFamily = (typeof supportedStyleFamilies)[number] | 'liquid-glass'
 async function writeFamily(family: PreviewFamily) {
   const glass = family === 'liquid-glass'
@@ -159,6 +160,8 @@ await fs.writeFile(
 )
 await writePresetGallery('apps/preview/src/generated/preset-gallery')
 await writeAuditPages('apps/preview/src/generated/audit')
+// The website editor's catalog components, for its dev server, build, typecheck and tests.
+await generateWwwUi()
 const recipeComponents = supportedComponentIds.filter(id => id !== 'button')
 const recipeDirectory = 'apps/preview/src/generated/catalog-recipes'
 const recipeCatalog = getCatalog('0.1.0')

@@ -78,6 +78,11 @@ const baseDependencies: readonly string[] = [
   'tailwind-merge',
 ]
 const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
+  chip: ['lucide-react'],
+  'input-otp': ['input-otp'],
+  slider: ['@radix-ui/react-slider'],
+  'toggle-group': ['@radix-ui/react-toggle-group'],
+  'tag-input': ['lucide-react'],
   empty: ['@radix-ui/react-slot'],
   field: ['lucide-react'],
   stepper: ['lucide-react'],
@@ -184,8 +189,11 @@ const usesRadix = (id: ComponentId) =>
 function editionDependencies(id: ComponentId, edition: Edition): string[] {
   const names = [...baseDependencies, ...(extraDependencies[id] ?? [])]
   if (edition === 'radix') return names
-  const kept = names.filter((name) => !name.startsWith('@radix-ui/'))
-  const baseUi = kept.length < names.length || /from '@base-ui\/react/.test(catalogData.baseTemplates[id as keyof typeof catalogData.baseTemplates] ?? '')
+  const baseTemplate = catalogData.baseTemplates[id as keyof typeof catalogData.baseTemplates]
+  // A Base UI template keeps only the component packages it imports (Input OTP drops input-otp).
+  const kept = names.filter((name) => !name.startsWith('@radix-ui/') &&
+    (baseDependencies.includes(name) || baseTemplate === undefined || baseTemplate.includes(`from '${name}`)))
+  const baseUi = kept.length < names.length || /from '@base-ui\/react/.test(baseTemplate ?? '')
   return baseUi ? [...kept, '@base-ui/react'] : kept
 }
 /** Editions a component can be installed in. */

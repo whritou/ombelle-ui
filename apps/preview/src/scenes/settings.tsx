@@ -74,6 +74,10 @@ import {
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '../generated/preset-gallery/components/ui/field'
 import { Kbd, KbdGroup } from '../generated/preset-gallery/components/ui/kbd'
 import { Spinner } from '../generated/preset-gallery/components/ui/spinner'
+import { Slider } from '../generated/preset-gallery/components/ui/slider'
+import { ToggleGroup, ToggleGroupItem } from '../generated/preset-gallery/components/ui/toggle-group'
+import { TagInput, TagInputInput, TagInputList } from '../generated/preset-gallery/components/ui/tag-input'
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../generated/preset-gallery/components/ui/input-otp'
 import { gate, type SceneProps } from './shared'
 
 export function SettingsScene(props: SceneProps) {
@@ -145,6 +149,20 @@ export function SettingsScene(props: SceneProps) {
                     </Field>,
                   )}
                   {show(
+                    'tag-input',
+                    'Tag Input',
+                    <Field>
+                      <FieldLabel>Topics</FieldLabel>
+                      <TagInput defaultValue={['design-tokens', 'glass']} name="topics">
+                        <TagInputList />
+                        <FieldControl>
+                          <TagInputInput placeholder="Add a topic" />
+                        </FieldControl>
+                      </TagInput>
+                      <FieldDescription>Enter or comma adds a topic. Backspace removes the last one.</FieldDescription>
+                    </Field>,
+                  )}
+                  {show(
                     'select',
                     'Select',
                     <div className="scene-field">
@@ -196,6 +214,71 @@ export function SettingsScene(props: SceneProps) {
                   <Button type="submit" onClick={() => setSaved(true)}>Save profile</Button>
                 </CardFooter>
               </form>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle level={2}>Appearance</CardTitle>
+                <CardDescription>How the workspace looks for you.</CardDescription>
+              </CardHeader>
+              <CardContent className="scene-fields">
+                {show(
+                  'toggle-group',
+                  'Toggle Group',
+                  <div className="scene-columns">
+                    <div className="scene-field">
+                      <Label id="scene-theme-label">Theme</Label>
+                      <ToggleGroup type="single" defaultValue="system" aria-labelledby="scene-theme-label">
+                        <ToggleGroupItem value="light">Light</ToggleGroupItem>
+                        <ToggleGroupItem value="system">System</ToggleGroupItem>
+                        <ToggleGroupItem value="dark">Dark</ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
+                    <div className="scene-field">
+                      <Label id="scene-density-label">Density</Label>
+                      <ToggleGroup type="single" defaultValue="comfortable" aria-labelledby="scene-density-label">
+                        <ToggleGroupItem value="compact">Compact</ToggleGroupItem>
+                        <ToggleGroupItem value="comfortable">Comfortable</ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
+                  </div>,
+                )}
+                {show(
+                  'slider',
+                  'Slider',
+                  <div className="scene-field">
+                    <Label id="scene-radius-label">Corner radius</Label>
+                    <Slider defaultValue={[12]} max={24} aria-labelledby="scene-radius-label" getValueText={(value) => `${value} pixels`} />
+                  </div>,
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle level={2}>Two-step sign-in</CardTitle>
+                <CardDescription>Enter the six-digit code from your authenticator app.</CardDescription>
+              </CardHeader>
+              <CardContent className="scene-fields">
+                {show(
+                  'input-otp',
+                  'Input OTP',
+                  <div className="scene-field">
+                    <Label id="scene-otp-label">Verification code</Label>
+                    <InputOTP maxLength={6} aria-labelledby="scene-otp-label">
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                      </InputOTPGroup>
+                      <InputOTPSeparator />
+                      <InputOTPGroup>
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>,
+                )}
+              </CardContent>
             </Card>
             <Card>
               <CardHeader>

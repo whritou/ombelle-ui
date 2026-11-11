@@ -637,13 +637,13 @@ for (const mode of modes) {
     await page.goto(editorUrl)
     await ready()
     // The picker button's name carries a Beta tag, so match the prefix.
-    await page.getByRole('group', { name: 'Style family', exact: true }).getByRole('button', { name: /^Liquid glass/ }).click()
+    await page.getByRole('radiogroup', { name: 'Style family', exact: true }).getByRole('radio', { name: /^Liquid glass/ }).click()
     const confirm = page.getByRole('button', { name: 'Confirm change' })
     const limitations = page.getByRole('heading', { name: 'Liquid glass limitations' })
     await expect(confirm.or(limitations)).toBeVisible()
     if (await confirm.isVisible()) await confirm.click()
     await expect(limitations).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Cristal (default)', exact: true })).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('radio', { name: 'Cristal (default)', exact: true })).toHaveAttribute('aria-checked', 'true')
     // The original material reports a contrast warning when its veil is too thin.
     await page.locator('[data-preset="builtin-liquid-glass"]').click()
     await segment(page, 'Preview mode', mode === 'dark' ? 'Dark' : 'Light').click()

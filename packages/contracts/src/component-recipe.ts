@@ -75,6 +75,33 @@ function validateComposition(recipe: ComponentRecipe): void {
     if (selected.some(id => !ids.has(id))) reject('Choose an item present in the recipe', path)
   }
   switch (recipe.component) {
+    case 'slider': {
+      const { min = 0, max = 100, value = 12, mode = 'single', rangeStart = 20, rangeEnd = 80 } = recipe.props
+      if (min >= max) reject('Maximum must be greater than minimum', '/props/max')
+      if (mode === 'single' && (value < min || value > max)) reject('Value must be within the range', '/props/value')
+      if (mode === 'range') {
+        if (rangeStart < min || rangeStart > max) reject('Range start must be within the range', '/props/rangeStart')
+        if (rangeEnd < min || rangeEnd > max) reject('Range end must be within the range', '/props/rangeEnd')
+        if (rangeStart > rangeEnd) reject('Range start must not exceed range end', '/props/rangeStart')
+      }
+      break
+    }
+    case 'toggle-group':
+      references(recipe.content.items, recipe.props.selection ?? [], '/props/selection')
+      if ((recipe.props.type ?? 'single') === 'single' && (recipe.props.selection ?? []).length > 1)
+        reject('A single-choice group selects one item', '/props/selection')
+      break
+    case 'chip':
+      references(recipe.content.chips, recipe.props.selection ?? [], '/props/selection')
+      break
+    case 'tag-input':
+      if (recipe.content.tags.length > (recipe.props.max ?? 8)) reject('Starting tags exceed the maximum', '/content/tags')
+      references(recipe.content.tags, [], '/content/tags')
+      break
+    case 'input-otp':
+      if ((recipe.props.separatorAfter ?? 3) >= (recipe.props.length ?? 6))
+        reject('Place the separator before the last slot', '/props/separatorAfter')
+      break
     case 'stepper':
       if (recipe.props.current !== undefined && recipe.props.current >= recipe.content.steps.length)
         reject('Choose a step present in the recipe', '/props/current')

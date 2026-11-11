@@ -10,14 +10,13 @@ import {
 } from '../generated/preset-gallery/components/ui/breadcrumb'
 import { Button } from '../generated/preset-gallery/components/ui/button'
 import { Card, CardContent, CardFooter } from '../generated/preset-gallery/components/ui/card'
-import { Checkbox } from '../generated/preset-gallery/components/ui/checkbox'
+import { Chip, ChipGroup } from '../generated/preset-gallery/components/ui/chip'
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
 } from '../generated/preset-gallery/components/ui/input-group'
-import { Label } from '../generated/preset-gallery/components/ui/label'
 import {
   Pagination,
   PaginationContent,
@@ -119,19 +118,17 @@ export function ProjectsScene(props: SceneProps) {
                     <SheetTitle>Filter projects</SheetTitle>
                     <SheetDescription>Show only the projects you need.</SheetDescription>
                   </SheetHeader>
-                  <fieldset className="scene-fields scene-fieldset">
-                    <legend className="scene-muted">Status</legend>
-                    {filters.map((filter, index) =>
-                      show(
-                        'checkbox',
-                        'Checkbox',
-                        <div key={filter} className="scene-inline">
-                          <Checkbox id={`scene-filter-${index}`} defaultChecked={index < 2} />
-                          <Label htmlFor={`scene-filter-${index}`}>{filter}</Label>
-                        </div>,
-                      ),
-                    )}
-                  </fieldset>
+                  {show(
+                    'chip',
+                    'Chip',
+                    <ChipGroup aria-label="Status filter" className="scene-fields">
+                      {filters.map((filter, index) => (
+                        <Chip key={filter} defaultPressed={index < 2}>
+                          {filter}
+                        </Chip>
+                      ))}
+                    </ChipGroup>,
+                  )}
                   <SheetFooter>
                     <SheetClose asChild>
                       <Button>Apply filters</Button>

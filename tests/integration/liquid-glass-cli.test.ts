@@ -30,6 +30,7 @@ const installOrder = [
   'table', 'accordion', 'progress', 'skeleton',
   'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast',
   'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper',
+  'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp',
 ] as const
 const installed = glassIds.filter((id) => (installOrder as readonly string[]).includes(id))
 const presetPath = path.resolve('packages/catalog/src/presets/liquid-glass.json')
@@ -70,8 +71,8 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the thirty-five experimental ids', () => {
-  expect(glassIds).toEqual(['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'progress', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper'])
+it('lists the forty experimental ids', () => {
+  expect(glassIds).toEqual(['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'progress', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp'])
 })
 
 for (const manager of ['pnpm', 'npm'] as const) {
@@ -118,7 +119,8 @@ for (const manager of ['pnpm', 'npm'] as const) {
         'accordion', 'alert', 'avatar', 'badge', 'card', 'checkbox', 'dropdown-menu', 'label', 'native-select', 'popover', 'progress',
         'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip',
         'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast',
-  'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper',
+        'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper',
+        'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp',
       ].map((id) => 'components/ui/' + id + '.css').sort(),
     )
     for (const artifact of canonical.artifacts.filter((a) => a.logicalPath.startsWith('components/ui/')))

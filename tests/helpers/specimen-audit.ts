@@ -206,11 +206,29 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
     if (items.length < 2) return null
     return items.indexOf(element) === items.length - 1 ? ['ArrowUp', 'ArrowDown'] : ['ArrowDown', 'ArrowUp']
   })
+  // A text field that draws no ring of its own may be ringed by a :focus-within wrapper inside the specimen
+  // (Input Group, Tag Input): the ring is then measured around that wrapper, as findForcedColors accepts it.
+  // Only text fields are probed: focusing other controls first can leave state behind (a Base UI menu
+  // item stays highlighted after blur), which would spoil the unfocused screenshot.
+  const ringOwner = keys ? false : await target.evaluate(element => {
+    document.querySelectorAll('[data-audit-ring-owner]').forEach(owner => owner.removeAttribute('data-audit-ring-owner'))
+    if (!element.matches('input, textarea')) return false
+    ;(element as HTMLElement).focus({ focusVisible: true } as FocusOptions)
+    if (element !== document.activeElement) return false
+    const ring = (style: CSSStyleDeclaration) => style.outlineStyle !== 'none' && (Number.parseFloat(style.outlineWidth) || 0) >= 1
+    if (ring(getComputedStyle(element))) return false
+    for (let current = element.parentElement; current && !current.matches('section[data-audit], [data-audit-open], body'); current = current.parentElement)
+      if (ring(getComputedStyle(current))) {
+        current.setAttribute('data-audit-ring-owner', '')
+        return true
+      }
+    return false
+  })
   if (keys) {
     await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
     await page.keyboard.press(keys[0]!)
   } else await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
-  const box = await target.boundingBox()
+  const box = await (ringOwner ? page.locator('[data-audit-ring-owner]') : target).boundingBox()
   const description = await target.evaluate((element, source) => (new Function('return ' + source)() as (e: Element) => string)(element), describeSource)
   // An earlier interaction can hide it (focusing a Radix tab selects it and hides the previous panel).
   if (!box) return []
