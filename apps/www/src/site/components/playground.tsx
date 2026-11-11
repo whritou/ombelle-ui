@@ -5,7 +5,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
 import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
-import { applyStartingPreset, createPresetDraft } from '../../preset-editor/model'
+import { applyStartingPreset, createPresetDraft, materializePreset } from '../../preset-editor/model'
+import { labInkFor, pickGlassScene } from '../glass-backdrops'
 import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { ToggleGroup } from '../toggle-group'
@@ -53,7 +54,6 @@ export function ComponentPlayground({ id, name, source, styles }: {
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   // The backdrop follows the glass preset and mode until the reader picks one; changing preset resets it.
   const [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
-  const backdrop = backdropOverride ?? glassPresetBackdrop(glassPreset, mode)
   const [status, setStatus] = useState<'connecting' | 'ready' | 'failed'>('connecting')
   const glass = styleSupport(id, 'liquid-glass')
   useEffect(() => {
@@ -69,6 +69,13 @@ export function ComponentPlayground({ id, name, source, styles }: {
     return family === 'liquid-glass' ? applyStartingPreset(base, glassPreset) : base
   }, [family, glassPreset])
   const compiled = usePresetCompiler(draft)
+  // The same automatic scene and lab ink as the preset editor; the reader's pick overrides it.
+  const glassData = useMemo(() => {
+    if (family !== 'liquid-glass') return null
+    try { return materializePreset(draft) } catch { return null }
+  }, [family, draft])
+  const backdrop = backdropOverride ?? (glassData ? pickGlassScene(glassData, mode, glassPreset) : glassPresetBackdrop(glassPreset, mode))
+  const labInk = glassData ? labInkFor(glassData, mode, backdrop) : null
   const css = styles[family]
   const glassCss = family === 'liquid-glass' && compiled.result?.preset.data.styleFamily === family && !compiled.stale
     ? compiled.result?.artifacts.find(({ logicalPath }) => logicalPath === 'styles/ui-style.css')?.content
@@ -110,7 +117,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
           <div className="overflow-hidden rounded-xl border border-border bg-card">
             <PresetPreviewFrame
               result={compiled.result}
-              view={{ mode, viewport: 'wide', focus: id, backdrop: family === 'liquid-glass' ? backdrop : undefined }}
+              view={{ mode, viewport: 'wide', focus: id, backdrop: family === 'liquid-glass' ? backdrop : undefined, labInk: labInk ?? undefined }}
               stale={compiled.stale}
               onStatus={setStatus}
               title={`${name} preview`}

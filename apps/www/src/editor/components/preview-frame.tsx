@@ -7,19 +7,21 @@ import { isPreviewAck, isPreviewReady, verifyPreviewCompileResult, type PreviewR
 import { previewFrameUrl } from '../preview-url'
 import { acceptButtonMeasure, acceptCatalogMeasure, verifyCatalogCompileResult, type CatalogPreviewRender, type MeasuredParts } from '../catalog-preview-protocol'
 
-export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure }: {
+export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure, reducedTransparency = false }: {
   result: InstallableRecipeCompileResult | null; view: EditorView
+  /** Simulates prefers-reduced-transparency in the preview. Preview state only, never saved. */
+  reducedTransparency?: boolean
   component?: ComponentRecipe['component']; componentName?: string
   /** Receives the rendered part dimensions of the latest render; the Button reports its 'button' slot. */
   onMeasure?(parts: MeasuredParts): void
 }) {
   const iframe = useRef<HTMLIFrameElement>(null)
   const port = useRef<MessagePort | null>(null)
-  const latest = useRef({ result, view })
+  const latest = useRef({ result, view, reducedTransparency })
   const nextRequestId = useRef(0)
   const sendEpoch = useRef(0)
   const lastAck = useRef(0)
-  latest.current = { result, view }
+  latest.current = { result, view, reducedTransparency }
   const measured = useRef(onMeasure)
   measured.current = onMeasure
 
@@ -32,6 +34,7 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
       const message: CatalogPreviewRender = {
         type: 'catalog-render', component, requestId: ++nextRequestId.current,
         result, mode: current.view.mode, viewport: current.view.viewport,
+        ...(current.reducedTransparency ? { reducedTransparency: true as const } : {}),
       }
       targetPort.postMessage(message)
       return
@@ -44,7 +47,8 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
     const message: PreviewRender = {
       type: 'render', requestId, scope: compiled.scope,
       state: { recipe: compiled.recipe.data, css, mode: current.view.mode,
-        viewport: current.view.viewport, forcedState: current.view.forcedState, requestId },
+        viewport: current.view.viewport, forcedState: current.view.forcedState, requestId,
+        ...(current.reducedTransparency ? { reducedTransparency: true as const } : {}) },
     }
     targetPort.postMessage(message)
   }
@@ -89,7 +93,7 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
 
   useEffect(() => {
     if (port.current) void sendCurrent(port.current)
-  }, [result, view])
+  }, [result, view, reducedTransparency])
 
   const url = previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)
   return <iframe ref={iframe} title={`${componentName} recipe preview`}

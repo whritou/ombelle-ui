@@ -12,7 +12,8 @@ import { LiquidGlassFilter } from './generated/preset-gallery/components/ui/liqu
 import manifest from './generated/preset-gallery/manifest'
 import { gallerySources } from './generated/preset-gallery/sources'
 import { PresetScenePage } from './scenes'
-import { GlassBackdropArt, hasLabPreviewInk, setGlassBackdrop } from './glass-backdrop-art'
+import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
+import { startReducedTransparencyMirror } from './reduced-transparency-mirror'
 import { GlassControlHalo } from './glass-control-halo'
 import './preset-preview.css'
 import { supportedComponentIds } from '../../../packages/contracts/src/component-ids.js'
@@ -131,8 +132,10 @@ function PresetPreview() {
     document.documentElement.dataset.scene = scene
     const backdrop = current.message.view.backdrop ?? 'kit'
     if (current.message.result.preset.data.styleFamily === 'liquid-glass')
-      setGlassBackdrop(document.documentElement, backdrop, hasLabPreviewInk(current.message.result.preset.data, backdrop))
+      setGlassBackdrop(document.documentElement, backdrop, current.message.view.labInk ?? null)
     else setGlassBackdrop(document.documentElement, undefined)
+    // The editors' "Preview transparency" toggle; the mirror holds the rules it switches on.
+    document.documentElement.toggleAttribute('data-reduced-transparency', current.message.view.reducedTransparency === true)
     if (focus) document.documentElement.dataset.focus = focus
     else delete document.documentElement.dataset.focus
     document.documentElement.dataset.presetHash =
@@ -190,5 +193,6 @@ function labelsInside(part: HTMLElement, shown: HTMLElement | undefined) {
   )
 }
 export function mountPresetPreview(element: HTMLElement) {
+  startReducedTransparencyMirror(document)
   createRoot(element).render(<PresetPreview />)
 }

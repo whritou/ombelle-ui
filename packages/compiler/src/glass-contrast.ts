@@ -239,6 +239,7 @@ const round = (v: number) => Math.round(v * 10000) / 10000
 export function glassBackdrop(
   design: Preset['design'] | undefined,
   mode: 'light' | 'dark',
+  range: GlassSceneRange = { low: 0, high: 1 },
 ): GlassBackdrop {
   const d = { ...glassDesignDefaults, ...design }
   if (d.transparency === 'reduced')
@@ -259,8 +260,8 @@ export function glassBackdrop(
     contrast,
     brightness,
     sheen,
-    low: transfer(0),
-    high: transfer(1),
+    low: transfer(range.low),
+    high: transfer(range.high),
   }
 }
 
@@ -295,13 +296,12 @@ function bound(
   const brightest = luminanceOf(onPlate(paint(surface.rgb, alpha, high, sheen)))
   const overDarkest = ratio(darkest, textLum)
   const overBrightest = ratio(brightest, textLum)
+  const inside = textLum > darkest && textLum < brightest
   return {
     overDarkest,
     overBrightest,
-    passes:
-      overDarkest >= 4.5 &&
-      overBrightest >= 4.5 &&
-      !(textLum > darkest && textLum < brightest),
+    inside,
+    passes: overDarkest >= 4.5 && overBrightest >= 4.5 && !inside,
   }
 }
 
@@ -375,11 +375,12 @@ export const glassTextPlate = 1
 function resolve(
   data: Preset,
   specs: readonly GlassPairSpec[],
+  range?: GlassSceneRange,
 ): Resolved[] {
   const out: Resolved[] = []
   for (const mode of ['light', 'dark'] as const) {
     const colors = data.modes[mode] as Record<string, string>
-    const backdrop = withPointerShine(glassBackdrop(data.design, mode), data.design)
+    const backdrop = withPointerShine(glassBackdrop(data.design, mode, range), data.design)
     const reduced = data.design?.transparency === 'reduced'
     for (const { surface, text, tint, coverage, solid } of specs) {
       const textColor = parseColor(colors[text])
@@ -447,6 +448,34 @@ function nested(resolved: Resolved[], opacity: number) {
     result[mode] = Math.max(opacity, found)
   }
   return result
+}
+
+/** One preview scene's range: its darkest and brightest pixels as gamma-encoded grey channel values, 0 to 1. */
+export type GlassSceneRange = { low: number; high: number }
+
+/**
+ * The worst ratio of the preset's glass text pairs in one mode, over a scene whose
+ * channels stay inside range. The scene enters the backdrop filter in place of the
+ * 0 to 1 range glassBackdrop assumes. The text is rated without its outline plate,
+ * which reads on any scene. Translucent text and text whose luminance falls
+ * inside the painted surface's range rate 1, since some pixel of the scene matches them.
+ */
+export function glassContrastOnScene(
+  data: Preset,
+  mode: 'light' | 'dark',
+  range: GlassSceneRange,
+): number {
+  const reduced = data.design?.transparency === 'reduced'
+  const opacity = reduced ? 1 : (data.design?.glassOpacity ?? glassDesignDefaults.glassOpacity)
+  const ratios = resolve(data, glassContrastPairs, range)
+    .filter((r) => r.mode === mode)
+    .map((r) => {
+      // Rated without the outline plate: the plate reads on any scene, so with it
+      // every scene would rate the same.
+      const painted = filtered({ ...r, plate: 0 }, opacity)
+      return !opaqueText(r) || painted.inside ? 1 : Math.min(painted.overDarkest, painted.overBrightest)
+    })
+  return round(Math.min(...ratios))
 }
 
 export function glassContrastReport(data: Preset): GlassContrastReport {

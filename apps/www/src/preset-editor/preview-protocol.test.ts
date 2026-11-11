@@ -221,3 +221,30 @@ it('the editor sends the glass backdrop with the view it renders', async () => {
     expect(await verifyPresetRender(sent, 0, manifest)).toEqual(sent)
   }
 })
+it('accepts a lab ink with a backdrop', async () => {
+  for (const labInk of ['light', 'dark']) {
+    const view = { ...message(), view: { mode: labInk, viewport: 'wide', backdrop: 'night', labInk } }
+    expect(await verifyPresetRender(view, 0, manifest)).toEqual(view)
+  }
+})
+it('rejects an unknown lab ink', async () => {
+  for (const labInk of ['dim', '', true, null])
+    expect(await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', backdrop: 'dawn', labInk } }, 0, manifest)).toBeNull()
+})
+it('sentPresetView keeps the lab ink', async () => {
+  const { sentPresetView } = await import('./preview-protocol')
+  expect(sentPresetView({ mode: 'dark', viewport: 'wide', scene: 'dashboard', backdrop: 'night', labInk: 'dark' })).toEqual({
+    mode: 'dark', viewport: 'wide', scene: 'dashboard', backdrop: 'night', labInk: 'dark',
+  })
+})
+it('accepts the reduced-transparency flag only as true, and sends it', async () => {
+  const { sentPresetView } = await import('./preview-protocol')
+  const view = { ...message(), view: { mode: 'light', viewport: 'wide', backdrop: 'mist', reducedTransparency: true } }
+  expect(await verifyPresetRender(view, 0, manifest)).toEqual(view)
+  for (const reducedTransparency of [false, 'yes'])
+    expect(await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', reducedTransparency } }, 0, manifest)).toBeNull()
+  expect(sentPresetView({ mode: 'light', viewport: 'wide', reducedTransparency: true })).toEqual({ mode: 'light', viewport: 'wide', reducedTransparency: true })
+})
+it('rejects a lab ink without a backdrop', async () => {
+  expect(await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', labInk: 'light' } }, 0, manifest)).toBeNull()
+})

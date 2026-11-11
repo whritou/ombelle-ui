@@ -1,9 +1,10 @@
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import type { Preset } from '@ombelle/contracts'
 import { contrastRatio } from '../../../tests/helpers/contrast.js'
 import {
   glassBackdrop,
+  glassContrastOnScene,
   glassContrastPairs,
   glassContrastReport,
   glassContrastReportFor,
@@ -417,4 +418,61 @@ it('reduced transparency evaluates covered surfaces opaque', () => {
     expect(Math.abs(p.ratioOverBlack - p.ratioOpaque)).toBeLessThan(1e-6)
     expect(Math.abs(p.ratioOverWhite - p.ratioOpaque)).toBeLessThan(1e-6)
   }
+})
+
+describe('glassContrastOnScene', () => {
+  const catalog = getCatalog('0.1.0')
+  const glassIds = Object.keys(catalog.startingPresets) as (keyof typeof catalog.startingPresets)[]
+  const full = { low: 0, high: 1 }
+
+  it('the report is unchanged', () => {
+    // Math.pow differs in the last bit between platforms, so compare ratios to 10 significant digits.
+    const rounded = (value: unknown): unknown => typeof value === 'number' ? Number(value.toPrecision(10))
+      : Array.isArray(value) ? value.map(rounded)
+      : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, rounded(entry)]))
+      : value
+    const reports = Object.fromEntries(glassIds.map((id) => [id, rounded(glassContrastReport(catalog.startingPresets[id]))]))
+    expect(reports).toMatchSnapshot()
+  })
+
+  it('full range equals the worst filtered pair of the report', () => {
+    // The family base has no material, so its report carries no text plate either.
+    const preset = catalog.startingPresets['builtin-liquid-glass']
+    for (const mode of ['light', 'dark'] as const) {
+      const pairs = glassContrastReport(preset).pairs.filter((pair) => pair.mode === mode)
+      const worst = Math.min(...pairs.map((pair) => Math.min(pair.ratioOverBlack, pair.ratioOverWhite)))
+      expect(glassContrastOnScene(preset, mode, full)).toBeCloseTo(worst, 3)
+    }
+  })
+
+  it('a narrower range never rates lower', () => {
+    for (const id of glassIds)
+      for (const mode of ['light', 'dark'] as const)
+        expect(glassContrastOnScene(catalog.startingPresets[id], mode, { low: 0.6, high: 0.9 }), id + mode)
+          .toBeGreaterThanOrEqual(glassContrastOnScene(catalog.startingPresets[id], mode, full))
+  })
+
+  it('rates the text without its outline plate', () => {
+    // The plate is what the lab ink removes, so the scene must count for material presets too.
+    const preset = catalog.startingPresets['builtin-liquid-glass-cristal']
+    expect(glassContrastOnScene(preset, 'light', { low: 0.6, high: 0.95 }))
+      .not.toBe(glassContrastOnScene(preset, 'light', { low: 0, high: 0.3 }))
+  })
+
+  it('reduced transparency ignores the range', () => {
+    const preset = structuredClone(catalog.startingPresets['builtin-liquid-glass-cristal'])
+    preset.design = { ...preset.design, transparency: 'reduced' } as Preset['design']
+    expect(glassContrastOnScene(preset, 'light', { low: 0.1, high: 0.2 }))
+      .toBe(glassContrastOnScene(preset, 'light', { low: 0.8, high: 0.9 }))
+  })
+
+  it('text inside the surface range rates 1', () => {
+    const preset = withColors({ card: '#808080', cardForeground: '#7f7f7f' }, { glassOpacity: 0.5 })
+    expect(glassContrastOnScene(preset, 'light', full)).toBe(1)
+  })
+
+  it('translucent text rates 1', () => {
+    const preset = withColors({ foreground: 'oklch(0 0 0 / 0.6)', cardForeground: 'oklch(0 0 0 / 0.6)' })
+    expect(glassContrastOnScene(preset, 'light', { low: 0.9, high: 1 })).toBe(1)
+  })
 })

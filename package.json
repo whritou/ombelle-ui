@@ -25,6 +25,7 @@
     "build:www": "pnpm --filter @ombelle/www build",
     "test:e2e": "playwright test",
     "test:editions": "playwright test -c playwright.edition.config.ts",
+    "measure:glass-scenes": "node -e \"process.env.OMBELLE_WRITE_GLASS_SCENES='1';require('node:child_process').execFileSync(process.execPath,['node_modules/@playwright/test/cli.js','test','tests/e2e/glass-scenes.spec.ts','-c','playwright.specimen-audit.config.ts'],{stdio:'inherit'})\"",
     "test:specimen-audit": "playwright test -c playwright.specimen-audit.config.ts",
     "prepare:base-consumers": "tsx scripts/prepare-base-consumers.ts",
     "test:base-consumers": "playwright test -c playwright.base-consumers.config.ts",

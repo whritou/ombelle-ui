@@ -97,3 +97,12 @@ it('rejects CSS content and cross-result tampering even when hashes retain valid
   expect(await verifyPreviewRender(message, 0)).toEqual(message)
   expect(await verifyPreviewRender({ ...message, state: { ...message.state, css: message.state.css + '\nbody { display: none; }' } }, 0)).toBeNull()
 })
+
+it('accepts the reduced-transparency flag only as true', async () => {
+  const message = await renderMessage('liquid-glass')
+  const flagged = { ...message, state: { ...message.state, reducedTransparency: true } }
+  expect(acceptPreviewRender(flagged, 0)).toEqual(flagged)
+  for (const reducedTransparency of [false, 'yes', 1])
+    expect(acceptPreviewRender({ ...message, state: { ...message.state, reducedTransparency } }, 0)).toBeNull()
+  expect(acceptPreviewRender(message, 0)).toEqual(message)
+})

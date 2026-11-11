@@ -108,7 +108,7 @@ export function PresetPreviewFrame({
   }, [attempt])
   useEffect(() => {
     send()
-  }, [result, view.mode, view.viewport, view.focus, view.scene, view.backdrop])
+  }, [result, view.mode, view.viewport, view.focus, view.scene, view.backdrop, view.labInk, view.reducedTransparency])
   return (
     <section aria-label="Preset preview">
       {caption && (

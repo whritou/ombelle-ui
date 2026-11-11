@@ -1,45 +1,18 @@
 import type { PresetBackdrop } from '../../www/src/preset-editor/preview-protocol'
-import type { Preset } from '@ombelle/contracts'
-import { defaultGlassPresetId, getCatalog } from '@ombelle/catalog'
-import { normalizeColor } from '@ombelle/compiler'
-import { glassPresetBackdrop } from '../../www/src/site/glass-presets'
-
-const labPresets = [
-  defaultGlassPresetId,
-  'builtin-liquid-glass-givre',
-  'builtin-liquid-glass-fume',
-  'builtin-liquid-glass-relief',
-] as const
-
-/**
- * The lab's ink is for an unedited lab material over its own light-mode backdrop (the
- * scene its text was tuned against). Custom edits and other scenes keep the text plate.
- */
-export function hasLabPreviewInk(preset: Preset, scene: PresetBackdrop): boolean {
-  const catalog = getCatalog(preset.catalogRelease)
-  return labPresets.some((id) => {
-    if (glassPresetBackdrop(id, 'light') !== scene) return false
-    const reference = catalog.startingPresets[id]
-    const designKeys = Object.keys(reference.design) as (keyof Preset['design'])[]
-    return designKeys.every((key) => (preset.design[key] ?? 0) === (reference.design[key] ?? 0))
-      && (['light', 'dark'] as const).every((mode) => Object.entries(reference.modes[mode]).every(([key, color]) => {
-        const actual = preset.modes[mode][key as keyof Preset['modes']['light']]
-        return actual !== undefined && normalizeColor(actual) === normalizeColor(color)
-      }))
-  })
-}
+import type { LabInk } from '../../www/src/site/glass-backdrops'
 
 /**
  * Puts the preview root over a glass backdrop, or takes it off with undefined. Every glass
  * preview goes through here so one starting preset shows the same scene everywhere. Kit is
  * the stylesheet's own gradient: naming it would switch that gradient off with no art drawn.
  */
-export function setGlassBackdrop(root: HTMLElement, scene: PresetBackdrop | undefined, labInk = false) {
+export function setGlassBackdrop(root: HTMLElement, scene: PresetBackdrop | undefined, labInk: LabInk | null = null) {
   if (scene) root.dataset.backdrop = 'glass'
   else delete root.dataset.backdrop
   if (scene && scene !== 'kit') root.dataset.glassBackdrop = scene
   else delete root.dataset.glassBackdrop
-  root.toggleAttribute('data-glass-lab-ink', Boolean(scene) && labInk)
+  if (scene && labInk) root.setAttribute('data-glass-lab-ink', labInk)
+  else root.removeAttribute('data-glass-lab-ink')
 }
 
 /** The lab's optical test backgrounds, kept as vector art so the same lines refract at any size. */

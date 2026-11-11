@@ -2,7 +2,9 @@ import * as React from 'react'
 import { describeComponentRecipe } from '@ombelle/compiler'
 import { renderSpecimen, type Primitives } from './render-specimen'
 import { measureCatalogParts, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
-import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
+import { resolveRecipePreset } from '@ombelle/catalog'
+import { glassPresetId } from '../../www/src/site/glass-presets'
+import { pickGlassScene } from '../../www/src/site/glass-backdrops'
 import { scopedCatalogComponents } from './generated/catalog-recipes'
 import { LiquidGlassFilter } from './generated/catalog-recipes/liquid-glass-filter'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
@@ -28,7 +30,8 @@ export function CatalogRecipePreview({ message, onMeasure }: {
     })
     return () => { active = false }
   }, [component, result.scope, instance])
-  const scene = glass && glassPresetBackdrop(glass, mode)
+  const presetRef = result.recipe.data.presetRef
+  const scene = React.useMemo(() => glass ? pickGlassScene(resolveRecipePreset(presetRef), mode, glass) : undefined, [glass, presetRef, mode])
   React.useLayoutEffect(() => {
     const root = document.documentElement
     root.classList.toggle('dark', mode === 'dark')

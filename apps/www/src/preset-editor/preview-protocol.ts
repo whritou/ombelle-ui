@@ -23,6 +23,10 @@ export type PresetView = {
   focus?: ComponentId
   scene?: PresetScene
   backdrop?: PresetBackdrop
+  /** The lab ink in place of the text plate, for an unedited lab preset over its own scene. */
+  labInk?: 'light' | 'dark'
+  /** Simulates prefers-reduced-transparency in the preview; sent only when on. */
+  reducedTransparency?: true
 }
 export type PresetRender = {
   type: 'preset-render'
@@ -50,13 +54,13 @@ const positiveId = (value: unknown): value is number =>
 const hash = (value: unknown): value is string =>
   typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
 /** The view as sent: unset focus and the default scene are omitted, since the sandbox accepts only exact view shapes. */
-export function sentPresetView({ mode, viewport, focus, scene, backdrop }: PresetView): PresetView {
+export function sentPresetView({ mode, viewport, focus, scene, backdrop, labInk, reducedTransparency }: PresetView): PresetView {
   const shape: PresetView = focus
     ? { mode, viewport, focus }
     : scene && scene !== 'gallery'
       ? { mode, viewport, scene }
       : { mode, viewport }
-  return backdrop ? { ...shape, backdrop } : shape
+  return { ...shape, ...(backdrop ? { backdrop } : {}), ...(labInk ? { labInk } : {}), ...(reducedTransparency ? { reducedTransparency } : {}) }
 }
 
 export function isPresetHandshake(
@@ -96,13 +100,16 @@ export async function verifyPresetRender(
       !record(input.view) ||
       (Object.hasOwn(input.view, 'backdrop') &&
         !(presetBackdrops as readonly unknown[]).includes(input.view.backdrop)) ||
+      // The lab ink names how text reads over a scene, so it never comes without one.
+      (Object.hasOwn(input.view, 'labInk') && ((input.view.labInk !== 'light' && input.view.labInk !== 'dark') || !Object.hasOwn(input.view, 'backdrop'))) ||
+      (Object.hasOwn(input.view, 'reducedTransparency') && input.view.reducedTransparency !== true) ||
       !((view) =>
         exact(view, ['mode', 'viewport']) ||
         (exact(view, ['mode', 'viewport', 'focus']) &&
           (supportedComponentIds as readonly unknown[]).includes(view.focus)) ||
         (exact(view, ['mode', 'viewport', 'scene']) &&
           (presetScenes as readonly unknown[]).includes(view.scene)))(
-        Object.fromEntries(Object.entries(input.view).filter(([key]) => key !== 'backdrop')),
+        Object.fromEntries(Object.entries(input.view).filter(([key]) => key !== 'backdrop' && key !== 'labInk' && key !== 'reducedTransparency')),
       ) ||
       !['light', 'dark'].includes(input.view.mode as string) ||
       !['wide', 'narrow'].includes(input.view.viewport as string)
