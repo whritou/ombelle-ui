@@ -7,6 +7,7 @@ import { draftFamily } from '../../www/src/editor/model'
 import { glassPresetId } from '../../www/src/site/glass-presets'
 import { labInkFor, pickGlassScene } from '../../www/src/site/glass-backdrops'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
+import { startReducedTransparencyMirror } from './reduced-transparency-mirror'
 import { editorButtons } from './generated/editor-buttons'
 import { RecipeIcon } from './recipe-icon'
 import { LiquidGlassFilter } from './generated/liquid-glass/components/ui/liquid-glass-filter'
@@ -88,6 +89,11 @@ function EditorPreview() {
   }, [])
 
   const buttonMessage = message?.type === 'render' ? message : null
+  // The editors' "Preview transparency" toggle; the mirror holds the rules it switches on.
+  const reducedTransparency = message?.type === 'render' ? message.state.reducedTransparency === true : message?.reducedTransparency === true
+  React.useEffect(() => {
+    document.documentElement.toggleAttribute('data-reduced-transparency', reducedTransparency)
+  }, [reducedTransparency])
   const state = buttonMessage?.state
   const family = state && draftFamily(state.recipe)
   const glassPreset = state && glassPresetId(state.recipe.presetRef.id)
@@ -179,5 +185,6 @@ function recipeChildren(recipe: PreviewRecipe) {
 }
 
 export function mountEditorPreview(element: HTMLElement) {
+  startReducedTransparencyMirror(document)
   createRoot(element).render(<EditorPreview />)
 }

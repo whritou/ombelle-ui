@@ -237,3 +237,11 @@ it('sentPresetView keeps the lab ink', async () => {
     mode: 'dark', viewport: 'wide', scene: 'dashboard', backdrop: 'night', labInk: 'dark',
   })
 })
+it('accepts the reduced-transparency flag only as true, and sends it', async () => {
+  const { sentPresetView } = await import('./preview-protocol')
+  const view = { ...message(), view: { mode: 'light', viewport: 'wide', backdrop: 'mist', reducedTransparency: true } }
+  expect(await verifyPresetRender(view, 0, manifest)).toEqual(view)
+  for (const reducedTransparency of [false, 'yes'])
+    expect(await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', reducedTransparency } }, 0, manifest)).toBeNull()
+  expect(sentPresetView({ mode: 'light', viewport: 'wide', reducedTransparency: true })).toEqual({ mode: 'light', viewport: 'wide', reducedTransparency: true })
+})

@@ -9,6 +9,8 @@ export type PreviewFrameState = {
   viewport: 'wide' | 'narrow'
   forcedState: 'none' | 'hover' | 'focus' | 'active' | 'disabled' | 'loading'
   requestId: number
+  /** Simulates prefers-reduced-transparency in the preview; sent only when on. */
+  reducedTransparency?: true
 }
 
 export type PreviewRender = { type: 'render'; requestId: number; scope: string; state: PreviewFrameState }
@@ -51,7 +53,8 @@ export function acceptPreviewRender(input: unknown, previousRequestId: number): 
     input.type !== 'render' || !requestId(input.requestId) ||
     input.requestId <= previousRequestId || !hash(input.scope) || !record(input.state)) return null
   const state = input.state
-  if (!exactKeys(state, ['recipe', 'css', 'mode', 'viewport', 'forcedState', 'requestId']) ||
+  const keys = ['recipe', 'css', 'mode', 'viewport', 'forcedState', 'requestId']
+  if (!(exactKeys(state, keys) || (exactKeys(state, [...keys, 'reducedTransparency']) && state.reducedTransparency === true)) ||
     state.requestId !== input.requestId || typeof state.css !== 'string' ||
     state.css.length === 0 || state.css.length > 100_000 ||
     !state.css.includes(`[data-ombelle-recipe='${input.scope}']`) ||

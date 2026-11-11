@@ -6,6 +6,12 @@ export const previewModeOptions = [
   { value: 'dark', label: 'Dark', icon: <Moon aria-hidden="true" size={14} /> },
 ] as const
 
+/** The liquid glass preview's simulated prefers-reduced-transparency; preview only, never saved. */
+export const previewTransparencyOptions = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'reduced', label: 'Reduced' },
+] as const
+
 /** Wide and narrow preview options; each editor names its narrow width. */
 export function previewWidthOptions(narrowLabel: string) {
   return [

@@ -38,3 +38,12 @@ it('rounds a baseline to the field step for the empty field', () => {
   expect(baselineText(600, 100)).toBe('600')
   expect(baselineText(undefined, 1)).toBeUndefined()
 })
+
+it('accepts the reduced-transparency flag only as true', async () => {
+  const result = await compileComponentRecipe({ recipe: badge })
+  const message = { type: 'catalog-render', component: 'badge', requestId: 3, result, mode: 'light', viewport: 'wide' }
+  expect(await verifyCatalogPreviewRender({ ...message, reducedTransparency: true }, 'badge', 2)).toEqual({ ...message, reducedTransparency: true })
+  for (const reducedTransparency of [false, 'yes'])
+    expect(await verifyCatalogPreviewRender({ ...message, reducedTransparency }, 'badge', 2)).toBeNull()
+  expect(await verifyCatalogPreviewRender(message, 'badge', 2)).toEqual(message)
+})
