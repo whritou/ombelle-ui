@@ -1,9 +1,10 @@
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { getCatalog } from '@ombelle/catalog'
 import type { Preset } from '@ombelle/contracts'
 import { contrastRatio } from '../../../tests/helpers/contrast.js'
 import {
   glassBackdrop,
+  glassContrastOnScene,
   glassContrastPairs,
   glassContrastReport,
   glassContrastReportFor,
@@ -417,4 +418,48 @@ it('reduced transparency evaluates covered surfaces opaque', () => {
     expect(Math.abs(p.ratioOverBlack - p.ratioOpaque)).toBeLessThan(1e-6)
     expect(Math.abs(p.ratioOverWhite - p.ratioOpaque)).toBeLessThan(1e-6)
   }
+})
+
+describe('glassContrastOnScene', () => {
+  const catalog = getCatalog('0.1.0')
+  const glassIds = Object.keys(catalog.startingPresets) as (keyof typeof catalog.startingPresets)[]
+  const full = { low: 0, high: 1 }
+
+  it('the report is unchanged', () => {
+    const reports = Object.fromEntries(glassIds.map((id) => [id, glassContrastReport(catalog.startingPresets[id])]))
+    expect(reports).toMatchSnapshot()
+  })
+
+  it('full range equals the worst filtered pair of the report', () => {
+    const preset = catalog.startingPresets['builtin-liquid-glass-cristal']
+    for (const mode of ['light', 'dark'] as const) {
+      const pairs = glassContrastReport(preset).pairs.filter((pair) => pair.mode === mode)
+      const worst = Math.min(...pairs.map((pair) => Math.min(pair.ratioOverBlack, pair.ratioOverWhite)))
+      expect(glassContrastOnScene(preset, mode, full)).toBeCloseTo(worst, 3)
+    }
+  })
+
+  it('a narrower range never rates lower', () => {
+    for (const id of glassIds)
+      for (const mode of ['light', 'dark'] as const)
+        expect(glassContrastOnScene(catalog.startingPresets[id], mode, { low: 0.6, high: 0.9 }), id + mode)
+          .toBeGreaterThanOrEqual(glassContrastOnScene(catalog.startingPresets[id], mode, full))
+  })
+
+  it('reduced transparency ignores the range', () => {
+    const preset = structuredClone(catalog.startingPresets['builtin-liquid-glass-cristal'])
+    preset.design = { ...preset.design, transparency: 'reduced' } as Preset['design']
+    expect(glassContrastOnScene(preset, 'light', { low: 0.1, high: 0.2 }))
+      .toBe(glassContrastOnScene(preset, 'light', { low: 0.8, high: 0.9 }))
+  })
+
+  it('text inside the surface range rates 1', () => {
+    const preset = withColors({ card: '#808080', cardForeground: '#7f7f7f' }, { glassOpacity: 0.5 })
+    expect(glassContrastOnScene(preset, 'light', full)).toBe(1)
+  })
+
+  it('translucent text rates 1', () => {
+    const preset = withColors({ foreground: 'oklch(0 0 0 / 0.6)', cardForeground: 'oklch(0 0 0 / 0.6)' })
+    expect(glassContrastOnScene(preset, 'light', { low: 0.9, high: 1 })).toBe(1)
+  })
 })
