@@ -3,6 +3,8 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { expect, it } from 'vitest'
 
+// The hosted build bundles both previews with the whole catalog; it took
+// 105 to 120 s on CI runners by batch 6a, so allow twice that.
 it('builds nested static runtime HTML/assets and workers without touching unrelated public files or a database', async () => {
   const sentinel = path.resolve('apps/www/public/.hosted-preview-test-sentinel')
   // A clean checkout has no tracked public files, so the directory may not exist yet.
@@ -53,4 +55,4 @@ it('builds nested static runtime HTML/assets and workers without touching unrela
       expect(bytes).not.toMatch(/<!doctype|postgres(?:ql)?:\/\//i)
     }
   } finally { await fs.rm(sentinel, { force: true }) }
-}, 120_000)
+}, 240_000)
