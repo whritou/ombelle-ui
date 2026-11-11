@@ -23,6 +23,8 @@ export function MatrixControls({ matrix }: { matrix: MatrixLayout }) {
         {`This matrix has ${matrix.capped} cells; showing the first ${matrixCellLimit}. Choose other axes to see the rest.`}
       </p>}
       {matrix.error && <p role="alert" className="be-matrix-cap">{matrix.error}</p>}
+      {/* Every cell compiles and is verified before the matrix replaces the single preview. */}
+      {!matrix.matrix && !matrix.error && <p role="status" className="be-matrix-cap" data-testid="matrix-pending">Compiling the matrix…</p>}
     </>}
   </>
 }

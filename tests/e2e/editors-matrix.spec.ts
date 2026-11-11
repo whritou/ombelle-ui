@@ -55,8 +55,11 @@ test('the Button matrix shows every variant and size, the states and the edits',
   await seed(page, [[DRAFT_STORAGE_KEY, serializeDraft(draft)]])
   await page.goto(`${site}/editor/component/button`)
   await segment(page, 'Preview layout', 'Matrix').click()
+  // The wait is announced until every cell compiled, then the status goes away.
+  await expect(page.getByTestId('matrix-pending')).toHaveText('Compiling the matrix…')
   const table = matrix(page, 'Button recipe preview')
   await expect(table).toBeVisible({ timeout: 60000 })
+  await expect(page.getByTestId('matrix-pending')).toHaveCount(0)
   await expect(table.locator('thead th[scope="col"]')).toHaveCount(4)
   await expect(table.locator('tbody th[scope="row"]')).toHaveCount(8)
   await expect(table.locator('.recipe-matrix-state')).toHaveCount(5)
