@@ -138,7 +138,12 @@ it('offers the lab glass presets in the component directory and installs Select 
   const { default: ComponentPage } = await import('../../apps/www/src/app/components/[id]/page.js')
   const overview = renderToStaticMarkup(createElement(ComponentsPage))
   expect(overview).toContain('Glass preview preset')
-  for (const label of ['Cristal', 'Givré', 'Fumé', 'Relief']) expect(overview).toContain(label)
+  // The picker is a closed Combobox: it shows the standard preview, and its
+  // options render only when it opens, so read them from its source list.
+  expect(overview).toMatch(/<input[^>]*role="combobox"[^>]*value="Standard preview"|<input[^>]*value="Standard preview"[^>]*role="combobox"/)
+  const { glassPresetOptions } = await import('../../apps/www/src/site/glass-presets.js')
+  const labels = glassPresetOptions().map((option) => option.label)
+  for (const label of ['Cristal', 'Givré', 'Fumé', 'Relief']) expect(labels).toContain(label)
   expect(overview).toContain('href="/components/select"')
   const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
   expect(select).not.toContain('Requires CLI')
