@@ -35,6 +35,7 @@
 [data-slot='table'] {
   inline-size: 100%;
   border-collapse: collapse;
+  overflow-wrap: normal;
   caption-side: bottom;
   color: var(--foreground);
   font-family: var(--font-family);

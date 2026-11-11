@@ -37,7 +37,7 @@
   text-transform: uppercase;
   line-height: 1.5;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   box-shadow: none;
 }
 [data-slot='badge'][data-variant='secondary'] {

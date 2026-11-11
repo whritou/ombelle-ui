@@ -38,7 +38,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   box-shadow: calc(var(--shadow-x) / 2) calc(var(--shadow-y) / 2) 0 var(--shadow-color, var(--border));
   transition: none;
   animation: none;

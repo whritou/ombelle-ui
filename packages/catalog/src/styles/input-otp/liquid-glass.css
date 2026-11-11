@@ -105,3 +105,23 @@
     border-color: CanvasText;
   }
 }
+
+/* Narrow containers: each slot keeps 46px when there is room and shrinks to 1.5rem
+   before the code overflows. The grid tracks also keep the code's minimum width small
+   inside grid and flex layouts. */
+[data-slot='input-otp'] {
+  max-inline-size: 100%;
+}
+[data-slot='input-otp'] > div {
+  min-inline-size: 0;
+}
+[data-slot='input-otp-group'] {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(1.5rem, 46px);
+  min-inline-size: 0;
+}
+[data-slot='input-otp-slot'] {
+  inline-size: auto;
+  min-inline-size: 0;
+}
