@@ -26,8 +26,25 @@ describe('Select 0.7.3 variants', () => {
     const html = renderToStaticMarkup(roles(ui, { multiple: true, defaultValue: ['designer', 'engineer'] }))
     const chips = [...html.matchAll(/<span[^>]*data-slot="select-chip"[^>]*>([^<]*)<\/span>/g)].map(match => match[1])
     expect(chips).toEqual(['Designer', 'Engineer'])
-    const hidden = [...html.matchAll(/<input[^>]*name="roles"[^>]*>/g)].map(match => /value="([^"]*)"/.exec(match[0])?.[1])
-    expect(hidden.filter(Boolean)).toEqual(expect.arrayContaining(['designer', 'engineer']))
+    // Base UI submits through hidden inputs; the Radix edition through a hidden native select, which also validates.
+    const inputs = [...html.matchAll(/<input[^>]*name="roles"[^>]*>/g)].map(match => /value="([^"]*)"/.exec(match[0])?.[1])
+    const select = /<select[^>]*name="roles"[^>]*>(.*?)<\/select>/.exec(html)?.[1] ?? ''
+    const chosen = [...select.matchAll(/<option[^>]*value="([^"]*)"[^>]*selected[^>]*>/g)].map(match => match[1])
+    expect([...inputs, ...chosen].filter(Boolean)).toEqual(expect.arrayContaining(['designer', 'engineer']))
+  })
+
+  it('radix: a required multiple Select validates through a hidden native select, and a disabled one submits nothing', () => {
+    const html = renderToStaticMarkup(roles(radix, { multiple: true, required: true, disabled: true, defaultValue: [] }))
+    expect(html).toMatch(/<select[^>]*multiple[^>]*>/)
+    expect(/<select[^>]*>/.exec(html)![0]).toMatch(/required/)
+    expect(/<select[^>]*>/.exec(html)![0]).toMatch(/disabled/)
+    expect(html).toContain('aria-required="true"')
+  })
+
+  it('base: chips use the labels of an items array, as Base UI accepts', () => {
+    const html = renderToStaticMarkup(roles(base as unknown as Ui, { multiple: true, defaultValue: ['designer'],
+      items: [{ value: 'designer', label: 'Product designer' }, { value: 'engineer', label: 'Engineer' }] }))
+    expect(html).toMatch(/data-slot="select-chip"[^>]*>Product designer</)
   })
 
   it.each(editions)('%s shows the placeholder when nothing is chosen', (_, ui) => {

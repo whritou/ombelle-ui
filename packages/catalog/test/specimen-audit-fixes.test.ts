@@ -267,6 +267,11 @@ describe('the 0.7.3 batch 6b and 6c variants', () => {
     const ring = declarations(read('table/minimalist.css'), "[data-slot='table-sort']:focus-visible")
     expect([ring.outline, ring['outline-offset']]).toEqual(['1px solid var(--ring)', '-1px'])
   })
+  it('liquid glass blurs the rows that scroll under its translucent sticky header', () => {
+    // Inside the family's @supports fallback, as every glass backdrop-filter is.
+    const css = read('table/liquid-glass.css').replace(/\s+/g, ' ')
+    expect(css).toContain("@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { [data-slot='table-head']:is([data-table-sticky] *) { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); } @media (prefers-reduced-transparency: reduce), (forced-colors: active) { [data-slot='table-head']:is([data-table-sticky] *) { -webkit-backdrop-filter: none; backdrop-filter: none; } } }")
+  })
   it('minimalist gives a sticky header a surface and keeps its rule while the rows scroll', () => {
     const sticky = declarations(read('table/minimalist.css'), "[data-slot='table-head']:is([data-table-sticky] *)")
     expect(sticky.background).toBe('var(--card)')

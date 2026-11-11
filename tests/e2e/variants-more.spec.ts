@@ -115,7 +115,7 @@ for (const edition of ['radix', 'base'] as const) {
       await open(page, edition)
       const fields = page.getByTestId('vm-fields')
       const count = fields.locator('#vm-bio-count')
-      await expect(count).not.toHaveAttribute('aria-live')
+      await expect(count).toHaveAttribute('aria-live', 'off')
       await fields.getByRole('textbox', { name: 'Bio' }).fill('x'.repeat(150))
       await expect(count).toHaveAttribute('aria-live', 'polite')
       await fields.getByRole('textbox', { name: 'Bio' }).fill('x'.repeat(170))
@@ -389,6 +389,26 @@ for (const edition of ['radix', 'base'] as const) {
       await page.mouse.move(now.x + 1000, 400, { steps: 6 })
       await page.mouse.up()
       await expect(grip).toHaveAttribute('aria-valuenow', '240')
+      // A narrower window narrows the bounds too, even below the minimum.
+      await grip.focus()
+      await page.keyboard.press('End')
+      await expect(grip).toHaveAttribute('aria-valuenow', '640')
+      await page.setViewportSize({ width: 220, height: 800 })
+      await expect(grip).toHaveAttribute('aria-valuenow', '204')
+    })
+
+    test('a top sheet grows as its handle is dragged down', async ({ page }) => {
+      await open(page, edition)
+      await page.getByTestId('vm-sheets').getByRole('button', { name: 'Show notices' }).click()
+      const handle = page.getByRole('separator', { name: 'Resize sheet' })
+      const before = Number(await handle.getAttribute('aria-valuenow'))
+      const box = (await handle.boundingBox())!
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2, box.y + 160, { steps: 6 })
+      await page.mouse.up()
+      expect(Number(await handle.getAttribute('aria-valuenow'))).toBeGreaterThan(before)
+      await expect(page.getByRole('dialog', { name: 'Notices' })).toBeVisible()
     })
   })
 }

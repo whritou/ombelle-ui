@@ -35,6 +35,12 @@ function collectItems(node: React.ReactNode, items: Record<string, React.ReactNo
   return items
 }
 
+/** Base UI takes items as a record of labels or as an array of { value, label }: chips read either. */
+function labelsByValue(items: unknown): Record<string, React.ReactNode> {
+  if (!Array.isArray(items)) return (items ?? {}) as Record<string, React.ReactNode>
+  return Object.fromEntries(items.map((item: { value: unknown; label: React.ReactNode }) => [String(item.value), item.label]))
+}
+
 /** The labels of the declared items, and whether the Select is multiple, for SelectValue's chips. */
 const SelectItemsContext = React.createContext<{ items: Record<string, React.ReactNode>; multiple: boolean }>({ items: {}, multiple: false })
 
@@ -44,7 +50,7 @@ export function Select<
 >({ items, children, ...props }: SelectProps<Value, Multiple>) {
   const labels = items ?? collectItems(children, {})
   return (
-    <SelectItemsContext.Provider value={{ items: labels as Record<string, React.ReactNode>, multiple: !!props.multiple }}>
+    <SelectItemsContext.Provider value={{ items: labelsByValue(labels), multiple: !!props.multiple }}>
       <SelectPrimitive.Root
         data-slot="select"
         items={labels}

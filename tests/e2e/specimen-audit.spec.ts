@@ -83,6 +83,8 @@ for (const family of styleFamilies)
           const section = page.locator(`section[data-audit="${id}"]`)
           const record = (list: Finding[]) => findings.push(...list.map(finding => ({ ...finding, component: id })))
           let paused = false
+          // Toasts are measured first and stay open; once done, their fixed viewports must not cover later overlays.
+          if (component !== 'toast') await page.locator('[data-slot$="toast-viewport"]').evaluateAll(list => list.forEach(element => { (element as HTMLElement).style.display = 'none' }))
           try {
           await section.scrollIntoViewIfNeeded()
           // Radix Toast is open from the start; a closed toast would leave nothing to measure.

@@ -35,7 +35,8 @@ describe('Input 0.7.3 variants', () => {
     const html = renderToStaticMarkup(h(InputGroupCount, { value, max: 160, id: 'bio-count' }))
     expect(html).toContain(`>${value} / 160<`)
     expect(html).toContain('id="bio-count"')
-    expect(html.includes('aria-live="polite"')).toBe(live)
+    // The region is always there, so the first change past 90 % is announced too.
+    expect(html).toContain(`aria-live="${live ? 'polite' : 'off'}"`)
     expect(html.includes('data-over')).toBe(over)
   })
 
@@ -50,6 +51,8 @@ describe('Input 0.7.3 variants', () => {
     expect(block(`textarea/${family}.css`)).toMatch(/\[data-slot='textarea'\]\[data-size='sm'\]/)
     const group = block(`input-group/${family}.css`)
     expect(group).toMatch(/\[data-slot='input-group-clear'\]:is\(\[role='group'\]:has\(> :placeholder-shown\) > \*, \[role='group'\]:has\(> :placeholder-shown\) > \* > \*\)\s*\{[^}]*display: none/)
+    // Nor is there anything to clear on a disabled or read-only field.
+    expect(group).toContain("[data-slot='input-group-clear']:is([role='group']:has(> :is(input, textarea):is(:disabled, :read-only)) > *, [role='group']:has(> :is(input, textarea):is(:disabled, :read-only)) > * > *)")
     expect(group).toMatch(/\[data-slot='input-group-count'\]\[data-over\]\s*\{[^}]*var\(--destructive\)/)
   })
 })

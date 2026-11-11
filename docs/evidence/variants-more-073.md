@@ -26,6 +26,7 @@ Each run measured only the components it names, in five families, both editions 
 | Toast, after the stack rework | 21 of 21 passed |
 | Select, Sheet and Table, after their CSS fixes | 20 of 21 passed. In minimalist Radix light, the Close ring of `sheet~handle` measured 108 of the 115 focus pixels needed |
 | Sheet, after the Close ring fix | 21 of 21 passed |
+| Select, Sheet, Table, Input Group, Pagination and Toast, after the final review fixes | 21 of 21 passed |
 
 Fixes, pinned in `packages/catalog/test/specimen-audit-fixes.test.ts`:
 
@@ -48,10 +49,11 @@ The harness now:
 - **Toast:** the remaining findings are focus pixels on the translucent toast, promise and stack surfaces. There, a 2px `--foreground` ring partly falls below 3:1 against the backdrop.
 - **Select:** in light mode, the trigger ring of `select` and `select~multiple` falls short too. The default Select already had this finding, so it was not introduced here.
 - **Sheet and Table:** no findings.
+- **Input Group:** in light mode, the field ring of `input-group` and `input-group~clearable` falls short. The default Input Group already had this finding.
 
 ## Browser tests
 
-`tests/e2e/variants-more.spec.ts` runs under `playwright.specimen-audit.config.ts` and passes 34 of 34: 17 tests in both editions.
+`tests/e2e/variants-more.spec.ts` runs under `playwright.specimen-audit.config.ts` and passes 40 of 40: 20 tests in both editions. Those counts include the tests added by the final review fixes.
 
 - **Tabs:**
   - Vertical tabs move with Arrow Up and Arrow Down.
@@ -83,6 +85,35 @@ The harness now:
 - **Sheet:**
   - The bottom handle resizes by keyboard, and a drag below a quarter closes the sheet.
   - The side sheet resizes by keyboard and pointer, within its bounds and within the viewport.
+
+## Final review fixes
+
+A fresh review of the whole branch found eight Important issues and twelve Minor ones. All are fixed or documented. Each fix has a test that failed first, except the required Select test: its fixture was not yet generated when that test first ran.
+
+- **Sheet handle:** the bottom handle reported 50 % whatever the sheet's height, so Arrow Down made a short sheet taller. It now measures the dialog it sits in.
+  - The Base UI edition also kept a dragged height after closing, sometimes below the minimum. A sheet now reopens at its content's height.
+  - A top sheet's handle grows the sheet as it is dragged down.
+  - A side sheet's width and its separator's bounds follow the window, even when the window is narrower than `minSize`.
+- **ToastPromise:** in the Radix edition, the result was never announced, because Radix announces a toast only when it mounts. The settled toast now mounts anew, and the announcement test counts one live region for it.
+- **Table:**
+  - In neo-brutalism dark, the sorted header and its ring were about 1.3:1 on the yellow head. They now take the head's own text colour.
+  - The minimalist sticky header had no surface, and lost its rule while the rows scrolled. It now has a `--card` surface and draws its rule as a shadow.
+  - The glass sticky header blurs the rows under it, except under reduced transparency and forced colours.
+  - The audit page now gives a sorted head an empty `onSort`, so the sort button renders and is measured. This found the minimalist sort ring cut 5px by the container, because the first column has no inline padding. The ring is now drawn inside the button.
+- **Pagination:** `PaginationCompact` with handlers and no hrefs rendered links with no href, which the keyboard could not reach. Its ends are now buttons. `PaginationPageSize` without `onValueChange` is uncontrolled, so it renders from a server component.
+- **Select, Radix edition:** a multiple Select now:
+  - validates `required` through a hidden native select, and submits nothing when `disabled`;
+  - sets `aria-required`;
+  - scrolls the highlighted option into view;
+  - highlights an option when it opens by click;
+  - gives each item it could not collect an id of its own.
+- **Select, Base UI edition:** chips read an `items` array of `{ value, label }`.
+- **Input Group:**
+  - The counter's live region is always present, so the first change past 90 % is announced.
+  - Clear hides on a disabled or read-only field.
+- **Documented:** the Base UI stack needs its toasts as direct children, and `ToastPromise` behaves differently in each edition after the component goes or the promise changes.
+
+The audit harness now hides the toast viewports once the toast sections are measured. Before, the open Radix toasts covered part of the Sheet grip measured later in the same run.
 
 ## Toast measurements
 

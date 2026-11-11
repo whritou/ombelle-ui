@@ -72,11 +72,13 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
   const height = sizing?.height ?? measured
   const current = () => sizing?.height ?? measure()
   const startHeight = React.useRef(height)
+  // A top sheet grows downwards, so its drag runs the other way.
+  const down = React.useRef(1)
   React.useLayoutEffect(() => { if (sizing?.height === undefined) setMeasured(measure()) }, [sizing?.height])
   // A closed sheet opens again at its content's height, in both editions.
   const reset = sizing?.reset
   React.useEffect(() => () => reset?.(), [reset])
-  const raw = (dy: number) => startHeight.current - dy / window.innerHeight * 100
+  const raw = (dy: number) => startHeight.current - down.current * dy / window.innerHeight * 100
   const drag = useDrag(
     ({ y }) => sizing?.setHeight(clamp(Math.round(raw(y)), 10, 95)),
     ({ y }) => { if (raw(y) < 25) sizing?.close(); else sizing?.setHeight(clamp(Math.round(raw(y)), 25, 95)) },
@@ -102,7 +104,11 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
         sizing?.setHeight(clamp(next, 25, 95))
       }}
       {...drag.handlers}
-      onPointerDown={event => { startHeight.current = current(); drag.handlers.onPointerDown(event) }}
+      onPointerDown={event => {
+        startHeight.current = current()
+        down.current = self.current?.closest('[role="dialog"]')?.getAttribute('data-side') === 'top' ? -1 : 1
+        drag.handlers.onPointerDown(event)
+      }}
     />
   )
 }
@@ -147,14 +153,27 @@ function useSheetSizing({ resizable, side, defaultSize, minSize, maxSize, onSize
   const dismiss = React.useRef<HTMLButtonElement | null>(null)
   const [height, setHeight] = React.useState<number>()
   const [width, setWidth] = React.useState(defaultSize)
-  const fit = (value: number) => Math.round(clamp(value, minSize, Math.max(minSize, Math.min(maxSize, (typeof window === 'undefined' ? maxSize + 16 : window.innerWidth) - 16))))
+  // The window's width, followed while the sheet is open, so the bounds and the separator's value stay true.
+  const [viewport, setViewport] = React.useState<number>()
+  React.useEffect(() => {
+    const follow = () => setViewport(window.innerWidth)
+    follow()
+    window.addEventListener('resize', follow)
+    return () => window.removeEventListener('resize', follow)
+  }, [])
+  const fit = (value: number) => {
+    const room = (viewport ?? (typeof window === 'undefined' ? maxSize + 16 : window.innerWidth)) - 16
+    const upper = Math.min(maxSize, room)
+    // A window narrower than minSize wins: the sheet never passes the viewport.
+    return Math.round(clamp(value, Math.min(minSize, upper), upper))
+  }
   const setSize = (value: number) => { const next = fit(value); setWidth(next); onSizeChange?.(next) }
   const reset = React.useCallback(() => setHeight(undefined), [])
   const sizing: SheetSizing = { height, setHeight, close: () => dismiss.current?.click(), reset }
   const inline = resizable && (side === 'inline-start' || side === 'inline-end')
   // --sheet-size caps a bottom sheet; the handle also sets its height, which otherwise follows the content.
   const style = inline ? { '--sheet-size': `${fit(width)}px` } : height !== undefined ? { '--sheet-size': `${height}vh`, blockSize: `${height}vh` } : undefined
-  return { sizing, dismiss, inline, width: fit(width), setSize, style: style as React.CSSProperties | undefined }
+  return { sizing, dismiss, inline, width: fit(width), min: fit(-Infinity), max: fit(Infinity), setSize, style: style as React.CSSProperties | undefined }
 }
 // end sheet size hook
 
@@ -184,7 +203,7 @@ function SheetPanel({ className, children, side = 'inline-end', size = 'default'
     <XIcon aria-hidden="true" />
   </SheetPrimitive.Close>
   const handle = sheet.inline
-    ? <SheetResizeHandle side={side as 'inline-start' | 'inline-end'} size={sheet.width} setSize={sheet.setSize} minSize={minSize} maxSize={maxSize} />
+    ? <SheetResizeHandle side={side as 'inline-start' | 'inline-end'} size={sheet.width} setSize={sheet.setSize} minSize={sheet.min} maxSize={sheet.max} />
     : null
   // Slot receives exactly one element in asChild mode. Put the built-in close
   // inside that element so native content composition retains both controls.

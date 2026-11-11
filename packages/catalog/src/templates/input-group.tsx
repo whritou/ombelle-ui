@@ -89,7 +89,7 @@ export type InputGroupCountProps = Omit<React.ComponentProps<'span'>, 'children'
 export function InputGroupCount({ className, value, max, ...props }: InputGroupCountProps) {
   return (
     <span
-      aria-live={value >= max * 0.9 ? 'polite' : undefined}
+      aria-live={value >= max * 0.9 ? 'polite' : 'off'}
       {...props}
       data-slot="input-group-count"
       data-over={value > max ? '' : undefined}

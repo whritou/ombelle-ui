@@ -261,6 +261,13 @@ function VariantsMoreSheets() {
           <SheetHeader><SheetTitle>Inspector</SheetTitle><SheetDescription>{width} px</SheetDescription></SheetHeader>
         </SheetContent>
       </Sheet>
+      <Sheet>
+        <SheetTrigger asChild><Button>Show notices</Button></SheetTrigger>
+        <SheetContent side="top">
+          <SheetHeader><SheetTitle>Notices</SheetTitle><SheetDescription>Drag the handle down to show more.</SheetDescription></SheetHeader>
+          <SheetHandle />
+        </SheetContent>
+      </Sheet>
       <output data-testid="vm-sheet-width">{width}</output>
     </div>
   )

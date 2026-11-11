@@ -101,10 +101,12 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
 
 - **`PaginationCompact`**: previous, "Page 2 of 12" and next, for narrow tables and phones.
   - It goes inside `Pagination`, with `page`, `pageCount`, `previousHref` and `nextHref`.
-  - `onPrevious` and `onNext` are click handlers on the links.
-  - The links are named "Previous page" and "Next page", and are disabled at the ends.
+  - `onPrevious` and `onNext` are click handlers.
+  - With an href, each end is a link; with a handler alone, it is a button, so the keyboard can use it either way.
+  - The ends are named "Previous page" and "Next page", and are disabled at the ends.
 - **`PaginationPageSize`**: a labelled native select for rows per page.
   - Props: `value`, `options` (10, 25, 50 and 100 by default), `onValueChange`, `label` ("Rows per page") and `range`, a text such as "1–25 of 290".
+  - Without `onValueChange`, `value` is only the initial choice, so it also renders from a server component.
 
 ## Style families
 

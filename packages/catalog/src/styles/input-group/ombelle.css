@@ -219,6 +219,10 @@
 [data-slot='input-group-clear']:is([role='group']:has(> :placeholder-shown) > *, [role='group']:has(> :placeholder-shown) > * > *) {
   display: none;
 }
+/* Nor on a disabled or read-only field, which the user cannot clear. */
+[data-slot='input-group-clear']:is([role='group']:has(> :is(input, textarea):is(:disabled, :read-only)) > *, [role='group']:has(> :is(input, textarea):is(:disabled, :read-only)) > * > *) {
+  display: none;
+}
 [data-slot='input-group-count'] {
   color: var(--muted-foreground);
   font-size: 0.75rem;

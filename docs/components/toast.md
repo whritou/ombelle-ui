@@ -105,8 +105,10 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
 - **`ToastPromise`**: one toast that follows a task.
   - Props: `promise`, `loading`, and `success` and `error` (content, or a function of the result).
   - While the promise is pending, it shows a spinner and stays open; it then turns `success` or `destructive` and takes the usual duration.
-  - A promise that settles after the component is gone changes nothing.
+  - **Radix edition:** the toast belongs to the component. If the component goes, so does the toast, and a promise that settles later changes nothing. A new `promise` restarts the same toast. The settled toast is announced as a new toast.
+  - **Base UI edition:** the toast belongs to the manager. It stays after the component goes, and still shows the result. A new `promise` adds a toast.
 - **`ToastViewport stack`**: overlaps the toasts, with the older ones peeking out behind the newest.
+  - In the Base UI edition, give the viewport the toasts as its direct children, as in `manager.toasts.map(...)`, so it can put the newest in front.
   - Hovering or focusing the stack spreads them out upwards, while the newest stays where it is.
   - There is no animation under reduced motion.
 

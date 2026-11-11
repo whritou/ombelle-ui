@@ -177,6 +177,19 @@
   /* Spread equals blur, so the shadow falls only below the header and the container does not cut it. */
   box-shadow: 0 6px 6px -6px color-mix(in oklab, var(--foreground) 40%, transparent);
 }
+/* The glass head is translucent: rows scrolling under it are blurred, not legible through it. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='table-head']:is([data-table-sticky] *) {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-slot='table-head']:is([data-table-sticky] *) {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
 [data-slot='table-sort'] {
   display: inline-flex;
   align-items: center;
