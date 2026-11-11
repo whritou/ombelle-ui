@@ -81,3 +81,17 @@ it('a capped matrix keeps the current cell', () => {
   expect(cells).toHaveLength(matrixCellLimit)
   expect(cells.filter((cell) => cell.current)).toEqual([expect.objectContaining({ row: 'h', column: '7' })])
 })
+
+it('shows the Button icon size icon-only, with the content as its label', () => {
+  const recipe = createEditorDraft('flat').recipe
+  const axes = matrixAxes('button')!
+  const { cells } = matrixCells(recipe, axes.rows, axes.columns, 'button')
+  const icon = cells.filter((cell) => cell.column === 'icon' && !cell.current)
+  expect(icon.length).toBeGreaterThan(0)
+  for (const cell of icon) {
+    expect(cell.recipe.icon).toEqual({ ...(recipe.icon ?? { name: 'plus' }), iconOnly: true })
+    expect(cell.recipe.content).toBe(recipe.content)
+  }
+  // The other sizes keep the recipe's own icon, or none.
+  for (const cell of cells.filter((item) => item.column !== 'icon')) expect(cell.recipe.icon).toEqual(recipe.icon)
+})

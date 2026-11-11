@@ -4,6 +4,10 @@
 
 - Fit narrow screens, in all five style families: Calendar day buttons share the width and its padding gives way below 350px; Input OTP slots shrink from 46px to 1.5rem before the code overflows, including inside grid and flex forms; Kbd and Command shortcuts stay on one line; Badge text breaks between words only; a Table keeps whole words in its cells and scrolls sideways instead of breaking them letter by letter; and the neo-brutalism Tabs list wraps. Projects get these with their next `add` or `theme add`.
 - Show the Avatar status dot above the next avatar in an Avatar Group; it was hidden behind it in every family.
+- Match the Input Group and Pagination to the 0.7.2 design in every family: a text or icon addon is a muted cell with a divider toward the field, the inline button is a filled primary pill (icon toggles with an accessible name stay quiet), and Pagination links are 38px with the current page filled in primary.
+- The Input OTP is as wide as its slots, and the active slot draws its ring inside itself, so it no longer meets the ring around the whole code.
+- Ombelle menus (Select, Dropdown Menu, Context Menu, Combobox, Command) mark the highlighted item with a solid primary fill, or a solid destructive fill, instead of a pink tint and a ring; the fill reaches 3:1 against the menu, and forced colors still draw an outline.
+- The Button matrix shows its icon size as icon-only buttons, with the recipe's icon or a plus.
 - The component editors size the preview to its content instead of scrolling inside a 20rem frame; matrix cells give block components such as Table and Slider a readable width; each Toast in a matrix stays in its own cell; and the component list is in alphabetical order. A `/demo` page shows every preset scene and component matrix with each family's default preset, in light or dark and at 320px or wide.
 
 ## 0.7.3 — 11 November 2026

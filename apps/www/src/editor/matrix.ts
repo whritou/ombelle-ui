@@ -60,6 +60,17 @@ export function propValue(recipe: { props: Record<string, unknown> }, prop: stri
  * One recipe per cell, in row order: the current recipe with every edit kept and only the
  * two axis props set. Stops at the cell limit; total says how many the axes make.
  */
+/**
+ * The Button's icon size is the icon-only button the 0.7.3 variants pair with a Tooltip: its cell
+ * shows the recipe's icon (or a plus) with no text, the content becoming its accessible label.
+ * The inspector's own cell is left as the recipe is.
+ */
+function withIconOnly<R extends { props: Record<string, unknown> }>(recipe: R, component: MatrixComponent): R {
+  if (component !== 'button' || recipe.props.size !== 'icon') return recipe
+  const icon = (recipe as { icon?: Record<string, unknown> }).icon
+  return { ...recipe, icon: { ...(icon ?? { name: 'plus' }), iconOnly: true } }
+}
+
 export function matrixCells<R extends { props: Record<string, unknown> }>(recipe: R, rows: MatrixAxis, columns: MatrixAxis | null, component: MatrixComponent): { cells: MatrixCell<R>[]; total: number } {
   const columnValues: readonly (string | number | null)[] = columns ? columns.values : [null]
   const currentRow = propValue(recipe, rows.prop, component)
@@ -68,7 +79,8 @@ export function matrixCells<R extends { props: Record<string, unknown> }>(recipe
   for (const row of rows.values) for (const column of columnValues) {
     if (cells.length === matrixCellLimit) break
     const props = { ...recipe.props, [rows.prop]: row, ...(columns && column !== null ? { [columns.prop]: column } : {}) }
-    cells.push({ row, column, recipe: { ...recipe, props }, current: row === currentRow && column === currentColumn })
+    const current = row === currentRow && column === currentColumn
+    cells.push({ row, column, recipe: current ? { ...recipe, props } : withIconOnly({ ...recipe, props }, component), current })
   }
   // Past the cap, the inspector's own cell still shows: it takes the last place.
   const total = rows.values.length * columnValues.length
