@@ -13,7 +13,7 @@ import {
 import { expectComponentContract } from './new-component-contract.js'
 
 describe('Table catalog contract', () => {
-  it('provides native table parts without client code or extra dependencies', () => {
+  it('provides native table parts without client code, with lucide-react for the sort arrows', () => {
     expectComponentContract('table', {
       client: false,
       parts: [
@@ -25,6 +25,7 @@ describe('Table catalog contract', () => {
         'TableRow',
         'TableHead',
         'TableCell',
+        'TableSkeletonRows',
       ],
       slots: [
         'table-container',
@@ -36,11 +37,14 @@ describe('Table catalog contract', () => {
         'table-row',
         'table-head',
         'table-cell',
+        'table-sort',
+        'table-skeleton',
       ],
       dependencies: [
         { name: 'react', version: '19.3.1' },
         { name: 'clsx', version: '2.1.1' },
         { name: 'tailwind-merge', version: '3.7.0' },
+        { name: 'lucide-react', version: '1.55.0' },
       ],
       selectors: [
         "[data-slot='table-container']",

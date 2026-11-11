@@ -30,6 +30,7 @@ import {
   PaginationItem,
   PaginationLink,
   PaginationNext,
+  PaginationPageSize,
   PaginationPrevious,
 } from '../generated/preset-gallery/components/ui/pagination'
 import {
@@ -54,6 +55,7 @@ import {
   Tabs,
   TabsContent,
   TabsList,
+  TabsCount,
   TabsTrigger,
 } from '../generated/preset-gallery/components/ui/tabs'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../generated/preset-gallery/components/ui/empty'
@@ -76,9 +78,13 @@ export function ProjectsScene(props: SceneProps) {
   const show = gate(props)
   const [owners, setOwners] = React.useState<string[]>([])
   const [dueBy, setDueBy] = React.useState<Date>()
-  const shown = rows
+  const [sort, setSort] = React.useState<'descending' | 'ascending'>('descending')
+  const [pageSize, setPageSize] = React.useState(25)
+  const filtered = rows
     .filter((row) => !owners.length || owners.includes(slug(row.owner)))
     .filter((row) => !dueBy || fromIsoDate(row.due)! <= dueBy)
+  // Rows are listed newest first; ascending shows the oldest first.
+  const shown = sort === 'descending' ? filtered : [...filtered].reverse()
   return (
     <main className="preset-scene" data-testid="preset-scene" data-scene="projects">
       <div className="scene-heading">
@@ -188,22 +194,22 @@ export function ProjectsScene(props: SceneProps) {
       <Card appearance="outlined">
         <CardContent>
           <Tabs defaultValue="all" className="scene-tabs">
-            <TabsList appearance="underline" aria-label="Project lists">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="mine">Mine</TabsTrigger>
-              <TabsTrigger value="archived">Archived</TabsTrigger>
+            <TabsList appearance="pills" aria-label="Project lists">
+              <TabsTrigger value="all">All<TabsCount>12</TabsCount></TabsTrigger>
+              <TabsTrigger value="mine">Mine<TabsCount>2</TabsCount></TabsTrigger>
+              <TabsTrigger value="archived">Archived<TabsCount>4</TabsCount></TabsTrigger>
             </TabsList>
             <TabsContent value="all">
               {show(
                 'table',
                 'Table',
-                <Table density="compact" striped aria-label="Projects">
+                <Table density="compact" striped stickyHeader maxBlockSize="20rem" aria-label="Projects">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Project</TableHead>
                       <TableHead>Owner</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead numeric>Updated</TableHead>
+                      <TableHead numeric sort={sort} onSort={() => setSort(sort === 'descending' ? 'ascending' : 'descending')}>Updated</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -249,7 +255,7 @@ export function ProjectsScene(props: SceneProps) {
           </Tabs>
         </CardContent>
         <CardFooter className="scene-footer">
-          <span className="scene-muted">Showing 1–6 of 12</span>
+          <PaginationPageSize value={pageSize} onValueChange={setPageSize} range={`Showing 1–6 of 12`} />
           {show(
             'pagination',
             'Pagination',

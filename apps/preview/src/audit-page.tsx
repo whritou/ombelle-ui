@@ -84,6 +84,8 @@ function AuditPage({ data, mode, ordinary, factories }: {
     <h1>Specimen audit: {data.family} / {data.edition} / {mode}</h1>
     {data.specimens.map(item => <section key={item.id} data-audit={item.id} data-audit-component={item.component}
       style={{ display: 'grid', gap: '0.75rem', inlineSize: 'min(100%, 40rem)', position: 'relative' }}>
+      {/* Toast viewports are fixed to one corner: lift each Toast section's own, so they do not cover each other. */}
+      {item.component === 'toast' ? <style>{`[data-audit="${item.id}"] [data-slot$="toast-viewport"] { inset-block-end: ${1 + 12 * data.specimens.filter(other => other.component === 'toast').indexOf(item)}rem !important; }`}</style> : null}
       <h2>{item.id}</h2>
       {/* Normal flow, as in an app: grid items would stretch inline components such as Badge to the full width. */}
       <div>

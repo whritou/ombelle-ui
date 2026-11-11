@@ -134,3 +134,78 @@
   [data-slot='toast'][data-state='open'] { animation: none; }
   [data-slot='toast'][data-swipe='cancel'] { transition: none; }
 }
+/* 0.7.3 variants */
+[data-slot='toast-viewport'][data-stack] {
+  display: grid;
+  gap: 0;
+  padding-block-end: 1.5rem;
+  /* Overlapping toasts need no scrolling, and a scroll box would cut their shadows and the spread stack. */
+  overflow: visible;
+}
+/* Collapsed, the newest toast is in front and the older ones are plain layers behind it, as on the board:
+   2.5rem high whatever their content, so they never show above it, narrower, fainter, and peeking out
+   below it by a fixed 10px and 20px. */
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *) {
+  grid-area: 1 / 1;
+  align-self: end;
+}
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):not(:last-child) {
+  max-block-size: 2.5rem;
+  overflow: hidden;
+  box-shadow: none;
+}
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):not(:last-child) > * {
+  visibility: hidden;
+}
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):nth-last-child(2) {
+  margin-inline: 0.625rem;
+  transform: translateY(0.625rem);
+  opacity: 0.8;
+}
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):nth-last-child(3) {
+  margin-inline: 1.25rem;
+  transform: translateY(1.25rem);
+  opacity: 0.55;
+}
+[data-slot='toast']:is([data-stack]:not(:hover, :focus-within, [data-expanded]) > *):nth-last-child(n + 4) {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Spread, the toasts form a column. The viewport stays anchored at the bottom with the same padding,
+   so the newest toast does not move from under the pointer and its timer stays paused. */
+[data-slot='toast-viewport'][data-stack]:is(:hover, :focus-within, [data-expanded]) {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+[data-slot='toast-spinner'] {
+  display: inline-block;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='toast']:is([data-stack] > *) {
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+  [data-slot='toast-spinner'] {
+    animation: toast-spinner-turn 0.8s linear infinite;
+  }
+}
+@keyframes toast-spinner-turn {
+  to {
+    rotate: 1turn;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='toast-spinner'] {
+    border-color: CanvasText;
+    border-inline-end-color: transparent;
+  }
+}
+/* end 0.7.3 variants */

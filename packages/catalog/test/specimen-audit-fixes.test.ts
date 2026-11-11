@@ -240,3 +240,44 @@ describe('the 0.7.3 card options', () => {
     expect([ring.outline, ring['outline-offset']]).toEqual(['3px solid var(--ring)', '2px'])
   })
 })
+
+describe('the 0.7.3 batch 6b and 6c variants', () => {
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+  it.each(families)('%s lets a toast stack overflow its viewport, so peeking toasts keep their shadows', family => {
+    expect(declarations(read(`toast/${family}.css`), "[data-slot='toast-viewport'][data-stack]").overflow).toBe('visible')
+  })
+  it.each(families)('%s keeps a text item icon inside its box', family => {
+    expect(declarations(read(`select/${family}.css`), "[data-slot='select-item-icon']")).toMatchObject({ overflow: 'hidden', 'font-size': '0.625rem' })
+  })
+  it.each(families)('%s rings a focused resize grip inside its edge', family => {
+    const ring = declarations(read(`sheet/${family}.css`), "[data-slot='sheet-resize-handle']:focus-visible")
+    expect(ring.outline).toMatch(/^2(\.5)?px /)
+    expect(ring['outline-offset']).toBe('-2px')
+  })
+  it('minimalist widens the Close ring of a top or bottom sheet, whose content height can set its edge between pixels', () => {
+    const ring = declarations(read('sheet/minimalist.css'), "[data-slot='sheet-dismiss']:is([data-side='bottom'] > *, [data-side='top'] > *):focus-visible")
+    expect(ring['outline-width']).toBe('2px')
+  })
+  it('neo-brutalism writes a sorted header and its ring in the yellow header\'s own text colour', () => {
+    const css = read('table/neo-brutalism.css')
+    expect(declarations(css, "[data-slot='table-sort']:is([aria-sort] > *)").color).toBe('inherit')
+    expect(declarations(css, "[data-slot='table-sort']:focus-visible").outline).toContain('var(--primary-foreground)')
+  })
+  it('minimalist rings a sort button inside itself, since its first column has no inline padding and the container clips', () => {
+    const ring = declarations(read('table/minimalist.css'), "[data-slot='table-sort']:focus-visible")
+    expect([ring.outline, ring['outline-offset']]).toEqual(['1px solid var(--ring)', '-1px'])
+  })
+  it('liquid glass blurs the rows that scroll under its translucent sticky header', () => {
+    // Inside the family's @supports fallback, as every glass backdrop-filter is.
+    const css = read('table/liquid-glass.css').replace(/\s+/g, ' ')
+    expect(css).toContain("@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { [data-slot='table-head']:is([data-table-sticky] *) { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); } @media (prefers-reduced-transparency: reduce), (forced-colors: active) { [data-slot='table-head']:is([data-table-sticky] *) { -webkit-backdrop-filter: none; backdrop-filter: none; } } }")
+  })
+  it('minimalist gives a sticky header a surface and keeps its rule while the rows scroll', () => {
+    const sticky = declarations(read('table/minimalist.css'), "[data-slot='table-head']:is([data-table-sticky] *)")
+    expect(sticky.background).toBe('var(--card)')
+    expect(sticky['box-shadow']).toMatch(/^inset 0 -1px 0 var\(--foreground\), 0 6px 6px -6px /)
+  })
+  it.each(families)('%s casts the sticky header shadow downwards only', family => {
+    expect(declarations(read(`table/${family}.css`), "[data-slot='table-head']:is([data-table-sticky] *)")['box-shadow']).toMatch(/(^|, )0 6px 6px -6px /)
+  })
+})

@@ -44,6 +44,20 @@ The Radix edition uses `@radix-ui/react-dialog` 1.3.1. Compose triggers and clos
 
 The Base UI edition uses `Dialog` from `@base-ui/react/dialog` 1.9.0. Compose with `render`, for example `<SheetTrigger render={<Button />}>Edit settings</SheetTrigger>`. Base UI uses `Popup` and `Backdrop` and forwards their native props. Its default render bridge adds `data-state="open" | "closed"` alongside Base UI's attributes; supplying a custom `render` replaces that bridge.
 
+## Variants (0.7.3)
+
+These need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`SheetHandle`**: for `side="bottom"`, or `side="top"`, where it goes last and is dragged down to grow.
+  - It is a separator named "Resize sheet", with the height as a percentage of the viewport, from 25 to 95.
+  - Arrow Up and Arrow Down change it by 10, and Home and End go to the bounds.
+  - Dragging it resizes the sheet, and releasing below 25 % closes it, returning focus to the trigger.
+- **`SheetContent resizable`**: for `side="inline-start"` or `"inline-end"`.
+  - It adds a separator named "Resize panel" on the open edge.
+  - The arrow keys change the width by 16px, or 64px with Shift, and Home and End go to `minSize` (240) and `maxSize` (640).
+  - Dragging resizes it too. The width never passes the viewport less 16px, even below `minSize`, and follows the window as it is resized.
+  - Other props: `defaultSize` (320) and `onSizeChange`.
+
 ## Styling and generated files
 
 The compiler emits `components/ui/sheet.tsx`, `components/ui/sheet.css` and an example. The source imports only its own stylesheet and utils; it does not import another installed component. Both editions also use lucide-react 1.55.0 for the icon and clsx 2.1.1 / tailwind-merge 3.7.0 through utils.

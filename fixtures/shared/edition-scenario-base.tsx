@@ -1,25 +1,26 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, AvatarOverflow, AvatarStatus } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGroupCount, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHandle, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
@@ -32,7 +33,7 @@ import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, Comma
 import { Calendar, DatePicker, toIsoDate } from '@/components/ui/calendar'
 import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, useToastManager } from '@/components/ui/toast'
+import { Toast, ToastAction, ToastClose, ToastDescription, ToastPromise, ToastProvider, ToastTitle, ToastViewport, useToastManager } from '@/components/ui/toast'
 
 // Ported components rendered identically in both editions; the parity test
 // compares computed styles of every [data-slot] element per section.
@@ -93,6 +94,233 @@ function CalendarScenario() {
           <DatePicker aria-label="Publish date" locale="en-US" calendar={shown} />
         </DialogContent>
       </Dialog>
+    </section>
+  )
+}
+
+const deploys = Array.from({ length: 12 }, (_, index) => ({ name: `Project ${String.fromCharCode(65 + index)}`, minutes: (index * 37) % 120 + 5 }))
+function VariantsMoreTable() {
+  const [sort, setSort] = React.useState<'ascending' | 'descending'>('descending')
+  const [loading, setLoading] = React.useState(false)
+  const rows = [...deploys].sort((a, b) => sort === 'ascending' ? a.minutes - b.minutes : b.minutes - a.minutes)
+  return (
+    <div data-testid="vm-table">
+      <button type="button" data-testid="vm-table-loading" onClick={() => setLoading(value => !value)}>Toggle loading</button>
+      <Table stickyHeader maxBlockSize="12rem" loading={loading} aria-label="Deploys">
+        <TableHeader>
+          <TableRow>
+            <TableHead sort={sort} onSort={() => setSort(value => value === 'descending' ? 'ascending' : 'descending')}>Updated</TableHead>
+            <TableHead>Project</TableHead>
+            <TableHead actions />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? <TableSkeletonRows rows={3} columns={3} /> : rows.map(row => (
+            <TableRow key={row.name}>
+              <TableCell>{row.minutes} min ago</TableCell>
+              <TableCell>{row.name}</TableCell>
+              <TableCell actions><button type="button" aria-label={`Actions for ${row.name}`}>…</button></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+function VariantsMoreFields() {
+  const [query, setQuery] = React.useState('')
+  const [bio, setBio] = React.useState('Designing systems that stay calm under change.')
+  return (
+    <div data-testid="vm-fields">
+      <Input size="sm" aria-label="Small input" placeholder="Small" />
+      <Input aria-label="Default input" placeholder="Default" />
+      <Input size="lg" aria-label="Large input" placeholder="Large" />
+      <InputGroup>
+        <InputGroupInput aria-label="Search projects" placeholder="Search" value={query} onChange={event => setQuery(event.target.value)} />
+        <InputGroupAddon align="inline-end">
+          {/* The consumer empties the field after a tick, as an async store would. */}
+          <InputGroupClear label="Clear search" onClear={() => setTimeout(() => setQuery(''), 0)} />
+        </InputGroupAddon>
+      </InputGroup>
+      <InputGroup>
+        <InputGroupTextarea aria-label="Bio" aria-describedby="vm-bio-count" value={bio} onChange={event => setBio(event.target.value)} />
+        <InputGroupAddon align="block-end">
+          <InputGroupText>Shown on your profile</InputGroupText>
+          <InputGroupCount id="vm-bio-count" value={bio.length} max={160} />
+        </InputGroupAddon>
+      </InputGroup>
+    </div>
+  )
+}
+
+const dot = <svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="5" fill="currentColor" /></svg>
+function VariantsMoreSelect() {
+  const [roles, setRoles] = React.useState<string[]>([])
+  const [sent, setSent] = React.useState('')
+  return (
+    <form data-testid="vm-select" onSubmit={event => { event.preventDefault(); setSent(new FormData(event.currentTarget).getAll('roles').join(',')) }}>
+      <p id="vm-roles-label">Roles</p>
+      <Select multiple name="roles" value={roles} onValueChange={setRoles}>
+        <SelectTrigger aria-labelledby="vm-roles-label"><SelectValue placeholder="Choose roles" /></SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Team</SelectLabel>
+            <SelectItem value="designer" icon={dot}>Designer</SelectItem>
+            <SelectItem value="engineer" icon={dot}>Engineer</SelectItem>
+          </SelectGroup>
+          <SelectSeparator />
+          <SelectGroup>
+            <SelectLabel>Guests</SelectLabel>
+            <SelectItem value="researcher" icon={dot}>Researcher</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <button type="submit" data-testid="vm-select-submit">Save roles</button>
+      <button type="button" data-testid="vm-select-reset" onClick={() => setRoles([])}>Reset roles</button>
+      <output data-testid="vm-select-output">{sent}</output>
+    </form>
+  )
+}
+
+function VariantsMoreToastButtons({ start }: { start: (outcome: 'resolve' | 'reject', leave?: boolean) => void; }) {
+  const manager = useToastManager()
+  return (
+    <div data-testid="vm-toasts">
+      <button type="button" onClick={() => manager.add({ title: 'Preset saved' })}>Show short toast</button>
+      <button type="button" onClick={() => manager.add({ title: 'Project archived', actionProps: { children: 'Undo', 'aria-label': 'Undo archiving' } })}>Show action toast</button>
+      <button type="button" onClick={() => { for (const name of ['First', 'Second', 'Third']) manager.add({ title: `${name} notification`, timeout: 0 }) }}>Show three toasts</button>
+      <button type="button" onClick={() => start('resolve')}>Publish preset</button>
+      <button type="button" onClick={() => start('reject')}>Publish offline</button>
+      <button type="button" onClick={() => start('resolve', true)}>Publish and leave</button>
+    </div>
+  )
+}
+function VariantsMoreToastList() {
+  const manager = useToastManager()
+  return (
+    <ToastViewport stack data-testid="vm-toast-viewport">
+      {manager.toasts.map(toast => (
+        <Toast key={toast.id} toast={toast}>
+          <ToastTitle>{toast.title}</ToastTitle>
+          {toast.actionProps ? <ToastAction altText="Undo archiving">Undo</ToastAction> : null}
+          <ToastClose />
+        </Toast>
+      ))}
+    </ToastViewport>
+  )
+}
+const vmCities = ['Amsterdam', 'Berlin', 'Copenhagen', 'Dublin', 'Edinburgh', 'Florence', 'Geneva', 'Helsinki', 'Istanbul', 'Jena', 'Kyiv', 'Lisbon', 'Madrid', 'Naples', 'Oslo', 'Prague']
+function VariantsMoreRequiredSelect() {
+  const [sent, setSent] = React.useState('')
+  return (
+    <form data-testid="vm-select-required" onSubmit={event => { event.preventDefault(); setSent(new FormData(event.currentTarget).getAll('cities').join(',') || 'none') }}>
+      <p id="vm-cities-label">Cities</p>
+      <Select multiple required name="cities" defaultValue={[]}>
+        <SelectTrigger aria-labelledby="vm-cities-label"><SelectValue placeholder="Choose cities" /></SelectTrigger>
+        <SelectContent>
+          {vmCities.map(city => <SelectItem key={city} value={city.toLowerCase()}>{city}</SelectItem>)}
+        </SelectContent>
+      </Select>
+      <button type="submit">Save cities</button>
+      <output data-testid="vm-cities-output">{sent}</output>
+    </form>
+  )
+}
+
+function VariantsMoreToasts() {
+  const [promise, setPromise] = React.useState<Promise<string> | null>(null)
+  const [pending, setPending] = React.useState(false)
+  const start = (outcome: 'resolve' | 'reject', leave = false) => {
+    const run = new Promise<string>((resolve, reject) => {
+      ;(window as unknown as Record<string, () => void>).__vmSettle = () => outcome === 'resolve' ? resolve('Ombelle') : reject(new Error('offline'))
+    })
+    setPromise(run)
+    setPending(leave)
+  }
+  return (
+    <ToastProvider>
+      <VariantsMoreToastButtons start={start} />
+      <button type="button" onClick={() => setPending(false)}>Leave</button>
+      {promise && !pending ? <ToastPromise key={String(promise)} promise={promise} loading="Publishing preset…" success={(name: string) => `${name} published`} error="Publishing failed" /> : null}
+      {promise && pending ? <ToastPromise promise={promise} loading="Publishing preset…" success="Published" error="Failed" /> : null}
+      <VariantsMoreToastList />
+    </ToastProvider>
+  )
+}
+
+function VariantsMoreSheets() {
+  const [width, setWidth] = React.useState(320)
+  return (
+    <div data-testid="vm-sheets">
+      <Sheet>
+        <SheetTrigger render={<Button />}>Filter projects</SheetTrigger>
+        <SheetContent side="bottom">
+          <SheetHandle />
+          <SheetHeader><SheetTitle>Filter projects</SheetTitle><SheetDescription>Drag the handle to resize or close.</SheetDescription></SheetHeader>
+        </SheetContent>
+      </Sheet>
+      <Sheet>
+        <SheetTrigger render={<Button />}>Open inspector</SheetTrigger>
+        <SheetContent side="inline-end" resizable onSizeChange={setWidth}>
+          <SheetHeader><SheetTitle>Inspector</SheetTitle><SheetDescription>{width} px</SheetDescription></SheetHeader>
+        </SheetContent>
+      </Sheet>
+      <Sheet>
+        <SheetTrigger render={<Button />}>Show notices</SheetTrigger>
+        <SheetContent side="top">
+          <SheetHeader><SheetTitle>Notices</SheetTitle><SheetDescription>Drag the handle down to show more.</SheetDescription></SheetHeader>
+          <SheetHandle />
+        </SheetContent>
+      </Sheet>
+      <output data-testid="vm-sheet-width">{width}</output>
+    </div>
+  )
+}
+
+// Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
+function VariantsMoreScenario() {
+  const [page, setPage] = React.useState(1)
+  const [report, setReport] = React.useState(1)
+  const [rows, setRows] = React.useState(25)
+  return (
+    <section aria-label="More variants" data-testid="variants-more">
+      <Tabs defaultValue="general" orientation="vertical" data-testid="vm-vertical-tabs">
+        <TabsList aria-label="Settings sections">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general">Profile, language and theme.</TabsContent>
+        <TabsContent value="members">People in this workspace.</TabsContent>
+        <TabsContent value="billing">Plan and invoices.</TabsContent>
+      </Tabs>
+      <Tabs defaultValue="all">
+        <TabsList appearance="pills" aria-label="Project lists">
+          <TabsTrigger value="all">All<TabsCount>12</TabsCount></TabsTrigger>
+          <TabsTrigger value="review">Review<TabsCount>3</TabsCount></TabsTrigger>
+          <TabsTrigger value="archived">Archived<TabsCount>0</TabsCount></TabsTrigger>
+        </TabsList>
+        <TabsContent value="all">All projects.</TabsContent>
+        <TabsContent value="review">Projects in review.</TabsContent>
+        <TabsContent value="archived">Archived projects.</TabsContent>
+      </Tabs>
+      <Pagination aria-label="Project pages" data-testid="vm-compact">
+        <PaginationCompact page={page} pageCount={3} previousHref="#vm-page" nextHref="#vm-page"
+          onPrevious={event => { event.preventDefault(); setPage(value => value - 1) }}
+          onNext={event => { event.preventDefault(); setPage(value => value + 1) }} />
+      </Pagination>
+      <Pagination aria-label="Report pages" data-testid="vm-compact-buttons">
+        <PaginationCompact page={report} pageCount={2} onPrevious={() => setReport(value => value - 1)} onNext={() => setReport(value => value + 1)} />
+      </Pagination>
+      <PaginationPageSize data-testid="vm-page-size" value={rows} onValueChange={setRows}
+        range={<output data-testid="vm-range">1–{rows} of 290</output>} />
+      <VariantsMoreTable />
+      <VariantsMoreFields />
+      <VariantsMoreSelect />
+      <VariantsMoreRequiredSelect />
+      <VariantsMoreToasts />
+      <VariantsMoreSheets />
     </section>
   )
 }
@@ -337,6 +565,7 @@ function CatalogExpansionScenario() {
         <OverlaysScenario />
         <CalendarScenario />
         <VariantsBasicsScenario />
+        <VariantsMoreScenario />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

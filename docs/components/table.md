@@ -49,6 +49,26 @@ Name every table with `TableCaption` or an `aria-label` on `Table`. Native table
 - `numeric` on `TableHead` and `TableCell` right-aligns the cell in tabular, monospaced digits.
 - `selected` on `TableRow` sets `data-state="selected"` and highlights the row. It is visual only: pair it with a visible control such as a Checkbox so the selection is perceivable without colour and operable by keyboard.
 
+## Variants (0.7.3)
+
+These need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`stickyHeader`**: keeps the header in view while the rows scroll.
+  - The rows scroll inside the table's container, whose height is at most `maxBlockSize` (24rem by default).
+  - The header cells stay on top, on the table's surface.
+- **Sorting**:
+  - `TableHead sort` (`ascending`, `descending` or `none`) sets `aria-sort` on the header.
+  - With `onSort`, the header becomes a button with an arrow, and a click calls `onSort`. Sorting the rows is yours.
+  - Without `onSort`, a sorted column states its order but has no button.
+- **Actions column**:
+  - `TableHead actions` and `TableCell actions` make a narrow column at the end.
+  - An empty actions header is named "Actions" with visually hidden text.
+  - Name each row's button after its row, for example "Actions for Website refresh".
+- **Loading**:
+  - `Table loading` marks the table `aria-busy`.
+  - `<TableSkeletonRows rows={3} columns={4} />` stands in for the rows with decorative bars, which pulse unless reduced motion is set.
+- **Dependency**: Table now depends on lucide-react, for the sort arrows.
+
 ## Styles and artifacts
 
 Use `<Table density="compact" striped>` for a denser data view. Compact reduces

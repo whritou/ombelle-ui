@@ -28,9 +28,13 @@ const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {
 const variantRecipeFields073: Readonly<Record<string, readonly string[]>> = {
   badge: ['appearance'], alert: ['dismissible', 'actions', 'layout'], card: ['mode'],
   avatar: ['shape', 'overflow'], accordion: ['appearance', 'icon'],
+  tabs: ['counts'], table: ['stickyHeader', 'sortable', 'actions', 'loading'], input: ['size'], textarea: ['size'],
+  'input-group': ['clearable', 'counter'], pagination: ['layout', 'pageSize'], select: ['multiple', 'icons'],
+  toast: ['mode'], sheet: ['handle', 'resizable'],
 }
 const variantRecipeValues073: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
   badge: { variant: ['success', 'warning', 'info'] },
+  tabs: { appearance: ['pills'] },
 }
 
 function usesVariants073(recipe: Pick<ComponentRecipe, 'component' | 'props'>): boolean {

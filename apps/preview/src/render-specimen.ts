@@ -8,6 +8,8 @@ export function renderSpecimen(specimen: RecipeSpecimen, primitives: Primitives,
   options: { triggerClass?(tag: string): string | undefined } = {}): React.ReactElement {
   const props: Record<string, unknown> = Object.fromEntries(Object.entries(specimen.props).map(([key, value]) =>
     [key, value && typeof value === 'object' && 'localId' in value ? instanceId + value.localId : value]))
+  // Specimens hold no handlers; a sorted head gets an empty one, so its sort button renders and is audited.
+  if (specimen.tag === 'TableHead' && props.sort !== undefined && props.onSort === undefined) props.onSort = () => {}
   const className = options.triggerClass?.(specimen.tag)
   if (className) props.className = className
   return React.createElement(primitives[specimen.tag] ?? specimen.tag, props, ...specimen.children.map(child =>

@@ -58,6 +58,19 @@
 [data-slot="button"]:disabled,[data-slot="input"]:disabled{border-color:GrayText;color:GrayText}
 [data-slot="dialog-description"]{color:CanvasText}
 }
+/* 0.7.3 variants: input */
+[data-slot="input"][data-size="sm"] {
+  min-height: 2rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.625rem;
+  font-size: 0.8125rem;
+}
+[data-slot="input"][data-size="lg"] {
+  min-height: 3rem;
+  padding-inline: 1rem;
+  font-size: 1rem;
+}
+/* end 0.7.3 variants: input */
 /* 0.7.3 variants */
 [data-slot="button"][data-variant="link-destructive"] {
   background: transparent;

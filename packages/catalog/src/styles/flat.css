@@ -49,6 +49,19 @@
 [data-slot="input"]:disabled{background:var(--muted);color:var(--foreground);border-bottom-color:var(--input);border-bottom-style:dotted;opacity:0.55}
 /* forced-colors boundaries */
 @media(forced-colors: active){[data-slot="dialog-content"]{border:1px solid CanvasText;box-shadow:none}[data-slot="button"][data-variant="outline"]{border:2px solid ButtonText;box-shadow:none}}
+/* 0.7.3 variants: input */
+[data-slot="input"][data-size="sm"] {
+  min-height: 2rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.625rem;
+  font-size: 0.8125rem;
+}
+[data-slot="input"][data-size="lg"] {
+  min-height: 3rem;
+  padding-inline: 1rem;
+  font-size: 1rem;
+}
+/* end 0.7.3 variants: input */
 /* 0.7.3 variants */
 [data-slot="button"][data-variant="link-destructive"] {
   background: transparent;

@@ -40,6 +40,16 @@ TabsList, TabsTrigger, and TabsContent forward their corresponding Radix List, T
 
 Automatic activation is the default: moving focus to a trigger selects its panel immediately. Keep automatically activated panel content available without noticeable latency. Consumers can explicitly set activationMode="manual" for panels that require deferred loading; Space or Enter then activates the focused tab. Tab enters the tab list at its selected trigger and moves onward to the active panel or its focusable content. Horizontal lists use Left/Right arrows, respecting dir="rtl"; vertical lists use Up/Down arrows. Home/End move to the first/last enabled trigger. Navigation skips disabled triggers and loops by default. Set orientation="vertical" on Tabs for a vertical list and panel layout.
 
+## Variants (0.7.3)
+
+These need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`TabsList appearance="pills"`**: rounded triggers, and the selected one is filled with the primary colours.
+- **`TabsCount`**: a count inside any trigger, such as `<TabsTrigger value="review">Review<TabsCount>3</TabsCount></TabsTrigger>`.
+  - It is part of the trigger's accessible name ("Review 3").
+  - In a selected pill, it is drawn on the primary foreground at 25 %.
+- **Vertical tabs**: `orientation="vertical"` keeps each family's existing vertical style, and moves with Arrow Up and Arrow Down.
+
 ## Styles and artifacts
 
 `TabsList` accepts `appearance="contained"` (the existing default) or

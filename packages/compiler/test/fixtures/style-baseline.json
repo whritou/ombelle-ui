@@ -14,7 +14,7 @@
         },
         {
           "logicalPath": "components/ui/input.tsx",
-          "sha256": "163fe1e1ad473d42d4c37eb4383de2701696a97defec8f4d0d7abaf2b2e63eff"
+          "sha256": "3727d76398aabf4b1f929270556c07fd8dc1c204dcf6488ff55a81eee67fbd61"
         },
         {
           "logicalPath": "examples/button.tsx",
@@ -34,7 +34,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "2e3d3d0014a5057d97f6a1318c8358e4f00569d7ba50f1707c15ad4db9f60107"
+          "sha256": "01fdd060cd34c73ef2881704c246a5afa92bf1377487a945d2556d35f0641241"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -55,7 +55,7 @@
         },
         {
           "logicalPath": "components/ui/input.tsx",
-          "sha256": "163fe1e1ad473d42d4c37eb4383de2701696a97defec8f4d0d7abaf2b2e63eff"
+          "sha256": "3727d76398aabf4b1f929270556c07fd8dc1c204dcf6488ff55a81eee67fbd61"
         },
         {
           "logicalPath": "examples/button.tsx",
@@ -75,7 +75,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "8cfae9af38302575d8c1ce909dec7620dacf6b54c0d545bf05e3abe78bc21ac0"
+          "sha256": "023c3dfd340a080dad1251fb8d8002fbe561be9d461b40c0c85326963cd22abc"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -96,7 +96,7 @@
         },
         {
           "logicalPath": "components/ui/input.tsx",
-          "sha256": "163fe1e1ad473d42d4c37eb4383de2701696a97defec8f4d0d7abaf2b2e63eff"
+          "sha256": "3727d76398aabf4b1f929270556c07fd8dc1c204dcf6488ff55a81eee67fbd61"
         },
         {
           "logicalPath": "examples/button.tsx",
@@ -116,7 +116,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "dea4830e9a7a372ccaa1d11a4e8833767eaac14825df3b4c84f8c3ad2c066196"
+          "sha256": "f091e7ec6e4d8266f4c09c51dda67de9f2eed94720ec2e1e4e57cd73b1c9c264"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -335,6 +335,21 @@
       ],
       "spec": "feat/variants-basics-073",
       "reason": "A loading Button restores a min-inline-size the consumer set and returns a callback-ref cleanup (batch 6a minors)"
+    },
+    {
+      "families": [
+        "flat",
+        "minimalist",
+        "neo-brutalism",
+        "ombelle",
+        "liquid-glass"
+      ],
+      "logicalPaths": [
+        "styles/ui-style.css",
+        "components/ui/input.tsx"
+      ],
+      "spec": "feat/variants-more-073",
+      "reason": "Input sm and lg sizes (0.7.3 variants, batches 6b and 6c)"
     }
   ]
 }

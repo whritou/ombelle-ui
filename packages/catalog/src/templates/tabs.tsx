@@ -16,7 +16,7 @@ export function TabsList({
   className,
   appearance = 'contained',
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' }) {
+}: React.ComponentProps<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' | 'pills' }) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
@@ -51,4 +51,9 @@ export function TabsContent({
       {...props}
     />
   )
+}
+
+/** A count in a trigger, such as the number of items in a list. It is part of the trigger's name. */
+export function TabsCount({ className, ...props }: React.ComponentProps<'span'>) {
+  return <span {...props} data-slot="tabs-count" className={cn(className)} />
 }

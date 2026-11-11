@@ -124,6 +124,21 @@ the same inner field glass treatment as Textarea; reduced transparency restores
 the opaque background. Forced colors remove the filter and shadow. This
 experimental family retains the same native semantics and logical layout.
 
+## Clear and counter (0.7.3)
+
+These need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`InputGroupClear`**: a Clear button for an addon.
+  - It is named "Clear" by default; `label` renames it, for example "Clear search".
+  - It calls `onClear`, where you empty the field, then moves focus back to the group's field.
+  - It is hidden while the field shows its placeholder, so give the field a `placeholder`; a space will do.
+  - It is also hidden on a disabled or read-only field.
+- **`InputGroupCount`**: shows "46 / 160" for `value` and `max`.
+  - Give it an `id`, and list that id in the field's `aria-describedby`.
+  - It is a live region that stays silent until 10 % of the limit, then speaks politely, rather than on every keystroke.
+  - Past the limit, it turns the destructive colour, underlined in forced colours.
+- **Dependency**: Input Group now depends on lucide-react, for the Clear icon.
+
 ## Files and ownership
 
 Compilation emits `components/ui/input-group.tsx`, colocated

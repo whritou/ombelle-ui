@@ -47,6 +47,15 @@ Textarea uses its family's Input treatment: border token (`--border` in flat, ne
 
 Under forced colors the control uses `Field`/`FieldText`, a system-color border, no shadow, and a `GrayText` placeholder. The invalid border becomes `double`, so the state does not rely on color. Minimalist also sets the focus outline to `Highlight`. The shared `[data-slot]` reduced-motion rule removes the background and border transitions. Textarea uses the saved global preset; a later theme operation can change semantic tokens but does not rewrite the installed `textarea.css`.
 
+## Sizes (0.7.3)
+
+These need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`size`**: `Input` and `Textarea` take `size="sm"` or `size="lg"`; `default`, or no size, keeps each family's size.
+  - `sm` is 2rem high with 0.8125rem text, and `lg` is 3rem with 1rem text.
+  - On `Input`, the prop replaces the HTML `size` attribute.
+- **Character counter**: see `InputGroupCount` on the Input Group page. It also works on its own beside a Textarea.
+
 ## Generated files and ownership
 
 Compilation emits `components/ui/textarea.tsx`, colocated `components/ui/textarea.css`, and `examples/textarea.tsx`, together with the existing shared utility and theme artifacts. The example labels each control with `htmlFor` and `id` and shows an invalid control whose error is linked by `aria-describedby`. The installer honors configured aliases and destination paths; the ordinary default usage destination is `src/ombelle-examples/textarea.tsx`. Importing the generated Textarea loads `./textarea.css`; retain that import if moving the component. The standard registry item includes the exact component, utility, and Textarea CSS bytes.

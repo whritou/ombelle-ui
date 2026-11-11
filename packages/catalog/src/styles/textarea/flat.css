@@ -60,3 +60,17 @@
     border-bottom-width: 4px;
   }
 }
+/* 0.7.3 variants */
+[data-slot='textarea'][data-size='sm'] {
+  min-block-size: 4rem;
+  padding-block: 0.5rem;
+  padding-inline: 0.625rem;
+  font-size: 0.8125rem;
+}
+[data-slot='textarea'][data-size='lg'] {
+  min-block-size: 8rem;
+  padding-block: 0.75rem;
+  padding-inline: 1rem;
+  font-size: 1rem;
+}
+/* end 0.7.3 variants */

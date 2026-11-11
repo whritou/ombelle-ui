@@ -9,7 +9,7 @@ it.each(supportedStyleFamilies)(
   async (family) => {
     const { css } = await expectStandaloneArtifacts(family, 'table', {
       importLine: "from '@/components/ui/table'",
-      dependencies: ['clsx', 'react', 'tailwind-merge'],
+      dependencies: ['clsx', 'lucide-react', 'react', 'tailwind-merge'],
     })
     const forced = forcedBlock(css)
     expect(forced).toContain(

@@ -173,6 +173,18 @@ New variants of Button, Badge, Alert, Card, Avatar and Accordion. Review them on
 - **Avatar**: the overflow count is announced as "4 more reviewers", or its label.
 - **Accordion**: a flush accordion keeps its headings and expanded states; the plus and minus icons are not announced.
 
+**Variants, batches 6b and 6c (0.7.3)**
+
+New variants of Tabs, Table, Input, Textarea, Input Group, Pagination, Select, Toast and Sheet. Review them on the preview `projects` and `settings` scenes and the edition pages' "More variants" section.
+
+- **Tabs**: a pill with a count is named with its count, such as "Review 3"; vertical tabs move with Arrow Up and Arrow Down.
+- **Table**: a sortable header is a button and announces its order through `aria-sort`; the actions header is named "Actions"; a loading table is busy, and its bars are not announced.
+- **Input Group**: Clear is named and returns focus to the field; the counter is announced near and past the limit only.
+- **Pagination**: compact previous and next are named "Previous page" and "Next page" and disabled at the ends; the page-size select is labelled.
+- **Select**: a multiple select announces a listbox that allows several choices, each option selected or not, and keeps focus on its trigger.
+- **Toast**: a toast is announced once; it waits while hovered or focused; a toast with an action stays until dismissed; a pending promise toast is not announced as an error.
+- **Sheet**: the bottom handle and the side grip are named separators with their values, and work with the keyboard.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -243,6 +255,19 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Card variants | | | | | | | | | | |
 | Avatar variants | | | | | | | | | | |
 | Accordion variants | | | | | | | | | | |
+
+#### Variants, batches 6b and 6c (0.7.3)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Tabs variants | | | | | | | | | | |
+| Table variants | | | | | | | | | | |
+| Input and Textarea sizes | | | | | | | | | | |
+| Input Group Clear and counter | | | | | | | | | | |
+| Pagination variants | | | | | | | | | | |
+| Select multiple | | | | | | | | | | |
+| Toast variants and timing | | | | | | | | | | |
+| Sheet handles | | | | | | | | | | |
 
 ### Findings
 

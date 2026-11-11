@@ -179,3 +179,54 @@
     color: CanvasText;
   }
 }
+/* 0.7.3 variants */
+/* A compact end without an href is a button: it takes the link's pointer and hover. */
+[data-slot='pagination-link']:is(button) {
+  cursor: pointer;
+}
+[data-slot='pagination-link']:is(button):not(:disabled):hover {
+  background: var(--muted);
+}
+[data-slot='pagination-compact'] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+}
+[data-slot='pagination-compact'] > strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+[data-slot='pagination-page-size'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-family);
+  font-size: 0.8125rem;
+}
+[data-slot='pagination-page-size'] > select {
+  box-sizing: border-box;
+  min-block-size: 2.125rem;
+  padding-block: 0;
+  padding-inline: 0.625rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) * 0.5);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 600;
+}
+[data-slot='pagination-page-size'] > select:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
+}
+@media (forced-colors: active) {
+  [data-slot='pagination-page-size'] > select {
+    border: 1px solid ButtonText;
+  }
+}
+/* end 0.7.3 variants */

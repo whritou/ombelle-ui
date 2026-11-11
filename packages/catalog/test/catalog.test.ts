@@ -171,6 +171,7 @@ describe('catalog contract', () => {
       'tabs-list',
       'tabs-trigger',
       'tabs-content',
+      'tabs-count',
     ])
     expect(tabs.dependencies).toEqual([
       { name: 'react', version: '19.3.1' },

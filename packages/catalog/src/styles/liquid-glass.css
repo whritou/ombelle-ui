@@ -230,6 +230,19 @@
   [data-slot="alert-dialog-content"], [data-slot="alert-dialog-header"], [data-slot="alert-dialog-footer"], [data-slot="alert-dialog-title"], [data-slot="alert-dialog-description"], [data-slot="alert-dialog-cancel"], [data-slot="alert-dialog-action"],
   [data-slot="toast"], [data-slot="toast-content"], [data-slot="toast-title"], [data-slot="toast-description"], [data-slot="toast-action"], [data-slot="toast-close"] { -webkit-text-stroke: 0; }
 }
+/* 0.7.3 variants: input */
+[data-slot="input"][data-size="sm"] {
+  min-height: 2rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.625rem;
+  font-size: 0.8125rem;
+}
+[data-slot="input"][data-size="lg"] {
+  min-height: 3rem;
+  padding-inline: 1rem;
+  font-size: 1rem;
+}
+/* end 0.7.3 variants: input */
 /* 0.7.3 variants */
 [data-slot="button"][data-variant="link-destructive"] {
   background: transparent;

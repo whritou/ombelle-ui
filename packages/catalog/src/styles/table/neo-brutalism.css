@@ -109,3 +109,76 @@
     forced-color-adjust: none;
   }
 }
+/* 0.7.3 variants */
+[data-slot='table-container']:has(> [data-table-sticky]) {
+  max-block-size: var(--table-max-block-size, 24rem);
+  overflow: auto;
+}
+[data-slot='table-head']:is([data-table-sticky] *) {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  /* Spread equals blur, so the shadow falls only below the header and the container does not cut it. */
+  box-shadow: 0 6px 6px -6px color-mix(in oklab, var(--foreground) 40%, transparent);
+}
+[data-slot='table-sort'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--radius) * 0.5);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+[data-slot='table-sort'] svg {
+  flex-shrink: 0;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
+[data-slot='table-sort']:is([aria-sort] > *) {
+  color: inherit;
+}
+[data-slot='table-sort']:focus-visible {
+  /* The head is on --primary: the ring takes its text colour. */
+  outline: 3px dashed var(--primary-foreground);
+  outline-offset: 4px;
+}
+[data-slot='table-head'][data-actions],
+[data-slot='table-cell'][data-actions] {
+  inline-size: 1%;
+  white-space: nowrap;
+  text-align: end;
+}
+[data-slot='table-skeleton'] {
+  display: block;
+  block-size: 0.625rem;
+  border-radius: 999px;
+  background: var(--muted);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='table-skeleton'] {
+    animation: table-skeleton-pulse 1.4s ease-in-out infinite;
+  }
+}
+@keyframes table-skeleton-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='table-skeleton'] {
+    background: GrayText;
+    forced-color-adjust: none;
+  }
+  [data-slot='table-sort']:focus-visible {
+    outline-color: Highlight;
+  }
+}
+/* end 0.7.3 variants */

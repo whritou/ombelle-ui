@@ -35,18 +35,30 @@ function collectItems(node: React.ReactNode, items: Record<string, React.ReactNo
   return items
 }
 
+/** Base UI takes items as a record of labels or as an array of { value, label }: chips read either. */
+function labelsByValue(items: unknown): Record<string, React.ReactNode> {
+  if (!Array.isArray(items)) return (items ?? {}) as Record<string, React.ReactNode>
+  return Object.fromEntries(items.map((item: { value: unknown; label: React.ReactNode }) => [String(item.value), item.label]))
+}
+
+/** The labels of the declared items, and whether the Select is multiple, for SelectValue's chips. */
+const SelectItemsContext = React.createContext<{ items: Record<string, React.ReactNode>; multiple: boolean }>({ items: {}, multiple: false })
+
 export function Select<
   Value = string,
   Multiple extends boolean | undefined = false,
 >({ items, children, ...props }: SelectProps<Value, Multiple>) {
+  const labels = items ?? collectItems(children, {})
   return (
-    <SelectPrimitive.Root
-      data-slot="select"
-      items={items ?? collectItems(children, {})}
-      {...props}
-    >
-      {children}
-    </SelectPrimitive.Root>
+    <SelectItemsContext.Provider value={{ items: labelsByValue(labels), multiple: !!props.multiple }}>
+      <SelectPrimitive.Root
+        data-slot="select"
+        items={labels}
+        {...props}
+      >
+        {children}
+      </SelectPrimitive.Root>
+    </SelectItemsContext.Provider>
   )
 }
 
@@ -67,6 +79,18 @@ export function SelectValue({
   className,
   ...props
 }: Part<typeof SelectPrimitive.Value>) {
+  const { items, multiple } = React.useContext(SelectItemsContext)
+  if (multiple) {
+    // A multiple Select shows a chip per chosen label, or the placeholder.
+    const { placeholder, children: _children, ...rest } = props as typeof props & { placeholder?: React.ReactNode }
+    return (
+      <SelectPrimitive.Value data-slot="select-value" className={cn(className)} {...rest}>
+        {(value: unknown) => Array.isArray(value) && value.length
+          ? value.map(item => <span key={String(item)} data-slot="select-chip" data-select-chip="">{items[String(item)] ?? String(item)}</span>)
+          : placeholder}
+      </SelectPrimitive.Value>
+    )
+  }
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
@@ -195,10 +219,13 @@ export function SelectItem({
   className,
   children,
   hint,
+  icon,
   ...props
 }: Part<typeof SelectPrimitive.Item> & {
   /** Short text shown after the label, such as why an option is disabled. */
   hint?: React.ReactNode
+  /** A decorative icon before the label. */
+  icon?: React.ReactNode
 }) {
   const hintId = React.useId()
   return (
@@ -211,6 +238,7 @@ export function SelectItem({
       )}
       {...props}
     >
+      {icon ? <span data-slot="select-item-icon" aria-hidden="true">{icon}</span> : null}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
       {hint ? (
         <span data-slot="select-item-hint" id={hintId}>

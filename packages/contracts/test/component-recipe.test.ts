@@ -219,3 +219,42 @@ it('keeps existing recipes free of the 0.7.3 variant fields', () => {
       if (!(component === 'card' && key === 'appearance')) expect(props).not.toHaveProperty(key)
   }
 })
+
+
+const moreDraft = (component: string, props: Record<string, unknown> = {}) => ({
+  ...badge, component, props,
+  content: defaultRecipeFields(componentRecipeFields(component as 'badge').content),
+})
+
+it.each([
+  ['tabs', { appearance: 'pills', counts: true }],
+  ['table', { stickyHeader: true, sortable: true, actions: true, loading: true }],
+  ['input', { size: 'sm' }],
+  ['textarea', { size: 'lg' }],
+  ['input-group', { clearable: true, counter: true }],
+  ['pagination', { layout: 'compact', pageSize: true }],
+  ['select', { multiple: true, icons: true }],
+  ['toast', { mode: 'promise' }],
+  ['toast', { mode: 'stack' }],
+  ['sheet', { handle: true, resizable: true }],
+] as const)('accepts the 0.7.3 %s variant %o', (component, props) => {
+  expect(validateComponentRecipe(moreDraft(component, props)).props).toMatchObject(props)
+})
+
+it.each([
+  ['input', { size: 'xl' }, '/props/size'],
+  ['pagination', { layout: 'wide' }, '/props/layout'],
+  ['toast', { mode: 'queue' }, '/props/mode'],
+  ['tabs', { appearance: 'chips' }, '/props/appearance'],
+] as const)('rejects the %s variant %o at %s', (component, props, path) => {
+  expect(() => validateComponentRecipe(moreDraft(component, props))).toThrow(expect.objectContaining({ path }))
+})
+
+it('keeps existing 6b and 6c recipes free of the new fields', () => {
+  const added = ['counts', 'stickyHeader', 'sortable', 'actions', 'loading', 'size', 'clearable', 'counter', 'layout', 'pageSize', 'multiple', 'icons', 'mode', 'handle', 'resizable']
+  for (const component of ['tabs', 'table', 'input', 'textarea', 'input-group', 'pagination', 'toast', 'sheet'] as const) {
+    const props = validateComponentRecipe(moreDraft(component)).props as Record<string, unknown>
+    // Sheet already had its own size field.
+    for (const key of added) if (!(component === 'sheet' && key === 'size')) expect(props, component + ' ' + key).not.toHaveProperty(key)
+  }
+})

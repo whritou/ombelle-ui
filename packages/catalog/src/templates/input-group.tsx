@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { XIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './input-group.css'
 
@@ -43,4 +44,58 @@ export function InputGroupButton({
   ...props
 }: React.ComponentProps<'button'>) {
   return <button {...props} type={type} data-slot="input-group-button" className={cn(className)} />
+}
+
+export type InputGroupClearProps = Omit<React.ComponentProps<'button'>, 'children'> & {
+  /** The button's accessible name. */
+  label?: string
+  /** Empty the field here; focus then moves back to the group's field. */
+  onClear?: () => void
+}
+
+/**
+ * A Clear button for an addon. It is hidden while the field shows its placeholder,
+ * so give the field a placeholder (a space will do).
+ */
+export function InputGroupClear({ className, label = 'Clear', onClear, onClick, ...props }: InputGroupClearProps) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      {...props}
+      onClick={onClear || onClick ? event => {
+        onClick?.(event)
+        onClear?.()
+        const field = event.currentTarget.closest('[data-slot="input-group"]')?.querySelector<HTMLElement>('input, textarea')
+        field?.focus()
+      } : undefined}
+      data-slot="input-group-clear"
+      className={cn(className)}
+    >
+      <XIcon aria-hidden="true" />
+    </button>
+  )
+}
+
+export type InputGroupCountProps = Omit<React.ComponentProps<'span'>, 'children'> & {
+  value: number
+  max: number
+}
+
+/**
+ * "46 / 160" under a field. Give it an id and list it in the field's aria-describedby.
+ * It is announced politely only near the limit, and past it, rather than on every keystroke.
+ */
+export function InputGroupCount({ className, value, max, ...props }: InputGroupCountProps) {
+  return (
+    <span
+      aria-live={value >= max * 0.9 ? 'polite' : 'off'}
+      {...props}
+      data-slot="input-group-count"
+      data-over={value > max ? '' : undefined}
+      className={cn(className)}
+    >
+      {value} / {max}
+    </span>
+  )
 }
