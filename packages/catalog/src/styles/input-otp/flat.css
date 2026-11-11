@@ -41,7 +41,8 @@
 [data-slot='input-otp-slot']:focus {
   border-block-end-color: var(--primary);
   outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  /* Inside the slot, so it never meets the ring around the whole code. */
+  outline-offset: -2px;
 }
 /* Radix types into one input laid over the whole code, so the code is ringed while it has focus. */
 [data-slot='input-otp']:has([data-input-otp]:focus-visible) {

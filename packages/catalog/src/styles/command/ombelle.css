@@ -71,9 +71,19 @@
 }
 [data-slot='command-item'][data-highlighted],
 [data-slot='command-item'][data-selected='true'] {
-  /* The highlight tint alone is below 3:1 against the menu: a ring marks the item reached with the keyboard. */
-  outline: 2px solid var(--ring);
+  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
+     the keyboard; the primary foreground keeps its text readable. */
+  background: var(--primary);
+  color: var(--primary-foreground);
+  /* Invisible here; forced colors draw it, since they drop the fill. */
+  outline: 2px solid transparent;
   outline-offset: -2px;
+}
+/* Indicators and shortcuts drawn in primary or muted colours follow the item's text instead. */
+[data-slot='command-item'][data-highlighted] > *,
+[data-slot='command-item'][data-selected='true'] > * {
+  --primary: currentColor;
+  --muted-foreground: currentColor;
 }
 [data-slot='command-search'] {
   box-sizing: border-box;

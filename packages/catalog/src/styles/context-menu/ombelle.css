@@ -71,8 +71,9 @@
   color: var(--destructive);
 }
 [data-slot='context-menu-item'][data-variant='destructive'][data-highlighted] {
-  background: color-mix(in oklab, var(--destructive) 14%, var(--popover));
-  color: var(--destructive);
+  /* A solid fill, like the primary one: the 14% tint was below 3:1 against the menu. */
+  background: var(--destructive);
+  color: var(--destructive-foreground);
 }
 [data-slot='context-menu-item'][data-disabled],
 [data-slot='context-menu-checkbox-item'][data-disabled],
@@ -155,9 +156,21 @@
 [data-slot='context-menu-checkbox-item'][data-highlighted],
 [data-slot='context-menu-radio-item'][data-highlighted],
 [data-slot='context-menu-sub-trigger'][data-highlighted] {
-  /* The highlight tint alone is below 3:1 against the menu: a ring marks the item reached with the keyboard. */
-  outline: 2px solid var(--ring);
+  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
+     the keyboard; the primary foreground keeps its text readable. */
+  background: var(--primary);
+  color: var(--primary-foreground);
+  /* Invisible here; forced colors draw it, since they drop the fill. */
+  outline: 2px solid transparent;
   outline-offset: -2px;
+}
+/* Indicators and shortcuts drawn in primary or muted colours follow the item's text instead. */
+[data-slot='context-menu-item'][data-highlighted] > *,
+[data-slot='context-menu-checkbox-item'][data-highlighted] > *,
+[data-slot='context-menu-radio-item'][data-highlighted] > *,
+[data-slot='context-menu-sub-trigger'][data-highlighted] > * {
+  --primary: currentColor;
+  --muted-foreground: currentColor;
 }
 [data-slot='context-menu-trigger'] {
   -webkit-touch-callout: none;
