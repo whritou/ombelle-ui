@@ -37,12 +37,12 @@ it('cells keep edits', () => {
     expect(cell.recipe.content).toEqual({ label: 'Beta' })
     expect(cell.recipe.appearance).toEqual(recipe.appearance)
   }
-  expect(cells[axes.columns!.values.length]!.recipe.props.variant).toBe(axes.rows.values[1])
+  expect((cells[axes.columns!.values.length]!.recipe.props as Record<string, unknown>).variant).toBe(axes.rows.values[1])
 })
 
 it('the current cell treats absent props as their default', () => {
   const recipe = createCatalogDraft('badge').recipe
-  expect(recipe.props.size).toBeUndefined()
+  expect((recipe.props as Record<string, unknown>).size).toBeUndefined()
   const axes = matrixAxes('badge')!
   const current = matrixCells(recipe, axes.rows, axes.columns, 'badge').cells.filter((cell) => cell.current)
   expect(current).toHaveLength(1)
