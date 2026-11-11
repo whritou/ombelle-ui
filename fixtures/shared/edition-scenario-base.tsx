@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
-import { Avatar, AvatarFallback, AvatarGroup, AvatarStatus } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, AvatarOverflow, AvatarStatus } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
@@ -18,7 +18,7 @@ import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, Breadcr
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -93,6 +93,81 @@ function CalendarScenario() {
           <DatePicker aria-label="Publish date" locale="en-US" calendar={shown} />
         </DialogContent>
       </Dialog>
+    </section>
+  )
+}
+
+// Browser coverage for the 0.7.3 batch 6a variants; the same in both editions.
+const pixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQBYkfQ8AAAAAElFTkSuQmCC'
+function VariantsBasicsScenario() {
+  const [saving, setSaving] = React.useState(false)
+  const [longLabel, setLongLabel] = React.useState(false)
+  const [notice, setNotice] = React.useState(true)
+  const [shared, setShared] = React.useState(false)
+  const [submitted, setSubmitted] = React.useState('')
+  const heading = React.useRef<HTMLHeadingElement>(null)
+  return (
+    <section aria-label="Variants" data-testid="variants">
+      <div className="specimen-row">
+        <Button data-testid="vb-save" loading={saving}>{longLabel ? 'Save all twelve changes' : 'Save changes'}</Button>
+        <button type="button" data-testid="vb-toggle-loading" onClick={() => setSaving(value => !value)}>Toggle saving</button>
+        <button type="button" data-testid="vb-longer-label" onClick={() => setLongLabel(true)}>Longer label</button>
+        <Button variant="link-destructive">Remove member</Button>
+      </div>
+      <div className="specimen-row">
+        <Badge appearance="soft" variant="success"><BadgeDot />Live</Badge>
+        <Badge appearance="soft" variant="warning">Degraded</Badge>
+        <Badge appearance="outline" variant="destructive">Deprecated</Badge>
+      </div>
+      {notice ? (
+        <Alert variant="info" data-testid="vb-alert" onDismiss={() => { setNotice(false); heading.current?.focus() }}>
+          <AlertTitle>New version available</AlertTitle>
+          <AlertDescription>0.7.3 adds 14 components.</AlertDescription>
+        </Alert>
+      ) : null}
+      <h3 ref={heading} tabIndex={-1} data-testid="vb-plan-heading">Plan</h3>
+      <Card data-testid="vb-link-card">
+        <CardHeader>
+          <CardTitle><CardLink href="#featured">Website refresh</CardLink></CardTitle>
+          <CardDescription data-testid="vb-link-description">Whole card is the link.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <button type="button" data-testid="vb-share" onClick={() => setShared(true)}>Share</button>
+          <span data-testid="vb-shared">{shared ? 'Shared' : ''}</span>
+        </CardContent>
+      </Card>
+      <form data-testid="vb-plan-form" onSubmit={event => { event.preventDefault(); setSubmitted('plan=' + String(new FormData(event.currentTarget).get('plan'))) }}>
+        <button type="button" data-testid="vb-before-plans">Before the plans</button>
+        <CardGroup name="plan" aria-labelledby="vb-plans-label" defaultValue="team">
+          <CardOption value="starter" title="Starter" description="One project." />
+          <CardOption value="team" title="Team" description="Selected option." />
+          <CardOption value="enterprise" title="Enterprise" description="Unlimited projects." />
+        </CardGroup>
+        <p id="vb-plans-label">Plan</p>
+        <button type="submit" data-testid="vb-plan-submit">Choose plan</button>
+        <output data-testid="vb-plan-output">{submitted}</output>
+      </form>
+      <Card>
+        <CardMedia><span /></CardMedia>
+        <CardHeader><CardTitle>Media header</CardTitle></CardHeader>
+      </Card>
+      <AvatarGroup aria-label="Reviewers: 7">
+        <Avatar role="img" aria-label="Ada Lovelace"><AvatarFallback>AL</AvatarFallback></Avatar>
+        <Avatar role="img" aria-label="Grace Hopper" data-testid="vb-avatar-broken"><AvatarImage src="/missing-avatar.png" alt="" /><AvatarFallback>GH</AvatarFallback></Avatar>
+        <Avatar role="img" aria-label="Hedy Lamarr" data-testid="vb-avatar-fast"><AvatarImage src={pixel} alt="" /><AvatarFallback>HL</AvatarFallback></Avatar>
+        <AvatarOverflow count={4} label="4 more reviewers" />
+      </AvatarGroup>
+      <Avatar shape="square" role="img" aria-label="Acme workspace"><AvatarFallback delayMs={0}>AC</AvatarFallback></Avatar>
+      <Accordion type="single" collapsible defaultValue="export" appearance="flush" icon="plus" data-testid="vb-accordion">
+        <AccordionItem value="export">
+          <AccordionTrigger>Can I export a preset?</AccordionTrigger>
+          <AccordionContent>Yes, as JSON or with the CLI.</AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="glass">
+          <AccordionTrigger>Does glass work in Firefox?</AccordionTrigger>
+          <AccordionContent>Mostly.</AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </section>
   )
 }
@@ -261,6 +336,7 @@ function CatalogExpansionScenario() {
         </section>
         <OverlaysScenario />
         <CalendarScenario />
+        <VariantsBasicsScenario />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

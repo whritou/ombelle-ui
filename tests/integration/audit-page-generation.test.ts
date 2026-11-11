@@ -28,7 +28,10 @@ it('writes one deterministic audit page per family and edition', { timeout: 2400
       const data = JSON.parse(first[`${family}-${edition}.json`]) as AuditData
       expect(data.family).toBe(family)
       expect(data.edition).toBe(edition)
-      expect(data.specimens.map(item => item.component)).toEqual([...supportedComponentIds].sort())
+      expect([...new Set(data.specimens.map(item => item.component))]).toEqual([...supportedComponentIds].sort())
+      expect(new Set(data.specimens.map(item => item.id)).size).toBe(data.specimens.length)
+      for (const id of ['button~link-destructive', 'badge~soft', 'alert~dismissible', 'card~options', 'avatar~overflow', 'accordion~flush'])
+        expect(data.specimens.map(item => item.id)).toContain(id)
       for (const item of data.specimens) {
         if (edition === 'base' || item.component === 'button') {
           expect(item.scope).toBeNull()
@@ -37,7 +40,7 @@ it('writes one deterministic audit page per family and edition', { timeout: 2400
           expect(item.css).toMatch(new RegExp(String.raw`\[data-ombelle-recipe=["']${item.scope}["']\]`))
         }
       }
-      expect(data.specimens.find(item => item.component === 'button')!.specimen)
+      expect(data.specimens.find(item => item.id === 'button')!.specimen)
         .toEqual({ tag: 'Button', props: {}, children: ['Save changes'] })
       expect(data.backdrop).toEqual(family === 'liquid-glass'
         ? { light: glassPresetBackdrop('builtin-liquid-glass', 'light'), dark: glassPresetBackdrop('builtin-liquid-glass', 'dark') }

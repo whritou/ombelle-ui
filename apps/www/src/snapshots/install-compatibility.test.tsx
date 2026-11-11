@@ -248,3 +248,35 @@ describe('published installer compatibility', () => {
     expect(html).toMatch(/&quot;info&quot;:&quot;#dbeafe&quot;/i)
   })
 })
+
+describe('0.7.3 variant recipes', () => {
+  const v072 = { version: '0.7.2' }
+  const v073 = { version: '0.7.3' }
+  it.each([
+    ['badge', { appearance: 'soft' }],
+    ['badge', { variant: 'warning' }],
+    ['alert', { dismissible: false }],
+    ['alert', { layout: 'compact' }],
+    ['card', { mode: 'static' }],
+    ['avatar', { shape: 'square' }],
+    ['avatar', { overflow: 0 }],
+    ['accordion', { icon: 'family' }],
+    ['accordion', { appearance: 'bordered' }],
+  ] as const)('gates a %s recipe using %o at CLI 0.7.3', (component, props) => {
+    const recipe = { component, props } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(true)
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v073)).toBe(false)
+  })
+
+  it('leaves a plain badge recipe installable at 0.7.2', () => {
+    const recipe = { component: 'badge', props: { variant: 'default' } } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(false)
+  })
+
+  it('gates a link-destructive Button recipe at CLI 0.7.3', () => {
+    const recipe = { props: { variant: 'link-destructive' } }
+    expect(compatibility.buttonRecipeInstallBlocked(recipe, v072)).toBe(true)
+    expect(compatibility.buttonRecipeInstallBlocked(recipe, v073)).toBe(false)
+    expect(compatibility.buttonRecipeInstallBlocked({ props: { variant: 'link' } }, v072)).toBe(false)
+  })
+})

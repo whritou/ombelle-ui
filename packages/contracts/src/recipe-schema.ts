@@ -69,7 +69,8 @@ export const recipeSchema = {
             "outline",
             "ghost",
             "link",
-            "destructive"
+            "destructive",
+            "link-destructive"
           ]
         },
         "size": {

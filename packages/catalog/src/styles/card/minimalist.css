@@ -100,3 +100,141 @@
     box-shadow: none;
   }
 }
+/* 0.7.3 variants */
+[data-slot='card']:has([data-card-link]) {
+  position: relative;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='card']:has([data-card-link]):hover {
+    transform: translateY(-2px);
+  }
+  [data-slot='card']:has([data-card-link]) {
+    transition: transform 150ms ease;
+  }
+}
+[data-slot='card-link'] {
+  color: inherit;
+  text-decoration-line: none;
+  outline: none;
+}
+[data-slot='card-link']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+[data-slot='card-link']:hover {
+  text-decoration-line: underline;
+  text-underline-offset: 3px;
+}
+:where([data-slot='card']:has([data-card-link]) :is(a:not([data-card-link]), button, input, select, textarea, summary)) {
+  position: relative;
+  z-index: 1;
+}
+[data-slot='card']:has([data-card-link]:focus-visible) {
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
+}
+[data-slot='card-group'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.75rem;
+}
+[data-slot='card-group'][data-orientation='vertical'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+[data-slot='card-option'] {
+  --card-padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  padding-block: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) * 1.5);
+  background: var(--card);
+  color: var(--card-foreground);
+  font-family: var(--font-family);
+  overflow-wrap: anywhere;
+  box-shadow: none;
+  position: relative;
+  gap: 0.25rem;
+  padding-inline: var(--card-padding);
+  padding-inline-end: calc(var(--card-padding) + 1.75rem);
+  cursor: pointer;
+}
+[data-card-option-input] {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+  appearance: none;
+}
+[data-slot='card-option']:has(:checked) {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
+}
+[data-slot='card-option']:has(:focus-visible) {
+  outline: 1px solid var(--ring);
+  outline-offset: 4px;
+}
+[data-slot='card-option']:has(:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+[data-slot='card-option-check'] {
+  position: absolute;
+  inset-block-start: var(--card-padding);
+  inset-inline-end: var(--card-padding);
+  display: none;
+  place-items: center;
+  inline-size: 1.375rem;
+  block-size: 1.375rem;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='card-option-check'] svg {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+}
+[data-slot='card-option'] :is(a, button, select, textarea, input:not([data-card-option-input])) {
+  position: relative;
+  z-index: 1;
+}
+:checked ~ [data-slot='card-option-check'] {
+  display: grid;
+}
+[data-slot='card']:has(> [data-card-media]) {
+  padding-block-start: 0;
+  overflow: hidden;
+}
+[data-slot='card-media'] {
+  display: block;
+  inline-size: 100%;
+  block-size: 6rem;
+  object-fit: cover;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 55%, var(--card)), color-mix(in oklab, var(--accent) 45%, var(--card)));
+}
+@media (forced-colors: active) {
+  [data-slot='card-option'] {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='card-option']:has(:checked) {
+    border: 3px solid Highlight;
+    box-shadow: none;
+  }
+  [data-slot='card-option-check'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='card']:has([data-card-link]:focus-visible) {
+    outline-color: Highlight;
+  }
+}
+/* end 0.7.3 variants */

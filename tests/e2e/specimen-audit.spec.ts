@@ -28,7 +28,8 @@ const overlays: Record<string, {
   select: { open: 'click', content: page => page.getByRole('listbox'), returnsFocus: true },
   tooltip: { open: 'focus', content: page => page.locator('[data-slot$="tooltip-content"]'), returnsFocus: true },
   // The trigger is the first collapsed item; its panel is found through aria-controls (both editions).
-  accordion: { open: 'click', content: page => page.locator('[data-audit-accordion-panel]'), returnsFocus: false },
+  // The panel is looked up in its own section: variant sections of the same component are on the page too.
+  accordion: { open: 'click', content: (_page, section) => section.locator('[data-audit-accordion-panel]'), returnsFocus: false },
   combobox: { open: 'click', content: page => page.locator('[data-slot$="combobox-content"]'), returnsFocus: true },
   'hover-card': { open: 'focus', content: page => page.locator('[data-slot$="hover-card-content"]'), returnsFocus: true,
     trigger: section => section.locator('[data-slot$="hover-card-trigger"]') },
@@ -69,14 +70,16 @@ for (const family of styleFamilies)
         const sections = page.locator('section[data-audit]')
         // Toast first: the Radix toast is open from page load and its timer must not run out before it is measured.
         const components = (await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!)))
-          .filter(component => !onlyComponents?.length || onlyComponents.includes(component))
+          // A variant section is component~variant; the filter and the count go by component.
+          .filter(id => !onlyComponents?.length || onlyComponents.includes(id.split('~')[0]!))
           .sort((a, b) => Number(b === 'toast') - Number(a === 'toast'))
         const shots = path.join(artifacts, family, edition, mode)
         await fs.mkdir(shots, { recursive: true })
         const body = page.locator('body')
-        for (const component of components) {
-          const section = page.locator(`section[data-audit="${component}"]`)
-          const record = (list: Finding[]) => findings.push(...list.map(finding => ({ ...finding, component })))
+        for (const id of components) {
+          const component = id.split('~')[0]!
+          const section = page.locator(`section[data-audit="${id}"]`)
+          const record = (list: Finding[]) => findings.push(...list.map(finding => ({ ...finding, component: id })))
           let paused = false
           try {
           await section.scrollIntoViewIfNeeded()
@@ -86,9 +89,9 @@ for (const family of styleFamilies)
             await pauseClock(page)
             paused = true
           }
-          await section.screenshot({ path: path.join(shots, `${component}.png`), animations: 'disabled' })
-          record(await measure(page, [section], section, component, counts))
-          record(await runAxe(page, [`section[data-audit="${component}"]`]))
+          await section.screenshot({ path: path.join(shots, `${id}.png`), animations: 'disabled' })
+          record(await measure(page, [section], section, id, counts))
+          record(await runAxe(page, [`section[data-audit="${id}"]`]))
           counts.axe++
           const listed = overlays[component]
           const overlay = component === 'accordion' && !await section.locator('[aria-expanded="false"][aria-controls]').count()
@@ -119,17 +122,17 @@ for (const family of styleFamilies)
             const content = isBaseToast ? page.locator('[data-slot$="toast"]').first() : overlay!.content(page, section).first()
             await expect(content, `${component} opens`).toBeVisible()
             if (isBaseToast) { await pauseClock(page); paused = true }
-            await content.evaluate((element, name) => element.setAttribute('data-audit-open', name), component)
-            await page.screenshot({ path: path.join(shots, `${component}-open.png`), animations: 'disabled' })
-            const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, component)
-            record(await measure(page, [content], inside ? section : body, `${component}-open`, counts))
-            record(await runAxe(page, [`[data-audit-open="${component}"]`]))
+            await content.evaluate((element, name) => element.setAttribute('data-audit-open', name), id)
+            await page.screenshot({ path: path.join(shots, `${id}-open.png`), animations: 'disabled' })
+            const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, id)
+            record(await measure(page, [content], inside ? section : body, `${id}-open`, counts))
+            record(await runAxe(page, [`[data-audit-open="${id}"]`]))
             counts.axe++
             // Overlays are the surfaces that carry backdrop filters: check them under forced colors while they are open.
             if (mode === 'light') {
               await markBorders([content])
               await page.emulateMedia({ forcedColors: 'active' })
-              record(await findForcedColors([content], await listFocusables(content, `${component}-open-forced`)))
+              record(await findForcedColors([content], await listFocusables(content, `${id}-open-forced`)))
               counts['forced-colors']++
               await page.emulateMedia({ forcedColors: 'none' })
             }
@@ -167,7 +170,7 @@ for (const family of styleFamilies)
         await fs.mkdir(partsDirectory, { recursive: true })
         if (!onlyComponents?.length) await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
         await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
-        expect(components).toHaveLength(onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length)
+        expect(new Set(components.map(id => id.split('~')[0]))).toHaveProperty('size', onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length)
         expect(errors, 'page errors').toEqual([])
         expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])
       })

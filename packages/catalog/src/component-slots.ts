@@ -35,14 +35,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'tooltip-content',
     'tooltip-arrow',
   ],
-  card: [
-    'card',
-    'card-header',
-    'card-title',
-    'card-description',
-    'card-content',
-    'card-footer',
-  ],
+  card: ['card', 'card-header', 'card-title', 'card-description', 'card-content', 'card-footer', 'card-link', 'card-media', 'card-group', 'card-option', 'card-option-check'],
   'native-select': [
     'native-select-wrapper',
     'native-select',
@@ -93,7 +86,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'dropdown-menu-sub-icon',
     'dropdown-menu-sub-content',
   ],
-  alert: ['alert', 'alert-title', 'alert-description'],
+  alert: ['alert', 'alert-title', 'alert-description', 'alert-actions', 'alert-dismiss'],
   popover: [
     'popover',
     'popover-trigger',
@@ -102,13 +95,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
     'popover-title',
     'popover-description',
   ],
-  avatar: [
-    'avatar',
-    'avatar-image',
-    'avatar-fallback',
-    'avatar-status',
-    'avatar-group',
-  ],
+  avatar: ['avatar', 'avatar-image', 'avatar-fallback', 'avatar-status', 'avatar-group', 'avatar-overflow'],
   separator: ['separator', 'separator-label'],
   accordion: [
     'accordion',

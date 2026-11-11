@@ -24,6 +24,29 @@ const expandedComponents = new Set(['input-group', 'sheet', 'alert-dialog', 'bre
 const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {
   badge: ['size', 'dot'], card: ['appearance'], table: ['density', 'striped'], tabs: ['appearance'],
 }
+// The 0.7.3 variant fields and values that older recipe schemas reject.
+const variantRecipeFields073: Readonly<Record<string, readonly string[]>> = {
+  badge: ['appearance'], alert: ['dismissible', 'actions', 'layout'], card: ['mode'],
+  avatar: ['shape', 'overflow'], accordion: ['appearance', 'icon'],
+}
+const variantRecipeValues073: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+  badge: { variant: ['success', 'warning', 'info'] },
+}
+
+function usesVariants073(recipe: Pick<ComponentRecipe, 'component' | 'props'>): boolean {
+  const props = recipe.props as Record<string, unknown>
+  return (variantRecipeFields073[recipe.component]?.some(key => Object.hasOwn(props, key)) ?? false) ||
+    Object.entries(variantRecipeValues073[recipe.component] ?? {}).some(([key, values]) => values.includes(String(props[key])))
+}
+
+/** A Button recipe with a 0.7.3 variant needs CLI 0.7.3. */
+export function buttonRecipeInstallBlocked(
+  recipe: { props?: { variant?: string } },
+  installer: { version: string } = publishedInstaller,
+): boolean {
+  return recipe.props?.variant === 'link-destructive' && compareVersions(installer.version, displayCatalogMinimumCli) < 0
+}
+
 const semanticPaletteFields = ['success', 'successForeground', 'warning', 'warningForeground', 'info', 'infoForeground']
 
 /** Older recipe schemas reject added keys even when their value is false or a component default. */
@@ -33,6 +56,7 @@ export function componentRecipeInstallBlocked(
 ): boolean {
   if (!catalogRecipeInstallerSupported(installer.version)) return true
   if (displayComponents.has(recipe.component)) return compareVersions(installer.version, displayCatalogMinimumCli) < 0
+  if (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0) return true
   if (compareVersions(installer.version, expandedCatalogMinimumCli) >= 0) return false
   if (expandedComponents.has(recipe.component)) return true
   if (expandedRecipeFields[recipe.component]?.some(key => Object.hasOwn(recipe.props, key))) return true
@@ -56,8 +80,10 @@ export function installableRecipeInstallNotice(
   if (recipe.schemaVersion === '2.0') {
     if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
     if (!componentRecipeInstallBlocked(recipe, installer)) return undefined
-    return displayComponents.has(recipe.component) ? displayCatalogInstallNotice : expandedCatalogInstallNotice
+    return displayComponents.has(recipe.component) || (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0)
+      ? displayCatalogInstallNotice : expandedCatalogInstallNotice
   }
+  if (buttonRecipeInstallBlocked(recipe, installer)) return displayCatalogInstallNotice
   return recipeInstallBlocked(recipe, installer) ? glassMaterialInstallNotice : undefined
 }
 

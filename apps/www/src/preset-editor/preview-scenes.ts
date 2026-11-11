@@ -13,7 +13,7 @@ export const sceneComponents: Record<PresetScene, string> = {
   gallery: 'All forty-four catalog components',
   dashboard:
     'Alert, Popover, Input, Dialog, Label, Avatar, Progress, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu, Table, Stepper',
-  projects: 'Breadcrumb, Input Group, Sheet, Chip, Alert, Card, Tabs, Table, Badge, Pagination, Button, Meter, Empty State, Combobox, Hover Card, Context Menu, Calendar',
+  projects: 'Breadcrumb, Input Group, Sheet, Chip, Alert, Card, Tabs, Table, Badge, Pagination, Button, Meter, Empty State, Combobox, Hover Card, Context Menu, Calendar, Avatar',
   settings:
     'Tabs, Card, Label, Input, Select, Native Select, Textarea, Toast, Checkbox, Switch, Radio Group, Input Group, Alert, Alert Dialog, Separator, Skeleton, Accordion, Button, Field, Kbd, Spinner, Tag Input, Toggle Group, Slider, Input OTP, Combobox, Command',
   'sign-in': 'Card, Alert, Label, Input, Checkbox, Button, Separator',

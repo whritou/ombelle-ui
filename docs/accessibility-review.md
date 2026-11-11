@@ -162,6 +162,17 @@ Combobox, Command, Hover Card, Context Menu and Calendar are not part of the 36 
 - **Calendar**: one Tab enters the grid, named by its month; the arrow keys, Page Up, Page Down, Home and End move by day, month and week end; each day is announced with its full date, "Today" and "selected"; a disabled day cannot be chosen; the Date Picker button announces its date or "Choose a date", and choosing or Escape returns focus to it.
 - **Context Menu**: Shift+F10 or the context-menu key on the focused area opens the menu; items, the submenu and the destructive item are announced; Escape returns focus to the area.
 
+**Variants, batch 6a (0.7.3)**
+
+New variants of Button, Badge, Alert, Card, Avatar and Accordion. Review them on the preview `projects` scene, the `settings` scene's Billing tab and the edition pages' "Variants" section, and record them in their own rows below.
+
+- **Button**: a loading button keeps its name and is announced busy; an icon-only button is named by its `aria-label`, and its Tooltip shows the same words.
+- **Badge**: soft and outline badges keep their status in the visible text; the colour is not the only cue.
+- **Alert**: the Dismiss button is named "Dismiss"; after a dismiss, focus moves to the next heading rather than being lost.
+- **Card**: a link card is announced as one link named by its title, and its other buttons keep their own names; a card group is announced as a radio group with its name, each option as a radio named by its title and described by its description; one Tab enters the group, and the arrow keys move and choose.
+- **Avatar**: the overflow count is announced as "4 more reviewers", or its label.
+- **Accordion**: a flush accordion keeps its headings and expanded states; the plus and minus icons are not announced.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -221,6 +232,17 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Hover Card | | | | | | | | | | |
 | Context Menu | | | | | | | | | | |
 | Calendar | | | | | | | | | | |
+
+#### Variants, batch 6a (0.7.3)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Button variants | | | | | | | | | | |
+| Badge variants | | | | | | | | | | |
+| Alert variants | | | | | | | | | | |
+| Card variants | | | | | | | | | | |
+| Avatar variants | | | | | | | | | | |
+| Accordion variants | | | | | | | | | | |
 
 ### Findings
 

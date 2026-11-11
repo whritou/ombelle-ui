@@ -15,6 +15,8 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
+  CardGroup,
+  CardOption,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -44,7 +46,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertActions, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import {
   Popover,
   PopoverTrigger,
@@ -55,6 +57,7 @@ import {
 import {
   Avatar,
   AvatarFallback,
+  AvatarOverflow,
   AvatarStatus,
   AvatarGroup,
 } from '@/components/ui/avatar'
@@ -344,6 +347,7 @@ export function PresetGallery({
           <Button disabled aria-busy="true">
             Saving…
           </Button>
+          <Button variant="link-destructive">Remove member</Button>
         </div>
       </section>
       <section aria-label="Status" data-component="badge">
@@ -355,6 +359,12 @@ export function PresetGallery({
         <div className="preset-row preset-variant">
           <Badge size="sm"><BadgeDot />Active</Badge>
           <Badge><BadgeDot />Default</Badge>
+        </div>
+        <div className="preset-row preset-variant">
+          <Badge appearance="soft" variant="success"><BadgeDot />Live</Badge>
+          <Badge appearance="soft" variant="warning">Degraded</Badge>
+          <Badge appearance="soft" variant="info">Info</Badge>
+          <Badge appearance="outline" variant="destructive">Deprecated</Badge>
         </div>
       </section>
       {gate(
@@ -386,7 +396,9 @@ export function PresetGallery({
             </Alert>
             <Alert variant="success"><AlertTitle>Saved</AlertTitle><AlertDescription>Your changes are ready.</AlertDescription></Alert>
             <Alert variant="warning"><AlertTitle>Review needed</AlertTitle><AlertDescription>Two items need your attention.</AlertDescription></Alert>
-            <Alert variant="info"><AlertTitle>New version</AlertTitle><AlertDescription>A component update is available.</AlertDescription></Alert>
+            <Alert variant="info"><AlertTitle>New version</AlertTitle><AlertDescription>A component update is available.</AlertDescription>
+              <AlertActions><Button size="sm">Update</Button><Button size="sm" variant="outline">Release notes</Button></AlertActions></Alert>
+            <Alert variant="warning" layout="compact"><AlertDescription>One seat left on the Team plan.</AlertDescription><a href="#upgrade">Upgrade</a></Alert>
           </div>
         </section>,
       )}
@@ -418,10 +430,11 @@ export function PresetGallery({
               <Avatar variant="secondary" role="img" aria-label="Margaret Knight">
                 <AvatarFallback>MK</AvatarFallback>
               </Avatar>
-              <Avatar variant="secondary" role="img" aria-label="3 more reviewers">
-                <AvatarFallback>+3</AvatarFallback>
-              </Avatar>
+              <AvatarOverflow count={3} label="3 more reviewers" />
             </AvatarGroup>
+            <Avatar shape="square" role="img" aria-label="Acme workspace">
+              <AvatarFallback>AC</AvatarFallback>
+            </Avatar>
             <span>6 people review this preset</span>
           </div>
         </section>,
@@ -444,6 +457,11 @@ export function PresetGallery({
           <Card appearance="outlined"><CardHeader><CardTitle level={3}>Outlined card</CardTitle></CardHeader><CardContent>Project summary.</CardContent></Card>
           <Card appearance="subtle" density="dense"><CardHeader><CardTitle level={3}>Subtle card</CardTitle></CardHeader><CardContent>Recent activity.</CardContent></Card>
         </div>
+        <p id="gallery-plan">Plan</p>
+        <CardGroup name="gallery-plan" aria-labelledby="gallery-plan" defaultValue="team">
+          <CardOption value="starter" title="Starter" description="One project." />
+          <CardOption value="team" title="Team" description="Ten seats." />
+        </CardGroup>
       </section>
       <form
         className="preset-form"

@@ -14,7 +14,8 @@ import {
   BreadcrumbSeparator,
 } from '../generated/preset-gallery/components/ui/breadcrumb'
 import { Button } from '../generated/preset-gallery/components/ui/button'
-import { Card, CardContent, CardFooter } from '../generated/preset-gallery/components/ui/card'
+import { Avatar, AvatarFallback, AvatarGroup, AvatarOverflow } from '../generated/preset-gallery/components/ui/avatar'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardLink, CardTitle } from '../generated/preset-gallery/components/ui/card'
 import { Chip, ChipGroup } from '../generated/preset-gallery/components/ui/chip'
 import {
   InputGroup,
@@ -222,7 +223,7 @@ export function ProjectsScene(props: SceneProps) {
                           </HoverCard>
                         </TableCell>
                         <TableCell>
-                          <Badge size="sm" variant={row.alert ? 'destructive' : 'default'}>
+                          <Badge size="sm" appearance="soft" variant={row.alert ? 'destructive' : 'success'}>
                             <BadgeDot />
                             {row.status}
                           </Badge>
@@ -275,6 +276,28 @@ export function ProjectsScene(props: SceneProps) {
         </CardFooter>
       </Card>
       <div className="scene-columns">
+        {show(
+          'card',
+          'Card',
+          <Card>
+            <CardHeader>
+              <CardTitle><CardLink href="#featured">Website refresh</CardLink></CardTitle>
+              <CardDescription>The featured project. Reviews close on Friday.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {show(
+                'avatar',
+                'Avatar',
+                <AvatarGroup aria-label="Reviewers: 7">
+                  <Avatar role="img" aria-label="Ada Lovelace"><AvatarFallback>AL</AvatarFallback></Avatar>
+                  <Avatar role="img" aria-label="Grace Hopper" variant="secondary"><AvatarFallback>GH</AvatarFallback></Avatar>
+                  <Avatar role="img" aria-label="Hedy Lamarr"><AvatarFallback>HL</AvatarFallback></Avatar>
+                  <AvatarOverflow count={4} label="4 more reviewers" />
+                </AvatarGroup>,
+              )}
+            </CardContent>
+          </Card>,
+        )}
         {show(
           'meter',
           'Meter',

@@ -282,7 +282,7 @@ export function compileScopedButtonStyles(input: {
     // Families paint ghost/link transparent and outline from --card, --background or
     // nothing at all, link text from --primary in some families,
     // and borders from different tokens; paint the overridden roles from the mapped token.
-    if (set('background') && (variant === 'outline' || variant === 'ghost' || variant === 'link'))
+    if (set('background') && (variant === 'outline' || variant === 'ghost' || variant === 'link' || variant === 'link-destructive'))
       paint.background = 'var(' + variable(colorTokens.background) + ')'
     // Glass Buttons are one ink: every label reads --foreground, so a foreground override is
     // painted for every variant, and secondary card glass reads the overridden token as its card.
@@ -340,7 +340,7 @@ export function compileScopedButtonStyles(input: {
         block(selector, { background: 'ButtonFace' }) +
         '}'
     }
-    if (set('foreground') && (variant === 'outline' || variant === 'link' || glass))
+    if (set('foreground') && (variant === 'outline' || variant === 'link' || variant === 'link-destructive' || glass))
       paint.color = 'var(' + variable(colorTokens.foreground) + ')'
     if (glass && set('background') && variant === 'secondary')
       paint['--card'] = 'var(' + variable(colorTokens.background) + ')'

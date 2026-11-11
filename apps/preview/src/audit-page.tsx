@@ -82,9 +82,9 @@ function AuditPage({ data, mode, ordinary, factories }: {
     {scene && <GlassBackdropArt scene={scene} />}
     {glass && OrdinaryFilter && <OrdinaryFilter />}
     <h1>Specimen audit: {data.family} / {data.edition} / {mode}</h1>
-    {data.specimens.map(item => <section key={item.component} data-audit={item.component}
+    {data.specimens.map(item => <section key={item.id} data-audit={item.id} data-audit-component={item.component}
       style={{ display: 'grid', gap: '0.75rem', inlineSize: 'min(100%, 40rem)', position: 'relative' }}>
-      <h2>{item.component}</h2>
+      <h2>{item.id}</h2>
       {/* Normal flow, as in an app: grid items would stretch inline components such as Badge to the full width. */}
       <div>
         {item.scope

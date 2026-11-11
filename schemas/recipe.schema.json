@@ -25,7 +25,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "variant": {"enum": ["default", "secondary", "outline", "ghost", "link", "destructive"]},
+        "variant": {"enum": ["default", "secondary", "outline", "ghost", "link", "destructive", "link-destructive"]},
         "size": {"enum": ["sm", "default", "lg", "icon"]},
         "disabled": {"type": "boolean"},
         "loading": {"type": "boolean"},

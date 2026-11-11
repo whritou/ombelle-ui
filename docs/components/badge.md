@@ -35,6 +35,22 @@ Size and dot composition require CLI 0.7.2 or later.
 
 The default variant uses each family's existing primary or secondary color pair; destructive uses the destructive treatment. Radius, border width, font, and neo brutalist shadows use the saved preset's design tokens. Long text wraps within its container. Forced colors use system colors and a double border for the destructive variant. Liquid glass is experimental and keeps its solid badge fills; the small size and dot add no backdrop filtering.
 
+## Variants (0.7.3)
+
+These variants need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **Intents:** `variant` also accepts `success`, `warning` and `info`.
+- **`appearance`:**
+  - `solid`: the default fill, which is also what you get without the prop.
+  - `soft`: a tinted status badge. Soft `success`, `warning` and `info` use the same surface and text pairs as Alert (`--success` and `--success-foreground`, and so on), so a status reads the same in a Badge and in an Alert. Soft `default` and `destructive` mix the primary or destructive colour over the card.
+  - `outline`: draws only the edge and the text, in the intent's colour. `appearance="outline" variant="destructive"` suits "Deprecated" or "Failing".
+- **Forced colours:** every appearance is drawn with a `CanvasText` border on `Canvas`.
+
+```tsx
+<Badge appearance="soft" variant="success" size="sm"><BadgeDot />Live</Badge>
+<Badge appearance="outline" variant="destructive">Deprecated</Badge>
+```
+
 ## Generated files and ownership
 
 The compiler emits `components/ui/badge.tsx`, colocated `badge.css`, and `examples/badge.tsx`, plus the shared utility and existing theme artifacts. The installer applies the configured component, utility, and usage paths. Importing Badge loads its CSS. Keep that CSS import when moving the source.

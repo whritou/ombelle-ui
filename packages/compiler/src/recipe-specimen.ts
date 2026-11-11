@@ -189,17 +189,31 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         }, String(index + 1)))),
         node('PaginationItem', {}, node('PaginationNext', { href: '#page-' + (props.page + 1), disabled: props.page === props.totalPages }, content.next))))
     case 'badge':
-      return node('Badge', { variant: props.variant, size: props.size }, ...(props.dot ? [node('BadgeDot')] : []), content.label)
+      return node('Badge', { variant: props.variant, size: props.size, appearance: props.appearance }, ...(props.dot ? [node('BadgeDot')] : []), content.label)
     case 'alert':
-      return node('Alert', props, node('AlertTitle', {}, content.title), node('AlertDescription', {}, content.description))
-    case 'avatar':
-      return node('Avatar', { size: props.size, variant: props.variant, role: 'img', 'aria-label': content.label },
+      // Specimen props cannot hold functions, so a dismissible specimen renders its Dismiss button as a child.
+      return node('Alert', { variant: props.variant, layout: props.layout }, node('AlertTitle', {}, content.title),
+        node('AlertDescription', {}, content.description),
+        ...(props.actions ? [node('AlertActions', {}, trigger('button', 'Undo'))] : []),
+        ...(props.dismissible ? [node('AlertDismiss')] : []))
+    case 'avatar': {
+      const avatar = node('Avatar', { size: props.size, variant: props.variant, shape: props.shape, role: 'img', 'aria-label': content.label },
         node('AvatarFallback', {}, content.initials),
         ...(props.status === 'none' ? [] : [node('AvatarStatus', { status: props.status })]))
-    case 'card':
-      return node('Card', { density: props.density, appearance: props.appearance }, node('CardHeader', {},
-        node('CardTitle', { level: props.level }, content.title), node('CardDescription', {}, content.description)),
-      node('CardContent', {}, content.body))
+      return props.overflow ? node('AvatarGroup', { 'aria-label': 'Reviewers' }, avatar, node('AvatarOverflow', { count: props.overflow, size: props.size })) : avatar
+    }
+    case 'card': {
+      if (props.mode === 'options')
+        return node('CardGroup', { name: 'plan', 'aria-label': content.title, defaultValue: 'team' },
+          node('CardOption', { value: 'starter', title: 'Starter', description: 'One project.' }),
+          node('CardOption', { value: 'team', title: 'Team', description: content.description || undefined }),
+          node('CardOption', { value: 'enterprise', title: 'Enterprise', description: 'Unlimited projects.' }))
+      const title = props.mode === 'link' ? node('CardLink', { href: '#card' }, content.title) : content.title
+      return node('Card', { density: props.density, appearance: props.appearance },
+        ...(props.mode === 'media' ? [node('CardMedia', {}, node('span'))] : []),
+        node('CardHeader', {}, node('CardTitle', { level: props.level }, title), node('CardDescription', {}, content.description)),
+        node('CardContent', {}, content.body))
+    }
     case 'progress':
       return node('Progress', { value: props.indeterminate ? null : props.value, max: props.max, 'aria-label': content.label })
     case 'separator':
@@ -241,9 +255,10 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       node('SelectContent', { position: props.position }, ...content.options.map(item =>
         node('SelectItem', { value: item.id, hint: item.hint || undefined }, item.label)))))
     case 'accordion':
-      return node('Accordion', props.type === 'single'
+      return node('Accordion', { ...(props.type === 'single'
         ? { type: 'single', collapsible: props.collapsible, defaultValue: props.expanded[0] }
-        : { type: 'multiple', defaultValue: props.expanded },
+        : { type: 'multiple', defaultValue: props.expanded }),
+      appearance: props.appearance, icon: props.icon === 'family' ? undefined : props.icon },
       ...content.items.map(item => node('AccordionItem', { value: item.id },
         node('AccordionTrigger', {}, item.label), node('AccordionContent', {}, item.body))))
     case 'tabs':

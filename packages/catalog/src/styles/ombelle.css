@@ -58,3 +58,32 @@
 [data-slot="button"]:disabled,[data-slot="input"]:disabled{border-color:GrayText;color:GrayText}
 [data-slot="dialog-description"]{color:CanvasText}
 }
+/* 0.7.3 variants */
+[data-slot="button"][data-variant="link-destructive"] {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: color-mix(in oklab, var(--destructive) 65%, var(--foreground));
+  padding: 0 4px;
+  text-decoration-line: underline;
+  text-underline-offset: 4px;
+}
+[data-slot="button"][data-variant="link-destructive"]:not(:disabled):hover {
+  background: transparent;
+  box-shadow: none;
+  text-decoration-thickness: 2px;
+}
+[data-slot="button"][data-variant="link-destructive"]:not(:disabled):active {
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.8;
+}
+[data-slot="button"][data-variant="link-destructive"]:disabled {
+  background: transparent;
+}
+@media (forced-colors: active) {
+  [data-slot="button"][data-variant="link-destructive"] {
+    color: LinkText;
+  }
+}
+/* end 0.7.3 variants */

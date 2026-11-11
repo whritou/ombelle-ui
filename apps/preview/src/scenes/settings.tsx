@@ -24,7 +24,9 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
+  CardGroup,
   CardHeader,
+  CardOption,
   CardTitle,
 } from '../generated/preset-gallery/components/ui/card'
 import { Checkbox } from '../generated/preset-gallery/components/ui/checkbox'
@@ -113,6 +115,8 @@ export function SettingsScene(props: SceneProps) {
   const [palette, setPalette] = React.useState(false)
   const [away, setAway] = React.useState<{ from?: Date; to?: Date } | undefined>({ from: new Date(2026, 10, 12), to: new Date(2026, 10, 18) })
   const [ran, setRan] = React.useState('')
+  const [renewal, setRenewal] = React.useState(true)
+  const planHeading = React.useRef<HTMLHeadingElement>(null)
   React.useEffect(() => {
     const toggle = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
@@ -511,11 +515,29 @@ export function SettingsScene(props: SceneProps) {
         </TabsContent>
         <TabsContent value="billing">
           <div className="scene-stack">
+            {renewal ? show(
+              'alert',
+              'Alert',
+              <Alert variant="info" onDismiss={() => { setRenewal(false); planHeading.current?.focus() }}>
+                <AlertTitle>Your plan renews on 1 December</AlertTitle>
+                <AlertDescription>Change it before then to switch at renewal.</AlertDescription>
+              </Alert>,
+            ) : null}
+            <h2 ref={planHeading} tabIndex={-1} id="scene-plan-label">Plan</h2>
+            {show(
+              'card',
+              'Card',
+              <CardGroup name="plan" aria-labelledby="scene-plan-label" defaultValue="team">
+                <CardOption value="starter" title="Starter" description="One project, two seats." />
+                <CardOption value="team" title="Team" description="Unlimited projects, ten seats." />
+                <CardOption value="enterprise" title="Enterprise" description="SSO and an uptime agreement." />
+              </CardGroup>,
+            )}
             Your plan renews on the first of the month.
             {show(
               'accordion',
               'Accordion',
-              <Accordion type="single" collapsible defaultValue="invoices">
+              <Accordion type="single" collapsible defaultValue="invoices" appearance="flush" icon="plus">
                 <AccordionItem value="invoices">
                   <AccordionTrigger level={2}>Where are my invoices?</AccordionTrigger>
                   <AccordionContent>Invoices are emailed to the billing contact and listed here each month.</AccordionContent>

@@ -80,6 +80,7 @@ export const recipeColorTokens: Record<
   outline: { background: 'card', foreground: 'cardForeground', border: 'border' },
   ghost: { background: 'background', foreground: 'foreground', border: 'border' },
   link: { background: 'background', foreground: 'foreground', border: 'border' },
+  'link-destructive': { background: 'background', foreground: 'destructive', border: 'border' },
 }
 export type NormalizedRecipe = Omit<Recipe, 'props' | 'icon'> & {
   props: Required<Recipe['props']>

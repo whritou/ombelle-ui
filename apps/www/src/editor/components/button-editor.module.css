@@ -114,6 +114,7 @@
 .root :global(.be-variant-sample)[data-variant="ghost"] { background: var(--muted); color: var(--ink); }
 .root :global(.be-variant-sample)[data-variant="link"] { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
 .root :global(.be-variant-sample)[data-variant="destructive"] { background: var(--destructive); color: var(--destructive-foreground, #fff); }
+.root :global(.be-variant-sample)[data-variant="link-destructive"] { color: var(--destructive); text-decoration: underline; text-underline-offset: 3px; }
 
 /* Disabled and loading switches. */
 .root :global(.be-switch-row) { display: flex; align-items: center; justify-content: space-between; gap: .75rem; min-height: 32px; }

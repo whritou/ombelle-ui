@@ -218,3 +218,25 @@ describe('the 0.7.3 calendar', () => {
     expect([ring.outline, ring['outline-offset']]).toEqual(['2px solid var(--ring)', '1px'])
   })
 })
+
+describe('the 0.7.3 batch 6a variants', () => {
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+  it.each(families)('%s mixes destructive text with the foreground, so neo-brutalism light passes 4.5:1', family => {
+    const mix = 'color-mix(in oklab, var(--destructive) 65%, var(--foreground))'
+    expect(declarations(read(`${family}.css`), "[data-slot='button'][data-variant='link-destructive']").color).toBe(mix)
+    const outline = family === 'liquid-glass' ? ":not(:root)" : ''
+    expect(declarations(read(`badge/${family}.css`), `[data-slot='badge'][data-appearance='outline'][data-variant='destructive']${outline}`).color).toBe(mix)
+  })
+
+  // Liquid glass keeps its 2px foreground ring (see 'liquid glass focus').
+  it.each(families.filter(family => family !== 'liquid-glass'))('%s rings the Alert Dismiss button in its text colour, which contrasts with every intent surface', family => {
+    expect(declarations(read(`alert/${family}.css`), "[data-slot='alert-dismiss']:focus-visible").outline).toBe('2px solid currentColor')
+  })
+})
+
+describe('the 0.7.3 card options', () => {
+  it('neo-brutalism rings a focused option with a solid line close to it, which its drop shadow cannot break up', () => {
+    const ring = declarations(read('card/neo-brutalism.css'), "[data-slot='card-option']:has(:focus-visible)")
+    expect([ring.outline, ring['outline-offset']]).toEqual(['3px solid var(--ring)', '2px'])
+  })
+})

@@ -71,3 +71,70 @@
     border-width: max(var(--border-width), 3px);
   }
 }
+/* 0.7.3 variants */
+[data-slot='badge'][data-variant='success'] {
+  background: var(--success-foreground, #14532d);
+  color: var(--success, #dcfce7);
+}
+[data-slot='badge'][data-variant='warning'] {
+  background: var(--warning-foreground, #78350f);
+  color: var(--warning, #fef3c7);
+}
+[data-slot='badge'][data-variant='info'] {
+  background: var(--info-foreground, #1e3a8a);
+  color: var(--info, #dbeafe);
+}
+[data-slot='badge'][data-appearance='soft'] {
+  border-color: transparent;
+  background: color-mix(in oklab, var(--primary) 14%, var(--card));
+  color: color-mix(in oklab, var(--primary) 70%, var(--foreground));
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='destructive'] {
+  background: color-mix(in oklab, var(--destructive) 14%, var(--card));
+  color: color-mix(in oklab, var(--destructive) 75%, var(--foreground));
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='success'] {
+  background: var(--success, #dcfce7);
+  color: var(--success-foreground, #14532d);
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='warning'] {
+  background: var(--warning, #fef3c7);
+  color: var(--warning-foreground, #78350f);
+}
+[data-slot='badge'][data-appearance='soft'][data-variant='info'] {
+  background: var(--info, #dbeafe);
+  color: var(--info-foreground, #1e3a8a);
+}
+[data-slot='badge'][data-appearance='outline'] {
+  background: transparent;
+  color: var(--foreground);
+  border-color: var(--border);
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='destructive'] {
+  color: color-mix(in oklab, var(--destructive) 65%, var(--foreground));
+  border-color: var(--destructive);
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='success'] {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--success-foreground, #14532d) 70%, var(--foreground));
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='warning'] {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--warning-foreground, #78350f) 70%, var(--foreground));
+}
+[data-slot='badge'][data-appearance='outline'][data-variant='info'] {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--info-foreground, #1e3a8a) 70%, var(--foreground));
+}
+@media (forced-colors: active) {
+  [data-slot='badge']:is([data-appearance='soft'], [data-appearance='outline']) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='badge']:is([data-appearance='soft'], [data-appearance='outline'])[data-variant='destructive'] {
+    border-style: double;
+    border-width: max(var(--border-width), 3px);
+  }
+}
+/* end 0.7.3 variants */

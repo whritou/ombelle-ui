@@ -76,8 +76,16 @@ const rule = (css: string, selector: string) => {
     if (m[1] === selector) out.push(m[2])
   return out.join(';')
 }
+// The contents of every forced-colors block, and nothing after them.
 const forcedBlock = (css: string) =>
-  css.split('@media(forced-colors:active){').slice(1).join('')
+  css.split('@media(forced-colors:active){').slice(1).map((rest) => {
+    let depth = 1
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '{') depth++
+      else if (rest[i] === '}' && --depth === 0) return rest.slice(0, i)
+    }
+    return rest
+  }).join('')
 const neo = async () => {
   const result = await compile({
     preset: getCatalog('0.1.0').presets['neo-brutalism'],

@@ -46,6 +46,16 @@ How to name avatars:
 - `AvatarStatus` draws a presence dot. `status` is `online` (the default) or `offline`. The dot is `aria-hidden`; put the status in the avatar's name.
 - `AvatarGroup` is a `div` with `role="group"`. It overlaps its avatars and outlines each one in the surface colour.
 
+## Variants (0.7.3)
+
+These variants need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **`shape="square"`** suits workspaces and teams, and uses the family's small radius. The default, `circle`, suits people.
+- **`AvatarOverflow`** shows the count of avatars not shown, such as "+4", in the family's avatar size.
+  - It is named "4 more" by default; `label` replaces the name, for example "4 more reviewers".
+  - Inside `AvatarGroup`, it overlaps like the avatars; outside a group it does not.
+- **Beside an `AvatarImage`, `AvatarFallback` waits 600 ms by default** (`delayMs`), so an image that loads quickly never flashes the initials. An Avatar without an image shows its initials at once, server-rendered too, as before. `delayMs={0}` shows them at once beside an image as well. The Avatar detects an `AvatarImage` among its direct children. The Base UI edition takes `delayMs` or Base UI's own `delay`.
+
 ## Styles and artifacts
 
 - Ombelle: an outlined circle; the large size casts an offset shadow.
@@ -65,4 +75,4 @@ In liquid glass, avatars are card glass discs with `foreground` initials at weig
 
 ## Base UI edition
 
-Projects whose `components.json` uses one of shadcn's `base-*` styles receive an Avatar built on `Avatar.Root`, `Avatar.Image` and `Avatar.Fallback` from `@base-ui/react/avatar` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-avatar`. `size`, `variant`, `AvatarStatus`, `AvatarGroup` and every `data-slot` match the Radix edition, and the stylesheet needs no state bridge. Base UI's fallback delay prop is `delay` instead of Radix's `delayMs`. The parity test covers fallbacks, status dots and groups; image loading follows Base UI's behaviour. The Base UI edition has no allowed styling differences.
+Projects whose `components.json` uses one of shadcn's `base-*` styles receive an Avatar built on `Avatar.Root`, `Avatar.Image` and `Avatar.Fallback` from `@base-ui/react/avatar` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-avatar`. `size`, `variant`, `AvatarStatus`, `AvatarGroup` and every `data-slot` match the Radix edition, and the stylesheet needs no state bridge. The fallback takes `delayMs`, as in the Radix edition, or Base UI's own `delay`. The parity test covers fallbacks, status dots and groups; image loading follows Base UI's behaviour. The Base UI edition has no allowed styling differences.

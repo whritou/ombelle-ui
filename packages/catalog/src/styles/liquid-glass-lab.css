@@ -89,7 +89,7 @@
         --glass-lab-opacity: calc(0.76 + var(--glass-opacity) * 0.24);
       }
       /* Component sheets can load after the shared theme. Anchor their paint to the component's own attributes. */
-      [data-slot="button"]:not([data-variant="link"]),
+      [data-slot="button"]:not([data-variant="link"], [data-variant="link-destructive"]),
       [data-slot="button"][data-variant="ghost"]:not(:disabled):hover,
       [data-slot="badge"][data-variant]:not(:root),
       [data-slot="input"],
@@ -124,13 +124,13 @@
         -webkit-text-stroke: 0.25px var(--glass-plate);
         paint-order: stroke fill;
       }
-      [data-slot="button"][data-variant]:not([data-variant="link"]):not(:disabled):hover {
+      [data-slot="button"][data-variant]:not([data-variant="link"], [data-variant="link-destructive"]):not(:disabled):hover {
         box-shadow: var(--glass-lab-control-shadow);
       }
       [data-slot="button"][data-variant]:not(:disabled):active {
         transform: none;
       }
-      [data-slot="button"][data-variant]:not([data-variant="link"]):not(:disabled):active {
+      [data-slot="button"][data-variant]:not([data-variant="link"], [data-variant="link-destructive"]):not(:disabled):active {
         box-shadow: var(--glass-lab-control-shadow);
       }
       [data-slot="input"]:focus-visible,

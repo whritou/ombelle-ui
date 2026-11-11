@@ -7,7 +7,7 @@ it.each([...supportedStyleFamilies, 'liquid-glass'] as const)(
   async (family) => {
     const { css } = await expectStandaloneArtifacts(family, 'alert', {
       importLine: "from '@/components/ui/alert'",
-      dependencies: ['clsx', 'react', 'tailwind-merge'],
+      dependencies: ['clsx', 'lucide-react', 'react', 'tailwind-merge'],
     })
     const forced = forcedBlock(css)
     expect(forced).toMatch(/\[data-slot="alert"\]\{background:Canvas;color:CanvasText;border/)

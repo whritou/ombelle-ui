@@ -173,7 +173,10 @@ export const componentRecipeSchema = {
                 "secondary",
                 "outline",
                 "accent",
-                "destructive"
+                "destructive",
+                "success",
+                "warning",
+                "info"
               ],
               "default": "default",
               "title": "Variant"
@@ -188,6 +191,14 @@ export const componentRecipeSchema = {
             "dot": {
               "type": "boolean",
               "title": "Status dot"
+            },
+            "appearance": {
+              "enum": [
+                "solid",
+                "soft",
+                "outline"
+              ],
+              "title": "Appearance"
             }
           },
           "additionalProperties": false,
@@ -229,6 +240,21 @@ export const componentRecipeSchema = {
               ],
               "default": "default",
               "title": "Variant"
+            },
+            "dismissible": {
+              "type": "boolean",
+              "title": "Dismiss button"
+            },
+            "actions": {
+              "type": "boolean",
+              "title": "Actions"
+            },
+            "layout": {
+              "enum": [
+                "default",
+                "compact"
+              ],
+              "title": "Layout"
             }
           },
           "additionalProperties": false,
@@ -293,6 +319,19 @@ export const componentRecipeSchema = {
               ],
               "default": "none",
               "title": "Status"
+            },
+            "shape": {
+              "enum": [
+                "circle",
+                "square"
+              ],
+              "title": "Shape"
+            },
+            "overflow": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99,
+              "title": "Overflow count"
             }
           },
           "additionalProperties": false,
@@ -359,6 +398,15 @@ export const componentRecipeSchema = {
                 "subtle"
               ],
               "title": "Appearance"
+            },
+            "mode": {
+              "enum": [
+                "static",
+                "link",
+                "options",
+                "media"
+              ],
+              "title": "Mode"
             }
           },
           "additionalProperties": false,
@@ -1118,6 +1166,21 @@ export const componentRecipeSchema = {
                 "overview"
               ],
               "title": "Initially expanded"
+            },
+            "appearance": {
+              "enum": [
+                "bordered",
+                "flush"
+              ],
+              "title": "Appearance"
+            },
+            "icon": {
+              "enum": [
+                "family",
+                "chevron",
+                "plus"
+              ],
+              "title": "Icon"
             }
           },
           "additionalProperties": false,

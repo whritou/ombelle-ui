@@ -81,6 +81,33 @@ success `#DCFCE7` / `#14532D`, warning `#FEF3C7` / `#78350F`, and info `#DBEAFE`
 requiring an update to existing installed themes. Liquid glass keeps the intent
 fill opaque and adds no blur.
 
+## Variants (0.7.3)
+
+These variants need CLI **0.7.3** or later, including in component recipes. Leaving a prop out renders what earlier releases render.
+
+- **Dismiss:**
+  - `onDismiss` adds a Dismiss button in the corner, 28px square and named "Dismiss". `dismissLabel` renames it.
+  - Alert does not remove itself: remove it in `onDismiss`, then move focus somewhere sensible, such as the next heading. Otherwise focus is lost with the button.
+  - `AlertDismiss` is the same button as a part, for when you wire it yourself. An `AlertDismiss` anywhere inside the Alert reserves the same corner space, and a direct child `AlertDismiss` takes the place of the one `onDismiss` adds, so the Alert never shows two.
+- **`AlertActions`:** holds buttons or links under the description.
+- **`layout="compact"`:** puts the icon, the text and a trailing link or button on one line.
+- **Dependency:** the Dismiss icon is lucide-react's `X`, so Alert now depends on lucide-react 1.55.0.
+
+```tsx
+const [open, setOpen] = React.useState(true)
+const next = React.useRef<HTMLHeadingElement>(null)
+return <>
+  {open && (
+    <Alert variant="info" onDismiss={() => { setOpen(false); next.current?.focus() }}>
+      <AlertTitle>New version available</AlertTitle>
+      <AlertDescription>0.7.3 adds 14 components.</AlertDescription>
+      <AlertActions><Button size="sm">Update</Button></AlertActions>
+    </Alert>
+  )}
+  <h2 ref={next} tabIndex={-1}>Plan</h2>
+</>
+```
+
 ## Styles and artifacts
 
 - Ombelle: the default alert has an outlined accent fill with an offset shadow. Destructive alerts use the card fill with a destructive outline, shadow, icon and title.

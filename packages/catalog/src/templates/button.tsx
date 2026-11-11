@@ -14,6 +14,7 @@ const buttonVariants = cva(
         outline: 'bg-background text-foreground',
         ghost: 'bg-transparent text-foreground',
         link: 'text-primary underline',
+        'link-destructive': 'text-destructive underline',
       },
       size: {
         sm: 'text-sm',
@@ -41,10 +42,37 @@ export function Button({
   type = 'button',
   disabled,
   children,
+  ref,
   ...props
 }: ButtonProps) {
   const Component = asChild ? Slot : 'button'
   const busy = loading && !asChild
+  const ownRef = React.useRef<HTMLButtonElement | null>(null)
+  const restingWidth = React.useRef<number | undefined>(undefined)
+  // Loading keeps the width measured at rest, so the spinner never makes the button grow.
+  // Every render at rest measures again, so a label or size changed since is kept too.
+  React.useLayoutEffect(() => {
+    if (!busy && ownRef.current) restingWidth.current = ownRef.current.getBoundingClientRect().width
+  })
+  React.useLayoutEffect(() => {
+    const element = ownRef.current
+    if (!busy || !element || restingWidth.current === undefined) return
+    // Never wider than its container, which may have narrowed since the last render.
+    const own = element.style.getPropertyValue('min-inline-size')
+    element.style.setProperty('min-inline-size', `min(${restingWidth.current}px, 100%)`)
+    // Put back a min width the consumer set, rather than clearing it.
+    return () => {
+      if (own) element.style.setProperty('min-inline-size', own)
+      else element.style.removeProperty('min-inline-size')
+    }
+  }, [busy])
+  const setRef = React.useCallback((element: HTMLButtonElement | null) => {
+    ownRef.current = element
+    const cleanup = typeof ref === 'function' ? ref(element) : undefined
+    if (ref && typeof ref !== 'function') ref.current = element
+    // A React 19 callback ref may return a cleanup, which React then calls instead of ref(null).
+    if (typeof cleanup === 'function') return () => { ownRef.current = null; cleanup() }
+  }, [ref])
   return (
     <Component
       data-variant={variant}
@@ -54,6 +82,7 @@ export function Button({
       disabled={disabled || busy || undefined}
       aria-busy={busy || undefined}
       {...props}
+      ref={setRef}
       // Set after the spread: an asChild trigger (Tooltip, Dialog) passes its
       // own data-slot through Radix Slot, which would hide the family styles.
       data-slot="button"
