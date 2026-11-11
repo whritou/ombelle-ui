@@ -273,3 +273,59 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} sheet`, () => {
+    test('the bottom handle resizes by keyboard, and a drag below a quarter closes the sheet', async ({ page }) => {
+      await open(page, edition)
+      const sheets = page.getByTestId('vm-sheets')
+      await sheets.getByRole('button', { name: 'Filter projects' }).click()
+      const handle = page.getByRole('separator', { name: 'Resize sheet' })
+      await expect(handle).toBeVisible()
+      await handle.focus()
+      const before = Number(await handle.getAttribute('aria-valuenow'))
+      await page.keyboard.press('ArrowUp')
+      await expect(handle).toHaveAttribute('aria-valuenow', String(Math.min(95, before + 10)))
+      await page.keyboard.press('End')
+      await expect(handle).toHaveAttribute('aria-valuenow', '95')
+      const box = (await handle.boundingBox())!
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2, 790, { steps: 8 })
+      await page.mouse.up()
+      await expect(page.getByRole('dialog', { name: 'Filter projects' })).toHaveCount(0)
+      await expect(sheets.getByRole('button', { name: 'Filter projects' })).toBeFocused()
+    })
+
+    test('the side sheet resizes by keyboard and pointer within its bounds and the viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 700, height: 800 })
+      await open(page, edition)
+      const sheets = page.getByTestId('vm-sheets')
+      await sheets.getByRole('button', { name: 'Open inspector' }).click()
+      const grip = page.getByRole('separator', { name: 'Resize panel' })
+      await grip.focus()
+      await expect(grip).toHaveAttribute('aria-valuenow', '320')
+      await page.keyboard.press('ArrowLeft')
+      await expect(grip).toHaveAttribute('aria-valuenow', '336')
+      await page.keyboard.press('Shift+ArrowLeft')
+      await expect(grip).toHaveAttribute('aria-valuenow', '400')
+      await page.keyboard.press('Home')
+      await expect(grip).toHaveAttribute('aria-valuenow', '240')
+      const box = (await grip.boundingBox())!
+      await page.mouse.move(box.x + box.width / 2, 400)
+      await page.mouse.down()
+      await page.mouse.move(box.x - 1000, 400, { steps: 6 })
+      await page.mouse.up()
+      // 640 is the maximum, but the viewport leaves 700 - 16.
+      await expect(grip).toHaveAttribute('aria-valuenow', '640')
+      const dialog = page.getByRole('dialog', { name: 'Inspector' })
+      expect(Math.round((await dialog.boundingBox())!.width)).toBeLessThanOrEqual(684)
+      const now = (await grip.boundingBox())!
+      await page.mouse.move(now.x + now.width / 2, 400)
+      await page.mouse.down()
+      await page.mouse.move(now.x + 1000, 400, { steps: 6 })
+      await page.mouse.up()
+      await expect(grip).toHaveAttribute('aria-valuenow', '240')
+    })
+  })
+}

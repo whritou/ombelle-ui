@@ -17,7 +17,7 @@ import { Separator } from '@/components/ui/separator'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGroupCount, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHandle, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/components/ui/table'
@@ -231,6 +231,28 @@ function VariantsMoreToasts() {
   )
 }
 
+function VariantsMoreSheets() {
+  const [width, setWidth] = React.useState(320)
+  return (
+    <div data-testid="vm-sheets">
+      <Sheet>
+        <SheetTrigger render={<Button />}>Filter projects</SheetTrigger>
+        <SheetContent side="bottom">
+          <SheetHandle />
+          <SheetHeader><SheetTitle>Filter projects</SheetTitle><SheetDescription>Drag the handle to resize or close.</SheetDescription></SheetHeader>
+        </SheetContent>
+      </Sheet>
+      <Sheet>
+        <SheetTrigger render={<Button />}>Open inspector</SheetTrigger>
+        <SheetContent side="inline-end" resizable onSizeChange={setWidth}>
+          <SheetHeader><SheetTitle>Inspector</SheetTitle><SheetDescription>{width} px</SheetDescription></SheetHeader>
+        </SheetContent>
+      </Sheet>
+      <output data-testid="vm-sheet-width">{width}</output>
+    </div>
+  )
+}
+
 // Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
 function VariantsMoreScenario() {
   const [page, setPage] = React.useState(1)
@@ -268,6 +290,7 @@ function VariantsMoreScenario() {
       <VariantsMoreFields />
       <VariantsMoreSelect />
       <VariantsMoreToasts />
+      <VariantsMoreSheets />
     </section>
   )
 }
