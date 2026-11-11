@@ -254,6 +254,10 @@ describe('the 0.7.3 batch 6b and 6c variants', () => {
     expect(ring.outline).toMatch(/^2(\.5)?px /)
     expect(ring['outline-offset']).toBe('-2px')
   })
+  it('minimalist widens the Close ring of a top or bottom sheet, whose content height can set its edge between pixels', () => {
+    const ring = declarations(read('sheet/minimalist.css'), "[data-slot='sheet-dismiss']:is([data-side='bottom'] > *, [data-side='top'] > *):focus-visible")
+    expect(ring['outline-width']).toBe('2px')
+  })
   it.each(families)('%s casts the sticky header shadow downwards only', family => {
     expect(declarations(read(`table/${family}.css`), "[data-slot='table-head']:is([data-table-sticky] *)")['box-shadow']).toMatch(/^0 6px 6px -6px /)
   })

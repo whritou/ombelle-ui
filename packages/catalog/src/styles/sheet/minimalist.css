@@ -205,6 +205,10 @@
 [data-slot='sheet-content']:has([data-sheet-dragging]) {
   transition: none;
 }
+/* A top or bottom sheet is as high as its content, so its edge can fall between pixels and blur a 1px ring. */
+[data-slot='sheet-dismiss']:is([data-side='bottom'] > *, [data-side='top'] > *):focus-visible {
+  outline-width: 2px;
+}
 @media (forced-colors: active) {
   [data-slot='sheet-handle']::before {
     background: CanvasText;
