@@ -8,6 +8,7 @@ import {
 import styles from './get-code-dialog.module.css'
 
 export type CodeScope = { id: string; label: string; description: string }
+export type CodeSummary = ReactNode | ((close: () => void) => ReactNode)
 export type CodeStatus =
   | { status: 'publishing' }
   | { status: 'ready'; reference: string; href: string }
@@ -42,6 +43,7 @@ export function GetCodeDialog({
   onRetry,
   announce,
   children,
+  summary,
 }: {
   open: boolean
   onClose: () => void
@@ -54,6 +56,8 @@ export function GetCodeDialog({
   announce: (text: string) => void
   /** Secondary local exports, such as the JSON download. */
   children?: ReactNode
+  /** What the edits change against the catalog default, read before publishing; a function gets the dialog's close. */
+  summary?: CodeSummary
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const [scope, setScope] = useState(scopes[0]!.id)
@@ -177,6 +181,7 @@ export function GetCodeDialog({
           className={styles.panel}
         >
           <p className={styles.description}>{active.description}</p>
+          {summary && <div className={styles.summary}>{typeof summary === 'function' ? summary(onClose) : summary}</div>}
 
           <div className={styles.terminal}>
             <div className={styles.terminalBar}>

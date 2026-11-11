@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { describeComponentRecipe } from '@ombelle/compiler'
+import type { ComponentRecipe, ComponentRecipeCompileResult } from '@ombelle/contracts'
 import { renderSpecimen, type Primitives } from './render-specimen'
 import { measureCatalogParts, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
 import { resolveRecipePreset } from '@ombelle/catalog'
@@ -14,10 +15,33 @@ const overlayTriggers = new Set(['DialogTrigger', 'SheetTrigger', 'AlertDialogTr
 const triggerClass = (tag: string) => !overlayTriggers.has(tag) ? undefined
   : tag === 'AlertDialogTrigger' ? 'recipe-preview-trigger recipe-preview-trigger-destructive' : 'recipe-preview-trigger'
 
-export function CatalogRecipePreview({ message, onMeasure }: {
-  message: CatalogPreviewRender; onMeasure?(requestId: number, parts: MeasuredParts): void
+/** The glass scene for a compiled recipe's preset, or none outside liquid glass. */
+export function useCatalogScene(result: ComponentRecipeCompileResult, mode: 'light' | 'dark') {
+  const glass = glassPresetId(result.recipe.data.presetRef.id)
+  const presetRef = result.recipe.data.presetRef
+  return React.useMemo(() => glass ? pickGlassScene(resolveRecipePreset(presetRef), mode, glass) : undefined, [glass, presetRef, mode])
+}
+
+/** The preview root's mode and glass backdrop, set once however many specimens it shows. */
+export function useCatalogRoot(mode: 'light' | 'dark', scene: ReturnType<typeof useCatalogScene>) {
+  React.useLayoutEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', mode === 'dark')
+    setGlassBackdrop(root, scene || undefined)
+    return () => {
+      root.classList.remove('dark')
+      setGlassBackdrop(root, undefined)
+    }
+  }, [mode, scene])
+}
+
+/**
+ * One compiled recipe as a scoped specimen: its CSS, its glass filter instance and the
+ * stage carrying its tokens. onRendered gets the stage once the specimen is drawn.
+ */
+export function CatalogSpecimenCell({ component, result, onRendered }: {
+  component: ComponentRecipe['component']; result: ComponentRecipeCompileResult; onRendered?(stage: HTMLElement): void
 }) {
-  const { component, result, mode, viewport } = message
   const [loaded, setLoaded] = React.useState<{ scope: string; primitives: Primitives }>()
   const instanceId = React.useId()
   const glass = glassPresetId(result.recipe.data.presetRef.id)
@@ -30,31 +54,33 @@ export function CatalogRecipePreview({ message, onMeasure }: {
     })
     return () => { active = false }
   }, [component, result.scope, instance])
-  const presetRef = result.recipe.data.presetRef
-  const scene = React.useMemo(() => glass ? pickGlassScene(resolveRecipePreset(presetRef), mode, glass) : undefined, [glass, presetRef, mode])
-  React.useLayoutEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle('dark', mode === 'dark')
-    setGlassBackdrop(root, scene || undefined)
-    return () => {
-      root.classList.remove('dark')
-      setGlassBackdrop(root, undefined)
-    }
-  }, [mode, scene])
-  const frame = React.useRef<HTMLDivElement>(null)
+  const stage = React.useRef<HTMLDivElement>(null)
   const rendered = loaded?.scope === result.scope
-  // Report what the preset renders so the editor's empty fields can show it.
   React.useEffect(() => {
-    if (rendered && frame.current) onMeasure?.(message.requestId, measureCatalogParts(frame.current, component))
-  }, [rendered, message.requestId, component, onMeasure])
+    if (rendered && stage.current) onRendered?.(stage.current)
+  }, [rendered, onRendered])
   const css = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${component}.css`))?.content
-  return <div ref={frame} className={mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={viewport}>
+  return <>
     <style>{css}</style>
     {instance && <LiquidGlassFilter key={result.scope} scope={result.scope} instance={instance} />}
-    {scene && <GlassBackdropArt scene={scene} />}
     {/* The stage carries the preset's tokens, so triggers and plain labels around the component use them too. */}
-    {rendered && <div className="recipe-stage" data-ombelle-recipe={result.scope} data-component={component}>
+    {rendered && <div ref={stage} className="recipe-stage" data-ombelle-recipe={result.scope} data-component={component}>
       {renderSpecimen(describeComponentRecipe(result.recipe.data), loaded.primitives, instanceId, { triggerClass })}
     </div>}
+  </>
+}
+
+export function CatalogRecipePreview({ message, onMeasure }: {
+  message: CatalogPreviewRender; onMeasure?(requestId: number, parts: MeasuredParts): void
+}) {
+  const { component, result, mode, viewport } = message
+  const scene = useCatalogScene(result, mode)
+  useCatalogRoot(mode, scene)
+  // Report what the preset renders so the editor's empty fields can show it.
+  const measure = React.useCallback((stage: HTMLElement) => onMeasure?.(message.requestId, measureCatalogParts(stage, component)),
+    [onMeasure, message.requestId, component])
+  return <div className={mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={viewport}>
+    {scene && <GlassBackdropArt scene={scene} />}
+    <CatalogSpecimenCell component={component} result={result} onRendered={measure} />
   </div>
 }

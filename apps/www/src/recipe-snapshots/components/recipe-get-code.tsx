@@ -7,6 +7,7 @@ import { codeInstallCommand, installableRecipeInstallNotice } from '../../snapsh
 import {
   GetCodeDialog,
   type CodeStatus,
+  type CodeSummary,
 } from '../../snapshots/components/get-code-dialog'
 
 type ResolvedRecipe = InstallableRecipeCompileResult['recipe']
@@ -21,6 +22,7 @@ export function RecipeGetCode({
   announce,
   className,
   secondary,
+  summary,
   componentName = 'Button',
   storageKey,
 }: {
@@ -30,6 +32,8 @@ export function RecipeGetCode({
   className?: string
   /** Secondary exports shown under the command, such as the JSON download. */
   secondary?: ReactNode
+  /** What the edits change against the catalog default. */
+  summary?: CodeSummary
   componentName?: string
   storageKey?: string
 }) {
@@ -69,6 +73,7 @@ export function RecipeGetCode({
         Get code
       </button>
       <GetCodeDialog
+        summary={summary}
         open={open}
         onClose={() => setOpen(false)}
         subject="recipe"

@@ -4,7 +4,7 @@ import { defineConfig } from '@playwright/test'
 // preview only, not the consumer apps. Run pnpm build:packages and pnpm generate:preview first.
 export default defineConfig({
   testDir: 'tests/e2e',
-  testMatch: ['editors-glass.spec.ts'],
+  testMatch: ['editors-glass.spec.ts', 'editors-matrix.spec.ts'],
   timeout: 120000,
   expect: { timeout: 15000 },
   workers: 1,

@@ -35,3 +35,18 @@ html[data-backdrop="glass"] .editor-preview { background: none; }
 html[data-backdrop='glass'] .recipe-preview-trigger:not(.recipe-preview-trigger-destructive) { border-color: color-mix(in oklab, white 55%, transparent); background: color-mix(in oklab, var(--card, white) 60%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 4px 16px -6px rgb(0 0 0 / 0.25); }
 @media (prefers-reduced-motion: reduce) { .recipe-preview-trigger { transition: none; } .recipe-preview-trigger:active { transform: none; } }
 html[data-backdrop='glass'] .recipe-stage > div > input { background: color-mix(in oklab, var(--card, white) 55%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); }
+
+/* Variant matrix: a real table, scrolling sideways in the narrow width with the row headers pinned. */
+.editor-preview[data-layout="matrix"] { align-items: flex-start; justify-content: flex-start; }
+.recipe-matrix-scroll { max-width: 100%; overflow-x: auto; }
+.recipe-matrix { border-collapse: separate; border-spacing: 12px; font: 500 12px/1.4 ui-sans-serif, system-ui, sans-serif; color: #3f3f46; }
+.editor-preview.dark .recipe-matrix { color: #d4d4d8; }
+.recipe-matrix caption { text-align: start; font-weight: 600; padding-block-end: 4px; }
+.recipe-matrix th { font-weight: 600; text-align: start; white-space: nowrap; }
+.recipe-matrix th[scope="row"] { position: sticky; inset-inline-start: 0; z-index: 1; padding-inline-end: 8px; background: inherit; }
+.recipe-matrix td { vertical-align: middle; padding: 8px; border-radius: 8px; }
+.recipe-matrix td[data-current] { outline: 2px dashed currentColor; outline-offset: 2px; }
+.recipe-matrix-current { display: block; margin-block-end: 6px; font-size: 11px; font-weight: 600; }
+.recipe-matrix-states { display: flex; flex-wrap: wrap; gap: 16px; }
+.recipe-matrix-state { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.recipe-matrix-state figcaption { font-size: 11px; }

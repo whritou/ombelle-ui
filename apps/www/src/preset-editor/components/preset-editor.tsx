@@ -54,6 +54,7 @@ import {
 } from '../schemes'
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { PresetGetCode } from '../../snapshots/components/preset-get-code'
+import { changesSummary, presetChanges } from '../../editor/artifact-diff'
 import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import { GlassStartingPoints } from './glass-starting-points'
@@ -226,6 +227,10 @@ export default function PresetEditor() {
   const reduced = transparencySupported && transparency === 'reduced'
   const backdropOptions = glassPreset ? glassBackdropMenu(glassPreset, mode, autoBackdrop, reduced) : glassBackdropOptions
   const labInk = glassPreset ? labInkFor(glassPreset, mode, backdrop) : null
+  // The catalog default Get code compares to: the starting preset for glass, the family's base otherwise.
+  const defaultDraft = useMemo(() => glass ? applyStartingPreset(createPresetDraft('liquid-glass'), backdropPreset)
+    : createPresetDraft(draft.family), [glass, backdropPreset, draft.family])
+  const reference = usePresetCompiler(defaultDraft)
   const glassReport = glass ? presetGlassReport(draft) : null
   const glassContrastWarning = glassReport?.passes === false
   // Download JSON and Get code both require a current compile result.
@@ -329,6 +334,8 @@ export default function PresetEditor() {
             contrastWarning={glassContrastWarning}
             announce={setNotice}
             describedBy={glass ? glassReadoutId : undefined}
+            summary={exportable && compiled.result && reference.result
+              ? <p data-testid="changes-summary">{changesSummary(presetChanges(compiled.result, reference.result))}</p> : undefined}
           />
         }
         extra={<><span className={styles.draftNote} title="Draft — automated token contrast only">Draft — automated token contrast only</span><a href="/docs/preset-editor" className="text-sm font-semibold underline underline-offset-4">Preset editor guide</a></>}

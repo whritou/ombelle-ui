@@ -142,3 +142,29 @@
   .file { box-shadow: none; border-bottom: 2px solid Highlight; }
   .code :global(.codeLine)::before { color: GrayText; }
 }
+
+/* Changes view: each line carries its sign in text; colour only reinforces it. */
+.diffCount {
+  margin: 0;
+  padding: 8px 20px 0;
+  background: var(--code-bg);
+  color: var(--code-text);
+  font: 500 12px/1.4 var(--font-mono);
+}
+.diffCode .diffLine,
+.diffCode .diffSkip {
+  display: block;
+  padding-inline: 20px;
+  white-space: pre;
+}
+.diffCode .diffLine[data-kind='add'] { background: rgb(165 214 167 / 14%); color: #a5d6a7; }
+.diffCode .diffLine[data-kind='remove'] { background: rgb(242 139 155 / 14%); color: #f28b9b; }
+.diffCode .diffSkip { color: var(--code-gutter); font-style: italic; }
+@media (forced-colors: active) {
+  .diffCode .diffLine[data-kind] { background: none; color: CanvasText; }
+}
+.viewToggle {
+  padding: 8px 12px;
+  background: var(--code-bg);
+  border-block-end: 1px solid var(--code-line);
+}

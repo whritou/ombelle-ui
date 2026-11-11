@@ -1,4 +1,4 @@
-import { handleCompileMessage } from './compile-protocol.js'
+import { handleBatchMessage, handleCompileMessage } from './compile-protocol.js'
 import { compileComponentRecipe } from '@ombelle/compiler'
 
 self.onmessage = async (event: MessageEvent<unknown>) => {
@@ -12,6 +12,10 @@ self.onmessage = async (event: MessageEvent<unknown>) => {
       self.postMessage({ type: 'invalid-catalog', requestId: data.requestId,
         error: error instanceof Error ? error.message : 'The recipe could not be compiled.' })
     }
+    return
+  }
+  if (data && typeof data === 'object' && 'type' in data && data.type === 'compile-batch') {
+    self.postMessage(await handleBatchMessage(data))
     return
   }
   self.postMessage(await handleCompileMessage(event.data))

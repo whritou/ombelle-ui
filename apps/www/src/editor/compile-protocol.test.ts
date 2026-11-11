@@ -1,7 +1,8 @@
 import { expect, it } from 'vitest'
 import { compileRecipe } from '@ombelle/compiler'
 import { createEditorDraft } from './model.js'
-import { compileEditorRecipe, handleCompileMessage } from './compile-protocol.js'
+import { compileEditorRecipe, handleBatchMessage, handleCompileMessage } from './compile-protocol.js'
+import { createCatalogDraft } from './catalog-draft.js'
 import { isCompileResponse } from './use-compiler.js'
 
 it('returns the shared compiler artifacts with their exact paths, bytes, hashes, and request ID', async () => {
@@ -45,4 +46,33 @@ it('rejects malformed worker responses before they enter editor state', async ()
   expect(isCompileResponse(valid)).toBe(true)
   expect(isCompileResponse({ type: 'compiled', requestId: 4, result: { artifacts: [{ logicalPath: 'x', content: 17 }] } })).toBe(false)
   expect(isCompileResponse({ type: 'invalid', requestId: 4, diagnostic: { code: 'BAD', message: 17 } })).toBe(false)
+})
+
+it('compiles a catalog batch in order', async () => {
+  const badge = (label: string) => ({ ...createCatalogDraft('badge').recipe, content: { label } })
+  const response = await handleBatchMessage({ type: 'compile-batch', requestId: 4, kind: 'catalog', recipes: [badge('One'), badge('Two')] })
+  expect(response.type).toBe('compiled-batch')
+  if (response.type !== 'compiled-batch') return
+  expect(response.requestId).toBe(4)
+  expect((response.results[1]!.recipe.data.content as { label: string }).label).toBe('Two')
+})
+
+it('reports the failing index of a batch', async () => {
+  const good = createCatalogDraft('badge').recipe
+  const response = await handleBatchMessage({ type: 'compile-batch', requestId: 5, kind: 'catalog', recipes: [good, { ...good, props: { variant: 'nope' } }] })
+  expect(response).toMatchObject({ type: 'invalid-batch', requestId: 5, index: 1 })
+})
+
+it('refuses a batch of 49 recipes or a non-array', async () => {
+  const good = createCatalogDraft('badge').recipe
+  expect(await handleBatchMessage({ type: 'compile-batch', requestId: 6, kind: 'catalog', recipes: Array(49).fill(good) })).toMatchObject({ type: 'invalid-batch', index: -1 })
+  expect(await handleBatchMessage({ type: 'compile-batch', requestId: 7, kind: 'catalog', recipes: 'x' })).toMatchObject({ type: 'invalid-batch', index: -1 })
+})
+
+it('compiles a Button batch', async () => {
+  const draft = createEditorDraft('flat')
+  const outline = { ...draft.recipe, props: { ...draft.recipe.props, variant: 'outline' } }
+  const response = await handleBatchMessage({ type: 'compile-batch', requestId: 8, kind: 'button', recipes: [draft.recipe, outline] })
+  expect(response.type).toBe('compiled-batch')
+  if (response.type === 'compiled-batch') expect((response.results[1]!.recipe.data.props as { variant: string }).variant).toBe('outline')
 })

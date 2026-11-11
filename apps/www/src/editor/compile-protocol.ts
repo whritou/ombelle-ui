@@ -1,5 +1,5 @@
-import { compileRecipe } from '@ombelle/compiler'
-import { FoundationError, validateRecipe, type RecipeCompileResult } from '@ombelle/contracts'
+import { compileComponentRecipe, compileRecipe } from '@ombelle/compiler'
+import { FoundationError, validateComponentRecipe, validateRecipe, type InstallableRecipeCompileResult, type RecipeCompileResult } from '@ombelle/contracts'
 
 export type CompileRequest = { type: 'compile'; requestId: number; recipe: unknown }
 export type CompileDiagnostic = {
@@ -61,4 +61,35 @@ export async function handleCompileMessage(input: unknown): Promise<CompileRespo
     })
   }
   return compileEditorRecipe(input as CompileRequest)
+}
+
+/** The matrix cells and the catalog default, compiled in one worker round trip. */
+export type BatchRequest = { type: 'compile-batch'; requestId: number; kind: 'button' | 'catalog'; recipes: unknown[] }
+export type BatchResponse =
+  | { type: 'compiled-batch'; requestId: number; results: InstallableRecipeCompileResult[] }
+  | { type: 'invalid-batch'; requestId: number; index: number; message: string }
+
+/** The most recipes one batch compiles: the matrix cap. */
+export const batchLimit = 48
+
+export async function handleBatchMessage(input: unknown): Promise<BatchResponse> {
+  const message = typeof input === 'object' && input !== null ? input as Partial<BatchRequest> : {}
+  const requestId = typeof message.requestId === 'number' && Number.isSafeInteger(message.requestId) && message.requestId >= 0 ? message.requestId : 0
+  if (message.type !== 'compile-batch' || (message.kind !== 'button' && message.kind !== 'catalog') ||
+    !Array.isArray(message.recipes) || message.recipes.length === 0 || message.recipes.length > batchLimit)
+    return { type: 'invalid-batch', requestId, index: -1, message: `Expected 1 to ${batchLimit} recipes to compile.` }
+  const results: InstallableRecipeCompileResult[] = []
+  for (const [index, recipe] of message.recipes.entries()) {
+    try {
+      if (message.kind === 'catalog') results.push(await compileComponentRecipe({ recipe: validateComponentRecipe(recipe) }))
+      else {
+        const response = await compileEditorRecipe({ type: 'compile', requestId, recipe })
+        if (response.type !== 'compiled') return { type: 'invalid-batch', requestId, index, message: response.diagnostic.message }
+        results.push(response.result)
+      }
+    } catch (error) {
+      return { type: 'invalid-batch', requestId, index, message: error instanceof Error ? error.message : 'The recipe could not be compiled.' }
+    }
+  }
+  return { type: 'compiled-batch', requestId, results }
 }

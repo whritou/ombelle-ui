@@ -8,8 +8,8 @@ import { FamilyPicker } from './family-picker'
 import { CatalogAppearance } from './catalog-appearance'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 
-export function CatalogProperties({ recipe, measured = {}, update }: {
-  recipe: ComponentRecipe; measured?: MeasuredParts; update(recipe: ComponentRecipe): void
+export function CatalogProperties({ recipe, measured = {}, previewMode = 'light', update }: {
+  recipe: ComponentRecipe; measured?: MeasuredParts; previewMode?: 'light' | 'dark'; update(recipe: ComponentRecipe): void
 }) {
   const family = resolveRecipePreset(recipe.presetRef).styleFamily
   const fields = componentRecipeFields(recipe.component)
@@ -59,7 +59,7 @@ export function CatalogProperties({ recipe, measured = {}, update }: {
       if (key === 'collapsible' && props.type === 'multiple') return null
       return <Field key={key} field={field} value={props[key]} update={value => change('props', key, value)} />
     })}
-    <CatalogAppearance recipe={recipe} glass={family === 'liquid-glass'} measured={measured} update={update} />
+    <CatalogAppearance recipe={recipe} glass={family === 'liquid-glass'} measured={measured} previewMode={previewMode} update={update} />
   </div>
 }
 

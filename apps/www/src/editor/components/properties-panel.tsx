@@ -8,7 +8,8 @@ import {
   type RecipeIconName, type StyleFamily,
 } from '@ombelle/contracts'
 import type { CompileDiagnostic } from '../compile-protocol'
-import type { PartDimension } from '../catalog-preview-protocol'
+import type { MeasuredPart, PartDimension } from '../catalog-preview-protocol'
+import { colorDimensionFor, colorPlaceholder } from '../measured-color'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { keepChoice } from '../../editor-shell/inspector'
 import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
@@ -27,7 +28,9 @@ type Props = {
   onChange: (recipe: Recipe, key: string) => void
   onDiagnostic: (path: string, message: string) => void
   /** The specimen's rendered values, shown in empty fields as the preset's. */
-  measured?: Partial<Record<PartDimension, number>>
+  measured?: MeasuredPart
+  /** The preview's mode: measured colours fill only that mode's empty fields. */
+  previewMode?: RecipeColorMode
 }
 
 type OverrideKey = 'radiusRem' | 'borderWidthPx' | 'minHeightPx' | 'shadowOffsetXPx' | 'shadowOffsetYPx' |
@@ -160,9 +163,9 @@ function StackField({ label, children }: { label: string; children: ReactNode })
   )
 }
 
-type ColorProps = Pick<Props, 'recipe' | 'diagnostic' | 'onChange' | 'onDiagnostic'>
+type ColorProps = Pick<Props, 'recipe' | 'diagnostic' | 'onChange' | 'onDiagnostic' | 'measured' | 'previewMode'>
 
-function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family }: ColorProps & { state: ColorState; family: StyleFamily }) {
+function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family, measured = {}, previewMode = 'light' }: ColorProps & { state: ColorState; family: StyleFamily }) {
   // Text being typed stays local until it is a complete color, then it becomes a recipe edit.
   const [typing, setTyping] = useState<Record<string, string>>({})
   const commit = (mode: RecipeColorMode, role: RecipeColorRole, value: string | undefined) => {
@@ -199,7 +202,7 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family
                         onChange={(event) => commit(mode, role, event.target.value)} />
                     </span>
                     <input id={`color-${key}`} type="text" className="colorText" aria-label={name} value={text}
-                      placeholder={fallback} title={overridden ? undefined : state === 'base' ? `Preset: ${value}` : `Family ${state} color, from ${value}`} maxLength={80} spellCheck={false}
+                      placeholder={state === 'base' ? colorPlaceholder(measured[colorDimensionFor[role]], mode, previewMode, fallback) : fallback} title={overridden ? undefined : state === 'base' ? `Preset: ${value}` : `Family ${state} color, from ${value}`} maxLength={80} spellCheck={false}
                       data-overridden={overridden || undefined} aria-invalid={invalid || undefined}
                       aria-describedby={describedBy}
                       onChange={(event) => {
@@ -258,7 +261,7 @@ export function baselineText(value: number | undefined, step: number): string | 
   return String(Number(value.toFixed(decimals)))
 }
 
-export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange, onDiagnostic, measured = {} }: Props) {
+export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange, onDiagnostic, measured = {}, previewMode = 'light' }: Props) {
   // Text being typed in a number field stays local until it is a valid value in range.
   const [typing, setTyping] = useState<Partial<Record<OverrideKey, string>>>({})
   const changeProp = (key: keyof Recipe['props'], value: string | boolean) =>
@@ -421,7 +424,8 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
             ? 'Hex such as #1d4ed8 or OKLCH such as oklch(55% 0.2 260). Empty fields use the preset.'
             : `Colors while the Button is ${colorState === 'hover' ? 'hovered' : 'pressed'}. Empty fields keep the style family's ${colorState} color.`}
         </p>
-        <ColorFields key={colorState} state={colorState} family={family} recipe={recipe} diagnostic={diagnostic} onChange={onChange} onDiagnostic={onDiagnostic} />
+        <ColorFields key={colorState} state={colorState} family={family} recipe={recipe} diagnostic={diagnostic} onChange={onChange} onDiagnostic={onDiagnostic}
+          measured={measured} previewMode={previewMode} />
       </InspectorSection>
       <InspectorSection id="inspector-shape" title="Shape & depth">
         {sliders.map(slider)}

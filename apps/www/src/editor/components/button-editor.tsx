@@ -17,6 +17,10 @@ import { ArtifactPanel } from './artifact-panel'
 import { ComponentNavigation } from './component-navigation'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
+import { useRecipeBatch } from '../use-recipe-batch'
+import { changesSummaryFor } from './changes-summary'
+import { MatrixControls } from './matrix-controls'
+import { useMatrixLayout } from '../use-matrix-layout'
 import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
@@ -53,8 +57,16 @@ export function ButtonEditor() {
   const [status, setStatus] = useState('Loading local draft…')
   const [measured, setMeasured] = useState<MeasuredParts>({})
   const draft = history.present
+  const matrix = useMatrixLayout('button', draft.recipe)
   const glassFamily = draftFamily(draft.recipe) === 'liquid-glass'
   const compilation = useCompiler(draft.recipe)
+  // The catalog default for the same family and preset: what Changes and Get code compare to.
+  const presetKey = JSON.stringify(draft.recipe.presetRef)
+  const defaults = useMemo(() => [resetDraftRecipe(draft, initialDraft.recipe).recipe],
+    // Only the family and preset decide the default, not the edits.
+    [presetKey])
+  const reference = useRecipeBatch('button', defaults).results?.[0] ?? null
+  const [showChanges, setShowChanges] = useState(0)
   const undoButton = useRef<HTMLButtonElement>(null)
   const redoButton = useRef<HTMLButtonElement>(null)
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
@@ -99,6 +111,9 @@ export function ButtonEditor() {
 
   const exportReady = compilation.status === 'compiled' && !compilation.stale &&
     diagnostic === null && resultMatchesDraft(compilation.result, draft.recipe)
+  // The summary diffs every file, so it is worked out once per result, not on every render.
+  const changes = useMemo(() => changesSummaryFor(exportReady ? compilation.result : null, reference, () => setShowChanges(count => count + 1)),
+    [exportReady, compilation.result, reference])
   const recipeJson = useMemo(() => {
     if (!exportReady) return null
     try { return serializeRecipe(draft) } catch { return null }
@@ -214,6 +229,7 @@ export function ButtonEditor() {
       }}
       menu={{ label: 'More actions', items: menuItems }}
       primary={<RecipeGetCode className={styles.getCode} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
+        summary={changes}
         secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
     />
     <h1 className={styles.srOnly}>Button editor</h1>
@@ -233,7 +249,7 @@ export function ButtonEditor() {
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
-          <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit} measured={measured.button}
+          <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit} measured={measured.button} previewMode={view.mode}
             onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
@@ -245,6 +261,7 @@ export function ButtonEditor() {
                 onChange={(mode) => setView((previous) => ({ ...previous, mode }))} />
               {glassFamily && transparencySupported && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
                 options={previewTransparencyOptions} onChange={setTransparency} />}
+              <MatrixControls matrix={matrix} />
               <SegmentedControl<EditorView['viewport']> label="Preview width" value={view.viewport}
                 options={previewWidthOptions('Narrow')}
                 onChange={(viewport) => setView((previous) => ({ ...previous, viewport }))} />
@@ -256,10 +273,11 @@ export function ButtonEditor() {
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
+              reference={reference} showChanges={showChanges}
               notice={experimentalNotice(draftFamily(draft.recipe))} />
           </div>
         </div>

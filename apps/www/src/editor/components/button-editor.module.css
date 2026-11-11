@@ -193,3 +193,6 @@
   .root :global(.artifactTabs) button[aria-selected="true"], .root :global(.mobileTabs) button[aria-current="page"] { border-bottom: 3px solid Highlight; }
   .specimen { border: 1px solid CanvasText; }
 }
+.root :global(.be-matrix-axis) { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; font-weight: 600; }
+.root :global(.be-matrix-axis) select { min-height: 32px; padding: 0 .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--foreground); font: inherit; font-weight: 500; }
+.root :global(.be-matrix-cap) { flex-basis: 100%; margin: 0; color: var(--muted-foreground); font-size: .8rem; }
