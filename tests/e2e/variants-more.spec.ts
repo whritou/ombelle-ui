@@ -246,6 +246,9 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(toastNamed(page, 'Publishing preset…')).toBeVisible()
       await page.evaluate(() => (window as unknown as { __vmSettle: () => void }).__vmSettle())
       await expect(toastNamed(page, 'Ombelle published')).toHaveAttribute('data-variant', 'success')
+      // The result is announced too, once, not only the loading text.
+      await page.clock.runFor(100)
+      expect(await announcers(page, 'Ombelle published')).toBe(1)
       await toasts.getByRole('button', { name: 'Publish offline' }).click()
       await page.evaluate(() => (window as unknown as { __vmSettle: () => void }).__vmSettle())
       await expect(toastNamed(page, 'Publishing failed')).toHaveAttribute('data-variant', 'destructive')

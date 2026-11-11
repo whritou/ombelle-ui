@@ -102,7 +102,8 @@ export function ToastPromise<T>({ promise, loading, success, error, className }:
   const pick = (settled: Settled<never>) => typeof settled === 'function' ? (settled as (value: unknown) => React.ReactNode)(state.value) : settled
   const title = state.status === 'pending' ? loading : state.status === 'success' ? pick(success as Settled<never>) : pick(error as Settled<never>)
   return (
-    <Toast open={open} onOpenChange={setOpen} className={className}
+    // Radix announces a toast once, when it mounts, so the settled toast mounts anew to announce its result.
+    <Toast key={state.status === 'pending' ? 'pending' : 'settled'} open={open} onOpenChange={setOpen} className={className}
       variant={state.status === 'success' ? 'success' : state.status === 'error' ? 'destructive' : 'default'}
       duration={state.status === 'pending' ? Infinity : undefined}
       data-toast-promise={state.status}>
