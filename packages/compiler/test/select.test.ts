@@ -54,7 +54,7 @@ it('compiles Select in liquid glass: the field trigger, the Dropdown Menu surfac
   expect(flat).toContain('color-mix(insrgb,whitecalc(var(--glass-sheen)*60%),transparent),transparent70%')
   expect(block(trigger + '[data-placeholder]')).toContain('color:var(--muted-foreground)')
   expect(block('[data-slot="select-icon"]')).toContain('color:var(--muted-foreground)')
-  expect(block(trigger + ':focus-visible')).toContain('border-color:var(--ring)')
+  expect(block(trigger + ':focus-visible')).toContain('outline:2pxsolidvar(--foreground);outline-offset:0')
   expect(block(trigger + '[aria-invalid="true"]')).toContain('border-color:var(--destructive)')
   expect(block(trigger + ':disabled,' + trigger + '[data-disabled]')).toContain('border-style:dashed')
   // The item hint is the kit's caption: 11px, 600, uppercase, letter-spaced, mutedForeground.

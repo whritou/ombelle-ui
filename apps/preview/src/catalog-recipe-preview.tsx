@@ -1,22 +1,16 @@
 import * as React from 'react'
-import { describeComponentRecipe, type RecipeSpecimen } from '@ombelle/compiler'
+import { describeComponentRecipe } from '@ombelle/compiler'
+import { renderSpecimen, type Primitives } from './render-specimen'
 import { measureCatalogParts, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
 import { glassPresetBackdrop, glassPresetId } from '../../www/src/site/glass-presets'
 import { scopedCatalogComponents } from './generated/catalog-recipes'
 import { LiquidGlassFilter } from './generated/catalog-recipes/liquid-glass-filter'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 
-type Primitives = Record<string, React.ElementType>
 /** Overlay triggers carry no catalog style; the preview draws them as buttons so they read as clickable. */
 const overlayTriggers = new Set(['DialogTrigger', 'SheetTrigger', 'AlertDialogTrigger', 'PopoverTrigger', 'TooltipTrigger', 'DropdownMenuTrigger'])
-function renderSpecimen(specimen: RecipeSpecimen, primitives: Primitives, instanceId: string): React.ReactElement {
-  const props = Object.fromEntries(Object.entries(specimen.props).map(([key, value]) =>
-    [key, value && typeof value === 'object' && 'localId' in value ? instanceId + value.localId : value]))
-  if (overlayTriggers.has(specimen.tag)) props.className = specimen.tag === 'AlertDialogTrigger'
-    ? 'recipe-preview-trigger recipe-preview-trigger-destructive' : 'recipe-preview-trigger'
-  return React.createElement(primitives[specimen.tag] ?? specimen.tag, props, ...specimen.children.map(child =>
-    typeof child === 'string' ? child : renderSpecimen(child, primitives, instanceId)))
-}
+const triggerClass = (tag: string) => !overlayTriggers.has(tag) ? undefined
+  : tag === 'AlertDialogTrigger' ? 'recipe-preview-trigger recipe-preview-trigger-destructive' : 'recipe-preview-trigger'
 
 export function CatalogRecipePreview({ message, onMeasure }: {
   message: CatalogPreviewRender; onMeasure?(requestId: number, parts: MeasuredParts): void
@@ -56,7 +50,7 @@ export function CatalogRecipePreview({ message, onMeasure }: {
     {scene && <GlassBackdropArt scene={scene} />}
     {/* The stage carries the preset's tokens, so triggers and plain labels around the component use them too. */}
     {rendered && <div className="recipe-stage" data-ombelle-recipe={result.scope} data-component={component}>
-      {renderSpecimen(describeComponentRecipe(result.recipe.data), loaded.primitives, instanceId)}
+      {renderSpecimen(describeComponentRecipe(result.recipe.data), loaded.primitives, instanceId, { triggerClass })}
     </div>}
   </div>
 }

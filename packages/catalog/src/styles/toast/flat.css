@@ -2,16 +2,18 @@
 [data-slot='toast-viewport'] {
   box-sizing: border-box;
   position: fixed;
-  inset-block-end: max(1rem, env(safe-area-inset-bottom));
-  inset-inline-end: max(1rem, env(safe-area-inset-right));
+  /* The scrolling viewport clips what overflows it, so its padding holds the toast's
+     shadow (16px down, 36px blur, -14px spread); the toast keeps its 1.5rem inset and width. */
+  inset-block-end: env(safe-area-inset-bottom, 0px);
+  inset-inline-end: env(safe-area-inset-right, 0px);
   z-index: 100;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  inline-size: min(24rem, calc(100vw - 2rem));
-  max-block-size: calc(100dvh - 2rem);
+  inline-size: min(26rem, 100vw);
+  max-block-size: 100dvh;
   margin: 0;
-  padding: 0.5rem;
+  padding: 1.5rem 1.5rem 2.5rem;
   overflow: auto;
   overscroll-behavior: contain;
   list-style: none;

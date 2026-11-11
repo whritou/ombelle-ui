@@ -44,6 +44,20 @@ Open `http://127.0.0.1:4173/<family>/?mode=<mode>` with `<family>` one of `flat`
 
 Also run each component once with the operating system's reduced-motion setting on, once in Windows forced colors (High Contrast) mode with NVDA, and once at 200 percent browser text zoom. Record these as notes on the K row of the affected component.
 
+## Automated checks
+
+The [specimen audit](evidence/specimen-audit.md) automates part of what this protocol looks for, in Chromium only. For every catalog component in all five families, both editions, and light and dark mode, it measures:
+
+- **Focus visible**: each control, list item and menu item reached by keyboard changes by at least 3:1 over 90 percent of a 1px outline.
+- **Clipping**: shadows and focus rings are not cut by a clipping ancestor.
+- **Overflow**: text does not leave its box, and boxes that clip do not squeeze their content.
+- **Spacing**: a label sits at least 4px from its control.
+- **Target size**: WCAG 2.5.8, with its spacing exception.
+- **Forced colors**: focus shows as an outline, borders survive and no backdrop filter remains.
+- **Axe**: the WCAG 2.2 A and AA rules.
+
+Run it with `pnpm test:specimen-audit` after `pnpm build:packages` and `pnpm generate:preview`. It does not replace any K, N or V pass: it checks what can be measured from rendered pixels and styles, not what a screen reader announces or how a person experiences reading order.
+
 ## Checks for every component
 
 Apply these in every pass, then the component-specific checks.

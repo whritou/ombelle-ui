@@ -24,9 +24,8 @@
   opacity: 1;
 }
 [data-slot='textarea']:focus-visible {
-  border-color: var(--ring);
-  outline: 3px solid var(--ring);
-  outline-offset: 2px;
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
 }
 [data-slot='textarea'][aria-invalid='true'] {
   border-color: var(--destructive);

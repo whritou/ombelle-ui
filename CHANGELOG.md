@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Add the specimen audit (`pnpm test:specimen-audit`), part of the foundation gate: every catalog component, as installed, is measured in all families, editions and modes for focus visibility, clipped shadows and rings, overflow, label spacing, target size, forced colors and axe rules. `pnpm build:packages` now fails on a catalog style rule that names no slot or marker, and a unit test fails when recipe primitives shadow the names that scope them.
+- Keep the neo-brutalism focus rings visible: the Accordion trigger and Dialog close draw their ring inside the control in its own text colour (it was near-white on yellow in dark mode), and the Radio item's ring takes the option's text colour (it matched the checked option's background in dark mode).
+- Let the flat and minimalist Toast viewports hold the toast shadow instead of cutting it; the toast keeps its 1.5rem inset and width, and sits 1rem higher.
+- Draw every liquid-glass focus indicator as a 2px `foreground` ring that hugs the control, instead of the blue 3px `ring` offset from it. Highlighted Select options and Dropdown Menu items use the same ink. Liquid glass remains experimental.
+- Draw the liquid-glass Progress light inside the indicator: the clipped track always cut the outer glow.
+- Mark the highlighted Select option and Dropdown Menu item with an inset ring in every family; the background tint alone was below 3:1 against the menu.
+- Space installed recipe labels from their controls: Checkbox and Switch sit beside their label with a gap, and Input, Textarea, Label, Native Select, Select, Input Group and Radio Group stack the label above the control. They rendered flush before.
+- The neo-brutalism focus-ring fix changes that family's shared `ui-style.css`; existing neo-brutalism projects are asked to run `theme add` on their next `add`.
+
 ## 0.7.2 — 9 November 2026
 
 - Add Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination and Toast in all five style families, with Radix and Base UI editions, recipe editors, source exports and CLI installation. Base UI Toast retains its native manager API.

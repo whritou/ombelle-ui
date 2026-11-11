@@ -49,8 +49,8 @@
   inset-inline-start: calc(100% - 1.25rem - 2px);
 }
 [data-slot='switch']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 2px;
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
 }
 [data-slot='switch']:disabled,
 [data-slot='switch'][data-disabled] {

@@ -565,11 +565,10 @@ describe('liquid-glass Button', () => {
     expect(decls(css, '[data-slot="input"]', 'reduced').background).toBe('var(--background)')
     expect(decls(css, '[data-slot="input"]', 'supports-forced').background).toBe('Field')
     expect(decls(css, '[data-slot="input"]', 'forced').color).toBe('FieldText')
-    // States: ring and ring-coloured border on focus, 2px destructive when invalid, dashed at 50% when disabled.
-    expect(decls(css, '[data-slot="input"]:focus-visible')).toMatchObject({
-      'border-color': 'var(--ring)',
-      outline: '3pxsolidvar(--ring)',
-      'outline-offset': '2px',
+    // States: a 2px ink ring hugging the field on focus, 2px destructive when invalid, dashed at 50% when disabled.
+    expect(decls(css, '[data-slot="input"]:focus-visible')).toEqual({
+      outline: '2pxsolidvar(--foreground)',
+      'outline-offset': '0',
     })
     expect(decls(css, '[data-slot="input"][aria-invalid="true"]')).toMatchObject({
       'border-color': 'var(--destructive)',

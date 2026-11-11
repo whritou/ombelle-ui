@@ -32,8 +32,9 @@
   border-radius: 50%;
   background: currentColor;
 }
+/* The ring falls on the option, whose checked background can be close to --ring: use the option's text colour. */
 [data-slot='radio-group-item']:focus-visible {
-  outline: 3px dashed var(--ring);
+  outline: 3px dashed currentColor;
   outline-offset: 4px;
 }
 [data-slot='radio-group-item']:disabled,

@@ -5,6 +5,8 @@ import {
   styleSupport,
 } from '../packages/contracts/src/style-families.ts'
 import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
+import { componentSlots } from '../packages/catalog/src/component-slots.ts'
+import { lintCatalogStyles, previewSlots, templateSlots } from './catalog-style-lint.ts'
 const base = 'packages/catalog/src/'
 const readText = (file) => fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n')
 const templates = Object.fromEntries(
@@ -55,6 +57,17 @@ const startingPresets = Object.fromEntries(
     .map((name) => JSON.parse(readText(base + 'presets/' + name)))
     .map((preset) => [preset.id, preset]),
 )
+const glassLabStyle = readText(base + 'styles/liquid-glass-lab.css')
+const lintMessages = lintCatalogStyles({
+  componentStyles,
+  familyStyles: { ...styles, 'liquid-glass-lab': glassLabStyle },
+  slots: Object.fromEntries(supportedComponentIds.map((id) => [
+    id,
+    templateSlots(id, [templates[id], baseTemplates[id]].filter(Boolean), componentSlots[id]),
+  ])),
+  previewSlots,
+})
+if (lintMessages.length) throw new Error('Catalog style lint failed:\n' + lintMessages.join('\n'))
 writeFileAtomicSync(
   base + 'generated.ts',
   '// Generated from reviewed catalog files.\nexport const catalogData = ' +
@@ -62,7 +75,7 @@ writeFileAtomicSync(
       templates,
       baseTemplates,
       styles,
-      glassLabStyle: readText(base + 'styles/liquid-glass-lab.css'),
+      glassLabStyle,
       componentStyles,
       presets,
       startingPresets,

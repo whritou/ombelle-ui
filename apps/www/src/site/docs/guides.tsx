@@ -32,7 +32,7 @@ export const guideSections: Record<GuideSlug, GuideSection[]> = {
       <Command args="add button card input label" />
       <p>Later additions use the saved project preset. Import the generated components using your configured aliases; the example below assumes <code>@/components/ui</code>.</p>
       <CodeBlock title="example.tsx" code={"import { Button } from '@/components/ui/button'\n\nexport function SaveAction() {\n  return <Button>Save changes</Button>\n}"} />
-      <p>Start your app using its existing dev command. Check light and dark rendering, keyboard focus, and disabled or invalid states. Next.js interactive examples belong in a client component. Each <a href="/components">component reference</a> includes usage and its supported API.</p>
+      <p>Start your app using its existing dev command. Check light and dark rendering, keyboard focus, and disabled or invalid states. The catalog's specimens for each built-in preset are checked automatically in Chromium for focus visibility, target size, forced colors and axe rules; your app still needs its own checks with your content and backdrop. Next.js interactive examples belong in a client component. Each <a href="/components">component reference</a> includes usage and its supported API.</p>
     </> },
     { id: 'next-steps', title: '5. Customize and keep your work', content: <>
       <p>Use <a href="/docs/presets">global presets</a> for shared project defaults and <a href="/docs/component-editor">component recipes</a> for an independently styled component. Generated source remains editable in your repository. Commit the generated files, saved preset, and lock file with your app.</p>

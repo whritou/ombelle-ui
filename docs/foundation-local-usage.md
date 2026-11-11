@@ -53,7 +53,7 @@ The new components (Label, Textarea, Native Select) are installed only after the
 CI runs two independent checkouts with separate setup/cache scopes:
 
 - `pnpm check:foundation:quality` builds packages, runs `pnpm test:unit` and `pnpm test:integration`, generates preview sources needed by typecheck, checks TypeScript, and runs `pnpm audit:workspace`. The integration command honors `OMBELLE_INTEGRATION_WORKERS`.
-- `pnpm check:foundation:consumers` builds packages, generates preview, prepares all consumers, builds preview and consumers, and runs the eighteen browser specs with the existing controlled workers. There is no browser file sharding.
+- `pnpm check:foundation:consumers` builds packages, generates preview, prepares all consumers, builds preview, runs the specimen audit, builds consumers, and runs the eighteen browser specs with the existing controlled workers. There is no browser file sharding.
 - `pnpm check:foundation:aggregate DIRECTORY` rebuilds package reference helpers and validates the two stable core artifact directories inside DIRECTORY. It never prepares consumers, starts browser servers, or imports machine-local consumer root descriptors.
 
 Every push and pull request runs the fast `CI` workflow (`.github/workflows/ci.yml`): build, typecheck and unit tests in one job, and the integration suite split across four parallel shards. Its `verify` job is the required check. The full Foundation workflow below no longer runs on every push; it runs nightly on the default branch and on demand from the Actions tab, and release or evidence claims still require a passing Foundation run.
@@ -191,3 +191,5 @@ pnpm test:base-consumers
 ```
 
 `pnpm test:editions` compares every ported component's computed styles between editions in the preview app.
+
+`pnpm test:specimen-audit` measures every catalog specimen, as installed, on the generated audit pages (`/audit/<family>/<edition>/?mode=light|dark`): overflow, clipping, label spacing, focus visibility, target size, forced colors and axe rules, in 20 configurations. It first runs self-tests that plant each defect and require the check to find it. Run `pnpm build:packages` and `pnpm generate:preview` first, and do not rebuild while it runs: the preview server reloads the pages. Set `OMBELLE_BROWSER_CHANNEL` to use an installed browser. Screenshots go to `.artifacts/specimen-audit/` and the evidence to `.artifacts/specimen-audit.json`; the foundation `consumers` group runs it and rejects incomplete or failing evidence. Liquid glass is experimental: its findings are recorded in the evidence and test report but only page errors fail it. See the [specimen audit evidence](evidence/specimen-audit.md).
