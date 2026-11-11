@@ -59,8 +59,9 @@ describe('Select 0.7.3 variants', () => {
   // Group labels and separators keep each family's existing style, so single Selects do not change.
   it.each(families)('%s styles chips, item icons and the multiple listbox', family => {
     const css = block(family)
-    for (const slot of ['select-chip', 'select-item-icon', 'select-listbox'])
+    for (const slot of ['select-chip', 'select-item-icon'])
       expect(css).toContain(`[data-slot='${slot}']`)
+    expect(css).toContain("[data-slot='select-viewport'][data-select-multiple]")
     expect(css).toMatch(/@media \(forced-colors: active\)/)
   })
 })

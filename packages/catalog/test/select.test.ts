@@ -41,7 +41,6 @@ describe('Select catalog contract', () => {
         'select-scroll-down-button',
         'select-chip',
         'select-item-icon',
-        'select-listbox',
       ],
       dependencies: [
         { name: 'react', version: '19.3.1' },

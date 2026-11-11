@@ -244,7 +244,7 @@ export function SelectContent({
             '--radix-select-content-available-height': 'var(--radix-popover-content-available-height)',
           } as React.CSSProperties}
         >
-          <div role="listbox" id={multi.listboxId} aria-multiselectable="true" data-slot="select-listbox">
+          <div role="listbox" id={multi.listboxId} aria-multiselectable="true" data-slot="select-viewport" data-select-multiple="">
             {children}
           </div>
         </PopoverPrimitive.Content>

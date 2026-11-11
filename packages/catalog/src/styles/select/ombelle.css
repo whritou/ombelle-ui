@@ -254,7 +254,7 @@
   inline-size: 1rem;
   block-size: 1rem;
 }
-[data-slot='select-listbox'] {
+[data-slot='select-viewport'][data-select-multiple] {
   display: flex;
   flex-direction: column;
   max-block-size: min(20rem, var(--radix-select-content-available-height, 20rem));

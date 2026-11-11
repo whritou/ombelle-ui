@@ -33,7 +33,7 @@ import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, Comma
 import { Calendar, DatePicker, toIsoDate } from '@/components/ui/calendar'
 import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from '@/components/ui/toast'
+import { Toast, ToastAction, ToastClose, ToastDescription, ToastPromise, ToastProvider, ToastTitle, ToastViewport } from '@/components/ui/toast'
 
 // Ported components rendered identically in both editions; the parity test
 // compares computed styles of every [data-slot] element per section.
@@ -183,6 +183,49 @@ function VariantsMoreSelect() {
   )
 }
 
+function VariantsMoreToasts() {
+  const [short, setShort] = React.useState(false)
+  const [action, setAction] = React.useState(false)
+  const [stack, setStack] = React.useState(false)
+  const [promise, setPromise] = React.useState<Promise<string> | null>(null)
+  const [pending, setPending] = React.useState(false)
+  const start = (outcome: 'resolve' | 'reject') => {
+    const run = new Promise<string>((resolve, reject) => {
+      ;(window as unknown as Record<string, () => void>).__vmSettle = () => outcome === 'resolve' ? resolve('Ombelle') : reject(new Error('offline'))
+    })
+    setPromise(run)
+  }
+  return (
+    <ToastProvider>
+      <div data-testid="vm-toasts">
+        <button type="button" onClick={() => setShort(true)}>Show short toast</button>
+        <button type="button" onClick={() => setAction(true)}>Show action toast</button>
+        <button type="button" onClick={() => setStack(true)}>Show three toasts</button>
+        <button type="button" onClick={() => start('resolve')}>Publish preset</button>
+        <button type="button" onClick={() => start('reject')}>Publish offline</button>
+        <button type="button" onClick={() => { start('resolve'); setPending(true) }}>Publish and leave</button>
+        <button type="button" onClick={() => setPending(false)}>Leave</button>
+      </div>
+      <Toast open={short} onOpenChange={setShort} data-testid="vm-toast-short">
+        <ToastTitle>Preset saved</ToastTitle>
+        <ToastClose />
+      </Toast>
+      <Toast open={action} onOpenChange={setAction} data-testid="vm-toast-action">
+        <ToastTitle>Project archived</ToastTitle>
+        <ToastAction altText="Undo archiving">Undo</ToastAction>
+      </Toast>
+      {['First', 'Second', 'Third'].map(name => (
+        <Toast key={name} open={stack} onOpenChange={setStack} duration={Infinity} data-testid="vm-toast-stacked">
+          <ToastTitle>{name} notification</ToastTitle>
+        </Toast>
+      ))}
+      {promise && !pending ? <ToastPromise key={String(promise)} promise={promise} loading="Publishing preset…" success={(name: string) => `${name} published`} error="Publishing failed" /> : null}
+      {promise && pending ? <ToastPromise promise={promise} loading="Publishing preset…" success="Published" error="Failed" /> : null}
+      <ToastViewport stack data-testid="vm-toast-viewport" />
+    </ToastProvider>
+  )
+}
+
 // Browser coverage for the 0.7.3 batch 6b and 6c variants; the same in both editions.
 function VariantsMoreScenario() {
   const [page, setPage] = React.useState(1)
@@ -219,6 +262,7 @@ function VariantsMoreScenario() {
       <VariantsMoreTable />
       <VariantsMoreFields />
       <VariantsMoreSelect />
+      <VariantsMoreToasts />
     </section>
   )
 }

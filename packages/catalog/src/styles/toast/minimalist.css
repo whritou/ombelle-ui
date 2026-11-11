@@ -134,3 +134,65 @@
   [data-slot='toast'][data-state='open'] { animation: none; }
   [data-slot='toast'][data-swipe='cancel'] { transition: none; }
 }
+/* 0.7.3 variants */
+[data-slot='toast-viewport'][data-stack] {
+  display: grid;
+  gap: 0;
+  padding-block-end: 1.5rem;
+}
+[data-slot='toast']:is([data-stack] > *) {
+  grid-area: 1 / 1;
+  align-self: end;
+}
+[data-slot='toast']:is([data-stack] > *):nth-last-child(2) {
+  transform: translateY(0.5rem) scale(0.96);
+}
+[data-slot='toast']:is([data-stack] > *):nth-last-child(3) {
+  transform: translateY(1rem) scale(0.92);
+}
+[data-slot='toast']:is([data-stack] > *):nth-last-child(n + 4) {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Spreading moves only the older toasts, upwards: the newest stays under the pointer, so hovering it
+   never makes it leave and resume its timer. */
+[data-slot='toast']:is([data-stack]:is(:hover, :focus-within, [data-expanded]) > *):nth-last-child(2) {
+  transform: translateY(calc(-100% - 0.75rem));
+}
+[data-slot='toast']:is([data-stack]:is(:hover, :focus-within, [data-expanded]) > *):nth-last-child(3) {
+  transform: translateY(calc(-200% - 1.5rem));
+}
+[data-slot='toast']:is([data-stack]:is(:hover, :focus-within, [data-expanded]) > *):nth-last-child(n + 4) {
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-slot='toast-spinner'] {
+  display: inline-block;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='toast']:is([data-stack] > *) {
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+  [data-slot='toast-spinner'] {
+    animation: toast-spinner-turn 0.8s linear infinite;
+  }
+}
+@keyframes toast-spinner-turn {
+  to {
+    rotate: 1turn;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='toast-spinner'] {
+    border-color: CanvasText;
+    border-inline-end-color: transparent;
+  }
+}
+/* end 0.7.3 variants */

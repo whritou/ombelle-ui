@@ -171,3 +171,105 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+// Toast timers run on Playwright's clock, installed before the page loads.
+const openWithClock = async (page: Page, edition: string) => {
+  await page.clock.install()
+  await open(page, edition)
+}
+const toastNamed = (page: Page, title: string) => page.locator('[data-slot$="toast"]').filter({ hasText: title })
+// The installed clock also fakes animation frames, which hover()'s stability check waits on: move the pointer instead.
+const pointAt = async (page: Page, target: ReturnType<Page['locator']>) => {
+  const box = (await target.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+}
+// Elements that would announce the text: live regions that are not off, and status or alert roles.
+const announcers = (page: Page, text: string) => page.evaluate(text => [...document.querySelectorAll('[aria-live], [role=status], [role=alert], [role=log]')]
+  .filter(element => element.getAttribute('aria-live') !== 'off' && (element.textContent ?? '').includes(text))
+  // Count the outermost announcer only; a nested one is part of the same announcement.
+  .filter((element, _, list) => !list.some(other => other !== element && other.contains(element))).length, text)
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} toast`, () => {
+    test('a short toast stays 6 seconds, and a toast with an action stays until dismissed', async ({ page }) => {
+      await openWithClock(page, edition)
+      const toasts = page.getByTestId('vm-toasts')
+      await toasts.getByRole('button', { name: 'Show short toast' }).click()
+      await expect(toastNamed(page, 'Preset saved')).toBeVisible()
+      await page.clock.runFor(5500)
+      await expect(toastNamed(page, 'Preset saved')).toBeVisible()
+      await page.clock.runFor(1500)
+      await expect(toastNamed(page, 'Preset saved')).toHaveCount(0)
+      await toasts.getByRole('button', { name: 'Show action toast' }).click()
+      await page.clock.runFor(30000)
+      await expect(toastNamed(page, 'Project archived')).toBeVisible()
+    })
+
+    test('a toast pauses while hovered and while focused', async ({ page }) => {
+      await openWithClock(page, edition)
+      const toasts = page.getByTestId('vm-toasts')
+      await toasts.getByRole('button', { name: 'Show short toast' }).click()
+      const toast = toastNamed(page, 'Preset saved')
+      await pointAt(page, toast)
+      await page.clock.runFor(8000)
+      await expect(toast, 'still open while hovered').toBeVisible()
+      await page.mouse.move(0, 0)
+      await page.clock.runFor(7000)
+      await expect(toast).toHaveCount(0)
+      await toasts.getByRole('button', { name: 'Show short toast' }).click()
+      await page.clock.runFor(100)
+      await expect(toastNamed(page, 'Preset saved')).toBeVisible()
+      // A keyboard user's focus: Base UI pauses for focus-visible only, as keyboard focus is.
+      await page.keyboard.press('Shift')
+      await toastNamed(page, 'Preset saved').locator('button').first().focus()
+      await page.clock.runFor(8000)
+      await expect(toastNamed(page, 'Preset saved'), 'still open while focused').toBeVisible()
+    })
+
+    test('a toast is announced by exactly one live region', async ({ page }) => {
+      await openWithClock(page, edition)
+      await page.getByTestId('vm-toasts').getByRole('button', { name: 'Show short toast' }).click()
+      await expect(toastNamed(page, 'Preset saved')).toBeVisible()
+      await page.clock.runFor(100)
+      expect(await announcers(page, 'Preset saved')).toBe(1)
+    })
+
+    test('ToastPromise follows the task to success or to an error, and stays open while pending', async ({ page }) => {
+      const errors: string[] = []
+      page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+      await openWithClock(page, edition)
+      const toasts = page.getByTestId('vm-toasts')
+      await toasts.getByRole('button', { name: 'Publish preset' }).click()
+      await expect(toastNamed(page, 'Publishing preset…')).toBeVisible()
+      await expect(toastNamed(page, 'Publishing preset…').locator('[data-slot$="toast-spinner"]')).toHaveCount(1)
+      await page.clock.runFor(20000)
+      await expect(toastNamed(page, 'Publishing preset…')).toBeVisible()
+      await page.evaluate(() => (window as unknown as { __vmSettle: () => void }).__vmSettle())
+      await expect(toastNamed(page, 'Ombelle published')).toHaveAttribute('data-variant', 'success')
+      await toasts.getByRole('button', { name: 'Publish offline' }).click()
+      await page.evaluate(() => (window as unknown as { __vmSettle: () => void }).__vmSettle())
+      await expect(toastNamed(page, 'Publishing failed')).toHaveAttribute('data-variant', 'destructive')
+      // Settling after the component has gone logs nothing.
+      await toasts.getByRole('button', { name: 'Publish and leave' }).click()
+      await page.getByRole('button', { name: 'Leave', exact: true }).click()
+      await page.evaluate(() => (window as unknown as { __vmSettle: () => void }).__vmSettle())
+      await page.clock.runFor(1000)
+      expect(errors).toEqual([])
+    })
+
+    test('stacked toasts overlap, and spread out on hover', async ({ page }) => {
+      await openWithClock(page, edition)
+      await page.getByTestId('vm-toasts').getByRole('button', { name: 'Show three toasts' }).click()
+      const viewport = page.getByTestId('vm-toast-viewport')
+      await expect(viewport).toHaveAttribute('data-stack', '')
+      const tops = () => viewport.locator('[data-slot$="toast"]').filter({ hasText: 'notification' }).evaluateAll(list => list.map(item => Math.round(item.getBoundingClientRect().top)))
+      await expect.poll(async () => (await tops()).length).toBe(3)
+      const collapsed = await tops()
+      expect(Math.max(...collapsed) - Math.min(...collapsed)).toBeLessThan(24)
+      await pointAt(page, viewport.locator('[data-slot$="toast"]').filter({ hasText: 'Third notification' }))
+      await page.clock.runFor(500)
+      const spread = await tops()
+      expect(Math.max(...spread) - Math.min(...spread)).toBeGreaterThan(60)
+    })
+  })
+}
