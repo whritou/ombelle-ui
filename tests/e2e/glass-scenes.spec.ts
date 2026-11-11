@@ -3,14 +3,14 @@ import fs from 'node:fs/promises'
 import { presetBackdrops } from '../../apps/www/src/preset-editor/preview-protocol.js'
 import { glassSceneRanges } from '../../apps/www/src/site/glass-backdrops.js'
 
-// Measures the channel range of every glass preview scene, the input of the editors'
+// Measures the luminance range of every glass preview scene, as grey channel values: the input of the editors'
 // contrast-aware backdrop pick. By default it checks the committed table; with
 // OMBELLE_WRITE_GLASS_SCENES=1 (pnpm measure:glass-scenes) it rewrites it.
 const write = process.env.OMBELLE_WRITE_GLASS_SCENES === '1'
 const tolerance = 0.02
 const columns = 32, rows = 20
 
-test('every glass scene matches its measured channel range', async ({ page }) => {
+test('every glass scene matches its measured luminance range', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 })
   const measured: Record<string, Record<string, { low: number; high: number }>> = {}
   for (const scene of presetBackdrops) {
@@ -34,10 +34,12 @@ test('every glass scene matches its measured channel range', async ({ page }) =>
             const x = Math.round(canvas.width * (0.1 + 0.8 * column / (columns - 1)))
             const y = Math.round(canvas.height * (0.1 + 0.8 * row / (rows - 1)))
             const [r, g, b] = context.getImageData(Math.min(x, canvas.width - 1), Math.min(y, canvas.height - 1), 1, 1).data
-            for (const channel of [r!, g!, b!]) {
-              low = Math.min(low, channel / 255)
-              high = Math.max(high, channel / 255)
-            }
+            // The grey whose luminance matches the pixel: a saturated dark pixel stays dark.
+            const linear = (c: number) => { const v = c / 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
+            const luminance = 0.2126 * linear(r!) + 0.7152 * linear(g!) + 0.0722 * linear(b!)
+            const grey = luminance <= 0.0031308 ? 12.92 * luminance : 1.055 * luminance ** (1 / 2.4) - 0.055
+            low = Math.min(low, grey)
+            high = Math.max(high, grey)
           }
         return { low: Math.round(low * 1e4) / 1e4, high: Math.round(high * 1e4) / 1e4 }
       }, { base64: image.toString('base64'), columns, rows })

@@ -14,7 +14,7 @@ export function glassPresetOptions(current?: StartingPresetId) {
     .map((value) => ({ value, label: startingPresets[value].name }))
 }
 
-type GlassPreviewMode = 'light' | 'dark'
+export type GlassPreviewMode = 'light' | 'dark'
 
 /**
  * Each starting preset's default preview backdrop per mode, picked so its text

@@ -129,7 +129,7 @@
   - `export function glassSceneRatios(data: Preset, mode: GlassPreviewMode): Record<PresetBackdrop, number>`, rounded to 2 decimals.
   - `export function pickGlassScene(data: Preset, mode: GlassPreviewMode, startingPresetId?: StartingPresetId): PresetBackdrop`
   - `export type LabInk = 'light' | 'dark'`
-  - `export function labInkFor(data: Preset, mode: GlassPreviewMode, scene: PresetBackdrop, startingPresetId?: StartingPresetId): LabInk | null`
+  - `export function labInkFor(data: Preset, mode: GlassPreviewMode, scene: PresetBackdrop): LabInk | null`. Revised by the user's decision in the ledger: an unedited lab preset over its own scene for the mode, no measurement.
   - `export const labStartingPresets: readonly StartingPresetId[]`, which are `defaultGlassPresetId`, `builtin-liquid-glass-givre`, `-fume` and `-relief`.
 
 - [ ] **Step 1: Write the failing tests**

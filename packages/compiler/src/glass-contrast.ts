@@ -450,13 +450,14 @@ function nested(resolved: Resolved[], opacity: number) {
   return result
 }
 
-/** The channel range of one preview scene: the lowest and highest gamma-encoded sRGB channel, 0 to 1. */
+/** One preview scene's range: its darkest and brightest pixels as gamma-encoded grey channel values, 0 to 1. */
 export type GlassSceneRange = { low: number; high: number }
 
 /**
  * The worst ratio of the preset's glass text pairs in one mode, over a scene whose
  * channels stay inside range. The scene enters the backdrop filter in place of the
- * 0 to 1 range glassBackdrop assumes. Translucent text and text whose luminance falls
+ * 0 to 1 range glassBackdrop assumes. The text is rated without its outline plate,
+ * which reads on any scene. Translucent text and text whose luminance falls
  * inside the painted surface's range rate 1, since some pixel of the scene matches them.
  */
 export function glassContrastOnScene(
@@ -469,7 +470,9 @@ export function glassContrastOnScene(
   const ratios = resolve(data, glassContrastPairs, range)
     .filter((r) => r.mode === mode)
     .map((r) => {
-      const painted = filtered(r, opacity)
+      // Rated without the outline plate: the plate reads on any scene, and the lab
+      // ink, which this rating gates, is the text with its plate removed.
+      const painted = filtered({ ...r, plate: 0 }, opacity)
       return !opaqueText(r) || painted.inside ? 1 : Math.min(painted.overDarkest, painted.overBrightest)
     })
   return round(Math.min(...ratios))

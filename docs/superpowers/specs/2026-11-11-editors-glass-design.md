@@ -21,7 +21,7 @@ Decisions taken in brainstorming (11 November 2026):
 
 - **Split:** two batches, two PRs; 7a first.
 - **Backdrop pick:** the editors both choose a default scene from measured contrast and show each scene's ratio in the backdrop menu. A manual choice still wins.
-- **Lab ink:** in both modes, the lab ink replaces the plate whenever the measured worst contrast on the chosen scene reaches 4.5:1. Otherwise the plate comes back.
+- **Lab ink (revised during Task 3, after a visual comparison):** the measured rule was dropped. Without its plate, no lab preset's text reaches 4.5:1 on any dark scene, and Fumé and Relief would lose the light ink they have today. The user chose the current rule, extended to dark mode: an unedited lab preset over its own scene for that mode. The measured ratios drive only the backdrop menu and the automatic scene.
 - **Reduced transparency:** a preview-only mirror. The preview copies its own `prefers-reduced-transparency` rules under an attribute, and the toggle sets that attribute. Installed CSS does not change.
 - **Toggle placement:** the preset, component and Button editors, beside "Preview mode", only when the family is liquid glass.
 - **Scene data:** a measured table, checked by an end-to-end test that re-measures the scenes. It is not sampled live in the preview, and not declared by hand.
@@ -33,22 +33,23 @@ Decisions taken in brainstorming (11 November 2026):
 `apps/www/src/site/glass-backdrops.ts` (new) exports:
 
 - `glassSceneRanges: Record<PresetBackdrop, Record<'light' | 'dark', { low: number; high: number }>>`.
-- `low` and `high` are the lowest and highest gamma-encoded sRGB channel values, from 0 to 1, over the sampled pixels. Channels, not luminance, because the backdrop filter works per channel; `glassBackdrop` in `packages/compiler/src/glass-contrast.ts` documents this.
+- `low` and `high` are the darkest and brightest sampled pixels, each as the gamma-encoded grey of the same relative luminance, from 0 to 1. The backdrop filter runs on that grey. A per-channel range was tried first: one high channel of a saturated dark pixel made every dark scene rate near 1:1.
 - Kit uses the stylesheet's gradient, so it is measured like the others.
 
-`scripts/measure-glass-scenes.ts` (new) generates the table:
+`tests/e2e/glass-scenes.spec.ts` (new) checks the table, and rewrites it when `OMBELLE_WRITE_GLASS_SCENES=1`:
 
 - It renders each scene with `GlassBackdropArt`, and Kit with its CSS, in Playwright's bundled Chromium at 1280 × 800, in both modes.
 - It reads the pixels of a 32 × 20 grid inside the area where the preview's surfaces sit, the central 80 % of the viewport.
 - It writes `glass-backdrops.ts` with values rounded to four decimals.
-- `pnpm measure:glass-scenes` runs it. It needs the preview build, like the specimen audit.
+- `pnpm measure:glass-scenes` runs it in write mode. It needs the preview build, like the specimen audit.
 
 ### Contrast on a scene
 
 In `packages/compiler/src/glass-contrast.ts`:
 
 - `glassContrastOnScene(data: Preset, mode: 'light' | 'dark', range: { low: number; high: number }): number` returns the worst ratio of the preset's glass text pairs (`glassContrastPairs`) for that mode.
-- It reuses the existing resolution and filtering. The scene's channel range enters the backdrop filter transfer in place of the full 0 to 1 range that `glassBackdrop` assumes. The text is then composited over the glass surface, over the two ends of the filtered range.
+- It rates the text without its outline plate. The plate reads on any scene, so with it every scene rates the same.
+- It reuses the existing resolution and filtering. The scene's range enters the backdrop filter transfer in place of the full 0 to 1 range that `glassBackdrop` assumes. The text is then composited over the glass surface, over the two ends of the filtered range.
 - With `design.transparency: 'reduced'`, the surface is opaque, the scene drops out, and the function returns the opaque ratio.
 - The existing `glassContrastReport` output is unchanged. The stable hashes and the compiler's emitted CSS are unaffected.
 
@@ -57,10 +58,10 @@ In `packages/compiler/src/glass-contrast.ts`:
 In `apps/www/src/site/glass-backdrops.ts`:
 
 - `glassSceneRatios(data: Preset, mode): Record<PresetBackdrop, number>` gives the ratio of every scene.
-- `pickGlassScene(data: Preset, mode, startingPresetId?: StartingPresetId): PresetBackdrop` returns the scene with the highest worst ratio.
-  - Ratios are compared at two decimals.
-  - On a tie, the scene from `glassPresetBackdrop(startingPresetId, mode)` wins. Then the order of `glassBackdropOptions` decides.
-  - For every built-in glass starting preset, unedited, the pick must equal today's table in both modes; a unit test pins it. Where the measurement disagrees with the table, the table entry is not changed silently: the plan records a ruling and the evidence explains it.
+- `pickGlassScene(data: Preset, mode, startingPresetId?: StartingPresetId): PresetBackdrop`:
+  - The starting preset's own scene, `glassPresetBackdrop(startingPresetId, mode)`, stays while the preset's ratio there is at least `min(4.5, the unedited starting preset's ratio there)`. An edit moves the scene only when it makes the text read worse than the curated choice, below 4.5:1.
+  - Otherwise, and without a starting preset, it returns the scene with the highest ratio, compared at two decimals, ties in the order of `glassBackdropOptions`.
+  - Unedited built-in starting presets therefore keep today's table in both modes; a unit test pins it.
 
 ## The backdrop pick in the editors
 
@@ -83,10 +84,10 @@ In `apps/www/src/site/glass-backdrops.ts`:
 
 ## Dark-mode lab ink
 
-`labInkFor(data: Preset, mode, scene, startingPresetId?): 'light' | 'dark' | null` replaces `hasLabPreviewInk`:
+`labInkFor(data: Preset, mode, scene): 'light' | 'dark' | null` replaces `hasLabPreviewInk`, in `apps/www/src/site/glass-backdrops.ts`:
 
-- **Which presets:** only presets whose starting preset is a lab preset (`defaultGlassPresetId`, Givré, Fumé, Relief), edited or not. The lab paint in `liquid-glass-lab.css` only applies to those.
-- **When it is on:** if `glassContrastOnScene` is 4.5:1 or more on the scene, it returns the mode. Otherwise it returns `null`, and the text plate stays.
+- **Which presets:** an unedited lab preset (`defaultGlassPresetId`, Givré, Fumé, Relief), detected by comparing its design values and colours with the catalog, as `hasLabPreviewInk` did.
+- **When it is on:** when the scene is that preset's own scene for the mode, `glassPresetBackdrop(id, mode)`; it returns the mode. Otherwise `null`, and the text plate stays. No measurement.
 - **Reduced transparency:** it returns `null`. Opaque surfaces have no glow to replace.
 
 `setGlassBackdrop(root, scene, labInk)` sets `data-glass-lab-ink="light"` or `"dark"`, or removes it.

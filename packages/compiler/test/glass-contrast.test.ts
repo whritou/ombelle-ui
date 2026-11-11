@@ -431,7 +431,8 @@ describe('glassContrastOnScene', () => {
   })
 
   it('full range equals the worst filtered pair of the report', () => {
-    const preset = catalog.startingPresets['builtin-liquid-glass-cristal']
+    // The family base has no material, so its report carries no text plate either.
+    const preset = catalog.startingPresets['builtin-liquid-glass']
     for (const mode of ['light', 'dark'] as const) {
       const pairs = glassContrastReport(preset).pairs.filter((pair) => pair.mode === mode)
       const worst = Math.min(...pairs.map((pair) => Math.min(pair.ratioOverBlack, pair.ratioOverWhite)))
@@ -444,6 +445,13 @@ describe('glassContrastOnScene', () => {
       for (const mode of ['light', 'dark'] as const)
         expect(glassContrastOnScene(catalog.startingPresets[id], mode, { low: 0.6, high: 0.9 }), id + mode)
           .toBeGreaterThanOrEqual(glassContrastOnScene(catalog.startingPresets[id], mode, full))
+  })
+
+  it('rates the text without its outline plate', () => {
+    // The plate is what the lab ink removes, so the scene must count for material presets too.
+    const preset = catalog.startingPresets['builtin-liquid-glass-cristal']
+    expect(glassContrastOnScene(preset, 'light', { low: 0.6, high: 0.95 }))
+      .not.toBe(glassContrastOnScene(preset, 'light', { low: 0, high: 0.3 }))
   })
 
   it('reduced transparency ignores the range', () => {
