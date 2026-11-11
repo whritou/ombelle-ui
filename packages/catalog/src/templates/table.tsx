@@ -115,7 +115,7 @@ export function TableHead({
   return (
     <th
       scope={scope}
-      aria-sort={onSort && sort && sort !== 'none' ? sort : undefined}
+      aria-sort={sort && sort !== 'none' ? sort : undefined}
       {...props}
       data-slot="table-head"
       data-numeric={numeric ? '' : undefined}

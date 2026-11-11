@@ -1,9 +1,9 @@
 'use client'
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon, InputGroupText, InputGroupButton } from '@/components/ui/input-group'
+import { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon, InputGroupText, InputGroupButton, InputGroupClear, InputGroupCount } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
+import { Pagination, PaginationCompact, PaginationContent, PaginationItem, PaginationLink, PaginationPageSize, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
 import { Badge, BadgeDot } from '@/components/ui/badge'
@@ -80,7 +80,7 @@ import {
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch, SwitchThumb } from '@/components/ui/switch'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsCount, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   TooltipProvider,
   Tooltip,
@@ -187,7 +187,9 @@ export function PresetGallery({
           <label htmlFor="preset-group-disabled">Managed domain</label>
           <InputGroup><InputGroupInput id="preset-group-disabled" defaultValue="acme.app" disabled /></InputGroup>
           <label htmlFor="preset-group-notes">Notes</label>
-          <InputGroup><InputGroupTextarea id="preset-group-notes" placeholder="Add a note" /><InputGroupAddon align="block-end"><InputGroupText>Optional</InputGroupText></InputGroupAddon></InputGroup>
+          <InputGroup><InputGroupTextarea id="preset-group-notes" placeholder="Add a note" aria-describedby="preset-group-count" /><InputGroupAddon align="block-end"><InputGroupText>Optional</InputGroupText><InputGroupCount id="preset-group-count" value={0} max={160} /></InputGroupAddon></InputGroup>
+          <label htmlFor="preset-group-search">Search</label>
+          <InputGroup><InputGroupInput id="preset-group-search" placeholder="Search" defaultValue="glass toast" /><InputGroupAddon align="inline-end"><InputGroupClear label="Clear search" /></InputGroupAddon></InputGroup>
         </div>
       </section>)}
       {gate('breadcrumb', 'Breadcrumb', <section aria-label="Breadcrumb" data-component="breadcrumb">
@@ -206,6 +208,8 @@ export function PresetGallery({
           <PaginationItem><PaginationEllipsis /></PaginationItem>
           <PaginationItem><PaginationNext href="#page-2" /></PaginationItem>
         </PaginationContent></Pagination>
+        <Pagination aria-label="Compact pages"><PaginationCompact page={2} pageCount={12} previousHref="#page-1" nextHref="#page-3" /></Pagination>
+        <PaginationPageSize value={25} range="1–25 of 290" />
       </section>)}
       {gate('sheet', 'Sheet', <section aria-label="Sheet" data-component="sheet">
         <h2>Sheet</h2><Sheet><SheetTrigger asChild><Button variant="outline">Open details</Button></SheetTrigger><SheetContent>
@@ -481,6 +485,8 @@ export function PresetGallery({
           'Input',
           <div data-component="input">
             <Input id="preset-project-name" defaultValue="Ombelle workspace" />
+            <Input size="sm" aria-label="Small input" placeholder="Small" />
+            <Input size="lg" aria-label="Large input" placeholder="Large" />
             <Label htmlFor="preset-email">Email</Label>
             <Input
               id="preset-email"
@@ -594,7 +600,7 @@ export function PresetGallery({
         <Tabs defaultValue="overview">
           <TabsList aria-label="Project sections">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="activity">Activity<TabsCount>3</TabsCount></TabsTrigger>
             <TabsTrigger value="settings" disabled>
               Settings
             </TabsTrigger>

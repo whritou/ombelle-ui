@@ -40,7 +40,11 @@ describe('Input 0.7.3 variants', () => {
   })
 
   it.each(families)('%s sizes inputs and textareas, hides Clear on an empty field, and colours an over count', family => {
-    const css = block(`${family}.css`).replaceAll('"', "'")
+    const own = readFileSync(new URL(`../src/styles/${family}.css`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+    // The family stylesheet holds batch 6a's Button block and this Input block side by side.
+    expect(own).toContain('/* 0.7.3 variants */')
+    expect(own).toContain('[data-slot="button"][data-variant="link-destructive"]')
+    const css = own.slice(own.indexOf('/* 0.7.3 variants: input */')).replaceAll('"', "'")
     expect(css).toMatch(/\[data-slot='input'\]\[data-size='sm'\][^{]*\{[^}]*min-height: 2rem/)
     expect(css).toMatch(/\[data-slot='input'\]\[data-size='lg'\][^{]*\{[^}]*min-height: 3rem/)
     expect(block(`textarea/${family}.css`)).toMatch(/\[data-slot='textarea'\]\[data-size='sm'\]/)

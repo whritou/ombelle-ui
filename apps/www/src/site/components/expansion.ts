@@ -99,21 +99,21 @@ export const expansionDocs = {
   },
   toast: {
     name: 'Toast', description: 'Transient feedback with optional actions, pausing and keyboard dismissal.',
-    api: 'ToastProvider (duration), ToastViewport, Toast (variant), ToastTitle, ToastDescription, ToastAction (altText), ToastClose',
-    states: 'Open, timed dismissal, paused, swipe, focus', basis: 'Reviewed Toast primitive; Base UI uses its native toast manager', client: true,
+    api: 'ToastProvider (duration), ToastViewport (stack), Toast (variant, duration), ToastTitle, ToastDescription, ToastAction (altText), ToastClose, ToastPromise (promise, loading, success, error), toastDuration',
+    states: 'Open, timed dismissal by content length, kept open with an action, paused on hover and focus, pending promise, stacked, swipe, focus', basis: 'Reviewed Toast primitive; Base UI uses its native toast manager', client: true,
     usage: expansionExamples.toast, minimumCli: '0.7.2',
     note: 'The Base UI edition uses useToastManager and a native toast object; see the exported example for that edition.',
   },
   'input-group': {
     name: 'Input Group', description: 'Combines a native input or textarea with text, icons and action buttons.',
-    api: 'InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon (align), InputGroupText, InputGroupButton',
+    api: 'InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon (align), InputGroupText, InputGroupButton, InputGroupClear (label, onClear), InputGroupCount (value, max)',
     states: 'Focus within, invalid, disabled, multiline', basis: 'Native input, textarea and button in a group', client: false,
     usage: expansionExamples['input-group'], minimumCli: '0.7.2',
   },
   sheet: {
     name: 'Sheet', description: 'A modal side panel for navigation, filters and project details.',
-    api: 'Sheet, SheetTrigger, SheetClose, SheetContent (side, size), SheetHeader, SheetFooter, SheetTitle, SheetDescription',
-    states: 'Open, closed, scroll, focus return, RTL', basis: 'Reviewed Dialog primitive with logical edge positioning', client: true,
+    api: 'Sheet, SheetTrigger, SheetClose, SheetContent (side, size, resizable, defaultSize, minSize, maxSize, onSizeChange), SheetHandle, SheetHeader, SheetFooter, SheetTitle, SheetDescription',
+    states: 'Open, closed, scroll, focus return, RTL, bottom drawer resized or closed by its handle, side panel resized', basis: 'Reviewed Dialog primitive with logical edge positioning', client: true,
     usage: expansionExamples.sheet, minimumCli: '0.7.2',
   },
   'alert-dialog': {
@@ -130,7 +130,7 @@ export const expansionDocs = {
   },
   pagination: {
     name: 'Pagination', description: 'Links between pages of results with active and disabled states.',
-    api: 'Pagination, PaginationContent, PaginationItem, PaginationLink (isActive, disabled), PaginationPrevious, PaginationNext, PaginationEllipsis',
+    api: 'Pagination, PaginationContent, PaginationItem, PaginationLink (isActive, disabled), PaginationPrevious, PaginationNext, PaginationEllipsis, PaginationCompact (page, pageCount), PaginationPageSize (value, options, onValueChange, range)',
     states: 'Default, active, disabled, focus', basis: 'Native nav, list and anchor links', client: false,
     usage: expansionExamples.pagination, minimumCli: '0.7.2',
   },

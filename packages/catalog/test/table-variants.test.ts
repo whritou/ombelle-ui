@@ -22,7 +22,9 @@ describe('Table 0.7.3 variants', () => {
   it('leaves aria-sort off for none and for a head that is not sortable', () => {
     expect(head({ sort: 'none', onSort: vi.fn() })).not.toContain('aria-sort')
     expect(head({})).not.toContain('data-slot="table-sort"')
+    // Without onSort, a sorted column states its order but has no button.
     expect(head({ sort: 'ascending' })).not.toContain('data-slot="table-sort"')
+    expect(head({ sort: 'ascending' })).toContain('aria-sort="ascending"')
   })
 
   it('names an empty actions head with hidden text and marks action cells', () => {

@@ -129,7 +129,7 @@ export function SelectValue({
     const chosen = multi.options.filter(option => multi.values.includes(option.value))
     return (
       <span data-slot="select-value">
-        {chosen.length ? chosen.map(option => <span key={option.value} data-slot="select-chip">{option.label}</span>) : placeholder}
+        {chosen.length ? chosen.map(option => <span key={option.value} data-slot="select-chip" data-select-chip="">{option.label}</span>) : placeholder}
       </span>
     )
   }

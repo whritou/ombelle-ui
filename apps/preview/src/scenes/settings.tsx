@@ -35,6 +35,7 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
+  InputGroupCount,
   InputGroupInput,
 } from '../generated/preset-gallery/components/ui/input-group'
 import { Label } from '../generated/preset-gallery/components/ui/label'
@@ -70,6 +71,7 @@ import {
   ToastClose,
   ToastDescription,
   ToastProvider,
+  ToastPromise,
   ToastTitle,
   ToastViewport,
 } from '../generated/preset-gallery/components/ui/toast'
@@ -116,6 +118,8 @@ export function SettingsScene(props: SceneProps) {
   const [away, setAway] = React.useState<{ from?: Date; to?: Date } | undefined>({ from: new Date(2026, 10, 12), to: new Date(2026, 10, 18) })
   const [ran, setRan] = React.useState('')
   const [renewal, setRenewal] = React.useState(true)
+  const [bio, setBio] = React.useState('Designing systems that stay calm under change.')
+  const [publishing, setPublishing] = React.useState<Promise<string> | null>(null)
   const planHeading = React.useRef<HTMLHeadingElement>(null)
   React.useEffect(() => {
     const toggle = (event: KeyboardEvent) => {
@@ -215,9 +219,9 @@ export function SettingsScene(props: SceneProps) {
                     'Select',
                     <div className="scene-field">
                       <Label id="scene-role-label">Role</Label>
-                      <Select defaultValue="designer">
+                      <Select multiple name="roles" defaultValue={['designer']}>
                         <SelectTrigger aria-labelledby="scene-role-label">
-                          <SelectValue />
+                          <SelectValue placeholder="Choose roles" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="designer">Designer</SelectItem>
@@ -246,7 +250,8 @@ export function SettingsScene(props: SceneProps) {
                     'Textarea',
                     <div className="scene-field">
                       <Label htmlFor="scene-bio">Bio</Label>
-                      <Textarea id="scene-bio" defaultValue="Designing systems that stay calm under change." />
+                      <Textarea id="scene-bio" aria-describedby="scene-bio-count" value={bio} onChange={(event) => setBio(event.target.value)} />
+                      <InputGroupCount id="scene-bio-count" value={bio.length} max={160} />
                     </div>,
                   )}
                 </CardContent>
@@ -556,6 +561,10 @@ export function SettingsScene(props: SceneProps) {
       'toast',
       'Toast',
       <>
+        <button type="button" className="scene-link" onClick={() => setPublishing(new Promise((resolve) => setTimeout(() => resolve('Ombelle'), 1500)))}>
+          Publish preset
+        </button>
+        {publishing ? <ToastPromise promise={publishing} loading="Publishing preset…" success={(name: string) => `${name} published`} error="Publishing failed" /> : null}
         <Toast open={saved} onOpenChange={setSaved} variant="success">
           <ToastTitle>Profile saved</ToastTitle>
           <ToastDescription>Your team sees the new details.</ToastDescription>

@@ -149,11 +149,22 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('ContextMenu', {}, node('ContextMenuTrigger', { variant: 'zone', tabIndex: 0, 'aria-label': content.zoneText }, content.zoneText),
         node('ContextMenuContent', {}, ...entries))
     }
-    case 'toast':
-      return node('ToastProvider', { duration: props.duration }, node('Toast', { variant: props.variant, defaultOpen: true },
-        node('ToastTitle', {}, content.title), node('ToastDescription', {}, content.description),
+    case 'toast': {
+      const toast = (title: string, extra: Props = {}) => node('Toast', { variant: props.variant, defaultOpen: true, ...extra },
+        node('ToastTitle', {}, title), node('ToastDescription', {}, content.description),
         ...(content.action ? [node('ToastAction', { altText: content.actionAltText }, content.action)] : []),
-        node('ToastClose', { 'aria-label': content.close })), node('ToastViewport'))
+        node('ToastClose', { 'aria-label': content.close }))
+      // Specimens hold no promise: the promise mode shows the pending toast, with ToastPromise's spinner.
+      // An hour stands in for Infinity, which a specimen cannot hold: these toasts stay open to be seen.
+      if (props.mode === 'promise')
+        return node('ToastProvider', { duration: props.duration }, node('Toast', { defaultOpen: true, duration: 3600000 },
+          node('span', { 'data-slot': 'toast-spinner', 'aria-hidden': 'true' }), node('ToastTitle', {}, content.title)), node('ToastViewport'))
+      if (props.mode === 'stack')
+        return node('ToastProvider', { duration: props.duration },
+          toast(content.title, { duration: 3600000 }), toast(content.title, { duration: 3600000 }), toast(content.title, { duration: 3600000 }),
+          node('ToastViewport', { stack: true }))
+      return node('ToastProvider', { duration: props.duration }, toast(content.title), node('ToastViewport'))
+    }
     case 'input-group': {
       const control = node(props.multiline ? 'InputGroupTextarea' : 'InputGroupInput', {
           id: localId('control'), placeholder: content.placeholder, defaultValue: content.initialText,
@@ -163,11 +174,19 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
           ...(content.addon ? [node('InputGroupText', {}, content.addon)] : []),
           ...(content.action ? [node('InputGroupButton', { disabled: props.disabled }, content.action)] : []))] : []
       const leading = props.align === 'inline-start' || props.align === 'block-start'
+      // Clear sits at the field's end; the counter goes under it.
+      const extras = [
+        ...(props.clearable ? [node('InputGroupAddon', { align: 'inline-end' }, node('InputGroupClear'))] : []),
+        ...(props.counter ? [node('InputGroupAddon', { align: 'block-end' },
+          node('InputGroupCount', { id: localId('count'), value: content.initialText.length, max: 160 }))] : []),
+      ]
+      if (props.counter) control.props['aria-describedby'] = localId('count')
       return node('div', stacked, label(content.label), node('InputGroup', {},
-        ...(leading ? [...addons, control] : [control, ...addons])))
+        ...(leading ? [...addons, control] : [control, ...addons]), ...extras))
     }
     case 'sheet':
-      return node('Sheet', {}, trigger('SheetTrigger', content.trigger), node('SheetContent', props,
+      return node('Sheet', {}, trigger('SheetTrigger', content.trigger), node('SheetContent', { side: props.side, size: props.size, resizable: props.resizable },
+        ...(props.handle ? [node('SheetHandle')] : []),
         node('SheetHeader', {}, node('SheetTitle', {}, content.title), node('SheetDescription', {}, content.description)),
         node('p', {}, content.body)))
     case 'alert-dialog':
@@ -182,6 +201,15 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
             ? node('BreadcrumbPage', {}, item.label) : node('BreadcrumbLink', { href: item.href }, item.label)),
         ])))
     case 'pagination':
+      if (props.layout === 'compact' || props.pageSize)
+        return node('div', stacked,
+          node('Pagination', { 'aria-label': content.label }, props.layout === 'compact'
+            ? node('PaginationCompact', { page: props.page, pageCount: props.totalPages,
+              previousHref: '#page-' + (props.page - 1), nextHref: '#page-' + (props.page + 1) })
+            : node('PaginationContent', {}, ...Array.from({ length: props.totalPages }, (_, index) => node('PaginationItem', {}, node('PaginationLink', {
+              href: '#page-' + (index + 1), isActive: props.page === index + 1, 'aria-label': 'Page ' + (index + 1),
+            }, String(index + 1)))))),
+          ...(props.pageSize ? [node('PaginationPageSize', { value: 25, range: `1–25 of ${props.totalPages * 25}` })] : []))
       return node('Pagination', { 'aria-label': content.label }, node('PaginationContent', {},
         node('PaginationItem', {}, node('PaginationPrevious', { href: '#page-' + (props.page - 1), disabled: props.page === 1 }, content.previous)),
         ...Array.from({ length: props.totalPages }, (_, index) => node('PaginationItem', {}, node('PaginationLink', {
@@ -225,6 +253,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('div', stacked, label(content.label), node(component === 'input' ? 'Input' : 'Textarea', {
         id: localId('control'), placeholder: content.placeholder, defaultValue: content.initialText,
         disabled: props.disabled, required: props.required, 'aria-invalid': props.invalid || undefined,
+        size: props.size === 'default' ? undefined : props.size,
       }))
     case 'label':
       return node('div', stacked, node('Label', { htmlFor: localId('control') }, content.label,
@@ -248,12 +277,16 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       }, ...content.options.map(item => node('RadioGroupOption', {}, node('RadioGroupItem', { value: item.id }),
         node('span', {}, node('RadioGroupOptionLabel', {}, item.label), ...(item.description
           ? [node('RadioGroupOptionDescription', {}, item.description)] : []))))))
-    case 'select':
+    case 'select': {
+      // A decorative dot for item icons: specimen props hold text, and the item hides its icon from assistive technology.
+      const icon = props.icons ? '●' : undefined
       return node('div', stacked, label(content.label), node('Select', {
-        defaultValue: props.selection || undefined, disabled: props.disabled, required: props.required,
+        ...(props.multiple ? { multiple: true, defaultValue: props.selection ? [props.selection] : [] } : { defaultValue: props.selection || undefined }),
+        disabled: props.disabled, required: props.required,
       }, node('SelectTrigger', { id: localId('control'), size: props.size }, node('SelectValue', { placeholder: content.placeholder })),
       node('SelectContent', { position: props.position }, ...content.options.map(item =>
-        node('SelectItem', { value: item.id, hint: item.hint || undefined }, item.label)))))
+        node('SelectItem', { value: item.id, hint: item.hint || undefined, ...(icon ? { icon } : {}) }, item.label)))))
+    }
     case 'accordion':
       return node('Accordion', { ...(props.type === 'single'
         ? { type: 'single', collapsible: props.collapsible, defaultValue: props.expanded[0] }
@@ -263,14 +296,21 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('AccordionTrigger', {}, item.label), node('AccordionContent', {}, item.body))))
     case 'tabs':
       return node('Tabs', { defaultValue: props.selection, orientation: props.orientation },
-        node('TabsList', { 'aria-label': 'Sections', appearance: props.appearance }, ...content.items.map(item => node('TabsTrigger', { value: item.id }, item.label))),
+        node('TabsList', { 'aria-label': 'Sections', appearance: props.appearance }, ...content.items.map((item, index) => node('TabsTrigger', { value: item.id }, item.label,
+          ...(props.counts ? [node('TabsCount', {}, String(index * 4 + 3))] : [])))),
         ...content.items.map(item => node('TabsContent', { value: item.id }, item.body)))
     case 'table': {
       const numeric = new Set(props.numeric)
-      return node('Table', { density: props.density, striped: props.striped }, node('TableCaption', {}, content.caption), node('TableHeader', {},
-        node('TableRow', {}, ...content.columns.map(column => node('TableHead', { numeric: numeric.has(column.id) }, column.label)))),
-      node('TableBody', {}, ...content.rows.map(row => node('TableRow', {}, ...row.cells.map((cell, index) =>
-        node('TableCell', { numeric: numeric.has(content.columns[index].id) }, cell))))))
+      // Specimens hold no handler, so a sortable specimen shows the sorted state on the first column.
+      const columns = content.columns.length + (props.actions ? 1 : 0)
+      return node('Table', { density: props.density, striped: props.striped, stickyHeader: props.stickyHeader, loading: props.loading },
+        node('TableCaption', {}, content.caption), node('TableHeader', {},
+        node('TableRow', {}, ...content.columns.map((column, index) => node('TableHead', {
+          numeric: numeric.has(column.id), ...(props.sortable && index === 0 ? { sort: 'descending' } : {}),
+        }, column.label)), ...(props.actions ? [node('TableHead', { actions: true })] : []))),
+      node('TableBody', {}, ...(props.loading ? [node('TableSkeletonRows', { rows: 3, columns })] : content.rows.map(row => node('TableRow', {},
+        ...row.cells.map((cell, index) => node('TableCell', { numeric: numeric.has(content.columns[index].id) }, cell)),
+        ...(props.actions ? [node('TableCell', { actions: true }, node('button', { type: 'button', 'aria-label': 'Actions for ' + row.cells[0] }, '…'))] : []))))))
     }
     case 'dialog':
       return node('Dialog', {}, trigger('DialogTrigger', content.trigger), node('DialogContent', {},

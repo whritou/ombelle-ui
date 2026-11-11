@@ -80,7 +80,7 @@ export function SelectValue({
     return (
       <SelectPrimitive.Value data-slot="select-value" className={cn(className)} {...rest}>
         {(value: unknown) => Array.isArray(value) && value.length
-          ? value.map(item => <span key={String(item)} data-slot="select-chip">{items[String(item)] ?? String(item)}</span>)
+          ? value.map(item => <span key={String(item)} data-slot="select-chip" data-select-chip="">{items[String(item)] ?? String(item)}</span>)
           : placeholder}
       </SelectPrimitive.Value>
     )

@@ -272,7 +272,7 @@
   }
 }
 /* 0.7.3 variants */
-[data-slot='select-value']:has([data-slot='select-chip']) {
+[data-slot='select-value']:has([data-select-chip]) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
@@ -290,7 +290,7 @@
   font-weight: 600;
   line-height: 1.2;
 }
-[data-slot='select-trigger']:has([data-slot='select-chip']) {
+[data-slot='select-trigger']:has([data-select-chip]) {
   block-size: auto;
   min-block-size: var(--control-height, 2.5rem);
   padding-block: 0.375rem;
