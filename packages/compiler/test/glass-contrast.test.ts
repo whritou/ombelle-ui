@@ -426,7 +426,12 @@ describe('glassContrastOnScene', () => {
   const full = { low: 0, high: 1 }
 
   it('the report is unchanged', () => {
-    const reports = Object.fromEntries(glassIds.map((id) => [id, glassContrastReport(catalog.startingPresets[id])]))
+    // Math.pow differs in the last bit between platforms, so compare ratios to 10 significant digits.
+    const rounded = (value: unknown): unknown => typeof value === 'number' ? Number(value.toPrecision(10))
+      : Array.isArray(value) ? value.map(rounded)
+      : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, rounded(entry)]))
+      : value
+    const reports = Object.fromEntries(glassIds.map((id) => [id, rounded(glassContrastReport(catalog.startingPresets[id]))]))
     expect(reports).toMatchSnapshot()
   })
 
