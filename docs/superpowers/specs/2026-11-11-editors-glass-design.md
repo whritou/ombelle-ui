@@ -115,16 +115,22 @@ The `state.mode === 'light'` condition in `editor-preview.tsx` and the light-onl
 - The Button and catalog component preview messages gain the same optional flag.
 - An old preview that receives no flag behaves as today.
 
-**The mirror, in `apps/preview/src/reduced-transparency-mirror.ts` (new):**
+**The mirror (revised in Task 8, after a parity check against CDP emulation):**
 
-- `mirrorReducedTransparency(doc: Document)` walks `doc.styleSheets`, skipping cross-origin sheets.
-  - Each `@media (prefers-reduced-transparency: reduce)` rule is copied into one `<style data-reduced-transparency-mirror>` element. Each selector is prefixed with `html[data-reduced-transparency] `, and a leading `:root` or `html` becomes `html[data-reduced-transparency]`.
-  - A rule under `@supports not (prefers-reduced-transparency: reduce)`, or under a media condition `not (prefers-reduced-transparency: reduce)`, keeps applying only while the attribute is absent. Its selector is prefixed with `html:not([data-reduced-transparency]) `. This matches `liquid-glass-lab.css`, which wraps its lab paint that way.
-  - Nested `@supports`, `@media` and `@layer` blocks are kept around the copied rule.
-- It runs once the preview's styles load, and again when the editor injects new compiled CSS. The previews already know when that happens.
-- It is idempotent: it rebuilds the mirror element and does not append to it.
+- The pure transform is `mirrorReducedTransparency(rules)` in `apps/www/src/site/reduced-transparency.ts`, so Vitest covers it. The DOM adapter is `startReducedTransparencyMirror(doc)` in `apps/preview/src/reduced-transparency-mirror.ts`.
+- It walks `doc.styleSheets`, skipping cross-origin sheets, and handles each sheet once.
+- **A `(prefers-reduced-transparency: reduce)` rule:**
+  - It gets a copy inserted right after it in the same rule list, inside `@media all`.
+  - Each copied selector is prefixed with `:where(html[data-reduced-transparency])`, which adds no specificity, so the copy keeps the original rule's specificity and source order.
+  - The copy keeps the other conditions of the query, and the `@supports`, `@media` and `@layer` blocks around it.
+- **A rule under `not (prefers-reduced-transparency: reduce)` or `(prefers-reduced-transparency: no-preference)`:**
+  - Adding rules cannot switch it off, so its selectors are gated in place with `:where(html:not([data-reduced-transparency]))`.
+  - It keeps following the real preference too.
+- **CSS nesting:** nested rules are resolved against their parent selector with `:is()`. A style rule with the media feature nested inside gets its copy after the whole rule.
+- It runs when the preview mounts, on every style mutation in the document, and on capture-phase `load` events of linked sheets.
 - The toggle sets or removes `data-reduced-transparency` on the preview's `html`.
 - The editor's own page, outside the iframe, is not affected.
+- **Parity:** on the top-level audit page, every `[data-slot]` element's backdrop filter, background colour and background image under the mirror equal those under CDP-emulated `prefers-reduced-transparency: reduce`. In the sandboxed editor preview, the emulation reaches `matchMedia` but not the cascade, so the editor test checks that the toggle makes the Card opaque and restores it.
 
 ## Styles
 
