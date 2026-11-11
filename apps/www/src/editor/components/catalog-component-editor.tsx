@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { canonicalize } from '@ombelle/compiler'
 import { resolveRecipePreset } from '@ombelle/catalog'
 import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@ombelle/contracts'
@@ -14,6 +14,8 @@ import { HISTORY_LIMIT } from '../history'
 import type { EditorView } from '../model'
 import { preserveRecovery, readRecoveries, recipeFilename } from '../storage'
 import { useCatalogCompiler } from '../use-catalog-compiler'
+import { useRecipeBatch } from '../use-recipe-batch'
+import { changesSummaryFor } from './changes-summary'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 import { ArtifactPanel } from './artifact-panel'
 import { CatalogProperties } from './catalog-properties'
@@ -41,6 +43,12 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const recipe = history.present
   const glassFamily = resolveRecipePreset(recipe.presetRef).styleFamily === 'liquid-glass'
   const { result, error, pending } = useCatalogCompiler(recipe)
+  // The catalog default for the same family and preset: what Changes and Get code compare to.
+  const presetKey = JSON.stringify(recipe.presetRef)
+  const defaults = useMemo(() => [{ ...createCatalogDraft(recipe.component).recipe, presetRef: JSON.parse(presetKey) }],
+    [recipe.component, presetKey])
+  const reference = useRecipeBatch('catalog', defaults).results?.[0] ?? null
+  const [showChanges, setShowChanges] = useState(0)
   const key = catalogDraftKey(component)
   const recoveryKey = `${key}.recoveries`
   useEffect(() => {
@@ -110,6 +118,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
         })),
       ] }}
       primary={<RecipeGetCode className={styles.getCode} recipe={result?.recipe ?? null} current={ready}
+        summary={changesSummaryFor(ready ? result : null, reference, () => setShowChanges(count => count + 1))}
         componentName={name} storageKey={`${key}.publication`} announce={setStatus}
         secondary={<button type="button" onClick={save} disabled={!ready}>Download JSON instead</button>} />}
     />
@@ -150,7 +159,8 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
               reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} /></div>
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
-            <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name} />
+            <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name}
+              reference={reference} showChanges={showChanges} />
           </div>
         </div>
       </div>

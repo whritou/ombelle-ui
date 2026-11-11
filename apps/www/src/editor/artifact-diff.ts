@@ -1,4 +1,4 @@
-import type { Artifact, InstallableRecipeCompileResult } from '@ombelle/contracts'
+import type { Artifact, CompileResult, InstallableRecipeCompileResult } from '@ombelle/contracts'
 import { diffSummary, lineDiff, type DiffLine } from './line-diff'
 
 export type FileChange = { kind: Artifact['kind'] | 'recipe'; name: string; lines: DiffLine[]; added: number; removed: number }
@@ -52,4 +52,25 @@ export function changesSummary(changes: FileChange[]): string {
   const added = changed.reduce((sum, item) => sum + item.added, 0)
   const removed = changed.reduce((sum, item) => sum + item.removed, 0)
   return `Changes from the catalog default: ${changed.length} ${changed.length === 1 ? 'file' : 'files'}, +${added} −${removed}`
+}
+
+/**
+ * A preset's generated files against its starting or base preset's, paired by kind and file
+ * name. The preset's own id, name and revision are normalized, so renaming it changes nothing.
+ */
+export function presetChanges(result: CompileResult, reference: CompileResult): FileChange[] {
+  const normalize = (content: string, compiled: CompileResult) => {
+    const { id, name, revision } = compiled.preset.data
+    return content
+      .replace(new RegExp(`(^|[^\\w-])${escape(id)}(?![\\w-])`, 'g'), '$1<preset>')
+      .replace(new RegExp(escape(name), 'g'), '<name>')
+      .replace(new RegExp(`(^|[^\\w])r${revision}(?!\\d)`, 'g'), '$1r<n>')
+  }
+  return result.artifacts
+    .filter((artifact) => artifact.kind !== 'usage' && artifact.kind !== 'utility')
+    .map((artifact) => {
+      const name = fileName(artifact.logicalPath)
+      const other = reference.artifacts.find((candidate) => candidate.kind === artifact.kind && fileName(candidate.logicalPath) === name)
+      return change(artifact.kind, name, other ? normalize(other.content, reference) : '', normalize(artifact.content, result))
+    })
 }

@@ -3,7 +3,7 @@ import { compileComponentRecipe, compileRecipe } from '@ombelle/compiler'
 import { validateComponentRecipe, validateRecipe, type ComponentRecipe } from '@ombelle/contracts'
 import badge from '../../../../examples/component-recipe.badge.json'
 import button from '../../../../examples/recipe.example.json'
-import { artifactChanges, changesSummary } from './artifact-diff'
+import { artifactChanges, changesSummary, presetChanges } from './artifact-diff'
 
 const compileBadge = (recipe: unknown) => compileComponentRecipe({ recipe: validateComponentRecipe(recipe) })
 const base = badge as unknown as ComponentRecipe
@@ -40,4 +40,16 @@ it('the Button pairs too', async () => {
   const changed = changes.filter((change) => change.added + change.removed > 0).length
   expect(changed).toBeGreaterThanOrEqual(1)
   expect(changed).toBeLessThanOrEqual(3)
+})
+
+it('a preset edit shows in the preset files, a renamed preset does not', async () => {
+  const { compile } = await import('@ombelle/compiler')
+  const { getCatalog } = await import('@ombelle/catalog')
+  const flat = getCatalog('0.1.0').presets.flat
+  const run = (preset: typeof flat) => compile({ preset, componentIds: ['button'], catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
+  const reference = await run(flat)
+  const renamed = await run({ ...flat, id: 'my-preset', name: 'Mine', revision: 4 })
+  expect(changesSummary(presetChanges(renamed, reference))).toBe('Same as the catalog default.')
+  const edited = await run({ ...flat, design: { ...flat.design, radiusRem: 0.25 } })
+  expect(changesSummary(presetChanges(edited, reference))).toMatch(/^Changes from the catalog default: /)
 })

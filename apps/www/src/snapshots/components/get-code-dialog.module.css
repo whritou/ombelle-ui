@@ -101,6 +101,17 @@
   color: var(--muted-foreground);
   font-size: 14px;
 }
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+}
+.summary p {
+  margin: 0;
+}
 .terminal {
   min-width: 0;
   border: 1px solid var(--border);

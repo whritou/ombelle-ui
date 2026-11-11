@@ -4,7 +4,7 @@ import { Code } from 'lucide-react'
 import type { ResolvedPreset } from '@ombelle/contracts'
 import { usePublication } from '../use-publication'
 import { codeInstallCommand, contrastInstallBlocked, glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked, semanticPaletteInstallBlocked, semanticPaletteInstallNotice } from '../install-command'
-import { GetCodeDialog, type CodeStatus } from './get-code-dialog'
+import { GetCodeDialog, type CodeStatus, type CodeSummary } from './get-code-dialog'
 
 const scopes = [
   {
@@ -39,6 +39,7 @@ export function PresetGetCode({
   describedBy,
   className,
   secondary,
+  summary,
 }: {
   preset: ResolvedPreset | null
   current: boolean
@@ -48,6 +49,8 @@ export function PresetGetCode({
   className?: string
   /** Secondary exports shown under the command, such as the JSON download. */
   secondary?: ReactNode
+  /** What the edits change against the catalog default. */
+  summary?: CodeSummary
 }) {
   const publication = usePublication({ preset, current, announce })
   const { state } = publication
@@ -90,6 +93,7 @@ export function PresetGetCode({
         Get code
       </button>
       <GetCodeDialog
+        summary={summary}
         open={open}
         onClose={() => setOpen(false)}
         subject="preset"

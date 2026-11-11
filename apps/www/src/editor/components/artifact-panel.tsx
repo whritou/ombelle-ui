@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { InstallableRecipe, InstallableRecipeCompileResult } from '@ombelle/contracts'
 import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compiler'
 import { recipeFilename } from '../storage'
 import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
 import { installableRecipeInstallNotice, installerRunner, publishedInstaller } from '../../snapshots/install-command'
+import { artifactChanges, type FileChange } from '../artifact-diff'
+import { collapseUnchanged } from '../line-diff'
+import { SegmentedControl } from '../../editor-shell'
+import { DiffView } from './diff-view'
 
 export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
 const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Recipe', 'Install']
@@ -49,8 +53,15 @@ function tabFile(tab: Tab, result: InstallableRecipeCompileResult): string {
   return tabArtifact(tab, result)?.logicalPath ?? tab
 }
 
-export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = null, componentName = 'Button' }: {
+/** The tab that shows each kind of change. */
+const changeTabs: Partial<Record<FileChange['kind'], Tab>> = { component: 'Component', style: 'CSS', recipe: 'Recipe' }
+
+export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = null, componentName = 'Button', reference = null, showChanges = 0 }: {
   result: InstallableRecipeCompileResult | null
+  /** The catalog default for the same family and preset; Changes diffs against it. */
+  reference?: InstallableRecipeCompileResult | null
+  /** Incremented by Get code's "Show changes" to open the first changed file's Changes view. */
+  showChanges?: number
   recipeJson: string | null
   stale: boolean
   onStatus: (message: string) => void
@@ -59,6 +70,17 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
   componentName?: string
 }) {
   const [tab, setTab] = useState<Tab>('Usage')
+  const [view, setView] = useState<'file' | 'changes'>('file')
+  const changes = useMemo(() => result && reference ? artifactChanges(result, reference) : null, [result, reference])
+  const tabChange = changes?.find((item) => changeTabs[item.kind] === tab) ?? null
+  useEffect(() => {
+    if (!showChanges || !changes) return
+    const first = changes.find((item) => item.added + item.removed > 0)
+    setTab((first && changeTabs[first.kind]) ?? 'CSS')
+    setView('changes')
+    requestAnimationFrame(() => document.getElementById('artifact-changes')?.focus())
+    // Only a new request opens the view; later recompiles keep the reader's choice.
+  }, [showChanges])
   const content = result ? tabContent(tab, result, recipeJson ?? '') : ''
   const data = result?.recipe.data
   const contrast = result && !stale ? data?.schemaVersion === '2.0'
@@ -97,7 +119,15 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
             <span className={code.file}><span className={code.fileName}>{tabFile(tab, result)}</span><span className={code.lang}>{languageNames[languages[tab]]}</span></span>
             <button type="button" className={code.copy} onClick={() => void copy()} disabled={stale || (tab === 'Recipe' && !recipeJson)} aria-label={`Copy ${tab}`}>Copy</button>
           </div>
-          <pre role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} tabIndex={0} className={code.code}><code>{highlightCode(content, languages[tab])}</code></pre>
+          {tabChange && <div className={code.viewToggle}>
+            <SegmentedControl<'file' | 'changes'> label="Show" value={view}
+              options={[{ value: 'file', label: 'File' }, { value: 'changes', label: 'Changes' }]} onChange={setView} />
+          </div>}
+          {tabChange && view === 'changes'
+            ? <div role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`}>
+              <DiffView id="artifact-changes" rows={collapseUnchanged(tabChange.lines)} added={tabChange.added} removed={tabChange.removed} />
+            </div>
+            : <pre role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} tabIndex={0} className={code.code}><code>{highlightCode(content, languages[tab])}</code></pre>}
         </div>
         {tab === 'Install' && <p className="artifactNote">Run from the folder containing the downloaded {recipeFilename(result.recipe.data)} with Node 24.19.0 or newer Node 24. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
         {tab === 'Recipe' && <p className="artifactNote">ID: {result.recipe.data.id} · Revision: {result.recipe.data.revision}. Changed content at an installed ID and revision needs a new revision.</p>}

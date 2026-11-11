@@ -17,6 +17,8 @@ import { ArtifactPanel } from './artifact-panel'
 import { ComponentNavigation } from './component-navigation'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
+import { useRecipeBatch } from '../use-recipe-batch'
+import { changesSummaryFor } from './changes-summary'
 import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
@@ -55,6 +57,13 @@ export function ButtonEditor() {
   const draft = history.present
   const glassFamily = draftFamily(draft.recipe) === 'liquid-glass'
   const compilation = useCompiler(draft.recipe)
+  // The catalog default for the same family and preset: what Changes and Get code compare to.
+  const presetKey = JSON.stringify(draft.recipe.presetRef)
+  const defaults = useMemo(() => [resetDraftRecipe(draft, initialDraft.recipe).recipe],
+    // Only the family and preset decide the default, not the edits.
+    [presetKey])
+  const reference = useRecipeBatch('button', defaults).results?.[0] ?? null
+  const [showChanges, setShowChanges] = useState(0)
   const undoButton = useRef<HTMLButtonElement>(null)
   const redoButton = useRef<HTMLButtonElement>(null)
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
@@ -214,6 +223,7 @@ export function ButtonEditor() {
       }}
       menu={{ label: 'More actions', items: menuItems }}
       primary={<RecipeGetCode className={styles.getCode} recipe={compilation.result?.recipe ?? null} current={exportReady && recovery === null} announce={setStatus}
+        summary={changesSummaryFor(exportReady ? compilation.result : null, reference, () => setShowChanges(count => count + 1))}
         secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
     />
     <h1 className={styles.srOnly}>Button editor</h1>
@@ -260,6 +270,7 @@ export function ButtonEditor() {
           </section>
           <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
+              reference={reference} showChanges={showChanges}
               notice={experimentalNotice(draftFamily(draft.recipe))} />
           </div>
         </div>
