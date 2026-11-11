@@ -11,6 +11,7 @@ const editedFields = {
   switch: 'label', table: 'caption', textarea: 'label', tooltip: 'trigger',
   spinner: 'label', kbd: 'keys', empty: 'title', field: 'label', meter: 'label',
   slider: 'label', 'toggle-group': 'label', chip: 'label', 'tag-input': 'label', 'input-otp': 'label',
+  combobox: 'label', command: 'placeholder', 'hover-card': 'title', 'context-menu': 'zoneText',
 } as const satisfies Record<Exclude<ComponentRecipe['component'], 'accordion' | 'tabs' | 'stepper'>, string>
 
 export function catalogRecipeFixtures(): readonly ComponentRecipe[] {

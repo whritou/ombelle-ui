@@ -12,6 +12,7 @@ import type { PartDimension } from '../catalog-preview-protocol'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
 import { keepChoice } from '../../editor-shell/inspector'
 import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../../generated/ui/components/ui/combobox'
 import { RECIPE_COLOR_PATTERN, recipeColor, withGlassPreset, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
 import { designControlLabel, glassControlHints, glassDesignControls } from '../../preset-editor/model'
@@ -50,6 +51,7 @@ const typeSliders: readonly Slider[] = [
   { key: 'letterSpacingEm', label: 'Letter spacing', min: -0.05, max: 0.2, step: 0.01, unit: 'em' },
 ]
 const iconNames = Object.keys(recipeIcons) as RecipeIconName[]
+const noIcon = 'none'
 const iconLabel = (name: string) => name.charAt(0).toUpperCase() + name.slice(1).replaceAll('-', ' ')
 const iconPositions = [
   { value: 'start', label: 'Leading' },
@@ -360,11 +362,17 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
         <div className="be-stack">
           <label htmlFor="button-icon" className="be-stack-label">Icon</label>
           <span className="be-icon-select">
-            <select id="button-icon" value={icon?.name ?? ''}
-              onChange={(event) => changeIcon(event.target.value ? { ...icon, name: event.target.value as RecipeIconName } : undefined)}>
-              <option value="">None</option>
-              {iconNames.map((name) => <option key={name} value={name}>{iconLabel(name)}</option>)}
-            </select>
+            <Combobox value={icon?.name ?? noIcon}
+              onValueChange={(name) => changeIcon(name && name !== noIcon ? { ...icon, name: name as RecipeIconName } : undefined)}>
+              <ComboboxInput id="button-icon" placeholder="Search icons" />
+              <ComboboxContent>
+                <ComboboxList>
+                  <ComboboxItem value={noIcon}>None</ComboboxItem>
+                  {iconNames.map((name) => <ComboboxItem key={name} value={name}>{iconLabel(name)}</ComboboxItem>)}
+                </ComboboxList>
+                <ComboboxEmpty>No icon matches.</ComboboxEmpty>
+              </ComboboxContent>
+            </Combobox>
             {icon && (
               <button type="button" className="colorReset" aria-label="Remove icon" title="Remove icon"
                 onClick={() => {

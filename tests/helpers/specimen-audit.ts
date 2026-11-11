@@ -286,6 +286,10 @@ export async function listFocusables(root: Locator, prefix: string): Promise<Loc
       for (const element of [root, ...root.querySelectorAll(`${selector}, ${items}`)]) {
         if (!(element instanceof HTMLElement) || !element.matches(`${selector}, ${items}`)) continue
         if (element.tabIndex < 0 && !element.matches(items)) continue
+        // Options of a list that a combobox controls are never focused: the field keeps focus and
+        // points at the active option with aria-activedescendant (Combobox, Command).
+        const list = element.matches('[role=option]') && !element.hasAttribute('tabindex') ? element.closest('[role=listbox][id]') : null
+        if (list && document.querySelector(`[role=combobox][aria-controls~="${CSS.escape(list.id)}"]`)) continue
         if (element.closest('[aria-hidden="true"], [inert]') || element.matches(':disabled, [aria-disabled="true"], [data-disabled]')
           || element.getClientRects().length === 0) continue
         const box = element.getBoundingClientRect()

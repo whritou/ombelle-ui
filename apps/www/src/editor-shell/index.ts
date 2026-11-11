@@ -1,5 +1,6 @@
 export { OverflowMenu, type OverflowItem } from './overflow-menu'
 export { EditorTopBar } from './top-bar'
+export { familyCommands, type PaletteGroup } from './command-groups'
 export { ControlRow, InspectorSection, SegmentedControl, SliderRow } from './inspector'
 export { ReviewDrawer, type DrawerTab } from './review-drawer'
 export { useDrawerState } from './use-drawer-state'

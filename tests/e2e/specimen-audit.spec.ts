@@ -13,7 +13,13 @@ const checks: AuditCheck[] = ['overflow', 'clipping', 'spacing', 'focus-visible'
 const artifacts = '.artifacts/specimen-audit'
 
 /** How each overlay opens, and where its content appears once open (outside the section when portalled). */
-const overlays: Record<string, { open: 'click' | 'focus'; content: (page: Page, section: Locator) => Locator; returnsFocus: boolean }> = {
+const overlays: Record<string, {
+  open: 'click' | 'focus' | 'contextmenu'
+  content: (page: Page, section: Locator) => Locator
+  returnsFocus: boolean
+  /** The element that opens it; default the section's first button or combobox. */
+  trigger?: (section: Locator) => Locator
+}> = {
   dialog: { open: 'click', content: page => page.getByRole('dialog'), returnsFocus: true },
   'alert-dialog': { open: 'click', content: page => page.getByRole('alertdialog'), returnsFocus: true },
   sheet: { open: 'click', content: page => page.getByRole('dialog'), returnsFocus: true },
@@ -23,7 +29,14 @@ const overlays: Record<string, { open: 'click' | 'focus'; content: (page: Page, 
   tooltip: { open: 'focus', content: page => page.locator('[data-slot$="tooltip-content"]'), returnsFocus: true },
   // The trigger is the first collapsed item; its panel is found through aria-controls (both editions).
   accordion: { open: 'click', content: page => page.locator('[data-audit-accordion-panel]'), returnsFocus: false },
+  combobox: { open: 'click', content: page => page.locator('[data-slot$="combobox-content"]'), returnsFocus: true },
+  'hover-card': { open: 'focus', content: page => page.locator('[data-slot$="hover-card-content"]'), returnsFocus: true,
+    trigger: section => section.locator('[data-slot$="hover-card-trigger"]') },
+  'context-menu': { open: 'contextmenu', content: page => page.getByRole('menu'), returnsFocus: true,
+    trigger: section => section.locator('[data-slot$="context-menu-trigger"]') },
 }
+// Limit a run to some components, for example after a fix to them: OMBELLE_AUDIT_COMPONENTS=combobox,command
+const onlyComponents = process.env.OMBELLE_AUDIT_COMPONENTS?.split(',').map(id => id.trim()).filter(Boolean)
 
 async function measure(page: Page, roots: Locator[], stop: Locator, prefix: string, counts: Record<AuditCheck, number>) {
   const findings: Finding[] = [...await findOverflow(roots), ...await findClipping(roots, stop), ...await findSpacing(roots), ...await findTargetSize(roots)]
@@ -53,6 +66,7 @@ for (const family of styleFamilies)
         const sections = page.locator('section[data-audit]')
         // Toast first: the Radix toast is open from page load and its timer must not run out before it is measured.
         const components = (await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!)))
+          .filter(component => !onlyComponents?.length || onlyComponents.includes(component))
           .sort((a, b) => Number(b === 'toast') - Number(a === 'toast'))
         const shots = path.join(artifacts, family, edition, mode)
         await fs.mkdir(shots, { recursive: true })
@@ -79,6 +93,7 @@ for (const family of styleFamilies)
           if (overlay || isBaseToast) {
             const trigger = isBaseToast ? section.getByRole('button', { name: 'Show notification' })
               : component === 'accordion' ? section.locator('[aria-expanded="false"][aria-controls]').first()
+              : overlay?.trigger ? overlay.trigger(section).first()
               : section.locator('button, [role="combobox"]').first()
             await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
             if (overlay?.open === 'focus') {
@@ -92,7 +107,8 @@ for (const family of styleFamilies)
               await expect(trigger).toBeFocused()
               // Base UI opens its tooltip after a delay timer; the page clock is frozen to keep toasts open.
               await page.clock.runFor(1500)
-            } else await trigger.click()
+            } else if (overlay?.open === 'contextmenu') await trigger.click({ button: 'right' })
+            else await trigger.click()
             if (component === 'accordion') await trigger.evaluate(element =>
               document.getElementById(element.getAttribute('aria-controls')!)?.setAttribute('data-audit-accordion-panel', ''))
             const content = isBaseToast ? page.locator('[data-slot$="toast"]').first() : overlay!.content(page, section).first()
@@ -141,16 +157,19 @@ for (const family of styleFamilies)
         const part = { family, edition, mode, specimens: components.length, checks: counts, failures: blocking.length + errors.length,
           experimentalFindings: experimental ? findings.length : 0,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
-        await fs.mkdir(path.join(artifacts, 'parts'), { recursive: true })
-        await fs.writeFile(path.join(artifacts, 'parts', `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
-        await fs.writeFile(path.join(artifacts, 'parts', `${family}-${edition}-${mode}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
-        expect(components).toHaveLength(supportedComponentIds.length)
+        // A run limited to some components writes its findings apart and leaves the evidence file alone.
+        const partsDirectory = path.join(artifacts, onlyComponents?.length ? 'partial' : 'parts')
+        await fs.mkdir(partsDirectory, { recursive: true })
+        if (!onlyComponents?.length) await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
+        await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
+        expect(components).toHaveLength(onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length)
         expect(errors, 'page errors').toEqual([])
         expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])
       })
 
 // Merge every configuration's part into the evidence file the foundation gate validates.
 test.afterAll(async () => {
+  if (onlyComponents?.length) return
   const directory = path.join(artifacts, 'parts')
   const names = (await fs.readdir(directory).catch(() => [] as string[])).filter(name => name.endsWith('.json') && !name.endsWith('.findings.json'))
   const parts = await Promise.all(names.map(async name => JSON.parse(await fs.readFile(path.join(directory, name), 'utf8'))))

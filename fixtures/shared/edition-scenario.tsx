@@ -27,6 +27,10 @@ import { Slider } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
+import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
+import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from '@/components/ui/toast'
 
 // Ported components rendered identically in both editions; the parity test
@@ -40,6 +44,114 @@ function Parity({ id, children }: { id: string; children: React.ReactNode }) {
         Start {id}
       </button>
       {children}
+    </section>
+  )
+}
+
+const overlayPresets = [
+  ['liquid-glass', 'Liquid glass'],
+  ['liquid-glass-givre', 'Liquid glass — Givre'],
+  ['liquid-glass-prism', 'Liquid glass — Prism'],
+  ['ombelle', 'Ombelle'],
+] as const
+
+// Browser coverage for Combobox, Command, Hover Card and Context Menu; the same in both editions.
+function OverlaysScenario() {
+  const [preset, setPreset] = React.useState('')
+  const [created, setCreated] = React.useState('')
+  const [presets, setPresets] = React.useState<string[]>([])
+  const [ran, setRan] = React.useState('')
+  const [palette, setPalette] = React.useState(false)
+  const [action, setAction] = React.useState('')
+  React.useEffect(() => {
+    const toggle = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setPalette((open) => !open)
+      }
+    }
+    window.addEventListener('keydown', toggle)
+    return () => window.removeEventListener('keydown', toggle)
+  }, [])
+  const options = overlayPresets.map(([value, label]) => <ComboboxItem key={value} value={value}>{label}</ComboboxItem>)
+  const run = (name: string) => {
+    setRan(name)
+    setPalette(false)
+  }
+  return (
+    <section aria-label="Overlays and search" data-testid="overlays-search">
+      <p id="os-preset-label">Preset</p>
+      <div data-testid="combobox-single">
+        <Combobox value={preset} onValueChange={setPreset} onCreate={setCreated}>
+          <ComboboxInput aria-labelledby="os-preset-label" placeholder="Search presets" />
+          <ComboboxContent>
+            <ComboboxList>{options}<ComboboxCreate /></ComboboxList>
+            <ComboboxEmpty>No presets found.</ComboboxEmpty>
+          </ComboboxContent>
+        </Combobox>
+      </div>
+      <p data-testid="combobox-value">Value: {preset}</p>
+      <button type="button" data-testid="combobox-set-ombelle" onClick={() => setPreset('ombelle')}>Use Ombelle</button>
+      <p data-testid="combobox-created">Created: {created}</p>
+      <p id="os-presets-label">Presets</p>
+      <div data-testid="combobox-multiple">
+        <Combobox multiple value={presets} onValueChange={setPresets}>
+          <ComboboxInput aria-labelledby="os-presets-label" />
+          <ComboboxContent>
+            <ComboboxList>{options}</ComboboxList>
+            <ComboboxEmpty>No presets found.</ComboboxEmpty>
+          </ComboboxContent>
+        </Combobox>
+      </div>
+      <button type="button" data-testid="command-opener" onClick={() => setPalette(true)}>Open command menu</button>
+      <CommandDialog open={palette} onOpenChange={setPalette}>
+        <Command label="Commands">
+          <CommandInput placeholder="Search commands" />
+          <CommandList>
+            <CommandGroup heading="Components">
+              <CommandItem onSelect={() => run('Add Button')}>Add Button<CommandShortcut>↵</CommandShortcut></CommandItem>
+              <CommandItem onSelect={() => run('Add Dialog')}>Add Dialog</CommandItem>
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup heading="Theme">
+              <CommandItem onSelect={() => run('Add theme from preset')}>Add theme from preset<CommandShortcut>Ctrl+T</CommandShortcut></CommandItem>
+            </CommandGroup>
+          </CommandList>
+          <CommandEmpty>No results.</CommandEmpty>
+        </Command>
+      </CommandDialog>
+      <p data-testid="command-ran">Ran: {ran}</p>
+      <p>
+        Built with{' '}
+        <HoverCard>
+          <HoverCardTrigger href="#hover-target" data-testid="hover-trigger">@ombelle</HoverCardTrigger>
+          <HoverCardContent data-testid="hover-content">
+            <strong>Ombelle UI</strong>
+            <p>Reviewed React components with deterministic presets.</p>
+            <HoverCardArrow />
+          </HoverCardContent>
+        </HoverCard>{' '}
+        presets.
+      </p>
+      <ContextMenu>
+        <ContextMenuTrigger variant="zone" tabIndex={0} aria-label="Layer: Hero card" data-testid="context-zone" style={{ minHeight: 160 }}>
+          Right-click or Shift+F10 on a layer
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onClick={() => setAction('Duplicate')}>Duplicate<ContextMenuShortcut>Ctrl+D</ContextMenuShortcut></ContextMenuItem>
+          <ContextMenuSub>
+            <ContextMenuSubTrigger>Apply preset</ContextMenuSubTrigger>
+            <ContextMenuSubContent>
+              <ContextMenuItem onClick={() => setAction('Ombelle')}>Ombelle</ContextMenuItem>
+              <ContextMenuItem onClick={() => setAction('Liquid glass')}>Liquid glass</ContextMenuItem>
+            </ContextMenuSubContent>
+          </ContextMenuSub>
+          <ContextMenuItem onClick={() => setAction('Copy as JSX')}>Copy as JSX</ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem variant="destructive" onClick={() => setAction('Delete')}>Delete<ContextMenuShortcut>Del</ContextMenuShortcut></ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+      <p data-testid="context-action">Action: {action}</p>
     </section>
   )
 }
@@ -105,6 +217,7 @@ function CatalogExpansionScenario() {
             </InputOTPGroup>
           </InputOTP>
         </section>
+        <OverlaysScenario />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

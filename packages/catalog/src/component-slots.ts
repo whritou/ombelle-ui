@@ -4,6 +4,10 @@ import type { ComponentId } from '@ombelle/contracts'
 export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   chip: ['chip', 'chip-remove', 'chip-group'],
   'input-otp': ['input-otp', 'input-otp-group', 'input-otp-slot', 'input-otp-separator'],
+  combobox: ['combobox', 'combobox-field', 'combobox-input', 'combobox-content', 'combobox-list', 'combobox-group', 'combobox-group-heading', 'combobox-item', 'combobox-match', 'combobox-empty', 'combobox-create', 'combobox-chips', 'combobox-chip', 'combobox-chip-remove'],
+  command: ['command', 'command-dialog-trigger', 'command-dialog-overlay', 'command-dialog', 'command-dialog-title', 'command-search', 'command-input', 'command-list', 'command-group', 'command-group-heading', 'command-item', 'command-shortcut', 'command-separator', 'command-empty'],
+  'context-menu': ['context-menu', 'context-menu-portal', 'context-menu-trigger', 'context-menu-content', 'context-menu-group', 'context-menu-label', 'context-menu-item', 'context-menu-checkbox-item', 'context-menu-radio-group', 'context-menu-radio-item', 'context-menu-item-indicator', 'context-menu-separator', 'context-menu-shortcut', 'context-menu-sub', 'context-menu-sub-trigger', 'context-menu-sub-icon', 'context-menu-sub-content'],
+  'hover-card': ['hover-card', 'hover-card-trigger', 'hover-card-content', 'hover-card-arrow'],
   slider: ['slider', 'slider-track', 'slider-range', 'slider-thumb', 'slider-ticks', 'slider-tick'],
   'toggle-group': ['toggle-group', 'toggle-group-item'],
   'tag-input': ['tag-input', 'tag-input-list', 'tag-input-tag', 'tag-input-remove', 'tag-input-input', 'tag-input-status'],

@@ -2,11 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { canonicalize } from '@ombelle/compiler'
-import { validateComponentRecipe, type ComponentRecipe } from '@ombelle/contracts'
+import { resolveRecipePreset } from '@ombelle/catalog'
+import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@ombelle/contracts'
+import { siteFamilyOrder } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, SegmentedControl, previewModeOptions, previewWidthOptions } from '../../editor-shell'
-import { catalogDraftKey, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
+import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewWidthOptions } from '../../editor-shell'
+import { catalogDraftKey, catalogPresetRef, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
+import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
 import type { EditorView } from '../model'
 import { preserveRecovery, readRecoveries, recipeFilename } from '../storage'
@@ -81,7 +84,9 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   }) : previous)
 
   return <main className={styles.root} aria-label={`${name} editor`}>
-    <EditorTopBar crumbs={['Components', name]} status={status} revision={`r${recipe.revision}`}
+    <EditorTopBar crumbs={['Components', name]}
+      commands={[familyCommands(siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
+        resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit({ ...recipe, presetRef: catalogPresetRef(style) }))]} status={status} revision={`r${recipe.revision}`}
       nameField={{ id: `${component}-recipe-id`, label: 'Recipe ID', value: recipe.id, maxLength: 80, readOnly: true, onChange: () => {} }}
       undo={{ buttonRef: undoRef, disabled: !history.past.length || recovery !== null, onClick: () => {
         if (history.past.length === 1) focusAfterHistory.current = redoRef.current

@@ -89,8 +89,8 @@ it('offers bounded padding, gap and typography sliders with resets once edited',
 
 it('offers icons, a position and an icon-only mode that relabels the content field', () => {
   const html = panel()
-  expect(html).toContain('<option value="" selected="">None</option>')
-  expect(html).toContain('<option value="arrow-right">Arrow right</option>')
+  // The options open in a popup; the field shows the chosen one.
+  expect(/<input[^>]*id="button-icon"[^>]*>/.exec(html)![0]).toContain('value="None"')
   expect(html).not.toContain('aria-label="Icon position"')
   const withIcon = panel(withRecipeIcon(recipe, { name: 'arrow-right' }))
   expect(withIcon).toContain('aria-label="Icon position"')
@@ -151,4 +151,13 @@ it('the Button editor shows material sliders for glass recipes only', () => {
   // An override shows its value and a reset; the rest follow the preset.
   const edited = render('liquid-glass', withRecipeOverride(recipe, 'glassHalo', 0.9))
   expect(edited).toMatch(/id="button-glassHalo-number"[^>]*value="0.9"/)
+})
+
+it('picks the icon in a searchable combobox labelled Icon, showing None when there is no icon', () => {
+  const html = panel()
+  const input = /<input[^>]*id="button-icon"[^>]*>/.exec(html)![0]
+  expect(input).toContain('role="combobox"')
+  expect(input).toContain('value="None"')
+  expect(html).toContain('for="button-icon"')
+  expect(/<input[^>]*id="button-icon"[^>]*>/.exec(panel(withRecipeIcon(recipe, { name: 'arrow-right' })))![0]).toContain('value="Arrow right"')
 })

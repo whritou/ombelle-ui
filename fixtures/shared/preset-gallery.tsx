@@ -104,6 +104,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Chip, ChipGroup, ChipRemove } from '@/components/ui/chip'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
+import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
+import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 
 // Family-independent: callers pass the component ids their family cannot
@@ -184,7 +188,7 @@ export function PresetGallery({
       </section>)}
       {gate('breadcrumb', 'Breadcrumb', <section aria-label="Breadcrumb" data-component="breadcrumb">
         <h2>Breadcrumb</h2>
-        <Breadcrumb><BreadcrumbList>
+        <Breadcrumb aria-label="Gallery path"><BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
@@ -273,6 +277,57 @@ export function PresetGallery({
         <h2>Input OTP</h2>
         <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>
       </section>)}
+      <div data-testid="overlays-search">
+      {gate('combobox', 'Combobox', <section aria-label="Combobox" data-component="combobox">
+        <h2>Combobox</h2>
+        <label id="gallery-preset">Preset</label>
+        <Combobox defaultValue="ombelle">
+          <ComboboxInput aria-labelledby="gallery-preset" placeholder="Search presets" />
+          <ComboboxContent>
+            <ComboboxList>
+              <ComboboxItem value="liquid-glass">Liquid glass</ComboboxItem>
+              <ComboboxItem value="liquid-glass-givre">Liquid glass — Givre</ComboboxItem>
+              <ComboboxItem value="ombelle">Ombelle</ComboboxItem>
+              <ComboboxCreate />
+            </ComboboxList>
+            <ComboboxEmpty>No presets found.</ComboboxEmpty>
+          </ComboboxContent>
+        </Combobox>
+      </section>)}
+      {gate('command', 'Command', <section aria-label="Command" data-component="command">
+        <h2>Command</h2>
+        <Command label="Commands">
+          <CommandInput placeholder="Search commands" />
+          <CommandList>
+            <CommandGroup heading="Components">
+              <CommandItem>Add Button<CommandShortcut>↵</CommandShortcut></CommandItem>
+              <CommandItem>Add Dialog</CommandItem>
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup heading="Theme">
+              <CommandItem>Add theme from preset<CommandShortcut>Ctrl+T</CommandShortcut></CommandItem>
+            </CommandGroup>
+          </CommandList>
+          <CommandEmpty>No results.</CommandEmpty>
+        </Command>
+      </section>)}
+      {gate('hover-card', 'Hover Card', <section aria-label="Hover Card" data-component="hover-card">
+        <h2>Hover Card</h2>
+        <p>Built with <HoverCard><HoverCardTrigger href="#ombelle">@ombelle</HoverCardTrigger><HoverCardContent><strong>Ombelle UI</strong><p>Reviewed React components with deterministic presets.</p><HoverCardArrow /></HoverCardContent></HoverCard> presets.</p>
+      </section>)}
+      {gate('context-menu', 'Context Menu', <section aria-label="Context Menu" data-component="context-menu">
+        <h2>Context Menu</h2>
+        <ContextMenu>
+          <ContextMenuTrigger variant="zone" tabIndex={0} aria-label="Layer: Hero card">Right-click or Shift+F10 on a layer</ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem>Duplicate<ContextMenuShortcut>Ctrl+D</ContextMenuShortcut></ContextMenuItem>
+            <ContextMenuItem>Copy as JSX</ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem variant="destructive">Delete<ContextMenuShortcut>Del</ContextMenuShortcut></ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </section>)}
+      </div>
       <section aria-label="Actions" data-component="button">
         <h2>Actions</h2>
         <div className="preset-row">

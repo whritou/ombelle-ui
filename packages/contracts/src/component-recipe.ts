@@ -102,6 +102,22 @@ function validateComposition(recipe: ComponentRecipe): void {
       if ((recipe.props.separatorAfter ?? 3) >= (recipe.props.length ?? 6))
         reject('Place the separator before the last slot', '/props/separatorAfter')
       break
+    case 'combobox':
+      references(recipe.content.items, recipe.props.selection ?? [], '/props/selection')
+      if ((recipe.props.mode ?? 'single') === 'single' && (recipe.props.selection ?? []).length > 1)
+        reject('A single combobox selects one item', '/props/selection')
+      break
+    case 'command':
+      if (recipe.content.groups.some(group => group.items.length === 0)) reject('Every group needs a command', '/content/groups')
+      break
+    case 'context-menu': {
+      const { items } = recipe.content
+      if (!items.some(item => item.kind !== 'separator')) reject('A menu needs an item', '/content/items')
+      if (items[0]?.kind === 'separator' || items.at(-1)?.kind === 'separator')
+        reject('A menu cannot start or end with a separator', '/content/items')
+      references(items, [], '/content/items')
+      break
+    }
     case 'stepper':
       if (recipe.props.current !== undefined && recipe.props.current >= recipe.content.steps.length)
         reject('Choose a step present in the recipe', '/props/current')

@@ -1,9 +1,15 @@
 'use client'
 
-import { Redo2, Undo2 } from 'lucide-react'
-import { useEffect, useRef, type ReactNode, type Ref } from 'react'
+import dynamic from 'next/dynamic'
+import { Redo2, Search, Undo2 } from 'lucide-react'
+import { useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
+import { editableComponents } from '../editor/editable-components'
+import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
 import styles from './editor-shell.module.css'
 import { OverflowMenu, type OverflowItem } from './overflow-menu'
+
+// The palette and its command menu load on first open, so they add nothing to the first page load.
+const CommandPalette = dynamic(() => import('./command-palette'), { ssr: false })
 
 type HistoryAction = {
   disabled: boolean
@@ -21,6 +27,7 @@ export function EditorTopBar({
   menu,
   primary,
   extra,
+  commands,
 }: {
   crumbs: readonly string[]
   nameField: {
@@ -39,8 +46,28 @@ export function EditorTopBar({
   menu: { label: string; items: readonly OverflowItem[] }
   primary: ReactNode
   extra?: ReactNode
+  /** The editor's own command groups for the Ctrl+K palette, such as its style families. */
+  commands?: readonly PaletteGroup[]
 }) {
   const bar = useStickyBarHeight()
+  const [palette, setPalette] = useState(false)
+  const [paletteLoaded, setPaletteLoaded] = useState(false)
+  const openPalette = (open: boolean) => {
+    if (open) setPaletteLoaded(true)
+    setPalette(open)
+  }
+  useEffect(() => {
+    if (!commands) return
+    const toggle = (event: KeyboardEvent) => {
+      if (!isCommandShortcut(event)) return
+      // Ctrl+K also works from text fields; the browser's own use of it gives way.
+      event.preventDefault()
+      setPaletteLoaded(true)
+      setPalette(open => !open)
+    }
+    window.addEventListener('keydown', toggle)
+    return () => window.removeEventListener('keydown', toggle)
+  }, [commands])
   return (
     <header ref={bar} className={styles.topBar}>
       <nav aria-label="Breadcrumb" className={styles.crumbs}>
@@ -85,10 +112,24 @@ export function EditorTopBar({
         >
           <Redo2 aria-hidden="true" size={16} />
         </button>
+        {commands && (
+          // Compact, so the bar keeps one row: the icon and the shortcut. Its name, "Commands Ctrl K",
+          // includes the keys it shows.
+          <button type="button" className={styles.commandsButton} title="Commands (Ctrl+K)"
+            aria-keyshortcuts="Control+K Meta+K" onClick={() => openPalette(true)}>
+            <Search aria-hidden="true" size={14} />
+            <span className="sr-only">Commands </span>
+            <span className={styles.commandsKeys}><kbd>Ctrl</kbd> <kbd>K</kbd></span>
+          </button>
+        )}
         <OverflowMenu id={`${nameField.id}-menu`} label={menu.label} items={menu.items} />
         {extra}
         {primary}
       </div>
+      {commands && paletteLoaded && (
+        <CommandPalette open={palette} onOpenChange={openPalette}
+          groups={paletteGroups(commands, menu.items, editableComponents, typeof window === 'undefined' ? '' : window.location.pathname)} />
+      )}
     </header>
   )
 }

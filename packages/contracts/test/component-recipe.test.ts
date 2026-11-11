@@ -131,3 +131,30 @@ it('gives every editable item list an id, as the editor adds one to each new ite
       if (field.type === 'array' && field.items?.properties)
         expect(Object.keys(field.items.properties), `${component} ${key}`).toContain('id')
 })
+
+const overlays = ['combobox', 'command', 'hover-card', 'context-menu'] as const
+const overlayDraft = (component: (typeof overlays)[number], props: Record<string, unknown> = {}, content?: Record<string, unknown>) => ({
+  ...badge, component, props,
+  content: content ?? defaultRecipeFields(componentRecipeFields(component).content),
+})
+const menuItems = (...kinds: string[]) => kinds.map((kind, index) => ({ id: `item-${index}`, label: 'Item', shortcut: '', kind }))
+
+it.each(overlays)('accepts the default %s recipe', component => {
+  expect(componentRecipeComponents).toContain(component)
+  expect(validateComponentRecipe(overlayDraft(component)).component).toBe(component)
+})
+
+it.each([
+  ['combobox', { selection: ['missing'] }, undefined, '/props/selection'],
+  ['combobox', { mode: 'single', selection: ['liquid-glass', 'ombelle'] }, undefined, '/props/selection'],
+  ['command', {}, { placeholder: 'Search', emptyText: 'None', groups: [{ id: 'empty', heading: 'Empty', items: [] }] }, '/content/groups'],
+  ['context-menu', {}, { zoneText: 'Zone', items: menuItems('separator', 'item') }, '/content/items'],
+  ['context-menu', {}, { zoneText: 'Zone', items: menuItems('item', 'separator') }, '/content/items'],
+  ['context-menu', {}, { zoneText: 'Zone', items: menuItems('separator') }, '/content/items'],
+] as const)('rejects %s with %o %o at %s', (component, props, content, path) => {
+  expect(() => validateComponentRecipe(overlayDraft(component, props, content))).toThrow(expect.objectContaining({ path }))
+})
+
+it('accepts a multiple combobox with several selections', () => {
+  expect(validateComponentRecipe(overlayDraft('combobox', { mode: 'multiple', selection: ['liquid-glass', 'ombelle'] })).component).toBe('combobox')
+})

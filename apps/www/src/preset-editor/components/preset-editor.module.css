@@ -179,6 +179,12 @@
   gap: 10px;
 }
 
+/* The page and width switchers wrap at narrow widths instead of widening the page. */
+.toolbar [data-slot='toggle-group'] {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
 /* Header and global actions share one bar. */
 .editor .draftNote {
   min-width: 0;

@@ -89,6 +89,53 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('InputOTP', { maxLength: length, 'aria-label': content.label },
         ...(after > 0 ? [slots(0, after), node('InputOTPSeparator'), slots(after, length)] : [slots(0, length)]))
     }
+    case 'combobox': {
+      const multiple = props.mode === 'multiple'
+      const selection = props.selection ?? []
+      const item = (entry: (typeof content.items)[number]) => node('ComboboxItem', { value: entry.id }, entry.label)
+      // Options without a group come first, then one group per name, in recipe order.
+      const groups = [...new Set(content.items.map(entry => entry.group.trim()).filter(Boolean))]
+      return node('div', stacked, node('label', { id: localId('label') }, content.label),
+        // The board shows the list filtered on "gla"; other options start unfiltered.
+        node('Combobox', { multiple, defaultValue: multiple ? selection : selection[0] ?? '',
+          defaultQuery: content.items.some(entry => entry.label.toLowerCase().includes('gla')) ? 'gla' : undefined },
+          node('ComboboxInput', { 'aria-labelledby': localId('label'), placeholder: content.placeholder || undefined }),
+          node('ComboboxContent', {},
+            node('ComboboxList', {},
+              ...content.items.filter(entry => !entry.group.trim()).map(item),
+              ...groups.map(group => node('ComboboxGroup', { heading: group }, ...content.items.filter(entry => entry.group.trim() === group).map(item))),
+              ...(props.creatable ?? true ? [node('ComboboxCreate')] : [])),
+            node('ComboboxEmpty', {}, content.emptyText))))
+    }
+    case 'command': {
+      const command = node('Command', { label: content.placeholder, ...(props.presentation === 'dialog' ? {} : { defaultSearch: 'add' }) },
+        node('CommandInput', { placeholder: content.placeholder }),
+        node('CommandList', {}, ...content.groups.flatMap((group, index) => [
+          ...(index ? [node('CommandSeparator')] : []),
+          node('CommandGroup', { heading: group.heading }, ...group.items.map(entry => node('CommandItem', {}, entry.label,
+            ...(entry.shortcut.trim() ? [node('CommandShortcut', {}, entry.shortcut.trim())] : [])))),
+        ])),
+        node('CommandEmpty', {}, content.emptyText))
+      if (props.presentation !== 'dialog') return command
+      return node('CommandDialog', {}, trigger('CommandDialogTrigger', 'Open command menu'), command)
+    }
+    case 'hover-card':
+      return node('p', {}, 'Built with ', node('HoverCard', {},
+        node('HoverCardTrigger', { href: '#' }, content.triggerText),
+        node('HoverCardContent', { side: props.side ?? 'bottom' },
+          node('div', inline, node('span', { 'aria-hidden': 'true', 'data-hover-card-avatar': '' }, content.initials),
+            node('div', {}, node('strong', {}, content.title), node('small', {}, content.handle))),
+          node('p', {}, content.body),
+          ...(props.arrow ?? true ? [node('HoverCardArrow')] : []))), ' presets.')
+    case 'context-menu': {
+      const entries = content.items.map(entry => entry.kind === 'separator' ? node('ContextMenuSeparator')
+        : entry.kind === 'submenu' ? node('ContextMenuSub', {}, node('ContextMenuSubTrigger', {}, entry.label),
+          node('ContextMenuSubContent', {}, node('ContextMenuItem', {}, 'Ombelle'), node('ContextMenuItem', {}, 'Liquid glass')))
+        : node('ContextMenuItem', entry.kind === 'destructive' ? { variant: 'destructive' } : {}, entry.label,
+          ...(entry.shortcut.trim() ? [node('ContextMenuShortcut', {}, entry.shortcut.trim())] : [])))
+      return node('ContextMenu', {}, node('ContextMenuTrigger', { variant: 'zone', tabIndex: 0, 'aria-label': content.zoneText }, content.zoneText),
+        node('ContextMenuContent', {}, ...entries))
+    }
     case 'toast':
       return node('ToastProvider', { duration: props.duration }, node('Toast', { variant: props.variant, defaultOpen: true },
         node('ToastTitle', {}, content.title), node('ToastDescription', {}, content.description),
