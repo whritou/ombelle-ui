@@ -27,7 +27,8 @@ type SheetSizing = {
   setHeight: (height: number) => void
   /** Closes the sheet through its own Close button, which returns focus to the trigger. */
   close: () => void
-  content: React.RefObject<HTMLDivElement | null>
+  /** Lets the sheet follow its content again, when a handle leaves it. */
+  reset: () => void
 }
 const SheetSizingContext = React.createContext<SheetSizing | null>(null)
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
@@ -65,13 +66,20 @@ function useDrag(onMove: (delta: { x: number; y: number }) => void, onEnd?: (del
  */
 export function SheetHandle({ className, label = 'Resize sheet' }: { className?: string; label?: string }) {
   const sizing = React.useContext(SheetSizingContext)
+  const self = React.useRef<HTMLDivElement | null>(null)
   const [measured, setMeasured] = React.useState(50)
+  // The sheet's height in vh, read from the dialog the handle sits in.
+  const measure = () => {
+    const box = self.current?.closest('[role="dialog"]')
+    return box ? Math.round(box.getBoundingClientRect().height / window.innerHeight * 100) : measured
+  }
   const height = sizing?.height ?? measured
+  const current = () => sizing?.height ?? measure()
   const startHeight = React.useRef(height)
-  React.useLayoutEffect(() => {
-    const box = sizing?.content.current
-    if (box && sizing?.height === undefined) setMeasured(Math.round(box.getBoundingClientRect().height / window.innerHeight * 100))
-  }, [sizing])
+  React.useLayoutEffect(() => { if (sizing?.height === undefined) setMeasured(measure()) }, [sizing?.height])
+  // A closed sheet opens again at its content's height, in both editions.
+  const reset = sizing?.reset
+  React.useEffect(() => () => reset?.(), [reset])
   const raw = (dy: number) => startHeight.current - dy / window.innerHeight * 100
   const drag = useDrag(
     ({ y }) => sizing?.setHeight(clamp(Math.round(raw(y)), 10, 95)),
@@ -79,6 +87,7 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
   )
   return (
     <div
+      ref={self}
       role="separator"
       aria-orientation="horizontal"
       aria-label={label}
@@ -90,13 +99,14 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
       data-sheet-dragging={drag.dragging ? '' : undefined}
       className={cn(className)}
       onKeyDown={event => {
-        const next = event.key === 'ArrowUp' ? height + 10 : event.key === 'ArrowDown' ? height - 10 : event.key === 'Home' ? 25 : event.key === 'End' ? 95 : undefined
+        const now = clamp(current(), 25, 95)
+        const next = event.key === 'ArrowUp' ? now + 10 : event.key === 'ArrowDown' ? now - 10 : event.key === 'Home' ? 25 : event.key === 'End' ? 95 : undefined
         if (next === undefined) return
         event.preventDefault()
         sizing?.setHeight(clamp(next, 25, 95))
       }}
       {...drag.handlers}
-      onPointerDown={event => { startHeight.current = height; drag.handlers.onPointerDown(event) }}
+      onPointerDown={event => { startHeight.current = current(); drag.handlers.onPointerDown(event) }}
     />
   )
 }
@@ -138,17 +148,17 @@ function SheetResizeHandle({ side, size, setSize, minSize, maxSize, label = 'Res
 function useSheetSizing({ resizable, side, defaultSize, minSize, maxSize, onSizeChange }: {
   resizable: boolean; side: string; defaultSize: number; minSize: number; maxSize: number; onSizeChange?: (size: number) => void
 }) {
-  const content = React.useRef<HTMLDivElement | null>(null)
   const dismiss = React.useRef<HTMLButtonElement | null>(null)
   const [height, setHeight] = React.useState<number>()
   const [width, setWidth] = React.useState(defaultSize)
   const fit = (value: number) => Math.round(clamp(value, minSize, Math.max(minSize, Math.min(maxSize, (typeof window === 'undefined' ? maxSize + 16 : window.innerWidth) - 16))))
   const setSize = (value: number) => { const next = fit(value); setWidth(next); onSizeChange?.(next) }
-  const sizing: SheetSizing = { height, setHeight, close: () => dismiss.current?.click(), content }
+  const reset = React.useCallback(() => setHeight(undefined), [])
+  const sizing: SheetSizing = { height, setHeight, close: () => dismiss.current?.click(), reset }
   const inline = resizable && (side === 'inline-start' || side === 'inline-end')
   // --sheet-size caps a bottom sheet; the handle also sets its height, which otherwise follows the content.
   const style = inline ? { '--sheet-size': `${fit(width)}px` } : height !== undefined ? { '--sheet-size': `${height}vh`, blockSize: `${height}vh` } : undefined
-  return { sizing, content, dismiss, inline, width: fit(width), setSize, style: style as React.CSSProperties | undefined }
+  return { sizing, dismiss, inline, width: fit(width), setSize, style: style as React.CSSProperties | undefined }
 }
 // end sheet size hook
 
@@ -169,7 +179,7 @@ export function SheetContent({ className, children, side = 'inline-end', size = 
     <SheetPrimitive.Portal>
       <SheetPrimitive.Backdrop data-slot="sheet-overlay" render={(backdropProps, state) => <div {...backdropProps} data-state={openState(state.open)} />} />
       <SheetSizingContext.Provider value={sheet.sizing}>
-        <SheetPrimitive.Popup ref={sheet.content} data-slot="sheet-content" data-side={side} data-size={size} data-resizable={sheet.inline ? '' : undefined}
+        <SheetPrimitive.Popup data-slot="sheet-content" data-side={side} data-size={size} data-resizable={sheet.inline ? '' : undefined}
           className={cn(className)} style={sheet.style ? { ...sheet.style, ...(style as React.CSSProperties) } : style}
           render={(popupProps, state) => <div {...popupProps} data-state={openState(state.open)} />} {...props}>
           {children}

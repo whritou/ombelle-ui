@@ -294,9 +294,17 @@ for (const edition of ['radix', 'base'] as const) {
       const handle = page.getByRole('separator', { name: 'Resize sheet' })
       await expect(handle).toBeVisible()
       await handle.focus()
+      const dialog = page.getByRole('dialog', { name: 'Filter projects' })
+      const percent = async () => Math.round((await dialog.boundingBox())!.height / page.viewportSize()!.height * 100)
+      const opened = await percent()
+      // The handle names the sheet's real height, and Arrow Down makes it shorter.
       const before = Number(await handle.getAttribute('aria-valuenow'))
+      expect(before).toBe(Math.min(95, Math.max(25, opened)))
+      await page.keyboard.press('ArrowDown')
+      await expect(handle).toHaveAttribute('aria-valuenow', String(Math.max(25, before - 10)))
+      expect(await percent()).toBeLessThanOrEqual(Math.max(opened, 25))
       await page.keyboard.press('ArrowUp')
-      await expect(handle).toHaveAttribute('aria-valuenow', String(Math.min(95, before + 10)))
+      await expect(handle).toHaveAttribute('aria-valuenow', String(Math.min(95, Math.max(25, before - 10) + 10)))
       await page.keyboard.press('End')
       await expect(handle).toHaveAttribute('aria-valuenow', '95')
       const box = (await handle.boundingBox())!
@@ -306,6 +314,10 @@ for (const edition of ['radix', 'base'] as const) {
       await page.mouse.up()
       await expect(page.getByRole('dialog', { name: 'Filter projects' })).toHaveCount(0)
       await expect(sheets.getByRole('button', { name: 'Filter projects' })).toBeFocused()
+      // Reopened, the sheet follows its content again, as it did the first time.
+      await sheets.getByRole('button', { name: 'Filter projects' }).click()
+      await expect(handle).toHaveAttribute('aria-valuenow', String(before))
+      expect(await percent()).toBe(opened)
     })
 
     test('the side sheet resizes by keyboard and pointer within its bounds and the viewport', async ({ page }) => {
