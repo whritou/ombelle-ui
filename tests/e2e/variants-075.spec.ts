@@ -200,3 +200,52 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} Breadcrumb collapse`, () => {
+    const visibleItems = (page: Page) => page.getByTestId('v075-breadcrumb').locator('[data-slot="breadcrumb-item"]:not([data-breadcrumb-overflow]):visible')
+
+    test('at 320px the middle folds into a menu of the hidden links, and at 1280px nothing folds', async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 800 })
+      await open(page, edition)
+      const nav = page.getByRole('navigation', { name: 'Component path' })
+      await expect(nav.getByRole('link', { name: 'Home' })).toBeVisible()
+      await expect(nav.getByText('Field', { exact: true })).toBeVisible()
+      const more = nav.getByRole('button', { name: /^Show \d+ more$/ })
+      await expect(more).toBeVisible()
+      const count = Number((await more.getAttribute('aria-label'))!.match(/\d+/)![0])
+      const hidden = await nav.locator('[data-breadcrumb-hidden][data-slot="breadcrumb-item"] a').evaluateAll(links => links.map(link => [link.textContent, link.getAttribute('href')]))
+      expect(hidden).toHaveLength(count)
+      expect(count).toBeGreaterThan(0)
+      const box = (await nav.boundingBox())!
+      const list = (await nav.locator('[data-slot="breadcrumb-list"]').boundingBox())!
+      expect(list.width).toBeLessThanOrEqual(box.width + 1)
+      await more.click()
+      const menu = page.getByRole('menu')
+      await expect(menu).toBeVisible()
+      const entries = await menu.getByRole('menuitem').evaluateAll(items => items.map(item => [item.textContent, item.getAttribute('href')]))
+      expect(entries).toEqual(hidden)
+      await page.keyboard.press('Escape')
+      await page.setViewportSize({ width: 1280, height: 800 })
+      await expect(nav.getByRole('button', { name: /^Show \d+ more$/ })).toHaveCount(0)
+      await expect(visibleItems(page)).toHaveCount(8)
+    })
+
+    test('changing the items while folded measures the new trail', async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 800 })
+      const section = await open(page, edition)
+      const nav = page.getByRole('navigation', { name: 'Component path' })
+      await expect(nav.getByRole('button', { name: /^Show \d+ more$/ })).toBeVisible()
+      await section.getByRole('button', { name: 'Switch trail' }).click()
+      await expect(nav.getByRole('link', { name: 'Home' })).toBeVisible()
+      await expect(nav.getByText('Field', { exact: true })).toBeVisible()
+      const more = nav.getByRole('button', { name: /^Show \d+ more$/ })
+      if (await more.count()) {
+        const count = Number((await more.getAttribute('aria-label'))!.match(/\d+/)![0])
+        expect(count).toBeLessThanOrEqual(3)
+        await expect(nav.locator('[data-breadcrumb-hidden][data-slot="breadcrumb-item"]')).toHaveCount(count)
+      }
+      await expect(nav.getByRole('link', { name: 'Presets' })).toHaveCount(0)
+    })
+  })
+}

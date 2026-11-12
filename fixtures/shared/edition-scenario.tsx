@@ -557,6 +557,35 @@ function TypedConfirm075() {
   )
 }
 
+const trail075 = [
+  ['Home', '#home'], ['Presets', '#presets'], ['Liquid glass', '#glass'], ['Givre', '#givre'],
+  ['Components', '#components'], ['Forms', '#forms'], ['Inputs', '#inputs'],
+]
+const shortTrail075 = [['Home', '#home'], ['Projects', '#projects'], ['Website refresh', '#website'], ['Release notes', '#notes']]
+
+/** A long trail that folds into a menu when it does not fit, for the Breadcrumb collapse tests. */
+function CollapsingTrail075() {
+  const [short, setShort] = React.useState(false)
+  const items = short ? shortTrail075 : trail075
+  return (
+    // As wide as the viewport, so the trail fits at 1280px and folds at 320px.
+    <div data-testid="v075-breadcrumb" style={{ inlineSize: 'calc(100vw - 3rem)' }}>
+      <Breadcrumb collapse="auto" aria-label="Component path">
+        <BreadcrumbList>
+          {items.map(([label, href]) => (
+            <React.Fragment key={href}>
+              <BreadcrumbItem><BreadcrumbLink href={href}>{label}</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+            </React.Fragment>
+          ))}
+          <BreadcrumbItem><BreadcrumbPage>Field</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <button type="button" onClick={() => setShort(value => !value)}>Switch trail</button>
+    </div>
+  )
+}
+
 /** The 0.7.5 variants, for tests/e2e/variants-075.spec.ts. */
 function VariantsScenario075() {
   return (
@@ -608,6 +637,7 @@ function VariantsScenario075() {
         <GrowingDialog075 />
       </div>
       <TypedConfirm075 />
+      <CollapsingTrail075 />
     </section>
   )
 }
