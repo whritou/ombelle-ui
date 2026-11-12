@@ -120,6 +120,10 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ? picker(undefined, content.value)
         : node('ColorPickerPair', { label: content.label }, picker('light', content.value), picker('dark', content.darkValue ?? content.value))
     }
+    case 'code-block':
+      return props.mode === 'command'
+        ? node('CodeBlockCommand', { args: content.args })
+        : node('CodeBlock', { code: content.code, language: props.language, title: content.title, lineNumbers: props.lineNumbers })
     case 'toggle':
       // Recipes carry no icon set, so an icon-only toggle shows its initial and keeps its label as its name.
       return node('Toggle', { variant: props.variant, size: props.size, defaultPressed: props.pressed, 'aria-label': props.iconOnly ? content.label : undefined },
