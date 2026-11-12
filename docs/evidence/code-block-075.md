@@ -34,15 +34,15 @@ Measured again at `6195b68` (`fix(catalog): match Code Block to the boards`), wh
 | `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | 449.4 kB | +8.9 kB |
 | `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | 847.3 kB | **+10.0 kB, at the limit** |
 
-### Accepted overage: `/editor/component/button`, and `/components/accordion` at the limit
+### Accepted overages: `/editor/component/button` and `/components/accordion`
 
 `/editor/component/button` grows by 10.4 kB gzip at `6195b68` (10.3 kB at `84e3c69`), over the 10 kB limit. The overage is accepted by a controller ruling and is to be reported to the user; it is not resolved in this sub-project.
 
-`/components/accordion` grows by 10.0 kB at `6195b68` (9.9 kB at `84e3c69`). Both figures are rounded to 0.1 kB, so the route is at the limit and may be up to 0.1 kB over it. It is recorded here with the same cause: the Code Block template source the catalog routes ship, which `6195b68` grew by about 300 bytes (`role="region"` on the code `pre` and the keyword span around the command runner, in both editions, plus their stylesheet rules). It is reported to the user with the button route; it was not reviewed separately.
+`/components/accordion` grows by 10.0 kB at `6195b68` (9.9 kB at `84e3c69`). Both figures are rounded to 0.1 kB, so the route is at the limit and may be up to 0.1 kB over it. It is recorded here with the same cause: the Code Block template source the catalog routes ship, which `6195b68` grew by about 300 bytes (`role="region"` on the code `pre` and the keyword span around the command runner, in both editions, plus their stylesheet rules). The controller ruling accepts this overage too, with the button route's, and both are to be reported to the user.
 
-- Most of the growth on the four catalog routes (8.6 to 8.9 kB) came before the website swaps: the Code Block template source and recipe description the site ships in the catalog.
-- The swaps add about 1.7 kB on this route. The generated `code-block` module is one file, so the artifact panel's `CodeBlockRoot`, `CodeBlockCopy` and `CodeBlockCode` bring along the Radix Tabs that only `CodeBlockCommand` uses. The deleted site code block, highlighter and Get code terminal offset part of it.
-- The Get code dialog loads `CodeBlockCommand` with a dynamic `import()`, requested when the dialog opens, so it downloads while the code publishes. That keeps `/editor/preset` at +8.9 kB (a static import gave +11.0 kB). On the button route the panel already loads the module, so the loader only adds about 0.3 kB (the static import gave +10.0 kB here).
+- Most of the growth on the four catalog routes came before the website swaps: +8.6 to +8.9 kB at `02fb028`, from the Code Block template source and recipe description the site ships in the catalog. At `6195b68` those routes are at +9.0 (`/editor/preset`), +10.4 (`/editor/component/button`), +8.9 (`/components`) and +10.0 kB (`/components/accordion`).
+- Measured at `84e3c69`, the swaps add about 1.7 kB on the button route (873.5 to 875.2 kB). The generated `code-block` module is one file, so the artifact panel's `CodeBlockRoot`, `CodeBlockCopy` and `CodeBlockCode` bring along the Radix Tabs that only `CodeBlockCommand` uses. The deleted site code block, highlighter and Get code terminal offset part of it.
+- The Get code dialog loads `CodeBlockCommand` with a dynamic `import()`, requested when the dialog opens, so it downloads while the code publishes. Measured at `84e3c69`, that kept `/editor/preset` at +8.9 kB (a static import gave +11.0 kB; +9.0 kB at `6195b68`). On the button route the panel already loads the module, so the loader only added about 0.3 kB at `84e3c69` (the static import gave +10.0 kB there).
 - Options not taken: split the Code Block template so the parts do not carry Radix Tabs (a catalog change, outside this sub-project); lazy-load the component editor's code view (it is visible on first paint, so it would flash).
 - The unused `code-view.module.css` rules were removed; that is stylesheet, not First Load JS.
 
