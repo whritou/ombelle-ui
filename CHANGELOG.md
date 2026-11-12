@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add Toggle, Collapsible, Scroll Area, Button Group and Item in all five style families, with Radix and Base UI editions, recipe editors, source exports and preview scenes. Toggle is a two-state button with `aria-pressed`; Collapsible hides its content from the Tab order while closed; Scroll Area has a styled scrollbar and its viewport is a keyboard stop only while its content overflows; Button Group joins Buttons, Inputs and Select triggers, and a split button is a Button plus a Dropdown Menu trigger around an icon Button; Item is a row of media, text and actions, whose link and actions are siblings inside an Item Group. The Radix editions use @radix-ui/react-toggle 1.2.1, @radix-ui/react-collapsible 1.2.1 and @radix-ui/react-scroll-area 1.4.0; the Base UI editions add no dependency. Installing them needs CLI 0.7.5. Liquid glass remains experimental.
+- Draw the family scrollbar on the Command, Combobox, Select and Sheet lists. Existing projects get it with their next `add` or `theme add`.
+- The website editors and docs use the catalog components, compiled at build time: the site theme toggle is a Toggle; the disclosures in the glass panel, the preset export panel, the preset confirmation and the docs mobile components sidebar are Collapsibles instead of `<details>`; the editor rails and panels, the review drawer, the Get code dialog body and the artifact tabs are Scroll Areas; and Undo and Redo are a Button Group named "History". The site's generated `cn` is now clsx only, without tailwind-merge. The seven measured routes load at most 8.9 kB more JavaScript (gzip), on `/editor/preset`, within the 10 kB limit.
+- The specimen audit judges overflow on each axis, so a scrolling area whose content is taller than its box is no longer reported as cut off.
+
 ## 0.7.4 — 11 November 2026
 
 - Publish CLI 0.7.4: the website install commands now use it, so projects get the new styles from npm. The registry tarball matches the tested candidate, and a fresh registry installation runs successfully.

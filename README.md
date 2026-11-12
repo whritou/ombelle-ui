@@ -1,6 +1,10 @@
 # Ombelle UI foundation
 
-The catalog now includes **45 components**. Release 0.7.3 adds
+The catalog now includes **50 components**. Release 0.7.5 adds Toggle,
+Collapsible, Scroll Area, Button Group and Item in all five families, with both
+editions and recipe editors; install them with **0.7.5** or later. See the
+[primitives design](docs/superpowers/specs/2026-11-12-primitives-075-design.md)
+and the [evidence](docs/evidence/primitives-075.md). Release 0.7.3 adds
 Spinner, Kbd, Empty, Field, Meter (with segmented progress), Stepper, Slider,
 Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card,
 Context Menu and Calendar (with a Date Picker), with
