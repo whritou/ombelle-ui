@@ -40,6 +40,8 @@ for (const edition of ['radix', 'base'] as const) {
       await trigger.focus()
       await page.keyboard.press('Tab')
       expect(await page.evaluate(() => document.activeElement?.getAttribute('href'))).not.toBe('#collapsible-link')
+      await expect(link).toHaveCount(0)
+      await expect(trigger).not.toBeFocused()
       await trigger.focus()
       await page.keyboard.press('Enter')
       await expect(trigger).toHaveAttribute('aria-expanded', 'true')
@@ -78,15 +80,18 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(viewport).toHaveAccessibleName('Short note')
       await expect(viewport).not.toHaveAttribute('tabindex', /.*/)
       await area.hover()
-      await page.waitForTimeout(300)
-      const visible = await area.locator('[data-slot="scroll-area-scrollbar"]').evaluateAll(
-        elements =>
-          elements.filter(element => {
-            const style = getComputedStyle(element)
-            return style.opacity !== '0' && style.visibility !== 'hidden' && style.display !== 'none' && element.getAttribute('data-state') !== 'hidden'
-          }).length,
-      )
-      expect(visible).toBe(0)
+      const visibleBars = () =>
+        area.locator('[data-slot="scroll-area-scrollbar"]').evaluateAll(
+          elements =>
+            elements.filter(element => {
+              const style = getComputedStyle(element)
+              return style.opacity !== '0' && style.visibility !== 'hidden' && style.display !== 'none' && element.getAttribute('data-state') !== 'hidden'
+            }).length,
+        )
+      // Poll for a second so a delayed fade-in would be caught.
+      const seen: number[] = []
+      await expect.poll(async () => { seen.push(await visibleBars()); return Math.max(...seen) }, { timeout: 1000, intervals: [100] }).toBe(0).catch(() => {})
+      expect(Math.max(...seen, await visibleBars())).toBe(0)
     })
 
     test('Button Group joins its children, keeps a single child round and lifts the focused child', async ({ page }) => {
@@ -107,10 +112,27 @@ for (const edition of ['radix', 'base'] as const) {
       expect(end.endEnd).not.toBe('0px')
       const single = await radii(page.getByRole('group', { name: 'Single action' }).getByRole('button', { name: 'Only' }))
       for (const value of Object.values(single)) expect(value).not.toBe('0px')
-      await page.keyboard.press('Tab')
       await first.focus()
       await expect(first).toBeFocused()
       expect(await zIndex(first)).toBeGreaterThan(await zIndex(second))
+    })
+
+    test('a disabled Button Group child keeps the joined border', async ({ page }) => {
+      await open(page, edition)
+      const group = page.getByRole('group', { name: 'Disabled middle' })
+      const middle = group.getByRole('button', { name: 'Middle' })
+      await expect(middle).toBeDisabled()
+      const style = await middle.evaluate(element => {
+        const s = getComputedStyle(element)
+        return {
+          left: s.borderLeftWidth, right: s.borderRightWidth,
+          startStart: s.borderStartStartRadius, endStart: s.borderEndStartRadius,
+          startEnd: s.borderStartEndRadius, endEnd: s.borderEndEndRadius,
+        }
+      })
+      expect(style.left).not.toBe('0px')
+      expect(style.right).not.toBe('0px')
+      expect([style.startStart, style.endStart, style.startEnd, style.endEnd]).toEqual(['0px', '0px', '0px', '0px'])
     })
 
     test('Item group is a list, and a link Item takes one Tab before its action', async ({ page }) => {
@@ -127,9 +149,16 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(link).toBeFocused()
       const ring = await link.evaluate(element => {
         const style = getComputedStyle(element)
-        return { outline: style.outlineStyle, shadow: style.boxShadow }
+        return { outline: style.outlineStyle, outlineWidth: style.outlineWidth, shadow: style.boxShadow }
       })
       expect(ring.outline !== 'none' || ring.shadow !== 'none').toBe(true)
+      await page.getByRole('group', { name: 'Single action' }).getByRole('button', { name: 'Only' }).focus()
+      const rest = await link.evaluate(element => {
+        const style = getComputedStyle(element)
+        return { outline: style.outlineStyle, outlineWidth: style.outlineWidth, shadow: style.boxShadow }
+      })
+      expect(ring).not.toEqual(rest)
+      await link.focus()
       await page.keyboard.press('Tab')
       await expect(action).toBeFocused()
     })

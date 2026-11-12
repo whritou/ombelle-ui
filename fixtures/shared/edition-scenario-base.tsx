@@ -584,6 +584,11 @@ function CatalogExpansionScenario() {
             <ButtonGroupSeparator />
             <Button variant="outline">Right</Button>
           </ButtonGroup>
+          <ButtonGroup data-testid="group-disabled" aria-label="Disabled middle">
+            <Button variant="outline">Before</Button>
+            <Button variant="outline" disabled>Middle</Button>
+            <Button variant="outline">After</Button>
+          </ButtonGroup>
           <ButtonGroup data-testid="group-one" aria-label="Single action">
             <Button variant="outline">Only</Button>
           </ButtonGroup>
