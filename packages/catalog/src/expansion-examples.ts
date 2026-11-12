@@ -18,6 +18,8 @@ export function Example(){return <><Slider defaultValue={[12]} max={24} aria-lab
 export function Example(){return <Collapsible><CollapsibleTrigger>Advanced shadow</CollapsibleTrigger><CollapsibleContent><p>Offset X and Offset Y</p></CollapsibleContent></Collapsible>}`,
   'scroll-area': `import { ScrollArea } from '@/components/ui/scroll-area'
 export function Example(){return <ScrollArea aria-label="Components" style={{ blockSize: 200 }}><ul><li>Accordion</li><li>Alert</li><li>Alert Dialog</li><li>Avatar</li><li>Badge</li><li>Breadcrumb</li></ul></ScrollArea>}`,
+  item: `import { Item, ItemGroup, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item'
+export function Example(){return <ItemGroup aria-label="Presets"><Item variant="outline"><ItemMedia variant="icon" aria-hidden="true">O</ItemMedia><ItemContent><ItemTitle>Ombelle</ItemTitle><ItemDescription>Built-in · stable in light and dark</ItemDescription></ItemContent><ItemActions><button type="button">Apply</button></ItemActions></Item><Item variant="muted" asChild><a href="/presets/studio-warm"><ItemContent><ItemTitle>Studio warm</ItemTitle><ItemDescription>Your preset · edited 2 h ago</ItemDescription></ItemContent></a></Item></ItemGroup>}`,
   'button-group': `import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '@/components/ui/button-group'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'

@@ -14,6 +14,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   toggle: ['toggle'],
   'scroll-area': ['scroll-area', 'scroll-area-viewport', 'scroll-area-scrollbar', 'scroll-area-thumb', 'scroll-area-corner'],
   'toggle-group': ['toggle-group', 'toggle-group-item'],
+  item: ['item', 'item-media', 'item-content', 'item-title', 'item-description', 'item-actions', 'item-group', 'item-separator'],
   'button-group': ['button-group', 'button-group-separator', 'button-group-text'],
   'tag-input': ['tag-input', 'tag-input-list', 'tag-input-tag', 'tag-input-remove', 'tag-input-input', 'tag-input-status'],
   spinner: ['spinner'],
