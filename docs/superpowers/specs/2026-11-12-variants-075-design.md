@@ -16,7 +16,7 @@ The board states its rule: every default stays.
 Decisions taken in brainstorming (12 November 2026):
 
 - **Split:** batches 4a and 4b, two PRs, 4b stacked on 4a.
-- **Breadcrumb auto-collapse** lives in `breadcrumb.tsx`, which becomes a client file that depends on Dropdown Menu, rather than a separate component. The board already composes Breadcrumb with Dropdown Menu.
+- **Breadcrumb auto-collapse** lives in `breadcrumb.tsx`, which becomes a client file that uses the dropdown menu primitive, rather than a separate component. The board already composes Breadcrumb with Dropdown Menu.
 - **Dialog sizes:** below 640px only `lg` and `fullscreen` fill the screen; `sm` and `default` behave as today.
 
 0.7.3's variant conventions carry over:
@@ -65,15 +65,15 @@ Decisions taken in brainstorming (12 November 2026):
 ### Dialog: `DialogBody`, `DialogFooter` and `size`
 
 - **Parts:**
-  - `DialogBody` (`data-slot="dialog-body"`) scrolls with `overflow: auto`. It takes `tabIndex={0}` so keyboard users can scroll it, and is named by the dialog title through `aria-labelledby`.
+  - `DialogBody` (`data-slot="dialog-body"`) scrolls with `overflow: auto`. It is a `role="region"` named by the dialog title through `aria-labelledby`, and takes `tabIndex={0}` while it overflows so keyboard users can scroll it (ruling in the plan: a body that fits adds no empty Tab stop).
   - `DialogFooter` (`data-slot="dialog-footer"`), a row of actions aligned to the end that stacks in reverse below 640px, matching `AlertDialogFooter`.
-- **Layout:** a `DialogContent` that contains a `DialogBody` becomes a column limited to `100dvh - 2rem`, detected with `:has([data-slot='dialog-body'])`; the header and footer stay visible while the body scrolls. When the body overflows, the footer gains a top border, from a scroll-state check on the body (`data-overflowing`, set by a ResizeObserver).
+- **Layout:** a `DialogContent` that contains a `DialogBody` becomes a column limited to `100dvh - 2rem`, detected with `:has(> [data-dialog-body])`, a marker the body renders so the selector names one slot; the header and footer stay visible while the body scrolls. When the body overflows, the footer gains a top border, from a scroll-state check on the body (`data-overflowing`, set by a ResizeObserver).
 - **`size`** on `DialogContent`: `sm` (24rem), `default` (today's width), `lg` (48rem) or `fullscreen` (the viewport less 1rem on each side), set as `data-size`. Below 640px, `lg` and `fullscreen` fill the screen with no radius; `sm` and `default` stay as today.
 - A dialog without the new parts or `size` renders exactly as before.
 
 ### Alert Dialog: `AlertDialogMedia` and typed confirmation
 
-- **`AlertDialogMedia`** (`data-slot="alert-dialog-media"`), placed in `AlertDialogHeader`: an icon tile, `aria-hidden`, with `tone` (`default` or `destructive`) set as `data-tone`.
+- **`AlertDialogMedia`** (`data-slot="alert-dialog-media"`), placed in `AlertDialogHeader`: an icon tile, `aria-hidden`, with `tone` (`default` or `destructive`) set as `data-tone`. With no children it draws an inline SVG for its tone, so Alert Dialog gains no icon dependency.
 - **`AlertDialogConfirmInput({ expected, label })`** (`data-slot="alert-dialog-confirm"`):
   - Renders an instruction, by default "Type <code>{expected}</code> to confirm", as the label of a text input.
   - Through context, `AlertDialogAction` is `disabled` until the input's value equals `expected` exactly, without trimming, case-sensitive. Pasting is allowed. Enter in the input activates the action only when it matches.
@@ -90,7 +90,7 @@ Decisions taken in brainstorming (12 November 2026):
   - When the trail overflows, the middle items fold, from the second item onward, into `BreadcrumbEllipsis`, until the trail fits. The first item and the current page (`BreadcrumbPage`) always stay.
   - `BreadcrumbEllipsis` becomes a Dropdown Menu trigger, a `button` named "Show N more", whose menu lists the hidden items as links in trail order.
   - The server renders the full trail; the collapse applies after mount.
-- **Template:** `breadcrumb.tsx` gains `'use client'` and imports the catalog Dropdown Menu (Radix `DropdownMenu`; Base UI `Menu` in the Base UI edition). Installing Breadcrumb now installs Dropdown Menu. The HTML of the default parts is unchanged.
+- **Template:** `breadcrumb.tsx` gains `'use client'` and imports the menu primitive directly (`@radix-ui/react-dropdown-menu`; Base UI `Menu` in a new Base UI template), drawing the menu under its own slots `breadcrumb-menu` and `breadcrumb-menu-item` with each family's Dropdown Menu rules repeated. Templates never import other catalog components and the catalog has no component-to-component install (ruling in the plan), so installing Breadcrumb installs the `@radix-ui/react-dropdown-menu` package, not the Dropdown Menu component. The HTML of the default parts is unchanged.
 - The docs keep the manual Ellipsis and Dropdown Menu composition for fixed trails.
 
 ## Styles
@@ -104,15 +104,15 @@ A generator in the session scratchpad appends the variant rules to each family s
 
 | Component | New fields |
 | --- | --- |
-| `checkbox` | `option` (`none`, `row` or `card`), `description` (string) |
+| `checkbox` | `option` (`none`, `row` or `card`), `description` (content string) |
 | `switch` | `size` (`default` or `sm`) |
-| `progress` | `size`, `tone`, `label` (boolean), `value` (boolean) |
+| `progress` | `size`, `tone`, `showLabel` (boolean), `showValue` (boolean); the recipe already has an integer `value` prop |
 | `popover` | `arrow` (boolean) |
 | `dialog` | `size`, `footer` (boolean), `scrollingBody` (boolean) |
-| `alert-dialog` | `media` (`none`, `default` or `destructive`), `confirmText` (string; empty for none) |
+| `alert-dialog` | `media` (`none`, `default` or `destructive`), `confirmText` (content string; empty for none) |
 | `breadcrumb` | `collapse` (`none` or `auto`) |
 
-For each field, `recipe-specimen.ts` builds a specimen, the component editor shows a control using the existing control types, and validation rejects unknown values. A `checkbox` recipe with `option` other than `none` requires a label. Every default keeps today's specimen and stable hash.
+New fields have no schema default, and the 0.7.5 gate checks for them in `props` and `content`. For each field, `recipe-specimen.ts` builds a specimen, the component editor shows a control using the existing control types, and validation rejects unknown values. A `checkbox` recipe with `option` other than `none` requires a label. Every default keeps today's specimen and stable hash.
 
 ## Website
 
@@ -123,7 +123,7 @@ For each field, `recipe-specimen.ts` builds a specimen, the component editor sho
   - the `window.confirm` before replacing recovery data, with destructive media.
 - **Switch `sm` and `CheckboxOption`:** in `editor/components/catalog-properties.tsx`, boolean fields become `sm` Switches in horizontal Field rows, and multi-choice fields become `CheckboxOption` rows, replacing its native checkboxes.
 - **Progress and `PopoverArrow`:** no hand-built equivalent exists in the editors or docs; they ship to the preview scenes and the gallery only.
-- `wwwUiComponents` in `scripts/generate-www-ui.ts` gains `dialog`, `alert-dialog`, `breadcrumb`, `switch`, `checkbox` and `field`; Breadcrumb's Dropdown Menu compiles with it as a registry dependency.
+- `wwwUiComponents` in `scripts/generate-www-ui.ts` gains `dialog`, `alert-dialog`, `breadcrumb`, `switch`, `checkbox` and `field`; Breadcrumb carries its own menu, so no Dropdown Menu component is compiled for it.
 
 ## Preview scenes and gallery
 
