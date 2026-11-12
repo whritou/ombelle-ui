@@ -249,12 +249,14 @@ export function ButtonEditor() {
       </p>}
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
-        <ScrollArea className={`www-scroll ${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
+        <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
+          <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
           <div className={styles.railContent}>
           <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit} measured={measured.button} previewMode={view.mode}
             onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
           </div>
         </ScrollArea>
+        </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
           <section className={`${styles.previewSection} ${view.panel === 'code' ? styles.mobileHiddenPreview : ''}`} aria-labelledby="preview-title">
             <h2 id="preview-title" className={styles.srOnly}>Live preview</h2>

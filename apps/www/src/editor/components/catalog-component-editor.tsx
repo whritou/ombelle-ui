@@ -25,6 +25,7 @@ import { ComponentNavigation } from './component-navigation'
 import { EditorTabs } from './editor-tabs'
 import { PreviewFrame } from './preview-frame'
 import styles from './button-editor.module.css'
+import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
 
 type History = { past: ComponentRecipe[]; present: ComponentRecipe; future: ComponentRecipe[] }
 
@@ -144,8 +145,12 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
       <EditorTabs active={view.panel} onChange={panel => setView(previous => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label={`${name} inspector`}>
-          <CatalogProperties recipe={recipe} measured={measured} previewMode={view.mode} update={edit} />
-          {error && <p role="alert" className="fieldError">{error}</p>}
+          <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
+            <div className={styles.railContent}>
+              <CatalogProperties recipe={recipe} measured={measured} previewMode={view.mode} update={edit} />
+              {error && <p role="alert" className="fieldError">{error}</p>}
+            </div>
+          </ScrollArea>
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
           <section className={`${styles.previewSection} ${view.panel === 'code' ? styles.mobileHiddenPreview : ''}`} aria-label="Live preview">

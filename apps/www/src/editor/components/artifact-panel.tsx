@@ -103,7 +103,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
       {notice && <p className="artifactNote" data-testid="experimental-notice">{notice}</p>}
       {contrast && <p className="artifactNote" role="status">{contrast}</p>}
       {result ? <>
-        <ScrollArea className="www-scroll artifactTabsScroll" aria-label="Artifact files">
+        <ScrollArea className="www-scroll www-scroll-x artifactTabsScroll" aria-label="Artifact files">
         <div className="artifactTabs" role="tablist" aria-label="Generated artifacts">
           {tabs.map((item) => <button key={item} type="button" role="tab" id={`artifact-${item.replaceAll(' ', '-')}`}
             aria-selected={tab === item} aria-controls="artifact-panel" tabIndex={tab === item ? 0 : -1}

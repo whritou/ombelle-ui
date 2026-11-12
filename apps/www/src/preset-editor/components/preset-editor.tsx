@@ -420,7 +420,8 @@ export default function PresetEditor() {
         </div>
       )}
       <div className={styles.workbench}>
-        <ScrollArea aria-label="Preset inspector" className={`www-scroll ${styles.panel}`}>
+        <section aria-label="Preset inspector" className={styles.panel}>
+          <ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
           <div className={styles.panelContent}>
           <InspectorSection id="inspector-family" title="Style family">
             <FamilyPicker value={draft.family} onChange={family} />
@@ -467,7 +468,8 @@ export default function PresetEditor() {
             <DesignControls {...controlProps} section="depth" />
           </InspectorSection>
           </div>
-        </ScrollArea>
+          </ScrollArea>
+        </section>
         <div className={styles.canvas}>
           <div className={styles.preview}>
             <div className={`${styles.toolbar} ${styles.previewBar}`}>

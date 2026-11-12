@@ -70,8 +70,9 @@
 .primary { min-width: 0; display: grid; gap: 1.25rem; }
 /* Preview and output read as cards; the rail stays beside them while scrolling. */
 .previewSection, .codeSection { border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); padding: 1.25rem; box-shadow: var(--shadow-soft); }
-.rail[data-slot='scroll-area'] { position: sticky; top: calc(var(--editor-bar-height, 0px) + 1rem); max-height: calc(100dvh - var(--editor-bar-height, 0px) - 2rem); border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
-.rail [data-slot='scroll-area-viewport'] { overscroll-behavior: contain; }
+.rail { position: sticky; top: calc(var(--editor-bar-height, 0px) + 1rem); }
+.railScroll[data-slot='scroll-area'] { max-height: calc(100dvh - var(--editor-bar-height, 0px) - 2rem); border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.railScroll [data-slot='scroll-area-viewport'] { overscroll-behavior: contain; }
 .railContent { padding: .25rem 1rem 0; }
 .rail section:last-child { border-bottom: 0; }
 .sectionTitle { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
@@ -184,7 +185,8 @@
   .workspace { display: block; min-height: 0; padding-top: 1rem; }
   .primary { padding: 0; }
   .previewSection, .codeSection { padding: 1rem; }
-  .rail[data-slot='scroll-area'] { position: static; max-height: none; }
+  .rail { position: static; }
+  .railScroll[data-slot='scroll-area'] { max-height: none; }
   .railContent { padding: .25rem 1rem; }
   .root :global(.mobileTabs) { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
   .root :global(.mobileTabs) button { border: 0; border-bottom: 3px solid transparent; background: none; padding: .8rem .4rem; color: var(--slate); font-weight: 600; }

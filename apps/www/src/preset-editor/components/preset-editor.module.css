@@ -228,16 +228,18 @@
   gap: 20px;
   align-items: start;
 }
-.panel[data-slot='scroll-area'] {
-  /* The site header scrolls away on editor pages. */
+.panel {
+  /* The site header scrolls away on editor pages. A wrapper holds it: Radix sets its own position on the Scroll Area root. */
   position: sticky;
   top: calc(var(--editor-bar-height, 0px) + 16px);
+}
+.panelScroll[data-slot='scroll-area'] {
   max-height: calc(100dvh - var(--editor-bar-height, 0px) - 32px);
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--card);
 }
-.panel [data-slot='scroll-area-viewport'] {
+.panelScroll [data-slot='scroll-area-viewport'] {
   overscroll-behavior: contain;
 }
 .panelContent {

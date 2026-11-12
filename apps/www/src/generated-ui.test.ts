@@ -34,6 +34,9 @@ it('compiles the same catalog component sources on every build', async () => {
     'lib/utils.ts',
   ].sort())
   expect(first['components/ui/slider.tsx']).toContain("from '../../lib/utils'")
+  // The site needs no Tailwind conflict merging, so its cn is clsx only and tailwind-merge stays out of the bundles.
+  expect(first['lib/utils.ts']).toContain("from 'clsx'")
+  expect(first['lib/utils.ts']).not.toContain('tailwind-merge')
 })
 
 it('defines in the site stylesheet every token the compiled styles read without a fallback', async () => {
