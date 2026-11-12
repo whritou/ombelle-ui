@@ -95,10 +95,9 @@ function validateComposition(recipe: ComponentRecipe): void {
     case 'color-picker':
       if (recipe.content.label.trim() === '') reject('Name the color picker', '/content/label')
       if (!isParsableColor(recipe.content.value)) reject('Enter a hex, rgb() or oklch() color', '/content/value')
-      if (recipe.content.darkValue !== undefined) {
-        if (recipe.props.paired === false) reject('A dark value needs a paired picker', '/content/darkValue')
-        if (!isParsableColor(recipe.content.darkValue)) reject('Enter a hex, rgb() or oklch() color', '/content/darkValue')
-      }
+      // An unpaired picker ignores its dark value, so the editor can switch the pair off and back on.
+      if (recipe.props.paired !== false && recipe.content.darkValue !== undefined && !isParsableColor(recipe.content.darkValue))
+        reject('Enter a hex, rgb() or oklch() color', '/content/darkValue')
       break
     case 'scroll-area':
       if (recipe.content.label.trim() === '') reject('Name the scroll area', '/content/label')

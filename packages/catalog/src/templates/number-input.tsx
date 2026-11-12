@@ -71,7 +71,9 @@ export function NumberInput({
   // A controlled value from outside resyncs the text, unless the focused field already spells it.
   React.useEffect(() => {
     if (rawText !== undefined || !controlled) return
-    if (focused.current && parseNumberText(textRef.current) === value) return
+    // A parent may store its own parse of the text ("1." as 1): the focused field keeps what was typed.
+    const typed = textRef.current
+    if (focused.current && (parseNumberText(typed) === value || (value !== null && Number.parseFloat(typed) === value))) return
     setText(show(value))
     setBlurredInvalid(false)
   }, [controlled, value, rawText])

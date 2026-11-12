@@ -89,3 +89,33 @@ Windows 11, Node 24.19.0, pnpm 11.25.0 through corepack, bundled Chromium. Each 
 | Specimen audit | `OMBELLE_AUDIT_COMPONENTS=number-input,color-picker pnpm test:specimen-audit` | No findings (see above) |
 
 The "restores raw draft" editor test showed that a remounted Number Input lost a stored half-typed value such as `-`. The `text` prop fixes it; the test now reaches its baseline failure (the 0.5 radius) after `-` comes back on reload, undo and redo.
+
+## Final review fixes
+
+A whole-branch review found one critical issue and six important ones. Each fix has a test that fails without it:
+
+| Finding | Fix | Test |
+| --- | --- | --- |
+| In the preset editor, the picker's popover opened under the token panel, which is a native `popover="auto"` in the top layer, and a click on it dismissed the panel | The popover is portalled into the nearest native popover or open dialog around the picker; `container` overrides this | `preset-editor.spec.ts`, "edits a token with its Color Picker inside the token panel, without closing the panel" |
+| Liquid glass edge tokens (`oklch(… / 14%)`) read as invalid and lost their alpha on edit | `parseColor` reads an OKLCH or RGB alpha, edits keep it, and the swatch shows it | `color-math.test.ts` alpha cases; `color-picker.test.ts` glass edge |
+| The editors offered RGB, which presets and recipes cannot store | A `formats` prop; the three editors pass `['oklch', 'hex']` | The preset-editor test checks the format options |
+| The recipe's "Light and dark pair" option could not be switched off | An unpaired recipe ignores its dark value | `component-recipe.test.ts` |
+| In Hex or RGB, the hue drifted at the dark and pale edges | The picker keeps its own HSV while the value is the one it wrote | `editor-inputs-075.spec.ts`, "keeps its hue in Hex format at the dark and pale edges" |
+| The live region announced the previous colour after a swatch, a pick or a keyboard hue step | The announcement is taken after the change renders | "announces the new contrast after a swatch" |
+| A parent storing `parseFloat` turned `1.` into `1` | A focused field keeps its text when the incoming value equals its loose parse | "keeps a trailing decimal point when its parent stores its own parse" |
+
+Four of the review's minor findings were also fixed:
+
+- `maxLength` reaches the text field.
+- The format field follows a value set from outside.
+- The printed contrast ratio is rounded down, so it never shows a level the colour misses.
+- The site's API line lists `text`.
+
+Results after the fixes:
+
+| Check | Result |
+| --- | --- |
+| `editor-inputs-075.spec.ts`, both editions | 28 passed |
+| Preset-editor tests that the fixes touch | Pass, apart from the two recorded baseline failures: the 0.5 radius, and the axe step of the 320 pixel reflow test |
+| Contracts, catalog, compiler and website unit tests | Pass. `preview-protocol.test.ts` timed out in its setup under the combined run and passed when run alone |
+| Foundation inventory and groups | 50 passed; the browser case total is now 685 |

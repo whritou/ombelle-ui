@@ -141,7 +141,7 @@ export function CatalogAppearance({ recipe, glass, measured = {}, previewMode = 
           return <div className="be-color-role" key={role}>
             <label htmlFor={id} className="be-color-role-name">{label}</label>
             <div className="be-color-chip" data-inherited={value === '' || undefined}>
-              <ColorPicker id={id} label={label} value={value} placeholder={colorPlaceholder(rendered[colorDimensionFor[role]], mode, previewMode, 'Preset')}
+              <ColorPicker id={id} label={label} value={value} formats={['oklch', 'hex']} maxLength={80} placeholder={colorPlaceholder(rendered[colorDimensionFor[role]], mode, previewMode, 'Preset')}
                 onValueChange={next => updateColor(role, next)} onInvalid={text => updateColor(role, text.trim())} />
               {value && <button type="button" className="colorReset" aria-label={`Reset ${label.toLowerCase()} color`}
                 onClick={() => { document.getElementById(id)?.focus(); updateColor(role, '') }}>

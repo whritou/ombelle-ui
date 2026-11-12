@@ -95,7 +95,7 @@ Each family file draws the trigger row from the family Input, the popover from t
 | Number Input | `min`, `max`, `step`, `unit` (`none`, `px`, `ms`, `%`, `deg`), `value` | `label`, `hint` |
 | Color Picker | `format`, `paired` (boolean), `contrast` (boolean), `swatches` (0 to 8), `eyeDropper` (boolean) | `label`, `value`, `darkValue` |
 
-`validateComposition` rejects `min` greater than `max`, a Number Input value outside its range, a Color Picker `value` or `darkValue` that does not parse, and `darkValue` without `paired`.
+`validateComposition` rejects `min` greater than `max`, a Number Input value outside its range, and a Color Picker `value` (or, when paired, `darkValue`) that does not parse. An unpaired recipe ignores its `darkValue` (changed during implementation, so the editor can switch the pair off).
 
 ## Website
 

@@ -32,7 +32,7 @@ describe('colour maths', () => {
   })
 
   it('agrees with the contracts parser', () => {
-    for (const text of ['#1d4ed8', '#abc', '#ABCDEF', 'rgb(29 78 216)', 'rgb(29, 78, 216)', 'oklch(55% 0.22 6)', 'oklch(0.55 0.22 6)',
+    for (const text of ['#1d4ed8', '#abc', '#ABCDEF', 'rgb(29 78 216)', 'rgb(29, 78, 216)', 'oklch(55% 0.22 6)', 'oklch(0.55 0.22 6)', 'oklch(0.97 0.004 350 / 14%)', 'oklch(0.5 0.1 20 / 0.4)',
       'red', '#12345', 'rgb(1 2)', 'rgb(300 0 0)', 'rgb(1, 2 3)', 'hsl(0 0% 0%)', 'oklch(1 2)', 'oklch(140% 0.1 20)', '', 'oklch(0.7 0.4 150)'])
       expect(math.parseColor(text) !== null, text).toBe(isParsableColor(text))
   })
@@ -79,5 +79,27 @@ describe('colour maths', () => {
     expect(math.hsvToRgb({ h: 0, s: 100, v: 100 })).toEqual({ r: 255, g: 0, b: 0 })
     expect(math.hsvToRgb({ h: 240, s: 100, v: 50 })).toEqual({ r: 0, g: 0, b: 127.5 })
     expect(math.rgbToHsv({ r: 0, g: 255, b: 0 })).toEqual({ h: 120, s: 100, v: 100 })
+  })
+})
+
+describe('alpha, kept but not edited', () => {
+  it('reads an OKLCH or RGB alpha and writes it back in every format but hex', () => {
+    expect(math.parseColor('oklch(0.97 0.004 350 / 14%)')!.alpha).toBeCloseTo(0.14)
+    expect(math.parseColor('oklch(0.97 0.004 350 / 0.5)')!.alpha).toBe(0.5)
+    expect(math.parseColor('rgb(29 78 216 / 50%)')!.alpha).toBe(0.5)
+    expect(math.parseColor('#1d4ed8')!.alpha).toBe(1)
+    expect(math.parseColor('oklch(0.5 0.1 20 / 140%)')).toBeNull()
+    const rgb = { r: 29, g: 78, b: 216 }
+    expect(math.formatColor(rgb, 'oklch', 0.14)).toBe('oklch(0.488 0.217 264.4 / 14%)')
+    expect(math.formatColor(rgb, 'rgb', 0.5)).toBe('rgb(29 78 216 / 50%)')
+    expect(math.formatColor(rgb, 'oklch', 1)).toBe('oklch(0.488 0.217 264.4)')
+  })
+})
+
+describe('contrast level and its printed ratio agree', () => {
+  it('judges the level on the unrounded ratio and never prints a ratio above the level it reaches', () => {
+    expect(math.contrastLevel(4.4996)).toBe('AA large')
+    expect(math.formatRatio(4.46)).toBe('4.4')
+    expect(math.formatRatio(21)).toBe('21.0')
   })
 })

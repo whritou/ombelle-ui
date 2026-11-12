@@ -185,7 +185,7 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family
                 <div className="be-color-cell" key={mode}>
                   <label htmlFor={`color-${key}`} className="be-chip-mode">{modeLabel}</label>
                   <div className="be-color-chip" data-inherited={overridden ? undefined : 'true'} data-invalid={invalid || undefined}>
-                    <ColorPicker id={`color-${key}`} label={name} value={overridden ? value : ''}
+                    <ColorPicker id={`color-${key}`} label={name} value={overridden ? value : ''} formats={['oklch', 'hex']} maxLength={80}
                       placeholder={state === 'base' ? colorPlaceholder(measured[colorDimensionFor[role]], mode, previewMode, fallback) : fallback}
                       title={overridden ? undefined : state === 'base' ? `Preset: ${value}` : `Family ${state} color, from ${value}`}
                       data-overridden={overridden || undefined} aria-invalid={invalid || undefined} aria-describedby={describedBy}

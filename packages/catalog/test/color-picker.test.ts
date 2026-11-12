@@ -65,6 +65,16 @@ describe('Color Picker', () => {
     expect(html).not.toContain('aria-invalid')
   })
 
+  it.each(editions)('%s keeps a transparent glass edge colour valid', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.ColorPicker, { label: 'Glass edge', value: 'oklch(0.97 0.004 350 / 14%)', onValueChange: () => {} }))
+    expect(html).not.toContain('aria-invalid')
+    expect(html).toMatch(/background:oklch\(0\.97 0\.004 350 \/ 14%\)/)
+  })
+
+  it.each(editions)('%s forwards maxLength to its text field', (_, ui) => {
+    expect(renderToStaticMarkup(h(ui.ColorPicker, { label: 'Primary', defaultValue: '#000000', maxLength: 80 }))).toMatch(/<input[^>]*maxLength="80"/)
+  })
+
   it.each(editions)('%s labels a pair and its light and dark pickers', (_, ui) => {
     const html = renderToStaticMarkup(h(ui.ColorPickerPair, { label: 'Primary' },
       h(ui.ColorPicker, { mode: 'light', defaultValue: 'oklch(0.55 0.22 6)' }),

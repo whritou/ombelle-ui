@@ -64,6 +64,47 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(input).not.toHaveAttribute('aria-invalid', 'true')
     })
 
+    test('Number Input keeps a trailing decimal point when its parent stores its own parse', async ({ page }) => {
+      await open(page, edition)
+      const input = page.getByRole('spinbutton', { name: 'Gap' })
+      // fill leaves the caret at the end; End would jump to the maximum, as a spinbutton key.
+      await input.fill('1.5')
+      await page.keyboard.press('Backspace')
+      await expect(input).toHaveValue('1.')
+      await page.keyboard.type('7')
+      await expect(input).toHaveValue('1.7')
+    })
+
+    test('Color Picker keeps its hue in Hex format at the dark and pale edges', async ({ page }) => {
+      await open(page, edition)
+      const fixture = page.getByTestId('color-fixture')
+      await fixture.getByRole('button', { name: 'Open Accent color picker' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Accent color' })
+      await dialog.getByRole('combobox', { name: 'Color format' }).selectOption('hex')
+      const hue = dialog.getByRole('slider', { name: 'Hue' })
+      const area = dialog.getByRole('slider', { name: 'Accent saturation and brightness' })
+      await area.focus()
+      // A first step writes a hex value; the hue it keeps is the one to compare with.
+      await page.keyboard.press('ArrowRight')
+      const hueText = await hue.getAttribute('aria-valuetext')
+      for (let i = 0; i < 99; i++) await page.keyboard.press('ArrowDown')
+      await expect(area).toHaveAttribute('aria-valuetext', /brightness [0-2]%$/)
+      for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowUp')
+      await expect(hue).toHaveAttribute('aria-valuetext', hueText!)
+      for (let i = 0; i < 12; i++) await page.keyboard.press('Shift+ArrowLeft')
+      await expect(area).toHaveAttribute('aria-valuetext', /^Saturation 0%/)
+      for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowRight')
+      await expect(hue).toHaveAttribute('aria-valuetext', hueText!)
+    })
+
+    test('Color Picker announces the new contrast after a swatch', async ({ page }) => {
+      await open(page, edition)
+      await page.getByTestId('color-fixture').getByRole('button', { name: 'Open Accent color picker' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Accent color' })
+      await dialog.getByRole('button', { name: 'Ink' }).click()
+      await expect(dialog.locator('[aria-live="polite"]')).toHaveText('16.8:1 on white, AAA')
+    })
+
     test('Color Picker area, hue, format, swatches and contrast drive the value', async ({ page }) => {
       await open(page, edition)
       const fixture = page.getByTestId('color-fixture')
@@ -97,7 +138,7 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(blue).toHaveAttribute('aria-pressed', 'true')
       await dialog.getByRole('button', { name: 'Ink' }).click()
       await expect(report).toHaveText('oklch(0.22 0.012 275)')
-      await expect(dialog.getByText('16.8:1')).toBeVisible()
+      await expect(dialog.locator('strong', { hasText: '16.8:1' })).toBeVisible()
       await expect(dialog.getByText('AAA', { exact: true })).toBeVisible()
 
       await dialog.getByRole('combobox', { name: 'Color format' }).selectOption('hex')

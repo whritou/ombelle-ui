@@ -166,13 +166,13 @@ export const expansionDocs = {
   },
   'number-input': {
     name: 'Number Input', description: 'A number field with steppers, an optional unit and keyboard stepping.',
-    api: 'NumberInput (value, defaultValue, onValueChange(value, { text, valid }), min, max, step, largeStep, unit, decrementLabel, incrementLabel)',
+    api: 'NumberInput (value, defaultValue, text, onValueChange(value, { text, valid }), min, max, step, largeStep, unit, decrementLabel, incrementLabel)',
     states: 'Value, empty, invalid, at a bound, disabled, focus', basis: 'Native text input with role spinbutton, one template for both editions', client: true,
     usage: expansionExamples['number-input'], minimumCli: '0.7.5',
   },
   'color-picker': {
     name: 'Color Picker', description: 'A colour field with a popover: area, hue, formats, eyedropper, swatches and contrast.',
-    api: 'ColorPicker (value, defaultValue, onValueChange, onInvalid, label, placeholder, format, swatches, contrastWith, contrastLabel, eyeDropper, mode), ColorPickerSwatches, ColorPickerPair (label)',
+    api: 'ColorPicker (value, defaultValue, onValueChange, onInvalid, label, placeholder, format, swatches, formats, contrastWith, contrastLabel, eyeDropper, mode, container), ColorPickerSwatches, ColorPickerPair (label)',
     states: 'Valid, invalid, empty with placeholder, open, disabled, focus', basis: 'Reviewed Radix Popover and Slider; Base UI Popover and Slider in the Base UI edition', client: true,
     usage: expansionExamples['color-picker'], minimumCli: '0.7.5',
   },

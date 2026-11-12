@@ -515,6 +515,7 @@ const editorInputSwatches = [
 function EditorInputsScenario() {
   const [radius, setRadius] = React.useState<number | null>(12)
   const [report, setReport] = React.useState('')
+  const [gap, setGap] = React.useState<number | null>(1.5)
   const [color, setColor] = React.useState('oklch(0.55 0.22 6)')
   // An editor shortcut sets the value while the popover stays open: Alt+R resets the accent.
   React.useEffect(() => {
@@ -535,6 +536,12 @@ function EditorInputsScenario() {
           }} />
         <output data-testid="number-report">{report}</output>
         <button type="button" onClick={() => setRadius(4)}>Reset radius</button>
+      </div>
+      <div data-testid="loose-number-fixture">
+        <label htmlFor="fixture-gap">Gap</label>
+        {/* A parent that stores its own parse of the text, as a form library would: "1." is stored as 1. */}
+        <NumberInput id="fixture-gap" value={gap} min={0} max={100} step={0.5}
+          onValueChange={(_, details) => setGap(Number.isNaN(Number.parseFloat(details.text)) ? null : Number.parseFloat(details.text))} />
       </div>
       <div data-testid="color-fixture">
         <ColorPicker label="Accent" value={color} onValueChange={setColor} swatches={editorInputSwatches}

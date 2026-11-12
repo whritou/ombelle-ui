@@ -964,6 +964,26 @@ test('keeps focus on a non-core token field after resetting it', async ({ page }
   await page.getByRole('button', { name: 'Reset light card', exact: true }).click()
   await expect(light).toBeFocused()
 })
+test('edits a token with its Color Picker inside the token panel, without closing the panel', async ({ page }) => {
+  await page.goto(url)
+  await ready(page)
+  await page.getByRole('button', { name: /^Primary colors/ }).click()
+  const panel = page.locator('#preset-color-panel-primary')
+  await expect(panel).toBeVisible()
+  const light = page.getByLabel('Light primary', { exact: true })
+  const before = await light.inputValue()
+  await page.getByRole('button', { name: 'Open Light primary color picker' }).click()
+  const picker = page.getByRole('dialog', { name: 'Light primary color' })
+  await expect(picker).toBeVisible()
+  // Each action fails if the picker is drawn under the panel; a click outside the panel would close it.
+  await picker.getByRole('slider', { name: 'Light primary saturation and brightness' }).click({ position: { x: 20, y: 20 } })
+  await expect(panel).toBeVisible()
+  await expect(light).not.toHaveValue(before)
+  await picker.getByRole('button', { name: 'Blue' }).click()
+  await expect(panel).toBeVisible()
+  await expect(light).toHaveValue(/^oklch\(/)
+  await expect(picker.getByRole('combobox', { name: 'Color format' }).locator('option')).toHaveText(['OKLCH', 'Hex'])
+})
 test('names warnings on the closed drawer rail and edits the failing token from Checks', async ({ page }) => {
   const draft = setPresetEdit(
     createPresetDraft('flat'),

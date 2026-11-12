@@ -27,6 +27,8 @@ export const fieldId = (path: string) => 'preset' + path.replaceAll('/', '-')
 export const tokenToggleId = 'preset-token-toggle'
 /** Popover that holds a colour token's light and dark fields. */
 export const colorPanelId = (key: string) => 'preset-color-panel-' + key
+/** Presets store hex or OKLCH colours, so the pickers offer only those formats. */
+const storableFormats = ['oklch', 'hex'] as const
 /** The token a colour is read on, for the contrast readout: primary with primaryForeground, and so on. */
 function contrastPair(key: string): string | undefined {
   if (key === 'background') return 'foreground'
@@ -194,6 +196,8 @@ export function TokenList({
                       <div className="preset-input-row">
                         <ColorPicker
                           id={fieldId(path)}
+                          formats={storableFormats}
+                          maxLength={80}
                           mode={mode}
                           label={label}
                           value={value}

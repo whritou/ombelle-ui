@@ -17,8 +17,15 @@ export type ColorFormat = 'oklch' | 'hex' | 'rgb'
 
 const numberPattern = String.raw`[+-]?(?:\d+(?:\.\d*)?|\.\d+)`
 const hexPattern = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
-const rgbPattern = new RegExp(String.raw`^rgb\(\s*(${numberPattern})(?:\s*,\s*|\s+)(${numberPattern})(?:\s*,\s*|\s+)(${numberPattern})\s*\)$`, 'i')
-const oklchPattern = new RegExp(String.raw`^oklch\(\s*(${numberPattern})(%?)\s+(${numberPattern})\s+(${numberPattern})\s*\)$`, 'i')
+const alphaPattern = String.raw`(?:\s*\/\s*(${numberPattern})(%?))?`
+const rgbPattern = new RegExp(String.raw`^rgb\(\s*(${numberPattern})(?:\s*,\s*|\s+)(${numberPattern})(?:\s*,\s*|\s+)(${numberPattern})${alphaPattern}\s*\)$`, 'i')
+const oklchPattern = new RegExp(String.raw`^oklch\(\s*(${numberPattern})(%?)\s+(${numberPattern})\s+(${numberPattern})${alphaPattern}\s*\)$`, 'i')
+/** An alpha of 0–1 or 0–100%, or null when out of range; 1 when absent. */
+const readAlpha = (value: string | undefined, percent: string | undefined) => {
+  if (value === undefined) return 1
+  const alpha = Number(value) / (percent ? 100 : 1)
+  return alpha >= 0 && alpha <= 1 ? alpha : null
+}
 
 const toLinear = (channel: number) => {
   const c = channel / 255
@@ -90,41 +97,50 @@ export function hsvToRgb({ h, s, v }: Hsv): Rgb {
   return { r: f(5), g: f(3), b: f(1) }
 }
 
-/** Reads #rgb, #rrggbb, rgb(r g b), rgb(r, g, b) and oklch(L C H) with L as 0–100% or 0–1; anything else is null. */
-export function parseColor(text: string): { rgb: Rgb; oklch: Oklch; inGamut: boolean } | null {
+/**
+ * Reads #rgb, #rrggbb, rgb(r g b), rgb(r, g, b) and oklch(L C H) with L as 0–100% or 0–1; anything else is null.
+ * The space forms may end in an alpha (`/ 14%` or `/ 0.14`): it is read and kept, never edited.
+ */
+export function parseColor(text: string): { rgb: Rgb; oklch: Oklch; inGamut: boolean; alpha: number } | null {
   const value = text.trim()
   if (hexPattern.test(value)) {
     const digits = value.length === 4 ? [...value.slice(1)].map(d => d + d).join('') : value.slice(1)
     const rgb = { r: parseInt(digits.slice(0, 2), 16), g: parseInt(digits.slice(2, 4), 16), b: parseInt(digits.slice(4, 6), 16) }
-    return { rgb, oklch: rgbToOklch(rgb), inGamut: true }
+    return { rgb, oklch: rgbToOklch(rgb), inGamut: true, alpha: 1 }
   }
   const r = rgbPattern.exec(value)
   if (r) {
     const commas = value.slice(4, -1).match(/,/g)?.length ?? 0
     const channels = [r[1], r[2], r[3]].map(Number)
-    if ((commas !== 0 && commas !== 2) || channels.some(c => c < 0 || c > 255)) return null
+    const alpha = readAlpha(r[4], r[5])
+    if ((commas !== 0 && commas !== 2) || (commas === 2 && r[4] !== undefined) || alpha === null || channels.some(c => c < 0 || c > 255)) return null
     const rgb = { r: channels[0]!, g: channels[1]!, b: channels[2]! }
-    return { rgb, oklch: rgbToOklch(rgb), inGamut: true }
+    return { rgb, oklch: rgbToOklch(rgb), inGamut: true, alpha }
   }
   const o = oklchPattern.exec(value)
   if (o) {
     const oklch = { l: Number(o[1]) / (o[2] ? 100 : 1), c: Number(o[3]), h: wrapHue(Number(o[4])) }
-    if (oklch.l < 0 || oklch.l > 1 || oklch.c < 0) return null
-    return { ...oklchToRgb(oklch), oklch }
+    const alpha = readAlpha(o[5], o[6])
+    if (oklch.l < 0 || oklch.l > 1 || oklch.c < 0 || alpha === null) return null
+    return { ...oklchToRgb(oklch), oklch, alpha }
   }
   return null
 }
 
 const trim = (n: number, digits: number) => String(Number(n.toFixed(digits)) || 0)
 
-/** Hex as lowercase #rrggbb, RGB as rgb(r g b), OKLCH with L and C to 3 decimals and H to 1. */
-export function formatColor(rgb: Rgb, format: ColorFormat): string {
+/**
+ * Hex as lowercase #rrggbb, RGB as rgb(r g b), OKLCH with L and C to 3 decimals and H to 1.
+ * An alpha below 1 is appended as a percentage to RGB and OKLCH; hex has no alpha here.
+ */
+export function formatColor(rgb: Rgb, format: ColorFormat, alpha = 1): string {
+  const suffix = alpha < 1 && format !== 'hex' ? ` / ${trim(alpha * 100, 1)}%` : ''
   const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(c => Math.round(Math.min(255, Math.max(0, c))))
   if (format === 'hex') return '#' + [r, g, b].map(c => c!.toString(16).padStart(2, '0')).join('')
-  if (format === 'rgb') return `rgb(${r} ${g} ${b})`
+  if (format === 'rgb') return `rgb(${r} ${g} ${b}${suffix})`
   const { l, c, h } = rgbToOklch(rgb)
   const chroma = trim(c, 3)
-  return `oklch(${trim(l, 3)} ${chroma} ${chroma === '0' ? '0' : trim(wrapHue(Number(h.toFixed(1))), 1)})`
+  return `oklch(${trim(l, 3)} ${chroma} ${chroma === '0' ? '0' : trim(wrapHue(Number(h.toFixed(1))), 1)}${suffix})`
 }
 
 const luminance = ({ r, g, b }: Rgb) => 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
@@ -132,7 +148,12 @@ const luminance = ({ r, g, b }: Rgb) => 0.2126 * toLinear(r) + 0.7152 * toLinear
 /** The WCAG 2 contrast ratio of two colours, from 1 to 21. */
 export function contrastRatio(a: Rgb, b: Rgb): number {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
-  return Math.round(((hi! + 0.05) / (lo! + 0.05)) * 1000) / 1000
+  return Math.round(((hi! + 0.05) / (lo! + 0.05)) * 1e6) / 1e6
+}
+
+/** A ratio to one decimal, rounded down, so the printed ratio never reaches a level the colour misses. */
+export function formatRatio(ratio: number): string {
+  return (Math.floor(ratio * 10 + 1e-9) / 10).toFixed(1)
 }
 
 export function contrastLevel(ratio: number): 'AAA' | 'AA' | 'AA large' | 'Fails' {
@@ -151,6 +172,7 @@ export function colorStateFromValue(value: string, previousHue: number): { hsv: 
 
 // color-picker-ui:start
 const formatNames: Record<ColorFormat, string> = { oklch: 'OKLCH', hex: 'Hex', rgb: 'RGB' }
+const allFormats: readonly ColorFormat[] = ['oklch', 'hex', 'rgb']
 const syntaxOf = (text: string): ColorFormat | null =>
   /^\s*#/.test(text) ? 'hex' : /^\s*rgb\(/i.test(text) ? 'rgb' : /^\s*oklch\(/i.test(text) ? 'oklch' : null
 
@@ -158,7 +180,7 @@ const syntaxOf = (text: string): ColorFormat | null =>
 function inFormat(text: string, format: ColorFormat): string | null {
   const parsed = parseColor(text)
   if (!parsed) return null
-  return syntaxOf(text) === format ? text.trim() : formatColor(parsed.rgb, format)
+  return syntaxOf(text) === format ? text.trim() : formatColor(parsed.rgb, format, parsed.alpha)
 }
 
 const sameColor = (a: Rgb, b: Rgb) => formatColor(a, 'hex') === formatColor(b, 'hex')
@@ -225,6 +247,16 @@ export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' 
   /** Go to the text field, with the field's own check: an editor's error message and its invalid state. */
   'aria-describedby'?: string
   'aria-invalid'?: boolean | 'true' | 'false'
+  /** The formats the format select offers, such as ['oklch', 'hex'] when only those can be stored (default all three). */
+  formats?: readonly ColorFormat[]
+  /** Goes to the text field. */
+  maxLength?: number
+  /**
+   * Where the popover is portalled. By default it goes into the nearest native popover or open dialog
+   * around the picker, which the browser draws above the page, so the picker's popover stays above it
+   * and clicks inside it do not dismiss it; otherwise into the document body.
+   */
+  container?: HTMLElement | null
 }
 
 /**
@@ -236,37 +268,52 @@ export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' 
 export function ColorPicker({
   value, defaultValue = '', onValueChange, onInvalid, label: ownLabel, placeholder, disabled, name, id,
   format: formatProp, defaultFormat = 'oklch', onFormatChange, swatches = [], contrastWith, contrastLabel,
-  eyeDropper = true, mode, className, children, 'aria-describedby': describedBy, 'aria-invalid': ariaInvalid, ...props
+  eyeDropper = true, mode, className, children, 'aria-describedby': describedBy, 'aria-invalid': ariaInvalid,
+  formats = allFormats, maxLength, container, ...props
 }: ColorPickerProps) {
   const pair = React.useContext(PairContext)
   const label = ownLabel ?? (pair ? (mode ? `${pair.label} · ${mode}` : pair.label) : 'Color')
   const [current, setCurrent] = useControllable(value, defaultValue, onValueChange)
-  const [format, setFormat] = useControllable(formatProp, defaultFormat, onFormatChange)
+  const [chosenFormat, setFormat] = useControllable(formatProp, defaultFormat, onFormatChange)
+  const format = formats.includes(chosenFormat) ? chosenFormat : formats[0] ?? 'oklch'
   const [open, setOpen] = React.useState(false)
-  const [hue, setHue] = React.useState(0)
+  // The picker's own HSV, kept while the value is the one it wrote, so 8-bit hex or RGB rounding cannot move the hue.
+  const [own, setOwn] = React.useState<Hsv | null>(null)
+  const lastWritten = React.useRef<string | null>(null)
+  const [portal, setPortal] = React.useState<HTMLElement | null>(null)
+  const root = React.useRef<HTMLDivElement>(null)
   const [text, setText] = React.useState(current)
   const [formatText, setFormatText] = React.useState<string | null>(null)
   const [announced, setAnnounced] = React.useState('')
+  const [announceTick, setAnnounceTick] = React.useState(0)
+  const announcePending = React.useRef(false)
+  const typingFormat = React.useRef(false)
   const [swatchesOutside, setSwatchesOutside] = React.useState(false)
   const typing = React.useRef(false)
   const pick = React.useRef<AbortController | null>(null)
   const hasEyeDropper = useHasEyeDropper()
 
   const shown = current.trim() === '' && placeholder ? placeholder : current
-  const state = colorStateFromValue(shown, hue)
-  const hsv = state?.hsv ?? { h: hue, s: 0, v: 0 }
+  const parsed = parseColor(shown)
+  const state = colorStateFromValue(shown, own?.h ?? 0)
+  const ownValue = own !== null && lastWritten.current !== null && shown.trim() === lastWritten.current
+  const hsv = ownValue ? own : state?.hsv ?? { h: own?.h ?? 0, s: 0, v: 0 }
   const rgb = state?.rgb ?? null
-
-  // The hue of a chromatic value becomes the remembered hue, so grey, black or white keep it.
-  React.useEffect(() => {
-    if (state && state.hsv.s >= 0.01 && state.hsv.v >= 0.01) setHue(state.hsv.h)
-  }, [state?.hsv.h, state?.hsv.s, state?.hsv.v])
+  const alpha = parsed?.alpha ?? 1
 
   // An outside value resyncs the text field, unless the focused field already spells it.
   React.useEffect(() => {
+    if (!typingFormat.current) setFormatText(null)
     if (typing.current && text.trim() === current.trim()) return
     setText(current)
   }, [current])
+
+  // Announce the readout of the colour now shown, after the change has rendered.
+  React.useEffect(() => {
+    if (!announcePending.current) return
+    announcePending.current = false
+    setAnnounced(readout)
+  }, [announceTick])
 
   React.useEffect(() => () => pick.current?.abort(), [])
 
@@ -277,24 +324,31 @@ export function ColorPicker({
     setFormatText(null)
   }
   const fromHsv = (next: Hsv) => {
-    setHue(next.h)
-    write(formatColor(hsvToRgb(next), format))
+    const written = formatColor(hsvToRgb(next), format, alpha)
+    setOwn(next)
+    lastWritten.current = written
+    write(written)
   }
 
   const contrastTarget = contrastWith ? parseColor(contrastWith) : null
   const ratio = rgb && contrastTarget ? contrastRatio(rgb, contrastTarget.rgb) : null
   const contrastName = contrastLabel ?? contrastWith
-  const readout = ratio === null ? '' : `${ratio.toFixed(1)}:1 on ${contrastName}, ${contrastLevel(ratio)}`
-  const announce = () => setAnnounced(readout)
+  const readout = ratio === null ? '' : `${formatRatio(ratio)}:1 on ${contrastName}, ${contrastLevel(ratio)}`
+  const announce = () => {
+    announcePending.current = true
+    setAnnounceTick(tick => tick + 1)
+  }
 
   const select = (next: string) => {
     const written = inFormat(next, format)
     if (written === null) return
+    lastWritten.current = null
     write(written)
     announce()
   }
 
   const setOpenState = (next: boolean) => {
+    if (next) setPortal(container !== undefined ? container : root.current?.closest<HTMLElement>('[popover], dialog[open]') ?? null)
     setOpen(next)
     if (!next) {
       pick.current?.abort()
@@ -317,7 +371,7 @@ export function ColorPicker({
     }
   }
 
-  const displayedFormat = formatText ?? (syntaxOf(shown) === format && rgb ? shown.trim() : rgb ? formatColor(rgb, format) : '')
+  const displayedFormat = formatText ?? (syntaxOf(shown) === format && rgb ? shown.trim() : rgb ? formatColor(rgb, format, alpha) : '')
   const formatInvalid = formatText !== null && formatText.trim() !== '' && parseColor(formatText) === null
 
   const area = React.useRef<HTMLDivElement>(null)
@@ -341,13 +395,13 @@ export function ColorPicker({
     fromHsv({ ...hsv, ...move })
   }
   const pure = formatColor(hsvToRgb({ h: hsv.h, s: 100, v: 100 }), 'hex')
-  const fill = rgb ? formatColor(rgb, 'hex') : 'transparent'
+  const fill = parsed ? shown.trim() : 'transparent'
 
   const context: PickerContextValue = { rgb, select, swatches, disabled, setSwatchesOutside }
 
   return (
     <PickerContext.Provider value={context}>
-      <div {...props} data-slot="color-picker" data-mode={mode} data-disabled={disabled ? '' : undefined} className={cn(className)}>
+      <div {...props} ref={root} data-slot="color-picker" data-mode={mode} data-disabled={disabled ? '' : undefined} className={cn(className)}>
         <PickerRoot open={open} onOpenChange={setOpenState}>
           <PickerAnchor data-slot="color-picker-trigger" data-mode={mode} data-invalid={invalid ? '' : undefined}>
             <PickerTrigger data-slot="color-picker-preview" aria-label={`Open ${label} color picker`} disabled={disabled}
@@ -363,6 +417,7 @@ export function ColorPicker({
               disabled={disabled}
               autoComplete="off"
               spellCheck={false}
+              maxLength={maxLength}
               value={text}
               onFocus={() => { typing.current = true }}
               onBlur={() => {
@@ -372,13 +427,14 @@ export function ColorPicker({
               onChange={event => {
                 const next = event.target.value
                 setText(next)
+                lastWritten.current = null
                 if (next.trim() === '') setCurrent('')
                 else if (parseColor(next)) setCurrent(next.trim())
                 else onInvalid?.(next)
               }}
             />
           </PickerAnchor>
-          <PickerContent data-slot="color-picker-content" aria-label={`${label} color`}>
+          <PickerContent container={portal} data-slot="color-picker-content" aria-label={`${label} color`}>
             <div
               ref={area}
               data-slot="color-picker-area"
@@ -424,7 +480,7 @@ export function ColorPicker({
                   setFormat(event.target.value as ColorFormat)
                   setFormatText(null)
                 }}>
-                {(Object.keys(formatNames) as ColorFormat[]).map(f => <option key={f} value={f}>{formatNames[f]}</option>)}
+                {formats.map(f => <option key={f} value={f}>{formatNames[f]}</option>)}
               </select>
               <input
                 data-slot="color-picker-value"
@@ -434,15 +490,18 @@ export function ColorPicker({
                 spellCheck={false}
                 disabled={disabled}
                 value={displayedFormat}
+                onFocus={() => { typingFormat.current = true }}
                 onChange={event => {
                   const next = event.target.value
                   setFormatText(next)
                   if (parseColor(next)) {
+                    lastWritten.current = null
                     setCurrent(next.trim())
                     setText(next.trim())
                   }
                 }}
                 onBlur={() => {
+                  typingFormat.current = false
                   if (!formatInvalid) setFormatText(null)
                 }}
               />
@@ -456,7 +515,7 @@ export function ColorPicker({
             {swatches.length > 0 && !swatchesOutside ? <SwatchList /> : null}
             {ratio !== null ? (
               <p data-slot="color-picker-contrast">
-                <strong>{ratio.toFixed(1)}:1</strong> on {contrastName}
+                <strong>{formatRatio(ratio)}:1</strong> on {contrastName}
                 <span data-slot="color-picker-contrast-level" data-level={contrastLevel(ratio).replace(' ', '-').toLowerCase()}>{contrastLevel(ratio)}</span>
                 <span aria-live="polite" style={hidden}>{announced}</span>
               </p>
@@ -529,9 +588,9 @@ function PickerTrigger(props: React.ComponentProps<'button'>) {
   return <PopoverPrimitive.Trigger asChild><button type="button" {...props} /></PopoverPrimitive.Trigger>
 }
 
-function PickerContent(props: React.ComponentProps<'div'>) {
+function PickerContent({ container, ...props }: React.ComponentProps<'div'> & { container?: HTMLElement | null }) {
   return (
-    <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Portal container={container ?? undefined}>
       <PopoverPrimitive.Content align="start" sideOffset={6} {...props} />
     </PopoverPrimitive.Portal>
   )
