@@ -20,17 +20,24 @@ Method: a temporary git worktree at `894a0e4`; `corepack pnpm install --frozen-l
 
 ## Website size, after
 
-Measured at `02fb028` (`feat(preview): show Code Block in the scenes, gallery and site`) with the same method, in this worktree after `corepack pnpm build:packages` and `corepack pnpm generate:preview` (`corepack pnpm run build` in `apps/www` exit 0). The growth covers the whole sub-project, mostly the Code Block template source and recipe description the site ships in the catalog. Every route stays inside the 10 kB gzip limit; the four routes that carry the catalog are within about 1.3 kB of it.
+Measured at `2a68964` (`feat(www): use the catalog Code Block in the docs, editors and Get code`) with the same method: after `corepack pnpm generate:preview` (packages unchanged since `02fb028`), `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 and pnpm 11.25.0.
 
-| Route | Scripts | Before, gzip | After, gzip | Growth |
-| --- | --- | --- | --- | --- |
-| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | +8.9 kB |
-| `/editor/component` | 10 | 241.1 kB | 241.4 kB | +0.3 kB |
-| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | +8.6 kB |
-| `/docs` | 11 | 242.1 kB | 242.3 kB | +0.2 kB |
-| `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | +0.2 kB |
-| `/components` | 14 | 440.5 kB | 449.2 kB | +8.7 kB |
-| `/components/accordion` | 15 | 837.3 kB | 846.2 kB | +8.9 kB |
+| Route | Scripts | Before, gzip | `02fb028`, gzip | After, gzip | Growth |
+| --- | --- | --- | --- | --- | --- |
+| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | 880.6 kB | +8.8 kB |
+| `/editor/component` | 10 | 241.1 kB | 241.4 kB | 241.4 kB | +0.3 kB |
+| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | 875.1 kB | **+10.2 kB** |
+| `/docs` | 11 | 242.1 kB | 242.3 kB | 242.3 kB | +0.2 kB |
+| `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | 249.5 kB | +0.3 kB |
+| `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | +8.7 kB |
+| `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | +9.9 kB |
+
+`/editor/component/button` is 0.2 kB over the 10 kB limit (875.10 kB, 896,099 bytes, against the rounded 864.9 kB before), and `/components/accordion` is 0.1 kB under it. Nothing was deferred beyond what is described here; the numbers are recorded for review before any merge.
+
+- Most of the growth (about 8.6 to 8.9 kB on the four catalog routes) came before the website swaps: the Code Block template source and recipe description the site ships in the catalog.
+- The swaps add about 1.6 kB on `/editor/component/button` and 0.9 kB on `/components/accordion`: the compiled Code Block module, whose `CodeBlockCommand` brings Radix Tabs into the artifact panel's route as well, less the deleted site code block, highlighter and Get code terminal. The generated module is one file, so the panel's parts cannot leave the command's Tabs behind.
+- With a static import, the Get code dialog put the Code Block and Radix Tabs into `/editor/preset`'s first load (+11.0 kB, with the button route at +10.0 kB). The dialog now loads `CodeBlockCommand` lazily, when a published command is ready, which brings `/editor/preset` to +8.8 kB and costs the button route about 0.2 kB of loader code, since its artifact panel already loads the module.
+- The unused `code-view.module.css` rules were removed; that is stylesheet, not First Load JS.
 
 ## Browser behaviour
 
