@@ -75,6 +75,17 @@ function validateComposition(recipe: ComponentRecipe): void {
     if (selected.some(id => !ids.has(id))) reject('Choose an item present in the recipe', path)
   }
   switch (recipe.component) {
+    case 'toggle':
+      if (recipe.props.iconOnly && recipe.content.label.trim() === '') reject('An icon-only toggle needs a label for its accessible name', '/content/label')
+      break
+    case 'button-group':
+      if (recipe.content.label.trim() === '') reject('Name the button group', '/content/label')
+      if ((recipe.props.mode ?? 'split') === 'split' && recipe.content.items.length < 2)
+        reject('A split button group needs at least two items', '/content/items')
+      break
+    case 'scroll-area':
+      if (recipe.content.label.trim() === '') reject('Name the scroll area', '/content/label')
+      break
     case 'slider': {
       const { min = 0, max = 100, value = 12, mode = 'single', rangeStart = 20, rangeEnd = 80 } = recipe.props
       if (min >= max) reject('Maximum must be greater than minimum', '/props/max')

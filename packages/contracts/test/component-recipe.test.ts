@@ -258,3 +258,72 @@ it('keeps existing 6b and 6c recipes free of the new fields', () => {
     for (const key of added) if (!(component === 'sheet' && key === 'size')) expect(props, component + ' ' + key).not.toHaveProperty(key)
   }
 })
+
+const primitives075 = ['toggle', 'collapsible', 'scroll-area', 'button-group', 'item'] as const
+const primitiveDraft = (component: (typeof primitives075)[number], props: Record<string, unknown> = {}, content?: Record<string, unknown>) => ({
+  ...badge, component, props,
+  content: content ?? defaultRecipeFields(componentRecipeFields(component).content),
+})
+
+it.each(primitives075)('accepts the default %s recipe', component => {
+  expect(componentRecipeComponents).toContain(component)
+  expect(validateComponentRecipe(primitiveDraft(component)).component).toBe(component)
+})
+
+it('gives each 0.7.5 primitive the documented defaults', () => {
+  const defaults = (component: (typeof primitives075)[number]) => ({
+    props: defaultRecipeFields(componentRecipeFields(component).props),
+    content: defaultRecipeFields(componentRecipeFields(component).content),
+  })
+  expect(defaults('toggle')).toEqual({ props: { variant: 'default', size: 'default', iconOnly: false, pressed: true }, content: { label: 'Show grid' } })
+  expect(defaults('collapsible')).toEqual({ props: { defaultOpen: true }, content: { label: 'Advanced shadow', rows: ['Offset X', 'Offset Y'] } })
+  expect(defaults('scroll-area')).toEqual({ props: { orientation: 'vertical', height: 200 }, content: { label: 'Components', itemCount: 12 } })
+  expect(defaults('button-group')).toEqual({ props: { mode: 'split', orientation: 'horizontal' }, content: { label: 'Install actions', items: ['Install', 'More install options'] } })
+  expect(defaults('item')).toEqual({
+    props: { variant: 'outline', size: 'default', media: 'icon', actions: true },
+    content: { title: 'Ombelle', description: 'Built-in · stable in light and dark' },
+  })
+})
+
+it.each([
+  ['toggle', { iconOnly: true }, { label: '' }, '/content/label'],
+  ['button-group', {}, { label: '' }, '/content/label'],
+  ['button-group', {}, { label: '   ' }, '/content/label'],
+  ['scroll-area', {}, { label: '' }, '/content/label'],
+  ['button-group', { mode: 'split' }, { items: ['Install'] }, '/content/items'],
+] as const)('rejects %s with %o and %o at %s', (component, props, content, path) => {
+  const base = defaultRecipeFields(componentRecipeFields(component).content)
+  expect(() => validateComponentRecipe(primitiveDraft(component, props, { ...base, ...content })))
+    .toThrow(expect.objectContaining({ path }))
+})
+
+it('accepts an empty-label toggle that is not icon-only, and a one-item toolbar group', () => {
+  expect(validateComponentRecipe(primitiveDraft('toggle', {}, { label: '' })).component).toBe('toggle')
+  expect(validateComponentRecipe(primitiveDraft('button-group', { mode: 'toolbar' }, { label: 'Tools', items: ['Bold'] })).component).toBe('button-group')
+})
+
+it.each([
+  ['collapsible', { content: { rows: [] } }],
+  ['collapsible', { content: { rows: Array(7).fill('Row') } }],
+  ['scroll-area', { props: { height: 100 } }],
+  ['scroll-area', { content: { itemCount: 3 } }],
+  ['button-group', { content: { items: [] } }],
+  ['button-group', { content: { items: Array(6).fill('Action') } }],
+  ['item', { props: { media: 'video' } }],
+  ['toggle', { props: { size: 'xl' } }],
+] as const)('rejects the %s recipe %o by schema', (component, override) => {
+  const base = primitiveDraft(component)
+  const recipe = { ...base, props: { ...base.props, ...('props' in override ? override.props : {}) },
+    content: { ...base.content, ...('content' in override ? override.content : {}) } }
+  expect(() => validateComponentRecipe(recipe)).toThrow()
+})
+
+it('names the 0.7.5 appearance parts', async () => {
+  const { componentRecipeParts } = await import('../src/component-recipe-appearance.js')
+  const slots = (id: (typeof primitives075)[number]) => componentRecipeParts[id].map(part => part.slot)
+  expect(slots('toggle')).toEqual(['toggle'])
+  expect(slots('collapsible')).toEqual(['collapsible-trigger', 'collapsible-content'])
+  expect(slots('scroll-area')).toEqual(['scroll-area', 'scroll-area-thumb'])
+  expect(slots('button-group')).toEqual(['button-group'])
+  expect(slots('item')).toEqual(['item', 'item-media'])
+})
