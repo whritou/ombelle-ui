@@ -31,6 +31,7 @@ The catalog goes from 50 to 52 components. Installing them needs CLI 0.7.5.
   - `onValueChange(value: number | null, details: { text: string; valid: boolean })`. It fires on every edit; `value` is `null` when the text is empty or does not parse.
   - `min`, `max`, `step` (default 1), `largeStep` (default 10), `unit`, `placeholder`, `disabled`, `name`, `id`, `decrementLabel`, `incrementLabel`.
   - `id` goes to the input, so `Field` and `<label htmlFor>` name it.
+  - `text` (added during implementation): the raw text, in place of `value`, for an editor that stores what was typed and restores it after a reload, an undo or a redo.
 - **Behaviour:**
   - The input is `type="text"` with `inputMode="decimal"` and `role="spinbutton"`, with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and `aria-valuetext` that adds the unit ("12 pixels"; units `px`, `ms`, `%` and `deg` have spoken names, others are read as written).
   - Arrow Up and Down move one `step`; Shift + arrow and Page Up or Page Down move one `largeStep`; Home and End go to `min` and `max`. Stepping clamps to the range.

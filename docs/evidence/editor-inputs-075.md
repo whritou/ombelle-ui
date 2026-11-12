@@ -71,3 +71,21 @@ After the fixes, the probe reads 14px popover padding, weight-500 format values 
 | Liquid glass trigger, field and popover sheen | Board's glass insets | Family glass Input and Popover | Glass is experimental; recorded, not blocking |
 
 The probe covered the Radix edition in light mode; the Base UI edition and dark mode are covered by the specimen audit and the browser tests (22 passed after the fixes).
+
+## Verification
+
+Windows 11, Node 24.19.0, pnpm 11.25.0 through corepack, bundled Chromium. Each command ran on the commit named in its row or later, on branch `feat/editor-inputs-075`.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Contracts | `corepack pnpm exec vitest run packages/contracts` | 306 passed |
+| Catalog, colour maths included | `corepack pnpm exec vitest run packages/catalog` | All passed after the board fixes; colour maths 34 of 34 (round trips, parsing, writing, WCAG 2 ratios, gamut, hue memory, agreement with the contracts parser) |
+| Compiler | `corepack pnpm exec vitest run packages/compiler` | All passed; under the parallel run two `generated-types.test.ts` cases hit their 60 s limit and passed alone (3 of 3) |
+| Website units | `corepack pnpm exec vitest run apps/www/src` | All passed with the editor swaps (1496 with the catalog) |
+| Typecheck | `corepack pnpm typecheck` | Exit 0 |
+| Integration | `vitest.integration.config.ts`: foundation inventory and groups, liquid glass CLI, www route | 50 and 26 passed |
+| Browser, both editions | `playwright -c playwright.specimen-audit.config.ts tests/e2e/editor-inputs-075.spec.ts` | 22 passed: keys and clamping, the half-typed value, area, hue, format, swatches, contrast levels, hue memory at black, a value set while open, the out-of-gamut value, the eyedropper resolved, cancelled and closed mid-pick, no eyedropper without the API, and the pair |
+| Editors end to end | `preset-editor.spec.ts`, `editor.spec.ts`, `catalog-editors.spec.ts`, with the website and preview servers only (as in [primitives evidence](primitives-075.md)) | The tests the swaps touch pass. What still fails is the recorded baseline: consumer apps not served, dashboard axe contrast, the 0.5 corner radius, and the 320 pixel reflow test's axe step on the gallery Date Picker trigger and Projects table. The reflow test needs 1.4 min now and was given 2 min |
+| Specimen audit | `OMBELLE_AUDIT_COMPONENTS=number-input,color-picker pnpm test:specimen-audit` | No findings (see above) |
+
+The "restores raw draft" editor test showed that a remounted Number Input lost a stored half-typed value such as `-`. The `text` prop fixes it; the test now reaches its baseline failure (the 0.5 radius) after `-` comes back on reload, undo and redo.

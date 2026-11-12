@@ -41,6 +41,18 @@ components. Liquid glass remains experimental. Installing the five needs CLI
 0.7.5 or later. See the [design](superpowers/specs/2026-11-12-primitives-075-design.md)
 and the [evidence](evidence/primitives-075.md).
 
+The 0.7.5 editor inputs add [Number Input](components/number-input.md) and
+[Color Picker](components/color-picker.md), with `ColorPickerPair` for a light
+and dark token, in all five families with Radix and Base UI editions and recipe
+editors. A Number Input keeps a half-typed value and reports it instead of
+clearing it. The Color Picker's area is a 2D slider with spoken saturation and
+brightness, its contrast readout states the WCAG level in text, and its
+eyedropper appears only where the browser has the EyeDropper API. The website's
+preset and component editors use them in place of native colour inputs and
+number fields. Liquid glass remains experimental. Installing them needs CLI
+0.7.5 or later. See the [design](superpowers/specs/2026-11-12-editor-inputs-075-design.md)
+and the [evidence](evidence/editor-inputs-075.md).
+
 The 0.7.3 overlays add [Combobox](components/combobox.md),
 [Command](components/command.md), [Hover Card](components/hover-card.md) and
 [Context Menu](components/context-menu.md) in all five families, with Radix and
