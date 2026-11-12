@@ -4,7 +4,9 @@ export type RecipeSpecimen = {
   tag: string
   props: Record<string, string | number | boolean | null | undefined | readonly (string | number)[] | { localId: string }
     // A flat object of plain values, such as a date range or a part's options.
-    | { readonly [key: string]: string | number | boolean | undefined }>
+    | { readonly [key: string]: string | number | boolean | undefined }
+    // A list of flat objects, such as a colour picker's swatches.
+    | readonly { readonly [key: string]: string }[]>
   children: readonly (RecipeSpecimen | string)[]
 }
 
@@ -16,6 +18,15 @@ const trigger = (tag: string, text: string) => node(tag, { type: 'button' }, tex
 // The installed recipe lays out its label and control itself, so the label never touches the control.
 const stacked = { className: 'grid gap-2' }
 const inline = { className: 'flex items-center gap-2' }
+// The 0.7.5 board's swatch row, then three more colours from its palette.
+const colorSwatches = [
+  { label: 'Rose', value: 'oklch(0.55 0.22 6)' }, { label: 'Blue', value: 'oklch(0.55 0.17 250)' },
+  { label: 'Green', value: 'oklch(0.55 0.13 150)' }, { label: 'Amber', value: 'oklch(0.62 0.14 75)' },
+  { label: 'Ink', value: 'oklch(0.22 0.012 275)' }, { label: 'Red', value: 'oklch(0.52 0.21 27)' },
+  { label: 'Sky', value: 'oklch(0.6 0.12 230)' }, { label: 'Paper', value: 'oklch(0.985 0.004 350)' },
+] as const
+// The Ombelle preset's primary foreground in light and dark.
+const primaryForeground = { light: 'oklch(0.99 0 0)', dark: 'oklch(0.16 0.01 275)' } as const
 
 export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen {
   const { component, content, props } = recipe
@@ -90,6 +101,24 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       const slots = (from: number, to: number) => node('InputOTPGroup', {}, ...Array.from({ length: to - from }, (_, offset) => node('InputOTPSlot', { index: from + offset })))
       return node('InputOTP', { maxLength: length, 'aria-label': content.label },
         ...(after > 0 ? [slots(0, after), node('InputOTPSeparator'), slots(after, length)] : [slots(0, length)]))
+    }
+    case 'number-input':
+      return node('div', stacked,
+        node('label', { htmlFor: localId('control') }, content.label),
+        node('NumberInput', { id: localId('control'), min: props.min, max: props.max, step: props.step,
+          unit: props.unit === 'none' ? undefined : props.unit ?? 'px', defaultValue: props.value, 'aria-describedby': localId('hint') }),
+        node('p', { id: localId('hint') }, content.hint))
+    case 'color-picker': {
+      const count = props.swatches ?? 5
+      const picker = (mode: 'light' | 'dark' | undefined, value: string) => node('ColorPicker', {
+        mode, label: mode ? undefined : content.label, defaultValue: value, defaultFormat: props.format ?? 'oklch', eyeDropper: props.eyeDropper ?? true,
+        swatches: count > 0 ? colorSwatches.slice(0, count) : undefined,
+        contrastWith: props.contrast === false ? undefined : primaryForeground[mode ?? 'light'],
+        contrastLabel: props.contrast === false ? undefined : 'Primary foreground',
+      })
+      return props.paired === false
+        ? picker(undefined, content.value)
+        : node('ColorPickerPair', { label: content.label }, picker('light', content.value), picker('dark', content.darkValue ?? content.value))
     }
     case 'toggle':
       // Recipes carry no icon set, so an icon-only toggle shows its initial and keeps its label as its name.
