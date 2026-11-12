@@ -27,7 +27,6 @@ describe('Item', () => {
       h(Item, { asChild: true }, h('a', { href: '/presets/ombelle' }, h(ItemContent, null, h(ItemTitle, null, 'Ombelle'))), h(ItemActions, null, h('button', { type: 'button' }, 'Apply'))),
       h(ItemSeparator)))
     expect(html.match(/role="list"/g)).toHaveLength(1)
-    expect(html.match(/role="listitem"/g)).toHaveLength(1)
     expect(html).toMatch(/^<div[^>]*role="list"[^>]*><div role="listitem"><div[^>]*data-slot="item"[^>]*data-as-child/)
     const link = html.match(/<a [^>]*>/)![0]
     expect(link).not.toContain('role=')
@@ -36,7 +35,16 @@ describe('Item', () => {
     expect(html.indexOf('</a>')).toBeLessThan(html.indexOf('<button'))
     expect(html).toContain('data-slot="item-actions"')
     expect(html).toContain('role="separator"')
-    expect(html.match(/role="listitem"/g)).toHaveLength(1)
+    expect(html.match(/role="listitem"/g)).toHaveLength(2)
+  })
+
+  it('keeps every direct child of the list a listitem', () => {
+    const html = renderToStaticMarkup(h(ItemGroup, null, h(Item), h(ItemSeparator), h(Item)))
+    const inner = html.slice(html.indexOf('>') + 1, html.lastIndexOf('</div>'))
+    expect(inner.match(/<div role="listitem">/g)).toHaveLength(3)
+    expect(inner.startsWith('<div role="listitem">')).toBe(true)
+    expect(inner.endsWith('</div></div>')).toBe(true)
+    expect(inner.replace(/<div role="listitem">.*?<\/div><\/div>/g, '')).toBe('')
   })
 
   it('merges the Item props into the link when there are no actions', () => {
@@ -67,6 +75,9 @@ describe('Item', () => {
       expect(css, family).toMatch(/\[data-slot='item'\]\[data-variant='muted'\]/)
       expect(css, family).toMatch(/\[data-slot='item'\]\[data-size='sm'\]/)
       expect(css, family).toContain('[data-item-link]:focus-visible')
+      expect(css, family).toContain("a[data-slot='item']:focus-visible")
+      expect(css, family).toContain("button[data-slot='item']:focus-visible")
+      expect(css, family).toContain('[data-item-link]:hover')
       expect(css, family).toMatch(/\[data-item-action\][^{]*\{[^}]*min-block-size:\s*(?:2[4-9]|[3-9]\d)px/)
       expect(css, family).toContain('prefers-reduced-motion')
     }

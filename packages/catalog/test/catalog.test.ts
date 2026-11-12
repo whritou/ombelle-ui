@@ -592,6 +592,11 @@ describe('catalog contract', () => {
       'hover-card',
       'context-menu',
       'calendar',
+      'toggle',
+      'collapsible',
+      'scroll-area',
+      'button-group',
+      'item',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

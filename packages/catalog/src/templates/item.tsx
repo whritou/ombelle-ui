@@ -26,12 +26,12 @@ export function Item({ className, variant = 'default', size = 'default', asChild
   )
 }
 
-/** A list of Items. Each Item sits in a listitem wrapper, so a link Item keeps its link role. */
+/** A list of Items. Each Item and separator sits in a listitem wrapper, so a link Item keeps its link role and the list stays valid. */
 export function ItemGroup({ className, children, ...props }: React.ComponentProps<'div'>) {
   return (
     <div role="list" {...props} data-slot="item-group" className={cn(className)}>
       {React.Children.map(children, child =>
-        React.isValidElement(child) && child.type === Item ? <div role="listitem">{child}</div> : child,
+        React.isValidElement(child) && (child.type === Item || child.type === ItemSeparator) ? <div role="listitem">{child}</div> : child,
       )}
     </div>
   )
