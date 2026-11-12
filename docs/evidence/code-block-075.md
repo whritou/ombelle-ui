@@ -10,13 +10,13 @@ Method: a temporary git worktree at `894a0e4`; `corepack pnpm install --frozen-l
 
 | Route | Scripts | First Load JS, gzip |
 | --- | --- | --- |
-| `/editor/preset` | 18 | 881.2 kB | +9.4 kB |
-| `/editor/component` | 10 | 241.4 kB | +0.3 kB |
-| `/editor/component/button` | 18 | 875.8 kB | **+10.9 kB, over the limit** |
-| `/docs` | 11 | 242.3 kB | +0.2 kB |
-| `/docs/getting-started` | 12 | 249.6 kB | +0.4 kB |
-| `/components` | 14 | 449.8 kB | +9.3 kB |
-| `/components/accordion` | 15 | 847.7 kB | **+10.4 kB, over the limit** |
+| `/editor/preset` | 18 | 871.8 kB |
+| `/editor/component` | 10 | 241.1 kB |
+| `/editor/component/button` | 18 | 864.9 kB |
+| `/docs` | 11 | 242.1 kB |
+| `/docs/getting-started` | 12 | 249.2 kB |
+| `/components` | 14 | 440.5 kB |
+| `/components/accordion` | 15 | 837.3 kB |
 
 ## Website size, after
 
@@ -208,10 +208,7 @@ Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 an
 
 - **Line numbers in the accessibility tree.** Chromium exposed each `::before` counter as StaticText ("1", "2", …) inside the code region. The five stylesheets now declare `content: counter(code-block-line)` and then `content: counter(code-block-line) / ''` (empty alt text; the first declaration is the fallback). `code-block-075.spec.ts` "line numbers stay out of the accessible text" reads the full AX tree over CDP and checks the `pre` region's StaticText holds no bare number and starts with the source's first line. Failed before the fix in both editions (32 numeric StaticText nodes), passes after.
 - **Gutter from line 100.** The `::before` was `min-inline-size: 2ch` per line, so line 100's code started 1ch (7.2 px) right of line 1's. `CodeBlockCode` sets `--code-block-gutter` to the digit count of its line count, and the stylesheets read `min-inline-size: max(2ch, var(--code-block-gutter, 2ch))`, so short files keep the board's 2ch. New fixture `code-block-long` (`lines.ts`, 120 lines) on the edition pages; "line 100 starts its code where line 1 does" compares lines 1, 9, 100 and 120 (failed by 7.17 px before, passes after). Unit test "sizes the line-number gutter from the line count" (1, 2, 3 and 4 digits).
-- **CRLF source.** `highlightCode` left `` at each line end, so `renderToString` emitted `a<!-- -->
-` and the HTML parser drew a blank line after every line. It now strips the `` before highlighting and emits the ending (`
-` or `
-`) as one text node; the text still equals the source. Unit test "server-renders CRLF source with one line break per line and no lone carriage return" (every language, four CRLF samples) failed before and passes after; the text-equality tests still pass.
+- **CRLF source.** `highlightCode` left `\r` at each line end, so `renderToString` emitted `a\r<!-- -->\n` and the HTML parser drew a blank line after every line. It now strips the `\r` before highlighting and emits the ending (`\r\n` or `\n`) as one text node; the text still equals the source. Unit test "server-renders CRLF source with one line break per line and no lone carriage return" (every language, four CRLF samples) failed before and passes after; the text-equality tests still pass.
 - **Copied across a content change.** `CodeBlockCopy` resets "Copied" and its status when `text` changes. "Copied resets when the copied content changes" (copy pnpm, switch to npm under a paused clock) failed before in both editions and passes after.
 - **Get code while publishing.** `editor.spec.ts` "the Get code dialog scrolls its long command…" now holds `/api/v1/recipes`, checks `get-code-command` shows "Generating" with no "Package manager" tab list, then, with `ombelle:get-code:manager` = `yarn` saved before opening, checks the yarn tab is selected once the command is ready (the 320 px checks now read the yarn panel). No test was added, so `browserSpecCounts` is unchanged.
 - **Minor:** the Get code fallback `pre` is `role="region"` named "Install command"; the specimen-audit config gains its missing space; `packages/compiler/test/code-block-075.test.ts` checks the scoped primitives return `highlightCode` (with `packageCommand`, `commandRunners` and the parts) and keep no `export type {…}`.
