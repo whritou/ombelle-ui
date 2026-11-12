@@ -29,6 +29,23 @@ export function NotificationSetting() {
 
 Every Switch requires an accessible name, normally a visible label whose htmlFor matches its id. The root uses role="switch" and announces off/on through aria-checked="false"/"true". Tab focuses an enabled control; Space and Enter toggle it. The primitive renders a type="button" control, so activation does not submit its form. Applications provide descriptions with aria-describedby as needed.
 
+## Variants (0.7.5)
+
+These need CLI **0.7.5** or later, including in component recipes. Leaving a prop or part out renders what earlier releases render.
+
+- **`size="sm"`** draws a smaller track and thumb, scaled from each family's default by the board's 34 × 20 to 46 × 26 ratio, and sets `data-size="sm"` on the root and on its thumb, including a `SwitchThumb` passed as a child.
+  - An inset `::before` on the root keeps the hit area at least 24 × 24 px.
+  - Use it in settings rows with `Field orientation="horizontal"`:
+
+```tsx
+<Field orientation="horizontal">
+  <FieldLabel>Reduced transparency</FieldLabel>
+  <FieldControl><Switch size="sm" /></FieldControl>
+</Field>
+```
+
+- **Recipe:** `size` (`default` or `sm`).
+
 ## API and forms
 
 Switch and SwitchProps expose React.ComponentProps<typeof SwitchPrimitive.Root>. checked and defaultChecked are booleans; onCheckedChange receives the next boolean state. Use checked with onCheckedChange for controlled state, or defaultChecked for uncontrolled state. Event handlers, primitive props, className, style, and the React 19 ref reach the visible root button. Its slot is switch.

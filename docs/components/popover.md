@@ -30,6 +30,24 @@ export function SharePreset() {
 
 Radix gives the content `role="dialog"` and the trigger `aria-haspopup="dialog"` and `aria-expanded`. Name the content: point `aria-labelledby` at the `PopoverTitle` id, or pass `aria-label`.
 
+## Variants (0.7.5)
+
+These need CLI **0.7.5** or later, including in component recipes. Leaving a prop or part out renders what earlier releases render.
+
+```tsx
+<PopoverContent aria-labelledby="shadow-title">
+  <PopoverArrow />
+  <PopoverTitle id="shadow-title">Shadow offset</PopoverTitle>
+  <PopoverDescription>Applies to cards, buttons and menus in this family.</PopoverDescription>
+</PopoverContent>
+```
+
+- **`PopoverArrow`** (`popover-arrow`) is a 20 × 10 arrow pointing at the trigger, placed inside `PopoverContent`. It is decorative and `aria-hidden`.
+  - Radix uses `Popover.Arrow`, Base UI `Popover.Arrow`; the Base template turns and places the arrow from Base UI's side.
+  - It is filled with the content's background. Where the content has a border (ombelle, minimalist, neo brutalism and liquid glass), the arrow's two outer edges continue it in the same colour and width; flat's popover has no border, so its arrow has none. In forced colours the edges are `CanvasText`.
+  - With an arrow and no `sideOffset`, the gap between trigger and content is 10px, which the arrow fills.
+- **Recipe:** `arrow` (boolean).
+
 ## API and keyboard
 
 - `Popover`, `PopoverTrigger` and `PopoverAnchor` forward the Radix Root, Trigger and Anchor props: `open`, `defaultOpen`, `onOpenChange`, `modal`, `asChild`.

@@ -215,6 +215,15 @@ Code Block is not part of the 36 PR5 entries either. Review it on the preview "C
 - **Copy announcement**: Copy is named "Copy <title>" or "Copy code"; after a click "Copied" is announced once and the label reads "Copied" for 1.5 s; when the clipboard is unavailable or refuses, "Copy failed" is announced and the label stays "Copy".
 - **Token contrast**: every token colour is readable on the dark surface in both site and preview modes (at least 4.5:1, line numbers 3:1, as measured in the evidence); in forced colours the code is `CanvasText` on `Canvas` with a visible border, and the selected tab is `Highlight`.
 
+**Variants, batch 4a (0.7.5)**
+
+Review these on the preview "0.7.5 variants" section of the edition pages, the Settings and Projects scenes and the website's component editor, and record them in their own rows below.
+
+- **Checkbox Option**: the checkbox is announced with the option's title as its name and its description as its description; a click on the title, the description or anywhere on the card toggles it once; Tab reaches the checkbox and Space toggles it; a disabled option does not toggle.
+- **Small Switch target**: the `sm` Switch can be activated anywhere in a 24 × 24 px area around its track; in a horizontal Field row it is named by the row's label.
+- **Progress labelling**: a Progress with a label is announced with the label as its name and the readout ("64%", or the formatted text) as its value; the readout itself is not read twice; a tone is never the only status signal.
+- **Popover arrow**: the arrow is not announced; the popover keeps its name and focus behaviour.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -304,6 +313,15 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Code Block scrollable `pre` | | | | | | | | | | |
 | Code Block copy announcement | | | | | | | | | | |
 | Code Block token contrast | | | | | | | | | | |
+
+#### Variants, batch 4a (0.7.5)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Checkbox Option | | | | | | | | | | |
+| Switch `sm` target size | | | | | | | | | | |
+| Progress label and value | | | | | | | | | | |
+| Popover arrow | | | | | | | | | | |
 
 #### Variants, batch 6a (0.7.3)
 

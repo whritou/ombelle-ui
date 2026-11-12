@@ -24,6 +24,30 @@ export function InstallProgress({ done, total }: { done: number; total: number }
 
 Name every bar with `aria-labelledby` or `aria-label`. Radix renders `role="progressbar"` with `aria-valuemin`, `aria-valuemax` and, when the amount is known, `aria-valuenow` and a value text. Pass `getValueLabel` for a custom announcement such as "3 of 8 checks". Show the visible figure, such as "64%", next to the label yourself.
 
+## Variants (0.7.5)
+
+These need CLI **0.7.5** or later, including in component recipes. Leaving a prop or part out renders what earlier releases render.
+
+```tsx
+import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
+
+<Progress value={64} size="lg" tone="success">
+  <ProgressLabel>Publishing preset, on track</ProgressLabel>
+  <ProgressValue />
+</Progress>
+```
+
+- **`size`** (`sm`, `default` or `lg`) and **`tone`** (`default`, `success`, `warning` or `destructive`) set `data-size` and `data-tone` on the bar. `sm` is half the family's default track and `lg` one and a half times it. Tones use the same strong colours as Meter segments; in forced colours every tone fill is `Highlight`.
+- **Tone is never the only signal.** Say the status in the label, as in "Upload failed at 35 %".
+- **`ProgressLabel`** and **`ProgressValue`**, passed as children:
+  - With either part, Progress renders a wrapper (`progress-field`) with a header row (`progress-header`: the label, then the value at the end) above the bar, because the bar's own children are presentational.
+  - The bar takes `aria-labelledby` set to the label.
+  - `ProgressValue` shows the rounded percentage ("64%"), or `format(value, max)` with the value clamped to `0`..`max`. It is `aria-hidden`; the bar's `aria-valuetext` carries the same text. While indeterminate it is empty and the bar has no `aria-valuetext`.
+  - Without either part, Progress renders exactly as before.
+  - `progressValueText(value, max, format?)` is exported for your own readouts.
+- The header and readout inherit the surrounding text colour, so they add no contrast pair on glass.
+- **Recipe:** `size`, `tone`, `showLabel` and `showValue` (booleans).
+
 ## API and states
 
 - `value` is a number from 0 to `max` (default 100). Omit it, or pass `null`, for an indeterminate bar.
