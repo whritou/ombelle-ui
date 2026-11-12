@@ -5,28 +5,66 @@ import { cn } from './utils.js'
 import './scroll-area.css'
 
 /**
- * Whether the viewport's content overflows in either axis. A ResizeObserver on
- * the viewport and its first child keeps it current. It is false before the
- * first measurement, so the server render never carries a tab stop.
+ * Whether the viewport's content overflows on an axis the viewport scrolls. An
+ * axis whose computed overflow is `hidden` or `clip` does not count, so a long
+ * line clipped in a vertical-only area adds no tab stop. A ResizeObserver on
+ * the viewport and its first child keeps it current, and `axes` measures again
+ * when the area's scrollbars change. It is false before the first measurement,
+ * so the server render never carries a tab stop.
  */
-export function useOverflowFocus(viewport: React.RefObject<HTMLElement | null>): boolean {
+export function useOverflowFocus(viewport: React.RefObject<HTMLElement | null>, axes?: string): boolean {
   const [overflowing, setOverflowing] = React.useState(false)
   React.useEffect(() => {
     const element = viewport.current
     if (!element) return
-    const measure = () =>
+    const scrolls = (overflow: string | undefined) => overflow !== 'hidden' && overflow !== 'clip'
+    const measure = () => {
+      const style = typeof getComputedStyle === 'function' ? getComputedStyle(element) : undefined
       setOverflowing(
-        element.scrollHeight > element.clientHeight ||
-          element.scrollWidth > element.clientWidth,
+        (scrolls(style?.overflowY) && element.scrollHeight > element.clientHeight) ||
+          (scrolls(style?.overflowX) && element.scrollWidth > element.clientWidth),
       )
+    }
     measure()
     if (typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(measure)
     observer.observe(element)
     if (element.firstElementChild) observer.observe(element.firstElementChild)
     return () => observer.disconnect()
-  }, [viewport])
+  }, [viewport, axes])
   return overflowing
+}
+
+type Scrolling = { x: boolean; y: boolean }
+
+/** Which axes scrolled in the last half second, by any means: wheel, keyboard, touch or script. */
+function useScrolling(viewport: React.RefObject<HTMLElement | null>): Scrolling {
+  const [scrolling, setScrolling] = React.useState<Scrolling>({ x: false, y: false })
+  React.useEffect(() => {
+    const element = viewport.current
+    if (!element) return
+    let top = element.scrollTop
+    let left = element.scrollLeft
+    const timers: Partial<Record<keyof Scrolling, ReturnType<typeof setTimeout>>> = {}
+    const mark = (axis: keyof Scrolling) => {
+      setScrolling(current => (current[axis] ? current : { ...current, [axis]: true }))
+      clearTimeout(timers[axis])
+      timers[axis] = setTimeout(() => setScrolling(current => ({ ...current, [axis]: false })), 500)
+    }
+    const onScroll = () => {
+      if (element.scrollTop !== top) mark('y')
+      if (element.scrollLeft !== left) mark('x')
+      top = element.scrollTop
+      left = element.scrollLeft
+    }
+    element.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      element.removeEventListener('scroll', onScroll)
+      clearTimeout(timers.x)
+      clearTimeout(timers.y)
+    }
+  }, [viewport])
+  return scrolling
 }
 
 const subscribe = () => () => {}
@@ -35,6 +73,11 @@ const subscribe = () => () => {}
 function useHydrated() {
   return React.useSyncExternalStore(subscribe, () => true, () => false)
 }
+
+const ScrollAreaContext = React.createContext<{
+  scrolling: Scrolling
+  setHorizontal?: (present: boolean) => void
+}>({ scrolling: { x: false, y: false } })
 
 type ScrollAreaProps = React.ComponentProps<'div'> & {
   'aria-label'?: string
@@ -54,31 +97,40 @@ export function ScrollArea({
   ...props
 }: ScrollAreaProps) {
   const viewport = React.useRef<HTMLDivElement>(null)
-  const overflowing = useOverflowFocus(viewport)
-  // Radix renders a hover scrollbar only after the pointer enters, so the
-  // server render and first hydration use "always" to include the bar (it
-  // shows on first paint), then the area switches to hover.
+  // The vertical bar is always there; a horizontal ScrollBar child reports itself.
+  const [horizontal, setHorizontal] = React.useState(false)
+  const overflowing = useOverflowFocus(viewport, horizontal ? 'xy' : 'y')
+  const scrolling = useScrolling(viewport)
+  const context = React.useMemo(() => ({ scrolling, setHorizontal }), [scrolling])
+  // Radix shows a hover scrollbar only once the pointer enters, so the server
+  // render uses "scroll" to include the bar, hidden; after hydration the area
+  // shows it on hover, and the scroll listener above shows it while scrolling.
   const hydrated = useHydrated()
   return (
-    <ScrollAreaPrimitive.Root
-      type={hydrated ? 'hover' : 'always'}
-      data-slot="scroll-area"
-      className={cn(className)}
-      {...(props as React.ComponentProps<typeof ScrollAreaPrimitive.Root>)}
-    >
-      <ScrollAreaPrimitive.Viewport
-        ref={viewport}
-        data-slot="scroll-area-viewport"
-        role="region"
-        aria-label={ariaLabel}
-        aria-labelledby={ariaLabelledby}
-        tabIndex={overflowing ? 0 : undefined}
+    <ScrollAreaContext.Provider value={context}>
+      <ScrollAreaPrimitive.Root
+        type={hydrated ? 'hover' : 'scroll'}
+        data-slot="scroll-area"
+        data-scrolling={scrolling.x || scrolling.y ? '' : undefined}
+        className={cn(className)}
+        {...(props as React.ComponentProps<typeof ScrollAreaPrimitive.Root>)}
       >
-        {children}
-      </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
-      <ScrollAreaPrimitive.Corner data-slot="scroll-area-corner" />
-    </ScrollAreaPrimitive.Root>
+        <ScrollAreaPrimitive.Viewport
+          ref={viewport}
+          data-slot="scroll-area-viewport"
+          role="region"
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
+          tabIndex={overflowing ? 0 : undefined}
+          // Set from the first render, so the overflow measurement never sees Radix's initial hidden axes.
+          style={{ overflowX: horizontal ? 'scroll' : 'hidden', overflowY: 'scroll' }}
+        >
+          {children}
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar />
+        <ScrollAreaPrimitive.Corner data-slot="scroll-area-corner" />
+      </ScrollAreaPrimitive.Root>
+    </ScrollAreaContext.Provider>
   )
 }
 
@@ -91,18 +143,26 @@ export function ScrollBar({
   React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
   'orientation'
 >) {
-  // Forced mount only for the server render; afterwards Radix mounts the bar
-  // and thumb only while the content overflows and the pointer is over it.
-  const force = useHydrated() ? {} : ({ forceMount: true } as const)
+  const { scrolling, setHorizontal } = React.useContext(ScrollAreaContext)
+  React.useEffect(() => {
+    if (orientation !== 'horizontal' || !setHorizontal) return
+    setHorizontal(true)
+    return () => setHorizontal(false)
+  }, [orientation, setHorizontal])
+  // The bar stays mounted while its axis overflows, so scrolling can show it
+  // without a hover; the thumb is forced only for the server render.
+  const hydrated = useHydrated()
+  const shown = scrolling[orientation === 'vertical' ? 'y' : 'x'] ? ({ 'data-state': 'visible' } as const) : {}
   return (
     <ScrollAreaPrimitive.ScrollAreaScrollbar
-      {...force}
+      forceMount
       orientation={orientation}
       className={cn(className)}
       {...props}
+      {...shown}
       data-slot="scroll-area-scrollbar"
     >
-      <ScrollAreaPrimitive.ScrollAreaThumb {...force} data-slot="scroll-area-thumb" />
+      <ScrollAreaPrimitive.ScrollAreaThumb {...(hydrated ? {} : ({ forceMount: true } as const))} data-slot="scroll-area-thumb" />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   )
 }

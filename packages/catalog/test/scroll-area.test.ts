@@ -29,6 +29,10 @@ describe('Scroll Area', () => {
     expect(count(html, 'data-slot="scroll-area-scrollbar"')).toBe(1)
     expect(html).toContain('data-orientation="vertical"')
     expect(html).toContain('data-slot="scroll-area-thumb"')
+    // The bar is in the server markup but hidden: it shows on hover or while scrolling, never on first paint.
+    const bar = /<div[^>]*data-slot="scroll-area-scrollbar"[^>]*>/.exec(html)?.[0] ?? ''
+    expect(bar).toContain('data-state="hidden"')
+    expect(html).not.toContain('data-state="visible"')
   })
 
   it.each(editions)('%s names the viewport from aria-labelledby', (_, ui) => {

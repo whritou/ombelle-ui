@@ -315,7 +315,8 @@ describe('the 0.7.5 primitives', () => {
     it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle'])('%s fades the viewport end into the card without catching the pointer', family => {
       expect(fade(family)).toMatchObject({
         position: 'sticky', 'inset-block-end': '0', 'block-size': '28px', 'margin-block-start': '-28px', 'pointer-events': 'none', opacity: '0',
-        background: 'linear-gradient(to bottom, transparent, var(--card))',
+        // A consumer whose area sits on another surface sets --scroll-area-fade to that surface's colour.
+        background: 'linear-gradient(to bottom, transparent, var(--scroll-area-fade, var(--card)))',
       })
       const css = read(`scroll-area/${family}.css`).replace(/\s+/g, ' ')
       expect(css).toContain('animation-timeline: scroll(nearest block)')

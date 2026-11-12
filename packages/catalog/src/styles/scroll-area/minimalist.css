@@ -19,7 +19,7 @@
 [data-slot='scroll-area-viewport']::-webkit-scrollbar {
   display: none;
 }
-/* Fades the last 28px into the card while more content waits below. Only where scroll-driven animation runs: the fade is hidden
+/* Fades the last 28px into the card (or the colour in --scroll-area-fade, for an area on another surface) while more content waits below. Only where scroll-driven animation runs: the fade is hidden
    when nothing scrolls (the timeline is inactive) and once the end is reached. */
 @supports (animation-timeline: scroll()) {
   [data-slot='scroll-area-viewport']::after {
@@ -31,7 +31,7 @@
     margin-block-start: -28px;
     pointer-events: none;
     opacity: 0;
-    background: linear-gradient(to bottom, transparent, var(--card));
+    background: linear-gradient(to bottom, transparent, var(--scroll-area-fade, var(--card)));
     animation: ombelle-scroll-area-fade linear both;
     animation-timeline: scroll(nearest block);
     animation-range: calc(100% - 28px) 100%;

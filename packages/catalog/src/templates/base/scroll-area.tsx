@@ -5,29 +5,38 @@ import { cn } from './utils.js'
 import './scroll-area.css'
 
 /**
- * Whether the viewport's content overflows in either axis. A ResizeObserver on
- * the viewport and its first child keeps it current. It is false before the
- * first measurement, so the server render never carries a tab stop.
+ * Whether the viewport's content overflows on an axis the viewport scrolls. An
+ * axis whose computed overflow is `hidden` or `clip` does not count, so a long
+ * line clipped in a vertical-only area adds no tab stop. A ResizeObserver on
+ * the viewport and its first child keeps it current, and `axes` measures again
+ * when the area's scrollbars change. It is false before the first measurement,
+ * so the server render never carries a tab stop.
  */
-export function useOverflowFocus(viewport: React.RefObject<HTMLElement | null>): boolean {
+export function useOverflowFocus(viewport: React.RefObject<HTMLElement | null>, axes?: string): boolean {
   const [overflowing, setOverflowing] = React.useState(false)
   React.useEffect(() => {
     const element = viewport.current
     if (!element) return
-    const measure = () =>
+    const scrolls = (overflow: string | undefined) => overflow !== 'hidden' && overflow !== 'clip'
+    const measure = () => {
+      const style = typeof getComputedStyle === 'function' ? getComputedStyle(element) : undefined
       setOverflowing(
-        element.scrollHeight > element.clientHeight ||
-          element.scrollWidth > element.clientWidth,
+        (scrolls(style?.overflowY) && element.scrollHeight > element.clientHeight) ||
+          (scrolls(style?.overflowX) && element.scrollWidth > element.clientWidth),
       )
+    }
     measure()
     if (typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(measure)
     observer.observe(element)
     if (element.firstElementChild) observer.observe(element.firstElementChild)
     return () => observer.disconnect()
-  }, [viewport])
+  }, [viewport, axes])
   return overflowing
 }
+
+/** Set by a horizontal ScrollBar inside the area, so the viewport scrolls sideways only with one, as in Radix. */
+const HorizontalBarContext = React.createContext<((present: boolean) => void) | undefined>(undefined)
 
 // Radix-compatible data-state: visible while hovered or scrolling and the
 // content overflows on that axis, so the shared stylesheet shows the bar the
@@ -61,26 +70,32 @@ export function ScrollArea({
   ...props
 }: ScrollAreaProps) {
   const viewport = React.useRef<HTMLDivElement>(null)
-  const overflowing = useOverflowFocus(viewport)
+  // The vertical bar is always there; a horizontal ScrollBar child reports itself.
+  const [horizontal, setHorizontal] = React.useState(false)
+  const overflowing = useOverflowFocus(viewport, horizontal ? 'xy' : 'y')
   return (
-    <ScrollAreaPrimitive.Root
-      data-slot="scroll-area"
-      className={cn(className)}
-      {...(props as Omit<React.ComponentProps<typeof ScrollAreaPrimitive.Root>, 'className'>)}
-    >
-      <ScrollAreaPrimitive.Viewport
-        ref={viewport}
-        data-slot="scroll-area-viewport"
-        role="region"
-        aria-label={ariaLabel}
-        aria-labelledby={ariaLabelledby}
-        tabIndex={overflowing ? 0 : undefined}
+    <HorizontalBarContext.Provider value={setHorizontal}>
+      <ScrollAreaPrimitive.Root
+        data-slot="scroll-area"
+        className={cn(className)}
+        {...(props as Omit<React.ComponentProps<typeof ScrollAreaPrimitive.Root>, 'className'>)}
       >
-        <ScrollAreaPrimitive.Content>{children}</ScrollAreaPrimitive.Content>
-      </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
-      <ScrollAreaPrimitive.Corner data-slot="scroll-area-corner" />
-    </ScrollAreaPrimitive.Root>
+        <ScrollAreaPrimitive.Viewport
+          ref={viewport}
+          data-slot="scroll-area-viewport"
+          role="region"
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
+          tabIndex={overflowing ? 0 : undefined}
+          // Always a value, never removed: React warns when a longhand beside Base UI's `overflow` disappears.
+          style={{ overflowX: horizontal ? 'scroll' : 'hidden' }}
+        >
+          <ScrollAreaPrimitive.Content>{children}</ScrollAreaPrimitive.Content>
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar />
+        <ScrollAreaPrimitive.Corner data-slot="scroll-area-corner" />
+      </ScrollAreaPrimitive.Root>
+    </HorizontalBarContext.Provider>
   )
 }
 
@@ -93,6 +108,12 @@ export function ScrollBar({
   React.ComponentProps<'div'>,
   'className'
 > & { className?: string }) {
+  const setHorizontal = React.useContext(HorizontalBarContext)
+  React.useEffect(() => {
+    if (orientation !== 'horizontal' || !setHorizontal) return
+    setHorizontal(true)
+    return () => setHorizontal(false)
+  }, [orientation, setHorizontal])
   return (
     <ScrollAreaPrimitive.Scrollbar
       // Mounted from the first render so the bar exists before measuring.

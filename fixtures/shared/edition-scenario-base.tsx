@@ -28,7 +28,7 @@ import { Slider } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Toggle } from '@/components/ui/toggle'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
@@ -578,6 +578,13 @@ function CatalogExpansionScenario() {
           </ScrollArea>
           <ScrollArea data-testid="scroll-short" aria-label="Short note" style={{ blockSize: '8rem', inlineSize: '16rem' }}>
             <p>Nothing to scroll.</p>
+          </ScrollArea>
+          <ScrollArea data-testid="scroll-wide" aria-label="Long line" style={{ blockSize: '8rem', inlineSize: '16rem' }}>
+            <p>{'Ombelle'.repeat(40)}</p>
+          </ScrollArea>
+          <ScrollArea data-testid="scroll-sideways" aria-label="Wide row" style={{ blockSize: '4rem', inlineSize: '16rem' }}>
+            <p style={{ inlineSize: '40rem', margin: 0 }}>Wide row</p>
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
           <ButtonGroup data-testid="group-two" aria-label="Alignment">
             <Button variant="outline">Left</Button>

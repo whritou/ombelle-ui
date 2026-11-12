@@ -62,6 +62,36 @@ describe('useOverflowFocus', () => {
     expect(observer.disconnected).toBe(true)
   })
 
+  it.each(editions)('%s counts an axis only while the viewport can scroll on it', (_, ui) => {
+    vi.stubGlobal('ResizeObserver', FakeObserver)
+    // A vertical-only area hides sideways overflow, yet a long unbreakable line still widens its content.
+    const style = { overflowX: 'hidden', overflowY: 'scroll' }
+    vi.stubGlobal('getComputedStyle', () => style)
+    const element = makeViewport()
+    element.scrollWidth = 400
+    ui.useOverflowFocus({ current: element as unknown as HTMLElement })
+    store.effect!()
+    const observer = FakeObserver.instances[0]!
+    expect(store.value).toBe(false)
+
+    style.overflowX = 'clip'
+    observer.callback()
+    expect(store.value).toBe(false)
+
+    style.overflowX = 'scroll'
+    observer.callback()
+    expect(store.value).toBe(true)
+
+    style.overflowX = 'hidden'
+    element.scrollHeight = 300
+    observer.callback()
+    expect(store.value).toBe(true)
+
+    style.overflowY = 'hidden'
+    observer.callback()
+    expect(store.value).toBe(false)
+  })
+
   it.each(editions)('%s measures once and does not fail without ResizeObserver', (_, ui) => {
     vi.stubGlobal('ResizeObserver', undefined)
     const element = makeViewport()

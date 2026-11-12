@@ -73,6 +73,43 @@ for (const edition of ['radix', 'base'] as const) {
         .not.toBe('0')
     })
 
+    test('an overflowing Scroll Area shows its bar while scrolling from the keyboard, without a hover', async ({ page }) => {
+      await open(page, edition)
+      await page.mouse.move(0, 0)
+      const area = page.getByTestId('scroll-long')
+      const viewport = area.locator('[data-slot="scroll-area-viewport"]')
+      const bar = area.locator('[data-slot="scroll-area-scrollbar"][data-orientation="vertical"]')
+      await expect(viewport).toHaveAttribute('tabindex', '0')
+      await viewport.focus()
+      await expect(bar).toHaveAttribute('data-state', 'hidden')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(() => bar.evaluate(element => element.getAttribute('data-state') + ' ' + getComputedStyle(element).opacity), { intervals: [20, 50, 100] })
+        .toBe('visible 1')
+      // It hides again once scrolling stops.
+      await expect(bar).toHaveAttribute('data-state', 'hidden')
+    })
+
+    test('a vertical Scroll Area with one long unbreakable line has no tab stop', async ({ page }) => {
+      await open(page, edition)
+      const area = page.getByTestId('scroll-wide')
+      const viewport = area.locator('[data-slot="scroll-area-viewport"]')
+      await expect(viewport).toHaveAccessibleName('Long line')
+      // The line is wider than the area, but sideways overflow is clipped without a horizontal bar, so nothing scrolls.
+      expect(await viewport.evaluate(element => ({ wider: element.scrollWidth > element.clientWidth, overflowX: getComputedStyle(element).overflowX })))
+        .toEqual({ wider: true, overflowX: 'hidden' })
+      await page.waitForTimeout(300)
+      await expect(viewport).not.toHaveAttribute('tabindex', /.*/)
+    })
+
+    test('a Scroll Area with a horizontal bar scrolls sideways and is a tab stop', async ({ page }) => {
+      await open(page, edition)
+      const viewport = page.getByTestId('scroll-sideways').locator('[data-slot="scroll-area-viewport"]')
+      await expect(viewport).toHaveAttribute('tabindex', '0')
+      await viewport.focus()
+      await page.keyboard.press('ArrowRight')
+      await expect.poll(() => viewport.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
+    })
+
     test('a short Scroll Area has no tab stop and no visible scrollbar on hover', async ({ page }) => {
       await open(page, edition)
       const area = page.getByTestId('scroll-short')
