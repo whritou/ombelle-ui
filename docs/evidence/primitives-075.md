@@ -132,3 +132,37 @@ Differences that remain:
 | Scroll Area fade under reduced motion | Fade shown | Fade removed entirely | The cue is an animation; reduced motion removes animations |
 
 The board probe covered the Radix edition in light mode only; the Base UI edition and dark mode were checked by the specimen audit, not by the probe.
+
+## Final fix wave verification
+
+Run on 2026-11-12 after the final review's fixes (commits `3b0d098` to `29254ee`), by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0, pnpm 11.25.0 (through corepack), Playwright 1.64.1 and its bundled Chromium 156.0.8078.4, headless, reduced motion on. Local runs, not CI runs or a human review.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Build | `corepack pnpm build:packages` | Passed |
+| Types | `corepack pnpm typecheck` | Passed |
+| Unit | `corepack pnpm test:unit` | 3016 passed, 2 failed of 3018 (215 files). `stable-families.test.ts` failed until the stable-family hash fixture was regenerated for the changed Scroll Area output (8 entries), then passed. `packages/cli/test/snapshot-cache.test.ts` "bounds valid entries to 100 and 16 MiB during writes" timed out at 60 s under the full run's load; alone it passed. Neither file's inputs other than the hashes changed. |
+| CLI upgrade route | `corepack pnpm exec vitest run --config vitest.integration.config.ts tests/integration/list-scrollbars-cli.test.ts` | 1 passed (new; built CLI) |
+| Preview | `corepack pnpm generate:preview` | Passed |
+| Primitives browser suite, both editions | `corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts tests/e2e/primitives-075.spec.ts` | 20 passed (10 per edition, including the three new Scroll Area cases) |
+| Specimen audit | `OMBELLE_AUDIT_COMPONENTS=button-group,scroll-area corepack pnpm test:specimen-audit tests/e2e/specimen-audit.spec.ts` | 21 passed: all 20 family, edition and mode configurations plus the glass backdrop check (3.3 min). The audit's own check self-tests were not rerun: the audit helper did not change. |
+| Website editor and docs e2e | `tests/e2e/editor.spec.ts` and `tests/e2e/preset-editor.spec.ts` with the www and preview dev servers only | See below |
+
+The new Scroll Area browser cases failed before the fix, on the same pages: the Radix bar was not mounted while scrolling from the keyboard without a hover, and the vertical-only area with one long unbreakable line was a Tab stop in Radix (`tabindex="0"`) and scrolled sideways in Base UI (`overflow-x: scroll`).
+
+### Website e2e
+
+The consumer apps cannot be served on this machine, so the run used a temporary Playwright config with the two spec files and only the website (`scripts/serve-snapshot-www.ts`, port 3000) and preview (`pnpm dev:preview`, port 4173) servers. Another local app held `[::]:3000` during the run; Playwright's own readiness probe reached it (404) instead of the site, so the two servers were started by hand and the config had no `webServer`. The browser reached the site: every page-level test that does not need a consumer passed or failed on site content, and the server log shows the requests.
+
+Result: 35 passed, 25 failed of 60 (10.4 min, two workers). The failing tests were then run at `ac6fe6e`, the branch point, in a temporary detached worktree (`pnpm install --frozen-lockfile --ignore-scripts`, `build:packages`, `generate:preview`, the same two servers started from that worktree, the same config). All 25 fail there too, with the same errors:
+
+| Test | Branch | `ac6fe6e` | Cause |
+| --- | --- | --- | --- |
+| `preset-editor.spec.ts` "matches downloaded … preset in installed vite/next" (16) | Failed | Failed | Needs the prepared npm consumer apps, which are not served here |
+| `editor.spec.ts` "editor and CLI-installed Button recipe have matching DOM and computed styles" | Failed | Failed | Connection refused on the consumer port 4180 |
+| `editor.spec.ts` "opens the saved Button draft from the component editor entry point" | Failed in the full run; passed alone | Failed | The first test of the run, on a cold dev server; passes when rerun alone on the branch |
+| `preset-editor.spec.ts` "opens on the dashboard … in flat, minimalist, neo-brutalism, ombelle" (4) | Failed | Failed | axe `color-contrast` (flat and ombelle Tabs count, neo-brutalism soft destructive Badge at 4.29:1) and `heading-order` in the preview scenes, with the same rules in both. On the branch the neo-brutalism run reports one more element with the same Badge defect: the "Needs attention" Badge inside the Projects scene's new Item list |
+| `preset-editor.spec.ts` "supports keyboard editing and 320 pixel reflow" | Failed | Failed | axe `label-content-name-mismatch`, `scrollable-region-focusable` and related rules on the gallery's Date Picker trigger and Projects table, the same two elements in both |
+| `preset-editor.spec.ts` "restores raw draft and history after refresh" and "edits numeric design values with a slider …" | Failed | Failed | Expect a 0.5 radius where the preset now gives 0.75 (and 0.8 after the slider step) |
+
+The new `editor.spec.ts` test "the History group casts no shadow behind its ghost Undo and Redo buttons" passed, as did the eight preset gallery tests, the theme toggle test and the Get code dialog test at 320 pixels.
