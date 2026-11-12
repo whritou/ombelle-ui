@@ -31,6 +31,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item'
+import { NumberInput } from '@/components/ui/number-input'
+import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
@@ -503,6 +505,53 @@ function OverlaysScenario() {
 
 // Browser coverage for newly added catalog contracts lives outside the parity
 // sections, so the existing edition comparisons keep their original contents.
+const editorInputSwatches = [
+  { label: 'Rose', value: 'oklch(0.55 0.22 6)' },
+  { label: 'Blue', value: '#1d4ed8' },
+  { label: 'Ink', value: 'oklch(0.22 0.012 275)' },
+]
+
+/** Number Input and Color Picker fixtures for tests/e2e/editor-inputs-075.spec.ts. */
+function EditorInputsScenario() {
+  const [radius, setRadius] = React.useState<number | null>(12)
+  const [report, setReport] = React.useState('')
+  const [color, setColor] = React.useState('oklch(0.55 0.22 6)')
+  // An editor shortcut sets the value while the popover stays open: Alt+R resets the accent.
+  React.useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.altKey && event.code === 'KeyR') setColor('#1d4ed8')
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+  return (
+    <section aria-label="Editor inputs" data-testid="editor-inputs-075">
+      <div data-testid="number-fixture">
+        <label htmlFor="fixture-radius">Border radius</label>
+        <NumberInput id="fixture-radius" value={radius} min={0} max={32} unit="px"
+          onValueChange={(value, details) => {
+            setRadius(value)
+            setReport(`${value === null ? 'null' : value} ${details.valid}`)
+          }} />
+        <output data-testid="number-report">{report}</output>
+        <button type="button" onClick={() => setRadius(4)}>Reset radius</button>
+      </div>
+      <div data-testid="color-fixture">
+        <ColorPicker label="Accent" value={color} onValueChange={setColor} swatches={editorInputSwatches}
+          contrastWith="oklch(0.99 0 0)" contrastLabel="white" />
+        <output data-testid="color-report">{color}</output>
+        <button type="button" onClick={() => setColor('#1d4ed8')}>Reset accent</button>
+      </div>
+      <div data-testid="pair-fixture">
+        <ColorPickerPair label="Primary">
+          <ColorPicker mode="light" defaultValue="oklch(0.55 0.22 6)" />
+          <ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" />
+        </ColorPickerPair>
+      </div>
+    </section>
+  )
+}
+
 function CatalogExpansionScenario() {
   const [submits, setSubmits] = React.useState(0)
   const [checks, setChecks] = React.useState(0)
@@ -607,6 +656,7 @@ function CatalogExpansionScenario() {
             </Item>
           </ItemGroup>
         </section>
+        <EditorInputsScenario />
         <OverlaysScenario />
         <CalendarScenario />
         <VariantsBasicsScenario />
