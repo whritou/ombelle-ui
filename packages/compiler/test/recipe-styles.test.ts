@@ -636,3 +636,19 @@ it('glass recipe overrides stay inside the contrast bound', async () => {
     }),
   ).toThrow(expect.objectContaining({ code: 'INVALID_DATA', path: '/design/glassOpacity' }))
 })
+
+it('accepts the Dialog small-screen breakpoint in a family stylesheet and keeps it out of Button recipe styles', async () => {
+  const { catalog, preset } = await glassPreset()
+  const css = compileRecipeStyles({
+    familyCss: catalog.styles['liquid-glass'] + "@media (max-width: 639.98px) { [data-slot='dialog-footer'] { flex-direction: column-reverse } }",
+    preset,
+    overrides: {},
+    scope: glassScope,
+    darkSelector: '.dark',
+  })
+  expect(css).not.toContain('dialog-footer')
+  expect(() => compileRecipeStyles({
+    familyCss: catalog.styles['liquid-glass'] + '@media (max-width: 500px) { [data-slot="button"] { color: red } }',
+    preset, overrides: {}, scope: glassScope, darkSelector: '.dark',
+  })).toThrow('Unsupported recipe style condition')
+})

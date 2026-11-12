@@ -98,3 +98,58 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} Dialog`, () => {
+    test('the footer stays visible while the named body scrolls with the keyboard', async ({ page }) => {
+      const section = await open(page, edition)
+      await section.getByRole('button', { name: 'Export preset' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Export preset' })
+      const body = dialog.getByRole('region', { name: 'Export preset' })
+      await expect(body).toHaveAttribute('data-overflowing', '')
+      await expect(body).toHaveAttribute('tabindex', '0')
+      const footer = dialog.locator('[data-slot="dialog-footer"]')
+      // The footer gains a top border while the body overflows.
+      expect(await footer.evaluate(element => parseFloat(getComputedStyle(element).borderTopWidth))).toBeGreaterThan(0)
+      await body.focus()
+      await page.keyboard.press('PageDown')
+      await expect.poll(() => body.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await body.evaluate(element => { element.scrollTop = element.scrollHeight })
+      const viewport = page.viewportSize()!
+      const box = (await footer.boundingBox())!
+      expect(box.y).toBeGreaterThanOrEqual(0)
+      expect(box.y + box.height).toBeLessThanOrEqual(viewport.height)
+      await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeInViewport()
+    })
+
+    test('a short body is no Tab stop until its content overflows', async ({ page }) => {
+      const section = await open(page, edition)
+      await section.getByRole('button', { name: 'Edit details' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Project details' })
+      const body = dialog.getByTestId('v075-growing-body')
+      await expect(body).toHaveAttribute('aria-labelledby', /.+/)
+      await expect(body).not.toHaveAttribute('tabindex', /.*/)
+      const footer = dialog.locator('[data-slot="dialog-footer"]')
+      expect(await footer.evaluate(element => getComputedStyle(element).borderTopWidth)).toBe('0px')
+      await dialog.getByRole('button', { name: 'Add details' }).click()
+      await expect(body).toHaveAttribute('tabindex', '0')
+      await expect(body).toHaveAttribute('data-overflowing', '')
+      await expect.poll(() => footer.evaluate(element => parseFloat(getComputedStyle(element).borderTopWidth))).toBeGreaterThan(0)
+    })
+
+    test('lg fills the screen at 375px and default does not', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 })
+      const section = await open(page, edition)
+      await section.getByRole('button', { name: 'Export preset' }).click()
+      const large = page.getByRole('dialog', { name: 'Export preset' })
+      const box = (await large.boundingBox())!
+      expect(Math.round(box.width)).toBe(375)
+      expect(await large.evaluate(element => getComputedStyle(element).borderTopLeftRadius)).toBe('0px')
+      await page.keyboard.press('Escape')
+      await expect(large).toBeHidden()
+      await section.getByRole('button', { name: 'Rename preset' }).click()
+      const small = page.getByRole('dialog', { name: 'Rename preset' })
+      expect((await small.boundingBox())!.width).toBeLessThan(375)
+    })
+  })
+}

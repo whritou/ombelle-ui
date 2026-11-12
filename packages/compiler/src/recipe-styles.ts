@@ -57,6 +57,8 @@ const allowedMediaConditions = [
   '(hover: hover)',
   'not (forced-colors: active)',
   'not (prefers-reduced-transparency: reduce)',
+  // The Dialog's small screens: lg and fullscreen fill the screen, and the footer stacks.
+  '(max-width: 639.98px)',
 ]
 // The single reviewed liquid-glass feature query; compared whitespace-normalized.
 const glassSupportsCondition =

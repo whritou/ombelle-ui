@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -517,6 +517,26 @@ const editorInputSwatches = [
   { label: 'Ink', value: 'oklch(0.22 0.012 275)' },
 ]
 
+/** A dialog whose body starts short and grows, for the Dialog body's Tab stop. */
+function GrowingDialog075() {
+  const [paragraphs, setParagraphs] = React.useState(1)
+  return (
+    <Dialog>
+      <DialogTrigger>Edit details</DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Project details</DialogTitle><DialogDescription>Notes for the team.</DialogDescription></DialogHeader>
+        <DialogBody data-testid="v075-growing-body">
+          {Array.from({ length: paragraphs }, (_, index) => <p key={index}>Note {index + 1}: the export keeps every token, the recipe pins and the preset revision for the next install.</p>)}
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" onClick={() => setParagraphs(count => count + 20)}>Add details</button>
+          <DialogClose>Done</DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 /** The 0.7.5 variants, for tests/e2e/variants-075.spec.ts. */
 function VariantsScenario075() {
   return (
@@ -544,6 +564,28 @@ function VariantsScenario075() {
             <PopoverDescription>Applies to cards, buttons and menus in this family.</PopoverDescription>
           </PopoverContent>
         </Popover>
+      </div>
+      <div data-testid="v075-dialogs" style={{ display: 'flex', gap: '0.75rem', marginBlockStart: '0.75rem' }}>
+        <Dialog>
+          <DialogTrigger>Export preset</DialogTrigger>
+          <DialogContent size="lg">
+            <DialogHeader><DialogTitle>Export preset</DialogTitle><DialogDescription>Choose what the JSON file includes.</DialogDescription></DialogHeader>
+            <DialogBody>
+              {Array.from({ length: 30 }, (_, index) => <p key={index}>Section {index + 1}: tokens, component recipes, glass materials and the preset revision.</p>)}
+            </DialogBody>
+            <DialogFooter>
+              <DialogClose>Cancel</DialogClose>
+              <button type="button">Export</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog>
+          <DialogTrigger>Rename preset</DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Rename preset</DialogTitle><DialogDescription>The install code stays the same.</DialogDescription></DialogHeader>
+          </DialogContent>
+        </Dialog>
+        <GrowingDialog075 />
       </div>
     </section>
   )

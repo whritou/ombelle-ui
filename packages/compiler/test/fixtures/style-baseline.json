@@ -10,7 +10,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "8f6dad935471a75a925b1f68d84738e078064ce29a0eee72d9270d81f761f46d"
+          "sha256": "4e4b851aca913f3d65b8c043f9ca96f38db8983c11110905c411db12c3d2aa0e"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -34,7 +34,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "01fdd060cd34c73ef2881704c246a5afa92bf1377487a945d2556d35f0641241"
+          "sha256": "b494836b3fd9eabfcf149fa38389ff8352d7c216657221c78dff3e8fc1f90146"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -51,7 +51,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "8f6dad935471a75a925b1f68d84738e078064ce29a0eee72d9270d81f761f46d"
+          "sha256": "4e4b851aca913f3d65b8c043f9ca96f38db8983c11110905c411db12c3d2aa0e"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -75,7 +75,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "023c3dfd340a080dad1251fb8d8002fbe561be9d461b40c0c85326963cd22abc"
+          "sha256": "a31d3e1ae1e92bc92bd14bd62049cf58cfa2a776b6fd1fb585ba604b5af0dbb1"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -92,7 +92,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "8f6dad935471a75a925b1f68d84738e078064ce29a0eee72d9270d81f761f46d"
+          "sha256": "4e4b851aca913f3d65b8c043f9ca96f38db8983c11110905c411db12c3d2aa0e"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -116,7 +116,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "f091e7ec6e4d8266f4c09c51dda67de9f2eed94720ec2e1e4e57cd73b1c9c264"
+          "sha256": "b375fa54d0e9f63c9f1c75103036a171acd24935b6f3eccf54d0f5491c32dd4e"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -350,6 +350,14 @@
       ],
       "spec": "feat/variants-more-073",
       "reason": "Input sm and lg sizes (0.7.3 variants, batches 6b and 6c)"
+    },
+    {
+      "logicalPaths": [
+        "components/ui/dialog.tsx",
+        "styles/ui-style.css"
+      ],
+      "spec": "docs/superpowers/specs/2026-11-12-variants-075-design.md",
+      "reason": "0.7.5 Dialog body, footer and sizes"
     }
   ]
 }
