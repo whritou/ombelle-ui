@@ -7,6 +7,7 @@ import {
   type RecipeColorMode, type RecipeColorRole,
 } from '@ombelle/contracts'
 import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shell'
+import { ColorPicker } from '../../generated/ui/components/ui/color-picker'
 import { designControlLabel, glassDesignControls } from '../../preset-editor/model'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 import { colorDimensionFor, colorPlaceholder } from '../measured-color'
@@ -140,13 +141,8 @@ export function CatalogAppearance({ recipe, glass, measured = {}, previewMode = 
           return <div className="be-color-role" key={role}>
             <label htmlFor={id} className="be-color-role-name">{label}</label>
             <div className="be-color-chip" data-inherited={value === '' || undefined}>
-              <span className="colorSwatch" style={{ backgroundColor: value || 'var(--muted)' }}>
-                <input type="color" aria-label={`Pick ${label.toLowerCase()} color`}
-                  value={/^#[0-9a-f]{6}$/i.test(value) ? value : '#000000'}
-                  onChange={event => updateColor(role, event.target.value)} />
-              </span>
-              <input id={id} type="text" className="colorText" value={value} placeholder={colorPlaceholder(rendered[colorDimensionFor[role]], mode, previewMode, 'Preset')}
-                spellCheck={false} maxLength={80} onChange={event => updateColor(role, event.target.value.trim())} />
+              <ColorPicker id={id} label={label} value={value} placeholder={colorPlaceholder(rendered[colorDimensionFor[role]], mode, previewMode, 'Preset')}
+                onValueChange={next => updateColor(role, next)} onInvalid={text => updateColor(role, text.trim())} />
               {value && <button type="button" className="colorReset" aria-label={`Reset ${label.toLowerCase()} color`}
                 onClick={() => { document.getElementById(id)?.focus(); updateColor(role, '') }}>
                 <RotateCcw aria-hidden="true" size={14} />

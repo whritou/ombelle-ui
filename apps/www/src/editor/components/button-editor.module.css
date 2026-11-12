@@ -45,7 +45,6 @@
 .root :global(.be-switch):hover:not(:disabled) { border-color: var(--ink); background: color-mix(in oklab, var(--muted), var(--foreground) 8%); }
 .root :global(.be-switch)[aria-checked="true"]:hover:not(:disabled) { border-color: var(--primary); background: var(--primary); filter: brightness(1.08); }
 .root :global(.colorReset):hover:not(:disabled) { background: var(--muted); color: var(--ink); }
-.root :global(.colorSwatch):hover { border-color: var(--ink); }
 .root :global(.artifactTabs) button:hover:not([aria-selected="true"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
 .root :global(.mobileTabs) button:hover:not([aria-current="page"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
 .recoveryActions button:hover:not(:disabled) { background: var(--muted); }
@@ -133,14 +132,10 @@
 .root :global(.be-color-chips) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
 .root :global(.be-color-cell) { display: grid; gap: .2rem; min-width: 0; align-content: start; }
 .root :global(.be-chip-mode) { color: var(--slate); font-size: .75rem; font-weight: 500; }
-.root :global(.be-color-chip) { display: flex; align-items: center; gap: .3rem; min-width: 0; padding: 3px; border: 1px solid var(--control); border-radius: .5rem; background: var(--surface); }
-.root :global(.be-color-chip)[data-inherited="true"] { border-style: dashed; }
-.root :global(.be-color-chip)[data-invalid] { border-color: var(--destructive); }
-.root :global(.colorSwatch) { position: relative; flex: none; display: block; width: 1.5rem; height: 1.5rem; border: 1px solid var(--control); border-radius: .35rem; overflow: hidden; }
-.root :global(.colorSwatch) input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; cursor: pointer; }
-.root :global(.colorSwatch):focus-within { outline: 2px solid var(--moss); outline-offset: 2px; }
-.root :global(.be-color-chip) input:global(.colorText) { flex: 1; min-width: 0; min-height: 24px; padding: 0 .25rem; border: 0; background: transparent; font: 400 .75rem var(--font-mono); color: var(--ink); text-overflow: ellipsis; }
-.root :global(.be-color-chip) input:global(.colorText)::placeholder { color: var(--slate); font-style: italic; }
+.root :global(.be-color-chip) { display: flex; align-items: center; gap: .3rem; min-width: 0; }
+.root :global(.be-color-chip) > [data-slot='color-picker'] { flex: 1; min-width: 0; }
+.root :global(.be-color-chip)[data-inherited="true"] [data-slot='color-picker-trigger'] { border-style: dashed; }
+.root :global(.be-color-chip)[data-invalid] [data-slot='color-picker-trigger'] { border-color: var(--destructive); }
 .root :global(.colorReset) { flex: none; display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; padding: 0; border: 0; background: transparent; color: var(--slate); }
 .root :global(.colorError) { grid-column: 1 / -1; }
 

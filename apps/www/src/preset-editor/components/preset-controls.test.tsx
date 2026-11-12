@@ -125,3 +125,21 @@ it('repurposed values survive a family round trip', () => {
   expect(html.replace(/<[^>]+>/g, '')).toContain('Glass shadow Y')
   expect(html).toContain('value="20"')
 })
+
+it('TokenList edits each token as a catalog Color Picker Pair with scheme swatches and contrast', () => {
+  const html = renderToStaticMarkup(
+    <TokenList draft={createPresetDraft('flat')} {...handlers} errorPath="/modes/dark/primary" warnings={new Set()} />,
+  )
+  expect(html).not.toContain('type="color"')
+  expect(html).toMatch(/role="group" aria-label="Primary" data-slot="color-picker-pair"/)
+  expect(html).toContain('aria-label="Open Light primary color picker"')
+  expect(html).toContain('aria-label="Open Dark primary color picker"')
+  expect(html).toMatch(/<input[^>]*id="preset-modes-dark-primary"[^>]*aria-invalid="true"[^>]*aria-describedby="preset-error"/)
+  expect(html).not.toMatch(/<input[^>]*id="preset-modes-light-primary"[^>]*aria-invalid/)
+})
+
+it('DesignControls uses the catalog Number Input for the shadow offsets', () => {
+  const html = renderToStaticMarkup(<DesignControls draft={createPresetDraft('flat')} {...handlers} section="depth" />)
+  expect(html).toMatch(/<input[^>]*id="preset-design-shadowOffsetXPx"[^>]*role="spinbutton"/)
+  expect(html).toContain('data-slot="number-input-decrement"')
+})

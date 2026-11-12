@@ -110,7 +110,7 @@
   flex-wrap: wrap;
   margin: 8px 0;
 }
-.editor :global(.preset-input-row) input,
+.editor :global(.preset-input-row) input:not([data-slot]),
 .editor :global(.preset-input-row) select {
   flex: 1;
   min-width: 80px;
@@ -316,22 +316,6 @@
   border: 1px solid var(--control);
   border-radius: 6px;
 }
-.editor :global(.preset-picker) {
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-}
-.editor :global(.preset-picker) input[type='color'] {
-  position: absolute;
-  inset: -8px;
-  width: calc(100% + 16px);
-  height: calc(100% + 16px);
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  opacity: 0;
-  cursor: pointer;
-}
 
 /* Popovers: anchored beside their row where supported, centred otherwise. */
 .editor :global(.preset-popover) {
@@ -375,6 +359,11 @@
   gap: 4px;
   margin-top: 10px;
 }
+/* The catalog Color Picker fills the row beside its reset button. */
+.editor :global(.preset-input-row) > [data-slot='color-picker'] {
+  flex: 1;
+  min-width: 0;
+}
 .editor :global(.preset-control) label {
   font-size: 13px;
 }
@@ -384,13 +373,13 @@
   gap: 6px;
   margin: 0;
 }
-.editor :global(.preset-input-row) input:not([type='color']),
+.editor :global(.preset-input-row) input:not([data-slot]),
 .editor :global(.preset-input-row) select {
   flex: 1;
   min-width: 0;
   width: 0;
 }
-.editor :global(.preset-popover) input:not([type='color']) {
+.editor :global(.preset-popover) input:not([data-slot]) {
   min-height: 38px;
   font-family: var(--font-mono);
   font-size: 13px;
@@ -942,7 +931,7 @@
   align-items: center;
   gap: 6px;
 }
-.editor :global(.preset-shadow-field) input {
+.editor :global(.preset-shadow-field) input:not([data-slot]) {
   min-height: 32px;
   padding: 0 6px;
 }

@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { defaultGlassPresetId, resolveRecipePreset } from '@ombelle/catalog'
 import { componentRecipeFields, defaultRecipeFields, styleSupport, type ComponentRecipe, type RecipeField } from '@ombelle/contracts'
 import { siteFamilyOrder } from '../../snapshots/install-command'
@@ -6,6 +7,7 @@ import { glassPresetId } from '../../site/glass-presets'
 import { catalogPresetRef } from '../catalog-draft'
 import { FamilyPicker } from './family-picker'
 import { CatalogAppearance } from './catalog-appearance'
+import { NumberInput } from '../../generated/ui/components/ui/number-input'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 
 export function CatalogProperties({ recipe, measured = {}, previewMode = 'light', update }: {
@@ -64,6 +66,19 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
 }
 
 type Item = Record<string, unknown> & { id: string }
+/** An integer property: a typed partial number stays in the field and changes nothing until it parses. */
+function IntegerField({ field, value, update }: { field: RecipeField; value: unknown; update(value: unknown): void }) {
+  const id = useId()
+  return <div className="be-stack">
+    <label htmlFor={id}>{field.title}</label>
+    <NumberInput id={id} value={typeof value === 'number' ? value : null} min={field.minimum} max={field.maximum}
+      onValueChange={(next, { text }) => {
+        if (text.trim() === '') update(null)
+        else if (next !== null) update(next)
+      }} />
+  </div>
+}
+
 function Field({ field, value, update, protectedIds = [], createItem }: {
   field: RecipeField
   value: unknown
@@ -116,10 +131,7 @@ function Field({ field, value, update, protectedIds = [], createItem }: {
   if (field.type === 'boolean') return <label className="flex gap-2">
     <input type="checkbox" checked={value === true} onChange={event => update(event.target.checked)} />{field.title}
   </label>
-  if (field.type === 'integer') return <label className="be-stack">{field.title}
-    <input type="number" value={typeof value === 'number' ? value : ''} min={field.minimum} max={field.maximum}
-      onChange={event => update(event.target.value === '' ? null : event.target.valueAsNumber)} />
-  </label>
+  if (field.type === 'integer') return <IntegerField field={field} value={value} update={update} />
   if ((field.maxLength ?? 0) > 200) return <label className="be-stack">{field.title}
     <textarea maxLength={field.maxLength} value={String(value ?? '')} onChange={event => update(event.target.value)} />
   </label>

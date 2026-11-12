@@ -735,6 +735,8 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   page,
   context,
 }) => {
+  // The keyboard walk crosses every token's Color Picker Pair and the whole preview gallery.
+  test.setTimeout(120000)
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.setViewportSize({ width: 320, height: 800 })
   await page.goto(url)
