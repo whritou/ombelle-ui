@@ -371,3 +371,22 @@ describe('the 0.7.5 primitives', () => {
     expect(declarations(read('button-group/ombelle.css'), "[data-slot='button-group'][data-orientation='vertical']")['border-radius']).toBe('calc(var(--control-height) / 2)')
   })
 })
+
+describe('editor inputs board comparison, measured on the edition pages against the 0.7.5 boards', () => {
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'] as const
+  it.each(families)('%s pads the Color Picker popover by 14px and sets its format value at weight 500 with 14px sides', family => {
+    const css = read(`color-picker/${family}.css`)
+    expect(declarations(css, "[data-slot='color-picker-content']").padding).toBe('0.875rem')
+    expect(declarations(css, "[data-slot='color-picker-value']")).toMatchObject({ 'font-weight': '500', 'padding-inline': '0.875rem' })
+  })
+  it.each([['minimalist', 'var(--radius)'], ['neo-brutalism', '0'], ['ombelle', '999px'], ['flat', '999px'], ['liquid-glass', '999px']])('%s rounds the hue track like the board (%s)', (family, radius) => {
+    expect(declarations(read(`color-picker/${family}.css`), "[data-slot='color-picker-hue']")['border-radius']).toBe(radius)
+  })
+  it('flat draws 1px edges on the picker parts, and boxes the trigger row and Number Input with a 10px radius, as its board', () => {
+    const css = read('color-picker/flat.css')
+    for (const slot of ['color-picker-preview', 'color-picker-area', 'color-picker-hue', 'color-picker-swatch'])
+      expect(declarations(css, `[data-slot='${slot}']`)['border-width'] ?? declarations(css, `[data-slot='${slot}']`).border, slot).toMatch(/^1px/)
+    expect(declarations(css, "[data-slot='color-picker-trigger']")).toMatchObject({ border: '1px solid var(--border)', 'border-radius': '10px' })
+    expect(declarations(read('number-input/flat.css'), "[data-slot='number-input']")).toMatchObject({ border: '1px solid var(--border)', 'border-radius': '10px' })
+  })
+})

@@ -115,6 +115,10 @@
     animation: none;
   }
 }
+/* 0.7.5 board: the picker popover is padded by 14px in every family. */
+[data-slot='color-picker-content'] {
+  padding: 0.875rem;
+}
 [data-slot='color-picker-area'] {
   position: relative;
   box-sizing: border-box;
@@ -135,7 +139,7 @@
   box-sizing: border-box;
   block-size: 0.875rem;
   border: var(--border-width) solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
   touch-action: none;
   user-select: none;
@@ -232,8 +236,10 @@
   cursor: pointer;
 }
 [data-slot='color-picker-value'] {
+  padding-inline: 0.875rem;
   background: var(--background);
   font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 500;
 }
 [data-slot='color-picker-value'][aria-invalid='true'] {
   border-color: var(--destructive);

@@ -149,6 +149,11 @@
     transition: none;
   }
 }
+/* 0.7.5 flat board: the Number Input is a 1px box with 10px corners. */
+[data-slot='number-input'] {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
 @media (forced-colors: active) {
   [data-slot='number-input-decrement'],
   [data-slot='number-input-increment'] {

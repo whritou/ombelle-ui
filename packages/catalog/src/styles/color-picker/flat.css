@@ -25,7 +25,7 @@
   block-size: 1.875rem;
   margin: 0;
   padding: 0;
-  border: var(--border-width) solid var(--border);
+  border: 1px solid var(--border);
   border-radius: calc(var(--radius) * 0.75);
   cursor: pointer;
 }
@@ -117,11 +117,15 @@
     animation: none;
   }
 }
+/* 0.7.5 board: the picker popover is padded by 14px in every family. */
+[data-slot='color-picker-content'] {
+  padding: 0.875rem;
+}
 [data-slot='color-picker-area'] {
   position: relative;
   box-sizing: border-box;
   block-size: 9.375rem;
-  border: var(--border-width) solid var(--border);
+  border: 1px solid var(--border);
   border-radius: calc(var(--radius) * 0.75);
   touch-action: none;
   cursor: crosshair;
@@ -136,7 +140,7 @@
   align-items: center;
   box-sizing: border-box;
   block-size: 0.875rem;
-  border: var(--border-width) solid var(--border);
+  border: 1px solid var(--border);
   border-radius: 999px;
   background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
   touch-action: none;
@@ -222,7 +226,7 @@
   min-inline-size: 0;
   block-size: 2.125rem;
   padding: 0 0.5rem;
-  border: var(--border-width) solid var(--input);
+  border: 1px solid var(--input);
   border-radius: calc(var(--radius) * 0.75);
   color: var(--foreground);
   font: inherit;
@@ -234,8 +238,10 @@
   cursor: pointer;
 }
 [data-slot='color-picker-value'] {
+  padding-inline: 0.875rem;
   background: var(--background);
   font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 500;
 }
 [data-slot='color-picker-value'][aria-invalid='true'] {
   border-color: var(--destructive);
@@ -253,7 +259,7 @@
   block-size: 2.125rem;
   margin: 0;
   padding: 0;
-  border: var(--border-width) solid var(--border);
+  border: 1px solid var(--border);
   border-radius: calc(var(--radius) * 0.75);
   background: var(--card);
   color: var(--card-foreground);
@@ -283,7 +289,7 @@
   block-size: 1.75rem;
   margin: 0;
   padding: 0;
-  border: var(--border-width) solid var(--border);
+  border: 1px solid var(--border);
   border-radius: calc(var(--radius) * 0.75);
   cursor: pointer;
 }
@@ -314,7 +320,7 @@
   align-items: center;
   min-block-size: 1.25rem;
   padding: 0 0.5rem;
-  border: var(--border-width) solid currentColor;
+  border: 1px solid currentColor;
   border-radius: 999px;
   color: var(--foreground);
   font-size: 0.625rem;
@@ -373,6 +379,11 @@
   [data-slot='color-picker-trigger'] {
     transition: none;
   }
+}
+/* 0.7.5 flat board: the trigger row is a 1px box with 10px corners. */
+[data-slot='color-picker-trigger'] {
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }
 @keyframes ombelle-color-picker-enter {
   from {

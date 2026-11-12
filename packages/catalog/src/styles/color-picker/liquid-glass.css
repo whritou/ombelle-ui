@@ -145,6 +145,10 @@
     animation: none;
   }
 }
+/* 0.7.5 board: the picker popover is padded by 14px in every family. */
+[data-slot='color-picker-content'] {
+  padding: 0.875rem;
+}
 [data-slot='color-picker-area'] {
   position: relative;
   box-sizing: border-box;
@@ -290,8 +294,10 @@
   cursor: pointer;
 }
 [data-slot='color-picker-value'] {
+  padding-inline: 0.875rem;
   background: var(--background);
   font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 500;
 }
 [data-slot='color-picker-value'][aria-invalid='true'] {
   border-color: var(--destructive);
