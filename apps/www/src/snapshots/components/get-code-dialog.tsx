@@ -212,7 +212,7 @@ export function GetCodeDialog({
               copyLabel="Copy install command"
             />
           ) : command ? (
-            <pre className={styles.command} tabIndex={0}>
+            <pre className={styles.command} tabIndex={0} role="region" aria-label="Install command">
               <code ref={fallback}>{command}</code>
             </pre>
           ) : (

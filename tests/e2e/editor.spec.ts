@@ -666,16 +666,33 @@ test('the History group casts no shadow behind its ghost Undo and Redo buttons',
 
 test('the Get code dialog scrolls its long command and keeps Close visible at 320 pixels', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 })
+  // A saved manager choice is read when the dialog mounts.
+  await page.addInitScript(() => localStorage.setItem('ombelle:get-code:manager', 'yarn'))
+  // Hold publishing, so the dialog shows its generating state first.
+  let release!: () => void
+  const held = new Promise<void>((resolve) => { release = resolve })
+  await page.route('**/api/v1/recipes', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue()
+    const response = await route.fetch()
+    await held
+    await route.fulfill({ response })
+  })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByRole('button', { name: 'Get code', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Get code' })
   await expect(dialog).toBeVisible()
+  await expect(dialog.getByTestId('get-code-command')).toBeVisible()
+  await expect(dialog.getByTestId('get-code-command')).toContainText('Generating')
+  await expect(dialog.getByRole('tablist', { name: 'Package manager' })).toHaveCount(0)
+  release()
+  await expect(dialog.getByRole('tab', { name: 'yarn', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await expect(dialog.getByTestId('get-code-command')).toHaveCount(0)
   const close = dialog.getByRole('button', { name: 'Close', exact: true })
   const closeBox = (await close.boundingBox())!
   expect(closeBox.x).toBeGreaterThanOrEqual(0)
   expect(closeBox.x + closeBox.width).toBeLessThanOrEqual(320)
   // The ready command is the selected manager's tab panel, which scrolls its one-line pre.
-  const command = dialog.getByRole('tabpanel', { name: 'pnpm', exact: true })
+  const command = dialog.getByRole('tabpanel', { name: 'yarn', exact: true })
   await expect(command).toContainText(/add --recipe rc_/)
   const box = (await command.boundingBox())!
   expect(box.x + box.width).toBeLessThanOrEqual(320)
