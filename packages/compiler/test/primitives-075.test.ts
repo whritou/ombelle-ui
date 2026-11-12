@@ -62,6 +62,12 @@ describe('0.7.5 primitive specimens', () => {
     const both = find(d('scroll-area', { orientation: 'both' }), 'div').filter(row => row.props.style)
     expect(both.length).toBeGreaterThan(0)
     expect(both.every(row => (row.props.style as Record<string, string>).inlineSize === '40rem' && row.props.className === undefined)).toBe(true)
+    // The sideways row lays its items out with inline styles too.
+    const horizontal = d('scroll-area', { orientation: 'horizontal' })
+    expect(find(horizontal, 'ScrollBar')[0]!.props.orientation).toBe('horizontal')
+    const row = find(horizontal, 'div')[0]!
+    expect(row.props).toEqual({ style: { display: 'flex', inlineSize: 'max-content', gap: '1rem' } })
+    expect(find(horizontal, 'div').every(div => div.props.className === undefined)).toBe(true)
   })
 
   it('marks the native children of each button group mode', () => {

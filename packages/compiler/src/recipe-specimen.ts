@@ -102,7 +102,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       const orientation = props.orientation ?? 'vertical'
       const rows = Array.from({ length: content.itemCount }, (_, index) => node('div', orientation === 'both' ? { style: { inlineSize: '40rem' } } : {}, `Item ${index + 1}`))
       return node('ScrollArea', { 'aria-label': content.label, style: { blockSize: `${props.height ?? 200}px` } },
-        orientation === 'horizontal' ? node('div', { className: 'flex w-max gap-4' }, ...rows) : node('div', {}, ...rows),
+        orientation === 'horizontal' ? node('div', { style: { display: 'flex', inlineSize: 'max-content', gap: '1rem' } }, ...rows) : node('div', {}, ...rows),
         ...(orientation === 'vertical' ? [] : [node('ScrollBar', { orientation: 'horizontal' })]))
     }
     case 'button-group': {
