@@ -197,7 +197,7 @@ const hidden: React.CSSProperties = {
   clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0,
 }
 
-export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' | 'onChange'> & {
+export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'onInvalid'> & {
   /** A CSS colour: #rrggbb, rgb(r g b) or oklch(L C H). An empty string shows the placeholder. */
   value?: string
   defaultValue?: string
@@ -222,6 +222,9 @@ export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' 
   /** Shows the eyedropper where the browser has the EyeDropper API (default true). */
   eyeDropper?: boolean
   mode?: 'light' | 'dark'
+  /** Go to the text field, with the field's own check: an editor's error message and its invalid state. */
+  'aria-describedby'?: string
+  'aria-invalid'?: boolean | 'true' | 'false'
 }
 
 /**
@@ -233,7 +236,7 @@ export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' 
 export function ColorPicker({
   value, defaultValue = '', onValueChange, onInvalid, label: ownLabel, placeholder, disabled, name, id,
   format: formatProp, defaultFormat = 'oklch', onFormatChange, swatches = [], contrastWith, contrastLabel,
-  eyeDropper = true, mode, className, children, ...props
+  eyeDropper = true, mode, className, children, 'aria-describedby': describedBy, 'aria-invalid': ariaInvalid, ...props
 }: ColorPickerProps) {
   const pair = React.useContext(PairContext)
   const label = ownLabel ?? (pair ? (mode ? `${pair.label} · ${mode}` : pair.label) : 'Color')
@@ -267,7 +270,7 @@ export function ColorPicker({
 
   React.useEffect(() => () => pick.current?.abort(), [])
 
-  const invalid = text.trim() !== '' && parseColor(text) === null
+  const invalid = (text.trim() !== '' && parseColor(text) === null) || ariaInvalid === true || ariaInvalid === 'true'
   const write = (next: string) => {
     setCurrent(next)
     setText(next)
@@ -355,6 +358,7 @@ export function ColorPicker({
               name={name}
               aria-label={label}
               aria-invalid={invalid || undefined}
+              aria-describedby={describedBy}
               placeholder={placeholder}
               disabled={disabled}
               autoComplete="off"

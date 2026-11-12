@@ -61,6 +61,15 @@ describe('Number Input', () => {
     expect(html).toMatch(/<input[^>]*id="radius"/)
   })
 
+  it('shows the raw text an editor stored, such as a half-typed value restored after a reload', () => {
+    const partial = renderToStaticMarkup(h(ui.NumberInput, { 'aria-label': 'Radius', text: '-', onValueChange: () => {} }))
+    expect(partial).toContain('value="-"')
+    expect(partial).not.toContain('aria-valuenow')
+    const number = renderToStaticMarkup(h(ui.NumberInput, { 'aria-label': 'Radius', text: '0.50', unit: 'rem', onValueChange: () => {} }))
+    expect(number).toContain('value="0.50"')
+    expect(number).toContain('aria-valuenow="0.5"')
+  })
+
   it('takes custom stepper names and leaves an empty value without valuenow', () => {
     const html = renderToStaticMarkup(h(ui.NumberInput, { 'aria-label': 'Delay', value: null, decrementLabel: 'Less', incrementLabel: 'More' }))
     expect(html).toContain('aria-label="Less"')

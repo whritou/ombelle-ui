@@ -80,7 +80,7 @@
   z-index: 50;
   display: flex;
   flex-direction: column;
-  max-block-size: var(--radix-popover-content-available-height);
+  max-block-size: var(--radix-popover-content-available-height, var(--available-height, 100vh));
   overflow: auto;
   padding: 1.125rem;
   border: 0;

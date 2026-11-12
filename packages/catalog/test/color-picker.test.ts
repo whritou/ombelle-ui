@@ -51,6 +51,12 @@ describe('Color Picker', () => {
     expect(html).toMatch(/data-slot="color-picker-trigger"[^>]*data-invalid=""/)
   })
 
+  it.each(editions)('%s passes an editor error to the text field', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.ColorPicker, { label: 'Primary', value: '#1d4ed8', 'aria-invalid': true, 'aria-describedby': 'preset-error', onValueChange: () => {} }))
+    expect(html).toMatch(/<input[^>]*aria-invalid="true"[^>]*aria-describedby="preset-error"/)
+    expect(html).not.toMatch(/data-slot="color-picker"[^>]*aria-describedby/)
+  })
+
   it.each(editions)('%s shows the placeholder colour for an empty value', (_, ui) => {
     const html = renderToStaticMarkup(h(ui.ColorPicker, { label: 'Border', defaultValue: '', placeholder: '#ff0000' }))
     expect(html).toContain('placeholder="#ff0000"')

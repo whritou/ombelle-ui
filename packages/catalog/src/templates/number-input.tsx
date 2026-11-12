@@ -29,6 +29,11 @@ export type NumberInputProps = Omit<React.ComponentProps<'input'>, 'value' | 'de
   /** The number, or null for an empty field. */
   value?: number | null
   defaultValue?: number | null
+  /**
+   * The raw text, for an editor that stores what was typed (such as "1." or "-") and restores it
+   * after a reload, an undo or a redo. It replaces value: the number is read from it.
+   */
+  text?: string
   /** Fires on every edit. value is null when the text is empty or does not parse; details.text is the raw text. */
   onValueChange?(value: number | null, details: { text: string; valid: boolean }): void
   min?: number
@@ -51,11 +56,11 @@ const show = (value: number | null | undefined) => (value === null || value === 
  * when it does not parse or is outside min..max.
  */
 export function NumberInput({
-  value, defaultValue = null, onValueChange, min, max, step = 1, largeStep = 10, unit,
+  value, defaultValue = null, text: rawText, onValueChange, min, max, step = 1, largeStep = 10, unit,
   decrementLabel, incrementLabel, className, disabled, onKeyDown, onBlur, onFocus, ...props
 }: NumberInputProps) {
   const controlled = value !== undefined
-  const [text, setText] = React.useState(() => show(controlled ? value : defaultValue))
+  const [text, setText] = React.useState(() => rawText ?? show(controlled ? value : defaultValue))
   const [blurredInvalid, setBlurredInvalid] = React.useState(false)
   const [labelText, setLabelText] = React.useState<string | null>(null)
   const input = React.useRef<HTMLInputElement>(null)
@@ -65,11 +70,18 @@ export function NumberInput({
 
   // A controlled value from outside resyncs the text, unless the focused field already spells it.
   React.useEffect(() => {
-    if (!controlled) return
+    if (rawText !== undefined || !controlled) return
     if (focused.current && parseNumberText(textRef.current) === value) return
     setText(show(value))
     setBlurredInvalid(false)
-  }, [controlled, value])
+  }, [controlled, value, rawText])
+
+  // Raw text from outside replaces the field's text, unless the field already holds it.
+  React.useEffect(() => {
+    if (rawText === undefined || rawText === textRef.current) return
+    setText(rawText)
+    setBlurredInvalid(false)
+  }, [rawText])
 
   React.useEffect(() => {
     const element = input.current
