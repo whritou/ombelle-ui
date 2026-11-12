@@ -88,10 +88,13 @@ for (const edition of ['radix', 'base'] as const) {
               return style.opacity !== '0' && style.visibility !== 'hidden' && style.display !== 'none' && element.getAttribute('data-state') !== 'hidden'
             }).length,
         )
-      // Poll for a second so a delayed fade-in would be caught.
+      // Sample for a full second so a delayed fade-in would be caught.
       const seen: number[] = []
-      await expect.poll(async () => { seen.push(await visibleBars()); return Math.max(...seen) }, { timeout: 1000, intervals: [100] }).toBe(0).catch(() => {})
-      expect(Math.max(...seen, await visibleBars())).toBe(0)
+      for (let sample = 0; sample < 10; sample++) {
+        seen.push(await visibleBars())
+        await page.waitForTimeout(100)
+      }
+      expect(seen).toEqual(new Array(10).fill(0))
     })
 
     test('Button Group joins its children, keeps a single child round and lifts the focused child', async ({ page }) => {
