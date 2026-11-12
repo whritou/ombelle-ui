@@ -29,7 +29,7 @@ const fields = {
 
 for (const [id, field] of Object.entries(fields)) test(`edits and restores ${id}`, async ({ page }) => {
   await page.goto(`http://127.0.0.1:3000/editor/component/${id}`)
-  if (id === 'separator') await page.getByRole('checkbox', { name: 'Decorative' }).uncheck()
+  if (id === 'separator') await page.getByRole('switch', { name: 'Decorative' }).uncheck()
   const control = page.getByLabel(field, { exact: true }).first()
   const text = `Edited ${id}`
   await control.fill(text)
@@ -78,7 +78,7 @@ for (const [id, field] of Object.entries(fields)) test(`edits and restores ${id}
     expect(space).toBeGreaterThanOrEqual(8)
   }
   if (id === 'progress') {
-    await page.getByRole('checkbox', { name: 'Indeterminate' }).check()
+    await page.getByRole('switch', { name: 'Indeterminate' }).check()
     const progress = preview.getByRole('progressbar', { name: text })
     await expect(progress).toHaveAttribute('data-state', 'indeterminate')
     await expect(progress).not.toHaveAttribute('aria-valuenow', /./)
