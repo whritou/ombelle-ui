@@ -49,6 +49,16 @@ describe('Button Group', () => {
       expect(css, family).toMatch(/margin-inline-start:\s*calc\(var\(--border-width/)
       expect(css, family).toMatch(/margin-block-start:\s*calc\(var\(--border-width/)
       expect(css, family).toMatch(/border-start-start-radius/)
+      expect(css, family).toMatch(/\[data-orientation='horizontal'\] > :not\(:first-child\) \{[^}]*border-start-start-radius: 0/)
+      expect(css, family).toMatch(/\[data-orientation='horizontal'\] > :not\(:last-child\) \{[^}]*border-end-end-radius: 0/)
+      expect(css, family).toMatch(/\[data-orientation='vertical'\] > :not\(:first-child\) \{[^}]*border-start-end-radius: 0/)
+      expect(css, family).toMatch(/\[data-orientation='vertical'\] > :not\(:last-child\) \{[^}]*border-end-start-radius: 0/)
+      // No unscoped rule squares corners, so a single child keeps all four.
+      for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g))
+        if (/border-(?:start|end)-(?:start|end)-radius/.test(body!)) expect(selector, family).toMatch(/:not\(:(?:first|last)-child\)/)
+      // A disabled child keeps the join: its rule resets no margin, border or radius.
+      for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g))
+        if (/:disabled/.test(selector!) && !/:not\(:disabled\)/.test(selector!)) expect(body, family).not.toMatch(/margin|border|radius/)
       expect(css, family).toContain('[data-button-group-button]')
       expect(css, family).toContain('[data-button-group-input]')
     }
