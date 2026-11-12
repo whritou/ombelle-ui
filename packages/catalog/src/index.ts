@@ -92,6 +92,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   collapsible: ['@radix-ui/react-collapsible', 'lucide-react'],
   toggle: ['@radix-ui/react-toggle'],
   'number-input': ['lucide-react'],
+  'color-picker': ['@radix-ui/react-popover', '@radix-ui/react-slider', 'lucide-react'],
   'scroll-area': ['@radix-ui/react-scroll-area'],
   'toggle-group': ['@radix-ui/react-toggle-group'],
   'tag-input': ['lucide-react'],

@@ -15,6 +15,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   'scroll-area': ['scroll-area', 'scroll-area-viewport', 'scroll-area-scrollbar', 'scroll-area-thumb', 'scroll-area-corner'],
   'toggle-group': ['toggle-group', 'toggle-group-item'],
   'number-input': ['number-input', 'number-input-input', 'number-input-decrement', 'number-input-increment', 'number-input-unit'],
+  'color-picker': ['color-picker', 'color-picker-trigger', 'color-picker-preview', 'color-picker-input', 'color-picker-content', 'color-picker-area', 'color-picker-area-thumb', 'color-picker-hue', 'color-picker-hue-thumb', 'color-picker-format', 'color-picker-format-select', 'color-picker-value', 'color-picker-eyedropper', 'color-picker-swatches', 'color-picker-swatch', 'color-picker-contrast', 'color-picker-contrast-level', 'color-picker-pair'],
   item: ['item', 'item-media', 'item-content', 'item-title', 'item-description', 'item-actions', 'item-group', 'item-separator'],
   'button-group': ['button-group', 'button-group-separator', 'button-group-text'],
   'tag-input': ['tag-input', 'tag-input-list', 'tag-input-tag', 'tag-input-remove', 'tag-input-input', 'tag-input-status'],
