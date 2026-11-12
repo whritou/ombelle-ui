@@ -37,8 +37,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the forty-five experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'calendar', 'card', 'checkbox', 'chip', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'kbd', 'label', 'meter', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle-group', 'tooltip'])
+  it('compiles the fifty experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'checkbox', 'chip', 'collapsible', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -50,10 +50,12 @@ describe('liquid-glass compile', () => {
       'components/ui/avatar.css',
       'components/ui/badge.css',
       'components/ui/breadcrumb.css',
+      'components/ui/button-group.css',
       'components/ui/calendar.css',
       'components/ui/card.css',
       'components/ui/checkbox.css',
       'components/ui/chip.css',
+      'components/ui/collapsible.css',
       'components/ui/combobox.css',
       'components/ui/command.css',
       'components/ui/context-menu.css',
@@ -63,6 +65,7 @@ describe('liquid-glass compile', () => {
       'components/ui/hover-card.css',
       'components/ui/input-group.css',
       'components/ui/input-otp.css',
+      'components/ui/item.css',
       'components/ui/kbd.css',
       'components/ui/label.css',
       'components/ui/meter.css',
@@ -71,6 +74,7 @@ describe('liquid-glass compile', () => {
       'components/ui/popover.css',
       'components/ui/progress.css',
       'components/ui/radio-group.css',
+      'components/ui/scroll-area.css',
       'components/ui/select.css',
       'components/ui/separator.css',
       'components/ui/sheet.css',
@@ -85,6 +89,7 @@ describe('liquid-glass compile', () => {
       'components/ui/textarea.css',
       'components/ui/toast.css',
       'components/ui/toggle-group.css',
+      'components/ui/toggle.css',
       'components/ui/tooltip.css',
       'styles/ui-style.css',
       'styles/ui-tokens.css',
