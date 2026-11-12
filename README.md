@@ -1,13 +1,16 @@
 # Ombelle UI foundation
 
-The catalog now includes **52 components**. Release 0.7.5 adds Toggle,
+The catalog now includes **53 components**. Release 0.7.5 adds Toggle,
 Collapsible, Scroll Area, Button Group and Item, then Number Input and Color
-Picker (with Color Picker Pair), in all five families, with both editions and
-recipe editors; install them with **0.7.5** or later. See the
+Picker (with Color Picker Pair), then Code Block (with Code Block Command), in
+all five families, with both editions and recipe editors; install them with
+**0.7.5** or later. See the
 [primitives design](docs/superpowers/specs/2026-11-12-primitives-075-design.md)
-and [evidence](docs/evidence/primitives-075.md), and the
+and [evidence](docs/evidence/primitives-075.md), the
 [editor inputs design](docs/superpowers/specs/2026-11-12-editor-inputs-075-design.md)
-and [evidence](docs/evidence/editor-inputs-075.md). Release 0.7.3 adds
+and [evidence](docs/evidence/editor-inputs-075.md), and the
+[Code Block design](docs/superpowers/specs/2026-11-12-code-block-075-design.md)
+and [evidence](docs/evidence/code-block-075.md). Release 0.7.3 adds
 Spinner, Kbd, Empty, Field, Meter (with segmented progress), Stepper, Slider,
 Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card,
 Context Menu and Calendar (with a Date Picker), with

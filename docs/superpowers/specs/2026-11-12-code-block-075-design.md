@@ -22,6 +22,7 @@ The package-manager row uses the Tabs primitive: `@radix-ui/react-tabs` (already
 ### Parts
 
 - `CodeBlock`, the root, with `CodeBlockHeader`, `CodeBlockTitle`, `CodeBlockCopy` and `CodeBlockCode`. `CodeBlock` renders all of them from its props; the parts are exported for custom layouts.
+- `CodeBlockRoot` (added during implementation): the styled root `div` that `CodeBlock` renders, so a custom layout of the parts keeps the frame. The parts take explicit props and need no context.
 - `CodeBlockCommand`, the command block with package-manager tabs.
 - `highlightCode(source, language)`, exported for consumers who render their own markup.
 
@@ -30,6 +31,7 @@ The package-manager row uses the Tabs primitive: `@radix-ui/react-tabs` (already
 - **Props:** `code` (string, required: what Copy copies), `language` (`tsx`, `css`, `json`, `shell` or `text`, default `tsx`), `title` (the file name shown in the header), `lineNumbers` (default `true`), `maxHeight` (default `32rem`), `copyLabel` (default "Copy <title>", or "Copy code" without a title), `children` (replaces the highlighted output; `code` is still copied).
 - **Header:** `CodeBlockTitle` shows `title`, then `CodeBlockCopy`.
 - **Code:** `CodeBlockCode` renders `pre > code`. The `pre` takes `tabIndex={0}` and `aria-label` "<title> source" (or "Code"), and scrolls inside `maxHeight`.
+  - Added during implementation: the `pre` has `role="region"`, because ARIA 1.2 prohibits naming a generic element; a `role` passed by the consumer wins.
 
 ### `CodeBlockCommand`
 
@@ -37,6 +39,10 @@ The package-manager row uses the Tabs primitive: `@radix-ui/react-tabs` (already
 - **Runners:** pnpm `pnpm dlx`, npm `npx`, yarn `yarn dlx`, bun `bunx`. The command shown and copied is `<runner> <args>`.
 - **Tabs:** a `tablist` named by `label`, one `tab` per manager; arrow keys move between tabs and select them, Home and End jump to the ends. The command is the `tabpanel`.
 - **Copy:** named "Copy command"; copies the full command for the selected manager.
+- Added during implementation:
+  - `copyLabel` (default "Copy command") names Copy, so the Get code dialog keeps "Copy install command" beside its own primary "Copy command" button.
+  - `runners?: Partial<Record<PackageManager, string>>` replaces some runners, so the docs keep `yarn dlx --quiet`. `commandRunners` and `packageCommand(manager, args, runners)` are exported.
+  - The runner is a `data-token="keyword"` span coloured like a keyword, as on the board; the text is unchanged.
 
 ### Highlighter
 
@@ -53,6 +59,7 @@ Each line is a `span` (`data-slot="code-block-line"`). Numbers come from a CSS c
 - `navigator.clipboard.writeText` on click. The label changes to "Copied" for 1.5 s, and a visually hidden polite live region announces "Copied".
 - If the clipboard is unavailable or the write rejects, the live region announces "Copy failed" and the label stays "Copy".
 - The timer is cleared on unmount.
+- `CodeBlockCopy` takes `onCopied?(ok: boolean)` (added during implementation), called after each attempt, so the artifact panel keeps its "Install copied." status line.
 
 ## Styles
 
@@ -60,6 +67,7 @@ Each family gets `styles/code-block/<family>.css` from its board.
 
 - **Surface colours:** slot-scoped custom properties on `code-block`, `--code-block-background` (`oklch(0.2 0.012 275)`) and `--code-block-foreground` (`oklch(0.93 0.005 275)`), the board's values in every family. Consumers can override them. The preset schema does not change.
 - **Token colours:** start from the board: `keyword` and `tag` mix the family `--primary` toward the foreground (the board's `oklch(0.78 0.12 6)` in Ombelle), `string` is the board's green, `comment` is the foreground at 55 %, and line numbers at 40 %. Each token colour must reach 4.5:1 on the surface, and line numbers 3:1; the style generator lightens any that fail in a family and records the change in the evidence.
+  - Amended during implementation: each family writes its token colours as literal `oklch()` values in slot-scoped custom properties (`--code-block-keyword`, `--code-block-string`, `--code-block-comment`, `--code-block-attr`, `--code-block-property`, `--code-block-punct`, `--code-block-line-number`), computed once from the family preset's `--primary` as the board mixes it. A `color-mix()` with the live `--primary` could fall under 4.5:1 for a preset with a dark primary; literals on the fixed surface cannot, and a unit test checks every one. Consumers can still override the properties.
 - **Family shape:** each family keeps its own border, radius and shadow from the board: the neo-brutalist offset shadow and square corners, the glass edge, the minimalist 1px border, the flat and Ombelle radius.
 - **Header:** tabs and the file title are pills; the selected tab has the board's 16 % foreground fill. Copy is an outline pill aligned to the end.
 - **Forced colours:** the surface uses `Canvas` and `CanvasText` with a visible border, the selected tab uses `Highlight`, and tokens fall back to `CanvasText`.
