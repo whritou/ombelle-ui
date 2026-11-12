@@ -15,3 +15,23 @@ The editor-inputs evidence (`docs/evidence/editor-inputs-075.md`) holds only a "
 | `/docs/getting-started` | 12 | 248.5 kB |
 | `/components` | 14 | 415.8 kB |
 | `/components/accordion` | 16 | 813.1 kB |
+
+## Token contrast
+
+Task 4 (`packages/catalog/test/code-block-contrast.test.ts`). The surface is `oklch(0.2 0.012 275)` in every family and both modes; ratios are WCAG 2 contrast on it, from `parseColor` and `contrastRatio` in `templates/color-picker.tsx`. The board's `color-mix(in oklab, var(--code-fg) N%, transparent)` values are written as the sRGB blend over the surface. Keyword and tag keep the family preset primary's hue at lightness `max(0.78, primary L)` and chroma `min(0.12, primary C)`, which gives the board's `oklch(0.78 0.12 6)` in Ombelle; flat and liquid glass are cut to chroma 0.11 to stay inside sRGB. No board colour failed its floor, so none was lightened.
+
+| Property | Families | Value | Ratio |
+| --- | --- | --- | --- |
+| `--code-block-foreground` | all | `oklch(0.93 0.005 275)` | 14.74 |
+| `--code-block-comment` (board 55 %) | all | `oklch(0.631 0.007 275)` | 5.19 |
+| `--code-block-string` (board green) | all | `oklch(0.82 0.11 150)` | 10.81 |
+| `--code-block-punct` (70 %) | all | `oklch(0.734 0.006 275)` | 7.68 |
+| `--code-block-line-number` (board 40 %, floor 3:1) | all | `oklch(0.524 0.008 275)` | 3.34 |
+| `--code-block-keyword` (board) | Ombelle | `oklch(0.78 0.12 6)` | 8.58 |
+| `--code-block-keyword` | flat, liquid glass | `oklch(0.78 0.11 264)` | 8.99 |
+| `--code-block-keyword` | minimalist | `oklch(0.78 0 0)` | 9.05 |
+| `--code-block-keyword` | neo-brutalism | `oklch(0.88 0.12 92)` | 12.63 |
+| `--code-block-attr` | Ombelle, flat, minimalist, liquid glass | `oklch(0.82 0.1 70)` | 10.22 |
+| `--code-block-attr` | neo-brutalism (apart from its yellow keyword) | `oklch(0.8 0.1 350)` | 9.28 |
+| `--code-block-property` | Ombelle, minimalist, neo-brutalism | `oklch(0.82 0.08 210)` | 10.66 |
+| `--code-block-property` | flat, liquid glass (apart from their blue keyword) | `oklch(0.8 0.1 300)` | 9.41 |

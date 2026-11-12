@@ -599,6 +599,7 @@ describe('catalog contract', () => {
       'item',
       'number-input',
       'color-picker',
+      'code-block',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

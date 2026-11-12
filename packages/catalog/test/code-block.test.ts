@@ -104,8 +104,7 @@ describe('Code Block', () => {
     }
   })
 
-  // The shared contract also requires the five family stylesheets, which Task 4 adds; unskip it there.
-  it.skip('meets the shared component contract with its stylesheets', () => {
+  it('meets the shared component contract with its stylesheets', () => {
     expectComponentContract('code-block', { client: true, parts, slots,
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-tabs', version: '1.2.1' },
         { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],

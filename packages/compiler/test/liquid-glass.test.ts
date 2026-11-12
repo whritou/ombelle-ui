@@ -55,6 +55,7 @@ describe('liquid-glass compile', () => {
       'components/ui/card.css',
       'components/ui/checkbox.css',
       'components/ui/chip.css',
+      'components/ui/code-block.css',
       'components/ui/collapsible.css',
       'components/ui/color-picker.css',
       'components/ui/combobox.css',
