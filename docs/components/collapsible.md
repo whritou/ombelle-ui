@@ -30,7 +30,7 @@ export function Shadow() {
 - `CollapsibleTrigger` is a button with `aria-expanded`. It draws a chevron (`data-slot="collapsible-icon"`) that turns when the content is open. The chevron stays turned under reduced motion, so an open and a closed trigger still look different.
 - With `asChild` (Radix) or `render` (Base UI) the trigger becomes your own element, and it then has no chevron.
 - Closed content is not rendered, so links and buttons inside it are out of the Tab order and are reached once it is open.
-- Opening and closing animate the content's height; reduced motion removes the animation.
+- Opening animates the content's height; closing hides it at once, since closed content is not rendered. Reduced motion removes the animation.
 - The root, trigger and content carry `data-state` (`open` or `closed`).
 
 ## Recipe
@@ -39,7 +39,7 @@ The recipe editor sets `defaultOpen`, the trigger label and one to six rows. Com
 
 ## Base UI edition
 
-The Base UI edition uses `Collapsible` from `@base-ui/react/collapsible` and adds no dependency beyond lucide-react. Its trigger takes `render` where the Radix trigger takes `asChild`: `<CollapsibleTrigger render={<a href="/docs" />}>`. Both editions write the same `data-state` and one height variable, so the stylesheet and the other props are the same.
+The Base UI edition uses `Collapsible` from `@base-ui/react/collapsible` and adds no dependency beyond lucide-react. Its trigger takes `render` where the Radix trigger takes `asChild`: `<CollapsibleTrigger render={<Button variant="ghost" />}>` in Base UI, `<CollapsibleTrigger asChild><Button variant="ghost">…</Button></CollapsibleTrigger>` in Radix. Keep the trigger a button: a link would become a disclosure button and stop navigating. Both editions write the same `data-state` and one height variable, so the stylesheet and the other props are the same.
 
 ## Liquid glass
 
