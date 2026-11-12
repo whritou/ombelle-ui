@@ -1,5 +1,5 @@
 'use client'
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import {
   packageManagers,
@@ -7,8 +7,11 @@ import {
 } from '../install-command'
 import styles from './get-code-dialog.module.css'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
-// Loaded when a command is ready, after publishing, so the editors' first load does not carry it.
-const CodeBlockCommand = lazy(() => import('../../generated/ui/components/ui/code-block').then((module) => ({ default: module.CodeBlockCommand })))
+// Requested when the dialog opens, alongside publishing, so the editors' first load does not carry it.
+type CommandBlock = typeof import('../../generated/ui/components/ui/code-block').CodeBlockCommand
+let commandBlock: Promise<CommandBlock> | undefined
+const loadCommandBlock = () =>
+  (commandBlock ??= import('../../generated/ui/components/ui/code-block').then((module) => module.CodeBlockCommand))
 
 export type CodeScope = { id: string; label: string; description: string }
 export type CodeSummary = ReactNode | ((close: () => void) => ReactNode)
@@ -64,6 +67,8 @@ export function GetCodeDialog({
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const terminal = useRef<HTMLDivElement>(null)
+  const fallback = useRef<HTMLElement>(null)
+  const [CodeBlockCommand, setCodeBlockCommand] = useState<CommandBlock | null>(null)
   const [scope, setScope] = useState(scopes[0]!.id)
   const [manager, setManager] = useState<PackageManager>('pnpm')
   const [copied, setCopied] = useState(false)
@@ -78,6 +83,15 @@ export function GetCodeDialog({
     if (open && !element.open) element.showModal()
     if (!open && element.open) element.close()
   }, [open, mounted])
+  useEffect(() => {
+    if (!open || CodeBlockCommand) return
+    let live = true
+    loadCommandBlock().then((block) => { if (live) setCodeBlockCommand(() => block) }, () => {
+      // A failed chunk keeps the plain command, which still copies and selects.
+      commandBlock = undefined
+    })
+    return () => { live = false }
+  }, [open, CodeBlockCommand])
   const active = scopes.find((item) => item.id === scope) ?? scopes[0]!
   const command =
     code.status === 'ready' && !installUnavailable ? commandFor(active.id, manager) : null
@@ -100,8 +114,8 @@ export function GetCodeDialog({
     } catch {
       announce('Clipboard unavailable. Select the command and copy it.')
       const range = document.createRange()
-      // The selected tab's command, as shown.
-      const node = terminal.current?.querySelector("[role='tabpanel'][data-state='active'] code")
+      // The selected tab's command, or the plain command while the block loads.
+      const node = terminal.current?.querySelector("[role='tabpanel'][data-state='active'] code") ?? fallback.current
       if (!node) return
       range.selectNodeContents(node)
       getSelection()?.removeAllRanges()
@@ -189,16 +203,18 @@ export function GetCodeDialog({
           <p className={styles.description}>{active.description}</p>
           {summary && <div className={styles.summary}>{typeof summary === 'function' ? summary(onClose) : summary}</div>}
 
-          {command ? (
-            <Suspense fallback={<pre className={styles.command}><code>{command}</code></pre>}>
-              <CodeBlockCommand
-                ref={terminal}
-                args={commandFor(active.id, 'npm').replace(/^npx /, '')}
-                manager={manager}
-                onManagerChange={chooseManager}
-                copyLabel="Copy install command"
-              />
-            </Suspense>
+          {command && CodeBlockCommand ? (
+            <CodeBlockCommand
+              ref={terminal}
+              args={commandFor(active.id, 'npm').replace(/^npx /, '')}
+              manager={manager}
+              onManagerChange={chooseManager}
+              copyLabel="Copy install command"
+            />
+          ) : command ? (
+            <pre className={styles.command} tabIndex={0}>
+              <code ref={fallback}>{command}</code>
+            </pre>
           ) : (
             <pre
               className={styles.command}
