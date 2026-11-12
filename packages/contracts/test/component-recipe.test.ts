@@ -445,3 +445,49 @@ it('names the Code Block appearance part', async () => {
   const { componentRecipeParts } = await import('../src/component-recipe-appearance.js')
   expect(componentRecipeParts['code-block'].map(part => part.slot)).toEqual(['code-block'])
 })
+
+const variants075Draft = (component: string, props: Record<string, unknown> = {}, content: Record<string, unknown> = {}) => ({
+  ...badge, component, props,
+  content: { ...defaultRecipeFields(componentRecipeFields(component as 'badge').content), ...content },
+})
+
+it.each([
+  ['checkbox', { option: 'row' }, {}],
+  ['checkbox', { option: 'card' }, { description: 'Adds sample files' }],
+  ['switch', { size: 'sm' }, {}],
+  ['switch', { size: 'default' }, {}],
+  ['progress', { size: 'lg', tone: 'success', showLabel: true, showValue: true }, {}],
+  ['progress', { size: 'sm', tone: 'destructive' }, {}],
+  ['popover', { arrow: true }, {}],
+] as const)('accepts the 0.7.5 %s variant %o %o', (component, props, content) => {
+  const recipe = validateComponentRecipe(variants075Draft(component, props, content))
+  expect(recipe.props).toMatchObject(props)
+  expect(recipe.content).toMatchObject(content)
+})
+
+it.each([
+  ['switch', { size: 'xl' }, '/props/size'],
+  ['progress', { tone: 'info' }, '/props/tone'],
+  ['progress', { size: 'xl' }, '/props/size'],
+  ['checkbox', { option: 'tile' }, '/props/option'],
+  ['popover', { arrow: 'yes' }, '/props/arrow'],
+] as const)('rejects the 0.7.5 %s variant %o at %s', (component, props, path) => {
+  expect(() => validateComponentRecipe(variants075Draft(component, props))).toThrow(expect.objectContaining({ path }))
+})
+
+it('accepts fields the specimen ignores, so the editor can switch them off and back on', () => {
+  expect(validateComponentRecipe(variants075Draft('progress', { indeterminate: true, showValue: true })).props).toMatchObject({ showValue: true })
+  expect(validateComponentRecipe(variants075Draft('checkbox', { option: 'none' }, { description: 'Adds sample files' })).content)
+    .toMatchObject({ description: 'Adds sample files' })
+})
+
+it('keeps batch 4a recipes free of the 0.7.5 variant fields', () => {
+  const added = ['option', 'description', 'size', 'tone', 'showLabel', 'showValue', 'arrow']
+  for (const component of ['checkbox', 'switch', 'progress', 'popover'] as const) {
+    const recipe = validateComponentRecipe(variants075Draft(component))
+    for (const key of added) {
+      expect(recipe.props, component + ' ' + key).not.toHaveProperty(key)
+    }
+  }
+  expect(validateComponentRecipe(variants075Draft('checkbox')).content).not.toHaveProperty('description')
+})

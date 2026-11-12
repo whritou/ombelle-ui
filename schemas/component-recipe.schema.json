@@ -469,6 +469,31 @@
               "type": "boolean",
               "default": false,
               "title": "Indeterminate"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "title": "Size"
+            },
+            "tone": {
+              "enum": [
+                "default",
+                "success",
+                "warning",
+                "destructive"
+              ],
+              "title": "Tone"
+            },
+            "showLabel": {
+              "type": "boolean",
+              "title": "Show label"
+            },
+            "showValue": {
+              "type": "boolean",
+              "title": "Show value"
             }
           },
           "additionalProperties": false,
@@ -599,6 +624,14 @@
               ],
               "default": "unchecked",
               "title": "Initial state"
+            },
+            "option": {
+              "enum": [
+                "none",
+                "row",
+                "card"
+              ],
+              "title": "Option layout"
             }
           },
           "additionalProperties": false,
@@ -613,6 +646,11 @@
               "maxLength": 200,
               "default": "Accept terms",
               "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000
             }
           },
           "additionalProperties": false,
@@ -1064,6 +1102,13 @@
               "type": "boolean",
               "default": false,
               "title": "Initially checked"
+            },
+            "size": {
+              "enum": [
+                "default",
+                "sm"
+              ],
+              "title": "Size"
             }
           },
           "additionalProperties": false,
@@ -1664,6 +1709,10 @@
               ],
               "default": "center",
               "title": "Alignment"
+            },
+            "arrow": {
+              "type": "boolean",
+              "title": "Arrow"
             }
           },
           "additionalProperties": false,
