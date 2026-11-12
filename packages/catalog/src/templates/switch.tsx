@@ -9,6 +9,9 @@ export type SwitchProps = React.ComponentProps<typeof SwitchPrimitive.Root> & {
   size?: 'default' | 'sm'
 }
 
+// The size reaches a thumb passed as a child too.
+const SwitchSize = React.createContext<'sm' | undefined>(undefined)
+
 export function Switch({ className, children, size, ...props }: SwitchProps) {
   const small = size === 'sm' ? 'sm' : undefined
   return (
@@ -18,7 +21,7 @@ export function Switch({ className, children, size, ...props }: SwitchProps) {
       className={cn(className)}
       {...props}
     >
-      {children ?? <SwitchThumb data-size={small} />}
+      <SwitchSize.Provider value={small}>{children ?? <SwitchThumb />}</SwitchSize.Provider>
     </SwitchPrimitive.Root>
   )
 }
@@ -30,6 +33,7 @@ export function SwitchThumb({
   return (
     <SwitchPrimitive.Thumb
       data-slot="switch-thumb"
+      data-size={React.useContext(SwitchSize)}
       className={cn(className)}
       {...props}
     />

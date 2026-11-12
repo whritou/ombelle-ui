@@ -143,6 +143,9 @@
   color: var(--secondary-foreground);
   box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow-color, var(--border));
 }
+[data-slot='checkbox-option']:has(> [data-state='checked']) > :first-child:focus-visible {
+  outline-color: var(--secondary-foreground);
+}
 [data-slot='checkbox-option']:has(> [data-disabled]) {
   border-style: dashed;
   background: var(--muted);

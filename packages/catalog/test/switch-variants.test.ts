@@ -19,6 +19,11 @@ describe('Switch size', () => {
     expect(html.match(/<[^>]*data-slot="switch-thumb"[^>]*>/)![0]).toContain('data-size="sm"')
   })
 
+  it.each(editions)('%s sizes a thumb passed as a child', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.Switch, { size: 'sm', 'aria-label': 'Reduced transparency' }, h(ui.SwitchThumb)))
+    expect(html.match(/<[^>]*data-slot="switch-thumb"[^>]*>/)![0]).toContain('data-size="sm"')
+  })
+
   it.each(editions)('%s adds no data-size for the default size', (_, ui) => {
     expect(renderToStaticMarkup(h(ui.Switch, { 'aria-label': 'A' }))).not.toContain('data-size')
     expect(renderToStaticMarkup(h(ui.Switch, { size: 'default', 'aria-label': 'A' }))).not.toContain('data-size')

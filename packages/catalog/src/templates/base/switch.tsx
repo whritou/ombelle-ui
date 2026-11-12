@@ -17,6 +17,9 @@ export type SwitchProps = Omit<
 // so the shared stylesheet applies. A custom render prop replaces this bridge.
 const checkedState = (checked: boolean) => (checked ? 'checked' : 'unchecked')
 
+// The size reaches a thumb passed as a child too.
+const SwitchSize = React.createContext<'sm' | undefined>(undefined)
+
 export function Switch({ className, children, size, ...props }: SwitchProps) {
   const small = size === 'sm' ? 'sm' : undefined
   return (
@@ -29,7 +32,7 @@ export function Switch({ className, children, size, ...props }: SwitchProps) {
       )}
       {...props}
     >
-      {children ?? <SwitchThumb data-size={small} />}
+      <SwitchSize.Provider value={small}>{children ?? <SwitchThumb />}</SwitchSize.Provider>
     </SwitchPrimitive.Root>
   )
 }
@@ -43,6 +46,7 @@ export function SwitchThumb({
   return (
     <SwitchPrimitive.Thumb
       data-slot="switch-thumb"
+      data-size={React.useContext(SwitchSize)}
       className={cn(className)}
       render={(thumbProps, state) => (
         <span {...thumbProps} data-state={checkedState(state.checked)} />
