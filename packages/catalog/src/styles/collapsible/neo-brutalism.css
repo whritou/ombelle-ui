@@ -4,7 +4,6 @@
   overflow: hidden;
   border: 2.5px solid var(--border);
   border-radius: 0;
-  box-shadow: var(--shadow-x, 3px) var(--shadow-y, 3px) 0 var(--shadow-color, var(--border));
   background: var(--card);
   color: var(--foreground);
   font-family: var(--font-family);
@@ -79,9 +78,6 @@
   [data-slot='collapsible-trigger'],
   [data-slot='collapsible-icon'] {
     transition: none;
-  }
-  [data-slot='collapsible-icon']:is([data-state='open'] > *) {
-    rotate: none;
   }
 }
 @media (forced-colors: active) {

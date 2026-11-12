@@ -3,7 +3,7 @@
   box-sizing: border-box;
   overflow: hidden;
   border: 1.5px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--card);
   color: var(--foreground);
   font-family: var(--font-family);
@@ -78,9 +78,6 @@
   [data-slot='collapsible-trigger'],
   [data-slot='collapsible-icon'] {
     transition: none;
-  }
-  [data-slot='collapsible-icon']:is([data-state='open'] > *) {
-    rotate: none;
   }
 }
 @media (forced-colors: active) {

@@ -2,8 +2,8 @@
 [data-slot='collapsible'] {
   box-sizing: border-box;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 2px;
+  border: 1px solid var(--input);
+  border-radius: 4px;
   background: var(--card);
   color: var(--foreground);
   font-family: var(--font-family);
@@ -78,9 +78,6 @@
   [data-slot='collapsible-trigger'],
   [data-slot='collapsible-icon'] {
     transition: none;
-  }
-  [data-slot='collapsible-icon']:is([data-state='open'] > *) {
-    rotate: none;
   }
 }
 @media (forced-colors: active) {

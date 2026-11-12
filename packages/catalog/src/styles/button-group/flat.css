@@ -46,6 +46,10 @@
   align-self: stretch;
   background: color-mix(in srgb, var(--primary-foreground) 45%, var(--primary));
 }
+/* Between outline buttons the rule takes the colour of their edge. */
+[data-slot='button-group-separator']:is([data-variant='outline'] + *) {
+  background: var(--primary);
+}
 [data-slot='button-group-separator'][data-orientation='horizontal'] {
   inline-size: var(--border-width, 1px);
 }

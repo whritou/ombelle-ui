@@ -100,7 +100,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('CollapsibleTrigger', {}, content.label), node('CollapsibleContent', {}, ...content.rows.map(row => node('p', {}, row))))
     case 'scroll-area': {
       const orientation = props.orientation ?? 'vertical'
-      const rows = Array.from({ length: content.itemCount }, (_, index) => node('div', orientation === 'both' ? { className: 'w-[40rem]' } : {}, `Item ${index + 1}`))
+      const rows = Array.from({ length: content.itemCount }, (_, index) => node('div', orientation === 'both' ? { style: { inlineSize: '40rem' } } : {}, `Item ${index + 1}`))
       return node('ScrollArea', { 'aria-label': content.label, style: { blockSize: `${props.height ?? 200}px` } },
         orientation === 'horizontal' ? node('div', { className: 'flex w-max gap-4' }, ...rows) : node('div', {}, ...rows),
         ...(orientation === 'vertical' ? [] : [node('ScrollBar', { orientation: 'horizontal' })]))

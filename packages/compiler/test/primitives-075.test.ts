@@ -58,6 +58,10 @@ describe('0.7.5 primitive specimens', () => {
     expect(find(v, 'ScrollBar')).toHaveLength(0)
     expect(find(v, 'div')[0]!.children).toHaveLength(12)
     expect(find(d('scroll-area', { orientation: 'both' }), 'ScrollBar')[0]!.props.orientation).toBe('horizontal')
+    // Inline styles, not Tailwind classes: a recipe specimen must not depend on a utility stylesheet.
+    const both = find(d('scroll-area', { orientation: 'both' }), 'div').filter(row => row.props.style)
+    expect(both.length).toBeGreaterThan(0)
+    expect(both.every(row => (row.props.style as Record<string, string>).inlineSize === '40rem' && row.props.className === undefined)).toBe(true)
   })
 
   it('marks the native children of each button group mode', () => {

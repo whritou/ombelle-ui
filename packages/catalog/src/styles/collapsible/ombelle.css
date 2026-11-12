@@ -79,9 +79,6 @@
   [data-slot='collapsible-icon'] {
     transition: none;
   }
-  [data-slot='collapsible-icon']:is([data-state='open'] > *) {
-    rotate: none;
-  }
 }
 @media (forced-colors: active) {
   [data-slot='collapsible'] {

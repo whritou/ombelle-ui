@@ -86,7 +86,7 @@ button[data-slot='item']:focus-visible {
   block-size: 40px;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
 }
 [data-slot='item-media'][data-variant='icon'] {
   background: var(--accent);
@@ -110,7 +110,7 @@ button[data-slot='item']:focus-visible {
 }
 [data-slot='item-title'] {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.3;
 }
 [data-slot='item-description'] {

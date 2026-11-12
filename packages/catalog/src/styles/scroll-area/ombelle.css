@@ -19,6 +19,32 @@
 [data-slot='scroll-area-viewport']::-webkit-scrollbar {
   display: none;
 }
+/* Fades the last 28px into the card while more content waits below. Only where scroll-driven animation runs: the fade is hidden
+   when nothing scrolls (the timeline is inactive) and once the end is reached. */
+@supports (animation-timeline: scroll()) {
+  [data-slot='scroll-area-viewport']::after {
+    content: '';
+    display: block;
+    position: sticky;
+    inset-block-end: 0;
+    block-size: 28px;
+    margin-block-start: -28px;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(to bottom, transparent, var(--card));
+    animation: ombelle-scroll-area-fade linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: calc(100% - 28px) 100%;
+  }
+}
+@keyframes ombelle-scroll-area-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
 /* The root clips overflow, so the focus ring sits inside the viewport. */
 [data-slot='scroll-area-viewport']:focus-visible {
   outline: 2.5px solid var(--ring);
@@ -57,6 +83,11 @@
   background: var(--muted);
 }
 @media (prefers-reduced-motion: reduce) {
+  @supports (animation-timeline: scroll()) {
+    [data-slot='scroll-area-viewport']::after {
+      animation: none;
+    }
+  }
   [data-slot='scroll-area-scrollbar'] {
     transition: none;
   }

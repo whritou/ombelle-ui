@@ -14,7 +14,7 @@
   text-decoration: none;
 }
 [data-slot='item'][data-variant='outline'] {
-  border-color: var(--border);
+  border-color: var(--input);
   background: var(--card);
 }
 [data-slot='item'][data-variant='muted'] {
@@ -85,7 +85,7 @@ button[data-slot='item']:focus-visible {
   inline-size: 40px;
   block-size: 40px;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--input);
   border-radius: 4px;
 }
 [data-slot='item-media'][data-variant='icon'] {
