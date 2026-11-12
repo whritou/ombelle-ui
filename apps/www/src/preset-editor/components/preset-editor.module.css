@@ -163,6 +163,8 @@
   border: 0;
   border-radius: inherit;
   background: transparent;
+  /* The area is transparent on the dialog, so its end fades into the dialog's surface, not the card. */
+  --scroll-area-fade: var(--background);
 }
 .confirmBody {
   padding: 24px;
