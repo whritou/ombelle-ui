@@ -17,14 +17,20 @@ const read = async (root: string) => {
   return files
 }
 
-it('compiles the same Slider, Toggle Group and Chip sources on every build', async () => {
+// The compiled Button is styled by the family stylesheet, not by a component stylesheet of its own.
+const stylelessComponents = new Set<string>(['button'])
+
+// Set inline by the component itself (Collapsible Content), so the site never defines it.
+const setByComponent = new Set(['--collapsible-height'])
+
+it('compiles the same catalog component sources on every build', async () => {
   const [a, b] = await Promise.all([1, 2].map(() => fs.mkdtemp(path.join(os.tmpdir(), 'www-ui-'))))
   await generateWwwUi(a!)
   await generateWwwUi(b!)
   const first = await read(a!)
   expect(await read(b!)).toEqual(first)
   expect(Object.keys(first).sort()).toEqual([
-    ...wwwUiComponents.flatMap(id => [`components/ui/${id}.css`, `components/ui/${id}.tsx`]),
+    ...wwwUiComponents.flatMap(id => (stylelessComponents.has(id) ? [] : [`components/ui/${id}.css`]).concat(`components/ui/${id}.tsx`)),
     'lib/utils.ts',
   ].sort())
   expect(first['components/ui/slider.tsx']).toContain("from '../../lib/utils'")
@@ -38,7 +44,7 @@ it('defines in the site stylesheet every token the compiled styles read without 
   const defined = new Set([...root.matchAll(/(--[\w-]+)\s*:/g)].map(match => match[1]))
   const read_ = await read(dir)
   const needed = new Set<string>()
-  for (const id of wwwUiComponents)
-    for (const match of read_[`components/ui/${id}.css`]!.matchAll(/var\((--[\w-]+)\)/g)) needed.add(match[1]!)
+  for (const id of wwwUiComponents.filter(id => !stylelessComponents.has(id)))
+    for (const match of read_[`components/ui/${id}.css`]!.matchAll(/var\((--[\w-]+)\)/g)) if (!setByComponent.has(match[1]!)) needed.add(match[1]!)
   expect([...needed].filter(name => !defined.has(name)).sort()).toEqual([])
 })

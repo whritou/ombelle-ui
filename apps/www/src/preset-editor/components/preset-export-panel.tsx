@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../generated/ui/components/ui/collapsible'
 import type { PresetCompilerState } from '../use-preset-compiler'
 import { contrastInstallBlocked, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller, semanticPaletteInstallBlocked, semanticPaletteInstallNotice } from '../../snapshots/install-command'
 import {
@@ -121,18 +122,20 @@ export function PresetExportPanel({
         Token CSS provides palette and design variables. Family CSS supplies
         reviewed style rules. Use both to apply the complete family in your project.
       </p>
-      <details>
-        <summary>Dependencies</summary>
-        <ul>
-          {state.result?.dependencies.map((dependency) => (
-            <li key={dependency.name}>
-              <code>
-                {dependency.name}@{dependency.version}
-              </code>
-            </li>
-          ))}
-        </ul>
-      </details>
+      <Collapsible>
+        <CollapsibleTrigger>Dependencies</CollapsibleTrigger>
+        <CollapsibleContent>
+          <ul>
+            {state.result?.dependencies.map((dependency) => (
+              <li key={dependency.name}>
+                <code>
+                  {dependency.name}@{dependency.version}
+                </code>
+              </li>
+            ))}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
       <h3>Install with the CLI</h3>
       <label htmlFor="preset-install">Installation path</label>
       <select

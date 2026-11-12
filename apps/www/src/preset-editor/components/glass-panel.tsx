@@ -1,5 +1,6 @@
 import type { GlassContrastReport } from '@ombelle/compiler'
 import { glassComponentList } from '../../site/components/catalog'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../generated/ui/components/ui/collapsible'
 
 // From docs/superpowers/specs/2026-11-03-liquid-glass-design.md, updated when the form controls became experimental.
 export const glassLimitations = [
@@ -93,14 +94,16 @@ export function GlassPanel({ report }: { report: GlassContrastReport | null }) {
         <p>
           Liquid glass is experimental. {glassComponentList()} support it.
         </p>
-        <details>
-          <summary>{glassLimitations.length} known limitations</summary>
-          <ul>
-            {glassLimitations.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </details>
+        <Collapsible>
+          <CollapsibleTrigger>{glassLimitations.length} known limitations</CollapsibleTrigger>
+          <CollapsibleContent>
+            <ul>
+              {glassLimitations.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </CollapsibleContent>
+        </Collapsible>
       </section>
       <section aria-labelledby="glass-contrast-heading">
         <h2 id="glass-contrast-heading">Liquid glass contrast bound</h2>

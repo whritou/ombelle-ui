@@ -7,6 +7,8 @@ import { editableComponents } from '../editor/editable-components'
 import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
 import styles from './editor-shell.module.css'
 import { OverflowMenu, type OverflowItem } from './overflow-menu'
+import { Button } from '../generated/ui/components/ui/button'
+import { ButtonGroup } from '../generated/ui/components/ui/button-group'
 
 // The palette and its command menu load on first open, so they add nothing to the first page load.
 const CommandPalette = dynamic(() => import('./command-palette'), { ssr: false })
@@ -92,26 +94,30 @@ export function EditorTopBar({
         {status}
       </span>
       <div className={styles.topActions}>
-        <button
-          type="button"
-          ref={undo.buttonRef}
-          className={styles.iconButton}
-          aria-label="Undo"
-          disabled={undo.disabled}
-          onClick={undo.onClick}
-        >
-          <Undo2 aria-hidden="true" size={16} />
-        </button>
-        <button
-          type="button"
-          ref={redo.buttonRef}
-          className={styles.iconButton}
-          aria-label="Redo"
-          disabled={redo.disabled}
-          onClick={redo.onClick}
-        >
-          <Redo2 aria-hidden="true" size={16} />
-        </button>
+        <ButtonGroup aria-label="History" className={styles.historyGroup}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            ref={undo.buttonRef}
+            className={styles.iconButton}
+            aria-label="Undo"
+            disabled={undo.disabled}
+            onClick={undo.onClick}
+          >
+            <Undo2 aria-hidden="true" size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            ref={redo.buttonRef}
+            className={styles.iconButton}
+            aria-label="Redo"
+            disabled={redo.disabled}
+            onClick={redo.onClick}
+          >
+            <Redo2 aria-hidden="true" size={16} />
+          </Button>
+        </ButtonGroup>
         {commands && (
           // Compact, so the bar keeps one row: the icon and the shortcut. Its name, "Commands Ctrl K",
           // includes the keys it shows.

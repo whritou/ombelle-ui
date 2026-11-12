@@ -48,6 +48,8 @@
   --shadow-x: 3px;
   --shadow-y: 3px;
   --motion-duration: 150ms;
+  /* The Ombelle preset's comfortable control height, for the compiled Button Group. */
+  --control-height: 2.5rem;
   --ink: oklch(0.22 0.012 275);
   --paper: oklch(0.985 0.004 350);
   --background: var(--paper);
@@ -310,3 +312,7 @@
     --motion-duration: 0ms;
   }
 }
+
+/* A catalog Scroll Area whose root carries the max-height: the root lays out as a column so the viewport fits inside it and scrolls. */
+.www-scroll { display: flex; flex-direction: column; }
+.www-scroll > [data-slot='scroll-area-viewport'] { flex: 1 1 auto; min-block-size: 0; }
