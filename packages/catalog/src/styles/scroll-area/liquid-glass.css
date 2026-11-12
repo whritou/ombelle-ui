@@ -1,6 +1,105 @@
-/* liquid-glass scroll-area (scaffold) */
+/* liquid-glass Scroll Area */
+[data-slot='scroll-area'] {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  box-shadow: inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), var(--glass-material-shadow, 0 0 #0000);
+}
+[data-slot='scroll-area-viewport'] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  scrollbar-width: none;
+}
+[data-slot='scroll-area-viewport']::-webkit-scrollbar {
+  display: none;
+}
+/* The root clips overflow, so the focus ring sits on the viewport edge. */
+[data-slot='scroll-area-viewport']:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
+}
+[data-slot='scroll-area-scrollbar'] {
+  display: flex;
+  box-sizing: border-box;
+  padding: 2px;
+  background: transparent;
+  touch-action: none;
+  user-select: none;
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+[data-slot='scroll-area-scrollbar'][data-state='hidden'] {
+  opacity: 0;
+  pointer-events: none;
+}
+[data-slot='scroll-area-scrollbar'][data-orientation='vertical'] {
+  inline-size: 12px;
+  flex-direction: row;
+}
+[data-slot='scroll-area-scrollbar'][data-orientation='horizontal'] {
+  block-size: 12px;
+  flex-direction: column;
+}
+[data-slot='scroll-area-thumb'] {
+  position: relative;
+  flex: 1;
+  border-radius: 999px;
+  background: color-mix(in srgb, white 70%, transparent);
+}
+[data-slot='scroll-area-corner'] {
+  background: transparent;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='scroll-area'] {
+    background: color-mix(in srgb, var(--card) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    backdrop-filter: blur(16px) saturate(1.5);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='scroll-area'] {
+      background: var(--card);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    [data-slot='scroll-area'] {
+      background: Canvas;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='scroll-area-scrollbar'] {
+    transition: none;
+  }
+}
 @media (forced-colors: active) {
   [data-slot='scroll-area'] {
     border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='scroll-area-viewport']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='scroll-area-scrollbar'] {
+    background: Canvas;
+  }
+  [data-slot='scroll-area-corner'] {
+    background: Canvas;
+  }
+  [data-slot='scroll-area-thumb'] {
+    border: 1px solid CanvasText;
+    background: CanvasText;
   }
 }
