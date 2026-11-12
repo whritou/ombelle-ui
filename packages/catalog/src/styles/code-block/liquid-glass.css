@@ -17,9 +17,10 @@
   flex-direction: column;
   min-inline-size: 0;
   overflow: hidden;
-  border: var(--border-width) solid var(--border);
+  /* The board's white rim: the preset's 14 % border would vanish on the dark surface. */
+  border: 1.5px solid color-mix(in srgb, white 50%, transparent);
   border-radius: calc(var(--radius) + 4px);
-  box-shadow: inset 1px 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent));
+  box-shadow: none;
   background: var(--code-block-background);
   color: var(--code-block-foreground);
   font-family: var(--font-family);

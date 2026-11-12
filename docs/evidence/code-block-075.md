@@ -35,3 +35,9 @@ Task 4 (`packages/catalog/test/code-block-contrast.test.ts`). The surface is `ok
 | `--code-block-attr` | neo-brutalism (apart from its yellow keyword) | `oklch(0.8 0.1 350)` | 9.28 |
 | `--code-block-property` | Ombelle, minimalist, neo-brutalism | `oklch(0.82 0.08 210)` | 10.66 |
 | `--code-block-property` | flat, liquid glass (apart from their blue keyword) | `oklch(0.8 0.1 300)` | 9.41 |
+
+## Liquid glass focus ring and rim
+
+- The glass root sets `--foreground` to `--code-block-foreground`, so the family's 2px `--foreground` focus ring shows on the always-dark code surface (the light-mode glass foreground is `#0F172A`).
+- The root clips its rounded corners (`overflow: hidden`, as on the board), so the code `pre` and the command tab panel draw that 2px ring at `outline-offset: -2px`, as Combobox and Command do in glass; the header tabs and Copy keep offset 0.
+- The glass root draws the board's rim, `1.5px solid` white at 50 %, instead of the preset's 14 % `--border`, which vanishes on the dark surface. Forced colours still replace it with a 1px `CanvasText` border.
