@@ -18,6 +18,8 @@
 [data-slot='button-group'][data-orientation='vertical'] {
   flex-direction: column;
   inline-size: fit-content;
+  /* A 999px radius would clamp to half the group's width; the end buttons clamp to about half their own height. */
+  border-radius: calc(var(--control-height) / 2);
 }
 [data-slot='button-group'] > * {
   min-inline-size: 0;

@@ -126,3 +126,9 @@ Differences that remain:
 | Scroll Area rail | 8px pill rail beside a 70px pill thumb | A 12 or 16px rail with a padded thumb, square in neo-brutalism and 1px-rounded in minimalist | Radix draws the rail and thumb to the content; the family keeps its corner style |
 | Neo-brutalism Item media edge | 1px | 2px | Family border width |
 | Liquid glass | Dark-scene colours, no fade | Preset colours; no fade | Experimental family; preset colours |
+| Hover and press lift in ombelle and neo-brutalism groups | Buttons lift on hover and press | Default, secondary and destructive buttons inside a group do not lift | The group casts one shadow; a per-button lift would split it at the joins |
+| Group shadow behind ghost or link buttons | No such group on the board | The group shadow is also cast behind groups of ghost or link buttons | The wrapper cannot know its children's variants; use outline or filled buttons in a group |
+| Scroll Area fade in both-axis areas | Fades the bottom edge | The fade follows vertical scroll only, not sideways scrolling | The scroll-driven range is the nearest block axis |
+| Scroll Area fade under reduced motion | Fade shown | Fade removed entirely | The cue is an animation; reduced motion removes animations |
+
+The board probe covered the Radix edition in light mode only; the Base UI edition and dark mode were checked by the specimen audit, not by the probe.

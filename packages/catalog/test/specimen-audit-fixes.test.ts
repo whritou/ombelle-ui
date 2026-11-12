@@ -361,4 +361,7 @@ describe('the 0.7.5 primitives', () => {
     expect(declarations(css, "[data-slot='button-group-separator']").background).toMatch(/color-mix\(in srgb, var\(--primary-foreground\) 45%, var\(--primary\)\)/)
     expect(declarations(css, "[data-slot='button-group-separator']:is([data-variant='outline'] + *)").background).toBe(colour)
   })
+  it('ombelle vertical Button Group shadow follows the corners of the end buttons, not half the group width', () => {
+    expect(declarations(read('button-group/ombelle.css'), "[data-slot='button-group'][data-orientation='vertical']")['border-radius']).toBe('calc(var(--control-height) / 2)')
+  })
 })
