@@ -10,37 +10,41 @@ Method: a temporary git worktree at `894a0e4`; `corepack pnpm install --frozen-l
 
 | Route | Scripts | First Load JS, gzip |
 | --- | --- | --- |
-| `/editor/preset` | 18 | 871.8 kB |
-| `/editor/component` | 10 | 241.1 kB |
-| `/editor/component/button` | 18 | 864.9 kB |
-| `/docs` | 11 | 242.1 kB |
-| `/docs/getting-started` | 12 | 249.2 kB |
-| `/components` | 14 | 440.5 kB |
-| `/components/accordion` | 15 | 837.3 kB |
+| `/editor/preset` | 18 | 881.2 kB | +9.4 kB |
+| `/editor/component` | 10 | 241.4 kB | +0.3 kB |
+| `/editor/component/button` | 18 | 875.8 kB | **+10.9 kB, over the limit** |
+| `/docs` | 11 | 242.3 kB | +0.2 kB |
+| `/docs/getting-started` | 12 | 249.6 kB | +0.4 kB |
+| `/components` | 14 | 449.8 kB | +9.3 kB |
+| `/components/accordion` | 15 | 847.7 kB | **+10.4 kB, over the limit** |
 
 ## Website size, after
 
 Measured at `84e3c69` (`fix(www): load the Get code command block when the dialog opens`) with the same method: after `corepack pnpm generate:preview` (packages unchanged since `02fb028`), `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 and pnpm 11.25.0. The `02fb028` column is the interim measurement before the website swaps.
 
-Measured again at `6195b68` (`fix(catalog): match Code Block to the boards`), which changed the template by about 300 bytes after the `84e3c69` measurement: `corepack pnpm build:packages`, `corepack pnpm generate:preview`, `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Same machine, Node and pnpm, on 2026-11-12. The "After" and "Growth" columns are from this run; the `84e3c69` column is kept for comparison. The script prints one decimal, so each growth figure is within ±0.1 kB.
+Measured again at `6195b68` (`fix(catalog): match Code Block to the boards`), which changed the template by about 300 bytes after the `84e3c69` measurement: `corepack pnpm build:packages`, `corepack pnpm generate:preview`, `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Same machine, Node and pnpm, on 2026-11-12. The `6195b68` column is from this run.
 
-| Route | Scripts | Before, gzip | `02fb028`, gzip | `84e3c69`, gzip | After (`6195b68`), gzip | Growth |
-| --- | --- | --- | --- | --- | --- | --- |
-| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | 880.7 kB | 880.8 kB | +9.0 kB |
-| `/editor/component` | 10 | 241.1 kB | 241.4 kB | 241.4 kB | 241.4 kB | +0.3 kB |
-| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | 875.2 kB | 875.3 kB | **+10.4 kB, over the limit** |
-| `/docs` | 11 | 242.1 kB | 242.3 kB | 242.3 kB | 242.3 kB | +0.2 kB |
-| `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | 249.5 kB | 249.5 kB | +0.3 kB |
-| `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | 449.4 kB | +8.9 kB |
-| `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | 847.3 kB | **+10.0 kB, at the limit** |
+Measured a third time at `8ae6891` (the final-review fix wave: `23c754e` changed the Code Block template and stylesheets, `8ae6891` the Get code dialog), with the same steps on the same machine, on 2026-11-12. The "After" and "Growth" columns are from this run; the earlier columns are kept for comparison. The script prints one decimal, so each growth figure is within ±0.1 kB.
 
-### Accepted overages: `/editor/component/button` and `/components/accordion`
+| Route | Scripts | Before, gzip | `02fb028`, gzip | `84e3c69`, gzip | `6195b68`, gzip | After (`8ae6891`), gzip | Growth |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | 880.7 kB | 880.8 kB | 881.2 kB | +9.4 kB |
+| `/editor/component` | 10 | 241.1 kB | 241.4 kB | 241.4 kB | 241.4 kB | 241.4 kB | +0.3 kB |
+| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | 875.2 kB | 875.3 kB | 875.8 kB | **+10.9 kB, over the limit** |
+| `/docs` | 11 | 242.1 kB | 242.3 kB | 242.3 kB | 242.3 kB | 242.3 kB | +0.2 kB |
+| `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | 249.5 kB | 249.5 kB | 249.6 kB | +0.4 kB |
+| `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | 449.4 kB | 449.8 kB | +9.3 kB |
+| `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | 847.3 kB | 847.7 kB | **+10.4 kB, over the limit** |
 
-`/editor/component/button` grows by 10.4 kB gzip at `6195b68` (10.3 kB at `84e3c69`), over the 10 kB limit. The overage is accepted by a controller ruling and is to be reported to the user; it is not resolved in this sub-project.
+### Accepted overages, pending confirmation: `/editor/component/button` and `/components/accordion`
 
-`/components/accordion` grows by 10.0 kB at `6195b68` (9.9 kB at `84e3c69`). Both figures are rounded to 0.1 kB, so the route is at the limit and may be up to 0.1 kB over it. It is recorded here with the same cause: the Code Block template source the catalog routes ship, which `6195b68` grew by about 300 bytes (`role="region"` on the code `pre` and the keyword span around the command runner, in both editions, plus their stylesheet rules). The controller ruling accepts this overage too, with the button route's, and both are to be reported to the user.
+`/editor/component/button` grows by 10.9 kB gzip at `8ae6891` (10.4 kB at `6195b68`, 10.3 kB at `84e3c69`), over the 10 kB limit. The overage is accepted by the implementation controller, pending the user's confirmation; it is not resolved in this sub-project.
 
-- Most of the growth on the four catalog routes came before the website swaps: +8.6 to +8.9 kB at `02fb028`, from the Code Block template source and recipe description the site ships in the catalog. At `6195b68` those routes are at +9.0 (`/editor/preset`), +10.4 (`/editor/component/button`), +8.9 (`/components`) and +10.0 kB (`/components/accordion`).
+`/components/accordion` grows by 10.4 kB at `8ae6891` (10.0 kB at `6195b68`, 9.9 kB at `84e3c69`), over the limit. It is recorded here with the same cause: the Code Block template source the catalog routes ship, which `6195b68` grew by about 300 bytes (`role="region"` on the code `pre` and the keyword span around the command runner, in both editions, plus their stylesheet rules). This overage too is accepted by the implementation controller, pending the user's confirmation, with the button route's.
+
+The final-review fixes (`23c754e`) add about 0.4 to 0.5 kB on the four catalog routes: the line-count helper, the gutter custom property, the CRLF handling and the Copied reset in the template's shared block (both editions), and the alt-text and gutter declarations in the five stylesheets. A first build with longer comments measured 0.3 kB more; the comments were shortened before this measurement.
+
+- Most of the growth on the four catalog routes came before the website swaps: +8.6 to +8.9 kB at `02fb028`, from the Code Block template source and recipe description the site ships in the catalog. At `8ae6891` those routes are at +9.4 (`/editor/preset`), +10.9 (`/editor/component/button`), +9.3 (`/components`) and +10.4 kB (`/components/accordion`).
 - Measured at `84e3c69`, the swaps add about 1.7 kB on the button route (873.5 to 875.2 kB). The generated `code-block` module is one file, so the artifact panel's `CodeBlockRoot`, `CodeBlockCopy` and `CodeBlockCode` bring along the Radix Tabs that only `CodeBlockCommand` uses. The deleted site code block, highlighter and Get code terminal offset part of it.
 - The Get code dialog loads `CodeBlockCommand` with a dynamic `import()`, requested when the dialog opens, so it downloads while the code publishes. Measured at `84e3c69`, that kept `/editor/preset` at +8.9 kB (a static import gave +11.0 kB; +9.0 kB at `6195b68`). On the button route the panel already loads the module, so the loader only added about 0.3 kB at `84e3c69` (the static import gave +10.0 kB there).
 - Options not taken: split the Code Block template so the parts do not carry Radix Tabs (a catalog change, outside this sub-project); lazy-load the component editor's code view (it is visible on first paint, so it would flash).
@@ -175,7 +179,7 @@ Differences that remain:
 | Pill widths | Copy 52px, `button.tsx` 86px | Copy 50px, `button.tsx` 92.6px | Font metrics of the fallback fonts; heights and padding match |
 | Keyword colour | Ombelle's `oklch(0.78 0.12 6)` on all five boards | Each family's primary hue (flat and liquid glass blue, minimalist grey, neo-brutalism yellow) | Task 4 decision: keyword and tag follow the family primary |
 | Comment and line-number colours | `color-mix` of the code foreground at 55 % and 40 % over the surface | Opaque `oklch` values | The same colour once blended on the surface (sRGB 136, 137, 142 for comments and 104, 106, 111 for line numbers, both ways, within rounding); token colours are literal per family |
-| Line-number column | `inline-block`, 22px wide | A CSS counter, `min-inline-size: 2ch` plus a `1ch` gap (22.1px at 13px) | Same offset; the column grows for files with 100 lines or more |
+| Line-number column | `inline-block`, 22px wide | A CSS counter, `min-inline-size: max(2ch, var(--code-block-gutter, 2ch))` plus a `1ch` gap (22.1px at 13px) | Same offset for files under 100 lines; from 100 lines the column is `--code-block-gutter` wide (the last number's digit count, set by `CodeBlockCode`), so every line's code still starts at the same x |
 | Pill line height | `normal` | `1` (title `28px`) | Height (28px) and vertical centring are the same |
 | Liquid glass text shadow | The scene's `0 1px 2px` dark text shadow is inherited by the code | None | Barely visible on the dark surface; experimental family |
 | Dark mode | Boards are light only | Same surface in both modes; the frame border and shadow follow the preset's dark tokens (for example, Ombelle: border at 80 % white, pink offset shadow) | The audit measured both modes |
@@ -197,6 +201,31 @@ Every Code Block's code `pre` is a named `region` landmark ("<title> source", or
 - **Browser behaviour:** `corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts tests/e2e/code-block-075.spec.ts` (its own preview server on 4185). Result: 16 passed (47 s), 8 per edition.
 - **Integration:** `corepack pnpm exec vitest run --config vitest.integration.config.ts tests/integration/liquid-glass-cli.test.ts tests/integration/www-route.test.ts`. The first run failed 2 of 26, both in `www-route.test.ts` ("lists the catalog and offers install commands…" and "offers the lab glass presets … installs Select…"): they looked for `pnpm dlx @ombelle-ui/cli@0.7.4 add <id>` in the server HTML, which `6195b68` splits into `<span data-token="keyword">pnpm dlx</span> @ombelle-ui/cli@0.7.4 add <id>`. The two tests now read the command from the HTML's text, with the tags removed. After that, `www-route.test.ts` passed 9 of 9; `liquid-glass-cli.test.ts` passed 17 of 17 in the first run, with `number-input`, `color-picker` and `code-block` added to its id list and install order.
 - **Types:** `corepack pnpm typecheck`, exit 0, before and after the test change.
+
+## Final-review fixes (`23c754e`, `8ae6891`)
+
+Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 and pnpm 11.25.0; ports 3000, 4173 and 4185 were free (`netstat -ano`) before each browser run. Not CI or a human review.
+
+- **Line numbers in the accessibility tree.** Chromium exposed each `::before` counter as StaticText ("1", "2", …) inside the code region. The five stylesheets now declare `content: counter(code-block-line)` and then `content: counter(code-block-line) / ''` (empty alt text; the first declaration is the fallback). `code-block-075.spec.ts` "line numbers stay out of the accessible text" reads the full AX tree over CDP and checks the `pre` region's StaticText holds no bare number and starts with the source's first line. Failed before the fix in both editions (32 numeric StaticText nodes), passes after.
+- **Gutter from line 100.** The `::before` was `min-inline-size: 2ch` per line, so line 100's code started 1ch (7.2 px) right of line 1's. `CodeBlockCode` sets `--code-block-gutter` to the digit count of its line count, and the stylesheets read `min-inline-size: max(2ch, var(--code-block-gutter, 2ch))`, so short files keep the board's 2ch. New fixture `code-block-long` (`lines.ts`, 120 lines) on the edition pages; "line 100 starts its code where line 1 does" compares lines 1, 9, 100 and 120 (failed by 7.17 px before, passes after). Unit test "sizes the line-number gutter from the line count" (1, 2, 3 and 4 digits).
+- **CRLF source.** `highlightCode` left `` at each line end, so `renderToString` emitted `a<!-- -->
+` and the HTML parser drew a blank line after every line. It now strips the `` before highlighting and emits the ending (`
+` or `
+`) as one text node; the text still equals the source. Unit test "server-renders CRLF source with one line break per line and no lone carriage return" (every language, four CRLF samples) failed before and passes after; the text-equality tests still pass.
+- **Copied across a content change.** `CodeBlockCopy` resets "Copied" and its status when `text` changes. "Copied resets when the copied content changes" (copy pnpm, switch to npm under a paused clock) failed before in both editions and passes after.
+- **Get code while publishing.** `editor.spec.ts` "the Get code dialog scrolls its long command…" now holds `/api/v1/recipes`, checks `get-code-command` shows "Generating" with no "Package manager" tab list, then, with `ombelle:get-code:manager` = `yarn` saved before opening, checks the yarn tab is selected once the command is ready (the 320 px checks now read the yarn panel). No test was added, so `browserSpecCounts` is unchanged.
+- **Minor:** the Get code fallback `pre` is `role="region"` named "Install command"; the specimen-audit config gains its missing space; `packages/compiler/test/code-block-075.test.ts` checks the scoped primitives return `highlightCode` (with `packageCommand`, `commandRunners` and the parts) and keep no `export type {…}`.
+- **Hashes:** `scripts/record-stable-hashes.ts` moved only the eight stable-family `code-block.tsx` and `code-block.css` entries.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Catalog and compiler units | `corepack pnpm exec vitest run packages/catalog packages/compiler/test/code-block-075.test.ts packages/compiler/test/stable-families.test.ts` | 72 files, 974 tests passed |
+| Types | `corepack pnpm typecheck` | exit 0 |
+| Code Block browser cases | `corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts tests/e2e/code-block-075.spec.ts` | 22 passed (11 per edition), on the final template |
+| Website e2e | temporary config (website on 3000 and preview on 4173 through corepack, no consumer servers, the main checkout's `.artifacts/consumers.json` copied in and removed afterwards), `editor.spec.ts` with `-g` "Get code dialog scrolls", "hydrates its server-rendered Code Block" and "artifact tabs support copy" | 3 passed (47.5 s) |
+| Website size | `corepack pnpm run build` in `apps/www`, then `node scripts/measure-www-first-load.mjs` | see "Website size, after" |
+
+The website e2e ran before the template comments were shortened and the CRLF ending was written more compactly; the rendered markup is the same, and the unit tests and `code-block-075.spec.ts` ran again on the final template. The Get code fallback `pre` appears only while the command block's chunk loads, so no browser test reaches it.
 
 ### Suites not run
 

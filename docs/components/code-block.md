@@ -84,8 +84,8 @@ export function Config({ code }: { code: string }) {
 
 ### Line numbers
 
-- Numbers come from a CSS counter in `::before`, so selecting or copying the code never includes them, and screen readers do not read them.
-- `lineNumbers={false}` sets `data-line-numbers="false"` on the `pre` and hides them. The column grows for files of 100 lines or more.
+- Numbers come from a CSS counter in `::before`, so selecting or copying the code never includes them. The generated content has empty alternative text (`content: counter(…) / ''`), so screen readers do not read them either.
+- `lineNumbers={false}` sets `data-line-numbers="false"` on the `pre` and hides them. `CodeBlockCode` sets `--code-block-gutter` to the digit count of the last line number, so the column fits the widest number and every line's code starts at the same place, from line 1 to line 100 and beyond.
 
 ### Another highlighter
 
