@@ -18,7 +18,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGr
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHandle, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogConfirmInput, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
@@ -532,6 +532,31 @@ function GrowingDialog075() {
   )
 }
 
+/** A delete confirmation that needs the project's name typed, for the typed-confirmation tests. */
+function TypedConfirm075() {
+  const [deleted, setDeleted] = React.useState(0)
+  return (
+    <div data-testid="v075-confirm">
+      <AlertDialog>
+        <AlertDialogTrigger type="button">Delete project</AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia tone="destructive" />
+            <AlertDialogTitle>Delete ombelle-site?</AlertDialogTitle>
+            <AlertDialogDescription>Its install code stops working for everyone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogConfirmInput expected="ombelle-site" />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setDeleted(count => count + 1)}>Delete project</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <output data-testid="v075-deleted">{deleted}</output>
+    </div>
+  )
+}
+
 /** The 0.7.5 variants, for tests/e2e/variants-075.spec.ts. */
 function VariantsScenario075() {
   return (
@@ -582,6 +607,7 @@ function VariantsScenario075() {
         </Dialog>
         <GrowingDialog075 />
       </div>
+      <TypedConfirm075 />
     </section>
   )
 }

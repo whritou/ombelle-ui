@@ -153,3 +153,50 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} typed confirmation`, () => {
+    const openConfirm = async (page: Page) => {
+      const section = await open(page, edition)
+      await section.getByRole('button', { name: 'Delete project' }).click()
+      const dialog = page.getByRole('alertdialog', { name: 'Delete ombelle-site?' })
+      await expect(dialog).toBeVisible()
+      return { section, dialog, input: dialog.getByRole('textbox', { name: 'Type ombelle-site to confirm' }), action: dialog.getByRole('button', { name: 'Delete project' }) }
+    }
+
+    test('the action is disabled until the text matches exactly, with its reason announced', async ({ page }) => {
+      const { section, dialog, input, action } = await openConfirm(page)
+      await expect(input).toBeFocused()
+      await expect(dialog.locator('[data-slot="alert-dialog-media"]')).toHaveAttribute('aria-hidden', 'true')
+      await input.pressSequentially('ombelle-sit')
+      await expect(action).toBeDisabled()
+      await expect(action).toHaveAccessibleDescription('Type ombelle-site to confirm')
+      for (const near of ['Ombelle-site', 'ombelle-site ', ' ombelle-site']) {
+        await input.fill(near)
+        await expect(action, near).toBeDisabled()
+      }
+      await input.press('Enter')
+      await expect(dialog).toBeVisible()
+      await expect(section.getByTestId('v075-deleted')).toHaveText('0')
+      await input.fill('ombelle-site')
+      await expect(action).toBeEnabled()
+      await expect(action).not.toHaveAttribute('aria-describedby', /.+/)
+      await input.press('Enter')
+      await expect(dialog).toBeHidden()
+      await expect(section.getByTestId('v075-deleted')).toHaveText('1')
+    })
+
+    test('pasting the text enables the action, Escape closes, and reopening starts empty', async ({ page }) => {
+      const { input, action, dialog } = await openConfirm(page)
+      await input.focus()
+      // A paste inserts the whole text at once; the input does not block paste.
+      await page.keyboard.insertText('ombelle-site')
+      await expect(action).toBeEnabled()
+      await page.keyboard.press('Escape')
+      await expect(dialog).toBeHidden()
+      const again = await openConfirm(page)
+      await expect(again.input).toHaveValue('')
+      await expect(again.action).toBeDisabled()
+    })
+  })
+}
