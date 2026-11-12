@@ -113,14 +113,15 @@ export function CodeBlockCopy({ text, label, onCopied, className, ...props }: Co
     }
   }, [])
   const copy = async () => {
-    // Clear the region first so a repeated result is announced again.
+    // Clear the region first so a repeated result is announced again. A missing
+    // clipboard also fails after an await, so the cleared region always renders first.
     setStatus('')
     let ok = false
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(text)
-        ok = true
-      }
+      await (typeof navigator !== 'undefined' && navigator.clipboard
+        ? navigator.clipboard.writeText(text)
+        : Promise.reject(new Error('Clipboard unavailable')))
+      ok = true
     } catch {
       ok = false
     }

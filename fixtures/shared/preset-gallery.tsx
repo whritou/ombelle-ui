@@ -119,6 +119,7 @@ import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { NumberInput } from '@/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
+import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 
 // Family-independent: callers pass the component ids their family cannot
@@ -400,6 +401,12 @@ export function PresetGallery({
             swatches={[{ label: 'Rose', value: 'oklch(0.55 0.22 6)' }, { label: 'Ink', value: 'oklch(0.22 0.012 275)' }]} />
           <ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" contrastWith="oklch(0.16 0.01 275)" contrastLabel="primary foreground" />
         </ColorPickerPair>
+      </section>)}
+      {gate('code-block', 'Code Block', <section aria-label="Code Block" data-component="code-block">
+        <h2>Code Block</h2>
+        <CodeBlockCommand args="@ombelle-ui/cli add button" />
+        <CodeBlock title="save.tsx" language="tsx"
+          code={"import { Button } from '@/components/ui/button'\n\n// Saves the draft.\nexport function Save() {\n  return <Button variant=\"outline\" size=\"sm\">Save</Button>\n}\n"} />
       </section>)}
       </div>
       <section aria-label="Actions" data-component="button">

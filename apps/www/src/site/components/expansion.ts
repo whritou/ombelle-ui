@@ -176,4 +176,10 @@ export const expansionDocs = {
     states: 'Valid, invalid, empty with placeholder, open, disabled, focus', basis: 'Reviewed Radix Popover and Slider; Base UI Popover and Slider in the Base UI edition', client: true,
     usage: expansionExamples['color-picker'], minimumCli: '0.7.5',
   },
+  'code-block': {
+    name: 'Code Block', description: 'Read-only code with a title, line numbers, highlighting and Copy, or a command with one tab per package manager.',
+    api: 'CodeBlock (code, language tsx, css, json, shell or text, title, lineNumbers, maxHeight, copyLabel), CodeBlockCommand (args, managers, manager, defaultManager, onManagerChange, label, copyLabel, runners), CodeBlockRoot, CodeBlockHeader, CodeBlockTitle, CodeBlockCopy, CodeBlockCode',
+    states: 'Default, scrolling, focus, copied, copy failed, selected tab, no line numbers', basis: 'Native pre and button with a polite status; Radix Tabs, or Base UI Tabs in the Base UI edition, for the command block', client: true,
+    usage: expansionExamples['code-block'], minimumCli: '0.7.5',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

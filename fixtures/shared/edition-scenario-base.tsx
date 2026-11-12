@@ -33,6 +33,7 @@ import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { NumberInput } from '@/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
+import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
@@ -564,6 +565,60 @@ function EditorInputsScenario() {
   )
 }
 
+// The Code Block file fixture: 30 lines, line 15 is 400 characters (tests/e2e/code-block-075.spec.ts).
+const codeBlockSummary = `  const summary = '${'Long lines scroll sideways. '.repeat(14).slice(0, 380)}'`
+const codeBlockSource = [
+  "import * as React from 'react'",
+  "import { Button } from '@acme/ui/button'",
+  "import { CodeBlockCommand } from '@acme/ui/code-block'",
+  "import { Card } from '@acme/ui/card'",
+  '',
+  'type ReleaseProps = {',
+  '  version: string',
+  '  notes?: string',
+  '}',
+  '',
+  '// Shows the release and the command that installs it.',
+  'export function Release({ version, notes }: ReleaseProps) {',
+  '  const [open, setOpen] = React.useState(false)',
+  "  const label = open ? 'Hide notes' : 'Show notes'",
+  codeBlockSummary,
+  '  return (',
+  '    <Card>',
+  '      <h2>Release {version}</h2>',
+  '      <CodeBlockCommand args="@ombelle-ui/cli add button" />',
+  '      <Button variant="outline" onClick={() => setOpen(!open)}>',
+  '        {label}',
+  '      </Button>',
+  '      {open ? <p>{notes ?? summary}</p> : null}',
+  '    </Card>',
+  '  )',
+  '}',
+  '',
+  'export function Releases() {',
+  '  return <Release version="0.7.5" />',
+  '}',
+].join('\n') + '\n'
+
+/** Code Block and Code Block Command fixtures for tests/e2e/code-block-075.spec.ts. */
+function CodeBlockScenario() {
+  const [manager, setManager] = React.useState('')
+  return (
+    <section aria-label="Code Block" data-testid="code-block-075">
+      <div data-testid="code-block-command">
+        <CodeBlockCommand args="@ombelle-ui/cli add button" onManagerChange={setManager} />
+        <output data-testid="code-block-manager">{manager}</output>
+      </div>
+      <div data-testid="code-block-file">
+        <CodeBlock title="release.tsx" language="tsx" code={codeBlockSource} maxHeight="12rem" />
+      </div>
+      <div data-testid="code-block-plain">
+        <CodeBlock title="tokens.css" language="css" code={':root {\n  --radius: 0.75rem;\n}\n'} lineNumbers={false} />
+      </div>
+    </section>
+  )
+}
+
 function CatalogExpansionScenario() {
   const [submits, setSubmits] = React.useState(0)
   const [checks, setChecks] = React.useState(0)
@@ -669,6 +724,7 @@ function CatalogExpansionScenario() {
           </ItemGroup>
         </section>
         <EditorInputsScenario />
+        <CodeBlockScenario />
         <OverlaysScenario />
         <CalendarScenario />
         <VariantsBasicsScenario />
