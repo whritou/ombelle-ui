@@ -12,6 +12,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   slider: ['slider', 'slider-track', 'slider-range', 'slider-thumb', 'slider-ticks', 'slider-tick'],
   collapsible: ['collapsible', 'collapsible-trigger', 'collapsible-icon', 'collapsible-content'],
   toggle: ['toggle'],
+  'scroll-area': ['scroll-area', 'scroll-area-viewport', 'scroll-area-scrollbar', 'scroll-area-thumb', 'scroll-area-corner'],
   'toggle-group': ['toggle-group', 'toggle-group-item'],
   'tag-input': ['tag-input', 'tag-input-list', 'tag-input-tag', 'tag-input-remove', 'tag-input-input', 'tag-input-status'],
   spinner: ['spinner'],

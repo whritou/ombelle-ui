@@ -1,6 +1,80 @@
-/* flat scroll-area (scaffold) */
+/* flat Scroll Area */
+[data-slot='scroll-area'] {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-family);
+}
+[data-slot='scroll-area-viewport'] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  scrollbar-width: none;
+}
+[data-slot='scroll-area-viewport']::-webkit-scrollbar {
+  display: none;
+}
+/* The root clips overflow, so the focus ring sits inside the viewport. */
+[data-slot='scroll-area-viewport']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+[data-slot='scroll-area-scrollbar'] {
+  display: flex;
+  box-sizing: border-box;
+  padding: 2px;
+  background: var(--muted);
+  touch-action: none;
+  user-select: none;
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+[data-slot='scroll-area-scrollbar'][data-state='hidden'] {
+  opacity: 0;
+  pointer-events: none;
+}
+[data-slot='scroll-area-scrollbar'][data-orientation='vertical'] {
+  inline-size: 12px;
+  flex-direction: row;
+}
+[data-slot='scroll-area-scrollbar'][data-orientation='horizontal'] {
+  block-size: 12px;
+  flex-direction: column;
+}
+[data-slot='scroll-area-thumb'] {
+  position: relative;
+  flex: 1;
+  border-radius: 999px;
+  background: var(--input);
+}
+[data-slot='scroll-area-corner'] {
+  background: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='scroll-area-scrollbar'] {
+    transition: none;
+  }
+}
 @media (forced-colors: active) {
   [data-slot='scroll-area'] {
     border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='scroll-area-viewport']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='scroll-area-scrollbar'],
+  [data-slot='scroll-area-corner'] {
+    background: Canvas;
+  }
+  [data-slot='scroll-area-thumb'] {
+    border: 1px solid CanvasText;
+    background: CanvasText;
   }
 }

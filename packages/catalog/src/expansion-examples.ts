@@ -16,6 +16,8 @@ export function Example(){return <p>Built with <HoverCard><HoverCardTrigger href
 export function Example(){return <><Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => value + ' pixels'} /><Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} /><SliderTicks values={[0, 25, 50, 75, 100]} /></>}`,
   collapsible: `import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 export function Example(){return <Collapsible><CollapsibleTrigger>Advanced shadow</CollapsibleTrigger><CollapsibleContent><p>Offset X and Offset Y</p></CollapsibleContent></Collapsible>}`,
+  'scroll-area': `import { ScrollArea } from '@/components/ui/scroll-area'
+export function Example(){return <ScrollArea aria-label="Components" style={{ blockSize: 200 }}><ul><li>Accordion</li><li>Alert</li><li>Alert Dialog</li><li>Avatar</li><li>Badge</li><li>Breadcrumb</li></ul></ScrollArea>}`,
   toggle: `import { Toggle } from '@/components/ui/toggle'
 export function Example(){return <><Toggle defaultPressed>Show grid</Toggle><Toggle variant="outline" aria-label="Pin preview">Pin</Toggle></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
