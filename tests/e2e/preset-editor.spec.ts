@@ -118,7 +118,7 @@ for (const family of supportedStyleFamilies)
         frame(page).getByRole('button', { name: 'Saving…' }),
       ).toHaveAttribute('aria-busy', 'true')
       await expect(
-        frame(page).getByRole('tab', { name: 'Overview' }),
+        frame(page).getByRole('tablist', { name: 'Project sections' }).getByRole('tab', { name: 'Overview' }),
       ).toHaveAttribute('aria-selected', 'true')
       await frame(page).getByTestId('preset-button').focus()
       expect(

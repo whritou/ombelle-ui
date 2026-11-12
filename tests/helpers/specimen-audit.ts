@@ -51,9 +51,10 @@ export function findOverflow(roots: Locator[]): Promise<Finding[]> {
       if (!(element instanceof HTMLElement) || !visible(element) || ellipsis(element)) continue
       const style = getComputedStyle(element)
       // Only a box that cuts its content can squeeze it; visible spill is judged by the text test below.
-      const cuts = [style.overflowX, style.overflowY].some(value => value === 'hidden' || value === 'clip')
-      if (cuts && (element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1)
-        && element.clientWidth > 0 && style.display !== 'inline')
+      // Judged per axis: a viewport that scrolls one way (Radix Scroll Area: overflow hidden scroll) cuts nothing there.
+      const cutsX = (style.overflowX === 'hidden' || style.overflowX === 'clip') && element.scrollWidth > element.clientWidth + 1
+      const cutsY = (style.overflowY === 'hidden' || style.overflowY === 'clip') && element.scrollHeight > element.clientHeight + 1
+      if ((cutsX || cutsY) && element.clientWidth > 0 && style.display !== 'inline')
         findings.push({ check: 'overflow', target: describe(element),
           detail: `content ${element.scrollWidth}×${element.scrollHeight} exceeds box ${element.clientWidth}×${element.clientHeight}` })
     }

@@ -350,7 +350,7 @@ export function PresetGallery({
         <h2>Toggle</h2>
         <Toggle aria-label="Bold" defaultPressed><b aria-hidden="true">B</b></Toggle>
         <Toggle variant="outline" size="sm">Show grid</Toggle>
-        <Toggle disabled>Disabled</Toggle>
+        <Toggle disabled>Disabled toggle</Toggle>
       </section>)}
       {gate('collapsible', 'Collapsible', <section aria-label="Collapsible" data-component="collapsible">
         <h2>Collapsible</h2>
