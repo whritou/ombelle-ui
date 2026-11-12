@@ -36,11 +36,11 @@ Measured a third time at `8ae6891` (the final-review fix wave: `23c754e` changed
 | `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | 449.4 kB | 449.8 kB | +9.3 kB |
 | `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | 847.3 kB | 847.7 kB | **+10.4 kB, over the limit** |
 
-### Accepted overages, pending confirmation: `/editor/component/button` and `/components/accordion`
+### Accepted overages: `/editor/component/button` and `/components/accordion`
 
-`/editor/component/button` grows by 10.9 kB gzip at `8ae6891` (10.4 kB at `6195b68`, 10.3 kB at `84e3c69`), over the 10 kB limit. The overage is accepted by the implementation controller, pending the user's confirmation; it is not resolved in this sub-project.
+`/editor/component/button` grows by 10.9 kB gzip at `8ae6891` (10.4 kB at `6195b68`, 10.3 kB at `84e3c69`), over the 10 kB limit. The maintainer accepted the overage on 2026-11-12; it is not reduced in this sub-project.
 
-`/components/accordion` grows by 10.4 kB at `8ae6891` (10.0 kB at `6195b68`, 9.9 kB at `84e3c69`), over the limit. It is recorded here with the same cause: the Code Block template source the catalog routes ship, which `6195b68` grew by about 300 bytes (`role="region"` on the code `pre` and the keyword span around the command runner, in both editions, plus their stylesheet rules). This overage too is accepted by the implementation controller, pending the user's confirmation, with the button route's.
+`/components/accordion` grows by 10.4 kB at `8ae6891` (10.0 kB at `6195b68`, 9.9 kB at `84e3c69`), over the limit. It is recorded here with the same cause: the Code Block template source the catalog routes ship, which `6195b68` grew by about 300 bytes (`role="region"` on the code `pre` and the keyword span around the command runner, in both editions, plus their stylesheet rules). The maintainer accepted this overage too, on 2026-11-12, with the button route's.
 
 The final-review fixes (`23c754e`) add about 0.4 to 0.5 kB on the four catalog routes: the line-count helper, the gutter custom property, the CRLF handling and the Copied reset in the template's shared block (both editions), and the alt-text and gutter declarations in the five stylesheets. A first build with longer comments measured 0.3 kB more; the comments were shortened before this measurement.
 
