@@ -491,3 +491,33 @@ it('keeps batch 4a recipes free of the 0.7.5 variant fields', () => {
   }
   expect(validateComponentRecipe(variants075Draft('checkbox')).content).not.toHaveProperty('description')
 })
+
+it.each([
+  ['dialog', { size: 'lg', footer: true, scrollingBody: true }, {}],
+  ['dialog', { size: 'fullscreen' }, {}],
+  ['dialog', { size: 'sm' }, {}],
+  ['alert-dialog', { media: 'destructive' }, { confirmText: 'ombelle-site' }],
+  ['alert-dialog', { media: 'none' }, { confirmText: '' }],
+  ['breadcrumb', { collapse: 'auto' }, {}],
+] as const)('accepts the 0.7.5 %s variant %o %o', (component, props, content) => {
+  const recipe = validateComponentRecipe(variants075Draft(component, props, content))
+  expect(recipe.props).toMatchObject(props)
+  expect(recipe.content).toMatchObject(content)
+})
+
+it.each([
+  ['dialog', { size: 'xl' }, {}, '/props/size'],
+  ['alert-dialog', { media: 'warning' }, {}, '/props/media'],
+  ['breadcrumb', { collapse: 'always' }, {}, '/props/collapse'],
+  ['alert-dialog', {}, { confirmText: 'x'.repeat(201) }, '/content/confirmText'],
+] as const)('rejects the 0.7.5 %s variant %o %o at %s', (component, props, content, path) => {
+  expect(() => validateComponentRecipe(variants075Draft(component, props, content))).toThrow(expect.objectContaining({ path }))
+})
+
+it('keeps batch 4b recipes free of the 0.7.5 variant fields', () => {
+  for (const component of ['dialog', 'alert-dialog', 'breadcrumb'] as const) {
+    const recipe = validateComponentRecipe(variants075Draft(component))
+    for (const key of ['size', 'footer', 'scrollingBody', 'media', 'collapse']) expect(recipe.props, component + ' ' + key).not.toHaveProperty(key)
+    expect(recipe.content).not.toHaveProperty('confirmText')
+  }
+})
