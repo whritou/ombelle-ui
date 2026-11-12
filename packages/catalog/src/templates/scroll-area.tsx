@@ -93,16 +93,16 @@ export function ScrollBar({
 >) {
   // Forced mount only for the server render; afterwards Radix mounts the bar
   // and thumb only while the content overflows and the pointer is over it.
-  const forceMount = !useHydrated()
+  const force = useHydrated() ? {} : ({ forceMount: true } as const)
   return (
     <ScrollAreaPrimitive.ScrollAreaScrollbar
-      forceMount={forceMount}
+      {...force}
       orientation={orientation}
       className={cn(className)}
       {...props}
       data-slot="scroll-area-scrollbar"
     >
-      <ScrollAreaPrimitive.ScrollAreaThumb forceMount={forceMount} data-slot="scroll-area-thumb" />
+      <ScrollAreaPrimitive.ScrollAreaThumb {...force} data-slot="scroll-area-thumb" />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   )
 }
