@@ -22,19 +22,23 @@ Method: a temporary git worktree at `894a0e4`; `corepack pnpm install --frozen-l
 
 Measured at `84e3c69` (`fix(www): load the Get code command block when the dialog opens`) with the same method: after `corepack pnpm generate:preview` (packages unchanged since `02fb028`), `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 and pnpm 11.25.0. The `02fb028` column is the interim measurement before the website swaps.
 
-| Route | Scripts | Before, gzip | `02fb028`, gzip | After, gzip | Growth |
-| --- | --- | --- | --- | --- | --- |
-| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | 880.7 kB | +8.9 kB |
-| `/editor/component` | 10 | 241.1 kB | 241.4 kB | 241.4 kB | +0.3 kB |
-| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | 875.2 kB | **+10.3 kB, over the limit** |
-| `/docs` | 11 | 242.1 kB | 242.3 kB | 242.3 kB | +0.2 kB |
-| `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | 249.5 kB | +0.3 kB |
-| `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | +8.7 kB |
-| `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | +9.9 kB |
+Measured again at `6195b68` (`fix(catalog): match Code Block to the boards`), which changed the template by about 300 bytes after the `84e3c69` measurement: `corepack pnpm build:packages`, `corepack pnpm generate:preview`, `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Same machine, Node and pnpm, on 2026-11-12. The "After" and "Growth" columns are from this run; the `84e3c69` column is kept for comparison. The script prints one decimal, so each growth figure is within ±0.1 kB.
 
-### Accepted overage: `/editor/component/button`
+| Route | Scripts | Before, gzip | `02fb028`, gzip | `84e3c69`, gzip | After (`6195b68`), gzip | Growth |
+| --- | --- | --- | --- | --- | --- | --- |
+| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | 880.7 kB | 880.8 kB | +9.0 kB |
+| `/editor/component` | 10 | 241.1 kB | 241.4 kB | 241.4 kB | 241.4 kB | +0.3 kB |
+| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | 875.2 kB | 875.3 kB | **+10.4 kB, over the limit** |
+| `/docs` | 11 | 242.1 kB | 242.3 kB | 242.3 kB | 242.3 kB | +0.2 kB |
+| `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | 249.5 kB | 249.5 kB | +0.3 kB |
+| `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | 449.4 kB | +8.9 kB |
+| `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | 847.3 kB | **+10.0 kB, at the limit** |
 
-`/editor/component/button` grows by 10.3 kB gzip, over the 10 kB limit. The overage is accepted by a controller ruling and is to be reported to the user; it is not resolved in this sub-project.
+### Accepted overage: `/editor/component/button`, and `/components/accordion` at the limit
+
+`/editor/component/button` grows by 10.4 kB gzip at `6195b68` (10.3 kB at `84e3c69`), over the 10 kB limit. The overage is accepted by a controller ruling and is to be reported to the user; it is not resolved in this sub-project.
+
+`/components/accordion` grows by 10.0 kB at `6195b68` (9.9 kB at `84e3c69`). Both figures are rounded to 0.1 kB, so the route is at the limit and may be up to 0.1 kB over it. It is recorded here with the same cause: the Code Block template source the catalog routes ship, which `6195b68` grew by about 300 bytes (`role="region"` on the code `pre` and the keyword span around the command runner, in both editions, plus their stylesheet rules). It is reported to the user with the button route; it was not reviewed separately.
 
 - Most of the growth on the four catalog routes (8.6 to 8.9 kB) came before the website swaps: the Code Block template source and recipe description the site ships in the catalog.
 - The swaps add about 1.7 kB on this route. The generated `code-block` module is one file, so the artifact panel's `CodeBlockRoot`, `CodeBlockCopy` and `CodeBlockCode` bring along the Radix Tabs that only `CodeBlockCommand` uses. The deleted site code block, highlighter and Get code terminal offset part of it.
@@ -178,3 +182,22 @@ Differences that remain:
 | Frame and code size | Three-line sample | The fixtures' longer sources, inside `maxHeight` | Board content |
 
 The board probe covered light mode only. The specimen audit and the axe runs covered dark mode and both editions.
+
+The board-comparison probe and the separate axe scripts (the "needs review" run in the specimen audit section and the edition-page Code Block run above) lived in the session scratchpad and are not committed; only their results are recorded here. The committed checks are the specimen audit, `code-block-075.spec.ts` and the unit tests.
+
+### Landmark names
+
+Every Code Block's code `pre` is a named `region` landmark ("<title> source", or "Code" without a title). Several untitled blocks on one page therefore share the name "Code". axe's `landmark-unique` rule, which reports this, is a best practice and is not in the WCAG-tag runs above, so those runs would not show it. The component page advises passing a `title` (or `label`) to each block.
+
+## Checks after the board fixes (`6195b68`)
+
+`6195b68` changed the template markup (`role="region"` on the code `pre`, the runner as a keyword span) after the website e2e above, so the website tests that read that markup were run again. Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 and pnpm 11.25.0, after `corepack pnpm build:packages`, `corepack pnpm generate:preview` and `corepack pnpm run build` in `apps/www`; ports 3000, 4173 and 4185 were free (`netstat -ano`) before each run. Not CI or a human review.
+
+- **Website e2e, `editor.spec.ts`:** the temporary config described under "Website e2e" (website on 3000 and preview on 4173 through corepack, no consumer servers, bundled Chromium, headless, reduced motion, the main checkout's `.artifacts/consumers.json` copied in and removed afterwards), with `-g` selecting four tests: "artifact tabs support copy…", "operates every Button editor control, artifact tab, download and publish dialog by keyboard", "the component page hydrates its server-rendered Code Block and install tabs without a hydration error" and "the Get code dialog scrolls its long command…". Result: 4 passed (1.6 min).
+- **Browser behaviour:** `corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts tests/e2e/code-block-075.spec.ts` (its own preview server on 4185). Result: 16 passed (47 s), 8 per edition.
+- **Integration:** `corepack pnpm exec vitest run --config vitest.integration.config.ts tests/integration/liquid-glass-cli.test.ts tests/integration/www-route.test.ts`. The first run failed 2 of 26, both in `www-route.test.ts` ("lists the catalog and offers install commands…" and "offers the lab glass presets … installs Select…"): they looked for `pnpm dlx @ombelle-ui/cli@0.7.4 add <id>` in the server HTML, which `6195b68` splits into `<span data-token="keyword">pnpm dlx</span> @ombelle-ui/cli@0.7.4 add <id>`. The two tests now read the command from the HTML's text, with the tags removed. After that, `www-route.test.ts` passed 9 of 9; `liquid-glass-cli.test.ts` passed 17 of 17 in the first run, with `number-input`, `color-picker` and `code-block` added to its id list and install order.
+- **Types:** `corepack pnpm typecheck`, exit 0, before and after the test change.
+
+### Suites not run
+
+The spec lists the full `pnpm test:unit` and `pnpm test:integration`. Per the user's instruction to run only the tests a change affects, they were not run in this task. The focused suites earlier tasks ran are recorded in their sections and commits; this task ran only the commands above. The full `pnpm check:foundation` gate and `pnpm test:specimen-audit` for every component were not run either.
