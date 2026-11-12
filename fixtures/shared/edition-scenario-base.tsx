@@ -26,6 +26,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Slider } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Toggle } from '@/components/ui/toggle'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
@@ -561,6 +566,39 @@ function CatalogExpansionScenario() {
               <InputOTPSlot index={5} />
             </InputOTPGroup>
           </InputOTP>
+        </section>
+        <section aria-label="Primitives" data-testid="primitives-075">
+          <Toggle data-testid="toggle-bold" aria-label="Bold">B</Toggle>
+          <Collapsible data-testid="collapsible-advanced">
+            <CollapsibleTrigger>Advanced</CollapsibleTrigger>
+            <CollapsibleContent><a href="#collapsible-link">Shadow offsets</a></CollapsibleContent>
+          </Collapsible>
+          <ScrollArea data-testid="scroll-long" aria-label="Release notes" style={{ blockSize: '8rem', inlineSize: '16rem' }}>
+            {Array.from({ length: 24 }, (_, index) => <p key={index}>Release note {index + 1}</p>)}
+          </ScrollArea>
+          <ScrollArea data-testid="scroll-short" aria-label="Short note" style={{ blockSize: '8rem', inlineSize: '16rem' }}>
+            <p>Nothing to scroll.</p>
+          </ScrollArea>
+          <ButtonGroup data-testid="group-two" aria-label="Alignment">
+            <Button variant="outline">Left</Button>
+            <ButtonGroupSeparator />
+            <Button variant="outline">Right</Button>
+          </ButtonGroup>
+          <ButtonGroup data-testid="group-one" aria-label="Single action">
+            <Button variant="outline">Only</Button>
+          </ButtonGroup>
+          <ItemGroup data-testid="item-group" aria-label="Projects">
+            <Item variant="outline">
+              <ItemMedia variant="icon" aria-hidden="true">P</ItemMedia>
+              <ItemContent><ItemTitle>Plain project</ItemTitle><ItemDescription>No link.</ItemDescription></ItemContent>
+            </Item>
+            <Item variant="outline" asChild>
+              <a href="#item-link" data-testid="item-link">
+                <ItemContent><ItemTitle>Linked project</ItemTitle><ItemDescription>Opens the project.</ItemDescription></ItemContent>
+              </a>
+              <ItemActions><Button variant="outline" size="sm">Archive</Button></ItemActions>
+            </Item>
+          </ItemGroup>
         </section>
         <OverlaysScenario />
         <CalendarScenario />

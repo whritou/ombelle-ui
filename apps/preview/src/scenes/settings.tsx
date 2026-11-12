@@ -80,6 +80,8 @@ import { Kbd, KbdGroup } from '../generated/preset-gallery/components/ui/kbd'
 import { Spinner } from '../generated/preset-gallery/components/ui/spinner'
 import { Slider } from '../generated/preset-gallery/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '../generated/preset-gallery/components/ui/toggle-group'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../generated/preset-gallery/components/ui/collapsible'
+import { ButtonGroup } from '../generated/preset-gallery/components/ui/button-group'
 import { TagInput, TagInputInput, TagInputList } from '../generated/preset-gallery/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../generated/preset-gallery/components/ui/input-otp'
 import { Calendar, formatDate } from '../generated/preset-gallery/components/ui/calendar'
@@ -322,6 +324,31 @@ export function SettingsScene(props: SceneProps) {
                       </ComboboxContent>
                     </Combobox>
                   </div>,
+                )}
+                {show(
+                  'button-group',
+                  'Button Group',
+                  <div className="scene-field">
+                    <Label id="scene-align-label">Text alignment</Label>
+                    <ButtonGroup aria-label="Alignment">
+                      <Button variant="outline">Left</Button>
+                      <Button variant="outline">Center</Button>
+                      <Button variant="outline">Right</Button>
+                    </ButtonGroup>
+                  </div>,
+                )}
+                {show(
+                  'collapsible',
+                  'Collapsible',
+                  <Collapsible>
+                    <CollapsibleTrigger>Advanced</CollapsibleTrigger>
+                    <CollapsibleContent className="scene-fields">
+                      <div className="scene-field">
+                        <Label id="scene-shadow-label">Shadow offsets</Label>
+                        <Slider defaultValue={[4]} max={12} aria-labelledby="scene-shadow-label" getValueText={(value) => `${value} pixels`} />
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>,
                 )}
               </CardContent>
             </Card>
