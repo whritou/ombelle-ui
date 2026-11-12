@@ -84,7 +84,6 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  color: var(--foreground);
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.35;
@@ -94,7 +93,6 @@
 }
 [data-slot='progress-value'] {
   flex-shrink: 0;
-  color: var(--muted-foreground);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.75rem;
   font-weight: 500;
@@ -103,9 +101,6 @@
 @media (forced-colors: active) {
   [data-slot='progress-indicator']:is([data-tone] > *) {
     background: Highlight;
-  }
-  [data-slot='progress-header'] {
-    color: CanvasText;
   }
 }
 /* end 0.7.5 variants */

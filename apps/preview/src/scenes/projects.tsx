@@ -14,6 +14,8 @@ import {
   BreadcrumbSeparator,
 } from '../generated/preset-gallery/components/ui/breadcrumb'
 import { Button } from '../generated/preset-gallery/components/ui/button'
+import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '../generated/preset-gallery/components/ui/popover'
+import { Progress, ProgressLabel, ProgressValue } from '../generated/preset-gallery/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarOverflow } from '../generated/preset-gallery/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardLink, CardTitle } from '../generated/preset-gallery/components/ui/card'
 import { Chip, ChipGroup } from '../generated/preset-gallery/components/ui/chip'
@@ -123,6 +125,18 @@ export function ProjectsScene(props: SceneProps) {
           <div className="scene-actions">
             {show('toggle', 'Toggle', <Toggle variant="outline">Show grid</Toggle>)}
             {show(
+              'popover',
+              'Popover',
+              <Popover>
+                <PopoverTrigger asChild><Button variant="ghost">Help</Button></PopoverTrigger>
+                <PopoverContent align="end" aria-labelledby="scene-help-title">
+                  <PopoverArrow />
+                  <PopoverTitle id="scene-help-title">Project lists</PopoverTitle>
+                  <PopoverDescription>Pin a project to keep it at the top of every list.</PopoverDescription>
+                </PopoverContent>
+              </Popover>,
+            )}
+            {show(
               'input-group',
               'Input Group',
               <InputGroup className="scene-search">
@@ -196,6 +210,14 @@ export function ProjectsScene(props: SceneProps) {
           </div>
         </header>
       </div>
+      {show(
+        'progress',
+        'Progress',
+        <Progress value={64} tone="success">
+          <ProgressLabel>Publishing Website refresh, on track</ProgressLabel>
+          <ProgressValue />
+        </Progress>,
+      )}
       {show(
         'alert',
         'Alert',
