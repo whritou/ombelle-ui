@@ -1,4 +1,4 @@
-// First-load JavaScript of the editor routes, from a finished `next build` of apps/www.
+// First-load JavaScript of the editor, docs and component routes, from a finished `next build` of apps/www.
 // Next.js 16 no longer prints First Load JS, so this sums the gzipped size of every
 // script a route's prerendered HTML loads. Usage: node scripts/measure-www-first-load.mjs
 import fs from 'node:fs'
@@ -7,7 +7,15 @@ import zlib from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 
 const next = fileURLToPath(new URL('../apps/www/.next/', import.meta.url))
-const routes = ['editor/preset', 'editor/component', 'editor/component/button']
+const routes = [
+  'editor/preset',
+  'editor/component',
+  'editor/component/button',
+  'docs',
+  'docs/getting-started',
+  'components',
+  'components/accordion',
+]
 
 const kb = (bytes) => (bytes / 1024).toFixed(1)
 for (const route of routes) {
