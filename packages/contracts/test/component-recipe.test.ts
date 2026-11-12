@@ -287,6 +287,9 @@ it('gives each 0.7.5 primitive the documented defaults', () => {
 
 it.each([
   ['toggle', { iconOnly: true }, { label: '' }, '/content/label'],
+  // A text toggle with no label would compile to a button with no name.
+  ['toggle', {}, { label: '' }, '/content/label'],
+  ['toggle', { iconOnly: false }, { label: '  ' }, '/content/label'],
   ['button-group', {}, { label: '' }, '/content/label'],
   ['button-group', {}, { label: '   ' }, '/content/label'],
   ['scroll-area', {}, { label: '' }, '/content/label'],
@@ -297,8 +300,8 @@ it.each([
     .toThrow(expect.objectContaining({ path }))
 })
 
-it('accepts an empty-label toggle that is not icon-only, and a one-item toolbar group', () => {
-  expect(validateComponentRecipe(primitiveDraft('toggle', {}, { label: '' })).component).toBe('toggle')
+it('accepts a labelled toggle, and a one-item toolbar group', () => {
+  expect(validateComponentRecipe(primitiveDraft('toggle', {}, { label: 'Bold' })).component).toBe('toggle')
   expect(validateComponentRecipe(primitiveDraft('button-group', { mode: 'toolbar' }, { label: 'Tools', items: ['Bold'] })).component).toBe('button-group')
 })
 

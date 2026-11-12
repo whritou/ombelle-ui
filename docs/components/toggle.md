@@ -32,7 +32,7 @@ export function Options() {
 
 ## Recipe
 
-The recipe editor sets `variant`, `size`, `iconOnly` and `pressed`, and the label. Compilation emits `components/ui/toggle.tsx`, `components/ui/toggle.css` and `examples/toggle.tsx`. Recipes carry no icon set, so an icon-only recipe shows the label's first letter, named by the label. Runtime dependencies are React 19.3.1, clsx 2.1.1 and tailwind-merge 3.7.0, plus @radix-ui/react-toggle 1.2.1 in the Radix edition.
+The recipe editor sets `variant`, `size`, `iconOnly` and `pressed`, and the label. Compilation emits `components/ui/toggle.tsx`, `components/ui/toggle.css` and `examples/toggle.tsx`. Recipes carry no icon set, so an icon-only recipe shows the label's first letter, named by the label. A recipe with an empty or blank label is rejected, icon-only or not, because the toggle would have no name. Runtime dependencies are React 19.3.1, clsx 2.1.1 and tailwind-merge 3.7.0, plus @radix-ui/react-toggle 1.2.1 in the Radix edition.
 
 ## Base UI edition
 

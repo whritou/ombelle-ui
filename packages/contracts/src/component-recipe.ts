@@ -76,7 +76,8 @@ function validateComposition(recipe: ComponentRecipe): void {
   }
   switch (recipe.component) {
     case 'toggle':
-      if (recipe.props.iconOnly && recipe.content.label.trim() === '') reject('An icon-only toggle needs a label for its accessible name', '/content/label')
+      if (recipe.content.label.trim() === '')
+        reject(recipe.props.iconOnly ? 'An icon-only toggle needs a label for its accessible name' : 'A toggle needs a label', '/content/label')
       break
     case 'button-group':
       if (recipe.content.label.trim() === '') reject('Name the button group', '/content/label')
