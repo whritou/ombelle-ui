@@ -1,0 +1,6 @@
+/* neo-brutalism toggle (scaffold) */
+@media (forced-colors: active) {
+  [data-slot='toggle'] {
+    border-color: CanvasText;
+  }
+}

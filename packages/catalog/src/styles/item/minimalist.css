@@ -1,0 +1,6 @@
+/* minimalist item (scaffold) */
+@media (forced-colors: active) {
+  [data-slot='item'] {
+    border-color: CanvasText;
+  }
+}

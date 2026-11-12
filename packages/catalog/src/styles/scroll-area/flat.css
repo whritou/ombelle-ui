@@ -1,0 +1,6 @@
+/* flat scroll-area (scaffold) */
+@media (forced-colors: active) {
+  [data-slot='scroll-area'] {
+    border-color: CanvasText;
+  }
+}

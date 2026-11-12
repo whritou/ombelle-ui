@@ -1,0 +1,6 @@
+/* ombelle collapsible (scaffold) */
+@media (forced-colors: active) {
+  [data-slot='collapsible'] {
+    border-color: CanvasText;
+  }
+}

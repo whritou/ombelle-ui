@@ -1,0 +1,6 @@
+/* minimalist button-group (scaffold) */
+@media (forced-colors: active) {
+  [data-slot='button-group'] {
+    border-color: CanvasText;
+  }
+}
