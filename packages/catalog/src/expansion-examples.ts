@@ -18,6 +18,11 @@ export function Example(){return <><Slider defaultValue={[12]} max={24} aria-lab
 export function Example(){return <Collapsible><CollapsibleTrigger>Advanced shadow</CollapsibleTrigger><CollapsibleContent><p>Offset X and Offset Y</p></CollapsibleContent></Collapsible>}`,
   'scroll-area': `import { ScrollArea } from '@/components/ui/scroll-area'
 export function Example(){return <ScrollArea aria-label="Components" style={{ blockSize: 200 }}><ul><li>Accordion</li><li>Alert</li><li>Alert Dialog</li><li>Avatar</li><li>Badge</li><li>Breadcrumb</li></ul></ScrollArea>}`,
+  'button-group': `import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '@/components/ui/button-group'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+export function Example(){return <><ButtonGroup aria-label="Install"><Button>Install</Button><DropdownMenu><DropdownMenuTrigger aria-label="More install options">More</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem>Install with npm</DropdownMenuItem><DropdownMenuItem>Install with pnpm</DropdownMenuItem></DropdownMenuContent></DropdownMenu></ButtonGroup><ButtonGroup aria-label="History"><Button variant="outline">Undo</Button><ButtonGroupSeparator /><Button variant="outline">Redo</Button></ButtonGroup><ButtonGroup><ButtonGroupText>https://</ButtonGroupText><Input aria-label="Domain" defaultValue="ombelle.dev" /><Button variant="outline">Copy</Button></ButtonGroup></>}`,
   toggle: `import { Toggle } from '@/components/ui/toggle'
 export function Example(){return <><Toggle defaultPressed>Show grid</Toggle><Toggle variant="outline" aria-label="Pin preview">Pin</Toggle></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
