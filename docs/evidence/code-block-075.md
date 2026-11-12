@@ -18,6 +18,28 @@ Method: a temporary git worktree at `894a0e4`; `corepack pnpm install --frozen-l
 | `/components` | 14 | 440.5 kB |
 | `/components/accordion` | 15 | 837.3 kB |
 
+## Website size, after
+
+Measured at `02fb028` (`feat(preview): show Code Block in the scenes, gallery and site`) with the same method, in this worktree after `corepack pnpm build:packages` and `corepack pnpm generate:preview` (`corepack pnpm run build` in `apps/www` exit 0). The growth covers the whole sub-project, mostly the Code Block template source and recipe description the site ships in the catalog. Every route stays inside the 10 kB gzip limit; the four routes that carry the catalog are within about 1.3 kB of it.
+
+| Route | Scripts | Before, gzip | After, gzip | Growth |
+| --- | --- | --- | --- | --- |
+| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | +8.9 kB |
+| `/editor/component` | 10 | 241.1 kB | 241.4 kB | +0.3 kB |
+| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | +8.6 kB |
+| `/docs` | 11 | 242.1 kB | 242.3 kB | +0.2 kB |
+| `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | +0.2 kB |
+| `/components` | 14 | 440.5 kB | 449.2 kB | +8.7 kB |
+| `/components/accordion` | 15 | 837.3 kB | 846.2 kB | +8.9 kB |
+
+## Browser behaviour
+
+`tests/e2e/code-block-075.spec.ts`, in `playwright.specimen-audit.config.ts` only (ignored by the default config). Command: `corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts tests/e2e/code-block-075.spec.ts`, after `build:packages` and `generate:preview`, with the config's own preview server on port 4185 and Playwright's bundled Chromium (headless, reduced motion). Local run by an agent on Windows 11 Home 10.0.26300, Node 24.19.0, on 2026-11-12; not CI or a human review.
+
+- Result: 16 passed, 8 per edition (radix and base), on `/editions/ombelle/<edition>/?mode=light`.
+- Before the fix, the missing-clipboard case failed in both editions: a second Copy click made no change to the status region, so "Copy failed" was not announced again. The cleared status and the failure were set in the same render, because no `await` ran when `navigator.clipboard` was missing. `CodeBlockCopy` now awaits a rejected promise in that case, as it does for a rejecting write; the change sits in the shared `code-block-parts` block, byte-identical in both editions, and moves the four stable-family `code-block.tsx` hashes.
+- `foundation-browser-inventory.test.ts` and `foundation-groups.test.ts` pass (50 tests), so the default config's browser count is unchanged.
+
 ## Token contrast
 
 Task 4 (`packages/catalog/test/code-block-contrast.test.ts`). The surface is `oklch(0.2 0.012 275)` in every family and both modes; ratios are WCAG 2 contrast on it, from `parseColor` and `contrastRatio` in `templates/color-picker.tsx`. The board's `color-mix(in oklab, var(--code-fg) N%, transparent)` values are written as the sRGB blend over the surface. Keyword and tag keep the family preset primary's hue at lightness `max(0.78, primary L)` and chroma `min(0.12, primary C)`, which gives the board's `oklch(0.78 0.12 6)` in Ombelle; flat and liquid glass are cut to chroma 0.11 to stay inside sRGB. No board colour failed its floor, so none was lightened.
