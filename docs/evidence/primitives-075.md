@@ -39,3 +39,17 @@ Measured at `c91c7a6` (`feat(www): use catalog Toggle, Collapsible, Scroll Area 
 | `/components/accordion` | 17 / 17 | 809.4 kB | 821.3 kB | +11.9 kB | no |
 
 Four routes exceed the 10 kB limit. Every route carries the site header, whose theme toggle now loads the compiled Toggle and its Radix package; that is the likely source of the roughly 9.3 kB common to the routes that grew least, and the editors and the components layout add the Collapsible, Scroll Area and Button Group on top (the split was not measured). Nothing was shrunk or deferred: the numbers are recorded for review before any merge.
+
+### After the review fixes
+
+Measured at `f386baf` (`fix(www): keep editor rails sticky and scrollable, unclip Scroll Area content and test the theme toggle`), same method. The generated `cn` for the site is now clsx only: no site call site passes classes that need Tailwind conflict merging (the only generated Button in the site is the History group, which passes a CSS-module class), so tailwind-merge no longer ships with the compiled components.
+
+| Route | Scripts | First Load JS before | First Load JS after fixes | Delta | Within 10 kB |
+| --- | --- | --- | --- | --- | --- |
+| `/editor/preset` | 17 | 820.8 kB | 829.7 kB | +8.9 kB | yes |
+| `/editor/component` | 10 | 239.4 kB | 240.4 kB | +1.0 kB | yes |
+| `/editor/component/button` | 18 | 827.8 kB | 835.0 kB | +7.2 kB | yes |
+| `/docs` | 11 | 240.4 kB | 241.4 kB | +1.0 kB | yes |
+| `/docs/getting-started` | 12 | 247.4 kB | 248.5 kB | +1.1 kB | yes |
+| `/components` | 14 | 412.6 kB | 415.8 kB | +3.2 kB | yes |
+| `/components/accordion` | 16 | 809.4 kB | 813.1 kB | +3.7 kB | yes |
