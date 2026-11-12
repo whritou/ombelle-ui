@@ -249,3 +249,14 @@
     opacity: 0.8;
   }
 }
+/* 0.7.5 scrollbars */
+[data-slot='command-list'] {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--foreground) 60%, transparent) transparent;
+}
+@media (forced-colors: active) {
+  [data-slot='command-list'] {
+    scrollbar-color: auto;
+  }
+}
+/* end 0.7.5 scrollbars */

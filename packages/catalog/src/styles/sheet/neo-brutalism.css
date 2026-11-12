@@ -215,3 +215,14 @@
   }
 }
 /* end 0.7.3 variants */
+/* 0.7.5 scrollbars */
+[data-slot='sheet-content'] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+@media (forced-colors: active) {
+  [data-slot='sheet-content'] {
+    scrollbar-color: auto;
+  }
+}
+/* end 0.7.5 scrollbars */
