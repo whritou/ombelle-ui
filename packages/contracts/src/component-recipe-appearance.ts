@@ -39,6 +39,7 @@ export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = 
   'button-group': [layout('button-group', 'Group')],
   item: [surface('item', 'Item'), mark('item-media', 'Media')],
   'number-input': [surface('number-input', 'Field')],
+  'code-block': [surface('code-block', 'Window')],
   'color-picker': [surface('color-picker-trigger', 'Trigger'), surface('color-picker-content', 'Panel', 'popover'), mark('color-picker-area-thumb', 'Marker')],
   'context-menu': [surface('context-menu-content', 'Menu', 'popover'), surface('context-menu-item', 'Item')],
   'input-group': [surface('input-group', 'Group', 'background'), text('input-group-input', 'Input'), text('input-group-textarea', 'Textarea'), layout('input-group-addon', 'Addon'), text('input-group-text', 'Addon text'), surface('input-group-button', 'Action')],
