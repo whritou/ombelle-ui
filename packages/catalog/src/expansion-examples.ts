@@ -30,6 +30,9 @@ export function Example(){return <><ButtonGroup aria-label="Install"><Button>Ins
   'color-picker': `import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 const swatches = [{ label: 'Rose', value: 'oklch(0.55 0.22 6)' }, { label: 'Ink', value: 'oklch(0.22 0.012 275)' }]
 export function Example(){return <><ColorPickerPair label="Primary"><ColorPicker mode="light" defaultValue="oklch(0.55 0.22 6)" swatches={swatches} contrastWith="oklch(0.99 0 0)" contrastLabel="primary foreground" /><ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" swatches={swatches} contrastWith="oklch(0.16 0.01 275)" contrastLabel="primary foreground" /></ColorPickerPair><ColorPicker label="Accent" defaultFormat="hex" defaultValue="#1d4ed8" /></>}`,
+  'code-block': `import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
+const source = "import { Button } from '@/components/ui/button'\\n\\nexport function Save() {\\n  return <Button>Save</Button>\\n}\\n"
+export function Example(){return <><CodeBlockCommand args="@ombelle-ui/cli add button" /><CodeBlock title="save.tsx" language="tsx" code={source} /></>}`,
   'number-input': `import { NumberInput } from '@/components/ui/number-input'
 export function Example(){return <><label htmlFor="radius">Border radius</label><NumberInput id="radius" name="radius" defaultValue={12} min={0} max={32} unit="px" onValueChange={(value, { valid }) => console.log(value, valid)} /></>}`,
   toggle: `import { Toggle } from '@/components/ui/toggle'
