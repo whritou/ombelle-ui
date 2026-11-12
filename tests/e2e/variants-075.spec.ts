@@ -43,3 +43,22 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} Switch`, () => {
+    test('a small Switch in a horizontal Field has a hit area of at least 24 by 24 px', async ({ page }) => {
+      const section = await open(page, edition)
+      const toggle = section.getByRole('switch', { name: 'Reduced transparency' })
+      await expect(toggle).toHaveAttribute('data-size', 'sm')
+      const box = (await toggle.boundingBox())!
+      expect(box.height).toBeLessThan(24)
+      // The ::before hit area reaches 12px above and below the centre of the track.
+      const hits = await page.evaluate(({ x, y, h }) => [y + h / 2 - 11.5, y + h / 2 + 11.5].map(top =>
+        document.elementFromPoint(x + 4, top)?.closest('[data-slot="switch"]') !== null), { x: box.x, y: box.y, h: box.height })
+      expect(hits).toEqual([true, true])
+      await toggle.focus()
+      await page.keyboard.press('Space')
+      await expect(toggle).toHaveAttribute('aria-checked', 'true')
+    })
+  })
+}

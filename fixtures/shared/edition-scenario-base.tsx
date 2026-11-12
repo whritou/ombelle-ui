@@ -528,6 +528,10 @@ function VariantsScenario075() {
           <CheckboxOption appearance="card" disabled name="extras" value="next" title="Next.js" description="App Router" />
         </div>
       </form>
+      <Field orientation="horizontal" data-testid="v075-switch-row">
+        <FieldLabel>Reduced transparency</FieldLabel>
+        <FieldControl><Switch size="sm" /></FieldControl>
+      </Field>
     </section>
   )
 }
