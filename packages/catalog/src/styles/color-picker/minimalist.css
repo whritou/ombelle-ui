@@ -1,0 +1,9 @@
+/* minimalist Color Picker */
+[data-slot='color-picker'] {
+  display: inline-flex;
+}
+@media (forced-colors: active) {
+  [data-slot='color-picker'] {
+    forced-color-adjust: auto;
+  }
+}

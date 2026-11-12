@@ -1,0 +1,167 @@
+/* ombelle Number Input */
+[data-slot='number-input'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: stretch;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--control-height, 2.5rem);
+  overflow: clip;
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--foreground);
+  transition: background-color var(--motion-duration), border-color var(--motion-duration);
+}
+[data-slot='number-input-input'] {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  inline-size: 100%;
+  min-inline-size: 3ch;
+  border: 0;
+  padding: 0.5rem 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: none;
+}
+[data-slot='number-input-input']:focus-visible {
+  outline: none;
+}
+[data-slot='number-input-input']::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+[data-slot='number-input-input']:disabled {
+  cursor: not-allowed;
+  color: var(--muted-foreground);
+}
+[data-slot='number-input-unit'] {
+  display: flex;
+  align-items: center;
+  padding-inline-end: 0.625rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+[data-slot='number-input-decrement'],
+[data-slot='number-input-increment'] {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 2.5rem;
+  min-block-size: 1.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--muted);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color var(--motion-duration);
+}
+[data-slot='number-input-decrement'] {
+  border-inline-end: var(--border-width) solid color-mix(in oklab, var(--border) 14%, transparent);
+}
+[data-slot='number-input-increment'] {
+  border-inline-start: var(--border-width) solid color-mix(in oklab, var(--border) 14%, transparent);
+}
+[data-slot='number-input-decrement'] svg,
+[data-slot='number-input-increment'] svg {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+}
+[data-slot='number-input-decrement']:hover:not(:disabled),
+[data-slot='number-input-increment']:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='number-input-decrement']:disabled,
+[data-slot='number-input-increment']:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+[data-slot='number-input-decrement']:focus-visible,
+[data-slot='number-input-increment']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+[data-slot='number-input'] {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: inset 0 2px 0 color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+[data-slot='number-input']:focus-within {
+  outline: 2.5px solid var(--ring);
+  outline-offset: 3px;
+  border-color: var(--ring);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--ring);
+}
+[data-slot='number-input'][data-invalid] {
+  border-color: var(--destructive);
+  border-width: max(var(--border-width), 2px);
+  box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--destructive);
+}
+[data-slot='number-input'][data-disabled] {
+  background: var(--muted);
+  border-style: dashed;
+  box-shadow: none;
+}
+@media (forced-colors: active) {
+  [data-slot='number-input'] {
+    background: Field;
+    color: FieldText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  [data-slot='number-input']:focus-within {
+    border-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+    background: Field;
+    box-shadow: none;
+  }
+  [data-slot='number-input'][data-invalid] {
+    border: 3px double CanvasText;
+    background: Field;
+    box-shadow: none;
+  }
+  [data-slot='number-input'][data-disabled] {
+    border-color: GrayText;
+    background: Field;
+    box-shadow: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='number-input'] {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='number-input-decrement'],
+  [data-slot='number-input-increment'] {
+    background: ButtonFace;
+    color: ButtonText;
+    border-color: CanvasText;
+  }
+  [data-slot='number-input-decrement']:disabled,
+  [data-slot='number-input-increment']:disabled {
+    color: GrayText;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='number-input'],
+  [data-slot='number-input-decrement'],
+  [data-slot='number-input-increment'] {
+    transition: none;
+  }
+}
