@@ -390,3 +390,12 @@ describe('editor inputs board comparison, measured on the edition pages against 
     expect(declarations(read('number-input/flat.css'), "[data-slot='number-input']")).toMatchObject({ border: '1px solid var(--border)', 'border-radius': '10px' })
   })
 })
+
+describe('the 0.7.5 Code Block matches its boards', () => {
+  it.each(['ombelle', 'flat', 'minimalist', 'neo-brutalism', 'liquid-glass'])('%s colours the command runner as a keyword, as the board does', family => {
+    const css = read(`code-block/${family}.css`)
+    expect(declarations(css, "[data-slot='code-block-command'] [data-token='keyword']").color).toBe('var(--code-block-keyword)')
+    // Forced colours: the runner falls back to CanvasText with the other tokens.
+    expect(css).toMatch(/\[data-slot='code-block-command'\] \[data-token\] \{\s*color: CanvasText;/)
+  })
+})

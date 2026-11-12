@@ -74,7 +74,7 @@ const args = '@ombelle-ui/cli add button'
 const tabs = (html: string) => [...html.matchAll(/<button[^>]*role="tab"[^>]*>([^<]*)<\/button>/g)].map((match) => match[1])
 const selectedTab = (html: string) => html.match(/<button(?=[^>]*role="tab")(?=[^>]*aria-selected="true")[^>]*>([^<]*)<\/button>/)?.[1]
 const panelText = (html: string) =>
-  [...html.matchAll(/<pre[^>]*data-slot="code-block-command"[^>]*><code>([^<]*)<\/code><\/pre>/g)].map((match) => match[1])
+  [...html.matchAll(/<pre[^>]*data-slot="code-block-command"[^>]*><code>([\s\S]*?)<\/code><\/pre>/g)].map((match) => match[1]!.replace(/<[^>]*>/g, ''))
 
 describe('Code Block', () => {
   it('provides the Code Block parts and Code Block Command, on Radix Tabs and on Base UI', () => {
@@ -117,12 +117,12 @@ describe('Code Block', () => {
       expect(block('../src/templates/base/code-block.tsx', name)).toBe(block('../src/templates/code-block.tsx', name))
   })
 
-  it.each(editions)('%s renders a titled file block with Copy, a focusable named pre, lines and a polite status', (_, ui) => {
+  it.each(editions)('%s renders a titled file block with Copy, a focusable named region pre, lines and a polite status', (_, ui) => {
     const html = renderToStaticMarkup(h(ui.CodeBlock, { code: 'a\nb', title: 'button.tsx' }))
     expect(html).toMatch(/^<div[^>]*data-slot="code-block"/)
     expect(html).toMatch(/<span[^>]*data-slot="code-block-title"[^>]*>button.tsx<\/span>/)
     expect(html).toMatch(/<button(?=[^>]*type="button")(?=[^>]*aria-label="Copy button.tsx")[^>]*>Copy<\/button>/)
-    expect(html).toMatch(/<pre(?=[^>]*tabindex="0")(?=[^>]*aria-label="button.tsx source")(?=[^>]*max-height:32rem)[^>]*data-slot="code-block-code"/)
+    expect(html).toMatch(/<pre(?=[^>]*tabindex="0")(?=[^>]*role="region")(?=[^>]*aria-label="button.tsx source")(?=[^>]*max-height:32rem)[^>]*data-slot="code-block-code"/)
     expect(html.match(/data-slot="code-block-line"/g)).toHaveLength(2)
     expect(html).toMatch(/<span(?=[^>]*data-slot="code-block-status")(?=[^>]*aria-live="polite")[^>]*><\/span>/)
     expect(html).not.toContain('data-line-numbers')
@@ -131,7 +131,7 @@ describe('Code Block', () => {
   it.each(editions)('%s names an untitled block "Code", hides line numbers on request and renders given children', (_, ui) => {
     const plain = renderToStaticMarkup(h(ui.CodeBlock, { code: 'a' }))
     expect(plain).toContain('aria-label="Copy code"')
-    expect(plain).toMatch(/<pre[^>]*aria-label="Code"/)
+    expect(plain).toMatch(/<pre(?=[^>]*role="region")[^>]*aria-label="Code"/)
     expect(plain).not.toContain('data-slot="code-block-title"')
     expect(renderToStaticMarkup(h(ui.CodeBlock, { code: 'a', lineNumbers: false }))).toMatch(/<pre[^>]*data-line-numbers="false"/)
     const custom = renderToStaticMarkup(h(ui.CodeBlock, { code: 'x', children: h('b', null, 'x') }))
@@ -141,9 +141,9 @@ describe('Code Block', () => {
       .toMatch(/aria-label="Copy snippet"[\s\S]*max-height:10rem/)
   })
 
-  it.each(editions)('%s lets a labelled pre drop its own name', (_, ui) => {
+  it.each(editions)('%s lets a labelled region pre drop its own name', (_, ui) => {
     const html = renderToStaticMarkup(h(ui.CodeBlockCode, { code: 'a', 'aria-labelledby': 'file-title' }))
-    expect(html).toContain('aria-labelledby="file-title"')
+    expect(html).toMatch(/<pre(?=[^>]*role="region")(?=[^>]*aria-labelledby="file-title")/)
     expect(html).not.toContain('aria-label=')
   })
 
@@ -156,6 +156,8 @@ describe('Code Block', () => {
     expect(selectedTab(html)).toBe('pnpm')
     expect(html).toMatch(/<button(?=[^>]*role="tab")(?=[^>]*aria-selected="true")(?=[^>]*data-state="active")/)
     expect(panelText(html)).toEqual([`pnpm dlx ${args}`])
+    // The board colours the runner as a keyword.
+    expect(html).toContain(`<code><span data-token="keyword">pnpm dlx</span> ${args}</code>`)
     expect(html).toContain('role="tabpanel"')
     expect(html).toMatch(/<button(?=[^>]*aria-label="Copy command")[^>]*>Copy<\/button>/)
     expect(html).toContain('data-slot="code-block-status"')
@@ -168,7 +170,9 @@ describe('Code Block', () => {
     expect(selectedTab(subset)).toBe('npm')
     expect(panelText(subset)).toEqual([`npx ${args}`])
     const runners = { yarn: 'yarn dlx --quiet' }
-    expect(panelText(renderToStaticMarkup(h(ui.CodeBlockCommand, { args, defaultManager: 'yarn', runners })))).toEqual([`yarn dlx --quiet ${args}`])
+    const custom = renderToStaticMarkup(h(ui.CodeBlockCommand, { args, defaultManager: 'yarn', runners }))
+    expect(panelText(custom)).toEqual([`yarn dlx --quiet ${args}`])
+    expect(custom).toContain(`<code><span data-token="keyword">yarn dlx --quiet</span> ${args}</code>`)
     const controlled = renderToStaticMarkup(h(ui.CodeBlockCommand, { args, manager: 'bun', onManagerChange: () => {}, label: 'Runner', copyLabel: 'Copy install' }))
     expect(selectedTab(controlled)).toBe('bun')
     expect(controlled).toContain('aria-label="Runner"')

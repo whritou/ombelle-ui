@@ -163,7 +163,7 @@ export type CodeBlockCodeProps = {
   lineNumbers?: boolean
   /** The pre scrolls inside this height; 32rem by default. */
   maxHeight?: string
-  /** The pre's accessible name, "Code" by default; dropped when `aria-labelledby` is set. */
+  /** The pre region's accessible name, "Code" by default; dropped when `aria-labelledby` is set. */
   label?: string
   /** Replaces the highlighted output, for another highlighter. */
   children?: React.ReactNode
@@ -183,6 +183,7 @@ export function CodeBlockCode({
   return (
     <pre
       tabIndex={0}
+      role="region"
       {...props}
       data-slot="code-block-code"
       data-line-numbers={lineNumbers ? undefined : 'false'}
@@ -241,13 +242,18 @@ export const commandRunners: Record<PackageManager, string> = {
 
 const packageManagers: readonly PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun']
 
+/** The runner of a manager: `pnpm dlx`, unless `runners` replaces it. */
+function commandRunner(manager: PackageManager, runners?: Partial<Record<PackageManager, string>>): string {
+  return runners?.[manager] ?? commandRunners[manager]
+}
+
 /** The runner, a space, then the arguments: `pnpm dlx @ombelle-ui/cli add button`. */
 export function packageCommand(
   manager: PackageManager,
   args: string,
   runners?: Partial<Record<PackageManager, string>>,
 ): string {
-  return `${runners?.[manager] ?? commandRunners[manager]} ${args}`
+  return `${commandRunner(manager, runners)} ${args}`
 }
 
 export type CodeBlockCommandProps = {
@@ -325,7 +331,10 @@ export function CodeBlockCommand({
       {listed.map((item) => (
         <TabsPrimitive.Content key={item} value={item}>
           <pre data-slot="code-block-command">
-            <code>{packageCommand(item, args, runners)}</code>
+            <code>
+              <span data-token="keyword">{commandRunner(item, runners)}</span>
+              {` ${args}`}
+            </code>
           </pre>
         </TabsPrimitive.Content>
       ))}

@@ -111,3 +111,70 @@ Task 4 (`packages/catalog/test/code-block-contrast.test.ts`). The surface is `ok
 - The glass root sets `--foreground` to `--code-block-foreground`, so the family's 2px `--foreground` focus ring shows on the always-dark code surface (the light-mode glass foreground is `#0F172A`).
 - The root clips its rounded corners (`overflow: hidden`, as on the board), so the code `pre` and the command tab panel draw that 2px ring at `outline-offset: -2px`, as Combobox and Command do in glass; the header tabs and Copy keep offset 0.
 - The glass root draws the board's rim, `1.5px solid` white at 50 %, instead of the preset's 14 % `--border`, which vanishes on the dark surface. Forced colours still replace it with a 1px `CanvasText` border.
+
+## Specimen audit
+
+`OMBELLE_AUDIT_COMPONENTS=code-block corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts specimen-audit.spec.ts`, after `corepack pnpm build:packages` and `corepack pnpm generate:preview`. The config ran its own preview server on port 4185 and used Playwright's bundled Chromium (headless, reduced motion). The audit specimen is the titled file block (`button.tsx`, three lines, line numbers on). Local run by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0, on 2026-11-12; not a CI run or a human review.
+
+| Run | Result |
+| --- | --- |
+| First run, before any fix | 21 passed (1.8 min): all 20 configurations (five families × Radix and Base UI × light and dark) and the backdrop check. No measured finding: focus, clipping, overflow, label spacing, target size, forced colours and axe (colour contrast of the token spans included). |
+| After the fixes below, with `code-block-075.spec.ts` | 37 passed (2.5 min): the same 21, plus Task 6's 16 browser cases |
+
+The audit fails only on axe violations. A separate axe run on the same section, with the audit's tags, also listed what axe could not decide. Before the fix it returned `aria-prohibited-attr` as "needs review" on the scrollable `pre`, in both editions: the `pre` has no role (generic), and ARIA 1.2 prohibits naming a generic element, so a screen reader may not read "button.tsx source".
+
+- **Fix:** `CodeBlockCode` gives the focusable `pre` `role="region"`, in both editions. The name stays "<title> source", or "Code" without a title, and `aria-labelledby` still replaces `aria-label`. A `role` prop passed by the consumer still wins, because it is spread after the default.
+- **Result:** after the fix, `aria-prohibited-attr` passes on the `pre` in both editions, with no violation and nothing left for review.
+- **Tests:** the three naming tests in `packages/catalog/test/code-block.test.ts` now also expect `role="region"`. They failed before the change in both editions (6 cases).
+- **Hashes:** the four stable-family `code-block.tsx` hashes moved.
+
+## Board comparison
+
+A probe read computed styles in section 03 of each board (`<Family>08Components.dc.html`, rendered from `file://`, with web fonts and the board's support script blocked) and in the Code Block fixtures on the edition pages (`/editions/<family>/<edition>/?mode=light`, the Code Block section: the command block, then the `release.tsx` file block). Both editions were probed at device scale 1 and 2. Colours were resolved to sRGB through a canvas. The probe covered:
+- the frame: border, radius, shadow, surface and text colour, font;
+- the bar: padding, gap and bottom rule;
+- the unselected and selected tab, the title pill and Copy: height, padding, border, radius, colour, fill and font;
+- the command and code `pre`: padding and font;
+- the keyword, string and comment tokens, and the line numbers.
+
+This Chromium floors computed border widths to whole pixels (1.5px reads as 1px, 2.5px as 2px), so border widths were compared through the declared values (`--border-width` and the literal widths in the stylesheets) instead. The board screenshots are in `docs/evidence/images/code-block-075/board-<family>-03.png`. Run on 2026-11-12 by an agent, same machine as above; not a human review.
+
+These match the board in every family and in both editions:
+
+| Part | Ombelle | Flat | Minimalist | Neo-brutalism | Liquid glass |
+| --- | --- | --- | --- | --- | --- |
+| Frame border | 1.5px `--line` | none | 1px `--bd` (`#E5E5E1`) | 2.5px `#111` | 1.5px white at 50 % |
+| Frame radius | 16px | 12px | 4px | 0 | 16px |
+| Frame shadow | `4px 4px 0` ink | the `--sho` pair | `0 12px 28px -16px` at 22 % | `6px 6px 0 #111` | none (the board's is transparent) |
+
+The other parts are the same in all five families:
+- surface `oklch(0.2 0.012 275)` and text `oklch(0.93 0.005 275)`;
+- bar padding `6px 6px 6px 10px`, gap 4px, and a 1px bottom rule at 18 %;
+- tab, title and Copy: 28px high, `0 10px` padding, 999px radius, weight 600, 12px;
+- unselected tab at 70 %, and the selected tab and title filled at 16 %;
+- Copy with a 1.5px border at 35 %;
+- code: `14px 16px` padding, `400 13px / 1.6`, and the string token `oklch(0.82 0.11 150)`.
+
+Fixed in this task:
+
+| Part | Family | Board | Before the fix | Test |
+| --- | --- | --- | --- | --- |
+| Command runner (`pnpm dlx`, `npx`, …) | all | In the keyword colour (`.p`) | Plain foreground | `code-block.test.ts` "renders a command block…" and "…takes custom runners" (the runner is a `data-token="keyword"` span); `specimen-audit-fixes.test.ts` "colours the command runner as a keyword, as the board does" |
+
+`CodeBlockCommand` now renders `<span data-token="keyword">{runner}</span>` and then the arguments, with the same text content as before (copy and `toHaveText` are unchanged). Each family stylesheet colours `[data-slot='code-block-command'] [data-token='keyword']` with `--code-block-keyword`, which is at least 8.58:1 on the surface (Task 4), and forced colours turn it into `CanvasText`. An axe run of the edition pages' Code Block section found no violation and nothing left for review, in every family, both editions and both modes. The stable-family `code-block.tsx` and `code-block.css` hashes moved.
+
+Differences that remain:
+
+| What | Board | Ours | Why it stays |
+| --- | --- | --- | --- |
+| Fonts | JetBrains Mono for pills and code; Hanken Grotesk for Copy, in every family | The preset's `--font-mono` (a system monospace stack) and `--font-family` | The catalog ships no web fonts; the preset sets the family. Copy uses the sans font and the rest the mono font, as on the board |
+| Pill widths | Copy 52px, `button.tsx` 86px | Copy 50px, `button.tsx` 92.6px | Font metrics of the fallback fonts; heights and padding match |
+| Keyword colour | Ombelle's `oklch(0.78 0.12 6)` on all five boards | Each family's primary hue (flat and liquid glass blue, minimalist grey, neo-brutalism yellow) | Task 4 decision: keyword and tag follow the family primary |
+| Comment and line-number colours | `color-mix` of the code foreground at 55 % and 40 % over the surface | Opaque `oklch` values | The same colour once blended on the surface (sRGB 136, 137, 142 for comments and 104, 106, 111 for line numbers, both ways, within rounding); token colours are literal per family |
+| Line-number column | `inline-block`, 22px wide | A CSS counter, `min-inline-size: 2ch` plus a `1ch` gap (22.1px at 13px) | Same offset; the column grows for files with 100 lines or more |
+| Pill line height | `normal` | `1` (title `28px`) | Height (28px) and vertical centring are the same |
+| Liquid glass text shadow | The scene's `0 1px 2px` dark text shadow is inherited by the code | None | Barely visible on the dark surface; experimental family |
+| Dark mode | Boards are light only | Same surface in both modes; the frame border and shadow follow the preset's dark tokens (for example, Ombelle: border at 80 % white, pink offset shadow) | The audit measured both modes |
+| Frame and code size | Three-line sample | The fixtures' longer sources, inside `maxHeight` | Board content |
+
+The board probe covered light mode only. The specimen audit and the axe runs covered dark mode and both editions.

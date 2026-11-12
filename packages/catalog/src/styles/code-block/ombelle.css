@@ -149,6 +149,7 @@
   color: var(--code-block-string);
 }
 [data-slot='code-block-code'] [data-token='keyword'],
+[data-slot='code-block-command'] [data-token='keyword'],
 [data-slot='code-block-code'] [data-token='tag'] {
   color: var(--code-block-keyword);
 }
@@ -191,7 +192,8 @@
     background: ButtonFace;
     color: ButtonText;
   }
-  [data-slot='code-block-code'] [data-token] {
+  [data-slot='code-block-code'] [data-token],
+  [data-slot='code-block-command'] [data-token] {
     color: CanvasText;
   }
   [data-slot='code-block-line']::before {
