@@ -62,3 +62,16 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} Progress`, () => {
+    test('a Progress is named by its label and its value text matches the readout', async ({ page }) => {
+      const section = await open(page, edition)
+      const bar = section.getByRole('progressbar', { name: 'Publishing — on track' })
+      await expect(bar).toHaveAttribute('aria-valuenow', '64')
+      const readout = section.getByTestId('v075-progress').locator('[data-slot="progress-value"]')
+      await expect(readout).toHaveText('64%')
+      await expect(bar).toHaveAttribute('aria-valuetext', (await readout.textContent())!)
+    })
+  })
+}

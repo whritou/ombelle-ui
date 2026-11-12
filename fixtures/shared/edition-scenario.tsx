@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescripti
 import { Checkbox, CheckboxOption } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, AvatarOverflow, AvatarStatus } from '@/components/ui/avatar'
-import { Progress } from '@/components/ui/progress'
+import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGroupCount, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
@@ -527,6 +527,9 @@ function VariantsScenario075() {
         <FieldLabel>Reduced transparency</FieldLabel>
         <FieldControl><Switch size="sm" /></FieldControl>
       </Field>
+      <div data-testid="v075-progress" style={{ marginBlockStart: '0.75rem' }}>
+        <Progress value={64} size="lg" tone="success"><ProgressLabel>Publishing — on track</ProgressLabel><ProgressValue /></Progress>
+      </div>
     </section>
   )
 }
