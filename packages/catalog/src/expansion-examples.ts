@@ -14,6 +14,8 @@ export function Example(){return <ContextMenu><ContextMenuTrigger variant="zone"
 export function Example(){return <p>Built with <HoverCard><HoverCardTrigger href="https://github.com/ombelle">@ombelle</HoverCardTrigger><HoverCardContent><strong>Ombelle UI</strong><p>Reviewed React components with deterministic presets.</p><HoverCardArrow /></HoverCardContent></HoverCard> presets.</p>}`,
   slider: `import { Slider, SliderTicks } from '@/components/ui/slider'
 export function Example(){return <><Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => value + ' pixels'} /><Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} /><SliderTicks values={[0, 25, 50, 75, 100]} /></>}`,
+  collapsible: `import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+export function Example(){return <Collapsible><CollapsibleTrigger>Advanced shadow</CollapsibleTrigger><CollapsibleContent><p>Offset X and Offset Y</p></CollapsibleContent></Collapsible>}`,
   toggle: `import { Toggle } from '@/components/ui/toggle'
 export function Example(){return <><Toggle defaultPressed>Show grid</Toggle><Toggle variant="outline" aria-label="Pin preview">Pin</Toggle></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'

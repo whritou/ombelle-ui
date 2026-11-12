@@ -89,6 +89,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   command: ['cmdk', '@radix-ui/react-dialog', 'lucide-react'],
   'context-menu': ['@radix-ui/react-context-menu', 'lucide-react'],
   slider: ['@radix-ui/react-slider'],
+  collapsible: ['@radix-ui/react-collapsible', 'lucide-react'],
   toggle: ['@radix-ui/react-toggle'],
   'toggle-group': ['@radix-ui/react-toggle-group'],
   'tag-input': ['lucide-react'],

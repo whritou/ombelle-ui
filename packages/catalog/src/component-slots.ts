@@ -10,6 +10,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   'context-menu': ['context-menu', 'context-menu-portal', 'context-menu-trigger', 'context-menu-content', 'context-menu-group', 'context-menu-label', 'context-menu-item', 'context-menu-checkbox-item', 'context-menu-radio-group', 'context-menu-radio-item', 'context-menu-item-indicator', 'context-menu-separator', 'context-menu-shortcut', 'context-menu-sub', 'context-menu-sub-trigger', 'context-menu-sub-icon', 'context-menu-sub-content'],
   'hover-card': ['hover-card', 'hover-card-trigger', 'hover-card-content', 'hover-card-arrow'],
   slider: ['slider', 'slider-track', 'slider-range', 'slider-thumb', 'slider-ticks', 'slider-tick'],
+  collapsible: ['collapsible', 'collapsible-trigger', 'collapsible-icon', 'collapsible-content'],
   toggle: ['toggle'],
   'toggle-group': ['toggle-group', 'toggle-group-item'],
   'tag-input': ['tag-input', 'tag-input-list', 'tag-input-tag', 'tag-input-remove', 'tag-input-input', 'tag-input-status'],
