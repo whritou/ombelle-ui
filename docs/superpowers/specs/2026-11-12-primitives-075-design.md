@@ -60,7 +60,7 @@ The catalog has 45 components on main (the board's "43 today" predates two later
 
 - **Parts:** `ScrollArea` (root, viewport and corner) and `ScrollBar` (`orientation`, `vertical` by default). `ScrollArea` renders a vertical `ScrollBar` by default; add a horizontal one as a child.
 - **Behaviour:** scrolling stays native; only the bar and thumb are drawn by the family. The bar shows on hover and while scrolling (`type="hover"` in Radix; the Base UI template matches it with the `data-hovering` and `data-scrolling` states).
-- **Accessibility:** the viewport takes `tabIndex={0}` so keyboard users can scroll it, and needs `aria-label` or `aria-labelledby`, passed through from `ScrollArea`. The bar and thumb are not focusable.
+- **Accessibility:** the viewport takes `tabIndex={0}` while its content overflows, so keyboard users can scroll it and a region that cannot scroll adds no Tab stop. It needs `aria-label` or `aria-labelledby`, passed through from `ScrollArea`. The bar and thumb are not focusable.
 - **Primitives:** Radix `@radix-ui/react-scroll-area` 1.4.0 (MIT, released 12 October 2026), a new pin in `manifest.ts`, and Base UI `ScrollArea`.
 - **Styles:** the board's thumb and rail in each family: the glass thumb, the brutalist square thumb with a border, the minimalist hairline.
 
@@ -84,8 +84,8 @@ The scrolling slots of Command (list), Combobox (list), Select (viewport and con
   - `Item`: `variant` (`default`, `outline` or `muted`, default `default`), `size` (`default` or `sm`), `asChild` to render a link or button.
   - `ItemMedia`: `variant` (`default`, `icon` or `image`).
 - **Accessibility:**
-  - `ItemGroup` is a `div` with `role="list"`. Inside it, each `Item` takes `role="listitem"` through context; an `Item` with `asChild` inside a group is wrapped in a `div role="listitem"`, so a link keeps its link role.
-  - Actions are real buttons and need names. A link Item keeps its actions outside the link: `ItemActions` renders beside the `asChild` element, not inside it.
+  - `ItemGroup` is a `div` with `role="list"` that wraps each `Item` in a `div role="listitem"`, so a link Item keeps its link role. No context is needed, so the template stays server-safe.
+  - Actions are real buttons and need names. A link Item keeps its actions outside the link: `ItemActions` renders beside the `asChild` element, not inside it. `asChild` clones its child, so Item has no dependency in either edition.
 - **Server-safe:** no `'use client'`.
 
 ## Recipes and the component editor
@@ -113,7 +113,7 @@ The scrolling slots of Command (list), Combobox (list), Select (viewport and con
   - the preset editor's scrolling panels (`preset-editor.module.css`);
   - the editor shell's scrolling panel (`editor-shell.module.css`);
   - the Get code dialog body (`snapshots/components/get-code-dialog.module.css`).
-  Each keeps its current maximum height and is named by its panel heading.
+  Each keeps its current maximum height and is named by its panel heading. A viewport is focusable only while its content overflows, so a region that cannot scroll adds no Tab stop.
 - **Button Group:** the Undo and Redo pair in `editor-shell/top-bar.tsx`, named "History".
 - **Item:** no hand-built equivalent exists in the editors or docs; it ships to the preview scenes and the gallery only.
 - **Not changed:** `editor/components/component-navigation.tsx` uses `<details>` as a menu; Collapsible would give it the wrong semantics.
