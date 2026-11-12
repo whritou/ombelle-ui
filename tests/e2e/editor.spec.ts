@@ -631,6 +631,14 @@ test('the site theme toggle follows the saved theme after mount without a hydrat
   expect(problems.filter((text) => /hydrat|did not match|mismatch/i.test(text))).toEqual([])
 })
 
+test('the History group casts no shadow behind its ghost Undo and Redo buttons', async ({ page }) => {
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  const group = page.getByRole('group', { name: 'History' })
+  await expect(group).toBeVisible()
+  await expect(group.getByRole('button', { name: 'Undo', exact: true })).toHaveAttribute('data-variant', 'ghost')
+  expect(await group.evaluate((element) => getComputedStyle(element).boxShadow)).toBe('none')
+})
+
 test('the Get code dialog scrolls its long command and keeps Close visible at 320 pixels', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
