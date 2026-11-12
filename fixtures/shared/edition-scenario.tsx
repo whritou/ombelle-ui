@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
+import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -529,6 +529,16 @@ function VariantsScenario075() {
       </Field>
       <div data-testid="v075-progress" style={{ marginBlockStart: '0.75rem' }}>
         <Progress value={64} size="lg" tone="success"><ProgressLabel>Publishing — on track</ProgressLabel><ProgressValue /></Progress>
+      </div>
+      <div data-testid="v075-popover" style={{ marginBlockStart: '0.75rem' }}>
+        <Popover>
+          <PopoverTrigger>Shadow help</PopoverTrigger>
+          <PopoverContent aria-labelledby="v075-popover-title">
+            <PopoverArrow />
+            <PopoverTitle id="v075-popover-title">Shadow offset</PopoverTitle>
+            <PopoverDescription>Applies to cards, buttons and menus in this family.</PopoverDescription>
+          </PopoverContent>
+        </Popover>
       </div>
     </section>
   )

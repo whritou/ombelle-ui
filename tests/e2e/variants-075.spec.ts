@@ -75,3 +75,26 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} Popover`, () => {
+    test('a PopoverArrow is drawn, hidden from assistive technology, and fills a 10px gap', async ({ page }) => {
+      const section = await open(page, edition)
+      const trigger = section.getByRole('button', { name: 'Shadow help' })
+      await trigger.click()
+      const content = page.getByRole('dialog', { name: 'Shadow offset' })
+      await expect(content).toBeVisible()
+      const arrow = content.locator('[data-slot="popover-arrow"]')
+      await expect(arrow).toBeVisible()
+      await expect(arrow).toHaveAttribute('aria-hidden', 'true')
+      const t = (await trigger.boundingBox())!
+      const c = (await content.boundingBox())!
+      expect(Math.abs(c.y - (t.y + t.height) - 10)).toBeLessThanOrEqual(1)
+      const a = (await arrow.boundingBox())!
+      // The arrow sits in the gap, pointing at the trigger, with its base on the content's edge.
+      expect(a.y + a.height).toBeGreaterThan(c.y - 0.5)
+      expect(a.y).toBeLessThan(c.y)
+      expect(a.y).toBeGreaterThanOrEqual(t.y + t.height - 1)
+    })
+  })
+}

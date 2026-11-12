@@ -93,3 +93,29 @@
     animation: none;
   }
 }
+/* 0.7.5 variants */
+[data-slot='popover-arrow'] {
+  fill: var(--popover);
+  overflow: visible;
+}
+[data-popover-arrow-fill] {
+  stroke: none;
+}
+[data-popover-arrow-edge] {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: var(--border-width);
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
+@media (forced-colors: active) {
+  [data-slot='popover-arrow'] {
+    fill: Canvas;
+    forced-color-adjust: none;
+  }
+  [data-popover-arrow-edge] {
+    stroke: CanvasText;
+    stroke-width: 1px;
+  }
+}
+/* end 0.7.5 variants */
