@@ -15,6 +15,10 @@
   box-shadow: none;
   transform: none;
 }
+/* Ghost and link buttons cast no shadow of their own, so a group of them casts none either. */
+[data-slot='button-group']:has(> [data-variant='ghost'], > [data-variant='link']) {
+  box-shadow: none;
+}
 [data-slot='button-group'][data-orientation='vertical'] {
   flex-direction: column;
   inline-size: fit-content;

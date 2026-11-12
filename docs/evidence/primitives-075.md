@@ -127,7 +127,7 @@ Differences that remain:
 | Neo-brutalism Item media edge | 1px | 2px | Family border width |
 | Liquid glass | Dark-scene colours, no fade | Preset colours; no fade | Experimental family; preset colours |
 | Hover and press lift in ombelle and neo-brutalism groups | Buttons lift on hover and press | Default, secondary and destructive buttons inside a group do not lift | The group casts one shadow; a per-button lift would split it at the joins |
-| Group shadow behind ghost or link buttons | No such group on the board | The group shadow is also cast behind groups of ghost or link buttons | The wrapper cannot know its children's variants; use outline or filled buttons in a group |
+| Group shadow behind ghost or link buttons | No such group on the board | No group shadow when a direct child is a ghost or link Button (`:has(> [data-variant='ghost'], > [data-variant='link'])`), so a mixed group loses its shadow too | Ghost and link buttons cast no shadow; the site's History group (two ghost icon buttons) showed a pill-shaped band behind them. Pinned by `casts no shadow behind ghost or link buttons` |
 | Scroll Area fade in both-axis areas | Fades the bottom edge | The fade follows vertical scroll only, not sideways scrolling | The scroll-driven range is the nearest block axis |
 | Scroll Area fade under reduced motion | Fade shown | Fade removed entirely | The cue is an animation; reduced motion removes animations |
 

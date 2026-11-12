@@ -71,7 +71,7 @@ In the Base UI edition, write the trigger as `<DropdownMenuTrigger render={<Butt
 - A disabled child keeps the joined border. The focused child's ring is drawn above its neighbours.
 - `ButtonGroupSeparator` is a rule between two children with `role="separator"`. Pass the group's `orientation`: the separator's `aria-orientation` crosses it. Between outline buttons it takes the colour of their edge.
 - `ButtonGroupText` is static text attached to a control, such as a unit or a URL prefix.
-- In the ombelle and neo-brutalism families the group casts one shadow, and default, secondary and destructive buttons inside it do not lift on hover or press, so the shadow stays whole at the joins. Use outline or filled buttons in a group: the shadow is also cast behind a group of ghost or link buttons.
+- In the ombelle and neo-brutalism families the group casts one shadow, and default, secondary and destructive buttons inside it do not lift on hover or press, so the shadow stays whole at the joins. A group whose buttons include ghost or link buttons casts no shadow, as those buttons cast none themselves; avoid mixing them with filled buttons in one group, which would then lose the group shadow too.
 - A button group is a `group`, not a toolbar: it adds no arrow-key navigation, and each child is its own Tab stop.
 
 ## Recipe
