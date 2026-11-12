@@ -29,10 +29,19 @@ export function useOverflowFocus(viewport: React.RefObject<HTMLElement | null>):
   return overflowing
 }
 
-// Radix-compatible data-state: visible while hovered or scrolling, so the
-// shared stylesheet shows the bar the same way on both editions.
-const barState = (state: { hovering: boolean; scrolling: boolean }) =>
-  state.hovering || state.scrolling ? 'visible' : 'hidden'
+// Radix-compatible data-state: visible while hovered or scrolling and the
+// content overflows on that axis, so the shared stylesheet shows the bar the
+// same way on both editions.
+const barState = (state: {
+  hovering: boolean
+  scrolling: boolean
+  orientation: 'vertical' | 'horizontal'
+  hasOverflowX: boolean
+  hasOverflowY: boolean
+}) => {
+  const overflows = state.orientation === 'vertical' ? state.hasOverflowY : state.hasOverflowX
+  return overflows && (state.hovering || state.scrolling) ? 'visible' : 'hidden'
+}
 
 type ScrollAreaProps = React.ComponentProps<'div'> & {
   'aria-label'?: string

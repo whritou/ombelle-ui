@@ -31,6 +31,11 @@ export function useOverflowFocus(viewport: React.RefObject<HTMLElement | null>):
 
 const subscribe = () => () => {}
 
+/** False on the server and during hydration, true afterwards. */
+function useHydrated() {
+  return React.useSyncExternalStore(subscribe, () => true, () => false)
+}
+
 type ScrollAreaProps = React.ComponentProps<'div'> & {
   'aria-label'?: string
   'aria-labelledby'?: string
@@ -51,9 +56,9 @@ export function ScrollArea({
   const viewport = React.useRef<HTMLDivElement>(null)
   const overflowing = useOverflowFocus(viewport)
   // Radix renders a hover scrollbar only after the pointer enters, so the
-  // server render and first hydration use "always" to include the bar, then
-  // the area switches to hover.
-  const hydrated = React.useSyncExternalStore(subscribe, () => true, () => false)
+  // server render and first hydration use "always" to include the bar (it
+  // shows on first paint), then the area switches to hover.
+  const hydrated = useHydrated()
   return (
     <ScrollAreaPrimitive.Root
       type={hydrated ? 'hover' : 'always'}
@@ -86,16 +91,18 @@ export function ScrollBar({
   React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
   'orientation'
 >) {
+  // Forced mount only for the server render; afterwards Radix mounts the bar
+  // and thumb only while the content overflows and the pointer is over it.
+  const forceMount = !useHydrated()
   return (
     <ScrollAreaPrimitive.ScrollAreaScrollbar
-      // Mounted from the first render so the bar exists before measuring.
-      forceMount
+      forceMount={forceMount}
       orientation={orientation}
       className={cn(className)}
       {...props}
       data-slot="scroll-area-scrollbar"
     >
-      <ScrollAreaPrimitive.ScrollAreaThumb forceMount data-slot="scroll-area-thumb" />
+      <ScrollAreaPrimitive.ScrollAreaThumb forceMount={forceMount} data-slot="scroll-area-thumb" />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   )
 }

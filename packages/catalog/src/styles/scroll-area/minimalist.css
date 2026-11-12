@@ -24,6 +24,7 @@
   outline: 1px solid var(--ring);
   outline-offset: -1px;
 }
+/* The thin rail is exempt from the 24px target rule: wheel, keyboard and touch scrolling give equivalent access. */
 [data-slot='scroll-area-scrollbar'] {
   display: flex;
   box-sizing: border-box;

@@ -25,6 +25,7 @@
   outline: 2px solid var(--foreground);
   outline-offset: 0;
 }
+/* The thin rail is exempt from the 24px target rule: wheel, keyboard and touch scrolling give equivalent access. */
 [data-slot='scroll-area-scrollbar'] {
   display: flex;
   box-sizing: border-box;
@@ -51,7 +52,8 @@
   position: relative;
   flex: 1;
   border-radius: 999px;
-  background: color-mix(in srgb, white 70%, transparent);
+  /* Foreground-based so it stays at least 3:1 against the glass in light and dark. */
+  background: color-mix(in srgb, var(--foreground) 60%, transparent);
 }
 [data-slot='scroll-area-corner'] {
   background: transparent;
