@@ -55,19 +55,29 @@ function highlightLine(line: string, language: CodeLanguage): React.ReactNode[] 
   return nodes
 }
 
+/** A final newline ends the last line. */
+function codeLines(code: string): string[] {
+  return (code.endsWith('\n') ? code.slice(0, -1) : code).split('\n')
+}
+
 /**
  * Highlighted lines for a read-only code view. Each line is a span so CSS counters
  * can number them; the text content stays exactly the input, newlines included.
+ * A CRLF ending is one text node, so server HTML holds no lone \r.
  */
 function highlightCode(code: string, language: CodeLanguage): React.ReactNode[] {
+  const lines = codeLines(code)
   const trailing = code.endsWith('\n')
-  const lines = (trailing ? code.slice(0, -1) : code).split('\n')
-  return lines.map((line, index) => (
-    <span key={index} data-slot="code-block-line">
-      {highlightLine(line, language)}
-      {index < lines.length - 1 || trailing ? '\n' : null}
-    </span>
-  ))
+  return lines.map((line, index) => {
+    const cr = line.endsWith('\r') ? '\r' : ''
+    const end = cr + (index < lines.length - 1 || trailing ? '\n' : '')
+    return (
+      <span key={index} data-slot="code-block-line">
+        {highlightLine(cr ? line.slice(0, -1) : line, language)}
+        {end || null}
+      </span>
+    )
+  })
 }
 // highlight:end
 
@@ -112,6 +122,12 @@ export function CodeBlockCopy({ text, label, onCopied, className, ...props }: Co
       clearTimeout(timer.current)
     }
   }, [])
+  // New text has not been copied.
+  React.useEffect(() => {
+    clearTimeout(timer.current)
+    setCopied(false)
+    setStatus('')
+  }, [text])
   const copy = async () => {
     // Clear the region first so a repeated result is announced again. A missing
     // clipboard also fails after an await, so the cleared region always renders first.
@@ -188,7 +204,7 @@ export function CodeBlockCode({
       data-slot="code-block-code"
       data-line-numbers={lineNumbers ? undefined : 'false'}
       aria-label={props['aria-labelledby'] === undefined ? (label ?? props['aria-label'] ?? 'Code') : undefined}
-      style={{ maxHeight, ...style }}
+      style={{ maxHeight, '--code-block-gutter': `${String(codeLines(code).length).length}ch`, ...style } as React.CSSProperties}
       className={cn(className)}
     >
       <code>{children ?? highlightCode(code, language)}</code>

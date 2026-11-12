@@ -133,8 +133,9 @@
 }
 [data-slot='code-block-line']::before {
   content: counter(code-block-line);
+  content: counter(code-block-line) / '';
   display: inline-block;
-  min-inline-size: 2ch;
+  min-inline-size: max(2ch, var(--code-block-gutter, 2ch));
   margin-inline-end: 1ch;
   color: var(--code-block-line-number);
   text-align: end;

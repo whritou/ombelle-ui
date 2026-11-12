@@ -1,7 +1,7 @@
 import { createElement, createElement as h } from 'react'
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { renderToStaticMarkup } from 'react-dom/server'
+import { renderToStaticMarkup, renderToString } from 'react-dom/server'
 import { styleSupport } from '@ombelle/contracts'
 import { highlightCode, type CodeLanguage } from '../src/templates/code-block.js'
 import * as radix from '../src/templates/code-block.js'
@@ -48,6 +48,18 @@ describe('highlightCode', () => {
   it('renders one line for empty input and two for CRLF input', () => {
     expect(render('', 'tsx').match(/data-slot="code-block-line"/g)).toHaveLength(1)
     expect(render('a\r\nb', 'tsx').match(/data-slot="code-block-line"/g)).toHaveLength(2)
+  })
+
+  it('server-renders CRLF source with one line break per line and no lone carriage return', () => {
+    // An HTML parser turns a lone \r into a line break, so "a\r<!-- -->\n" would show a blank line.
+    const parsed = (html: string) => html.replace(/\r\n?/g, '\n').replace(/<[^>]+>/g, '')
+    for (const language of languages) {
+      for (const code of ['a\r\nb\r\n', '// one\r\n// two\r\nx', '/* a */\r\n{ b: 1 }\r\n', '# a\r\nnpx b --c\r\n']) {
+        const html = renderToString(createElement('pre', null, highlightCode(code, language)))
+        expect(html, `${language} ${JSON.stringify(code)}`).not.toMatch(/\r(?!\n)/)
+        expect(parsed(html), `${language} ${JSON.stringify(code)}`).toBe(code.replace(/\r\n/g, '\n'))
+      }
+    }
   })
 
   it('adds no token markers for plain text', () => {
@@ -139,6 +151,14 @@ describe('Code Block', () => {
     expect(custom).not.toContain('data-slot="code-block-line"')
     expect(renderToStaticMarkup(h(ui.CodeBlock, { code: 'a', copyLabel: 'Copy snippet', maxHeight: '10rem' })))
       .toMatch(/aria-label="Copy snippet"[\s\S]*max-height:10rem/)
+  })
+
+  it.each(editions)('%s sizes the line-number gutter from the line count', (_, ui) => {
+    const gutter = (code: string) => renderToStaticMarkup(h(ui.CodeBlockCode, { code })).match(/--code-block-gutter:(\d+)ch/)?.[1]
+    expect(gutter('a')).toBe('1')
+    expect(gutter('x\n'.repeat(99))).toBe('2')
+    expect(gutter('x\n'.repeat(100))).toBe('3')
+    expect(gutter(`${'x\r\n'.repeat(1000)}y`)).toBe('4')
   })
 
   it.each(editions)('%s lets a labelled region pre drop its own name', (_, ui) => {

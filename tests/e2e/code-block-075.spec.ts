@@ -218,5 +218,55 @@ for (const edition of ['radix', 'base'] as const) {
         .evaluate(line => getComputedStyle(line, '::before').content)
       expect(plain).toBe('none')
     })
+
+    test('line numbers stay out of the accessible text', async ({ page }) => {
+      await open(page, edition)
+      // Chromium's own accessibility tree: the pre's static text, without the ::before numbers.
+      const cdp = await page.context().newCDPSession(page)
+      const { root } = await cdp.send('DOM.getDocument', { depth: -1 })
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: "[data-testid='code-block-file'] pre" })
+      const { node } = await cdp.send('DOM.describeNode', { nodeId })
+      await cdp.send('Accessibility.enable')
+      const { nodes } = await cdp.send('Accessibility.getFullAXTree')
+      const byId = new Map(nodes.map(item => [item.nodeId, item]))
+      const pre = nodes.find(item => item.backendDOMNodeId === node.backendNodeId)!
+      expect(pre.role?.value).toBe('region')
+      const texts: string[] = []
+      const walk = (id: string) => {
+        const item = byId.get(id)
+        if (!item) return
+        if (item.role?.value === 'StaticText') texts.push(String(item.name?.value ?? ''))
+        for (const child of item.childIds ?? []) walk(child)
+      }
+      walk(pre.nodeId)
+      expect(texts.length).toBeGreaterThan(0)
+      expect(texts.filter(text => /^\d+$/.test(text.trim()))).toEqual([])
+      expect(texts.join('').startsWith(sourceLines[0]!)).toBe(true)
+      await cdp.detach()
+    })
+
+    test('line 100 starts its code where line 1 does', async ({ page }) => {
+      await open(page, edition)
+      const starts = await page.getByTestId('code-block-long').locator('[data-slot="code-block-line"]').evaluateAll(lines =>
+        [lines[0]!, lines[8]!, lines[99]!, lines[119]!].map(line => line.firstElementChild!.getBoundingClientRect().left))
+      expect(starts).toHaveLength(4)
+      for (const start of starts) expect(Math.abs(start - starts[0]!)).toBeLessThan(0.5)
+    })
+
+    test('Copied resets when the copied content changes', async ({ page }) => {
+      await page.clock.install()
+      await open(page, edition)
+      await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1000)
+      const fixture = page.getByTestId('code-block-command')
+      const copy = fixture.getByRole('button', { name: 'Copy command' })
+      // The fixture's <output> is a status too.
+      const status = fixture.locator('[data-slot="code-block-status"]')
+      await copy.click()
+      await expect(copy).toHaveText('Copied')
+      await expect(status).toHaveText('Copied')
+      await fixture.getByRole('tab', { name: 'npm', exact: true }).click()
+      await expect(copy).toHaveText('Copy')
+      await expect(status).toHaveText('')
+    })
   })
 }

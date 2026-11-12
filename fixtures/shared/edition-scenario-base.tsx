@@ -600,6 +600,9 @@ const codeBlockSource = [
   '}',
 ].join('\n') + '\n'
 
+// 120 lines, so the gutter holds three-digit numbers (tests/e2e/code-block-075.spec.ts).
+const codeBlockLongSource = Array.from({ length: 120 }, (_, index) => `const line${index + 1} = ${index + 1}`).join('\n') + '\n'
+
 /** Code Block and Code Block Command fixtures for tests/e2e/code-block-075.spec.ts. */
 function CodeBlockScenario() {
   const [manager, setManager] = React.useState('')
@@ -614,6 +617,9 @@ function CodeBlockScenario() {
       </div>
       <div data-testid="code-block-plain">
         <CodeBlock title="tokens.css" language="css" code={':root {\n  --radius: 0.75rem;\n}\n'} lineNumbers={false} />
+      </div>
+      <div data-testid="code-block-long">
+        <CodeBlock title="lines.ts" language="tsx" code={codeBlockLongSource} maxHeight="8rem" />
       </div>
     </section>
   )

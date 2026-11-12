@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalog, getTemplate } from '@ombelle/catalog'
 import { componentRecipeFields, defaultRecipeFields, styleFamilies, validateComponentRecipe, type ComponentRecipe } from '@ombelle/contracts'
-import { compileComponentRecipe, describeComponentRecipe } from '../src/index.js'
+import { compileComponentRecipe, describeComponentRecipe, scopeRecipeTemplate } from '../src/index.js'
 import { findShadowedNames } from './recipe-shadowing.js'
 
 const catalog = getCatalog('0.1.0')
@@ -22,6 +22,17 @@ describe.each(styleFamilies)('%s code block recipes', family => {
     const source = first.artifacts.find(artifact => artifact.logicalPath.endsWith('/code-block.tsx'))!.content
     for (const name of parts) expect(source).toContain(`function ${name}(`)
     expect(findShadowedNames(source)).toEqual([])
+  })
+})
+
+describe('code block scoped primitives', () => {
+  it.each(['radix', 'base'] as const)('%s returns highlightCode and drops the type re-export', edition => {
+    const source = scopeRecipeTemplate(getTemplate(catalog, 'code-block', edition), '@/lib/utils')
+    const returned = source.match(/return \{ ([^}]*) \}\n\}\n$/)?.[1]?.split(', ')
+    expect(returned).toEqual(expect.arrayContaining(['highlightCode', 'packageCommand', 'commandRunners', ...parts]))
+    expect(source).not.toMatch(/export type \{/)
+    // Only the factory itself is exported.
+    expect(source.match(/^export .*$/gm)).toEqual(['export function createScopedPrimitives(recipeScope: string, recipeInstance?: string) {'])
   })
 })
 
