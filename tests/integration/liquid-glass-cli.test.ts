@@ -71,7 +71,7 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the forty experimental ids', () => {
+it('lists the fifty experimental ids, one per catalog component', () => {
   expect(glassIds).toEqual(['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'progress', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item'])
 })
 
