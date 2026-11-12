@@ -39,8 +39,7 @@
   font-size: 17px;
   font-weight: 650;
 }
-.close,
-.iconButton {
+.close {
   display: inline-grid;
   place-items: center;
   width: 32px;
@@ -53,17 +52,14 @@
   color: var(--muted-foreground);
   cursor: pointer;
 }
-.close:hover:active,
-.iconButton:not(:disabled):hover:active {
+.close:hover:active {
   background: color-mix(in oklab, var(--foreground) 14%, transparent);
 }
-.close:hover,
-.iconButton:not(:disabled):hover {
+.close:hover {
   background: color-mix(in oklab, var(--foreground) 8%, transparent);
   color: var(--foreground);
 }
-.close svg,
-.iconButton svg {
+.close svg {
   width: 16px;
   height: 16px;
   fill: none;
@@ -117,48 +113,14 @@
 .summary p {
   margin: 0;
 }
-.terminal {
+/* The status shown until the install command is ready. */
+.command {
   min-width: 0;
+  margin: 0;
+  padding: 14px 16px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: color-mix(in oklab, var(--foreground) 4%, var(--background));
-}
-.terminalBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 8px 8px 10px;
-  border-bottom: 1px solid var(--border);
-}
-.managers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-}
-.managers button {
-  min-height: 28px;
-  padding: 0 8px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted-foreground);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 13px;
-  cursor: pointer;
-}
-.managers button:hover:not([aria-pressed='true']) {
-  border-color: var(--border);
-  color: var(--foreground);
-}
-.managers button[aria-pressed='true'] {
-  border-color: var(--border);
-  background: var(--background);
-  color: var(--foreground);
-}
-.command {
-  margin: 0;
-  padding: 14px 16px;
   overflow-x: auto;
   white-space: pre;
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -261,9 +223,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .close,
-  .iconButton,
   .tabs button,
-  .managers button,
   .primary {
     transition: background-color 0.12s, border-color 0.12s, color 0.12s;
   }

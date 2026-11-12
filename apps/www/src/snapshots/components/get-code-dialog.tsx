@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import {
   packageManagers,
@@ -7,6 +7,8 @@ import {
 } from '../install-command'
 import styles from './get-code-dialog.module.css'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
+// Loaded when a command is ready, after publishing, so the editors' first load does not carry it.
+const CodeBlockCommand = lazy(() => import('../../generated/ui/components/ui/code-block').then((module) => ({ default: module.CodeBlockCommand })))
 
 export type CodeScope = { id: string; label: string; description: string }
 export type CodeSummary = ReactNode | ((close: () => void) => ReactNode)
@@ -61,6 +63,7 @@ export function GetCodeDialog({
   summary?: CodeSummary
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
+  const terminal = useRef<HTMLDivElement>(null)
   const [scope, setScope] = useState(scopes[0]!.id)
   const [manager, setManager] = useState<PackageManager>('pnpm')
   const [copied, setCopied] = useState(false)
@@ -97,7 +100,8 @@ export function GetCodeDialog({
     } catch {
       announce('Clipboard unavailable. Select the command and copy it.')
       const range = document.createRange()
-      const node = document.getElementById('get-code-command')
+      // The selected tab's command, as shown.
+      const node = terminal.current?.querySelector("[role='tabpanel'][data-state='active'] code")
       if (!node) return
       range.selectNodeContents(node)
       getSelection()?.removeAllRanges()
@@ -185,57 +189,30 @@ export function GetCodeDialog({
           <p className={styles.description}>{active.description}</p>
           {summary && <div className={styles.summary}>{typeof summary === 'function' ? summary(onClose) : summary}</div>}
 
-          <div className={styles.terminal}>
-            <div className={styles.terminalBar}>
-              <div
-                className={styles.managers}
-                role="group"
-                aria-label="Package manager"
-              >
-                {packageManagers.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-pressed={item === manager}
-                    onClick={() => chooseManager(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className={styles.iconButton}
-                aria-label="Copy install command"
-                disabled={!command}
-                onClick={() => void copy()}
-              >
-                <svg viewBox="0 0 16 16" aria-hidden="true">
-                  {copied ? (
-                    <path d="M3 8.5l3 3 7-7" />
-                  ) : (
-                    <>
-                      <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" />
-                      <path d="M10.5 3.5v-.5a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5" />
-                    </>
-                  )}
-                </svg>
-              </button>
-            </div>
+          {command ? (
+            <Suspense fallback={<pre className={styles.command}><code>{command}</code></pre>}>
+              <CodeBlockCommand
+                ref={terminal}
+                args={commandFor(active.id, 'npm').replace(/^npx /, '')}
+                manager={manager}
+                onManagerChange={chooseManager}
+                copyLabel="Copy install command"
+              />
+            </Suspense>
+          ) : (
             <pre
               className={styles.command}
               data-testid="get-code-command"
               tabIndex={0}
               aria-busy={code.status === 'publishing'}
             >
-              <code id="get-code-command">
-                {command ??
-                  (code.status === 'publishing'
-                    ? `Generating your ${subject} code…`
-                    : installUnavailable ?? 'No code yet.')}
+              <code>
+                {code.status === 'publishing'
+                  ? `Generating your ${subject} code…`
+                  : installUnavailable ?? 'No code yet.'}
               </code>
             </pre>
-          </div>
+          )}
 
           {code.status === 'failed' && (
             <div role="alert" className={styles.error}>

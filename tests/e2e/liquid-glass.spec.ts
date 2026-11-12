@@ -683,7 +683,7 @@ for (const mode of modes) {
     const code = page.getByRole('dialog', { name: 'Get code' })
     const published = code.getByTestId('get-code-reference')
     await expect(published).toBeVisible()
-    await expect(code.getByTestId('get-code-command')).toContainText(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ps_`)
+    await expect(code.getByRole('tabpanel', { name: 'pnpm', exact: true })).toContainText(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ps_`)
     const publishedPage = await page.context().newPage()
     await publishedPage.goto(new URL((await published.getAttribute('href'))!, page.url()).href)
     await expect(publishedPage.getByText('Contrast warning. Some Liquid Glass text falls below 4.5:1 in the contrast model.')).toBeVisible()

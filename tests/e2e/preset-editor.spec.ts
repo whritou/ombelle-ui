@@ -862,7 +862,7 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await page.keyboard.press('Enter')
   expect((await published).status()).toBe(201)
   const dialog = page.getByRole('dialog', { name: 'Get code' })
-  const command = dialog.getByTestId('get-code-command')
+  const command = dialog.getByRole('tabpanel', { name: 'pnpm', exact: true })
   await expect(command).toContainText(/init --preset ps_[a-f0-9]{32}@1/)
   await dialog.getByRole('tab', { name: 'New project' }).focus()
   await page.keyboard.press('ArrowRight')

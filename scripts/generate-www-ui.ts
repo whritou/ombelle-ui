@@ -6,7 +6,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { compile } from '@ombelle/compiler'
 
-export const wwwUiComponents = ['slider', 'toggle-group', 'chip', 'combobox', 'command', 'button', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'number-input', 'color-picker'] as const
+export const wwwUiComponents = ['slider', 'toggle-group', 'chip', 'combobox', 'command', 'button', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'number-input', 'color-picker', 'code-block'] as const
 
 const wwwUtils = `import { clsx, type ClassValue } from 'clsx'
 export function cn(...inputs: ClassValue[]) {

@@ -13,7 +13,8 @@ import { ToggleGroup } from '../toggle-group'
 import { GlassPresetSelect } from '../glass-preset-select'
 import { glassBackdropOptions, glassPresetBackdrop, glassPresetId } from '../glass-presets'
 import type { PresetBackdrop } from '../../preset-editor/preview-protocol'
-import { CodeBlock } from './code-block'
+import { CodeBlock } from '../../generated/ui/components/ui/code-block'
+import { codeLanguage } from './code-language'
 
 // Exhaustive by type: adding a style family fails the typecheck until it has a label.
 const familyLabels: Record<StyleFamily, string> = {
@@ -127,11 +128,16 @@ export function ComponentPlayground({ id, name, source, styles }: {
           </div>
         </Tabs.Content>
         <Tabs.Content value="code" className="mt-3 space-y-3">
-          <CodeBlock code={source} title={`components/ui/${id}.tsx`} maxHeight="28rem" />
-          {css && <CodeBlock code={css} title={`${family} styles`} maxHeight="20rem" />}
-          {glassCss && <CodeBlock code={glassCss} title="Liquid Glass · shared material" maxHeight="20rem" />}
+          <SourceBlock code={source} title={`components/ui/${id}.tsx`} maxHeight="28rem" />
+          {css && <SourceBlock code={css} title={`${family} styles`} maxHeight="20rem" />}
+          {glassCss && <SourceBlock code={glassCss} title="Liquid Glass · shared material" maxHeight="20rem" />}
         </Tabs.Content>
       </Tabs.Root>
     </div>
   )
+}
+
+/** A source file, highlighted in the language its title names. */
+function SourceBlock({ code, title, maxHeight }: { code: string; title: string; maxHeight: string }) {
+  return <CodeBlock code={code} title={title} language={codeLanguage(title)} maxHeight={maxHeight} />
 }

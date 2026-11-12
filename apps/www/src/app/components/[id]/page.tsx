@@ -4,7 +4,7 @@ import { getCatalog } from '@ombelle/catalog'
 import { styleSupport } from '@ombelle/contracts'
 import { editableComponents } from '../../../editor/editable-components'
 import { componentDoc, componentDocs, componentInstallable, glassOnSite } from '../../../site/components/catalog'
-import { CodeBlock, CommandTabs } from '../../../site/components/code-block'
+import { CodeBlock, CodeBlockCommand } from '../../../generated/ui/components/ui/code-block'
 import { ComponentPlayground } from '../../../site/components/playground'
 import { publishedInstaller } from '../../../snapshots/install-command'
 import { familyList } from '../../../site/families'
@@ -64,7 +64,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
           {installable ? (
             <>
               <div className="mt-4">
-                <CommandTabs release={release} args={`add ${doc.id}`} />
+                <CodeBlockCommand args={`${release} add ${doc.id}`} runners={{ yarn: 'yarn dlx --quiet' }} />
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
                 Adds <code className="font-mono text-foreground">{template.logicalPath}</code> and installs {template.dependencies.map(d => d.name).join(', ')} with lifecycle scripts disabled.
