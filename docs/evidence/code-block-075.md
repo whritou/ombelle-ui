@@ -20,24 +20,63 @@ Method: a temporary git worktree at `894a0e4`; `corepack pnpm install --frozen-l
 
 ## Website size, after
 
-Measured at `2a68964` (`feat(www): use the catalog Code Block in the docs, editors and Get code`) with the same method: after `corepack pnpm generate:preview` (packages unchanged since `02fb028`), `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 and pnpm 11.25.0.
+Measured at `84e3c69` (`fix(www): load the Get code command block when the dialog opens`) with the same method: after `corepack pnpm generate:preview` (packages unchanged since `02fb028`), `corepack pnpm run build` in `apps/www` (exit 0), then `node scripts/measure-www-first-load.mjs`. Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0 and pnpm 11.25.0. The `02fb028` column is the interim measurement before the website swaps.
 
 | Route | Scripts | Before, gzip | `02fb028`, gzip | After, gzip | Growth |
 | --- | --- | --- | --- | --- | --- |
-| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | 880.6 kB | +8.8 kB |
+| `/editor/preset` | 18 | 871.8 kB | 880.7 kB | 880.7 kB | +8.9 kB |
 | `/editor/component` | 10 | 241.1 kB | 241.4 kB | 241.4 kB | +0.3 kB |
-| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | 875.1 kB | **+10.2 kB** |
+| `/editor/component/button` | 18 | 864.9 kB | 873.5 kB | 875.2 kB | **+10.3 kB, over the limit** |
 | `/docs` | 11 | 242.1 kB | 242.3 kB | 242.3 kB | +0.2 kB |
 | `/docs/getting-started` | 12 | 249.2 kB | 249.4 kB | 249.5 kB | +0.3 kB |
 | `/components` | 14 | 440.5 kB | 449.2 kB | 449.2 kB | +8.7 kB |
 | `/components/accordion` | 15 / 16 | 837.3 kB | 846.2 kB | 847.1 kB | +9.9 kB |
 
-`/editor/component/button` is 0.2 kB over the 10 kB limit (875.10 kB, 896,099 bytes, against the rounded 864.9 kB before), and `/components/accordion` is 0.1 kB under it. Nothing was deferred beyond what is described here; the numbers are recorded for review before any merge.
+### Accepted overage: `/editor/component/button`
 
-- Most of the growth (about 8.6 to 8.9 kB on the four catalog routes) came before the website swaps: the Code Block template source and recipe description the site ships in the catalog.
-- The swaps add about 1.6 kB on `/editor/component/button` and 0.9 kB on `/components/accordion`: the compiled Code Block module, whose `CodeBlockCommand` brings Radix Tabs into the artifact panel's route as well, less the deleted site code block, highlighter and Get code terminal. The generated module is one file, so the panel's parts cannot leave the command's Tabs behind.
-- With a static import, the Get code dialog put the Code Block and Radix Tabs into `/editor/preset`'s first load (+11.0 kB, with the button route at +10.0 kB). The dialog now loads `CodeBlockCommand` lazily, when a published command is ready, which brings `/editor/preset` to +8.8 kB and costs the button route about 0.2 kB of loader code, since its artifact panel already loads the module.
+`/editor/component/button` grows by 10.3 kB gzip, over the 10 kB limit. The overage is accepted by a controller ruling and is to be reported to the user; it is not resolved in this sub-project.
+
+- Most of the growth on the four catalog routes (8.6 to 8.9 kB) came before the website swaps: the Code Block template source and recipe description the site ships in the catalog.
+- The swaps add about 1.7 kB on this route. The generated `code-block` module is one file, so the artifact panel's `CodeBlockRoot`, `CodeBlockCopy` and `CodeBlockCode` bring along the Radix Tabs that only `CodeBlockCommand` uses. The deleted site code block, highlighter and Get code terminal offset part of it.
+- The Get code dialog loads `CodeBlockCommand` with a dynamic `import()`, requested when the dialog opens, so it downloads while the code publishes. That keeps `/editor/preset` at +8.9 kB (a static import gave +11.0 kB). On the button route the panel already loads the module, so the loader only adds about 0.3 kB (the static import gave +10.0 kB here).
+- Options not taken: split the Code Block template so the parts do not carry Radix Tabs (a catalog change, outside this sub-project); lazy-load the component editor's code view (it is visible on first paint, so it would flash).
 - The unused `code-view.module.css` rules were removed; that is stylesheet, not First Load JS.
+
+## Website e2e
+
+The four website specs that read the Get code command or the install tabs, with a temporary Playwright config:
+- servers: the website (`corepack pnpm exec tsx scripts/serve-snapshot-www.ts`, port 3000) and the preview (`corepack pnpm dev:preview`, port 4173) only, no consumer servers;
+- run: two workers, bundled Chromium, headless, reduced motion;
+- command: `corepack pnpm exec playwright test -c <scratchpad>/playwright.task7.config.ts`, with `testMatch` set to `editor.spec.ts`, `preset-editor.spec.ts`, `recipe-snapshots.spec.ts` and `liquid-glass.spec.ts`;
+- order: after `corepack pnpm generate:preview`.
+
+The specs read the consumer port map at import, so the main checkout's `.artifacts/consumers.json` was copied in for the run. Run on 2026-11-12 by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0; not CI or a human review.
+
+Full run at the swap commit: 58 passed, 34 failed of 92 (10.2 min).
+
+Three failures were caused by the swaps:
+- `editor.spec.ts` "artifact tabs support copy…" and "operates every Button editor control … by keyboard";
+- `recipe-snapshots.spec.ts` "publishes a recipe when Get code opens…".
+
+In each, `getByRole('status')` matched two elements: the Code Block's Copy announces in a status region of its own. The specs now read the page status without `[data-slot="code-block-status"]`, and all three pass. "operates every Button editor control … by keyboard" also failed once more, before reaching Get code: a Variant toggle on a cold dev server. It passes alone.
+
+These failures are also in the `primitives-075` baseline, with the same causes:
+- `preset-editor.spec.ts` "matches downloaded … preset in installed vite/next" (16): needs the prepared consumer apps.
+- `editor.spec.ts` "editor and CLI-installed Button recipe…": consumer port 4180.
+- `editor.spec.ts` "opens the saved Button draft…": the first test on a cold dev server; passes alone.
+- `preset-editor.spec.ts` "opens on the dashboard … in" (4): baseline.
+- `preset-editor.spec.ts` "restores raw draft and history after refresh" and "edits numeric design values with a slider …": baseline.
+- `preset-editor.spec.ts` "supports keyboard editing and 320 pixel reflow": axe `label-content-name-mismatch` and `scrollable-region-focusable`, on the gallery Date Picker trigger and the Projects table. The test's Get code assertions before the axe scan pass.
+
+These failures are not in that baseline:
+- **`liquid-glass.spec.ts` "preset editor glass flow", light and dark.** Both fail at the final axe scan (line 709), after the Get code command assertion (line 686) passes. The scan finds `label-content-name-mismatch` and `scrollable-region-focusable` only inside the preset gallery iframe, on `button[aria-labelledby="gallery-due"]` (Date Picker trigger) and `section[aria-label="Projects table"] > div[data-slot="table-container"]`. These are the two elements the baseline found pre-existing in "supports keyboard editing and 320 pixel reflow", and the website swaps do not touch the gallery. Pre-existing at `da30a91`: not confirmed by a run at that commit.
+- **`recipe-snapshots.spec.ts` "published … recipe matches installed Vite and Next Buttons…" (4).** All four stop in `tests/helpers/editor-preset-consumer.ts` while copying a prepared consumer root (`ENOENT`), before any comparison. The copied port map names consumer folders that this machine does not have. This is the same cause as the baseline's consumer cases.
+
+After the dialog fix (`84e3c69`), the tests that open Get code were rerun:
+- passed (5): `editor.spec.ts` "operates every Button editor control … by keyboard" and "the Get code dialog scrolls its long command…"; `recipe-snapshots.spec.ts` "publishes a recipe…", "keeps local exports usable…" and "recovers a lost recipe publication…";
+- failed only at the gallery axe scan described above (3): `preset-editor.spec.ts` "supports keyboard editing and 320 pixel reflow" and both `liquid-glass.spec.ts` "preset editor glass flow" cases.
+
+`editor.spec.ts` "the component page hydrates its server-rendered Code Block and install tabs without a hydration error" passed. It compares the `/components/button` server HTML from `request.get` with the hydrated page's `pre[data-slot='code-block-code']` inner HTML, and checks the yarn (`yarn dlx --quiet`) and npm tabs.
 
 ## Browser behaviour
 
