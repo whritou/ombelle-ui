@@ -26,6 +26,8 @@ describe('ariaKeyShortcuts', () => {
     [['⇧', 'A'], 'Shift+A'],
     [['Esc'], 'Escape'],
     [['Enter'], 'Enter'],
+    [['constructor'], 'constructor'],
+    [['toString', 'x'], 'toString+X'],
     [['ArrowUp'], 'ArrowUp'],
     [[], ''],
   ])('%j is %s', (keys, expected) => {

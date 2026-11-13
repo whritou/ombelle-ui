@@ -146,7 +146,10 @@ export function ariaKeyShortcuts(keys: readonly string[]): string {
     esc: 'Escape',
   }
   return keys
-    .map((key) => names[key.toLowerCase()] ?? (key.length === 1 ? key.toUpperCase() : key))
+    .map((key) => {
+      const name = key.toLowerCase()
+      return Object.hasOwn(names, name) ? names[name]! : key.length === 1 ? key.toUpperCase() : key
+    })
     .join('+')
 }
 

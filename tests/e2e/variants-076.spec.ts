@@ -363,29 +363,30 @@ for (const edition of ['radix', 'base'] as const) {
       return trigger
     }
 
+    // Announced once: the trigger's aria-keyshortcuts carries the keys, and what is read as its
+    // description or as the tooltip's text is "Undo" with no key names. The browser computes it.
+    const announcedOnce = async (page: Page, trigger: ReturnType<Page['locator']>) => {
+      const describedBy = await trigger.getAttribute('aria-describedby')
+      if (describedBy) {
+        await expect(trigger).toHaveAccessibleDescription('Undo')
+        return
+      }
+      // No description wiring (Base UI): the open tooltip's own accessible text.
+      expect(edition).toBe('base')
+      const tip = page.locator('[data-slot="tooltip-content"]').filter({ has: page.locator('[data-slot="tooltip-shortcut"]') }).first()
+      await expect(tip).toMatchAriaSnapshot(`- text: Undo`)
+      const snapshot = await tip.ariaSnapshot()
+      expect(snapshot).not.toMatch(/Ctrl|Z/)
+    }
+
     test('hover shows the key caps; the trigger announces the shortcut once', async ({ page }) => {
       const trigger = await checks(page, locator => locator.hover())
-      // Radix points aria-describedby at a hidden copy of the tooltip; Base UI has no description,
-      // so its tooltip's own accessible text is checked. Neither includes the keys.
-      const described = await trigger.evaluate(node => {
-        // The text a screen reader reads: aria-hidden parts are left out.
-        const read = (element: Element) => {
-          const clone = element.cloneNode(true) as HTMLElement
-          clone.querySelectorAll('[aria-hidden="true"]').forEach(hidden => hidden.remove())
-          return (clone.textContent ?? '').trim()
-        }
-        const ids = (node.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean)
-        const fromIds = ids.map(id => document.getElementById(id)).filter((el): el is HTMLElement => !!el).map(read).join(' ')
-        if (ids.length) return fromIds
-        const tip = document.querySelector('[data-slot="tooltip-content"]:has([data-slot="tooltip-shortcut"])')
-        return tip ? read(tip) : ''
-      })
-      expect(described).toBe('Undo')
-      expect(described).not.toContain('Ctrl')
+      await announcedOnce(page, trigger)
     })
 
-    test('focus shows the key caps', async ({ page }) => {
-      await checks(page, locator => locator.focus())
+    test('focus shows the key caps; the trigger announces the shortcut once', async ({ page }) => {
+      const trigger = await checks(page, locator => locator.focus())
+      await announcedOnce(page, trigger)
     })
   })
 }
