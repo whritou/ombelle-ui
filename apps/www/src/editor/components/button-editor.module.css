@@ -46,7 +46,6 @@
 .root :global(.be-switch)[aria-checked="true"]:hover:not(:disabled) { border-color: var(--primary); background: var(--primary); filter: brightness(1.08); }
 .root :global(.colorReset):hover:not(:disabled) { background: var(--muted); color: var(--ink); }
 .root :global(.artifactTabs) button:hover:not([aria-selected="true"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
-.root :global(.mobileTabs) button:hover:not([aria-current="page"]) { background: none; color: var(--ink); border-bottom-color: var(--control); }
 .recoveryActions button:hover:not(:disabled) { background: var(--muted); }
 .recoveryActions button:first-child:hover:not(:disabled) { background: var(--moss); filter: brightness(1.08); }
 @media (prefers-reduced-motion: no-preference) {
@@ -174,26 +173,69 @@
 .recoveryActions { display: flex; flex-wrap: wrap; gap: .6rem; }
 .recoveryActions button:first-child { background: var(--moss); border-color: var(--moss); color: var(--primary-foreground); }
 .preservedRecovery { margin: 0; border-bottom: 1px solid var(--line); padding: .85rem 0; color: var(--slate); font-size: .86rem; }
-.root :global(.mobileTabs) { display: none; }
+/* The width toggle and the state select only show where they fit: width from 1200px, the select below 768px. */
+.widthControl, .stateToggle { display: contents; }
+.stateSelect { display: none; }
 
-@media (max-width: 800px) {
-  .workspace { display: block; min-height: 0; padding-top: 1rem; }
-  .primary { padding: 0; }
+/* Below 1200px the editor fills the viewport and each pane is the only scroller in it. */
+@media (max-width: 1199px) {
+  .root { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; padding-bottom: 0; }
+  .root > * { flex: none; }
+  .root > .workspace { flex: 1 1 auto; min-height: 0; }
+  .workspace { grid-template-columns: 300px minmax(0, 1fr); align-items: stretch; padding-bottom: 1rem; }
+  .rail { position: static; display: flex; min-height: 0; }
+  .railScroll[data-slot='scroll-area'] { flex: 1; min-height: 0; max-height: none; }
+  .railScroll [data-slot='scroll-area-viewport'] { overscroll-behavior: auto; }
+  .primary { min-height: 0; overflow-y: auto; align-content: start; }
+  .viewControls [data-slot='toggle-group'] { flex-wrap: wrap; max-width: 100%; }
+  .widthControl { display: none; }
+}
+@media (max-width: 767px) {
+  /* One scroller; the dock floats over its last 96px. */
+  .workspace { display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; padding: 1rem 0 96px; }
+  .primary { overflow: visible; padding: 0; }
   .previewSection, .codeSection { padding: 1rem; }
-  .rail { position: static; }
+  .rail { display: block; }
   .railScroll[data-slot='scroll-area'] { max-height: none; }
   .railContent { padding: .25rem 1rem; }
-  .root :global(.mobileTabs) { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
-  .root :global(.mobileTabs) button { border: 0; border-bottom: 3px solid transparent; background: none; padding: .8rem .4rem; color: var(--slate); font-weight: 600; }
-  .root :global(.mobileTabs) button[aria-current="page"] { border-bottom-color: var(--moss); color: var(--ink); }
-  .mobileHiddenPrimary, .mobileHiddenPreview, .mobileHiddenCode, .mobileHiddenRail { display: none; }
+  .mobileHiddenPreview, .mobileHiddenCode, .mobileHiddenRail { display: none; }
+  .stateToggle { display: none; }
+  .stateSelect { display: flex; flex: 1; min-width: 0; }
+  /* Customize pins a compact preview above the inspector. */
+  .primary.paneCustomize { order: -1; position: sticky; top: 0; z-index: 2; background: var(--background); padding-bottom: 4px; }
+  .paneCustomize .previewSection { padding: .625rem; }
+  .paneCustomize .viewControls { flex-wrap: nowrap; margin-bottom: .5rem; }
+  .paneCustomize .viewControls > :not([data-slot='toggle-group'][aria-label='Preview mode'], .stateSelect) { display: none; }
+  /* The frame keeps its own height; the card shows its middle, where the specimen sits. */
+  .paneCustomize .specimen { display: flex; flex-direction: column; justify-content: center; min-height: 0; height: 132px; }
+  .paneCustomize .specimen > * { flex: none; }
+  .codeSection :global(pre), .codeSection :global(code) { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
 @media (prefers-reduced-motion: reduce) { .root * { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 @media (forced-colors: active) {
   .recoveryActions button:first-child { forced-color-adjust: auto; border: 2px solid ButtonText; }
-  .root :global(.artifactTabs) button[aria-selected="true"], .root :global(.mobileTabs) button[aria-current="page"] { border-bottom: 3px solid Highlight; }
+  .root :global(.artifactTabs) button[aria-selected="true"] { border-bottom: 3px solid Highlight; }
   .specimen { border: 1px solid CanvasText; }
 }
 .root :global(.be-matrix-axis) { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; font-weight: 600; }
 .root :global(.be-matrix-axis) select { min-height: 32px; padding: 0 .4rem; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--foreground); font: inherit; font-weight: 500; }
 .root :global(.be-matrix-cap) { flex-basis: 100%; margin: 0; color: var(--muted-foreground); font-size: .8rem; }
+
+@media (max-width: 1199px) {
+  .root .getCode { height: 44px; min-height: 44px; }
+}
+
+@media (max-width: 767px) {
+  .root .getCode { padding-inline: 14px; }
+  .root .getCode svg { display: none; }
+}
+
+/* Phone panes keep focused controls clear of the dock and, in Customize, of the pinned specimen. */
+@media (max-width: 767px) {
+  .workspace { padding-bottom: 112px; scroll-padding-bottom: 112px; }
+  .workspace:has(> .paneCustomize) { scroll-padding-top: 250px; }
+}
+@media (max-width: 767px) {
+  /* The pane ends above the dock, so the browser scrolls a control the dock would cover into view. */
+  .workspace { margin-bottom: 92px; padding-bottom: 16px; scroll-padding-bottom: 16px; }
+}

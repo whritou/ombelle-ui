@@ -17,8 +17,10 @@ export function SiteHeader() {
   // Pages that embed preview iframes scroll the header away: a pinned header
   // would cover iframe content and intercept clicks inside it.
   const pinned = !/^\/(editor|presets|recipes)\//.test(pathname)
+  // Below 1200px the editors fill the viewport and carry their own navigation.
+  const editor = pathname.startsWith('/editor/')
   return (
-    <header className={`${pinned ? 'sticky top-0' : 'relative'} z-40 border-b border-border bg-background`}>
+    <header className={`${pinned ? 'sticky top-0' : 'relative'} z-40 border-b border-border bg-background${editor ? ' max-[1199px]:hidden' : ''}`}>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">
         Skip to content
       </a>

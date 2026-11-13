@@ -75,7 +75,7 @@ describe('Button editor model', () => {
   it('keeps presentation state outside recipe data', () => {
     const draft = createEditorDraft('flat')
     const before = JSON.stringify(draft.recipe)
-    const view: EditorView = { mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' }
+    const view: EditorView = { mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'none' }
     const darkNarrowFocus: EditorView = { ...view, mode: 'dark', viewport: 'narrow', forcedState: 'focus' }
     expect(darkNarrowFocus).toMatchObject({ mode: 'dark', viewport: 'narrow', forcedState: 'focus' })
     expect(JSON.stringify(draft.recipe)).toBe(before)
@@ -84,7 +84,7 @@ describe('Button editor model', () => {
   it('round-trips a forced active state without touching recipe data', () => {
     const draft = createEditorDraft('flat')
     const before = JSON.stringify(draft.recipe)
-    const view: EditorView = { mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'active' }
+    const view: EditorView = { mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'active' }
     expect(JSON.parse(JSON.stringify(view))).toEqual(view)
     expect(view.forcedState).toBe('active')
     expect(JSON.stringify(draft.recipe)).toBe(before)

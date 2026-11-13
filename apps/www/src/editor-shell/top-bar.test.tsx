@@ -51,7 +51,8 @@ it('EditorTopBar puts History, Commands and the menu in one Editor actions toolb
       menu={{ label: 'More actions', items: [{ id: 'del', label: 'Delete', onSelect: noop, destructive: true }, { id: 'dup', label: 'Duplicate', onSelect: noop }] }}
       commands={[]} primary={<button type="button">Get code</button>} />,
   )
-  const toolbar = /<div[^>]*role="toolbar"[^>]*>([^]*?)<\/div><button type="button">Get code/.exec(html)
+  // The phone's More actions button (hidden from 768px) may sit between the toolbar and the primary action.
+  const toolbar = /<div[^>]*role="toolbar"[^>]*>([^]*?)<\/div>(?:<button[^>]*aria-haspopup="dialog"[^>]*>[^]*?<\/button>)?<button type="button">Get code/.exec(html)
   expect(toolbar).not.toBeNull()
   expect(toolbar![0]).toMatch(/aria-label="Editor actions"/)
   expect(toolbar![1]).toContain('aria-label="History"')

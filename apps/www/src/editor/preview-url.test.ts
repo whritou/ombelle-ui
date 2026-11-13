@@ -17,7 +17,7 @@ it.each(['javascript:alert(1)', '//example.com', 'file:///tmp/preview', 'http://
 })
 it('keeps both hosted iframes opaque with scripts as their only sandbox privilege', () => {
   vi.stubEnv('NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN', '')
-  const editor = renderToStaticMarkup(createElement(PreviewFrame, { result: null, view: { mode: 'light', viewport: 'wide', forcedState: 'none', panel: 'preview' } }))
+  const editor = renderToStaticMarkup(createElement(PreviewFrame, { result: null, view: { mode: 'light', viewport: 'wide', forcedState: 'none', panel: 'customize' } }))
   const preset = renderToStaticMarkup(createElement(PresetPreviewFrame, { result: null, view: { mode: 'light', viewport: 'wide' }, stale: false, onStatus() {} }))
   for (const [html, kind] of [[editor, 'editor'], [preset, 'preset']]) {
     expect(html).toContain(`src="/ombelle-preview/${kind}-preview/"`)

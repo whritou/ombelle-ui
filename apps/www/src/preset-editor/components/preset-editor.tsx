@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Download, ShieldCheck } from 'lucide-react'
+import { Download, Eye, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
 import { defaultSiteFamily, offeredStyleFamilies } from '../../snapshots/install-command'
 import {
@@ -72,7 +72,14 @@ import {
   useReducedTransparencySupport,
   previewWidthOptions,
   useDrawerState,
+  EditorDock,
+  useViewportClass,
+  focusHistoryTarget,
+  returnTarget,
+  visibleMoreActions,
 } from '../../editor-shell'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../../generated/ui/components/ui/sheet'
+import { NativeSelect, NativeSelectOption } from '../../generated/ui/components/ui/native-select'
 import { PresetChecks, presetWarningCount } from './preset-checks'
 import { presetScenes, type PresetBackdrop, type PresetScene } from '../preview-protocol'
 import { sceneComponents, sceneOptions } from '../preview-scenes'
@@ -141,6 +148,19 @@ export default function PresetEditor() {
     false,
   )
   const [drawerTab, setDrawerTab] = useState('checks')
+  // Phone panes and the tablet's review sheet: view state only, never saved.
+  const [pane, setPane] = useState<'customize' | 'preview' | 'checks'>('customize')
+  const [reviewSheetOpen, setReviewSheetOpen] = useState(false)
+  const reviewOpener = useRef<HTMLButtonElement>(null)
+  const viewportClass = useViewportClass()
+  const previousViewport = useRef(viewportClass)
+  useEffect(() => {
+    // A review open on a wider screen stays in view: the phone shows its Checks pane.
+    if (viewportClass === 'phone' && previousViewport.current === 'desktop' && drawerOpen) setPane('checks')
+    // The tablet's sheet belongs to the tablet: leaving that width closes it for good.
+    if (viewportClass !== 'tablet') setReviewSheetOpen(false)
+    previousViewport.current = viewportClass
+  }, [viewportClass, drawerOpen])
   const draft = history.present,
     compiled = usePresetCompiler(draft)
   useEffect(() => {
@@ -171,7 +191,7 @@ export default function PresetEditor() {
       )
   }, [compiled.result])
   useEffect(() => {
-    focusAfterHistory.current?.focus()
+    focusHistoryTarget(focusAfterHistory.current)
     focusAfterHistory.current = null
   }, [history])
   function commit(next: PresetEditorDraft, key: string, coalesce = false) {
@@ -242,8 +262,40 @@ export default function PresetEditor() {
     onReset: (path: Parameters<typeof resetPresetField>[1]) =>
       commit(resetPresetField(draft, path), 'reset:' + path),
   }
+  // Checks and Export, shared by the desktop drawer, the tablet sheet and the phone's Checks pane.
+  const reviewTabs = [
+              {
+                id: 'checks',
+                label: 'Checks',
+                icon: <ShieldCheck aria-hidden="true" size={20} />,
+                badge: presetWarningCount(contrast, glassReport),
+                content: (
+                  <PresetChecks
+                    contrast={contrast}
+                    glassReport={glassReport}
+                    onEditToken={revealPresetField}
+                  />
+                ),
+              },
+              {
+                id: 'export',
+                label: 'Export',
+                icon: <Download aria-hidden="true" size={20} />,
+                content: (
+                  <PresetExportPanel
+                    draft={draft}
+                    state={compiled}
+                    announce={setNotice}
+                    contrastWarning={glassContrastWarning}
+                    describedBy={glass ? glassReadoutId : undefined}
+                  />
+                ),
+              },
+  ]
+  const warnings = presetWarningCount(contrast, glassReport)
+  const warningText = warnings ? `, ${warnings} ${warnings === 1 ? 'warning' : 'warnings'}` : ''
   return (
-    <main className={styles.editor} aria-label="Preset editor">
+    <main className={styles.editor} aria-label="Preset editor" data-editor-root="">
       <EditorTopBar
         commands={[familyCommands(offeredStyleFamilies(draft.family), draft.family, familyNames, family)]}
         crumbs={['Presets']}
@@ -277,6 +329,7 @@ export default function PresetEditor() {
             setHistory(redoPreset)
           },
         }}
+        links={[{ label: 'Preset editor guide', href: '/docs/preset-editor' }]}
         menu={{
           label: 'More actions',
           items: [
@@ -301,9 +354,7 @@ export default function PresetEditor() {
               label: 'ID & revision…',
               onSelect: () => {
                 // The menu light-dismisses; remember its trigger so closing can return there.
-                identityOpener.current = document.querySelector<HTMLElement>(
-                  'button[aria-label="More actions"]',
-                )
+                identityOpener.current = visibleMoreActions()
                 setIdentityOpen(true)
               },
             },
@@ -333,7 +384,10 @@ export default function PresetEditor() {
               ? <p data-testid="changes-summary">{changesSummary(presetChanges(compiled.result, reference.result))}</p> : undefined}
           />
         }
-        extra={<><span className={styles.draftNote} title="Draft — automated token contrast only">Draft — automated token contrast only</span><a href="/docs/preset-editor" className="text-sm font-semibold underline underline-offset-4">Preset editor guide</a></>}
+        extra={<><button ref={reviewOpener} type="button" className={styles.reviewOpener} aria-label={`Checks and export${warningText}`}
+          aria-haspopup="dialog" aria-expanded={reviewSheetOpen} onClick={() => setReviewSheetOpen(true)}>
+          <ShieldCheck aria-hidden="true" size={18} />{warnings ? <span className={styles.reviewBadge} aria-hidden="true">{warnings}</span> : null}
+        </button><span className={styles.draftNote} title="Draft — automated token contrast only">Draft — automated token contrast only</span><a href="/docs/preset-editor" className="text-sm font-semibold underline underline-offset-4">Preset editor guide</a></>}
       />
       <h1 className={styles.srOnly}>Preset editor</h1>
       {warning && <p role="alert">{warning}</p>}
@@ -419,7 +473,7 @@ export default function PresetEditor() {
         </div>
       )}
       <div className={styles.workbench}>
-        <section aria-label="Preset inspector" className={styles.panel}>
+        <section aria-label="Preset inspector" className={`${styles.panel} ${pane !== 'customize' ? styles.phoneHidden : ''}`}>
           <ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
           <div className={styles.panelContent}>
           <InspectorSection id="inspector-family" title="Style family">
@@ -469,8 +523,12 @@ export default function PresetEditor() {
           </div>
           </ScrollArea>
         </section>
-        <div className={styles.canvas}>
-          <div className={styles.preview}>
+        <div className={`${styles.canvas} ${pane === 'customize' ? styles.peek : ''} ${pane === 'checks' ? styles.phoneHidden : ''}`}>
+          <section className={styles.preview} aria-label="Live preview">
+            {/* On a phone's Customize pane the preview shrinks to this card. */}
+            <div className={styles.peekBar}>
+              <b>Live preview · {sceneOptions.find(option => option.value === scene)?.label}</b>
+            </div>
             <div className={`${styles.toolbar} ${styles.previewBar}`}>
               <SegmentedControl<typeof mode>
                 label="Preview mode"
@@ -486,12 +544,21 @@ export default function PresetEditor() {
                   onChange={setTransparency}
                 />
               )}
-              <SegmentedControl<PresetScene>
-                label="Preview page"
-                value={scene}
-                options={sceneOptions}
-                onChange={setScene}
-              />
+              <span className={styles.pageToggle}>
+                <SegmentedControl<PresetScene>
+                  label="Preview page"
+                  value={scene}
+                  options={sceneOptions}
+                  onChange={setScene}
+                />
+              </span>
+              {/* Below 1200px four page segments do not fit beside the others; the same choice as a select. */}
+              <label className={styles.pageSelect}>
+                <span className={styles.srOnly}>Preview page</span>
+                <NativeSelect value={scene} onChange={(event) => setScene(event.target.value as PresetScene)}>
+                  {sceneOptions.map((option) => <NativeSelectOption key={option.value} value={option.value}>{option.label}</NativeSelectOption>)}
+                </NativeSelect>
+              </label>
               {glass && (
                 <SegmentedControl<PresetBackdrop>
                   label="Preview backdrop"
@@ -500,12 +567,14 @@ export default function PresetEditor() {
                   onChange={setBackdropOverride}
                 />
               )}
-              <SegmentedControl<typeof viewport>
-                label="Preview width"
-                value={viewport}
-                options={previewWidthOptions('320 px')}
-                onChange={setViewport}
-              />
+              <span className={styles.widthToggle}>
+                <SegmentedControl<typeof viewport>
+                  label="Preview width"
+                  value={viewport}
+                  options={previewWidthOptions('320 px')}
+                  onChange={setViewport}
+                />
+              </span>
               <p
                 data-testid="preset-preview-status"
                 className={styles.previewStatus}
@@ -514,6 +583,7 @@ export default function PresetEditor() {
                 Preview {previewStatus}
               </p>
             </div>
+            <div className={styles.peekFrame} inert={pane === 'customize' && viewportClass === 'phone'}>
             <PresetPreviewFrame
               result={compiled.result}
               view={{
@@ -527,56 +597,60 @@ export default function PresetEditor() {
               stale={compiled.stale}
               onStatus={setPreviewStatus}
             />
+            </div>
             <p className={styles.sceneComponents}>
               Components in this page: {sceneComponents[scene]}
             </p>
-          </div>
+          </section>
         </div>
-        <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
+        {viewportClass === 'phone' && pane === 'checks' && (
+          <section className={styles.checksPane} aria-labelledby="phone-checks-heading">
+            {/* The pane's own heading keeps the levels in order before the checks' h3 sections. */}
+            <h2 id="phone-checks-heading" className={styles.srOnly}>Checks and export</h2>
+            <PresetChecks contrast={contrast} glassReport={glassReport} onEditToken={(path) => { setPane('customize'); revealPresetField(path) }} />
+            <Collapsible defaultOpen className={styles.exportSection}>
+              <CollapsibleTrigger>Export</CollapsibleTrigger>
+              <CollapsibleContent>
+                <PresetExportPanel draft={draft} state={compiled} announce={setNotice}
+                  contrastWarning={glassContrastWarning} describedBy={glass ? glassReadoutId : undefined} />
+              </CollapsibleContent>
+            </Collapsible>
+          </section>
+        )}
+        {viewportClass === 'desktop' && <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
           <ReviewDrawer
             label="Review"
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
             activeTab={drawerTab}
             onTabChange={setDrawerTab}
-            tabs={[
-              {
-                id: 'checks',
-                label: 'Checks',
-                icon: <ShieldCheck aria-hidden="true" size={20} />,
-                badge: presetWarningCount(contrast, glassReport),
-                content: (
-                  <PresetChecks
-                    contrast={contrast}
-                    glassReport={glassReport}
-                    onEditToken={revealPresetField}
-                  />
-                ),
-              },
-              {
-                id: 'export',
-                label: 'Export',
-                icon: <Download aria-hidden="true" size={20} />,
-                content: (
-                  <PresetExportPanel
-                    draft={draft}
-                    state={compiled}
-                    announce={setNotice}
-                    contrastWarning={glassContrastWarning}
-                    describedBy={glass ? glassReadoutId : undefined}
-                  />
-                ),
-              },
-            ]}
+            tabs={reviewTabs}
           />
-        </div>
+        </div>}
       </div>
+      <Sheet open={viewportClass === 'tablet' && reviewSheetOpen} onOpenChange={setReviewSheetOpen}>
+        <SheetContent side="bottom" aria-label="Checks and export" className={styles.reviewSheet}
+          onCloseAutoFocus={(event) => { event.preventDefault(); returnTarget(reviewOpener.current)?.focus() }}>
+          <SheetHeader>
+            <SheetTitle>Checks and export</SheetTitle>
+            <SheetDescription className={styles.srOnly}>Contrast checks and the preset export.</SheetDescription>
+          </SheetHeader>
+          <ReviewDrawer label="Review" open onOpenChange={(open) => { if (!open) setReviewSheetOpen(false) }}
+            activeTab={drawerTab} onTabChange={setDrawerTab} tabs={reviewTabs} />
+        </SheetContent>
+      </Sheet>
+      <EditorDock<typeof pane> label="Preset editor panes" value={pane} onChange={setPane} tabs={[
+        { value: 'customize', label: 'Customize', icon: <SlidersHorizontal aria-hidden="true" /> },
+        { value: 'preview', label: 'Preview', icon: <Eye aria-hidden="true" /> },
+        { value: 'checks', label: 'Checks', icon: <ShieldCheck aria-hidden="true" />, badge: warnings },
+      ]} />
       <AlertDialog open={confirmation !== null} onOpenChange={(open) => { if (!open) finishConfirmation(false) }}>
         <AlertDialogContent
           onCloseAutoFocus={(event) => {
             // Return to the control that asked, such as the family picker or the menu.
             event.preventDefault()
-            returnFocus.current?.focus()
+            // A sheet's item that asked is gone once the sheet closes; More actions takes focus instead.
+            returnTarget(returnFocus.current)?.focus()
           }}
         >
           <AlertDialogHeader>
@@ -624,7 +698,7 @@ export default function PresetEditor() {
           onCloseAutoFocus={(event) => {
             // Done and Escape alike return to the More actions button the menu came from.
             event.preventDefault()
-            identityOpener.current?.focus()
+            returnTarget(identityOpener.current)?.focus()
             identityOpener.current = null
           }}
         >

@@ -44,34 +44,6 @@
   gap: 0.25rem;
 }
 
-.componentNavigation {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.componentNavigation a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding-inline: 0.75rem;
-  border-radius: 0.5rem;
-  color: var(--muted-foreground);
-  font-size: 0.875rem;
-  text-decoration: none;
-}
-
-.componentNavigation a:hover,
-.componentNavigation a[aria-current='page'] {
-  background: var(--muted);
-  color: var(--foreground);
-}
-
-.componentNavigation a[aria-current='page'] { font-weight: 600; }
-.componentNavigation a:active { background: var(--border); }
 
 .nameField {
   display: flex;
@@ -517,4 +489,446 @@
   border: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/* Phone and tablet top bar. The back link, the strip break and the phone's More button only show below 768px or 1200px. */
+.backLink,
+.rowBreak,
+.phoneMore {
+  display: none;
+}
+.backLink {
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
+}
+.extra {
+  display: contents;
+}
+@media (max-width: 1199px) {
+  .topBar {
+    position: static;
+  }
+  .backLink {
+    display: inline-grid;
+  }
+  .iconButton,
+  .commandsButton {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+  .commandsButton {
+    width: auto;
+  }
+}
+@media (max-width: 767px) {
+  .topBar {
+    gap: 6px 6px;
+    padding: 6px 8px;
+  }
+  .crumbs {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .topActions {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .phoneHidden,
+  .extra,
+  .topActions [data-toolbar-overflow-trigger] {
+    display: none !important;
+  }
+  .phoneMore {
+    display: inline-grid;
+  }
+  .rowBreak {
+    display: block;
+    flex-basis: 100%;
+    height: 0;
+    margin-inline: -8px;
+    border-top: 1px solid var(--border);
+  }
+  .nameField {
+    flex: 1 1 0;
+  }
+  .nameField input {
+    width: 100%;
+    height: 32px;
+    min-height: 32px;
+  }
+  .status {
+    min-width: 0;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* The phone's More actions sheet. */
+.phoneSheet {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.moreList {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.moreItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 15px;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.moreItem:hover:not(:disabled) {
+  background: var(--muted);
+}
+.moreItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.moreItem[data-destructive] {
+  color: var(--destructive);
+}
+.moreSeparator {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--border);
+}
+@media (max-width: 767px) {
+  /* Row one: back, trail or switcher, actions. Row two, after the break: name, revision, status. */
+  .topActions {
+    order: 1;
+    margin-inline-start: auto;
+  }
+  .rowBreak {
+    order: 2;
+  }
+  .nameField,
+  .revision,
+  .status {
+    order: 3;
+  }
+}
+@media (max-width: 767px) {
+  /* The back link stands for the trail's parents; only the current page or switcher shows. */
+  .crumbs [data-slot='breadcrumb-item']:not(:last-child),
+  .crumbs [data-slot='breadcrumb-separator'] {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  /* A real basis, so the field starts the strip instead of squeezing beside the break. */
+  .nameField {
+    flex: 1 1 8rem;
+  }
+}
+@media (max-width: 767px) {
+  .topBar {
+    row-gap: 4px;
+  }
+}
+
+/* The component switcher: the trail's current page, as a button. */
+.switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 2px 8px 2px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  box-shadow: 2px 2px 0 var(--border);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.switcher:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (max-width: 1199px) {
+  .switcher {
+    min-height: 44px;
+    padding-inline: 14px 10px;
+  }
+}
+.switcherSearch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-block: 12px;
+}
+.switcherSearch svg {
+  position: absolute;
+  left: 12px;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+.switcherSearch input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px 0 38px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+}
+.switcherList {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+.switcherList a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.switcherList a:hover {
+  background: var(--muted);
+}
+.switcherList a[aria-current='page'] {
+  background: var(--muted);
+  font-weight: 600;
+}
+.switcherList a span {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.switcherEmpty {
+  padding: 12px;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+.switcherLinks {
+  display: grid;
+  gap: 2px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.switcherLinks a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--foreground);
+  font-weight: 600;
+  text-decoration-color: var(--primary);
+  text-underline-offset: 4px;
+}
+@media (max-width: 767px) {
+  .topBar {
+    column-gap: 4px;
+  }
+  .topActions {
+    gap: 4px;
+  }
+  .switcher {
+    padding-inline: 10px 8px;
+  }
+}
+
+/* The phone's floating pane switcher. */
+.dock {
+  display: none;
+}
+@media (max-width: 767px) {
+  .dock {
+    position: fixed;
+    inset: auto 12px max(16px, env(safe-area-inset-bottom)) 12px;
+    z-index: 35;
+    display: block;
+  }
+  .dock [data-slot='toggle-group'] {
+    display: flex;
+    width: 100%;
+  }
+  .dock [data-slot='toggle-group-item'] {
+    position: relative;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-block-size: 48px;
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+  .dock [data-slot='toggle-group-item'] > svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+}
+.dockBadge {
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 8px);
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--warning);
+  color: var(--background);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* On a phone the slider rows keep only the exact number field, with 44px steppers. */
+@media (max-width: 767px) {
+  /* Two classes, to win over the catalog Slider's own display. */
+  .sliderRow .sliderRange {
+    display: none;
+  }
+  .sliderRow {
+    grid-template-columns: minmax(0, 1fr) 10rem 44px;
+    grid-template-areas: 'l n r';
+  }
+  .sliderNumber [data-slot='number-input'] {
+    min-block-size: 44px;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+  }
+  .sliderNumber [data-slot='number-input-decrement'],
+  .sliderNumber [data-slot='number-input-increment'] {
+    inline-size: 2.5rem;
+  }
+  .sliderReset {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* A long component name shortens instead of pushing the chevron out of the bar. */
+.switcher {
+  max-width: 100%;
+  min-width: 0;
+}
+.switcher > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.switcher > svg {
+  flex: none;
+}
+@media (max-width: 767px) {
+  /* Room for the switcher's focus ring inside the trail's clipping box. */
+  .crumbs {
+    padding: 4px;
+    margin: -4px;
+  }
+}
+
+/* The dock is a full-width bar with its own background, so nothing shows through around it. */
+@media (max-width: 767px) {
+  .dock {
+    inset: auto 0 0 0;
+    padding: 8px 12px max(12px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--background);
+  }
+  .dock [data-slot='toggle-group-item'] {
+    gap: 4px;
+    min-block-size: 56px;
+    font-size: 13px;
+  }
+  .dock [data-slot='toggle-group-item'] > svg {
+    inline-size: 20px;
+    block-size: 20px;
+  }
+}
+@media (max-width: 767px) {
+  /* Three parts, to win over the catalog Toggle Group's segmented size and padding. */
+  .dock [data-slot='toggle-group'] [data-slot='toggle-group-item'][data-variant] {
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-block-size: 56px;
+    padding: 6px;
+    font-size: 13px;
+  }
+}
+@media (max-width: 767px) {
+  .labelOnlyTrail {
+    display: none;
+  }
+}
+
+/* The site menu replaces the site header below 1200px; on a phone it also stands for the back link. */
+.siteMenuButton {
+  display: none;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
+}
+@media (max-width: 1199px) {
+  .siteMenuButton {
+    display: inline-grid;
+  }
+}
+@media (max-width: 767px) {
+  .backLink {
+    display: none;
+  }
+}
+.siteMenuLinks {
+  display: grid;
+  gap: 2px;
+  margin-top: 12px;
+}
+.siteMenuLinks a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--foreground);
+  font-weight: 600;
+  text-decoration: none;
+}
+.siteMenuLinks a:hover {
+  background: var(--muted);
 }

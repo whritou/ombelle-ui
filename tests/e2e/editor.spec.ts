@@ -48,11 +48,17 @@ async function buttonSnapshot(button: import('@playwright/test').Locator) {
 
 test('opens the saved Button draft from the component editor entry point', async ({ page }) => {
   const origin = 'http://127.0.0.1:3000'
+  // The site header, with its current section, shows on editor pages from 1200px.
+  await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto(`${origin}/components/button`)
   await page.getByRole('link', { name: 'Customize' }).click()
   await expect(page).toHaveURL(`${origin}/editor/component/button`)
+  // Typing before hydration is lost to the controlled field; Get code enables once the editor is live.
+  await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 30000 })
   await page.getByLabel('Button text').fill('Saved from Button docs')
   await expect(pageStatus(page)).toContainText('Draft saved locally.')
+  // The status already read "saved" before the edit; wait for the edit itself to be stored.
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft') ?? '')).toContain('Saved from Button docs')
 
   await page.goto(`${origin}/editor/component`)
   await expect(page).toHaveURL(`${origin}/editor/component/button`)
@@ -65,9 +71,13 @@ test('offers keyboard access to the catalog on mobile', async ({ page }) => {
   const origin = 'http://127.0.0.1:3000'
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`${origin}/editor/component/button`)
-  const navigation = page.getByRole('navigation', { name: 'Editable components' })
-  await expect(navigation.getByRole('link', { name: 'Button', exact: true })).toHaveAttribute('aria-current', 'page')
-  const browse = navigation.getByRole('link', { name: 'Browse all components' })
+  // The component switcher holds the catalog links on every width.
+  const switcher = page.getByRole('button', { name: 'Component: Button. Choose a component', exact: true })
+  await tabTo(page, switcher)
+  await page.keyboard.press('Enter')
+  const sheet = page.getByRole('dialog', { name: 'Choose a component' })
+  await expect(sheet.getByRole('link', { name: /^Button/ }).first()).toHaveAttribute('aria-current', 'page')
+  const browse = sheet.getByRole('link', { name: 'Browse all components' })
   await tabTo(page, browse)
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(`${origin}/components`)
@@ -107,6 +117,8 @@ test('edits Button family, props, and bounded overrides', async ({ page }) => {
 })
 
 test('view mode does not change recipe hash and a draft restores after reload', async ({ page }) => {
+  // The width toggle shows from 1200px; below that the preview fills its column.
+  await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByLabel('Button text').fill('Saved draft')
   await expect(pageStatus(page)).toContainText('saved')
@@ -244,20 +256,39 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
   expect(JSON.parse(raw!).recipe.props).toEqual({})
 })
 
-test('mobile workspace tabs retain the draft and preview mode', async ({ page }) => {
+test('the phone dock keeps the draft and preview mode across panes', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
-  await page.getByRole('button', { name: 'Customize', exact: true }).click()
+  const dock = page.getByRole('navigation', { name: 'Button editor panes' })
+  const pane = (name: string) => dock.getByRole('radio', { name, exact: true })
+  await expect(pane('Customize')).toHaveAttribute('aria-checked', 'true')
+  // The dock is a full-width bar on the bottom edge, with 56px panes.
+  const box = (await dock.boundingBox())!
+  expect(Math.round(844 - (box.y + box.height))).toBe(0)
+  expect((await pane('Customize').boundingBox())!.height).toBeGreaterThanOrEqual(56)
+  // Customize pins the specimen above the inspector, so an edit shows while it is made.
   await page.getByLabel('Button text').fill('Mobile draft')
-  await page.getByRole('button', { name: 'Preview', exact: true }).click()
   await segment(page, 'Preview mode', 'Dark').click()
   await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]')).toHaveText('Mobile draft', { timeout: 20000 })
-  await page.getByRole('button', { name: 'Code', exact: true }).click()
+  await pane('Code').click()
   await expect(page.getByRole('tab', { name: 'Usage' })).toBeVisible()
-  await page.getByRole('button', { name: 'Customize', exact: true }).click()
+  await expect(page.getByLabel('Button text')).toBeHidden()
+  await pane('Matrix').click()
+  await expect(segment(page, 'Preview layout', 'Matrix')).toHaveAttribute('aria-checked', 'true')
+  await pane('Customize').click()
+  // Customize hides the layout toggle, so it is read without the accessibility tree.
+  await expect(page.locator('[role="radiogroup"][aria-label="Preview layout"] [aria-checked="true"]')).toHaveText('Single')
   await expect(page.getByLabel('Button text')).toHaveValue('Mobile draft')
-  await page.getByRole('button', { name: 'Preview', exact: true }).click()
   await expect(segment(page, 'Preview mode', 'Dark')).toHaveAttribute('aria-checked', 'true')
+})
+
+test('a tablet shows the inspector beside the preview without the dock', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 })
+  await page.goto('http://127.0.0.1:3000/editor/component/button')
+  const rail = (await page.getByRole('complementary', { name: 'Button inspector' }).boundingBox())!
+  const preview = (await page.getByRole('region', { name: 'Live preview' }).boundingBox())!
+  expect(rail.x + rail.width).toBeLessThanOrEqual(preview.x)
+  await expect(page.getByRole('navigation', { name: 'Button editor panes' })).toBeHidden()
 })
 
 test('editor and CLI-installed Button recipe have matching DOM and computed styles', async ({ context }) => {
@@ -497,6 +528,8 @@ test('sandboxed preview receives validated recipe updates only over its port', a
 })
 
 test('operates every Button editor control, artifact tab, download and publish dialog by keyboard', async ({ page, context }) => {
+  // The width toggle shows from 1200px; below that the preview fills its column.
+  await page.setViewportSize({ width: 1280, height: 800 })
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending', { timeout: 30000 })
@@ -569,7 +602,15 @@ test('operates every Button editor control, artifact tab, download and publish d
 
   // The download lives in the top bar's overflow menu; keyboard focus returns to its trigger afterwards.
   const more = moreActions(page)
-  await tabTo(page, more, { backward: true, max: 250 })
+  // The top bar's actions are one Toolbar: one Tab stop, then End moves to its last item, More actions.
+  const toolbar = page.getByRole('toolbar', { name: 'Editor actions' })
+  for (let presses = 0; !(await toolbar.evaluate(element => element.contains(document.activeElement))); presses++) {
+    if (presses >= 250) throw new Error('Shift+Tab did not reach the Editor actions toolbar')
+    await page.keyboard.press('Shift+Tab')
+  }
+  await page.keyboard.press('End')
+  await expect(more).toBeFocused()
+  await expectVisibleFocus(page)
   await page.keyboard.press('Enter')
   const download = menuItem(page, 'Download recipe JSON')
   await expect(download).toBeEnabled()
@@ -607,7 +648,14 @@ test('operates every Button editor control, artifact tab, download and publish d
   await page.keyboard.type(' now')
   const undo = page.getByRole('button', { name: 'Undo', exact: true })
   const redo = page.getByRole('button', { name: 'Redo', exact: true })
-  await tabTo(page, undo, { backward: true })
+  // Undo is the first item of the one-stop Editor actions toolbar: Shift+Tab into it, then Home.
+  const actions = page.getByRole('toolbar', { name: 'Editor actions' })
+  for (let presses = 0; !(await actions.evaluate(element => element.contains(document.activeElement))); presses++) {
+    if (presses >= 120) throw new Error('Shift+Tab did not reach the Editor actions toolbar')
+    await page.keyboard.press('Shift+Tab')
+  }
+  await page.keyboard.press('Home')
+  await expect(undo).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(text).toHaveValue('Keyboard ship')
   await expect(redo).toBeFocused()

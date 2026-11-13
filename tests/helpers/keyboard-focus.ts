@@ -7,7 +7,12 @@ async function activeFocus(page: Page) {
   return page.evaluate(() => {
     const element = document.activeElement
     if (!element || element === document.body || element.tagName === 'IFRAME') return null
-    const style = getComputedStyle(element)
+    // The development server's own overlay (the "N" badge) is not part of the site.
+    if (element.tagName === 'NEXTJS-PORTAL') return null
+    // Number Input and Color Picker draw their ring on the whole box, not on the text field inside.
+    const ringed = element.closest("[data-slot='number-input'], [data-slot='color-picker-trigger']")
+    const box = element.matches("[data-slot='number-input-input'], [data-slot='color-picker-input']") && ringed ? ringed : element
+    const style = getComputedStyle(box)
     return {
       element: `${element.tagName.toLowerCase()}${element.id ? '#' + element.id : ''} ${element.getAttribute('aria-label') ?? element.textContent?.trim().slice(0, 40) ?? ''}`,
       focusVisible: element.matches(':focus-visible'),

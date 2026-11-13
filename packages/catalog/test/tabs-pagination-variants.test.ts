@@ -31,7 +31,8 @@ describe('Tabs 0.7.3 variants', () => {
     const css = block(`tabs/${family}.css`)
     expect(css).toMatch(/\[data-slot='tabs-list'\]\[data-appearance='pills'\][^{]*\{[^}]*gap/)
     expect(css).toMatch(/\[data-slot='tabs-trigger'\]:is\(\[data-appearance='pills'\] > \*\)\[data-state='active'\][^{]*\{[^}]*var\(--primary\)/)
-    expect(css).toMatch(/\[data-slot='tabs-count'\]:is\(\[data-state='active'\] > \*\)[^{]*\{[^}]*color-mix\(in oklab, var\(--primary-foreground\) 25%/)
+    // The selected tab's count is an outline on the tab's own fill (pinned in specimen-audit-fixes.test.ts).
+    expect(css).toMatch(/\[data-slot='tabs-count'\]:is\(\[data-state='active'\] > \*\)[^{]*\{[^}]*box-shadow: inset 0 0 0 1\.5px currentColor/)
     expect(css).toMatch(/@media \(forced-colors: active\)/)
   })
 })

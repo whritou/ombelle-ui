@@ -36,3 +36,31 @@ export function familyCommands<Family extends string>(families: readonly Family[
     })),
   }
 }
+
+/**
+ * The palette's own search. An exact name comes first, then names that start with the query, then
+ * names with a word that starts with it, then names or keywords that contain it; ties keep their
+ * order. Groups keep their order and empty ones are dropped, so Enter picks the best match.
+ */
+export function filterPalette(groups: readonly PaletteGroup[], query: string): PaletteGroup[] {
+  const needle = query.trim().toLowerCase()
+  if (!needle) return [...groups]
+  const rank = (command: PaletteCommand) => {
+    const label = command.label.toLowerCase()
+    if (label === needle) return 0
+    if (label.startsWith(needle)) return 1
+    if (label.split(/\s+/).some(word => word.startsWith(needle))) return 2
+    if (label.includes(needle)) return 3
+    if (command.keywords?.some(keyword => keyword.toLowerCase().includes(needle))) return 4
+    return -1
+  }
+  return groups.map((group, order) => {
+    const ranked = group.commands.map((command, index) => ({ command, index, rank: rank(command) }))
+      .filter(entry => entry.rank >= 0)
+      .sort((a, b) => a.rank - b.rank || a.index - b.index)
+    return { order, best: ranked[0]?.rank ?? Infinity, group: { ...group, commands: ranked.map(entry => entry.command) } }
+  }).filter(entry => entry.group.commands.length)
+    // The group holding the best match comes first, so Enter picks it.
+    .sort((a, b) => a.best - b.best || a.order - b.order)
+    .map(entry => entry.group)
+}

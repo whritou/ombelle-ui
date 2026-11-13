@@ -9,7 +9,8 @@ export type EditorDraft = { storageVersion: 1; recipe: Recipe }
 export type EditorView = {
   mode: 'light' | 'dark'
   viewport: 'wide' | 'narrow'
-  panel: 'preview' | 'customize' | 'code'
+  /** The pane a phone shows; above 768px every pane is on screen. */
+  panel: 'customize' | 'matrix' | 'code'
   forcedState: 'none' | 'hover' | 'focus' | 'active' | 'disabled' | 'loading'
 }
 

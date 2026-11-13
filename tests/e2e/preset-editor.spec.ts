@@ -27,6 +27,9 @@ import {
   type PresetRender,
 } from '../../apps/www/src/preset-editor/preview-protocol.js'
 
+// These cases test the desktop review drawer; below 1200px it becomes a sheet (tests/e2e/editors-responsive.spec.ts).
+test.use({ viewport: { width: 1280, height: 800 } })
+
 type FrameProbe = {
   hold: boolean
   blocked: boolean
@@ -317,8 +320,9 @@ test('restores raw draft and history after refresh', async ({ page }) => {
     '-',
   )
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  // Undo returns to the fresh draft's Ombelle radius.
   await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue(
-    '0.5',
+    String(getCatalog('0.1.0').presets.ombelle.design.radiusRem),
   )
   await page.getByRole('button', { name: 'Redo', exact: true }).click()
   await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue(
@@ -754,24 +758,33 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await page.keyboard.type('Keyboard theme')
   await expect(name).toHaveValue('Keyboard theme')
 
+  // At 320px Redo lives in the More actions sheet; the last Undo hands focus to More actions.
   const undo = page.getByRole('button', { name: 'Undo', exact: true })
-  const redo = page.getByRole('button', { name: 'Redo', exact: true })
-  for (const [from, to, value] of [
-    [undo, redo, defaultName],
-    [redo, undo, 'Keyboard theme'],
-  ] as const) {
-    await tabTo(page, from)
-    for (let presses = 0; presses < 40 && (await from.isEnabled()); presses++) {
-      await expect(from).toBeFocused()
-      await page.keyboard.press('Enter')
-    }
-    await expect(name).toHaveValue(value)
-    await expect(to).toBeFocused()
-    await expectVisibleFocus(page)
+  const more = page.getByRole('button', { name: 'More actions', exact: true })
+  await tabTo(page, undo)
+  for (let presses = 0; presses < 40 && (await undo.isEnabled()); presses++) {
+    await expect(undo).toBeFocused()
+    await page.keyboard.press('Enter')
   }
+  await expect(name).toHaveValue(defaultName)
+  await expect(more).toBeFocused()
+  await expectVisibleFocus(page)
+  const sheet = page.getByRole('dialog', { name: 'More actions' })
+  const redo = sheet.getByRole('button', { name: 'Redo', exact: true })
+  for (let presses = 0; presses < 40 && (await name.inputValue()) !== 'Keyboard theme'; presses++) {
+    await expect(more).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(redo).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(sheet).toBeHidden()
+  }
+  await expect(name).toHaveValue('Keyboard theme')
+  await expect(more).toBeFocused()
+  await expectVisibleFocus(page)
 
   const family = familyButton(page, 'Minimalist')
-  const confirmDialog = page.getByRole('dialog', {
+  // The family confirmation is an Alert Dialog.
+  const confirmDialog = page.getByRole('alertdialog', {
     name: 'Change style family?',
   })
   await arrowTo(page, family)
@@ -822,10 +835,11 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   // Close the colour popover the way a keyboard user would.
   await page.keyboard.press('Escape')
 
-  const exportRail = page.getByRole('button', { name: /^Open export/ })
-  await tabTo(page, exportRail, { max: 300 })
+  // At 320px Export is in the Checks pane, reached from the dock: Tab to it, arrow to Checks, Enter.
+  const checksPane = page.getByRole('navigation', { name: 'Preset editor panes' }).getByRole('radio', { name: /^Checks/ })
+  await arrowTo(page, checksPane, { tabs: 300 })
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('tab', { name: 'Export' })).toBeFocused()
+  await expect(checksPane).toHaveAttribute('aria-checked', 'true')
   const downloadButton = page.getByRole('button', {
     name: 'Download preset JSON',
     exact: true,
@@ -891,7 +905,8 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   expect(layout.scrollWidth, JSON.stringify(layout)).toBeLessThanOrEqual(layout.width)
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
-  await segment(page, 'Preview width', '320 px').click()
+  // At 320px the preview is its own pane, already at the phone's width.
+  await page.getByRole('navigation', { name: 'Preset editor panes' }).getByRole('radio', { name: 'Preview', exact: true }).click()
   await frame(page).getByTestId('preset-button').focus()
   await page.keyboard.press('Tab')
   expect(
@@ -946,7 +961,9 @@ test('edits numeric design values with a slider and keeps the exact field in syn
   const slider = page.getByLabel('Corner radius slider', { exact: true })
   await slider.focus()
   await page.keyboard.press('ArrowRight')
-  await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue('0.55')
+  // One 0.05 rem step up from the fresh draft's Ombelle radius.
+  const radius = getCatalog('0.1.0').presets.ombelle.design.radiusRem ?? 0.75
+  await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue(String(Number((radius + 0.05).toFixed(2))))
   await page.getByLabel('Corner radius', { exact: true }).fill('1.25')
   await expect(slider).toHaveAttribute('aria-valuenow', '1.25')
 })

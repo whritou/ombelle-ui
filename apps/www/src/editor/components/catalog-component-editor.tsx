@@ -7,7 +7,7 @@ import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@om
 import { siteFamilyOrder } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
+import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
 import { catalogDraftKey, catalogPresetRef, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
@@ -21,8 +21,8 @@ import { useMatrixLayout } from '../use-matrix-layout'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 import { ArtifactPanel } from './artifact-panel'
 import { CatalogProperties } from './catalog-properties'
-import { ComponentNavigation } from './component-navigation'
-import { EditorTabs } from './editor-tabs'
+import { ComponentSwitcher } from './component-switcher'
+import { ComponentEditorDock, paneClasses, switchPane } from './editor-panes'
 import { PreviewFrame } from './preview-frame'
 import styles from './button-editor.module.css'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
@@ -36,7 +36,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const [recoveries, setRecoveries] = useState<string[]>([])
   const [status, setStatus] = useState('Loading draft…')
   const [measured, setMeasured] = useState<MeasuredParts>({})
-  const [view, setView] = useState<EditorView>({ mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' })
+  const [view, setView] = useState<EditorView>({ mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'none' })
   // Preview state only: never saved with the recipe.
   const [transparency, setTransparency] = useState<'auto' | 'reduced'>('auto')
   const transparencySupported = useReducedTransparencySupport()
@@ -56,7 +56,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const key = catalogDraftKey(component)
   const recoveryKey = `${key}.recoveries`
   useEffect(() => {
-    focusAfterHistory.current?.focus()
+    focusHistoryTarget(focusAfterHistory.current)
     focusAfterHistory.current = null
   }, [history])
   useEffect(() => {
@@ -101,8 +101,9 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
     past: [...previous.past, previous.present].slice(-HISTORY_LIMIT), present: previous.future[0], future: previous.future.slice(1),
   }) : previous)
 
-  return <main className={styles.root} aria-label={`${name} editor`}>
+  return <main className={styles.root} aria-label={`${name} editor`} data-editor-root="">
     <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
+      back={{ label: 'All components', href: '/editor/component' }} switcher={<ComponentSwitcher current={component} />}
       commands={[familyCommands(siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
         resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit({ ...recipe, presetRef: catalogPresetRef(style) }))]} status={status} revision={`r${recipe.revision}`}
       nameField={{ id: `${component}-recipe-id`, label: 'Recipe ID', value: recipe.id, maxLength: 80, readOnly: true, onChange: () => {} }}
@@ -129,7 +130,6 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
         secondary={<button type="button" onClick={save} disabled={!ready}>Download JSON instead</button>} />}
     />
     <h1 className={styles.srOnly}>{name} editor</h1>
-    <ComponentNavigation current={component} />
     {recovery !== null ? <section className={styles.recovery} role="alert">
       <h2>Your saved draft needs recovery</h2>
       <div className={styles.recoveryActions}>
@@ -142,9 +142,9 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
         }}>Start new draft</button>
       </div>
     </section> : <>
-      <EditorTabs active={view.panel} onChange={panel => setView(previous => ({ ...previous, panel }))} />
+      <ComponentEditorDock name={name} pane={view.panel} matrix={matrix} onChange={pane => switchPane(pane, view.panel, matrix, setView)} />
       <div className={styles.workspace}>
-        <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label={`${name} inspector`}>
+        <aside className={paneClasses(view.panel).rail} aria-label={`${name} inspector`}>
           <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
             <div className={styles.railContent}>
               <CatalogProperties recipe={recipe} measured={measured} previewMode={view.mode} update={edit} />
@@ -152,16 +152,16 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
             </div>
           </ScrollArea>
         </aside>
-        <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
-          <section className={`${styles.previewSection} ${view.panel === 'code' ? styles.mobileHiddenPreview : ''}`} aria-label="Live preview">
+        <div className={paneClasses(view.panel).primary}>
+          <section className={paneClasses(view.panel).preview} aria-label="Live preview">
             <div className={styles.viewControls}>
               <SegmentedControl label="Preview mode" value={view.mode} options={previewModeOptions}
                 onChange={mode => setView(previous => ({ ...previous, mode }))} />
               {glassFamily && transparencySupported && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
                 options={previewTransparencyOptions} onChange={setTransparency} />}
               <MatrixControls matrix={matrix} />
-              <SegmentedControl label="Preview width" value={view.viewport} options={previewWidthOptions('Narrow')}
-                onChange={viewport => setView(previous => ({ ...previous, viewport }))} />
+              <span className={styles.widthControl}><SegmentedControl label="Preview width" value={view.viewport} options={previewWidthOptions('Narrow')}
+                onChange={viewport => setView(previous => ({ ...previous, viewport }))} /></span>
               <p className={styles.previewStatus} data-status={ready ? 'current' : 'pending'}>
                 {ready ? 'Matches current recipe' : result ? 'Showing the last valid recipe' : 'Compiling preview…'}
               </p>
@@ -169,7 +169,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
             <div className={styles.specimen}><PreviewFrame result={result} view={view} component={component} componentName={name} onMeasure={setMeasured}
               reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
           </section>
-          <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
+          <div className={paneClasses(view.panel).code}>
             <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name}
               reference={reference} showChanges={showChanges} />
           </div>

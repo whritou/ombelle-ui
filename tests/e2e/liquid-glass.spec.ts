@@ -8,6 +8,9 @@ import { glassFailingPairLine } from '../helpers/glass-readout.js'
 import { componentsWithStyleSupport } from '@ombelle/contracts'
 import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
+// These cases test the desktop review drawer; below 1200px it becomes a sheet (tests/e2e/editors-responsive.spec.ts).
+test.use({ viewport: { width: 1280, height: 800 } })
+
 // Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
 // Accessible names repeat across the three backdrop copies, so every scenario
 // locator is scoped to its [data-backdrop] section.

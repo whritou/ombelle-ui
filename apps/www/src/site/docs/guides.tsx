@@ -135,7 +135,7 @@ export const guideSections: Record<GuideSlug, GuideSection[]> = {
   ],
   'component-editor': [
     { id: 'choose', title: '1. Choose a component', content: <>
-      <p>Open the <a href="/editor/component">component editor</a> and pick one of the {componentDocs.length} catalog components. Each component has its own local draft. Fresh drafts start in Ombelle; a saved draft restores its own family and edits.</p>
+      <p>Open the <a href="/editor/component">component editor</a> and pick one of the {componentDocs.length} catalog components. To switch while editing, open the component's name in the top bar: it lists every editor, with search, Browse all components and this guide. Each component has its own local draft. Fresh drafts start in Ombelle; a saved draft restores its own family and edits.</p>
       <p>A recipe is an independently installed instance, with content, props, and supported visual overrides. It does not replace your global preset. Ordinary component installation supports both Radix and Base UI; recipe installation currently supports Radix only.</p>
     </> },
     { id: 'customize', title: '2. Customize content and appearance', content: <>

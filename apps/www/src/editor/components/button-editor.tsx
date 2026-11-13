@@ -14,21 +14,26 @@ import { PreviewFrame } from './preview-frame'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
-import { ComponentNavigation } from './component-navigation'
+import { ComponentSwitcher } from './component-switcher'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
-import { EditorTabs } from './editor-tabs'
+import { ComponentEditorDock, paneClasses, switchPane } from './editor-panes'
+import { NativeSelect, NativeSelectOption } from '../../generated/ui/components/ui/native-select'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import { useRecipeBatch } from '../use-recipe-batch'
 import { changesSummaryFor } from './changes-summary'
 import { MatrixControls } from './matrix-controls'
 import { useMatrixLayout } from '../use-matrix-layout'
-import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
+import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
 const initialDraft: EditorDraft = changeDraftFamily({ storageVersion: 1, recipe: validateRecipe(exampleRecipe) }, defaultSiteFamily)
 const initialRecipeJson = serializeRecipe(initialDraft)
-const initialView: EditorView = { mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' }
+const initialView: EditorView = { mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'none' }
+const forcedStates: readonly { value: EditorView['forcedState']; label: string }[] = [
+  { value: 'none', label: 'Rest' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' },
+  { value: 'active', label: 'Active' }, { value: 'disabled', label: 'Disabled' }, { value: 'loading', label: 'Loading' },
+]
 const initialHistory: EditorHistory = { past: [], present: initialDraft, future: [] }
 
 function download(name: string, text: string, type: string) {
@@ -73,7 +78,7 @@ export function ButtonEditor() {
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
-    focusAfterHistory.current?.focus()
+    focusHistoryTarget(focusAfterHistory.current)
     focusAfterHistory.current = null
   }, [history])
 
@@ -191,6 +196,7 @@ export function ButtonEditor() {
     catch { setStatus('Recovery download failed. The stored draft is still available.') }
   }
 
+  const panes = paneClasses(view.panel)
   const previewCurrent = !(compilation.stale || diagnostic || !resultMatchesDraft(compilation.result, draft.recipe))
   const menuItems: OverflowItem[] = [
     { id: 'download-json', label: 'Download recipe JSON', disabled: !recipeJson || recovery !== null, onSelect: saveDownload },
@@ -203,10 +209,12 @@ export function ButtonEditor() {
     { id: 'reset-recipe', label: 'Reset recipe', destructive: true, disabled: recovery !== null, onSelect: resetRecipe },
   ]
 
-  return <main className={styles.root} aria-label="Button editor">
+  return <main className={styles.root} aria-label="Button editor" data-editor-root="">
     <EditorTopBar
       commands={[familyCommands(siteFamilyOrder, draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}
+      back={{ label: 'All components', href: '/editor/component' }}
+      switcher={<ComponentSwitcher current="button" />}
       nameField={{
         id: 'button-recipe-id', label: 'Recipe ID', value: draft.recipe.id, maxLength: 80, readOnly: true,
         onChange: () => {},
@@ -234,7 +242,6 @@ export function ButtonEditor() {
         secondary={<button type="button" onClick={saveDownload} disabled={!recipeJson}>Download JSON instead</button>} />}
     />
     <h1 className={styles.srOnly}>Button editor</h1>
-    <ComponentNavigation current="button" />
 
     {recovery !== null ? <section className={styles.recovery} role="alert" aria-labelledby="recovery-title">
       <h2 id="recovery-title">Your saved draft needs recovery</h2>
@@ -247,9 +254,9 @@ export function ButtonEditor() {
       {preservedRecoveries.length > 0 && <p className={styles.preservedRecovery}>
         {preservedRecoveries.length} previous invalid draft{preservedRecoveries.length === 1 ? ' is' : 's are'} preserved on this device. Download {preservedRecoveries.length === 1 ? 'it' : 'them'} from More actions.
       </p>}
-      <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
+      <ComponentEditorDock name="Button" pane={view.panel} matrix={matrix} onChange={(pane) => switchPane(pane, view.panel, matrix, setView)} />
       <div className={styles.workspace}>
-        <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
+        <aside className={panes.rail} aria-label="Button inspector">
           <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
           <div className={styles.railContent}>
           <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit} measured={measured.button} previewMode={view.mode}
@@ -257,8 +264,8 @@ export function ButtonEditor() {
           </div>
         </ScrollArea>
         </aside>
-        <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
-          <section className={`${styles.previewSection} ${view.panel === 'code' ? styles.mobileHiddenPreview : ''}`} aria-labelledby="preview-title">
+        <div className={panes.primary}>
+          <section className={panes.preview} aria-labelledby="preview-title">
             <h2 id="preview-title" className={styles.srOnly}>Live preview</h2>
             <div className={styles.viewControls}>
               <SegmentedControl<EditorView['mode']> label="Preview mode" value={view.mode}
@@ -267,12 +274,18 @@ export function ButtonEditor() {
               {glassFamily && transparencySupported && <SegmentedControl<'auto' | 'reduced'> label="Preview transparency" value={transparency}
                 options={previewTransparencyOptions} onChange={setTransparency} />}
               <MatrixControls matrix={matrix} />
-              <SegmentedControl<EditorView['viewport']> label="Preview width" value={view.viewport}
+              <span className={styles.widthControl}><SegmentedControl<EditorView['viewport']> label="Preview width" value={view.viewport}
                 options={previewWidthOptions('Narrow')}
-                onChange={(viewport) => setView((previous) => ({ ...previous, viewport }))} />
-              <SegmentedControl<EditorView['forcedState']> label="Preview state" value={view.forcedState}
-                options={[{ value: 'none', label: 'Rest' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' }, { value: 'active', label: 'Active' }, { value: 'disabled', label: 'Disabled' }, { value: 'loading', label: 'Loading' }]}
-                onChange={(forcedState) => setView((previous) => ({ ...previous, forcedState }))} />
+                onChange={(viewport) => setView((previous) => ({ ...previous, viewport }))} /></span>
+              <span className={styles.stateToggle}><SegmentedControl<EditorView['forcedState']> label="Preview state" value={view.forcedState}
+                options={forcedStates}
+                onChange={(forcedState) => setView((previous) => ({ ...previous, forcedState }))} /></span>
+              {/* A phone has no room for six segments; the same choice as a select. */}
+              <label className={styles.stateSelect}><span className={styles.srOnly}>Preview state</span>
+                <NativeSelect value={view.forcedState} onChange={(event) => setView((previous) => ({ ...previous, forcedState: event.target.value as EditorView['forcedState'] }))}>
+                  {forcedStates.map((state) => <NativeSelectOption key={state.value} value={state.value}>{state.label}</NativeSelectOption>)}
+                </NativeSelect>
+              </label>
               <p className={styles.previewStatus} data-status={previewCurrent ? 'current' : 'pending'}>
                 {previewCurrent ? 'Matches current recipe' : compilation.result ? 'Showing the last valid recipe' : 'Compiling preview…'}
               </p>
@@ -280,7 +293,7 @@ export function ButtonEditor() {
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} onMeasure={setMeasured}
               reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
           </section>
-          <div className={`${styles.codeSection} ${view.panel === 'preview' ? styles.mobileHiddenCode : ''}`}>
+          <div className={panes.code}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
               reference={reference} showChanges={showChanges}
               notice={experimentalNotice(draftFamily(draft.recipe))} />

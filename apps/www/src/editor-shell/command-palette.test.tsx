@@ -37,3 +37,20 @@ it('shows a Commands button with its shortcut when the editor has commands', () 
   expect(html).toContain('Commands')
   expect(html).toMatch(/<kbd[^>]*>Ctrl<\/kbd>/)
 })
+
+it('ranks an exact name first, then names that start with the query, then word starts, then any match', async () => {
+  const { filterPalette } = await import('./command-groups')
+  const pages = ['Alert', 'Alert Dialog', 'Dialog', 'Dialog Footer Demo', 'Sheet'].map(label => ({ id: label, label, run: noop }))
+  const [components] = filterPalette([{ heading: 'Components', commands: pages }], 'dialog')
+  expect(components!.commands.map(command => command.label)).toEqual(['Dialog', 'Dialog Footer Demo', 'Alert Dialog'])
+})
+
+it('keeps every command for an empty query, matches keywords, and drops empty groups', async () => {
+  const { filterPalette } = await import('./command-groups')
+  const groups = [
+    { heading: 'Families', commands: [{ id: 'f', label: 'Switch to Flat', keywords: ['family', 'style'], run: noop }] },
+    { heading: 'Components', commands: [{ id: 'b', label: 'Badge', keywords: ['component'], run: noop }] },
+  ]
+  expect(filterPalette(groups, '  ')).toEqual(groups)
+  expect(filterPalette(groups, 'style').map(group => group.heading)).toEqual(['Families'])
+})

@@ -1,11 +1,15 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { Redo2, Search, Undo2 } from 'lucide-react'
+import { ChevronLeft, Ellipsis, Redo2, Search, Undo2 } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
 import { editableComponents } from '../editor/editable-components'
 import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
 import styles from './editor-shell.module.css'
+import { MoreActionsSheet, type MoreLink } from './more-sheet'
+import { SiteMenu } from './site-menu'
+import { useViewportClass } from './breakpoints'
+import { returnTarget } from './history-focus'
 import { Button } from '../generated/ui/components/ui/button'
 import { ButtonGroup } from '../generated/ui/components/ui/button-group'
 import { Toolbar, ToolbarButton, ToolbarOverflow, ToolbarOverflowItem } from '../generated/ui/components/ui/toolbar'
@@ -40,6 +44,9 @@ export function EditorTopBar({
   primary,
   extra,
   commands,
+  back,
+  switcher,
+  links,
 }: {
   /** The trail, ending with the current page; an ancestor with an href is a link. */
   crumbs: readonly (string | { label: string; href: string })[]
@@ -61,7 +68,18 @@ export function EditorTopBar({
   extra?: ReactNode
   /** The editor's own command groups for the Ctrl+K palette, such as its style families. */
   commands?: readonly PaletteGroup[]
+  /** A link to the page above this editor, shown before the trail on phones and tablets. */
+  back?: { label: string; href: string }
+  /** Replaces the trail's current page, such as the component switcher. */
+  switcher?: ReactNode
+  /** Links the phone's More actions sheet lists, such as the editor's guide. */
+  links?: readonly MoreLink[]
 }) {
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreButton = useRef<HTMLButtonElement>(null)
+  const viewport = useViewportClass()
+  // The More actions sheet belongs to the phone: a wider screen closes it for good.
+  useEffect(() => { if (viewport !== 'phone') setMoreOpen(false) }, [viewport])
   const bar = useStickyBarHeight()
   const [palette, setPalette] = useState(false)
   const [paletteLoaded, setPaletteLoaded] = useState(false)
@@ -83,14 +101,18 @@ export function EditorTopBar({
   }, [commands])
   return (
     <header ref={bar} className={styles.topBar}>
-      <Breadcrumb collapse="auto" className={styles.crumbs}>
+      {/* Below 1200px the site header is not shown; its links live in this menu. */}
+      <SiteMenu />
+      {back && <a href={back.href} className={styles.backLink} aria-label={back.label}><ChevronLeft aria-hidden="true" size={18} /></a>}
+      {/* A trail that is only the current page's name, with no link or switcher, is left out on a phone. */}
+      <Breadcrumb collapse="auto" className={`${styles.crumbs} ${!switcher && crumbs.every(crumb => typeof crumb === 'string') ? styles.labelOnlyTrail : ''}`}>
         <BreadcrumbList>
           {crumbs.map((crumb, index) => {
             const label = typeof crumb === 'string' ? crumb : crumb.label
             const last = index === crumbs.length - 1
             return (
               <BreadcrumbItem key={`${index}-${label}`}>
-                {last ? <BreadcrumbPage>{label}</BreadcrumbPage>
+                {last ? (switcher ?? <BreadcrumbPage>{label}</BreadcrumbPage>)
                   : typeof crumb === 'string' ? <span>{label}</span>
                   : <BreadcrumbLink href={crumb.href}>{label}</BreadcrumbLink>}
               </BreadcrumbItem>
@@ -98,6 +120,8 @@ export function EditorTopBar({
           }).flatMap((item, index) => index ? [<BreadcrumbSeparator key={`separator-${index}`} />, item] : [item])}
         </BreadcrumbList>
       </Breadcrumb>
+      {/* On a phone the name, revision and status wrap into a strip under the bar. */}
+      <span className={styles.rowBreak} aria-hidden="true" />
       <div className={styles.nameField}>
         <label htmlFor={nameField.id}>{nameField.label}</label>
         <input
@@ -132,7 +156,7 @@ export function EditorTopBar({
             variant="ghost"
             size="icon-sm"
             ref={redo.buttonRef}
-            className={styles.iconButton}
+            className={`${styles.iconButton} ${styles.phoneHidden}`}
             aria-label="Redo"
             disabled={redo.disabled}
             onClick={redo.onClick}
@@ -143,7 +167,7 @@ export function EditorTopBar({
         {commands && (
           // Compact, so the bar keeps one row: the icon and the shortcut. Its name, "Commands Ctrl K",
           // includes the keys it shows.
-          <ToolbarButton className={styles.commandsButton} title="Commands (Ctrl+K)" menuLabel="Commands"
+          <ToolbarButton className={`${styles.commandsButton} ${styles.phoneHidden}`} title="Commands (Ctrl+K)" menuLabel="Commands"
             aria-keyshortcuts="Control+K Meta+K" onClick={() => openPalette(true)}>
             <Search aria-hidden="true" size={14} />
             <span className="sr-only">Commands </span>
@@ -158,9 +182,15 @@ export function EditorTopBar({
           ))}
         </ToolbarOverflow>
         </Toolbar>
-        {extra}
+        <Button ref={moreButton} variant="ghost" size="icon" className={`${styles.iconButton} ${styles.phoneMore}`} aria-label="More actions" data-phone-more=""
+          aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen(true)}>
+          <Ellipsis aria-hidden="true" size={18} />
+        </Button>
+        {extra && <span className={styles.extra}>{extra}</span>}
         {primary}
       </div>
+      <MoreActionsSheet open={moreOpen && viewport === 'phone'} onOpenChange={setMoreOpen} returnFocus={moreButton} redo={redo} items={menu.items} links={links}
+        onCommands={commands ? () => openPalette(true) : undefined} />
       {commands && paletteLoaded && (
         <CommandPalette open={palette} onOpenChange={openPalette}
           groups={paletteGroups(commands, menu.items, editableComponents, typeof window === 'undefined' ? '' : window.location.pathname)} />

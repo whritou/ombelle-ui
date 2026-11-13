@@ -56,7 +56,7 @@ describe('Button editor history', () => {
 
   it('ignores unchanged recipes and view-only changes', () => {
     const start = initial()
-    const view: EditorView = { mode: 'light', viewport: 'wide', panel: 'preview', forcedState: 'none' }
+    const view: EditorView = { mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'none' }
     const nextView: EditorView = { ...view, mode: 'dark', viewport: 'narrow', forcedState: 'hover' }
     expect(nextView.mode).toBe('dark')
     const unchanged = recordDraft(start, structuredClone(start.present.recipe), { groupKey: 'mode', at: 1000 })
