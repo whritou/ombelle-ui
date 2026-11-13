@@ -33,6 +33,9 @@ export function Example(){return <><ColorPickerPair label="Primary"><ColorPicker
   'code-block': `import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 const source = "import { Button } from '@/components/ui/button'\\n\\nexport function Save() {\\n  return <Button>Save</Button>\\n}\\n"
 export function Example(){return <><CodeBlockCommand args="@ombelle-ui/cli add button" /><CodeBlock title="save.tsx" language="tsx" code={source} /></>}`,
+  carousel: `import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter } from '@/components/ui/carousel'
+const kits = ['Ombelle', 'Flat', 'Minimalist', 'Neo brutalism', 'Liquid glass']
+export function Example(){return <Carousel aria-label="UI kits"><CarouselContent>{kits.map(kit => <CarouselItem key={kit}><div className="rounded-lg border p-6">{kit}</div></CarouselItem>)}</CarouselContent><CarouselPrevious /><CarouselNext /><CarouselDots /><CarouselCounter /></Carousel>}`,
   'aspect-ratio': `import { AspectRatio } from '@/components/ui/aspect-ratio'
 export function Example(){return <AspectRatio ratio={16 / 9} style={{ maxInlineSize: '32rem' }}><img src="/preview.png" alt="The Ombelle preset gallery in light mode" /></AspectRatio>}`,
   'password-field': `import { PasswordField, PasswordFieldControl, PasswordFieldInput, PasswordFieldToggle, PasswordFieldCapsLock, PasswordFieldStrength } from '@/components/ui/password-field'

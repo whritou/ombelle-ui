@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
+import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle, type PasswordCheck } from '@/components/ui/password-field'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, Form, FormErrorSummary, type FormErrors } from '@/components/ui/field'
 
@@ -74,6 +75,32 @@ function PasswordForm() {
   )
 }
 
+const kits = ['Ombelle', 'Flat', 'Minimalist', 'Neo brutalism', 'Liquid glass', 'Studio warm']
+const kitCard = { display: 'grid', placeItems: 'center', blockSize: '8rem', border: '1px solid currentColor', borderRadius: '0.75rem' } as const
+
+function KitCarousel() {
+  const [count, setCount] = React.useState(5)
+  return (
+    <div style={{ display: 'grid', gap: '0.5rem' }}>
+      <Carousel aria-label="UI kits" data-testid="c076-carousel">
+        <CarouselContent>
+          {kits.slice(0, count).map(kit => <CarouselItem key={kit}><div style={kitCard}>{kit}</div></CarouselItem>)}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+        <CarouselDots />
+        <CarouselCounter />
+      </Carousel>
+      <button type="button" onClick={() => setCount(6)}>Add a slide</button>
+      <Carousel aria-label="One kit" data-testid="c076-carousel-one">
+        <CarouselContent><CarouselItem><div style={kitCard}>Ombelle</div></CarouselItem></CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
+  )
+}
+
 export function ComponentsScenario076() {
   const stack = { display: 'grid', gap: '1rem', maxInlineSize: '28rem' } as const
   return (
@@ -81,6 +108,9 @@ export function ComponentsScenario076() {
       <div style={stack}>
         <SavePresetForm />
         <PasswordForm />
+      </div>
+      <div style={{ maxInlineSize: '36rem' }}>
+        <KitCarousel />
       </div>
       <div data-testid="c076-aspect" style={{ inlineSize: '240px' }}>
         <AspectRatio>

@@ -93,6 +93,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   toggle: ['@radix-ui/react-toggle'],
   'number-input': ['lucide-react'],
   'password-field': ['lucide-react'],
+  carousel: ['lucide-react'],
   'color-picker': ['@radix-ui/react-popover', '@radix-ui/react-slider', 'lucide-react'],
   'code-block': ['@radix-ui/react-tabs'],
   'scroll-area': ['@radix-ui/react-scroll-area'],
