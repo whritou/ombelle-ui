@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { CodeBlock, CommandTabs } from '../components/code-block'
+import { CodeBlock, CodeBlockCommand } from '../../generated/ui/components/ui/code-block'
 import { componentDocs } from '../components/catalog'
 import { familyList } from '../families'
 import { publishedInstaller } from '../../snapshots/install-command'
@@ -9,7 +9,7 @@ type GuideSection = { id: string; title: string; content: ReactNode }
 const release = `${publishedInstaller.packageName}@${publishedInstaller.version}`
 const npx = `npx ${release}`
 function Command({ args }: { args: string }) {
-  return <div className="my-5"><CommandTabs release={release} args={args} /></div>
+  return <div className="my-5"><CodeBlockCommand args={`${release} ${args}`} runners={{ yarn: 'yarn dlx --quiet' }} /></div>
 }
 
 export const guideSections: Record<GuideSlug, GuideSection[]> = {

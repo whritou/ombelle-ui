@@ -1,0 +1,215 @@
+/* neo-brutalism Code Block */
+[data-slot='code-block'] {
+  --code-block-background: oklch(0.2 0.012 275);
+  --code-block-foreground: oklch(0.93 0.005 275);
+  --code-block-comment: oklch(0.631 0.007 275);
+  --code-block-string: oklch(0.82 0.11 150);
+  --code-block-keyword: oklch(0.88 0.12 92);
+  --code-block-attr: oklch(0.8 0.1 350);
+  --code-block-property: oklch(0.82 0.08 210);
+  --code-block-punct: oklch(0.734 0.006 275);
+  --code-block-line-number: oklch(0.524 0.008 275);
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: calc(var(--shadow-x) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color, var(--border));
+  background: var(--code-block-background);
+  color: var(--code-block-foreground);
+  font-family: var(--font-family);
+}
+[data-slot='code-block-header'] {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+  padding-block: 6px;
+  padding-inline: 10px 6px;
+  border-block-end: 1px solid color-mix(in oklab, var(--code-block-foreground) 18%, transparent);
+}
+[data-slot='code-block-tabs'] {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+}
+[data-slot='code-block-title'],
+[data-slot='code-block-tab'],
+[data-slot='code-block-copy'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  block-size: 28px;
+  min-inline-size: 28px;
+  margin: 0;
+  padding-block: 0;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in oklab, var(--code-block-foreground) 70%, transparent);
+  font: 600 12px / 1 var(--font-mono, ui-monospace, monospace);
+  white-space: nowrap;
+}
+[data-slot='code-block-title'] {
+  display: block;
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--code-block-foreground) 16%, transparent);
+  color: var(--code-block-foreground);
+  line-height: 28px;
+  text-overflow: ellipsis;
+}
+[data-slot='code-block-tab'],
+[data-slot='code-block-copy'] {
+  cursor: pointer;
+  transition:
+    background-color var(--motion-duration),
+    color var(--motion-duration);
+}
+[data-slot='code-block-tab']:hover,
+[data-slot='code-block-tab'][data-state='active'] {
+  color: var(--code-block-foreground);
+}
+[data-slot='code-block-tab'][data-state='active'] {
+  background: color-mix(in oklab, var(--code-block-foreground) 16%, transparent);
+}
+[data-slot='code-block-copy'] {
+  margin-inline-start: auto;
+  border: 1.5px solid color-mix(in oklab, var(--code-block-foreground) 35%, transparent);
+  color: var(--code-block-foreground);
+  font-family: var(--font-family);
+}
+[data-slot='code-block-copy']:hover {
+  background: color-mix(in oklab, var(--code-block-foreground) 10%, transparent);
+}
+[data-slot='code-block-tab']:focus-visible,
+[data-slot='code-block-copy']:focus-visible {
+  outline: 3px dashed var(--code-block-foreground);
+  outline-offset: 2px;
+}
+[data-slot='code-block-code'],
+[data-slot='code-block-command'] {
+  box-sizing: border-box;
+  margin: 0;
+  padding-block: 14px;
+  padding-inline: 16px;
+  background: transparent;
+  color: inherit;
+  font: 400 13px / 1.6 var(--font-mono, ui-monospace, monospace);
+  white-space: pre;
+  tab-size: 2;
+}
+/* A bare monospace family would shrink the inner code element. */
+[data-slot='code-block-code'] code,
+[data-slot='code-block-command'] code {
+  font: inherit;
+}
+[data-slot='code-block-code'] {
+  overflow: auto;
+  counter-reset: code-block-line;
+}
+/* The focusable tab panel is the command's scroller, so the keyboard scrolls a long command. */
+[data-code-block-mode='command'] > [role='tabpanel'] {
+  min-inline-size: 0;
+  overflow-x: auto;
+}
+[data-slot='code-block-code']:focus-visible,
+[data-code-block-mode='command'] > [role='tabpanel']:focus-visible {
+  outline: 3px dashed var(--code-block-foreground);
+  outline-offset: -3px;
+}
+[data-slot='code-block-line'] {
+  counter-increment: code-block-line;
+}
+[data-slot='code-block-line']::before {
+  content: counter(code-block-line);
+  content: counter(code-block-line) / '';
+  display: inline-block;
+  min-inline-size: max(2ch, var(--code-block-gutter, 2ch));
+  margin-inline-end: 1ch;
+  color: var(--code-block-line-number);
+  text-align: end;
+  -webkit-user-select: none;
+  user-select: none;
+}
+[data-line-numbers='false'] [data-slot='code-block-line']::before {
+  content: none;
+}
+[data-slot='code-block-code'] [data-token='comment'] {
+  color: var(--code-block-comment);
+}
+[data-slot='code-block-code'] [data-token='string'] {
+  color: var(--code-block-string);
+}
+[data-slot='code-block-code'] [data-token='keyword'],
+[data-slot='code-block-command'] [data-token='keyword'],
+[data-slot='code-block-code'] [data-token='tag'] {
+  color: var(--code-block-keyword);
+}
+[data-slot='code-block-code'] [data-token='attr'],
+[data-slot='code-block-code'] [data-token='number'] {
+  color: var(--code-block-attr);
+}
+[data-slot='code-block-code'] [data-token='property'],
+[data-slot='code-block-code'] [data-token='flag'] {
+  color: var(--code-block-property);
+}
+[data-slot='code-block-code'] [data-token='punct'] {
+  color: var(--code-block-punct);
+}
+@media (forced-colors: active) {
+  [data-slot='code-block'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='code-block-header'] {
+    border-color: CanvasText;
+  }
+  [data-slot='code-block-title'] {
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='code-block-tab'] {
+    background: ButtonFace;
+    color: ButtonText;
+  }
+  [data-slot='code-block-tab'][data-state='active'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='code-block-copy'] {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+  [data-slot='code-block-code'] [data-token],
+  [data-slot='code-block-command'] [data-token] {
+    color: CanvasText;
+  }
+  [data-slot='code-block-line']::before {
+    color: GrayText;
+  }
+  [data-slot='code-block-tab']:focus-visible,
+  [data-slot='code-block-copy']:focus-visible,
+  [data-slot='code-block-code']:focus-visible,
+  [data-code-block-mode='command'] > [role='tabpanel']:focus-visible {
+    outline-color: Highlight;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='code-block-tab'],
+  [data-slot='code-block-copy'] {
+    transition: none;
+  }
+}

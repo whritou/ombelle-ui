@@ -51,5 +51,6 @@ export const supportedComponentIds = [
   'item',
   'number-input',
   'color-picker',
+  'code-block',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

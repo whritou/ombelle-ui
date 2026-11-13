@@ -14,6 +14,8 @@ const url = 'http://127.0.0.1:3000/editor/component/button'
 // The local service shares one development rate bucket across every test and
 // worker.
 test.beforeEach(async () => resetSnapshotBrowserQuota())
+// The page's own status line; the Code Block's Copy announces in a status region of its own.
+const pageStatus = (page: Page) => page.getByRole('status').and(page.locator(':not([data-slot="code-block-status"])'))
 const getCode = (page: Page) => page.getByRole('button', { name: 'Get code', exact: true })
 const codeDialog = (page: Page) => page.getByRole('dialog', { name: 'Get code' })
 
@@ -27,7 +29,7 @@ test('publishes a recipe when Get code opens and opens a read-only share page wi
   await getCode(page).click()
   const link = codeDialog(page).getByTestId('get-code-reference')
   await expect(link).toHaveText(/^rc_[a-f0-9]{32}@1$/)
-  await expect(codeDialog(page).getByTestId('get-code-command')).toContainText(/add --recipe rc_[a-f0-9]{32}@1/)
+  await expect(codeDialog(page).getByRole('tabpanel', { name: 'pnpm', exact: true })).toContainText(/add --recipe rc_[a-f0-9]{32}@1/)
   expect(posts).toBe(1)
   await page.keyboard.press('Escape')
   await getCode(page).click()
@@ -41,7 +43,7 @@ test('publishes a recipe when Get code opens and opens a read-only share page wi
   expect(await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))).toBe(before)
   await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new DOMException('Denied', 'NotAllowedError') } } }))
   await page.getByRole('button', { name: 'Copy install command', exact: true }).click()
-  await expect(page.getByRole('status')).toHaveText(/Copy unavailable/)
+  await expect(pageStatus(page)).toHaveText(/Copy unavailable/)
   const downloading = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Download recipe JSON', exact: true }).click()
   const download = await downloading

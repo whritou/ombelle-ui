@@ -24,6 +24,7 @@ const stylelessComponents = new Set<string>(['button'])
 const setByComponent = new Set(['--collapsible-height'])
 
 it('compiles the same catalog component sources on every build', async () => {
+  expect(wwwUiComponents).toContain('code-block')
   const [a, b] = await Promise.all([1, 2].map(() => fs.mkdtemp(path.join(os.tmpdir(), 'www-ui-'))))
   await generateWwwUi(a!)
   await generateWwwUi(b!)
@@ -47,7 +48,11 @@ it('defines in the site stylesheet every token the compiled styles read without 
   const defined = new Set([...root.matchAll(/(--[\w-]+)\s*:/g)].map(match => match[1]))
   const read_ = await read(dir)
   const needed = new Set<string>()
-  for (const id of wwwUiComponents.filter(id => !stylelessComponents.has(id)))
-    for (const match of read_[`components/ui/${id}.css`]!.matchAll(/var\((--[\w-]+)\)/g)) if (!setByComponent.has(match[1]!)) needed.add(match[1]!)
+  for (const id of wwwUiComponents.filter(id => !stylelessComponents.has(id))) {
+    const css = read_[`components/ui/${id}.css`]!
+    // A stylesheet's own custom properties (the Code Block surface and token colours) need no site token.
+    const own = new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map(match => match[1]))
+    for (const match of css.matchAll(/var\((--[\w-]+)\)/g)) if (!setByComponent.has(match[1]!) && !own.has(match[1]!)) needed.add(match[1]!)
+  }
   expect([...needed].filter(name => !defined.has(name)).sort()).toEqual([])
 })

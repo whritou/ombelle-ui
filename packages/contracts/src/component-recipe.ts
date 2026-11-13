@@ -99,6 +99,11 @@ function validateComposition(recipe: ComponentRecipe): void {
       if (recipe.props.paired !== false && recipe.content.darkValue !== undefined && !isParsableColor(recipe.content.darkValue))
         reject('Enter a hex, rgb() or oklch() color', '/content/darkValue')
       break
+    case 'code-block':
+      if ((recipe.props.mode ?? 'file') === 'command') {
+        if ((recipe.content.args ?? '').trim() === '') reject('Enter the command arguments', '/content/args')
+      } else if ((recipe.content.code ?? '').trim() === '') reject('Enter the code to show', '/content/code')
+      break
     case 'scroll-area':
       if (recipe.content.label.trim() === '') reject('Name the scroll area', '/content/label')
       break

@@ -1,87 +1,5 @@
-/* Read-only code editor: one dark palette in both site themes, like most editors. */
-.window {
-  --code-bg: #15161b;
-  --code-bar: #1d1f26;
-  --code-line: #2a2d36;
-  --code-text: #e4e6eb;
-  --code-muted: #9ba2ae;
-  --code-gutter: #5d6370;
-  overflow: hidden;
-  border: 1px solid var(--code-line);
-  border-radius: 12px;
-  background: var(--code-bg);
-  color: var(--code-text);
-}
-
-.bar {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 40px;
-  padding: 0 8px 0 0;
-  border-bottom: 1px solid var(--code-line);
-  background: var(--code-bar);
-}
-
-.file {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  padding: 0 14px;
-  border-inline-end: 1px solid var(--code-line);
-  background: var(--code-bg);
-  box-shadow: inset 0 2px 0 var(--primary);
-  font: 500 12.5px/1 var(--font-mono);
-}
-
-.fileName {
-  overflow: hidden;
-  color: var(--code-text);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lang {
-  flex: none;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--code-line);
-  color: var(--code-muted);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-}
-
-.window .copy {
-  align-self: center;
-  min-height: 28px;
-  padding: 0 12px;
-  border: 1px solid var(--code-line);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--code-text);
-  font: 500 12.5px var(--font-sans);
-  cursor: pointer;
-}
-
-.window .copy:hover:not(:disabled) {
-  border-color: var(--code-muted);
-  background: var(--code-line);
-}
-
-.window .copy:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.window .copy:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
+/* The Changes view inside the editor's Code Block: it reads the catalog Code Block surface and colours. */
 .code {
-  counter-reset: line;
   max-height: 24rem;
   min-height: 10rem;
   margin: 0;
@@ -89,8 +7,8 @@
   overflow: auto;
   border: 0;
   border-radius: 0;
-  background: var(--code-bg);
-  color: var(--code-text);
+  background: var(--code-block-background);
+  color: var(--code-block-foreground);
   font: 400 12.5px/1.7 var(--font-mono);
   tab-size: 2;
 }
@@ -100,55 +18,11 @@
   outline-offset: -2px;
 }
 
-.code :global(.codeLine) {
-  display: block;
-  padding-inline: 0 20px;
-  white-space: pre;
-}
-
-.code :global(.codeLine)::before {
-  counter-increment: line;
-  content: counter(line);
-  display: inline-block;
-  width: 3.25em;
-  margin-inline-end: 16px;
-  padding-inline-end: 12px;
-  border-inline-end: 1px solid var(--code-line);
-  color: var(--code-gutter);
-  text-align: right;
-  user-select: none;
-}
-
-:is(.code, .command) :global(.tok-comment) { color: #7f8696; font-style: italic; }
-:is(.code, .command) :global(.tok-string) { color: #a5d6a7; }
-:is(.code, .command) :global(.tok-keyword) { color: #d0a3f5; }
-:is(.code, .command) :global(.tok-tag) { color: #f28b9b; }
-:is(.code, .command) :global(.tok-attr) { color: #f5c08a; }
-:is(.code, .command) :global(.tok-number) { color: #f5c08a; }
-:is(.code, .command) :global(.tok-property) { color: #8cc8ff; }
-:is(.code, .command) :global(.tok-flag) { color: #8cc8ff; }
-:is(.code, .command) :global(.tok-punct) { color: #a3a9b5; }
-
-/* A one-line command beside the bar, highlighted like the code but without line numbers. */
-.command {
-  flex: 1;
-  min-width: 0;
-  color: var(--code-text);
-  font: 400 13px/1.7 var(--font-mono);
-  overflow-wrap: anywhere;
-}
-
-@media (forced-colors: active) {
-  .file { box-shadow: none; border-bottom: 2px solid Highlight; }
-  .code :global(.codeLine)::before { color: GrayText; }
-}
-
 /* Changes view: each line carries its sign in text; colour only reinforces it. */
 .diffCount {
   margin: 0;
   padding: 8px 20px 0;
-  background: var(--code-bg);
-  color: var(--code-text);
+  color: var(--code-block-foreground);
   font: 500 12px/1.4 var(--font-mono);
 }
 .diffCode .diffLine,
@@ -159,12 +33,11 @@
 }
 .diffCode .diffLine[data-kind='add'] { background: rgb(165 214 167 / 14%); color: #a5d6a7; }
 .diffCode .diffLine[data-kind='remove'] { background: rgb(242 139 155 / 14%); color: #f28b9b; }
-.diffCode .diffSkip { color: var(--code-gutter); font-style: italic; }
+.diffCode .diffSkip { color: var(--code-block-comment); font-style: italic; }
 @media (forced-colors: active) {
   .diffCode .diffLine[data-kind] { background: none; color: CanvasText; }
 }
 .viewToggle {
   padding: 8px 12px;
-  background: var(--code-bg);
-  border-block-end: 1px solid var(--code-line);
+  border-block-end: 1px solid color-mix(in oklab, var(--code-block-foreground) 18%, transparent);
 }

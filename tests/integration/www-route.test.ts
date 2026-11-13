@@ -10,6 +10,9 @@ import HomePage from '../../apps/www/src/app/page.js'
 import { SiteFooter } from '../../apps/www/src/site/footer.js'
 import { catalog075MinimumCli, compareVersions, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
+// The Code Block command wraps its runner in a keyword token span, so commands are read from the text.
+const textOf = (html: string) => html.replace(/<[^>]*>/g, '')
+
 describe('Button editor route', () => {
   it('renders the Button editor heading and breadcrumb context in the main landmark', () => {
     const html = renderToStaticMarkup(createElement(ButtonEditorPage))
@@ -92,10 +95,10 @@ it('lists the catalog and offers install commands only for components the publis
     const command = `pnpm dlx ${runner} add ${id}`
     if (componentInstallable(doc)) {
       if (doc.minimumCli) expect(compareVersions(publishedInstaller.version, doc.minimumCli)).toBeGreaterThanOrEqual(0)
-      expect(html).toContain(command)
+      expect(textOf(html)).toContain(command)
       if (!glassOnSite(id)) expect(html).toContain(`add ${id} is refused with STYLE_UNAVAILABLE`)
     } else {
-      expect(html).not.toContain(command)
+      expect(textOf(html)).not.toContain(command)
       expect(html).toContain(`Requires CLI ${doc.minimumCli}`)
     }
     expect(html).toContain('Liquid glass: experimental.')
@@ -147,6 +150,6 @@ it('offers the lab glass presets in the component directory and installs Select 
   expect(overview).toContain('href="/components/select"')
   const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
   expect(select).not.toContain('Requires CLI')
-  expect(select).toContain(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} add select`)
+  expect(textOf(select)).toContain(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} add select`)
   expect(select).toContain('Liquid glass: experimental.')
 })

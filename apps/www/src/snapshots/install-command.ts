@@ -23,7 +23,7 @@ const displayComponents = new Set(['spinner', 'kbd', 'empty', 'field', 'meter', 
 export const catalog075MinimumCli = '0.7.5'
 export const catalog075InstallNotice = `This recipe requires CLI ${catalog075MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
 // The 0.7.5 additions: primitives.
-const catalog075Components = new Set(['toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker'])
+const catalog075Components = new Set(['toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block'])
 
 const expandedComponents = new Set(['input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast'])
 const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {

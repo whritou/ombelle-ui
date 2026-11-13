@@ -13,6 +13,8 @@ import {
 import fs from 'node:fs'
 import { publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
+// The page's own status line; the Code Block's Copy announces in a status region of its own.
+const pageStatus = (page: import('@playwright/test').Page) => page.getByRole('status').and(page.locator(':not([data-slot="code-block-status"])'))
 const consumerPorts = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8')) as Record<string, { port: number }>
 
 async function buttonSnapshot(button: import('@playwright/test').Locator) {
@@ -50,7 +52,7 @@ test('opens the saved Button draft from the component editor entry point', async
   await page.getByRole('link', { name: 'Customize' }).click()
   await expect(page).toHaveURL(`${origin}/editor/component/button`)
   await page.getByLabel('Button text').fill('Saved from Button docs')
-  await expect(page.getByRole('status')).toContainText('Draft saved locally.')
+  await expect(pageStatus(page)).toContainText('Draft saved locally.')
 
   await page.goto(`${origin}/editor/component`)
   await expect(page).toHaveURL(`${origin}/editor/component/button`)
@@ -107,7 +109,7 @@ test('edits Button family, props, and bounded overrides', async ({ page }) => {
 test('view mode does not change recipe hash and a draft restores after reload', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByLabel('Button text').fill('Saved draft')
-  await expect(page.getByRole('status')).toContainText('saved')
+  await expect(pageStatus(page)).toContainText('saved')
   await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending')
   const before = await page.getByTestId('recipe-hash').textContent()
   await segment(page, 'Preview mode', 'Dark').click()
@@ -181,7 +183,7 @@ test('failed recovery download cannot lose invalid bytes when replacement storag
   })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByRole('button', { name: 'Download recovery copy' }).click()
-  await expect(page.getByRole('status')).toContainText('Recovery download failed')
+  await expect(pageStatus(page)).toContainText('Recovery download failed')
   await page.getByRole('button', { name: 'Start new draft' }).click()
   await expect(page.getByRole('alert', { name: 'Your saved draft needs recovery' })).toBeVisible()
   expect(await page.evaluate(() => localStorage.getItem('ombelle.button-editor.draft'))).toBe('{failed recovery')
@@ -204,7 +206,7 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
     await page.getByRole('tab', { name }).click()
     await expect(page.getByRole('tabpanel')).not.toBeEmpty()
     await page.getByRole('button', { name: `Copy ${name}` }).click()
-    await expect(page.getByRole('status')).toContainText('copied')
+    await expect(pageStatus(page)).toContainText('copied')
   }
   const downloadPromise = page.waitForEvent('download')
   await (await openMenuItem(page, 'Download recipe JSON')).click()
@@ -215,7 +217,7 @@ test('artifact tabs support copy and validated recipe JSON download', async ({ p
   const { validateRecipe } = await import('@ombelle/contracts')
   const recipe = validateRecipe(JSON.parse(await readFile(file!, 'utf8')))
   expect(recipe.component).toBe('button')
-  await expect(page.getByRole('status')).toContainText('downloaded')
+  await expect(pageStatus(page)).toContainText('downloaded')
   await page.getByRole('tab', { name: 'Install' }).click()
   const command = await page.getByRole('tabpanel').textContent()
   expect(command).toContain(download.suggestedFilename())
@@ -553,7 +555,7 @@ test('operates every Button editor control, artifact tab, download and publish d
   await expect(page.getByRole('tabpanel')).toContainText('add --recipe ./')
   await tabTo(page, page.getByRole('button', { name: 'Copy Install' }))
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('status')).toContainText('Install copied.')
+  await expect(pageStatus(page)).toContainText('Install copied.')
   await tabTo(page, page.getByRole('tabpanel'))
 
   const expected = {
@@ -585,11 +587,11 @@ test('operates every Button editor control, artifact tab, download and publish d
   await page.keyboard.press('Enter')
   const dialog = page.getByRole('dialog', { name: 'Get code' })
   await expect(dialog.getByTestId('get-code-reference')).toHaveText(/^rc_[a-f0-9]{32}@1$/)
-  const npm = dialog.getByRole('button', { name: 'npm', exact: true })
+  const npm = dialog.getByRole('tab', { name: 'npm', exact: true })
   await npm.focus()
   await page.keyboard.press('Enter')
-  await expect(npm).toHaveAttribute('aria-pressed', 'true')
-  await expect(dialog.getByTestId('get-code-command')).toContainText(/^npx /)
+  await expect(npm).toHaveAttribute('aria-selected', 'true')
+  await expect(dialog.getByRole('tabpanel', { name: 'npm', exact: true })).toContainText(/^npx /)
   await expectVisibleFocus(page)
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   await page.keyboard.press('Escape')
@@ -631,6 +633,29 @@ test('the site theme toggle follows the saved theme after mount without a hydrat
   expect(problems.filter((text) => /hydrat|did not match|mismatch/i.test(text))).toEqual([])
 })
 
+test('the component page hydrates its server-rendered Code Block and install tabs without a hydration error', async ({ page, request }) => {
+  const problems: string[] = []
+  page.on('console', (message) => { if (message.type() === 'error' || message.type() === 'warning') problems.push(message.text()) })
+  page.on('pageerror', (error) => problems.push(error.message))
+  const response = await request.get('http://127.0.0.1:3000/components/button')
+  expect(response.ok()).toBe(true)
+  const served = await response.text()
+  await page.goto('http://127.0.0.1:3000/components/button')
+  const tabs = page.getByRole('tablist', { name: 'Package manager' })
+  // A click before hydration does nothing, so retry until the tabs respond.
+  await expect(async () => {
+    await tabs.getByRole('tab', { name: 'yarn', exact: true }).click()
+    await expect(page.getByRole('tabpanel', { name: 'yarn', exact: true })).toHaveText(/^yarn dlx --quiet @ombelle-ui\/cli@\d+\.\d+\.\d+ add button$/, { timeout: 1000 })
+  }).toPass()
+  await tabs.getByRole('tab', { name: 'npm', exact: true }).click()
+  await expect(page.getByRole('tabpanel', { name: 'npm', exact: true })).toHaveText(/^npx @ombelle-ui\/cli@\d+\.\d+\.\d+ add button$/)
+  const code = page.locator("pre[data-slot='code-block-code']").first()
+  const server = await page.evaluate((html) => new DOMParser().parseFromString(html, 'text/html').querySelector("pre[data-slot='code-block-code']")?.innerHTML ?? null, served)
+  expect(server).toContain("data-slot=\"code-block-line\"")
+  expect(await code.evaluate((element) => element.innerHTML)).toBe(server)
+  expect(problems.filter((text) => /hydrat|did not match|mismatch/i.test(text))).toEqual([])
+})
+
 test('the History group casts no shadow behind its ghost Undo and Redo buttons', async ({ page }) => {
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   const group = page.getByRole('group', { name: 'History' })
@@ -641,17 +666,36 @@ test('the History group casts no shadow behind its ghost Undo and Redo buttons',
 
 test('the Get code dialog scrolls its long command and keeps Close visible at 320 pixels', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 })
+  // A saved manager choice is read when the dialog mounts.
+  await page.addInitScript(() => localStorage.setItem('ombelle:get-code:manager', 'yarn'))
+  // Hold publishing, so the dialog shows its generating state first.
+  let release!: () => void
+  const held = new Promise<void>((resolve) => { release = resolve })
+  await page.route('**/api/v1/recipes', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue()
+    const response = await route.fetch()
+    await held
+    await route.fulfill({ response })
+  })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByRole('button', { name: 'Get code', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Get code' })
   await expect(dialog).toBeVisible()
+  await expect(dialog.getByTestId('get-code-command')).toBeVisible()
+  await expect(dialog.getByTestId('get-code-command')).toContainText('Generating')
+  await expect(dialog.getByRole('tablist', { name: 'Package manager' })).toHaveCount(0)
+  release()
+  await expect(dialog.getByRole('tab', { name: 'yarn', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await expect(dialog.getByTestId('get-code-command')).toHaveCount(0)
   const close = dialog.getByRole('button', { name: 'Close', exact: true })
   const closeBox = (await close.boundingBox())!
   expect(closeBox.x).toBeGreaterThanOrEqual(0)
   expect(closeBox.x + closeBox.width).toBeLessThanOrEqual(320)
-  const command = dialog.getByTestId('get-code-command')
+  // The ready command is the selected manager's tab panel, which scrolls its one-line pre.
+  const command = dialog.getByRole('tabpanel', { name: 'yarn', exact: true })
+  await expect(command).toContainText(/add --recipe rc_/)
   const box = (await command.boundingBox())!
   expect(box.x + box.width).toBeLessThanOrEqual(320)
-  const overflow = await command.evaluate((element) => ({ scrolls: getComputedStyle(element).overflowX, pre: getComputedStyle(element).whiteSpace }))
+  const overflow = await command.evaluate((element) => ({ scrolls: getComputedStyle(element).overflowX, pre: getComputedStyle(element.querySelector('pre')!).whiteSpace }))
   expect(overflow).toEqual({ scrolls: 'auto', pre: 'pre' })
 })

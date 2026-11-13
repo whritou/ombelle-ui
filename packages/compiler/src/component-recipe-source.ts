@@ -24,6 +24,11 @@ export function scopeRecipeTemplate(template: ComponentTemplate, utilsImport: st
       exports.push(name)
       return ''
     })
+    .replace(/^export type \{[^}]*\};?$/gm, '')
+    .replace(/^export \{([^}]*)\};?$/gm, (_, names: string) => {
+      exports.push(...names.split(',').map(name => name.trim()).filter(Boolean))
+      return ''
+    })
     .replace(/^export (?=(?:type|interface) )/gm, '')
     .replace(/data-slot=(["'])([a-z][a-z0-9-]*)\1/g, (attribute, _, slot: string) =>
       slots.has(slot) ? `data-slot="recipe-${slot}" data-ombelle-recipe={recipeScope} data-ombelle-recipe-instance={recipeInstance}` : attribute)

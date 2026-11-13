@@ -63,6 +63,7 @@ import { Meter, MeterLabel, MeterValue } from '../generated/preset-gallery/compo
 import { Toggle } from '../generated/preset-gallery/components/ui/toggle'
 import { ScrollArea } from '../generated/preset-gallery/components/ui/scroll-area'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '../generated/preset-gallery/components/ui/item'
+import { CodeBlock, CodeBlockCommand } from '../generated/preset-gallery/components/ui/code-block'
 import { gate, type SceneProps } from './shared'
 
 const rows = [
@@ -76,6 +77,14 @@ const rows = [
 
 const filters = ['On track', 'Needs attention', 'Shipped'] as const
 const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+
+const componentsJson = `{
+  "style": "new-york",
+  "tsx": true,
+  "tailwind": { "css": "src/app/globals.css" },
+  "aliases": { "components": "@/components", "ui": "@/components/ui" }
+}
+`
 
 export function ProjectsScene(props: SceneProps) {
   const show = gate(props)
@@ -311,6 +320,20 @@ export function ProjectsScene(props: SceneProps) {
                 </ItemGroup>
               </ScrollArea>,
             )}
+          </CardContent>
+        </Card>,
+      )}
+      {show(
+        'code-block',
+        'Code Block',
+        <Card>
+          <CardHeader>
+            <CardTitle>Add a component</CardTitle>
+            <CardDescription>Run from the project root. The CLI reads the CSS file and aliases from components.json.</CardDescription>
+          </CardHeader>
+          <CardContent className="scene-fields">
+            <CodeBlockCommand args="@ombelle-ui/cli add button" />
+            <CodeBlock title="components.json" language="json" code={componentsJson} />
           </CardContent>
         </Card>,
       )}

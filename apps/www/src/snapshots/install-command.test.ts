@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
+// The source the site's generated Code Block is compiled from.
+import { commandRunners } from '../../../../packages/catalog/src/templates/code-block'
 import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, packageManagers, publishedInstaller, siteFamilyOrder, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
@@ -96,6 +98,19 @@ describe('Get code commands', () => {
       `bunx ${publishedInstaller.packageName}@${publishedInstaller.version} add --recipe ${recipe.reference} --snapshot-origin '${recipe.origin}' --recipe-hash ${recipe.recipeHash}`)
     expect(() => codeInstallCommand({ kind: 'recipe', source: recipe }, 'new', 'npm')).toThrow()
     expect(() => codeInstallCommand({ kind: 'preset', source }, 'recipe', 'npm')).toThrow()
+  })
+  it('gives the Code Block command the npm command without its runner, so each tab shows the same command', () => {
+    const recipe = { origin: officialSnapshotOrigin, reference: 'rc_' + 'c'.repeat(32) + '@1', recipeHash: 'd'.repeat(64) }
+    const codes = [
+      [{ kind: 'preset', source: official }, 'new'],
+      [{ kind: 'preset', source }, 'theme'],
+      [{ kind: 'recipe', source: recipe }, 'recipe'],
+    ] as const
+    for (const [code, scope] of codes) {
+      const args = codeInstallCommand(code, scope, 'npm').replace(/^npx /, '')
+      for (const manager of packageManagers)
+        expect(`${commandRunners[manager]} ${args}`).toBe(codeInstallCommand(code, scope, manager))
+    }
   })
 })
 

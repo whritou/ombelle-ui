@@ -35,6 +35,7 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'item',
   'number-input',
   'color-picker',
+  'code-block',
   'input-group',
   'sheet',
   'alert-dialog',

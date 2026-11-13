@@ -53,6 +53,21 @@ number fields. Liquid glass remains experimental. Installing them needs CLI
 0.7.5 or later. See the [design](superpowers/specs/2026-11-12-editor-inputs-075-design.md)
 and the [evidence](evidence/editor-inputs-075.md).
 
+The 0.7.5 [Code Block](components/code-block.md) shows read-only source with
+Copy: a file block with a title and line numbers, or a command block with one
+tab per package manager. It is available in all five families with Radix and
+Base UI editions and a recipe editor, on the board's dark surface in both
+modes. Its own highlighter covers TSX, CSS, JSON and shell, and another
+highlighter's output can be passed as children. The code is a named, scrollable
+region; line numbers are a CSS counter, so they are neither read nor copied;
+Copy announces "Copied" or "Copy failed" in a polite live region; and every
+token colour reaches 4.5:1 on the surface (line numbers 3:1). The website's
+docs, component pages, playground, editors' artifact views and Get code dialog
+use it in place of the site's own code block. Liquid glass remains
+experimental. Installing it needs CLI 0.7.5 or later. See the
+[design](superpowers/specs/2026-11-12-code-block-075-design.md) and the
+[evidence](evidence/code-block-075.md).
+
 The 0.7.3 overlays add [Combobox](components/combobox.md),
 [Command](components/command.md), [Hover Card](components/hover-card.md) and
 [Context Menu](components/context-menu.md) in all five families, with Radix and

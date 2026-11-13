@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import type { InstallableRecipe, InstallableRecipeCompileResult } from '@ombelle/contracts'
 import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compiler'
 import { recipeFilename } from '../storage'
-import { highlightCode, type CodeLanguage } from './code-highlight'
 import code from './code-view.module.css'
 import { installableRecipeInstallNotice, installerRunner, publishedInstaller } from '../../snapshots/install-command'
 import { artifactChanges, type FileChange } from '../artifact-diff'
@@ -10,6 +9,7 @@ import { collapseUnchanged } from '../line-diff'
 import { SegmentedControl } from '../../editor-shell'
 import { DiffView } from './diff-view'
 import { ScrollArea, ScrollBar } from '../../generated/ui/components/ui/scroll-area'
+import { CodeBlockCode, CodeBlockCopy, CodeBlockHeader, CodeBlockRoot, CodeBlockTitle, type CodeLanguage } from '../../generated/ui/components/ui/code-block'
 
 export type Tab = 'Usage' | 'Component' | 'CSS' | 'Recipe' | 'Install'
 const tabs: Tab[] = ['Usage', 'Component', 'CSS', 'Recipe', 'Install']
@@ -45,7 +45,6 @@ function tabContent(tab: Tab, result: InstallableRecipeCompileResult, json: stri
 }
 
 const languages: Record<Tab, CodeLanguage> = { Usage: 'tsx', Component: 'tsx', CSS: 'css', Recipe: 'json', Install: 'shell' }
-const languageNames: Record<CodeLanguage, string> = { tsx: 'TSX', css: 'CSS', json: 'JSON', shell: 'Shell' }
 
 /** The file name shown on the editor tab: the artifact path where there is one. */
 function tabFile(tab: Tab, result: InstallableRecipeCompileResult): string {
@@ -87,14 +86,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
   const contrast = result && !stale ? data?.schemaVersion === '2.0'
     ? glassContrastWarning(withComponentRecipeGlass(result.preset.data, data.appearance?.glass))
     : glassContrastWarning(result.preset.data, data?.overrides) : undefined
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(content)
-      onStatus(`${tab} copied.`)
-    } catch {
-      onStatus(`${tab} could not be copied. Check clipboard permissions.`)
-    }
-  }
+  const copied = (ok: boolean) => onStatus(ok ? `${tab} copied.` : `${tab} could not be copied. Check clipboard permissions.`)
   return (
     <section className="artifacts" aria-labelledby="artifacts-title">
       <div className="sectionTitle"><div><h2 id="artifacts-title">Generated output</h2><p>Compiled from this {componentName} recipe.</p></div>
@@ -118,11 +110,11 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
         </div>
         <ScrollBar orientation="horizontal" />
         </ScrollArea>
-        <div className={code.window}>
-          <div className={code.bar}>
-            <span className={code.file}><span className={code.fileName}>{tabFile(tab, result)}</span><span className={code.lang}>{languageNames[languages[tab]]}</span></span>
-            <button type="button" className={code.copy} onClick={() => void copy()} disabled={stale || (tab === 'Recipe' && !recipeJson)} aria-label={`Copy ${tab}`}>Copy</button>
-          </div>
+        <CodeBlockRoot>
+          <CodeBlockHeader>
+            <CodeBlockTitle>{tabFile(tab, result)}</CodeBlockTitle>
+            <CodeBlockCopy text={content} label={`Copy ${tab}`} disabled={stale || (tab === 'Recipe' && !recipeJson)} onCopied={copied} />
+          </CodeBlockHeader>
           {tabChange && <div className={code.viewToggle}>
             <SegmentedControl<'file' | 'changes'> label="Show" value={view}
               options={[{ value: 'file', label: 'File' }, { value: 'changes', label: 'Changes' }]} onChange={setView} />
@@ -131,8 +123,8 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
             ? <div role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`}>
               <DiffView id="artifact-changes" rows={collapseUnchanged(tabChange.lines)} added={tabChange.added} removed={tabChange.removed} />
             </div>
-            : <pre role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} tabIndex={0} className={code.code}><code>{highlightCode(content, languages[tab])}</code></pre>}
-        </div>
+            : <CodeBlockCode code={content} language={languages[tab]} role="tabpanel" id="artifact-panel" aria-labelledby={`artifact-${tab.replaceAll(' ', '-')}`} />}
+        </CodeBlockRoot>
         {tab === 'Install' && <p className="artifactNote">Run from the folder containing the downloaded {recipeFilename(result.recipe.data)} with Node 24.19.0 or newer Node 24. Replace APP with the path to an initialized project. The CLI verifies conflicts before applying. An installed recipe ID and revision are immutable; increase the revision before installing changed content.</p>}
         {tab === 'Recipe' && <p className="artifactNote">ID: {result.recipe.data.id} · Revision: {result.recipe.data.revision}. Changed content at an installed ID and revision needs a new revision.</p>}
       </> : <p>Compiling generated output…</p>}
