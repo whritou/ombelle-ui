@@ -6,13 +6,22 @@ import { useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
 import { editableComponents } from '../editor/editable-components'
 import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
 import styles from './editor-shell.module.css'
-import { OverflowMenu, type OverflowItem } from './overflow-menu'
 import { Button } from '../generated/ui/components/ui/button'
 import { ButtonGroup } from '../generated/ui/components/ui/button-group'
+import { Toolbar, ToolbarButton, ToolbarOverflow, ToolbarOverflowItem } from '../generated/ui/components/ui/toolbar'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../generated/ui/components/ui/breadcrumb'
 
 // The palette and its command menu load on first open, so they add nothing to the first page load.
 const CommandPalette = dynamic(() => import('./command-palette'), { ssr: false })
+
+/** An action in the top bar's menu. */
+export type OverflowItem = {
+  id: string
+  label: string
+  onSelect: () => void
+  destructive?: boolean
+  disabled?: boolean
+}
 
 type HistoryAction = {
   disabled: boolean
@@ -106,8 +115,9 @@ export function EditorTopBar({
         {status}
       </span>
       <div className={styles.topActions}>
+        <Toolbar aria-label="Editor actions" className={styles.actionsToolbar}>
         <ButtonGroup aria-label="History" className={styles.historyGroup}>
-          <Button
+          <ToolbarButton asChild><Button
             variant="ghost"
             size="icon-sm"
             ref={undo.buttonRef}
@@ -117,8 +127,8 @@ export function EditorTopBar({
             onClick={undo.onClick}
           >
             <Undo2 aria-hidden="true" size={16} />
-          </Button>
-          <Button
+          </Button></ToolbarButton>
+          <ToolbarButton asChild><Button
             variant="ghost"
             size="icon-sm"
             ref={redo.buttonRef}
@@ -128,19 +138,26 @@ export function EditorTopBar({
             onClick={redo.onClick}
           >
             <Redo2 aria-hidden="true" size={16} />
-          </Button>
+          </Button></ToolbarButton>
         </ButtonGroup>
         {commands && (
           // Compact, so the bar keeps one row: the icon and the shortcut. Its name, "Commands Ctrl K",
           // includes the keys it shows.
-          <button type="button" className={styles.commandsButton} title="Commands (Ctrl+K)"
+          <ToolbarButton className={styles.commandsButton} title="Commands (Ctrl+K)" menuLabel="Commands"
             aria-keyshortcuts="Control+K Meta+K" onClick={() => openPalette(true)}>
             <Search aria-hidden="true" size={14} />
             <span className="sr-only">Commands </span>
             <span className={styles.commandsKeys}><kbd>Ctrl</kbd> <kbd>K</kbd></span>
-          </button>
+          </ToolbarButton>
         )}
-        <OverflowMenu id={`${nameField.id}-menu`} label={menu.label} items={menu.items} />
+        <ToolbarOverflow label={menu.label}>
+          {menu.items.map((item) => (
+            <ToolbarOverflowItem key={item.id} onSelect={item.onSelect} destructive={item.destructive} disabled={item.disabled}>
+              {item.label}
+            </ToolbarOverflowItem>
+          ))}
+        </ToolbarOverflow>
+        </Toolbar>
         {extra}
         {primary}
       </div>

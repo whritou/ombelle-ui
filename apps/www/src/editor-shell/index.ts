@@ -1,4 +1,4 @@
-export { OverflowMenu, type OverflowItem } from './overflow-menu'
+export type { OverflowItem } from './top-bar'
 export { EditorTopBar } from './top-bar'
 export { familyCommands, type PaletteGroup } from './command-groups'
 export { ControlRow, InspectorSection, SegmentedControl, SliderRow } from './inspector'

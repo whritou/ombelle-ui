@@ -164,7 +164,6 @@
 }
 
 .iconButton:focus-visible,
-.menuItem:focus-visible,
 .sliderReset:focus-visible,
 .railButton:focus-visible,
 .tabs button:focus-visible {
@@ -172,64 +171,14 @@
   outline-offset: 2px;
 }
 
-.menu {
-  /* Placed under its trigger by OverflowMenu; the UA centring is replaced. */
-  position: fixed;
-  inset: auto;
-  margin: 0;
-  min-width: 11rem;
-  padding: 0.25rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--card);
-  color: var(--foreground);
-  box-shadow: 0 8px 24px oklch(0 0 0 / 15%);
-}
 
-.menu:popover-open {
-  display: flex;
-  flex-direction: column;
-}
 
-.menuItem {
-  min-height: 32px;
-  padding: 0 0.625rem;
-  border: 0;
-  border-radius: 0.25rem;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-}
 
-.menuItem:hover:not(:disabled) {
-  background: var(--muted);
-}
 
-.menuItem:active:not(:disabled) {
-  background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
-}
 
-.menuItem[data-destructive='true']:hover:not(:disabled) {
-  background: var(--warning-soft);
-}
 
-.menuItem:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
-.menuItem[data-destructive='true'] {
-  color: var(--warning);
-}
 
-.menuSeparator {
-  width: 100%;
-  margin: 0.25rem 0;
-  border: 0;
-  border-top: 1px solid var(--border);
-}
 
 /* Inspector */
 
@@ -486,7 +435,6 @@
 /* Interactive feedback eases in; globals.css turns it off under reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
   .iconButton,
-  .menuItem,
   .sliderReset,
   .railButton,
   .tabs button {
@@ -558,4 +506,12 @@
   border-radius: 4px;
   background: var(--background);
   font: inherit;
+}
+
+/* The top bar's actions keep their look: the catalog Toolbar adds one Tab stop and arrow keys, not a frame. */
+.actionsToolbar {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }

@@ -1,4 +1,4 @@
-import type { OverflowItem } from './overflow-menu'
+import type { OverflowItem } from './top-bar'
 
 export type PaletteCommand = { id: string; label: string; keywords?: string[]; shortcut?: string; run(): void }
 export type PaletteGroup = { heading: string; commands: readonly PaletteCommand[] }
