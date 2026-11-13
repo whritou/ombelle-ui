@@ -22,7 +22,8 @@ const specimen = (component: Id, props: Record<string, unknown> = {}, content: R
 const all = (node: RecipeSpecimen | string): RecipeSpecimen[] => typeof node === 'string' ? [] : [node, ...node.children.flatMap(all)]
 const find = (node: RecipeSpecimen, tag: string) => all(node).find(item => item.tag === tag)
 const tags = (node: RecipeSpecimen) => all(node).map(item => item.tag)
-const boardDiff = ' :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }'
+// The board's diff, as in apps/preview projects.tsx, the preset gallery and the audit: context lines start with a space.
+const boardDiff = ' :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }\n'
 
 const variantRecipes = [
   ['sheet', { side: 'bottom', handle: true, snapPoints: 'half-full' }, {}, ['SheetContent', 'SheetHandle']],

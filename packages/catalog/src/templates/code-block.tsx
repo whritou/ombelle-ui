@@ -87,20 +87,27 @@ const visuallyHidden: React.CSSProperties = {
   position: 'absolute', inlineSize: 1, blockSize: 1, margin: -1, padding: 0, overflow: 'hidden',
   clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0,
 }
+// A hidden prefix that a text selection skips, so copied lines start with their own text.
+const unselectable: React.CSSProperties = { ...visuallyHidden, userSelect: 'none' }
 
 export type DiffKind = 'added' | 'removed' | 'unchanged'
 
-/** The first character is the marker: `+` adds, `-` removes, anything else is unchanged and kept as written. */
+/**
+ * The first character is the marker, as in a unified diff: `+` adds, `-` removes, a space keeps the line
+ * unchanged. Any other line is unchanged and kept as written.
+ */
 function diffKind(line: string): DiffKind {
   return line.startsWith('+') ? 'added' : line.startsWith('-') ? 'removed' : 'unchanged'
 }
 
+/** A line without its marker: a leading `+`, `-` or space. */
+function withoutMarker(line: string): string {
+  return /^[+\- ]/.test(line) ? line.slice(1) : line
+}
+
 /** The lines of a diff, without the marker; a CRLF ending keeps its CR at the end of the text. */
 export function diffLines(code: string): { kind: DiffKind; text: string }[] {
-  return codeLines(code).map((line) => {
-    const kind = diffKind(line)
-    return { kind, text: kind === 'unchanged' ? line : line.slice(1) }
-  })
+  return codeLines(code).map((line) => ({ kind: diffKind(line), text: withoutMarker(line) }))
 }
 
 /** The added and unchanged lines without markers, with the original line endings and final newline. */
@@ -108,7 +115,7 @@ export function diffNewVersion(code: string): string {
   return code
     .split(/(?<=\n)/)
     .filter((line) => diffKind(line) !== 'removed')
-    .map((line) => (diffKind(line) === 'added' ? line.slice(1) : line))
+    .map(withoutMarker)
     .join('')
 }
 
@@ -132,7 +139,7 @@ function highlightDiff(code: string, language: CodeLanguage): React.ReactNode[] 
         <span data-slot="code-block-diff-marker" aria-hidden="true">
           {line.kind === 'added' ? '+' : line.kind === 'removed' ? '−' : ' '}
         </span>
-        {line.kind === 'unchanged' ? null : <span style={visuallyHidden}>{line.kind === 'added' ? 'Added: ' : 'Removed: '}</span>}
+        {line.kind === 'unchanged' ? null : <span style={unselectable}>{line.kind === 'added' ? 'Added: ' : 'Removed: '}</span>}
         {highlightLine(cr ? line.text.slice(0, -1) : line.text, language)}
         {end || null}
       </span>
@@ -233,7 +240,7 @@ export type CodeBlockCodeProps = {
   maxHeight?: string
   /** The pre region's accessible name, "Code" by default; dropped when `aria-labelledby` is set. */
   label?: string
-  /** Marks lines starting with `+` or `-` as added or removed; ignored with `children`. */
+  /** Marks lines starting with `+` or `-` as added or removed, and a leading space as unchanged; ignored with `children`. */
   diff?: boolean
   /** Replaces the highlighted output, for another highlighter. */
   children?: React.ReactNode
@@ -251,6 +258,8 @@ export function CodeBlockCode({
   style,
   ...props
 }: CodeBlockCodeProps) {
+  // Another highlighter's output has no markers to read.
+  const diffed = diff === true && children === undefined
   return (
     <pre
       tabIndex={0}
@@ -258,12 +267,12 @@ export function CodeBlockCode({
       {...props}
       data-slot="code-block-code"
       data-line-numbers={lineNumbers ? undefined : 'false'}
-      data-diff={diff && children === undefined ? '' : undefined}
+      data-diff={diffed ? '' : undefined}
       aria-label={props['aria-labelledby'] === undefined ? (label ?? props['aria-label'] ?? 'Code') : undefined}
       style={{ maxHeight, '--code-block-gutter': `${String(codeLines(code).length).length}ch`, ...style } as React.CSSProperties}
       className={cn(className)}
     >
-      <code>{children ?? (diff ? highlightDiff(code, language) : highlightCode(code, language))}</code>
+      <code>{children ?? (diffed ? highlightDiff(code, language) : highlightCode(code, language))}</code>
     </pre>
   )
 }

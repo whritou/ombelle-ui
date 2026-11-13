@@ -208,6 +208,8 @@ describe('Code Block', () => {
   })
 })
 const diffText = ':root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n}\n'
+// The board's diff in the unified-diff format: context lines start with a space.
+const spacedDiff = ' :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }\n'
 // The HTML of a titled css block at the Task 1 commit (db22321b); the same in both editions.
 const beforeDiff = "<div data-slot=\"code-block\" class=\"\"><div data-slot=\"code-block-header\" class=\"\"><span data-slot=\"code-block-title\" class=\"\">ui-style.css</span><button type=\"button\" data-slot=\"code-block-copy\" aria-label=\"Copy ui-style.css\" class=\"\">Copy</button><span role=\"status\" aria-live=\"polite\" data-slot=\"code-block-status\" style=\"position:absolute;inline-size:1px;block-size:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0\"></span></div><pre tabindex=\"0\" role=\"region\" data-slot=\"code-block-code\" aria-label=\"ui-style.css source\" style=\"max-height:32rem;--code-block-gutter:1ch\" class=\"\"><code><span data-slot=\"code-block-line\"><span data-token=\"punct\">:</span>root <span data-token=\"punct\">{</span>\n</span><span data-slot=\"code-block-line\">  <span data-token=\"property\">--radius</span><span data-token=\"punct\">:</span> <span data-token=\"number\">0.5rem</span><span data-token=\"punct\">;</span>\n</span><span data-slot=\"code-block-line\"><span data-token=\"punct\">}</span>\n</span></code></pre></div>"
 
@@ -243,8 +245,26 @@ describe('Code Block diff helpers', () => {
   it('treats a custom property at column 0 as a removed line (the first character is the marker)', () => {
     expect(radix.diffLines('--radius: 4px\n')[0]).toEqual({ kind: 'removed', text: '-radius: 4px' })
     expect(radix.diffNewVersion('a\n--radius: 4px\nb')).toBe('a\nb')
-    expect(radix.diffLines(' --radius: 4px')[0]).toEqual({ kind: 'unchanged', text: ' --radius: 4px' })
-    expect(radix.diffNewVersion(' --radius: 4px')).toBe(' --radius: 4px')
+    // A leading space is the context marker, so a line that starts with "-" stays unchanged behind one.
+    expect(radix.diffLines(' --radius: 4px')[0]).toEqual({ kind: 'unchanged', text: '--radius: 4px' })
+    expect(radix.diffNewVersion(' --radius: 4px')).toBe('--radius: 4px')
+  })
+
+  it('strips the space marker of a context line, as in a unified diff', () => {
+    expect(radix.diffLines(' :root {')).toEqual([{ kind: 'unchanged', text: ':root {' }])
+    expect(base.diffLines(' :root {')).toEqual([{ kind: 'unchanged', text: ':root {' }])
+    expect(radix.diffNewVersion(spacedDiff)).toBe(':root {\n  --radius: 0.75rem;\n  --shadow-offset: 3px;\n}\n')
+    expect(base.diffNewVersion(spacedDiff)).toBe(radix.diffNewVersion(spacedDiff))
+    expect(radix.diffLines(spacedDiff)).toEqual(radix.diffLines(diffText))
+    expect(radix.diffCounts(spacedDiff)).toEqual({ added: 2, removed: 1 })
+    // An unprefixed context line stays as written; CRLF is kept.
+    expect(radix.diffLines('a\n b')).toEqual([{ kind: 'unchanged', text: 'a' }, { kind: 'unchanged', text: 'b' }])
+    const crlf = spacedDiff.replace(/\n/g, '\r\n')
+    expect(radix.diffNewVersion(crlf)).toBe(':root {\r\n  --radius: 0.75rem;\r\n  --shadow-offset: 3px;\r\n}\r\n')
+    expect(radix.diffLines(crlf)[0]).toEqual({ kind: 'unchanged', text: ':root {\r' })
+    // The marker column shows the blank; the line's own text has no leading space.
+    expect(text(renderToStaticMarkup(h(radix.CodeBlockCode, { code: spacedDiff, language: 'css', diff: true }))))
+      .toBe(' :root {\n−Removed:   --radius: 0.5rem;\n+Added:   --radius: 0.75rem;\n+Added:   --shadow-offset: 3px;\n }\n')
   })
 
   it('handles empty input and a lone marker', () => {
@@ -291,6 +311,20 @@ describe.each(editions)('%s Code Block diff', (_, ui) => {
     const plain = renderToStaticMarkup(h(ui.CodeBlock, { code: ':root {\n  --radius: 0.5rem;\n}\n', title: 'ui-style.css', language: 'css' }))
     expect(plain).toBe(beforeDiff)
     expect(renderToStaticMarkup(h(ui.CodeBlock, { code: diffText, diff: false }))).not.toContain('data-diff')
+  })
+
+  it('reads the diff only when children is undefined, for the pre and for the lines alike', () => {
+    const empty = renderToStaticMarkup(h(ui.CodeBlockCode, { code: diffText, language: 'css', diff: true, children: null }))
+    expect(empty).not.toContain('data-diff')
+    expect(empty).not.toContain('code-block-diff-marker')
+    const own = renderToStaticMarkup(h(ui.CodeBlockCode, { code: diffText, language: 'css', diff: true }))
+    expect(own).toContain('data-diff=""')
+    expect(own).toContain('code-block-diff-marker')
+  })
+
+  it('keeps the hidden Added and Removed prefixes out of a text selection', () => {
+    expect(html).toMatch(/<span style="[^"]*user-select:none[^"]*">Removed: <\/span>/)
+    expect(html).toMatch(/<span style="[^"]*user-select:none[^"]*">Added: <\/span>/)
   })
 
   it('keeps the text of a non-diff block equal to the code', () => {

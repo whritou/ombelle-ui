@@ -31,8 +31,8 @@ const buttonVariants: Record<string, RecipeSpecimen> = {
 type RecipeVariant = Record<string, unknown> | { props: Record<string, unknown>; content: Record<string, unknown> }
 const withContent = (variant: RecipeVariant) => 'content' in variant
   ? variant as { props: Record<string, unknown>; content: Record<string, unknown> } : { props: variant, content: {} }
-/** The board's diff in section 05 of the 0.7.6 variants. */
-const boardDiff = ' :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }'
+/** The board's diff in section 05 of the 0.7.6 variants; context lines start with a space, as in a unified diff. */
+const boardDiff = ' :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }\n'
 
 /** The variants measured beside each component's default specimen, as recipe props (and content). */
 const recipeVariants: Partial<Record<ComponentId, Record<string, RecipeVariant>>> = {
