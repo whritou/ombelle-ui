@@ -64,10 +64,12 @@ describe('Progress label and value', () => {
 })
 
 describe('Progress default output', () => {
-  // Recorded from the templates before the 0.7.5 variants (commit 488c8b7).
+  // Recorded from the templates before the 0.7.5 variants (commit 488c8b7). Base UI formats the value text
+  // with the runtime's default locale ("25%" in en-US, "25 %" in fr-FR), so the expected text does too.
+  const percent = new Intl.NumberFormat(undefined, { style: 'percent' }).format(0.25)
   const before = {
     radix: '<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" aria-valuetext="25%" role="progressbar" data-state="loading" data-value="25" data-max="100" data-slot="progress" class="" aria-label="Upload"><div data-state="loading" data-value="25" data-max="100" data-slot="progress-indicator" style="inline-size:25%"></div></div>',
-    base: '<div data-progressing="" aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" aria-valuetext="25\xa0%" role="progressbar" data-slot="progress" data-state="loading" data-value="25" data-max="100" aria-label="Upload"><div data-progressing="" style="inset-inline-start:0;width:25%;inline-size:25%" data-slot="progress-indicator" data-state="loading" data-value="25" data-max="100"></div><span role="presentation" style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:0;position:fixed;top:0;left:0">x</span></div>',
+    base: `<div data-progressing="" aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" aria-valuetext="${percent}" role="progressbar" data-slot="progress" data-state="loading" data-value="25" data-max="100" aria-label="Upload"><div data-progressing="" style="inset-inline-start:0;width:25%;inline-size:25%" data-slot="progress-indicator" data-state="loading" data-value="25" data-max="100"></div><span role="presentation" style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:0;position:fixed;top:0;left:0">x</span></div>`,
   }
   it.each(editions)('%s keeps a bar without parts byte-identical', (edition, ui) => {
     expect(renderToStaticMarkup(h(ui.Progress, { value: 25, 'aria-label': 'Upload' } as never))).toBe(before[edition])
