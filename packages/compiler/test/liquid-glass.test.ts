@@ -37,8 +37,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the fifty-three experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'number-input', 'pagination', 'popover', 'progress', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'tooltip'])
+  it('compiles the fifty-seven experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -47,12 +47,14 @@ describe('liquid-glass compile', () => {
       'components/ui/accordion.css',
       'components/ui/alert-dialog.css',
       'components/ui/alert.css',
+      'components/ui/aspect-ratio.css',
       'components/ui/avatar.css',
       'components/ui/badge.css',
       'components/ui/breadcrumb.css',
       'components/ui/button-group.css',
       'components/ui/calendar.css',
       'components/ui/card.css',
+      'components/ui/carousel.css',
       'components/ui/checkbox.css',
       'components/ui/chip.css',
       'components/ui/code-block.css',
@@ -74,6 +76,7 @@ describe('liquid-glass compile', () => {
       'components/ui/native-select.css',
       'components/ui/number-input.css',
       'components/ui/pagination.css',
+      'components/ui/password-field.css',
       'components/ui/popover.css',
       'components/ui/progress.css',
       'components/ui/radio-group.css',
@@ -93,6 +96,7 @@ describe('liquid-glass compile', () => {
       'components/ui/toast.css',
       'components/ui/toggle-group.css',
       'components/ui/toggle.css',
+      'components/ui/toolbar.css',
       'components/ui/tooltip.css',
       'styles/ui-style.css',
       'styles/ui-tokens.css',

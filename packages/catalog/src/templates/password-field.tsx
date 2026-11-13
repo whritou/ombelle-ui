@@ -4,7 +4,10 @@ import { ArrowBigUpIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './password-field.css'
 
-export type PasswordCheck = { label: string; test(value: string): boolean }
+/** A check the value must pass: a function, or a regular expression source in `match`. */
+export type PasswordCheck = { label: string } & ({ test(value: string): boolean } | { match: string })
+
+const passes = (check: PasswordCheck, value: string) => ('test' in check ? check.test(value) : new RegExp(check.match).test(value))
 
 type PasswordFieldState = {
   inputId: string
@@ -179,9 +182,9 @@ export type PasswordFieldStrengthProps = React.ComponentProps<'div'> & { checks:
 /** How many checks the value passes, and the first one it fails. */
 export function PasswordFieldStrength({ checks, className, ...props }: PasswordFieldStrengthProps) {
   const field = usePasswordField('PasswordFieldStrength')
-  const passed = checks.filter(check => check.test(field.value)).length
+  const passed = checks.filter(check => passes(check, field.value)).length
   const word = strengthWord(passed, checks.length)
-  const failing = checks.find(check => !check.test(field.value))
+  const failing = checks.find(check => !passes(check, field.value))
   const hint = failing ? ` · ${failing.label}${checks.length - passed === 1 ? ' to reach the last check' : ''}` : ''
   return (
     <div
