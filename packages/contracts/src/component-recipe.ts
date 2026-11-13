@@ -116,6 +116,7 @@ function validateComposition(recipe: ComponentRecipe): void {
     case 'carousel':
       if (recipe.content.label.trim() === '') reject('Name the carousel', '/content/label')
       if (recipe.props.thumbnails && recipe.props.variant !== 'image') reject('Thumbnails need the image variant; set variant to image or turn thumbnails off', '/props/thumbnails')
+      if (recipe.props.variant === 'image' && (recipe.props.slidesPerView ?? 1) > 1) reject('The image variant shows one image per view; set slidesPerView to 1 or use the default variant', '/props/slidesPerView')
       break
     case 'password-field':
       if (recipe.content.label.trim() === '') reject('Label the password field', '/content/label')

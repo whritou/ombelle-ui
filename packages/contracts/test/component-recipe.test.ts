@@ -627,6 +627,8 @@ it.each([
   ['carousel', { variant: 'image' }, {}],
   ['carousel', { variant: 'default' }, {}],
   ['carousel', { variant: 'image', thumbnails: true }, {}],
+  ['carousel', { variant: 'image', slidesPerView: 1 }, {}],
+  ['carousel', { variant: 'default', slidesPerView: 3 }, {}],
   ['carousel', { thumbnails: false }, {}],
 ] as const)('accepts the 0.7.6 %s variant %o %o', (component, props, content) => {
   const recipe = validateComponentRecipe(variants076Draft(component, props, content))
@@ -657,6 +659,7 @@ it.each([
   ['tooltip', {}, { shortcut: 'A+B+C+D' }, '/content/shortcut', /shortcut/],
   ['carousel', { thumbnails: true }, {}, '/props/thumbnails', /thumbnails/],
   ['carousel', { variant: 'default', thumbnails: true }, {}, '/props/thumbnails', /thumbnails/],
+  ['carousel', { variant: 'image', slidesPerView: 2 }, {}, '/props/slidesPerView', /slidesPerView/],
 ] as const)('rejects the 0.7.6 %s composition %o %o at %s', (component, props, content, path, message) => {
   expect(() => validateComponentRecipe(variants076Draft(component, props, content)))
     .toThrow(expect.objectContaining({ path, message: expect.stringMatching(message) }))
