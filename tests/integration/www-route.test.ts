@@ -23,7 +23,7 @@ describe('Button editor route', () => {
   it('names Button in the component switcher and links back to the component editors', () => {
     const html = renderToStaticMarkup(createElement(ButtonEditorPage))
     // The switcher's list and catalog links render in a sheet when it opens.
-    expect(html).toMatch(/<button\b(?=[^>]*aria-label="Component: Button. Choose a component")(?=[^>]*aria-haspopup="dialog")[^>]*>Button</)
+    expect(html).toMatch(/<button\b(?=[^>]*aria-label="Component: Button. Choose a component")(?=[^>]*aria-haspopup="dialog")[^>]*><span>Button<\/span>/)
     expect(html).toMatch(/<a\b(?=[^>]*href="\/editor\/component")(?=[^>]*aria-label="All components")[^>]*>/)
     expect(html).not.toContain('aria-label="Editable components"')
   })
