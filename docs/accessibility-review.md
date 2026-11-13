@@ -350,6 +350,17 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Alert Dialog typed confirmation | | | | | | | | | | |
 | Breadcrumb collapsed menu | | | | | | | | | | |
 
+#### Variants (0.7.6)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Sheet snap handle value text (`Half height`, `Full height`, `33%`) | | | | | | | | | | |
+| Card action button name | | | | | | | | | | |
+| Slider editable value field (Enter, blur, Escape, bad input) | | | | | | | | | | |
+| Progress and Meter ring: hidden number, value text read once | | | | | | | | | | |
+| Code Block diff markers and `Added:` / `Removed:` screen-reader text | | | | | | | | | | |
+| Tooltip shortcut announced once, through `aria-keyshortcuts` | | | | | | | | | | |
+
 #### Variants, batch 6a (0.7.3)
 
 | Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |

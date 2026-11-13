@@ -112,6 +112,27 @@ export function Highlighted({ code, lines }: { code: string; lines: React.ReactN
 
 Tokens are `span` elements with `data-token` set to `comment`, `string`, `keyword`, `tag`, `attr`, `number`, `property`, `punct` or `flag`; the stylesheet colours them inside `code-block-code`.
 
+### Diff (0.7.6)
+
+`diff` needs CLI **0.7.6** or later, including in component recipes. Leaving it out renders what earlier releases render.
+
+```tsx
+const change = ':root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n}\n'
+
+<CodeBlock title="ui-style.css" language="css" diff code={change} />
+```
+
+- **The marker is the first character of a line, and only that.** A line that starts with `+` is added and one that starts with `-` is removed; the marker character is not shown in the code. Every other line is unchanged and is shown and copied as written, including a leading space.
+- **Indent unchanged lines that start with `-`.** A CSS custom property at column 0 (`--radius: 4px;`) starts with `-`, so it reads as a removed line. Indent it, or start the line with a space, to keep it unchanged.
+- Each line starts with an `aria-hidden` marker in a 28px column before the line numbers: `+`, `−` (U+2212) or a space. Added and removed lines carry `data-diff="added"` or `"removed"`, a tinted band and the visually hidden prefix `Added: ` or `Removed: `, so a screen reader hears the change and colour is never the only signal.
+- The header shows the count after the title, `+2 −1` (`aria-hidden`), with the hidden text `2 added, 1 removed`.
+- Copy copies only the new version: unchanged and added lines, without their markers, with the input's line endings (CRLF stays CRLF). Its label defaults to "Copy the new {title}", or "Copy the new code" without a title.
+- On the tinted bands a `comment` token takes the `--code-block-punct` colour: the comment colour falls below 4.5:1 on the bands, and the punctuation colour stays above it on both.
+- `diff` applies to the built-in highlighted output. With `children` (another highlighter) it sets nothing: no count, no markers and the plain Copy label.
+- `CodeBlockCode` takes `diff` too. `diffLines(code)`, `diffNewVersion(code)` and `diffCounts(code)` are exported.
+- Forced colours drop the bands and keep the markers and count in `CanvasText`.
+- **Recipe:** `diff` (boolean), in file mode only; it is rejected with `mode: 'command'`.
+
 ## Surface and token colours
 
 Each family stylesheet sets custom properties on `[data-slot='code-block']`. Override them on the root or an ancestor rule of your own:

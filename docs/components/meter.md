@@ -50,6 +50,19 @@ export function Storage() {
 - `MeterLabel` names the track automatically. Without it, pass `aria-label` or `aria-labelledby` to `Meter`.
 - The root carries `data-mode`: `bar`, `discrete` or `labelled`.
 
+## Variants (0.7.6)
+
+`shape` needs CLI **0.7.6** or later, including in component recipes. Leaving it out, or `shape="bar"`, renders what earlier releases render.
+
+```tsx
+<Meter shape="circle" value={72} max={100} aria-label="Storage used" />
+```
+
+- **`shape="circle"`** draws the total as a 72px ring (`meter-ring`, with `meter-ring-track` and `meter-ring-indicator`) inside the track, with the rounded percentage (`meter-ring-value`, 14px) in the centre. The ring and the number are `aria-hidden`; the track keeps `role="meter"`, its name and its value text ("72 of 100").
+- Segmented and labelled meters draw their total as one ring: cells and parts are not drawn, and a legend stays below.
+- Neo brutalism draws square ends; forced colours draw the ring in `Highlight` on a `GrayText` track.
+- **Recipe:** `shape` (`bar` or `circle`), in both modes.
+
 ## Recipe
 
 The recipe editor sets `mode` (`discrete` or `labelled`), `value`, `max`, `segments`, `warningPercent` (default 60), the label and up to four labelled parts. Compilation emits `components/ui/meter.tsx`, `components/ui/meter.css` and `examples/meter.tsx`. Runtime dependencies are React 19.3.1, clsx 2.1.1 and tailwind-merge 3.7.0, plus @base-ui/react 1.9.0 in the Base UI edition.

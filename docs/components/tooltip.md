@@ -42,6 +42,31 @@ TooltipTrigger, TooltipContent and TooltipArrow forward React.ComponentProps of 
 
 Pointer hover opens the tooltip after the configured delay; keyboard focus opens it immediately. Escape dismisses it while focus remains on the trigger. Leaving the trigger and content or blurring the trigger closes it. Radix preserves hoverable content by default, so pointer users can move into the description without closing it. Avoid disabling this behavior without assessing accessibility. No custom event logic overrides Radix. Tooltip is descriptive and never takes focus.
 
+## Variants (0.7.6)
+
+`TooltipShortcut` needs CLI **0.7.6** or later, including in component recipes. Leaving it out renders what earlier releases render.
+
+```tsx
+import {
+  Tooltip, TooltipContent, TooltipShortcut, TooltipTrigger, ariaKeyShortcuts,
+} from '@/components/ui/tooltip'
+
+const undo = ['Ctrl', 'Z']
+
+<Tooltip>
+  <TooltipTrigger type="button" aria-label="Undo" aria-keyshortcuts={ariaKeyShortcuts(undo)}>↶</TooltipTrigger>
+  <TooltipContent>
+    Undo
+    <TooltipShortcut keys={undo} />
+  </TooltipContent>
+</Tooltip>
+```
+
+- **`TooltipShortcut`** (`keys`, up to three in practice) draws one key cap (`tooltip-shortcut-key`, a `kbd`) per key after the tooltip text. It is `aria-hidden`, so the tooltip is announced as "Undo" alone.
+- **Pass the same keys to `aria-keyshortcuts` on the trigger** through `ariaKeyShortcuts(keys)`, so the shortcut is announced once, by the trigger. It turns `Ctrl` into `Control`, `Cmd` and `⌘` into `Meta`, `Option` and `⌥` into `Alt`, `⇧` into `Shift` and `Esc` into `Escape`, upper-cases a single character, and joins with `+`: `['Ctrl', 'Z']` gives `Control+Z`, `['Cmd', 'Shift', 'p']` gives `Meta+Shift+P`.
+- Key caps are mono 11px with a 1px border at 45 % of the tooltip's text colour, a 4px radius (square in neo brutalism) and a 3px gap. Forced colours draw the border in `CanvasText`.
+- **Recipe:** `content.shortcut`, up to three keys joined by `+` (`Ctrl+Z`, `Ctrl+Shift+P`), at most 40 characters; empty means none. An empty key (`Ctrl++`) or a fourth key is rejected.
+
 ## Styles and artifacts
 
 The content uses semantic popover colors for both modes, readable text, logical padding and sizing, wrapping, and a width bounded by the available collision space. The default side offset separates content from the trigger focus ring. Consumers must still check placement around other focusable controls and keep triggers at least 24 by 24 CSS pixels (44 by 44 preferred). Flat has a subtle shadow, minimalist removes it, neo-brutalism and ombelle use the preset offset shadow (ombelle fills the content with the primary color). Arrow fill and outline match the content. Trigger focus uses a 3px ring with 3px offset. Forced colors use system colors for content, arrow and focus; reduced motion removes the entry fade.

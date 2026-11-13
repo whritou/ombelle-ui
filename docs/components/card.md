@@ -104,6 +104,30 @@ Card stays a server component with no new dependency, and both editions use the 
 </Card>
 ```
 
+## Variants (0.7.6)
+
+`CardAction` needs CLI **0.7.6** or later, including in component recipes. Leaving it out renders what earlier releases render.
+
+```tsx
+import { Card, CardAction, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+<Card>
+  <CardHeader>
+    <CardTitle>Studio warm</CardTitle>
+    <CardDescription>Your preset · edited 2 h ago</CardDescription>
+    <CardAction>
+      <button type="button" aria-label="More actions for Studio warm"><span aria-hidden="true">⋯</span></button>
+    </CardAction>
+  </CardHeader>
+</Card>
+```
+
+- **`CardAction`** (`data-slot="card-action"`) puts a control at the end of the header. The header becomes a two-column grid: the title and description fill the first column and the action spans both rows of the second, aligned with the title's top. The title's start and top stay where they are when the action changes, and the title takes the width the action leaves.
+- The action sits above a `CardLink` layer, so it keeps its own click on a link card.
+- A bare `<button>` in it is drawn as the family's small outline icon button, 34 × 34 px, with a hover tint and the family focus ring (in neo brutalism a solid ring inside the button, which stays visible on the filled header). A catalog `Button` (it carries its own `data-slot`) keeps its own styles. Name an icon-only button, as in "More actions for Studio warm".
+- For stat rows and lists, use `density="dense"`; there is no separate `size` prop (see the [0.7.6 evidence](../evidence/variants-076.md) for how it compares with the board's small card).
+- **Recipe:** `action` (boolean) adds a "More actions for {title}" button; it is rejected with `mode: 'options'`.
+
 ## Generated files and ownership
 
 Compilation emits `components/ui/card.tsx`, colocated `components/ui/card.css`, and `examples/card.tsx`, together with the existing shared utility and theme artifacts. The installer honors configured aliases and destination paths; the ordinary default usage destination is `src/ombelle-examples/card.tsx`. Importing the generated Card loads `./card.css`; retain that import if moving the component. The standard registry item includes the exact component, utility, and Card CSS bytes.
