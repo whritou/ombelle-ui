@@ -159,9 +159,10 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
     const children = Array.from(element.children) as HTMLElement[]
     const entries = children.filter(child => child.getAttribute('role') !== 'presentation' && !child.hasAttribute('data-breadcrumb-overflow'))
     const signature = entries.map(entry => entry.textContent ?? '').join('\u0000')
-    if (measured.current?.signature !== signature) {
-      // Measure from the full trail: unfold first, then measure on the next layout.
-      if (entries.some(entry => entry.hidden)) {
+    const unfolded = !entries.some(entry => entry.hidden)
+    // Widths are read from the full trail: whenever it shows (a late web font can widen it), and after the items change.
+    if (measured.current?.signature !== signature || unfolded) {
+      if (!unfolded) {
         measured.current = null
         setHidden(0)
         return
@@ -189,9 +190,28 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
     const element = list.current
     if (!element || typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(() => recompute())
-    observer.observe(element)
-    if (element.parentElement) observer.observe(element.parentElement)
-    return () => observer.disconnect()
+    // The nav sets the space; the items' own size changes when a web font loads.
+    const watch = () => {
+      observer.disconnect()
+      observer.observe(element)
+      if (element.parentElement) observer.observe(element.parentElement)
+      for (const child of Array.from(element.children)) observer.observe(child)
+    }
+    watch()
+    const children = new MutationObserver(watch)
+    children.observe(element, { childList: true })
+    // Fonts that finish loading while the trail is folded change hidden widths too: measure from the full trail again.
+    const fonts = typeof document === 'undefined' ? undefined : document.fonts
+    const refit = () => {
+      measured.current = null
+      setHidden(0)
+    }
+    fonts?.addEventListener?.('loadingdone', refit)
+    return () => {
+      observer.disconnect()
+      children.disconnect()
+      fonts?.removeEventListener?.('loadingdone', refit)
+    }
   }, [recompute])
 
   const hiddenLinks = React.useCallback(() => Array.from(list.current?.querySelectorAll<HTMLAnchorElement>(':scope > [data-breadcrumb-hidden] a[href]') ?? [])

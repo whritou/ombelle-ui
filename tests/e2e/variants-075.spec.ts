@@ -270,3 +270,19 @@ for (const edition of ['radix', 'base'] as const) {
     }
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test(`${edition}: a Breadcrumb measures again when its text grows after mount, as with a font swap`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await open(page, edition)
+    const nav = page.getByRole('navigation', { name: 'Component path' })
+    await expect(nav.getByRole('link', { name: 'Forms' })).toBeVisible()
+    await expect(nav.getByRole('button', { name: /^Show \d+ more$/ })).toHaveCount(0)
+    // A wider font arriving late: the items grow while nothing is folded.
+    await nav.evaluate(element => { (element as HTMLElement).style.fontSize = '2.25rem' })
+    await expect(nav.getByRole('button', { name: /^Show \d+ more$/ })).toBeVisible()
+    const box = (await nav.boundingBox())!
+    const list = await nav.locator('ol').evaluate(element => element.scrollWidth)
+    expect(list).toBeLessThanOrEqual(Math.ceil(box.width) + 1)
+  })
+}

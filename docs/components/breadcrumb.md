@@ -89,7 +89,7 @@ This needs CLI **0.7.5** or later, including in component recipes. Without `coll
 
 - With `collapse="auto"`, a ResizeObserver measures the trail against the width of the `nav`. When it does not fit, the middle items fold, from the second onward, until it fits. The first item and the current page always stay; when they alone do not fit, every middle item folds. A trail of one or two items never folds.
 - In their place, `BreadcrumbEllipsis` becomes a menu button named "Show N more" whose menu lists the folded pages as links, in trail order. The menu is drawn with each family's Dropdown Menu look, under the slots `breadcrumb-menu` and `breadcrumb-menu-item`.
-- The server renders the full trail; the collapse applies after mount. Item widths are measured from a full render and measured again when the items change. Items mapped to fragments, as above, fold too.
+- The server renders the full trail; the collapse applies after mount. Item widths are measured from the full trail: whenever it is shown, again when the items change, and again when web fonts finish loading. Items mapped to fragments, as above, fold too.
 - Installing Breadcrumb now installs `@radix-ui/react-dropdown-menu` (Radix edition), not the Dropdown Menu component.
 - A single long label is not truncated.
 - **Recipe:** `collapse` (`none` or `auto`).
