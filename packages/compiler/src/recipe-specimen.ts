@@ -36,6 +36,11 @@ const colorSwatches = [
   { label: 'Ink', value: 'oklch(0.22 0.012 275)' }, { label: 'Red', value: 'oklch(0.52 0.21 27)' },
   { label: 'Sky', value: 'oklch(0.6 0.12 230)' }, { label: 'Paper', value: 'oklch(0.985 0.004 350)' },
 ] as const
+// The 0.7.6 board's password checks, as patterns: specimen props hold no functions.
+const passwordChecks = [
+  { label: 'at least 12 characters', match: '^.{12,}$' }, { label: 'a number', match: '\\d' }, { label: 'add a symbol', match: '[^A-Za-z0-9]' },
+] as const
+const ratios = { '16/9': 16 / 9, '4/3': 4 / 3, '1/1': 1, '3/2': 3 / 2, '21/9': 21 / 9 } as const
 // The Ombelle preset's primary foreground in light and dark.
 const primaryForeground = { light: 'oklch(0.99 0 0)', dark: 'oklch(0.16 0.01 275)' } as const
 
@@ -55,6 +60,17 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ...(content.secondaryAction.trim() ? [node('button', { type: 'button', 'data-empty-action': 'secondary' }, content.secondaryAction)] : []),
         node('button', { type: 'button', 'data-empty-action': 'primary' }, content.primaryAction)))
     case 'field': {
+      if (props.form === 'summary' || (props.fieldset ?? 'none') !== 'none') {
+        // Named fields with native controls marked for the Field styles; the first two carry an error.
+        const names = content.fields?.length ? content.fields : [content.label]
+        const fields = names.map((name, index) => node('Field', { name: `field-${index + 1}`, required: index === 0 },
+          node('FieldLabel', {}, name), node('FieldControl', {}, node('input', { type: 'text', 'data-field-input': '' })), node('FieldError', {})))
+        const body = (props.fieldset ?? 'none') === 'none' ? fields
+          : [node('FieldSet', { disabled: props.fieldset === 'disabled' }, node('FieldLegend', {}, content.legend ?? ''), ...fields)]
+        if (props.form !== 'summary') return body[0]
+        const errors = Object.fromEntries(names.slice(0, 2).map((_, index) => [`field-${index + 1}`, 'Enter a value.']))
+        return node('Form', { summaryAction: 'saving', errors, 'aria-label': content.legend }, node('FormErrorSummary', {}), ...body)
+      }
       // A native control marked for the Field styles: a recipe compiles only its own component.
       const control = props.control === 'textarea' ? node('textarea', { placeholder: content.placeholder || undefined, 'data-field-input': '' })
         : props.control === 'native-select' ? node('select', { 'data-field-input': '' }, node('option', { value: '' }, content.placeholder || 'Choose an option'))
@@ -159,6 +175,41 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
           ? [node('input', { type: 'text', 'aria-label': content.label, 'data-button-group-input': '' }), button(first)]
           : content.items.map(button)
       return node('ButtonGroup', { orientation: props.orientation, 'aria-label': content.label }, ...children)
+    }
+    case 'password-field': {
+      const field = (text: string, suffix: string, extras: RecipeSpecimen[]) => node('PasswordField', {},
+        node('label', { htmlFor: localId(suffix) }, text),
+        node('PasswordFieldControl', {}, node('PasswordFieldInput', { id: localId(suffix), autoComplete: 'new-password' }), node('PasswordFieldToggle', {})),
+        ...extras)
+      return node('div', stacked,
+        field(content.label, 'control', [
+          ...(props.capsLockNotice === false ? [] : [node('PasswordFieldCapsLock', {})]),
+          ...(props.strength === false ? [] : [node('PasswordFieldStrength', { checks: passwordChecks })]),
+        ]),
+        ...(props.confirm ? [field('Confirm password', 'confirm', [])] : []))
+    }
+    case 'carousel':
+      return node('Carousel', { 'aria-label': content.label, slidesPerView: props.slidesPerView ?? 1 },
+        node('CarouselContent', {}, ...content.slides.map(slide => node('CarouselItem', {}, node('div', { 'data-carousel-card': '' }, slide)))),
+        node('CarouselPrevious', {}), node('CarouselNext', {}),
+        ...(props.dots === false ? [] : [node('CarouselDots', {})]),
+        ...(props.counter === false ? [] : [node('CarouselCounter', {})]))
+    case 'aspect-ratio':
+      return node('AspectRatio', { ratio: ratios[props.ratio ?? '16/9'] }, node('span', {}, content.label))
+    case 'toolbar': {
+      const toggles = props.toggles ?? 'single'
+      const items = content.items
+      const grouped = toggles === 'single' ? items.slice(0, 2) : toggles === 'multiple' ? items.slice(0, -1) : []
+      const rest = items.slice(grouped.length)
+      const value = (index: number) => `item-${index + 1}`
+      return node('Toolbar', { 'aria-label': content.label },
+        ...(grouped.length ? [node('ToolbarToggleGroup', toggles === 'single'
+          ? { type: 'single', defaultValue: value(0), 'aria-label': content.label }
+          : { type: 'multiple', defaultValue: [value(0)], 'aria-label': content.label },
+        ...grouped.map((item, index) => node('ToolbarToggleItem', { value: value(index) }, item)))] : []),
+        ...(grouped.length && rest.length ? [node('ToolbarSeparator', {})] : []),
+        ...rest.map(item => node('ToolbarButton', {}, item)),
+        ...(props.overflow === false ? [] : [node('ToolbarOverflow', {})]))
     }
     case 'item':
       return node('Item', { variant: props.variant, size: props.size },
@@ -341,6 +392,14 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ...(props.required ? [node('span', { 'aria-hidden': 'true' }, '*')] : [])),
       node('input', { id: localId('control'), type: 'text', required: props.required }))
     case 'checkbox':
+      if (props.group === 'parent') {
+        const options = content.options ?? []
+        // A recipe compiles only its own component: a native fieldset, marked for the Checkbox styles.
+        return node('fieldset', { 'data-checkbox-group-fieldset': '' }, node('legend', { 'data-checkbox-group-legend': '' }, content.legend ?? ''),
+          node('CheckboxGroup', { defaultValue: options.slice(0, Math.floor(options.length / 2)).map((_, index) => `option-${index + 1}`) },
+            node('CheckboxGroupParent', { title: 'All' }),
+            ...options.map((option, index) => node('CheckboxOption', { value: `option-${index + 1}`, title: option }))))
+      }
       // The option layouts name the checkbox by their own title; a description shows only with one.
       if (props.option === 'row' || props.option === 'card')
         return node('CheckboxOption', { appearance: props.option, title: content.label, description: content.description || undefined,

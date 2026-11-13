@@ -68,6 +68,9 @@ import { Toggle } from '../generated/preset-gallery/components/ui/toggle'
 import { ScrollArea } from '../generated/preset-gallery/components/ui/scroll-area'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '../generated/preset-gallery/components/ui/item'
 import { CodeBlock, CodeBlockCommand } from '../generated/preset-gallery/components/ui/code-block'
+import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '../generated/preset-gallery/components/ui/carousel'
+import { AspectRatio } from '../generated/preset-gallery/components/ui/aspect-ratio'
+import { Toolbar, ToolbarOverflow, ToolbarToggleGroup, ToolbarToggleItem } from '../generated/preset-gallery/components/ui/toolbar'
 import { gate, type SceneProps } from './shared'
 
 const rows = [
@@ -129,6 +132,17 @@ export function ProjectsScene(props: SceneProps) {
             <p className="scene-muted">12 projects across 3 teams.</p>
           </div>
           <div className="scene-actions">
+            {show(
+              'toolbar',
+              'Toolbar',
+              <Toolbar aria-label="View options">
+                <ToolbarToggleGroup type="single" defaultValue="list" aria-label="Layout">
+                  <ToolbarToggleItem value="list">List</ToolbarToggleItem>
+                  <ToolbarToggleItem value="board">Board</ToolbarToggleItem>
+                </ToolbarToggleGroup>
+                <ToolbarOverflow />
+              </Toolbar>,
+            )}
             {show('toggle', 'Toggle', <Toggle variant="outline">Show grid</Toggle>)}
             {show(
               'dialog',
@@ -361,6 +375,28 @@ export function ProjectsScene(props: SceneProps) {
           )}
         </CardFooter>
       </Card>
+      {show(
+        'carousel',
+        'Carousel',
+        <Card appearance="outlined">
+          <CardContent>
+            <Carousel aria-label="Recent projects" slidesPerView={2}>
+              <CarouselContent>
+                {rows.slice(0, 5).map((row) => (
+                  <CarouselItem key={row.name}>
+                    {show('aspect-ratio', 'Aspect Ratio', <AspectRatio ratio={16 / 9}><span>{row.name}</span></AspectRatio>)}
+                    <p className="scene-muted">{row.owner}, updated {row.updated}</p>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+              <CarouselDots />
+              <CarouselCounter />
+            </Carousel>
+          </CardContent>
+        </Card>,
+      )}
       {show(
         'item',
         'Item',

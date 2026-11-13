@@ -38,7 +38,7 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
   expect(html).not.toContain('form controls other than Input')
   // The supported list follows the contracts' support table, so it names every component.
   expect(html).toContain(
-    'Liquid glass is experimental. Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea, Tooltip, Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination, Toast, Spinner, Kbd, Empty State, Field, Meter, Stepper, Slider, Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card, Context Menu, Calendar, Toggle, Collapsible, Scroll Area, Button Group, Item, Number Input, Color Picker and Code Block support it.',
+    'Liquid glass is experimental. Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea, Tooltip, Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination, Toast, Spinner, Kbd, Empty State, Field, Meter, Stepper, Slider, Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card, Context Menu, Calendar, Toggle, Collapsible, Scroll Area, Button Group, Item, Number Input, Color Picker, Code Block, Password Field, Carousel, Aspect Ratio and Toolbar support it.',
   )
   // No component is unavailable in glass any more, so the panel names none.
   expect(html).not.toContain('unavailable')

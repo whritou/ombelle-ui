@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { ComponentsScenario076 } from './components-076-scenario'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -861,6 +862,7 @@ function CatalogExpansionScenario() {
         <VariantsBasicsScenario />
         <VariantsMoreScenario />
         <VariantsScenario075 />
+        <ComponentsScenario076 />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

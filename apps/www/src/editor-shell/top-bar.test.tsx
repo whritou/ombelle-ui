@@ -2,7 +2,6 @@ import { createRef } from 'react'
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { EditorTopBar } from './top-bar'
-import { OverflowMenu, menuFocusTarget, menuPosition } from './overflow-menu'
 
 const noop = () => {}
 const history = { disabled: false, onClick: noop, buttonRef: createRef<HTMLButtonElement>() }
@@ -45,27 +44,22 @@ it('EditorTopBar groups Undo and Redo as a History button group, keeping their d
   expect(buttons[1]).toContain('disabled=""')
 })
 
-it('OverflowMenu puts destructive items last after a separator', () => {
+it('EditorTopBar puts History, Commands and the menu in one Editor actions toolbar, with the primary action outside', () => {
   const html = renderToStaticMarkup(
-    <OverflowMenu
-      id="m"
-      label="More"
-      items={[
-        { id: 'del', label: 'Delete', onSelect: noop, destructive: true },
-        { id: 'dup', label: 'Duplicate', onSelect: noop },
-        { id: 'off', label: 'Off', onSelect: noop, disabled: true },
-      ]}
-    />,
+    <EditorTopBar crumbs={['A']} nameField={{ id: 'n', label: 'Name', value: 'x', maxLength: 9, onChange: noop }}
+      revision="r1" status="" undo={history} redo={history}
+      menu={{ label: 'More actions', items: [{ id: 'del', label: 'Delete', onSelect: noop, destructive: true }, { id: 'dup', label: 'Duplicate', onSelect: noop }] }}
+      commands={[]} primary={<button type="button">Get code</button>} />,
   )
-  expect(html).toContain('aria-label="More"')
-  expect(html).toContain('popoverTarget="m"')
-  expect(html).toContain('role="menu"')
-  expect(html).toContain('aria-haspopup="menu"')
-  expect(html.match(/role="menuitem"/g)).toHaveLength(3)
-  expect(html).toContain('role="separator"')
-  expect(html.indexOf('Duplicate')).toBeLessThan(html.indexOf('role="separator"'))
-  expect(html.indexOf('role="separator"')).toBeLessThan(html.indexOf('Delete'))
-  expect(html).toContain('disabled=""')
+  const toolbar = /<div[^>]*role="toolbar"[^>]*>([^]*?)<\/div><button type="button">Get code/.exec(html)
+  expect(toolbar).not.toBeNull()
+  expect(toolbar![0]).toMatch(/aria-label="Editor actions"/)
+  expect(toolbar![1]).toContain('aria-label="History"')
+  expect(toolbar![1]).toContain('aria-label="Undo"')
+  expect(toolbar![1]).toContain('aria-keyshortcuts="Control+K Meta+K"')
+  expect(toolbar![1]).toMatch(/<button[^>]*aria-label="More actions"[^>]*aria-haspopup="menu"|<button[^>]*aria-haspopup="menu"[^>]*aria-label="More actions"/)
+  expect(toolbar![1]).not.toContain('Get code')
+  expect(html).not.toContain('role="menu"')
 })
 
 it('EditorTopBar can render the name field read-only', () => {
@@ -80,24 +74,6 @@ it('EditorTopBar can render the name field read-only', () => {
   expect(field()).not.toContain('readOnly')
 })
 
-it('menuFocusTarget follows the menu keyboard pattern over enabled items', () => {
-  const disabled = [false, true, false, false]
-  expect(menuFocusTarget('ArrowDown', 0, disabled)).toBe(2)
-  expect(menuFocusTarget('ArrowDown', 3, disabled)).toBe(0)
-  expect(menuFocusTarget('ArrowUp', 2, disabled)).toBe(0)
-  expect(menuFocusTarget('ArrowUp', 0, disabled)).toBe(3)
-  expect(menuFocusTarget('ArrowDown', -1, disabled)).toBe(0)
-  expect(menuFocusTarget('ArrowUp', -1, disabled)).toBe(3)
-  expect(menuFocusTarget('Home', 3, disabled)).toBe(0)
-  expect(menuFocusTarget('End', 0, disabled)).toBe(3)
-  expect(menuFocusTarget('Tab', 0, disabled)).toBeNull()
-  expect(menuFocusTarget('ArrowDown', -1, [true, true])).toBeNull()
-})
-
-it('menuPosition opens the menu under its trigger, right edges aligned, inside the viewport', () => {
-  expect(menuPosition({ bottom: 40.4, right: 1200 }, 1440)).toEqual({ top: 44, right: 240 })
-  expect(menuPosition({ bottom: 40, right: 1440 }, 1440)).toEqual({ top: 44, right: 4 })
-})
 
 it('EditorTopBar shows its trail as a collapsing catalog Breadcrumb with the current page marked', () => {
   const html = renderToStaticMarkup(

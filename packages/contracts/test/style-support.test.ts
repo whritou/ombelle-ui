@@ -10,7 +10,7 @@ import {
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block']
+const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block', 'password-field', 'carousel', 'aspect-ratio', 'toolbar']
 const glassUnavailable: string[] = []
 
 describe('style support table', () => {
@@ -33,8 +33,8 @@ describe('style support table', () => {
     expect(componentsWithStyleSupport('liquid-glass', ['stable'])).toEqual([])
     expect(componentsWithStyleSupport('flat', ['stable'])).toEqual([...supportedComponentIds])
   })
-  it('marks ombelle stable for all fifty-three components', () => {
-    expect(supportedComponentIds).toHaveLength(53)
+  it('marks ombelle stable for all fifty-seven components', () => {
+    expect(supportedComponentIds).toHaveLength(57)
     for (const id of supportedComponentIds) expect(styleSupport(id, 'ombelle')).toBe('stable')
   })
   it('recognises families', () => {
@@ -67,7 +67,7 @@ describe('assertStyleAvailable with a synthetic family', () => {
       expect(() => support.assertStyleAvailable(['card', 'progress', 'skeleton'], 'liquid-glass')).toThrow(
         expect.objectContaining({
           code: 'STYLE_UNAVAILABLE',
-          message: expect.stringMatching(/^Progress is unavailable for liquid-glass\. Experimental liquid-glass components: alert, accordion, .*tooltip, input-group, sheet, alert-dialog, breadcrumb, pagination, toast, spinner, kbd, empty, field, meter, stepper, slider, toggle-group, chip, tag-input, input-otp, combobox, command, hover-card, context-menu, calendar, toggle, collapsible, scroll-area, button-group, item, number-input, color-picker, code-block.$/),
+          message: expect.stringMatching(/^Progress is unavailable for liquid-glass\. Experimental liquid-glass components: alert, accordion, .*tooltip, input-group, sheet, alert-dialog, breadcrumb, pagination, toast, spinner, kbd, empty, field, meter, stepper, slider, toggle-group, chip, tag-input, input-otp, combobox, command, hover-card, context-menu, calendar, toggle, collapsible, scroll-area, button-group, item, number-input, color-picker, code-block, password-field, carousel, aspect-ratio, toolbar.$/),
           path: '/componentIds',
           nextAction: 'Choose a stable family for this component or remove it.',
         }),

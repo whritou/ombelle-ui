@@ -139,7 +139,7 @@ it('previews a published glass preset below the contrast bound', async () => {
   expect(session.state.result?.preset.data.design.glassOpacity).toBe(0.3)
 })
 it.each([
-  ['liquid-glass', ['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block']],
+  ['liquid-glass', ['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block', 'password-field', 'carousel', 'aspect-ratio', 'toolbar']],
   ['flat', supportedComponentIds],
 ] as const)(
   'compiles the components a %s snapshot supports for its preview',

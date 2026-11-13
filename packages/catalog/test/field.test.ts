@@ -16,8 +16,8 @@ const field = (props: Record<string, unknown> = {}, control = h('input', { type:
 
 describe('Field', () => {
   it('provides the Field parts as a client component', () => {
-    expectComponentContract('field', { client: true, parts: ['Field', 'FieldLabel', 'FieldControl', 'FieldDescription', 'FieldError'],
-      slots: ['field', 'field-label', 'field-description', 'field-error'],
+    expectComponentContract('field', { client: true, parts: ['Field', 'FieldLabel', 'FieldControl', 'FieldDescription', 'FieldError', 'FieldSet', 'FieldLegend', 'Form', 'FormErrorSummary'],
+      slots: ['field', 'field-label', 'field-description', 'field-error', 'field-set', 'field-legend', 'form', 'form-error-summary', 'form-error-summary-title', 'form-error-summary-list'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' },
         { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='field']", "[data-slot='field-label']", "[data-slot='field-description']", "[data-slot='field-error']"],

@@ -107,6 +107,27 @@ function validateComposition(recipe: ComponentRecipe): void {
     case 'scroll-area':
       if (recipe.content.label.trim() === '') reject('Name the scroll area', '/content/label')
       break
+    case 'toolbar':
+      if (recipe.content.label.trim() === '') reject('Name the toolbar', '/content/label')
+      if (recipe.props.toggles === 'multiple' && recipe.content.items.length < 2)
+        reject('A toolbar with multiple toggles needs at least two items', '/content/items')
+      break
+    case 'carousel':
+      if (recipe.content.label.trim() === '') reject('Name the carousel', '/content/label')
+      break
+    case 'password-field':
+      if (recipe.content.label.trim() === '') reject('Label the password field', '/content/label')
+      break
+    case 'field':
+      if (((recipe.props.fieldset ?? 'none') !== 'none' || recipe.props.form === 'summary') && !(recipe.content.legend ?? '').trim())
+        reject('A form or fieldset needs a legend', '/content/legend')
+      break
+    case 'checkbox':
+      if (recipe.props.group === 'parent') {
+        if (!(recipe.content.legend ?? '').trim()) reject('A checkbox group needs a legend', '/content/legend')
+        if ((recipe.content.options ?? []).length < 2) reject('A checkbox group needs at least two options', '/content/options')
+      }
+      break
     case 'slider': {
       const { min = 0, max = 100, value = 12, mode = 'single', rangeStart = 20, rangeEnd = 80 } = recipe.props
       if (min >= max) reject('Maximum must be greater than minimum', '/props/max')

@@ -36,7 +36,8 @@ async function expectedTestInventory(kind) {
     // measured run. No test bodies execute, and downloaded reports cannot define
     // their own expected identities or reduce their expected assertion counts.
     const inventory = execute(process.execPath, [cli, 'list', ...selection, '--staticParse=false', '--json'], {
-      cwd: repo, windowsHide: true, timeout: 180000, maxBuffer: 8 * 1024 * 1024,
+      // Listing every unit file takes close to 200 s on CI runners and grows with the catalog.
+      cwd: repo, windowsHide: true, timeout: 360000, maxBuffer: 8 * 1024 * 1024,
     }).then(({ stdout }) => {
       const rows = JSON.parse(stdout)
       if (!Array.isArray(rows) || !rows.length) fail('Empty expected ' + kind + ' assertion inventory')

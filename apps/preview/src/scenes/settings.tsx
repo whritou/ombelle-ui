@@ -82,6 +82,9 @@ import { Slider } from '../generated/preset-gallery/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '../generated/preset-gallery/components/ui/toggle-group'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../generated/preset-gallery/components/ui/collapsible'
 import { ButtonGroup } from '../generated/preset-gallery/components/ui/button-group'
+import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle } from '../generated/preset-gallery/components/ui/password-field'
+import { Form, FormErrorSummary, FieldSet, FieldLegend } from '../generated/preset-gallery/components/ui/field'
+import { CheckboxGroup, CheckboxGroupParent } from '../generated/preset-gallery/components/ui/checkbox'
 import { NumberInput } from '../generated/preset-gallery/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '../generated/preset-gallery/components/ui/color-picker'
 import { TagInput, TagInputInput, TagInputList } from '../generated/preset-gallery/components/ui/tag-input'
@@ -94,6 +97,12 @@ import { gate, type SceneProps } from './shared'
 const startingPresets = ['Ombelle', 'Liquid glass', 'Liquid glass — Givre', 'Liquid glass — Prism', 'Flat', 'Minimalist', 'Neo-brutalism']
 
 /** The workspace's quick actions, shown inline and in the Ctrl+K dialog. */
+const passwordChecks = [
+  { label: 'at least 12 characters', match: '^.{12,}$' },
+  { label: 'a number', match: '\\d' },
+  { label: 'add a symbol', match: '[^A-Za-z0-9]' },
+]
+
 function QuickActions({ onRun }: { onRun(action: string): void }) {
   return (
     <>
@@ -351,6 +360,41 @@ export function SettingsScene(props: SceneProps) {
                       </div>
                     </CollapsibleContent>
                   </Collapsible>,
+                )}
+                {show(
+                  'password-field',
+                  'Password Field',
+                  <Form aria-label="Security" summaryAction="saving" onSubmit={(event) => event.preventDefault()}>
+                    <FormErrorSummary />
+                    <Field name="current" required>
+                      <FieldLabel>Current password</FieldLabel>
+                      <FieldControl><Input type="password" autoComplete="current-password" /></FieldControl>
+                      <FieldError />
+                    </Field>
+                    <PasswordField>
+                      <Label htmlFor="scene-new-password">New password</Label>
+                      <PasswordFieldControl>
+                        <PasswordFieldInput id="scene-new-password" autoComplete="new-password" />
+                        <PasswordFieldToggle />
+                      </PasswordFieldControl>
+                      <PasswordFieldCapsLock />
+                      <PasswordFieldStrength checks={passwordChecks} />
+                    </PasswordField>
+                    <div><Button type="submit" variant="outline">Change password</Button></div>
+                  </Form>,
+                )}
+                {show(
+                  'checkbox',
+                  'Checkbox',
+                  <FieldSet>
+                    <FieldLegend>Notifications</FieldLegend>
+                    <CheckboxGroup defaultValue={['deploys']}>
+                      <CheckboxGroupParent title="All notifications" />
+                      <CheckboxOption value="deploys" title="Deploys" />
+                      <CheckboxOption value="comments" title="Comments" />
+                      <CheckboxOption value="mentions" title="Mentions" />
+                    </CheckboxGroup>
+                  </FieldSet>,
                 )}
                 {show(
                   'color-picker',

@@ -1,0 +1,224 @@
+'use client'
+import * as React from 'react'
+import * as ToolbarPrimitive from '@radix-ui/react-toolbar'
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
+import { CheckIcon, EllipsisIcon } from 'lucide-react'
+import { cn } from './utils.js'
+import './toolbar.css'
+
+type ToolbarState = {
+  overflowed: readonly HTMLElement[]
+  triggerRef: React.RefObject<HTMLButtonElement | null>
+  /** True while a ToolbarOverflow with its own items is present, so the trigger always shows. */
+  setPersistent(persistent: boolean): void
+  focusTrigger: number
+}
+
+const ToolbarContext = React.createContext<ToolbarState | null>(null)
+
+function useToolbar(part: string): ToolbarState {
+  const state = React.useContext(ToolbarContext)
+  if (!state) throw new Error(`${part} must be used inside <Toolbar>`)
+  return state
+}
+
+const entrySelector = '[data-toolbar-item], [data-toolbar-separator]'
+
+/**
+ * Hides the items that no longer fit, from the end, and returns them in order. Measuring shows every
+ * item first, so a widening bar brings items back in the same order.
+ */
+function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef: React.RefObject<HTMLButtonElement | null>, persistent: boolean) {
+  const [overflowed, setOverflowed] = React.useState<readonly HTMLElement[]>([])
+  const [focusTrigger, setFocusTrigger] = React.useState(0)
+  const measure = React.useCallback(() => {
+    const root = rootRef.current
+    if (!root) return
+    const entries = [...root.querySelectorAll<HTMLElement>(entrySelector)].filter(element => element.closest('[data-toolbar-root]') === root)
+    const focused = entries.find(element => element.contains(document.activeElement))
+    // Measured on the real layout, so grouped items, gaps and separators count as drawn.
+    const fits = () => root.scrollWidth <= root.clientWidth + 1
+    for (const element of entries) element.hidden = false
+    const trigger = triggerRef.current
+    const triggerHidden = trigger?.hidden ?? true
+    // Without its own items, More takes no room until something overflows.
+    if (trigger && !persistent) trigger.hidden = true
+    let fit = entries.length
+    if (persistent || !fits()) {
+      if (trigger) trigger.hidden = false
+      while (fit > 0 && !fits()) entries[--fit].hidden = true
+      // A separator never ends the visible row.
+      while (fit > 0 && fit < entries.length && entries[fit - 1].hasAttribute('data-toolbar-separator')) entries[--fit].hidden = true
+    }
+    // React owns the trigger's hidden state; measuring only borrows it.
+    if (trigger) trigger.hidden = triggerHidden
+    entries.forEach((element, index) => {
+      element.hidden = index >= fit
+      if (index >= fit) element.setAttribute('data-overflowed', '')
+      else element.removeAttribute('data-overflowed')
+    })
+    const next = entries.slice(fit).filter(element => element.hasAttribute('data-toolbar-item'))
+    setOverflowed(previous => (previous.length === next.length && previous.every((element, index) => element === next[index]) ? previous : next))
+    if (focused && focused.hidden) setFocusTrigger(count => count + 1)
+  }, [rootRef, triggerRef, persistent])
+  React.useLayoutEffect(() => {
+    measure()
+    const root = rootRef.current
+    if (!root || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(() => measure())
+    observer.observe(root)
+    if (root.parentElement) observer.observe(root.parentElement)
+    // Items added, removed or relabelled change what fits without resizing the bar. Only the
+    // tree and text are watched, not the hidden attributes measuring sets.
+    const mutations = typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(() => measure())
+    mutations?.observe(root, { childList: true, subtree: true, characterData: true })
+    return () => {
+      observer.disconnect()
+      mutations?.disconnect()
+    }
+  }, [measure, rootRef])
+  return { overflowed, focusTrigger }
+}
+
+/** How a hidden toolbar item reads in the More menu. */
+function menuEntry(element: HTMLElement) {
+  const label = element.getAttribute('data-menu-label') || element.getAttribute('aria-label') || element.textContent?.trim() || ''
+  const kind = element.getAttribute('data-toolbar-kind') ?? 'button'
+  const pressed = element.getAttribute('aria-pressed') === 'true' || element.getAttribute('aria-checked') === 'true' || element.getAttribute('data-state') === 'on'
+  const disabled = element.hasAttribute('disabled') || element.getAttribute('aria-disabled') === 'true'
+  return { label, kind, pressed, disabled }
+}
+
+/** Puts destructive items last, after their own separator, as the editor's menu always has. */
+function orderItems(children: React.ReactNode) {
+  const items = React.Children.toArray(children).filter(React.isValidElement) as React.ReactElement<{ destructive?: boolean }>[]
+  return { regular: items.filter(item => !item.props.destructive), destructive: items.filter(item => item.props.destructive) }
+}
+
+export type ToolbarProps = React.ComponentProps<typeof ToolbarPrimitive.Root>
+
+/** One Tab stop for the whole bar; arrow keys move between items, and items that do not fit move into ToolbarOverflow. */
+export function Toolbar({ className, ref, children, ...props }: ToolbarProps) {
+  const rootRef = React.useRef<HTMLDivElement | null>(null)
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null)
+  const [persistent, setPersistent] = React.useState(false)
+  const { overflowed, focusTrigger } = useOverflow(rootRef, triggerRef, persistent)
+  return (
+    <ToolbarContext.Provider value={{ overflowed, triggerRef, setPersistent, focusTrigger }}>
+      <ToolbarPrimitive.Root
+        {...props}
+        ref={(node) => {
+          rootRef.current = node
+          if (typeof ref === 'function') ref(node)
+          else if (ref) ref.current = node
+        }}
+        data-slot="toolbar"
+        data-toolbar-root=""
+        className={cn(className)}
+      >
+        {children}
+      </ToolbarPrimitive.Root>
+    </ToolbarContext.Provider>
+  )
+}
+
+type ItemProps = { menuLabel?: string }
+
+export function ToolbarButton({ className, menuLabel, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Button> & ItemProps) {
+  return <ToolbarPrimitive.Button {...props} data-slot="toolbar-button" data-toolbar-item="" data-toolbar-kind="button" data-menu-label={menuLabel} className={cn(className)} />
+}
+
+export function ToolbarLink({ className, menuLabel, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Link> & ItemProps) {
+  return <ToolbarPrimitive.Link {...props} data-slot="toolbar-link" data-toolbar-item="" data-toolbar-kind="link" data-menu-label={menuLabel} className={cn(className)} />
+}
+
+export function ToolbarToggleGroup({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToggleGroup>) {
+  return <ToolbarPrimitive.ToggleGroup {...props} data-slot="toolbar-toggle-group" className={cn(className)} />
+}
+
+export function ToolbarToggleItem({ className, menuLabel, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToggleItem> & ItemProps) {
+  return <ToolbarPrimitive.ToggleItem {...props} data-slot="toolbar-toggle-item" data-toolbar-item="" data-toolbar-kind="toggle" data-menu-label={menuLabel} className={cn(className)} />
+}
+
+export function ToolbarSeparator({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Separator>) {
+  return <ToolbarPrimitive.Separator {...props} data-slot="toolbar-separator" data-toolbar-separator="" className={cn(className)} />
+}
+
+export type ToolbarOverflowProps = {
+  /** The trigger's name. */
+  label?: string
+  /** ToolbarOverflowItem entries that always stay in the menu, after the overflowed items. */
+  children?: React.ReactNode
+  className?: string
+}
+
+/** The More menu: overflowed items in order, then its own items. Its trigger shows only when the menu has something in it. */
+export function ToolbarOverflow({ label = 'More', children, className }: ToolbarOverflowProps) {
+  const toolbar = useToolbar('ToolbarOverflow')
+  const { regular, destructive } = orderItems(children)
+  const own = regular.length + destructive.length > 0
+  const { setPersistent, triggerRef, focusTrigger } = toolbar
+  React.useLayoutEffect(() => setPersistent(own), [own, setPersistent])
+  React.useEffect(() => {
+    if (focusTrigger) triggerRef.current?.focus()
+  }, [focusTrigger, triggerRef])
+  const show = own || toolbar.overflowed.length > 0
+  return (
+    <DropdownMenuPrimitive.Root>
+      <DropdownMenuPrimitive.Trigger asChild>
+        <ToolbarPrimitive.Button ref={triggerRef} aria-label={label} hidden={!show} data-slot="toolbar-overflow-trigger" data-toolbar-overflow-trigger="" className={cn(className)}>
+          <EllipsisIcon aria-hidden="true" />
+        </ToolbarPrimitive.Button>
+      </DropdownMenuPrimitive.Trigger>
+      <DropdownMenuPrimitive.Portal>
+        <DropdownMenuPrimitive.Content align="end" sideOffset={6} loop data-slot="toolbar-overflow-content" aria-label={label}>
+          <OverflowEntries elements={toolbar.overflowed} />
+          {toolbar.overflowed.length > 0 && regular.length > 0 && <DropdownMenuPrimitive.Separator data-slot="toolbar-overflow-separator" />}
+          {regular}
+          {destructive.length > 0 && (toolbar.overflowed.length > 0 || regular.length > 0) && <DropdownMenuPrimitive.Separator data-slot="toolbar-overflow-separator" />}
+          {destructive}
+        </DropdownMenuPrimitive.Content>
+      </DropdownMenuPrimitive.Portal>
+    </DropdownMenuPrimitive.Root>
+  )
+}
+
+/** The overflowed items, read from the toolbar each time the menu opens. */
+function OverflowEntries({ elements }: { elements: readonly HTMLElement[] }) {
+  return (
+    <>
+      {elements.filter(element => element.isConnected).map((element, index) => {
+        const entry = menuEntry(element)
+        return entry.kind === 'toggle'
+          ? (
+              <DropdownMenuPrimitive.CheckboxItem key={index} checked={entry.pressed} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
+                <span data-slot="toolbar-overflow-indicator">
+                  <DropdownMenuPrimitive.ItemIndicator><CheckIcon aria-hidden="true" /></DropdownMenuPrimitive.ItemIndicator>
+                </span>
+                {entry.label}
+              </DropdownMenuPrimitive.CheckboxItem>
+            )
+          : (
+              <DropdownMenuPrimitive.Item key={index} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
+                <span data-slot="toolbar-overflow-indicator" />
+                {entry.label}
+              </DropdownMenuPrimitive.Item>
+            )
+      })}
+    </>
+  )
+}
+
+export type ToolbarOverflowItemProps = Omit<React.ComponentProps<typeof DropdownMenuPrimitive.Item>, 'onSelect'> & {
+  onSelect(): void
+  destructive?: boolean
+}
+
+export function ToolbarOverflowItem({ onSelect, destructive = false, className, children, ...props }: ToolbarOverflowItemProps) {
+  return (
+    <DropdownMenuPrimitive.Item {...props} onSelect={() => onSelect()} data-slot="toolbar-overflow-item" data-variant={destructive ? 'destructive' : undefined} className={cn(className)}>
+      <span data-slot="toolbar-overflow-indicator" />
+      {children}
+    </DropdownMenuPrimitive.Item>
+  )
+}

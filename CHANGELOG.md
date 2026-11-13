@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add Password Field, Carousel, Aspect Ratio and Toolbar, in all five style families and both editions, with recipe editors. Password Field shows and hides the value without moving the caret or remounting the input, hides it again on submit, announces Caps Lock, and rates the value against checks you pass (a function or a pattern). Carousel snaps with CSS scroll snap, has previous and next buttons (hidden below 640px), one dot per slide and a counter, and never autoplays; it has no dependency. Aspect Ratio keeps media at a fixed ratio. Toolbar is one Tab stop with arrow, Home and End keys, and items that no longer fit move, in order, into a More menu; installing it installs @radix-ui/react-toolbar 1.2.1 and @radix-ui/react-dropdown-menu 2.2.1 in the Radix edition (the Base UI edition adds no dependency). The catalog has 57 components.
+- Add `Form`, `FormErrorSummary`, `FieldSet` and `FieldLegend` to Field, and `CheckboxGroup`, `CheckboxGroupParent` and `CheckboxGroupCount` to Checkbox. A Form leaves validation to the browser before hydration, then reads its named fields' constraints and its own `validate` on submit, shows server errors keyed by field name, and moves focus to a summary whose lines focus their fields; an error clears when its field changes. A Checkbox Group's parent reads checked, unchecked or mixed and checks or clears every enabled child. A disabled FieldSet disables every control inside, including Base UI checkboxes. Projects that already have Field or Checkbox get the parts by adding them again. `Field` takes an optional `name`.
+- Recipes that use the new components, or the new `field` fields (`form`, `fieldset`, `legend`, `fields`) or `checkbox` fields (`group`, `legend`, `options`), need CLI 0.7.6. Default Field and Checkbox recipes are unchanged. Liquid glass remains experimental.
+- The website editors' top bar is built on the catalog Toolbar: Undo, Redo, Commands and the editor menu are one Tab stop, and the hand-built overflow menu is gone.
+
 ## 0.7.5 — 13 November 2026
 
 - Publish CLI 0.7.5: the website install commands now use it, so projects can install the eight new components and the new variants from npm. The registry tarball matches the tested candidate, and a fresh registry installation runs successfully.

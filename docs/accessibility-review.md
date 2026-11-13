@@ -232,6 +232,17 @@ Review these on the preview "0.7.5 variants" section of the edition pages, the P
 - **Typed confirmation**: focus starts in the text field, announced with the instruction as its name; the action is announced as unavailable with the instruction as its description until the text matches exactly; Enter does nothing until then; Escape and Cancel close.
 - **Collapsed Breadcrumb menu**: the "Show N more" button is announced with its count and opens a menu whose items are the folded pages, as links, in trail order; Escape closes it and returns focus to the button.
 
+**Components (0.7.6)**
+
+Review these on the preview "0.7.6 components" section of the edition pages, the Settings and Projects scenes and the website's editor top bar, and record them in their own rows below.
+
+- **Form error summary**: before the first submit nothing is announced as invalid; after a failed submit focus moves to the summary, announced as a region named "Fix N fields before …"; each line is a link that moves focus to its field, which is announced as invalid with its message as its description; an error clears when its field changes.
+- **FieldSet and Checkbox Group**: the group is announced with its legend; the parent checkbox is announced as mixed, checked or not checked, with the count in its name; pressing it checks or clears every enabled child; a disabled fieldset disables every control inside.
+- **Password Field**: the toggle is announced as "Show password", pressed or not; toggling keeps focus and the caret in the input; "Caps Lock is on" is announced once while the input has focus; the strength meter is announced with its word and the first missing check.
+- **Carousel**: the region is announced as a carousel with its name, each slide as "N of M"; the viewport is one Tab stop scrolled by the arrow keys; Previous and Next are announced as unavailable at the ends; the current dot is marked as current; nothing moves on its own.
+- **Aspect Ratio**: the frame adds no role or name; its media keeps its own alt text.
+- **Toolbar**: the toolbar is one Tab stop announced with its name; the arrow keys, Home and End move between items; toggles announce their state; when items overflow, the More button is announced with its menu, which lists the hidden items in order with toggles as checkable items, and focus never lands on a hidden item.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -362,6 +373,18 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Select multiple | | | | | | | | | | |
 | Toast variants and timing | | | | | | | | | | |
 | Sheet handles | | | | | | | | | | |
+
+#### Components (0.7.6)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Form and error summary | | | | | | | | | | |
+| FieldSet and Checkbox Group | | | | | | | | | | |
+| Password Field | | | | | | | | | | |
+| Carousel | | | | | | | | | | |
+| Aspect Ratio | | | | | | | | | | |
+| Toolbar and More menu | | | | | | | | | | |
+| Editor top bar toolbar | | | | | | | | | | |
 
 ### Findings
 

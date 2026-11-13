@@ -45,13 +45,20 @@ const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, 
   select: { multiple: { multiple: true, icons: true } },
   toast: { promise: { mode: 'promise' }, stack: { mode: 'stack' } },
   sheet: { handle: { side: 'bottom', handle: true }, resizable: { resizable: true } },
-  checkbox: { row: { option: 'row', checked: 'checked' }, card: { option: 'card', checked: 'checked' } },
+  checkbox: { row: { option: 'row', checked: 'checked' }, card: { option: 'card', checked: 'checked' }, group: { group: 'parent' } },
+  field: { form: { form: 'summary', fieldset: 'default' } },
   switch: { sm: { size: 'sm', checked: true } },
   progress: { labelled: { size: 'lg', tone: 'success', showLabel: true, showValue: true }, destructive: { tone: 'destructive', size: 'sm' } },
   popover: { arrow: { arrow: true } },
   dialog: { 'lg-scrolling': { size: 'lg', scrollingBody: true, footer: true }, fullscreen: { size: 'fullscreen', footer: true } },
   'alert-dialog': { media: { media: 'default' }, 'destructive-confirm': { media: 'destructive' } },
   breadcrumb: { collapse: { collapse: 'auto' } },
+}
+
+/** Content the 0.7.6 part variants need beside their props: a legend, and the fields or options. */
+const recipeVariantContent: Record<string, Record<string, unknown>> = {
+  'field~form': { legend: 'Save preset', fields: ['Preset name', 'Radius'] },
+  'checkbox~group': { legend: 'Overlays to install', options: ['Dialog', 'Popover', 'Sheet', 'Tooltip'] },
 }
 
 function presetRef(family: StyleFamily): ComponentRecipe['presetRef'] {
@@ -62,9 +69,9 @@ function presetRef(family: StyleFamily): ComponentRecipe['presetRef'] {
 }
 
 /** The component editor's starting draft for a component, pinned to the family's built-in preset. */
-function draft(component: ComponentRecipe['component'], family: StyleFamily, props: Record<string, unknown> = {}): ComponentRecipe {
+function draft(component: ComponentRecipe['component'], family: StyleFamily, props: Record<string, unknown> = {}, content: Record<string, unknown> = {}): ComponentRecipe {
   return validateComponentRecipe({ schemaVersion: '2.0', component, id: `catalog_${component.replaceAll('-', '_')}`,
-    revision: 1, presetRef: presetRef(family), props, content: defaultRecipeFields(componentRecipeFields(component).content) })
+    revision: 1, presetRef: presetRef(family), props, content: { ...defaultRecipeFields(componentRecipeFields(component).content), ...content } })
 }
 
 async function familyData(family: StyleFamily): Promise<Record<AuditEdition, AuditData>> {
@@ -83,7 +90,7 @@ async function familyData(family: StyleFamily): Promise<Record<AuditEdition, Aud
     }
     for (const [name, props] of [['', {}], ...Object.entries(recipeVariants[component] ?? {})] as const) {
       const id = name ? `${component}~${name}` : component
-      const recipe = draft(component as ComponentRecipe['component'], family, props)
+      const recipe = draft(component as ComponentRecipe['component'], family, props, recipeVariantContent[id])
       const result = await compileComponentRecipe({ recipe })
       const specimen = describeComponentRecipe(recipe)
       const css = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${component}.css`))!.content

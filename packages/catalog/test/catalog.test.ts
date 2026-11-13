@@ -241,7 +241,7 @@ describe('catalog contract', () => {
   it('provides Checkbox with scoped dependencies, slots and all accessible state styles', () => {
     expect(supportedComponentIds).toContain('checkbox')
     const checkbox = getTemplate(getCatalog('0.1.0'), 'checkbox' as ComponentId)
-    expect(checkbox.slots).toEqual(['checkbox', 'checkbox-indicator', 'checkbox-option', 'checkbox-option-title', 'checkbox-option-description'])
+    expect(checkbox.slots).toEqual(['checkbox', 'checkbox-indicator', 'checkbox-option', 'checkbox-option-title', 'checkbox-option-description', 'checkbox-group', 'checkbox-group-parent', 'checkbox-group-parent-title', 'checkbox-group-count'])
     expect(checkbox.dependencies).toEqual([
       { name: 'react', version: '19.3.1' },
       { name: '@radix-ui/react-checkbox', version: '1.4.1' },
@@ -600,6 +600,10 @@ describe('catalog contract', () => {
       'number-input',
       'color-picker',
       'code-block',
+      'password-field',
+      'carousel',
+      'aspect-ratio',
+      'toolbar',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

@@ -1,11 +1,12 @@
 'use client'
 import * as React from 'react'
 import { Field as FieldPrimitive } from '@base-ui/react/field'
+import { Fieldset as FieldsetPrimitive } from '@base-ui/react/fieldset'
 import { CircleAlertIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './field.css'
 
-const FieldFlags = React.createContext({ invalid: false, required: false, disabled: false })
+const FieldFlags = React.createContext<{ invalid: boolean; required: boolean; disabled: boolean; controlId?: string; message?: string }>({ invalid: false, required: false, disabled: false })
 
 export type FieldProps = Omit<FieldPrimitive.Root.Props, 'className'> & {
   className?: string
@@ -18,14 +19,27 @@ export type FieldProps = Omit<FieldPrimitive.Root.Props, 'className'> & {
  * Wires a label, hint and error to one control through Base UI's Field. The
  * control is wrapped in FieldControl.
  */
-export function Field({ className, orientation = 'vertical', invalid = false, required = false, disabled = false, ...props }: FieldProps) {
+export function Field({ className, name, orientation = 'vertical', invalid: ownInvalid = false, required = false, disabled = false, onChange, ...props }: FieldProps) {
+  const form = React.useContext(FormContext)
+  const inForm = form !== null && name !== undefined
+  const message = inForm ? form.message(name) : undefined
+  const invalid = ownInvalid || message !== undefined
+  const label = inForm ? labelOf(props.children as React.ReactNode) || name : undefined
+  const register = form?.register
+  React.useLayoutEffect(() => (register && name !== undefined && label !== undefined ? register(name, label) : undefined), [register, name, label])
   return (
-    <FieldFlags.Provider value={{ invalid, required, disabled }}>
+    <FieldFlags.Provider value={{ invalid, required, disabled, ...(inForm ? { controlId: form.idFor(name), message } : {}) }}>
       <FieldPrimitive.Root
         {...props}
+        name={name}
+        onChange={inForm ? (event: Parameters<NonNullable<FieldProps['onChange']>>[0]) => {
+          onChange?.(event)
+          form.clear(name)
+        } : onChange}
         invalid={invalid}
         disabled={disabled}
         data-slot="field"
+        data-form-field={inForm ? name : undefined}
         data-orientation={orientation}
         data-invalid={invalid || undefined}
         data-disabled={disabled || undefined}
@@ -54,12 +68,12 @@ type ControlProps = { id?: string; 'aria-describedby'?: string }
  * after the control's own description.
  */
 export function FieldControl({ children }: { children: React.ReactElement<ControlProps> }) {
-  const { required } = React.useContext(FieldFlags)
+  const { required, controlId } = React.useContext(FieldFlags)
   const { id, 'aria-describedby': describedBy, ...rest } = children.props
   return (
     <FieldPrimitive.Control
       render={React.createElement(children.type, { ...rest, key: children.key })}
-      id={id}
+      id={id ?? controlId}
       aria-describedby={describedBy}
       required={required || undefined}
     />
@@ -72,12 +86,240 @@ export function FieldDescription({ className, ...props }: Omit<FieldPrimitive.De
 
 /** Shown only while the field is invalid. */
 export function FieldError({ className, children, ...props }: Omit<FieldPrimitive.Error.Props, 'className' | 'match'> & { className?: string }) {
-  const { invalid } = React.useContext(FieldFlags)
+  const { invalid, message } = React.useContext(FieldFlags)
   if (!invalid) return null
   return (
     <FieldPrimitive.Error {...props} match data-slot="field-error" className={cn(className)}>
       <CircleAlertIcon aria-hidden="true" />
-      {children}
+      {children ?? message}
     </FieldPrimitive.Error>
+  )
+}
+
+/** Names a group of fields or controls; disabled, it disables every control inside. */
+export function FieldSet({ className, ...props }: React.ComponentProps<typeof FieldsetPrimitive.Root>) {
+  return <FieldsetPrimitive.Root {...props} data-slot="field-set" className={cn(className as string)} />
+}
+
+export function FieldLegend({ className, ...props }: React.ComponentProps<typeof FieldsetPrimitive.Legend>) {
+  return <FieldsetPrimitive.Legend {...props} data-slot="field-legend" className={cn(className as string)} />
+}
+
+export type FormErrors = Record<string, string | readonly string[]>
+export type FormValues = Record<string, FormDataEntryValue | FormDataEntryValue[]>
+
+type SummaryLine = { name: string; label: string; message: string; known: boolean }
+type FormState = {
+  idFor(name: string): string
+  message(name: string): string | undefined
+  clear(name: string): void
+  /** A Field rendered by a component the Form cannot see while rendering still joins it. */
+  register(name: string, label: string): () => void
+  focus(name: string): void
+  lines: readonly SummaryLine[]
+  summaryAction: 'saving' | 'submitting'
+  summaryRef: React.RefObject<HTMLDivElement | null>
+}
+
+const FormContext = React.createContext<FormState | null>(null)
+
+const firstMessage = (value: string | readonly string[] | undefined) => (typeof value === 'string' ? value : value?.[0]) || undefined
+
+function textOf(node: React.ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(textOf).join('')
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) return textOf(node.props.children)
+  return ''
+}
+
+function labelOf(children: React.ReactNode): string | undefined {
+  let label: string | undefined
+  React.Children.forEach(children, child => {
+    if (label !== undefined || !React.isValidElement<{ children?: React.ReactNode }>(child)) return
+    label = child.type === FieldLabel ? textOf(child.props.children).trim() : labelOf(child.props.children)
+  })
+  return label
+}
+
+/** The named fields inside a form, in order, found while rendering so the summary is right in server HTML. */
+function collectFields(children: React.ReactNode, out: { name: string; label: string }[] = []) {
+  React.Children.forEach(children, child => {
+    if (!React.isValidElement<{ name?: unknown; children?: React.ReactNode }>(child)) return
+    if (child.type === Field && typeof child.props.name === 'string') out.push({ name: child.props.name, label: labelOf(child.props.children) || child.props.name })
+    else collectFields(child.props.children, out)
+  })
+  return out
+}
+
+function formValues(form: HTMLFormElement): FormValues {
+  const values: FormValues = {}
+  for (const [name, value] of new FormData(form)) {
+    const previous = values[name]
+    values[name] = previous === undefined ? value : [...(Array.isArray(previous) ? previous : [previous]), value]
+  }
+  return values
+}
+
+export type FormProps = Omit<React.ComponentProps<'form'>, 'noValidate'> & {
+  /** Errors returned by the server, keyed by field name. A new object shows them again. */
+  errors?: FormErrors
+  /** The form's own checks, run after the browser's constraints on submit. */
+  validate?(values: FormValues): FormErrors | undefined | void
+  /** The summary reads "Fix 2 fields before saving" or "… before submitting". */
+  summaryAction?: 'saving' | 'submitting'
+}
+
+/**
+ * Collects the errors of its named Fields on submit. Before hydration the browser validates; after
+ * it, the form reads each control's constraints, then `validate`, and a failed submit focuses the
+ * FormErrorSummary. A field's error clears when its value changes.
+ */
+export function Form({ errors, validate, summaryAction = 'submitting', onSubmit, id, className, children, ...props }: FormProps) {
+  const generated = React.useId()
+  const formId = id ?? generated
+  const [hydrated, setHydrated] = React.useState(false)
+  React.useEffect(() => setHydrated(true), [])
+  const [client, setClient] = React.useState<Readonly<Record<string, string>>>({})
+  const [cleared, setCleared] = React.useState<ReadonlySet<string>>(new Set())
+  const [shownErrors, setShownErrors] = React.useState(errors)
+  // A new errors object shows every server error again.
+  if (shownErrors !== errors) {
+    setShownErrors(errors)
+    setCleared(new Set())
+  }
+  const [focusRequest, setFocusRequest] = React.useState(0)
+  const summaryRef = React.useRef<HTMLDivElement | null>(null)
+  const found = collectFields(children)
+  const [registered, setRegistered] = React.useState<ReadonlyMap<string, string>>(new Map())
+  const register = React.useCallback((name: string, label: string) => {
+    setRegistered(previous => (previous.get(name) === label ? previous : new Map(previous).set(name, label)))
+    return () => setRegistered(previous => {
+      if (!previous.has(name)) return previous
+      const next = new Map(previous)
+      next.delete(name)
+      return next
+    })
+  }, [])
+  // Fields found while rendering keep their order; registered ones the walk missed follow.
+  const fields = [...found, ...[...registered].filter(([name]) => !found.some(field => field.name === name)).map(([name, label]) => ({ name, label }))]
+  const idFor = (name: string) => `${formId}-field-${name.replace(/[^A-Za-z0-9_-]/g, '-')}`
+  const focusField = (name: string) => {
+    // The field's control by its id, or else the first visible control inside the named field.
+    const control = document.getElementById(idFor(name)) ?? document.querySelector<HTMLElement>(
+      `[data-form-field="${CSS.escape(name)}"] :is(input:not([type="hidden"]):not([aria-hidden="true"]), textarea, select, button)`)
+    control?.focus()
+  }
+
+  const shown: Record<string, string> = {}
+  for (const [name, value] of Object.entries(errors ?? {})) {
+    const message = firstMessage(value)
+    if (message && !cleared.has(name)) shown[name] = message
+  }
+  // The form's own messages, constraints first, win over the server's.
+  Object.assign(shown, client)
+  const lines: SummaryLine[] = [
+    ...fields.filter(field => shown[field.name]).map(field => ({ name: field.name, label: field.label, message: shown[field.name], known: true })),
+    ...Object.keys(shown).filter(name => !fields.some(field => field.name === name)).map(name => ({ name, label: name, message: shown[name], known: false })),
+  ]
+
+  React.useEffect(() => {
+    if (focusRequest === 0) return
+    if (summaryRef.current) summaryRef.current.focus()
+    else {
+      const first = lines.find(line => line.known)
+      if (first) focusField(first.name)
+    }
+    // Only a new submit moves focus.
+  }, [focusRequest])
+
+  const state: FormState = {
+    idFor,
+    message: name => shown[name],
+    clear: name => {
+      setCleared(previous => (previous.has(name) ? previous : new Set(previous).add(name)))
+      setClient(previous => {
+        if (!(name in previous)) return previous
+        const next = { ...previous }
+        delete next[name]
+        return next
+      })
+    },
+    register,
+    focus: focusField,
+    lines,
+    summaryAction,
+    summaryRef,
+  }
+
+  return (
+    <FormContext.Provider value={state}>
+      <form
+        {...props}
+        id={id}
+        noValidate={hydrated || undefined}
+        data-slot="form"
+        className={cn(className)}
+        onSubmit={(event) => {
+          const form = event.currentTarget
+          // Every named control's own constraints, keyed by its name: this also covers composite controls,
+          // whose hidden input carries the name and the constraint.
+          const constraint: Record<string, string> = {}
+          for (const element of Array.from(form.elements) as HTMLInputElement[]) {
+            if (!element.name || element.disabled || typeof element.checkValidity !== 'function') continue
+            if (!element.checkValidity() && !(element.name in constraint)) constraint[element.name] = element.validationMessage
+          }
+          const custom: Record<string, string> = {}
+          for (const [name, value] of Object.entries(validate?.(formValues(form)) ?? {})) {
+            const message = firstMessage(value)
+            if (message) custom[name] = message
+          }
+          const next = { ...custom, ...constraint }
+          setClient(next)
+          if (Object.keys(next).length > 0) {
+            event.preventDefault()
+            setFocusRequest(count => count + 1)
+            return
+          }
+          onSubmit?.(event)
+        }}
+      >
+        {children}
+      </form>
+    </FormContext.Provider>
+  )
+}
+
+const summaryText = (line: SummaryLine) =>
+  `${line.label}: ${line.message.charAt(0).toLowerCase()}${line.message.slice(1).replace(/\.$/, '')}`
+
+/** Lists every invalid field after a failed submit; it takes focus, and each line moves focus to its field. */
+export function FormErrorSummary({ className, ...props }: React.ComponentProps<'div'>) {
+  const form = React.useContext(FormContext)
+  if (!form) throw new Error('FormErrorSummary must be used inside <Form>')
+  const titleId = React.useId()
+  if (form.lines.length === 0) return null
+  const count = form.lines.length
+  return (
+    <div {...props} ref={form.summaryRef} role="region" tabIndex={-1} aria-labelledby={titleId} data-slot="form-error-summary" className={cn(className)}>
+      <CircleAlertIcon aria-hidden="true" />
+      <p id={titleId} data-slot="form-error-summary-title">{`Fix ${count} ${count === 1 ? 'field' : 'fields'} before ${form.summaryAction}`}</p>
+      <ul data-slot="form-error-summary-list">
+        {form.lines.map(line => (
+          <li key={line.name}>
+            {line.known ? (
+              <a
+                href={'#' + form.idFor(line.name)}
+                onClick={(event) => {
+                  event.preventDefault()
+                  form.focus(line.name)
+                }}
+              >
+                {summaryText(line)}
+              </a>
+            ) : summaryText(line)}
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

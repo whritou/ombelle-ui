@@ -189,3 +189,85 @@
   }
 }
 /* end 0.7.5 variants */
+/* 0.7.6 parts */
+[data-checkbox-group-fieldset] {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+  margin: 0;
+  padding-block: 8px 10px;
+  padding-inline: 10px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-family);
+}
+[data-checkbox-group-legend] {
+  padding-inline: 6px;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+[data-slot='checkbox-group'] {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  font-family: var(--font-family);
+}
+[data-slot='checkbox-group-parent'] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 36px;
+  padding-inline: 6px;
+  border-radius: calc(var(--radius) - 4px);
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+[data-slot='checkbox-group-parent']:has(> [data-disabled]) {
+  cursor: not-allowed;
+}
+[data-slot='checkbox-group-count'] {
+  margin-inline-start: auto;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 500;
+}
+[data-slot='checkbox-option'][data-checkbox-group-item] {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  min-block-size: 36px;
+  padding-block: 0;
+  padding-inline: 36px 6px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+[data-slot='checkbox-option'][data-checkbox-group-item]:has(> [data-state]) {
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+[data-slot='checkbox-option'][data-checkbox-group-item] > :first-child {
+  grid-row: auto;
+  margin-block-start: 0;
+}
+[data-slot='checkbox-option'][data-checkbox-group-item] > :first-child:focus-visible {
+  outline-color: var(--ring);
+}
+@media (forced-colors: active) {
+  [data-slot='checkbox-group-parent']:has(> [data-state='checked'], > [data-state='indeterminate']) {
+    color: Highlight;
+  }
+  [data-slot='checkbox-group-count'] {
+    color: CanvasText;
+  }
+}
+/* end 0.7.6 parts */

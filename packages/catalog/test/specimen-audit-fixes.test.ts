@@ -407,3 +407,44 @@ describe('the 0.7.5 variants pass the specimen audit', () => {
       .toBe('var(--secondary-foreground)')
   })
 })
+
+describe('0.7.6 components match their boards', () => {
+  it('ombelle frames take the board radius, not the larger Card radius', () => {
+    for (const [file, selector] of [['field/ombelle.css', "[data-slot='field-set']"], ['field/ombelle.css', "[data-slot='form-error-summary']"],
+      ['toolbar/ombelle.css', "[data-slot='toolbar']"], ['aspect-ratio/ombelle.css', "[data-slot='aspect-ratio']"]] as const)
+      expect(declarations(read(file), selector)['border-radius'], file).toBe('var(--radius)')
+  })
+
+  it('flat frames draw the board 1px border although flat controls are borderless', () => {
+    for (const [file, selector] of [['field/flat.css', "[data-slot='field-set']"], ['field/flat.css', "[data-slot='form-error-summary']"],
+      ['toolbar/flat.css', "[data-slot='toolbar']"], ['aspect-ratio/flat.css', "[data-slot='aspect-ratio']"]] as const)
+      expect(declarations(read(file), selector).border, file).toMatch(/^max\(1px, var\(--border-width\)\) solid /)
+  })
+
+  it('Carousel arrows are 34px, as on the board', () => {
+    for (const family of ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
+      expect(px(declarations(read(`carousel/${family}.css`), "[data-slot='carousel-previous']")['block-size']!), family).toBe(34)
+  })
+})
+
+describe('0.7.6 audit findings', () => {
+  it('minimalist keeps the ring colour on a focused invalid Field input', () => {
+    const focused = declarations(read('field/minimalist.css'), "[data-slot='field'][data-invalid] [data-field-input]:focus-visible")
+    expect(focused['border-color']).toBe('var(--ring)')
+    // Red turning to the ring is not a 3:1 change, so the ring also grows below the line.
+    expect(focused['box-shadow']).toBe('0 2px 0 var(--ring)')
+  })
+
+  it('minimalist Carousel dots draw a 2px ring', () => {
+    expect(declarations(read('carousel/minimalist.css'), "[data-slot='carousel-dot']:focus-visible").outline).toBe('2px solid var(--ring)')
+  })
+
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s grouped checkboxes keep the ring colour on their transparent row', family => {
+    expect(declarations(read(`checkbox/${family}.css`), "[data-slot='checkbox-option'][data-checkbox-group-item] > :first-child:focus-visible")['outline-color'])
+      .toBe(family === 'liquid-glass' ? 'var(--foreground)' : 'var(--ring)')
+  })
+
+  it('neo-brutalism summary links use the text colour on the tinted summary', () => {
+    expect(declarations(read('field/neo-brutalism.css'), "[data-slot='form-error-summary-list'] a").color).toBe('var(--foreground)')
+  })
+})

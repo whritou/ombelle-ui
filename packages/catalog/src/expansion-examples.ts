@@ -33,6 +33,16 @@ export function Example(){return <><ColorPickerPair label="Primary"><ColorPicker
   'code-block': `import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 const source = "import { Button } from '@/components/ui/button'\\n\\nexport function Save() {\\n  return <Button>Save</Button>\\n}\\n"
 export function Example(){return <><CodeBlockCommand args="@ombelle-ui/cli add button" /><CodeBlock title="save.tsx" language="tsx" code={source} /></>}`,
+  toolbar: `import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
+export function Example(){return <Toolbar aria-label="View options"><ToolbarToggleGroup type="single" defaultValue="light" aria-label="Theme"><ToolbarToggleItem value="light">Light</ToolbarToggleItem><ToolbarToggleItem value="dark">Dark</ToolbarToggleItem></ToolbarToggleGroup><ToolbarSeparator /><ToolbarToggleGroup type="multiple" aria-label="Guides"><ToolbarToggleItem value="grid">Grid</ToolbarToggleItem></ToolbarToggleGroup><ToolbarLink href="#preview">Open preview</ToolbarLink><ToolbarOverflow /></Toolbar>}`,
+  carousel: `import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter } from '@/components/ui/carousel'
+const kits = ['Ombelle', 'Flat', 'Minimalist', 'Neo brutalism', 'Liquid glass']
+export function Example(){return <Carousel aria-label="UI kits"><CarouselContent>{kits.map(kit => <CarouselItem key={kit}><div className="rounded-lg border p-6">{kit}</div></CarouselItem>)}</CarouselContent><CarouselPrevious /><CarouselNext /><CarouselDots /><CarouselCounter /></Carousel>}`,
+  'aspect-ratio': `import { AspectRatio } from '@/components/ui/aspect-ratio'
+export function Example(){return <AspectRatio ratio={16 / 9} style={{ maxInlineSize: '32rem' }}><img src="/preview.png" alt="The Ombelle preset gallery in light mode" /></AspectRatio>}`,
+  'password-field': `import { PasswordField, PasswordFieldControl, PasswordFieldInput, PasswordFieldToggle, PasswordFieldCapsLock, PasswordFieldStrength } from '@/components/ui/password-field'
+const checks = [{ label: 'at least 12 characters', test: (value: string) => value.length >= 12 }, { label: 'a number', test: (value: string) => /\\d/.test(value) }, { label: 'add a symbol', test: (value: string) => /[^A-Za-z0-9]/.test(value) }]
+export function Example(){return <><label htmlFor="new-password">Password</label><PasswordField><PasswordFieldControl><PasswordFieldInput id="new-password" name="password" autoComplete="new-password" /><PasswordFieldToggle /></PasswordFieldControl><PasswordFieldCapsLock /><PasswordFieldStrength checks={checks} /></PasswordField></>}`,
   'number-input': `import { NumberInput } from '@/components/ui/number-input'
 export function Example(){return <><label htmlFor="radius">Border radius</label><NumberInput id="radius" name="radius" defaultValue={12} min={0} max={32} unit="px" onValueChange={(value, { valid }) => console.log(value, valid)} /></>}`,
   toggle: `import { Toggle } from '@/components/ui/toggle'
