@@ -113,9 +113,10 @@ it('exposes every component editor and Customize link with the published install
   const { editableComponents } = await import('../../apps/www/src/editor/editable-components.js')
   const { default: EditorPage } = await import('../../apps/www/src/app/editor/component/[id]/page.js')
   const { default: ComponentPage } = await import('../../apps/www/src/app/components/[id]/page.js')
-  const { ComponentNavigation } = await import('../../apps/www/src/editor/components/component-navigation.js')
+  const { filterComponents } = await import('../../apps/www/src/editor/components/component-switcher.js')
   expect(editableComponents.map(({ id }) => id).sort()).toEqual([...supportedComponentIds].sort())
-  const chooser = renderToStaticMarkup(createElement(ComponentNavigation, { current: 'button' }))
+  // The component switcher lists every editor; its sheet renders in a portal, so the list it shows is checked.
+  const chooser = filterComponents('').map(component => `href="${component.href}"`).join(' ')
   for (const id of supportedComponentIds) {
     const href = `href="/editor/component/${id}"`
     expect(chooser).toContain(href)

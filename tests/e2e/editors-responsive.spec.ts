@@ -90,3 +90,41 @@ test('a long preset name stays inside a 320px top bar', async ({ page }) => {
   await page.getByLabel('Preset name', { exact: true }).fill('A very long preset name '.repeat(5))
   await expectFitsViewport(page, 320)
 })
+
+for (const size of [{ width: 1440, height: 900 }, { width: 375, height: 812 }] as const) {
+  test(`the component switcher replaces the component row at ${size.width}px`, async ({ page }) => {
+    await page.setViewportSize(size)
+    await open(page, editors[1].url)
+    await expect(page.locator('[aria-label="Editable components"]')).toHaveCount(0)
+    const switcher = page.getByRole('button', { name: 'Component: Button. Choose a component', exact: true })
+    await switcher.click()
+    const sheet = page.getByRole('dialog', { name: 'Choose a component' })
+    await expect(sheet).toBeVisible()
+    await expect(sheet.getByRole('link', { name: /^Button/ }).first()).toHaveAttribute('aria-current', 'page')
+    await sheet.getByLabel('Search components', { exact: true }).fill('acc')
+    const names = await sheet.getByRole('list', { name: 'Components' }).getByRole('link').allTextContents()
+    expect(names.length).toBeGreaterThan(0)
+    expect(names.every(name => /acc/i.test(name))).toBe(true)
+    await expect(sheet.getByRole('link', { name: 'Browse all components', exact: true })).toHaveAttribute('href', '/components')
+    await expect(sheet.getByRole('link', { name: 'Component editor guide', exact: true })).toHaveAttribute('href', '/docs/component-editor')
+    await page.keyboard.press('Escape')
+    await expect(sheet).toBeHidden()
+    await expect(switcher).toBeFocused()
+    if (size.width < 768) {
+      const sheetBox = page.getByRole('link', { name: 'All components', exact: true })
+      await expect(sheetBox).toHaveAttribute('href', '/editor/component')
+    }
+  })
+}
+
+test('the pinned specimen shows the Button inside its card on a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await open(page, editors[1].url)
+  const button = page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]')
+  await expect(button).toBeVisible({ timeout: 20000 })
+  const card = (await page.locator('iframe[title="Button recipe preview"]').locator('xpath=..').boundingBox())!
+  const shown = (await button.boundingBox())!
+  expect(card.height).toBeLessThanOrEqual(140)
+  expect(shown.y).toBeGreaterThanOrEqual(card.y)
+  expect(shown.y + shown.height).toBeLessThanOrEqual(card.y + card.height)
+})

@@ -140,7 +140,7 @@ export function DemoPage() {
   const page = demoPages[index]!
   const previous = demoPages[(index - 1 + demoPages.length) % demoPages.length]!
   const next = demoPages[(index + 1) % demoPages.length]!
-  const view: EditorView = { mode: state.mode, viewport: state.width, panel: 'preview', forcedState: 'none' }
+  const view: EditorView = { mode: state.mode, viewport: state.width, panel: 'customize', forcedState: 'none' }
   const unavailable = page.kind === 'component' && styleSupport(page.id, state.family) === 'unavailable'
   return <main className={styles.root} aria-labelledby="demo-title">
     <header className={styles.bar}>

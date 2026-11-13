@@ -49,7 +49,7 @@ export function PublishedRecipe({ snapshot, origin, name = 'Button' }: { snapsho
     <label>Preview width <select value={viewport} onChange={event => setViewport(event.target.value as typeof viewport)}><option value="wide">Wide</option><option value="narrow">Narrow</option></select></label>
     {result && <PreviewFrame key={snapshot.id + '@' + snapshot.revision} result={result} componentName={name}
       component={snapshot.snapshotVersion === '2.0' ? snapshot.recipe.component : undefined}
-      view={{ mode, viewport, panel: 'preview', forcedState: 'none' }} />}
+      view={{ mode, viewport, panel: 'customize', forcedState: 'none' }} />}
     {command ? <>
       <label>Install command<textarea aria-label="Install command" readOnly value={command} rows={5} /></label>
       <p>This command runs the published {publishedInstaller.packageName}@{publishedInstaller.version} installer through npx (Node 24.19.0 or newer Node 24). Replace APP with the target directory, review the plan, then use --yes to apply.</p>

@@ -1037,3 +1037,12 @@
     min-height: 44px;
   }
 }
+
+@media (max-width: 767px) {
+  .editor .getCode {
+    padding-inline: 14px;
+  }
+  .editor .getCode svg {
+    display: none;
+  }
+}

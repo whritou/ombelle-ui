@@ -44,34 +44,6 @@
   gap: 0.25rem;
 }
 
-.componentNavigation {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.componentNavigation a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding-inline: 0.75rem;
-  border-radius: 0.5rem;
-  color: var(--muted-foreground);
-  font-size: 0.875rem;
-  text-decoration: none;
-}
-
-.componentNavigation a:hover,
-.componentNavigation a[aria-current='page'] {
-  background: var(--muted);
-  color: var(--foreground);
-}
-
-.componentNavigation a[aria-current='page'] { font-weight: 600; }
-.componentNavigation a:active { background: var(--border); }
 
 .nameField {
   display: flex;
@@ -676,4 +648,163 @@
   .topBar {
     row-gap: 4px;
   }
+}
+
+/* The component switcher: the trail's current page, as a button. */
+.switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 2px 8px 2px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  box-shadow: 2px 2px 0 var(--border);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.switcher:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (max-width: 1199px) {
+  .switcher {
+    min-height: 44px;
+    padding-inline: 14px 10px;
+  }
+}
+.switcherSearch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-block: 12px;
+}
+.switcherSearch svg {
+  position: absolute;
+  left: 12px;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+.switcherSearch input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px 0 38px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+}
+.switcherList {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+.switcherList a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.switcherList a:hover {
+  background: var(--muted);
+}
+.switcherList a[aria-current='page'] {
+  background: var(--muted);
+  font-weight: 600;
+}
+.switcherList a span {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.switcherEmpty {
+  padding: 12px;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+.switcherLinks {
+  display: grid;
+  gap: 2px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.switcherLinks a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--foreground);
+  font-weight: 600;
+  text-decoration-color: var(--primary);
+  text-underline-offset: 4px;
+}
+@media (max-width: 767px) {
+  .topBar {
+    column-gap: 4px;
+  }
+  .topActions {
+    gap: 4px;
+  }
+  .switcher {
+    padding-inline: 10px 8px;
+  }
+}
+
+/* The phone's floating pane switcher. */
+.dock {
+  display: none;
+}
+@media (max-width: 767px) {
+  .dock {
+    position: fixed;
+    inset: auto 12px max(16px, env(safe-area-inset-bottom)) 12px;
+    z-index: 35;
+    display: block;
+  }
+  .dock [data-slot='toggle-group'] {
+    display: flex;
+    width: 100%;
+  }
+  .dock [data-slot='toggle-group-item'] {
+    position: relative;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-block-size: 48px;
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+  .dock [data-slot='toggle-group-item'] > svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+}
+.dockBadge {
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 8px);
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--warning);
+  color: var(--background);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
 }
