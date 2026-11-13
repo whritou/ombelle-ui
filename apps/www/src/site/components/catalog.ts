@@ -64,7 +64,7 @@ export function Status() {
   card: {
     name: 'Card',
     description: 'Groups related content with a header, body and footer.',
-    api: 'Card (density: default, dense; appearance: default, outlined, subtle), CardHeader, CardTitle (level), CardDescription, CardContent, CardFooter, CardLink, CardMedia, CardGroup (name, value, defaultValue, onValueChange), CardOption (value, title, description, disabled)',
+    api: 'Card (density: default, dense; appearance: default, outlined, subtle), CardHeader, CardAction, CardTitle (level), CardDescription, CardContent, CardFooter, CardLink, CardMedia, CardGroup (name, value, defaultValue, onValueChange), CardOption (value, title, description, disabled)',
     states: 'Default, dense, outlined, subtle; link card with hover lift; option selected, focused and disabled; media header',
     basis: '<section> or <div> with deliberate headings',
     client: false,
@@ -286,7 +286,7 @@ export function SummaryField() {
   tooltip: {
     name: 'Tooltip',
     description: 'A Radix tooltip shown on hover and keyboard focus.',
-    api: 'TooltipProvider, Tooltip, TooltipTrigger, TooltipContent, TooltipArrow',
+    api: 'TooltipProvider, Tooltip, TooltipTrigger, TooltipContent, TooltipArrow, TooltipShortcut (keys); ariaKeyShortcuts(keys) for aria-keyshortcuts on the trigger',
     states: 'Keyboard, hover, dismissal',
     basis: 'Reviewed Radix tooltip primitive',
     client: true,
@@ -552,7 +552,7 @@ export function Faq() {
     name: 'Progress',
     glassMinimumCli: '0.5.0',
     description: 'Shows how far a task has got, or that it is running when the amount is unknown.',
-    api: 'value (null for indeterminate), max, getValueLabel, size (sm, default, lg), tone (default, success, warning, destructive); ProgressLabel, ProgressValue (format)',
+    api: 'value (null for indeterminate), max, getValueLabel, size (sm, default, lg), tone (default, success, warning, destructive), shape (bar, circle); ProgressLabel, ProgressValue (format)',
     states: 'Loading, complete, indeterminate',
     basis: 'Reviewed Radix progress primitive',
     client: true,

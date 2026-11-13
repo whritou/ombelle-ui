@@ -41,6 +41,17 @@ const passwordChecks = [
   { label: 'at least 12 characters', match: '^.{12,}$' }, { label: 'a number', match: '\\d' }, { label: 'add a symbol', match: '[^A-Za-z0-9]' },
 ] as const
 const ratios = { '16/9': 16 / 9, '4/3': 4 / 3, '1/1': 1, '3/2': 3 / 2, '21/9': 21 / 9 } as const
+// The recipe's snap points, as fractions of the viewport height.
+const sheetSnapPoints = { 'half-full': [0.5, 0.9], 'third-half-full': [0.33, 0.5, 0.9] } as const
+// A copy of the Tooltip template's ariaKeyShortcuts: the compiler cannot import templates.
+const ariaKeyNames: Record<string, string> = {
+  ctrl: 'Control', control: 'Control', cmd: 'Meta', command: 'Meta', '⌘': 'Meta', meta: 'Meta',
+  alt: 'Alt', option: 'Alt', '⌥': 'Alt', shift: 'Shift', '⇧': 'Shift', esc: 'Escape',
+}
+const ariaKeyShortcuts = (keys: readonly string[]) => keys.map(key => {
+  const name = key.toLowerCase()
+  return Object.hasOwn(ariaKeyNames, name) ? ariaKeyNames[name] : key.length === 1 ? key.toUpperCase() : key
+}).join('+')
 // The Ombelle preset's primary foreground in light and dark.
 const primaryForeground = { light: 'oklch(0.99 0 0)', dark: 'oklch(0.16 0.01 275)' } as const
 
@@ -81,12 +92,13 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     }
     case 'meter': {
       const tones = ['primary', 'info', 'success', 'warning'] as const
+      const shape = props.shape === 'circle' ? { shape: 'circle' } : {}
       if (props.mode === 'labelled')
-        return node('Meter', { max: props.max }, node('MeterLabel', {}, content.label), node('MeterValue'),
+        return node('Meter', { max: props.max, ...shape }, node('MeterLabel', {}, content.label), node('MeterValue'),
           ...content.parts.map((part, index) => node('MeterSegment', { value: part.value, tone: tones[index] })),
           node('MeterLegend', {}, ...content.parts.map((part, index) => node('MeterLegendItem', { tone: tones[index] }, part.label))))
       return node('Meter', { value: props.value, max: props.max, segments: props.segments,
-        warningAt: props.warningPercent === undefined ? undefined : props.warningPercent / 100 }, node('MeterLabel', {}, content.label), node('MeterValue'))
+        warningAt: props.warningPercent === undefined ? undefined : props.warningPercent / 100, ...shape }, node('MeterLabel', {}, content.label), node('MeterValue'))
     }
     case 'stepper':
       return node('Stepper', { orientation: props.orientation, 'aria-label': 'Progress' }, ...content.steps.map((step, index) =>
@@ -97,9 +109,16 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     case 'slider': {
       const min = props.min ?? 0, max = props.max ?? 100
       const range = props.mode === 'range'
-      const slider = node('Slider', range
-        ? { defaultValue: [props.rangeStart ?? 20, props.rangeEnd ?? 80], min, max, step: props.step ?? 1, thumbLabels: [content.minLabel, content.maxLabel] }
-        : { defaultValue: [props.value ?? 12], min, max, step: props.step ?? 1, 'aria-label': content.label })
+      const shown = props.valueDisplay === 'readout' || props.valueDisplay === 'editable'
+      // With a value display, a single thumb takes its name from a visible label beside the value; a range keeps its thumb labels.
+      const value = node('SliderValue', props.valueDisplay === 'editable' ? { editable: true } : {})
+      const slider = range
+        ? node('Slider', { defaultValue: [props.rangeStart ?? 20, props.rangeEnd ?? 80], min, max, step: props.step ?? 1, thumbLabels: [content.minLabel, content.maxLabel] },
+          ...(shown ? [value] : []))
+        : shown
+          ? node('Slider', { defaultValue: [props.value ?? 12], min, max, step: props.step ?? 1, 'aria-labelledby': localId('label') },
+            node('span', { id: localId('label') }, content.label), value)
+          : node('Slider', { defaultValue: [props.value ?? 12], min, max, step: props.step ?? 1, 'aria-label': content.label })
       if (!props.ticks) return slider
       const ticks = [0, 0.25, 0.5, 0.75, 1].map(share => Math.round(min + (max - min) * share))
       return node('div', stacked, slider, node('SliderTicks', { values: ticks, min, max }))
@@ -150,7 +169,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     case 'code-block':
       return props.mode === 'command'
         ? node('CodeBlockCommand', { args: content.args })
-        : node('CodeBlock', { code: content.code, language: props.language, title: content.title, lineNumbers: props.lineNumbers })
+        : node('CodeBlock', { code: content.code, language: props.language, title: content.title, lineNumbers: props.lineNumbers, ...(props.diff ? { diff: true } : {}) })
     case 'toggle':
       // Recipes carry no icon set, so an icon-only toggle shows its initial and keeps its label as its name.
       return node('Toggle', { variant: props.variant, size: props.size, defaultPressed: props.pressed, 'aria-label': props.iconOnly ? content.label : undefined },
@@ -311,7 +330,8 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ...(leading ? [...addons, control] : [control, ...addons]), ...extras))
     }
     case 'sheet':
-      return node('Sheet', {}, trigger('SheetTrigger', content.trigger), node('SheetContent', { side: props.side, size: props.size, resizable: props.resizable },
+      return node('Sheet', {}, trigger('SheetTrigger', content.trigger), node('SheetContent', { side: props.side, size: props.size, resizable: props.resizable,
+        ...(props.snapPoints && props.snapPoints !== 'none' ? { snapPoints: sheetSnapPoints[props.snapPoints] } : {}) },
         ...(props.handle ? [node('SheetHandle')] : []),
         node('SheetHeader', {}, node('SheetTitle', {}, content.title), node('SheetDescription', {}, content.description)),
         node('p', {}, content.body)))
@@ -367,7 +387,9 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       const title = props.mode === 'link' ? node('CardLink', { href: '#card' }, content.title) : content.title
       return node('Card', { density: props.density, appearance: props.appearance },
         ...(props.mode === 'media' ? [node('CardMedia', {}, node('span'))] : []),
-        node('CardHeader', {}, node('CardTitle', { level: props.level }, title), node('CardDescription', {}, content.description)),
+        node('CardHeader', {}, node('CardTitle', { level: props.level }, title), node('CardDescription', {}, content.description),
+          ...(props.action ? [node('CardAction', {}, node('button', { type: 'button', 'aria-label': 'More actions for ' + content.title },
+            node('span', { 'aria-hidden': 'true' }, '⋯')))] : [])),
         node('CardContent', {}, content.body))
     }
     case 'progress':
@@ -375,6 +397,7 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         value: props.indeterminate ? null : props.value, max: props.max,
         ...(props.showLabel ? {} : { 'aria-label': content.label }),
         size: props.size === 'default' ? undefined : props.size, tone: props.tone === 'default' ? undefined : props.tone,
+        ...(props.shape === 'circle' ? { shape: 'circle' } : {}),
       }, ...(props.showLabel ? [node('ProgressLabel', {}, content.label)] : []), ...(props.showValue ? [node('ProgressValue')] : []))
     case 'separator':
       return node('Separator', props, ...(!props.decorative && content.label ? [content.label] : []))
@@ -473,9 +496,14 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       }, ...(arrow ? [node('PopoverArrow')] : []),
       node('PopoverTitle', { id: localId('title') }, content.title), node('PopoverDescription', {}, content.description)))
     }
-    case 'tooltip':
-      return node('TooltipProvider', { delayDuration: 300 }, node('Tooltip', {}, trigger('TooltipTrigger', content.trigger),
-        node('TooltipContent', props, content.text, node('TooltipArrow'))))
+    case 'tooltip': {
+      // The key caps are hidden from assistive technology; the trigger's aria-keyshortcuts announces them once.
+      const keys = content.shortcut?.trim() ? content.shortcut.split('+').map(key => key.trim()) : []
+      const button = trigger('TooltipTrigger', content.trigger)
+      if (keys.length) button.props['aria-keyshortcuts'] = ariaKeyShortcuts(keys)
+      return node('TooltipProvider', { delayDuration: 300 }, node('Tooltip', {}, button,
+        node('TooltipContent', props, content.text, ...(keys.length ? [node('TooltipShortcut', { keys })] : []), node('TooltipArrow'))))
+    }
   }
 }
 

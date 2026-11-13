@@ -19,8 +19,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogConfirmIn
 import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '../generated/preset-gallery/components/ui/popover'
 import { Progress, ProgressLabel, ProgressValue } from '../generated/preset-gallery/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarOverflow } from '../generated/preset-gallery/components/ui/avatar'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardLink, CardTitle } from '../generated/preset-gallery/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardLink, CardTitle } from '../generated/preset-gallery/components/ui/card'
 import { Chip, ChipGroup } from '../generated/preset-gallery/components/ui/chip'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../generated/preset-gallery/components/ui/dropdown-menu'
 import {
   InputGroup,
   InputGroupAddon,
@@ -43,6 +44,7 @@ import {
   SheetContent,
   SheetDescription,
   SheetFooter,
+  SheetHandle,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -71,6 +73,7 @@ import { CodeBlock, CodeBlockCommand } from '../generated/preset-gallery/compone
 import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '../generated/preset-gallery/components/ui/carousel'
 import { AspectRatio } from '../generated/preset-gallery/components/ui/aspect-ratio'
 import { Toolbar, ToolbarOverflow, ToolbarToggleGroup, ToolbarToggleItem } from '../generated/preset-gallery/components/ui/toolbar'
+import { ariaKeyShortcuts, Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipShortcut, TooltipTrigger } from '../generated/preset-gallery/components/ui/tooltip'
 import { gate, type SceneProps } from './shared'
 
 const rows = [
@@ -84,6 +87,29 @@ const rows = [
 
 const filters = ['On track', 'Needs attention', 'Shipped'] as const
 const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+
+const cards = [
+  { name: 'Studio warm', detail: 'Your preset, edited 2 h ago' },
+  { name: 'Night shift', detail: 'Shared by Grace Hopper' },
+] as const
+
+const uploads = [
+  { name: 'brand-kit.zip', value: 64 },
+  { name: 'tokens.json', value: 40 },
+] as const
+
+const toolbar = [
+  { label: 'Undo', keys: ['Ctrl', 'Z'], icon: <><path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></> },
+  { label: 'Redo', keys: ['Ctrl', 'Shift', 'Z'], icon: <><path d="m15 14 5-5-5-5" /><path d="M20 9H10a6 6 0 0 0 0 12h3" /></> },
+] as const
+
+// The install preview: what `add` changes in the theme file.
+const installDiff = ` :root {
+-  --radius: 0.5rem;
++  --radius: 0.75rem;
++  --shadow-offset: 3px;
+ }
+`
 
 const componentsJson = `{
   "style": "new-york",
@@ -142,6 +168,26 @@ export function ProjectsScene(props: SceneProps) {
                 </ToolbarToggleGroup>
                 <ToolbarOverflow />
               </Toolbar>,
+            )}
+            {show(
+              'tooltip',
+              'Tooltip',
+              <TooltipProvider delayDuration={300}>
+                {toolbar.map(({ label, keys, icon }) => (
+                  <Tooltip key={label}>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" size="icon" aria-label={label} aria-keyshortcuts={ariaKeyShortcuts(keys)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icon}</svg>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {label}
+                      <TooltipShortcut keys={[...keys]} />
+                      <TooltipArrow />
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </TooltipProvider>,
             )}
             {show('toggle', 'Toggle', <Toggle variant="outline">Show grid</Toggle>)}
             {show(
@@ -266,6 +312,29 @@ export function ProjectsScene(props: SceneProps) {
                 </SheetContent>
               </Sheet>,
             )}
+            {show(
+              'sheet',
+              'Sheet',
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline">Quick filters</Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" snapPoints={[0.5, 0.9]}>
+                  <SheetHandle label="Resize Quick filters" />
+                  <SheetHeader>
+                    <SheetTitle>Quick filters</SheetTitle>
+                    <SheetDescription>Settles at half or full height when released.</SheetDescription>
+                  </SheetHeader>
+                  <div className="scene-actions">
+                    {filters.map((filter) => (
+                      <SheetClose key={filter} asChild>
+                        <Button variant="outline" size="sm">{filter}</Button>
+                      </SheetClose>
+                    ))}
+                  </div>
+                </SheetContent>
+              </Sheet>,
+            )}
           </div>
         </header>
       </div>
@@ -276,6 +345,34 @@ export function ProjectsScene(props: SceneProps) {
           <ProgressLabel>Publishing Website refresh, on track</ProgressLabel>
           <ProgressValue />
         </Progress>,
+      )}
+      {show(
+        'progress',
+        'Progress',
+        <Card appearance="outlined">
+          <CardHeader>
+            <CardTitle level={2}>Uploads</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="scene-list" aria-label="Uploads">
+              {uploads.map((upload) => (
+                <li key={upload.name} className="scene-list-row">
+                  <Progress shape="circle" size="lg" value={upload.value} aria-label={`Uploading ${upload.name}`}>
+                    <ProgressValue />
+                  </Progress>
+                  <span className="scene-grow">
+                    <strong>{upload.name}</strong>
+                    <span className="scene-muted">{upload.value}% uploaded</span>
+                  </span>
+                  <Button variant="outline" size="sm" disabled>
+                    <Progress shape="circle" size="sm" value={upload.value} aria-label={`Saving ${upload.name}`} />
+                    Saving
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>,
       )}
       {show(
         'alert',
@@ -437,6 +534,7 @@ export function ProjectsScene(props: SceneProps) {
           <CardContent className="scene-fields">
             <CodeBlockCommand args="@ombelle-ui/cli add button" />
             <CodeBlock title="components.json" language="json" code={componentsJson} />
+            <CodeBlock title="ui-style.css" language="css" diff code={installDiff} />
           </CardContent>
         </Card>,
       )}
@@ -473,9 +571,42 @@ export function ProjectsScene(props: SceneProps) {
                 <MeterValue />
               </Meter>
               <p className="scene-muted">Steps past 60% switch to the warning colour.</p>
+              <div className="scene-inline">
+                <Meter value={72} max={100} shape="circle" aria-labelledby="scene-storage-label" aria-valuetext="72 of 100 GB" />
+                <span id="scene-storage-label">Storage used</span>
+              </div>
             </CardContent>
           </Card>,
         )}
+        {cards.map((card) => (
+          <React.Fragment key={card.name}>
+            {show(
+              'card',
+              'Card',
+              <Card density="dense">
+                <CardHeader>
+                  <CardTitle>{card.name}</CardTitle>
+                  <CardDescription>{card.detail}</CardDescription>
+                  <CardAction>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon-sm" aria-label={`More actions for ${card.name}`}>
+                          <span aria-hidden="true">⋯</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                        <DropdownMenuItem>Share</DropdownMenuItem>
+                        <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </CardAction>
+                </CardHeader>
+                <CardContent>Warm neutrals with a clay accent.</CardContent>
+              </Card>,
+            )}
+          </React.Fragment>
+        ))}
         {show(
           'empty',
           'Empty State',

@@ -27,13 +27,21 @@ const buttonVariants: Record<string, RecipeSpecimen> = {
   loading: { tag: 'Button', props: { loading: true }, children: ['Saving…'] },
 }
 
-/** The 0.7.3 variants measured beside each component's default specimen, as recipe props. */
-const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, unknown>>>> = {
+/** Recipe props, or recipe props with content that replaces some of the default content. No recipe prop is named content. */
+type RecipeVariant = Record<string, unknown> | { props: Record<string, unknown>; content: Record<string, unknown> }
+const withContent = (variant: RecipeVariant) => 'content' in variant
+  ? variant as { props: Record<string, unknown>; content: Record<string, unknown> } : { props: variant, content: {} }
+/** The board's diff in section 05 of the 0.7.6 variants. */
+const boardDiff = ' :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }'
+
+/** The variants measured beside each component's default specimen, as recipe props (and content). */
+const recipeVariants: Partial<Record<ComponentId, Record<string, RecipeVariant>>> = {
   badge: { soft: { appearance: 'soft', variant: 'warning' }, 'soft-success': { appearance: 'soft', variant: 'success', size: 'sm', dot: true },
     outline: { appearance: 'outline', variant: 'destructive' }, 'outline-success': { appearance: 'outline', variant: 'success' },
     'outline-warning': { appearance: 'outline', variant: 'warning' }, 'outline-info': { appearance: 'outline', variant: 'info' } },
   alert: { dismissible: { dismissible: true, actions: true, variant: 'info' }, compact: { layout: 'compact', variant: 'warning' } },
-  card: { link: { mode: 'link' }, options: { mode: 'options' }, media: { mode: 'media' } },
+  card: { link: { mode: 'link' }, options: { mode: 'options' }, media: { mode: 'media' },
+    action: { action: true }, 'action-dense': { action: true, density: 'dense' } },
   avatar: { square: { shape: 'square' }, overflow: { overflow: 4 } },
   accordion: { flush: { appearance: 'flush', icon: 'plus' }, chevron: { icon: 'chevron' } },
   tabs: { pills: { appearance: 'pills', counts: true } },
@@ -44,15 +52,21 @@ const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, 
   pagination: { compact: { layout: 'compact', pageSize: true } },
   select: { multiple: { multiple: true, icons: true } },
   toast: { promise: { mode: 'promise' }, stack: { mode: 'stack' } },
-  sheet: { handle: { side: 'bottom', handle: true }, resizable: { resizable: true } },
+  sheet: { handle: { side: 'bottom', handle: true }, resizable: { resizable: true },
+    snap: { side: 'bottom', handle: true, snapPoints: 'half-full' } },
   checkbox: { row: { option: 'row', checked: 'checked' }, card: { option: 'card', checked: 'checked' }, group: { group: 'parent' } },
   field: { form: { form: 'summary', fieldset: 'default' } },
   switch: { sm: { size: 'sm', checked: true } },
-  progress: { labelled: { size: 'lg', tone: 'success', showLabel: true, showValue: true }, destructive: { tone: 'destructive', size: 'sm' } },
+  progress: { labelled: { size: 'lg', tone: 'success', showLabel: true, showValue: true }, destructive: { tone: 'destructive', size: 'sm' },
+    circle: { shape: 'circle', size: 'lg', showValue: true }, 'circle-sm': { shape: 'circle', size: 'sm' } },
   popover: { arrow: { arrow: true } },
   dialog: { 'lg-scrolling': { size: 'lg', scrollingBody: true, footer: true }, fullscreen: { size: 'fullscreen', footer: true } },
   'alert-dialog': { media: { media: 'default' }, 'destructive-confirm': { media: 'destructive' } },
   breadcrumb: { collapse: { collapse: 'auto' } },
+  slider: { readout: { valueDisplay: 'readout' }, editable: { valueDisplay: 'editable' } },
+  meter: { circle: { shape: 'circle' } },
+  'code-block': { diff: { props: { diff: true, language: 'css' }, content: { code: boardDiff, title: 'ui-style.css' } } },
+  tooltip: { shortcut: { props: {}, content: { shortcut: 'Ctrl+Z' } } },
 }
 
 /** Content the 0.7.6 part variants need beside their props: a legend, and the fields or options. */
@@ -88,9 +102,10 @@ async function familyData(family: StyleFamily): Promise<Record<AuditEdition, Aud
       }
       continue
     }
-    for (const [name, props] of [['', {}], ...Object.entries(recipeVariants[component] ?? {})] as const) {
+    for (const [name, variant] of [['', {}], ...Object.entries(recipeVariants[component] ?? {})] as const) {
       const id = name ? `${component}~${name}` : component
-      const recipe = draft(component as ComponentRecipe['component'], family, props, recipeVariantContent[id])
+      const { props, content } = withContent(variant)
+      const recipe = draft(component as ComponentRecipe['component'], family, props, { ...recipeVariantContent[id], ...content })
       const result = await compileComponentRecipe({ recipe })
       const specimen = describeComponentRecipe(recipe)
       const css = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${component}.css`))!.content
