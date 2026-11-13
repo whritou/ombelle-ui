@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSepa
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipShortcut, TooltipTrigger, ariaKeyShortcuts } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
@@ -709,6 +709,24 @@ function VariantsScenario076() {
       </div>
       <div data-testid="rg-diff">
         <CodeBlock title="ui-style.css" language="css" diff code={[':root {', '-  --radius: 0.5rem;', '+  --radius: 0.75rem;', '+  --shadow-offset: 3px;', '}', ''].join('\n')} />
+      </div>
+      <div data-testid="ts-shortcuts">
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger type="button" aria-label="Undo" aria-keyshortcuts={ariaKeyShortcuts(['Ctrl', 'Z'])} data-testid="ts-undo">↶</TooltipTrigger>
+            <TooltipContent>
+              Undo
+              <TooltipShortcut keys={['Ctrl', 'Z']} />
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger type="button" aria-keyshortcuts={ariaKeyShortcuts(['Ctrl', 'K'])} data-testid="ts-search">Search</TooltipTrigger>
+            <TooltipContent>
+              Search
+              <TooltipShortcut keys={['Ctrl', 'K']} />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <div data-testid="rg-nodiff">
         <CodeBlock title="ui-style.css" language="css" code={[':root {', '  --radius: 0.75rem;', '  --shadow-offset: 3px;', '}', ''].join('\n')} />

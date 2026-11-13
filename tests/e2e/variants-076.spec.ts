@@ -332,4 +332,60 @@ for (const edition of ['radix', 'base'] as const) {
       expect(offset).toBeLessThanOrEqual(28)
     })
   })
+
+  test.describe(`${edition} TooltipShortcut`, () => {
+    const checks = async (page: Page, show: (trigger: ReturnType<Page['locator']>) => Promise<void>) => {
+      const section = await open(page, edition)
+      const trigger = section.getByTestId('ts-undo')
+      await expect(trigger).toHaveAttribute('aria-keyshortcuts', 'Control+Z')
+      const tip = page.locator('[data-slot="tooltip-content"]').filter({ has: page.locator('[data-slot="tooltip-shortcut"]') })
+      // The page may still be hydrating on a cold start: repeat the gesture until the tooltip opens.
+      await expect(async () => {
+        await page.mouse.move(0, 0)
+        await trigger.evaluate(node => (node as HTMLElement).blur())
+        await show(trigger)
+        await expect(tip.first()).toBeVisible({ timeout: 1500 })
+      }).toPass({ timeout: 30000 })
+      const keys = tip.first().locator('[data-slot="tooltip-shortcut-key"]')
+      await expect(keys).toHaveText(['Ctrl', 'Z'])
+      await expect(tip.first().locator('[data-slot="tooltip-shortcut"]')).toHaveAttribute('aria-hidden', 'true')
+      // Key caps are drawn: a border and a 11px mono font, in a row after the text.
+      const cap = await keys.first().evaluate(node => {
+        const style = getComputedStyle(node)
+        return { border: style.borderTopWidth, size: style.fontSize, family: style.fontFamily }
+      })
+      expect(cap.border).toBe('1px')
+      expect(cap.size).toBe('11px')
+      expect(cap.family).toContain('monospace')
+      const [first, second] = [await keys.nth(0).boundingBox(), await keys.nth(1).boundingBox()]
+      expect(second!.x).toBeGreaterThan(first!.x)
+      expect(Math.abs(second!.y - first!.y)).toBeLessThan(2)
+      return trigger
+    }
+
+    test('hover shows the key caps; the trigger announces the shortcut once', async ({ page }) => {
+      const trigger = await checks(page, locator => locator.hover())
+      // Radix points aria-describedby at a hidden copy of the tooltip; Base UI has no description,
+      // so its tooltip's own accessible text is checked. Neither includes the keys.
+      const described = await trigger.evaluate(node => {
+        // The text a screen reader reads: aria-hidden parts are left out.
+        const read = (element: Element) => {
+          const clone = element.cloneNode(true) as HTMLElement
+          clone.querySelectorAll('[aria-hidden="true"]').forEach(hidden => hidden.remove())
+          return (clone.textContent ?? '').trim()
+        }
+        const ids = (node.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean)
+        const fromIds = ids.map(id => document.getElementById(id)).filter((el): el is HTMLElement => !!el).map(read).join(' ')
+        if (ids.length) return fromIds
+        const tip = document.querySelector('[data-slot="tooltip-content"]:has([data-slot="tooltip-shortcut"])')
+        return tip ? read(tip) : ''
+      })
+      expect(described).toBe('Undo')
+      expect(described).not.toContain('Ctrl')
+    })
+
+    test('focus shows the key caps', async ({ page }) => {
+      await checks(page, locator => locator.focus())
+    })
+  })
 }
