@@ -178,7 +178,7 @@
   font-size: 0.75rem;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  line-height: normal;
 }
 [data-slot='progress-ring-value']:is([data-size='lg'] > *) {
   font-size: 16px;
@@ -188,7 +188,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   [data-slot='progress-ring']:is([data-state='indeterminate'] > *) {
-    animation: progress-ring-spin 1s linear infinite;
+    animation: progress-ring-spin calc(var(--motion-duration, 150ms) * 20 / 3) linear infinite;
   }
 }
 @media (prefers-reduced-motion: reduce) {

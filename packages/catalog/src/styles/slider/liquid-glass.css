@@ -165,7 +165,7 @@
   font: inherit;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 [data-slot='slider-value-input']:focus-visible {

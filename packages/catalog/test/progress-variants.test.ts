@@ -171,7 +171,7 @@ describe('Progress shape circle', () => {
     expect(rules).toContain(`stroke-linecap: ${neo ? 'butt' : 'round'};`)
     expect(rules).toMatch(new RegExp(`progress-ring-indicator'\\] \\{[^}]*stroke: ${neo ? 'var\\(--foreground\\)' : 'var\\(--primary\\)'};`))
     const guard = /@media \(prefers-reduced-motion: no-preference\) \{[^]*?\n\}/
-    expect(rules.match(guard)?.[0]).toContain('animation: progress-ring-spin 1s linear infinite')
+    expect(rules.match(guard)?.[0]).toContain('animation: progress-ring-spin calc(var(--motion-duration, 150ms) * 20 / 3) linear infinite')
     expect(rules.replace(guard, '')).not.toMatch(/animation:/)
     const forced = rules.match(/@media \(forced-colors: active\) \{([^]*)\n\}\n?$/)?.[1] ?? ''
     expect(forced).toMatch(/progress-ring-indicator[^}]*stroke: Highlight/)

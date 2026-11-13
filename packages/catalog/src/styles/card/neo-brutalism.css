@@ -273,12 +273,26 @@
   background: transparent;
   color: inherit;
   font: inherit;
-  line-height: 1;
+  line-height: normal;
   cursor: pointer;
+}
+[data-slot='card-action'] > :where(button:not([data-slot])) {
+  border: var(--border-width) solid var(--foreground);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 2px 2px 0 var(--foreground);
+}
+[data-slot='card-action'] > :where(button:not([data-slot])):hover {
+  background-image: linear-gradient(color-mix(in oklab, currentColor 8%, transparent) 0 0);
 }
 [data-slot='card-action'] > :where(button:not([data-slot])):focus-visible {
   outline: 3px dashed var(--ring);
   outline-offset: 4px;
+}
+/* The header is filled with --secondary, where the --ring outline falls under 3:1 in dark mode: ring inside the button. */
+[data-slot='card-action'] > :where(button:not([data-slot])):focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: -5px;
 }
 @media (forced-colors: active) {
   [data-slot='card-action'] > :where(button:not([data-slot])) {
