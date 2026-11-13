@@ -212,10 +212,12 @@
   [data-slot='carousel'][data-carousel-thumbnails] {
     grid-template-areas: 'content' 'dots' 'thumbnails';
   }
+  /* A scrolling row clips what overflows its padding box: 8px covers every family's focus ring and current outline. */
   [data-slot='carousel-thumbnails'] {
     flex-wrap: nowrap;
     overflow-x: auto;
     overscroll-behavior-x: contain;
+    padding: 8px;
   }
   [data-slot='carousel-previous']:is([data-carousel-thumbnails] > *),
   [data-slot='carousel-next']:is([data-carousel-thumbnails] > *) {

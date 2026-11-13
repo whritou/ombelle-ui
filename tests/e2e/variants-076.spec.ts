@@ -468,4 +468,42 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(carousel.getByRole('button', { name: 'Previous slide' })).toBeVisible()
     })
   })
+
+  test.describe(`${edition} image Carousel thumbnail outlines at 375px`, () => {
+    for (const family of ['minimalist', 'neo-brutalism', 'ombelle'] as const) {
+      test(`${family}: a focused thumbnail's ring and the current outline stay inside the scrolling row`, async ({ page }) => {
+        await page.setViewportSize({ width: 375, height: 800 })
+        await page.goto(`/editions/${family}/${edition}/?mode=light`)
+        const carousel = page.getByTestId('variants-076').getByTestId('ic-carousel')
+        await expect(carousel).toBeVisible({ timeout: 60000 })
+        await carousel.scrollIntoViewIfNeeded()
+        const row = carousel.locator('[data-slot="carousel-thumbnails"]')
+        expect(await row.evaluate(element => element.scrollWidth > element.clientWidth)).toBe(true)
+        // The outline's box (border box grown by outline width and offset) against the row's visible padding box.
+        const fits = (index: number) => row.evaluate((element, at) => {
+          const button = element.querySelectorAll<HTMLElement>(':scope > button')[at]!
+          const style = getComputedStyle(button)
+          const grow = parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset)
+          const box = button.getBoundingClientRect(), outer = element.getBoundingClientRect()
+          const left = outer.left + element.clientLeft, top = outer.top + element.clientTop
+          const right = left + element.clientWidth, bottom = top + element.clientHeight
+          return { grow, inside: box.left - grow >= left - 0.5 && box.top - grow >= top - 0.5 && box.right + grow <= right + 0.5 && box.bottom + grow <= bottom + 0.5 }
+        }, index)
+        // The first thumbnail is current: its outline fits at the row's start.
+        expect(await fits(0)).toEqual({ grow: expect.any(Number), inside: true })
+        // Keyboard focus on the second shows the focus ring, which also fits.
+        await row.locator('button').nth(1).focus()
+        await expect(row.locator('button').nth(1)).toBeFocused()
+        const focused = await fits(1)
+        expect(focused.grow).toBeGreaterThan(0)
+        expect(focused.inside).toBe(true)
+        // At the far end of the row, the last thumbnail's ring fits too.
+        await row.locator('button').nth(4).focus()
+        await row.evaluate(element => { element.scrollLeft = element.scrollWidth })
+        const last = await fits(4)
+        expect(last.grow).toBeGreaterThan(0)
+        expect(last.inside).toBe(true)
+      })
+    }
+  })
 }

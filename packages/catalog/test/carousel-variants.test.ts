@@ -105,6 +105,25 @@ describe('Carousel image variant styles', () => {
       for (const selector of match[1]!.split(','))
         expect((selector.match(/data-slot=/g) ?? []).length, selector).toBeLessThanOrEqual(1)
   })
+
+  it.each(families)('%s pads the scrolling phone row enough to show the focus ring and the current outline', family => {
+    const rules = marker(family)
+    // How far an outline reaches outside its box: width plus offset.
+    const extent = (selector: string) => {
+      const body = rules.match(new RegExp(`^${selector.replace(/[[\]().:']/g, '\\$&')}\\s*\\{([^}]*)\\}`, 'm'))?.[1] ?? ''
+      const width = Number(body.match(/outline: ([\d.]+)px/)?.[1])
+      const offset = Number(body.match(/outline-offset: (-?[\d.]+)(?:px)?;/)?.[1])
+      expect(width, `${family} ${selector} outline`).toBeGreaterThan(0)
+      expect(Number.isNaN(offset), `${family} ${selector} offset`).toBe(false)
+      return width + offset
+    }
+    const phone = rules.match(/@media \(width < 640px\)\s*\{([^@]*)/)?.[1] ?? ''
+    const row = phone.match(/\[data-slot='carousel-thumbnails'\]\s*\{([^}]*)\}/)?.[1] ?? ''
+    expect(row).toContain('overflow-x: auto')
+    const padding = Number(row.match(/padding: ([\d.]+)px;/)?.[1])
+    expect(padding).toBeGreaterThanOrEqual(extent("[data-slot='carousel-thumbnail']:focus-visible"))
+    expect(padding).toBeGreaterThanOrEqual(extent("[data-slot='carousel-thumbnail'][aria-current='true']"))
+  })
 })
 
 // The default usage as the rebase head 06bd87d6 renders it.
