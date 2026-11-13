@@ -178,7 +178,7 @@ Liquid glass (experimental, non-blocking): the dark-mode findings files of both 
 
 `t11-board.mjs` in the session workspace screenshots board section 07 of each family (`file://`, 1440px) and reads computed styles from the board's `.ivp`, `.ph` and `.thumbs button` and from the audit's `carousel~image-thumbnails` (`/audit/<family>/<edition>/?mode=light`, 1100px, both editions). Screenshots: `docs/evidence/images/variants-076/board-<family>-07.png`.
 
-These match the board in flat, minimalist, neo brutalism and Ombelle, both editions (after the fixes below): each slide is 88 % of the viewport, so the next one peeks, with a 12px gap; the frame is 16:9 (1.778) with the family edge and large radius; thumbnails are 84 × 47.3 at the same ratio, 10px apart, at opacity 0.6 with the family edge and radius; the current one is at opacity 1 with a 2px `--primary` outline at 2px (neo brutalism 3px ink). The thumbnails are named by the slide text (`Ombelle`, `Flat`, …); images 3 to 5 have `loading="lazy"`, images 1 and 2 none.
+These match the board in flat, minimalist, neo brutalism and Ombelle, both editions (after the fixes below): each slide is 88 % of the viewport, so the next one peeks, with a 12px gap; the frame is 16:9 (1.778) with the family edge and large radius; thumbnails are 84 × 47.3 at the same ratio, 10px apart, at opacity 0.6 with the family edge and radius; the current one is at opacity 1 with a 2px `--primary` outline at 2px (neo brutalism 3px ink). The thumbnails are named by the slide text (`Ombelle`, `Flat`, …); images 3 to 5 have `loading="lazy"`, images 1 and 2 none. The lazy-image browser case proves the `loading` attribute and that each image eventually loads; it does not prove loading was deferred, because the fixtures are data URIs.
 
 Fixed:
 
@@ -201,7 +201,7 @@ Differences that remain:
 | Caption row | `.icap`: a title, a hint and the counter under the image | `CarouselCounter` only, in the dots row | The board caption is page content, not a part |
 | Dots with thumbnails | No dots | The recipe keeps `dots` (on by default), so the thumbnails specimen shows both | The brief adds `CarouselThumbnails` to the specimen; `dots: false` gives the board's look |
 | "Hidden below 640px" marker | An annotation | None | Board annotation. Below 640px every Carousel hides its arrows (track 1's rule); the image block repeats it for carousels with thumbnails |
-| Aspect Ratio | The note says the frame uses Aspect Ratio | `carousel.tsx` sets `aspect-ratio` itself | Templates import no other catalog component |
+| Aspect Ratio | The note says the frame uses Aspect Ratio | the stylesheet sets `aspect-ratio` from the `--carousel-ratio` custom property that `carousel.tsx` sets (no Aspect Ratio import) | Templates import no other catalog component |
 
 ### Section 07 not run
 
