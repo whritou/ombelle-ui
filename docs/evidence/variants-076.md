@@ -1,6 +1,6 @@
 # 0.7.6 variants evidence
 
-Sections 01 to 06 of the 0.7.6 variant boards: Sheet `snapPoints`, `CardAction`, `SliderValue`, Progress and Meter `shape="circle"`, Code Block `diff` and `TooltipShortcut`, in all five style families and both editions. Spec: `docs/superpowers/specs/2026-11-13-variants-076-design.md`. Plan: `docs/superpowers/plans/2026-11-13-variants-076.md`. Branch `feat/variants-076`, commits `db22321b` to the Task 9 commits.
+Sections 01 to 06 of the 0.7.6 variant boards: Sheet `snapPoints`, `CardAction`, `SliderValue`, Progress and Meter `shape="circle"`, Code Block `diff` and `TooltipShortcut`, and section 07, the image Carousel (at the end of this file), in all five style families and both editions. Spec: `docs/superpowers/specs/2026-11-13-variants-076-design.md`. Plan: `docs/superpowers/plans/2026-11-13-variants-076.md`. Branch `feat/variants-076`, commits `db22321b` to the Task 9 commits.
 
 Run on 2026-11-13 by agents on Windows 11 Home 10.0.26300 with Node 24.19.0, pnpm 11.25.0 (through corepack), Playwright 1.64.1 and its bundled Chromium 156.0.8078.4, headless, reduced motion on. Local runs, not CI runs or a human review.
 
@@ -10,7 +10,7 @@ Run on 2026-11-13 by agents on Windows 11 Home 10.0.26300 with Node 24.19.0, pnp
 | --- | --- |
 | Website First Load JS | The plan swaps nothing into the website; it changes only `install-command.ts` (the 0.7.6 gate) and the docs entries. The catalog chunk the editor routes ship grows with the new templates and styles; that growth was not measured |
 | Foundation gate (`pnpm check:foundation`) | Not part of this plan; it needs registry access and the npm, Yarn and Bun consumer toolchain |
-| Section 07 (Carousel `variant="image"`, `CarouselThumbnails`) | Waits for track 1's Carousel |
+| Section 07 (Carousel `variant="image"`, `CarouselThumbnails`) | Done after the rebase onto track 1; see [Section 07](#section-07-image-carousel) |
 | Human screen-reader review | The 0.7.6 rows in `docs/accessibility-review.md` are open |
 
 ## Checks
@@ -123,6 +123,8 @@ The whole-branch review (`59ce79f3..812a8962`) asked for the fixes below. Commit
 
 ## Merge with track 1
 
+Done: on 13 November 2026 `feat/variants-076` was rebased onto `origin/feat/components-076` at `a9c00e4e` (track 1, with Carousel), and the two `variantRecipeFields076` maps were merged into one map with one `usesVariants076` (`7da68d89` gates both tracks' fields). The plan below was the instruction for that merge.
+
 `variantRecipeFields076` and `usesVariants076` in `apps/www/src/snapshots/install-command.ts` exist on both this branch and track 1. The merge must fold this branch's seven entries into one map and keep one function:
 
 ```ts
@@ -142,3 +144,66 @@ sheet: ['snapPoints'], card: ['action'], slider: ['valueDisplay'], progress: ['s
 ## Deferred
 
 Minor findings carried from the task reviews, not fixed in this plan: snap points changed after mount are not re-seeded; the Base UI Sheet SSR test imports a file `@base-ui/react` does not export; the Base Slider sets its input id through the thumb's `render` clone, which overrides a Base UI Field's control id; the indeterminate ring renders an empty number span; the compiler and the Tooltip template each hold a copy of the key-name mapping, with no test that compares them; `generated-types.test.ts` can time out at 60 s under a parallel run (it passes alone).
+
+## Section 07: image Carousel
+
+Board section 07 of `<Family>076Variants.dc.html`: `<Carousel variant="image" ratio="16 / 9">` with `CarouselImage` and `CarouselThumbnails`. Task 10 built the template, styles, recipe fields and the edition fixture `ic-carousel` (`315fa8e5`, `3960c090`); Task 11 adds the recipe specimens, the audit sections, the gallery and scene, the board fixes and the docs. Same machine, Node, pnpm, Playwright and Chromium as above; local runs, not CI.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Default specimen | `carousel` added to `variants-076-defaults.ts` and its default specimen recorded into `variants-076-default-specimens.json` (40 entries) at `3960c090`, before `recipe-specimen.ts` changed | The test passes after the change: the default carousel specimen is unchanged in all five families |
+| RED | `vitest run packages/compiler/test/variants-076.test.ts` | "draws an image carousel with one data-URI image per slide, named by the slide text" failed (`expected { 'aria-label': 'UI kits', …(1) } to match object { variant: 'image', ratio: '16 / 9' }`) |
+| Specimens | same | 80 passed. `variant: 'image'` passes `variant` and `ratio: '16 / 9'` and draws each slide as `CarouselImage` with a 16:9 SVG data URI (one hue per slide index, under 400 characters) and the slide text as `alt`; `thumbnails: true` adds `CarouselThumbnails`; `default` or absent gives the old specimen. Both image recipes compile deterministically in all five families with `findShadowedNames` `[]`, and all 14 variant recipes typecheck as compiled |
+| Board fixes RED | `vitest run packages/catalog/test/specimen-audit-fixes.test.ts -t "image Carousel"` | 2 failed (flat edge `var(--border-width)`; minimalist `--border` and the large radius), then the flat focus case failed (offset `2px`) |
+| Focused tests | `vitest run` on `variants-076`, `stable-families`, `generated-types` (compiler), `carousel`, `carousel-variants`, `specimen-audit-fixes`, `catalog` (catalog), `component-recipe` (contracts) | 8 files, 636 passed. A full `vitest run packages/compiler` during the audit had one timeout in `generated-types.test.ts` (60 s, under load); it passed in the focused run |
+| Stable hashes | `tsx scripts/record-stable-hashes.ts` | 2 entries moved: `flat/compile/components/ui/carousel.css` and `minimalist/compile/components/ui/carousel.css` (the board fixes). No template changed |
+| Gallery | `vitest run --config vitest.integration.config.ts tests/integration/preset-gallery-generation.test.ts` | 13 passed |
+| Browser tests | `playwright test -c playwright.specimen-audit.config.ts tests/e2e/variants-076.spec.ts -g "image Carousel"`, then `-g "flat: a focused thumbnail"` after flat was added to the 375px outline case | 14 passed (46 s), then 2 passed: Task 10's cases pass with the fixed CSS, and flat's moved focus ring stays inside the scrolling row at 375px |
+| Types | `corepack pnpm typecheck` | Passed |
+
+### Section 07 audit
+
+`OMBELLE_AUDIT_COMPONENTS=carousel corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts tests/e2e/specimen-audit.spec.ts`, after `build:packages` and `generate:preview`. New sections: `carousel~image` and `carousel~image-thumbnails`, beside the default `carousel`.
+
+| Run | Result |
+| --- | --- |
+| First run (8.4 min) | 17 passed, 4 failed. Flat Radix light and dark: "focus-visible: 0 focus pixels at 3:1 (0 changed), 236 needed" on the current thumbnail ("Ombelle") of `carousel~image-thumbnails`. Flat Base light and dark failed at `page.goto` with `net::ERR_NETWORK_ACCESS_DENIED` (no finding; re-run below) |
+| After the fixes, `-g "flat/\|minimalist/"` (2.5 min) | 8 passed: flat and minimalist, both editions and modes, the two families whose CSS changed. The other 12 configurations and the glass backdrop check passed in the first run, on CSS that has not changed since |
+
+Fixed: in flat the focus ring (2px `--ring` at 2px) and the current outline (2px `--primary` at 2px) are the same colour in the same place, so focusing the current thumbnail drew nothing new. Flat's thumbnail focus ring now sits at 4px, outside the current outline; the phone row's 8px padding still holds it (the 375px browser case now includes flat). Pinned in `specimen-audit-fixes.test.ts`, "the 0.7.6 image Carousel matches board section 07".
+
+Liquid glass (experimental, non-blocking): the dark-mode findings files of both editions are empty. In light mode each edition records 23 carousel findings, all focus-visible: the viewport, Next and the dots in all three sections (the default `carousel` as well as the image sections, so they come from the plain carousel's glass rules), and the "Neo brutalism" and "Liquid glass" thumbnails of `carousel~image-thumbnails`.
+
+### Section 07 board comparison
+
+`t11-board.mjs` in the session workspace screenshots board section 07 of each family (`file://`, 1440px) and reads computed styles from the board's `.ivp`, `.ph` and `.thumbs button` and from the audit's `carousel~image-thumbnails` (`/audit/<family>/<edition>/?mode=light`, 1100px, both editions). Screenshots: `docs/evidence/images/variants-076/board-<family>-07.png`.
+
+These match the board in flat, minimalist, neo brutalism and Ombelle, both editions (after the fixes below): each slide is 88 % of the viewport, so the next one peeks, with a 12px gap; the frame is 16:9 (1.778) with the family edge and large radius; thumbnails are 84 × 47.3 at the same ratio, 10px apart, at opacity 0.6 with the family edge and radius; the current one is at opacity 1 with a 2px `--primary` outline at 2px (neo brutalism 3px ink). The thumbnails are named by the slide text (`Ombelle`, `Flat`, …); images 3 to 5 have `loading="lazy"`, images 1 and 2 none.
+
+Fixed:
+
+| Part | Board | Before | After and test |
+| --- | --- | --- | --- |
+| Flat frame and thumbnail edge | 1px solid line | `var(--border-width)` (0 in flat), so no edge | `max(1px, var(--border-width)) solid var(--border)`, as track 1's flat frames. Measured 1px `rgb(226, 230, 238)` |
+| Flat thumbnail radius | 10px (`--r`) | 8px (`--radius`) | 10px, as flat's boxed fields. Measured 10px |
+| Minimalist frame and thumbnail edge | 1px in the strong line (`#8C8C86`) | `--border` (`#E5E5E1`) | `1px solid var(--input)`. Measured `rgb(140, 140, 134)` |
+| Minimalist frame radius | 4px (its `--r-lg`) | 8px (`calc(var(--radius) + 4px)`) | `var(--radius)`. Measured 4px |
+| Flat thumbnail focus | Not drawn | Hidden under the current outline (audit) | Ring at 4px (above) |
+
+All five are pinned in `specimen-audit-fixes.test.ts`, "the 0.7.6 image Carousel matches board section 07".
+
+Differences that remain:
+
+| What | Board | Ours | Why it stays |
+| --- | --- | --- | --- |
+| Liquid glass radii | 24px frame, 18px thumbnails | 16px and 12px (`--radius` + 4px and `--radius`) | The family radius tokens; liquid glass is experimental |
+| Liquid glass colours | Drawn on the dark glass page: white 28 % edges, a light blue current outline | Measured in light mode: the glass line and `--primary` | The board shows one mode; the specimen follows the preset in each mode |
+| Caption row | `.icap`: a title, a hint and the counter under the image | `CarouselCounter` only, in the dots row | The board caption is page content, not a part |
+| Dots with thumbnails | No dots | The recipe keeps `dots` (on by default), so the thumbnails specimen shows both | The brief adds `CarouselThumbnails` to the specimen; `dots: false` gives the board's look |
+| "Hidden below 640px" marker | An annotation | None | Board annotation. Below 640px every Carousel hides its arrows (track 1's rule); the image block repeats it for carousels with thumbnails |
+| Aspect Ratio | The note says the frame uses Aspect Ratio | `carousel.tsx` sets `aspect-ratio` itself | Templates import no other catalog component |
+
+### Section 07 not run
+
+- The preview's Projects scene and the preset gallery in a browser: they render only inside the preset preview frame, driven by the website editor's messages. Both are typechecked (`apps/preview/src/generated/preset-gallery/gallery.tsx` is generated from `fixtures/shared/preset-gallery.tsx`) and the gallery generation test passes; the same parts run in the edition fixture `ic-carousel` and the audit sections.
+- The full unit and integration suites, the foundation gate and a human screen-reader review (the Carousel rows in `docs/accessibility-review.md` are open).

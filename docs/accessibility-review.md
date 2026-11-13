@@ -240,6 +240,7 @@ Review these on the preview "0.7.6 components" section of the edition pages, the
 - **FieldSet and Checkbox Group**: the group is announced with its legend; the parent checkbox is announced as mixed, checked or not checked, with the count in its name; pressing it checks or clears every enabled child; a disabled fieldset disables every control inside.
 - **Password Field**: the toggle is announced as "Show password", pressed or not; toggling keeps focus and the caret in the input; "Caps Lock is on" is announced once while the input has focus; the strength meter is announced with its word and the first missing check.
 - **Carousel**: the region is announced as a carousel with its name, each slide as "N of M"; the viewport is one Tab stop scrolled by the arrow keys; Previous and Next are announced as unavailable at the ends; the current dot is marked as current; nothing moves on its own.
+- **Image Carousel**: each slide's image is announced with its alt text; the thumbnails are a group named "Choose an image", each button named by its image's alt text and the current one announced as current; activating a thumbnail moves to its slide and the current mark follows; images from the third slide load lazily without changing what is announced; below 640px the thumbnails scroll sideways and every one stays reachable with Tab.
 - **Aspect Ratio**: the frame adds no role or name; its media keeps its own alt text.
 - **Toolbar**: the toolbar is one Tab stop announced with its name; the arrow keys, Home and End move between items; toggles announce their state; when items overflow, the More button is announced with its menu, which lists the hidden items in order with toggles as checkable items, and focus never lands on a hidden item.
 
@@ -360,6 +361,8 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Progress and Meter ring: hidden number, value text read once | | | | | | | | | | |
 | Code Block diff markers and `Added:` / `Removed:` screen-reader text | | | | | | | | | | |
 | Tooltip shortcut announced once, through `aria-keyshortcuts` | | | | | | | | | | |
+| Carousel image: required alt, lazy images from the third slide | | | | | | | | | | |
+| Carousel thumbnails named by alt text, current one with `aria-current` | | | | | | | | | | |
 
 #### Variants, batch 6a (0.7.3)
 
