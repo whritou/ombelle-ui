@@ -227,8 +227,10 @@ export function PresetGallery({
           <PaginationItem><PaginationEllipsis /></PaginationItem>
           <PaginationItem><PaginationNext href="#page-2" /></PaginationItem>
         </PaginationContent></Pagination>
-        <Pagination aria-label="Compact pages"><PaginationCompact page={2} pageCount={12} previousHref="#page-1" nextHref="#page-3" /></Pagination>
-        <PaginationPageSize value={25} range="1–25 of 290" />
+        <div className="preset-variants">
+          <Pagination aria-label="Compact pages"><PaginationCompact page={2} pageCount={12} previousHref="#page-1" nextHref="#page-3" /></Pagination>
+          <PaginationPageSize value={25} range="1–25 of 290" />
+        </div>
       </section>)}
       {gate('sheet', 'Sheet', <section aria-label="Sheet" data-component="sheet">
         <h2>Sheet</h2><Sheet><SheetTrigger asChild><Button variant="outline">Open details</Button></SheetTrigger><SheetContent>
@@ -289,12 +291,14 @@ export function PresetGallery({
       {gate('toggle-group', 'Toggle Group', <section aria-label="Toggle Group" data-component="toggle-group">
         <h2>Toggle Group</h2>
         <ToggleGroup type="single" defaultValue="week" aria-label="Calendar view"><ToggleGroupItem value="day">Day</ToggleGroupItem><ToggleGroupItem value="week">Week</ToggleGroupItem><ToggleGroupItem value="month">Month</ToggleGroupItem></ToggleGroup>
-        <ToggleGroup type="multiple" variant="toolbar" defaultValue={['bold']} aria-label="Text formatting"><ToggleGroupItem value="bold" aria-label="Bold"><b aria-hidden="true">B</b></ToggleGroupItem><ToggleGroupItem value="italic" aria-label="Italic"><i aria-hidden="true">I</i></ToggleGroupItem><ToggleGroupItem value="underline" aria-label="Underline"><u aria-hidden="true">U</u></ToggleGroupItem></ToggleGroup>
+        <div className="preset-variant">
+          <ToggleGroup type="multiple" variant="toolbar" defaultValue={['bold']} aria-label="Text formatting"><ToggleGroupItem value="bold" aria-label="Bold"><b aria-hidden="true">B</b></ToggleGroupItem><ToggleGroupItem value="italic" aria-label="Italic"><i aria-hidden="true">I</i></ToggleGroupItem><ToggleGroupItem value="underline" aria-label="Underline"><u aria-hidden="true">U</u></ToggleGroupItem></ToggleGroup>
+        </div>
       </section>)}
       {gate('chip', 'Chip', <section aria-label="Chip" data-component="chip">
         <h2>Chip</h2>
         <ChipGroup aria-label="Status filter"><Chip defaultPressed>On track</Chip><Chip defaultPressed={false}>Needs attention</Chip><Chip defaultPressed={false}>Shipped</Chip></ChipGroup>
-        <p><Chip>glass<ChipRemove /></Chip></p>
+        <div className="preset-variant"><Chip>glass<ChipRemove /></Chip></div>
       </section>)}
       {gate('tag-input', 'Tag Input', <section aria-label="Tag Input" data-component="tag-input">
         <h2>Tag Input</h2>
@@ -305,7 +309,7 @@ export function PresetGallery({
         <h2>Input OTP</h2>
         <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>
       </section>)}
-      <div data-testid="overlays-search">
+      <div data-testid="overlays-search" className="preset-sections">
       {gate('combobox', 'Combobox', <section aria-label="Combobox" data-component="combobox">
         <h2>Combobox</h2>
         <label id="gallery-preset">Preset</label>
@@ -342,8 +346,10 @@ export function PresetGallery({
       {gate('calendar', 'Calendar', <section aria-label="Calendar" data-component="calendar">
         <h2>Calendar</h2>
         <Calendar mode="range" today="2026-11-10" defaultMonth="2026-11-01" aria-label="Stay" selected={{ from: '2026-11-12', to: '2026-11-18' }} />
-        <p id="gallery-due">Due date</p>
-        <DatePicker aria-labelledby="gallery-due" defaultValue="2026-11-12" calendar={{ today: '2026-11-10' }} />
+        <div className="preset-variant">
+          <p id="gallery-due" className="preset-label">Due date</p>
+          <DatePicker aria-labelledby="gallery-due" defaultValue="2026-11-12" calendar={{ today: '2026-11-10' }} />
+        </div>
       </section>)}
       {gate('hover-card', 'Hover Card', <section aria-label="Hover Card" data-component="hover-card">
         <h2>Hover Card</h2>

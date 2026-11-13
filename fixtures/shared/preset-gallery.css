@@ -21,6 +21,12 @@ body {
   grid-template-columns: minmax(0, 1fr);
   gap: 28px;
 }
+/* A wrapper around several sections keeps the gallery's spacing between them. */
+.preset-sections {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+}
 .preset-gallery > header {
   display: block;
   margin: 0;
@@ -57,6 +63,9 @@ body {
 /* A component's extra appearances sit under its main example. */
 .preset-variant {
   margin-top: 16px;
+}
+.preset-label {
+  margin: 0 0 8px;
 }
 .preset-variants {
   display: grid;
