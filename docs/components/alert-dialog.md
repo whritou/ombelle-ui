@@ -37,6 +37,33 @@ export function DiscardDraft({ discard }: { discard: () => void }) {
 }
 ```
 
+## Variants (0.7.5)
+
+These need CLI **0.7.5** or later, including in component recipes. Leaving a prop or part out renders what earlier releases render.
+
+```tsx
+<AlertDialogContent>
+  <AlertDialogHeader>
+    <AlertDialogMedia tone="destructive" />
+    <AlertDialogTitle>Delete ombelle-site?</AlertDialogTitle>
+    <AlertDialogDescription>Its install code stops working for everyone.</AlertDialogDescription>
+  </AlertDialogHeader>
+  <AlertDialogConfirmInput expected="ombelle-site" />
+  <AlertDialogFooter>
+    <AlertDialogCancel>Cancel</AlertDialogCancel>
+    <AlertDialogAction onClick={deleteProject}>Delete project</AlertDialogAction>
+  </AlertDialogFooter>
+</AlertDialogContent>
+```
+
+- **`AlertDialogMedia`** (`alert-dialog-media`) is an icon tile for the header, `aria-hidden`, with `tone` (`default` or `destructive`) set as `data-tone`. Without children it draws its own icon: a circled "i" for `default`, a warning triangle for `destructive`. It adds no icon dependency.
+- **`AlertDialogConfirmInput`** (`alert-dialog-confirm`) asks for `expected` to be typed:
+  - It renders the instruction, by default "Type <code>expected</code> to confirm" (or your `label`), as the label of a text input (`alert-dialog-confirm-input`) with autocomplete and spellcheck off.
+  - `AlertDialogAction` is `disabled` until the input's value equals `expected` exactly: no trimming, case-sensitive. While it is disabled, the action's `aria-describedby` points at the instruction, so the reason is announced. Pasting is allowed.
+  - Enter in the input runs the action only when the text matches; otherwise it does nothing and the dialog stays open.
+  - When the dialog opens, focus goes to the input instead of Cancel. The text starts empty each time the dialog opens, because the content unmounts when it closes; content kept mounted with `forceMount` (Radix) or `keepMounted` (Base UI) keeps the typed text.
+- **Recipe:** `media` (`none`, `default` or `destructive`) and the content field `confirmText` (empty for none).
+
 ## API and editions
 
 `AlertDialog` supports controlled `open` / `onOpenChange` and uncontrolled `defaultOpen`. DOM parts forward their native primitive props, handlers and React 19 refs. `AlertDialogHeader` and `AlertDialogFooter` are native divs. Include a title, description and enabled cancel control. Put the cancel control before the action in the DOM to keep keyboard and visual ordering aligned.

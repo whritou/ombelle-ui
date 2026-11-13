@@ -53,6 +53,16 @@ number fields. Liquid glass remains experimental. Installing them needs CLI
 0.7.5 or later. See the [design](superpowers/specs/2026-11-12-editor-inputs-075-design.md)
 and the [evidence](evidence/editor-inputs-075.md).
 
+The 0.7.5 variants add, with recipe fields that need CLI 0.7.5:
+[Checkbox Option](components/checkbox.md#variants-075) rows and cards, a small
+[Switch](components/switch.md#variants-075), [Progress](components/progress.md#variants-075)
+sizes, tones, a label and a value, a [Popover arrow](components/popover.md#variants-075),
+a scrolling [Dialog](components/dialog.md#variants-075) body, footer and sizes,
+[Alert Dialog](components/alert-dialog.md#variants-075) media and typed confirmation,
+and a [Breadcrumb](components/breadcrumb.md#collapse-075) that collapses into a menu.
+See the [design](superpowers/specs/2026-11-12-variants-075-design.md) and the
+[evidence](evidence/variants-075.md).
+
 The 0.7.5 [Code Block](components/code-block.md) shows read-only source with
 Copy: a file block with a title and line numbers, or a command block with one
 tab per package manager. It is available in all five families with Radix and

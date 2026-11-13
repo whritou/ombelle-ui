@@ -2,8 +2,10 @@
 
 Breadcrumb shows a page's place in a hierarchy using a named native `nav`, an
 ordered list and links. The current page is a noninteractive span with
-`aria-current="page"`. The same template serves both primitive editions and
-does not require a client boundary or a navigation runtime.
+`aria-current="page"`. Since 0.7.5 it is a client component, because a long
+trail can collapse into a menu: the Radix edition uses
+`@radix-ui/react-dropdown-menu` and the Base UI edition Base UI `Menu`. It
+needs no navigation runtime.
 
 This component requires CLI **0.7.2** or later:
 `npx @ombelle-ui/cli@0.7.2 add breadcrumb`. For a built local checkout:
@@ -66,6 +68,33 @@ All parts accept their native props, React 19 refs, `className` and `style`.
 Separators and ellipses enforce `role="presentation"` and `aria-hidden="true"`
 and do not enter the tab order. They are decoration, so do not put interactive
 content inside them. Chevron direction follows inherited `dir="rtl"`.
+
+## Collapse (0.7.5)
+
+This needs CLI **0.7.5** or later, including in component recipes. Without `collapse`, Breadcrumb renders what earlier releases render.
+
+```tsx
+<Breadcrumb collapse="auto">
+  <BreadcrumbList>
+    {trail.map((page) => (
+      <React.Fragment key={page.href}>
+        <BreadcrumbItem><BreadcrumbLink href={page.href}>{page.label}</BreadcrumbLink></BreadcrumbItem>
+        <BreadcrumbSeparator />
+      </React.Fragment>
+    ))}
+    <BreadcrumbItem><BreadcrumbPage>Number Input</BreadcrumbPage></BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+- With `collapse="auto"`, a ResizeObserver measures the trail against the width of the `nav`. When it does not fit, the middle items fold, from the second onward, until it fits. The first item and the current page always stay; when they alone do not fit, every middle item folds. A trail of one or two items never folds.
+- In their place, `BreadcrumbEllipsis` becomes a menu button named "Show N more" whose menu lists the folded pages as links, in trail order. The menu is drawn with each family's Dropdown Menu look, under the slots `breadcrumb-menu` and `breadcrumb-menu-item`.
+- The server renders the full trail; the collapse applies after mount. Item widths are measured from a full render and measured again when the items change. Items mapped to fragments, as above, fold too.
+- Installing Breadcrumb now installs `@radix-ui/react-dropdown-menu` (Radix edition), not the Dropdown Menu component.
+- A single long label is not truncated.
+- **Recipe:** `collapse` (`none` or `auto`).
+
+For a fixed trail, keep the manual composition below.
 
 ## Overflow composition
 

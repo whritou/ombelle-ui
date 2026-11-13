@@ -90,3 +90,77 @@ Differences that remain:
 ### Website
 
 The component editor's boolean fields are small Switches in horizontal Field rows, and its choice lists (Accordion's expanded items, Table's numeric columns) are `CheckboxOption` rows. Size: see "Website size, batch 4a".
+
+## Batch 4b: Dialog, Alert Dialog and Breadcrumb
+
+Branch `feat/variants-dialogs-075`, stacked on batch 4a. Run on 2026-11-13 by an agent, same machine, Node, pnpm and Playwright as batch 4a. Local runs, not CI runs or a human review.
+
+### Checks
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Build | `corepack pnpm build:packages`, then `corepack pnpm generate:preview` | Passed |
+| Types | `corepack pnpm typecheck`; `tsc --noEmit -p apps/www` | Passed |
+| Contracts and gate | `vitest run packages/contracts/test/component-recipe.test.ts apps/www/src/snapshots/install-compatibility.test.tsx` | Passed; the new cases failed first (12) |
+| Catalog and compiler | `vitest run packages/catalog packages/compiler` | 2133 passed. `generated-types.test.ts` (it typechecks every Base UI component, the new Base Breadcrumb included) timed out at 60 s under the full run's load; alone with a 300 s timeout it passed 3 of 3 |
+| Default specimens | `variants-075.test.ts` | Every default recipe specimen of the seven components, in all five families, still equals the fixture recorded before any change |
+| Website units | `vitest run apps/www/src` | 633 passed |
+| Variant browser tests, both editions | `playwright test -c playwright.specimen-audit.config.ts tests/e2e/variants-075.spec.ts` | Passed: Dialog footer on screen while the named body scrolls with Page Down, in all five families; a short body is no Tab stop until it overflows; `lg` fills a 375px screen with no radius and `default` does not; typed confirmation (focus in the field, near misses `ombelle-sit`, `Ombelle-site`, trailing and leading spaces, Enter on a mismatch, paste, Escape, empty on reopen); Breadcrumb at 320px folds into a "Show N more" menu whose links match the folded items in order, unfolds at 1280px, and measures again when the items change |
+
+### Specimen audit
+
+`OMBELLE_AUDIT_COMPONENTS=dialog,alert-dialog,breadcrumb corepack pnpm exec playwright test -c playwright.specimen-audit.config.ts tests/e2e/specimen-audit.spec.ts`, after the fixes below: 21 passed (11.8 min), all 20 family, edition and mode configurations plus the glass backdrop check. The audit variants are `dialog~lg-scrolling`, `dialog~fullscreen`, `alert-dialog~media` and `alert-dialog~destructive-confirm` (media only: the audit's drafts take props, and `confirmText` is content), and `breadcrumb~collapse`.
+
+### Board comparison
+
+A probe (`board-compare-4b.mjs` in the session workspace) read computed styles of board sections 04 (Dialog), 05 (Alert Dialog) and 07 (Breadcrumb) and of the edition-page fixtures opened in each family (Radix edition, 1280px; the Breadcrumb at 320px). Board screenshots: `docs/evidence/images/variants-075/board-<family>-{04,05,07}.png`.
+
+These match: the icon tile is 40 × 40 in every family; the disabled action is at 50 % opacity; the typed-confirmation instruction sits above a field with the code in a muted pill; the "Show N more" menu repeats each family's Dropdown Menu (items 34 to 40px high).
+
+Fixed: the Dialog column in neo-brutalism and liquid glass (see below).
+
+Differences that remain:
+
+| What | Board | Ours | Why it stays |
+| --- | --- | --- | --- |
+| Dialog frame, title and footer | One generic dialog (18px / 800 title, 6px offset shadow, footer on a white strip with an 18px inset) in every family | Each family's existing Dialog frame and title; the footer has no strip of its own and gains a top border only while the body overflows | The spec keeps every existing default; the border marks the scroll, as the spec asks |
+| Ellipsis button | 28px circle | 32px round button | A larger target; it stays a circle |
+| Destructive action colour | The confirm button is destructive on the board | The action keeps the family's Alert Dialog action colour | Alert Dialog has no destructive action variant; the consumer styles the action. The media tile carries the tone |
+| Fonts | Hanken Grotesk, Archivo, JetBrains Mono | The preset's fonts | The catalog ships no web fonts |
+
+### Defects found and fixed while testing
+
+| Defect | Found by | Fix and test |
+| --- | --- | --- |
+| In neo-brutalism and liquid glass the dialog content is laid out as a block, so a `DialogBody` never scrolled and the footer was clipped below the screen | The batch 4b board probe (computed styles of the opened fixtures) | The 0.7.5 rule sets the column itself (`display: flex; flex-direction: column`). `dialog-variants.test.ts` failed in 5 families, then passed; the browser test "a scrolling Dialog body keeps the footer on screen in every family" passes in both editions |
+| Recipe scoping renames `data-slot="breadcrumb-item"` inside the Breadcrumb's own `querySelectorAll` strings, so a recipe-compiled Breadcrumb threw and the audit pages did not render | `editors-glass.spec.ts` (the glass audit page never became ready) | The collapse finds items and separators by structure (separators are `role="presentation"`, the ellipsis item carries `data-breadcrumb-overflow`). `breadcrumb-variants.test.ts` "queries its parts without slot names" failed for both templates, then passed; the audit page renders again |
+| The DialogBody's name was missing: Radix sets the dialog's `aria-labelledby` after the body's first effect | The browser test of the body's name | The body reads the label on every measure |
+| The Breadcrumb menu read `--radix-dropdown-menu-content-available-height` with no fallback; the site does not load the Dropdown Menu stylesheet | `generated-ui.test.ts` | The copied rule falls back to `70vh` |
+
+### Website
+
+- The editor top bar's trail is a `Breadcrumb collapse="auto"` (Components is a link to `/editor/component`).
+- The Get code dialog is a `Dialog` with `DialogContent size="lg"`, a `DialogBody` and the Copy command in a `DialogFooter`. It returns focus to the button that opened it unless an action (Show changes) moved focus on purpose.
+- The preset editor's ID & revision dialog is a `Dialog` with a body and a Done footer. The family change and token reset confirmations are `AlertDialog`s with `AlertDialogMedia` (destructive for the reset), keeping the Collapsible list of changed values; Cancel has initial focus. Replacing saved recovery data asks with a destructive `AlertDialog` instead of `window.confirm`.
+- The site does not load family stylesheets, and Dialog has no stylesheet of its own, so `apps/www/src/app/globals.css` carries the Ombelle family's Dialog rules (including the 0.7.5 block) between `/* catalog dialog */` markers; `generated-ui.test.ts` checks that the file parses and holds them.
+- `@radix-ui/react-alert-dialog` 1.2.1 and `@radix-ui/react-dropdown-menu` 2.2.1 were added to `apps/www`.
+
+Editors end to end (`editor.spec.ts`, `preset-editor.spec.ts`, `catalog-editors.spec.ts`, `recipe-snapshots.spec.ts`, `editors-glass.spec.ts`, `editors-matrix.spec.ts`, and `liquid-glass.spec.ts` "preset editor glass flow" and "bounded contrast"), with the temporary website and preview config:
+- Fixed during the swap: the Get code dialog lost its name when its title took a fixed `id`; focus did not return to Get code; the top bar trail kept the site's list margin and indent, which made the bar wrap to two rows and cover the preview frame's dialog; the gallery Dialog grew with a footer (the footer was removed from the gallery); `editors-matrix.spec.ts` scanned `include('dialog')`, the old native element, now `[role="dialog"]`; `preset-editor.spec.ts` read the ID field of the closed native dialog, and now opens the ID & revision dialog first. No test was added or removed in a counted spec, so the 686 browser cases are unchanged.
+- What still fails is the recorded baseline: the consumer installs (consumer apps not served; npm `ETARGET` for the existing pin `@radix-ui/react-alert-dialog@1.2.1`), "opens on the dashboard …" (axe `color-contrast`, 4), "restores raw draft …" and "edits numeric design values …" (the 0.5 radius), and "supports keyboard editing and 320 pixel reflow" and the glass flow (axe `label-content-name-mismatch` and `scrollable-region-focusable` on the gallery Date Picker trigger and the Projects table, the same nodes as in `code-block-075.md`).
+
+## Website size, batch 4b: over the limit, decision pending
+
+Measured after the batch 4b website changes, with the same method (`corepack pnpm run build` in `apps/www`, exit 0, then `node scripts/measure-www-first-load.mjs`), on 2026-11-13.
+
+| Route | Scripts | Before, gzip | After batch 4a | After batch 4b | Growth from before |
+| --- | --- | --- | --- | --- | --- |
+| `/editor/preset` | 18 | 883.8 kB | 888.4 kB | 907.1 kB | **+23.3 kB, over the limit** |
+| `/editor/component` | 10 | 241.4 kB | 241.6 kB | 241.8 kB | +0.4 kB |
+| `/editor/component/button` | 18 | 878.4 kB | 883.0 kB | 900.2 kB | **+21.8 kB, over the limit** |
+| `/docs` | 11 | 242.4 kB | 242.5 kB | 242.8 kB | +0.4 kB |
+| `/docs/getting-started` | 12 | 249.6 kB | 249.8 kB | 250.0 kB | +0.4 kB |
+| `/components` | 14 | 452.0 kB | 456.5 kB | 468.4 kB | **+16.4 kB, over the limit** |
+| `/components/accordion` | 16 | 849.9 kB | 854.5 kB | 866.6 kB | **+16.7 kB, over the limit** |
+
+Where it comes from, read from the build's chunks: the shared chunk holding the catalog source (templates and stylesheets, which these routes ship to compile recipes) grew with the new templates and styles, the two Breadcrumb templates and their menu styles most; and the editor routes now load Radix Dropdown Menu (a chunk of about 22 kB gzip, partly shared with the Popover code they already load) through the top bar's Breadcrumb. This overrun has not been accepted; it waits for the maintainer.
