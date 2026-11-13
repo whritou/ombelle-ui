@@ -105,6 +105,10 @@
 [data-slot='field-set']:disabled {
   opacity: 0.55;
 }
+/* An invalid input keeps the ring colour while focused (found by the 0.7.6 Form specimen). */
+[data-slot='field'][data-invalid] [data-field-input]:focus-visible {
+  border-color: var(--ring);
+}
 [data-slot='field-legend'] {
   padding-inline: 6px;
   color: var(--foreground);

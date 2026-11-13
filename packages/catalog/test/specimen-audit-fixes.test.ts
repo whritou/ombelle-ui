@@ -426,3 +426,22 @@ describe('0.7.6 components match their boards', () => {
       expect(px(declarations(read(`carousel/${family}.css`), "[data-slot='carousel-previous']")['block-size']!), family).toBe(34)
   })
 })
+
+describe('0.7.6 audit findings', () => {
+  it('minimalist keeps the ring colour on a focused invalid Field input', () => {
+    expect(declarations(read('field/minimalist.css'), "[data-slot='field'][data-invalid] [data-field-input]:focus-visible")['border-color']).toBe('var(--ring)')
+  })
+
+  it('minimalist Carousel dots draw a 2px ring', () => {
+    expect(declarations(read('carousel/minimalist.css'), "[data-slot='carousel-dot']:focus-visible").outline).toBe('2px solid var(--ring)')
+  })
+
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s grouped checkboxes keep the ring colour on their transparent row', family => {
+    expect(declarations(read(`checkbox/${family}.css`), "[data-slot='checkbox-option'][data-checkbox-group-item] > :first-child:focus-visible")['outline-color'])
+      .toBe(family === 'liquid-glass' ? 'var(--foreground)' : 'var(--ring)')
+  })
+
+  it('neo-brutalism summary links use the text colour on the tinted summary', () => {
+    expect(declarations(read('field/neo-brutalism.css'), "[data-slot='form-error-summary-list'] a").color).toBe('var(--foreground)')
+  })
+})

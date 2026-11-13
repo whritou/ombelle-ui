@@ -292,6 +292,9 @@
   grid-row: auto;
   margin-block-start: 0;
 }
+[data-slot='checkbox-option'][data-checkbox-group-item] > :first-child:focus-visible {
+  outline-color: var(--foreground);
+}
 @media (forced-colors: active) {
   [data-slot='checkbox-group-parent']:has(> [data-state='checked'], > [data-state='indeterminate']) {
     color: Highlight;

@@ -165,7 +165,7 @@
   line-height: 1.4;
 }
 [data-slot='form-error-summary-list'] a {
-  color: var(--destructive);
+  color: var(--foreground);
   font-weight: 600;
   text-underline-offset: 2px;
 }
