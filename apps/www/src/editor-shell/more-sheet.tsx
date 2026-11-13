@@ -4,6 +4,7 @@ import { BookOpen, Redo2, Search } from 'lucide-react'
 import type { ReactNode, RefObject } from 'react'
 import styles from './editor-shell.module.css'
 import type { OverflowItem } from './top-bar'
+import { returnTarget } from './history-focus'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../generated/ui/components/ui/sheet'
 
 export type MoreLink = { label: string; href: string }
@@ -56,7 +57,12 @@ export function MoreActionsSheet({ open, onOpenChange, returnFocus, ...list }: {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" aria-label="More actions" className={styles.phoneSheet}
-        onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus.current?.focus() }}>
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          // An action that opened a dialog keeps focus there; otherwise back to the button on screen.
+          if (document.querySelector('[data-slot="dialog-content"], [data-slot="alert-dialog-content"]')) return
+          returnTarget(returnFocus.current)?.focus()
+        }}>
         <SheetHeader>
           <SheetTitle>More actions</SheetTitle>
           <SheetDescription className="sr-only">Actions that do not fit in the top bar on a phone.</SheetDescription>

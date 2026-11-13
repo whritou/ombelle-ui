@@ -239,3 +239,56 @@ test.describe('on a 375px phone', () => {
     })
   }
 })
+
+// Final review findings.
+test('closing ID & revision or the reset confirmation on a phone returns focus to More actions', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await open(page, editors[0].url)
+  const more = page.getByRole('button', { name: 'More actions', exact: true })
+  for (const item of ['ID & revision…', 'Reset all tokens…']) {
+    await more.click()
+    await page.getByRole('dialog', { name: 'More actions' }).getByRole('button', { name: item, exact: true }).click()
+    await expect(page.locator('[data-slot="dialog-content"], [data-slot="alert-dialog-content"]').first()).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(more).toBeFocused()
+  }
+})
+
+test('the More actions sheet closes when the screen widens past a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await open(page, editors[1].url)
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  const sheet = page.getByRole('dialog', { name: 'More actions' })
+  await expect(sheet).toBeVisible()
+  await page.setViewportSize({ width: 800, height: 1024 })
+  await expect(sheet).toBeHidden()
+  await page.setViewportSize({ width: 375, height: 812 })
+  await expect(sheet).toBeHidden()
+})
+
+test('the tablet Checks and export sheet does not reopen after the screen widens and narrows', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 1024 })
+  await open(page, editors[0].url)
+  await page.getByRole('button', { name: /^Checks and export/ }).click()
+  const sheet = page.getByRole('dialog', { name: 'Checks and export' })
+  await expect(sheet).toBeVisible()
+  await page.setViewportSize({ width: 1300, height: 900 })
+  await expect(sheet).toBeHidden()
+  await page.setViewportSize({ width: 900, height: 1024 })
+  await page.waitForTimeout(500)
+  await expect(sheet).toBeHidden()
+})
+
+test('a long component name shortens in the switcher at 320px and keeps its chevron', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  await page.goto('http://127.0.0.1:3000/editor/component/dropdown-menu')
+  const switcher = page.getByRole('button', { name: 'Component: Dropdown Menu. Choose a component', exact: true })
+  await expect(switcher).toBeVisible({ timeout: 60000 })
+  const box = (await switcher.boundingBox())!
+  const nav = (await page.getByRole('navigation', { name: 'Breadcrumb' }).boundingBox())!
+  const chevron = (await switcher.locator('svg').boundingBox())!
+  expect(box.x + box.width).toBeLessThanOrEqual(nav.x + nav.width + 0.5)
+  expect(chevron.x + chevron.width).toBeLessThanOrEqual(box.x + box.width)
+  expect(await switcher.locator('span').evaluate(element => getComputedStyle(element).textOverflow)).toBe('ellipsis')
+  await expectFitsViewport(page, 320)
+})

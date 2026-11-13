@@ -75,6 +75,8 @@ import {
   EditorDock,
   useViewportClass,
   focusHistoryTarget,
+  returnTarget,
+  visibleMoreActions,
 } from '../../editor-shell'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../../generated/ui/components/ui/sheet'
 import { NativeSelect, NativeSelectOption } from '../../generated/ui/components/ui/native-select'
@@ -155,6 +157,8 @@ export default function PresetEditor() {
   useEffect(() => {
     // A review open on a wider screen stays in view: the phone shows its Checks pane.
     if (viewportClass === 'phone' && previousViewport.current !== 'phone' && drawerOpen) setPane('checks')
+    // The tablet's sheet belongs to the tablet: leaving that width closes it for good.
+    if (viewportClass !== 'tablet') setReviewSheetOpen(false)
     previousViewport.current = viewportClass
   }, [viewportClass, drawerOpen])
   const draft = history.present,
@@ -350,9 +354,7 @@ export default function PresetEditor() {
               label: 'ID & revision…',
               onSelect: () => {
                 // The menu light-dismisses; remember its trigger so closing can return there.
-                identityOpener.current = document.querySelector<HTMLElement>(
-                  'button[aria-label="More actions"]',
-                )
+                identityOpener.current = visibleMoreActions()
                 setIdentityOpen(true)
               },
             },
@@ -627,7 +629,7 @@ export default function PresetEditor() {
       </div>
       <Sheet open={viewportClass === 'tablet' && reviewSheetOpen} onOpenChange={setReviewSheetOpen}>
         <SheetContent side="bottom" aria-label="Checks and export" className={styles.reviewSheet}
-          onCloseAutoFocus={(event) => { event.preventDefault(); reviewOpener.current?.focus() }}>
+          onCloseAutoFocus={(event) => { event.preventDefault(); returnTarget(reviewOpener.current)?.focus() }}>
           <SheetHeader>
             <SheetTitle>Checks and export</SheetTitle>
             <SheetDescription className={styles.srOnly}>Contrast checks and the preset export.</SheetDescription>
@@ -646,7 +648,8 @@ export default function PresetEditor() {
           onCloseAutoFocus={(event) => {
             // Return to the control that asked, such as the family picker or the menu.
             event.preventDefault()
-            returnFocus.current?.focus()
+            // A sheet's item that asked is gone once the sheet closes; More actions takes focus instead.
+            returnTarget(returnFocus.current)?.focus()
           }}
         >
           <AlertDialogHeader>
@@ -694,7 +697,7 @@ export default function PresetEditor() {
           onCloseAutoFocus={(event) => {
             // Done and Escape alike return to the More actions button the menu came from.
             event.preventDefault()
-            identityOpener.current?.focus()
+            returnTarget(identityOpener.current)?.focus()
             identityOpener.current = null
           }}
         >

@@ -5,6 +5,7 @@ import { useId, useRef, useState } from 'react'
 import type { ComponentId } from '@ombelle/contracts'
 import styles from '../../editor-shell/editor-shell.module.css'
 import { useViewportClass } from '../../editor-shell/breakpoints'
+import { returnTarget } from '../../editor-shell/history-focus'
 import { editableComponents } from '../editable-components'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../../generated/ui/components/ui/sheet'
 
@@ -34,11 +35,11 @@ export function ComponentSwitcher({ current }: { current: ComponentId }) {
     <>
       <button ref={trigger} type="button" className={styles.switcher} aria-haspopup="dialog" aria-expanded={open}
         aria-label={`Component: ${label}. Choose a component`} onClick={() => setOpen(true)}>
-        {label}<ChevronDown aria-hidden="true" size={14} />
+        <span>{label}</span><ChevronDown aria-hidden="true" size={14} />
       </button>
       <Sheet open={open} onOpenChange={(next) => { setOpen(next); if (!next) setQuery('') }}>
         <SheetContent side={viewport === 'phone' ? 'bottom' : 'inline-end'} aria-label="Choose a component" className={styles.phoneSheet}
-          onCloseAutoFocus={(event) => { event.preventDefault(); trigger.current?.focus() }}>
+          onCloseAutoFocus={(event) => { event.preventDefault(); returnTarget(trigger.current)?.focus() }}>
           <SheetHeader>
             <SheetTitle>Choose a component</SheetTitle>
             <SheetDescription className="sr-only">Open the editor of another component.</SheetDescription>

@@ -7,6 +7,8 @@ import { editableComponents } from '../editor/editable-components'
 import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
 import styles from './editor-shell.module.css'
 import { MoreActionsSheet, type MoreLink } from './more-sheet'
+import { useViewportClass } from './breakpoints'
+import { returnTarget } from './history-focus'
 import { Button } from '../generated/ui/components/ui/button'
 import { ButtonGroup } from '../generated/ui/components/ui/button-group'
 import { Toolbar, ToolbarButton, ToolbarOverflow, ToolbarOverflowItem } from '../generated/ui/components/ui/toolbar'
@@ -74,6 +76,9 @@ export function EditorTopBar({
 }) {
   const [moreOpen, setMoreOpen] = useState(false)
   const moreButton = useRef<HTMLButtonElement>(null)
+  const viewport = useViewportClass()
+  // The More actions sheet belongs to the phone: a wider screen closes it for good.
+  useEffect(() => { if (viewport !== 'phone') setMoreOpen(false) }, [viewport])
   const bar = useStickyBarHeight()
   const [palette, setPalette] = useState(false)
   const [paletteLoaded, setPaletteLoaded] = useState(false)
@@ -180,7 +185,7 @@ export function EditorTopBar({
         {extra && <span className={styles.extra}>{extra}</span>}
         {primary}
       </div>
-      <MoreActionsSheet open={moreOpen} onOpenChange={setMoreOpen} returnFocus={moreButton} redo={redo} items={menu.items} links={links}
+      <MoreActionsSheet open={moreOpen && viewport === 'phone'} onOpenChange={setMoreOpen} returnFocus={moreButton} redo={redo} items={menu.items} links={links}
         onCommands={commands ? () => openPalette(true) : undefined} />
       {commands && paletteLoaded && (
         <CommandPalette open={palette} onOpenChange={openPalette}
