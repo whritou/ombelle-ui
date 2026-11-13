@@ -226,6 +226,71 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(more).toBeHidden()
     })
 
+    test('a Form checks a Field rendered by a wrapper component and links it in the summary', async ({ page }) => {
+      const section = await open(page, edition)
+      const form = section.getByTestId('c076-form')
+      await form.getByRole('textbox', { name: 'Preset name' }).fill('Studio')
+      const email = form.getByRole('textbox', { name: 'Email' })
+      await email.fill('not an address')
+      await form.getByRole('button', { name: 'Save preset' }).click()
+      const summary = form.getByRole('region', { name: 'Fix 1 field before saving' })
+      await expect(summary).toBeFocused()
+      await expect(form.getByRole('status')).toHaveText('')
+      await summary.getByRole('link', { name: /^Email: / }).click()
+      await expect(email).toBeFocused()
+      await expect(email).toHaveAttribute('aria-invalid', 'true')
+    })
+
+    test('a Checkbox keeps the ref it is given', async ({ page }) => {
+      const section = await open(page, edition)
+      await section.getByRole('button', { name: 'Focus the terms checkbox' }).click()
+      await expect(section.getByRole('checkbox', { name: 'Terms by ref' })).toBeFocused()
+    })
+
+    test('a two-per-view Carousel marks the last slide current at the end', async ({ page }) => {
+      const section = await open(page, edition)
+      const pairs = section.getByTestId('c076-carousel-pairs')
+      await pairs.getByRole('button', { name: 'Slide 4', exact: true }).click()
+      await expect(pairs.getByRole('button', { name: 'Slide 4', exact: true })).toHaveAttribute('aria-current', 'true')
+      await expect(pairs.locator('[data-slot="carousel-counter"]')).toHaveText('4 / 4')
+    })
+
+    test('the More menu shows a toggle chosen from it as pressed when reopened', async ({ page }) => {
+      const section = await open(page, edition)
+      const box = section.getByTestId('c076-toolbar')
+      const toolbar = section.getByRole('toolbar', { name: 'View options' })
+      await box.evaluate((element) => { (element as HTMLElement).style.inlineSize = '160px' })
+      const more = toolbar.getByRole('button', { name: 'More' })
+      await more.click()
+      await page.getByRole('menuitemcheckbox', { name: 'Grid' }).click()
+      await page.keyboard.press('Escape')
+      await more.click()
+      await expect(page.getByRole('menuitemcheckbox', { name: 'Grid' })).toHaveAttribute('aria-checked', 'true')
+    })
+
+    test('the last Toolbar item comes back once it fits without More, and a new tool overflows', async ({ page }) => {
+      const section = await open(page, edition)
+      const box = section.getByTestId('c076-toolbar')
+      const toolbar = section.getByRole('toolbar', { name: 'View options' })
+      const more = toolbar.getByRole('button', { name: 'More' })
+      // The width every item needs without More, measured at full width.
+      const needed = await toolbar.evaluate((element) => {
+        const items = [...element.querySelectorAll('[data-toolbar-item]')] as HTMLElement[]
+        const style = getComputedStyle(element)
+        return Math.ceil(items[items.length - 1]!.getBoundingClientRect().right - element.getBoundingClientRect().left
+          + parseFloat(style.paddingInlineEnd) + parseFloat(style.borderRightWidth))
+      })
+      const resize = (size: number) => box.evaluate((element, value) => { (element as HTMLElement).style.inlineSize = value + 'px' }, size)
+      await resize(160)
+      await expect(more).toBeVisible()
+      await resize(needed + 1)
+      await expect(toolbar.getByRole('link', { name: 'Open preview' })).toBeVisible()
+      await expect(more).toBeHidden()
+      await section.getByRole('button', { name: 'Add a tool' }).click()
+      await expect(more).toBeVisible()
+      await expect(toolbar.getByText('Export as image')).toBeHidden()
+    })
+
     test('a disabled FieldSet disables every control in it', async ({ page }) => {
       const section = await open(page, edition)
       const editions = section.getByTestId('c076-editions')

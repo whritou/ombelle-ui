@@ -41,6 +41,8 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
     for (const element of entries) element.hidden = false
     const trigger = triggerRef.current
     const triggerHidden = trigger?.hidden ?? true
+    // Without its own items, More takes no room until something overflows.
+    if (trigger && !persistent) trigger.hidden = true
     let fit = entries.length
     if (persistent || !fits()) {
       if (trigger) trigger.hidden = false
@@ -65,7 +67,14 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
     const observer = new ResizeObserver(() => measure())
     observer.observe(root)
     if (root.parentElement) observer.observe(root.parentElement)
-    return () => observer.disconnect()
+    // Items added, removed or relabelled change what fits without resizing the bar. Only the
+    // tree and text are watched, not the hidden attributes measuring sets.
+    const mutations = typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(() => measure())
+    mutations?.observe(root, { childList: true, subtree: true, characterData: true })
+    return () => {
+      observer.disconnect()
+      mutations?.disconnect()
+    }
   }, [measure, rootRef])
   return { overflowed, focusTrigger }
 }
@@ -162,24 +171,7 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
       </DropdownMenuPrimitive.Trigger>
       <DropdownMenuPrimitive.Portal>
         <DropdownMenuPrimitive.Content align="end" sideOffset={6} loop data-slot="toolbar-overflow-content" aria-label={label}>
-          {toolbar.overflowed.map((element, index) => {
-            const entry = menuEntry(element)
-            return entry.kind === 'toggle'
-              ? (
-                  <DropdownMenuPrimitive.CheckboxItem key={index} checked={entry.pressed} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
-                    <span data-slot="toolbar-overflow-indicator">
-                      <DropdownMenuPrimitive.ItemIndicator><CheckIcon aria-hidden="true" /></DropdownMenuPrimitive.ItemIndicator>
-                    </span>
-                    {entry.label}
-                  </DropdownMenuPrimitive.CheckboxItem>
-                )
-              : (
-                  <DropdownMenuPrimitive.Item key={index} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
-                    <span data-slot="toolbar-overflow-indicator" />
-                    {entry.label}
-                  </DropdownMenuPrimitive.Item>
-                )
-          })}
+          <OverflowEntries elements={toolbar.overflowed} />
           {toolbar.overflowed.length > 0 && regular.length > 0 && <DropdownMenuPrimitive.Separator data-slot="toolbar-overflow-separator" />}
           {regular}
           {destructive.length > 0 && (toolbar.overflowed.length > 0 || regular.length > 0) && <DropdownMenuPrimitive.Separator data-slot="toolbar-overflow-separator" />}
@@ -187,6 +179,32 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
         </DropdownMenuPrimitive.Content>
       </DropdownMenuPrimitive.Portal>
     </DropdownMenuPrimitive.Root>
+  )
+}
+
+/** The overflowed items, read from the toolbar each time the menu opens. */
+function OverflowEntries({ elements }: { elements: readonly HTMLElement[] }) {
+  return (
+    <>
+      {elements.filter(element => element.isConnected).map((element, index) => {
+        const entry = menuEntry(element)
+        return entry.kind === 'toggle'
+          ? (
+              <DropdownMenuPrimitive.CheckboxItem key={index} checked={entry.pressed} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
+                <span data-slot="toolbar-overflow-indicator">
+                  <DropdownMenuPrimitive.ItemIndicator><CheckIcon aria-hidden="true" /></DropdownMenuPrimitive.ItemIndicator>
+                </span>
+                {entry.label}
+              </DropdownMenuPrimitive.CheckboxItem>
+            )
+          : (
+              <DropdownMenuPrimitive.Item key={index} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
+                <span data-slot="toolbar-overflow-indicator" />
+                {entry.label}
+              </DropdownMenuPrimitive.Item>
+            )
+      })}
+    </>
   )
 }
 

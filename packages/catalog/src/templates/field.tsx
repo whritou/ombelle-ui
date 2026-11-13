@@ -60,6 +60,9 @@ export function Field({
   const inForm = form !== null && name !== undefined
   const message = inForm ? form.message(name) : undefined
   const invalid = ownInvalid || message !== undefined
+  const label = inForm ? labelOf(children) || name : undefined
+  const register = form?.register
+  React.useLayoutEffect(() => (register && name !== undefined && label !== undefined ? register(name, label) : undefined), [register, name, label])
   const state: FieldState = {
     controlId: inForm ? form.idFor(name) : id + '-control',
     descriptionId: contains(children, FieldDescription) ? id + '-description' : undefined,
@@ -75,6 +78,7 @@ export function Field({
         role="group"
         {...props}
         data-slot="field"
+        data-form-field={inForm ? name : undefined}
         data-orientation={orientation}
         data-invalid={invalid || undefined}
         data-disabled={disabled || undefined}
@@ -159,6 +163,9 @@ type FormState = {
   idFor(name: string): string
   message(name: string): string | undefined
   clear(name: string): void
+  /** A Field rendered by a component the Form cannot see while rendering still joins it. */
+  register(name: string, label: string): () => void
+  focus(name: string): void
   lines: readonly SummaryLine[]
   summaryAction: 'saving' | 'submitting'
   summaryRef: React.RefObject<HTMLDivElement | null>
@@ -232,8 +239,26 @@ export function Form({ errors, validate, summaryAction = 'submitting', onSubmit,
   }
   const [focusRequest, setFocusRequest] = React.useState(0)
   const summaryRef = React.useRef<HTMLDivElement | null>(null)
-  const fields = collectFields(children)
+  const found = collectFields(children)
+  const [registered, setRegistered] = React.useState<ReadonlyMap<string, string>>(new Map())
+  const register = React.useCallback((name: string, label: string) => {
+    setRegistered(previous => (previous.get(name) === label ? previous : new Map(previous).set(name, label)))
+    return () => setRegistered(previous => {
+      if (!previous.has(name)) return previous
+      const next = new Map(previous)
+      next.delete(name)
+      return next
+    })
+  }, [])
+  // Fields found while rendering keep their order; registered ones the walk missed follow.
+  const fields = [...found, ...[...registered].filter(([name]) => !found.some(field => field.name === name)).map(([name, label]) => ({ name, label }))]
   const idFor = (name: string) => `${formId}-field-${name.replace(/[^A-Za-z0-9_-]/g, '-')}`
+  const focusField = (name: string) => {
+    // The field's control by its id, or else the first visible control inside the named field.
+    const control = document.getElementById(idFor(name)) ?? document.querySelector<HTMLElement>(
+      `[data-form-field="${CSS.escape(name)}"] :is(input:not([type="hidden"]):not([aria-hidden="true"]), textarea, select, button)`)
+    control?.focus()
+  }
 
   const shown: Record<string, string> = {}
   for (const [name, value] of Object.entries(errors ?? {})) {
@@ -252,7 +277,7 @@ export function Form({ errors, validate, summaryAction = 'submitting', onSubmit,
     if (summaryRef.current) summaryRef.current.focus()
     else {
       const first = lines.find(line => line.known)
-      if (first) document.getElementById(idFor(first.name))?.focus()
+      if (first) focusField(first.name)
     }
     // Only a new submit moves focus.
   }, [focusRequest])
@@ -269,6 +294,8 @@ export function Form({ errors, validate, summaryAction = 'submitting', onSubmit,
         return next
       })
     },
+    register,
+    focus: focusField,
     lines,
     summaryAction,
     summaryRef,
@@ -284,10 +311,12 @@ export function Form({ errors, validate, summaryAction = 'submitting', onSubmit,
         className={cn(className)}
         onSubmit={(event) => {
           const form = event.currentTarget
+          // Every named control's own constraints, keyed by its name: this also covers composite controls,
+          // whose hidden input carries the name and the constraint.
           const constraint: Record<string, string> = {}
-          for (const field of fields) {
-            const control = form.ownerDocument.getElementById(idFor(field.name)) as HTMLInputElement | null
-            if (control && typeof control.checkValidity === 'function' && !control.checkValidity()) constraint[field.name] = control.validationMessage
+          for (const element of Array.from(form.elements) as HTMLInputElement[]) {
+            if (!element.name || element.disabled || typeof element.checkValidity !== 'function') continue
+            if (!element.checkValidity() && !(element.name in constraint)) constraint[element.name] = element.validationMessage
           }
           const custom: Record<string, string> = {}
           for (const [name, value] of Object.entries(validate?.(formValues(form)) ?? {})) {
@@ -331,10 +360,8 @@ export function FormErrorSummary({ className, ...props }: React.ComponentProps<'
               <a
                 href={'#' + form.idFor(line.name)}
                 onClick={(event) => {
-                  const control = document.getElementById(form.idFor(line.name))
-                  if (!control) return
                   event.preventDefault()
-                  control.focus()
+                  form.focus(line.name)
                 }}
               >
                 {summaryText(line)}

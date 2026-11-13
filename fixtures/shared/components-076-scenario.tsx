@@ -1,13 +1,23 @@
 import * as React from 'react'
 import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
-import { Toolbar, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
+import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
 import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle, type PasswordCheck } from '@/components/ui/password-field'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, Form, FormErrorSummary, type FormErrors } from '@/components/ui/field'
 
 // The 0.7.6 components in both editions (tests/e2e/components-076.spec.ts).
 // scripts/generate-preview.ts copies this file next to each edition's scenario.
+function EmailField() {
+  return (
+    <Field name="email">
+      <FieldLabel>Email</FieldLabel>
+      <FieldControl><input type="email" /></FieldControl>
+      <FieldError />
+    </Field>
+  )
+}
+
 function SavePresetForm() {
   const [errors, setErrors] = React.useState<FormErrors | undefined>()
   const [saved, setSaved] = React.useState(0)
@@ -32,6 +42,7 @@ function SavePresetForm() {
         <FieldControl><input type="number" min={0} max={48} /></FieldControl>
         <FieldError />
       </Field>
+      <EmailField />
       <Field name="description">
         <FieldLabel>Description</FieldLabel>
         <FieldControl><input type="text" /></FieldControl>
@@ -93,6 +104,13 @@ function KitCarousel() {
         <CarouselCounter />
       </Carousel>
       <button type="button" onClick={() => setCount(6)}>Add a slide</button>
+      <Carousel aria-label="Kit pairs" slidesPerView={2} data-testid="c076-carousel-pairs">
+        <CarouselContent>
+          {kits.slice(0, 4).map(kit => <CarouselItem key={kit}><div style={kitCard}>{kit}</div></CarouselItem>)}
+        </CarouselContent>
+        <CarouselDots />
+        <CarouselCounter />
+      </Carousel>
       <Carousel aria-label="One kit" data-testid="c076-carousel-one">
         <CarouselContent><CarouselItem><div style={kitCard}>Ombelle</div></CarouselItem></CarouselContent>
         <CarouselPrevious />
@@ -102,14 +120,26 @@ function KitCarousel() {
   )
 }
 
+function RefCheckbox() {
+  const ref = React.useRef<HTMLButtonElement>(null)
+  return (
+    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+      <Checkbox ref={ref} aria-label="Terms by ref" />
+      <button type="button" onClick={() => ref.current?.focus()}>Focus the terms checkbox</button>
+    </div>
+  )
+}
+
 function ViewToolbar() {
   const [width, setWidth] = React.useState(640)
+  const [extra, setExtra] = React.useState(false)
   return (
     <div style={{ display: 'grid', gap: '0.5rem' }}>
       <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
         Toolbar width
         <input type="range" min={160} max={640} step={10} value={width} onChange={event => setWidth(Number(event.target.value))} />
       </label>
+      <button type="button" onClick={() => setExtra(true)}>Add a tool</button>
       <div data-testid="c076-toolbar" style={{ inlineSize: width + 'px' }}>
         <Toolbar aria-label="View options">
           <ToolbarToggleGroup type="single" defaultValue="light" aria-label="Theme">
@@ -121,6 +151,7 @@ function ViewToolbar() {
             <ToolbarToggleItem value="grid">Grid</ToolbarToggleItem>
           </ToolbarToggleGroup>
           <ToolbarLink href="#preview">Open preview</ToolbarLink>
+          {extra && <ToolbarButton>Export as image</ToolbarButton>}
           <ToolbarOverflow />
         </Toolbar>
       </div>
@@ -166,6 +197,7 @@ export function ComponentsScenario076() {
           </Field>
         </FieldSet>
         <Checkbox aria-label="Unrelated" />
+        <RefCheckbox />
       </div>
     </section>
   )

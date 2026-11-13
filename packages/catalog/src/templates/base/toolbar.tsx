@@ -43,6 +43,8 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
     for (const element of entries) element.hidden = false
     const trigger = triggerRef.current
     const triggerHidden = trigger?.hidden ?? true
+    // Without its own items, More takes no room until something overflows.
+    if (trigger && !persistent) trigger.hidden = true
     let fit = entries.length
     if (persistent || !fits()) {
       if (trigger) trigger.hidden = false
@@ -67,7 +69,14 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
     const observer = new ResizeObserver(() => measure())
     observer.observe(root)
     if (root.parentElement) observer.observe(root.parentElement)
-    return () => observer.disconnect()
+    // Items added, removed or relabelled change what fits without resizing the bar. Only the
+    // tree and text are watched, not the hidden attributes measuring sets.
+    const mutations = typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(() => measure())
+    mutations?.observe(root, { childList: true, subtree: true, characterData: true })
+    return () => {
+      observer.disconnect()
+      mutations?.disconnect()
+    }
   }, [measure, rootRef])
   return { overflowed, focusTrigger }
 }
@@ -218,31 +227,7 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
             // The shared menu rules read Radix's available-height variable.
             style={{ '--radix-dropdown-menu-content-available-height': 'var(--available-height)' } as React.CSSProperties}
           >
-            {toolbar.overflowed.map((element, index) => {
-              const entry = menuEntry(element)
-              return entry.kind === 'toggle'
-                ? (
-                    <MenuPrimitive.CheckboxItem
-                      key={index}
-                      checked={entry.pressed}
-                      disabled={entry.disabled}
-                      onCheckedChange={() => element.click()}
-                      data-slot="toolbar-overflow-item"
-                      render={(itemProps, state) => <div {...itemProps} data-state={state.checked ? 'checked' : 'unchecked'} />}
-                    >
-                      <span data-slot="toolbar-overflow-indicator">
-                        <MenuPrimitive.CheckboxItemIndicator><CheckIcon aria-hidden="true" /></MenuPrimitive.CheckboxItemIndicator>
-                      </span>
-                      {entry.label}
-                    </MenuPrimitive.CheckboxItem>
-                  )
-                : (
-                    <MenuPrimitive.Item key={index} disabled={entry.disabled} onClick={() => element.click()} data-slot="toolbar-overflow-item">
-                      <span data-slot="toolbar-overflow-indicator" />
-                      {entry.label}
-                    </MenuPrimitive.Item>
-                  )
-            })}
+            <OverflowEntries elements={toolbar.overflowed} />
             {toolbar.overflowed.length > 0 && regular.length > 0 && <MenuPrimitive.Separator data-slot="toolbar-overflow-separator" />}
             {regular}
             {destructive.length > 0 && (toolbar.overflowed.length > 0 || regular.length > 0) && <MenuPrimitive.Separator data-slot="toolbar-overflow-separator" />}
@@ -251,6 +236,46 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
         </MenuPrimitive.Positioner>
       </MenuPrimitive.Portal>
     </MenuPrimitive.Root>
+  )
+}
+
+/**
+ * The overflowed items, read from the toolbar each time the menu opens. A checkbox item keeps the
+ * menu open, so it reads the item again once the toggle has re-rendered.
+ */
+function OverflowEntries({ elements }: { elements: readonly HTMLElement[] }) {
+  const [, refresh] = React.useReducer((count: number) => count + 1, 0)
+  return (
+    <>
+      {elements.filter(element => element.isConnected).map((element, index) => {
+        const entry = menuEntry(element)
+        return entry.kind === 'toggle'
+          ? (
+              <MenuPrimitive.CheckboxItem
+                key={index}
+                checked={entry.pressed}
+                disabled={entry.disabled}
+                onCheckedChange={() => {
+                  element.click()
+                  setTimeout(refresh)
+                }}
+                data-slot="toolbar-overflow-item"
+                render={(itemProps, state) => <div {...itemProps} data-state={state.checked ? 'checked' : 'unchecked'} />}
+              >
+                <span data-slot="toolbar-overflow-indicator">
+                  <MenuPrimitive.CheckboxItemIndicator><CheckIcon aria-hidden="true" /></MenuPrimitive.CheckboxItemIndicator>
+                </span>
+                {entry.label}
+              </MenuPrimitive.CheckboxItem>
+            )
+          : (
+              <MenuPrimitive.Item key={index} disabled={entry.disabled} onClick={() => element.click()} data-slot="toolbar-overflow-item">
+                <span data-slot="toolbar-overflow-indicator" />
+                {entry.label}
+              </MenuPrimitive.Item>
+            )
+      })}
+    </>
   )
 }
 

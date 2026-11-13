@@ -64,6 +64,7 @@ function CheckboxControl({
   onCheckedChange,
   rootId,
   disabled,
+  ref,
   ...props
 }: CheckboxProps & { rootId?: string }) {
   const [inFieldset, fieldsetRef] = useFieldsetDisabled()
@@ -86,7 +87,11 @@ function CheckboxControl({
         <span {...rootProps} id={rootId ?? rootProps.id} data-state={checkedState(state)} />
       )}
       {...props}
-      ref={fieldsetRef}
+      ref={(node: HTMLElement | null) => {
+        fieldsetRef(node)
+        if (typeof ref === 'function') ref(node as never)
+        else if (ref) (ref as React.RefObject<HTMLElement | null>).current = node
+      }}
       disabled={disabled || inFieldset}
     >
       <CheckboxPrimitive.Indicator

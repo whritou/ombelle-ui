@@ -101,7 +101,9 @@ export function CarouselContent({ className, children, onScroll, ...props }: Rea
       if (Math.abs(slide.offsetLeft - left) < Math.abs(slides[index].offsetLeft - left)) index = at
     })
     const max = content.scrollWidth - content.clientWidth
-    setPosition({ index, atStart: left <= 1, atEnd: left >= max - 1 })
+    const atEnd = left >= max - 1
+    // With several slides per view, the last ones never reach the start: at the end, the last slide is current.
+    setPosition({ index: max > 1 && atEnd ? slides.length - 1 : index, atStart: left <= 1, atEnd })
   }, [contentRef, setPosition])
   React.useEffect(() => {
     measure()
