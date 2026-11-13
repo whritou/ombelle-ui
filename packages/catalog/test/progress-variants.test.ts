@@ -97,3 +97,84 @@ describe('Progress above its maximum', () => {
     expect(attr(html, 'progress', 'aria-valuetext')).toBe('100%')
   })
 })
+
+// Output of the Task 1 commit (db22321b) for a labelled, toned bar.
+const task1Bar: Record<'radix' | 'base', string> = {
+  radix: '<div data-slot="progress-field"><div data-slot="progress-header"><span id="_R_0_-label" data-slot="progress-label" class="">Up</span><span aria-hidden="true" data-slot="progress-value" class="">64%</span></div><div aria-valuemax="100" aria-valuemin="0" aria-valuenow="64" aria-valuetext="64%" role="progressbar" data-state="loading" data-value="64" data-max="100" data-slot="progress" data-size="lg" data-tone="success" class="" aria-labelledby="_R_0_-label"><div data-state="loading" data-value="64" data-max="100" data-slot="progress-indicator" style="inline-size:64%"></div></div></div>',
+  base: '<div data-slot="progress-field"><div data-slot="progress-header"><span id="_R_0_-label" data-slot="progress-label" class="">Up</span><span aria-hidden="true" data-slot="progress-value" class="">64%</span></div><div data-progressing="" aria-labelledby="_R_0_-label" aria-valuemax="100" aria-valuemin="0" aria-valuenow="64" aria-valuetext="64%" role="progressbar" data-slot="progress" data-state="loading" data-value="64" data-max="100" data-size="lg" data-tone="success"><div data-progressing="" style="inset-inline-start:0;width:64%;inline-size:64%" data-slot="progress-indicator" data-state="loading" data-value="64" data-max="100"></div><span role="presentation" style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:0;position:fixed;top:0;left:0">x</span></div></div>',
+}
+const dash = (html: string, slot: string) => attr(html, slot, 'stroke-dasharray')
+const ring = (ui: Ui, props: Record<string, unknown> = {}, value = true, label = false) =>
+  renderToStaticMarkup(h(ui.Progress, { shape: 'circle', value: 64, 'aria-label': 'Uploading preset', ...props } as never,
+    ...(label ? [h(ui.ProgressLabel, {}, 'Uploading preset')] : []), ...(value ? [h(ui.ProgressValue)] : [])))
+const ringCss = (family: string) => readFileSync(new URL(`../src/styles/progress/${family}.css`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+  .match(/\/\* 0\.7\.6 variants \*\/([^]*?)\/\* end 0\.7\.6 variants \*\//)?.[1] ?? ''
+
+describe('Progress shape circle', () => {
+  it.each(editions)('%s draws a ring with the number inside and the label alone in the header', (_, ui) => {
+    const html = ring(ui, { size: 'lg', 'aria-label': undefined }, true, true)
+    expect(attr(html, 'progress', 'data-shape')).toBe('circle')
+    expect(attr(html, 'progress-field', 'data-progress-shape')).toBe('circle')
+    expect(attr(html, 'progress-ring', 'viewBox')).toBe('0 0 64 64')
+    expect(attr(html, 'progress-ring', 'aria-hidden')).toBe('true')
+    expect(dash(html, 'progress-ring-indicator')).toBe('64 100')
+    expect(attr(html, 'progress-ring-indicator', 'pathLength')).toBe('100')
+    expect(attr(html, 'progress-ring-track', 'pathLength')).toBe('100')
+    expect(attr(html, 'progress-ring-value', 'aria-hidden')).toBe('true')
+    expect(html).toMatch(/data-slot="progress-ring-value"[^>]*>64%<\/span>/)
+    expect(attr(html, 'progress', 'aria-valuetext')).toBe('64%')
+    expect(attr(html, 'progress', 'aria-labelledby')).toBe(attr(html, 'progress-label', 'id'))
+    expect(html).not.toContain('data-slot="progress-value"')
+    expect(html).not.toContain('data-slot="progress-indicator"')
+    expect(html.match(/<div data-slot="progress-header">(.*?)<\/div>/)?.[1]).toMatch(/^<span[^>]*data-slot="progress-label"[^>]*>Uploading preset<\/span>$/)
+  })
+
+  it.each(editions)('%s shows no number without ProgressValue and needs no field', (_, ui) => {
+    const html = ring(ui, {}, false)
+    expect(html).not.toContain('progress-ring-value')
+    expect(html).not.toContain('progress-field')
+    expect(attr(html, 'progress', 'aria-label')).toBe('Uploading preset')
+  })
+
+  it.each(editions)('%s turns a quarter while indeterminate and has no value text', (_, ui) => {
+    const html = ring(ui, { value: null })
+    expect(dash(html, 'progress-ring-indicator')).toBe('25 100')
+    expect(attr(html, 'progress', 'aria-valuetext')).toBeUndefined()
+    expect(attr(html, 'progress', 'data-state')).toBe('indeterminate')
+    expect(ring(ui, { value: null }, true)).toMatch(/data-slot="progress-ring-value"[^>]*><\/span>/)
+  })
+
+  it.each(editions)('%s clamps a value past the maximum and keeps size and tone', (_, ui) => {
+    const html = ring(ui, { value: 150, size: 'sm', tone: 'warning' })
+    expect(dash(html, 'progress-ring-indicator')).toBe('100 100')
+    expect(attr(html, 'progress', 'aria-valuenow')).toBe('100')
+    expect(attr(html, 'progress', 'aria-valuetext')).toBe('100%')
+    expect(attr(html, 'progress', 'data-size')).toBe('sm')
+    expect(attr(html, 'progress', 'data-tone')).toBe('warning')
+  })
+
+  it.each(editions)('%s sets nothing for shape bar or no shape, and renders as the Task 1 commit did', (edition, ui) => {
+    const bar = (extra: Record<string, unknown>) => renderToStaticMarkup(h(ui.Progress, { value: 64, size: 'lg', tone: 'success', ...extra } as never,
+      h(ui.ProgressLabel, {}, 'Up'), h(ui.ProgressValue)))
+    expect(bar({})).toBe(task1Bar[edition])
+    expect(bar({ shape: 'bar' })).toBe(task1Bar[edition])
+    expect(task1Bar[edition]).not.toContain('data-shape')
+  })
+
+  it.each(families)('%s draws three ring sizes, a guarded spin and forced colours', family => {
+    const rules = ringCss(family)
+    expect(rules).toMatch(/\[data-slot='progress'\]\[data-shape='circle'\] \{[^}]*inline-size: 48px;[^}]*block-size: 48px/)
+    expect(rules).toMatch(/\[data-shape='circle'\]\[data-size='sm'\] \{[^}]*inline-size: 18px;[^}]*block-size: 18px/)
+    expect(rules).toMatch(/\[data-shape='circle'\]\[data-size='lg'\] \{[^}]*inline-size: 96px;[^}]*block-size: 96px/)
+    expect(rules).toMatch(/progress-ring-value'\]:is\(\[data-size='lg'\] > \*\) \{[^}]*font-size: 16px/)
+    const neo = family === 'neo-brutalism'
+    expect(rules).toContain(`stroke-linecap: ${neo ? 'butt' : 'round'};`)
+    expect(rules).toMatch(new RegExp(`progress-ring-indicator'\\] \\{[^}]*stroke: ${neo ? 'var\\(--foreground\\)' : 'var\\(--primary\\)'};`))
+    const guard = /@media \(prefers-reduced-motion: no-preference\) \{[^]*?\n\}/
+    expect(rules.match(guard)?.[0]).toContain('animation: progress-ring-spin 1s linear infinite')
+    expect(rules.replace(guard, '')).not.toMatch(/animation:/)
+    const forced = rules.match(/@media \(forced-colors: active\) \{([^]*)\n\}\n?$/)?.[1] ?? ''
+    expect(forced).toMatch(/progress-ring-indicator[^}]*stroke: Highlight/)
+    expect(forced).toMatch(/progress-ring-track[^}]*stroke: GrayText/)
+  })
+})

@@ -240,4 +240,46 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(input).toHaveValue('0.25')
     })
   })
+
+  test.describe(`${edition} Progress and Meter rings`, () => {
+    const size = async (locator: ReturnType<Page['locator']>) => {
+      const box = (await locator.boundingBox())!
+      return [Math.round(box.width), Math.round(box.height)]
+    }
+
+    test('the lg ring is named, valued and shows its number outside the accessibility tree', async ({ page }) => {
+      const section = await open(page, edition)
+      const upload = section.getByRole('progressbar', { name: 'Uploading preset', exact: true })
+      await expect(upload).toHaveAttribute('aria-valuetext', /^64\s?%$/)
+      await expect(upload.locator('[data-slot="progress-ring-value"]')).toHaveText('64%')
+      await expect(upload.locator('[data-slot="progress-ring"]')).toHaveAttribute('aria-hidden', 'true')
+      // The number and the ring are hidden from assistive technology, so the name is just the label.
+      await expect(upload).toMatchAriaSnapshot('- progressbar "Uploading preset"')
+      await expect(section.getByRole('progressbar', { name: '64%' })).toHaveCount(0)
+      expect(await size(upload)).toEqual([96, 96])
+      expect(await upload.locator('[data-slot="progress-ring-value"]').evaluate(node => getComputedStyle(node).fontSize)).toBe('16px')
+    })
+
+    test('the meter ring is 72 by 72 and the button ring 18 by 18', async ({ page }) => {
+      const section = await open(page, edition)
+      const meter = section.getByRole('meter', { name: 'Storage used', exact: true })
+      await expect(meter).toHaveAttribute('aria-valuenow', '72')
+      await expect(meter.locator('[data-slot="meter-ring-value"]')).toHaveText('72%')
+      expect(await size(meter)).toEqual([72, 72])
+      const saving = section.getByRole('button', { name: /Saving/ })
+      await expect(saving).toBeDisabled()
+      expect(await size(saving.locator('[data-slot="progress"]'))).toEqual([18, 18])
+      await expect(saving.locator('[data-slot="progress-ring-value"]')).toHaveCount(0)
+    })
+
+    test('the indeterminate ring does not spin with reduced motion, and does when motion is allowed', async ({ page }) => {
+      const section = await open(page, edition)
+      const spinner = section.getByRole('progressbar', { name: 'Syncing', exact: true }).locator('[data-slot="progress-ring"]')
+      expect(await size(section.getByRole('progressbar', { name: 'Syncing', exact: true }))).toEqual([48, 48])
+      await expect.poll(() => spinner.evaluate(node => getComputedStyle(node).animationName)).toBe('none')
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await expect.poll(() => spinner.evaluate(node => getComputedStyle(node).animationName)).toBe('progress-ring-spin')
+      await expect.poll(() => spinner.evaluate(node => getComputedStyle(node).animationDuration)).toBe('1s')
+    })
+  })
 }

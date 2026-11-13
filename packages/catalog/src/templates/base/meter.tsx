@@ -17,6 +17,8 @@ export type MeterProps = Omit<React.ComponentProps<'div'>, 'children'> & {
   segments?: number
   /** Discrete mode: filled cells past this fraction (0 to 1) use the warning colour. */
   warningAt?: number
+  /** `circle` draws the total as a ring with its rounded percentage; segments and cells are not drawn. */
+  shape?: 'bar' | 'circle'
   children?: React.ReactNode
 }
 
@@ -32,6 +34,7 @@ export function Meter({
   max,
   segments,
   warningAt,
+  shape,
   'aria-valuetext': valueText,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
@@ -51,7 +54,7 @@ export function Meter({
   return (
     <MeterLabelId.Provider value={labelId}>
       <MeterReading.Provider value={{ now, max }}>
-      <div {...props} data-slot="meter" data-mode={parts.length ? 'labelled' : segments ? 'discrete' : 'bar'} className={cn(className)}>
+      <div {...props} data-slot="meter" data-mode={parts.length ? 'labelled' : segments ? 'discrete' : 'bar'} data-shape={shape === 'circle' ? 'circle' : undefined} className={cn(className)}>
         {rest}
         <MeterPrimitive.Root
           value={now}
@@ -62,13 +65,31 @@ export function Meter({
           aria-labelledby={ariaLabelledBy ?? (hasLabel ? labelId : undefined)}
           data-slot="meter-track"
           data-mode={parts.length ? 'labelled' : segments ? 'discrete' : 'bar'}
+          data-shape={shape === 'circle' ? 'circle' : undefined}
         >
-          <MeterFill now={now} min={min} span={max - min || 1} segments={segments} warningAt={warningAt} parts={parts} />
+          {shape === 'circle' ? (
+            <MeterRing percent={((now - min) / (max - min || 1)) * 100} />
+          ) : (
+            <MeterFill now={now} min={min} span={max - min || 1} segments={segments} warningAt={warningAt} parts={parts} />
+          )}
         </MeterPrimitive.Root>
         {legend}
       </div>
       </MeterReading.Provider>
     </MeterLabelId.Provider>
+  )
+}
+
+/** The total drawn as a ring, with its rounded percentage inside. */
+function MeterRing({ percent }: { percent: number }) {
+  return (
+    <>
+      <svg data-slot="meter-ring" viewBox="0 0 64 64" aria-hidden="true">
+        <circle data-slot="meter-ring-track" cx="32" cy="32" r="26" pathLength="100" />
+        <circle data-slot="meter-ring-indicator" cx="32" cy="32" r="26" pathLength="100" strokeDasharray={`${Number(percent.toFixed(2))} 100`} />
+      </svg>
+      <span data-slot="meter-ring-value" aria-hidden="true">{Math.round(percent)}%</span>
+    </>
   )
 }
 

@@ -122,3 +122,50 @@
     background: Highlight;
   }
 }
+/* 0.7.6 variants */
+[data-slot='meter-track'][data-shape='circle'] {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  justify-self: start;
+  inline-size: 72px;
+  block-size: 72px;
+  border-radius: 0;
+  background: transparent;
+}
+[data-slot='meter-ring'] {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  rotate: -90deg;
+}
+[data-slot='meter-ring-track'],
+[data-slot='meter-ring-indicator'] {
+  fill: none;
+  stroke-width: 6;
+}
+[data-slot='meter-ring-track'] {
+  stroke: color-mix(in srgb, var(--foreground) 10%, var(--card));
+}
+[data-slot='meter-ring-indicator'] {
+  stroke: var(--primary);
+  stroke-linecap: round;
+}
+[data-slot='meter-ring-value'] {
+  position: relative;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+@media (forced-colors: active) {
+  [data-slot='meter-ring-indicator'] {
+    stroke: Highlight;
+  }
+  [data-slot='meter-ring-track'] {
+    stroke: GrayText;
+  }
+}
+/* end 0.7.6 variants */

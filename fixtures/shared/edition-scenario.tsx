@@ -14,6 +14,7 @@ import { Checkbox, CheckboxOption } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, AvatarOverflow, AvatarStatus } from '@/components/ui/avatar'
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
+import { Meter } from '@/components/ui/meter'
 import { Separator } from '@/components/ui/separator'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGroupCount, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
@@ -692,6 +693,15 @@ function VariantsScenario076() {
         <label id="sv-opacity-label">Shadow opacity</label>
         <SliderValue editable />
       </Slider>
+      <div data-testid="rg-rings">
+        <Progress shape="circle" size="lg" value={64} aria-label="Uploading preset" data-testid="rg-upload"><ProgressValue /></Progress>
+        <Progress shape="circle" aria-label="Syncing" data-testid="rg-sync" />
+        <Meter shape="circle" value={72} max={100} aria-label="Storage used" data-testid="rg-meter" />
+        <Button type="button" variant="outline" size="sm" disabled>
+          <Progress shape="circle" size="sm" value={40} aria-label="Saving" data-testid="rg-saving" />
+          Saving
+        </Button>
+      </div>
     </section>
   )
 }

@@ -104,3 +104,103 @@
   }
 }
 /* end 0.7.5 variants */
+/* 0.7.6 variants */
+[data-slot='progress'][data-shape='circle'] {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  align-self: flex-start;
+  inline-size: 48px;
+  block-size: 48px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+[data-slot='progress'][data-shape='circle'][data-size='sm'] {
+  inline-size: 18px;
+  block-size: 18px;
+}
+[data-slot='progress'][data-shape='circle'][data-size='lg'] {
+  inline-size: 96px;
+  block-size: 96px;
+}
+[data-slot='progress-field'][data-progress-shape='circle'] {
+  align-items: flex-start;
+}
+[data-slot='progress-ring'] {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  rotate: -90deg;
+}
+[data-slot='progress-ring-track'],
+[data-slot='progress-ring-indicator'] {
+  fill: none;
+  stroke-width: 6;
+}
+[data-slot='progress-ring-track']:is([data-size='sm'] > * > *),
+[data-slot='progress-ring-indicator']:is([data-size='sm'] > * > *) {
+  stroke-width: 8;
+}
+[data-slot='progress-ring-track'] {
+  stroke: var(--muted);
+}
+[data-slot='progress-ring-indicator'] {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  transition: stroke-dasharray var(--motion-duration, 150ms) ease-out;
+}
+[data-slot='progress-ring-indicator']:is([data-tone='success'] > * > *) {
+  stroke: var(--success-foreground, oklch(50% 0.13 150));
+}
+[data-slot='progress-ring-indicator']:is([data-tone='warning'] > * > *) {
+  stroke: var(--warning-foreground, oklch(60% 0.14 75));
+}
+[data-slot='progress-ring-indicator']:is([data-tone='destructive'] > * > *) {
+  stroke: var(--destructive);
+}
+[data-slot='progress-ring-value'] {
+  position: relative;
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+[data-slot='progress-ring-value']:is([data-size='lg'] > *) {
+  font-size: 16px;
+}
+[data-slot='progress-ring-value']:is([data-size='sm'] > *) {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='progress-ring']:is([data-state='indeterminate'] > *) {
+    animation: progress-ring-spin 1s linear infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='progress-ring-indicator'] {
+    transition: none;
+  }
+}
+@keyframes progress-ring-spin {
+  from {
+    rotate: -90deg;
+  }
+  to {
+    rotate: 270deg;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='progress-ring-indicator'],
+  [data-slot='progress-ring-indicator']:is([data-tone] > * > *) {
+    stroke: Highlight;
+  }
+  [data-slot='progress-ring-track'] {
+    stroke: GrayText;
+  }
+}
+/* end 0.7.6 variants */
