@@ -106,7 +106,7 @@ type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'classNam
 export type ToolbarProps = Part<typeof ToolbarPrimitive.Root>
 
 /** One Tab stop for the whole bar; arrow keys move between items, and items that do not fit move into ToolbarOverflow. */
-export function Toolbar({ className, ref, children, ...props }: ToolbarProps) {
+export function Toolbar({ className, ref, children, onKeyDown, ...props }: ToolbarProps) {
   const rootRef = React.useRef<HTMLDivElement | null>(null)
   const triggerRef = React.useRef<HTMLButtonElement | null>(null)
   const [persistent, setPersistent] = React.useState(false)
@@ -122,6 +122,17 @@ export function Toolbar({ className, ref, children, ...props }: ToolbarProps) {
         }}
         data-slot="toolbar"
         className={cn(className)}
+        onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+          onKeyDown?.(event as never)
+          if (event.defaultPrevented || (event.key !== 'Home' && event.key !== 'End')) return
+          // Base UI's toolbar leaves Home and End off; they go to the first and last visible, enabled item.
+          const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[data-toolbar-item], [data-slot="toolbar-overflow-trigger"]')]
+            .filter(item => !item.hidden && item.closest('[data-slot="toolbar"]') === event.currentTarget && !item.hasAttribute('data-disabled') && !(item as HTMLButtonElement).disabled)
+          const target = event.key === 'Home' ? items[0] : items[items.length - 1]
+          if (!target) return
+          event.preventDefault()
+          target.focus()
+        }}
       >
         {children}
       </ToolbarPrimitive.Root>
@@ -213,7 +224,12 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
       </MenuPrimitive.Trigger>
       <MenuPrimitive.Portal>
         <MenuPrimitive.Positioner align="end" sideOffset={6}>
-          <MenuPrimitive.Popup data-slot="toolbar-overflow-content" aria-label={label}>
+          <MenuPrimitive.Popup
+            data-slot="toolbar-overflow-content"
+            aria-label={label}
+            // The shared menu rules read Radix's available-height variable.
+            style={{ '--radix-dropdown-menu-content-available-height': 'var(--available-height)' } as React.CSSProperties}
+          >
             {toolbar.overflowed.map((element, index) => {
               const entry = menuEntry(element)
               return entry.kind === 'toggle'

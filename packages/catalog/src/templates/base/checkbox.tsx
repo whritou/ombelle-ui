@@ -43,14 +43,30 @@ export function Checkbox({ value, id, disabled, checked: ownChecked, onCheckedCh
   return <CheckboxControl {...rest} value={value} id={id} disabled={disabled} checked={ownChecked} onCheckedChange={ownChange} />
 }
 
+/**
+ * Base UI's checkbox is a span, which a disabled native fieldset does not disable; it reads the
+ * nearest disabled fieldset after each render instead.
+ */
+function useFieldsetDisabled(): [boolean, (node: HTMLElement | null) => void] {
+  const [disabled, setDisabled] = React.useState(false)
+  const node = React.useRef<HTMLElement | null>(null)
+  React.useLayoutEffect(() => {
+    const next = node.current?.closest('fieldset:disabled') != null
+    if (next !== disabled) setDisabled(next)
+  })
+  return [disabled, (element) => { node.current = element }]
+}
+
 function CheckboxControl({
   className,
   checked,
   defaultChecked,
   onCheckedChange,
   rootId,
+  disabled,
   ...props
 }: CheckboxProps & { rootId?: string }) {
+  const [inFieldset, fieldsetRef] = useFieldsetDisabled()
   // An uncontrolled indeterminate checkbox becomes checked on its first change.
   const [mixed, setMixed] = React.useState(defaultChecked === 'indeterminate')
   const controlled = checked !== undefined
@@ -70,6 +86,8 @@ function CheckboxControl({
         <span {...rootProps} id={rootId ?? rootProps.id} data-state={checkedState(state)} />
       )}
       {...props}
+      ref={fieldsetRef}
+      disabled={disabled || inFieldset}
     >
       <CheckboxPrimitive.Indicator
         data-slot="checkbox-indicator"
