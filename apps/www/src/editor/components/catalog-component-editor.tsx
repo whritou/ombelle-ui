@@ -101,7 +101,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
     past: [...previous.past, previous.present].slice(-HISTORY_LIMIT), present: previous.future[0], future: previous.future.slice(1),
   }) : previous)
 
-  return <main className={styles.root} aria-label={`${name} editor`}>
+  return <main className={styles.root} aria-label={`${name} editor`} data-editor-root="">
     <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
       commands={[familyCommands(siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
         resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit({ ...recipe, presetRef: catalogPresetRef(style) }))]} status={status} revision={`r${recipe.revision}`}

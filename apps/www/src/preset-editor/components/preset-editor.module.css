@@ -436,41 +436,6 @@
   font-size: 13px;
   color: var(--muted-foreground);
 }
-@media (max-width: 960px) {
-  .workbench {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .drawerSlot,
-  .drawerSlot[data-open] {
-    position: static;
-    width: auto;
-    max-height: none;
-  }
-  .drawerSlot > aside {
-    max-width: none;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-  }
-  .drawerSlot > aside:not(:has([role='tablist'])) {
-    flex-direction: row;
-    width: auto;
-  }
-  .panel {
-    position: static;
-    max-height: none;
-    overflow: visible;
-  }
-  .editor :global(.preset-color-list) {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-    gap: 2px 8px;
-  }
-}
-@media (max-width: 800px) {
-  .editor {
-    padding: 24px 16px 48px;
-  }
-}
 @media (max-width: 560px) {
   .field {
     grid-template-columns: minmax(0, 1fr);
@@ -989,3 +954,79 @@
 .editor :global(.preset-starting-options) [data-slot]:focus-visible,
 .editor :global(.preset-tint-chips) button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 .editor :global(.preset-tint-swatch) { inline-size: 14px; block-size: 14px; border-radius: 4px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); }
+
+/* Below 1200px the editor fills the viewport and each pane is the only scroller in it.
+   Last in the file, so these win over the desktop workbench rules above. */
+@media (max-width: 1199px) {
+  .editor {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+  .editor > * {
+    flex: none;
+  }
+  .editor > .workbench {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .workbench {
+    grid-template-columns: 300px minmax(0, 1fr) auto;
+    align-items: stretch;
+    margin-top: 12px;
+    padding-bottom: 16px;
+  }
+  .panel {
+    position: static;
+    display: flex;
+    min-height: 0;
+  }
+  .panelScroll[data-slot='scroll-area'] {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+  }
+  .panelScroll [data-slot='scroll-area-viewport'] {
+    overscroll-behavior: auto;
+  }
+  .canvas {
+    min-height: 0;
+    overflow-y: auto;
+    align-content: start;
+  }
+  .drawerSlot,
+  .drawerSlot[data-open] {
+    position: static;
+    max-height: none;
+  }
+}
+@media (max-width: 767px) {
+  .editor {
+    padding-inline: 16px;
+  }
+  .workbench {
+    display: block;
+    overflow-y: auto;
+  }
+  .panel {
+    display: block;
+  }
+  .canvas {
+    overflow: visible;
+    margin-top: 16px;
+  }
+  .drawerSlot,
+  .drawerSlot[data-open] {
+    width: auto;
+    margin-top: 16px;
+  }
+  .drawerSlot > aside {
+    max-width: none;
+  }
+  .drawerSlot > aside:not(:has([role='tablist'])) {
+    flex-direction: row;
+    width: auto;
+  }
+}

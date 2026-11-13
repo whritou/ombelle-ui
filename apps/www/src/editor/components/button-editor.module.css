@@ -176,11 +176,23 @@
 .preservedRecovery { margin: 0; border-bottom: 1px solid var(--line); padding: .85rem 0; color: var(--slate); font-size: .86rem; }
 .root :global(.mobileTabs) { display: none; }
 
-@media (max-width: 800px) {
-  .workspace { display: block; min-height: 0; padding-top: 1rem; }
-  .primary { padding: 0; }
+/* Below 1200px the editor fills the viewport and each pane is the only scroller in it. */
+@media (max-width: 1199px) {
+  .root { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; padding-bottom: 0; }
+  .root > * { flex: none; }
+  .root > .workspace { flex: 1 1 auto; min-height: 0; }
+  .workspace { grid-template-columns: 300px minmax(0, 1fr); align-items: stretch; padding-bottom: 1rem; }
+  .rail { position: static; display: flex; min-height: 0; }
+  .railScroll[data-slot='scroll-area'] { flex: 1; min-height: 0; max-height: none; }
+  .railScroll [data-slot='scroll-area-viewport'] { overscroll-behavior: auto; }
+  .primary { min-height: 0; overflow-y: auto; align-content: start; }
+  .viewControls [data-slot='toggle-group'] { flex-wrap: wrap; max-width: 100%; }
+}
+@media (max-width: 767px) {
+  .workspace { display: block; overflow-y: auto; padding-top: 1rem; }
+  .primary { overflow: visible; padding: 0; }
   .previewSection, .codeSection { padding: 1rem; }
-  .rail { position: static; }
+  .rail { display: block; }
   .railScroll[data-slot='scroll-area'] { max-height: none; }
   .railContent { padding: .25rem 1rem; }
   .root :global(.mobileTabs) { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }

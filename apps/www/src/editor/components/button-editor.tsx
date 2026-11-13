@@ -203,7 +203,7 @@ export function ButtonEditor() {
     { id: 'reset-recipe', label: 'Reset recipe', destructive: true, disabled: recovery !== null, onSelect: resetRecipe },
   ]
 
-  return <main className={styles.root} aria-label="Button editor">
+  return <main className={styles.root} aria-label="Button editor" data-editor-root="">
     <EditorTopBar
       commands={[familyCommands(siteFamilyOrder, draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}

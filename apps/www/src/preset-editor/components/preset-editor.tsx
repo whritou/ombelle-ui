@@ -243,7 +243,7 @@ export default function PresetEditor() {
       commit(resetPresetField(draft, path), 'reset:' + path),
   }
   return (
-    <main className={styles.editor} aria-label="Preset editor">
+    <main className={styles.editor} aria-label="Preset editor" data-editor-root="">
       <EditorTopBar
         commands={[familyCommands(offeredStyleFamilies(draft.family), draft.family, familyNames, family)]}
         crumbs={['Presets']}

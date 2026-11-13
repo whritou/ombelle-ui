@@ -494,3 +494,10 @@
   }
 }
 /* end catalog dialog */
+
+/* Below 1200px the editors fill the viewport, so the site footer stays off their pages. */
+@media (max-width: 1199px) {
+  body:has([data-editor-root]) > footer {
+    display: none;
+  }
+}
