@@ -33,6 +33,9 @@ export function Example(){return <><ColorPickerPair label="Primary"><ColorPicker
   'code-block': `import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 const source = "import { Button } from '@/components/ui/button'\\n\\nexport function Save() {\\n  return <Button>Save</Button>\\n}\\n"
 export function Example(){return <><CodeBlockCommand args="@ombelle-ui/cli add button" /><CodeBlock title="save.tsx" language="tsx" code={source} /></>}`,
+  'password-field': `import { PasswordField, PasswordFieldControl, PasswordFieldInput, PasswordFieldToggle, PasswordFieldCapsLock, PasswordFieldStrength } from '@/components/ui/password-field'
+const checks = [{ label: 'at least 12 characters', test: (value: string) => value.length >= 12 }, { label: 'a number', test: (value: string) => /\\d/.test(value) }, { label: 'add a symbol', test: (value: string) => /[^A-Za-z0-9]/.test(value) }]
+export function Example(){return <><label htmlFor="new-password">Password</label><PasswordField><PasswordFieldControl><PasswordFieldInput id="new-password" name="password" autoComplete="new-password" /><PasswordFieldToggle /></PasswordFieldControl><PasswordFieldCapsLock /><PasswordFieldStrength checks={checks} /></PasswordField></>}`,
   'number-input': `import { NumberInput } from '@/components/ui/number-input'
 export function Example(){return <><label htmlFor="radius">Border radius</label><NumberInput id="radius" name="radius" defaultValue={12} min={0} max={32} unit="px" onValueChange={(value, { valid }) => console.log(value, valid)} /></>}`,
   toggle: `import { Toggle } from '@/components/ui/toggle'

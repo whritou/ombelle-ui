@@ -594,7 +594,7 @@ it('adds no 0.7.6 key to the default Field and Checkbox recipes', () => {
 it('names the 0.7.6 appearance parts', async () => {
   const { componentRecipeParts } = await import('../src/component-recipe-appearance.js')
   const slots = (id: (typeof components076)[number]) => componentRecipeParts[id].map(part => part.slot)
-  expect(slots('password-field')).toEqual(['password-field', 'password-field-strength-bar'])
+  expect(slots('password-field')).toEqual(['password-field-control', 'password-field-strength-bar'])
   expect(slots('carousel')).toEqual(['carousel-content', 'carousel-dot'])
   expect(slots('aspect-ratio')).toEqual(['aspect-ratio'])
   expect(slots('toolbar')).toEqual(['toolbar', 'toolbar-toggle-item'])

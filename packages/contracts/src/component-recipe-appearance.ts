@@ -40,7 +40,7 @@ export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = 
   item: [surface('item', 'Item'), mark('item-media', 'Media')],
   'number-input': [surface('number-input', 'Field')],
   'code-block': [surface('code-block', 'Window')],
-  'password-field': [surface('password-field', 'Field'), mark('password-field-strength-bar', 'Strength')],
+  'password-field': [surface('password-field-control', 'Field'), mark('password-field-strength-bar', 'Strength')],
   carousel: [layout('carousel-content', 'Slides'), mark('carousel-dot', 'Dot')],
   'aspect-ratio': [surface('aspect-ratio', 'Frame')],
   toolbar: [surface('toolbar', 'Toolbar'), mark('toolbar-toggle-item', 'Toggle')],
