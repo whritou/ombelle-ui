@@ -164,3 +164,15 @@ Measured after the batch 4b website changes, with the same method (`corepack pnp
 | `/components/accordion` | 16 | 849.9 kB | 854.5 kB | 866.6 kB | **+16.7 kB, over the limit** |
 
 Where it comes from, read from the build's chunks: the shared chunk holding the catalog source (templates and stylesheets, which these routes ship to compile recipes) grew with the new templates and styles, the two Breadcrumb templates and their menu styles most; and the editor routes now load Radix Dropdown Menu (a chunk of about 22 kB gzip, partly shared with the Popover code they already load) through the top bar's Breadcrumb. This overrun has not been accepted; it waits for the maintainer.
+
+## Final review
+
+A fresh reviewer read the whole range (`bfc78c2` to the batch 4b head) against the spec, the plan and its Review Focus, and ran the focused catalog tests. Fixed, each with a test that failed first:
+
+| Finding | Fix and test |
+| --- | --- |
+| Critical: the typed confirmation survived a close, so reopening showed the old text with the action enabled. The confirmation state lives in the `AlertDialogContent` wrapper, which stays mounted when the primitive content closes; the browser test reopened through a page reload, so it missed this | The confirm input clears the text when it unmounts with the closed content. The browser test now reopens on the same page after Escape and after Cancel (both editions) |
+| Important: a Radix Progress above its maximum was announced as indeterminate while its readout said 100% (Radix drops a value above `max`) | The Radix template clamps the value to `0`..`max`, as the readout and Base UI do. `progress-variants.test.ts` "is a complete bar whose value and readout agree" (on batch 4a too) |
+| Important: Breadcrumb widths were measured once per text, so a web font that loads after mount left them stale and the trail overflowed | The trail is measured whenever it is fully shown, the items' own size is observed, and loaded fonts trigger a measure from the full trail. The browser test "measures again when its text grows after mount" (both editions) |
+
+Deferred minor findings: the overflow menu lists only folded items that have links; Popover and Progress find their parts among direct children only; a user `id` on `ProgressLabel` breaks the bar's name; the preset editor's confirmation text blanks during the close animation; `DialogBody` does not watch text-node changes. After the fixes: `vitest run packages/catalog packages/compiler` 2155 passed, the whole `variants-075.spec.ts` 30 passed, `corepack pnpm typecheck` passed.
