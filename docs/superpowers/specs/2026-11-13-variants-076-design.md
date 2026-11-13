@@ -93,7 +93,7 @@ The seven components' pages, `docs/accessibility-review.md` rows, the CHANGELOG 
 
 ## Delivery
 
-Branch `feat/variants-076` from `feat/components-076`, one PR. If it grows like 0.7.5's did, the builder may split it into two batches (props-and-parts first: Card, Slider, Progress and Meter, Tooltip; then Sheet, Code Block and Carousel), each with its own PR.
+Runs in parallel with track 1, in its own session and worktree (decided 13 November 2026). Branch `feat/variants-076` from `docs/specs-076`, one PR. Sections 01 to 06 need nothing from track 1. Section 07 (the Carousel image variant) needs track 1's Carousel, so it is done last, after `feat/variants-076` is rebased onto `feat/components-076` once that branch has Carousel. If it grows like 0.7.5's did, the builder may split it into two batches (props-and-parts first: Card, Slider, Progress and Meter, Tooltip; then Sheet, Code Block and Carousel), each with its own PR.
 
 ## Left to the builder
 
