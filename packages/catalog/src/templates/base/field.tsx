@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import { Field as FieldPrimitive } from '@base-ui/react/field'
+import { Fieldset as FieldsetPrimitive } from '@base-ui/react/fieldset'
 import { CircleAlertIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './field.css'
@@ -80,4 +81,13 @@ export function FieldError({ className, children, ...props }: Omit<FieldPrimitiv
       {children}
     </FieldPrimitive.Error>
   )
+}
+
+/** Names a group of fields or controls; disabled, it disables every control inside. */
+export function FieldSet({ className, ...props }: React.ComponentProps<typeof FieldsetPrimitive.Root>) {
+  return <FieldsetPrimitive.Root {...props} data-slot="field-set" className={cn(className as string)} />
+}
+
+export function FieldLegend({ className, ...props }: React.ComponentProps<typeof FieldsetPrimitive.Legend>) {
+  return <FieldsetPrimitive.Legend {...props} data-slot="field-legend" className={cn(className as string)} />
 }

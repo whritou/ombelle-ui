@@ -123,3 +123,12 @@ export function FieldError({ className, children, ...props }: React.ComponentPro
     </p>
   )
 }
+
+/** Names a group of fields or controls; disabled, it disables every control inside. */
+export function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
+  return <fieldset {...props} data-slot="field-set" className={cn(className)} />
+}
+
+export function FieldLegend({ className, ...props }: React.ComponentProps<'legend'>) {
+  return <legend {...props} data-slot="field-legend" className={cn(className)} />
+}
