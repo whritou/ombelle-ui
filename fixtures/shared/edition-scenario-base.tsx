@@ -20,7 +20,7 @@ import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, Breadcr
 import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHandle, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogConfirmInput, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -650,6 +650,8 @@ function VariantsScenario075() {
 
 /** The 0.7.6 variants, for tests/e2e/variants-076.spec.ts; later tasks add their parts here. */
 function VariantsScenario076() {
+  const [wideAction, setWideAction] = React.useState(false)
+  const [actionClicks, setActionClicks] = React.useState(0)
   return (
     <section aria-label="0.7.6 variants" data-testid="variants-076">
       <Sheet>
@@ -659,6 +661,34 @@ function VariantsScenario076() {
           <SheetHeader><SheetTitle>Filters</SheetTitle><SheetDescription>Settles on half or full height when released.</SheetDescription></SheetHeader>
         </SheetContent>
       </Sheet>
+      <Card data-testid="ca-card">
+        <CardHeader>
+          <CardTitle data-testid="ca-title">Studio warm</CardTitle>
+          <CardDescription data-testid="ca-description">Your preset · edited 2 h ago</CardDescription>
+          <CardAction data-testid="ca-action">
+            <button type="button" aria-label="More actions for Studio warm" data-testid="ca-button" style={wideAction ? { inlineSize: 120 } : undefined}>
+              <span aria-hidden="true">⋯</span>
+            </button>
+          </CardAction>
+        </CardHeader>
+      </Card>
+      <Button type="button" onClick={() => setWideAction(wide => !wide)}>Swap the card action</Button>
+      <Card data-testid="ca-link-card">
+        <CardHeader>
+          <CardTitle><CardLink href="#ca-followed">Linked preset</CardLink></CardTitle>
+          <CardDescription>Whole card is the link.</CardDescription>
+          <CardAction>
+            <button type="button" aria-label="More actions for Linked preset" data-testid="ca-link-button" onClick={() => setActionClicks(count => count + 1)}>
+              <span aria-hidden="true">⋯</span>
+            </button>
+          </CardAction>
+        </CardHeader>
+      </Card>
+      <p data-testid="ca-clicks">Action clicks: {actionClicks}</p>
+      <div data-testid="ca-stats">
+        <Card density="dense"><CardHeader><CardTitle>53</CardTitle><CardDescription>components</CardDescription></CardHeader></Card>
+        <Card density="dense"><CardHeader><CardTitle>5</CardTitle><CardDescription>style families</CardDescription></CardHeader></Card>
+      </div>
     </section>
   )
 }

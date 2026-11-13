@@ -375,6 +375,7 @@ describe('catalog contract', () => {
       'card-group',
       'card-option',
       'card-option-check',
+      'card-action',
     ])
     for (const part of [
       'Card',

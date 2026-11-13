@@ -95,3 +95,68 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} CardAction`, () => {
+    test('keeps the title beside the action, whatever the action holds', async ({ page }) => {
+      const section = await open(page, edition)
+      const card = section.getByTestId('ca-card')
+      const title = card.getByTestId('ca-title')
+      const description = card.getByTestId('ca-description')
+      const action = card.getByTestId('ca-action')
+      const button = card.getByTestId('ca-button')
+      const measure = async () => {
+        const [header, t, d, a, b] = await Promise.all([card.locator('[data-slot="card-header"]'), title, description, action, button].map(async locator => (await locator.boundingBox())!))
+        return { header, t, d, a, b }
+      }
+      // The header's padding, so the tracks are compared with its content box.
+      const padding = await card.locator('[data-slot="card-header"]').evaluate(el => parseFloat(getComputedStyle(el).paddingInlineEnd) + parseFloat(getComputedStyle(el).paddingInlineStart))
+      const narrow = await measure()
+      expect(narrow.b.width).toBe(34)
+      expect(narrow.b.height).toBe(34)
+      // The action starts at the title's top and runs past the description's top.
+      expect(Math.abs(narrow.a.y - narrow.t.y)).toBeLessThanOrEqual(1)
+      expect(narrow.a.y + narrow.a.height).toBeGreaterThan(narrow.d.y)
+      // Title and description share column 1; the action sits at the end, clear of both.
+      expect(narrow.d.x).toBeCloseTo(narrow.t.x, 0)
+      expect(narrow.t.x + narrow.t.width + 12).toBeLessThanOrEqual(narrow.a.x + 1)
+      expect(narrow.t.width + 12 + narrow.a.width).toBeCloseTo(narrow.header.width - padding, 0)
+      await section.getByRole('button', { name: 'Swap the card action' }).click()
+      await expect(button).toHaveCSS('width', '120px')
+      const wide = await measure()
+      // The grid tracks hold: title, a 12px gap and the action fill the header, and the title's top and start do not move.
+      expect(wide.t.width + 12 + wide.a.width).toBeCloseTo(wide.header.width - padding, 0)
+      expect(wide.a.width).toBeCloseTo(120, 0)
+      expect(wide.t.x - wide.header.x).toBeCloseTo(narrow.t.x - narrow.header.x, 0)
+      // (Positions are viewport-relative and the click scrolls, so compare the offsets from the header.)
+      expect(Math.abs((wide.t.y - wide.header.y) - (narrow.t.y - narrow.header.y))).toBeLessThanOrEqual(1)
+      expect(Math.abs(wide.a.y - wide.t.y)).toBeLessThanOrEqual(1)
+      expect(wide.t.x + wide.t.width + 12).toBeLessThanOrEqual(wide.a.x + 1)
+    })
+
+    test('a click on the action in a CardLink card runs its handler and does not follow the link', async ({ page }) => {
+      const section = await open(page, edition)
+      const button = section.getByRole('button', { name: 'More actions for Linked preset' })
+      const box = (await button.boundingBox())!
+      expect(box.width).toBeGreaterThanOrEqual(24)
+      expect(box.height).toBeGreaterThanOrEqual(24)
+      await button.click()
+      await expect(section.getByTestId('ca-clicks')).toHaveText('Action clicks: 1')
+      expect(new URL(page.url()).hash).not.toBe('#ca-followed')
+      // The rest of the card still follows the link.
+      const card = section.getByTestId('ca-link-card')
+      const cardBox = (await card.boundingBox())!
+      await page.mouse.click(cardBox.x + cardBox.width / 2, cardBox.y + cardBox.height - 6)
+      await expect.poll(() => new URL(page.url()).hash).toBe('#ca-followed')
+    })
+
+    test('dense stat cards render', async ({ page }) => {
+      const section = await open(page, edition)
+      const cards = section.getByTestId('ca-stats').locator('[data-slot="card"]')
+      await expect(cards).toHaveCount(2)
+      await expect(cards.first()).toHaveAttribute('data-density', 'dense')
+      await expect(cards.first()).toContainText('53')
+      await expect(cards.last()).toContainText('style families')
+    })
+  })
+}

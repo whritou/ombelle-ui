@@ -30,6 +30,17 @@ export function CardHeader({ className, ...props }: CardHeaderProps) {
   return <div {...props} data-slot="card-header" className={cn(className)} />
 }
 
+export type CardActionProps = React.ComponentProps<'div'>
+
+/**
+ * A control at the end of the header, such as a menu button. Put it in CardHeader beside the
+ * title and description; it takes the second column and spans both rows, so the title keeps its
+ * place whatever the action holds. Name its button (aria-label) after the card.
+ */
+export function CardAction({ className, ...props }: CardActionProps) {
+  return <div {...props} data-slot="card-action" data-card-action="" className={cn(className)} />
+}
+
 export type CardTitleProps = React.ComponentProps<'h3'> & {
   level?: 1 | 2 | 3 | 4 | 5 | 6
 }
