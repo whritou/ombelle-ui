@@ -117,6 +117,8 @@ test('edits Button family, props, and bounded overrides', async ({ page }) => {
 })
 
 test('view mode does not change recipe hash and a draft restores after reload', async ({ page }) => {
+  // The width toggle shows from 1200px; below that the preview fills its column.
+  await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await page.getByLabel('Button text').fill('Saved draft')
   await expect(pageStatus(page)).toContainText('saved')
@@ -524,6 +526,8 @@ test('sandboxed preview receives validated recipe updates only over its port', a
 })
 
 test('operates every Button editor control, artifact tab, download and publish dialog by keyboard', async ({ page, context }) => {
+  // The width toggle shows from 1200px; below that the preview fills its column.
+  await page.setViewportSize({ width: 1280, height: 800 })
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   await expect(page.getByTestId('recipe-hash')).not.toHaveText('Pending', { timeout: 30000 })
