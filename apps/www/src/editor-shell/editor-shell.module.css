@@ -509,7 +509,10 @@
 }
 
 /* The top bar's actions keep their look: the catalog Toolbar adds one Tab stop and arrow keys, not a frame. */
-.actionsToolbar {
+/* Two classes, to win over the catalog Toolbar's own frame. */
+.topActions .actionsToolbar {
+  /* Full width, so the bar wraps as before instead of moving actions into the menu. */
+  flex: none;
   padding: 0;
   border: 0;
   background: transparent;

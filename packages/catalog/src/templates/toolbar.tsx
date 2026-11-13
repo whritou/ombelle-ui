@@ -6,20 +6,6 @@ import { CheckIcon, EllipsisIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './toolbar.css'
 
-/** How many leading items fit: all of them without the trigger, or as many as fit beside it. */
-export function fitCount(widths: readonly number[], available: number, triggerWidth: number, gap: number): number {
-  const total = widths.reduce((sum, width) => sum + width, 0) + Math.max(0, widths.length - 1) * gap
-  if (total <= available) return widths.length
-  let used = triggerWidth
-  let count = 0
-  for (const width of widths) {
-    if (used + width + gap > available) break
-    used += width + gap
-    count++
-  }
-  return count
-}
-
 type ToolbarState = {
   overflowed: readonly HTMLElement[]
   triggerRef: React.RefObject<HTMLButtonElement | null>
@@ -45,24 +31,24 @@ const entrySelector = '[data-toolbar-item], [data-toolbar-separator]'
 function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef: React.RefObject<HTMLButtonElement | null>, persistent: boolean) {
   const [overflowed, setOverflowed] = React.useState<readonly HTMLElement[]>([])
   const [focusTrigger, setFocusTrigger] = React.useState(0)
-  const triggerWidth = React.useRef(34)
   const measure = React.useCallback(() => {
     const root = rootRef.current
     if (!root) return
     const entries = [...root.querySelectorAll<HTMLElement>(entrySelector)].filter(element => element.closest('[data-toolbar-root]') === root)
     const focused = entries.find(element => element.contains(document.activeElement))
+    // Measured on the real layout, so grouped items, gaps and separators count as drawn.
+    const fits = () => root.scrollWidth <= root.clientWidth + 1
     for (const element of entries) element.hidden = false
     const trigger = triggerRef.current
-    if (trigger && !trigger.hidden) triggerWidth.current = trigger.getBoundingClientRect().width || triggerWidth.current
-    const style = getComputedStyle(root)
-    const gap = parseFloat(style.columnGap) || 0
-    const available = root.clientWidth - (parseFloat(style.paddingInlineStart) || 0) - (parseFloat(style.paddingInlineEnd) || 0)
-    const widths = entries.map(element => element.getBoundingClientRect().width)
-    let fit = persistent
-      ? fitCount(widths, available - triggerWidth.current - gap, 0, gap)
-      : fitCount(widths, available, triggerWidth.current + gap, gap)
-    // A separator never ends the visible row.
-    while (fit > 0 && fit < entries.length && entries[fit - 1].hasAttribute('data-toolbar-separator')) fit--
+    const triggerHidden = trigger?.hidden ?? true
+    let fit = entries.length
+    if (persistent || !fits()) {
+      if (trigger) trigger.hidden = false
+      while (fit > 0 && !fits()) entries[--fit].hidden = true
+      // A separator never ends the visible row.
+      while (fit > 0 && fit < entries.length && entries[fit - 1].hasAttribute('data-toolbar-separator')) entries[--fit].hidden = true
+      if (trigger) trigger.hidden = triggerHidden
+    }
     entries.forEach((element, index) => {
       element.hidden = index >= fit
       if (index >= fit) element.setAttribute('data-overflowed', '')
@@ -78,6 +64,7 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
     if (!root || typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(() => measure())
     observer.observe(root)
+    if (root.parentElement) observer.observe(root.parentElement)
     return () => observer.disconnect()
   }, [measure, rootRef])
   return { overflowed, focusTrigger }

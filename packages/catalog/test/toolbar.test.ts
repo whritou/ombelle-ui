@@ -11,20 +11,6 @@ const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
 const slots = ['toolbar', 'toolbar-button', 'toolbar-link', 'toolbar-toggle-group', 'toolbar-toggle-item', 'toolbar-separator', 'toolbar-overflow-trigger', 'toolbar-overflow-content', 'toolbar-overflow-item', 'toolbar-overflow-indicator', 'toolbar-overflow-separator']
 const tag = (html: string, pattern: string) => html.match(new RegExp(`<[^>]*${pattern}[^>]*>`))?.[0] ?? ''
 
-describe('fitCount', () => {
-  it.each([
-    [[40, 40, 40, 80], 300, 32, 4, 4],
-    [[40, 40, 40, 80], 150, 32, 4, 2],
-    [[], 100, 32, 4, 0],
-    [[200], 100, 32, 4, 0],
-    [[40, 40], 84, 32, 4, 2],
-    [[40, 40], 83, 32, 4, 1],
-  ] as const)('fits %o in %i beside a %ipx trigger', (widths, available, trigger, gap, expected) => {
-    expect(radix.fitCount(widths, available, trigger, gap)).toBe(expected)
-    expect(base.fitCount(widths, available, trigger, gap)).toBe(expected)
-  })
-})
-
 describe('Toolbar', () => {
   it('provides the parts in both editions', () => {
     expectComponentContract('toolbar', { client: true,
