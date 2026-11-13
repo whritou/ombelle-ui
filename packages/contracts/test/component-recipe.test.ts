@@ -599,3 +599,69 @@ it('names the 0.7.6 appearance parts', async () => {
   expect(slots('aspect-ratio')).toEqual(['aspect-ratio'])
   expect(slots('toolbar')).toEqual(['toolbar', 'toolbar-toggle-item'])
 })
+
+const variants076Draft = (component: string, props: Record<string, unknown> = {}, content: Record<string, unknown> = {}) => ({
+  ...badge, component, props,
+  content: { ...defaultRecipeFields(componentRecipeFields(component as 'badge').content), ...content },
+})
+
+it.each([
+  ['sheet', { side: 'bottom', snapPoints: 'none' }, {}],
+  ['sheet', { side: 'bottom', snapPoints: 'half-full' }, {}],
+  ['sheet', { side: 'bottom', snapPoints: 'third-half-full' }, {}],
+  ['card', { action: true }, {}],
+  ['card', { action: false }, {}],
+  ['slider', { valueDisplay: 'none' }, {}],
+  ['slider', { valueDisplay: 'readout' }, {}],
+  ['slider', { valueDisplay: 'editable' }, {}],
+  ['slider', { mode: 'range', valueDisplay: 'readout' }, {}],
+  ['progress', { shape: 'bar' }, {}],
+  ['progress', { shape: 'circle' }, {}],
+  ['meter', { shape: 'bar' }, {}],
+  ['meter', { shape: 'circle' }, {}],
+  ['code-block', { diff: true }, {}],
+  ['code-block', { diff: false }, {}],
+  ['tooltip', {}, { shortcut: '' }],
+  ['tooltip', {}, { shortcut: 'Ctrl+Z' }],
+  ['tooltip', {}, { shortcut: 'Ctrl+Shift+P' }],
+] as const)('accepts the 0.7.6 %s variant %o %o', (component, props, content) => {
+  const recipe = validateComponentRecipe(variants076Draft(component, props, content))
+  expect(recipe.props).toMatchObject(props)
+  expect(recipe.content).toMatchObject(content)
+})
+
+it.each([
+  ['sheet', { snapPoints: 'quarter' }, {}, '/props/snapPoints'],
+  ['slider', { valueDisplay: 'value' }, {}, '/props/valueDisplay'],
+  ['progress', { shape: 'ring' }, {}, '/props/shape'],
+  ['meter', { shape: 'ring' }, {}, '/props/shape'],
+  ['code-block', { diff: 'yes' }, {}, '/props/diff'],
+  ['card', { action: 'yes' }, {}, '/props/action'],
+  ['tooltip', {}, { shortcut: 'x'.repeat(41) }, '/content/shortcut'],
+] as const)('rejects the 0.7.6 %s variant %o %o at %s', (component, props, content, path) => {
+  expect(() => validateComponentRecipe(variants076Draft(component, props, content))).toThrow(expect.objectContaining({ path }))
+})
+
+it.each([
+  ['sheet', { side: 'inline-end', snapPoints: 'half-full' }, {}, '/props/snapPoints', /snapPoints/],
+  ['slider', { mode: 'range', valueDisplay: 'editable' }, {}, '/props/valueDisplay', /valueDisplay/],
+  ['card', { mode: 'options', action: true }, {}, '/props/action', /action/],
+  ['code-block', { mode: 'command', diff: true }, { args: 'add button' }, '/props/diff', /diff/],
+  ['tooltip', {}, { shortcut: 'Ctrl++' }, '/content/shortcut', /shortcut/],
+  ['tooltip', {}, { shortcut: 'A+B+C+D' }, '/content/shortcut', /shortcut/],
+] as const)('rejects the 0.7.6 %s composition %o %o at %s', (component, props, content, path, message) => {
+  expect(() => validateComponentRecipe(variants076Draft(component, props, content)))
+    .toThrow(expect.objectContaining({ path, message: expect.stringMatching(message) }))
+})
+
+it('keeps the 0.7.6 fields out of the default recipe fields', () => {
+  const added = { sheet: ['snapPoints'], card: ['action'], slider: ['valueDisplay'], progress: ['shape'], meter: ['shape'], 'code-block': ['diff'] } as const
+  for (const [component, keys] of Object.entries(added)) {
+    const fields = componentRecipeFields(component as 'badge')
+    for (const key of keys) expect(defaultRecipeFields(fields.props), component + ' ' + key).not.toHaveProperty(key)
+    const recipe = validateComponentRecipe(variants076Draft(component))
+    for (const key of keys) expect(recipe.props, component + ' ' + key).not.toHaveProperty(key)
+  }
+  expect(defaultRecipeFields(componentRecipeFields('tooltip').content)).not.toHaveProperty('shortcut')
+  expect(validateComponentRecipe(variants076Draft('tooltip')).content).not.toHaveProperty('shortcut')
+})

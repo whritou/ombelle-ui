@@ -407,6 +407,10 @@ export const componentRecipeSchema = {
                 "media"
               ],
               "title": "Mode"
+            },
+            "action": {
+              "type": "boolean",
+              "title": "Action button"
             }
           },
           "additionalProperties": false,
@@ -495,6 +499,13 @@ export const componentRecipeSchema = {
             "showValue": {
               "type": "boolean",
               "title": "Show value"
+            },
+            "shape": {
+              "enum": [
+                "bar",
+                "circle"
+              ],
+              "title": "Shape"
             }
           },
           "additionalProperties": false,
@@ -1831,6 +1842,11 @@ export const componentRecipeSchema = {
               "maxLength": 200,
               "default": "View project details",
               "pattern": "\\S"
+            },
+            "shortcut": {
+              "type": "string",
+              "title": "Keyboard shortcut",
+              "maxLength": 40
             }
           },
           "additionalProperties": false,
@@ -1972,6 +1988,14 @@ export const componentRecipeSchema = {
             "resizable": {
               "type": "boolean",
               "title": "Resizable"
+            },
+            "snapPoints": {
+              "enum": [
+                "none",
+                "half-full",
+                "third-half-full"
+              ],
+              "title": "Snap points"
             }
           },
           "additionalProperties": false,
@@ -2627,6 +2651,13 @@ export const componentRecipeSchema = {
               "maximum": 100,
               "default": 60,
               "title": "Warning from (%)"
+            },
+            "shape": {
+              "enum": [
+                "bar",
+                "circle"
+              ],
+              "title": "Shape"
             }
           },
           "additionalProperties": false,
@@ -2857,6 +2888,14 @@ export const componentRecipeSchema = {
               "maximum": 100000,
               "default": 80,
               "title": "Range end"
+            },
+            "valueDisplay": {
+              "enum": [
+                "none",
+                "readout",
+                "editable"
+              ],
+              "title": "Value display"
             }
           },
           "additionalProperties": false,
@@ -4232,6 +4271,10 @@ export const componentRecipeSchema = {
               "type": "boolean",
               "default": true,
               "title": "Line numbers"
+            },
+            "diff": {
+              "type": "boolean",
+              "title": "Diff"
             }
           },
           "additionalProperties": false,

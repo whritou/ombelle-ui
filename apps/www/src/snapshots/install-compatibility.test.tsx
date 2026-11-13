@@ -347,3 +347,32 @@ describe('0.7.5 variant recipes, batch 4b', () => {
     expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(false)
   })
 })
+
+describe('0.7.6 variant recipes', () => {
+  const v075 = { version: '0.7.5' }
+  const v076 = { version: '0.7.6' }
+  it.each([
+    ['progress', { shape: 'circle' }, {}],
+    ['tooltip', {}, { shortcut: 'Ctrl+Z' }],
+    ['sheet', { snapPoints: 'none' }, {}],
+    ['card', { action: false }, {}],
+    ['slider', { valueDisplay: 'none' }, {}],
+    ['meter', { shape: 'bar' }, {}],
+    ['code-block', { diff: false }, {}],
+  ] as const)('gates a %s recipe using %o %o at CLI 0.7.6', (component, props, content) => {
+    const recipe = { component, props, content } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(true)
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v076)).toBe(false)
+    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v075)).toBe(compatibility.catalog076InstallNotice)
+  })
+
+  it.each(['sheet', 'card', 'slider', 'progress', 'meter', 'tooltip'])('leaves a %s recipe without new fields installable at 0.7.5', component => {
+    const recipe = { component, props: {}, content: { trigger: 'Open' } } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(false)
+  })
+
+  it('words the notice like the 0.7.5 one', () => {
+    expect(compatibility.catalog076MinimumCli).toBe('0.7.6')
+    expect(compatibility.catalog076InstallNotice).toBe(compatibility.catalog075InstallNotice.replace('0.7.5', '0.7.6'))
+  })
+})
