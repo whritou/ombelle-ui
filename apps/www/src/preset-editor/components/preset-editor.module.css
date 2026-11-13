@@ -1046,3 +1046,137 @@
     display: none;
   }
 }
+
+/* Phone and tablet structures. Desktop shows the page segments and width toggle and hides the rest. */
+.pageToggle,
+.widthToggle,
+.peekFrame {
+  display: contents;
+}
+.pageSelect,
+.peekBar,
+.reviewOpener {
+  display: none;
+}
+.reviewOpener {
+  position: relative;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
+}
+.reviewBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--warning);
+  color: var(--background);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+.reviewSheet aside {
+  max-width: none;
+  border: 0;
+}
+@media (max-width: 1199px) {
+  .pageToggle {
+    display: none;
+  }
+  .pageSelect {
+    display: flex;
+    flex: 1 1 10rem;
+    min-width: 0;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .editor .reviewOpener {
+    display: inline-grid;
+  }
+}
+@media (max-width: 767px) {
+  .widthToggle {
+    display: none;
+  }
+  .phoneHidden {
+    display: none !important;
+  }
+  /* One scroller; the dock floats over its last 96px. */
+  .workbench {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 96px;
+  }
+  .canvas {
+    margin-top: 0;
+  }
+  /* Customize pins the preview as a small card above the inspector. */
+  .canvas.peek {
+    order: -1;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--background);
+    padding-bottom: 4px;
+  }
+  .peek .preview {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    box-shadow: var(--shadow-soft);
+  }
+  .peek .previewBar,
+  .peek .sceneComponents,
+  .peek .peekFrame > section > p {
+    display: none;
+  }
+  .peek .peekFrame {
+    display: block;
+    position: relative;
+    flex: none;
+    width: 112px;
+    height: 84px;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  .peek .peekFrame iframe {
+    width: 390px !important;
+    max-width: none !important;
+    transform: scale(0.287);
+    transform-origin: 0 0;
+    pointer-events: none;
+  }
+  .peek .peekBar {
+    display: grid;
+    flex: 1;
+    gap: 6px;
+    min-width: 0;
+    font-size: 14px;
+  }
+  .editor .peekOpen {
+    justify-self: start;
+    min-height: 40px;
+    padding-inline: 14px;
+  }
+  .checksPane {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+  }
+}

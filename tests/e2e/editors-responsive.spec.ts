@@ -128,3 +128,59 @@ test('the pinned specimen shows the Button inside its card on a phone', async ({
   expect(shown.y).toBeGreaterThanOrEqual(card.y)
   expect(shown.y + shown.height).toBeLessThanOrEqual(card.y + card.height)
 })
+
+const presetDock = (page: Page) => page.getByRole('navigation', { name: 'Preset editor panes' })
+const presetPane = (page: Page, name: string) => presetDock(page).getByRole('radio', { name: new RegExp('^' + name) })
+
+test('the preset editor on a phone pins the live preview and moves between its panes', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await open(page, editors[0].url)
+  await expect(presetPane(page, 'Customize')).toHaveAttribute('aria-checked', 'true')
+  await expect(presetPane(page, 'Preview')).toBeVisible()
+  await expect(presetPane(page, 'Checks')).toBeVisible()
+  const peek = page.getByRole('region', { name: 'Live preview' })
+  await expect(peek).toBeVisible()
+  const before = (await peek.boundingBox())!
+  expect(before.height).toBeLessThanOrEqual(130)
+  await page.locator('[class*="workbench"]').first().evaluate(element => { element.scrollTop += 600 })
+  await expect.poll(async () => Math.round((await peek.boundingBox())!.y)).toBe(Math.round(before.y))
+  await peek.getByRole('button', { name: 'Open preview', exact: true }).click()
+  await expect(presetPane(page, 'Preview')).toHaveAttribute('aria-checked', 'true')
+  expect((await page.locator('iframe[title="Preset preview"], [aria-label="Preset preview"] iframe').first().boundingBox())!.height).toBeGreaterThan(300)
+  await presetPane(page, 'Checks').click()
+  await expect(page.getByRole('list', { name: 'Contrast results by mode' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Download preset JSON', exact: true })).toBeVisible()
+  await expectFitsViewport(page, 375)
+})
+
+test('the preset editor on a tablet keeps the preview beside the inspector and opens Checks and export in a sheet', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 })
+  await open(page, editors[0].url)
+  const inspector = (await page.getByRole('region', { name: 'Preset inspector' }).boundingBox())!
+  const preview = (await page.getByRole('region', { name: 'Live preview' }).boundingBox())!
+  expect(inspector.x + inspector.width).toBeLessThanOrEqual(preview.x)
+  await expect(page.getByRole('complementary', { name: 'Review' })).toBeHidden()
+  const opener = page.getByRole('button', { name: /^Checks and export/ })
+  expect((await opener.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  await opener.click()
+  const sheet = page.getByRole('dialog', { name: 'Checks and export' })
+  await expect(sheet).toBeVisible()
+  const box = (await sheet.boundingBox())!
+  expect(Math.abs(box.y + box.height - 1024)).toBeLessThanOrEqual(1)
+  await page.keyboard.press('Escape')
+  await expect(sheet).toBeHidden()
+  await expect(opener).toBeFocused()
+})
+
+test('resizing with the review drawer open keeps the draft and the open review', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await open(page, editors[0].url)
+  await page.getByLabel('Preset name', { exact: true }).fill('Resize check')
+  await page.getByRole('button', { name: /^Open export/ }).click()
+  await expect(page.getByRole('tab', { name: 'Export', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await page.setViewportSize({ width: 375, height: 812 })
+  await expect(presetPane(page, 'Checks')).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByLabel('Preset name', { exact: true })).toHaveValue('Resize check')
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await expect(page.getByRole('tab', { name: 'Export', exact: true })).toHaveAttribute('aria-selected', 'true')
+})

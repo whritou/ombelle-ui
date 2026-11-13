@@ -10,6 +10,9 @@ import { canonicalize, frame, publishEditorPreset, resetSnapshotBrowserQuota, sh
 import { expectColorParity } from '../helpers/color-compare.js'
 import { assertPresetGalleryButtonPixels, snapshotPresetDom } from '../helpers/preset-gallery-parity.js'
 
+// These cases test the desktop review drawer; below 1200px it becomes a sheet (tests/e2e/editors-responsive.spec.ts).
+test.use({ viewport: { width: 1280, height: 800 } })
+
 test.beforeAll(async ({ browser }, info) => {
   await fs.writeFile('.artifacts/snapshot-browser-version.json', JSON.stringify({ engine: browser.browserType().name(), version: browser.version(), channel: info.project.use.channel ?? 'bundled' }, null, 2))
 })

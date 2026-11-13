@@ -7,7 +7,7 @@ import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@om
 import { siteFamilyOrder } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
+import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
 import { catalogDraftKey, catalogPresetRef, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
@@ -56,7 +56,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const key = catalogDraftKey(component)
   const recoveryKey = `${key}.recoveries`
   useEffect(() => {
-    focusAfterHistory.current?.focus()
+    focusHistoryTarget(focusAfterHistory.current)
     focusAfterHistory.current = null
   }, [history])
   useEffect(() => {

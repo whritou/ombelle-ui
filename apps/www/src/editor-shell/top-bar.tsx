@@ -173,7 +173,7 @@ export function EditorTopBar({
           ))}
         </ToolbarOverflow>
         </Toolbar>
-        <Button ref={moreButton} variant="ghost" size="icon" className={`${styles.iconButton} ${styles.phoneMore}`} aria-label="More actions"
+        <Button ref={moreButton} variant="ghost" size="icon" className={`${styles.iconButton} ${styles.phoneMore}`} aria-label="More actions" data-phone-more=""
           aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen(true)}>
           <Ellipsis aria-hidden="true" size={18} />
         </Button>

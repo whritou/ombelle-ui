@@ -23,7 +23,7 @@ import { useRecipeBatch } from '../use-recipe-batch'
 import { changesSummaryFor } from './changes-summary'
 import { MatrixControls } from './matrix-controls'
 import { useMatrixLayout } from '../use-matrix-layout'
-import { EditorTopBar, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
+import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
@@ -78,7 +78,7 @@ export function ButtonEditor() {
   const focusAfterHistory = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
-    focusAfterHistory.current?.focus()
+    focusHistoryTarget(focusAfterHistory.current)
     focusAfterHistory.current = null
   }, [history])
 

@@ -27,6 +27,9 @@ import {
   type PresetRender,
 } from '../../apps/www/src/preset-editor/preview-protocol.js'
 
+// These cases test the desktop review drawer; below 1200px it becomes a sheet (tests/e2e/editors-responsive.spec.ts).
+test.use({ viewport: { width: 1280, height: 800 } })
+
 type FrameProbe = {
   hold: boolean
   blocked: boolean
@@ -754,21 +757,29 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await page.keyboard.type('Keyboard theme')
   await expect(name).toHaveValue('Keyboard theme')
 
+  // At 320px Redo lives in the More actions sheet; the last Undo hands focus to More actions.
   const undo = page.getByRole('button', { name: 'Undo', exact: true })
-  const redo = page.getByRole('button', { name: 'Redo', exact: true })
-  for (const [from, to, value] of [
-    [undo, redo, defaultName],
-    [redo, undo, 'Keyboard theme'],
-  ] as const) {
-    await tabTo(page, from)
-    for (let presses = 0; presses < 40 && (await from.isEnabled()); presses++) {
-      await expect(from).toBeFocused()
-      await page.keyboard.press('Enter')
-    }
-    await expect(name).toHaveValue(value)
-    await expect(to).toBeFocused()
-    await expectVisibleFocus(page)
+  const more = page.getByRole('button', { name: 'More actions', exact: true })
+  await tabTo(page, undo)
+  for (let presses = 0; presses < 40 && (await undo.isEnabled()); presses++) {
+    await expect(undo).toBeFocused()
+    await page.keyboard.press('Enter')
   }
+  await expect(name).toHaveValue(defaultName)
+  await expect(more).toBeFocused()
+  await expectVisibleFocus(page)
+  const sheet = page.getByRole('dialog', { name: 'More actions' })
+  const redo = sheet.getByRole('button', { name: 'Redo', exact: true })
+  for (let presses = 0; presses < 40 && (await name.inputValue()) !== 'Keyboard theme'; presses++) {
+    await expect(more).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(redo).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(sheet).toBeHidden()
+  }
+  await expect(name).toHaveValue('Keyboard theme')
+  await expect(more).toBeFocused()
+  await expectVisibleFocus(page)
 
   const family = familyButton(page, 'Minimalist')
   const confirmDialog = page.getByRole('dialog', {
