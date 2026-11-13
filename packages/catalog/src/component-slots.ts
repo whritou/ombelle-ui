@@ -24,7 +24,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   kbd: ['kbd', 'kbd-group'],
   stepper: ['stepper', 'stepper-list', 'stepper-item', 'stepper-indicator', 'stepper-title', 'stepper-description', 'stepper-separator'],
   meter: ['meter', 'meter-label', 'meter-value', 'meter-track', 'meter-cell', 'meter-segment', 'meter-legend', 'meter-legend-item'],
-  field: ['field', 'field-label', 'field-description', 'field-error', 'field-set', 'field-legend'],
+  field: ['field', 'field-label', 'field-description', 'field-error', 'field-set', 'field-legend', 'form', 'form-error-summary', 'form-error-summary-title', 'form-error-summary-list'],
   empty: ['empty', 'empty-header', 'empty-media', 'empty-title', 'empty-description', 'empty-content'],
   badge: ['badge', 'badge-dot'],
   toast: ['toast-viewport', 'toast', 'toast-content', 'toast-title', 'toast-description', 'toast-action', 'toast-close', 'toast-spinner'],

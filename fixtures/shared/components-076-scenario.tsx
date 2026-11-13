@@ -1,13 +1,54 @@
 import * as React from 'react'
 import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
-import { Field, FieldControl, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
+import { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, Form, FormErrorSummary, type FormErrors } from '@/components/ui/field'
 
 // The 0.7.6 components in both editions (tests/e2e/components-076.spec.ts).
 // scripts/generate-preview.ts copies this file next to each edition's scenario.
+function SavePresetForm() {
+  const [errors, setErrors] = React.useState<FormErrors | undefined>()
+  const [saved, setSaved] = React.useState(0)
+  return (
+    <Form
+      data-testid="c076-form"
+      summaryAction="saving"
+      errors={errors}
+      onSubmit={event => {
+        event.preventDefault()
+        setSaved(count => count + 1)
+      }}
+    >
+      <FormErrorSummary />
+      <Field name="name" required>
+        <FieldLabel>Preset name</FieldLabel>
+        <FieldControl><input type="text" /></FieldControl>
+        <FieldError />
+      </Field>
+      <Field name="radius">
+        <FieldLabel>Radius</FieldLabel>
+        <FieldControl><input type="number" min={0} max={48} /></FieldControl>
+        <FieldError />
+      </Field>
+      <Field name="description">
+        <FieldLabel>Description</FieldLabel>
+        <FieldControl><input type="text" /></FieldControl>
+        <FieldDescription>Shown in the preset list.</FieldDescription>
+      </Field>
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <button type="submit">Save preset</button>
+        <button type="button" onClick={() => setErrors({ name: 'A preset with this name already exists.', ghost: 'Unknown field error.' })}>Return server errors</button>
+      </div>
+      <p role="status">{saved ? `Saved ${saved}` : ''}</p>
+    </Form>
+  )
+}
+
 export function ComponentsScenario076() {
   const stack = { display: 'grid', gap: '1rem', maxInlineSize: '28rem' } as const
   return (
     <section aria-label="0.7.6 components" data-testid="components-076" style={{ display: 'grid', gap: '1.5rem' }}>
+      <div style={stack}>
+        <SavePresetForm />
+      </div>
       <div style={stack} data-testid="c076-checkbox-group">
         <FieldSet>
           <FieldLegend>Overlays to install</FieldLegend>
