@@ -132,8 +132,6 @@
   border-radius: calc(var(--radius) + 2px);
   background: color-mix(in oklab, var(--destructive) 14%, transparent);
   color: var(--foreground);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  backdrop-filter: blur(16px) saturate(1.5);
 }
 [data-slot='form-error-summary']:focus-visible {
   outline: 2px solid var(--foreground);
@@ -171,6 +169,12 @@
   border-radius: 2px;
   outline: 2px solid var(--foreground);
   outline-offset: 0;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='form-error-summary'] {
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
+  }
 }
 @media (forced-colors: active) {
   [data-slot='field-set'] {

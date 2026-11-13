@@ -29,7 +29,7 @@ export function Field({ className, name, orientation = 'vertical', invalid: ownI
       <FieldPrimitive.Root
         {...props}
         name={name}
-        onChange={inForm ? (event: React.FormEvent<HTMLDivElement>) => {
+        onChange={inForm ? (event: Parameters<NonNullable<FieldProps['onChange']>>[0]) => {
           onChange?.(event)
           form.clear(name)
         } : onChange}

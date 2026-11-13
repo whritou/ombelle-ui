@@ -84,6 +84,7 @@
 [data-slot='toolbar-overflow-trigger'] {
   margin-inline-start: auto;
 }
+
 [data-slot='toolbar-button'][hidden],
 [data-slot='toolbar-link'][hidden],
 [data-slot='toolbar-toggle-item'][hidden],

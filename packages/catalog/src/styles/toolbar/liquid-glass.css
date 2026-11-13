@@ -11,8 +11,6 @@
   background: color-mix(in oklab, var(--background) 55%, transparent);
   color: var(--foreground);
   font-family: var(--font-family);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  backdrop-filter: blur(16px) saturate(1.5);
 }
 [data-slot='toolbar-toggle-group'] {
   display: flex;
@@ -84,6 +82,12 @@
 }
 [data-slot='toolbar-overflow-trigger'] {
   margin-inline-start: auto;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='toolbar'] {
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
+  }
 }
 [data-slot='toolbar-button'][hidden],
 [data-slot='toolbar-link'][hidden],
