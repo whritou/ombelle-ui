@@ -1,6 +1,14 @@
 # Ombelle UI foundation
 
-The catalog now includes **53 components**. Release 0.7.5 adds Toggle,
+The catalog now includes **57 components**. The next release, 0.7.6, adds
+Password Field, Carousel, Aspect Ratio and Toolbar, and Form, Fieldset and
+Checkbox Group parts in Field and Checkbox, in all five families with both
+editions and recipe editors; installing them needs CLI **0.7.6**, which is not
+published yet. See the
+[components design](docs/superpowers/specs/2026-11-13-components-076-design.md)
+and [evidence](docs/evidence/components-076.md).
+
+Release 0.7.5 adds Toggle,
 Collapsible, Scroll Area, Button Group and Item, then Number Input and Color
 Picker (with Color Picker Pair), then Code Block (with Code Block Command), in
 all five families, with both editions and recipe editors; install them with

@@ -29,6 +29,21 @@ build time, so its single choices are radio groups with one Tab stop. See the
 [form controls design](superpowers/specs/2026-11-10-form-controls-design.md)
 and the [evidence](evidence/form-controls-073.md).
 
+The 0.7.6 components add [Password Field](components/password-field.md),
+[Carousel](components/carousel.md), [Aspect Ratio](components/aspect-ratio.md)
+and [Toolbar](components/toolbar.md), and the parts
+[Form, FormErrorSummary, FieldSet and FieldLegend](components/field.md#form-and-fieldset-076)
+in Field and [Checkbox Group](components/checkbox.md#checkbox-group-076) in
+Checkbox, in all five families with Radix and Base UI editions and recipe
+editors. A Form leaves validation to the browser until it hydrates, then
+collects its fields' errors on submit into a summary that takes focus. A
+Password Field's toggle keeps the caret and the input element. A Carousel
+scrolls with CSS scroll snap and never autoplays. A Toolbar is one Tab stop
+whose items overflow, in order, into a More menu; the website editors' top bar
+uses it. Liquid glass remains experimental. Installing them needs CLI 0.7.6 or
+later. See the [design](superpowers/specs/2026-11-13-components-076-design.md)
+and the [evidence](evidence/components-076.md).
+
 The 0.7.5 primitives add [Toggle](components/toggle.md),
 [Collapsible](components/collapsible.md), [Scroll Area](components/scroll-area.md),
 [Button Group](components/button-group.md) and [Item](components/item.md) in

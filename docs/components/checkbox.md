@@ -50,6 +50,36 @@ import { CheckboxOption } from '@/components/ui/checkbox'
 - **Row** follows each family's Radio Group option row. **Card** is a padded tile with the box at its top-end corner; when checked it takes a `--primary` border and a 3px `--primary` halo at 25 %, as Card Option does. In forced colours the checked option takes a `Highlight` edge.
 - **Recipe:** `option` (`none`, `row` or `card`) and the content field `description`. A description shows only with a row or card option.
 
+## Checkbox Group (0.7.6)
+
+`checkbox.tsx` also exports `CheckboxGroup`, `CheckboxGroupParent` and `CheckboxGroupCount`. They ship in the Checkbox component because the group drives each checkbox: a project that installed Checkbox before 0.7.6 gets them by adding Checkbox again (`add checkbox`). They need CLI **0.7.6**. Pair the group with Field's `FieldSet` and `FieldLegend` to name it.
+
+```tsx
+import { CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
+import { FieldLegend, FieldSet } from '@/components/ui/field'
+
+export function Overlays() {
+  return (
+    <FieldSet>
+      <FieldLegend>Overlays to install</FieldLegend>
+      <CheckboxGroup defaultValue={['dialog', 'popover']}>
+        <CheckboxGroupParent title="All overlays" />
+        <CheckboxOption value="dialog" title="Dialog" />
+        <CheckboxOption value="popover" title="Popover" />
+        <CheckboxOption value="sheet" title="Sheet" />
+        <CheckboxOption value="tooltip" title="Tooltip" />
+      </CheckboxGroup>
+    </FieldSet>
+  )
+}
+```
+
+- `CheckboxGroup` takes `value`, `defaultValue` and `onValueChange` as lists of values, and `disabled`. Every `Checkbox` or `CheckboxOption` inside it with a `value` takes its checked state from the group; outside a group, nothing changes. `allValues` names the values the parent controls when the checkboxes are not direct descendants.
+- `CheckboxGroupParent` reads checked when every child is checked, unchecked when none is, and mixed (`aria-checked="mixed"`) otherwise; it points at the children with `aria-controls`. Pressing it checks every enabled child, or clears them when all enabled children are already checked. Disabled children keep their state. It shows "2 of 4" after its title unless `count={false}`; `CheckboxGroupCount` shows the same count anywhere in the group.
+- Options inside a group are drawn as compact rows, indented under the parent.
+- The Base UI edition builds the group with the same logic as the Radix edition, not `@base-ui/react/checkbox-group`, whose parent restores the earlier mixed state on a third press. A Base UI checkbox is a `span`, so it reads the nearest disabled `fieldset` itself.
+- **Recipe:** `group` (`none` or `parent`) and the content fields `legend` and up to six `options`. A group needs a legend and at least two options.
+
 ## Form behavior
 
 Radix renders a hidden native checkbox input when the root belongs to a form, forwarding `name`, `value` (default `on`), `required`, `disabled`, and `form`. Checked controls submit their value; unchecked and indeterminate controls do not. `required` uses native validation through that input. A disabled control, including one inside a disabled `fieldset`, cannot be activated and contributes no submitted value. The native `:disabled` selector also styles fieldset-disabled roots. An uncontrolled form reset restores the initial state, including an initial mixed state. Controlled state remains owned by the application; handle reset in that state owner as appropriate. Forwarded refs target the visible button, not the hidden input.
