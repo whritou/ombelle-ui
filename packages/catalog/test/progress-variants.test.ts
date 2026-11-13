@@ -86,3 +86,12 @@ describe('Progress 0.7.5 styles', () => {
     expect(rules).toMatch(/@media \(forced-colors: active\)[^]*progress-indicator[^]*Highlight/)
   })
 })
+
+describe('Progress above its maximum', () => {
+  it.each(editions)('%s is a complete bar whose value and readout agree', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.Progress, { value: 150, max: 100 } as never, h(ui.ProgressLabel, {}, 'Upload'), h(ui.ProgressValue)))
+    expect(attr(html, 'progress', 'aria-valuenow')).toBe('100')
+    expect(attr(html, 'progress', 'data-state')).toBe('complete')
+    expect(attr(html, 'progress', 'aria-valuetext')).toBe('100%')
+  })
+})

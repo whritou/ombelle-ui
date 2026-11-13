@@ -42,7 +42,7 @@ import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress
 - **`ProgressLabel`** and **`ProgressValue`**, passed as children:
   - With either part, Progress renders a wrapper (`progress-field`) with a header row (`progress-header`: the label, then the value at the end) above the bar, because the bar's own children are presentational.
   - The bar takes `aria-labelledby` set to the label.
-  - `ProgressValue` shows the rounded percentage ("64%"), or `format(value, max)` with the value clamped to `0`..`max`. It is `aria-hidden`; the bar's `aria-valuetext` carries the same text. While indeterminate it is empty and the bar has no `aria-valuetext`.
+  - `ProgressValue` shows the rounded percentage ("64%"), or `format(value, max)` with the value clamped to `0`..`max`. The bar itself takes the same clamped value, so a value above `max` is a complete bar in both editions. It is `aria-hidden`; the bar's `aria-valuetext` carries the same text. While indeterminate it is empty and the bar has no `aria-valuetext`.
   - Without either part, Progress renders exactly as before.
   - `progressValueText(value, max, format?)` is exported for your own readouts.
 - The header and readout inherit the surrounding text colour, so they add no contrast pair on glass.

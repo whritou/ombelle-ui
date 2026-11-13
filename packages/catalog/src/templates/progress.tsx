@@ -56,7 +56,8 @@ export function Progress({
       data-size={size === 'default' ? undefined : size}
       data-tone={tone === 'default' ? undefined : tone}
       className={cn(className)}
-      value={value}
+      // Radix treats a value outside 0..max as indeterminate; clamp it, as the readout and Base UI do.
+      value={value === null || value === undefined ? value : Math.min(Math.max(value, 0), max)}
       max={max}
       {...(label ? { 'aria-labelledby': labelId } : {})}
       {...(readout ? { 'aria-valuetext': text } : {})}
