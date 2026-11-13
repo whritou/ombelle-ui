@@ -521,3 +521,81 @@ it('keeps batch 4b recipes free of the 0.7.5 variant fields', () => {
     expect(recipe.content).not.toHaveProperty('confirmText')
   }
 })
+
+const components076 = ['password-field', 'carousel', 'aspect-ratio', 'toolbar'] as const
+const draft076 = (component: string, props: Record<string, unknown> = {}, content: Record<string, unknown> = {}) => ({
+  ...badge, component,
+  props: { ...defaultRecipeFields(componentRecipeFields(component as never).props), ...props },
+  content: { ...defaultRecipeFields(componentRecipeFields(component as never).content), ...content },
+})
+
+it.each(components076)('accepts the default %s recipe', component => {
+  expect(componentRecipeComponents).toContain(component)
+  expect(validateComponentRecipe(draft076(component)).component).toBe(component)
+})
+
+it('gives each 0.7.6 component the documented defaults', () => {
+  const defaults = (component: (typeof components076)[number]) => ({
+    props: defaultRecipeFields(componentRecipeFields(component).props),
+    content: defaultRecipeFields(componentRecipeFields(component).content),
+  })
+  expect(defaults('password-field')).toEqual({ props: { strength: true, capsLockNotice: true, confirm: false }, content: { label: 'Password' } })
+  expect(defaults('carousel')).toEqual({
+    props: { dots: true, counter: true, slidesPerView: 1 },
+    content: { label: 'UI kits', slides: ['Ombelle', 'Flat', 'Minimalist', 'Neo brutalism', 'Liquid glass'] },
+  })
+  expect(defaults('aspect-ratio')).toEqual({ props: { ratio: '16/9' }, content: { label: 'Preview' } })
+  expect(defaults('toolbar')).toEqual({
+    props: { overflow: true, toggles: 'single' },
+    content: { label: 'View options', items: ['Light', 'Dark', 'Grid', 'Open preview'] },
+  })
+})
+
+it.each([
+  ['aspect-ratio', { ratio: '5/4' }, {}],
+  ['toolbar', { toggles: 'all' }, {}],
+  ['carousel', { slidesPerView: 4 }, {}],
+  ['carousel', {}, { slides: Array(9).fill('Slide') }],
+  ['toolbar', {}, { items: [] }],
+  ['field', { form: 'wizard' }, {}],
+  ['field', { fieldset: 'open' }, {}],
+  ['checkbox', { group: 'all' }, {}],
+  ['checkbox', {}, { options: Array(7).fill('Option') }],
+] as const)('rejects the 0.7.6 %s recipe %o %o by schema', (component, props, content) => {
+  expect(() => validateComponentRecipe(draft076(component, props, content))).toThrow()
+})
+
+it.each([
+  ['toolbar', {}, { label: ' ' }, '/content/label'],
+  ['carousel', {}, { label: '' }, '/content/label'],
+  ['password-field', {}, { label: '' }, '/content/label'],
+  ['toolbar', { toggles: 'multiple' }, { items: ['Grid'] }, '/content/items'],
+  ['field', { fieldset: 'default' }, {}, '/content/legend'],
+  ['field', { form: 'summary' }, { legend: ' ' }, '/content/legend'],
+  ['checkbox', { group: 'parent' }, { options: ['Dialog', 'Popover'] }, '/content/legend'],
+  ['checkbox', { group: 'parent' }, { legend: 'Overlays', options: ['Dialog'] }, '/content/options'],
+] as const)('rejects the 0.7.6 %s recipe %o %o at %s', (component, props, content, path) => {
+  expect(() => validateComponentRecipe(draft076(component, props, content))).toThrow(expect.objectContaining({ path }))
+})
+
+it('accepts a Field form and fieldset, and a Checkbox group, with a legend', () => {
+  expect(validateComponentRecipe(draft076('field', { form: 'summary', fieldset: 'disabled' }, { legend: 'Save preset', fields: ['Preset name', 'Radius'] })).component).toBe('field')
+  expect(validateComponentRecipe(draft076('checkbox', { group: 'parent' }, { legend: 'Overlays to install', options: ['Dialog', 'Popover'] })).component).toBe('checkbox')
+})
+
+it('adds no 0.7.6 key to the default Field and Checkbox recipes', () => {
+  for (const component of ['field', 'checkbox'] as const) {
+    const fields = componentRecipeFields(component)
+    const defaults = { ...defaultRecipeFields(fields.props), ...defaultRecipeFields(fields.content) }
+    for (const key of ['form', 'fieldset', 'legend', 'fields', 'group', 'options']) expect(defaults, component + ' ' + key).not.toHaveProperty(key)
+  }
+})
+
+it('names the 0.7.6 appearance parts', async () => {
+  const { componentRecipeParts } = await import('../src/component-recipe-appearance.js')
+  const slots = (id: (typeof components076)[number]) => componentRecipeParts[id].map(part => part.slot)
+  expect(slots('password-field')).toEqual(['password-field', 'password-field-strength-bar'])
+  expect(slots('carousel')).toEqual(['carousel-content', 'carousel-dot'])
+  expect(slots('aspect-ratio')).toEqual(['aspect-ratio'])
+  expect(slots('toolbar')).toEqual(['toolbar', 'toolbar-toggle-item'])
+})

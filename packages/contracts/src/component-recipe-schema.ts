@@ -633,6 +633,13 @@ export const componentRecipeSchema = {
                 "card"
               ],
               "title": "Option layout"
+            },
+            "group": {
+              "enum": [
+                "none",
+                "parent"
+              ],
+              "title": "Group"
             }
           },
           "additionalProperties": false,
@@ -652,6 +659,22 @@ export const componentRecipeSchema = {
               "type": "string",
               "title": "Description",
               "maxLength": 1000
+            },
+            "legend": {
+              "type": "string",
+              "title": "Legend",
+              "maxLength": 200
+            },
+            "options": {
+              "type": "array",
+              "title": "Options",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              }
             }
           },
           "additionalProperties": false,
@@ -2485,6 +2508,21 @@ export const componentRecipeSchema = {
               ],
               "default": "vertical",
               "title": "Orientation"
+            },
+            "form": {
+              "enum": [
+                "none",
+                "summary"
+              ],
+              "title": "Form"
+            },
+            "fieldset": {
+              "enum": [
+                "none",
+                "default",
+                "disabled"
+              ],
+              "title": "Fieldset"
             }
           },
           "additionalProperties": false,
@@ -2518,6 +2556,22 @@ export const componentRecipeSchema = {
               "title": "Placeholder",
               "maxLength": 200,
               "default": "acme-dashboard"
+            },
+            "legend": {
+              "type": "string",
+              "title": "Legend",
+              "maxLength": 200
+            },
+            "fields": {
+              "type": "array",
+              "title": "Fields",
+              "minItems": 1,
+              "maxItems": 4,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              }
             }
           },
           "additionalProperties": false,
@@ -4207,6 +4261,216 @@ export const componentRecipeSchema = {
           },
           "additionalProperties": false,
           "required": []
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "password-field"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "strength": {
+              "type": "boolean",
+              "default": true,
+              "title": "Strength meter"
+            },
+            "capsLockNotice": {
+              "type": "boolean",
+              "default": true,
+              "title": "Caps Lock notice"
+            },
+            "confirm": {
+              "type": "boolean",
+              "default": false,
+              "title": "Confirm field"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Password"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "carousel"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "dots": {
+              "type": "boolean",
+              "default": true,
+              "title": "Dots"
+            },
+            "counter": {
+              "type": "boolean",
+              "default": true,
+              "title": "Counter"
+            },
+            "slidesPerView": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3,
+              "default": 1,
+              "title": "Slides per view"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "UI kits"
+            },
+            "slides": {
+              "type": "array",
+              "title": "Slides",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              },
+              "default": [
+                "Ombelle",
+                "Flat",
+                "Minimalist",
+                "Neo brutalism",
+                "Liquid glass"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "slides"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "aspect-ratio"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "ratio": {
+              "enum": [
+                "16/9",
+                "4/3",
+                "1/1",
+                "3/2",
+                "21/9"
+              ],
+              "default": "16/9",
+              "title": "Ratio"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Preview"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "toolbar"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "overflow": {
+              "type": "boolean",
+              "default": true,
+              "title": "Overflow menu"
+            },
+            "toggles": {
+              "enum": [
+                "none",
+                "single",
+                "multiple"
+              ],
+              "default": "single",
+              "title": "Toggles"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "View options"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              },
+              "default": [
+                "Light",
+                "Dark",
+                "Grid",
+                "Open preview"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "items"
+          ]
         }
       }
     }

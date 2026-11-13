@@ -1,0 +1,392 @@
+{
+  "flat/field": {
+    "tag": "Field",
+    "props": {
+      "required": true,
+      "invalid": false,
+      "disabled": false,
+      "orientation": "vertical"
+    },
+    "children": [
+      {
+        "tag": "FieldLabel",
+        "props": {},
+        "children": [
+          "Project name"
+        ]
+      },
+      {
+        "tag": "FieldControl",
+        "props": {},
+        "children": [
+          {
+            "tag": "input",
+            "props": {
+              "type": "text",
+              "placeholder": "acme-dashboard",
+              "data-field-input": ""
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "FieldDescription",
+        "props": {},
+        "children": [
+          "Shown in the CLI and the editor header."
+        ]
+      },
+      {
+        "tag": "FieldError",
+        "props": {},
+        "children": [
+          "Use lower case letters and dashes only."
+        ]
+      }
+    ]
+  },
+  "flat/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
+  },
+  "minimalist/field": {
+    "tag": "Field",
+    "props": {
+      "required": true,
+      "invalid": false,
+      "disabled": false,
+      "orientation": "vertical"
+    },
+    "children": [
+      {
+        "tag": "FieldLabel",
+        "props": {},
+        "children": [
+          "Project name"
+        ]
+      },
+      {
+        "tag": "FieldControl",
+        "props": {},
+        "children": [
+          {
+            "tag": "input",
+            "props": {
+              "type": "text",
+              "placeholder": "acme-dashboard",
+              "data-field-input": ""
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "FieldDescription",
+        "props": {},
+        "children": [
+          "Shown in the CLI and the editor header."
+        ]
+      },
+      {
+        "tag": "FieldError",
+        "props": {},
+        "children": [
+          "Use lower case letters and dashes only."
+        ]
+      }
+    ]
+  },
+  "minimalist/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
+  },
+  "neo-brutalism/field": {
+    "tag": "Field",
+    "props": {
+      "required": true,
+      "invalid": false,
+      "disabled": false,
+      "orientation": "vertical"
+    },
+    "children": [
+      {
+        "tag": "FieldLabel",
+        "props": {},
+        "children": [
+          "Project name"
+        ]
+      },
+      {
+        "tag": "FieldControl",
+        "props": {},
+        "children": [
+          {
+            "tag": "input",
+            "props": {
+              "type": "text",
+              "placeholder": "acme-dashboard",
+              "data-field-input": ""
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "FieldDescription",
+        "props": {},
+        "children": [
+          "Shown in the CLI and the editor header."
+        ]
+      },
+      {
+        "tag": "FieldError",
+        "props": {},
+        "children": [
+          "Use lower case letters and dashes only."
+        ]
+      }
+    ]
+  },
+  "neo-brutalism/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
+  },
+  "ombelle/field": {
+    "tag": "Field",
+    "props": {
+      "required": true,
+      "invalid": false,
+      "disabled": false,
+      "orientation": "vertical"
+    },
+    "children": [
+      {
+        "tag": "FieldLabel",
+        "props": {},
+        "children": [
+          "Project name"
+        ]
+      },
+      {
+        "tag": "FieldControl",
+        "props": {},
+        "children": [
+          {
+            "tag": "input",
+            "props": {
+              "type": "text",
+              "placeholder": "acme-dashboard",
+              "data-field-input": ""
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "FieldDescription",
+        "props": {},
+        "children": [
+          "Shown in the CLI and the editor header."
+        ]
+      },
+      {
+        "tag": "FieldError",
+        "props": {},
+        "children": [
+          "Use lower case letters and dashes only."
+        ]
+      }
+    ]
+  },
+  "ombelle/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
+  },
+  "liquid-glass/field": {
+    "tag": "Field",
+    "props": {
+      "required": true,
+      "invalid": false,
+      "disabled": false,
+      "orientation": "vertical"
+    },
+    "children": [
+      {
+        "tag": "FieldLabel",
+        "props": {},
+        "children": [
+          "Project name"
+        ]
+      },
+      {
+        "tag": "FieldControl",
+        "props": {},
+        "children": [
+          {
+            "tag": "input",
+            "props": {
+              "type": "text",
+              "placeholder": "acme-dashboard",
+              "data-field-input": ""
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "FieldDescription",
+        "props": {},
+        "children": [
+          "Shown in the CLI and the editor header."
+        ]
+      },
+      {
+        "tag": "FieldError",
+        "props": {},
+        "children": [
+          "Use lower case letters and dashes only."
+        ]
+      }
+    ]
+  },
+  "liquid-glass/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
+  }
+}

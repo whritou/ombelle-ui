@@ -52,5 +52,9 @@ export const supportedComponentIds = [
   'number-input',
   'color-picker',
   'code-block',
+  'password-field',
+  'carousel',
+  'aspect-ratio',
+  'toolbar',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

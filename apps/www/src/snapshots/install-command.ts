@@ -42,6 +42,25 @@ const variantRecipeValues073: Readonly<Record<string, Readonly<Record<string, re
   tabs: { appearance: ['pills'] },
 }
 
+export const catalog076MinimumCli = '0.7.6'
+export const catalog076InstallNotice = `This recipe requires CLI ${catalog076MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+// The 0.7.6 additions: new components.
+const catalog076Components = new Set(['password-field', 'carousel', 'aspect-ratio', 'toolbar'])
+// The 0.7.6 fields, in props or content, that older recipe schemas reject.
+const variantRecipeFields076: Readonly<Record<string, readonly string[]>> = {
+  field: ['form', 'fieldset', 'legend', 'fields'], checkbox: ['group', 'legend', 'options'],
+}
+
+function usesVariants076(recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown }): boolean {
+  const fields = recipe.props as Record<string, unknown>
+  const content = (recipe.content ?? {}) as Record<string, unknown>
+  return variantRecipeFields076[recipe.component]?.some(key => Object.hasOwn(fields, key) || Object.hasOwn(content, key)) ?? false
+}
+
+function needs076(recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown }, installer: { version: string }): boolean {
+  return (catalog076Components.has(recipe.component) || usesVariants076(recipe)) && compareVersions(installer.version, catalog076MinimumCli) < 0
+}
+
 // The 0.7.5 variant fields, in props or content, that older recipe schemas reject.
 const variantRecipeFields075: Readonly<Record<string, readonly string[]>> = {
   checkbox: ['option', 'description'], switch: ['size'], progress: ['size', 'tone', 'showLabel', 'showValue'], popover: ['arrow'],
@@ -76,6 +95,8 @@ export function componentRecipeInstallBlocked(
   installer: { version: string } = publishedInstaller,
 ): boolean {
   if (!catalogRecipeInstallerSupported(installer.version)) return true
+  if (needs076(recipe, installer)) return true
+  if (catalog076Components.has(recipe.component)) return false
   if (catalog075Components.has(recipe.component)) return compareVersions(installer.version, catalog075MinimumCli) < 0
   if (usesVariants075(recipe) && compareVersions(installer.version, catalog075MinimumCli) < 0) return true
   if (displayComponents.has(recipe.component)) return compareVersions(installer.version, displayCatalogMinimumCli) < 0
@@ -103,6 +124,7 @@ export function installableRecipeInstallNotice(
   if (recipe.schemaVersion === '2.0') {
     if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
     if (!componentRecipeInstallBlocked(recipe, installer)) return undefined
+    if (needs076(recipe, installer)) return catalog076InstallNotice
     if (catalog075Components.has(recipe.component) || (usesVariants075(recipe) && compareVersions(installer.version, catalog075MinimumCli) < 0)) return catalog075InstallNotice
     return displayComponents.has(recipe.component) || (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0)
       ? displayCatalogInstallNotice : expandedCatalogInstallNotice
