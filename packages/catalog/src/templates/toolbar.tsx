@@ -173,7 +173,7 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
         </ToolbarPrimitive.Button>
       </DropdownMenuPrimitive.Trigger>
       <DropdownMenuPrimitive.Portal>
-        <DropdownMenuPrimitive.Content align="end" sideOffset={6} data-slot="toolbar-overflow-content" aria-label={label}>
+        <DropdownMenuPrimitive.Content align="end" sideOffset={6} loop data-slot="toolbar-overflow-content" aria-label={label}>
           {toolbar.overflowed.map((element, index) => {
             const entry = menuEntry(element)
             return entry.kind === 'toggle'
