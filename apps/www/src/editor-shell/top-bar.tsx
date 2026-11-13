@@ -101,7 +101,8 @@ export function EditorTopBar({
   return (
     <header ref={bar} className={styles.topBar}>
       {back && <a href={back.href} className={styles.backLink} aria-label={back.label}><ChevronLeft aria-hidden="true" size={18} /></a>}
-      <Breadcrumb collapse="auto" className={styles.crumbs}>
+      {/* A trail that is only the current page's name, with no link or switcher, is left out on a phone. */}
+      <Breadcrumb collapse="auto" className={`${styles.crumbs} ${!switcher && crumbs.every(crumb => typeof crumb === 'string') ? styles.labelOnlyTrail : ''}`}>
         <BreadcrumbList>
           {crumbs.map((crumb, index) => {
             const label = typeof crumb === 'string' ? crumb : crumb.label

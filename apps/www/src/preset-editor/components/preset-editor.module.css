@@ -1230,3 +1230,8 @@
     scroll-padding-bottom: 16px;
   }
 }
+
+/* The editor's pill buttons skip the Collapsible header: its rounded box clips a square header. */
+.editor [data-slot='collapsible-trigger'] {
+  border-radius: 0;
+}

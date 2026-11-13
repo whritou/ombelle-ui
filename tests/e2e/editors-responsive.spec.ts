@@ -136,6 +136,8 @@ test('the preset editor on a phone pins the live preview and moves between its p
   await page.setViewportSize({ width: 375, height: 812 })
   await open(page, editors[0].url)
   await expect(presetPane(page, 'Customize')).toHaveAttribute('aria-checked', 'true')
+  // A trail that is only the page's name does nothing on a phone; the bar leaves it out.
+  await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toBeHidden()
   await expect(presetPane(page, 'Preview')).toBeVisible()
   await expect(presetPane(page, 'Checks')).toBeVisible()
   const peek = page.getByRole('region', { name: 'Live preview' })
@@ -150,6 +152,8 @@ test('the preset editor on a phone pins the live preview and moves between its p
   await presetPane(page, 'Checks').click()
   await expect(page.getByRole('list', { name: 'Contrast results by mode' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Download preset JSON', exact: true })).toBeVisible()
+  // The Export header is square inside its rounded box, which clips it; a pill header looks detached.
+  expect(await page.getByRole('button', { name: 'Export', exact: true }).evaluate(element => getComputedStyle(element).borderTopLeftRadius)).toBe('0px')
   await expectFitsViewport(page, 375)
 })
 
