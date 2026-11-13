@@ -70,7 +70,7 @@ import { Toggle } from '../generated/preset-gallery/components/ui/toggle'
 import { ScrollArea } from '../generated/preset-gallery/components/ui/scroll-area'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '../generated/preset-gallery/components/ui/item'
 import { CodeBlock, CodeBlockCommand } from '../generated/preset-gallery/components/ui/code-block'
-import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '../generated/preset-gallery/components/ui/carousel'
+import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselImage, CarouselItem, CarouselNext, CarouselPrevious, CarouselThumbnails } from '../generated/preset-gallery/components/ui/carousel'
 import { AspectRatio } from '../generated/preset-gallery/components/ui/aspect-ratio'
 import { Toolbar, ToolbarOverflow, ToolbarToggleGroup, ToolbarToggleItem } from '../generated/preset-gallery/components/ui/toolbar'
 import { ariaKeyShortcuts, Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipShortcut, TooltipTrigger } from '../generated/preset-gallery/components/ui/tooltip'
@@ -102,6 +102,13 @@ const toolbar = [
   { label: 'Undo', keys: ['Ctrl', 'Z'], icon: <><path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></> },
   { label: 'Redo', keys: ['Ctrl', 'Shift', 'Z'], icon: <><path d="m15 14 5-5-5-5" /><path d="M20 9H10a6 6 0 0 0 0 12h3" /></> },
 ] as const
+
+// Project covers for the gallery: small 16:9 SVGs, one hue each, so the scene ships no image files.
+const covers = [
+  ['The Website refresh home page', 210], ['The Mobile onboarding welcome screen', 160], ['The Billing migration invoice table', 30],
+  ['The Design tokens colour scale', 290], ['The Help center search page', 95],
+].map(([alt, hue]) => ({ alt: alt as string, src: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
+  + `<rect width='16' height='9' fill='hsl(${hue} 70% 82%)'/><rect x='2' y='2' width='12' height='5' rx='.6' fill='hsl(${hue} 45% 38%)'/></svg>`) }))
 
 // The install preview: what `add` changes in the theme file.
 const installDiff = ` :root {
@@ -493,6 +500,30 @@ export function ProjectsScene(props: SceneProps) {
             </Carousel>
           </CardContent>
         </Card>,
+      )}
+      {/* One gate, so a family without Carousel shows one note, not two. */}
+      {props.unavailable.includes('carousel') ? null : (
+        <Card appearance="outlined">
+          <CardHeader>
+            <CardTitle level={2}>Project gallery</CardTitle>
+            <CardDescription>Covers from the five newest projects.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Carousel aria-label="Project gallery" variant="image" ratio="16 / 9">
+              <CarouselContent>
+                {covers.map((cover) => (
+                  <CarouselItem key={cover.alt}>
+                    <CarouselImage src={cover.src} alt={cover.alt} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+              <CarouselCounter />
+              <CarouselThumbnails />
+            </Carousel>
+          </CardContent>
+        </Card>
       )}
       {show(
         'item',

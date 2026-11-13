@@ -2,7 +2,7 @@ import { getCatalog } from '@ombelle/catalog'
 import { componentRecipeFields, defaultRecipeFields, styleFamilies, validateComponentRecipe, type ComponentRecipe } from '@ombelle/contracts'
 import { describeComponentRecipe } from '../src/index.js'
 
-export const variants076Components = ['sheet', 'card', 'slider', 'progress', 'meter', 'code-block', 'tooltip'] as const
+export const variants076Components = ['sheet', 'card', 'slider', 'progress', 'meter', 'code-block', 'tooltip', 'carousel'] as const
 
 /** The default recipe specimen of each 0.7.6 variant component in each family, keyed `family/component`. */
 export function variants076DefaultSpecimens(): Record<string, unknown> {

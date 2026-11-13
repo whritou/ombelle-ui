@@ -52,6 +52,12 @@ const ariaKeyShortcuts = (keys: readonly string[]) => keys.map(key => {
   const name = key.toLowerCase()
   return Object.hasOwn(ariaKeyNames, name) ? ariaKeyNames[name] : key.length === 1 ? key.toUpperCase() : key
 }).join('+')
+// A recipe carries no image files: each image Carousel slide is a 16:9 SVG in its own hue, a sky over a hill.
+const slideImage = (index: number) => {
+  const hue = (210 + index * 72) % 360
+  return 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
+    + `<rect width='16' height='9' fill='hsl(${hue} 70% 82%)'/><path d='M0 6.5Q5 3.5 10 6t6-1V9H0z' fill='hsl(${hue} 45% 38%)'/></svg>`)
+}
 // The Ombelle preset's primary foreground in light and dark.
 const primaryForeground = { light: 'oklch(0.99 0 0)', dark: 'oklch(0.16 0.01 275)' } as const
 
@@ -207,12 +213,17 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ]),
         ...(props.confirm ? [field('Confirm password', 'confirm', [])] : []))
     }
-    case 'carousel':
-      return node('Carousel', { 'aria-label': content.label, slidesPerView: props.slidesPerView ?? 1 },
-        node('CarouselContent', {}, ...content.slides.map(slide => node('CarouselItem', {}, node('div', { 'data-carousel-card': '' }, slide)))),
+    case 'carousel': {
+      const image = props.variant === 'image'
+      return node('Carousel', { 'aria-label': content.label, slidesPerView: props.slidesPerView ?? 1, ...(image ? { variant: 'image', ratio: '16 / 9' } : {}) },
+        node('CarouselContent', {}, ...content.slides.map((slide, index) => node('CarouselItem', {}, image
+          ? node('CarouselImage', { src: slideImage(index), alt: slide })
+          : node('div', { 'data-carousel-card': '' }, slide)))),
         node('CarouselPrevious', {}), node('CarouselNext', {}),
         ...(props.dots === false ? [] : [node('CarouselDots', {})]),
-        ...(props.counter === false ? [] : [node('CarouselCounter', {})]))
+        ...(props.counter === false ? [] : [node('CarouselCounter', {})]),
+        ...(image && props.thumbnails === true ? [node('CarouselThumbnails', {})] : []))
+    }
     case 'aspect-ratio':
       return node('AspectRatio', { ratio: ratios[props.ratio ?? '16/9'] }, node('span', {}, content.label))
     case 'toolbar': {

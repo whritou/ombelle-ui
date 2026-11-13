@@ -179,6 +179,116 @@
       }
     ]
   },
+  "flat/carousel": {
+    "tag": "Carousel",
+    "props": {
+      "aria-label": "UI kits",
+      "slidesPerView": 1
+    },
+    "children": [
+      {
+        "tag": "CarouselContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Ombelle"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Flat"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Minimalist"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Neo brutalism"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Liquid glass"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "CarouselPrevious",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselNext",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselDots",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselCounter",
+        "props": {},
+        "children": []
+      }
+    ]
+  },
   "minimalist/sheet": {
     "tag": "Sheet",
     "props": {},
@@ -356,6 +466,116 @@
             ]
           }
         ]
+      }
+    ]
+  },
+  "minimalist/carousel": {
+    "tag": "Carousel",
+    "props": {
+      "aria-label": "UI kits",
+      "slidesPerView": 1
+    },
+    "children": [
+      {
+        "tag": "CarouselContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Ombelle"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Flat"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Minimalist"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Neo brutalism"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Liquid glass"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "CarouselPrevious",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselNext",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselDots",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselCounter",
+        "props": {},
+        "children": []
       }
     ]
   },
@@ -539,6 +759,116 @@
       }
     ]
   },
+  "neo-brutalism/carousel": {
+    "tag": "Carousel",
+    "props": {
+      "aria-label": "UI kits",
+      "slidesPerView": 1
+    },
+    "children": [
+      {
+        "tag": "CarouselContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Ombelle"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Flat"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Minimalist"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Neo brutalism"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Liquid glass"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "CarouselPrevious",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselNext",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselDots",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselCounter",
+        "props": {},
+        "children": []
+      }
+    ]
+  },
   "ombelle/sheet": {
     "tag": "Sheet",
     "props": {},
@@ -719,6 +1049,116 @@
       }
     ]
   },
+  "ombelle/carousel": {
+    "tag": "Carousel",
+    "props": {
+      "aria-label": "UI kits",
+      "slidesPerView": 1
+    },
+    "children": [
+      {
+        "tag": "CarouselContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Ombelle"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Flat"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Minimalist"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Neo brutalism"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Liquid glass"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "CarouselPrevious",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselNext",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselDots",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselCounter",
+        "props": {},
+        "children": []
+      }
+    ]
+  },
   "liquid-glass/sheet": {
     "tag": "Sheet",
     "props": {},
@@ -896,6 +1336,116 @@
             ]
           }
         ]
+      }
+    ]
+  },
+  "liquid-glass/carousel": {
+    "tag": "Carousel",
+    "props": {
+      "aria-label": "UI kits",
+      "slidesPerView": 1
+    },
+    "children": [
+      {
+        "tag": "CarouselContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Ombelle"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Flat"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Minimalist"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Neo brutalism"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "CarouselItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "div",
+                "props": {
+                  "data-carousel-card": ""
+                },
+                "children": [
+                  "Liquid glass"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "CarouselPrevious",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselNext",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselDots",
+        "props": {},
+        "children": []
+      },
+      {
+        "tag": "CarouselCounter",
+        "props": {},
+        "children": []
       }
     ]
   }

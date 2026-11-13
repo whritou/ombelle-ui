@@ -67,6 +67,7 @@ const recipeVariants: Partial<Record<ComponentId, Record<string, RecipeVariant>>
   meter: { circle: { shape: 'circle' } },
   'code-block': { diff: { props: { diff: true, language: 'css' }, content: { code: boardDiff, title: 'ui-style.css' } } },
   tooltip: { shortcut: { props: {}, content: { shortcut: 'Ctrl+Z' } } },
+  carousel: { image: { variant: 'image' }, 'image-thumbnails': { variant: 'image', thumbnails: true } },
 }
 
 /** Content the 0.7.6 part variants need beside their props: a legend, and the fields or options. */

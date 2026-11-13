@@ -470,7 +470,7 @@ for (const edition of ['radix', 'base'] as const) {
   })
 
   test.describe(`${edition} image Carousel thumbnail outlines at 375px`, () => {
-    for (const family of ['minimalist', 'neo-brutalism', 'ombelle'] as const) {
+    for (const family of ['flat', 'minimalist', 'neo-brutalism', 'ombelle'] as const) {
       test(`${family}: a focused thumbnail's ring and the current outline stay inside the scrolling row`, async ({ page }) => {
         await page.setViewportSize({ width: 375, height: 800 })
         await page.goto(`/editions/${family}/${edition}/?mode=light`)

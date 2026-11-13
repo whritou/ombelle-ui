@@ -478,6 +478,26 @@ describe('the 0.7.6 variants pass the specimen audit and match their boards', ()
   })
 })
 
+describe('the 0.7.6 image Carousel matches board section 07', () => {
+  const frame = "[data-slot='carousel-item']:is([data-variant='image'] > * > *)"
+  const thumbnail = "[data-slot='carousel-thumbnail']"
+  it('flat draws the board 1px edge on the frames and thumbnails although flat controls are borderless, with 10px thumbnails', () => {
+    const css = read('carousel/flat.css')
+    expect(declarations(css, frame).border).toBe('max(1px, var(--border-width)) solid var(--border)')
+    expect(declarations(css, thumbnail)).toMatchObject({ border: 'max(1px, var(--border-width)) solid var(--border)', 'border-radius': '10px' })
+  })
+  it('minimalist draws the frames and thumbnails in the strong line with the small radius', () => {
+    const css = read('carousel/minimalist.css')
+    expect(declarations(css, frame)).toMatchObject({ border: '1px solid var(--input)', 'border-radius': 'var(--radius)' })
+    expect(declarations(css, thumbnail)).toMatchObject({ border: '1px solid var(--input)', 'border-radius': 'var(--radius)' })
+  })
+  it('flat moves the focus ring of a thumbnail outside the current outline: both were 2px at 2px in the primary colour, so focusing the current one changed nothing', () => {
+    const css = read('carousel/flat.css')
+    expect(declarations(css, `${thumbnail}[aria-current='true']`)).toMatchObject({ outline: '2px solid var(--primary)', 'outline-offset': '2px' })
+    expect(declarations(css, `${thumbnail}:focus-visible`)).toMatchObject({ outline: '2px solid var(--ring)', 'outline-offset': '4px' })
+  })
+})
+
 describe('the 0.7.6 Card action in neo brutalism', () => {
   it('rings the bare action inside itself in its own text colour: the --ring outline on the --secondary header fell under 3:1 in dark mode', () => {
     const css = read('card/neo-brutalism.css')

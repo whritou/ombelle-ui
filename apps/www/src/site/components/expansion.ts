@@ -190,8 +190,8 @@ export const expansionDocs = {
   },
   carousel: {
     name: 'Carousel', description: 'Slides that snap as they scroll, with previous and next buttons, one dot per slide and a counter. It never autoplays.',
-    api: 'Carousel (slidesPerView 1, 2 or 3), CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter',
-    states: 'First slide, middle, last slide, one slide, focus, below 640px (no arrows)', basis: 'CSS scroll snap with no dependency, one template for both editions', client: true,
+    api: 'Carousel (slidesPerView 1, 2 or 3, variant default or image, ratio), CarouselContent, CarouselItem, CarouselImage (src, alt required, loading), CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter, CarouselThumbnails',
+    states: 'First slide, middle, last slide, one slide, focus, below 640px (no arrows), image with the next one peeking, current thumbnail', basis: 'CSS scroll snap with no dependency, one template for both editions', client: true,
     usage: expansionExamples.carousel, minimumCli: '0.7.6',
   },
   'aspect-ratio': {

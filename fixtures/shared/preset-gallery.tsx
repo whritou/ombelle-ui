@@ -125,7 +125,7 @@ import { NumberInput } from '@/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle } from '@/components/ui/password-field'
-import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselImage, CarouselItem, CarouselNext, CarouselPrevious, CarouselThumbnails } from '@/components/ui/carousel'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
 import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
@@ -136,6 +136,12 @@ export type PresetGalleryProps = {
   unavailable?: readonly string[]
   familyLabel?: string
 }
+
+// The board's field trip photos as small 16:9 SVGs, one hue each: the gallery ships no image files.
+const fieldTripPhotos = [
+  ['A lake below pine hills', 195], ['Sand dunes at dusk', 25], ['A city skyline at night', 240], ['A coastline', 200], ['A field of poppies', 95],
+].map(([alt, hue]) => ({ alt: alt as string, src: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
+  + `<rect width='16' height='9' fill='hsl(${hue} 70% 82%)'/><path d='M0 6.5Q5 3.5 10 6t6-1V9H0z' fill='hsl(${hue} 45% 38%)'/></svg>`) }))
 
 function ToastExample() {
   const [open, setOpen] = React.useState(false)
@@ -478,6 +484,17 @@ export function PresetGallery({
           <CarouselDots />
           <CarouselCounter />
         </Carousel>
+        <div data-component="carousel~image-thumbnails">
+          <Carousel aria-label="Field trip photos" variant="image" ratio="16 / 9">
+            <CarouselContent>
+              {fieldTripPhotos.map(photo => <CarouselItem key={photo.alt}><CarouselImage src={photo.src} alt={photo.alt} /></CarouselItem>)}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+            <CarouselCounter />
+            <CarouselThumbnails />
+          </Carousel>
+        </div>
       </section>)}
       {gate('aspect-ratio', 'Aspect Ratio', <section aria-label="Aspect Ratio" data-component="aspect-ratio">
         <h2>Aspect Ratio</h2>

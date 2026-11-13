@@ -9,7 +9,7 @@ import { findShadowedNames } from './recipe-shadowing.js'
 import { variants076DefaultSpecimens } from './variants-076-defaults.js'
 
 const catalog = getCatalog('0.1.0')
-type Id = 'sheet' | 'card' | 'slider' | 'progress' | 'meter' | 'code-block' | 'tooltip'
+type Id = 'sheet' | 'card' | 'slider' | 'progress' | 'meter' | 'code-block' | 'tooltip' | 'carousel'
 type Family = (typeof styleFamilies)[number]
 const recipe = (component: Id, props: Record<string, unknown> = {}, content: Record<string, unknown> = {}, family: Family = 'ombelle') => {
   const { id, revision, catalogRelease, compilerVersion } = family === 'liquid-glass' ? catalog.startingPresets['builtin-liquid-glass'] : catalog.presets[family]
@@ -38,6 +38,8 @@ const variantRecipes = [
   ['meter', { shape: 'circle' }, {}, ['Meter']],
   ['code-block', { diff: true }, { code: boardDiff, title: 'ui-style.css' }, ['CodeBlock', 'diffLines']],
   ['tooltip', {}, { shortcut: 'Ctrl+Z' }, ['TooltipShortcut', 'TooltipContent']],
+  ['carousel', { variant: 'image' }, {}, ['Carousel', 'CarouselImage']],
+  ['carousel', { variant: 'image', thumbnails: true }, {}, ['Carousel', 'CarouselImage', 'CarouselThumbnails']],
 ] as const
 
 describe('0.7.6 variant specimens', () => {
@@ -111,6 +113,34 @@ describe('0.7.6 variant specimens', () => {
     const plain = specimen('tooltip', {}, { shortcut: '' })
     expect(tags(plain)).not.toContain('TooltipShortcut')
     expect(find(plain, 'TooltipTrigger')!.props).not.toHaveProperty('aria-keyshortcuts')
+  })
+
+  it('draws an image carousel with one data-URI image per slide, named by the slide text', () => {
+    const image = specimen('carousel', { variant: 'image' })
+    expect(image.props).toMatchObject({ variant: 'image', ratio: '16 / 9' })
+    const slides = (recipe('carousel').content as { slides: string[] }).slides
+    const items = find(image, 'CarouselContent')!.children as RecipeSpecimen[]
+    expect(items.map(item => item.tag)).toEqual(slides.map(() => 'CarouselItem'))
+    const images = items.map(item => item.children[0] as RecipeSpecimen)
+    expect(images.map(item => item.tag)).toEqual(slides.map(() => 'CarouselImage'))
+    expect(images.map(item => item.props.alt)).toEqual(slides)
+    const sources = images.map(item => item.props.src as string)
+    for (const src of sources) {
+      expect(src).toMatch(/^data:image\/svg\+xml,/)
+      expect(src.length).toBeLessThan(400)
+    }
+    // One hue per slide, the same on every call.
+    expect(new Set(sources).size).toBe(slides.length)
+    expect(specimen('carousel', { variant: 'image' })).toEqual(image)
+    expect(tags(image)).not.toContain('CarouselThumbnails')
+    expect(tags(specimen('carousel', { variant: 'image', thumbnails: true }))).toContain('CarouselThumbnails')
+    for (const plain of [specimen('carousel', { variant: 'default' }), specimen('carousel')]) {
+      expect(plain.props).not.toHaveProperty('variant', expect.anything())
+      expect(plain.props).not.toHaveProperty('ratio', expect.anything())
+      expect(tags(plain)).not.toContain('CarouselImage')
+      expect(tags(plain)).not.toContain('CarouselThumbnails')
+    }
+    expect(specimen('carousel', { variant: 'default' })).toEqual(specimen('carousel'))
   })
 
   describe.each(styleFamilies)('%s', family => {

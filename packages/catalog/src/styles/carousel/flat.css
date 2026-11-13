@@ -158,7 +158,7 @@
   position: relative;
   flex: 0 0 88%;
   aspect-ratio: var(--carousel-ratio, 16 / 9);
-  border: var(--border-width) solid var(--border);
+  border: max(1px, var(--border-width)) solid var(--border);
   border-radius: calc(var(--radius) + 4px);
   overflow: hidden;
 }
@@ -182,8 +182,8 @@
   inline-size: 84px;
   aspect-ratio: var(--carousel-ratio, 16 / 9);
   padding: 0;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border: max(1px, var(--border-width)) solid var(--border);
+  border-radius: 10px;
   overflow: hidden;
   background: none;
   cursor: pointer;
@@ -203,7 +203,7 @@
 [data-slot='carousel-thumbnail']:focus-visible {
   opacity: 1;
   outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 @media (width < 640px) {
   [data-slot='carousel'][data-carousel-thumbnails] {
