@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
+import { AspectRatio } from '@/components/ui/aspect-ratio'
 import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle, type PasswordCheck } from '@/components/ui/password-field'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, Form, FormErrorSummary, type FormErrors } from '@/components/ui/field'
 
@@ -80,6 +81,11 @@ export function ComponentsScenario076() {
       <div style={stack}>
         <SavePresetForm />
         <PasswordForm />
+      </div>
+      <div data-testid="c076-aspect" style={{ inlineSize: '240px' }}>
+        <AspectRatio>
+          <img alt="A striped placeholder" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='18'%3E%3Crect width='32' height='18' fill='%23c9c2b8'/%3E%3C/svg%3E" />
+        </AspectRatio>
       </div>
       <div style={stack} data-testid="c076-checkbox-group">
         <FieldSet>

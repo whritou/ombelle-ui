@@ -116,6 +116,19 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(form.getByRole('status')).toHaveText('')
     })
 
+    test('an Aspect Ratio frame keeps 16 : 9 at any width and its image fills it', async ({ page }) => {
+      const section = await open(page, edition)
+      const box = section.getByTestId('c076-aspect')
+      for (const width of [240, 480, 960]) {
+        await box.evaluate((element, size) => { (element as HTMLElement).style.inlineSize = size + 'px' }, width)
+        const frame = await box.locator('[data-slot="aspect-ratio"]').boundingBox()
+        const image = await box.getByRole('img').boundingBox()
+        expect(Math.abs(frame!.height - frame!.width * 9 / 16)).toBeLessThanOrEqual(1)
+        expect(Math.abs(image!.height - frame!.height)).toBeLessThanOrEqual(4)
+        expect(Math.abs(image!.width - frame!.width)).toBeLessThanOrEqual(4)
+      }
+    })
+
     test('a disabled FieldSet disables every control in it', async ({ page }) => {
       const section = await open(page, edition)
       const editions = section.getByTestId('c076-editions')

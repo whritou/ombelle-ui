@@ -1,0 +1,28 @@
+/* ombelle Aspect Ratio */
+[data-slot='aspect-ratio'] {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+[data-slot='aspect-ratio'] > :is(img, video, iframe, picture, canvas) {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+  object-fit: cover;
+}
+@media (forced-colors: active) {
+  [data-slot='aspect-ratio'] {
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+}
