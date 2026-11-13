@@ -959,7 +959,7 @@ test('edits numeric design values with a slider and keeps the exact field in syn
   await slider.focus()
   await page.keyboard.press('ArrowRight')
   // One 0.05 rem step up from the fresh draft's Ombelle radius.
-  const radius = getCatalog('0.1.0').presets.ombelle.design.radiusRem
+  const radius = getCatalog('0.1.0').presets.ombelle.design.radiusRem ?? 0.75
   await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue(String(Number((radius + 0.05).toFixed(2))))
   await page.getByLabel('Corner radius', { exact: true }).fill('1.25')
   await expect(slider).toHaveAttribute('aria-valuenow', '1.25')
