@@ -808,3 +808,28 @@
   font-weight: 600;
   line-height: 1;
 }
+
+/* On a phone the slider rows keep only the exact number field, with 44px steppers. */
+@media (max-width: 767px) {
+  /* Two classes, to win over the catalog Slider's own display. */
+  .sliderRow .sliderRange {
+    display: none;
+  }
+  .sliderRow {
+    grid-template-columns: minmax(0, 1fr) 10rem 44px;
+    grid-template-areas: 'l n r';
+  }
+  .sliderNumber [data-slot='number-input'] {
+    min-block-size: 44px;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+  }
+  .sliderNumber [data-slot='number-input-decrement'],
+  .sliderNumber [data-slot='number-input-increment'] {
+    inline-size: 2.5rem;
+  }
+  .sliderReset {
+    width: 44px;
+    height: 44px;
+  }
+}

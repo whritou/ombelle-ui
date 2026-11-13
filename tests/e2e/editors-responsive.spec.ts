@@ -184,3 +184,58 @@ test('resizing with the review drawer open keeps the draft and the open review',
   await page.setViewportSize({ width: 1440, height: 900 })
   await expect(page.getByRole('tab', { name: 'Export', exact: true })).toHaveAttribute('aria-selected', 'true')
 })
+
+/** The surface's box sits on the bottom edge and spans the 375px phone. */
+async function expectBottomSheet(surface: import('@playwright/test').Locator) {
+  await expect(surface).toBeVisible()
+  const box = (await surface.boundingBox())!
+  expect(Math.abs(box.y + box.height - 812)).toBeLessThanOrEqual(1)
+  expect(Math.round(box.x)).toBe(0)
+  expect(Math.round(box.width)).toBe(375)
+}
+
+test.describe('on a 375px phone', () => {
+  test.use({ viewport: { width: 375, height: 812 } })
+
+  for (const editor of editors) {
+    test(`Get code opens from the bottom in the ${editor.name}`, async ({ page }) => {
+      await open(page, editor.url)
+      await page.getByRole('button', { name: 'Get code', exact: true }).click()
+      await expectBottomSheet(page.locator('[data-slot="dialog-content"]'))
+    })
+  }
+
+  test('the family confirmation and ID & revision open from the bottom', async ({ page }) => {
+    await open(page, editors[0].url)
+    await page.getByRole('radiogroup', { name: 'Style family', exact: true }).getByRole('radio', { name: /^Neo-brutalism/ }).click()
+    await expectBottomSheet(page.locator('[data-slot="alert-dialog-content"]'))
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await page.getByRole('button', { name: 'More actions', exact: true }).click()
+    await page.getByRole('dialog', { name: 'More actions' }).getByRole('button', { name: 'ID & revision…', exact: true }).click()
+    await expectBottomSheet(page.locator('[data-slot="dialog-content"]'))
+  })
+
+  test('a colour token opens its editor from the bottom', async ({ page }) => {
+    await open(page, editors[0].url)
+    await page.getByRole('button', { name: /^Muted foreground colors/ }).click()
+    await expectBottomSheet(page.getByRole('dialog', { name: 'Muted foreground colors' }))
+  })
+
+  test('the Button colour picker opens from the bottom', async ({ page }) => {
+    await open(page, editors[1].url)
+    await page.getByRole('button', { name: 'Open Light background color picker', exact: true }).click()
+    await expectBottomSheet(page.locator('[data-slot="color-picker-content"]'))
+  })
+
+  for (const editor of editors) {
+    test(`the ${editor.name} shows 44px steppers instead of sliders`, async ({ page }) => {
+      await open(page, editor.url)
+      const inspector = page.locator('main[data-editor-root] [aria-label="Inspector controls"]')
+      await expect(inspector.locator('[data-slot="slider"]').first()).toBeHidden()
+      const heights = await inspector.locator('[data-slot="number-input"]').evaluateAll(elements =>
+        elements.filter(element => (element as HTMLElement).offsetParent !== null).map(element => element.getBoundingClientRect().height))
+      expect(heights.length).toBeGreaterThan(0)
+      expect(Math.min(...heights)).toBeGreaterThanOrEqual(44)
+    })
+  }
+})
