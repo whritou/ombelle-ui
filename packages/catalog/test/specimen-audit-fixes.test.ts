@@ -429,7 +429,10 @@ describe('0.7.6 components match their boards', () => {
 
 describe('0.7.6 audit findings', () => {
   it('minimalist keeps the ring colour on a focused invalid Field input', () => {
-    expect(declarations(read('field/minimalist.css'), "[data-slot='field'][data-invalid] [data-field-input]:focus-visible")['border-color']).toBe('var(--ring)')
+    const focused = declarations(read('field/minimalist.css'), "[data-slot='field'][data-invalid] [data-field-input]:focus-visible")
+    expect(focused['border-color']).toBe('var(--ring)')
+    // Red turning to the ring is not a 3:1 change, so the ring also grows below the line.
+    expect(focused['box-shadow']).toBe('0 2px 0 var(--ring)')
   })
 
   it('minimalist Carousel dots draw a 2px ring', () => {
