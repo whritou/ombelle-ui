@@ -262,17 +262,13 @@
   inline-size: 34px;
   block-size: 34px;
   padding: 0;
-  border: 1px solid var(--border);
+  border: 1px solid var(--input);
   border-radius: 4px;
-  background: transparent;
+  background: var(--card);
   color: inherit;
   font: inherit;
   line-height: normal;
   cursor: pointer;
-}
-[data-slot='card-action'] > :where(button:not([data-slot])) {
-  border: 1px solid var(--input);
-  background: var(--card);
 }
 [data-slot='card-action'] > :where(button:not([data-slot])):hover {
   background-image: linear-gradient(color-mix(in oklab, currentColor 8%, transparent) 0 0);

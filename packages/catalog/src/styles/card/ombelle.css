@@ -265,16 +265,12 @@
   padding: 0;
   border: var(--border-width) solid var(--border);
   border-radius: 999px;
-  background: transparent;
+  background: var(--card);
   color: inherit;
+  box-shadow: 2px 2px 0 var(--border);
   font: inherit;
   line-height: normal;
   cursor: pointer;
-}
-[data-slot='card-action'] > :where(button:not([data-slot])) {
-  border: var(--border-width) solid var(--border);
-  background: var(--card);
-  box-shadow: 2px 2px 0 var(--border);
 }
 [data-slot='card-action'] > :where(button:not([data-slot])):hover {
   background-image: linear-gradient(color-mix(in oklab, currentColor 8%, transparent) 0 0);
