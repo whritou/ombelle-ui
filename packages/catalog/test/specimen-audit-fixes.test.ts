@@ -407,3 +407,22 @@ describe('the 0.7.5 variants pass the specimen audit', () => {
       .toBe('var(--secondary-foreground)')
   })
 })
+
+describe('0.7.6 components match their boards', () => {
+  it('ombelle frames take the board radius, not the larger Card radius', () => {
+    for (const [file, selector] of [['field/ombelle.css', "[data-slot='field-set']"], ['field/ombelle.css', "[data-slot='form-error-summary']"],
+      ['toolbar/ombelle.css', "[data-slot='toolbar']"], ['aspect-ratio/ombelle.css', "[data-slot='aspect-ratio']"]] as const)
+      expect(declarations(read(file), selector)['border-radius'], file).toBe('var(--radius)')
+  })
+
+  it('flat frames draw the board 1px border although flat controls are borderless', () => {
+    for (const [file, selector] of [['field/flat.css', "[data-slot='field-set']"], ['field/flat.css', "[data-slot='form-error-summary']"],
+      ['toolbar/flat.css', "[data-slot='toolbar']"], ['aspect-ratio/flat.css', "[data-slot='aspect-ratio']"]] as const)
+      expect(declarations(read(file), selector).border, file).toMatch(/^max\(1px, var\(--border-width\)\) solid /)
+  })
+
+  it('Carousel arrows are 34px, as on the board', () => {
+    for (const family of ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
+      expect(px(declarations(read(`carousel/${family}.css`), "[data-slot='carousel-previous']")['block-size']!), family).toBe(34)
+  })
+})

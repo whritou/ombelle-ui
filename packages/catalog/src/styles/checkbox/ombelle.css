@@ -199,7 +199,7 @@
   padding-block: 8px 10px;
   padding-inline: 10px;
   border: var(--border-width) solid var(--border);
-  border-radius: calc(var(--radius) + 4px);
+  border-radius: var(--radius);
   font-family: var(--font-family);
 }
 [data-checkbox-group-legend] {

@@ -19,7 +19,7 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  border-radius: calc(var(--radius) + 4px);
+  border-radius: var(--radius);
 }
 [data-slot='carousel-content']::-webkit-scrollbar {
   display: none;
@@ -37,8 +37,8 @@
 [data-slot='carousel-next'] {
   display: inline-grid;
   place-items: center;
-  inline-size: 36px;
-  block-size: 36px;
+  inline-size: 34px;
+  block-size: 34px;
   padding: 0;
   border: var(--border-width) solid var(--border);
   border-radius: 999px;
