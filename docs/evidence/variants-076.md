@@ -32,7 +32,7 @@ Run on 2026-11-13 by agents on Windows 11 Home 10.0.26300 with Node 24.19.0, pnp
 | Build | `corepack pnpm build:packages`, then `corepack pnpm generate:preview` | Passed after every task; the catalog style lint passed |
 | Types | `corepack pnpm typecheck` | Passed |
 | Foundation inventory | `vitest run --config vitest.integration.config.ts tests/integration/foundation-groups.test.ts tests/integration/foundation-browser-inventory.test.ts` | 2 files, 50 passed |
-| Variant browser tests, both editions | `playwright test -c playwright.specimen-audit.config.ts tests/e2e/variants-076.spec.ts` | 32 passed (1.3 min), after the Task 9 fixes; each component task ran its own cases first (Task 7: 4 TooltipShortcut cases on a temporary config, port 4302) |
+| Variant browser tests, both editions | `playwright test -c playwright.specimen-audit.config.ts tests/e2e/variants-076.spec.ts` | 32 passed (1.3 min), after the Task 9 fixes: on the Task 9 working tree that was committed as `c90fc2a4`, so before `09f28cc8` (Card action rules written once, computed styles unchanged) and before the final review fixes. Each component task ran its own cases first (Task 7: 4 TooltipShortcut cases on a temporary config, port 4302). The final review re-ran the Sheet, Slider and Code Block cases (below) |
 
 ### Variant browser tests
 
@@ -99,6 +99,36 @@ Differences that remain:
 | Board snap guides | Dashed lines at 0.9, 0.5 and 0.25 with labels | None | They are the board's annotation, not part of the sheet |
 | Fonts | Hanken Grotesk, Archivo, JetBrains Mono | The preset's `--font-family` and `--font-mono` | The catalog ships no web fonts |
 
+## Final review fixes
+
+The whole-branch review (`59ce79f3..812a8962`) asked for the fixes below. Commits `95fc4620` to `3b793977`; the generated catalog and stable hashes are in `ae348c32`.
+
+| Fix | Change | Test |
+| --- | --- | --- |
+| Code Block diff context lines (`95fc4620`) | The unified-diff rule: in `diff` mode a leading space marks an unchanged line and is dropped from the shown text and from the copied new version, like `+` and `-`; a line with none of the three stays as written; CRLF is kept. `diffLines`, `diffNewVersion` and `diffCounts` share one `withoutMarker` helper, identical in both editions. The four copies of the board diff (`apps/preview/src/scenes/projects.tsx`, `fixtures/shared/preset-gallery.tsx`, `scripts/generate-audit.ts`, `packages/compiler/test/variants-076.test.ts`) are now the same text: ` :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }\n`. `docs/components/code-block.md` states the rule (to keep a line that starts with `-` unchanged, prefix it with a space), and the CHANGELOG says Code Block `diff` reads a unified diff | `code-block.test.ts` "strips the space marker of a context line, as in a unified diff" (` :root {` gives `:root {`; the space-prefixed board diff copies `:root {\n  --radius: 0.75rem;\n  --shadow-offset: 3px;\n}\n`; an unprefixed context line stays; CRLF stays) and the updated column-0 case (` --radius: 4px` is unchanged `--radius: 4px`): failed first, then passed |
+| Code Block minors (`95fc4620`) | `CodeBlockCode` reads the diff under one condition, `diff === true && children === undefined`, for `data-diff` and for the lines (before, `children={null}` rendered markers without `data-diff`). The hidden `Added: ` and `Removed: ` spans add `user-select: none` | "reads the diff only when children is undefined, for the pre and for the lines alike" and "keeps the hidden Added and Removed prefixes out of a text selection", both editions: failed first, then passed |
+| Slider comma decimals (`b9693fe3`) | The editable value reads `,` as `.` before parsing, in the code both editions share; one line in `docs/components/slider.md` | `variants-076.spec.ts` "an editable value commits on Enter and blur…": `0,35` and Enter gives 0.35. Failed first in both editions (the thumb stayed at 1), then passed |
+| Sheet minors (`cbb6f79c`) | `nearestSnapPoint([])` returns `undefined` (typed `number \| undefined`; the callers pass a non-empty list and assert it); `sheetSnapPoints` drops non-finite points, and a list with none left has no snap points. The size hook block stays byte-identical between editions | `sheet-variants.test.ts` "finds no nearest point among none, without throwing" and "drops snap points that are not finite numbers" (`[NaN, Infinity, 0.5]` opens at 50vh; `[NaN]` renders as a sheet without snap points), both editions: failed first (`Reduce of empty array with no initial value`; no 50vh), then passed |
+| Tooltip contract test (`3b793977`) | The full unit suite found `catalog.test.ts` still listing the Tooltip slots before TooltipShortcut (`4d7c8319` added `tooltip-shortcut` and `tooltip-shortcut-key`). The test lists them | `vitest run packages/catalog/test/catalog.test.ts`: 28 passed |
+
+| Check | Command | Result |
+| --- | --- | --- |
+| RED | `vitest run packages/catalog/test/code-block.test.ts packages/catalog/test/sheet-variants.test.ts` | 10 failed, 69 passed |
+| Build | `corepack pnpm build:packages`, `corepack pnpm generate:preview`, `corepack pnpm typecheck` | Passed. No CSS changed, so the style generator was not run |
+| Stable hashes | `tsx scripts/record-stable-hashes.ts` | 12 entries moved: `code-block.tsx`, `sheet.tsx` and `slider.tsx` in the four stable families; nothing else |
+| Focused unit tests | `vitest run` on `code-block`, `code-block-contrast`, `sheet-variants`, `sheet`, `slider-variants`, `slider` (catalog) and `variants-076`, `stable-families` (compiler) | 8 files, 229 passed |
+| Browser tests | `playwright test tests/e2e/variants-076.spec.ts -g "Sheet snap points\|SliderValue\|Code Block"`, on a temporary copy of the specimen-audit config on port 4198 (deleted after) | 16 passed (52 s): Sheet 4, SliderValue 6, Code Block diff 6, both editions |
+| Full unit suite | `corepack pnpm test:unit` at `ae348c32` | 3 failed, 3691 passed (234 files). `catalog.test.ts` (Tooltip slots) came from this branch and is fixed in `3b793977`. `packages/cli/test/snapshot-cache.test.ts` "bounds valid entries to 100 and 16 MiB during writes" and `packages/compiler/test/generated-types.test.ts` timed out at 60 s under the parallel run; run alone at the same head both files passed (30 passed) |
+| Full integration suite | `corepack pnpm test:integration` at `ae348c32` | 38 failed, 589 passed, 13 skipped (73 files, 33.6 min). None traced to this branch: 26 need Bun ("Cannot resolve a supported native bun executable"; Bun is not installed on this machine), including `manager-runtime.test.ts`, `bun-consumers`, `bun-manager`, `bun-cross-runner`, the Bun cases of `packed-cli`, `component-preset-cli` and `recipe-cli`; `packed-cli` "packs only standalone installer files…" failed in `tar` ("Cannot connect to D: resolve failed": the Windows path read as a remote host); the rest were `EBUSY` on temporary directory removal, 60 s timeouts, or "snapshot cache was not saved … ENOENT" in the shared user cache under parallel load (`component-preset-cli`, `component-preset-preservation`, `component-recipe-cli` card, progress and separator, `form-controls-cli` label, `snapshot-journey`, `upstream`). Re-run alone at `3b793977`: the `component-recipe-cli` card, progress and separator cases and the `form-controls-cli` label case, 4 passed. The others were not re-run on `59ce79f3`, so whether they also fail there was not confirmed |
+
+## Merge with track 1
+
+`variantRecipeFields076` and `usesVariants076` in `apps/www/src/snapshots/install-command.ts` exist on both this branch and track 1. The merge must fold this branch's seven entries into one map and keep one function:
+
+```ts
+sheet: ['snapPoints'], card: ['action'], slider: ['valueDisplay'], progress: ['shape'], meter: ['shape'], 'code-block': ['diff'], tooltip: ['shortcut']
+```
+
 ## Defects found while testing
 
 | Defect | Found by | Fix and test |
@@ -111,4 +141,4 @@ Differences that remain:
 
 ## Deferred
 
-Minor findings carried from the task reviews, not fixed in this plan: snap points changed after mount are not re-seeded, and `nearestSnapPoint([])` throws; the Base UI Sheet SSR test imports a file `@base-ui/react` does not export; the Base Slider sets its input id through the thumb's `render` clone, which overrides a Base UI Field's control id, and a comma decimal is not normalised; the indeterminate ring renders an empty number span; the visually hidden diff prefixes can be selected; the compiler and the Tooltip template each hold a copy of the key-name mapping, with no test that compares them; `generated-types.test.ts` can time out at 60 s under a parallel run (it passes alone).
+Minor findings carried from the task reviews, not fixed in this plan: snap points changed after mount are not re-seeded; the Base UI Sheet SSR test imports a file `@base-ui/react` does not export; the Base Slider sets its input id through the thumb's `render` clone, which overrides a Base UI Field's control id; the indeterminate ring renders an empty number span; the compiler and the Tooltip template each hold a copy of the key-name mapping, with no test that compares them; `generated-types.test.ts` can time out at 60 s under a parallel run (it passes alone).
