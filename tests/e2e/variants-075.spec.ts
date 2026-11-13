@@ -194,9 +194,15 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(action).toBeEnabled()
       await page.keyboard.press('Escape')
       await expect(dialog).toBeHidden()
-      const again = await openConfirm(page)
-      await expect(again.input).toHaveValue('')
-      await expect(again.action).toBeDisabled()
+      // Reopen on the same page, without a reload: the typed text must not survive the close.
+      await page.getByTestId('variants-075').getByRole('button', { name: 'Delete project' }).click()
+      await expect(dialog).toBeVisible()
+      await expect(input).toHaveValue('')
+      await expect(action).toBeDisabled()
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toBeHidden()
+      await page.getByTestId('variants-075').getByRole('button', { name: 'Delete project' }).click()
+      await expect(input).toHaveValue('')
     })
   })
 }

@@ -17,7 +17,7 @@ export function AlertDialogTrigger({ className, ...props }: Part<typeof AlertDia
 }
 export type AlertDialogContentProps = Part<typeof AlertDialogPrimitive.Popup>
 export function AlertDialogContent({ className, children, ref, initialFocus, ...props }: AlertDialogContentProps) {
-  // The popup unmounts when the dialog closes, so a typed confirmation starts empty each time.
+  // The confirm input clears the typed text when it unmounts with the closed popup.
   const confirm = useConfirm()
   const popupRef = React.useRef<HTMLDivElement | null>(null)
   const mergedRef = React.useCallback((element: HTMLDivElement | null) => {
@@ -75,7 +75,7 @@ type Confirm = {
 }
 const ConfirmContext = React.createContext<Confirm | null>(null)
 
-/** The typed-confirmation state for one open dialog; the content renders it, so closing resets it. */
+/** The typed-confirmation state; the input's unmount on close clears it, so each opening starts empty. */
 function useConfirm(): Confirm {
   const [expected, setExpected] = React.useState<string>()
   const [instructionId, setInstructionId] = React.useState<string>()
@@ -87,6 +87,8 @@ function useConfirm(): Confirm {
     setInstructionId(id)
     input.current = element
     return () => {
+      // The wrapper outlives the primitive's content, so closing clears the typed text here.
+      setValue('')
       setExpected(undefined)
       setInstructionId(undefined)
       input.current = null

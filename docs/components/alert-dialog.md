@@ -61,7 +61,7 @@ These need CLI **0.7.5** or later, including in component recipes. Leaving a pro
   - It renders the instruction, by default "Type <code>expected</code> to confirm" (or your `label`), as the label of a text input (`alert-dialog-confirm-input`) with autocomplete and spellcheck off.
   - `AlertDialogAction` is `disabled` until the input's value equals `expected` exactly: no trimming, case-sensitive. While it is disabled, the action's `aria-describedby` points at the instruction, so the reason is announced. Pasting is allowed.
   - Enter in the input runs the action only when the text matches; otherwise it does nothing and the dialog stays open.
-  - When the dialog opens, focus goes to the input instead of Cancel. The text starts empty each time the dialog opens, because the content unmounts when it closes; content kept mounted with `forceMount` (Radix) or `keepMounted` (Base UI) keeps the typed text.
+  - When the dialog opens, focus goes to the input instead of Cancel. The text starts empty each time the dialog opens: the input clears it when it unmounts with the closed content. Content kept mounted with `forceMount` (Radix) or `keepMounted` (Base UI) keeps the typed text.
 - **Recipe:** `media` (`none`, `default` or `destructive`) and the content field `confirmText` (empty for none).
 
 ## API and editions
