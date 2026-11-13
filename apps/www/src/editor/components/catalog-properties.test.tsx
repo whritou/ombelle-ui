@@ -40,3 +40,13 @@ it('shows multi-choice fields as checkbox option rows named by each choice', () 
   // Radix keeps a hidden, aria-hidden input for forms; no visible native checkbox remains.
   expect(html).not.toMatch(/<input type="checkbox"(?![^>]*aria-hidden="true")/)
 })
+
+it('edits the 0.7.6 lists that start empty, with Add and Remove', () => {
+  const html = panel('checkbox')
+  expect(html).toContain('Group')
+  expect(html).toMatch(/<button[^>]*>Add Options<\/button>/)
+  const recipe = createCatalogDraft('field').recipe
+  const filled = renderToStaticMarkup(<CatalogProperties recipe={{ ...recipe, content: { ...recipe.content, fields: ['Preset name', 'Radius'] } } as typeof recipe} update={noop} />)
+  expect(filled.match(/>Remove Fields \d<\/button>/g)).toHaveLength(2)
+  expect(filled).toMatch(/<button[^>]*>Add Fields<\/button>/)
+})

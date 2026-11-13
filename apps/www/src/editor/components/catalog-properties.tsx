@@ -118,10 +118,18 @@ function Field({ field, value, update, protectedIds = [], createItem }: {
     </fieldset>
   }
   if (field.type === 'array' && field.items) {
-    const cells = value as string[]
-    return <div className="grid gap-2">{cells.map((cell, index) =>
-      <Field key={index} field={{ ...field.items, title: `Cell ${index + 1}` }} value={cell}
-        update={next => update(cells.map((text, position) => index === position ? next : text))} />)}
+    // Lists with no default, such as the 0.7.6 fields and options, start empty.
+    const cells = Array.isArray(value) ? value as string[] : []
+    // A list whose length can vary gets Add and Remove; a fixed-length list keeps its cells.
+    const resizable = field.maxItems !== undefined && field.maxItems !== field.minItems
+    return <div className="grid gap-2">{cells.map((cell, index) => <div key={index} className="grid gap-1">
+      <Field field={{ ...field.items, title: `Cell ${index + 1}` }} value={cell}
+        update={next => update(cells.map((text, position) => index === position ? next : text))} />
+      {resizable && <button type="button" disabled={cells.length <= (field.minItems ?? 0)}
+        onClick={() => update(cells.filter((_, position) => position !== index))}>Remove {field.title} {index + 1}</button>}
+    </div>)}
+      {resizable && <button type="button" disabled={cells.length >= field.maxItems!}
+        onClick={() => update([...cells, ''])}>Add {field.title}</button>}
     </div>
   }
   if (field.enum) return <label className="be-stack">{field.title}
