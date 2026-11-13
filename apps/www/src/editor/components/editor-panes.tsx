@@ -22,10 +22,16 @@ export function paneClasses(pane: Pane) {
   }
 }
 
-/** Switches the pane; entering Matrix turns the Matrix layout on, leaving it turns it off. */
+/** The preview layout chosen before entering the Matrix pane, restored when leaving it. */
+const layoutBeforeMatrix: { current: 'single' | 'matrix' } = { current: 'single' }
+
+/** Switches the pane; entering Matrix turns the Matrix layout on, leaving it restores the layout chosen before. */
 export function switchPane(pane: Pane, previous: Pane, matrix: MatrixLayout, setView: (update: (view: EditorView) => EditorView) => void) {
-  if (pane === 'matrix' && previous !== 'matrix') matrix.setLayout('matrix')
-  if (pane !== 'matrix' && previous === 'matrix') matrix.setLayout('single')
+  if (pane === 'matrix' && previous !== 'matrix') {
+    layoutBeforeMatrix.current = matrix.layout
+    matrix.setLayout('matrix')
+  }
+  if (pane !== 'matrix' && previous === 'matrix') matrix.setLayout(layoutBeforeMatrix.current)
   setView(view => ({ ...view, panel: pane }))
 }
 

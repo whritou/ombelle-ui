@@ -1168,7 +1168,7 @@
   }
   .editor .peekOpen {
     justify-self: start;
-    min-height: 40px;
+    min-height: 44px;
     padding-inline: 14px;
   }
   .checksPane {

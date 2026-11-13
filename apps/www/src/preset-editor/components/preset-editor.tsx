@@ -156,7 +156,7 @@ export default function PresetEditor() {
   const previousViewport = useRef(viewportClass)
   useEffect(() => {
     // A review open on a wider screen stays in view: the phone shows its Checks pane.
-    if (viewportClass === 'phone' && previousViewport.current !== 'phone' && drawerOpen) setPane('checks')
+    if (viewportClass === 'phone' && previousViewport.current === 'desktop' && drawerOpen) setPane('checks')
     // The tablet's sheet belongs to the tablet: leaving that width closes it for good.
     if (viewportClass !== 'tablet') setReviewSheetOpen(false)
     previousViewport.current = viewportClass
@@ -605,7 +605,9 @@ export default function PresetEditor() {
           </section>
         </div>
         {viewportClass === 'phone' && pane === 'checks' && (
-          <section className={styles.checksPane} aria-label="Checks and export">
+          <section className={styles.checksPane} aria-labelledby="phone-checks-heading">
+            {/* The pane's own heading keeps the levels in order before the checks' h3 sections. */}
+            <h2 id="phone-checks-heading" className={styles.srOnly}>Checks and export</h2>
             <PresetChecks contrast={contrast} glassReport={glassReport} onEditToken={(path) => { setPane('customize'); revealPresetField(path) }} />
             <Collapsible defaultOpen className={styles.exportSection}>
               <CollapsibleTrigger>Export</CollapsibleTrigger>

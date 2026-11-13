@@ -783,7 +783,8 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await expectVisibleFocus(page)
 
   const family = familyButton(page, 'Minimalist')
-  const confirmDialog = page.getByRole('dialog', {
+  // The family confirmation is an Alert Dialog.
+  const confirmDialog = page.getByRole('alertdialog', {
     name: 'Change style family?',
   })
   await arrowTo(page, family)
@@ -834,10 +835,11 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   // Close the colour popover the way a keyboard user would.
   await page.keyboard.press('Escape')
 
-  const exportRail = page.getByRole('button', { name: /^Open export/ })
-  await tabTo(page, exportRail, { max: 300 })
+  // At 320px Export is in the Checks pane, reached from the dock: Tab to it, arrow to Checks, Enter.
+  const checksPane = page.getByRole('navigation', { name: 'Preset editor panes' }).getByRole('radio', { name: /^Checks/ })
+  await arrowTo(page, checksPane, { tabs: 300 })
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('tab', { name: 'Export' })).toBeFocused()
+  await expect(checksPane).toHaveAttribute('aria-checked', 'true')
   const downloadButton = page.getByRole('button', {
     name: 'Download preset JSON',
     exact: true,
@@ -903,7 +905,8 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   expect(layout.scrollWidth, JSON.stringify(layout)).toBeLessThanOrEqual(layout.width)
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
-  await segment(page, 'Preview width', '320 px').click()
+  // At 320px the preview is its own pane, already at the phone's width.
+  await page.getByRole('navigation', { name: 'Preset editor panes' }).getByRole('radio', { name: 'Preview', exact: true }).click()
   await frame(page).getByTestId('preset-button').focus()
   await page.keyboard.press('Tab')
   expect(
