@@ -116,7 +116,7 @@ export function TermsField() {
   dialog: {
     name: 'Dialog',
     description: 'A modal window that traps focus and returns it when closed.',
-    api: 'Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose',
+    api: 'Dialog, DialogTrigger, DialogContent (size sm, default, lg or fullscreen), DialogTitle, DialogDescription, DialogBody, DialogFooter, DialogClose',
     states: 'Open, closed, scroll, focus return',
     basis: 'Reviewed Radix dialog primitive',
     client: true,

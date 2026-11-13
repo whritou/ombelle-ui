@@ -16,6 +16,17 @@ const localId = (suffix: string) => ({ localId: '-' + suffix })
 const label = (text: string) => node('label', { htmlFor: localId('control') }, text)
 const trigger = (tag: string, text: string) => node(tag, { type: 'button' }, text)
 // The installed recipe lays out its label and control itself, so the label never touches the control.
+// Fixed text for a Dialog specimen with a scrolling body, long enough to scroll at 100dvh - 2rem on a phone.
+const dialogParagraphs = [
+  'Tokens: the colours, radius, shadow and motion of the preset, in light and dark.',
+  'Components: every recipe with its props, content and appearance overrides.',
+  'Glass materials: blur, refraction and tint, for liquid glass presets only.',
+  'Revision: the preset revision and catalog release the recipes were made with.',
+  'Install code: the code teammates paste to install the same preset.',
+  'Sharing: who can open the preset page and who can publish a new revision.',
+  'History: the last twenty revisions, each with its author and date.',
+  'Export format: JSON with a schema version, readable by the CLI.',
+]
 const stacked = { className: 'grid gap-2' }
 const inline = { className: 'flex items-center gap-2' }
 // The 0.7.5 board's swatch row, then three more colours from its palette.
@@ -255,10 +266,12 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('p', {}, content.body)))
     case 'alert-dialog':
       return node('AlertDialog', {}, trigger('AlertDialogTrigger', content.trigger), node('AlertDialogContent', {},
-        node('AlertDialogHeader', {}, node('AlertDialogTitle', {}, content.title), node('AlertDialogDescription', {}, content.description)),
+        node('AlertDialogHeader', {}, ...(props.media && props.media !== 'none' ? [node('AlertDialogMedia', { tone: props.media })] : []),
+          node('AlertDialogTitle', {}, content.title), node('AlertDialogDescription', {}, content.description)),
+        ...(content.confirmText ? [node('AlertDialogConfirmInput', { expected: content.confirmText })] : []),
         node('AlertDialogFooter', {}, node('AlertDialogCancel', {}, content.cancel), node('AlertDialogAction', {}, content.action))))
     case 'breadcrumb':
-      return node('Breadcrumb', { 'aria-label': content.label }, node('BreadcrumbList', {},
+      return node('Breadcrumb', { 'aria-label': content.label, collapse: props.collapse === 'auto' ? 'auto' : undefined }, node('BreadcrumbList', {},
         ...content.items.flatMap((item, index) => [
           ...(index ? [node('BreadcrumbSeparator')] : []),
           node('BreadcrumbItem', {}, index === content.items.length - 1
@@ -387,8 +400,10 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ...(props.actions ? [node('TableCell', { actions: true }, node('button', { type: 'button', 'aria-label': 'Actions for ' + row.cells[0] }, '…'))] : []))))))
     }
     case 'dialog':
-      return node('Dialog', {}, trigger('DialogTrigger', content.trigger), node('DialogContent', {},
-        node('DialogHeader', {}, node('DialogTitle', {}, content.title), node('DialogDescription', {}, content.description))))
+      return node('Dialog', {}, trigger('DialogTrigger', content.trigger), node('DialogContent', { size: props.size === 'default' ? undefined : props.size },
+        node('DialogHeader', {}, node('DialogTitle', {}, content.title), node('DialogDescription', {}, content.description)),
+        ...(props.scrollingBody ? [node('DialogBody', {}, ...dialogParagraphs.map(text => node('p', {}, text)))] : []),
+        ...(props.footer ? [node('DialogFooter', {}, node('DialogClose', { type: 'button' }, 'Cancel'), node('button', { type: 'button' }, 'Save changes'))] : [])))
     case 'dropdown-menu':
       return node('DropdownMenu', {}, trigger('DropdownMenuTrigger', content.trigger), node('DropdownMenuContent', {},
         ...content.items.map(item => node('DropdownMenuItem', { variant: item.variant, disabled: item.disabled }, item.label))))

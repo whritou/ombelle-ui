@@ -14,6 +14,8 @@ import {
   BreadcrumbSeparator,
 } from '../generated/preset-gallery/components/ui/breadcrumb'
 import { Button } from '../generated/preset-gallery/components/ui/button'
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../generated/preset-gallery/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogConfirmInput, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from '../generated/preset-gallery/components/ui/alert-dialog'
 import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '../generated/preset-gallery/components/ui/popover'
 import { Progress, ProgressLabel, ProgressValue } from '../generated/preset-gallery/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarOverflow } from '../generated/preset-gallery/components/ui/avatar'
@@ -105,12 +107,16 @@ export function ProjectsScene(props: SceneProps) {
         {show(
           'breadcrumb',
           'Breadcrumb',
-          <Breadcrumb aria-label="Project path">
+          <Breadcrumb aria-label="Project path" collapse="auto">
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="#overview">Overview</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
+              {[['Overview', '#overview'], ['Acme workspace', '#workspace'], ['Design team', '#team'], ['Q4 roadmap', '#roadmap']].map(([label, href]) => (
+                <React.Fragment key={href}>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                </React.Fragment>
+              ))}
               <BreadcrumbItem>
                 <BreadcrumbPage>Projects</BreadcrumbPage>
               </BreadcrumbItem>
@@ -124,6 +130,45 @@ export function ProjectsScene(props: SceneProps) {
           </div>
           <div className="scene-actions">
             {show('toggle', 'Toggle', <Toggle variant="outline">Show grid</Toggle>)}
+            {show(
+              'dialog',
+              'Dialog',
+              <Dialog>
+                <DialogTrigger asChild><Button variant="outline">Export</Button></DialogTrigger>
+                <DialogContent size="lg">
+                  <DialogHeader>
+                    <DialogTitle>Export projects</DialogTitle>
+                    <DialogDescription>Choose what the CSV file includes.</DialogDescription>
+                  </DialogHeader>
+                  <DialogBody>
+                    {rows.map((row) => <p key={row.name}>{row.name}: {row.owner}, {row.status}, updated {row.updated}.</p>)}
+                  </DialogBody>
+                  <DialogFooter>
+                    <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                    <Button>Export CSV</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>,
+            )}
+            {show(
+              'alert-dialog',
+              'Alert Dialog',
+              <AlertDialog>
+                <AlertDialogTrigger asChild><Button variant="destructive">Delete project</Button></AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogMedia tone="destructive" />
+                    <AlertDialogTitle>Delete Website refresh?</AlertDialogTitle>
+                    <AlertDialogDescription>Its history and install codes are removed for everyone.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogConfirmInput expected="website-refresh" />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction>Delete project</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>,
+            )}
             {show(
               'popover',
               'Popover',

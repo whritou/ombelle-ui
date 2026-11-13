@@ -49,6 +49,9 @@ const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, 
   switch: { sm: { size: 'sm', checked: true } },
   progress: { labelled: { size: 'lg', tone: 'success', showLabel: true, showValue: true }, destructive: { tone: 'destructive', size: 'sm' } },
   popover: { arrow: { arrow: true } },
+  dialog: { 'lg-scrolling': { size: 'lg', scrollingBody: true, footer: true }, fullscreen: { size: 'fullscreen', footer: true } },
+  'alert-dialog': { media: { media: 'default' }, 'destructive-confirm': { media: 'destructive' } },
+  breadcrumb: { collapse: { collapse: 'auto' } },
 }
 
 function presetRef(family: StyleFamily): ComponentRecipe['presetRef'] {
