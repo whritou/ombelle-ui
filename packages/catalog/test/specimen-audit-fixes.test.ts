@@ -506,3 +506,20 @@ describe('the 0.7.6 Card action in neo brutalism', () => {
     expect(declarations(css, action).color).toBe('var(--card-foreground)')
   })
 })
+
+// The preset editor's dashboard preview, checked with axe (tests/e2e/preset-editor.spec.ts).
+describe('text on the preset preview pages reaches 4.5:1', () => {
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])(
+    '%s draws the selected tab count as an outline on the tab fill, not a lighter fill under white text',
+    family => {
+      const count = declarations(read(`tabs/${family}.css`), "[data-slot='tabs-count']:is([data-state='active'] > *)")
+      expect(count.background).toBe('transparent')
+      expect(count['box-shadow']).toBe('inset 0 0 0 1.5px currentColor')
+      expect(count.color).toBe('inherit')
+    },
+  )
+  it('neo-brutalism soft destructive Badge darkens its text towards the ink', () => {
+    const badge = declarations(read('badge/neo-brutalism.css'), "[data-slot='badge'][data-appearance='soft'][data-variant='destructive']")
+    expect(badge.color).toBe('color-mix(in oklab, var(--destructive) 60%, var(--foreground))')
+  })
+})

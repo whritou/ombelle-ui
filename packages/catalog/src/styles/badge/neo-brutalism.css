@@ -97,7 +97,7 @@
 }
 [data-slot='badge'][data-appearance='soft'][data-variant='destructive'] {
   background: color-mix(in oklab, var(--destructive) 14%, var(--card));
-  color: color-mix(in oklab, var(--destructive) 75%, var(--foreground));
+  color: color-mix(in oklab, var(--destructive) 60%, var(--foreground));
 }
 [data-slot='badge'][data-appearance='soft'][data-variant='success'] {
   background: var(--success, #dcfce7);

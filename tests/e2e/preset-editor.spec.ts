@@ -320,8 +320,9 @@ test('restores raw draft and history after refresh', async ({ page }) => {
     '-',
   )
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  // Undo returns to the fresh draft's Ombelle radius.
   await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue(
-    '0.5',
+    String(getCatalog('0.1.0').presets.ombelle.design.radiusRem),
   )
   await page.getByRole('button', { name: 'Redo', exact: true }).click()
   await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue(
@@ -957,7 +958,9 @@ test('edits numeric design values with a slider and keeps the exact field in syn
   const slider = page.getByLabel('Corner radius slider', { exact: true })
   await slider.focus()
   await page.keyboard.press('ArrowRight')
-  await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue('0.55')
+  // One 0.05 rem step up from the fresh draft's Ombelle radius.
+  const radius = getCatalog('0.1.0').presets.ombelle.design.radiusRem
+  await expect(page.getByLabel('Corner radius', { exact: true })).toHaveValue(String(Number((radius + 0.05).toFixed(2))))
   await page.getByLabel('Corner radius', { exact: true }).fill('1.25')
   await expect(slider).toHaveAttribute('aria-valuenow', '1.25')
 })
