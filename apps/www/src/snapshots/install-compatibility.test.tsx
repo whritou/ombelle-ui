@@ -371,6 +371,19 @@ describe('0.7.6 variant recipes', () => {
     expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(false)
   })
 
+  it.each([
+    ['field', { form: 'summary', fieldset: 'default' }, { legend: 'Save preset', fields: ['Preset name', 'Radius'] }],
+    ['checkbox', { group: 'parent' }, { legend: 'Overlays to install', options: ['Dialog', 'Popover'] }],
+    ['progress', { shape: 'circle' }, {}],
+    ['tooltip', {}, { shortcut: 'Ctrl+Z' }],
+  ] as const)('gates both 0.7.6 tracks through one helper: %s %o %o', (component, props, content) => {
+    const recipe = { component, props, content } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(true)
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v076)).toBe(false)
+    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v075)).toBe(compatibility.catalog076InstallNotice)
+    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v076)).toBeUndefined()
+  })
+
   it('words the notice like the 0.7.5 one', () => {
     expect(compatibility.catalog076MinimumCli).toBe('0.7.6')
     expect(compatibility.catalog076InstallNotice).toBe(compatibility.catalog075InstallNotice.replace('0.7.5', '0.7.6'))
