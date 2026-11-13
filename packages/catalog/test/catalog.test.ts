@@ -50,6 +50,9 @@ describe('catalog contract', () => {
       'tooltip-trigger',
       'tooltip-content',
       'tooltip-arrow',
+      // TooltipShortcut (0.7.6): the key caps after the tooltip text.
+      'tooltip-shortcut',
+      'tooltip-shortcut-key',
     ])
     expect(tooltip.dependencies).toEqual([
       { name: 'react', version: '19.3.1' },
