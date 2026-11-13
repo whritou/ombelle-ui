@@ -30,7 +30,7 @@ Measured at `cb25d34` with the same method, on 2026-11-13.
 | `/components` | 469.1 kB | 494.5 kB | +25.4 kB | no |
 | `/components/accordion` | 867.3 kB | 893.8 kB | +26.5 kB | no |
 
-Four routes exceed the limit. Comparing the scripts of `/components` in the two builds, the growth is the chunk that carries the catalog data (every component's template and stylesheet, both editions, five families): 200.2 kB to 224.2 kB gzip. The four components and the Field and Checkbox parts add that much catalog source. The editor top bar's Toolbar adds about 0.8 kB, the growth of `/docs`, which loads no catalog data. The project owner accepted the overrun on 13 November 2026, with loading the catalog data on demand as follow-up work before the release.
+Four routes exceed the limit. Comparing the scripts of `/components` in the two builds, the growth is the chunk that carries the catalog data (every component's template and stylesheet, both editions, five families): 200.2 kB to 224.2 kB gzip. The four components and the Field and Checkbox parts add that much catalog source. The editor top bar's Toolbar adds about 0.8 kB, the growth of `/docs`, which loads no catalog data. The project owner accepted the overrun on 13 November 2026: the website's bundle size, including loading component data on demand, will be addressed in a later optimisation of the whole site, not as a condition of this release.
 
 ## Browser tests
 
