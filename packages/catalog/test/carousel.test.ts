@@ -5,7 +5,7 @@ import { getCatalog, getTemplate } from '../src/index.js'
 import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '../src/templates/carousel.js'
 import { expectComponentContract } from './new-component-contract.js'
 
-const slots = ['carousel', 'carousel-content', 'carousel-item', 'carousel-previous', 'carousel-next', 'carousel-dots', 'carousel-dot', 'carousel-counter']
+const slots = ['carousel', 'carousel-content', 'carousel-item', 'carousel-previous', 'carousel-next', 'carousel-dots', 'carousel-dot', 'carousel-counter', 'carousel-image', 'carousel-thumbnails', 'carousel-thumbnail']
 const tag = (html: string, pattern: string) => html.match(new RegExp(`<[^>]*${pattern}[^>]*>`))?.[0] ?? ''
 const tags = (html: string, pattern: string) => [...html.matchAll(new RegExp(`<[^>]*${pattern}[^>]*>`, 'g'))].map(match => match[0])
 const attr = (element: string, name: string) => element.match(new RegExp(` ${name}="([^"]*)"`))?.[1]
@@ -17,7 +17,7 @@ const carousel = (names: readonly string[]) => h(Carousel, { 'aria-label': 'UI k
 describe('Carousel', () => {
   it('provides one client template for both editions', () => {
     expectComponentContract('carousel', { client: true,
-      parts: ['Carousel', 'CarouselContent', 'CarouselItem', 'CarouselPrevious', 'CarouselNext', 'CarouselDots', 'CarouselCounter'], slots,
+      parts: ['Carousel', 'CarouselContent', 'CarouselItem', 'CarouselPrevious', 'CarouselNext', 'CarouselDots', 'CarouselCounter', 'CarouselImage', 'CarouselThumbnails'], slots,
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: [...slots.map(slot => `[data-slot='${slot}']`), '@media (width < 640px)'], glass: 'experimental' })
     const catalog = getCatalog('0.1.0')

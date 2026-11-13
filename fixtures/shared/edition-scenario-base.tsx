@@ -36,6 +36,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, 
 import { NumberInput } from '@/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
+import { Carousel, CarouselContent, CarouselCounter, CarouselImage, CarouselItem, CarouselNext, CarouselPrevious, CarouselThumbnails } from '@/components/ui/carousel'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
@@ -649,6 +650,18 @@ function VariantsScenario075() {
   )
 }
 
+/** Field trip photos for the image Carousel: small SVG data URIs, one hue per slide, so they really load. */
+const fieldTripPhotos = [
+  ['#3F7F8C', 'A lake below pine hills'],
+  ['#D9708A', 'Sand dunes at dusk'],
+  ['#2A3166', 'A city skyline at night'],
+  ['#2C7DA0', 'A coastline'],
+  ['#6E8B3D', 'A field of poppies'],
+].map(([hue, alt]) => ({
+  alt,
+  src: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="320" height="180" fill="${hue}"/></svg>`),
+}))
+
 /** The 0.7.6 variants, for tests/e2e/variants-076.spec.ts; later tasks add their parts here. */
 function VariantsScenario076() {
   const [wideAction, setWideAction] = React.useState(false)
@@ -731,6 +744,15 @@ function VariantsScenario076() {
       <div data-testid="rg-nodiff">
         <CodeBlock title="ui-style.css" language="css" code={[':root {', '  --radius: 0.75rem;', '  --shadow-offset: 3px;', '}', ''].join('\n')} />
       </div>
+      <Carousel variant="image" ratio="16 / 9" aria-label="Field trip photos" data-testid="ic-carousel">
+        <CarouselContent>
+          {fieldTripPhotos.map(photo => <CarouselItem key={photo.alt}><CarouselImage src={photo.src} alt={photo.alt} /></CarouselItem>)}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+        <CarouselCounter />
+        <CarouselThumbnails />
+      </Carousel>
     </section>
   )
 }

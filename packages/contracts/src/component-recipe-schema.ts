@@ -4375,6 +4375,17 @@ export const componentRecipeSchema = {
               "maximum": 3,
               "default": 1,
               "title": "Slides per view"
+            },
+            "variant": {
+              "enum": [
+                "default",
+                "image"
+              ],
+              "title": "Variant"
+            },
+            "thumbnails": {
+              "type": "boolean",
+              "title": "Thumbnails"
             }
           },
           "additionalProperties": false,

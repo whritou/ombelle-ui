@@ -394,4 +394,78 @@ for (const edition of ['radix', 'base'] as const) {
       await announcedOnce(page, trigger)
     })
   })
+
+  test.describe(`${edition} image Carousel`, () => {
+    const alts = ['A lake below pine hills', 'Sand dunes at dusk', 'A city skyline at night', 'A coastline', 'A field of poppies']
+    const setup = async (page: Page) => {
+      const section = await open(page, edition)
+      const carousel = section.getByTestId('ic-carousel')
+      await carousel.scrollIntoViewIfNeeded()
+      const thumbnail = (n: number) => carousel.getByRole('button', { name: alts[n - 1], exact: true })
+      const slide = (n: number) => carousel.getByRole('group', { name: `${n} of 5`, exact: true })
+      const content = carousel.locator('[data-slot="carousel-content"]')
+      const counter = carousel.locator('[data-slot="carousel-counter"]')
+      // A slide is in view when it starts at the viewport's start.
+      const inView = async (n: number) => {
+        await expect.poll(async () => {
+          const [box, viewport] = [await slide(n).boundingBox(), await content.boundingBox()]
+          return Math.abs(box!.x - viewport!.x)
+        }).toBeLessThanOrEqual(2)
+      }
+      return { carousel, thumbnail, slide, content, counter, inView }
+    }
+
+    test('a thumbnail scrolls to its slide and Next moves aria-current on', async ({ page }) => {
+      const { carousel, thumbnail, counter, inView } = await setup(page)
+      await expect(carousel.getByRole('group', { name: 'Choose an image' })).toBeVisible()
+      await expect(thumbnail(1)).toHaveAttribute('aria-current', 'true')
+      await thumbnail(4).click()
+      await expect(thumbnail(4)).toHaveAttribute('aria-current', 'true')
+      await expect(thumbnail(1)).not.toHaveAttribute('aria-current', 'true')
+      await expect(counter).toHaveText('4 / 5')
+      await inView(4)
+      await carousel.getByRole('button', { name: 'Next slide' }).click()
+      await expect(thumbnail(5)).toHaveAttribute('aria-current', 'true')
+      await expect(thumbnail(4)).not.toHaveAttribute('aria-current', 'true')
+      await expect(counter).toHaveText('5 / 5')
+    })
+
+    test('images past the next one load lazily, and each loads once scrolled into view', async ({ page }) => {
+      const { carousel, thumbnail, slide, inView } = await setup(page)
+      const images = carousel.locator('[data-slot="carousel-image"]')
+      await expect(images).toHaveCount(5)
+      for (const n of [1, 2]) await expect(images.nth(n - 1)).not.toHaveAttribute('loading', /./)
+      for (const n of [3, 4, 5]) await expect(images.nth(n - 1)).toHaveAttribute('loading', 'lazy')
+      for (const n of [3, 4, 5]) {
+        await thumbnail(n).click()
+        if (n < 5) await inView(n)
+        const image = slide(n).locator('[data-slot="carousel-image"]')
+        await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)).toBe(true)
+      }
+    })
+
+    test('the frame keeps the 16:9 ratio', async ({ page }) => {
+      const { slide } = await setup(page)
+      const box = (await slide(1).boundingBox())!
+      expect(Math.abs(box.height - box.width * 9 / 16)).toBeLessThanOrEqual(1)
+    })
+
+    test('at 375px the arrows hide, the thumbnails scroll sideways and the carousel fits the page; at 1280px the arrows show', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 800 })
+      const { carousel } = await setup(page)
+      await expect(carousel.getByRole('button', { name: 'Next slide' })).toBeHidden()
+      await expect(carousel.getByRole('button', { name: 'Previous slide' })).toBeHidden()
+      const row = carousel.locator('[data-slot="carousel-thumbnails"]')
+      expect(await row.evaluate(element => element.scrollWidth > element.clientWidth)).toBe(true)
+      // The edition page holds other fixtures that are wider than a phone, so the check is that the carousel
+      // adds no page overflow: it fits the viewport and does not scroll sideways itself.
+      const box = (await carousel.boundingBox())!
+      expect(box.x).toBeGreaterThanOrEqual(0)
+      expect(box.x + box.width).toBeLessThanOrEqual(375)
+      expect(await carousel.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+      await page.setViewportSize({ width: 1280, height: 800 })
+      await expect(carousel.getByRole('button', { name: 'Next slide' })).toBeVisible()
+      await expect(carousel.getByRole('button', { name: 'Previous slide' })).toBeVisible()
+    })
+  })
 }

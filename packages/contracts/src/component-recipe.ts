@@ -115,6 +115,7 @@ function validateComposition(recipe: ComponentRecipe): void {
       break
     case 'carousel':
       if (recipe.content.label.trim() === '') reject('Name the carousel', '/content/label')
+      if (recipe.props.thumbnails && recipe.props.variant !== 'image') reject('Thumbnails need the image variant; set variant to image or turn thumbnails off', '/props/thumbnails')
       break
     case 'password-field':
       if (recipe.content.label.trim() === '') reject('Label the password field', '/content/label')

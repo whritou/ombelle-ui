@@ -624,6 +624,10 @@ it.each([
   ['tooltip', {}, { shortcut: '' }],
   ['tooltip', {}, { shortcut: 'Ctrl+Z' }],
   ['tooltip', {}, { shortcut: 'Ctrl+Shift+P' }],
+  ['carousel', { variant: 'image' }, {}],
+  ['carousel', { variant: 'default' }, {}],
+  ['carousel', { variant: 'image', thumbnails: true }, {}],
+  ['carousel', { thumbnails: false }, {}],
 ] as const)('accepts the 0.7.6 %s variant %o %o', (component, props, content) => {
   const recipe = validateComponentRecipe(variants076Draft(component, props, content))
   expect(recipe.props).toMatchObject(props)
@@ -638,6 +642,8 @@ it.each([
   ['code-block', { diff: 'yes' }, {}, '/props/diff'],
   ['card', { action: 'yes' }, {}, '/props/action'],
   ['tooltip', {}, { shortcut: 'x'.repeat(41) }, '/content/shortcut'],
+  ['carousel', { variant: 'photo' }, {}, '/props/variant'],
+  ['carousel', { thumbnails: 'yes' }, {}, '/props/thumbnails'],
 ] as const)('rejects the 0.7.6 %s variant %o %o at %s', (component, props, content, path) => {
   expect(() => validateComponentRecipe(variants076Draft(component, props, content))).toThrow(expect.objectContaining({ path }))
 })
@@ -649,13 +655,15 @@ it.each([
   ['code-block', { mode: 'command', diff: true }, { args: 'add button' }, '/props/diff', /diff/],
   ['tooltip', {}, { shortcut: 'Ctrl++' }, '/content/shortcut', /shortcut/],
   ['tooltip', {}, { shortcut: 'A+B+C+D' }, '/content/shortcut', /shortcut/],
+  ['carousel', { thumbnails: true }, {}, '/props/thumbnails', /thumbnails/],
+  ['carousel', { variant: 'default', thumbnails: true }, {}, '/props/thumbnails', /thumbnails/],
 ] as const)('rejects the 0.7.6 %s composition %o %o at %s', (component, props, content, path, message) => {
   expect(() => validateComponentRecipe(variants076Draft(component, props, content)))
     .toThrow(expect.objectContaining({ path, message: expect.stringMatching(message) }))
 })
 
 it('keeps the 0.7.6 fields out of the default recipe fields', () => {
-  const added = { sheet: ['snapPoints'], card: ['action'], slider: ['valueDisplay'], progress: ['shape'], meter: ['shape'], 'code-block': ['diff'] } as const
+  const added = { sheet: ['snapPoints'], card: ['action'], slider: ['valueDisplay'], progress: ['shape'], meter: ['shape'], 'code-block': ['diff'], carousel: ['variant', 'thumbnails'] } as const
   for (const [component, keys] of Object.entries(added)) {
     const fields = componentRecipeFields(component as 'badge')
     for (const key of keys) expect(defaultRecipeFields(fields.props), component + ' ' + key).not.toHaveProperty(key)
