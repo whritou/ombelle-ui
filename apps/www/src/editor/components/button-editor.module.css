@@ -25,10 +25,10 @@
 .root :where(h1, h2, h3, h4) { font-size: revert; font-weight: revert; }
 .root :where(a) { color: var(--moss); text-decoration: underline; text-underline-offset: 3px; }
 :where(.root) :where(button) { border: 1px solid var(--line); border-radius: .45rem; background: var(--surface); color: var(--ink); padding: .5rem .85rem; font-weight: 600; }
-.root :where(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) { border: 1px solid var(--control); border-radius: .4rem; background: var(--surface); color: var(--ink); }
+.root :where(input:not([type="checkbox"], [type="radio"], [type="range"], [data-slot^="number-input"], [data-slot^="color-picker"]), select:not([data-slot^="color-picker"]), textarea) { border: 1px solid var(--control); border-radius: .4rem; background: var(--surface); color: var(--ink); }
 
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
-.root :is(button, input, select, pre):focus-visible {
+.root :is(button, input, select, pre):focus-visible:where(:not([data-slot='color-picker-input'], [data-slot='number-input-input'])) {
   outline: 3px solid var(--ring);
   outline-offset: 3px;
 }
@@ -98,7 +98,7 @@
 .root :global(.properties) label { font-size: .85rem; font-weight: 600; }
 .root :global(.be-stack) { display: grid; gap: .3rem; }
 .root :global(.be-stack-label) { color: var(--slate); font-size: .8rem; font-weight: 600; }
-.root :global(.properties) input[type="text"] { width: 100%; min-height: 32px; padding: 0 .5rem; }
+.root :global(.properties) input[type="text"]:not([data-slot^="number-input"], [data-slot^="color-picker"]) { width: 100%; min-height: 32px; padding: 0 .5rem; }
 .root :global(.be-icon-select) { display: flex; align-items: center; gap: .3rem; min-width: 0; }
 .root :global(.be-icon-select) > [data-slot='combobox'] { flex: 1; min-width: 0; }
 .root :global(.fieldError) { color: var(--destructive); font-size: .83rem; }
@@ -142,7 +142,7 @@
 /* Shadow X/Y as a number pair. */
 .root :global(.be-shadow-row) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
 .root :global(.be-shadow-field) { display: flex; align-items: center; gap: .3rem; min-width: 0; font-size: .8125rem; color: var(--slate); }
-.root :global(.be-shadow-field) input { flex: 1; min-width: 0; min-height: 28px; }
+.root :global(.be-shadow-field) input:not([data-slot]) { flex: 1; min-width: 0; min-height: 28px; }
 
 /* Style family picker in the inspector. */
 .root :global(.be-families)[data-slot] { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }

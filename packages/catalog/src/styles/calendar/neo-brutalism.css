@@ -239,3 +239,13 @@
   block-size: auto;
   aspect-ratio: 1;
 }
+/* The calendar is as wide as its months, and every month as wide as seven days,
+   so the width does not change from one month to the next. */
+[data-slot='calendar'] {
+  inline-size: fit-content;
+}
+[data-slot='calendar-grid'] {
+  table-layout: fixed;
+  inline-size: 15.75rem; /* seven 2.25rem days */
+  max-inline-size: 100%;
+}
