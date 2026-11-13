@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as radix from '../src/templates/breadcrumb.js'
@@ -66,5 +67,12 @@ describe('Breadcrumb collapse', () => {
     expect(names(radixTemplate)).toContain('@radix-ui/react-dropdown-menu')
     expect(names(baseTemplate)).toContain('@base-ui/react')
     expect(names(baseTemplate)).not.toContain('@radix-ui/react-dropdown-menu')
+  })
+})
+
+describe('Breadcrumb collapse under recipe scoping', () => {
+  it.each(['breadcrumb.tsx', 'base/breadcrumb.tsx'])('%s queries its parts without slot names, which recipe scoping rewrites', file => {
+    const source = readFileSync(new URL(`../src/templates/${file}`, import.meta.url), 'utf8')
+    for (const call of source.match(/querySelector(?:All)?(?:<[^>]*>)?\([^)]*\)/g) ?? []) expect(call).not.toContain('data-slot')
   })
 })

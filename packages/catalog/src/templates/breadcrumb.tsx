@@ -154,7 +154,10 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
   const recompute = React.useCallback(() => {
     const element = list.current
     if (!element) return
-    const entries = Array.from(element.querySelectorAll<HTMLElement>(':scope > [data-slot="breadcrumb-item"]:not([data-breadcrumb-overflow])'))
+    // Parts are told apart by structure, not by slot names: recipe scoping renames the slots.
+    // Separators are presentational list items; the ellipsis item is marked.
+    const children = Array.from(element.children) as HTMLElement[]
+    const entries = children.filter(child => child.getAttribute('role') !== 'presentation' && !child.hasAttribute('data-breadcrumb-overflow'))
     const signature = entries.map(entry => entry.textContent ?? '').join('\u0000')
     if (measured.current?.signature !== signature) {
       // Measure from the full trail: unfold first, then measure on the next layout.
@@ -164,7 +167,7 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
         return
       }
       const gap = parseFloat(getComputedStyle(element).columnGap) || 0
-      const separators = Array.from(element.querySelectorAll<HTMLElement>(':scope > [data-slot="breadcrumb-separator"]'))
+      const separators = children.filter(child => child.getAttribute('role') === 'presentation')
       measured.current = {
         signature,
         widths: entries.map(entry => entry.getBoundingClientRect().width + gap),
