@@ -182,4 +182,28 @@ export const expansionDocs = {
     states: 'Default, scrolling, focus, copied, copy failed, selected tab, no line numbers', basis: 'Native pre and button with a polite status; Radix Tabs, or Base UI Tabs in the Base UI edition, for the command block', client: true,
     usage: expansionExamples['code-block'], minimumCli: '0.7.5',
   },
+  'password-field': {
+    name: 'Password Field', description: 'A password input with a show toggle that keeps the caret, a Caps Lock notice and an optional strength meter.',
+    api: 'PasswordField, PasswordFieldControl, PasswordFieldInput (every input prop but type), PasswordFieldToggle, PasswordFieldCapsLock, PasswordFieldStrength (checks: { label, test } or { label, match })',
+    states: 'Hidden, shown, Caps Lock on, weak, fair, strong, very strong, disabled, focus', basis: 'Native input and button, one template for both editions', client: true,
+    usage: expansionExamples['password-field'], minimumCli: '0.7.6',
+  },
+  carousel: {
+    name: 'Carousel', description: 'Slides that snap as they scroll, with previous and next buttons, one dot per slide and a counter. It never autoplays.',
+    api: 'Carousel (slidesPerView 1, 2 or 3), CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter',
+    states: 'First slide, middle, last slide, one slide, focus, below 640px (no arrows)', basis: 'CSS scroll snap with no dependency, one template for both editions', client: true,
+    usage: expansionExamples.carousel, minimumCli: '0.7.6',
+  },
+  'aspect-ratio': {
+    name: 'Aspect Ratio', description: 'Keeps a preview, video or image at a fixed ratio while its width follows the layout.',
+    api: 'AspectRatio (ratio, a number such as 16 / 9)',
+    states: 'Empty, with media', basis: 'The CSS aspect-ratio property, one server template for both editions', client: false,
+    usage: expansionExamples['aspect-ratio'], minimumCli: '0.7.6',
+  },
+  toolbar: {
+    name: 'Toolbar', description: 'One Tab stop for a row of buttons, links and toggles; arrow keys move between them, and items that do not fit move into a More menu.',
+    api: 'Toolbar (orientation, loop), ToolbarButton, ToolbarLink, ToolbarToggleGroup (type single or multiple, value, defaultValue, onValueChange), ToolbarToggleItem, ToolbarSeparator, ToolbarOverflow (label), ToolbarOverflowItem (onSelect, destructive)',
+    states: 'Default, pressed, focus, disabled, overflowing, menu open', basis: 'Reviewed Radix Toolbar and Dropdown Menu; Base UI Toolbar, Toggle Group and Menu in the Base UI edition', client: true,
+    usage: expansionExamples.toolbar, minimumCli: '0.7.6',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

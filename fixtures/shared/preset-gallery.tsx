@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { Checkbox, CheckboxOption } from '@/components/ui/checkbox'
+import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
 import {
   Select,
   SelectTrigger,
@@ -101,7 +101,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
-import { Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
+import { Field, FieldLabel, FieldControl, FieldDescription, FieldError, FieldLegend, FieldSet, Form, FormErrorSummary } from '@/components/ui/field'
 import { Meter, MeterLabel, MeterValue, MeterSegment, MeterLegend, MeterLegendItem } from '@/components/ui/meter'
 import { Slider, SliderTicks } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -121,6 +121,10 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 import { NumberInput } from '@/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
+import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle } from '@/components/ui/password-field'
+import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { AspectRatio } from '@/components/ui/aspect-ratio'
+import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 
 // Family-independent: callers pass the component ids their family cannot
@@ -267,6 +271,14 @@ export function PresetGallery({
           <FieldDescription>Shown in the CLI and the editor header.</FieldDescription><FieldError>Use lower case letters and dashes only.</FieldError></Field>
         <Field invalid><FieldLabel>Package scope</FieldLabel><FieldControl><Input defaultValue="Acme UI" /></FieldControl>
           <FieldError>Use lower case letters and dashes only.</FieldError></Field>
+        <Form aria-label="Save preset" summaryAction="saving" errors={{ name: 'A preset with this name already exists.', radius: 'Enter a number from 0 to 48.' }} data-component="field~form">
+          <FormErrorSummary />
+          <FieldSet>
+            <FieldLegend>Save preset</FieldLegend>
+            <Field name="name"><FieldLabel>Preset name</FieldLabel><FieldControl><Input defaultValue="Ombelle" /></FieldControl><FieldError /></Field>
+            <Field name="radius"><FieldLabel>Radius</FieldLabel><FieldControl><Input type="number" defaultValue="60" /></FieldControl><FieldError /></Field>
+          </FieldSet>
+        </Form>
       </section>)}
       {gate('meter', 'Meter', <section aria-label="Meter" data-component="meter">
         <h2>Meter</h2>
@@ -427,6 +439,58 @@ export function PresetGallery({
             swatches={[{ label: 'Rose', value: 'oklch(0.55 0.22 6)' }, { label: 'Ink', value: 'oklch(0.22 0.012 275)' }]} />
           <ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" contrastWith="oklch(0.16 0.01 275)" contrastLabel="primary foreground" />
         </ColorPickerPair>
+      </section>)}
+      {gate('password-field', 'Password Field', <section aria-label="Password Field" data-component="password-field">
+        <h2>Password Field</h2>
+        <PasswordField>
+          <Label htmlFor="gallery-password">Password</Label>
+          <PasswordFieldControl>
+            <PasswordFieldInput id="gallery-password" defaultValue="correct-horse-7" autoComplete="new-password" />
+            <PasswordFieldToggle />
+          </PasswordFieldControl>
+          <PasswordFieldCapsLock />
+          <PasswordFieldStrength checks={[{ label: 'at least 12 characters', match: '^.{12,}$' }, { label: 'a number', match: '\\d' }, { label: 'add a symbol', match: '[^A-Za-z0-9]' }]} />
+        </PasswordField>
+      </section>)}
+      {gate('carousel', 'Carousel', <section aria-label="Carousel" data-component="carousel">
+        <h2>Carousel</h2>
+        <Carousel aria-label="UI kits">
+          <CarouselContent>
+            {['Ombelle', 'Flat', 'Minimalist', 'Neo brutalism', 'Liquid glass'].map(kit => (
+              <CarouselItem key={kit}><Card><CardContent><p>{kit}</p></CardContent></Card></CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+          <CarouselDots />
+          <CarouselCounter />
+        </Carousel>
+      </section>)}
+      {gate('aspect-ratio', 'Aspect Ratio', <section aria-label="Aspect Ratio" data-component="aspect-ratio">
+        <h2>Aspect Ratio</h2>
+        <div className="preset-row">
+          <AspectRatio ratio={16 / 9} style={{ inlineSize: '12rem' }}><span>16 : 9</span></AspectRatio>
+          <AspectRatio ratio={1} style={{ inlineSize: '6rem' }}><span>1 : 1</span></AspectRatio>
+          <AspectRatio ratio={4 / 3} style={{ inlineSize: '8rem' }}><span>4 : 3</span></AspectRatio>
+        </div>
+      </section>)}
+      {gate('toolbar', 'Toolbar', <section aria-label="Toolbar" data-component="toolbar">
+        <h2>Toolbar</h2>
+        <Toolbar aria-label="Preset editor">
+          <ToolbarButton>Undo</ToolbarButton>
+          <ToolbarButton>Redo</ToolbarButton>
+          <ToolbarSeparator />
+          <ToolbarToggleGroup type="single" defaultValue="light" aria-label="Theme">
+            <ToolbarToggleItem value="light">Light</ToolbarToggleItem>
+            <ToolbarToggleItem value="dark">Dark</ToolbarToggleItem>
+          </ToolbarToggleGroup>
+          <ToolbarSeparator />
+          <ToolbarToggleGroup type="multiple" defaultValue={['grid']} aria-label="Guides">
+            <ToolbarToggleItem value="grid">Grid</ToolbarToggleItem>
+          </ToolbarToggleGroup>
+          <ToolbarLink href="#preview">Open preview</ToolbarLink>
+          <ToolbarOverflow />
+        </Toolbar>
       </section>)}
       {gate('code-block', 'Code Block', <section aria-label="Code Block" data-component="code-block">
         <h2>Code Block</h2>
@@ -630,6 +694,20 @@ export function PresetGallery({
             <CheckboxOption title="Include examples" description="Adds examples next to each component." defaultChecked />
             <CheckboxOption appearance="card" title="Vite" description="React 19" />
           </div>,
+        )}
+        {gate(
+          'checkbox',
+          'Checkbox',
+          <FieldSet data-component="checkbox~group">
+            <FieldLegend>Overlays to install</FieldLegend>
+            <CheckboxGroup defaultValue={['dialog', 'popover']}>
+              <CheckboxGroupParent title="All overlays" />
+              <CheckboxOption value="dialog" title="Dialog" />
+              <CheckboxOption value="popover" title="Popover" />
+              <CheckboxOption value="sheet" title="Sheet" />
+              <CheckboxOption value="tooltip" title="Tooltip" />
+            </CheckboxGroup>
+          </FieldSet>,
         )}
         {gate(
           'switch',

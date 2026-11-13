@@ -11,7 +11,7 @@ it('shows every catalog component across the pages', () => {
   const names = new Set(
     sceneOptions.flatMap((option) => sceneComponents[option.value].split(', ')),
   )
-  expect(names.size).toBe(53)
+  expect(names.size).toBe(57)
 })
 
 it('still names the components of every scene the protocol accepts', () => {
