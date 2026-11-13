@@ -15,6 +15,7 @@ import {
   presetFieldValue,
 } from '../model'
 import { browserColor } from '../contrast'
+import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
 import {
   accentSchemes,
   baseSchemes,
@@ -172,7 +173,9 @@ export function TokenList({
                 <span className="preset-swatch" aria-hidden="true" style={{ backgroundColor: dark }} />
               </button>
               <div id={colorPanelId(key)} popover="auto" className="preset-popover" aria-label={`${name} colors`} role="dialog">
-                <p className="preset-popover-title">{name}</p>
+                <ScrollArea aria-labelledby={`${colorPanelId(key)}-title`} className="www-scroll preset-popover-scroll">
+                <div className="preset-popover-body">
+                <p id={`${colorPanelId(key)}-title`} className="preset-popover-title">{name}</p>
                 {(['light', 'dark'] as const).map((mode) => {
                   const path: PresetEditablePath = `/modes/${mode}/${key}`,
                     value = mode === 'light' ? light : dark,
@@ -206,6 +209,8 @@ export function TokenList({
                 })}
                 {glassEdge && <p id="preset-glass-edge-hint" className="preset-popover-hint">{glassControlHints.border}</p>}
                 <p className="preset-popover-hint">Hex such as #1d4ed8, or OKLCH such as oklch(55% 0.2 260).</p>
+                </div>
+                </ScrollArea>
               </div>
             </li>
           )

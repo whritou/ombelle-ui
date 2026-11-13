@@ -3,6 +3,7 @@
 import { PanelRightClose } from 'lucide-react'
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import styles from './editor-shell.module.css'
+import { ScrollArea } from '../generated/ui/components/ui/scroll-area'
 
 export type DrawerTab = {
   id: string
@@ -135,7 +136,9 @@ export function ReviewDrawer({
           aria-labelledby={`${active.id}-tab`}
           className={styles.panel}
         >
-          {active.content}
+          <ScrollArea aria-labelledby={`${active.id}-tab`} className={`www-scroll ${styles.panelScroll}`}>
+            <div className={styles.panelContent}>{active.content}</div>
+          </ScrollArea>
         </div>
       ) : null}
     </aside>

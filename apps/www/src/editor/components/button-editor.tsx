@@ -15,6 +15,7 @@ import type { MeasuredParts } from '../catalog-preview-protocol'
 import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
 import { ComponentNavigation } from './component-navigation'
+import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
 import { EditorTabs } from './editor-tabs'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import { useRecipeBatch } from '../use-recipe-batch'
@@ -249,8 +250,12 @@ export function ButtonEditor() {
       <EditorTabs active={view.panel} onChange={(panel) => setView((previous) => ({ ...previous, panel }))} />
       <div className={styles.workspace}>
         <aside className={`${styles.rail} ${view.panel !== 'customize' ? styles.mobileHiddenRail : ''}`} aria-label="Button inspector">
+          <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
+          <div className={styles.railContent}>
           <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit} measured={measured.button} previewMode={view.mode}
             onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
+          </div>
+        </ScrollArea>
         </aside>
         <div className={`${styles.primary} ${view.panel === 'customize' ? styles.mobileHiddenPrimary : ''}`}>
           <section className={`${styles.previewSection} ${view.panel === 'code' ? styles.mobileHiddenPreview : ''}`} aria-labelledby="preview-title">

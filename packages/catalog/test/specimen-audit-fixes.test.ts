@@ -288,3 +288,86 @@ describe('the 0.7.3 batch 6b and 6c variants', () => {
     expect(declarations(read(`table/${family}.css`), "[data-slot='table-head']:is([data-table-sticky] *)")['box-shadow']).toMatch(/(^|, )0 6px 6px -6px /)
   })
 })
+
+describe('the 0.7.5 primitives', () => {
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+  it.each(families)('%s Collapsible keeps the open chevron turned under reduced motion, so open and closed stay apart', family => {
+    // Reduced motion removes the transition only: the end state is information.
+    postcss.parse(read(`collapsible/${family}.css`)).walkAtRules('media', media => {
+      if (!/prefers-reduced-motion/.test(media.params)) return
+      media.walkDecls('rotate', () => { throw new Error('a reduced-motion rule resets the chevron rotation') })
+    })
+    expect(declarations(read(`collapsible/${family}.css`), "[data-slot='collapsible-icon']:is([data-state='open'] > *)").rotate).toBe('180deg')
+  })
+  describe('Scroll Area bottom fade', () => {
+    // The boards fade the last 28px into the card while more content waits below, and not at the end or when nothing scrolls.
+    const fade = (family: string) => {
+      let found: Record<string, string> | undefined
+      postcss.parse(read(`scroll-area/${family}.css`)).walkRules(rule => {
+        // The base rule, not the one inside the reduced-motion block.
+        if (!found && rule.parent?.type === 'atrule' && (rule.parent as postcss.AtRule).name === 'supports' && rule.selectors.includes("[data-slot='scroll-area-viewport']::after")) {
+          found = {}
+          rule.walkDecls(decl => { found![decl.prop] = decl.value })
+        }
+      })
+      return found
+    }
+    it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle'])('%s fades the viewport end into the card without catching the pointer', family => {
+      expect(fade(family)).toMatchObject({
+        position: 'sticky', 'inset-block-end': '0', 'block-size': '28px', 'margin-block-start': '-28px', 'pointer-events': 'none', opacity: '0',
+        // A consumer whose area sits on another surface sets --scroll-area-fade to that surface's colour.
+        background: 'linear-gradient(to bottom, transparent, var(--scroll-area-fade, var(--card)))',
+      })
+      const css = read(`scroll-area/${family}.css`).replace(/\s+/g, ' ')
+      expect(css).toContain('animation-timeline: scroll(nearest block)')
+      expect(css).toContain('animation-range: calc(100% - 28px) 100%')
+    })
+    it('liquid glass has no fade, as on its board', () => {
+      expect(fade('liquid-glass')).toBeUndefined()
+    })
+  })
+  it.each(families)('%s Button Group falls back to 1px wherever it reads --border-width, as the -1px join margin does', family => {
+    expect(read(`button-group/${family}.css`)).not.toMatch(/var\(--border-width\)/)
+  })
+  it.each([['ombelle', '999px'], ['neo-brutalism', 'var(--radius)']])('%s Button Group casts one shadow for the whole group, as its board does, and takes it off the buttons', (family, radius) => {
+    const css = read(`button-group/${family}.css`)
+    const group = declarations(css, "[data-slot='button-group']")
+    expect(group['box-shadow']).toBe('var(--shadow-x) var(--shadow-y) 0 var(--shadow-color, var(--border))')
+    expect(group['border-radius']).toBe(radius)
+    // A button's own shadow and hover lift would split the group's shadow at the joins.
+    const button = "[data-slot='button-group'][data-orientation] > :is(button, a, [role='button'])"
+    expect(declarations(css, button)).toMatchObject({ 'box-shadow': 'none', transform: 'none' })
+    expect(declarations(css, `${button}:not(:disabled):is(:hover, :active)`)).toMatchObject({ 'box-shadow': 'none', transform: 'none' })
+  })
+  describe('board comparison, measured on the audit page against the 0.7.5 boards', () => {
+    it('minimalist draws Collapsible, Scroll Area and outline Item edges in the strong line colour of the board (--input) and rounds Toggle and Collapsible to 4px', () => {
+      expect(declarations(read('collapsible/minimalist.css'), "[data-slot='collapsible']")).toMatchObject({ border: '1px solid var(--input)', 'border-radius': '4px' })
+      expect(declarations(read('scroll-area/minimalist.css'), "[data-slot='scroll-area']").border).toBe('1px solid var(--input)')
+      expect(declarations(read('item/minimalist.css'), "[data-slot='item'][data-variant='outline']")['border-color']).toBe('var(--input)')
+      expect(declarations(read('item/minimalist.css'), "[data-slot='item-media'][data-variant='image']").border).toBe('1px solid var(--input)')
+      expect(declarations(read('toggle/minimalist.css'), "[data-slot='toggle']")['border-radius']).toBe('4px')
+    })
+    it('flat rounds Toggle and Collapsible to 10px and Item media to 12px, and sets the Item title at 800', () => {
+      expect(declarations(read('toggle/flat.css'), "[data-slot='toggle']")['border-radius']).toBe('10px')
+      expect(declarations(read('collapsible/flat.css'), "[data-slot='collapsible']")['border-radius']).toBe('10px')
+      expect(declarations(read('item/flat.css'), "[data-slot='item-media'][data-variant='image']")['border-radius']).toBe('12px')
+      expect(declarations(read('item/flat.css'), "[data-slot='item-title']")['font-weight']).toBe('800')
+    })
+    it('neo-brutalism leaves the Collapsible without a shadow, as on its board', () => {
+      expect(declarations(read('collapsible/neo-brutalism.css'), "[data-slot='collapsible']")['box-shadow']).toBeUndefined()
+    })
+  })
+  it.each([['flat', 'var(--primary)'], ['minimalist', 'var(--input)'], ['ombelle', 'var(--border)'], ['neo-brutalism', 'var(--border)'], ['liquid-glass', 'var(--input)']])('%s Button Group rules between outline buttons in the colour of their edge, not the primary mix', (family, colour) => {
+    const css = read(`button-group/${family}.css`)
+    expect(declarations(css, "[data-slot='button-group-separator']").background).toMatch(/color-mix\(in srgb, var\(--primary-foreground\) 45%, var\(--primary\)\)/)
+    expect(declarations(css, "[data-slot='button-group-separator']:is([data-variant='outline'] + *)").background).toBe(colour)
+  })
+  it.each(['ombelle', 'neo-brutalism'])('%s Button Group casts no shadow behind ghost or link buttons, which cast none themselves', family => {
+    // A group of quiet buttons (the site's History group) would otherwise show a shadow band with no edge in front of it.
+    expect(declarations(read(`button-group/${family}.css`), "[data-slot='button-group']:has(> [data-variant='ghost'], > [data-variant='link'])"))
+      .toEqual({ 'box-shadow': 'none' })
+  })
+  it('ombelle vertical Button Group shadow follows the corners of the end buttons, not half the group width', () => {
+    expect(declarations(read('button-group/ombelle.css'), "[data-slot='button-group'][data-orientation='vertical']")['border-radius']).toBe('calc(var(--control-height) / 2)')
+  })
+})

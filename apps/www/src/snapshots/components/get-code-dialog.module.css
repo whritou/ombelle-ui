@@ -4,8 +4,6 @@
   margin: auto;
   height: fit-content;
   width: min(34rem, calc(100vw - 32px));
-  max-height: calc(100dvh - 32px);
-  overflow: auto;
   padding: 0;
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -17,7 +15,14 @@
   background: color-mix(in oklab, var(--foreground) 45%, transparent);
   backdrop-filter: blur(4px);
 }
-.body {
+/* The dialog's body is a catalog Scroll Area: the max-height sits on its root, inside the dialog's 1px border. */
+.body[data-slot='scroll-area'] {
+  max-height: calc(100dvh - 34px);
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+}
+.bodyContent {
   display: grid;
   gap: 0;
 }

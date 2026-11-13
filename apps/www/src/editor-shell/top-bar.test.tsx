@@ -29,6 +29,22 @@ it('EditorTopBar renders the name field, status and one primary action', () => {
   expect(html).toContain('Rev 3')
 })
 
+it('EditorTopBar groups Undo and Redo as a History button group, keeping their disabled state', () => {
+  const html = renderToStaticMarkup(
+    <EditorTopBar crumbs={['A']} nameField={{ id: 'n', label: 'Name', value: 'x', maxLength: 9, onChange: noop }}
+      revision="r1" status="" undo={history} redo={{ ...history, disabled: true }}
+      menu={{ label: 'More', items: [] }} primary={null} />,
+  )
+  const group = /<div role="group" aria-label="History"[^>]*data-slot="button-group"[^>]*>(.*?)<\/div>/.exec(html)
+  expect(group).not.toBeNull()
+  const buttons = group![1]!.match(/<button[^>]*>/g)!
+  expect(buttons).toHaveLength(2)
+  expect(buttons[0]).toContain('aria-label="Undo"')
+  expect(buttons[0]).not.toContain('disabled')
+  expect(buttons[1]).toContain('aria-label="Redo"')
+  expect(buttons[1]).toContain('disabled=""')
+})
+
 it('OverflowMenu puts destructive items last after a separator', () => {
   const html = renderToStaticMarkup(
     <OverflowMenu

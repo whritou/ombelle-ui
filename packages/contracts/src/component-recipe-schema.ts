@@ -3619,6 +3619,296 @@ export const componentRecipeSchema = {
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "toggle"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "enum": [
+                "default",
+                "outline"
+              ],
+              "default": "default",
+              "title": "Variant"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "default": "default",
+              "title": "Size"
+            },
+            "iconOnly": {
+              "type": "boolean",
+              "default": false,
+              "title": "Icon only"
+            },
+            "pressed": {
+              "type": "boolean",
+              "default": true,
+              "title": "Pressed"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Show grid"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "collapsible"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "defaultOpen": {
+              "type": "boolean",
+              "default": true,
+              "title": "Open by default"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Advanced shadow",
+              "pattern": "\\S"
+            },
+            "rows": {
+              "type": "array",
+              "title": "Rows",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              },
+              "default": [
+                "Offset X",
+                "Offset Y"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "rows"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "scroll-area"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "orientation": {
+              "enum": [
+                "vertical",
+                "horizontal",
+                "both"
+              ],
+              "default": "vertical",
+              "title": "Orientation"
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 120,
+              "maximum": 480,
+              "default": 200,
+              "title": "Height"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Components"
+            },
+            "itemCount": {
+              "type": "integer",
+              "minimum": 4,
+              "maximum": 40,
+              "default": 12,
+              "title": "Item count"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "itemCount"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "button-group"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "toolbar",
+                "split",
+                "input"
+              ],
+              "default": "split",
+              "title": "Mode"
+            },
+            "orientation": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ],
+              "default": "horizontal",
+              "title": "Orientation"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Install actions"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 1,
+              "maxItems": 5,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              },
+              "default": [
+                "Install",
+                "More install options"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "item"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "enum": [
+                "default",
+                "outline",
+                "muted"
+              ],
+              "default": "outline",
+              "title": "Variant"
+            },
+            "size": {
+              "enum": [
+                "default",
+                "sm"
+              ],
+              "default": "default",
+              "title": "Size"
+            },
+            "media": {
+              "enum": [
+                "none",
+                "icon",
+                "image"
+              ],
+              "default": "icon",
+              "title": "Media"
+            },
+            "actions": {
+              "type": "boolean",
+              "default": true,
+              "title": "Actions"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "maxLength": 200,
+              "default": "Ombelle",
+              "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 200,
+              "default": "Built-in · stable in light and dark"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "description"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

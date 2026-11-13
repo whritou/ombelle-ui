@@ -118,7 +118,7 @@ for (const family of supportedStyleFamilies)
         frame(page).getByRole('button', { name: 'Saving…' }),
       ).toHaveAttribute('aria-busy', 'true')
       await expect(
-        frame(page).getByRole('tab', { name: 'Overview' }),
+        frame(page).getByRole('tablist', { name: 'Project sections' }).getByRole('tab', { name: 'Overview' }),
       ).toHaveAttribute('aria-selected', 'true')
       await frame(page).getByTestId('preset-button').focus()
       expect(
@@ -841,10 +841,10 @@ test('supports keyboard editing and 320 pixel reflow', async ({
   await page.keyboard.press('Enter')
   await expect(page.getByRole('status')).toHaveText('Export copied.')
   await tabTo(page, page.getByLabel('Export text'))
-  const dependencies = page.locator('summary', { hasText: 'Dependencies' })
+  const dependencies = page.getByRole('button', { name: 'Dependencies', exact: true })
   await tabTo(page, dependencies)
   await page.keyboard.press('Enter')
-  await expect(dependencies.locator('..')).toHaveAttribute('open', '')
+  await expect(dependencies).toHaveAttribute('aria-expanded', 'true')
   const install = page.getByLabel('Installation path', { exact: true })
   await tabTo(page, install)
   await page.keyboard.press('ArrowDown')

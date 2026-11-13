@@ -70,8 +70,11 @@ for (const [id, field] of Object.entries(fields)) test(`edits and restores ${id}
     await expect(page.getByRole('tabpanel')).toContainText('--glass-blur: 17px')
     await expect(page.getByRole('tabpanel')).toContainText('padding-inline: 24px')
     const tabs = page.getByRole('tablist', { name: 'Generated artifacts' })
-    const space = await tabs.evaluate(element =>
-      element.nextElementSibling!.getBoundingClientRect().top - element.getBoundingClientRect().bottom)
+    // The tab strip sits in a Scroll Area; the gap is measured from that area to the code window after it.
+    const space = await tabs.evaluate(element => {
+      const area = element.closest('[data-slot="scroll-area"]')!
+      return area.nextElementSibling!.getBoundingClientRect().top - area.getBoundingClientRect().bottom
+    })
     expect(space).toBeGreaterThanOrEqual(8)
   }
   if (id === 'progress') {

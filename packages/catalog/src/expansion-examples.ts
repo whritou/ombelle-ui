@@ -14,6 +14,21 @@ export function Example(){return <ContextMenu><ContextMenuTrigger variant="zone"
 export function Example(){return <p>Built with <HoverCard><HoverCardTrigger href="https://github.com/ombelle">@ombelle</HoverCardTrigger><HoverCardContent><strong>Ombelle UI</strong><p>Reviewed React components with deterministic presets.</p><HoverCardArrow /></HoverCardContent></HoverCard> presets.</p>}`,
   slider: `import { Slider, SliderTicks } from '@/components/ui/slider'
 export function Example(){return <><Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => value + ' pixels'} /><Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} /><SliderTicks values={[0, 25, 50, 75, 100]} /></>}`,
+  collapsible: `import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+export function Example(){return <Collapsible><CollapsibleTrigger>Advanced shadow</CollapsibleTrigger><CollapsibleContent><p>Offset X and Offset Y</p></CollapsibleContent></Collapsible>}`,
+  'scroll-area': `import { ScrollArea } from '@/components/ui/scroll-area'
+export function Example(){return <ScrollArea aria-label="Components" style={{ blockSize: 200 }}><ul><li>Accordion</li><li>Alert</li><li>Alert Dialog</li><li>Avatar</li><li>Badge</li><li>Breadcrumb</li></ul></ScrollArea>}`,
+  item: `import { Item, ItemGroup, ItemMedia, ItemContent, ItemTitle, ItemDescription, ItemActions } from '@/components/ui/item'
+export function Example(){return <ItemGroup aria-label="Presets"><Item variant="outline"><ItemMedia variant="icon" aria-hidden="true">O</ItemMedia><ItemContent><ItemTitle>Ombelle</ItemTitle><ItemDescription>Built-in · stable in light and dark</ItemDescription></ItemContent><ItemActions><button type="button">Apply</button></ItemActions></Item><Item variant="muted" asChild><a href="/presets/studio-warm"><ItemContent><ItemTitle>Studio warm</ItemTitle><ItemDescription>Your preset · edited 2 h ago</ItemDescription></ItemContent></a></Item></ItemGroup>}`,
+  'button-group': `import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '@/components/ui/button-group'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { ChevronDownIcon } from 'lucide-react'
+// Radix form (asChild). In the Base UI edition use <DropdownMenuTrigger render={<Button size="icon" aria-label="More install options" />}>.
+export function Example(){return <><ButtonGroup aria-label="Install"><Button>Install</Button><DropdownMenu><DropdownMenuTrigger asChild><Button size="icon" aria-label="More install options"><ChevronDownIcon aria-hidden="true" /></Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem>Install with npm</DropdownMenuItem><DropdownMenuItem>Install with pnpm</DropdownMenuItem></DropdownMenuContent></DropdownMenu></ButtonGroup><ButtonGroup aria-label="History"><Button variant="outline">Undo</Button><ButtonGroupSeparator /><Button variant="outline">Redo</Button></ButtonGroup><ButtonGroup aria-label="Website"><ButtonGroupText>https://</ButtonGroupText><Input aria-label="Domain" defaultValue="ombelle.dev" /><Button variant="outline">Copy</Button></ButtonGroup></>}`,
+  toggle: `import { Toggle } from '@/components/ui/toggle'
+export function Example(){return <><Toggle defaultPressed>Show grid</Toggle><Toggle variant="outline" aria-label="Pin preview">Pin</Toggle></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 export function Example(){return <ToggleGroup type="single" defaultValue="week" aria-label="Calendar view"><ToggleGroupItem value="day">Day</ToggleGroupItem><ToggleGroupItem value="week">Week</ToggleGroupItem><ToggleGroupItem value="month">Month</ToggleGroupItem></ToggleGroup>}`,
   'tag-input': `import { TagInput, TagInputList, TagInputInput } from '@/components/ui/tag-input'

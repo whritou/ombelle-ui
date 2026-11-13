@@ -6,6 +6,7 @@ import {
   type PackageManager,
 } from '../install-command'
 import styles from './get-code-dialog.module.css'
+import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
 
 export type CodeScope = { id: string; label: string; description: string }
 export type CodeSummary = ReactNode | ((close: () => void) => ReactNode)
@@ -119,7 +120,8 @@ export function GetCodeDialog({
         if (event.target === dialog.current) onClose()
       }}
     >
-      <div className={styles.body}>
+      <ScrollArea aria-labelledby="get-code-heading" className={`www-scroll ${styles.body}`}>
+      <div className={styles.bodyContent}>
         <div className={styles.head}>
           <h2 id="get-code-heading" className={styles.title}>
             Get code
@@ -277,6 +279,7 @@ export function GetCodeDialog({
           {children && <div className={styles.secondary}>{children}</div>}
         </div>
       </div>
+      </ScrollArea>
     </dialog>,
     document.body,
   )

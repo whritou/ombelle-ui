@@ -60,6 +60,9 @@ import {
 } from '../generated/preset-gallery/components/ui/tabs'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../generated/preset-gallery/components/ui/empty'
 import { Meter, MeterLabel, MeterValue } from '../generated/preset-gallery/components/ui/meter'
+import { Toggle } from '../generated/preset-gallery/components/ui/toggle'
+import { ScrollArea } from '../generated/preset-gallery/components/ui/scroll-area'
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '../generated/preset-gallery/components/ui/item'
 import { gate, type SceneProps } from './shared'
 
 const rows = [
@@ -109,6 +112,7 @@ export function ProjectsScene(props: SceneProps) {
             <p className="scene-muted">12 projects across 3 teams.</p>
           </div>
           <div className="scene-actions">
+            {show('toggle', 'Toggle', <Toggle variant="outline">Show grid</Toggle>)}
             {show(
               'input-group',
               'Input Group',
@@ -281,6 +285,35 @@ export function ProjectsScene(props: SceneProps) {
           )}
         </CardFooter>
       </Card>
+      {show(
+        'item',
+        'Item',
+        <Card appearance="outlined">
+          <CardContent>
+            {show(
+              'scroll-area',
+              'Scroll Area',
+              <ScrollArea aria-label="Project list" style={{ blockSize: '14rem' }}>
+                <ItemGroup>
+                  {rows.map((row) => (
+                    <Item key={row.name} variant="outline" size="sm" asChild>
+                      <a href={`#project-${slug(row.name)}`}>
+                        <ItemContent>
+                          <ItemTitle>{row.name}</ItemTitle>
+                          <ItemDescription>{row.owner}, updated {row.updated}</ItemDescription>
+                        </ItemContent>
+                      </a>
+                      <ItemActions>
+                        <Badge size="sm" appearance="soft" variant={row.alert ? 'destructive' : 'success'}>{row.status}</Badge>
+                      </ItemActions>
+                    </Item>
+                  ))}
+                </ItemGroup>
+              </ScrollArea>,
+            )}
+          </CardContent>
+        </Card>,
+      )}
       <div className="scene-columns">
         {show(
           'card',

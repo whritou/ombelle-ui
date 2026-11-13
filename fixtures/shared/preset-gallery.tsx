@@ -104,6 +104,11 @@ import { Field, FieldLabel, FieldControl, FieldDescription, FieldError } from '@
 import { Meter, MeterLabel, MeterValue, MeterSegment, MeterLegend, MeterLegendItem } from '@/components/ui/meter'
 import { Slider, SliderTicks } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Toggle } from '@/components/ui/toggle'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '@/components/ui/button-group'
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { Chip, ChipGroup, ChipRemove } from '@/components/ui/chip'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
@@ -340,6 +345,44 @@ export function PresetGallery({
             <ContextMenuItem variant="destructive">Delete<ContextMenuShortcut>Del</ContextMenuShortcut></ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+      </section>)}
+      {gate('toggle', 'Toggle', <section aria-label="Toggle" data-component="toggle">
+        <h2>Toggle</h2>
+        <Toggle aria-label="Bold" defaultPressed><b aria-hidden="true">B</b></Toggle>
+        <Toggle variant="outline" size="sm">Show grid</Toggle>
+        <Toggle disabled>Disabled toggle</Toggle>
+      </section>)}
+      {gate('collapsible', 'Collapsible', <section aria-label="Collapsible" data-component="collapsible">
+        <h2>Collapsible</h2>
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger>Advanced</CollapsibleTrigger>
+          <CollapsibleContent><p>Shadow offsets and blur.</p></CollapsibleContent>
+        </Collapsible>
+        <Collapsible>
+          <CollapsibleTrigger>Closed by default</CollapsibleTrigger>
+          <CollapsibleContent><p>Hidden until opened.</p></CollapsibleContent>
+        </Collapsible>
+      </section>)}
+      {gate('scroll-area', 'Scroll Area', <section aria-label="Scroll Area" data-component="scroll-area">
+        <h2>Scroll Area</h2>
+        <ScrollArea aria-label="Release notes" style={{ blockSize: '8rem', inlineSize: '16rem' }}>
+          {Array.from({ length: 24 }, (_, index) => <p key={index}>Release note {index + 1}</p>)}
+        </ScrollArea>
+      </section>)}
+      {gate('button-group', 'Button Group', <section aria-label="Button Group" data-component="button-group">
+        <h2>Button Group</h2>
+        <ButtonGroup aria-label="Alignment"><Button variant="outline">Left</Button><Button variant="outline">Center</Button><Button variant="outline">Right</Button></ButtonGroup>
+        <ButtonGroup aria-label="Zoom"><ButtonGroupText>Zoom</ButtonGroupText><ButtonGroupSeparator /><Button variant="outline">100%</Button></ButtonGroup>
+      </section>)}
+      {gate('item', 'Item', <section aria-label="Item" data-component="item">
+        <h2>Item</h2>
+        <ItemGroup aria-label="Projects">
+          <Item variant="outline"><ItemMedia variant="icon" aria-hidden="true">P</ItemMedia><ItemContent><ItemTitle>Website refresh</ItemTitle><ItemDescription>On track, due Friday.</ItemDescription></ItemContent></Item>
+          <Item variant="outline" asChild>
+            <a href="#billing"><ItemContent><ItemTitle>Billing migration</ItemTitle><ItemDescription>Shipped 10 minutes ago.</ItemDescription></ItemContent></a>
+            <ItemActions><Button variant="outline" size="sm">Archive</Button></ItemActions>
+          </Item>
+        </ItemGroup>
       </section>)}
       </div>
       <section aria-label="Actions" data-component="button">

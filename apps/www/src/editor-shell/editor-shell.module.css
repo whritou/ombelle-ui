@@ -121,6 +121,17 @@
   cursor: pointer;
 }
 
+/* The catalog Button Group joins Undo and Redo; the site's own border width keeps the shared edge to one line. */
+.historyGroup {
+  --border-width: 1px;
+  flex: none;
+}
+
+.historyGroup .iconButton {
+  background: var(--card);
+  color: var(--foreground);
+}
+
 .iconButton:hover:not(:disabled) {
   border-color: var(--control);
   background: var(--muted);
@@ -469,10 +480,23 @@
 }
 
 .panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* The tab panel's content scrolls in a catalog Scroll Area that fills the drawer. */
+.panelScroll[data-slot='scroll-area'] {
   flex: 1;
   min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.panelContent {
   padding: 0.75rem;
-  overflow: auto;
 }
 
 /* The slider is the catalog Slider (apps/www/src/generated/ui), on the row's second line. */

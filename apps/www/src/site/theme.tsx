@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Moon, Sun } from 'lucide-react'
+import { Toggle } from '../generated/ui/components/ui/toggle'
 
 export const themeStorageKey = 'ombelle-theme'
 
@@ -25,8 +26,7 @@ export function useSiteDark(): boolean {
 export function ThemeToggle() {
   const [dark, setDark] = useState(false)
   useEffect(() => setDark(document.documentElement.classList.contains('dark')), [])
-  const toggle = () => {
-    const next = !dark
+  const toggle = (next: boolean) => {
     setDark(next)
     document.documentElement.classList.toggle('dark', next)
     try {
@@ -34,14 +34,14 @@ export function ThemeToggle() {
     } catch {}
   }
   return (
-    <button
-      type="button"
-      onClick={toggle}
+    <Toggle
+      variant="outline"
+      size="sm"
       aria-label="Dark theme"
-      aria-pressed={dark}
-      className="inline-flex size-11 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-muted active:bg-foreground/10"
+      pressed={dark}
+      onPressedChange={toggle}
     >
       {dark ? <Sun className="size-4" aria-hidden /> : <Moon className="size-4" aria-hidden />}
-    </button>
+    </Toggle>
   )
 }

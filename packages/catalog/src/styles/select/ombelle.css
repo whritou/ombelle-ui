@@ -280,3 +280,21 @@
   }
 }
 /* end 0.7.3 variants */
+/* 0.7.5 scrollbars */
+[data-slot='select-viewport'] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--input) transparent;
+}
+[data-slot='select-content'] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--input) transparent;
+}
+@media (forced-colors: active) {
+  [data-slot='select-viewport'] {
+    scrollbar-color: auto;
+  }
+  [data-slot='select-content'] {
+    scrollbar-color: auto;
+  }
+}
+/* end 0.7.5 scrollbars */

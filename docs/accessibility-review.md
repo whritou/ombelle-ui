@@ -185,6 +185,17 @@ New variants of Tabs, Table, Input, Textarea, Input Group, Pagination, Select, T
 - **Toast**: a toast is announced once; it waits while hovered or focused; a toast with an action stays until dismissed; a pending promise toast is not announced as an error.
 - **Sheet**: the bottom handle and the side grip are named separators with their values, and work with the keyboard.
 
+**Primitives (0.7.5)**
+
+Toggle, Collapsible, Scroll Area, Button Group and Item are not part of the 36 PR5 entries either. Review them on the preview "Primitives" section of the edition pages and in the website editor, and record them in their own rows below. Review the family scrollbars on the Command, Combobox, Select and Sheet lists with the same pass as Scroll Area.
+
+- **Toggle**: the button is announced with its name and as pressed or not; Space and Enter toggle it; an icon-only Toggle is named by its `aria-label`.
+- **Collapsible**: the trigger is announced as expanded or collapsed; Tab skips links and buttons in closed content and reaches them once it is open.
+- **Scroll Area**: the viewport is announced as a region with its name; it is a Tab stop only while its content overflows, and then the arrow, Page Up and Page Down keys scroll it.
+- **Button Group**: the group is announced with its name; each button is its own Tab stop; a separator is not a Tab stop; the ring of the focused button is whole.
+- **Item**: a link Item is announced as a link inside a list item; its actions are separate buttons reached after it, not inside it.
+- **List scrollbars**: the scrollbar on a Command, Combobox, Select or Sheet list does not add a Tab stop or change what the list announces.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -244,6 +255,17 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Hover Card | | | | | | | | | | |
 | Context Menu | | | | | | | | | | |
 | Calendar | | | | | | | | | | |
+
+#### Primitives (0.7.5)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Toggle | | | | | | | | | | |
+| Collapsible | | | | | | | | | | |
+| Scroll Area | | | | | | | | | | |
+| Button Group | | | | | | | | | | |
+| Item | | | | | | | | | | |
+| List scrollbars (Command, Combobox, Select, Sheet) | | | | | | | | | | |
 
 #### Variants, batch 6a (0.7.3)
 

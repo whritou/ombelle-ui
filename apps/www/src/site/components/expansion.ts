@@ -134,4 +134,34 @@ export const expansionDocs = {
     states: 'Default, active, disabled, focus', basis: 'Native nav, list and anchor links', client: false,
     usage: expansionExamples.pagination, minimumCli: '0.7.2',
   },
+  toggle: {
+    name: 'Toggle', description: 'A two-state button that stays pressed until it is pressed again.',
+    api: 'Toggle (variant default or outline, size sm, default or lg, pressed, defaultPressed, onPressedChange, disabled)',
+    states: 'Off, on, hover, focus, disabled', basis: 'Radix Toggle; Base UI Toggle in the Base UI edition', client: true,
+    usage: expansionExamples.toggle, minimumCli: '0.7.5',
+  },
+  collapsible: {
+    name: 'Collapsible', description: 'A trigger that shows or hides one region of content.',
+    api: 'Collapsible (open, defaultOpen, onOpenChange, disabled), CollapsibleTrigger, CollapsibleContent',
+    states: 'Closed, open, focus, disabled', basis: 'Radix Collapsible; Base UI Collapsible in the Base UI edition', client: true,
+    usage: expansionExamples.collapsible, minimumCli: '0.7.5',
+  },
+  'scroll-area': {
+    name: 'Scroll Area', description: 'A region with styled scrollbars that scrolls with the keyboard when its content overflows.',
+    api: 'ScrollArea (className, style), ScrollBar (orientation vertical or horizontal)',
+    states: 'Fits, overflowing, scrolling, focus', basis: 'Radix Scroll Area; Base UI Scroll Area in the Base UI edition', client: true,
+    usage: expansionExamples['scroll-area'], minimumCli: '0.7.5',
+  },
+  'button-group': {
+    name: 'Button Group', description: 'Joins related buttons and inputs into one control.',
+    api: 'ButtonGroup (orientation horizontal or vertical, aria-label), ButtonGroupSeparator, ButtonGroupText',
+    states: 'Default, hover, focus, disabled child, single child', basis: 'Native div with role="group"', client: false,
+    usage: expansionExamples['button-group'], minimumCli: '0.7.5',
+  },
+  item: {
+    name: 'Item', description: 'A row with media, a title, a description and actions.',
+    api: 'Item (variant default, outline or muted, size default or sm, asChild), ItemMedia (variant icon or image), ItemContent, ItemTitle, ItemDescription, ItemActions, ItemGroup, ItemSeparator',
+    states: 'Default, hover and focus when a link, with actions', basis: 'Native div, or a link through asChild', client: false,
+    usage: expansionExamples.item, minimumCli: '0.7.5',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

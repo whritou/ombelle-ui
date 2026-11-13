@@ -20,6 +20,11 @@ export const displayCatalogInstallNotice = `This recipe requires CLI ${displayCa
 // The 0.7.3 additions: display components and form controls.
 const displayComponents = new Set(['spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar'])
 
+export const catalog075MinimumCli = '0.7.5'
+export const catalog075InstallNotice = `This recipe requires CLI ${catalog075MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+// The 0.7.5 additions: primitives.
+const catalog075Components = new Set(['toggle', 'collapsible', 'scroll-area', 'button-group', 'item'])
+
 const expandedComponents = new Set(['input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast'])
 const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {
   badge: ['size', 'dot'], card: ['appearance'], table: ['density', 'striped'], tabs: ['appearance'],
@@ -59,6 +64,7 @@ export function componentRecipeInstallBlocked(
   installer: { version: string } = publishedInstaller,
 ): boolean {
   if (!catalogRecipeInstallerSupported(installer.version)) return true
+  if (catalog075Components.has(recipe.component)) return compareVersions(installer.version, catalog075MinimumCli) < 0
   if (displayComponents.has(recipe.component)) return compareVersions(installer.version, displayCatalogMinimumCli) < 0
   if (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0) return true
   if (compareVersions(installer.version, expandedCatalogMinimumCli) >= 0) return false
@@ -84,6 +90,7 @@ export function installableRecipeInstallNotice(
   if (recipe.schemaVersion === '2.0') {
     if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
     if (!componentRecipeInstallBlocked(recipe, installer)) return undefined
+    if (catalog075Components.has(recipe.component)) return catalog075InstallNotice
     return displayComponents.has(recipe.component) || (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0)
       ? displayCatalogInstallNotice : expandedCatalogInstallNotice
   }

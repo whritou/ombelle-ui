@@ -1,6 +1,10 @@
 # Ombelle UI foundation
 
-The catalog now includes **45 components**. Release 0.7.3 adds
+The catalog now includes **50 components**. Release 0.7.5 adds Toggle,
+Collapsible, Scroll Area, Button Group and Item in all five families, with both
+editions and recipe editors; install them with **0.7.5** or later. See the
+[primitives design](docs/superpowers/specs/2026-11-12-primitives-075-design.md)
+and the [evidence](docs/evidence/primitives-075.md). Release 0.7.3 adds
 Spinner, Kbd, Empty, Field, Meter (with segmented progress), Stepper, Slider,
 Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card,
 Context Menu and Calendar (with a Date Picker), with
@@ -57,7 +61,7 @@ pnpm exec playwright install chromium
 pnpm check:foundation
 ```
 
-On a machine with Microsoft Edge already installed, set OMBELLE_BROWSER_CHANNEL to msedge for a local run; otherwise the gate uses Playwright's bundled Chromium. The gate builds packages, runs unit/subprocess checks, prepares **40** standalone consumers using frozen fixture locks, checks types, audits, and builds the preview and consumer apps. The product app production build is checked separately. It retains the previous nineteen cases and adds fifteen minimalist cases: two npm, two pnpm, three Yarn (Classic and modern `node-modules`/Plug'n'Play), and eight Bun framework/lockfile/CLI-runtime combinations, plus four ombelle consumers (npm and pnpm, Vite and Next.js) and two pnpm liquid-glass consumers (Vite and Next.js). All framework builds use Node. The gate expects 681 browser cases across twenty-one specs, including sixteen downloaded-preset comparisons against private npm Vite/Next.js copies. Browser coverage compares pixels, normalized DOM, computed styles, hashes, keyboard behavior, and axe results for preview/npm/pnpm in both modes, measured for flat, minimalist and neo brutalism at the recorded evidence run; ombelle's full browser and consumer coverage is pending the foundation gate. Yarn/Bun coverage is installation, source parity, audit, and production builds. Bun's audit checks its whole dependency graph; other managers audit production dependencies. The gate needs registry access; installed components need no Ombelle service.
+On a machine with Microsoft Edge already installed, set OMBELLE_BROWSER_CHANNEL to msedge for a local run; otherwise the gate uses Playwright's bundled Chromium. The gate builds packages, runs unit/subprocess checks, prepares **40** standalone consumers using frozen fixture locks, checks types, audits, and builds the preview and consumer apps. The product app production build is checked separately. It retains the previous nineteen cases and adds fifteen minimalist cases: two npm, two pnpm, three Yarn (Classic and modern `node-modules`/Plug'n'Play), and eight Bun framework/lockfile/CLI-runtime combinations, plus four ombelle consumers (npm and pnpm, Vite and Next.js) and two pnpm liquid-glass consumers (Vite and Next.js). All framework builds use Node. The gate expects 684 browser cases across twenty-one specs, including sixteen downloaded-preset comparisons against private npm Vite/Next.js copies. Browser coverage compares pixels, normalized DOM, computed styles, hashes, keyboard behavior, and axe results for preview/npm/pnpm in both modes, measured for flat, minimalist and neo brutalism at the recorded evidence run; ombelle's full browser and consumer coverage is pending the foundation gate. Yarn/Bun coverage is installation, source parity, audit, and production builds. Bun's audit checks its whole dependency graph; other managers audit production dependencies. The gate needs registry access; installed components need no Ombelle service.
 
 The gate also runs `pnpm test:specimen-audit`, which measures every catalog component as installed in all five families, both editions and both modes; see [specimen audit evidence](docs/evidence/specimen-audit.md).
 

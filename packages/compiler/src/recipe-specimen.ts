@@ -91,6 +91,37 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('InputOTP', { maxLength: length, 'aria-label': content.label },
         ...(after > 0 ? [slots(0, after), node('InputOTPSeparator'), slots(after, length)] : [slots(0, length)]))
     }
+    case 'toggle':
+      // Recipes carry no icon set, so an icon-only toggle shows its initial and keeps its label as its name.
+      return node('Toggle', { variant: props.variant, size: props.size, defaultPressed: props.pressed, 'aria-label': props.iconOnly ? content.label : undefined },
+        props.iconOnly ? node('span', { 'aria-hidden': 'true' }, content.label.slice(0, 1)) : content.label)
+    case 'collapsible':
+      return node('Collapsible', { defaultOpen: props.defaultOpen },
+        node('CollapsibleTrigger', {}, content.label), node('CollapsibleContent', {}, ...content.rows.map(row => node('p', {}, row))))
+    case 'scroll-area': {
+      const orientation = props.orientation ?? 'vertical'
+      const rows = Array.from({ length: content.itemCount }, (_, index) => node('div', orientation === 'both' ? { style: { inlineSize: '40rem' } } : {}, `Item ${index + 1}`))
+      return node('ScrollArea', { 'aria-label': content.label, style: { blockSize: `${props.height ?? 200}px` } },
+        orientation === 'horizontal' ? node('div', { style: { display: 'flex', inlineSize: 'max-content', gap: '1rem' } }, ...rows) : node('div', {}, ...rows),
+        ...(orientation === 'vertical' ? [] : [node('ScrollBar', { orientation: 'horizontal' })]))
+    }
+    case 'button-group': {
+      // Native buttons and inputs marked for the Button Group styles: a recipe compiles only its own component.
+      const button = (text: string) => node('button', { type: 'button', 'data-button-group-button': '' }, text)
+      const [first = '', second = ''] = content.items
+      const children = props.mode === 'split'
+        ? [button(first), node('button', { type: 'button', 'aria-label': second, 'data-button-group-button': '' }, node('span', { 'aria-hidden': 'true' }, '▾'))]
+        : props.mode === 'input'
+          ? [node('input', { type: 'text', 'aria-label': content.label, 'data-button-group-input': '' }), button(first)]
+          : content.items.map(button)
+      return node('ButtonGroup', { orientation: props.orientation, 'aria-label': content.label }, ...children)
+    }
+    case 'item':
+      return node('Item', { variant: props.variant, size: props.size },
+        ...(props.media === 'none' ? [] : [node('ItemMedia', { variant: props.media },
+          props.media === 'image' ? node('img', { src: 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', alt: '' }) : node('span', { 'aria-hidden': 'true' }, content.title.slice(0, 1)))]),
+        node('ItemContent', {}, node('ItemTitle', {}, content.title), node('ItemDescription', {}, content.description)),
+        ...(props.actions ? [node('ItemActions', {}, node('button', { type: 'button', 'data-item-action': '' }, 'Apply'))] : []))
     case 'calendar': {
       // The installed component keeps the real today, so disablePast keeps working; the shown month
       // and selection are fixed, so the source and the stable hashes do not change day to day.

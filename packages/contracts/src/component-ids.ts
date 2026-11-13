@@ -44,5 +44,10 @@ export const supportedComponentIds = [
   'hover-card',
   'context-menu',
   'calendar',
+  'toggle',
+  'collapsible',
+  'scroll-area',
+  'button-group',
+  'item',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

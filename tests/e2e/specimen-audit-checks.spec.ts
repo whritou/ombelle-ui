@@ -16,6 +16,15 @@ test('overflow: squeezed button text is reported', async ({ page }) => {
   expect(await findOverflow([clean])).toEqual([])
 })
 
+test('overflow: a viewport that scrolls vertically and clips sideways is judged only on the sideways axis', async ({ page }) => {
+  // Radix Scroll Area sets overflow: hidden scroll on its viewport: the tall content scrolls, so only a wide spill is a defect.
+  const viewport = (content: string) => `<div style="overflow:hidden scroll;inline-size:200px;block-size:60px">${content}</div>`
+  await fixture(page, viewport('<div style="inline-size:400px;block-size:200px">wide</div>'), viewport('<div style="block-size:200px">tall</div>'))
+  const [defect, clean] = both(page)
+  expect((await findOverflow([defect])).map(f => f.check)).toContain('overflow')
+  expect(await findOverflow([clean])).toEqual([])
+})
+
 test('clipping: a shadow cut by a scroll container is reported', async ({ page }) => {
   const box = (padding: string) => `<div style="overflow:auto;padding:${padding}"><div style="block-size:40px;box-shadow:0 0 24px #000">x</div></div>`
   await fixture(page, box('0'), box('32px'))

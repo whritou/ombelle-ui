@@ -77,6 +77,8 @@ import { PresetChecks, presetWarningCount } from './preset-checks'
 import { presetScenes, type PresetBackdrop, type PresetScene } from '../preview-protocol'
 import { sceneComponents, sceneOptions } from '../preview-scenes'
 import styles from './preset-editor.module.css'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../generated/ui/components/ui/collapsible'
+import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
 import { useSiteDark } from '../../site/theme'
 
 const familyName = (family: StyleFamily) => familyNames[family]
@@ -419,6 +421,8 @@ export default function PresetEditor() {
       )}
       <div className={styles.workbench}>
         <section aria-label="Preset inspector" className={styles.panel}>
+          <ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
+          <div className={styles.panelContent}>
           <InspectorSection id="inspector-family" title="Style family">
             <FamilyPicker value={draft.family} onChange={family} />
           </InspectorSection>
@@ -463,6 +467,8 @@ export default function PresetEditor() {
           <InspectorSection id="inspector-depth" title="Depth & motion">
             <DesignControls {...controlProps} section="depth" />
           </InspectorSection>
+          </div>
+          </ScrollArea>
         </section>
         <div className={styles.canvas}>
           <div className={styles.preview}>
@@ -575,13 +581,17 @@ export default function PresetEditor() {
           finishConfirmation(false)
         }}
       >
+        <ScrollArea aria-labelledby="preset-confirm-heading" className={`www-scroll ${styles.confirmScroll}`}>
+        <div className={styles.confirmBody}>
         <h2 id="preset-confirm-heading">{confirmation?.label}</h2>
         <p className={styles.confirmText}>{confirmation?.description}</p>
         {confirmation && confirmation.changes.length > 0 && (
-          <details className={styles.confirmChanges}>
-            <summary>
+          <Collapsible className={styles.confirmChanges}>
+            <CollapsibleTrigger>
               Show the {confirmation.changes.length} values that change
-            </summary>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+            <ScrollArea aria-label="Changed values" className="www-scroll">
             <ul>
               {confirmation.changes.map((change) => (
                 <li key={change.path}>
@@ -599,7 +609,9 @@ export default function PresetEditor() {
                 </li>
               ))}
             </ul>
-          </details>
+            </ScrollArea>
+            </CollapsibleContent>
+          </Collapsible>
         )}
         <div className={styles.confirmActions}>
           <button
@@ -617,6 +629,8 @@ export default function PresetEditor() {
             Confirm change
           </button>
         </div>
+        </div>
+        </ScrollArea>
       </dialog>
       <dialog
         ref={identityDialog}
@@ -628,6 +642,8 @@ export default function PresetEditor() {
           identityOpener.current = null
         }}
       >
+        <ScrollArea aria-labelledby="preset-identity-heading" className={`www-scroll ${styles.confirmScroll}`}>
+        <div className={styles.confirmBody}>
         <h2 id="preset-identity-heading">ID &amp; revision</h2>
         <p className={styles.confirmText}>
           The id names this preset in your project. Raise the revision when you
@@ -657,6 +673,8 @@ export default function PresetEditor() {
             Done
           </button>
         </div>
+        </div>
+        </ScrollArea>
       </dialog>
     </main>
   )

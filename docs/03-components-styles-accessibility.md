@@ -29,6 +29,18 @@ build time, so its single choices are radio groups with one Tab stop. See the
 [form controls design](superpowers/specs/2026-11-10-form-controls-design.md)
 and the [evidence](evidence/form-controls-073.md).
 
+The 0.7.5 primitives add [Toggle](components/toggle.md),
+[Collapsible](components/collapsible.md), [Scroll Area](components/scroll-area.md),
+[Button Group](components/button-group.md) and [Item](components/item.md) in
+all five families, with Radix and Base UI editions and recipe editors. A Scroll
+Area viewport is a keyboard stop only while its content overflows, closed
+Collapsible content leaves the Tab order, and an Item link keeps its link role
+inside an Item Group. Command, Combobox, Select and Sheet draw the family
+scrollbar on their lists. The website's editors and docs use the compiled
+components. Liquid glass remains experimental. Installing the five needs CLI
+0.7.5 or later. See the [design](superpowers/specs/2026-11-12-primitives-075-design.md)
+and the [evidence](evidence/primitives-075.md).
+
 The 0.7.3 overlays add [Combobox](components/combobox.md),
 [Command](components/command.md), [Hover Card](components/hover-card.md) and
 [Context Menu](components/context-menu.md) in all five families, with Radix and

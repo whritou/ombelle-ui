@@ -29,14 +29,16 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
   expect(html).toContain(
     '<section aria-labelledby="glass-limitations-heading"><h2 id="glass-limitations-heading">Liquid glass limitations</h2>',
   )
-  for (const item of glassLimitations) expect(html).toContain(`<li>${item}</li>`)
+  // The limitations sit in a closed Collapsible: its trigger is a collapsed button and its content is not rendered.
+  expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>5 known limitations/)
+  expect(html).not.toContain('<details')
+  for (const item of glassLimitations) expect(html).not.toContain(`<li>${item}</li>`)
   // Every form control is experimental in glass now, so the panel no longer claims they are unavailable.
   expect(glassLimitations).toHaveLength(5)
   expect(html).not.toContain('form controls other than Input')
-  expect(html).toContain('<summary>5 known limitations</summary>')
   // The supported list follows the contracts' support table, so it names every component.
   expect(html).toContain(
-    'Liquid glass is experimental. Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea, Tooltip, Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination, Toast, Spinner, Kbd, Empty State, Field, Meter, Stepper, Slider, Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card, Context Menu and Calendar support it.',
+    'Liquid glass is experimental. Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea, Tooltip, Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination, Toast, Spinner, Kbd, Empty State, Field, Meter, Stepper, Slider, Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card, Context Menu, Calendar, Toggle, Collapsible, Scroll Area, Button Group and Item support it.',
   )
   // No component is unavailable in glass any more, so the panel names none.
   expect(html).not.toContain('unavailable')
@@ -123,6 +125,8 @@ it('keeps exports available for a compiled draft with a contrast warning', async
   )
   for (const name of ['Download preset JSON', 'Copy export'])
     expect(html).toContain(`<button type="button" aria-describedby="${glassReadoutId}">${name}</button>`)
+  expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Dependencies/)
+  expect(html).not.toContain('<details')
   expect(html).toContain(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ./project-preset.json`)
 })
 
