@@ -49,7 +49,7 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
   const measure = React.useCallback(() => {
     const root = rootRef.current
     if (!root) return
-    const entries = [...root.querySelectorAll<HTMLElement>(entrySelector)].filter(element => element.closest('[data-slot="toolbar"]') === root)
+    const entries = [...root.querySelectorAll<HTMLElement>(entrySelector)].filter(element => element.closest('[data-toolbar-root]') === root)
     const focused = entries.find(element => element.contains(document.activeElement))
     for (const element of entries) element.hidden = false
     const trigger = triggerRef.current
@@ -116,6 +116,7 @@ export function Toolbar({ className, ref, children, ...props }: ToolbarProps) {
           else if (ref) ref.current = node
         }}
         data-slot="toolbar"
+        data-toolbar-root=""
         className={cn(className)}
       >
         {children}
@@ -168,7 +169,7 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
   return (
     <DropdownMenuPrimitive.Root>
       <DropdownMenuPrimitive.Trigger asChild>
-        <ToolbarPrimitive.Button ref={triggerRef} aria-label={label} hidden={!show} data-slot="toolbar-overflow-trigger" className={cn(className)}>
+        <ToolbarPrimitive.Button ref={triggerRef} aria-label={label} hidden={!show} data-slot="toolbar-overflow-trigger" data-toolbar-overflow-trigger="" className={cn(className)}>
           <EllipsisIcon aria-hidden="true" />
         </ToolbarPrimitive.Button>
       </DropdownMenuPrimitive.Trigger>

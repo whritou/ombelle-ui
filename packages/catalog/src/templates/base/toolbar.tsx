@@ -51,7 +51,7 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
   const measure = React.useCallback(() => {
     const root = rootRef.current
     if (!root) return
-    const entries = [...root.querySelectorAll<HTMLElement>(entrySelector)].filter(element => element.closest('[data-slot="toolbar"]') === root)
+    const entries = [...root.querySelectorAll<HTMLElement>(entrySelector)].filter(element => element.closest('[data-toolbar-root]') === root)
     const focused = entries.find(element => element.contains(document.activeElement))
     for (const element of entries) element.hidden = false
     const trigger = triggerRef.current
@@ -121,13 +121,14 @@ export function Toolbar({ className, ref, children, onKeyDown, ...props }: Toolb
           else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = node
         }}
         data-slot="toolbar"
+        data-toolbar-root=""
         className={cn(className)}
         onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
           onKeyDown?.(event as never)
           if (event.defaultPrevented || (event.key !== 'Home' && event.key !== 'End')) return
           // Base UI's toolbar leaves Home and End off; they go to the first and last visible, enabled item.
-          const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[data-toolbar-item], [data-slot="toolbar-overflow-trigger"]')]
-            .filter(item => !item.hidden && item.closest('[data-slot="toolbar"]') === event.currentTarget && !item.hasAttribute('data-disabled') && !(item as HTMLButtonElement).disabled)
+          const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[data-toolbar-item], [data-toolbar-overflow-trigger]')]
+            .filter(item => !item.hidden && item.closest('[data-toolbar-root]') === event.currentTarget && !item.hasAttribute('data-disabled') && !(item as HTMLButtonElement).disabled)
           const target = event.key === 'Home' ? items[0] : items[items.length - 1]
           if (!target) return
           event.preventDefault()
@@ -218,7 +219,7 @@ export function ToolbarOverflow({ label = 'More', children, className }: Toolbar
   return (
     <MenuPrimitive.Root>
       <MenuPrimitive.Trigger
-        render={<ToolbarPrimitive.Button ref={triggerRef} aria-label={label} hidden={!show} data-slot="toolbar-overflow-trigger" className={cn(className)} />}
+        render={<ToolbarPrimitive.Button ref={triggerRef} aria-label={label} hidden={!show} data-slot="toolbar-overflow-trigger" data-toolbar-overflow-trigger="" className={cn(className)} />}
       >
         <EllipsisIcon aria-hidden="true" />
       </MenuPrimitive.Trigger>

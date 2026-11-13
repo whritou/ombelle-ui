@@ -61,7 +61,7 @@ export function Carousel({ slidesPerView = 1, className, children, ...props }: C
     setPosition,
     scrollTo: index => {
       const content = contentRef.current
-      const item = content?.querySelectorAll<HTMLElement>(':scope > [data-slot="carousel-item"]')[index]
+      const item = content?.querySelectorAll<HTMLElement>(':scope > [data-carousel-item]')[index]
       if (!content || !item) return
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       content.scrollTo({ left: item.offsetLeft, behavior: reduce ? 'auto' : 'smooth' })
@@ -94,7 +94,7 @@ export function CarouselContent({ className, children, onScroll, ...props }: Rea
   const measure = React.useCallback(() => {
     const content = contentRef.current
     if (!content) return
-    const slides = [...content.querySelectorAll<HTMLElement>(':scope > [data-slot="carousel-item"]')]
+    const slides = [...content.querySelectorAll<HTMLElement>(':scope > [data-carousel-item]')]
     const left = Math.abs(content.scrollLeft)
     let index = 0
     slides.forEach((slide, at) => {
@@ -144,6 +144,7 @@ export function CarouselItem({ index = 0, count = 1, className, ...props }: Caro
       aria-label={`${index + 1} of ${count}`}
       {...props}
       data-slot="carousel-item"
+      data-carousel-item=""
       className={cn(className)}
     />
   )

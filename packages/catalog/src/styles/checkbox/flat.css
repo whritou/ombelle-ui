@@ -172,6 +172,26 @@
 }
 /* end 0.7.5 variants */
 /* 0.7.6 parts */
+[data-checkbox-group-fieldset] {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+  margin: 0;
+  padding-block: 8px 10px;
+  padding-inline: 10px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-family);
+}
+[data-checkbox-group-legend] {
+  padding-inline: 6px;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
 [data-slot='checkbox-group'] {
   display: flex;
   flex-direction: column;

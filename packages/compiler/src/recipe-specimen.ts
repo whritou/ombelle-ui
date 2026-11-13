@@ -394,7 +394,8 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     case 'checkbox':
       if (props.group === 'parent') {
         const options = content.options ?? []
-        return node('FieldSet', {}, node('FieldLegend', {}, content.legend ?? ''),
+        // A recipe compiles only its own component: a native fieldset, marked for the Checkbox styles.
+        return node('fieldset', { 'data-checkbox-group-fieldset': '' }, node('legend', { 'data-checkbox-group-legend': '' }, content.legend ?? ''),
           node('CheckboxGroup', { defaultValue: options.slice(0, Math.floor(options.length / 2)).map((_, index) => `option-${index + 1}`) },
             node('CheckboxGroupParent', { title: 'All' }),
             ...options.map((option, index) => node('CheckboxOption', { value: `option-${index + 1}`, title: option }))))
