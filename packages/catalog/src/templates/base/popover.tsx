@@ -63,7 +63,7 @@ export function PopoverContent({
   style,
   side = 'bottom',
   align = 'center',
-  sideOffset = 6,
+  sideOffset,
   alignOffset,
   collisionPadding,
   sticky,
@@ -75,7 +75,7 @@ export function PopoverContent({
       <PopoverPrimitive.Positioner
         side={side}
         align={align}
-        sideOffset={sideOffset}
+        sideOffset={sideOffset ?? (hasArrow(props.children) ? ARROW_HEIGHT : 6)}
         alignOffset={alignOffset}
         collisionPadding={collisionPadding}
         sticky={sticky}
@@ -127,5 +127,46 @@ export function PopoverDescription({
 }: React.ComponentProps<'p'>) {
   return (
     <p {...props} data-slot="popover-description" className={cn(className)} />
+  )
+}
+
+// The arrow is 20 x 10: it fills the 10px gap PopoverContent leaves when it holds one.
+const ARROW_WIDTH = 20
+const ARROW_HEIGHT = 10
+const hasArrow = (children: React.ReactNode) =>
+  React.Children.toArray(children).some(child => React.isValidElement(child) && child.type === PopoverArrow)
+// Base UI places the arrow along the edge; its distance from the content and its turn come from the side.
+// The shape points down, and its base overlaps the content's border.
+const overlap = 'calc(var(--border-width, 1px) - ' + ARROW_HEIGHT + 'px)'
+const across = 'calc(var(--border-width, 1px) - ' + (ARROW_WIDTH + ARROW_HEIGHT) / 2 + 'px)'
+const arrowPlacement: Record<string, React.CSSProperties> = {
+  top: { bottom: overlap },
+  bottom: { top: overlap, rotate: '180deg' },
+  left: { right: across, rotate: '-90deg' },
+  right: { left: across, rotate: '90deg' },
+}
+
+/** A decorative arrow pointing at the trigger. Place it inside PopoverContent. */
+export function PopoverArrow({ className, ...props }: Omit<Part<typeof PopoverPrimitive.Arrow>, 'children'>) {
+  return (
+    <PopoverPrimitive.Arrow
+      data-slot="popover-arrow"
+      aria-hidden="true"
+      className={cn(className)}
+      render={(arrowProps, state) => (
+        <svg
+          {...(arrowProps as React.SVGProps<SVGSVGElement>)}
+          style={{ ...(arrowProps.style as React.CSSProperties), overflow: 'visible', ...arrowPlacement[state.side] }}
+          width={ARROW_WIDTH}
+          height={ARROW_HEIGHT}
+          viewBox="0 0 30 10"
+          preserveAspectRatio="none"
+        >
+          <polygon data-popover-arrow-fill="" points="0,0 30,0 15,10" />
+          <polyline data-popover-arrow-edge="" points="0,0 15,10 30,0" />
+        </svg>
+      )}
+      {...props}
+    />
   )
 }

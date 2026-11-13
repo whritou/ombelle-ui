@@ -399,3 +399,11 @@ describe('the 0.7.5 Code Block matches its boards', () => {
     expect(css).toMatch(/\[data-slot='code-block-command'\] \[data-token\] \{\s*color: CanvasText;/)
   })
 })
+
+describe('the 0.7.5 variants pass the specimen audit', () => {
+  it('neo-brutalism draws the focus ring of a checked Checkbox Option in the option text colour', () => {
+    // The checked option is filled with --secondary, where the --ring outline fell under 3:1 in dark mode.
+    expect(declarations(read('checkbox/neo-brutalism.css'), "[data-slot='checkbox-option']:has(> [data-state='checked']) > :first-child:focus-visible")['outline-color'])
+      .toBe('var(--secondary-foreground)')
+  })
+})

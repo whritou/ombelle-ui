@@ -8,6 +8,9 @@ import { catalogPresetRef } from '../catalog-draft'
 import { FamilyPicker } from './family-picker'
 import { CatalogAppearance } from './catalog-appearance'
 import { NumberInput } from '../../generated/ui/components/ui/number-input'
+import { Switch } from '../../generated/ui/components/ui/switch'
+import { CheckboxOption } from '../../generated/ui/components/ui/checkbox'
+import { Field as UiField, FieldControl, FieldLabel } from '../../generated/ui/components/ui/field'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 
 export function CatalogProperties({ recipe, measured = {}, previewMode = 'light', update }: {
@@ -51,11 +54,9 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
         const selected = props[key] as string[]
         return <fieldset key={key}>
           <legend>{field.title}</legend>
-          {choices.map(choice => <label key={choice.id} className="flex gap-2">
-            <input type="checkbox" checked={selected.includes(choice.id)} onChange={event => change('props', key,
-              event.target.checked ? [...selected, choice.id] : selected.filter(id => id !== choice.id))} />
-            {String(choice.label)}
-          </label>)}
+          {choices.map(choice => <CheckboxOption key={choice.id} title={String(choice.label)} checked={selected.includes(choice.id)}
+            onCheckedChange={checked => change('props', key,
+              checked === true ? [...selected, choice.id] : selected.filter(id => id !== choice.id))} />)}
         </fieldset>
       }
       if (key === 'collapsible' && props.type === 'multiple') return null
@@ -128,9 +129,10 @@ function Field({ field, value, update, protectedIds = [], createItem }: {
       {field.enum.map(option => <option key={option} value={String(option)}>{String(option)}</option>)}
     </select>
   </label>
-  if (field.type === 'boolean') return <label className="flex gap-2">
-    <input type="checkbox" checked={value === true} onChange={event => update(event.target.checked)} />{field.title}
-  </label>
+  if (field.type === 'boolean') return <UiField orientation="horizontal">
+    <FieldLabel>{field.title}</FieldLabel>
+    <FieldControl><Switch size="sm" checked={value === true} onCheckedChange={update} /></FieldControl>
+  </UiField>
   if (field.type === 'integer') return <IntegerField field={field} value={value} update={update} />
   if ((field.maxLength ?? 0) > 200) return <label className="be-stack">{field.title}
     <textarea maxLength={field.maxLength} value={String(value ?? '')} onChange={event => update(event.target.value)} />

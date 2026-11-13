@@ -4,15 +4,15 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
+import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox, CheckboxOption } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, AvatarOverflow, AvatarStatus } from '@/components/ui/avatar'
-import { Progress } from '@/components/ui/progress'
+import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGroupCount, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
@@ -517,6 +517,38 @@ const editorInputSwatches = [
   { label: 'Ink', value: 'oklch(0.22 0.012 275)' },
 ]
 
+/** The 0.7.5 variants, for tests/e2e/variants-075.spec.ts. */
+function VariantsScenario075() {
+  return (
+    <section aria-label="0.7.5 variants" data-testid="variants-075">
+      <form data-testid="v075-checkbox" onSubmit={event => event.preventDefault()}>
+        <CheckboxOption name="extras" value="examples" title="Include examples" description="Adds sample files" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.625rem', marginBlockStart: '0.75rem' }}>
+          <CheckboxOption appearance="card" name="extras" value="vite" title="Vite" description="React 19" />
+          <CheckboxOption appearance="card" disabled name="extras" value="next" title="Next.js" description="App Router" />
+        </div>
+      </form>
+      <Field orientation="horizontal" data-testid="v075-switch-row">
+        <FieldLabel>Reduced transparency</FieldLabel>
+        <FieldControl><Switch size="sm" /></FieldControl>
+      </Field>
+      <div data-testid="v075-progress" style={{ marginBlockStart: '0.75rem' }}>
+        <Progress value={64} size="lg" tone="success"><ProgressLabel>Publishing — on track</ProgressLabel><ProgressValue /></Progress>
+      </div>
+      <div data-testid="v075-popover" style={{ marginBlockStart: '0.75rem' }}>
+        <Popover>
+          <PopoverTrigger>Shadow help</PopoverTrigger>
+          <PopoverContent aria-labelledby="v075-popover-title">
+            <PopoverArrow />
+            <PopoverTitle id="v075-popover-title">Shadow offset</PopoverTitle>
+            <PopoverDescription>Applies to cards, buttons and menus in this family.</PopoverDescription>
+          </PopoverContent>
+        </Popover>
+      </div>
+    </section>
+  )
+}
+
 /** Number Input and Color Picker fixtures for tests/e2e/editor-inputs-075.spec.ts. */
 function EditorInputsScenario() {
   const [radius, setRadius] = React.useState<number | null>(12)
@@ -735,6 +767,7 @@ function CatalogExpansionScenario() {
         <CalendarScenario />
         <VariantsBasicsScenario />
         <VariantsMoreScenario />
+        <VariantsScenario075 />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

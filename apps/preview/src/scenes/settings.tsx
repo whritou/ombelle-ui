@@ -29,7 +29,7 @@ import {
   CardOption,
   CardTitle,
 } from '../generated/preset-gallery/components/ui/card'
-import { Checkbox } from '../generated/preset-gallery/components/ui/checkbox'
+import { Checkbox, CheckboxOption } from '../generated/preset-gallery/components/ui/checkbox'
 import { Input } from '../generated/preset-gallery/components/ui/input'
 import {
   InputGroup,
@@ -459,6 +459,29 @@ export function SettingsScene(props: SceneProps) {
                   <div className="scene-inline">
                     <Switch id="scene-mentions" defaultChecked />
                     <Label htmlFor="scene-mentions">Notify me when I am mentioned</Label>
+                  </div>,
+                )}
+                {show(
+                  'switch',
+                  'Switch',
+                  <div className="scene-fields">
+                    <Field orientation="horizontal">
+                      <FieldLabel>Reduced transparency</FieldLabel>
+                      <FieldControl><Switch size="sm" defaultChecked /></FieldControl>
+                    </Field>
+                    <Field orientation="horizontal">
+                      <FieldLabel>Show contrast readout</FieldLabel>
+                      <FieldControl><Switch size="sm" /></FieldControl>
+                    </Field>
+                  </div>,
+                )}
+                {show(
+                  'checkbox',
+                  'Checkbox',
+                  <div role="group" aria-label="Framework targets"
+                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(10rem, 1fr))', gap: '0.625rem' }}>
+                    <CheckboxOption appearance="card" title="Vite" description="React 19" defaultChecked />
+                    <CheckboxOption appearance="card" title="Next.js" description="App Router" />
                   </div>,
                 )}
                 {show(

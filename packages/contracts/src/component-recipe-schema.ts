@@ -470,6 +470,31 @@ export const componentRecipeSchema = {
               "type": "boolean",
               "default": false,
               "title": "Indeterminate"
+            },
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg"
+              ],
+              "title": "Size"
+            },
+            "tone": {
+              "enum": [
+                "default",
+                "success",
+                "warning",
+                "destructive"
+              ],
+              "title": "Tone"
+            },
+            "showLabel": {
+              "type": "boolean",
+              "title": "Show label"
+            },
+            "showValue": {
+              "type": "boolean",
+              "title": "Show value"
             }
           },
           "additionalProperties": false,
@@ -600,6 +625,14 @@ export const componentRecipeSchema = {
               ],
               "default": "unchecked",
               "title": "Initial state"
+            },
+            "option": {
+              "enum": [
+                "none",
+                "row",
+                "card"
+              ],
+              "title": "Option layout"
             }
           },
           "additionalProperties": false,
@@ -614,6 +647,11 @@ export const componentRecipeSchema = {
               "maxLength": 200,
               "default": "Accept terms",
               "pattern": "\\S"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "maxLength": 1000
             }
           },
           "additionalProperties": false,
@@ -1065,6 +1103,13 @@ export const componentRecipeSchema = {
               "type": "boolean",
               "default": false,
               "title": "Initially checked"
+            },
+            "size": {
+              "enum": [
+                "default",
+                "sm"
+              ],
+              "title": "Size"
             }
           },
           "additionalProperties": false,
@@ -1665,6 +1710,10 @@ export const componentRecipeSchema = {
               ],
               "default": "center",
               "title": "Alignment"
+            },
+            "arrow": {
+              "type": "boolean",
+              "title": "Arrow"
             }
           },
           "additionalProperties": false,

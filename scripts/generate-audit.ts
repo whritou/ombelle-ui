@@ -45,6 +45,10 @@ const recipeVariants: Partial<Record<ComponentId, Record<string, Record<string, 
   select: { multiple: { multiple: true, icons: true } },
   toast: { promise: { mode: 'promise' }, stack: { mode: 'stack' } },
   sheet: { handle: { side: 'bottom', handle: true }, resizable: { resizable: true } },
+  checkbox: { row: { option: 'row', checked: 'checked' }, card: { option: 'card', checked: 'checked' } },
+  switch: { sm: { size: 'sm', checked: true } },
+  progress: { labelled: { size: 'lg', tone: 'success', showLabel: true, showValue: true }, destructive: { tone: 'destructive', size: 'sm' } },
+  popover: { arrow: { arrow: true } },
 }
 
 function presetRef(family: StyleFamily): ComponentRecipe['presetRef'] {

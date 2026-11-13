@@ -25,7 +25,8 @@ export function PopoverAnchor({
 export function PopoverContent({
   className,
   align = 'center',
-  sideOffset = 6,
+  sideOffset,
+  children,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
   return (
@@ -33,10 +34,13 @@ export function PopoverContent({
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}
-        sideOffset={sideOffset}
+        // Radix adds the arrow's height to the offset, so the 10px gap needs no extra offset.
+        sideOffset={sideOffset ?? (hasArrow(children) ? 0 : 6)}
         className={cn(className)}
         {...props}
-      />
+      >
+        {children}
+      </PopoverPrimitive.Content>
     </PopoverPrimitive.Portal>
   )
 }
@@ -63,5 +67,38 @@ export function PopoverDescription({
 }: React.ComponentProps<'p'>) {
   return (
     <p {...props} data-slot="popover-description" className={cn(className)} />
+  )
+}
+
+// The arrow is 20 x 10: it fills the 10px gap PopoverContent leaves when it holds one.
+const ARROW_WIDTH = 20
+const ARROW_HEIGHT = 10
+const hasArrow = (children: React.ReactNode) =>
+  React.Children.toArray(children).some(child => React.isValidElement(child) && child.type === PopoverArrow)
+
+/** A decorative arrow pointing at the trigger. Place it inside PopoverContent. */
+export function PopoverArrow({
+  className,
+  style,
+  ...props
+}: Omit<React.ComponentProps<typeof PopoverPrimitive.Arrow>, 'children' | 'asChild'>) {
+  return (
+    <PopoverPrimitive.Arrow
+      data-slot="popover-arrow"
+      aria-hidden="true"
+      width={ARROW_WIDTH}
+      height={ARROW_HEIGHT}
+      className={cn(className)}
+      // Overlap the content's border so the arrow's base covers it.
+      style={{ translate: '0 calc(var(--border-width, 1px) * -1)', overflow: 'visible', ...style }}
+      {...props}
+      asChild
+    >
+      {/* With asChild, Radix sets its svg props on this svg. */}
+      <svg>
+        <polygon data-popover-arrow-fill="" points="0,0 30,0 15,10" />
+        <polyline data-popover-arrow-edge="" points="0,0 15,10 30,0" />
+      </svg>
+    </PopoverPrimitive.Arrow>
   )
 }

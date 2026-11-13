@@ -31,6 +31,25 @@ export function TermsField() {
 
 Every Checkbox needs an accessible name, normally a visible `label` with matching `htmlFor` and `id`. The application supplies `aria-invalid` and links error/help text using `aria-describedby`. Mixed state is announced with `aria-checked="mixed"`. Tab focuses the enabled control; Space toggles it, including mixed to checked. Enter does not toggle or submit the root button. Callers manage selection-group semantics and mixed parent state.
 
+## Variants (0.7.5)
+
+These need CLI **0.7.5** or later, including in component recipes. Leaving a prop or part out renders what earlier releases render.
+
+```tsx
+import { CheckboxOption } from '@/components/ui/checkbox'
+
+<CheckboxOption name="extras" value="examples" title="Include examples" description="Adds examples next to the component." />
+<CheckboxOption appearance="card" name="targets" value="vite" title="Vite" description="React 19" />
+```
+
+- **`CheckboxOption`** takes every `Checkbox` prop plus `title` (required), `description` and `appearance` (`row`, the default, or `card`).
+  - It renders a `label` (`checkbox-option`, with `data-appearance`) holding the checkbox, the title (`checkbox-option-title`) and the description (`checkbox-option-description`).
+  - The title names the checkbox through the wrapping label; the description describes it through `aria-describedby`, merged with any `aria-describedby` you pass.
+  - A click anywhere on the row or card toggles the checkbox once, in both editions and inside a form. The keyboard is the checkbox's own: Tab, then Space.
+  - `className` goes on the label; the other props go on the checkbox.
+- **Row** follows each family's Radio Group option row. **Card** is a padded tile with the box at its top-end corner; when checked it takes a `--primary` border and a 3px `--primary` halo at 25 %, as Card Option does. In forced colours the checked option takes a `Highlight` edge.
+- **Recipe:** `option` (`none`, `row` or `card`) and the content field `description`. A description shows only with a row or card option.
+
 ## Form behavior
 
 Radix renders a hidden native checkbox input when the root belongs to a form, forwarding `name`, `value` (default `on`), `required`, `disabled`, and `form`. Checked controls submit their value; unchecked and indeterminate controls do not. `required` uses native validation through that input. A disabled control, including one inside a disabled `fieldset`, cannot be activated and contributes no submitted value. The native `:disabled` selector also styles fieldset-disabled roots. An uncontrolled form reset restores the initial state, including an initial mixed state. Controlled state remains owned by the application; handle reset in that state owner as appropriate. Forwarded refs target the visible button, not the hidden input.

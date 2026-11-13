@@ -307,7 +307,11 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('CardContent', {}, content.body))
     }
     case 'progress':
-      return node('Progress', { value: props.indeterminate ? null : props.value, max: props.max, 'aria-label': content.label })
+      return node('Progress', {
+        value: props.indeterminate ? null : props.value, max: props.max,
+        ...(props.showLabel ? {} : { 'aria-label': content.label }),
+        size: props.size === 'default' ? undefined : props.size, tone: props.tone === 'default' ? undefined : props.tone,
+      }, ...(props.showLabel ? [node('ProgressLabel', {}, content.label)] : []), ...(props.showValue ? [node('ProgressValue')] : []))
     case 'separator':
       return node('Separator', props, ...(!props.decorative && content.label ? [content.label] : []))
     case 'skeleton':
@@ -324,10 +328,16 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         ...(props.required ? [node('span', { 'aria-hidden': 'true' }, '*')] : [])),
       node('input', { id: localId('control'), type: 'text', required: props.required }))
     case 'checkbox':
+      // The option layouts name the checkbox by their own title; a description shows only with one.
+      if (props.option === 'row' || props.option === 'card')
+        return node('CheckboxOption', { appearance: props.option, title: content.label, description: content.description || undefined,
+          disabled: props.disabled, required: props.required,
+          defaultChecked: props.checked === 'indeterminate' ? 'indeterminate' : props.checked === 'checked' })
       return node('div', inline, node('Checkbox', { id: localId('control'), disabled: props.disabled, required: props.required,
         defaultChecked: props.checked === 'indeterminate' ? 'indeterminate' : props.checked === 'checked' }), label(content.label))
     case 'switch':
-      return node('div', inline, node('Switch', { id: localId('control'), disabled: props.disabled, defaultChecked: props.checked },
+      return node('div', inline, node('Switch', { id: localId('control'), disabled: props.disabled, defaultChecked: props.checked,
+        size: props.size === 'sm' ? 'sm' : undefined },
         node('SwitchThumb')), label(content.label))
     case 'native-select':
       return node('div', stacked, label(content.label), node('NativeSelect', {
@@ -382,10 +392,13 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     case 'dropdown-menu':
       return node('DropdownMenu', {}, trigger('DropdownMenuTrigger', content.trigger), node('DropdownMenuContent', {},
         ...content.items.map(item => node('DropdownMenuItem', { variant: item.variant, disabled: item.disabled }, item.label))))
-    case 'popover':
+    case 'popover': {
+      const { arrow, ...placement } = props
       return node('Popover', {}, trigger('PopoverTrigger', content.trigger), node('PopoverContent', {
-        ...props, 'aria-labelledby': localId('title'),
-      }, node('PopoverTitle', { id: localId('title') }, content.title), node('PopoverDescription', {}, content.description)))
+        ...placement, 'aria-labelledby': localId('title'),
+      }, ...(arrow ? [node('PopoverArrow')] : []),
+      node('PopoverTitle', { id: localId('title') }, content.title), node('PopoverDescription', {}, content.description)))
+    }
     case 'tooltip':
       return node('TooltipProvider', { delayDuration: 300 }, node('Tooltip', {}, trigger('TooltipTrigger', content.trigger),
         node('TooltipContent', props, content.text, node('TooltipArrow'))))

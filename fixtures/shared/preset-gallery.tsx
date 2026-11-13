@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox, CheckboxOption } from '@/components/ui/checkbox'
 import {
   Select,
   SelectTrigger,
@@ -51,6 +51,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
+  PopoverArrow,
   PopoverTitle,
   PopoverDescription,
 } from '@/components/ui/popover'
@@ -77,7 +78,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion'
-import { Progress } from '@/components/ui/progress'
+import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch, SwitchThumb } from '@/components/ui/switch'
 import { Tabs, TabsCount, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -596,6 +597,14 @@ export function PresetGallery({
           </div>,
         )}
         {gate(
+          'checkbox',
+          'Checkbox',
+          <div className="preset-stack" data-component="checkbox~option">
+            <CheckboxOption title="Include examples" description="Adds examples next to each component." defaultChecked />
+            <CheckboxOption appearance="card" title="Vite" description="React 19" />
+          </div>,
+        )}
+        {gate(
           'switch',
           'Switch',
           <div className="preset-row" data-component="switch">
@@ -603,6 +612,14 @@ export function PresetGallery({
               <SwitchThumb />
             </Switch>
             <Label htmlFor="preset-notifications">Enable notifications</Label>
+          </div>,
+        )}
+        {gate(
+          'switch',
+          'Switch',
+          <div className="preset-row" data-component="switch~sm">
+            <Switch id="preset-transparency" size="sm" />
+            <Label htmlFor="preset-transparency">Reduced transparency</Label>
           </div>,
         )}
         {gate(
@@ -732,6 +749,7 @@ export function PresetGallery({
               <Button>Share preset</Button>
             </PopoverTrigger>
             <PopoverContent align="start" aria-labelledby="preset-share-title">
+              <PopoverArrow />
               <PopoverTitle id="preset-share-title">Share preset</PopoverTitle>
               <PopoverDescription>
                 Anyone with the link can install this preset.
@@ -864,6 +882,12 @@ export function PresetGallery({
               <span>64%</span>
             </div>
             <Progress value={64} aria-labelledby="preset-progress-install" />
+            <div data-component="progress~labelled">
+              <Progress value={40} size="sm" tone="warning">
+                <ProgressLabel>Consumer matrix, 16 of 40</ProgressLabel>
+                <ProgressValue />
+              </Progress>
+            </div>
             <div className="preset-progress-label">
               <span id="preset-progress-contrast">Contrast checks</span>
               <span>8 / 8</span>

@@ -304,3 +304,25 @@ describe('0.7.3 variant recipes, batches 6b and 6c', () => {
     expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(false)
   })
 })
+
+describe('0.7.5 variant recipes, batch 4a', () => {
+  const v074 = { version: '0.7.4' }
+  const v075 = { version: '0.7.5' }
+  it.each([
+    ['checkbox', { option: 'row' }, {}], ['checkbox', {}, { description: 'x' }],
+    ['switch', { size: 'default' }, {}],
+    ['progress', { tone: 'success' }, {}], ['progress', { size: 'sm' }, {}],
+    ['progress', { showLabel: false }, {}], ['progress', { showValue: true }, {}],
+    ['popover', { arrow: false }, {}],
+  ] as const)('gates a %s recipe using %o %o at CLI 0.7.5', (component, props, content) => {
+    const recipe = { component, props, content } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(true)
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(false)
+    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v074)).toBe(compatibility.catalog075InstallNotice)
+  })
+
+  it.each(['checkbox', 'switch', 'progress', 'popover'])('leaves a %s recipe without new fields installable at 0.7.4', component => {
+    const recipe = { component, props: {}, content: { label: 'Accept terms' } } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(false)
+  })
+})

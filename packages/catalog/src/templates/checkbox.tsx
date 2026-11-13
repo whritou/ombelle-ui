@@ -21,3 +21,33 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
     </CheckboxPrimitive.Root>
   )
 }
+
+export type CheckboxOptionProps = CheckboxProps & {
+  title: React.ReactNode
+  description?: React.ReactNode
+  appearance?: 'row' | 'card'
+}
+
+/** A checkbox with its title and description, as a row or a card; the whole label toggles it. */
+export function CheckboxOption({
+  title,
+  description,
+  appearance = 'row',
+  className,
+  'aria-describedby': describedBy,
+  ...props
+}: CheckboxOptionProps) {
+  const descriptionId = React.useId()
+  const described = [describedBy, description != null ? descriptionId : undefined].filter(Boolean).join(' ') || undefined
+  return (
+    <label data-slot="checkbox-option" data-appearance={appearance} className={cn(className)}>
+      <Checkbox {...props} aria-describedby={described} />
+      <span data-slot="checkbox-option-title">{title}</span>
+      {description != null && (
+        <span data-slot="checkbox-option-description" id={descriptionId}>
+          {description}
+        </span>
+      )}
+    </label>
+  )
+}
