@@ -8,7 +8,7 @@ import PrivacyPage from '../../apps/www/src/app/privacy/page.js'
 import SecurityPage from '../../apps/www/src/app/security/page.js'
 import HomePage from '../../apps/www/src/app/page.js'
 import { SiteFooter } from '../../apps/www/src/site/footer.js'
-import { catalog075MinimumCli, compareVersions, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
+import { catalog076MinimumCli, compareVersions, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 // The Code Block command wraps its runner in a keyword token span, so commands are read from the text.
 const textOf = (html: string) => html.replace(/<[^>]*>/g, '')
@@ -66,8 +66,8 @@ it('renders the public landing page with editor links and the published installe
   // The landing matrix links to the whole current catalog, including preview-only additions.
   expect(html).toContain(`Explore all ${supportedComponentIds.length} components`)
   expect(html).not.toContain('not available in glass')
-  // The 0.7.5 primitives need CLI 0.7.5: until it is published, the glass note says some components need it.
-  if (compareVersions(publishedInstaller.version, catalog075MinimumCli) < 0) expect(html).toContain('need a newer installer')
+  // The 0.7.6 components need CLI 0.7.6: until it is published, the glass note says some components need it.
+  if (compareVersions(publishedInstaller.version, catalog076MinimumCli) < 0) expect(html).toContain('need a newer installer')
   else expect(html).not.toContain('need a newer installer')
   expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')
