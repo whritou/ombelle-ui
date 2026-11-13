@@ -262,8 +262,10 @@ test('the phone dock keeps the draft and preview mode across panes', async ({ pa
   const dock = page.getByRole('navigation', { name: 'Button editor panes' })
   const pane = (name: string) => dock.getByRole('radio', { name, exact: true })
   await expect(pane('Customize')).toHaveAttribute('aria-checked', 'true')
+  // The dock is a full-width bar on the bottom edge, with 56px panes.
   const box = (await dock.boundingBox())!
-  expect(Math.round(844 - (box.y + box.height))).toBe(16)
+  expect(Math.round(844 - (box.y + box.height))).toBe(0)
+  expect((await pane('Customize').boundingBox())!.height).toBeGreaterThanOrEqual(56)
   // Customize pins the specimen above the inspector, so an edit shows while it is made.
   await page.getByLabel('Button text').fill('Mobile draft')
   await segment(page, 'Preview mode', 'Dark').click()
@@ -600,7 +602,15 @@ test('operates every Button editor control, artifact tab, download and publish d
 
   // The download lives in the top bar's overflow menu; keyboard focus returns to its trigger afterwards.
   const more = moreActions(page)
-  await tabTo(page, more, { backward: true, max: 250 })
+  // The top bar's actions are one Toolbar: one Tab stop, then End moves to its last item, More actions.
+  const toolbar = page.getByRole('toolbar', { name: 'Editor actions' })
+  for (let presses = 0; !(await toolbar.evaluate(element => element.contains(document.activeElement))); presses++) {
+    if (presses >= 250) throw new Error('Shift+Tab did not reach the Editor actions toolbar')
+    await page.keyboard.press('Shift+Tab')
+  }
+  await page.keyboard.press('End')
+  await expect(more).toBeFocused()
+  await expectVisibleFocus(page)
   await page.keyboard.press('Enter')
   const download = menuItem(page, 'Download recipe JSON')
   await expect(download).toBeEnabled()

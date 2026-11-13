@@ -229,3 +229,13 @@
   .root .getCode { padding-inline: 14px; }
   .root .getCode svg { display: none; }
 }
+
+/* Phone panes keep focused controls clear of the dock and, in Customize, of the pinned specimen. */
+@media (max-width: 767px) {
+  .workspace { padding-bottom: 112px; scroll-padding-bottom: 112px; }
+  .workspace:has(> .paneCustomize) { scroll-padding-top: 250px; }
+}
+@media (max-width: 767px) {
+  /* The pane ends above the dock, so the browser scrolls a control the dock would cover into view. */
+  .workspace { margin-bottom: 92px; padding-bottom: 16px; scroll-padding-bottom: 16px; }
+}

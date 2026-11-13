@@ -854,3 +854,33 @@
     margin: -4px;
   }
 }
+
+/* The dock is a full-width bar with its own background, so nothing shows through around it. */
+@media (max-width: 767px) {
+  .dock {
+    inset: auto 0 0 0;
+    padding: 8px 12px max(12px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--background);
+  }
+  .dock [data-slot='toggle-group-item'] {
+    gap: 4px;
+    min-block-size: 56px;
+    font-size: 13px;
+  }
+  .dock [data-slot='toggle-group-item'] > svg {
+    inline-size: 20px;
+    block-size: 20px;
+  }
+}
+@media (max-width: 767px) {
+  /* Three parts, to win over the catalog Toggle Group's segmented size and padding. */
+  .dock [data-slot='toggle-group'] [data-slot='toggle-group-item'][data-variant] {
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-block-size: 56px;
+    padding: 6px;
+    font-size: 13px;
+  }
+}

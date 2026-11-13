@@ -1180,3 +1180,53 @@
     background: var(--card);
   }
 }
+
+/* Phone panes keep focused controls clear of the dock and, in Customize, of the pinned preview. */
+@media (max-width: 767px) {
+  .workbench {
+    padding-bottom: 112px;
+    scroll-padding-bottom: 112px;
+  }
+  .workbench:has(> .peek) {
+    scroll-padding-top: 140px;
+  }
+  /* Preview: the frame fills the pane between the toolbar and the dock, and its page scrolls inside. */
+  .workbench:has(> .canvas:not(.peek):not(.phoneHidden)) {
+    overflow: hidden;
+  }
+  .canvas:not(.peek) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .canvas:not(.peek) .preview {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .canvas:not(.peek) .peekFrame,
+  .canvas:not(.peek) .peekFrame > section {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .canvas:not(.peek) .peekFrame iframe {
+    flex: 1;
+    min-height: 0;
+    height: auto !important;
+  }
+  .canvas:not(.peek) .sceneComponents {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  /* The pane ends above the dock, so the browser scrolls a control the dock would cover into view. */
+  .workbench {
+    margin-bottom: 92px;
+    padding-bottom: 16px;
+    scroll-padding-bottom: 16px;
+  }
+}

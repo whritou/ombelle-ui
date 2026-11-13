@@ -292,3 +292,42 @@ test('a long component name shortens in the switcher at 320px and keeps its chev
   expect(await switcher.locator('span').evaluate(element => getComputedStyle(element).textOverflow)).toBe('ellipsis')
   await expectFitsViewport(page, 320)
 })
+
+// Neither the pinned preview at the top nor the dock at the bottom may cover a focused control.
+for (const editor of editors) {
+  test(`a focused control in the ${editor.name} stays clear of the pinned preview and the dock`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await open(page, editor.url)
+    const pinned = page.locator('main[data-editor-root] [class*="paneCustomize"], main[data-editor-root] [class*="peek"]').first()
+    const dock = page.getByRole('navigation', { name: /editor panes$/ })
+    const controls = page.locator('main[data-editor-root] [aria-label="Inspector controls"] :is(input, button):not(:disabled):visible')
+    const count = await controls.count()
+    for (const index of [count - 1, 0, Math.floor(count / 2)]) {
+      await controls.nth(index).focus()
+      await page.waitForTimeout(150)
+      const box = (await controls.nth(index).boundingBox())!
+      const top = (await pinned.boundingBox())!
+      const bottom = (await dock.boundingBox())!
+      expect(box.y, `control ${index} is below the pinned preview`).toBeGreaterThanOrEqual(top.y + top.height - 1)
+      expect(box.y + box.height, `control ${index} is above the dock`).toBeLessThanOrEqual(bottom.y + 1)
+    }
+  })
+}
+
+test('the phone preview fits between the toolbar and the dock and scrolls inside', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await open(page, editors[0].url)
+  await page.getByRole('navigation', { name: 'Preset editor panes' }).getByRole('radio', { name: 'Preview', exact: true }).click()
+  const frame = page.locator('[aria-label="Preset preview"] iframe')
+  await expect(frame.contentFrame().locator('body')).toBeVisible({ timeout: 30000 })
+  const box = (await frame.boundingBox())!
+  const dock = (await page.getByRole('navigation', { name: 'Preset editor panes' }).boundingBox())!
+  expect(box.y + box.height).toBeLessThanOrEqual(dock.y + 1)
+  expect(box.height).toBeGreaterThan(200)
+  // The pane itself has nothing left to scroll; the page inside the frame does.
+  const pane = page.locator('main[data-editor-root] [class*="workbench"]').first()
+  expect(await pane.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.wheel(0, 400)
+  await expect.poll(() => frame.contentFrame().locator('html').evaluate(() => scrollY)).toBeGreaterThan(0)
+})
