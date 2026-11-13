@@ -146,7 +146,7 @@ test('the preset editor on a phone pins the live preview and moves between its p
   expect(before.height).toBeLessThanOrEqual(130)
   await page.locator('[class*="workbench"]').first().evaluate(element => { element.scrollTop += 600 })
   await expect.poll(async () => Math.round((await peek.boundingBox())!.y)).toBe(Math.round(before.y))
-  await peek.getByRole('button', { name: 'Open preview', exact: true }).click()
+  await presetPane(page, 'Preview').click()
   await expect(presetPane(page, 'Preview')).toHaveAttribute('aria-checked', 'true')
   expect((await page.locator('iframe[title="Preset preview"], [aria-label="Preset preview"] iframe').first().boundingBox())!.height).toBeGreaterThan(300)
   await presetPane(page, 'Checks').click()
@@ -335,3 +335,20 @@ test('the phone preview fits between the toolbar and the dock and scrolls inside
   await page.mouse.wheel(0, 400)
   await expect.poll(() => frame.contentFrame().locator('html').evaluate(() => scrollY)).toBeGreaterThan(0)
 })
+
+for (const editor of editors) {
+  test(`the ${editor.name} offers the site menu on a phone`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await open(page, editor.url)
+    const menu = page.getByRole('button', { name: 'Site menu', exact: true })
+    expect((await menu.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+    await menu.click()
+    const sheet = page.getByRole('dialog', { name: 'Site menu' })
+    for (const [label, href] of [['Get started', '/#get-started'], ['Docs', '/docs'], ['Components', '/components'], ['Preset editor', '/editor/preset'], ['Component editor', '/editor/component']])
+      await expect(sheet.getByRole('link', { name: label, exact: true })).toHaveAttribute('href', href)
+    await expect(sheet.getByRole('link', { name: /GitHub/ })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(sheet).toBeHidden()
+    await expect(menu).toBeFocused()
+  })
+}

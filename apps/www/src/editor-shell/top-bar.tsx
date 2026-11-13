@@ -7,6 +7,7 @@ import { editableComponents } from '../editor/editable-components'
 import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
 import styles from './editor-shell.module.css'
 import { MoreActionsSheet, type MoreLink } from './more-sheet'
+import { SiteMenu } from './site-menu'
 import { useViewportClass } from './breakpoints'
 import { returnTarget } from './history-focus'
 import { Button } from '../generated/ui/components/ui/button'
@@ -100,6 +101,8 @@ export function EditorTopBar({
   }, [commands])
   return (
     <header ref={bar} className={styles.topBar}>
+      {/* Below 1200px the site header is not shown; its links live in this menu. */}
+      <SiteMenu />
       {back && <a href={back.href} className={styles.backLink} aria-label={back.label}><ChevronLeft aria-hidden="true" size={18} /></a>}
       {/* A trail that is only the current page's name, with no link or switcher, is left out on a phone. */}
       <Breadcrumb collapse="auto" className={`${styles.crumbs} ${!switcher && crumbs.every(crumb => typeof crumb === 'string') ? styles.labelOnlyTrail : ''}`}>

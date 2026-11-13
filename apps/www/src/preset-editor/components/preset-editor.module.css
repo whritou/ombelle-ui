@@ -1166,11 +1166,6 @@
     min-width: 0;
     font-size: 14px;
   }
-  .editor .peekOpen {
-    justify-self: start;
-    min-height: 44px;
-    padding-inline: 14px;
-  }
   .checksPane {
     display: grid;
     gap: 12px;

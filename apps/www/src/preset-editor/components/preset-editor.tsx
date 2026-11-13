@@ -528,7 +528,6 @@ export default function PresetEditor() {
             {/* On a phone's Customize pane the preview shrinks to this card. */}
             <div className={styles.peekBar}>
               <b>Live preview · {sceneOptions.find(option => option.value === scene)?.label}</b>
-              <button type="button" className={styles.peekOpen} onClick={() => setPane('preview')}>Open preview</button>
             </div>
             <div className={`${styles.toolbar} ${styles.previewBar}`}>
               <SegmentedControl<typeof mode>
