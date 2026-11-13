@@ -643,6 +643,21 @@ function VariantsScenario075() {
   )
 }
 
+/** The 0.7.6 variants, for tests/e2e/variants-076.spec.ts; later tasks add their parts here. */
+function VariantsScenario076() {
+  return (
+    <section aria-label="0.7.6 variants" data-testid="variants-076">
+      <Sheet>
+        <SheetTrigger asChild><Button>Filters</Button></SheetTrigger>
+        <SheetContent side="bottom" snapPoints={[0.5, 0.9]}>
+          <SheetHandle label="Resize Filters" />
+          <SheetHeader><SheetTitle>Filters</SheetTitle><SheetDescription>Settles on half or full height when released.</SheetDescription></SheetHeader>
+        </SheetContent>
+      </Sheet>
+    </section>
+  )
+}
+
 /** Number Input and Color Picker fixtures for tests/e2e/editor-inputs-075.spec.ts. */
 function EditorInputsScenario() {
   const [radius, setRadius] = React.useState<number | null>(12)
@@ -863,6 +878,7 @@ function CatalogExpansionScenario() {
         <VariantsMoreScenario />
         <VariantsScenario075 />
         <ComponentsScenario076 />
+        <VariantsScenario076 />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

@@ -5,7 +5,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 describe.each(['radix', 'base'] as const)('Sheet %s edition', (edition) => {
   // The assertions exercise only common DOM props; primitive-specific prop
   // types differ between editions and remain on the public templates.
-  const load = (): Promise<{ [K in keyof typeof import('../src/templates/sheet.js')]: ElementType }> => edition === 'base'
+  // The snap point helpers are plain functions, not parts.
+  const load = (): Promise<{ [K in keyof typeof import('../src/templates/sheet.js') as K extends 'nearestSnapPoint' | 'snapPointText' ? never : K]: ElementType }> => edition === 'base'
     ? import('../src/templates/base/sheet.js')
     : import('../src/templates/sheet.js')
 

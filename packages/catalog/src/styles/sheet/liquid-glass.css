@@ -240,3 +240,11 @@
   }
 }
 /* end 0.7.5 scrollbars */
+/* 0.7.6 variants */
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='sheet-content'][data-sheet-snap]:not(:has([data-sheet-dragging])) {
+    transition: block-size 200ms ease-out;
+  }
+}
+/* Forced colours: the snap settle is unchanged; the handle keeps its 0.7.3 forced-colours rules. */
+/* end 0.7.6 variants */
