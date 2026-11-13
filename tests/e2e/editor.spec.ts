@@ -648,7 +648,14 @@ test('operates every Button editor control, artifact tab, download and publish d
   await page.keyboard.type(' now')
   const undo = page.getByRole('button', { name: 'Undo', exact: true })
   const redo = page.getByRole('button', { name: 'Redo', exact: true })
-  await tabTo(page, undo, { backward: true })
+  // Undo is the first item of the one-stop Editor actions toolbar: Shift+Tab into it, then Home.
+  const actions = page.getByRole('toolbar', { name: 'Editor actions' })
+  for (let presses = 0; !(await actions.evaluate(element => element.contains(document.activeElement))); presses++) {
+    if (presses >= 120) throw new Error('Shift+Tab did not reach the Editor actions toolbar')
+    await page.keyboard.press('Shift+Tab')
+  }
+  await page.keyboard.press('Home')
+  await expect(undo).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(text).toHaveValue('Keyboard ship')
   await expect(redo).toBeFocused()
