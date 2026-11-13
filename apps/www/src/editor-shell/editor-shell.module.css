@@ -33,6 +33,10 @@
   padding: 0;
   border: 0;
 }
+/* The current page keeps the family's filled pill, so its text needs room. */
+.crumbs [data-slot='breadcrumb-page'] {
+  padding: 0.125rem 0.625rem;
+}
 /* The site's list margin and indent outrank the catalog's list reset here. */
 .crumbs [data-slot='breadcrumb-list'] {
   margin: 0;

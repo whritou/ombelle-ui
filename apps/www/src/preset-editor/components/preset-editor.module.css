@@ -49,10 +49,12 @@
   text-decoration-color: var(--primary);
   text-underline-offset: 4px;
 }
-:where(.editor) button,
-:where(.editor) input,
-:where(.editor) select,
-:where(.editor) textarea {
+/* Generic editor controls. The compiled Number Input and Color Picker draw
+   their own parts, so these rules leave them alone. */
+:where(.editor) button:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])),
+:where(.editor) input:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])),
+:where(.editor) select:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])),
+:where(.editor) textarea:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])) {
   font: inherit;
   border: 1px solid var(--control);
   border-radius: 8px;
@@ -61,17 +63,18 @@
   color: var(--foreground);
   min-height: 44px;
 }
-:where(.editor) button {
+:where(.editor) button:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])) {
   cursor: pointer;
   border-radius: 999px;
   padding-inline: 16px;
   font-weight: 600;
 }
-:where(.editor) button:disabled {
+:where(.editor) button:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])):disabled {
   opacity: 0.5;
   cursor: default;
 }
-.editor :focus-visible {
+/* The Color Picker and Number Input ring their whole box, not the field inside. */
+.editor :focus-visible:where(:not([data-slot='color-picker-input'], [data-slot='number-input-input'])) {
   outline: 3px solid var(--ring);
   outline-offset: 3px;
 }
@@ -123,8 +126,8 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-:where(.editor) input,
-:where(.editor) textarea {
+:where(.editor) input:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])),
+:where(.editor) textarea:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])) {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -879,6 +882,13 @@
   align-items: center;
   gap: 6px;
 }
+/* Two compact Number Inputs share the row, like the slider fields above. */
+.editor :global(.preset-shadow-field) [data-slot='number-input'] {
+  min-block-size: 32px;
+}
+.editor :global(.preset-shadow-field) :is([data-slot='number-input-decrement'], [data-slot='number-input-increment']) {
+  inline-size: 1.75rem;
+}
 .editor :global(.preset-shadow-field) input:not([data-slot]) {
   min-height: 32px;
   padding: 0 6px;
@@ -886,11 +896,11 @@
 
 /* Hover and press feedback. The button default matches the base button rule's
    specificity, so classed buttons with their own background keep it. */
-:where(.editor) button:where(:hover:not(:disabled)) {
+:where(.editor) button:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])):where(:hover:not(:disabled)) {
   border-color: var(--muted-foreground);
   background: var(--muted);
 }
-:where(.editor) button:where(:active:not(:disabled)) {
+:where(.editor) button:where(:not([data-slot^='number-input'], [data-slot^='color-picker'])):where(:active:not(:disabled)) {
   background: color-mix(in oklab, var(--muted), var(--foreground) 8%);
 }
 :where(.editor) a:hover {

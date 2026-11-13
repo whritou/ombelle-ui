@@ -203,18 +203,20 @@ export function PresetGallery({
       </section>)}
       {gate('breadcrumb', 'Breadcrumb', <section aria-label="Breadcrumb" data-component="breadcrumb">
         <h2>Breadcrumb</h2>
-        <Breadcrumb aria-label="Gallery path"><BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
-        </BreadcrumbList></Breadcrumb>
-        <div data-component="breadcrumb~collapse" style={{ maxInlineSize: '16rem' }}>
-          <Breadcrumb aria-label="Long gallery path" collapse="auto"><BreadcrumbList>
+        <div className="preset-stack">
+          <Breadcrumb aria-label="Gallery path"><BreadcrumbList>
             <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink href="#workspace">Acme workspace</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList></Breadcrumb>
+          <div data-component="breadcrumb~collapse" style={{ maxInlineSize: '16rem' }}>
+            <Breadcrumb aria-label="Long gallery path" collapse="auto"><BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbLink href="#workspace">Acme workspace</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList></Breadcrumb>
+          </div>
         </div>
       </section>)}
       {gate('pagination', 'Pagination', <section aria-label="Pagination" data-component="pagination">
@@ -361,20 +363,24 @@ export function PresetGallery({
       </section>)}
       {gate('toggle', 'Toggle', <section aria-label="Toggle" data-component="toggle">
         <h2>Toggle</h2>
-        <Toggle aria-label="Bold" defaultPressed><b aria-hidden="true">B</b></Toggle>
-        <Toggle variant="outline" size="sm">Show grid</Toggle>
-        <Toggle disabled>Disabled toggle</Toggle>
+        <div className="preset-row">
+          <Toggle aria-label="Bold" defaultPressed><b aria-hidden="true">B</b></Toggle>
+          <Toggle variant="outline" size="sm">Show grid</Toggle>
+          <Toggle disabled>Disabled toggle</Toggle>
+        </div>
       </section>)}
       {gate('collapsible', 'Collapsible', <section aria-label="Collapsible" data-component="collapsible">
         <h2>Collapsible</h2>
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger>Advanced</CollapsibleTrigger>
-          <CollapsibleContent><p>Shadow offsets and blur.</p></CollapsibleContent>
-        </Collapsible>
-        <Collapsible>
-          <CollapsibleTrigger>Closed by default</CollapsibleTrigger>
-          <CollapsibleContent><p>Hidden until opened.</p></CollapsibleContent>
-        </Collapsible>
+        <div className="preset-stack">
+          <Collapsible defaultOpen>
+            <CollapsibleTrigger>Advanced</CollapsibleTrigger>
+            <CollapsibleContent><p>Shadow offsets and blur.</p></CollapsibleContent>
+          </Collapsible>
+          <Collapsible>
+            <CollapsibleTrigger>Closed by default</CollapsibleTrigger>
+            <CollapsibleContent><p>Hidden until opened.</p></CollapsibleContent>
+          </Collapsible>
+        </div>
       </section>)}
       {gate('scroll-area', 'Scroll Area', <section aria-label="Scroll Area" data-component="scroll-area">
         <h2>Scroll Area</h2>
@@ -384,8 +390,10 @@ export function PresetGallery({
       </section>)}
       {gate('button-group', 'Button Group', <section aria-label="Button Group" data-component="button-group">
         <h2>Button Group</h2>
-        <ButtonGroup aria-label="Alignment"><Button variant="outline">Left</Button><Button variant="outline">Center</Button><Button variant="outline">Right</Button></ButtonGroup>
-        <ButtonGroup aria-label="Zoom"><ButtonGroupText>Zoom</ButtonGroupText><ButtonGroupSeparator /><Button variant="outline">100%</Button></ButtonGroup>
+        <div className="preset-row">
+          <ButtonGroup aria-label="Alignment"><Button variant="outline">Left</Button><Button variant="outline">Center</Button><Button variant="outline">Right</Button></ButtonGroup>
+          <ButtonGroup aria-label="Zoom"><ButtonGroupText>Zoom</ButtonGroupText><ButtonGroupSeparator /><Button variant="outline">100%</Button></ButtonGroup>
+        </div>
       </section>)}
       {gate('item', 'Item', <section aria-label="Item" data-component="item">
         <h2>Item</h2>
@@ -399,10 +407,12 @@ export function PresetGallery({
       </section>)}
       {gate('number-input', 'Number Input', <section aria-label="Number Input" data-component="number-input">
         <h2>Number Input</h2>
-        <label htmlFor="gallery-radius">Border radius</label>
-        <NumberInput id="gallery-radius" defaultValue={12} min={0} max={32} unit="px" />
-        <label htmlFor="gallery-duration">Motion duration</label>
-        <NumberInput id="gallery-duration" defaultValue={160} min={0} max={1000} step={10} largeStep={100} unit="ms" />
+        <div className="preset-stack">
+          <label htmlFor="gallery-radius">Border radius</label>
+          <NumberInput id="gallery-radius" defaultValue={12} min={0} max={32} unit="px" />
+          <label htmlFor="gallery-duration">Motion duration</label>
+          <NumberInput id="gallery-duration" defaultValue={160} min={0} max={1000} step={10} largeStep={100} unit="ms" />
+        </div>
       </section>)}
       {gate('color-picker', 'Color Picker', <section aria-label="Color Picker" data-component="color-picker">
         <h2>Color Picker</h2>
@@ -414,9 +424,11 @@ export function PresetGallery({
       </section>)}
       {gate('code-block', 'Code Block', <section aria-label="Code Block" data-component="code-block">
         <h2>Code Block</h2>
-        <CodeBlockCommand args="@ombelle-ui/cli add button" />
-        <CodeBlock title="save.tsx" language="tsx"
-          code={"import { Button } from '@/components/ui/button'\n\n// Saves the draft.\nexport function Save() {\n  return <Button variant=\"outline\" size=\"sm\">Save</Button>\n}\n"} />
+        <div className="preset-column">
+          <CodeBlockCommand args="@ombelle-ui/cli add button" />
+          <CodeBlock title="save.tsx" language="tsx"
+            code={"import { Button } from '@/components/ui/button'\n\n// Saves the draft.\nexport function Save() {\n  return <Button variant=\"outline\" size=\"sm\">Save</Button>\n}\n"} />
+        </div>
       </section>)}
       </div>
       <section aria-label="Actions" data-component="button">

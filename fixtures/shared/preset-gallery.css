@@ -67,6 +67,11 @@ body {
   display: grid;
   gap: 12px;
 }
+.preset-column {
+  display: grid;
+  gap: 12px;
+  min-inline-size: 0;
+}
 .preset-tight {
   gap: 8px;
   flex-wrap: nowrap;
