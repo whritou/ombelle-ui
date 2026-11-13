@@ -149,21 +149,21 @@ Editors end to end (`editor.spec.ts`, `preset-editor.spec.ts`, `catalog-editors.
 - Fixed during the swap: the Get code dialog lost its name when its title took a fixed `id`; focus did not return to Get code; the top bar trail kept the site's list margin and indent, which made the bar wrap to two rows and cover the preview frame's dialog; the gallery Dialog grew with a footer (the footer was removed from the gallery); `editors-matrix.spec.ts` scanned `include('dialog')`, the old native element, now `[role="dialog"]`; `preset-editor.spec.ts` read the ID field of the closed native dialog, and now opens the ID & revision dialog first. No test was added or removed in a counted spec, so the 686 browser cases are unchanged.
 - What still fails is the recorded baseline: the consumer installs (consumer apps not served; npm `ETARGET` for the existing pin `@radix-ui/react-alert-dialog@1.2.1`), "opens on the dashboard …" (axe `color-contrast`, 4), "restores raw draft …" and "edits numeric design values …" (the 0.5 radius), and "supports keyboard editing and 320 pixel reflow" and the glass flow (axe `label-content-name-mismatch` and `scrollable-region-focusable` on the gallery Date Picker trigger and the Projects table, the same nodes as in `code-block-075.md`).
 
-## Website size, batch 4b: over the limit, decision pending
+## Website size, batch 4b: over the limit, accepted
 
 Measured after the batch 4b website changes, with the same method (`corepack pnpm run build` in `apps/www`, exit 0, then `node scripts/measure-www-first-load.mjs`), on 2026-11-13.
 
 | Route | Scripts | Before, gzip | After batch 4a | After batch 4b | Growth from before |
 | --- | --- | --- | --- | --- | --- |
-| `/editor/preset` | 18 | 883.8 kB | 888.4 kB | 907.1 kB | **+23.3 kB, over the limit** |
+| `/editor/preset` | 18 | 883.8 kB | 888.4 kB | 907.1 kB | **+23.3 kB, over the limit, accepted** |
 | `/editor/component` | 10 | 241.4 kB | 241.6 kB | 241.8 kB | +0.4 kB |
-| `/editor/component/button` | 18 | 878.4 kB | 883.0 kB | 900.2 kB | **+21.8 kB, over the limit** |
+| `/editor/component/button` | 18 | 878.4 kB | 883.0 kB | 900.2 kB | **+21.8 kB, over the limit, accepted** |
 | `/docs` | 11 | 242.4 kB | 242.5 kB | 242.8 kB | +0.4 kB |
 | `/docs/getting-started` | 12 | 249.6 kB | 249.8 kB | 250.0 kB | +0.4 kB |
-| `/components` | 14 | 452.0 kB | 456.5 kB | 468.4 kB | **+16.4 kB, over the limit** |
-| `/components/accordion` | 16 | 849.9 kB | 854.5 kB | 866.6 kB | **+16.7 kB, over the limit** |
+| `/components` | 14 | 452.0 kB | 456.5 kB | 468.4 kB | **+16.4 kB, over the limit, accepted** |
+| `/components/accordion` | 16 | 849.9 kB | 854.5 kB | 866.6 kB | **+16.7 kB, over the limit, accepted** |
 
-Where it comes from, read from the build's chunks: the shared chunk holding the catalog source (templates and stylesheets, which these routes ship to compile recipes) grew with the new templates and styles, the two Breadcrumb templates and their menu styles most; and the editor routes now load Radix Dropdown Menu (a chunk of about 22 kB gzip, partly shared with the Popover code they already load) through the top bar's Breadcrumb. This overrun has not been accepted; it waits for the maintainer.
+Where it comes from, read from the build's chunks: the shared chunk holding the catalog source (templates and stylesheets, which these routes ship to compile recipes) grew with the new templates and styles, the two Breadcrumb templates and their menu styles most; and the editor routes now load Radix Dropdown Menu (a chunk of about 22 kB gzip, partly shared with the Popover code they already load) through the top bar's Breadcrumb. The maintainer accepted this overrun on 2026-11-13, keeping the collapsing Breadcrumb in the top bar.
 
 ## Final review
 
