@@ -5,3 +5,4 @@ export { ControlRow, InspectorSection, SegmentedControl, SliderRow } from './ins
 export { ReviewDrawer, type DrawerTab } from './review-drawer'
 export { useDrawerState } from './use-drawer-state'
 export { previewLayoutOptions, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from './view-options'
+export { desktopQuery, phoneQuery, tabletQuery, useViewportClass, viewportClass, type ViewportClass } from './breakpoints'
