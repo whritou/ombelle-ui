@@ -231,17 +231,18 @@ type SliderValueInputProps = {
   onCommit(value: number): void
 }
 
-// A draft that follows the value while the field is not focused. Enter or blur commits a number,
-// stepped and clamped; other text, or Escape, restores the value.
+// The field shows the value until it is edited, focused or not, so a thumb moved while the field
+// has focus (a press on the track) still shows. Enter or blur commits an edited number, stepped and
+// clamped; other text, or Escape, restores the value. An unedited field commits nothing.
 function SliderValueInput({ value, min, max, step, onCommit, className, ...props }: SliderValueInputProps) {
   const [draft, setDraft] = React.useState<string | null>(null)
   const commit = () => {
-    const typed = (draft ?? '').trim()
+    if (draft === null) return
+    const typed = draft.trim()
     const parsed = typed === '' ? Number.NaN : Number(typed)
-    if (!Number.isFinite(parsed)) return value
+    if (!Number.isFinite(parsed)) return
     const next = stepValue(parsed, min, max, step)
     if (next !== value) onCommit(next)
-    return next
   }
   return (
     <input
@@ -252,7 +253,6 @@ function SliderValueInput({ value, min, max, step, onCommit, className, ...props
       data-slot="slider-value-input"
       className={cn(className)}
       value={draft ?? String(value)}
-      onFocus={() => setDraft(String(value))}
       onChange={(event) => setDraft(event.currentTarget.value)}
       onBlur={() => {
         commit()
@@ -261,10 +261,11 @@ function SliderValueInput({ value, min, max, step, onCommit, className, ...props
       onKeyDown={(event) => {
         if (event.key === 'Enter') {
           event.preventDefault()
-          setDraft(String(commit()))
-        } else if (event.key === 'Escape' && draft !== null && draft !== String(value)) {
+          commit()
+          setDraft(null)
+        } else if (event.key === 'Escape' && draft !== null) {
           event.preventDefault()
-          setDraft(String(value))
+          setDraft(null)
         }
       }}
     />

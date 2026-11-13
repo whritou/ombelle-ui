@@ -222,5 +222,22 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(thumb).toHaveAttribute('aria-valuenow', '0')
       await expect(input).toHaveValue('0')
     })
+
+    test('a press on the track while the field has focus keeps the pressed value', async ({ page }) => {
+      const section = await open(page, edition)
+      const input = section.getByRole('textbox', { name: 'Shadow opacity', exact: true })
+      const thumb = section.getByRole('slider', { name: 'Shadow opacity', exact: true })
+      await input.focus()
+      await expect(input).toHaveValue('0.75')
+      const track = (await section.getByTestId('sv-opacity').locator('[data-slot="slider-track"]').boundingBox())!
+      await page.mouse.click(track.x + track.width * 0.25, track.y + track.height / 2)
+      await expect(thumb).toHaveAttribute('aria-valuenow', '0.25')
+      await expect(input).toHaveValue('0.25')
+      await expect(input).not.toBeFocused()
+      // Still there once every event of the press has run.
+      await page.waitForTimeout(200)
+      await expect(thumb).toHaveAttribute('aria-valuenow', '0.25')
+      await expect(input).toHaveValue('0.25')
+    })
   })
 }
