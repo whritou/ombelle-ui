@@ -156,7 +156,7 @@ test('accepts app unit evidence from Windows and Unix source paths', async () =>
   await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
   for (const suite of result.testResults) suite.name = 'Z:\\portable-checkout\\' + suite.name.replace('/different-checkout/', '').replaceAll('/', '\\')
   await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
-}, 600000) // Fixture discovery (bounded at 360 s; it grows with the catalog) plus an independently bounded runtime inventory.
+}, 900000) // Fixture discovery and the validator's own inventory, each bounded at 360 s; both grow with the catalog.
 test('rejects missing app unit files and assertions after headline counts are adjusted', async () => {
   for (const mode of ['file', 'assertion']) {
     const result = await testResults(['packages/', 'apps/www/src/'])
@@ -165,7 +165,7 @@ test('rejects missing app unit files and assertions after headline counts are ad
     result.numTotalTests -= removed; result.numPassedTests -= removed
     await expect(validateTestResults(result, 'unit')).rejects.toThrow()
   }
-}, 600000) // Reuses the discovery above, or runs it when this test runs alone.
+}, 900000) // Reuses the discovery above, or runs it when this test runs alone.
 test('rejects omitted Card browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'card.spec.ts')
