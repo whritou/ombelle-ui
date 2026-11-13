@@ -35,22 +35,24 @@ type SheetSizing = {
 const SheetSizingContext = React.createContext<SheetSizing | null>(null)
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
-/** A bottom sheet's snap points, lowest first and within 0.25..0.95; other sides have none. */
+/** A bottom sheet's finite snap points, lowest first and within 0.25..0.95; other sides, and a list without one, have none. */
 function sheetSnapPoints(side: string, points: readonly number[] | undefined) {
-  if (side !== 'bottom' || !points?.length) return undefined
-  return [...new Set(points.map(point => clamp(point, 0.25, 0.95)))].sort((a, b) => a - b)
+  const finite = side === 'bottom' ? points?.filter(point => Number.isFinite(point)) : undefined
+  if (!finite?.length) return undefined
+  return [...new Set(finite.map(point => clamp(point, 0.25, 0.95)))].sort((a, b) => a - b)
 }
 /** A snap point's height in vh. */
 const snapHeight = (point: number) => Math.round(point * 100)
 
-/** The snap point (a fraction) nearest to a height in vh; a tie goes to the higher point. */
-export function nearestSnapPoint(height: number, points: readonly number[]): number {
+/** The snap point (a fraction) nearest to a height in vh; a tie goes to the higher point; none without points. */
+export function nearestSnapPoint(height: number, points: readonly number[]): number | undefined {
   // Rounded to a hundredth of a percent, so 0.29 * 100 counts as 29 and a tie stays a tie.
   const away = (point: number) => Math.abs(Math.round(point * 10000) / 100 - height)
-  return points.reduce((best, point) => {
+  return points.reduce<number | undefined>((best, point) => {
+    if (best === undefined) return point
     const distance = away(point), bestDistance = away(best)
     return distance < bestDistance || (distance === bestDistance && point > best) ? point : best
-  })
+  }, undefined)
 }
 
 /** The words a handle reads for a snap point: Half height, Full height (the highest, from 0.9), or a percentage. */
@@ -114,7 +116,7 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
   const raw = (dy: number) => startHeight.current - down.current * dy / window.innerHeight * 100
   const points = sizing?.snapPoints
   // A released drag settles on the nearest snap point, or anywhere from 25 to 95 % without them.
-  const settle = (value: number) => points ? snapHeight(nearestSnapPoint(value, points)) : clamp(Math.round(value), 25, 95)
+  const settle = (value: number) => points ? snapHeight(nearestSnapPoint(value, points)!) : clamp(Math.round(value), 25, 95)
   const drag = useDrag(
     ({ y }) => sizing?.setHeight(clamp(Math.round(raw(y)), 10, 95)),
     ({ y }) => { if (raw(y) < 25) sizing?.close(); else sizing?.setHeight(settle(raw(y))) },
@@ -122,7 +124,7 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
   const [min, max] = points ? [snapHeight(points[0]!), snapHeight(points[points.length - 1]!)] : [25, 95]
   // The key a snap handle moves to: the next point up or down from the nearest, or the lowest or the highest.
   const step = (key: string, snaps: readonly number[]) => {
-    const index = snaps.indexOf(nearestSnapPoint(current(), snaps)), last = snaps.length - 1
+    const index = snaps.indexOf(nearestSnapPoint(current(), snaps)!), last = snaps.length - 1
     const next = key === 'ArrowUp' ? Math.min(index + 1, last) : key === 'ArrowDown' ? index - 1
       : key === 'Home' ? 0 : key === 'End' ? last : undefined
     return next === undefined ? undefined : next < 0 ? 'close' : snapHeight(snaps[next]!)
@@ -136,7 +138,7 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
       aria-valuenow={clamp(height, min, max)}
       aria-valuemin={min}
       aria-valuemax={max}
-      aria-valuetext={points ? snapPointText(nearestSnapPoint(height, points), points) : undefined}
+      aria-valuetext={points ? snapPointText(nearestSnapPoint(height, points)!, points) : undefined}
       tabIndex={0}
       data-slot="sheet-handle"
       data-sheet-dragging={drag.dragging ? '' : undefined}

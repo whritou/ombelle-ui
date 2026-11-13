@@ -78,6 +78,18 @@ describe('Sheet 0.7.6 snap points', () => {
     expect(ui.snapPointText(0.8, [0.5, 0.8])).toBe('80%')
   })
 
+  it.each(['radix', 'base'] as const)('%s finds no nearest point among none, without throwing', async edition => {
+    const ui = edition === 'radix' ? await import('../src/templates/sheet.js') : await import('../src/templates/base/sheet.js')
+    expect(ui.nearestSnapPoint(50, [])).toBeUndefined()
+  })
+
+  it.each(['radix', 'base'] as const)('%s drops snap points that are not finite numbers', async edition => {
+    expect(content(await openSheet(edition, { side: 'bottom', snapPoints: [Number.NaN, Number.POSITIVE_INFINITY, 0.5], children: 'x' })))
+      .toMatch(/style="[^"]*--sheet-size:50vh;block-size:50vh/)
+    // Only non-finite points: the sheet has none, as without snap points.
+    expect(await openSheet(edition, { side: 'bottom', snapPoints: [Number.NaN], children: 'x' })).toBe(unsnapped[edition])
+  })
+
   it('keeps the snap logic inside the shared size hook', () => {
     const radix = shared(source('sheet.tsx'))
     expect(radix).toContain('export function nearestSnapPoint')
