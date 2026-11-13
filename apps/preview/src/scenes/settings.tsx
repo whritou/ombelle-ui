@@ -78,7 +78,7 @@ import {
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '../generated/preset-gallery/components/ui/field'
 import { Kbd, KbdGroup } from '../generated/preset-gallery/components/ui/kbd'
 import { Spinner } from '../generated/preset-gallery/components/ui/spinner'
-import { Slider } from '../generated/preset-gallery/components/ui/slider'
+import { Slider, SliderValue } from '../generated/preset-gallery/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '../generated/preset-gallery/components/ui/toggle-group'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../generated/preset-gallery/components/ui/collapsible'
 import { ButtonGroup } from '../generated/preset-gallery/components/ui/button-group'
@@ -314,6 +314,14 @@ export function SettingsScene(props: SceneProps) {
                   <div className="scene-field">
                     <Label id="scene-radius-label">Corner radius</Label>
                     <Slider defaultValue={[12]} max={24} aria-labelledby="scene-radius-label" getValueText={(value) => `${value} pixels`} />
+                    <Slider defaultValue={[16]} max={32} aria-labelledby="scene-font-label" getValueText={(value) => `${value} px`}>
+                      <Label id="scene-font-label">Base font size</Label>
+                      <SliderValue />
+                    </Slider>
+                    <Slider defaultValue={[0.75]} max={1} step={0.05} aria-labelledby="scene-shadow-label">
+                      <Label id="scene-shadow-label">Shadow opacity</Label>
+                      <SliderValue editable />
+                    </Slider>
                   </div>,
                 )}
                 {show(

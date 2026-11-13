@@ -27,13 +27,13 @@ export const expansionDocs = {
   },
   meter: {
     name: 'Meter', description: 'A measurement within a known range, such as a quota, in cells or labelled parts.',
-    api: 'Meter (value, min, max, segments, warningAt), MeterLabel, MeterSegment (value, tone), MeterLegend, MeterLegendItem (tone)',
+    api: 'Meter (value, min, max, segments, warningAt, shape bar or circle), MeterLabel, MeterSegment (value, tone), MeterLegend, MeterLegendItem (tone)',
     states: 'Discrete, warning, labelled parts, clamped values', basis: 'role="meter" with value text; Base UI uses its Meter', client: true,
     usage: expansionExamples.meter, minimumCli: '0.7.3',
   },
   slider: {
     name: 'Slider', description: 'A value or a range chosen along a track, with optional ticks.',
-    api: 'Slider (value, defaultValue, min, max, step, orientation, thumbLabels, getValueText), SliderTicks (values, min, max)',
+    api: 'Slider (value, defaultValue, min, max, step, orientation, thumbLabels, getValueText), SliderValue (format, editable), SliderTicks (values, min, max)',
     states: 'Single, range, disabled, vertical, focus', basis: 'Reviewed Radix Slider; Base UI Slider in the Base UI edition', client: true,
     usage: expansionExamples.slider, minimumCli: '0.7.3',
   },
@@ -112,7 +112,7 @@ export const expansionDocs = {
   },
   sheet: {
     name: 'Sheet', description: 'A modal side panel for navigation, filters and project details.',
-    api: 'Sheet, SheetTrigger, SheetClose, SheetContent (side, size, resizable, defaultSize, minSize, maxSize, onSizeChange), SheetHandle, SheetHeader, SheetFooter, SheetTitle, SheetDescription',
+    api: 'Sheet, SheetTrigger, SheetClose, SheetContent (side, size, resizable, defaultSize, minSize, maxSize, onSizeChange, snapPoints for bottom sheets), SheetHandle, SheetHeader, SheetFooter, SheetTitle, SheetDescription',
     states: 'Open, closed, scroll, focus return, RTL, bottom drawer resized or closed by its handle, side panel resized', basis: 'Reviewed Dialog primitive with logical edge positioning', client: true,
     usage: expansionExamples.sheet, minimumCli: '0.7.2',
   },
@@ -178,7 +178,7 @@ export const expansionDocs = {
   },
   'code-block': {
     name: 'Code Block', description: 'Read-only code with a title, line numbers, highlighting and Copy, or a command with one tab per package manager.',
-    api: 'CodeBlock (code, language tsx, css, json, shell or text, title, lineNumbers, maxHeight, copyLabel), CodeBlockCommand (args, managers, manager, defaultManager, onManagerChange, label, copyLabel, runners), CodeBlockRoot, CodeBlockHeader, CodeBlockTitle, CodeBlockCopy, CodeBlockCode',
+    api: 'CodeBlock (code, language tsx, css, json, shell or text, title, lineNumbers, maxHeight, copyLabel, diff), CodeBlockCommand (args, managers, manager, defaultManager, onManagerChange, label, copyLabel, runners), CodeBlockRoot, CodeBlockHeader, CodeBlockTitle, CodeBlockCopy, CodeBlockCode (diff); diffLines, diffNewVersion, diffCounts',
     states: 'Default, scrolling, focus, copied, copy failed, selected tab, no line numbers', basis: 'Native pre and button with a polite status; Radix Tabs, or Base UI Tabs in the Base UI edition, for the command block', client: true,
     usage: expansionExamples['code-block'], minimumCli: '0.7.5',
   },
@@ -190,8 +190,8 @@ export const expansionDocs = {
   },
   carousel: {
     name: 'Carousel', description: 'Slides that snap as they scroll, with previous and next buttons, one dot per slide and a counter. It never autoplays.',
-    api: 'Carousel (slidesPerView 1, 2 or 3), CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter',
-    states: 'First slide, middle, last slide, one slide, focus, below 640px (no arrows)', basis: 'CSS scroll snap with no dependency, one template for both editions', client: true,
+    api: 'Carousel (slidesPerView 1, 2 or 3, variant default or image, ratio), CarouselContent, CarouselItem, CarouselImage (src, alt required, loading), CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter, CarouselThumbnails',
+    states: 'First slide, middle, last slide, one slide, focus, below 640px (no arrows), image with the next one peeking, current thumbnail', basis: 'CSS scroll snap with no dependency, one template for both editions', client: true,
     usage: expansionExamples.carousel, minimumCli: '0.7.6',
   },
   'aspect-ratio': {

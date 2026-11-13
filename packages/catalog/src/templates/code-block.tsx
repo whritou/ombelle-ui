@@ -87,6 +87,65 @@ const visuallyHidden: React.CSSProperties = {
   position: 'absolute', inlineSize: 1, blockSize: 1, margin: -1, padding: 0, overflow: 'hidden',
   clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0,
 }
+// A hidden prefix that a text selection skips, so copied lines start with their own text.
+const unselectable: React.CSSProperties = { ...visuallyHidden, userSelect: 'none' }
+
+export type DiffKind = 'added' | 'removed' | 'unchanged'
+
+/**
+ * The first character is the marker, as in a unified diff: `+` adds, `-` removes, a space keeps the line
+ * unchanged. Any other line is unchanged and kept as written.
+ */
+function diffKind(line: string): DiffKind {
+  return line.startsWith('+') ? 'added' : line.startsWith('-') ? 'removed' : 'unchanged'
+}
+
+/** A line without its marker: a leading `+`, `-` or space. */
+function withoutMarker(line: string): string {
+  return /^[+\- ]/.test(line) ? line.slice(1) : line
+}
+
+/** The lines of a diff, without the marker; a CRLF ending keeps its CR at the end of the text. */
+export function diffLines(code: string): { kind: DiffKind; text: string }[] {
+  return codeLines(code).map((line) => ({ kind: diffKind(line), text: withoutMarker(line) }))
+}
+
+/** The added and unchanged lines without markers, with the original line endings and final newline. */
+export function diffNewVersion(code: string): string {
+  return code
+    .split(/(?<=\n)/)
+    .filter((line) => diffKind(line) !== 'removed')
+    .map(withoutMarker)
+    .join('')
+}
+
+export function diffCounts(code: string): { added: number; removed: number } {
+  const lines = diffLines(code)
+  return {
+    added: lines.filter((line) => line.kind === 'added').length,
+    removed: lines.filter((line) => line.kind === 'removed').length,
+  }
+}
+
+/** Like highlightCode, with a marker column; changes also carry a hidden "Added: " or "Removed: ". */
+function highlightDiff(code: string, language: CodeLanguage): React.ReactNode[] {
+  const lines = diffLines(code)
+  const trailing = code.endsWith('\n')
+  return lines.map((line, index) => {
+    const cr = line.text.endsWith('\r') ? '\r' : ''
+    const end = cr + (index < lines.length - 1 || trailing ? '\n' : '')
+    return (
+      <span key={index} data-slot="code-block-line" data-diff={line.kind === 'unchanged' ? undefined : line.kind}>
+        <span data-slot="code-block-diff-marker" aria-hidden="true">
+          {line.kind === 'added' ? '+' : line.kind === 'removed' ? '−' : ' '}
+        </span>
+        {line.kind === 'unchanged' ? null : <span style={unselectable}>{line.kind === 'added' ? 'Added: ' : 'Removed: '}</span>}
+        {highlightLine(cr ? line.text.slice(0, -1) : line.text, language)}
+        {end || null}
+      </span>
+    )
+  })
+}
 
 export function CodeBlockRoot({ className, ...props }: React.ComponentProps<'div'>) {
   return <div {...props} data-slot="code-block" className={cn(className)} />
@@ -181,6 +240,8 @@ export type CodeBlockCodeProps = {
   maxHeight?: string
   /** The pre region's accessible name, "Code" by default; dropped when `aria-labelledby` is set. */
   label?: string
+  /** Marks lines starting with `+` or `-` as added or removed, and a leading space as unchanged; ignored with `children`. */
+  diff?: boolean
   /** Replaces the highlighted output, for another highlighter. */
   children?: React.ReactNode
 } & Omit<React.ComponentProps<'pre'>, 'children'>
@@ -191,11 +252,14 @@ export function CodeBlockCode({
   lineNumbers = true,
   maxHeight = '32rem',
   label,
+  diff,
   children,
   className,
   style,
   ...props
 }: CodeBlockCodeProps) {
+  // Another highlighter's output has no markers to read.
+  const diffed = diff === true && children === undefined
   return (
     <pre
       tabIndex={0}
@@ -203,11 +267,12 @@ export function CodeBlockCode({
       {...props}
       data-slot="code-block-code"
       data-line-numbers={lineNumbers ? undefined : 'false'}
+      data-diff={diffed ? '' : undefined}
       aria-label={props['aria-labelledby'] === undefined ? (label ?? props['aria-label'] ?? 'Code') : undefined}
       style={{ maxHeight, '--code-block-gutter': `${String(codeLines(code).length).length}ch`, ...style } as React.CSSProperties}
       className={cn(className)}
     >
-      <code>{children ?? highlightCode(code, language)}</code>
+      <code>{children ?? (diffed ? highlightDiff(code, language) : highlightCode(code, language))}</code>
     </pre>
   )
 }
@@ -220,24 +285,39 @@ export type CodeBlockProps = {
   title?: string
   lineNumbers?: boolean
   maxHeight?: string
-  /** "Copy <title>", or "Copy code" without a title, by default. */
+  /** "Copy <title>", or "Copy code" without a title, by default; "Copy the new <title>" with `diff`. */
   copyLabel?: string
+  /** Shows `+` and `-` lines as a diff, with a count in the header; Copy takes the new version. */
+  diff?: boolean
   children?: React.ReactNode
 } & Omit<React.ComponentProps<'div'>, 'children'>
 
 /** A file block: the title and Copy in the header, then the code. */
-export function CodeBlock({ code, language, title, lineNumbers, maxHeight, copyLabel, children, ...props }: CodeBlockProps) {
+export function CodeBlock({ code, language, title, lineNumbers, maxHeight, copyLabel, diff, children, ...props }: CodeBlockProps) {
+  // Another highlighter's output has no markers to read.
+  const shown = diff === true && children === undefined
+  const counts = shown ? diffCounts(code) : undefined
   return (
     <CodeBlockRoot {...props}>
       <CodeBlockHeader>
         {title ? <CodeBlockTitle>{title}</CodeBlockTitle> : null}
-        <CodeBlockCopy text={code} label={copyLabel ?? (title ? `Copy ${title}` : 'Copy code')} />
+        {counts ? (
+          <span data-slot="code-block-diff-count">
+            <span aria-hidden="true">{`+${counts.added} −${counts.removed}`}</span>
+            <span style={visuallyHidden}>{`${counts.added} added, ${counts.removed} removed`}</span>
+          </span>
+        ) : null}
+        <CodeBlockCopy
+          text={shown ? diffNewVersion(code) : code}
+          label={copyLabel ?? (shown ? `Copy the new ${title || 'code'}` : title ? `Copy ${title}` : 'Copy code')}
+        />
       </CodeBlockHeader>
       <CodeBlockCode
         code={code}
         language={language}
         lineNumbers={lineNumbers}
         maxHeight={maxHeight}
+        diff={shown}
         label={title ? `${title} source` : 'Code'}
       >
         {children}

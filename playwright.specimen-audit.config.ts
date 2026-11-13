@@ -4,7 +4,7 @@ import { defineConfig } from '@playwright/test'
 // Run pnpm build:packages and pnpm generate:preview first.
 export default defineConfig({
   testDir: 'tests/e2e',
-  testMatch: ['specimen-audit-checks.spec.ts', 'specimen-audit.spec.ts', 'display-components.spec.ts', 'form-controls.spec.ts', 'primitives-075.spec.ts', 'editor-inputs-075.spec.ts', 'code-block-075.spec.ts', 'overlays-search.spec.ts', 'calendar.spec.ts', 'variants-basics.spec.ts', 'variants-more.spec.ts', 'variants-075.spec.ts', 'components-076.spec.ts', 'glass-scenes.spec.ts'],
+  testMatch: ['specimen-audit-checks.spec.ts', 'specimen-audit.spec.ts', 'display-components.spec.ts', 'form-controls.spec.ts', 'primitives-075.spec.ts', 'editor-inputs-075.spec.ts', 'code-block-075.spec.ts', 'overlays-search.spec.ts', 'calendar.spec.ts', 'variants-basics.spec.ts', 'variants-more.spec.ts', 'variants-075.spec.ts', 'components-076.spec.ts', 'variants-076.spec.ts', 'glass-scenes.spec.ts'],
   timeout: 300000,
   expect: { timeout: 10000 },
   workers: 4,

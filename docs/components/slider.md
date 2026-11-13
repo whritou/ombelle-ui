@@ -42,6 +42,34 @@ export function PriceRange() {
 - Range thumbs keep their order and do not pass each other.
 - `SliderTicks` (`values`, `min`, `max`) draws labelled marks under the track. It is hidden from assistive technology, since the thumbs carry the value.
 
+## Variants (0.7.6)
+
+`SliderValue` needs CLI **0.7.6** or later, including in component recipes. Leaving it out renders what earlier releases render.
+
+```tsx
+import { Slider, SliderValue } from '@/components/ui/slider'
+
+<Slider defaultValue={[12]} max={48} aria-labelledby="radius-label" getValueText={(value) => `${value} px`}>
+  <label id="radius-label">Radius</label>
+  <SliderValue />
+</Slider>
+<Slider defaultValue={[0.75]} max={1} step={0.05} aria-labelledby="opacity-label">
+  <label id="opacity-label">Shadow opacity</label>
+  <SliderValue editable />
+</Slider>
+```
+
+- **`SliderValue`** goes inside the Slider. The Slider then renders a field (`slider-field`) with a header row (`slider-header`: the other children, then the value at the end) above the track. Without it, the Slider renders exactly as before.
+- The value is an `<output>` (`slider-value`) whose `for` names the thumbs. It shows `format(value, index)`, or `getValueText`, or the number; a range reads `20 – 80`. When the Slider has no `getValueText`, the thumbs speak `format` too. It is not a live region: the thumbs already announce their value.
+- **`editable`** turns a single thumb's value into a text field (`slider-value-input`, 76 × 34 px, centred mono text, drawn like the family's Number Input), named by the Slider's own label:
+  - Enter or leaving the field moves the thumb to the typed value, clamped to `min`..`max` and rounded to `step` (`0.33` with step 0.05 becomes 0.35); Enter keeps focus in the field;
+  - a comma decimal reads as a point, so `0,35` is 0.35;
+  - text that is not a number, or an empty field, restores the current value; Escape restores it without moving the thumb;
+  - dragging the thumb, or pressing on the track, updates the field.
+  On a range, `editable` shows the readout instead.
+- `stepValue(value, min, max, step)` is exported.
+- **Recipe:** `valueDisplay` is `none`, `readout` or `editable`; `editable` is rejected with `mode: 'range'`.
+
 ## Recipe
 
 The recipe editor sets `mode` (`single` or `range`), `min`, `max`, `step`, `ticks`, the single `value`, the `rangeStart` and `rangeEnd`, the label and the two thumb labels. A value outside the range, a range whose start passes its end, or a maximum not above the minimum is rejected.

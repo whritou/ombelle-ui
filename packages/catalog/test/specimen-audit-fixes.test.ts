@@ -448,3 +448,61 @@ describe('0.7.6 audit findings', () => {
     expect(declarations(read('field/neo-brutalism.css'), "[data-slot='form-error-summary-list'] a").color).toBe('var(--foreground)')
   })
 })
+
+describe('the 0.7.6 variants pass the specimen audit and match their boards', () => {
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  const action = "[data-slot='card-action'] > :where(button:not([data-slot]))"
+  it.each(families)('%s keeps the ring numbers inside their box: a line height of 1 cut the glyphs', family => {
+    expect(declarations(read(`progress/${family}.css`), "[data-slot='progress-ring-value']")['line-height']).toBe('normal')
+    expect(declarations(read(`meter/${family}.css`), "[data-slot='meter-ring-value']")['line-height']).toBe('normal')
+  })
+  it.each(families)('%s keeps the Card action glyph inside its box and tints the button on hover', family => {
+    const css = read(`card/${family}.css`)
+    expect(declarations(css, action)['line-height']).toBe('normal')
+    expect(declarations(css, `${action}:hover`)['background-image']).toBe('linear-gradient(color-mix(in oklab, currentColor 8%, transparent) 0 0)')
+  })
+  it.each([
+    ['flat', { border: '0', 'box-shadow': 'inset 0 0 0 2px var(--primary)', color: 'var(--primary)', background: 'var(--card)' }],
+    ['minimalist', { border: '1px solid var(--input)', background: 'var(--card)' }],
+    ['neo-brutalism', { border: 'var(--border-width) solid var(--foreground)', 'box-shadow': '2px 2px 0 var(--foreground)', background: 'var(--card)' }],
+    ['ombelle', { border: 'var(--border-width) solid var(--border)', 'box-shadow': '2px 2px 0 var(--border)', background: 'var(--card)' }],
+  ])('%s draws the bare Card action as the board\'s small outline icon button', (family, expected) => {
+    expect(declarations(read(`card/${family}.css`), action)).toMatchObject(expected)
+  })
+  it.each(families)('%s sets the editable Slider value at weight 500, as the board\'s field', family => {
+    expect(declarations(read(`slider/${family}.css`), "[data-slot='slider-value-input']")['font-weight']).toBe('500')
+  })
+  it.each(families)('%s spins the indeterminate ring with the preset motion duration, so a reduced-motion preset holds it still', family => {
+    const css = read(`progress/${family}.css`)
+    expect(css).toContain('animation: progress-ring-spin calc(var(--motion-duration, 150ms) * 20 / 3) linear infinite;')
+  })
+})
+
+describe('the 0.7.6 image Carousel matches board section 07', () => {
+  const frame = "[data-slot='carousel-item']:is([data-variant='image'] > * > *)"
+  const thumbnail = "[data-slot='carousel-thumbnail']"
+  it('flat draws the board 1px edge on the frames and thumbnails although flat controls are borderless, with 10px thumbnails', () => {
+    const css = read('carousel/flat.css')
+    expect(declarations(css, frame).border).toBe('max(1px, var(--border-width)) solid var(--border)')
+    expect(declarations(css, thumbnail)).toMatchObject({ border: 'max(1px, var(--border-width)) solid var(--border)', 'border-radius': '10px' })
+  })
+  it('minimalist draws the frames and thumbnails in the strong line with the small radius', () => {
+    const css = read('carousel/minimalist.css')
+    expect(declarations(css, frame)).toMatchObject({ border: '1px solid var(--input)', 'border-radius': 'var(--radius)' })
+    expect(declarations(css, thumbnail)).toMatchObject({ border: '1px solid var(--input)', 'border-radius': 'var(--radius)' })
+  })
+  it('flat moves the focus ring of a thumbnail outside the current outline: both were 2px at 2px in the primary colour, so focusing the current one changed nothing', () => {
+    const css = read('carousel/flat.css')
+    expect(declarations(css, `${thumbnail}[aria-current='true']`)).toMatchObject({ outline: '2px solid var(--primary)', 'outline-offset': '2px' })
+    expect(declarations(css, `${thumbnail}:focus-visible`)).toMatchObject({ outline: '2px solid var(--ring)', 'outline-offset': '4px' })
+  })
+})
+
+describe('the 0.7.6 Card action in neo brutalism', () => {
+  it('rings the bare action inside itself in its own text colour: the --ring outline on the --secondary header fell under 3:1 in dark mode', () => {
+    const css = read('card/neo-brutalism.css')
+    const action = "[data-slot='card-action'] > :where(button:not([data-slot]))"
+    expect(declarations(css, `${action}:focus-visible`)).toMatchObject({ outline: '3px solid currentColor', 'outline-offset': '-5px' })
+    expect(declarations(css, action).color).toBe('var(--card-foreground)')
+  })
+})

@@ -103,6 +103,7 @@ function validateComposition(recipe: ComponentRecipe): void {
       if ((recipe.props.mode ?? 'file') === 'command') {
         if ((recipe.content.args ?? '').trim() === '') reject('Enter the command arguments', '/content/args')
       } else if ((recipe.content.code ?? '').trim() === '') reject('Enter the code to show', '/content/code')
+      if (recipe.props.diff && (recipe.props.mode ?? 'file') === 'command') reject('A command has no diff; turn diff off or use a file', '/props/diff')
       break
     case 'scroll-area':
       if (recipe.content.label.trim() === '') reject('Name the scroll area', '/content/label')
@@ -114,6 +115,8 @@ function validateComposition(recipe: ComponentRecipe): void {
       break
     case 'carousel':
       if (recipe.content.label.trim() === '') reject('Name the carousel', '/content/label')
+      if (recipe.props.thumbnails && recipe.props.variant !== 'image') reject('Thumbnails need the image variant; set variant to image or turn thumbnails off', '/props/thumbnails')
+      if (recipe.props.variant === 'image' && (recipe.props.slidesPerView ?? 1) > 1) reject('The image variant shows one image per view; set slidesPerView to 1 or use the default variant', '/props/slidesPerView')
       break
     case 'password-field':
       if (recipe.content.label.trim() === '') reject('Label the password field', '/content/label')
@@ -131,6 +134,7 @@ function validateComposition(recipe: ComponentRecipe): void {
     case 'slider': {
       const { min = 0, max = 100, value = 12, mode = 'single', rangeStart = 20, rangeEnd = 80 } = recipe.props
       if (min >= max) reject('Maximum must be greater than minimum', '/props/max')
+      if (recipe.props.valueDisplay === 'editable' && mode === 'range') reject('A range slider cannot use an editable valueDisplay; choose readout', '/props/valueDisplay')
       if (mode === 'single' && (value < min || value > max)) reject('Value must be within the range', '/props/value')
       if (mode === 'range') {
         if (rangeStart < min || rangeStart > max) reject('Range start must be within the range', '/props/rangeStart')
@@ -204,6 +208,22 @@ function validateComposition(recipe: ComponentRecipe): void {
       if (recipe.content.items.slice(0, -1).some(item => !item.href))
         reject('Ancestor pages require a link', '/content/items')
       break
+    case 'sheet':
+      if (recipe.props.snapPoints !== undefined && recipe.props.snapPoints !== 'none' && (recipe.props.side ?? 'inline-end') !== 'bottom')
+        reject('snapPoints needs a sheet that opens from the bottom', '/props/snapPoints')
+      break
+    case 'card':
+      if (recipe.props.action && recipe.props.mode === 'options') reject('A card with options cannot also have an action', '/props/action')
+      break
+    case 'tooltip': {
+      const { shortcut = '' } = recipe.content
+      if (shortcut !== '') {
+        const keys = shortcut.split('+')
+        if (keys.length > 3 || keys.some(key => key.trim() === ''))
+          reject('A shortcut is up to three keys joined by +, such as Ctrl+Shift+P', '/content/shortcut')
+      }
+      break
+    }
     case 'progress':
       if (!recipe.props.indeterminate && recipe.props.value > recipe.props.max)
         reject('Progress cannot exceed its maximum', '/props/value')

@@ -57,3 +57,27 @@
     animation: none;
   }
 }
+/* 0.7.6 variants */
+[data-slot='tooltip-content']:has(> [data-tooltip-shortcut]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline-end: 8px;
+}
+[data-slot='tooltip-shortcut'] {
+  display: inline-flex;
+  gap: 3px;
+}
+[data-slot='tooltip-shortcut-key'] {
+  padding-block: 1px;
+  padding-inline: 6px;
+  border: 1px solid color-mix(in oklab, currentColor 45%, transparent);
+  border-radius: 0;
+  font: 500 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (forced-colors: active) {
+  [data-slot='tooltip-shortcut-key'] {
+    border-color: CanvasText;
+  }
+}
+/* end 0.7.6 variants */

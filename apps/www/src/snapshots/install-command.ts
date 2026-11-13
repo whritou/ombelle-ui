@@ -49,6 +49,7 @@ const catalog076Components = new Set(['password-field', 'carousel', 'aspect-rati
 // The 0.7.6 fields, in props or content, that older recipe schemas reject.
 const variantRecipeFields076: Readonly<Record<string, readonly string[]>> = {
   field: ['form', 'fieldset', 'legend', 'fields'], checkbox: ['group', 'legend', 'options'],
+  sheet: ['snapPoints'], card: ['action'], slider: ['valueDisplay'], progress: ['shape'], meter: ['shape'], 'code-block': ['diff'], tooltip: ['shortcut'],
 }
 
 function usesVariants076(recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown }): boolean {

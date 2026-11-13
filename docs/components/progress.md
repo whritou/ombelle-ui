@@ -48,6 +48,26 @@ import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress
 - The header and readout inherit the surrounding text colour, so they add no contrast pair on glass.
 - **Recipe:** `size`, `tone`, `showLabel` and `showValue` (booleans).
 
+## Variants (0.7.6)
+
+`shape` needs CLI **0.7.6** or later, including in component recipes. Leaving it out, or `shape="bar"`, renders what earlier releases render.
+
+```tsx
+<Progress shape="circle" size="lg" value={64} aria-label="Uploading preset"><ProgressValue /></Progress>
+<Button variant="outline" size="sm" disabled>
+  <Progress shape="circle" size="sm" value={40} aria-label="Saving" />
+  Saving
+</Button>
+```
+
+- **`shape="circle"`** draws the same value as a ring: a 64 × 64 SVG (`progress-ring`, with `progress-ring-track` and `progress-ring-indicator` circles) that fills the root, starting at the top. It is `aria-hidden`; the root keeps its role, name and value text.
+- Sizes: `sm` 18px (a thicker stroke, for buttons, with no number), `default` 48px, `lg` 96px with a 16px number.
+- The number shows only with `ProgressValue`, inside the ring and `aria-hidden`; the root's `aria-valuetext` carries the same text. Without it the ring has no number. `ProgressLabel` stays in the header above the ring.
+- Tones colour the ring. Neo brutalism draws square ends and a `--foreground` ring; the other families round ends and a `--primary` ring.
+- Indeterminate, a quarter of the ring spins once per second, at the preset's motion speed: a preset with reduced motion, or the system's reduced-motion setting, holds it still.
+- Forced colours: the ring is `Highlight` on a `GrayText` track.
+- **Recipe:** `shape` (`bar` or `circle`).
+
 ## API and states
 
 - `value` is a number from 0 to `max` (default 100). Omit it, or pass `null`, for an indeterminate bar.

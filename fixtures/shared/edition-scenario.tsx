@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSepa
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogBody, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipShortcut, TooltipTrigger, ariaKeyShortcuts } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RadioGroup, RadioGroupItem, RadioGroupOption, RadioGroupOptionDescription, RadioGroupOptionLabel } from '@/components/ui/radio-group'
@@ -14,18 +14,19 @@ import { Checkbox, CheckboxOption } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, AvatarOverflow, AvatarStatus } from '@/components/ui/avatar'
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
+import { Meter } from '@/components/ui/meter'
 import { Separator } from '@/components/ui/separator'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGroupCount, InputGroupInput, InputGroupText, InputGroupTextarea } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHandle, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogConfirmInput, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
-import { Slider } from '@/components/ui/slider'
+import { Slider, SliderValue } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Toggle } from '@/components/ui/toggle'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -35,6 +36,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, 
 import { NumberInput } from '@/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
+import { Carousel, CarouselContent, CarouselCounter, CarouselImage, CarouselItem, CarouselNext, CarouselPrevious, CarouselThumbnails } from '@/components/ui/carousel'
 import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
@@ -643,6 +645,113 @@ function VariantsScenario075() {
   )
 }
 
+/** Field trip photos for the image Carousel: small SVG data URIs, one hue per slide, so they really load. */
+const fieldTripPhotos = [
+  ['#3F7F8C', 'A lake below pine hills'],
+  ['#D9708A', 'Sand dunes at dusk'],
+  ['#2A3166', 'A city skyline at night'],
+  ['#2C7DA0', 'A coastline'],
+  ['#6E8B3D', 'A field of poppies'],
+].map(([hue, alt]) => ({
+  alt,
+  src: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="320" height="180" fill="${hue}"/></svg>`),
+}))
+
+/** The 0.7.6 variants, for tests/e2e/variants-076.spec.ts; later tasks add their parts here. */
+function VariantsScenario076() {
+  const [wideAction, setWideAction] = React.useState(false)
+  const [actionClicks, setActionClicks] = React.useState(0)
+  return (
+    <section aria-label="0.7.6 variants" data-testid="variants-076">
+      <Sheet>
+        <SheetTrigger asChild><Button>Filters</Button></SheetTrigger>
+        <SheetContent side="bottom" snapPoints={[0.5, 0.9]}>
+          <SheetHandle label="Resize Filters" />
+          <SheetHeader><SheetTitle>Filters</SheetTitle><SheetDescription>Settles on half or full height when released.</SheetDescription></SheetHeader>
+        </SheetContent>
+      </Sheet>
+      <Card data-testid="ca-card">
+        <CardHeader>
+          <CardTitle data-testid="ca-title">Studio warm</CardTitle>
+          <CardDescription data-testid="ca-description">Your preset · edited 2 h ago</CardDescription>
+          <CardAction data-testid="ca-action">
+            <button type="button" aria-label="More actions for Studio warm" data-testid="ca-button" style={wideAction ? { inlineSize: 120 } : undefined}>
+              <span aria-hidden="true">⋯</span>
+            </button>
+          </CardAction>
+        </CardHeader>
+      </Card>
+      <Button type="button" onClick={() => setWideAction(wide => !wide)}>Swap the card action</Button>
+      <Card data-testid="ca-link-card">
+        <CardHeader>
+          <CardTitle><CardLink href="#ca-followed">Linked preset</CardLink></CardTitle>
+          <CardDescription>Whole card is the link.</CardDescription>
+          <CardAction>
+            <button type="button" aria-label="More actions for Linked preset" data-testid="ca-link-button" onClick={() => setActionClicks(count => count + 1)}>
+              <span aria-hidden="true">⋯</span>
+            </button>
+          </CardAction>
+        </CardHeader>
+      </Card>
+      <p data-testid="ca-clicks">Action clicks: {actionClicks}</p>
+      <div data-testid="ca-stats">
+        <Card density="dense"><CardHeader><CardTitle>53</CardTitle><CardDescription>components</CardDescription></CardHeader></Card>
+        <Card density="dense"><CardHeader><CardTitle>5</CardTitle><CardDescription>style families</CardDescription></CardHeader></Card>
+      </div>
+      <Slider data-testid="sv-radius" defaultValue={[12]} min={0} max={48} aria-labelledby="sv-radius-label" getValueText={(value) => `${value} px`}>
+        <label id="sv-radius-label">Radius</label>
+        <SliderValue />
+      </Slider>
+      <Slider data-testid="sv-opacity" defaultValue={[0.75]} min={0} max={1} step={0.05} aria-labelledby="sv-opacity-label">
+        <label id="sv-opacity-label">Shadow opacity</label>
+        <SliderValue editable />
+      </Slider>
+      <div data-testid="rg-rings">
+        <Progress shape="circle" size="lg" value={64} aria-label="Uploading preset" data-testid="rg-upload"><ProgressValue /></Progress>
+        <Progress shape="circle" aria-label="Syncing" data-testid="rg-sync" />
+        <Meter shape="circle" value={72} max={100} aria-label="Storage used" data-testid="rg-meter" />
+        <Button type="button" variant="outline" size="sm" disabled>
+          <Progress shape="circle" size="sm" value={40} aria-label="Saving" data-testid="rg-saving" />
+          Saving
+        </Button>
+      </div>
+      <div data-testid="rg-diff">
+        <CodeBlock title="ui-style.css" language="css" diff code={[':root {', '-  --radius: 0.5rem;', '+  --radius: 0.75rem;', '+  --shadow-offset: 3px;', '}', ''].join('\n')} />
+      </div>
+      <div data-testid="ts-shortcuts">
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger type="button" aria-label="Undo" aria-keyshortcuts={ariaKeyShortcuts(['Ctrl', 'Z'])} data-testid="ts-undo">↶</TooltipTrigger>
+            <TooltipContent>
+              Undo
+              <TooltipShortcut keys={['Ctrl', 'Z']} />
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger type="button" aria-keyshortcuts={ariaKeyShortcuts(['Ctrl', 'K'])} data-testid="ts-search">Search</TooltipTrigger>
+            <TooltipContent>
+              Search
+              <TooltipShortcut keys={['Ctrl', 'K']} />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      <div data-testid="rg-nodiff">
+        <CodeBlock title="ui-style.css" language="css" code={[':root {', '  --radius: 0.75rem;', '  --shadow-offset: 3px;', '}', ''].join('\n')} />
+      </div>
+      <Carousel variant="image" ratio="16 / 9" aria-label="Field trip photos" data-testid="ic-carousel">
+        <CarouselContent>
+          {fieldTripPhotos.map(photo => <CarouselItem key={photo.alt}><CarouselImage src={photo.src} alt={photo.alt} /></CarouselItem>)}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+        <CarouselCounter />
+        <CarouselThumbnails />
+      </Carousel>
+    </section>
+  )
+}
+
 /** Number Input and Color Picker fixtures for tests/e2e/editor-inputs-075.spec.ts. */
 function EditorInputsScenario() {
   const [radius, setRadius] = React.useState<number | null>(12)
@@ -863,6 +972,7 @@ function CatalogExpansionScenario() {
         <VariantsMoreScenario />
         <VariantsScenario075 />
         <ComponentsScenario076 />
+        <VariantsScenario076 />
         <p id="field-own-note">Visible to your team.</p>
         <Field invalid>
           <FieldLabel>Display name</FieldLabel>

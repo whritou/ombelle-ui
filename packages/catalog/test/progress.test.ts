@@ -9,7 +9,7 @@ describe('Progress catalog contract', () => {
     expectComponentContract('progress', {
       client: true,
       parts: ['Progress'],
-      slots: ['progress', 'progress-indicator'],
+      slots: ['progress', 'progress-indicator', 'progress-ring', 'progress-ring-track', 'progress-ring-indicator', 'progress-ring-value'],
       dependencies: [
         { name: 'react', version: '19.3.1' },
         { name: '@radix-ui/react-progress', version: '1.2.1' },

@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon, InputGroupText, InputGroupButton, InputGroupClear, InputGroupCount } from '@/components/ui/input-group'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Pagination, PaginationCompact, PaginationContent, PaginationItem, PaginationLink, PaginationPageSize, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet'
+import { Sheet, SheetTrigger, SheetContent, SheetHandle, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogMedia, AlertDialogConfirmInput } from '@/components/ui/alert-dialog'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@/components/ui/toast'
 import {
   Card,
+  CardAction,
   CardHeader,
   CardTitle,
   CardDescription,
@@ -88,6 +89,8 @@ import {
   TooltipTrigger,
   TooltipContent,
   TooltipArrow,
+  TooltipShortcut,
+  ariaKeyShortcuts,
 } from '@/components/ui/tooltip'
 import {
   Dialog,
@@ -103,7 +106,7 @@ import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
 import { Field, FieldLabel, FieldControl, FieldDescription, FieldError, FieldLegend, FieldSet, Form, FormErrorSummary } from '@/components/ui/field'
 import { Meter, MeterLabel, MeterValue, MeterSegment, MeterLegend, MeterLegendItem } from '@/components/ui/meter'
-import { Slider, SliderTicks } from '@/components/ui/slider'
+import { Slider, SliderTicks, SliderValue } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Toggle } from '@/components/ui/toggle'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -122,7 +125,7 @@ import { NumberInput } from '@/components/ui/number-input'
 import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle } from '@/components/ui/password-field'
-import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselImage, CarouselItem, CarouselNext, CarouselPrevious, CarouselThumbnails } from '@/components/ui/carousel'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
 import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
@@ -133,6 +136,12 @@ export type PresetGalleryProps = {
   unavailable?: readonly string[]
   familyLabel?: string
 }
+
+// The board's field trip photos as small 16:9 SVGs, one hue each: the gallery ships no image files.
+const fieldTripPhotos = [
+  ['A lake below pine hills', 195], ['Sand dunes at dusk', 25], ['A city skyline at night', 240], ['A coastline', 200], ['A field of poppies', 95],
+].map(([alt, hue]) => ({ alt: alt as string, src: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
+  + `<rect width='16' height='9' fill='hsl(${hue} 70% 82%)'/><path d='M0 6.5Q5 3.5 10 6t6-1V9H0z' fill='hsl(${hue} 45% 38%)'/></svg>`) }))
 
 function ToastExample() {
   const [open, setOpen] = React.useState(false)
@@ -241,6 +250,11 @@ export function PresetGallery({
           <SheetHeader><SheetTitle>Project details</SheetTitle><SheetDescription>Review the current project.</SheetDescription></SheetHeader>
           <p>Your project is ready to review.</p><SheetFooter><SheetClose asChild><Button>Done</Button></SheetClose></SheetFooter>
         </SheetContent></Sheet>
+        <div data-component="sheet~snap"><Sheet><SheetTrigger asChild><Button variant="outline">Open filters</Button></SheetTrigger>
+          <SheetContent side="bottom" snapPoints={[0.5, 0.9]}><SheetHandle label="Resize Filters" />
+            <SheetHeader><SheetTitle>Filters</SheetTitle><SheetDescription>Settles on 0.5 or 0.9 when released.</SheetDescription></SheetHeader>
+            <SheetFooter><SheetClose asChild><Button variant="outline" size="sm">Forms</Button></SheetClose><SheetClose asChild><Button variant="outline" size="sm">Overlays</Button></SheetClose></SheetFooter>
+          </SheetContent></Sheet></div>
       </section>)}
       {gate('alert-dialog', 'Alert Dialog', <section aria-label="Alert Dialog" data-component="alert-dialog">
         <h2>Alert Dialog</h2><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive">Delete project</Button></AlertDialogTrigger><AlertDialogContent>
@@ -285,6 +299,7 @@ export function PresetGallery({
         <Meter value={128} max={200} segments={10} warningAt={0.6}><MeterLabel>Deploys this month</MeterLabel><MeterValue /></Meter>
         <Meter max={10}><MeterLabel>Storage</MeterLabel><MeterValue>7 / 10 GB</MeterValue><MeterSegment value={4} tone="primary" /><MeterSegment value={2} tone="info" /><MeterSegment value={1} tone="success" />
           <MeterLegend><MeterLegendItem tone="primary">Builds</MeterLegendItem><MeterLegendItem tone="info">Assets</MeterLegendItem><MeterLegendItem tone="success">Logs</MeterLegendItem></MeterLegend></Meter>
+        <div data-component="meter~circle"><Meter value={72} max={100} shape="circle"><MeterLabel>Storage used</MeterLabel></Meter></div>
       </section>)}
       {gate('stepper', 'Stepper', <section aria-label="Stepper" data-component="stepper">
         <h2>Stepper</h2>
@@ -299,6 +314,10 @@ export function PresetGallery({
         <Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => `${value} pixels`} />
         <Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} />
         <SliderTicks values={[0, 25, 50, 75, 100]} />
+        <div data-component="slider~readout"><Slider defaultValue={[12]} max={48} aria-labelledby="gallery-slider-radius" getValueText={value => `${value} px`}>
+          <span id="gallery-slider-radius">Radius</span><SliderValue /></Slider></div>
+        <div data-component="slider~editable"><Slider defaultValue={[0.75]} max={1} step={0.05} aria-labelledby="gallery-slider-shadow">
+          <span id="gallery-slider-shadow">Shadow opacity</span><SliderValue editable /></Slider></div>
       </section>)}
       {gate('toggle-group', 'Toggle Group', <section aria-label="Toggle Group" data-component="toggle-group">
         <h2>Toggle Group</h2>
@@ -465,6 +484,17 @@ export function PresetGallery({
           <CarouselDots />
           <CarouselCounter />
         </Carousel>
+        <div data-component="carousel~image-thumbnails">
+          <Carousel aria-label="Field trip photos" variant="image" ratio="16 / 9">
+            <CarouselContent>
+              {fieldTripPhotos.map(photo => <CarouselItem key={photo.alt}><CarouselImage src={photo.src} alt={photo.alt} /></CarouselItem>)}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+            <CarouselCounter />
+            <CarouselThumbnails />
+          </Carousel>
+        </div>
       </section>)}
       {gate('aspect-ratio', 'Aspect Ratio', <section aria-label="Aspect Ratio" data-component="aspect-ratio">
         <h2>Aspect Ratio</h2>
@@ -498,6 +528,8 @@ export function PresetGallery({
           <CodeBlockCommand args="@ombelle-ui/cli add button" />
           <CodeBlock title="save.tsx" language="tsx"
             code={"import { Button } from '@/components/ui/button'\n\n// Saves the draft.\nexport function Save() {\n  return <Button variant=\"outline\" size=\"sm\">Save</Button>\n}\n"} />
+          <div data-component="code-block~diff"><CodeBlock title="ui-style.css" language="css" diff
+            code={" :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }\n"} /></div>
         </div>
       </section>)}
       </div>
@@ -620,6 +652,12 @@ export function PresetGallery({
           <Card appearance="outlined"><CardHeader><CardTitle level={3}>Outlined card</CardTitle></CardHeader><CardContent>Project summary.</CardContent></Card>
           <Card appearance="subtle" density="dense"><CardHeader><CardTitle level={3}>Subtle card</CardTitle></CardHeader><CardContent>Recent activity.</CardContent></Card>
         </div>
+        <div data-component="card~action"><Card><CardHeader><CardTitle level={3}>Studio warm</CardTitle><CardDescription>Your preset, edited 2 h ago</CardDescription>
+          <CardAction><Button variant="outline" size="icon-sm" aria-label="More actions for Studio warm"><span aria-hidden="true">⋯</span></Button></CardAction></CardHeader>
+          <CardContent>Warm neutrals with a clay accent, for the studio app.</CardContent></Card></div>
+        <div data-component="card~action-dense"><Card density="dense"><CardHeader><CardTitle level={3}>Night shift</CardTitle><CardDescription>Shared with you</CardDescription>
+          <CardAction><Button variant="outline" size="icon-sm" aria-label="More actions for Night shift"><span aria-hidden="true">⋯</span></Button></CardAction></CardHeader>
+          <CardContent>Deep blues for late reviews.</CardContent></Card></div>
         <p id="gallery-plan">Plan</p>
         <CardGroup name="gallery-plan" aria-labelledby="gallery-plan" defaultValue="team">
           <CardOption value="starter" title="Starter" description="One project." />
@@ -819,6 +857,18 @@ export function PresetGallery({
               <TooltipArrow />
             </TooltipContent>
           </Tooltip>
+          <div data-component="tooltip~shortcut">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" aria-keyshortcuts={ariaKeyShortcuts(['Ctrl', 'Z'])}>Undo</Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Undo the last change
+                <TooltipShortcut keys={['Ctrl', 'Z']} />
+                <TooltipArrow />
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </TooltipProvider>
       </section>
       {gate(
@@ -992,6 +1042,14 @@ export function PresetGallery({
                 <ProgressLabel>Consumer matrix, 16 of 40</ProgressLabel>
                 <ProgressValue />
               </Progress>
+            </div>
+            <div className="preset-row">
+              <div data-component="progress~circle">
+                <Progress shape="circle" size="lg" value={64} aria-label="Uploading preset"><ProgressValue /></Progress>
+              </div>
+              <div data-component="progress~circle-sm">
+                <Button variant="outline" size="sm" disabled><Progress shape="circle" size="sm" value={40} aria-label="Saving" />Saving</Button>
+              </div>
             </div>
             <div className="preset-progress-label">
               <span id="preset-progress-contrast">Contrast checks</span>

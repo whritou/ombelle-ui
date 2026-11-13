@@ -230,3 +230,54 @@
   }
 }
 /* end 0.7.3 variants */
+/* 0.7.6 variants */
+[data-slot='card-header']:has(> [data-card-action]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 12px;
+  align-items: start;
+  align-content: start;
+}
+[data-slot='card-header']:has(> [data-card-action]) > :not([data-card-action]) {
+  grid-column: 1;
+}
+[data-slot='card-action'] {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  position: relative;
+  z-index: 1;
+}
+[data-slot='card-action'] > :where(button:not([data-slot])) {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 34px;
+  block-size: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--primary);
+  box-shadow: inset 0 0 0 2px var(--primary);
+  font: inherit;
+  line-height: normal;
+  cursor: pointer;
+}
+[data-slot='card-action'] > :where(button:not([data-slot])):hover {
+  background-image: linear-gradient(color-mix(in oklab, currentColor 8%, transparent) 0 0);
+}
+[data-slot='card-action'] > :where(button:not([data-slot])):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  [data-slot='card-action'] > :where(button:not([data-slot])) {
+    border: 1px solid CanvasText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+  [data-slot='card-action'] > :where(button:not([data-slot])):focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+/* end 0.7.6 variants */

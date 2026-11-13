@@ -150,3 +150,87 @@
     transition: none;
   }
 }
+/* 0.7.6 variants */
+[data-slot='carousel'][data-carousel-thumbnails] {
+  grid-template-areas: 'previous content next' 'dots dots dots' 'thumbnails thumbnails thumbnails';
+}
+[data-slot='carousel-content']:is([data-variant='image'] > *) {
+  gap: 12px;
+}
+[data-slot='carousel-item']:is([data-variant='image'] > * > *) {
+  position: relative;
+  flex: 0 0 88%;
+  aspect-ratio: var(--carousel-ratio, 16 / 9);
+  border: var(--border-width) solid var(--foreground);
+  border-radius: 0;
+  overflow: hidden;
+}
+[data-slot='carousel-image'] {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+[data-slot='carousel-thumbnails'] {
+  grid-area: thumbnails;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-inline-size: 0;
+  padding: 4px;
+}
+[data-slot='carousel-thumbnail'] {
+  flex: none;
+  inline-size: 84px;
+  aspect-ratio: var(--carousel-ratio, 16 / 9);
+  padding: 0;
+  border: var(--border-width) solid var(--foreground);
+  border-radius: 0;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+  opacity: 0.6;
+}
+[data-slot='carousel-thumbnail'] > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+[data-slot='carousel-thumbnail'][aria-current='true'] {
+  opacity: 1;
+  outline: 3px solid var(--foreground);
+  outline-offset: 2px;
+}
+[data-slot='carousel-thumbnail']:focus-visible {
+  opacity: 1;
+  outline: 3px dashed var(--ring);
+  outline-offset: 4px;
+}
+@media (width < 640px) {
+  [data-slot='carousel'][data-carousel-thumbnails] {
+    grid-template-areas: 'content' 'dots' 'thumbnails';
+  }
+  /* A scrolling row clips what overflows its padding box: 8px covers every family's focus ring and current outline. */
+  [data-slot='carousel-thumbnails'] {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 8px;
+  }
+  [data-slot='carousel-previous']:is([data-carousel-thumbnails] > *),
+  [data-slot='carousel-next']:is([data-carousel-thumbnails] > *) {
+    display: none;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='carousel-item']:is([data-variant='image'] > * > *),
+  [data-slot='carousel-thumbnail'] {
+    border-color: CanvasText;
+  }
+  [data-slot='carousel-thumbnail'][aria-current='true'] {
+    outline-color: Highlight;
+  }
+}
+/* end 0.7.6 variants */

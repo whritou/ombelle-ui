@@ -58,6 +58,30 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
   - Dragging resizes it too. The width never passes the viewport less 16px, even below `minSize`, and follows the window as it is resized.
   - Other props: `defaultSize` (320) and `onSizeChange`.
 
+## Variants (0.7.6)
+
+`snapPoints` needs CLI **0.7.6** or later, including in component recipes. Leaving it out renders what earlier releases render.
+
+```tsx
+<Sheet>
+  <SheetTrigger>Filters</SheetTrigger>
+  <SheetContent side="bottom" snapPoints={[0.5, 0.9]}>
+    <SheetHandle label="Resize Filters" />
+    <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
+  </SheetContent>
+</Sheet>
+```
+
+- **Snap points apply to bottom sheets only.** On any other `side` the prop is ignored and adds no attribute. Each point is a fraction of the viewport height, kept between 0.25 and 0.95; duplicates are dropped and the points are sorted.
+- The sheet opens at its first point and opens there again after it closes, however it was left.
+- With a `SheetHandle`:
+  - a drag moves the sheet freely; on release it settles on the nearest point (a tie goes to the higher one), and a release below 25 % closes it and returns focus to the trigger;
+  - Arrow Up goes to the next higher point, Arrow Down to the next lower one, and Arrow Down on the lowest point closes the sheet; Home and End go to the lowest and highest points;
+  - the handle's value text names the point: `Half height` for 0.5, `Full height` for the highest point when it is at least 0.9, otherwise the percentage (`33%`).
+- The settle is a 200 ms height transition, only when the user allows motion; nothing moves under `prefers-reduced-motion: reduce`. Forced colours are unchanged.
+- `nearestSnapPoint(height, points)` and `snapPointText(point, points)` are exported.
+- **Recipe:** `snapPoints` is `none`, `half-full` (`[0.5, 0.9]`) or `third-half-full` (`[0.33, 0.5, 0.9]`), and needs `side: 'bottom'`.
+
 ## Styling and generated files
 
 The compiler emits `components/ui/sheet.tsx`, `components/ui/sheet.css` and an example. The source imports only its own stylesheet and utils; it does not import another installed component. Both editions also use lucide-react 1.55.0 for the icon and clsx 2.1.1 / tailwind-merge 3.7.0 through utils.
