@@ -195,13 +195,14 @@ type SliderValueInputProps = {
 
 // The field shows the value until it is edited, focused or not, so a thumb moved while the field
 // has focus (a press on the track) still shows. Enter or blur commits an edited number, stepped and
-// clamped; other text, or Escape, restores the value. An unedited field commits nothing.
+// clamped (a comma decimal counts as a point); other text, or Escape, restores the value. An unedited field commits nothing.
 function SliderValueInput({ value, min, max, step, onCommit, className, ...props }: SliderValueInputProps) {
   const [draft, setDraft] = React.useState<string | null>(null)
   const commit = () => {
     if (draft === null) return
     const typed = draft.trim()
-    const parsed = typed === '' ? Number.NaN : Number(typed)
+    // A comma decimal, as typed in many locales, reads as a point.
+    const parsed = typed === '' ? Number.NaN : Number(typed.replace(',', '.'))
     if (!Number.isFinite(parsed)) return
     const next = stepValue(parsed, min, max, step)
     if (next !== value) onCommit(next)

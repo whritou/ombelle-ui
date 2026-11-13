@@ -211,6 +211,11 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(thumb).toHaveAttribute('aria-valuenow', '1')
       await input.blur()
       await expect(thumb).toHaveAttribute('aria-valuenow', '1')
+      // A comma decimal is read as a point.
+      await input.fill('0,35')
+      await input.press('Enter')
+      await expect(thumb).toHaveAttribute('aria-valuenow', '0.35')
+      await expect(input).toHaveValue('0.35')
       // A drag to the start of the track updates the field.
       const root = section.getByTestId('sv-opacity')
       const handle = (await root.locator('[data-slot="slider-thumb"]').boundingBox())!

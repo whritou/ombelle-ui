@@ -63,6 +63,7 @@ import { Slider, SliderValue } from '@/components/ui/slider'
 - The value is an `<output>` (`slider-value`) whose `for` names the thumbs. It shows `format(value, index)`, or `getValueText`, or the number; a range reads `20 – 80`. When the Slider has no `getValueText`, the thumbs speak `format` too. It is not a live region: the thumbs already announce their value.
 - **`editable`** turns a single thumb's value into a text field (`slider-value-input`, 76 × 34 px, centred mono text, drawn like the family's Number Input), named by the Slider's own label:
   - Enter or leaving the field moves the thumb to the typed value, clamped to `min`..`max` and rounded to `step` (`0.33` with step 0.05 becomes 0.35); Enter keeps focus in the field;
+  - a comma decimal reads as a point, so `0,35` is 0.35;
   - text that is not a number, or an empty field, restores the current value; Escape restores it without moving the thumb;
   - dragging the thumb, or pressing on the track, updates the field.
   On a range, `editable` shows the readout instead.
