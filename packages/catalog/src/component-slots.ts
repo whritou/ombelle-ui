@@ -9,7 +9,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   command: ['command', 'command-dialog-trigger', 'command-dialog-overlay', 'command-dialog', 'command-dialog-title', 'command-search', 'command-input', 'command-list', 'command-group', 'command-group-heading', 'command-item', 'command-shortcut', 'command-separator', 'command-empty'],
   'context-menu': ['context-menu', 'context-menu-portal', 'context-menu-trigger', 'context-menu-content', 'context-menu-group', 'context-menu-label', 'context-menu-item', 'context-menu-checkbox-item', 'context-menu-radio-group', 'context-menu-radio-item', 'context-menu-item-indicator', 'context-menu-separator', 'context-menu-shortcut', 'context-menu-sub', 'context-menu-sub-trigger', 'context-menu-sub-icon', 'context-menu-sub-content'],
   'hover-card': ['hover-card', 'hover-card-trigger', 'hover-card-content', 'hover-card-arrow'],
-  slider: ['slider', 'slider-track', 'slider-range', 'slider-thumb', 'slider-ticks', 'slider-tick'],
+  slider: ['slider', 'slider-track', 'slider-range', 'slider-thumb', 'slider-ticks', 'slider-tick', 'slider-field', 'slider-header', 'slider-value', 'slider-value-input'],
   collapsible: ['collapsible', 'collapsible-trigger', 'collapsible-icon', 'collapsible-content'],
   toggle: ['toggle'],
   'scroll-area': ['scroll-area', 'scroll-area-viewport', 'scroll-area-scrollbar', 'scroll-area-thumb', 'scroll-area-corner'],

@@ -160,3 +160,67 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test.describe(`${edition} SliderValue`, () => {
+    test('the readout follows the thumb', async ({ page }) => {
+      const section = await open(page, edition)
+      const field = section.locator('[data-slot="slider-field"]').filter({ has: page.getByTestId('sv-radius') })
+      const readout = field.locator('[data-slot="slider-value"]')
+      await expect(readout).toHaveText('12 px')
+      const thumb = section.getByRole('slider', { name: 'Radius', exact: true })
+      await expect(thumb).toHaveAttribute('aria-valuetext', '12 px')
+      await thumb.focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(readout).toHaveText('13 px')
+      await expect(thumb).toHaveAttribute('aria-valuetext', '13 px')
+      expect(await readout.getAttribute('for')).toBe(await thumb.getAttribute('id'))
+    })
+
+    test('an editable value commits on Enter and blur, restores bad text and Escape, and follows a drag', async ({ page }) => {
+      const section = await open(page, edition)
+      const input = section.getByRole('textbox', { name: 'Shadow opacity', exact: true })
+      const thumb = section.getByRole('slider', { name: 'Shadow opacity', exact: true })
+      await expect(input).toHaveValue('0.75')
+      const box = (await input.boundingBox())!
+      expect(Math.round(box.width)).toBe(76)
+      expect(Math.round(box.height)).toBe(34)
+      // 0.33 lands on the nearest 0.05 step.
+      await input.fill('0.33')
+      await input.press('Enter')
+      await expect(thumb).toHaveAttribute('aria-valuenow', '0.35')
+      await expect(input).toHaveValue('0.35')
+      await expect(input).toBeFocused()
+      // Not a number: the value is restored and the thumb stays.
+      await input.fill('abc')
+      await input.press('Enter')
+      await expect(input).toHaveValue('0.35')
+      await expect(thumb).toHaveAttribute('aria-valuenow', '0.35')
+      await input.fill('')
+      await input.press('Enter')
+      await expect(input).toHaveValue('0.35')
+      // Above the maximum, committed on blur: clamped to 1.
+      await input.fill('5')
+      await input.blur()
+      await expect(thumb).toHaveAttribute('aria-valuenow', '1')
+      await expect(input).toHaveValue('1')
+      // Escape restores the text and leaves the thumb.
+      await input.fill('0.2')
+      await input.press('Escape')
+      await expect(input).toHaveValue('1')
+      await expect(thumb).toHaveAttribute('aria-valuenow', '1')
+      await input.blur()
+      await expect(thumb).toHaveAttribute('aria-valuenow', '1')
+      // A drag to the start of the track updates the field.
+      const root = section.getByTestId('sv-opacity')
+      const handle = (await root.locator('[data-slot="slider-thumb"]').boundingBox())!
+      const track = (await root.locator('[data-slot="slider-track"]').boundingBox())!
+      await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(track.x - 20, handle.y + handle.height / 2, { steps: 8 })
+      await page.mouse.up()
+      await expect(thumb).toHaveAttribute('aria-valuenow', '0')
+      await expect(input).toHaveValue('0')
+    })
+  })
+}

@@ -25,7 +25,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
-import { Slider } from '@/components/ui/slider'
+import { Slider, SliderValue } from '@/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Toggle } from '@/components/ui/toggle'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -689,6 +689,14 @@ function VariantsScenario076() {
         <Card density="dense"><CardHeader><CardTitle>53</CardTitle><CardDescription>components</CardDescription></CardHeader></Card>
         <Card density="dense"><CardHeader><CardTitle>5</CardTitle><CardDescription>style families</CardDescription></CardHeader></Card>
       </div>
+      <Slider data-testid="sv-radius" defaultValue={[12]} min={0} max={48} aria-labelledby="sv-radius-label" getValueText={(value) => `${value} px`}>
+        <label id="sv-radius-label">Radius</label>
+        <SliderValue />
+      </Slider>
+      <Slider data-testid="sv-opacity" defaultValue={[0.75]} min={0} max={1} step={0.05} aria-labelledby="sv-opacity-label">
+        <label id="sv-opacity-label">Shadow opacity</label>
+        <SliderValue editable />
+      </Slider>
     </section>
   )
 }
