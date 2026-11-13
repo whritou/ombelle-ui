@@ -702,6 +702,12 @@ function VariantsScenario076() {
           Saving
         </Button>
       </div>
+      <div data-testid="rg-diff">
+        <CodeBlock title="ui-style.css" language="css" diff code={[':root {', '-  --radius: 0.5rem;', '+  --radius: 0.75rem;', '+  --shadow-offset: 3px;', '}', ''].join('\n')} />
+      </div>
+      <div data-testid="rg-nodiff">
+        <CodeBlock title="ui-style.css" language="css" code={[':root {', '  --radius: 0.75rem;', '  --shadow-offset: 3px;', '}', ''].join('\n')} />
+      </div>
     </section>
   )
 }

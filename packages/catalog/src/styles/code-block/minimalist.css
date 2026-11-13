@@ -213,3 +213,60 @@
     transition: none;
   }
 }
+/* 0.7.6 variants */
+[data-slot='code-block-diff-count'] {
+  flex: none;
+  margin-inline-start: 6px;
+  color: color-mix(in oklab, var(--code-block-foreground) 75%, transparent);
+  font: 500 12px / 1 var(--font-mono, ui-monospace, monospace);
+  white-space: nowrap;
+}
+[data-slot='code-block-code'][data-diff] {
+  padding-inline: 0;
+}
+[data-diff] [data-slot='code-block-line'] {
+  position: relative;
+  display: block;
+  inline-size: max-content;
+  min-inline-size: 100%;
+  box-sizing: border-box;
+  padding-inline-start: calc(28px + 1ch);
+  padding-inline-end: 16px;
+}
+[data-diff]:not([data-line-numbers='false']) [data-slot='code-block-line'] {
+  padding-inline-start: calc(28px + max(2ch, var(--code-block-gutter, 2ch)) + 1ch);
+}
+[data-diff] [data-slot='code-block-line']::before {
+  position: absolute;
+  inset-inline-start: 28px;
+}
+[data-slot='code-block-line'][data-diff='added'] {
+  background: color-mix(in oklab, oklch(0.72 0.17 150) 24%, transparent);
+}
+[data-slot='code-block-line'][data-diff='removed'] {
+  background: color-mix(in oklab, oklch(0.66 0.2 25) 26%, transparent);
+}
+/* A comment on a tinted band would fall below 4.5:1, so it takes the punctuation colour there. */
+[data-slot='code-block-line'][data-diff] [data-token='comment'] {
+  color: var(--code-block-punct);
+}
+[data-slot='code-block-diff-marker'] {
+  position: absolute;
+  inset-inline-start: 0;
+  display: inline-block;
+  inline-size: 28px;
+  text-align: center;
+  color: color-mix(in oklab, var(--code-block-foreground) 80%, transparent);
+  -webkit-user-select: none;
+  user-select: none;
+}
+@media (forced-colors: active) {
+  [data-slot='code-block-line'][data-diff] {
+    background: transparent;
+  }
+  [data-slot='code-block-diff-marker'],
+  [data-slot='code-block-diff-count'] {
+    color: CanvasText;
+  }
+}
+/* end 0.7.6 variants */

@@ -282,4 +282,54 @@ for (const edition of ['radix', 'base'] as const) {
       await expect.poll(() => spinner.evaluate(node => getComputedStyle(node).animationDuration)).toBe('1s')
     })
   })
+
+  test.describe(`${edition} Code Block diff`, () => {
+    test('Copy writes exactly the new version', async ({ page }) => {
+      await page.addInitScript(() => {
+        const w = window as unknown as { copied: string[] }
+        w.copied = []
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (text: string) => { w.copied.push(text) } } })
+      })
+      const section = await open(page, edition)
+      await section.getByRole('button', { name: 'Copy the new ui-style.css', exact: true }).click()
+      await expect(section.getByRole('status').filter({ hasText: 'Copied' })).toHaveCount(1)
+      expect(await page.evaluate(() => (window as unknown as { copied: string[] }).copied))
+        .toEqual([':root {\n  --radius: 0.75rem;\n  --shadow-offset: 3px;\n}\n'])
+    })
+
+    test('the code region reads Removed and Added, and the count reads aloud', async ({ page }) => {
+      const section = await open(page, edition)
+      const diff = section.getByTestId('rg-diff')
+      const region = diff.getByRole('region', { name: 'ui-style.css source' })
+      const text = (await region.evaluate(node => (node as HTMLElement).textContent)) ?? ''
+      expect(text).toContain('Removed:   --radius: 0.5rem;')
+      expect(text).toContain('Added:   --radius: 0.75rem;')
+      expect(text).toContain('Added:   --shadow-offset: 3px;')
+      await expect(region.locator('[data-slot="code-block-diff-marker"]').first()).toHaveAttribute('aria-hidden', 'true')
+      await expect(diff.locator('[data-slot="code-block-diff-count"]')).toContainText('2 added, 1 removed')
+      await expect(diff.locator('[data-slot="code-block-diff-count"] [aria-hidden="true"]')).toHaveText('+2 −1')
+      // The default block has no markers.
+      await expect(section.getByTestId('rg-nodiff').locator('[data-slot="code-block-diff-marker"]')).toHaveCount(0)
+    })
+
+    test('lines are tinted, one line high, and the marker column moves the text by less than its width', async ({ page }) => {
+      const section = await open(page, edition)
+      const lines = section.getByTestId('rg-diff').locator('[data-slot="code-block-line"]')
+      const plain = section.getByTestId('rg-nodiff').locator('[data-slot="code-block-line"]')
+      const background = (index: number) => lines.nth(index).evaluate(node => getComputedStyle(node).backgroundColor)
+      expect(await background(0)).toBe('rgba(0, 0, 0, 0)')
+      expect(await background(1)).not.toBe('rgba(0, 0, 0, 0)')
+      expect(await background(2)).not.toBe('rgba(0, 0, 0, 0)')
+      expect(await background(1)).not.toBe(await background(2))
+      const heights = await Promise.all([0, 1, 2, 3, 4].map(async index => Math.round((await lines.nth(index).boundingBox())!.height * 10) / 10))
+      expect(new Set(heights).size).toBe(1)
+      // The same line pitch as the default block, whose lines are inline.
+      const pitch = (await plain.nth(1).boundingBox())!.y - (await plain.nth(0).boundingBox())!.y
+      expect(Math.abs(heights[0]! - pitch)).toBeLessThan(1)
+      const start = async (locator: ReturnType<Page['locator']>) => (await locator.first().locator('[data-token]').first().boundingBox())!.x
+      const offset = (await start(lines)) - (await start(plain))
+      expect(offset).toBeGreaterThanOrEqual(0)
+      expect(offset).toBeLessThanOrEqual(28)
+    })
+  })
 }
