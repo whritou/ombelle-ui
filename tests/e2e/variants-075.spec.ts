@@ -249,3 +249,18 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+for (const edition of ['radix', 'base'] as const) {
+  test(`${edition}: a scrolling Dialog body keeps the footer on screen in every family`, async ({ page }) => {
+    for (const family of ['ombelle', 'flat', 'minimalist', 'neo-brutalism', 'liquid-glass']) {
+      await page.goto(`/editions/${family}/${edition}/?mode=light`)
+      const section = page.getByTestId('variants-075')
+      await expect(section).toBeVisible({ timeout: 60000 })
+      await section.getByRole('button', { name: 'Export preset' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Export preset' })
+      await expect(dialog.getByRole('region', { name: 'Export preset' }), family).toHaveAttribute('data-overflowing', '')
+      await expect(dialog.getByRole('button', { name: 'Cancel' }), family).toBeInViewport()
+      await page.keyboard.press('Escape')
+    }
+  })
+}

@@ -150,7 +150,7 @@ button[data-slot='breadcrumb-ellipsis']:focus-visible {
   display: flex;
   flex-direction: column;
   min-inline-size: 12rem;
-  max-block-size: var(--radix-dropdown-menu-content-available-height);
+  max-block-size: var(--radix-dropdown-menu-content-available-height, 70vh);
   overflow-x: hidden;
   overflow-y: auto;
   padding: 0.25rem;

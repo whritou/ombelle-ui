@@ -34,7 +34,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "b494836b3fd9eabfcf149fa38389ff8352d7c216657221c78dff3e8fc1f90146"
+          "sha256": "766f8e49da93ec171958fba25735bd72b1473ffcbfec1f8fd6a8a071b9cdb2c8"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -75,7 +75,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "a31d3e1ae1e92bc92bd14bd62049cf58cfa2a776b6fd1fb585ba604b5af0dbb1"
+          "sha256": "db033e4ab1483fb67c92421cbbdb5b90e54a325dc9fdca73f78f64c820f4d887"
         },
         {
           "logicalPath": "styles/ui-tokens.css",
@@ -116,7 +116,7 @@
         },
         {
           "logicalPath": "styles/ui-style.css",
-          "sha256": "b375fa54d0e9f63c9f1c75103036a171acd24935b6f3eccf54d0f5491c32dd4e"
+          "sha256": "ef140eb7fa0b4b0482dbf2c805ffbd6d7fa52330cd90a63c808db8d9a9b8b87c"
         },
         {
           "logicalPath": "styles/ui-tokens.css",

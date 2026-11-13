@@ -28,6 +28,8 @@ describe('Dialog body, footer and size', () => {
   it.each(families)('%s lays out the body column, the overflow border, the sizes and small screens', family => {
     const rules = block(family)
     expect(rules).toMatch(/\[data-slot='dialog-content'\]:has\(> \[data-dialog-body\]\) \{[^}]*max-block-size: calc\(100dvh - 2rem\)/)
+    // Neo-brutalism and liquid glass lay the content out as a block, so the column is set here for every family.
+    expect(rules).toMatch(/\[data-slot='dialog-content'\]:has\(> \[data-dialog-body\]\) \{[^}]*display: flex;[^}]*flex-direction: column;/)
     expect(rules).toMatch(/\[data-slot='dialog-body'\] \{[^}]*overflow: auto/)
     expect(rules).toMatch(/\[data-slot='dialog-footer'\]:is\(:has\(> \[data-dialog-body\]\[data-overflowing\]\) > \*\) \{[^}]*border-block-start/)
     expect(rules).toMatch(/\[data-slot='dialog-content'\]\[data-size='sm'\] \{[^}]*24rem/)
