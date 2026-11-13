@@ -9,6 +9,7 @@ import styles from './editor-shell.module.css'
 import { OverflowMenu, type OverflowItem } from './overflow-menu'
 import { Button } from '../generated/ui/components/ui/button'
 import { ButtonGroup } from '../generated/ui/components/ui/button-group'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../generated/ui/components/ui/breadcrumb'
 
 // The palette and its command menu load on first open, so they add nothing to the first page load.
 const CommandPalette = dynamic(() => import('./command-palette'), { ssr: false })
@@ -31,7 +32,8 @@ export function EditorTopBar({
   extra,
   commands,
 }: {
-  crumbs: readonly string[]
+  /** The trail, ending with the current page; an ancestor with an href is a link. */
+  crumbs: readonly (string | { label: string; href: string })[]
   nameField: {
     id: string
     label: string
@@ -72,11 +74,21 @@ export function EditorTopBar({
   }, [commands])
   return (
     <header ref={bar} className={styles.topBar}>
-      <nav aria-label="Breadcrumb" className={styles.crumbs}>
-        {crumbs.map((crumb, index) => (
-          <span key={`${index}-${crumb}`}>{crumb}</span>
-        ))}
-      </nav>
+      <Breadcrumb collapse="auto" className={styles.crumbs}>
+        <BreadcrumbList>
+          {crumbs.map((crumb, index) => {
+            const label = typeof crumb === 'string' ? crumb : crumb.label
+            const last = index === crumbs.length - 1
+            return (
+              <BreadcrumbItem key={`${index}-${label}`}>
+                {last ? <BreadcrumbPage>{label}</BreadcrumbPage>
+                  : typeof crumb === 'string' ? <span>{label}</span>
+                  : <BreadcrumbLink href={crumb.href}>{label}</BreadcrumbLink>}
+              </BreadcrumbItem>
+            )
+          }).flatMap((item, index) => index ? [<BreadcrumbSeparator key={`separator-${index}`} />, item] : [item])}
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className={styles.nameField}>
         <label htmlFor={nameField.id}>{nameField.label}</label>
         <input

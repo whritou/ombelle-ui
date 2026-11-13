@@ -96,8 +96,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
-  DialogFooter,
 } from '@/components/ui/dialog'
 
 import { Spinner } from '@/components/ui/spinner'
@@ -946,11 +944,6 @@ export function PresetGallery({
             <p className="preset-dialog-copy">
               Review your choices and close this dialog to continue editing.
             </p>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Keep editing</Button>
-              </DialogClose>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </section>

@@ -206,7 +206,7 @@ export function ButtonEditor() {
   return <main className={styles.root} aria-label="Button editor">
     <EditorTopBar
       commands={[familyCommands(siteFamilyOrder, draftFamily(draft.recipe), familyNames, chooseFamily)]}
-      crumbs={['Components', 'Button']}
+      crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}
       nameField={{
         id: 'button-recipe-id', label: 'Recipe ID', value: draft.recipe.id, maxLength: 80, readOnly: true,
         onChange: () => {},

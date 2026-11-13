@@ -364,9 +364,15 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
   await expect(page.getByLabel('Dark primary', { exact: true })).toHaveValue(
     'invalid',
   )
-  await expect(page.getByLabel('Preset id', { exact: true })).toHaveValue(
+  // The ID & revision dialog is a catalog Dialog, rendered only while open.
+  await page.getByRole('button', { name: 'More actions', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'ID & revision…' }).click()
+  const identity = page.getByRole('dialog', { name: 'ID & revision' })
+  await expect(identity.getByLabel('Preset id', { exact: true })).toHaveValue(
     'project_preset',
   )
+  await identity.getByRole('button', { name: 'Done', exact: true }).click()
+  await expect(identity).toBeHidden()
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
   await expect(familyButton(page, 'Ombelle')).toHaveAttribute('aria-checked', 'true')
 })

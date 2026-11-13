@@ -98,3 +98,14 @@ it('menuPosition opens the menu under its trigger, right edges aligned, inside t
   expect(menuPosition({ bottom: 40.4, right: 1200 }, 1440)).toEqual({ top: 44, right: 240 })
   expect(menuPosition({ bottom: 40, right: 1440 }, 1440)).toEqual({ top: 44, right: 4 })
 })
+
+it('EditorTopBar shows its trail as a collapsing catalog Breadcrumb with the current page marked', () => {
+  const html = renderToStaticMarkup(
+    <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}
+      nameField={{ id: 'n', label: 'Name', value: 'x', maxLength: 9, onChange: noop }}
+      revision="r1" status="" undo={history} redo={history} menu={{ label: 'More', items: [] }} primary={null} />,
+  )
+  expect(html).toMatch(/<nav[^>]*aria-label="Breadcrumb"[^>]*data-slot="breadcrumb"[^>]*data-collapse="auto"/)
+  expect(html).toMatch(/<a[^>]*href="\/editor\/component"[^>]*data-slot="breadcrumb-link"|<a[^>]*data-slot="breadcrumb-link"[^>]*href="\/editor\/component"/)
+  expect(html).toMatch(/<span[^>]*aria-current="page"[^>]*data-slot="breadcrumb-page"[^>]*>Button<\/span>/)
+})

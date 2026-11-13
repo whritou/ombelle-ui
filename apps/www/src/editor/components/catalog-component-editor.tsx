@@ -102,7 +102,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   }) : previous)
 
   return <main className={styles.root} aria-label={`${name} editor`}>
-    <EditorTopBar crumbs={['Components', name]}
+    <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
       commands={[familyCommands(siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
         resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit({ ...recipe, presetRef: catalogPresetRef(style) }))]} status={status} revision={`r${recipe.revision}`}
       nameField={{ id: `${component}-recipe-id`, label: 'Recipe ID', value: recipe.id, maxLength: 80, readOnly: true, onChange: () => {} }}

@@ -148,34 +148,6 @@
   overflow-wrap: anywhere;
   font-size: 13px;
 }
-.editor .confirmDialog {
-  max-width: min(600px, calc(100vw - 32px));
-  padding: 0;
-  background: var(--background);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-soft);
-}
-/* The dialog's body scrolls in a catalog Scroll Area; the padding sits inside it so focus rings are never clipped. */
-.editor .confirmScroll[data-slot='scroll-area'] {
-  max-height: calc(80vh - 2px);
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
-  /* The area is transparent on the dialog, so its end fades into the dialog's surface, not the card. */
-  --scroll-area-fade: var(--background);
-}
-.confirmBody {
-  padding: 24px;
-}
-.editor .confirmDialog::backdrop {
-  background: color-mix(in oklab, var(--ink) 50%, transparent);
-}
-.editor .confirmDialog li {
-  overflow-wrap: anywhere;
-  padding: 4px 0;
-}
 .toolbar {
   display: flex;
   align-items: center;
@@ -254,13 +226,13 @@
   gap: 8px;
   margin-bottom: 6px;
 }
-.editor .field label {
+.field label {
   font-size: 13px;
   font-weight: 500;
   color: var(--muted-foreground);
   text-transform: capitalize;
 }
-.editor .field input {
+.field input {
   min-height: 36px;
   padding: 6px 10px;
   font-size: 13px;
@@ -697,53 +669,34 @@
   color: var(--destructive);
 }
 
-/* Confirmation dialog: centred (the site reset removes the native auto
-   margins) with a short message and an optional list of changed values. */
-.editor .confirmDialog {
-  position: fixed;
-  inset: 0;
-  width: min(30rem, calc(100vw - 32px));
-  height: fit-content;
-  max-height: calc(100dvh - 32px);
-  margin: auto;
-  padding: 22px 24px 20px;
-  border-radius: 16px;
-}
-.editor .confirmDialog h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
-}
-.editor .confirmText {
-  margin: 0 0 12px;
-  color: var(--muted-foreground);
-  font-size: 14px;
-}
-.editor .confirmChanges {
+/* The confirmation is an Alert Dialog portalled to the body, outside .editor. */
+.confirmChanges {
   margin: 0 0 16px;
   padding: 0;
   border: 0;
   font-size: 13px;
 }
-.editor .confirmChanges [data-slot='scroll-area'] {
+.confirmChanges [data-slot='scroll-area'] {
   max-height: 14rem;
   margin: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
 }
-.editor .confirmChanges ul {
+.confirmChanges ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.editor .confirmChanges li {
+.confirmChanges li {
+  overflow-wrap: anywhere;
   display: flex;
   justify-content: space-between;
   gap: 12px;
   padding: 3px 0;
   border-bottom: 1px solid var(--border);
 }
-.editor .confirmValues {
+.confirmValues {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -752,19 +705,14 @@
   color: var(--muted-foreground);
   white-space: nowrap;
 }
-.editor .confirmValues i {
+.confirmValues i {
   display: inline-block;
   width: 10px;
   height: 10px;
   border: 1px solid var(--border);
   border-radius: 3px;
 }
-.editor .confirmActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-.editor .confirmPrimary {
+.confirmPrimary {
   border-color: var(--primary);
   background: var(--primary);
   color: var(--primary-foreground);
@@ -949,13 +897,13 @@
   color: var(--primary);
 }
 .editor .getCode:not(:disabled):hover,
-.editor .confirmPrimary:not(:disabled):hover {
+.confirmPrimary:not(:disabled):hover {
   border-color: var(--primary);
   background: var(--primary);
   filter: brightness(1.08);
 }
 .editor .getCode:not(:disabled):active,
-.editor .confirmPrimary:not(:disabled):active {
+.confirmPrimary:not(:disabled):active {
   filter: brightness(0.94);
 }
 .editor :global(.preset-color-row):active {

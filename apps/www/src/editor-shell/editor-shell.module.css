@@ -22,9 +22,22 @@
   font-size: 0.8125rem;
 }
 
-.crumbs span + span::before {
-  content: '/';
-  margin-right: 0.5rem;
+/* The trail is a catalog Breadcrumb: keep it on one line and quiet, as before. */
+.crumbs {
+  min-width: 0;
+  font-size: 0.8125rem;
+}
+.crumbs [data-slot='breadcrumb-link'],
+.crumbs [data-slot='breadcrumb-page'] {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
+/* The site's list margin and indent outrank the catalog's list reset here. */
+.crumbs [data-slot='breadcrumb-list'] {
+  margin: 0;
+  padding: 0;
+  gap: 0.25rem;
 }
 
 .componentNavigation {
