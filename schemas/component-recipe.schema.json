@@ -3908,6 +3908,154 @@
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "number-input"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000,
+              "default": 0,
+              "title": "Minimum"
+            },
+            "max": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000,
+              "default": 32,
+              "title": "Maximum"
+            },
+            "step": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 1,
+              "title": "Step"
+            },
+            "unit": {
+              "enum": [
+                "none",
+                "px",
+                "ms",
+                "%",
+                "deg"
+              ],
+              "default": "px",
+              "title": "Unit"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000,
+              "default": 12,
+              "title": "Value"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Border radius"
+            },
+            "hint": {
+              "type": "string",
+              "title": "Hint",
+              "maxLength": 200,
+              "default": "Arrow keys step by 1, Shift + arrow by 10."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "hint"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "color-picker"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "enum": [
+                "oklch",
+                "hex",
+                "rgb"
+              ],
+              "default": "oklch",
+              "title": "Format"
+            },
+            "paired": {
+              "type": "boolean",
+              "default": true,
+              "title": "Light and dark pair"
+            },
+            "contrast": {
+              "type": "boolean",
+              "default": true,
+              "title": "Contrast readout"
+            },
+            "swatches": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8,
+              "default": 5,
+              "title": "Swatches"
+            },
+            "eyeDropper": {
+              "type": "boolean",
+              "default": true,
+              "title": "Eyedropper"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Primary"
+            },
+            "value": {
+              "type": "string",
+              "title": "Value",
+              "maxLength": 100,
+              "default": "oklch(0.55 0.22 6)"
+            },
+            "darkValue": {
+              "type": "string",
+              "title": "Dark value",
+              "maxLength": 100,
+              "default": "oklch(0.7 0.18 6)"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "value"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

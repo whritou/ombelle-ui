@@ -5,6 +5,7 @@ import { componentRecipeParts } from './component-recipe-appearance.js'
 import { FoundationError } from './diagnostics.js'
 import { validateRecipe, type Recipe } from './recipe.js'
 import { assertColorValue } from './validate.js'
+import { isParsableColor } from './color-syntax.js'
 
 export type ComponentRecipe = FromSchema<typeof componentRecipeSchema>
 export type InstallableRecipe = Recipe | ComponentRecipe
@@ -83,6 +84,20 @@ function validateComposition(recipe: ComponentRecipe): void {
       if (recipe.content.label.trim() === '') reject('Name the button group', '/content/label')
       if ((recipe.props.mode ?? 'split') === 'split' && recipe.content.items.length < 2)
         reject('A split button group needs at least two items', '/content/items')
+      break
+    case 'number-input': {
+      const { min = 0, max = 32, value = 12 } = recipe.props
+      if (recipe.content.label.trim() === '') reject('Name the number input', '/content/label')
+      if (min > max) reject('Maximum must not be less than minimum', '/props/max')
+      if (value < min || value > max) reject('Value must be within the range', '/props/value')
+      break
+    }
+    case 'color-picker':
+      if (recipe.content.label.trim() === '') reject('Name the color picker', '/content/label')
+      if (!isParsableColor(recipe.content.value)) reject('Enter a hex, rgb() or oklch() color', '/content/value')
+      // An unpaired picker ignores its dark value, so the editor can switch the pair off and back on.
+      if (recipe.props.paired !== false && recipe.content.darkValue !== undefined && !isParsableColor(recipe.content.darkValue))
+        reject('Enter a hex, rgb() or oklch() color', '/content/darkValue')
       break
     case 'scroll-area':
       if (recipe.content.label.trim() === '') reject('Name the scroll area', '/content/label')

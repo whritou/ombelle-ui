@@ -27,6 +27,11 @@ import { Input } from '@/components/ui/input'
 import { ChevronDownIcon } from 'lucide-react'
 // Radix form (asChild). In the Base UI edition use <DropdownMenuTrigger render={<Button size="icon" aria-label="More install options" />}>.
 export function Example(){return <><ButtonGroup aria-label="Install"><Button>Install</Button><DropdownMenu><DropdownMenuTrigger asChild><Button size="icon" aria-label="More install options"><ChevronDownIcon aria-hidden="true" /></Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem>Install with npm</DropdownMenuItem><DropdownMenuItem>Install with pnpm</DropdownMenuItem></DropdownMenuContent></DropdownMenu></ButtonGroup><ButtonGroup aria-label="History"><Button variant="outline">Undo</Button><ButtonGroupSeparator /><Button variant="outline">Redo</Button></ButtonGroup><ButtonGroup aria-label="Website"><ButtonGroupText>https://</ButtonGroupText><Input aria-label="Domain" defaultValue="ombelle.dev" /><Button variant="outline">Copy</Button></ButtonGroup></>}`,
+  'color-picker': `import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
+const swatches = [{ label: 'Rose', value: 'oklch(0.55 0.22 6)' }, { label: 'Ink', value: 'oklch(0.22 0.012 275)' }]
+export function Example(){return <><ColorPickerPair label="Primary"><ColorPicker mode="light" defaultValue="oklch(0.55 0.22 6)" swatches={swatches} contrastWith="oklch(0.99 0 0)" contrastLabel="primary foreground" /><ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" swatches={swatches} contrastWith="oklch(0.16 0.01 275)" contrastLabel="primary foreground" /></ColorPickerPair><ColorPicker label="Accent" defaultFormat="hex" defaultValue="#1d4ed8" /></>}`,
+  'number-input': `import { NumberInput } from '@/components/ui/number-input'
+export function Example(){return <><label htmlFor="radius">Border radius</label><NumberInput id="radius" name="radius" defaultValue={12} min={0} max={32} unit="px" onValueChange={(value, { valid }) => console.log(value, valid)} /></>}`,
   toggle: `import { Toggle } from '@/components/ui/toggle'
 export function Example(){return <><Toggle defaultPressed>Show grid</Toggle><Toggle variant="outline" aria-label="Pin preview">Pin</Toggle></>}`,
   'toggle-group': `import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'

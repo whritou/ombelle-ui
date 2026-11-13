@@ -8,7 +8,7 @@ it.each(['spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'togg
   expect(installableRecipeInstallNotice({ schemaVersion: '2.0', component, props: {} } as never, { version: '0.7.2' })).toContain('0.7.3')
 })
 
-it.each(['toggle', 'collapsible', 'scroll-area', 'button-group', 'item'] as const)('requires CLI 0.7.5 for %s recipes', component => {
+it.each(['toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker'] as const)('requires CLI 0.7.5 for %s recipes', component => {
   expect(catalog075MinimumCli).toBe('0.7.5')
   expect(componentRecipeInstallBlocked({ component, props: {} }, { version: '0.7.4' })).toBe(true)
   expect(componentRecipeInstallBlocked({ component, props: {} }, { version: '0.7.5' })).toBe(false)

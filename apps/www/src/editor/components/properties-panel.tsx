@@ -14,6 +14,8 @@ import { InspectorSection, SegmentedControl, SliderRow } from '../../editor-shel
 import { keepChoice } from '../../editor-shell/inspector'
 import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../../generated/ui/components/ui/combobox'
+import { ColorPicker } from '../../generated/ui/components/ui/color-picker'
+import { NumberInput } from '../../generated/ui/components/ui/number-input'
 import { RECIPE_COLOR_PATTERN, recipeColor, withGlassPreset, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
 import { designControlLabel, glassControlHints, glassDesignControls } from '../../preset-editor/model'
@@ -109,18 +111,7 @@ const colorModes: readonly { mode: RecipeColorMode; label: string }[] = [
   { mode: 'light', label: 'Light' },
   { mode: 'dark', label: 'Dark' },
 ]
-const hexByte = (n: number) => n.toString(16).padStart(2, '0')
-/** Native color inputs only take #rrggbb, so OKLCH values are converted through a canvas for display. */
-function pickerValue(value: string): string {
-  if (/^#[0-9a-f]{6}$/i.test(value)) return value.toLowerCase()
-  if (typeof document === 'undefined' || typeof CSS === 'undefined' || !CSS.supports('color', value)) return '#000000'
-  const context = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
-  if (!context) return '#000000'
-  context.fillStyle = value
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return '#' + [r, g, b].map(hexByte).join('')
-}
+const colorMessage = 'Enter a hex color such as #1d4ed8 or an OKLCH color such as oklch(55% 0.2 260).'
 
 function FieldError({ diagnostic, path }: { diagnostic: CompileDiagnostic | null; path: string }) {
   return diagnostic?.path === path
@@ -166,8 +157,6 @@ function StackField({ label, children }: { label: string; children: ReactNode })
 type ColorProps = Pick<Props, 'recipe' | 'diagnostic' | 'onChange' | 'onDiagnostic' | 'measured' | 'previewMode'>
 
 function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family, measured = {}, previewMode = 'light' }: ColorProps & { state: ColorState; family: StyleFamily }) {
-  // Text being typed stays local until it is a complete color, then it becomes a recipe edit.
-  const [typing, setTyping] = useState<Record<string, string>>({})
   const commit = (mode: RecipeColorMode, role: RecipeColorRole, value: string | undefined) => {
     const key = colorKey(state, role)
     onChange(withRecipeColor(recipe, mode, key, value), `overrides.colors.${mode}.${key}`)
@@ -189,7 +178,6 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family
               const field = colorKey(state, role)
               const key = `${mode}-${field}`, path = `/overrides/colors/${mode}/${field}`
               const { value, overridden } = recipeColor(recipe, mode, field)
-              const text = typing[key] ?? (overridden ? value : '')
               const name = `${modeLabel} ${label.toLowerCase()}`
               const invalid = diagnostic?.path === path
               const describedBy = [invalid ? `color-${key}-error` : undefined, hint ? 'color-role-border-hint' : undefined].filter(Boolean).join(' ') || undefined
@@ -197,33 +185,20 @@ function ColorFields({ recipe, diagnostic, onChange, onDiagnostic, state, family
                 <div className="be-color-cell" key={mode}>
                   <label htmlFor={`color-${key}`} className="be-chip-mode">{modeLabel}</label>
                   <div className="be-color-chip" data-inherited={overridden ? undefined : 'true'} data-invalid={invalid || undefined}>
-                    <span className="colorSwatch" style={{ backgroundColor: value }}>
-                      <input type="color" aria-label={`${name} picker`} aria-describedby={hint ? 'color-role-border-hint' : undefined} value={pickerValue(value)}
-                        onChange={(event) => commit(mode, role, event.target.value)} />
-                    </span>
-                    <input id={`color-${key}`} type="text" className="colorText" aria-label={name} value={text}
-                      placeholder={state === 'base' ? colorPlaceholder(measured[colorDimensionFor[role]], mode, previewMode, fallback) : fallback} title={overridden ? undefined : state === 'base' ? `Preset: ${value}` : `Family ${state} color, from ${value}`} maxLength={80} spellCheck={false}
-                      data-overridden={overridden || undefined} aria-invalid={invalid || undefined}
-                      aria-describedby={describedBy}
-                      onChange={(event) => {
-                        const next = event.target.value.trim()
-                        setTyping({ ...typing, [key]: event.target.value })
+                    <ColorPicker id={`color-${key}`} label={name} value={overridden ? value : ''} formats={['oklch', 'hex']} maxLength={80}
+                      placeholder={state === 'base' ? colorPlaceholder(measured[colorDimensionFor[role]], mode, previewMode, fallback) : fallback}
+                      title={overridden ? undefined : state === 'base' ? `Preset: ${value}` : `Family ${state} color, from ${value}`}
+                      data-overridden={overridden || undefined} aria-invalid={invalid || undefined} aria-describedby={describedBy}
+                      onValueChange={(next) => {
                         if (next === '') commit(mode, role, undefined)
                         else if (RECIPE_COLOR_PATTERN.test(next)) commit(mode, role, next)
-                        else onDiagnostic(path, 'Enter a hex color such as #1d4ed8 or an OKLCH color such as oklch(55% 0.2 260).')
+                        else onDiagnostic(path, colorMessage)
                       }}
-                      onBlur={() => {
-                        const rest = { ...typing }
-                        delete rest[key]
-                        setTyping(rest)
-                      }} />
+                      onInvalid={() => onDiagnostic(path, colorMessage)} />
                     {overridden && (
                       <button type="button" className="colorReset" aria-label={`Reset ${mode} ${label.toLowerCase()} to ${fallback.toLowerCase()}`}
                         title={`Reset ${mode} ${label.toLowerCase()} to ${fallback.toLowerCase()}`}
                         onClick={() => {
-                          const rest = { ...typing }
-                          delete rest[key]
-                          setTyping(rest)
                           // This button leaves the page once the value is cleared; hand focus to the field first.
                           document.getElementById(`color-${key}`)?.focus()
                           commit(mode, role, undefined)
@@ -436,11 +411,11 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
             return (
               <div className="be-shadow-field" key={key}>
                 <span aria-hidden="true">{axis}</span>
-                <input id={id} type="text" inputMode="decimal" maxLength={80} spellCheck={false}
-                  aria-label={designControlLabel(key, family)} value={display(key, min, max)} placeholder={baseline(key, 1) ?? 'Preset'}
+                <NumberInput id={id} maxLength={80} min={min} max={max}
+                  aria-label={designControlLabel(key, family)} text={display(key, min, max)} placeholder={baseline(key, 1) ?? 'Preset'}
                   aria-invalid={diagnostic?.path === path || undefined}
                   aria-describedby={[diagnostic?.path === path ? `error${path.replaceAll('/', '-')}` : undefined, glass ? 'button-shadow-hint' : undefined].filter(Boolean).join(' ') || undefined}
-                  onChange={(event) => update(key, event.target.value, min, max, 'px')} />
+                  onValueChange={(_, details) => update(key, details.text, min, max, 'px')} />
                 {recipe.overrides[key] !== undefined && (
                   <button type="button" className="colorReset" aria-label={glass ? `Reset ${designControlLabel(key, family).toLowerCase()}` : `Reset shadow ${axis.toLowerCase()} offset`}
                     onClick={() => reset(key, id)}>

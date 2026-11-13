@@ -82,6 +82,8 @@ import { Slider } from '../generated/preset-gallery/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '../generated/preset-gallery/components/ui/toggle-group'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../generated/preset-gallery/components/ui/collapsible'
 import { ButtonGroup } from '../generated/preset-gallery/components/ui/button-group'
+import { NumberInput } from '../generated/preset-gallery/components/ui/number-input'
+import { ColorPicker, ColorPickerPair } from '../generated/preset-gallery/components/ui/color-picker'
 import { TagInput, TagInputInput, TagInputList } from '../generated/preset-gallery/components/ui/tag-input'
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../generated/preset-gallery/components/ui/input-otp'
 import { Calendar, formatDate } from '../generated/preset-gallery/components/ui/calendar'
@@ -349,6 +351,22 @@ export function SettingsScene(props: SceneProps) {
                       </div>
                     </CollapsibleContent>
                   </Collapsible>,
+                )}
+                {show(
+                  'color-picker',
+                  'Color Picker',
+                  <ColorPickerPair label="Brand color">
+                    <ColorPicker mode="light" defaultValue="oklch(0.55 0.22 6)" contrastWith="oklch(0.99 0 0)" contrastLabel="brand foreground" />
+                    <ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" contrastWith="oklch(0.16 0.01 275)" contrastLabel="brand foreground" />
+                  </ColorPickerPair>,
+                )}
+                {show(
+                  'number-input',
+                  'Number Input',
+                  <div className="scene-field">
+                    <Label htmlFor="scene-timeout">Session timeout</Label>
+                    <NumberInput id="scene-timeout" defaultValue={30} min={5} max={240} step={5} unit="min" />
+                  </div>,
                 )}
               </CardContent>
             </Card>

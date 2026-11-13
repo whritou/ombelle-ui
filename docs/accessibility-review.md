@@ -196,6 +196,16 @@ Toggle, Collapsible, Scroll Area, Button Group and Item are not part of the 36 P
 - **Item**: a link Item is announced as a link inside a list item; its actions are separate buttons reached after it, not inside it.
 - **List scrollbars**: the scrollbar on a Command, Combobox, Select or Sheet list does not add a Tab stop or change what the list announces.
 
+**Editor inputs (0.7.5)**
+
+Number Input and Color Picker are not part of the 36 PR5 entries either. Review them on the preview "Editor inputs" section of the edition pages, the settings scene and the website's preset and component editors, and record them in their own rows below.
+
+- **Number Input steppers**: the field is announced as a spin button with its name, value and unit ("12 pixels"); the arrow, Page, Home and End keys change it; the two steppers are named "Decrease …" and "Increase …", are not Tab stops, and are announced as unavailable at the bounds; a half-typed value is kept and announced as invalid after the field loses focus.
+- **Color Picker 2D area**: the swatch button is announced with "Open … color picker" and as expanded or collapsed; the popover is a dialog named "… color"; the area is one Tab stop announced as a 2D slider with "Saturation …%, brightness …%", and the arrow keys move it; the hue slider reads "Hue, … degrees".
+- **Color Picker contrast readout**: the ratio and its level (AAA, AA, AA large or Fails) are text, not colour alone; the ratio is announced once when a drag or key press ends, not on every move.
+- **Color Picker eyedropper**: where the browser has the EyeDropper API, the button is named "Pick a color from the screen"; Esc in the browser's picker leaves the value; where the API is missing, no button is shown.
+- **Color Picker Pair**: the pair is announced as a group with the token's name, and each picker as "… · light" and "… · dark".
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -266,6 +276,16 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Button Group | | | | | | | | | | |
 | Item | | | | | | | | | | |
 | List scrollbars (Command, Combobox, Select, Sheet) | | | | | | | | | | |
+
+#### Editor inputs (0.7.5)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Number Input and steppers | | | | | | | | | | |
+| Color Picker 2D area and hue | | | | | | | | | | |
+| Color Picker contrast readout | | | | | | | | | | |
+| Color Picker eyedropper | | | | | | | | | | |
+| Color Picker Pair | | | | | | | | | | |
 
 #### Variants, batch 6a (0.7.3)
 

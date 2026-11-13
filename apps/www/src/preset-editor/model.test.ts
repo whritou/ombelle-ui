@@ -225,7 +225,7 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
 })
 
 it('requests only components the family supports', () => {
-  expect(previewComponentIds('flat')).toHaveLength(50)
+  expect(previewComponentIds('flat')).toHaveLength(52)
   expect(previewComponentIds('liquid-glass')).toEqual([
     'alert',
     'accordion',
@@ -277,6 +277,8 @@ it('requests only components the family supports', () => {
     'scroll-area',
     'button-group',
     'item',
+    'number-input',
+    'color-picker',
   ])
 })
 

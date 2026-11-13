@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import styles from './editor-shell.module.css'
 import { Slider } from '../generated/ui/components/ui/slider'
 import { ToggleGroup, ToggleGroupItem } from '../generated/ui/components/ui/toggle-group'
+import { NumberInput } from '../generated/ui/components/ui/number-input'
 
 export function InspectorSection({
   id,
@@ -110,9 +111,9 @@ export function SliderRow({
       </label>
       <span className={styles.sliderNumber}>
         {/* Text, not type="number": a half-typed or invalid value stays visible and is reported, not discarded. */}
-        <input id={`${id}-number`} type="text" inputMode="decimal" maxLength={80} placeholder={placeholder} value={value}
-          onChange={(event) => onChange(event.target.value)} {...shared} />
-        <span aria-hidden="true">{unit}</span>
+        <NumberInput id={`${id}-number`} maxLength={80} placeholder={placeholder} min={min} max={max} step={step}
+          unit={unit || undefined} text={value} {...shared}
+          onValueChange={(_, details) => onChange(details.text)} />
       </span>
       {edited ? (
         <button

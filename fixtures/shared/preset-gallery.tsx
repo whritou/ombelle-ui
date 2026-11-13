@@ -117,6 +117,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Calendar, DatePicker } from '@/components/ui/calendar'
 import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '@/components/ui/context-menu'
+import { NumberInput } from '@/components/ui/number-input'
+import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 
 // Family-independent: callers pass the component ids their family cannot
@@ -383,6 +385,21 @@ export function PresetGallery({
             <ItemActions><Button variant="outline" size="sm">Archive</Button></ItemActions>
           </Item>
         </ItemGroup>
+      </section>)}
+      {gate('number-input', 'Number Input', <section aria-label="Number Input" data-component="number-input">
+        <h2>Number Input</h2>
+        <label htmlFor="gallery-radius">Border radius</label>
+        <NumberInput id="gallery-radius" defaultValue={12} min={0} max={32} unit="px" />
+        <label htmlFor="gallery-duration">Motion duration</label>
+        <NumberInput id="gallery-duration" defaultValue={160} min={0} max={1000} step={10} largeStep={100} unit="ms" />
+      </section>)}
+      {gate('color-picker', 'Color Picker', <section aria-label="Color Picker" data-component="color-picker">
+        <h2>Color Picker</h2>
+        <ColorPickerPair label="Primary">
+          <ColorPicker mode="light" defaultValue="oklch(0.55 0.22 6)" contrastWith="oklch(0.99 0 0)" contrastLabel="primary foreground"
+            swatches={[{ label: 'Rose', value: 'oklch(0.55 0.22 6)' }, { label: 'Ink', value: 'oklch(0.22 0.012 275)' }]} />
+          <ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" contrastWith="oklch(0.16 0.01 275)" contrastLabel="primary foreground" />
+        </ColorPickerPair>
       </section>)}
       </div>
       <section aria-label="Actions" data-component="button">

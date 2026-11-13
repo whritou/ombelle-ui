@@ -14,8 +14,9 @@ import {
   glassDesignControls,
   presetFieldValue,
 } from '../model'
-import { browserColor } from '../contrast'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
+import { ColorPicker, ColorPickerPair } from '../../generated/ui/components/ui/color-picker'
+import { NumberInput } from '../../generated/ui/components/ui/number-input'
 import {
   accentSchemes,
   baseSchemes,
@@ -26,19 +27,27 @@ export const fieldId = (path: string) => 'preset' + path.replaceAll('/', '-')
 export const tokenToggleId = 'preset-token-toggle'
 /** Popover that holds a colour token's light and dark fields. */
 export const colorPanelId = (key: string) => 'preset-color-panel-' + key
+/** Presets store hex or OKLCH colours, so the pickers offer only those formats. */
+const storableFormats = ['oklch', 'hex'] as const
+/** The token a colour is read on, for the contrast readout: primary with primaryForeground, and so on. */
+function contrastPair(key: string): string | undefined {
+  if (key === 'background') return 'foreground'
+  if (key === 'foreground') return 'background'
+  if (key.endsWith('Foreground')) return key.slice(0, -'Foreground'.length)
+  return colorKeys.includes(`${key}Foreground` as (typeof colorKeys)[number]) ? `${key}Foreground` : undefined
+}
+/** The one-click schemes' values for a token, as the picker's swatches. */
+function schemeSwatches(key: string, mode: 'light' | 'dark') {
+  return [...accentSchemes, ...baseSchemes].flatMap((scheme) => {
+    const value = scheme[mode][key]
+    return value ? [{ label: scheme.label, value }] : []
+  })
+}
 const human = (key: string) =>
   key.replace(/[A-Z]/g, (c) => ' ' + c.toLowerCase())
 const title = (key: string) => {
   const words = human(key)
   return words[0]!.toUpperCase() + words.slice(1)
-}
-const hex = (n: number) => n.toString(16).padStart(2, '0')
-/** Native color pickers only take #rrggbb; OKLCH values are converted for display. */
-function pickerValue(value: string) {
-  if (/^#[0-9a-f]{6}$/i.test(value)) return value.toLowerCase()
-  if (typeof CSS === 'undefined') return '#000000'
-  const rgb = browserColor(value)
-  return rgb ? '#' + rgb.slice(0, 3).map(hex).join('') : '#000000'
 }
 /** Opens the colour popover holding `path`, if any, and focuses its field. */
 export function revealPresetField(path: string) {
@@ -176,37 +185,36 @@ export function TokenList({
                 <ScrollArea aria-labelledby={`${colorPanelId(key)}-title`} className="www-scroll preset-popover-scroll">
                 <div className="preset-popover-body">
                 <p id={`${colorPanelId(key)}-title`} className="preset-popover-title">{name}</p>
+                <ColorPickerPair label={name} className="preset-color-pair">
                 {(['light', 'dark'] as const).map((mode) => {
                   const path: PresetEditablePath = `/modes/${mode}/${key}`,
                     value = mode === 'light' ? light : dark,
                     label = `${mode === 'light' ? 'Light' : 'Dark'} ${glassEdge ? name.toLowerCase() : human(key)}`
+                  const pair = contrastPair(key)
                   return (
                     <div className="preset-control" key={mode}>
-                      <label htmlFor={fieldId(path)}>{label}</label>
                       <div className="preset-input-row">
-                        <span className="preset-swatch preset-picker" style={{ backgroundColor: value }}>
-                          <input
-                            type="color"
-                            tabIndex={-1}
-                            aria-hidden="true"
-                            value={pickerValue(value)}
-                            onChange={(e) => edit(path, e.target.value)}
-                          />
-                        </span>
-                        <input
+                        <ColorPicker
                           id={fieldId(path)}
-                          value={value}
+                          formats={storableFormats}
                           maxLength={80}
-                          spellCheck={false}
+                          mode={mode}
+                          label={label}
+                          value={value}
+                          swatches={schemeSwatches(key, mode)}
+                          contrastWith={pair ? presetFieldValue(draft, `/modes/${mode}/${pair}` as PresetEditablePath) : undefined}
+                          contrastLabel={pair ? human(pair) : undefined}
                           aria-invalid={errorPath === path || undefined}
                           aria-describedby={errorPath === path ? 'preset-error' : glassEdge ? 'preset-glass-edge-hint' : undefined}
-                          onChange={(e) => edit(path, e.target.value)}
+                          onValueChange={(next) => edit(path, next)}
+                          onInvalid={(text) => edit(path, text)}
                         />
                         <ResetButton draft={draft} path={path} label={`Reset ${mode} ${glassEdge ? name.toLowerCase() : human(key)}`} onReset={reset} />
                       </div>
                     </div>
                   )
                 })}
+                </ColorPickerPair>
                 {glassEdge && <p id="preset-glass-edge-hint" className="preset-popover-hint">{glassControlHints.border}</p>}
                 <p className="preset-popover-hint">Hex such as #1d4ed8, or OKLCH such as oklch(55% 0.2 260).</p>
                 </div>
@@ -285,15 +293,13 @@ export function DesignControls({
             </>
           )}
         </label>
-        <input
+        <NumberInput
           id={fieldId(path)}
-          inputMode="decimal"
           maxLength={80}
-          spellCheck={false}
-          value={presetFieldValue(draft, path)}
+          text={presetFieldValue(draft, path)}
           aria-invalid={errorPath === path || undefined}
           aria-describedby={errorPath === path ? 'preset-error' : glass ? shadowHintId : undefined}
-          onChange={(e) => onEdit(path, e.target.value)}
+          onValueChange={(_, details) => onEdit(path, details.text)}
         />
         <ResetButton
           draft={draft}

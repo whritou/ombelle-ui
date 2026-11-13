@@ -49,5 +49,7 @@ export const supportedComponentIds = [
   'scroll-area',
   'button-group',
   'item',
+  'number-input',
+  'color-picker',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

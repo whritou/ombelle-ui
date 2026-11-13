@@ -31,6 +31,7 @@ The catalog goes from 50 to 52 components. Installing them needs CLI 0.7.5.
   - `onValueChange(value: number | null, details: { text: string; valid: boolean })`. It fires on every edit; `value` is `null` when the text is empty or does not parse.
   - `min`, `max`, `step` (default 1), `largeStep` (default 10), `unit`, `placeholder`, `disabled`, `name`, `id`, `decrementLabel`, `incrementLabel`.
   - `id` goes to the input, so `Field` and `<label htmlFor>` name it.
+  - `text` (added during implementation): the raw text, in place of `value`, for an editor that stores what was typed and restores it after a reload, an undo or a redo.
 - **Behaviour:**
   - The input is `type="text"` with `inputMode="decimal"` and `role="spinbutton"`, with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and `aria-valuetext` that adds the unit ("12 pixels"; units `px`, `ms`, `%` and `deg` have spoken names, others are read as written).
   - Arrow Up and Down move one `step`; Shift + arrow and Page Up or Page Down move one `largeStep`; Home and End go to `min` and `max`. Stepping clamps to the range.
@@ -41,7 +42,7 @@ The catalog goes from 50 to 52 components. Installing them needs CLI 0.7.5.
 
 ### Color Picker (`color-picker`, client, no new dependency)
 
-A composition of the catalog's Popover, Slider, Input and Native Select. Installing it installs those four. Each edition uses its own Popover and Slider templates.
+Self-contained, like Combobox and Calendar: the catalog has no component-to-component install, so the template imports the Popover and Slider primitives of its edition directly and draws its inputs and format select as native elements, with each family's Input, Popover, Slider and Badge rules repeated in its stylesheet.
 
 - **Parts:** `ColorPicker`, `ColorPickerSwatches` and `ColorPickerPair`. The popover's area, hue, format row and contrast readout are internal and carry their own `data-slot` values (`color-picker-area`, `-hue`, `-format`, `-eyedropper`, `-contrast`) for styling.
 - **Props:**
@@ -94,7 +95,7 @@ Each family file draws the trigger row from the family Input, the popover from t
 | Number Input | `min`, `max`, `step`, `unit` (`none`, `px`, `ms`, `%`, `deg`), `value` | `label`, `hint` |
 | Color Picker | `format`, `paired` (boolean), `contrast` (boolean), `swatches` (0 to 8), `eyeDropper` (boolean) | `label`, `value`, `darkValue` |
 
-`validateComposition` rejects `min` greater than `max`, a Number Input value outside its range, a Color Picker `value` or `darkValue` that does not parse, and `darkValue` without `paired`.
+`validateComposition` rejects `min` greater than `max`, a Number Input value outside its range, and a Color Picker `value` (or, when paired, `darkValue`) that does not parse. An unpaired recipe ignores its `darkValue` (changed during implementation, so the editor can switch the pair off).
 
 ## Website
 
@@ -108,7 +109,7 @@ Each family file draws the trigger row from the family Input, the popover from t
   - the number field of `SliderRow` in `editor-shell/inspector.tsx`, next to its Slider;
   - the shadow X and Y fields in `preset-controls.tsx` and `properties-panel.tsx`.
   The editors keep receiving the raw text through `details.text`, so their own validation and messages stay the same.
-- **Build:** `wwwUiComponents` in `scripts/generate-www-ui.ts` (today `slider`, `toggle-group`, `chip`, `combobox` and `command`) gains `number-input` and `color-picker`; Color Picker's registry dependencies (Popover, Input and Native Select) compile with it. `apps/www` already pins `@radix-ui/react-popover`, so no new dependency is added.
+- **Build:** `wwwUiComponents` in `scripts/generate-www-ui.ts` (today `slider`, `toggle-group`, `chip`, `combobox` and `command`) gains `number-input` and `color-picker`; `apps/www` already pins `@radix-ui/react-popover`, so no new dependency is added.
 
 ## Preview scenes and gallery
 

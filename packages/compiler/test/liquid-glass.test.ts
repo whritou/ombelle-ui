@@ -37,8 +37,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the fifty experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'checkbox', 'chip', 'collapsible', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'pagination', 'popover', 'progress', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'tooltip'])
+  it('compiles the fifty-two experimental components', async () => {
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'checkbox', 'chip', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'number-input', 'pagination', 'popover', 'progress', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -56,6 +56,7 @@ describe('liquid-glass compile', () => {
       'components/ui/checkbox.css',
       'components/ui/chip.css',
       'components/ui/collapsible.css',
+      'components/ui/color-picker.css',
       'components/ui/combobox.css',
       'components/ui/command.css',
       'components/ui/context-menu.css',
@@ -70,6 +71,7 @@ describe('liquid-glass compile', () => {
       'components/ui/label.css',
       'components/ui/meter.css',
       'components/ui/native-select.css',
+      'components/ui/number-input.css',
       'components/ui/pagination.css',
       'components/ui/popover.css',
       'components/ui/progress.css',

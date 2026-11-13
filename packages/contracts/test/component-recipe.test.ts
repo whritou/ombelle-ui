@@ -330,3 +330,78 @@ it('names the 0.7.5 appearance parts', async () => {
   expect(slots('button-group')).toEqual(['button-group'])
   expect(slots('item')).toEqual(['item', 'item-media'])
 })
+
+const editorInputs075 = ['number-input', 'color-picker'] as const
+const editorInputDraft = (component: (typeof editorInputs075)[number], props: Record<string, unknown> = {}, content: Record<string, unknown> = {}) => ({
+  ...badge, component,
+  props: { ...defaultRecipeFields(componentRecipeFields(component).props), ...props },
+  content: { ...defaultRecipeFields(componentRecipeFields(component).content), ...content },
+})
+
+it.each(editorInputs075)('accepts the default %s recipe', component => {
+  expect(componentRecipeComponents).toContain(component)
+  expect(validateComponentRecipe(editorInputDraft(component)).component).toBe(component)
+})
+
+it('gives Number Input and Color Picker the board defaults', () => {
+  const defaults = (component: (typeof editorInputs075)[number]) => ({
+    props: defaultRecipeFields(componentRecipeFields(component).props),
+    content: defaultRecipeFields(componentRecipeFields(component).content),
+  })
+  expect(defaults('number-input')).toEqual({
+    props: { min: 0, max: 32, step: 1, unit: 'px', value: 12 },
+    content: { label: 'Border radius', hint: 'Arrow keys step by 1, Shift + arrow by 10.' },
+  })
+  expect(defaults('color-picker')).toEqual({
+    props: { format: 'oklch', paired: true, contrast: true, swatches: 5, eyeDropper: true },
+    content: { label: 'Primary', value: 'oklch(0.55 0.22 6)', darkValue: 'oklch(0.7 0.18 6)' },
+  })
+})
+
+it.each([
+  ['number-input', { min: 10, max: 4, value: 5 }, {}, '/props/max'],
+  ['number-input', { value: 40 }, {}, '/props/value'],
+  ['number-input', {}, { label: ' ' }, '/content/label'],
+  ['color-picker', {}, { value: 'red' }, '/content/value'],
+  ['color-picker', {}, { darkValue: '#12345' }, '/content/darkValue'],
+  ['color-picker', {}, { label: '' }, '/content/label'],
+] as const)('rejects %s with %o and %o at %s', (component, props, content, path) => {
+  expect(() => validateComponentRecipe(editorInputDraft(component, props, content)))
+    .toThrow(expect.objectContaining({ path }))
+})
+
+it('ignores the dark value of an unpaired Color Picker, so the editor can switch the pair off', () => {
+  expect(validateComponentRecipe(editorInputDraft('color-picker', { paired: false })).component).toBe('color-picker')
+  expect(validateComponentRecipe(editorInputDraft('color-picker', { paired: false }, { darkValue: 'not a colour' })).component).toBe('color-picker')
+})
+
+it('accepts an unpaired Color Picker without a dark value', () => {
+  const draft = editorInputDraft('color-picker', { paired: false })
+  delete (draft.content as { darkValue?: string }).darkValue
+  expect(validateComponentRecipe(draft).component).toBe('color-picker')
+})
+
+it.each([
+  ['number-input', { props: { unit: 'em' } }],
+  ['number-input', { props: { step: 0 } }],
+  ['color-picker', { props: { swatches: 9 } }],
+  ['color-picker', { props: { format: 'hsl' } }],
+] as const)('rejects the %s recipe %o by schema', (component, override) => {
+  expect(() => validateComponentRecipe(editorInputDraft(component, 'props' in override ? override.props : {}))).toThrow()
+})
+
+it('names the editor input appearance parts', async () => {
+  const { componentRecipeParts } = await import('../src/component-recipe-appearance.js')
+  expect(componentRecipeParts['number-input'].map(part => part.slot)).toEqual(['number-input'])
+  expect(componentRecipeParts['color-picker'].map(part => part.slot)).toEqual(['color-picker-trigger', 'color-picker-content', 'color-picker-area-thumb'])
+})
+
+it.each(['oklch(0.97 0.004 350 / 14%)', '#1d4ed8', '#abc', '#ABCDEF', 'rgb(29 78 216)', 'rgb(29, 78, 216)', 'oklch(55% 0.22 6)', 'oklch(0.55 0.22 6)', ' oklch(0.7 0.18 6) '])('reads %s as a colour', async text => {
+  const { isParsableColor } = await import('../src/color-syntax.js')
+  expect(isParsableColor(text)).toBe(true)
+})
+
+it.each(['red', '#12345', 'rgb(1 2)', 'rgb(300 0 0)', 'hsl(0 0% 0%)', 'oklch(1 2)', 'oklch(140% 0.1 20)', ''])('rejects %s as a colour', async text => {
+  const { isParsableColor } = await import('../src/color-syntax.js')
+  expect(isParsableColor(text)).toBe(false)
+})

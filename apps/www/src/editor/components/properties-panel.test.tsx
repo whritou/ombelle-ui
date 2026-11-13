@@ -38,6 +38,14 @@ it('offers a reset only for an overridden color value', () => {
   expect(html).toContain('value="#ffffff"')
 })
 
+it('uses the catalog Color Picker and Number Input', () => {
+  const html = panel(withRecipeColor(recipe, 'dark', 'foreground', '#ffffff'))
+  expect(html).not.toContain('type="color"')
+  expect(html).toContain('aria-label="Open Dark text color picker"')
+  expect(html).toMatch(/<input[^>]*id="color-dark-foreground"[^>]*aria-label="Dark text"/)
+  expect(html).toMatch(/role="spinbutton"[^>]*aria-label="Shadow X offset"|aria-label="Shadow X offset"[^>]*role="spinbutton"/)
+})
+
 it('labels the button type group and switches', () => {
   const html = panel()
   expect(html).toContain('role="radiogroup" aria-label="Button type"')
@@ -132,7 +140,8 @@ it('Button editor describes the glass edge colour fields with their hint', () =>
   expect(glass).toContain(`<p id="color-role-border-hint" class="colorHint">${glassControlHints.border}</p>`)
   for (const mode of ['light', 'dark'])
     expect(glass).toMatch(new RegExp(`id="color-${mode}-border"[^>]*aria-describedby="color-role-border-hint"`))
-  expect(glass.match(/aria-describedby="color-role-border-hint"/g)).toHaveLength(4)
+  // One text field per mode now: the catalog Color Picker replaced the separate native picker.
+  expect(glass.match(/aria-describedby="color-role-border-hint"/g)).toHaveLength(2)
   const flat = render('flat')
   expect(flat).not.toContain('color-role-border-hint')
 })

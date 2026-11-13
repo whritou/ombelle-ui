@@ -28,6 +28,16 @@ it('SliderRow puts the catalog slider on its own line and shows reset only when 
   )
 })
 
+it('SliderRow uses the catalog Number Input for its value, with named steppers and its unit', () => {
+  const html = renderToStaticMarkup(<SliderRow {...slider} />)
+  expect(html).toMatch(/<input[^>]*id="r-number"[^>]*role="spinbutton"|<input[^>]*role="spinbutton"[^>]*id="r-number"/)
+  expect(html).toContain('aria-valuenow="0.75"')
+  expect(html).toContain('aria-valuemin="0"')
+  expect(html).toContain('aria-valuemax="2"')
+  expect(html).toContain('data-slot="number-input-unit" aria-hidden="true">rem<')
+  expect(html).toContain('value="0.75"')
+})
+
 it('SliderRow links invalid state and description to both inputs', () => {
   const html = renderToStaticMarkup(<SliderRow {...slider} invalid describedBy="why" />)
   expect(html.match(/aria-invalid="true"/g)).toHaveLength(2)
