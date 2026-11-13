@@ -5,7 +5,7 @@ import { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon, Input
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Pagination, PaginationCompact, PaginationContent, PaginationItem, PaginationLink, PaginationPageSize, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet'
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogMedia, AlertDialogConfirmInput } from '@/components/ui/alert-dialog'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@/components/ui/toast'
 import {
@@ -208,6 +208,14 @@ export function PresetGallery({
           <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList></Breadcrumb>
+        <div data-component="breadcrumb~collapse" style={{ maxInlineSize: '16rem' }}>
+          <Breadcrumb aria-label="Long gallery path" collapse="auto"><BreadcrumbList>
+            <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbLink href="#workspace">Acme workspace</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
+          </BreadcrumbList></Breadcrumb>
+        </div>
       </section>)}
       {gate('pagination', 'Pagination', <section aria-label="Pagination" data-component="pagination">
         <h2>Pagination</h2><Pagination><PaginationContent>
@@ -228,7 +236,8 @@ export function PresetGallery({
       </section>)}
       {gate('alert-dialog', 'Alert Dialog', <section aria-label="Alert Dialog" data-component="alert-dialog">
         <h2>Alert Dialog</h2><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive">Delete project</Button></AlertDialogTrigger><AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Delete this project?</AlertDialogTitle><AlertDialogDescription>This preview does not delete any data.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogHeader><AlertDialogMedia tone="destructive" /><AlertDialogTitle>Delete this project?</AlertDialogTitle><AlertDialogDescription>This preview does not delete any data.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogConfirmInput expected="website-refresh" />
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Delete project</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent></AlertDialog>
       </section>)}

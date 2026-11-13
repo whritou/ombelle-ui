@@ -326,3 +326,24 @@ describe('0.7.5 variant recipes, batch 4a', () => {
     expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(false)
   })
 })
+
+describe('0.7.5 variant recipes, batch 4b', () => {
+  const v074 = { version: '0.7.4' }
+  const v075 = { version: '0.7.5' }
+  it.each([
+    ['dialog', { size: 'default' }, {}], ['dialog', { footer: true }, {}], ['dialog', { scrollingBody: false }, {}],
+    ['alert-dialog', { media: 'none' }, {}], ['alert-dialog', {}, { confirmText: '' }],
+    ['breadcrumb', { collapse: 'none' }, {}],
+  ] as const)('gates a %s recipe using %o %o at CLI 0.7.5', (component, props, content) => {
+    const recipe = { component, props, content } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(false)
+    // Alert Dialog and Breadcrumb already need 0.7.2; any new field needs 0.7.5.
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(true)
+    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v074)).toBe(compatibility.catalog075InstallNotice)
+  })
+
+  it.each(['dialog', 'alert-dialog', 'breadcrumb'])('leaves a %s recipe without new fields installable at 0.7.4', component => {
+    const recipe = { component, props: {}, content: { trigger: 'Open' } } as unknown as ComponentRecipe
+    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(false)
+  })
+})

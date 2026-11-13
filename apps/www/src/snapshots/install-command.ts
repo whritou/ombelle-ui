@@ -45,6 +45,7 @@ const variantRecipeValues073: Readonly<Record<string, Readonly<Record<string, re
 // The 0.7.5 variant fields, in props or content, that older recipe schemas reject.
 const variantRecipeFields075: Readonly<Record<string, readonly string[]>> = {
   checkbox: ['option', 'description'], switch: ['size'], progress: ['size', 'tone', 'showLabel', 'showValue'], popover: ['arrow'],
+  dialog: ['size', 'footer', 'scrollingBody'], 'alert-dialog': ['media', 'confirmText'], breadcrumb: ['collapse'],
 }
 
 function usesVariants075(recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown }): boolean {

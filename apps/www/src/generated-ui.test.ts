@@ -17,8 +17,9 @@ const read = async (root: string) => {
   return files
 }
 
-// The compiled Button is styled by the family stylesheet, not by a component stylesheet of its own.
-const stylelessComponents = new Set<string>(['button'])
+// The compiled Button and Dialog are styled by the family stylesheet, not by a component stylesheet of their own;
+// the site carries the Ombelle Dialog rules in globals.css (between the catalog dialog markers).
+const stylelessComponents = new Set<string>(['button', 'dialog'])
 
 // Set inline by the component itself (Collapsible Content), so the site never defines it.
 const setByComponent = new Set(['--collapsible-height'])
@@ -55,4 +56,13 @@ it('defines in the site stylesheet every token the compiled styles read without 
     for (const match of css.matchAll(/var\((--[\w-]+)\)/g)) if (!setByComponent.has(match[1]!) && !own.has(match[1]!)) needed.add(match[1]!)
   }
   expect([...needed].filter(name => !defined.has(name)).sort()).toEqual([])
+})
+
+it('keeps the site stylesheet, with its copied catalog Dialog rules, valid CSS', async () => {
+  const { default: postcss } = await import('postcss')
+  const globals = await fs.readFile(path.resolve(__dirname, 'app/globals.css'), 'utf8')
+  expect(() => postcss.parse(globals)).not.toThrow()
+  const block = globals.slice(globals.indexOf('/* catalog dialog */'), globals.indexOf('/* end catalog dialog */'))
+  for (const slot of ['dialog-content', 'dialog-body', 'dialog-footer']) expect(block).toContain(`[data-slot='${slot}']`)
+  expect(block).toContain("[data-slot='dialog-content']:is([data-size='lg'], [data-size='fullscreen'])")
 })

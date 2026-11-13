@@ -106,7 +106,7 @@ test('Changes and the Get code summary', async ({ page }) => {
   await page.getByRole('button', { name: 'Get code', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Get code' })
   await expect(dialog.getByTestId('changes-summary')).toHaveText(/^Changes from the catalog default: \d+ files?, \+\d+ −\d+$/)
-  const results = await new AxeBuilder({ page }).include('dialog').analyze()
+  const results = await new AxeBuilder({ page }).include('[role="dialog"]').analyze()
   expect(results.violations.map((violation) => violation.id)).toEqual([])
   await dialog.getByRole('button', { name: 'Show changes', exact: true }).click()
   await expect(changes).toBeFocused()

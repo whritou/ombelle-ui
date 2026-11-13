@@ -1,12 +1,11 @@
 'use client'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 import {
   packageManagers,
   type PackageManager,
 } from '../install-command'
 import styles from './get-code-dialog.module.css'
-import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../generated/ui/components/ui/dialog'
 // Requested when the dialog opens, alongside publishing, so the editors' first load does not carry it.
 type CommandBlock = typeof import('../../generated/ui/components/ui/code-block').CodeBlockCommand
 let commandBlock: Promise<CommandBlock> | undefined
@@ -65,8 +64,9 @@ export function GetCodeDialog({
   /** What the edits change against the catalog default, read before publishing; a function gets the dialog's close. */
   summary?: CodeSummary
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
   const terminal = useRef<HTMLDivElement>(null)
+  // The dialog opens from the editor's own button, not a Dialog trigger, so it returns focus there itself.
+  const opener = useRef<HTMLElement | null>(null)
   const fallback = useRef<HTMLElement>(null)
   const [CodeBlockCommand, setCodeBlockCommand] = useState<CommandBlock | null>(null)
   const [scope, setScope] = useState(scopes[0]!.id)
@@ -78,11 +78,8 @@ export function GetCodeDialog({
     setMounted(true)
   }, [])
   useEffect(() => {
-    const element = dialog.current
-    if (!element) return
-    if (open && !element.open) element.showModal()
-    if (!open && element.open) element.close()
-  }, [open, mounted])
+    if (open) opener.current = document.activeElement as HTMLElement | null
+  }, [open])
   useEffect(() => {
     if (!open || CodeBlockCommand) return
     let live = true
@@ -124,38 +121,22 @@ export function GetCodeDialog({
   }
 
   if (!mounted) return null
-  // Portal to the body so editor toolbar styles never reach the dialog.
-  return createPortal(
-    <dialog
-      ref={dialog}
-      className={styles.dialog}
-      aria-labelledby="get-code-heading"
-      onCancel={(event) => {
-        event.preventDefault()
-        onClose()
-      }}
-      onClick={(event) => {
-        if (event.target === dialog.current) onClose()
-      }}
-    >
-      <ScrollArea aria-labelledby="get-code-heading" className={`www-scroll ${styles.body}`}>
-      <div className={styles.bodyContent}>
-        <div className={styles.head}>
-          <h2 id="get-code-heading" className={styles.title}>
+  // The catalog Dialog: its body scrolls between the title and the Copy command footer.
+  return (
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onClose() }}>
+      <DialogContent size="lg" className={styles.dialog} aria-describedby={undefined}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          // An action that moved focus on purpose (Show changes) keeps it; otherwise return to the opener.
+          const active = document.activeElement
+          if (!active || active === document.body) opener.current?.focus()
+        }}>
+        <DialogHeader className={styles.head}>
+          <DialogTitle className={styles.title}>
             Get code
-          </h2>
-          <button
-            type="button"
-            className={styles.close}
-            aria-label="Close"
-            onClick={onClose}
-          >
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M4 4l8 8M12 4l-8 8" />
-            </svg>
-          </button>
-        </div>
-
+          </DialogTitle>
+        </DialogHeader>
+        <DialogBody className={styles.body}>
         {scopes.length > 1 && (
           <div
             className={styles.tabs}
@@ -241,18 +222,6 @@ export function GetCodeDialog({
             </div>
           )}
 
-          <button
-            type="button"
-            className={styles.primary}
-            disabled={!command}
-            onClick={() => void copy()}
-          >
-            {code.status === 'publishing'
-              ? 'Generating code…'
-              : copied
-                ? 'Copied'
-                : 'Copy command'}
-          </button>
         </div>
 
         <div className={styles.footer}>
@@ -271,9 +240,22 @@ export function GetCodeDialog({
           </p>
           {children && <div className={styles.secondary}>{children}</div>}
         </div>
-      </div>
-      </ScrollArea>
-    </dialog>,
-    document.body,
+        </DialogBody>
+        <DialogFooter className={styles.actions}>
+          <button
+            type="button"
+            className={styles.primary}
+            disabled={!command}
+            onClick={() => void copy()}
+          >
+            {code.status === 'publishing'
+              ? 'Generating code…'
+              : copied
+                ? 'Copied'
+                : 'Copy command'}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

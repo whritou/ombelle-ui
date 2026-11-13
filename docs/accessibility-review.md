@@ -224,6 +224,14 @@ Review these on the preview "0.7.5 variants" section of the edition pages, the S
 - **Progress labelling**: a Progress with a label is announced with the label as its name and the readout ("64%", or the formatted text) as its value; the readout itself is not read twice; a tone is never the only status signal.
 - **Popover arrow**: the arrow is not announced; the popover keeps its name and focus behaviour.
 
+**Variants, batch 4b (0.7.5)**
+
+Review these on the preview "0.7.5 variants" section of the edition pages, the Projects scene and the website's editors, and record them in their own rows below.
+
+- **Scrolling Dialog body**: the body is announced as a region named by the dialog title; while it overflows, Tab reaches it and the arrow keys and Page Down scroll it; the footer actions stay on screen; a body that fits is not a Tab stop.
+- **Typed confirmation**: focus starts in the text field, announced with the instruction as its name; the action is announced as unavailable with the instruction as its description until the text matches exactly; Enter does nothing until then; Escape and Cancel close.
+- **Collapsed Breadcrumb menu**: the "Show N more" button is announced with its count and opens a menu whose items are the folded pages, as links, in trail order; Escape closes it and returns focus to the button.
+
 ## Results
 
 Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
@@ -322,6 +330,14 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Switch `sm` target size | | | | | | | | | | |
 | Progress label and value | | | | | | | | | | |
 | Popover arrow | | | | | | | | | | |
+
+#### Variants, batch 4b (0.7.5)
+
+| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Dialog scrolling body and footer | | | | | | | | | | |
+| Alert Dialog typed confirmation | | | | | | | | | | |
+| Breadcrumb collapsed menu | | | | | | | | | | |
 
 #### Variants, batch 6a (0.7.3)
 

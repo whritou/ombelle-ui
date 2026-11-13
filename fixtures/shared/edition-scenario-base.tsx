@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Popover, PopoverArrow, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -18,7 +18,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupClear, InputGr
 import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Pagination, PaginationCompact, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPageSize, PaginationPrevious } from '@/components/ui/pagination'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHandle, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogConfirmInput, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/components/ui/table'
 import { Badge, BadgeDot } from '@/components/ui/badge'
@@ -517,6 +517,80 @@ const editorInputSwatches = [
   { label: 'Ink', value: 'oklch(0.22 0.012 275)' },
 ]
 
+/** A dialog whose body starts short and grows, for the Dialog body's Tab stop. */
+function GrowingDialog075() {
+  const [paragraphs, setParagraphs] = React.useState(1)
+  return (
+    <Dialog>
+      <DialogTrigger>Edit details</DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Project details</DialogTitle><DialogDescription>Notes for the team.</DialogDescription></DialogHeader>
+        <DialogBody data-testid="v075-growing-body">
+          {Array.from({ length: paragraphs }, (_, index) => <p key={index}>Note {index + 1}: the export keeps every token, the recipe pins and the preset revision for the next install.</p>)}
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" onClick={() => setParagraphs(count => count + 20)}>Add details</button>
+          <DialogClose>Done</DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/** A delete confirmation that needs the project's name typed, for the typed-confirmation tests. */
+function TypedConfirm075() {
+  const [deleted, setDeleted] = React.useState(0)
+  return (
+    <div data-testid="v075-confirm">
+      <AlertDialog>
+        <AlertDialogTrigger type="button">Delete project</AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia tone="destructive" />
+            <AlertDialogTitle>Delete ombelle-site?</AlertDialogTitle>
+            <AlertDialogDescription>Its install code stops working for everyone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogConfirmInput expected="ombelle-site" />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setDeleted(count => count + 1)}>Delete project</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <output data-testid="v075-deleted">{deleted}</output>
+    </div>
+  )
+}
+
+const trail075 = [
+  ['Home', '#home'], ['Presets', '#presets'], ['Liquid glass', '#glass'], ['Givre', '#givre'],
+  ['Components', '#components'], ['Forms', '#forms'], ['Inputs', '#inputs'],
+]
+const shortTrail075 = [['Home', '#home'], ['Projects', '#projects'], ['Website refresh', '#website'], ['Release notes', '#notes']]
+
+/** A long trail that folds into a menu when it does not fit, for the Breadcrumb collapse tests. */
+function CollapsingTrail075() {
+  const [short, setShort] = React.useState(false)
+  const items = short ? shortTrail075 : trail075
+  return (
+    // As wide as the viewport, so the trail fits at 1280px and folds at 320px.
+    <div data-testid="v075-breadcrumb" style={{ inlineSize: 'calc(100vw - 3rem)' }}>
+      <Breadcrumb collapse="auto" aria-label="Component path">
+        <BreadcrumbList>
+          {items.map(([label, href]) => (
+            <React.Fragment key={href}>
+              <BreadcrumbItem><BreadcrumbLink href={href}>{label}</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+            </React.Fragment>
+          ))}
+          <BreadcrumbItem><BreadcrumbPage>Field</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <button type="button" onClick={() => setShort(value => !value)}>Switch trail</button>
+    </div>
+  )
+}
+
 /** The 0.7.5 variants, for tests/e2e/variants-075.spec.ts. */
 function VariantsScenario075() {
   return (
@@ -545,6 +619,30 @@ function VariantsScenario075() {
           </PopoverContent>
         </Popover>
       </div>
+      <div data-testid="v075-dialogs" style={{ display: 'flex', gap: '0.75rem', marginBlockStart: '0.75rem' }}>
+        <Dialog>
+          <DialogTrigger>Export preset</DialogTrigger>
+          <DialogContent size="lg">
+            <DialogHeader><DialogTitle>Export preset</DialogTitle><DialogDescription>Choose what the JSON file includes.</DialogDescription></DialogHeader>
+            <DialogBody>
+              {Array.from({ length: 30 }, (_, index) => <p key={index}>Section {index + 1}: tokens, component recipes, glass materials and the preset revision.</p>)}
+            </DialogBody>
+            <DialogFooter>
+              <DialogClose>Cancel</DialogClose>
+              <button type="button">Export</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog>
+          <DialogTrigger>Rename preset</DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Rename preset</DialogTitle><DialogDescription>The install code stays the same.</DialogDescription></DialogHeader>
+          </DialogContent>
+        </Dialog>
+        <GrowingDialog075 />
+      </div>
+      <TypedConfirm075 />
+      <CollapsingTrail075 />
     </section>
   )
 }

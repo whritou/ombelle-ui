@@ -1565,7 +1565,25 @@ export const componentRecipeSchema = {
         },
         "props": {
           "type": "object",
-          "properties": {},
+          "properties": {
+            "size": {
+              "enum": [
+                "sm",
+                "default",
+                "lg",
+                "fullscreen"
+              ],
+              "title": "Size"
+            },
+            "footer": {
+              "type": "boolean",
+              "title": "Footer"
+            },
+            "scrollingBody": {
+              "type": "boolean",
+              "title": "Scrolling body"
+            }
+          },
           "additionalProperties": false,
           "required": []
         },
@@ -1983,7 +2001,16 @@ export const componentRecipeSchema = {
         },
         "props": {
           "type": "object",
-          "properties": {},
+          "properties": {
+            "media": {
+              "enum": [
+                "none",
+                "default",
+                "destructive"
+              ],
+              "title": "Media"
+            }
+          },
           "additionalProperties": false,
           "required": []
         },
@@ -2024,6 +2051,11 @@ export const componentRecipeSchema = {
               "maxLength": 200,
               "default": "Delete project",
               "pattern": "\\S"
+            },
+            "confirmText": {
+              "type": "string",
+              "title": "Text to type to confirm",
+              "maxLength": 200
             }
           },
           "additionalProperties": false,
@@ -2044,7 +2076,15 @@ export const componentRecipeSchema = {
         },
         "props": {
           "type": "object",
-          "properties": {},
+          "properties": {
+            "collapse": {
+              "enum": [
+                "none",
+                "auto"
+              ],
+              "title": "Collapse"
+            }
+          },
           "additionalProperties": false,
           "required": []
         },

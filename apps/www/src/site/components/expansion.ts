@@ -118,13 +118,13 @@ export const expansionDocs = {
   },
   'alert-dialog': {
     name: 'Alert Dialog', description: 'Requests a deliberate response before a destructive or important action.',
-    api: 'AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction',
+    api: 'AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogMedia (tone), AlertDialogConfirmInput (expected, label)',
     states: 'Open, closed, cancel focus, focus return', basis: 'Dedicated Alert Dialog primitive', client: true,
     usage: expansionExamples['alert-dialog'], minimumCli: '0.7.2',
   },
   breadcrumb: {
     name: 'Breadcrumb', description: 'Shows a page’s place in a hierarchy of links.',
-    api: 'Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis',
+    api: 'Breadcrumb (collapse none or auto), BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis',
     states: 'Link, current page, focus', basis: 'Native nav, ordered list, links and current-page span', client: false,
     usage: expansionExamples.breadcrumb, minimumCli: '0.7.2',
   },

@@ -79,6 +79,8 @@ import { sceneComponents, sceneOptions } from '../preview-scenes'
 import styles from './preset-editor.module.css'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../generated/ui/components/ui/collapsible'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../generated/ui/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle } from '../../generated/ui/components/ui/alert-dialog'
 import { useSiteDark } from '../../site/theme'
 
 const familyName = (family: StyleFamily) => familyNames[family]
@@ -124,13 +126,12 @@ export default function PresetEditor() {
     'connecting' | 'ready' | 'failed'
   >('connecting')
   const [confirmation, setConfirmation] = useState<
-    (FamilyChange & { label: string; description: string }) | null
+    (FamilyChange & { label: string; description: string; tone: 'default' | 'destructive' }) | null
   >(null)
-  const dialog = useRef<HTMLDialogElement>(null),
-    identityDialog = useRef<HTMLDialogElement>(null),
-    identityOpener = useRef<HTMLElement | null>(null),
-    cancelButton = useRef<HTMLButtonElement>(null),
+  const identityOpener = useRef<HTMLElement | null>(null),
     returnFocus = useRef<HTMLElement | null>(null)
+  const [identityOpen, setIdentityOpen] = useState(false)
+  const [replaceOpen, setReplaceOpen] = useState(false)
   const undoButton = useRef<HTMLButtonElement>(null),
     redoButton = useRef<HTMLButtonElement>(null),
     focusAfterHistory = useRef<HTMLButtonElement | null>(null)
@@ -173,14 +174,6 @@ export default function PresetEditor() {
     focusAfterHistory.current?.focus()
     focusAfterHistory.current = null
   }, [history])
-  useEffect(() => {
-    if (confirmation) {
-      dialog.current?.showModal()
-      // Start on Cancel, not the optional list toggle, so Enter is safe.
-      cancelButton.current?.focus()
-    }
-    else if (dialog.current?.open) dialog.current.close()
-  }, [confirmation])
   function commit(next: PresetEditorDraft, key: string, coalesce = false) {
     setRestoreWarning(null)
     setHistory((previous) =>
@@ -190,11 +183,10 @@ export default function PresetEditor() {
   function finishConfirmation(accept: boolean) {
     if (accept && confirmation) commit(confirmation.draft, 'family/reset')
     setConfirmation(null)
-    returnFocus.current?.focus()
   }
-  function confirm(change: FamilyChange, label: string, description: string) {
+  function confirm(change: FamilyChange, label: string, description: string, tone: 'default' | 'destructive' = 'default') {
     returnFocus.current = document.activeElement as HTMLElement
-    setConfirmation({ ...change, label, description })
+    setConfirmation({ ...change, label, description, tone })
   }
   function family(family: StyleFamily) {
     const change = planPresetFamilyChange(draft, family)
@@ -312,7 +304,7 @@ export default function PresetEditor() {
                 identityOpener.current = document.querySelector<HTMLElement>(
                   'button[aria-label="More actions"]',
                 )
-                identityDialog.current?.showModal()
+                setIdentityOpen(true)
               },
             },
             {
@@ -324,6 +316,7 @@ export default function PresetEditor() {
                   { draft: resetPresetTokens(draft), changes: [] },
                   'Reset all tokens?',
                   `Colors and design values go back to the ${familyName(draft.family)} defaults. The preset name, id and revision stay. You can undo this.`,
+                  'destructive',
                 ),
             },
           ],
@@ -367,15 +360,18 @@ export default function PresetEditor() {
           >
             Download recovery data
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (
-                !window.confirm(
-                  'Replace the saved recovery data with a new preset draft?',
-                )
-              )
-                return
+          <AlertDialog open={replaceOpen} onOpenChange={setReplaceOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia tone="destructive" />
+                <AlertDialogTitle>Replace the saved recovery data?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  A new preset draft replaces the saved data. Download it first if you may need it.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => {
               try {
                 localStorage.removeItem(draftStorageKey)
                 localStorage.removeItem(historyStorageKey)
@@ -387,8 +383,11 @@ export default function PresetEditor() {
                   'Storage could not be reset. Your recovery data is retained.',
                 )
               }
-            }}
-          >
+            }}>Replace recovery data</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <button type="button" onClick={() => setReplaceOpen(true)}>
             Reset saved draft
           </button>
         </section>
@@ -572,110 +571,92 @@ export default function PresetEditor() {
           />
         </div>
       </div>
-      <dialog
-        ref={dialog}
-        className={styles.confirmDialog}
-        aria-labelledby="preset-confirm-heading"
-        onCancel={(event) => {
-          event.preventDefault()
-          finishConfirmation(false)
-        }}
-      >
-        <ScrollArea aria-labelledby="preset-confirm-heading" className={`www-scroll ${styles.confirmScroll}`}>
-        <div className={styles.confirmBody}>
-        <h2 id="preset-confirm-heading">{confirmation?.label}</h2>
-        <p className={styles.confirmText}>{confirmation?.description}</p>
-        {confirmation && confirmation.changes.length > 0 && (
-          <Collapsible className={styles.confirmChanges}>
-            <CollapsibleTrigger>
-              Show the {confirmation.changes.length} values that change
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-            <ScrollArea aria-label="Changed values" className="www-scroll">
-            <ul>
-              {confirmation.changes.map((change) => (
-                <li key={change.path}>
-                  <span>{changeLabel(change.path)}</span>
-                  <span className={styles.confirmValues}>
-                    {isColor(change.before) && (
-                      <i aria-hidden="true" style={{ background: change.before }} />
-                    )}
-                    {change.before} →{' '}
-                    {isColor(change.after) && (
-                      <i aria-hidden="true" style={{ background: change.after }} />
-                    )}
-                    {change.after}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            </ScrollArea>
-            </CollapsibleContent>
-          </Collapsible>
-        )}
-        <div className={styles.confirmActions}>
-          <button
-            ref={cancelButton}
-            type="button"
-            onClick={() => finishConfirmation(false)}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={styles.confirmPrimary}
-            onClick={() => finishConfirmation(true)}
-          >
-            Confirm change
-          </button>
-        </div>
-        </div>
-        </ScrollArea>
-      </dialog>
-      <dialog
-        ref={identityDialog}
-        className={styles.confirmDialog}
-        aria-labelledby="preset-identity-heading"
-        onClose={() => {
-          // Fires for Done and Escape alike.
-          identityOpener.current?.focus()
-          identityOpener.current = null
-        }}
-      >
-        <ScrollArea aria-labelledby="preset-identity-heading" className={`www-scroll ${styles.confirmScroll}`}>
-        <div className={styles.confirmBody}>
-        <h2 id="preset-identity-heading">ID &amp; revision</h2>
-        <p className={styles.confirmText}>
-          The id names this preset in your project. Raise the revision when you
-          publish a changed version.
-        </p>
-        {(['id', 'revision'] as const).map((key) => (
-          <div className={styles.field} key={key}>
-            <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
-            <input
-              id={fieldId('/' + key)}
-              value={draft.identity[key]}
-              maxLength={key === 'revision' ? 16 : 80}
-              inputMode={key === 'revision' ? 'numeric' : undefined}
-              aria-invalid={diagnostic?.path === '/' + key || undefined}
-              onChange={(e) =>
-                commit(setPresetIdentity(draft, key, e.target.value), key)
-              }
-            />
-          </div>
-        ))}
-        <div className={styles.confirmActions}>
-          <button
-            type="button"
-            className={styles.confirmPrimary}
-            onClick={() => identityDialog.current?.close()}
-          >
-            Done
-          </button>
-        </div>
-        </div>
-        </ScrollArea>
-      </dialog>
+      <AlertDialog open={confirmation !== null} onOpenChange={(open) => { if (!open) finishConfirmation(false) }}>
+        <AlertDialogContent
+          onCloseAutoFocus={(event) => {
+            // Return to the control that asked, such as the family picker or the menu.
+            event.preventDefault()
+            returnFocus.current?.focus()
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogMedia tone={confirmation?.tone ?? 'default'} />
+            <AlertDialogTitle>{confirmation?.label}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmation?.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          {confirmation && confirmation.changes.length > 0 && (
+            <Collapsible className={styles.confirmChanges}>
+              <CollapsibleTrigger>
+                Show the {confirmation.changes.length} values that change
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+              <ScrollArea aria-label="Changed values" className="www-scroll">
+              <ul>
+                {confirmation.changes.map((change) => (
+                  <li key={change.path}>
+                    <span>{changeLabel(change.path)}</span>
+                    <span className={styles.confirmValues}>
+                      {isColor(change.before) && (
+                        <i aria-hidden="true" style={{ background: change.before }} />
+                      )}
+                      {change.before} →{' '}
+                      {isColor(change.after) && (
+                        <i aria-hidden="true" style={{ background: change.after }} />
+                      )}
+                      {change.after}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              </ScrollArea>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+          <AlertDialogFooter>
+            {/* Alert Dialog starts on Cancel, so Enter is safe. */}
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => finishConfirmation(true)}>Confirm change</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <Dialog open={identityOpen} onOpenChange={setIdentityOpen}>
+        <DialogContent
+          onCloseAutoFocus={(event) => {
+            // Done and Escape alike return to the More actions button the menu came from.
+            event.preventDefault()
+            identityOpener.current?.focus()
+            identityOpener.current = null
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>ID &amp; revision</DialogTitle>
+            <DialogDescription>
+              The id names this preset in your project. Raise the revision when you
+              publish a changed version.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            {(['id', 'revision'] as const).map((key) => (
+              <div className={styles.field} key={key}>
+                <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
+                <input
+                  id={fieldId('/' + key)}
+                  value={draft.identity[key]}
+                  maxLength={key === 'revision' ? 16 : 80}
+                  inputMode={key === 'revision' ? 'numeric' : undefined}
+                  aria-invalid={diagnostic?.path === '/' + key || undefined}
+                  onChange={(e) =>
+                    commit(setPresetIdentity(draft, key, e.target.value), key)
+                  }
+                />
+              </div>
+            ))}
+          </DialogBody>
+          <DialogFooter>
+            <DialogClose className={styles.confirmPrimary}>Done</DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }

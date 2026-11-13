@@ -62,12 +62,45 @@ describe('0.7.5 variant specimens', () => {
     expect(tags(specimen('popover', { arrow: false }))).not.toContain('PopoverArrow')
   })
 
+  it('sizes a dialog and gives it a scrolling body and a footer, passing no unknown prop', () => {
+    const dialog = specimen('dialog', { size: 'lg', scrollingBody: true, footer: true })
+    const content = find(dialog, 'DialogContent')!
+    expect(content.props).toMatchObject({ size: 'lg' })
+    expect(content.props).not.toHaveProperty('footer')
+    expect(find(dialog, 'DialogBody')!.children.filter(child => typeof child !== 'string')).toHaveLength(8)
+    const footer = find(dialog, 'DialogFooter')!
+    expect(all(footer).find(item => item.tag === 'DialogClose')!.children).toContain('Cancel')
+    expect(all(footer).some(item => item.children.includes('Save changes'))).toBe(true)
+    const plain = specimen('dialog', { size: 'default', scrollingBody: false, footer: false })
+    expect(tags(plain)).not.toEqual(expect.arrayContaining(['DialogBody']))
+    expect(tags(plain)).not.toContain('DialogFooter')
+    expect(find(plain, 'DialogContent')!.props).not.toHaveProperty('size', expect.anything())
+  })
+
+  it('adds media and a typed confirmation to an alert dialog', () => {
+    const alert = specimen('alert-dialog', { media: 'destructive' }, { confirmText: 'ombelle-site' })
+    const header = find(alert, 'AlertDialogHeader')!
+    expect((header.children[0] as RecipeSpecimen).tag).toBe('AlertDialogMedia')
+    expect((header.children[0] as RecipeSpecimen).props).toMatchObject({ tone: 'destructive' })
+    expect(find(alert, 'AlertDialogConfirmInput')!.props).toMatchObject({ expected: 'ombelle-site' })
+    expect(tags(specimen('alert-dialog', { media: 'none' }, { confirmText: '' }))).not.toEqual(expect.arrayContaining(['AlertDialogMedia']))
+    expect(tags(specimen('alert-dialog', {}, { confirmText: '' }))).not.toContain('AlertDialogConfirmInput')
+  })
+
+  it('collapses a breadcrumb', () => {
+    expect(find(specimen('breadcrumb', { collapse: 'auto' }), 'Breadcrumb')!.props).toMatchObject({ collapse: 'auto' })
+    expect(find(specimen('breadcrumb', { collapse: 'none' }), 'Breadcrumb')!.props).not.toHaveProperty('collapse', expect.anything())
+  })
+
   describe.each(styleFamilies)('%s', family => {
     it.each([
       ['checkbox', { option: 'card' }, { description: 'Adds sample files' }, ['Checkbox', 'CheckboxOption']],
       ['switch', { size: 'sm' }, {}, ['Switch']],
       ['progress', { size: 'sm', tone: 'warning', showLabel: true, showValue: true }, {}, ['Progress', 'ProgressLabel', 'ProgressValue']],
       ['popover', { arrow: true }, {}, ['PopoverArrow', 'PopoverContent']],
+      ['dialog', { size: 'fullscreen', scrollingBody: true, footer: true }, {}, ['DialogBody', 'DialogFooter', 'DialogContent']],
+      ['alert-dialog', { media: 'default' }, { confirmText: 'delete' }, ['AlertDialogMedia', 'AlertDialogConfirmInput', 'AlertDialogAction']],
+      ['breadcrumb', { collapse: 'auto' }, {}, ['Breadcrumb', 'BreadcrumbList', 'BreadcrumbEllipsis']],
     ] as const)('compiles a %s variant recipe deterministically with its parts', async (component, props, content, parts) => {
       const first = await compileComponentRecipe({ recipe: recipe(component, props, content, family) })
       const second = await compileComponentRecipe({ recipe: recipe(component, props, content, family) })

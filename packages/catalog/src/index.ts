@@ -113,6 +113,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   select: ['@radix-ui/react-select', '@radix-ui/react-popover', 'lucide-react'],
   'radio-group': ['@radix-ui/react-radio-group'],
   'dropdown-menu': ['@radix-ui/react-dropdown-menu', 'lucide-react'],
+  breadcrumb: ['@radix-ui/react-dropdown-menu'],
   popover: ['@radix-ui/react-popover'],
   avatar: ['@radix-ui/react-avatar'],
   separator: ['@radix-ui/react-separator'],

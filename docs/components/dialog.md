@@ -32,6 +32,36 @@ export function Example() {
 }
 ```
 
+## Variants (0.7.5)
+
+These need CLI **0.7.5** or later, including in component recipes. Leaving a prop or part out renders what earlier releases render.
+
+```tsx
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+
+<Dialog>
+  <DialogTrigger>Export preset</DialogTrigger>
+  <DialogContent size="lg">
+    <DialogHeader>
+      <DialogTitle>Export preset</DialogTitle>
+      <DialogDescription>Choose what the JSON file includes.</DialogDescription>
+    </DialogHeader>
+    <DialogBody>{/* long content */}</DialogBody>
+    <DialogFooter>
+      <DialogClose>Cancel</DialogClose>
+      <button type="button">Export</button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+- **`DialogBody`** (`dialog-body`) scrolls between the header and the footer. It is a region named by the dialog's title. While its content overflows it is a Tab stop (`tabIndex=0`), so keyboard users can scroll it with the arrow keys and Page Up and Page Down, and it carries `data-overflowing`; a body that fits adds no Tab stop. It also renders the marker `data-dialog-body`.
+- **`DialogFooter`** (`dialog-footer`) is a row of actions at the end. It stays visible while the body scrolls, gains a top border while the body overflows, and below 640px stacks its actions in reverse order, the first action at the bottom.
+- **Layout:** a `DialogContent` that holds a `DialogBody` becomes a column no taller than `100dvh - 2rem`.
+- **`size`** on `DialogContent`: `sm` (24rem), `default` (the existing width), `lg` (48rem) or `fullscreen` (the viewport less 1rem on each side), set as `data-size`. Below 640px, `lg` and `fullscreen` fill the screen with no corner radius; `sm` and `default` keep their width.
+- Dialog has no stylesheet of its own; these rules are in each family's stylesheet. Recipe styles accept one more media condition, `(max-width: 639.98px)`, for them.
+- **Recipe:** `size`, `footer` and `scrollingBody` (booleans). The footer holds a Close named "Cancel" and a "Save changes" button; the scrolling body holds eight paragraphs.
+
 ## Radix edition
 
 Projects whose `components.json` uses `radix-nova` or `new-york`, and projects without `components.json`, receive the Radix Dialog from `@radix-ui/react-dialog` 1.3.1. `Dialog`, `DialogTrigger` and `DialogClose` are Radix's own parts; `asChild` renders the trigger or close button as another component.
