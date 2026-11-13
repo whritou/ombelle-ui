@@ -38,7 +38,7 @@ Playwright with its bundled Chromium, headless, reduced motion, Windows 11, Node
 
 | Check | Result |
 | --- | --- |
-| `tests/e2e/components-076.spec.ts`, both editions (preview on port 4186) | 24 passed (12 per edition) |
+| `tests/e2e/components-076.spec.ts`, both editions (preview on port 4186) | 36 passed (18 per edition), after the final review's fixes |
 | Editor specs (`editor.spec.ts`, `preset-editor.spec.ts`, `editor-commands.spec.ts`; website on 3000, preview on 4173, no consumer servers) | The cases the Toolbar swap touches pass: Ctrl+K from the name field, the palette switching the family, the mobile workspace tabs, stale exports blocked in the menu, and the menu keyboard pattern with focus returning after "ID & revision". What still fails is the recorded baseline (consumer installs, the port 4180 consumer, dashboard axe contrast, the 0.5 radius, the 320 pixel reflow, the cold-server first test) and two cases that fail identically at the branch point `8a06cd5d` in a clean worktree: "Ctrl+K … choosing a component opens its editor" (it opens Alert Dialog) and "operates every Button editor control … by keyboard" (the padding number field's outline). |
 
 Two things found on the way, both fixed: the first full editor run reported "Preview failed" because the packages were rebuilt after `generate:preview` (a stale preview manifest); and the editor's toolbar shrank beside the primary action and moved Commands into the menu, which led to measuring overflow on the real layout and keeping the editor's toolbar at full width.
@@ -70,6 +70,18 @@ A probe (`board-compare-076.mjs` in the plan workspace) read computed styles of 
 | Liquid glass radii | 18–24px | 12–14px from the family's radius | Liquid glass is experimental; recorded, not blocking |
 | Flat frame radius | 10–12px | 8px, the family's radius | Flat keeps one radius |
 | Heights of a few pixels | Board fonts | Fallback fonts in the probe | Web fonts were not loaded on the board |
+
+## Final review
+
+A fresh reviewer read the whole branch. It found no critical issue and five important ones, each fixed with a browser case that failed first:
+
+- Form checked only the Fields it found while rendering, so a Field inside a wrapper component, or a composite control whose constraint sits on a hidden input, submitted invalid data. Form now checks every named control through `form.elements`, and Fields register with it, so wrapped Fields also get summary links.
+- The Toolbar's More menu showed a toggle's old pressed state after it was chosen from the menu. The menu now reads each item when it opens (and again after a choice in Base UI, whose checkbox item keeps the menu open).
+- The last overflowed Toolbar item did not come back when it fitted without More. More now takes no room until something overflows. A first version of this fix left More hidden for a menu with its own items, caught by the editor tests and pinned by a new case.
+- The Toolbar did not re-measure when items were added, removed or relabelled without a resize. It now also watches its own tree and text.
+- The Base UI Checkbox dropped the caller's ref, and a Carousel with two or three slides per view never marked its last slide current. Both are fixed.
+
+The reviewer's minor findings are deferred: server errors passed as a new object on every parent render reappear; the strength meter does not follow a value set without an input event; a password stays shown when the browser blocks a submit before the submit event; a Toolbar without ToolbarOverflow still hides items; an empty toggle group keeps its gaps; sanitised Form ids can collide; CarouselContent replaces the caller's ref; an invalid check pattern throws; and pressing a parent that is mixed only because of a disabled child clears instead of checking.
 
 ## Accessibility review
 

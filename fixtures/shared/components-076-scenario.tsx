@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
-import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
+import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarOverflowItem, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
 import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle, type PasswordCheck } from '@/components/ui/password-field'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, Form, FormErrorSummary, type FormErrors } from '@/components/ui/field'
@@ -139,6 +139,12 @@ function ViewToolbar() {
         Toolbar width
         <input type="range" min={160} max={640} step={10} value={width} onChange={event => setWidth(Number(event.target.value))} />
       </label>
+      <Toolbar aria-label="Preset actions">
+        <ToolbarButton>Undo</ToolbarButton>
+        <ToolbarOverflow label="More preset actions">
+          <ToolbarOverflowItem onSelect={() => {}}>Duplicate</ToolbarOverflowItem>
+        </ToolbarOverflow>
+      </Toolbar>
       <button type="button" onClick={() => setExtra(true)}>Add a tool</button>
       <div data-testid="c076-toolbar" style={{ inlineSize: width + 'px' }}>
         <Toolbar aria-label="View options">

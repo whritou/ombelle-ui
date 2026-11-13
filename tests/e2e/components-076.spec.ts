@@ -291,6 +291,14 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(toolbar.getByText('Export as image')).toBeHidden()
     })
 
+    test('a Toolbar whose menu has its own items always shows More', async ({ page }) => {
+      const section = await open(page, edition)
+      const toolbar = section.getByRole('toolbar', { name: 'Preset actions' })
+      await expect(toolbar.getByRole('button', { name: 'More preset actions' })).toBeVisible()
+      await toolbar.getByRole('button', { name: 'More preset actions' }).click()
+      await expect(page.getByRole('menuitem', { name: 'Duplicate' })).toBeVisible()
+    })
+
     test('a disabled FieldSet disables every control in it', async ({ page }) => {
       const section = await open(page, edition)
       const editions = section.getByTestId('c076-editions')

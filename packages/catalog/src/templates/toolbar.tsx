@@ -49,8 +49,9 @@ function useOverflow(rootRef: React.RefObject<HTMLDivElement | null>, triggerRef
       while (fit > 0 && !fits()) entries[--fit].hidden = true
       // A separator never ends the visible row.
       while (fit > 0 && fit < entries.length && entries[fit - 1].hasAttribute('data-toolbar-separator')) entries[--fit].hidden = true
-      if (trigger) trigger.hidden = triggerHidden
     }
+    // React owns the trigger's hidden state; measuring only borrows it.
+    if (trigger) trigger.hidden = triggerHidden
     entries.forEach((element, index) => {
       element.hidden = index >= fit
       if (index >= fit) element.setAttribute('data-overflowed', '')
