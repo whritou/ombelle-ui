@@ -18,6 +18,7 @@ export const componentSlots: Partial<Record<ComponentId, readonly string[]>> = {
   'color-picker': ['color-picker', 'color-picker-trigger', 'color-picker-preview', 'color-picker-input', 'color-picker-content', 'color-picker-area', 'color-picker-area-thumb', 'color-picker-hue', 'color-picker-hue-thumb', 'color-picker-format', 'color-picker-format-select', 'color-picker-value', 'color-picker-eyedropper', 'color-picker-swatches', 'color-picker-swatch', 'color-picker-contrast', 'color-picker-contrast-level', 'color-picker-pair'],
   'code-block': ['code-block', 'code-block-header', 'code-block-title', 'code-block-copy', 'code-block-status', 'code-block-code', 'code-block-line', 'code-block-tabs', 'code-block-tab', 'code-block-command'],
   'aspect-ratio': ['aspect-ratio'],
+  toolbar: ['toolbar', 'toolbar-button', 'toolbar-link', 'toolbar-toggle-group', 'toolbar-toggle-item', 'toolbar-separator', 'toolbar-overflow-trigger', 'toolbar-overflow-content', 'toolbar-overflow-item', 'toolbar-overflow-indicator', 'toolbar-overflow-separator'],
   carousel: ['carousel', 'carousel-content', 'carousel-item', 'carousel-previous', 'carousel-next', 'carousel-dots', 'carousel-dot', 'carousel-counter'],
   'password-field': ['password-field', 'password-field-control', 'password-field-input', 'password-field-toggle', 'password-field-caps-lock', 'password-field-strength', 'password-field-strength-bar', 'password-field-strength-text'],
   item: ['item', 'item-media', 'item-content', 'item-title', 'item-description', 'item-actions', 'item-group', 'item-separator'],

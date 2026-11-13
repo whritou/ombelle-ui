@@ -33,6 +33,8 @@ export function Example(){return <><ColorPickerPair label="Primary"><ColorPicker
   'code-block': `import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
 const source = "import { Button } from '@/components/ui/button'\\n\\nexport function Save() {\\n  return <Button>Save</Button>\\n}\\n"
 export function Example(){return <><CodeBlockCommand args="@ombelle-ui/cli add button" /><CodeBlock title="save.tsx" language="tsx" code={source} /></>}`,
+  toolbar: `import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
+export function Example(){return <Toolbar aria-label="View options"><ToolbarToggleGroup type="single" defaultValue="light" aria-label="Theme"><ToolbarToggleItem value="light">Light</ToolbarToggleItem><ToolbarToggleItem value="dark">Dark</ToolbarToggleItem></ToolbarToggleGroup><ToolbarSeparator /><ToolbarToggleGroup type="multiple" aria-label="Guides"><ToolbarToggleItem value="grid">Grid</ToolbarToggleItem></ToolbarToggleGroup><ToolbarLink href="#preview">Open preview</ToolbarLink><ToolbarOverflow /></Toolbar>}`,
   carousel: `import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, CarouselCounter } from '@/components/ui/carousel'
 const kits = ['Ombelle', 'Flat', 'Minimalist', 'Neo brutalism', 'Liquid glass']
 export function Example(){return <Carousel aria-label="UI kits"><CarouselContent>{kits.map(kit => <CarouselItem key={kit}><div className="rounded-lg border p-6">{kit}</div></CarouselItem>)}</CarouselContent><CarouselPrevious /><CarouselNext /><CarouselDots /><CarouselCounter /></Carousel>}`,

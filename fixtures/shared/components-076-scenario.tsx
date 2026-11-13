@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
+import { Toolbar, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
 import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle, type PasswordCheck } from '@/components/ui/password-field'
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, Form, FormErrorSummary, type FormErrors } from '@/components/ui/field'
@@ -101,6 +102,32 @@ function KitCarousel() {
   )
 }
 
+function ViewToolbar() {
+  const [width, setWidth] = React.useState(640)
+  return (
+    <div style={{ display: 'grid', gap: '0.5rem' }}>
+      <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        Toolbar width
+        <input type="range" min={160} max={640} step={10} value={width} onChange={event => setWidth(Number(event.target.value))} />
+      </label>
+      <div data-testid="c076-toolbar" style={{ inlineSize: width + 'px' }}>
+        <Toolbar aria-label="View options">
+          <ToolbarToggleGroup type="single" defaultValue="light" aria-label="Theme">
+            <ToolbarToggleItem value="light">Light</ToolbarToggleItem>
+            <ToolbarToggleItem value="dark">Dark</ToolbarToggleItem>
+          </ToolbarToggleGroup>
+          <ToolbarSeparator />
+          <ToolbarToggleGroup type="multiple" aria-label="Guides">
+            <ToolbarToggleItem value="grid">Grid</ToolbarToggleItem>
+          </ToolbarToggleGroup>
+          <ToolbarLink href="#preview">Open preview</ToolbarLink>
+          <ToolbarOverflow />
+        </Toolbar>
+      </div>
+    </div>
+  )
+}
+
 export function ComponentsScenario076() {
   const stack = { display: 'grid', gap: '1rem', maxInlineSize: '28rem' } as const
   return (
@@ -109,6 +136,7 @@ export function ComponentsScenario076() {
         <SavePresetForm />
         <PasswordForm />
       </div>
+      <ViewToolbar />
       <div style={{ maxInlineSize: '36rem' }}>
         <KitCarousel />
       </div>
