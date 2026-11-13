@@ -60,3 +60,33 @@ test('the desktop keeps the site header', async ({ page }) => {
   await open(page, editors[0].url)
   await expect(page.locator('header:has(a[href="#main"])')).toBeVisible()
 })
+
+for (const editor of editors) {
+  test(`the ${editor.name} keeps a compact top bar and a More actions sheet on a phone`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await open(page, editor.url)
+    const bar = page.locator('main[data-editor-root] > header').first()
+    expect((await bar.boundingBox())!.height).toBeLessThanOrEqual(100)
+    await expect(page.getByRole('button', { name: 'Redo', exact: true })).toBeHidden()
+    await expect(page.getByRole('button', { name: /^Commands/ })).toBeHidden()
+    const more = page.getByRole('button', { name: 'More actions', exact: true })
+    expect((await more.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+    await more.click()
+    const sheet = page.getByRole('dialog', { name: 'More actions' })
+    await expect(sheet).toBeVisible()
+    const box = (await sheet.boundingBox())!
+    expect(Math.abs(box.y + box.height - 812)).toBeLessThanOrEqual(1)
+    expect(Math.round(box.width)).toBe(375)
+    await expect(sheet.getByRole('button', { name: 'Redo', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(sheet).toBeHidden()
+    await expect(more).toBeFocused()
+  })
+}
+
+test('a long preset name stays inside a 320px top bar', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  await open(page, editors[0].url)
+  await page.getByLabel('Preset name', { exact: true }).fill('A very long preset name '.repeat(5))
+  await expectFitsViewport(page, 320)
+})

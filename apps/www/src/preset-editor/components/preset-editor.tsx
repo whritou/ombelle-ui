@@ -277,6 +277,7 @@ export default function PresetEditor() {
             setHistory(redoPreset)
           },
         }}
+        links={[{ label: 'Preset editor guide', href: '/docs/preset-editor' }]}
         menu={{
           label: 'More actions',
           items: [

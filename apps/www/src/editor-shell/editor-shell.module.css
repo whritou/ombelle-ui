@@ -518,3 +518,162 @@
   background: transparent;
   box-shadow: none;
 }
+
+/* Phone and tablet top bar. The back link, the strip break and the phone's More button only show below 768px or 1200px. */
+.backLink,
+.rowBreak,
+.phoneMore {
+  display: none;
+}
+.backLink {
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
+}
+.extra {
+  display: contents;
+}
+@media (max-width: 1199px) {
+  .topBar {
+    position: static;
+  }
+  .backLink {
+    display: inline-grid;
+  }
+  .iconButton,
+  .commandsButton {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+  .commandsButton {
+    width: auto;
+  }
+}
+@media (max-width: 767px) {
+  .topBar {
+    gap: 6px 6px;
+    padding: 6px 8px;
+  }
+  .crumbs {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .topActions {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .phoneHidden,
+  .extra,
+  .topActions [data-toolbar-overflow-trigger] {
+    display: none !important;
+  }
+  .phoneMore {
+    display: inline-grid;
+  }
+  .rowBreak {
+    display: block;
+    flex-basis: 100%;
+    height: 0;
+    margin-inline: -8px;
+    border-top: 1px solid var(--border);
+  }
+  .nameField {
+    flex: 1 1 0;
+  }
+  .nameField input {
+    width: 100%;
+    height: 32px;
+    min-height: 32px;
+  }
+  .status {
+    min-width: 0;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* The phone's More actions sheet. */
+.phoneSheet {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.moreList {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.moreItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 15px;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.moreItem:hover:not(:disabled) {
+  background: var(--muted);
+}
+.moreItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.moreItem[data-destructive] {
+  color: var(--destructive);
+}
+.moreSeparator {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--border);
+}
+@media (max-width: 767px) {
+  /* Row one: back, trail or switcher, actions. Row two, after the break: name, revision, status. */
+  .topActions {
+    order: 1;
+    margin-inline-start: auto;
+  }
+  .rowBreak {
+    order: 2;
+  }
+  .nameField,
+  .revision,
+  .status {
+    order: 3;
+  }
+}
+@media (max-width: 767px) {
+  /* The back link stands for the trail's parents; only the current page or switcher shows. */
+  .crumbs [data-slot='breadcrumb-item']:not(:last-child),
+  .crumbs [data-slot='breadcrumb-separator'] {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  /* A real basis, so the field starts the strip instead of squeezing beside the break. */
+  .nameField {
+    flex: 1 1 8rem;
+  }
+}
+@media (max-width: 767px) {
+  .topBar {
+    row-gap: 4px;
+  }
+}

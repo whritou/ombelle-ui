@@ -1030,3 +1030,10 @@
     width: auto;
   }
 }
+
+@media (max-width: 1199px) {
+  .editor .getCode {
+    height: 44px;
+    min-height: 44px;
+  }
+}
