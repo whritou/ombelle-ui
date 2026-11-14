@@ -115,6 +115,19 @@ describe.each(familiesWithPalettes)('%s palettes', (family: Family) => {
     expect(releasePalette(hand).edits).toEqual(hand.edits)
   })
 
+  it.runIf(family === 'minimalist')('carries each palette colour in its accent and ring, except neutral Ink', () => {
+    const spread = (color: string) => {
+      const channels = rgb(color)
+      return Math.max(...channels) - Math.min(...channels)
+    }
+    for (const palette of palettes.filter((p) => p.id !== 'ink')) {
+      expect(spread(palette.light.accent!), `${palette.id} light accent`).toBeGreaterThanOrEqual(24)
+      expect(spread(palette.dark.accent!), `${palette.id} dark accent`).toBeGreaterThanOrEqual(20)
+      expect(spread(palette.light.ring!), `${palette.id} light ring`).toBeGreaterThanOrEqual(60)
+      expect(spread(palette.light.background!), `${palette.id} light background`).toBeGreaterThanOrEqual(6)
+    }
+  })
+
   it('tells palettes apart by their light and dark swatch', () => {
     expect(new Set(palettes.map((p) => p.swatch)).size).toBe(palettes.length)
     expect(new Set(palettes.map((p) => p.swatchDark)).size).toBe(palettes.length)
