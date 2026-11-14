@@ -18,6 +18,7 @@ import { prefixSharedRules, prefixSlots, templateSlots } from './prefix-slots.js
 import { sha256 } from './hash.js'
 import { assertGlassContrast, glassTokens } from './glass.js'
 import { glassMaterialActive } from './glass-contrast.js'
+import { fontRuleBlock, resolveTypography } from './typography.js'
 const variable = (key: string) =>
   '--' + key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
 // Usage examples emitted as examples/<id>.tsx; Input uses the fallback.
@@ -119,20 +120,18 @@ export async function compile(input: {
     for (const [key, value] of Object.entries(preset.data.modes[mode]))
       theme[mode][variable(key)] = value
   const d = preset.data.design
+  const typography = resolveTypography(d)
   Object.assign(theme.light, {
     '--radius': d.radiusRem + 'rem',
     '--border-width': d.borderWidthPx + 'px',
     '--shadow-x': d.shadowOffsetXPx + 'px',
     '--shadow-y': d.shadowOffsetYPx + 'px',
     '--control-height': d.density === 'compact' ? '2.25rem' : '2.5rem',
-    '--font-family':
-      d.fontFamilyId === 'system-serif'
-        ? 'Georgia, serif'
-        : d.fontFamilyId === 'system-mono'
-          ? 'monospace'
-          : "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    '--font-family': typography.family,
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
+  if (typography.heading) theme.light['--font-heading'] = typography.heading
+  if (typography.mono) theme.light['--font-mono'] = typography.mono
   if (family === 'liquid-glass') {
     const glass = glassTokens(preset.data)
     Object.assign(theme.light, glass.light)
@@ -158,6 +157,7 @@ export async function compile(input: {
       logicalPath: 'styles/ui-tokens.css',
       kind: 'style',
       content:
+        typography.imports.join('') +
         block(':root', theme.light) +
         block('.dark', theme.dark) +
         block('@theme inline', theme.theme),
@@ -165,13 +165,17 @@ export async function compile(input: {
     {
       logicalPath: 'styles/ui-style.css',
       kind: 'style',
-      content: prefixSharedRules(
-        catalog.styles[family] + (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : ''),
+      // The CLI installs this file and not ui-tokens.css, so the font imports lead it too.
+      content: typography.imports.join('') + prefixSharedRules(
+        catalog.styles[family] +
+          (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : '') +
+          fontRuleBlock(typography),
         [...prefixedSlots.values()].flat(),
       ),
     },
   ]
   const dependencies = new Map<string, string>()
+  for (const dep of typography.dependencies) dependencies.set(dep.name, dep.version)
   for (const id of ids) {
     const template = getTemplate(catalog, id, input.edition ?? 'radix')
     let content = template.content.replaceAll("'./utils.js'", "'@/lib/utils'")

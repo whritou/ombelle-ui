@@ -66,3 +66,18 @@ it('does not write an envelope over the UTF-8 budget', async () => {
   ).toThrow()
   expect(storage.length).toBe(0)
 })
+
+it('round-trips a publish attempt for a preset that uses font pairs under schema version 1.1', async () => {
+  const ombelle = getCatalog('0.1.0').presets.ombelle
+  const attempt = createPublishAttempt(
+    await normalizePublishedPreset({
+      ...structuredClone(ombelle),
+      schemaVersion: '1.1',
+      design: { ...ombelle.design, fontFamilyId: 'inter', headingFontFamilyId: 'fraunces' },
+    }),
+    100,
+  )
+  const storage = memoryStorage()
+  writePublishAttempt(storage, attempt)
+  expect(readPublishAttempt(storage, 101)).toEqual(attempt)
+})

@@ -1,5 +1,7 @@
 import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type ComponentRecipe, type InstallableRecipe, type Recipe, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
+import { usesExtendedTypography, type PresetTypography } from '@ombelle/contracts'
+
 /** Verified public npm release shown on code pages. */
 export const publishedInstaller = { packageName: publicCliPackageName, version: '0.7.7' } as const
 export const catalogRecipeMinimumCli = '0.6.0'
@@ -115,6 +117,17 @@ export function semanticPaletteInstallBlocked(
 ): boolean {
   return compareVersions(installer.version, expandedCatalogMinimumCli) < 0 &&
     Object.values(preset.modes ?? {}).some(colors => semanticPaletteFields.some(key => Object.hasOwn(colors, key)))
+}
+
+/** First published installer that reads presets with a display, body or code font from the font registry. */
+export const fontsMinimumCli = '0.7.8'
+export const fontsInstallNotice = `This preset uses font pairs and requires CLI ${fontsMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+/** Earlier installers reject a schema 1.1 preset, so the site shows no command for one until 0.7.8 is published. */
+export function fontsInstallBlocked(
+  preset: { design?: PresetTypography },
+  installer: { version: string } = publishedInstaller,
+): boolean {
+  return compareVersions(installer.version, fontsMinimumCli) < 0 && usesExtendedTypography(preset.design)
 }
 
 /** A shared notice keeps local artifacts, Get code and published snapshots on the same compatibility rule. */

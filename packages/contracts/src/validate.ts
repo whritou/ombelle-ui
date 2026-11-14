@@ -2,6 +2,7 @@ import Ajv2020 from 'ajv/dist/2020.js'
 import type { Preset } from './types.js'
 import { presetSchema } from './preset-schema.js'
 import { FoundationError } from './diagnostics.js'
+import { usesExtendedTypography } from './fonts.js'
 const check = new Ajv2020({ allErrors: true, strict: true }).compile(
   presetSchema,
 )
@@ -21,6 +22,12 @@ export function validatePreset(input: unknown): Preset {
     )
   }
   const preset = input as Preset
+  if (preset.schemaVersion === '1.0' && usesExtendedTypography(preset.design))
+    throw new FoundationError(
+      'INVALID_DATA',
+      'Presets that use extended typography must declare schemaVersion 1.1',
+      '/schemaVersion',
+    )
   if (!Number.isSafeInteger(preset.revision))
     throw new FoundationError(
       'INVALID_DATA',

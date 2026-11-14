@@ -33,8 +33,8 @@ function validateAttempt(input: unknown): PublishAttempt {
         stack.push({ value: child, depth: next.depth + 1 })
   }
   const preset = validatePreset(value.preset)
+  // validatePreset has already limited schemaVersion to 1.0 and 1.1 and matched it to the fields.
   if (
-    preset.schemaVersion !== '1.0' ||
     preset.catalogRelease !== '0.1.0' ||
     preset.compilerVersion !== '0.1.0' ||
     !isStyleFamily(preset.styleFamily) ||

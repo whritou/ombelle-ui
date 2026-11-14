@@ -10,8 +10,10 @@ import {
   colorKeys,
   designControlLabel,
   designControls,
+  fontLabel,
   glassControlHints,
   glassDesignControls,
+  optionalFontFields,
   presetFieldValue,
 } from '../model'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
@@ -246,7 +248,19 @@ const optionLabels: Record<string, string> = {
   reduced: 'Reduced',
   auto: 'Auto',
 }
-const shapeKeys: readonly string[] = ['fontFamilyId', 'radiusRem', 'density', 'borderWidthPx']
+const shapeKeys: readonly string[] = [
+  'fontFamilyId',
+  'headingFontFamilyId',
+  'monoFontFamilyId',
+  'radiusRem',
+  'density',
+  'borderWidthPx',
+]
+/** What an empty value means for the optional font pickers. */
+const unsetFontLabels: Record<string, string> = {
+  headingFontFamilyId: 'Same as body font',
+  monoFontFamilyId: 'Default code font',
+}
 /**
  * Design values. `section` splits them for the inspector: "shape" is type, corners,
  * density and borders; "depth" is shadow, motion and the glass material. Omit it for all.
@@ -327,6 +341,34 @@ export function DesignControls({
                   {glassControlHints.shadowOffsetXPx}
                 </p>
               )}
+            </div>
+          )
+        if (key === 'fontFamilyId' || optionalFontFields.includes(key) )
+          return (
+            <div key={key} className="preset-choice">
+              <ControlRow label={control.label} htmlFor={fieldId(path)} edited={edited}>
+                <div className="preset-segmented-field">
+                  <select
+                    id={fieldId(path)}
+                    className="preset-font-select"
+                    aria-label={control.label}
+                    value={value}
+                    onChange={(event) =>
+                      // Choosing the unset option drops the edit, so the preset falls back to 1.0.
+                      event.target.value === '' ? onReset(path) : onEdit(path, event.target.value)
+                    }
+                  >
+                    {unsetFontLabels[key] !== undefined && <option value="">{unsetFontLabels[key]}</option>}
+                    {'options' in control &&
+                      control.options.map((option) => (
+                        <option key={option} value={option}>
+                          {fontLabel(option)}
+                        </option>
+                      ))}
+                  </select>
+                  <ResetButton draft={draft} path={path} label={`Reset ${control.label.toLowerCase()}`} onReset={onReset} />
+                </div>
+              </ControlRow>
             </div>
           )
         if ('options' in control)

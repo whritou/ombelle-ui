@@ -15,6 +15,7 @@ import { PresetScenePage } from './scenes'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 import { startReducedTransparencyMirror } from './reduced-transparency-mirror'
 import { GlassControlHalo } from './glass-control-halo'
+import { loadPresetFonts, presetFontIds } from './preset-fonts'
 import './preset-preview.css'
 import { supportedComponentIds } from '../../../packages/contracts/src/component-ids.js'
 import {
@@ -152,6 +153,11 @@ function PresetPreview() {
   }, [current])
   const family = current?.message.result.preset.data.styleFamily
   const design = current?.message.result.preset.data.design
+  // Only the fonts the previewed preset uses are fetched, and each is fetched once.
+  const fontKey = design ? presetFontIds(design).join(',') : ''
+  React.useEffect(() => {
+    if (fontKey) void loadPresetFonts(fontKey.split(','))
+  }, [fontKey])
   const glassFilterKey = [
     design?.transparency,
     design?.glassRefraction,

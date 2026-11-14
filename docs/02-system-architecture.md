@@ -134,7 +134,7 @@ The compiler provides a declarative token patch; the CLI uses a CSS parser to up
 
 When a supported library style needs additional reviewed slot rules, write `ui-style.css` and add one import through a parsed change. Palette-only application to ordinary shadcn components must not depend on those slot rules. Existing components inherit tokens they already consume; complete visual-family transformations that need new classes or markup require a separate explicit migration. See the installation and theme merging specification.
 
-The default preset scope is the application root; advanced nested scopes are deferred until portals and inheritance are proven. A theme-only operation does not install dependencies or rewrite component source.
+The default preset scope is the application root; advanced nested scopes are deferred until portals and inheritance are proven. A theme-only operation does not rewrite component source, and installs no dependency except the pinned font packages of a preset that opts into registry fonts.
 
 ## Reliability and security requirements
 

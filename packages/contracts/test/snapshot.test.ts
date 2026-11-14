@@ -144,3 +144,18 @@ describe('snapshot origins and sources', () => {
     expect(() => validateSnapshotSource(input)).toThrow()
   })
 })
+
+describe('snapshots with extended typography', () => {
+  it('validates a snapshot whose preset declares 1.1 and uses font pairs', () => {
+    const fonted = {
+      ...preset,
+      schemaVersion: '1.1',
+      design: { ...preset.design, fontFamilyId: 'inter', headingFontFamilyId: 'fraunces' },
+    }
+    expect(validatePresetSnapshot({ ...envelope, preset: fonted }).preset.schemaVersion).toBe('1.1')
+  })
+  it('rejects a snapshot whose preset uses font pairs under 1.0', () => {
+    const stale = { ...preset, design: { ...preset.design, headingFontFamilyId: 'fraunces' } }
+    expect(() => validatePresetSnapshot({ ...envelope, preset: stale })).toThrow()
+  })
+})

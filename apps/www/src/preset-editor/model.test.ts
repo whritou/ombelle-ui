@@ -13,6 +13,8 @@ import {
   colorKeys,
   designControls,
   glassDesignControls,
+  fontControlOptions,
+  fontLabel,
   presetFieldValue,
   presetGlassReport,
   previewComponentIds,
@@ -41,7 +43,8 @@ it.each(styleFamilies)(
     result.modes.light.background = '#123456'
     expect(getCatalog('0.1.0').presets[family]).toEqual(base)
     expect(colorKeys).toHaveLength(19)
-    expect(Object.keys(designControls)).toHaveLength(7)
+    // Seven shape and depth controls plus the display and code font pickers.
+    expect(Object.keys(designControls)).toHaveLength(9)
   },
 )
 
@@ -375,4 +378,59 @@ it.each(startingPresetOrder)('leaving liquid glass from %s returns to Ombelle de
   // A colour the user picked on top of the starting preset travels.
   const tinted = setPresetEdit(glass, '/modes/light/primary', '#123456')
   expect(planPresetFamilyChange(tinted, 'ombelle').draft.edits['/modes/light/primary']).toBe('#123456')
+})
+
+it('offers fonts by role', () => {
+  expect(fontControlOptions.monoFontFamilyId).toContain('jetbrains-mono')
+  expect(fontControlOptions.monoFontFamilyId).toContain('system-mono')
+  expect(fontControlOptions.monoFontFamilyId).not.toContain('inter')
+  expect(fontControlOptions.headingFontFamilyId).toContain('young-serif')
+  expect(fontControlOptions.headingFontFamilyId).toContain('fraunces')
+  expect(fontControlOptions.fontFamilyId).toContain('inter')
+  expect(fontControlOptions.fontFamilyId).not.toContain('young-serif')
+  expect(fontControlOptions.fontFamilyId).not.toContain('michroma')
+  for (const system of ['system-sans', 'system-serif', 'system-mono'])
+    expect(fontControlOptions.fontFamilyId).toContain(system)
+})
+
+it('labels system and registry fonts', () => {
+  expect(fontLabel('system-serif')).toBe('Serif')
+  expect(fontLabel('system-sans')).toBe('Sans')
+  expect(fontLabel('ibm-plex-mono')).toBe('IBM Plex Mono')
+})
+
+it('relabels the font controls and adds the display and code pickers', () => {
+  expect(designControls.fontFamilyId.label).toBe('Body font')
+  expect(designControls.headingFontFamilyId.label).toBe('Display font')
+  expect(designControls.monoFontFamilyId.label).toBe('Code font')
+})
+
+it('declares schemaVersion 1.1 once a display font is chosen and 1.0 again when it is cleared', () => {
+  const draft = createPresetDraft('ombelle')
+  expect(materializePreset(draft).schemaVersion).toBe('1.0')
+  const withHeading = setPresetEdit(draft, '/design/headingFontFamilyId', 'fraunces')
+  const preset = materializePreset(withHeading)
+  expect(preset.schemaVersion).toBe('1.1')
+  expect(preset.design.headingFontFamilyId).toBe('fraunces')
+  const cleared = resetPresetField(withHeading, '/design/headingFontFamilyId')
+  const back = materializePreset(cleared)
+  expect(back.schemaVersion).toBe('1.0')
+  expect('headingFontFamilyId' in back.design).toBe(false)
+})
+
+it('reads an unset display and code font as an empty value', () => {
+  const draft = createPresetDraft('flat')
+  expect(presetFieldValue(draft, '/design/headingFontFamilyId')).toBe('')
+  expect(presetFieldValue(draft, '/design/monoFontFamilyId')).toBe('')
+  expect(presetFieldValue(draft, '/design/fontFamilyId')).toBe('system-sans')
+})
+
+it('materializes a registry body font and code font under 1.1', () => {
+  let draft = createPresetDraft('minimalist')
+  draft = setPresetEdit(draft, '/design/fontFamilyId', 'geist')
+  draft = setPresetEdit(draft, '/design/monoFontFamilyId', 'geist-mono')
+  const preset = materializePreset(draft)
+  expect(preset.schemaVersion).toBe('1.1')
+  expect(preset.design.fontFamilyId).toBe('geist')
+  expect(preset.design.monoFontFamilyId).toBe('geist-mono')
 })

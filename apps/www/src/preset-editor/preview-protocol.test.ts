@@ -248,3 +248,22 @@ it('accepts the reduced-transparency flag only as true, and sends it', async () 
 it('rejects a lab ink without a backdrop', async () => {
   expect(await verifyPresetRender({ ...message(), view: { mode: 'light', viewport: 'wide', labInk: 'light' } }, 0, manifest)).toBeNull()
 })
+
+it('drops the font imports a browser cannot resolve and keeps the font tokens', async () => {
+  const ombelle = structuredClone(getCatalog('0.1.0').presets.ombelle)
+  const fonted = await compile({
+    preset: {
+      ...ombelle,
+      schemaVersion: '1.1',
+      design: { ...ombelle.design, fontFamilyId: 'inter', headingFontFamilyId: 'fraunces' },
+    },
+    componentIds: ['card'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  expect(fonted.artifacts.some((a) => a.content.includes('@fontsource'))).toBe(true)
+  const css = presetRuntimeStyles(fonted)
+  expect(css).not.toContain('@fontsource')
+  expect(css).toContain('--font-heading')
+  expect(css).toContain('Inter Variable')
+})

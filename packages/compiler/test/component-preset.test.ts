@@ -350,3 +350,24 @@ describe('liquid-glass component presets', () => {
     })
   })
 })
+
+describe('component presets and fonts', () => {
+  const fonted = (design: Record<string, string>) => {
+    const preset = structuredClone(getCatalog('0.1.0').presets.ombelle)
+    return { ...preset, schemaVersion: '1.1', design: { ...preset.design, ...design } }
+  }
+  it.each([
+    [{ fontFamilyId: 'inter' }, '/design/fontFamilyId'],
+    [{ headingFontFamilyId: 'fraunces' }, '/design/headingFontFamilyId'],
+    [{ monoFontFamilyId: 'jetbrains-mono' }, '/design/monoFontFamilyId'],
+  ])('rejects registry fonts in a component preset %j', async (design, path) => {
+    await expect(compileButtonPreset({ preset: fonted(design) })).rejects.toMatchObject({
+      code: 'INVALID_DATA',
+      path,
+    })
+  })
+  it('still compiles a component preset that uses only system fonts', async () => {
+    const result = await compileButtonPreset({ preset: fonted({ fontFamilyId: 'system-serif' }) })
+    expect(result.artifacts.length).toBeGreaterThan(0)
+  })
+})

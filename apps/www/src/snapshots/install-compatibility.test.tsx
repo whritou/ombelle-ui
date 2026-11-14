@@ -12,7 +12,7 @@ import { installText } from '../editor/components/artifact-panel'
 import { PublishedRecipe } from '../recipe-snapshots/components/published-recipe'
 import { PublishedPreset } from './components/published-preset'
 import { PresetExportPanel } from '../preset-editor/components/preset-export-panel'
-import { createPresetDraft } from '../preset-editor/model'
+import { createPresetDraft, setPresetEdit } from '../preset-editor/model'
 import * as compatibility from './install-command'
 
 const current = { version: '0.7.1' }
@@ -387,5 +387,66 @@ describe('0.7.6 variant recipes', () => {
   it('words the notice like the 0.7.5 one', () => {
     expect(compatibility.catalog076MinimumCli).toBe('0.7.6')
     expect(compatibility.catalog076InstallNotice).toBe(compatibility.catalog075InstallNotice.replace('0.7.5', '0.7.6'))
+  })
+})
+
+describe('font pairs', () => {
+  const fonted = () => {
+    const preset = structuredClone(getCatalog('0.1.0').presets.ombelle)
+    return {
+      ...preset,
+      schemaVersion: '1.1' as const,
+      design: { ...preset.design, fontFamilyId: 'inter' as const, headingFontFamilyId: 'fraunces' as const },
+    }
+  }
+  it('holds a preset that uses font pairs until the published installer is 0.7.8', () => {
+    expect(compatibility.fontsMinimumCli).toBe('0.7.8')
+    expect(compatibility.fontsInstallBlocked({ design: { headingFontFamilyId: 'fraunces' } }, { version: '0.7.7' })).toBe(true)
+    expect(compatibility.fontsInstallBlocked({ design: { fontFamilyId: 'inter' } }, { version: '0.7.7' })).toBe(true)
+    expect(compatibility.fontsInstallBlocked({ design: { headingFontFamilyId: 'fraunces' } }, { version: '0.7.8' })).toBe(false)
+    expect(compatibility.fontsInstallBlocked({ design: { fontFamilyId: 'system-serif' } }, { version: '0.7.7' })).toBe(false)
+    expect(compatibility.fontsInstallBlocked({ design: {} }, { version: '0.7.7' })).toBe(false)
+    expect(compatibility.fontsInstallNotice).toContain('requires CLI 0.7.8')
+  })
+
+  it('shows no command and the notice for a published preset that uses font pairs', () => {
+    const snapshot: PresetSnapshot = {
+      snapshotVersion: '1.0',
+      id: 'ps_' + 'a'.repeat(32),
+      revision: 1,
+      preset: fonted(),
+      presetHash: 'b'.repeat(64),
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+      createdAt: '2026-11-14T12:00:00.000Z',
+      validationStatus: 'draft',
+    }
+    const html = renderToStaticMarkup(
+      <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" />,
+    )
+    expect(html).toContain('requires CLI 0.7.8')
+    expect(html).not.toContain('npx @ombelle-ui/cli@0.7.7')
+    expect(html).toContain('Download preset JSON')
+  })
+
+  it('holds the export panel command for a preset that uses font pairs', async () => {
+    const draft = setPresetEdit(createPresetDraft('ombelle'), '/design/headingFontFamilyId', 'fraunces')
+    const result = await compile({
+      preset: fonted(),
+      componentIds: ['button'],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+    })
+    const html = renderToStaticMarkup(
+      <PresetExportPanel
+        draft={draft}
+        state={{ status: 'compiled', stale: false, diagnostic: null, draftKey: canonicalize(draft), result }}
+        announce={() => {}}
+        contrastWarning={false}
+      />,
+    )
+    expect(html).toContain('data-testid="preset-install-held"')
+    expect(html).toContain('requires CLI 0.7.8')
+    expect(html).not.toContain('data-testid="preset-install-command"')
   })
 })

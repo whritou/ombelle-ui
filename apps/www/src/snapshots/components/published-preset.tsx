@@ -6,7 +6,7 @@ import { PresetPreviewFrame } from '../../preset-editor/components/preset-previe
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
-import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, semanticPaletteInstallBlocked, semanticPaletteInstallNotice, snapshotInstallCommand } from '../install-command'
+import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, fontsInstallBlocked, fontsInstallNotice, semanticPaletteInstallBlocked, semanticPaletteInstallNotice, snapshotInstallCommand } from '../install-command'
 import {
   createSnapshotPreviewSession,
   selectSnapshotPreview,
@@ -61,6 +61,7 @@ export function PublishedPreset({
   const useLocalInstaller = contrastInstallBlocked(contrastWarning)
   const installUnavailable = semanticPaletteInstallBlocked(snapshot.preset)
     ? semanticPaletteInstallNotice
+    : fontsInstallBlocked({ design: snapshot.preset.design }) ? fontsInstallNotice
     : !useLocalInstaller && materialInstallBlocked({ design: snapshot.preset.design }) ? glassMaterialInstallNotice : undefined
   const source = {
     origin,
