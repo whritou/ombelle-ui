@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.7.8 — 14 November 2026
+
+- Add font pairs: a preset can choose a display font (`headingFontFamilyId`), a body font (`fontFamilyId`) and a code font (`monoFontFamilyId`) from 19 self-hosted Fontsource fonts, all OFL-1.1 at exact pinned versions (see `docs/fonts.md`). Display-only fonts (Young Serif, Michroma, Bricolage Grotesque) are refused as body or code fonts.
+- A preset that uses any registry font declares preset format 1.1; presets that use none stay 1.0 and compile and install to the same bytes as before. Older CLIs reject a 1.1 preset.
+- `init` and `theme add` plan and install the missing pinned font packages for a font preset (and only those), start the installed `ui-style.css` with the font imports, remove font tokens a later theme no longer sets, and name font packages the new theme no longer imports. Component-scoped presets reject registry fonts.
+- The preset editor gets display, body and code font pickers, the preview loads the chosen fonts from its own bundle, and the hosted publish path accepts format 1.1. The website holds back the install command for a font preset until the published installer is 0.7.8.
+- Young Serif and Michroma carry a 1.5 title line height so catalog titles do not overflow. The specimen audit can run with fonts (`OMBELLE_AUDIT_FONTS`).
+
 ## 0.7.7 — 14 November 2026
 
 - Publish CLI 0.7.7: the website install commands now use it, so projects get the 0.7.7 style and behaviour fixes from npm. The registry tarball matches the tested candidate, and a fresh registry installation runs successfully.
