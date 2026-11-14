@@ -1,0 +1,65 @@
+# Font pairs evidence
+
+Date: 2026-11-14. Branch `feat/font-pairs`, cut from `feat/components-076`. Design: [font pairs design](../superpowers/specs/2026-11-14-font-pairs-design.md). Plan: [font pairs plan](../superpowers/plans/2026-11-14-font-pairs.md). This records what ran, what passed, and what did not run.
+
+## Environment
+
+- Windows 11 Home, Node 24.19.0, npm 11.19.0, pnpm 11.25.0 (through Corepack, and a scratch install put on `PATH` for the CLI tests), Yarn Classic 1.22.22 and Bun 1.4.4 (through `npx`, spike only).
+- Browser: the Chromium headless shell bundled with Playwright 1.64.1 (build 1248). No other browser or channel.
+- All 19 registry fonts are `@fontsource` or `@fontsource-variable` packages at 5.3.0, licence OFL-1.1 (read from the npm registry the same day).
+
+## What passed
+
+| Check | Result |
+|---|---|
+| Import spike (npm, pnpm, Yarn Classic, Bun by Vite and Next) | 8 of 8 builds passed. See [font spike](font-spike.md). |
+| `pnpm typecheck` | Clean. |
+| Compiler unit tests including the stable-hash fixture (`stable family artifacts are byte-identical`) | 52 files, 1204 tests passed. Presets without fonts compile to identical bytes. |
+| Font registry, schema enum and version-rule tests | Passed (`packages/catalog/test/fonts.test.ts`, `packages/contracts/test`). |
+| Editor model and controls tests | Passed (`apps/www/src/preset-editor`). |
+| CLI integration through `init` and `theme add` (`tests/integration/font-pairs-cli.test.ts`) | 5 of 5 passed. |
+| Preview loader and audit style tests (`tests/integration/preview-fonts.test.ts`) | 5 of 5 passed. |
+| Consumer matrix, foundation groups and browser inventory tests | Passed unchanged (no consumer rows were added; see below). |
+| `pnpm build:preview` | Built. It emits 79 `.woff2` files (every unicode subset of the 19 fonts), loaded lazily per selected font. |
+
+### End to end with the built CLI
+
+The built CLI ran `init --preset <inter, fraunces, jetbrains-mono, schemaVersion 1.1>` and then `add card kbd` in copies of `fixtures/vite` and `fixtures/next` with npm, and the projects were built.
+
+- `init` planned and installed `@fontsource-variable/fraunces`, `inter` and `jetbrains-mono` at exactly 5.3.0, with lifecycle scripts disabled.
+- `package.json` pinned the three versions. The installed `src/styles/ui-style.css` started with the three `@import` lines, and `src/index.css` carried the font tokens.
+- Vite built with 15 font files emitted; Next built with 16. Both built CSS files contained `--font-heading`.
+
+### Specimen audit with the intended pairings
+
+Command, per pairing: `OMBELLE_AUDIT_FONTS=<body>,<heading>,<mono> OMBELLE_AUDIT_FAMILIES=<family> OMBELLE_AUDIT_COMPONENTS=<18 components> playwright test -c playwright.specimen-audit.config.ts tests/e2e/specimen-audit.spec.ts`. The 18 components are the ones that show titles, code, or most of the label text: button, badge, input, tabs, card, dialog, alert-dialog, alert, sheet, popover, empty, item, toast, stepper, kbd, input-otp, code-block, number-input. Each run covers Radix and Base, light and dark.
+
+| Family audited | Body / display / code | Result |
+|---|---|---|
+| ombelle | figtree / bricolage-grotesque / geist-mono | 0 findings |
+| flat | dm-sans / dm-sans / geist-mono | 0 findings |
+| minimalist | geist / geist / geist-mono | 0 findings |
+| neo-brutalism | work-sans / space-grotesk / space-mono | 0 findings |
+| liquid-glass (experimental) | inter / inter-tight / jetbrains-mono | 50 non-blocking findings (24 focus-visible, 26 forced-colors), identical to the same run without fonts |
+| minimalist (stand-in for Papier) | instrument-sans / fraunces / ibm-plex-mono | 0 findings |
+| ombelle (stand-in for Organic) | nunito / young-serif / geist-mono | 0 findings after the fix below |
+| flat (stand-in for Retro futuristic) | exo-2 / michroma / share-tech-mono | 0 findings after the fix below |
+| flat (neutral) | inter / inter / jetbrains-mono | 0 findings |
+
+The three planned families do not exist yet, so their pairings were audited under the closest existing family. This says whether the fonts fit the catalog components; it does not replace auditing the families once they exist.
+
+## Findings and fixes
+
+- **Young Serif and Michroma overflowed titles.** The first audit of those two pairings failed with `overflow` on the alert-dialog, dialog, empty, popover and sheet titles ("text extends past its box"). Their glyph box is taller than the catalog's 1.25 to 1.3 title line height. Fix: the registry carries `displayLineHeight: 1.5` for those two fonts, and the font rule block adds that line height to the heading slots. Family styles are unchanged.
+- **The rule block needed more specificity.** A component's own title rule has the same specificity and can load after the font rules, so the first version of the fix did not apply. The heading and code rules now use `:not([hidden])`, which only raises specificity. The audit page's override adds one more step because each recipe specimen renders its own `<style>` after it.
+- **First audit attempt was a cold-server failure.** Four parallel workers against a freshly started Vite server failed to mount the page. A warmed server with two workers passed. That was not a product defect.
+
+## Not run, or failing here
+
+- **Failures that come from this machine, not from the change.**
+  - Unit suite: 3 of 3643 tests failed in the full run. Two (`snapshot-cache` and `preview-protocol` glass backdrop) hit the 60 second limit under load and pass when run alone. The third file, `component-preset-plan.test.ts` (2 tests), fails with "Cannot locate a pnpm JavaScript entry without shell evaluation".
+  - Integration suite: 35 of 654 tests failed. 25 need a native Bun executable that is not installed here; one is a Windows `tar` path error in `packed-cli.test.ts`; the rest are 60 second timeouts or a snapshot-cache `ENOENT` warning on this Windows profile, and four of them still fail when run alone, with the same pnpm-entry, snapshot-cache and `EBUSY` errors.
+  - I did not run the suite on the base commit to prove these fail there too. The error messages name the missing launcher, Bun, or the Windows cache path, none of which the font work touches.
+- **Consumer matrix rows.** The plan added `vite-fonts` and `next-fonts` consumer rows. I did not add them: the matrix size cascades into the foundation gate counts, the browser inventory and the CI evidence, and this machine cannot run that gate (it needs Yarn, Bun and the browser toolchain). The end-to-end check above, the spike and the CLI integration test cover the same chain for npm. This is a follow-up for the maintainer.
+- **Not covered:** Yarn Classic, modern Yarn, Plug'n'Play and Bun through the real CLI (only the spike's bare import build covers them), the pnpm CLI path (the pnpm launcher could not be resolved by the CLI here), macOS and Linux, any browser except Chromium, and any manual assistive-technology review. The full foundation gate (`pnpm check:foundation`) was not run.
+- **Deploying the live service and releasing the CLI** are maintainer steps; see the rollout order in `docs/snapshot-service-operations.md`.
