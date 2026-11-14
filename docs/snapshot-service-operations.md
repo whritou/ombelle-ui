@@ -112,3 +112,13 @@ In place as of 2026-11-02:
 - a verified Postgres backup and restore drill (first run 2026-11-02).
 
 See [production operations](production-operations.md) for the runbook, backup cadence and drill log. Privacy requests have no dedicated email address: requesters open a GitHub issue asking for a private channel.
+
+## Rolling out font pairs (schema version 1.1)
+
+A preset that uses extended typography (a heading font, a code font, or a body font outside the three system ids) declares `schemaVersion` `"1.1"`; every other preset keeps `"1.0"`. Snapshot validation reuses the preset validator, so a service built from this release accepts both versions. Ship in this order:
+
+1. Deploy a service that accepts `"1.1"` presets and snapshots.
+2. Release the CLI. A CLI older than this release rejects a `"1.1"` preset with an unsupported `/schemaVersion` diagnostic, so the editor must not offer fonts to people before the CLI that reads them exists.
+3. Expose the font pickers in the preset editor.
+
+Deploying the live service is a maintainer step, not part of the font-pairs change. Presets that stay at `"1.0"` keep working with every earlier CLI.

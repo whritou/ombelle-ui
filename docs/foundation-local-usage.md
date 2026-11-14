@@ -193,3 +193,14 @@ pnpm test:base-consumers
 `pnpm test:editions` compares every ported component's computed styles between editions in the preview app.
 
 `pnpm test:specimen-audit` measures every catalog specimen, as installed, on the generated audit pages (`/audit/<family>/<edition>/?mode=light|dark`): overflow, clipping, label spacing, focus visibility, target size, forced colors and axe rules, in 20 configurations. It first runs self-tests that plant each defect and require the check to find it. Run `pnpm build:packages` and `pnpm generate:preview` first, and do not rebuild while it runs: the preview server reloads the pages. Set `OMBELLE_BROWSER_CHANNEL` to use an installed browser. Screenshots go to `.artifacts/specimen-audit/` and the evidence to `.artifacts/specimen-audit.json`; the foundation `consumers` group runs it and rejects incomplete or failing evidence. Liquid glass is experimental: its findings are recorded in the evidence and test report but only page errors fail it. See the [specimen audit evidence](evidence/specimen-audit.md).
+
+## Fonts
+
+A preset can choose a body font, a display font and a code font from the registry in [fonts](fonts.md). The three system stacks stay the defaults, so a preset without fonts compiles and installs exactly as before and existing installs do not change. Fonts are opt-in picks.
+
+- Each registry font is self-hosted through an exactly pinned [Fontsource](https://fontsource.org) package. Nothing is requested from a third-party font host at install, build or run time. A preset that uses any registry font declares `schemaVersion` `"1.1"`.
+- `init` and `theme add` write the font tokens (`--font-family`, `--font-heading`, `--font-mono`) into your global CSS. The installed `ui-style.css` starts with the `@import` lines for the fonts in use and carries the rules that apply the heading and code fonts.
+- Theme-only commands do not normally touch the package manager. A preset that opts into registry fonts is the exception: its plan lists the missing Fontsource packages and installs them with lifecycle scripts disabled, because the installed CSS imports them. Presets without fonts still plan no dependency.
+- Changing fonts later with `theme add` rewrites `ui-style.css` with only the current imports and leaves the old font packages installed. The installer never removes dependencies, and an unused font package can be removed by hand.
+- Component-scoped recipes, including local Button `add --recipe`, never carry fonts. They use the font stack of the global preset and import nothing.
+- When the project's style file is not managed by Ombelle, the plan prints a notice naming the font packages to import in your own global CSS.
