@@ -1,8 +1,17 @@
 # Standalone CLI candidate
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.7.6.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.7.7.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
 Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
+
+The 0.7.7 release fixes installed styles and behaviour in all five families and
+both editions: Pagination's current page on hover, Scroll Area padding, gutter
+and wrapping, Carousel slide insets, the Toolbar More menu, Tooltip closing,
+Item wrapping, the Number Input unit, Code Block's copy feedback and a Progress
+circle inside a button. It adds no component, recipe field or format; recipe
+format 1.0/2.0 and catalog/compiler compatibility 0.1.0 remain. The public
+installer is 0.7.7; its registry tarball and a fresh registry install were
+verified after publication.
 
 The 0.7.6 release adds four catalog components (57 total): Password Field,
 Carousel, Aspect Ratio and Toolbar. It also adds Form and FieldSet parts to
@@ -10,8 +19,7 @@ Field, Checkbox groups, Sheet snap points, Card actions, Slider values, circular
 Progress and Meter, Code Block diffs, Tooltip shortcuts and the image Carousel,
 every default unchanged. Their install commands and the recipe fields they use
 require CLI 0.7.6; recipe format 1.0/2.0 and catalog/compiler compatibility
-0.1.0 remain. The public installer is 0.7.6; its registry tarball and a fresh
-registry install were verified after publication.
+0.1.0 remain.
 
 The 0.7.5 release adds eight catalog components (53 total): Toggle, Collapsible,
 Scroll Area, Button Group, Item, Number Input, Color Picker and Code Block. It
@@ -60,7 +68,7 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.7.6. The published installer is `@ombelle-ui/cli@0.7.6`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
+All six workspace packages use software version 0.7.7. The published installer is `@ombelle-ui/cli@0.7.7`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
 
 Release 0.5.0 in this order:
 
@@ -109,6 +117,8 @@ Post-publication checks on 2026-11-02:
 
 `@ombelle-ui/cli@0.7.1` was published on 2026-11-08 from `2d0510b` with the npm `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-piZhdP/5TFjMXlckqaMiL7WNV96i72/YGxqNrdoqTd/kRsxAcBOF3z5Brs6s6OR1HLi/4z7eXFDpQ5V/wzxbQg==`). The candidate passed 29 release checks and default production builds in plain Vite, shadcn Radix Vite, and shadcn Base UI Vite consumers; both Radix consumers installed all 23 downloaded recipes, and all three reapplied their preset as a no-op. A fresh registry-backed `npm exec --package=@ombelle-ui/cli@0.7.1 -- ombelle --help` succeeded after publication. The pack manifest reports a dirty working tree only because of a preexisting untracked local directory; tracked sources matched the release commit. Catalog/compiler compatibility remains 0.1.0 and recipe formats remain 1.0/2.0. The full foundation gate was not run for this patch; see [the original investigation and follow-up checks](evidence/real-world-installations-2026-11-08.md).
 
+`@ombelle-ui/cli@0.7.7` was published on 2026-11-14 from `6c499ed9` (the release-prep commit of PR #130) by npm identity `ombelle` with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-rUsxGWHpOc25/BlD1zeR42Q3pdYqtbTpzpbrs9qCkKZ8rHHimssMXvItXbxFqQ2Enum51VXYsKNeKsMAakxDPg==`). The candidate passed 7 of the 10 standalone release checks; the 3 Bun checks were not run, because Bun was not installed. A fresh script-disabled registry install ran `npm exec --offline -- ombelle --help` successfully. The candidate was packed from a clean tree. See [release evidence](evidence/npm-0.7.7-2026-11-14.md).
+
 `@ombelle-ui/cli@0.7.6` was published on 2026-11-13 from `3c1c2122` (the release-prep commit of PR #126, merged as `ee6fdc49`) by npm identity `ombelle` with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-7uLNqtu1zmKjYaxhgpzZ1PH8ng9sUfPNLn+5AY5Id9S25n3Vj5MhVvfHq9kZdyjhWA8+LbHScxYC7G1gsJAsng==`). The candidate passed 7 of the 10 standalone release checks; the 3 Bun checks were not run, because Bun was not installed. A fresh script-disabled registry install ran `npm exec --offline -- ombelle --help` successfully. The candidate was packed from a clean tree. See [release evidence](evidence/npm-0.7.6-2026-11-13.md).
 
 `@ombelle-ui/cli@0.7.5` was published on 2026-11-13 from `492cf14c` (the merge of PR #121) by npm identity `ombelle` with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-O9eUbZWL/BiYvTxrC2wOaGpU7/OcxP3CI29V6Bxw0bowMIx98Cb26zZ9Abi1U8RNTiUAbPXUB/cNqpUyPdGc9A==`). The candidate passed 7 of the 10 standalone release checks; the 3 Bun checks were not run, because Bun was not installed. A fresh script-disabled registry install ran `npm exec --offline -- ombelle --help` successfully. Tracked sources matched the merge commit; the pack manifest reports a dirty tree only because of the preexisting untracked `.claude/` directory. See [release verification](evidence/npm-0.7.5-2026-11-13.md).
@@ -119,7 +129,7 @@ Post-publication checks on 2026-11-02:
 
 `@ombelle-ui/cli@0.7.2` was published on 2026-11-09 from `79dce7d` (the merge of PR #97) by npm identity `ombelle` with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-gsdc34nEygMawVplPylcqC7r5Z3NJ4fuRu2RvMwCzlDlAWymUrL1s8G757zlAEfOK9rqez+sAt1NNLzyfvVFfA==`). The candidate passed all 10 standalone release checks and 22 expansion scenarios: the six new components and five variant APIs installed in both editions, with recipe installs verified for Radix and the documented Base UI recipe guard preserved. A fresh script-disabled registry install ran `npm exec --offline -- ombelle --help` successfully. Tracked sources matched the merge commit; the pack manifest reports a dirty tree only because of the preexisting untracked `.claude/` directory. See [release verification](evidence/npm-0.7.2-2026-11-09.md).
 
-Code pages and Get code use `@ombelle-ui/cli@0.7.6` commands for all catalog editors. The runner table below records the 0.2.1 verification. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
+Code pages and Get code use `@ombelle-ui/cli@0.7.7` commands for all catalog editors. The runner table below records the 0.2.1 verification. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
 
 ## Verified public runners
 
