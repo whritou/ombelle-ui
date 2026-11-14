@@ -115,7 +115,7 @@ See [production operations](production-operations.md) for the runbook, backup ca
 
 ## Rolling out font pairs (schema version 1.1)
 
-A preset that uses extended typography (a heading font, a code font, or a body font outside the three system ids) declares `schemaVersion` `"1.1"`; every other preset keeps `"1.0"`. Snapshot validation reuses the preset validator, so a service built from this release accepts both versions. Ship in this order:
+A preset that uses extended typography (a heading font, a code font, or a body font outside the three system ids) declares `schemaVersion` `"1.1"`; every other preset keeps `"1.0"`. Snapshot validation reuses the preset validator, and the publish endpoint and the editor's retry store accept both versions, so a service built from this release accepts a `"1.1"` preset. The site holds back the install command for a font preset until the published CLI is at least 0.7.8 (`fontsMinimumCli`). Ship in this order:
 
 1. Deploy a service that accepts `"1.1"` presets and snapshots.
 2. Release the CLI. A CLI older than this release rejects a `"1.1"` preset with an unsupported `/schemaVersion` diagnostic, so the editor must not offer fonts to people before the CLI that reads them exists.

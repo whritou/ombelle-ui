@@ -73,7 +73,7 @@ Use npm install, pnpm add, or yarn add only when the planned component installat
 8. Save the normalized ui-preset.json plus product configuration and lock provenance. Future add commands reuse the preset. Track touched selectors and declarations individually so unrelated edits to globals.css do not become false conflicts.
 9. Repeat with the same inputs and receive a no-op. Restore touched files if the merge fails. Dry-run leaves the project unchanged.
 
-Additional CSS for compatible library slot recipes may be generated in ui-style.css and imported once. This must be reviewed CSS and must not force component reinstalls. A theme-only plan changes no component TSX or JSX, no application usage and no dependency set.
+Additional CSS for compatible library slot recipes may be generated in ui-style.css and imported once. This must be reviewed CSS and must not force component reinstalls. A theme-only plan changes no component TSX or JSX, no application usage and no dependency set, except the pinned font packages of a preset that opts into registry fonts.
 
 See the [CSS before](../examples/globals.before.css), [CSS after](../examples/globals.after.css) and [standard registry theme](../examples/registry-theme.example.json) examples. They illustrate the output contract; they are not an implemented merger.
 
@@ -93,6 +93,6 @@ It does not automatically create our product's preset configuration or lockfile.
 
 Across all four managers, verify fresh setup, source installation and existing-project theme merging. Include Yarn Classic and modern Yarn with node-modules and Plug'n'Play, and execute the CLI under Bun as well as Node. Pin tested versions in CI.
 
-Check light and dark values, custom CSS paths, preservation of unrelated CSS, compatible mappings, duplicate handling, local token conflicts, idempotence, rollback, dry-run non-mutation and saved preset reuse in a fresh process. Hash component source before and after theme application to prove it was not replaced. Check that no foreign lockfile or unnecessary dependency command appears, including when a different runner launches the CLI.
+Check light and dark values, custom CSS paths, preservation of unrelated CSS, compatible mappings, duplicate handling, local token conflicts, idempotence, rollback, dry-run non-mutation and saved preset reuse in a fresh process. Hash component source before and after theme application to prove it was not replaced. Check that no foreign lockfile or unnecessary dependency command appears, including when a different runner launches the CLI. A preset without registry fonts plans no dependency; one with registry fonts plans only its missing pinned font packages.
 
 Dark mode follows the configured single class on the Button or an ancestor. Complex selectors and nested independently themed subtrees require migration or remain outside this local guarantee. Scoped provenance records the selected preset separately from saved global preset provenance; canonical and transformed artifact hashes remain distinct. Existing transaction/recovery safeguards and lifecycle-script suppression apply. See [local imports, ownership, and recovery](foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](evidence/component-scoped-button-presets.md).
