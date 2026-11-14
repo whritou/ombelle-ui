@@ -20,6 +20,11 @@
   box-shadow: inset 0 0 0 var(--border-width) var(--border);
   animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
 }
+/* Closing has no animation: the enter animation kept a closed tooltip mounted, and visible,
+   while the library waited for an exit animation that never ended. */
+[data-slot='tooltip-content'][data-state='closed'] {
+  animation: none;
+}
 [data-slot='tooltip-arrow'] {
   fill: var(--foreground);
   stroke: var(--border);

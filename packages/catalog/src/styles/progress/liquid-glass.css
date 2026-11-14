@@ -154,6 +154,10 @@
   background: transparent;
   box-shadow: none;
 }
+/* Inside a button the ring sits on the label's line, not at the top of the button. */
+[data-slot='progress'][data-shape='circle']:is(button > *) {
+  align-self: center;
+}
 [data-slot='progress'][data-shape='circle'][data-size='sm'] {
   inline-size: 18px;
   block-size: 18px;
