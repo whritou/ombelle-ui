@@ -238,3 +238,17 @@ it('unsupported methods and OPTIONS return safe request IDs without config or da
     }
   }
 })
+
+it('publishes a preset that uses font pairs under schema version 1.1', async () => {
+  const { origin } = await fixture()
+  const fonted = {
+    ...preset,
+    schemaVersion: '1.1',
+    design: { ...(preset.design as Record<string, unknown>), fontFamilyId: 'inter', headingFontFamilyId: 'fraunces' },
+  }
+  const response = await post(origin, randomUUID(), { preset: fonted })
+  expect(response.status).toBe(201)
+  const snapshot = (await response.json()) as PresetSnapshot
+  expect(snapshot.preset.schemaVersion).toBe('1.1')
+  expect(snapshot.preset.design).toMatchObject({ fontFamilyId: 'inter', headingFontFamilyId: 'fraunces' })
+})

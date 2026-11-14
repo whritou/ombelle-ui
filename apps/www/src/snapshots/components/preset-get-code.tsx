@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { ResolvedPreset } from '@ombelle/contracts'
 import { usePublication } from '../use-publication'
-import { codeInstallCommand, contrastInstallBlocked, glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked, semanticPaletteInstallBlocked, semanticPaletteInstallNotice } from '../install-command'
+import { codeInstallCommand, contrastInstallBlocked, glassContrastInstallNotice, glassMaterialInstallNotice, materialInstallBlocked, fontsInstallBlocked, fontsInstallNotice, semanticPaletteInstallBlocked, semanticPaletteInstallNotice } from '../install-command'
 import { GetCodeDialog, type CodeStatus, type CodeSummary } from './get-code-dialog'
 
 const scopes = [
@@ -57,6 +57,8 @@ export function PresetGetCode({
   const [open, setOpen] = useState(false)
   const installUnavailable = preset && semanticPaletteInstallBlocked(preset.data)
     ? semanticPaletteInstallNotice
+    : preset && fontsInstallBlocked({ design: preset.data.design })
+      ? fontsInstallNotice
     : contrastInstallBlocked(contrastWarning)
       ? glassContrastInstallNotice
       : preset && materialInstallBlocked({ design: preset.data.design })

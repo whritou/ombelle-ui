@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { PresetEditorDraft } from '../model'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../generated/ui/components/ui/collapsible'
 import type { PresetCompilerState } from '../use-preset-compiler'
-import { contrastInstallBlocked, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller, semanticPaletteInstallBlocked, semanticPaletteInstallNotice } from '../../snapshots/install-command'
+import { contrastInstallBlocked, glassMaterialMinimumCli, installerRunner, materialInstallBlocked, publishedInstaller, fontsInstallBlocked, fontsInstallNotice, semanticPaletteInstallBlocked, semanticPaletteInstallNotice } from '../../snapshots/install-command'
 import {
   canExportPreset,
   serializePresetExport,
@@ -167,6 +167,8 @@ export function PresetExportPanel({
       </p>}
       {semanticPaletteInstallBlocked({ modes: state.result?.preset.data.modes }) ? (
         <p data-testid="preset-install-held">{semanticPaletteInstallNotice}</p>
+      ) : fontsInstallBlocked({ design: state.result?.preset.data.design }) ? (
+        <p data-testid="preset-install-held">{fontsInstallNotice}</p>
       ) : !useLocalInstaller && materialInstallBlocked({ design: state.result?.preset.data.design }) ? (
         <p data-testid="preset-install-held">
           This preset uses liquid glass material settings, which need{' '}

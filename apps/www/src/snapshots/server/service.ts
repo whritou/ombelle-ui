@@ -38,8 +38,11 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
       const input: unknown = (body as { preset: unknown }).preset
       if (input && typeof input === 'object' && !Array.isArray(input)) {
         const fields = input as Record<string, unknown>
-        const releases = { schemaVersion: '1.0', catalogRelease: '0.1.0', compilerVersion: '0.1.0' }
+        const releases = { catalogRelease: '0.1.0', compilerVersion: '0.1.0' }
+        // 1.1 is a preset that uses font pairs; the preset validator checks that the version and the fields agree.
+        const schemaVersions = ['1.0', '1.1']
         if (Object.entries(releases).some(([key, value]) => typeof fields[key] === 'string' && fields[key] !== value) ||
+            (typeof fields.schemaVersion === 'string' && !schemaVersions.includes(fields.schemaVersion)) ||
             (typeof fields.styleFamily === 'string' && !isStyleFamily(fields.styleFamily)))
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
       }
