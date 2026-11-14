@@ -47,10 +47,10 @@ import {
   revealPresetField,
 } from './preset-controls'
 import {
-  accentSchemes,
   applyColorScheme,
-  baseSchemes,
-  resetColorScheme,
+  releasePalette,
+  resetPalette,
+  resetPrimary,
 } from '../schemes'
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
 import { PresetGetCode } from '../../snapshots/components/preset-get-code'
@@ -209,7 +209,8 @@ export default function PresetEditor() {
     setConfirmation({ ...change, label, description, tone })
   }
   function family(family: StyleFamily) {
-    const change = planPresetFamilyChange(draft, family)
+    // Liquid glass has no Palette row: a carried palette would override Cristal with no one-click way back.
+    const change = planPresetFamilyChange(family === 'liquid-glass' ? releasePalette(draft) : draft, family)
     const count = change.changes.length
     if (count)
       confirm(
@@ -504,10 +505,7 @@ export default function PresetEditor() {
               }
               onResetGroup={(group) =>
                 commit(
-                  resetColorScheme(
-                    draft,
-                    group === 'accent' ? accentSchemes : baseSchemes,
-                  ),
+                  group === 'accent' ? resetPrimary(draft) : resetPalette(draft),
                   'scheme:' + group,
                 )
               }

@@ -576,6 +576,17 @@
   border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
   border-radius: 999px;
 }
+.editor :global(.preset-scheme-dot)[data-palette] {
+  position: relative;
+}
+.editor :global(.preset-scheme-dot)[data-palette]::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 999px;
+  background: var(--preset-scheme-mark);
+  border: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
+}
 .editor :global(.preset-scheme-default) {
   background: conic-gradient(var(--primary) 0 50%, var(--muted) 0);
 }

@@ -16,6 +16,7 @@ import {
   createPresetDraft,
   setPresetEdit,
 } from '../../apps/www/src/preset-editor/model.js'
+import { paletteSchemes } from '../../apps/www/src/preset-editor/schemes.js'
 import { openExport, segment, waitForCompiled } from '../helpers/preset-editor-ui.js'
 import { expectVisibleFocus, arrowTo, tabTo } from '../helpers/keyboard-focus.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
@@ -934,24 +935,31 @@ test('exports the current preset while preview is unavailable', async ({
   await expect(alert.getByRole('button', { name: 'Retry preview' })).toBeVisible()
   expect(JSON.parse(await download(page)).design.radiusRem).toBe(1.3)
 })
-test('applies accent and base color schemes in one step and returns to the style default', async ({
+test('applies a style palette and a primary colour in one step and returns to the style default', async ({
   page,
 }) => {
   await page.goto(url)
   await ready(page)
-  const rose = page.getByRole('button', { name: 'Rose accent', exact: true })
+  // The fresh draft is Ombelle: its first palette is Peach.
+  const peach = page.getByRole('button', { name: 'Peach palette', exact: true })
+  await peach.click()
+  await expect(peach).toHaveAttribute('aria-pressed', 'true')
+  const rose = page.getByRole('button', { name: 'Rose primary', exact: true })
   await rose.click()
   await expect(rose).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: 'Stone base', exact: true }).click()
   await ready(page)
   const preset = JSON.parse(await download(page))
   expect(preset.modes.light.primary.toLowerCase()).toBe('#e11d48')
-  expect(preset.modes.dark.background.toLowerCase()).toBe('#1c1917')
-  await page.getByRole('button', { name: 'Style default base', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'Stone base', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  const peachPalette = paletteSchemes('ombelle')[0]!
+  expect(preset.modes.light.background).toBe(peachPalette.light.background)
+  expect(preset.modes.dark.background).toBe(peachPalette.dark.background)
+  await expect(peach).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: 'Style default palette', exact: true }).click()
+  await expect(peach).toHaveAttribute('aria-pressed', 'false')
   await expect(rose).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'Stone base', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await ready(page)
+  expect(JSON.parse(await download(page)).modes.light.background).toBe(paletteSchemes('ombelle')[0]!.light.background)
 })
 test('edits numeric design values with a slider and keeps the exact field in sync', async ({
   page,
