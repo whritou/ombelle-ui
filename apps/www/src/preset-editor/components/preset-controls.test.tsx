@@ -148,3 +148,19 @@ it('DesignControls uses the catalog Number Input for the shadow offsets', () => 
   expect(html).toMatch(/<input[^>]*id="preset-design-shadowOffsetXPx"[^>]*role="spinbutton"/)
   expect(html).toContain('data-slot="number-input-decrement"')
 })
+
+it('selects the style font in each picker and the unset option once it is chosen', () => {
+  const selected = (html: string, label: string) => {
+    const select = new RegExp(`<select[^>]*aria-label="${label}"[^>]*>(.*?)</select>`).exec(html)![1]
+    return /<option[^>]*value="([^"]*)"[^>]*selected/.exec(select)?.[1]
+  }
+  const ombelle = renderToStaticMarkup(<DesignControls draft={createPresetDraft('ombelle')} {...handlers} section="shape" />)
+  expect(selected(ombelle, 'Body font')).toBe('figtree')
+  expect(selected(ombelle, 'Display font')).toBe('bricolage-grotesque')
+  expect(selected(ombelle, 'Code font')).toBe('geist-mono')
+  const flat = renderToStaticMarkup(<DesignControls draft={createPresetDraft('flat')} {...handlers} section="shape" />)
+  expect(selected(flat, 'Body font')).toBe('dm-sans')
+  expect(selected(flat, 'Display font')).toBe('')
+  const none = setPresetEdit(createPresetDraft('ombelle'), '/design/headingFontFamilyId', '')
+  expect(selected(renderToStaticMarkup(<DesignControls draft={none} {...handlers} section="shape" />), 'Display font')).toBe('')
+})

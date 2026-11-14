@@ -1,4 +1,4 @@
-import { defaultGlassPresetId, fontById, fontRegistry, getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, fontById, fontRegistry, getCatalog, styleFamilyFonts, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler'
 import {
   FoundationError,
@@ -203,7 +203,24 @@ export function presetFieldValue(
   path: PresetEditablePath,
 ): string {
   if (Object.hasOwn(draft.edits, path)) return draft.edits[path]!
+  // Until someone picks a font, the draft uses its style's fonts, not the catalog preset's system stack.
+  if (isFontPath(path)) return familyFontValue(draft.family, path.slice('/design/'.length) as FontKey)
   return fieldValueOf(getCatalog('0.1.0').presets[draft.family], path)
+}
+
+const fontKeys = ['fontFamilyId', 'headingFontFamilyId', 'monoFontFamilyId'] as const
+export type FontKey = (typeof fontKeys)[number]
+const isFontPath = (path: string) => fontKeys.some((key) => path === '/design/' + key)
+/** True when a picker's chosen value is the style's own, so the draft needs no edit for it. */
+export function fontChoiceIsStyleFont(family: StyleFamily, key: FontKey, value: string): boolean {
+  return value === familyFontValue(family, key)
+}
+/** The font a style family gives a picker; empty means the display font follows the body font. */
+export function familyFontValue(family: StyleFamily, key: FontKey): string {
+  const fonts = styleFamilyFonts[family]
+  if (key === 'fontFamilyId') return fonts.body
+  if (key === 'monoFontFamilyId') return fonts.mono
+  return fonts.display === fonts.body ? '' : fonts.display
 }
 
 /** A preset's value for an editable path, as the editor stores it. */
@@ -235,7 +252,8 @@ export function applyStartingPreset(input: PresetEditorDraft, id: StartingPreset
 export function matchingStartingPreset(draft: PresetEditorDraft): StartingPresetId | null {
   if (draft.family !== 'liquid-glass') return null
   const catalog = getCatalog('0.1.0')
-  const paths = editablePathsFor('liquid-glass')
+  // Fonts are independent of the starting point, so they never decide which one a draft matches.
+  const paths = editablePathsFor('liquid-glass').filter((path) => !isFontPath(path))
   return (
     startingPresetOrder.find((id) =>
       paths.every((path) => presetFieldValue(draft, path) === fieldValueOf(catalog.startingPresets[id], path)),
@@ -295,6 +313,11 @@ export function materializePreset(input: PresetEditorDraft): Preset {
     compilerVersion: '0.1.0',
     platform: 'react-web',
   })
+  // The style's fonts first; an edit below, including an empty one, overrides them.
+  for (const key of fontKeys) {
+    const value = familyFontValue(draft.family, key)
+    if (value) Object.assign(preset.design, { [key]: value })
+  }
   for (const [path, raw] of Object.entries(draft.edits)) {
     const [, group, key, token] = path.split('/')
     if (group === 'modes')

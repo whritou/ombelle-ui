@@ -177,7 +177,8 @@ test('keeps local exports available when publication service is unavailable', as
   const pending = page.waitForEvent('download')
   await page.getByRole('button', { name: 'More actions', exact: true }).click()
   await page.getByRole('menuitem', { name: 'Download JSON', exact: true }).click()
-  expect(JSON.parse(await fs.readFile(await (await pending).path()!, 'utf8')).schemaVersion).toBe('1.0')
+  // The default draft carries its style's fonts, so its export declares preset format 1.1.
+  expect(JSON.parse(await fs.readFile(await (await pending).path()!, 'utf8')).schemaVersion).toBe('1.1')
 })
 
 test('handles clipboard and storage denial while preserving draft exports', async ({ page }) => {
