@@ -127,3 +127,27 @@ it('plans no Fontsource dependency and imports nothing for a preset without font
   expect(plan.dependencyPlan).toEqual([])
   expect(styleChange(plan).afterContent).not.toContain('@fontsource')
 })
+
+it('removes the font tokens a later theme no longer emits and names the font packages it no longer imports', async () => {
+  const { root, trio, pair, command } = await setup(true)
+  expect((await command(['init', '--preset', trio, '--yes'])).code).toBe(0)
+  const switched = await command(['theme', 'add', pair, '--yes'])
+  expect(switched.code, switched.output).toBe(0)
+  const css = await fs.readFile(path.join(root, 'src/index.css'), 'utf8')
+  expect(css).not.toContain('--font-mono')
+  expect(css).toContain('--font-heading')
+  const notices = (jsonRecord(switched.data).notices as string[]).join('\n')
+  expect(notices).toContain('@fontsource-variable/inter')
+  expect(notices).toContain('@fontsource-variable/jetbrains-mono')
+  expect(notices).not.toContain('@fontsource-variable/fraunces')
+})
+
+it('leaves a font token the user edited in place when a later theme stops emitting it', async () => {
+  const { root, trio, pair, command } = await setup(true)
+  expect((await command(['init', '--preset', trio, '--yes'])).code).toBe(0)
+  const file = path.join(root, 'src/index.css')
+  await fs.writeFile(file, (await fs.readFile(file, 'utf8')).replace(/--font-mono:[^;]+;/, '--font-mono: monospace;'))
+  const switched = await command(['theme', 'add', pair, '--yes'])
+  expect(switched.code, switched.output).toBe(0)
+  expect(await fs.readFile(file, 'utf8')).toContain('--font-mono: monospace')
+})

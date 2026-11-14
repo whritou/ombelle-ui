@@ -13,10 +13,20 @@ import {
   type ManagedDeclaration,
 } from '@ombelle/contracts'
 import { sha256 } from '@ombelle/compiler'
-import { getCatalog } from '@ombelle/catalog'
+import { fontRegistry, getCatalog } from '@ombelle/catalog'
 import { readText } from '../project/inspect.js'
 import { portable } from '../project/paths.js'
 import { appendState, baseLock, fileChange } from './components.js'
+const fontTokens = ['--font-heading', '--font-mono']
+/** Fontsource packages the last theme imported, read from the font tokens it recorded in the lock. */
+function previouslyImportedFonts(context: ProjectContext): Set<string> {
+  const packages = new Set<string>()
+  for (const record of context.lock?.managedDeclarations ?? [])
+    if (record.property === '--font-family' || fontTokens.includes(record.property))
+      for (const font of fontRegistry)
+        if (record.value.includes(font.stack.split(',')[0]!)) packages.add(font.fontsource.package)
+  return packages
+}
 // Managed global components recorded in the lock, keyed by catalog id.
 function installedComponents(context: ProjectContext): Map<ComponentId, string[]> {
   const installed = new Map<ComponentId, string[]>()
@@ -141,6 +151,20 @@ export async function planTheme(
       block.raws.before = '\n'
       css.append(block)
     }
+    // A font token this theme no longer emits is removed while it is still exactly what was
+    // installed; a value the user edited, or one that existed before Ombelle managed it, stays.
+    for (const previous of context.lock?.managedDeclarations ?? []) {
+      if (
+        previous.selector !== selector ||
+        !fontTokens.includes(previous.property) ||
+        Object.hasOwn(values, previous.property)
+      )
+        continue
+      const stale = block.nodes?.find(
+        (n) => n.type === 'decl' && n.prop === previous.property,
+      ) as postcss.Declaration | undefined
+      if (stale && !previous.existedBefore && stale.value.trimEnd() === previous.value) stale.remove()
+    }
     for (const property of Object.keys(values).sort()) {
       const declarations = block.nodes?.filter(
         (n) => n.type === 'decl' && n.prop === property,
@@ -262,6 +286,16 @@ export async function planTheme(
       'The style file is not managed here, so import ' +
         fontPackages.map((d) => d.name).join(', ') +
         ' in your global CSS yourself',
+    )
+  // The installer never removes packages. Name the font packages the previous theme imported
+  // and this one does not, so they can be removed by hand.
+  const imported = new Set(result.dependencies.map((d) => d.name))
+  const unused = [...previouslyImportedFonts(context)].filter((name) => !imported.has(name)).sort()
+  if (unused.length)
+    plan.notices.push(
+      'Font packages this theme no longer imports: ' +
+        unused.join(', ') +
+        '. They stay installed; remove them with your package manager if nothing else uses them.',
     )
   plan.managedDeclarations = records
   lock.managedDeclarations = records
