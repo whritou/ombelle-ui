@@ -22,6 +22,7 @@ import { NumberInput } from '../../generated/ui/components/ui/number-input'
 import {
   accentSchemes,
   paletteSchemes,
+  primaryTokenKeys,
   schemeMatches,
   type ColorScheme,
 } from '../schemes'
@@ -39,10 +40,17 @@ function contrastPair(key: string): string | undefined {
   return colorKeys.includes(`${key}Foreground` as (typeof colorKeys)[number]) ? `${key}Foreground` : undefined
 }
 /** The one-click schemes' values for a token, as the picker's swatches. */
-function schemeSwatches(key: string, mode: 'light' | 'dark', family: StyleFamily) {
-  return [...paletteSchemes(family), ...accentSchemes].flatMap((scheme) => {
+export function schemeSwatches(key: string, mode: 'light' | 'dark', family: StyleFamily) {
+  const seen = new Set<string>()
+  return [
+    ...paletteSchemes(family).map((scheme) => ({ scheme, label: scheme.label + ' palette' })),
+    ...accentSchemes.map((scheme) => ({ scheme, label: scheme.label + ' primary' })),
+  ].flatMap(({ scheme, label }) => {
     const value = scheme[mode][key]
-    return value ? [{ label: scheme.label, value }] : []
+    // Schemes that share a colour (a Neo-brutalism border, say) list it once.
+    if (!value || seen.has(value.toLowerCase())) return []
+    seen.add(value.toLowerCase())
+    return [{ label, value }]
   })
 }
 const human = (key: string) =>
@@ -429,15 +437,20 @@ export function DesignControls({
     </div>
   )
 }
-function touchesScheme(draft: PresetEditorDraft, schemes: readonly ColorScheme[]) {
+function touchesScheme(
+  draft: PresetEditorDraft,
+  schemes: readonly ColorScheme[],
+  ignore: readonly string[] = [],
+) {
   return schemes.some((scheme) =>
     (['light', 'dark'] as const).some((mode) =>
       Object.keys(scheme[mode]).some((key) =>
-        Object.hasOwn(draft.edits, `/modes/${mode}/${key}`),
+        !ignore.includes(key) && Object.hasOwn(draft.edits, `/modes/${mode}/${key}`),
       ),
     ),
   )
 }
+/** The tokens the Primary row owns; a palette still counts as applied while it overrides them. */
 export type SchemeGroup = 'palette' | 'accent'
 /** One-click palettes for the style, and primary colours; TokenList keeps every token editable. */
 export function ThemeControls({
@@ -460,9 +473,14 @@ export function ThemeControls({
   return (
     <div className="preset-schemes">
       {shown.map((group) => {
-        const active = group.schemes.find((scheme) => schemeMatches(draft, scheme))
-        const untouched = !touchesScheme(draft, group.touchable)
-        const current = active?.label ?? (untouched ? 'Style default' : 'Custom')
+        const ignore = group.id === 'palette' ? primaryTokenKeys : []
+        const active = group.schemes.find((scheme) => schemeMatches(draft, scheme, ignore))
+        // A palette's own primary is not a choice made in the Primary row.
+        const fromPalette =
+          group.id === 'accent' && !active && palettes.some((palette) => schemeMatches(draft, palette))
+        const untouched = !touchesScheme(draft, group.touchable, ignore)
+        const current = active?.label ?? (fromPalette ? 'Palette' : untouched ? 'Style default' : 'Custom')
+        const atDefault = !active && (untouched || fromPalette)
         return (
           <div
             key={group.id}
@@ -478,7 +496,7 @@ export function ThemeControls({
               <button
                 type="button"
                 className="preset-scheme"
-                aria-pressed={!active && untouched}
+                aria-pressed={atDefault}
                 aria-label={`Style default ${group.label.toLowerCase()}`}
                 title="Style default"
                 onClick={() => onResetGroup(group.id)}
@@ -503,7 +521,7 @@ export function ThemeControls({
                       scheme.swatchDark
                         ? ({
                             background: `linear-gradient(135deg, ${scheme.swatch} 50%, ${scheme.swatchDark} 50%)`,
-                            '--preset-scheme-mark': scheme.light.primary,
+                            '--preset-scheme-mark': scheme.swatchMark ?? scheme.light.primary,
                           } as CSSProperties)
                         : { background: scheme.swatch }
                     }

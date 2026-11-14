@@ -41,7 +41,7 @@ Goal: each style offers palettes designed for it, complete in light and dark.
 ## Constraints
 
 - Only the editor in `apps/www/src/preset-editor/` changes; palettes live in `schemes.ts`.
-- Values are hex or OKLCH, as the colour pickers accept (`storableFormats`).
+- Values are hex, or OKLCH for Ombelle (its family default is OKLCH); both are formats the colour pickers accept (`storableFormats`).
 - `destructive` and `destructiveForeground` stay with the style (existing test asserts this).
 - Deterministic data only, no runtime colour generation.
 
