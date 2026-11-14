@@ -20,6 +20,11 @@
   animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
 }
 /* Hairline on the arrow's outer edges only, like a rotated square cut into the box. */
+/* Closing has no animation: the enter animation kept a closed tooltip mounted, and visible,
+   while the library waited for an exit animation that never ended. */
+[data-slot='tooltip-content'][data-state='closed'] {
+  animation: none;
+}
 [data-slot='tooltip-arrow'] {
   fill: var(--card);
   stroke: none;

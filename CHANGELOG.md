@@ -4,7 +4,8 @@
 
 - Pagination: hovering the current page keeps its primary text colour; it took the hover colour of the other pages and dropped to 1.0–1.7:1 on the primary fill.
 - Scroll Area: content keeps 0.5rem by 0.75rem clear of the border, and while the area scrolls the viewport keeps a gutter as wide as the scrollbar, so the bar no longer covers badges and other content at the end of a line. Without a horizontal ScrollBar, content takes the viewport's width and wraps instead of running under the clipped edge.
-- Tooltip: a tooltip closes when the pointer leaves the page, as when it leaves an embedded preview; it stayed open because no later pointer move reached it.
+- Tooltip: a tooltip closes when the pointer leaves the page, as when it leaves an embedded preview; it stayed open because no later pointer move reached it. A tooltip closed by a click no longer stays on screen: its enter animation applied in the closed state too, so the library waited for an exit animation that never ended.
+- Progress: a circle inside a button sits on the label's line in every family; it was pinned to the top of the button.
 - Item: when the content would be narrower than 9rem beside the actions, the actions wrap under it instead of breaking the title letter by letter.
 - Carousel: the slides sit 8px inside the scrolling viewport (20px in liquid glass), so their borders, offset shadows and focus rings are no longer cut at the edges.
 - Toolbar: plain items in the More menu no longer draw an empty check box; only toggle items keep the box and its indent.

@@ -371,7 +371,7 @@ export function ProjectsScene(props: SceneProps) {
                     <strong>{upload.name}</strong>
                     <span className="scene-muted">{upload.value}% uploaded</span>
                   </span>
-                  <Button variant="outline" size="sm" disabled>
+                  <Button variant="outline" size="sm" aria-disabled="true" aria-busy="true">
                     <Progress shape="circle" size="sm" value={upload.value} aria-label={`Saving ${upload.name}`} />
                     Saving
                   </Button>

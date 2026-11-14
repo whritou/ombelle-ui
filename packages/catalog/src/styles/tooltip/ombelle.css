@@ -25,6 +25,11 @@
    The dash skips the 30-unit base so the outline stays open where the arrow meets the bubble;
    the arrow moves up by one border width so its fill covers the bubble border at the mouth.
    The stroke is in user units: x2.35 gives about one border width on screen. */
+/* Closing has no animation: the enter animation kept a closed tooltip mounted, and visible,
+   while the library waited for an exit animation that never ended. */
+[data-slot='tooltip-content'][data-state='closed'] {
+  animation: none;
+}
 [data-slot='tooltip-arrow'] {
   overflow: visible;
   fill: var(--primary);
