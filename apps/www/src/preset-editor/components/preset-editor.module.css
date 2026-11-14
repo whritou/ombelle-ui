@@ -830,6 +830,21 @@
 .editor :global(.preset-segmented-field) button[aria-pressed] {
   padding-inline: 10px;
 }
+.editor :global(.preset-font-select) {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--control);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+}
+.editor :global(.preset-font-select:focus-visible) {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
 .editor :global(.preset-shadow-row) {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

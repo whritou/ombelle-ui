@@ -1,9 +1,11 @@
-import { defaultGlassPresetId, getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, fontById, fontRegistry, getCatalog, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler'
 import {
   FoundationError,
   componentsWithStyleSupport,
   isStyleFamily,
+  presetSchemaVersion,
+  systemFontIds,
   validatePreset,
   type ComponentId,
   type Preset,
@@ -31,11 +33,28 @@ export const colorKeys = [
   'input',
   'ring',
 ] as const
+const fontIdsWith = (role: 'display' | 'body' | 'mono') =>
+  fontRegistry.filter((font) => font.roles.includes(role)).map((font) => font.id)
+/** The ids each font picker offers: the system stacks plus the registry fonts with the matching role. */
+export const fontControlOptions = {
+  fontFamilyId: [...systemFontIds, ...fontIdsWith('body')],
+  headingFontFamilyId: [...systemFontIds, ...fontIdsWith('display')],
+  monoFontFamilyId: ['system-mono', ...fontIdsWith('mono')],
+} as const satisfies Record<string, readonly string[]>
+/** Pickers whose empty value means "not set": the display and code fonts. */
+export const optionalFontFields: readonly string[] = ['headingFontFamilyId', 'monoFontFamilyId']
+const systemFontLabels: Record<string, string> = {
+  'system-sans': 'Sans',
+  'system-serif': 'Serif',
+  'system-mono': 'Mono',
+}
+export function fontLabel(id: string): string {
+  return systemFontLabels[id] ?? fontById(id)?.label ?? id
+}
 export const designControls = {
-  fontFamilyId: {
-    label: 'Font family',
-    options: ['system-sans', 'system-serif', 'system-mono'],
-  },
+  fontFamilyId: { label: 'Body font', options: fontControlOptions.fontFamilyId },
+  headingFontFamilyId: { label: 'Display font', options: fontControlOptions.headingFontFamilyId },
+  monoFontFamilyId: { label: 'Code font', options: fontControlOptions.monoFontFamilyId },
   radiusRem: { label: 'Corner radius', min: 0, max: 2 },
   density: { label: 'Density', options: ['comfortable', 'compact'] },
   borderWidthPx: { label: 'Border width', min: 0, max: 4 },
@@ -192,6 +211,7 @@ function fieldValueOf(preset: Preset, path: PresetEditablePath): string {
   const [, group, key, token] = path.split('/')
   if (group === 'design') {
     const value = preset.design[key as keyof Preset['design']]
+    if (value === undefined && optionalFontFields.includes(key!)) return ''
     return String(value === undefined && optionalGlassFields.includes(key!) ? 0 : value)
   }
   return String(preset.modes[key as 'light' | 'dark'][token as (typeof colorKeys)[number]])
@@ -292,9 +312,11 @@ export function materializePreset(input: PresetEditorDraft): Preset {
           fail(path, 'Enter a finite number.')
         value = Number(raw)
       }
-      Object.assign(preset.design, { [key]: value })
+      if (value === '' && optionalFontFields.includes(key)) delete (preset.design as Record<string, unknown>)[key]
+      else Object.assign(preset.design, { [key]: value })
     }
   }
+  preset.schemaVersion = presetSchemaVersion(preset.design)
   return validatePreset(preset)
 }
 
