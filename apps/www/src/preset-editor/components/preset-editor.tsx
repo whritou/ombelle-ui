@@ -523,12 +523,9 @@ export default function PresetEditor() {
           </div>
           </ScrollArea>
         </section>
-        <div className={`${styles.canvas} ${pane === 'customize' ? styles.peek : ''} ${pane === 'checks' ? styles.phoneHidden : ''}`}>
+        {/* On a phone the preview is its own pane, reached from the dock. */}
+        <div className={`${styles.canvas} ${pane !== 'preview' ? styles.phoneHidden : ''}`}>
           <section className={styles.preview} aria-label="Live preview">
-            {/* On a phone's Customize pane the preview shrinks to this card. */}
-            <div className={styles.peekBar}>
-              <b>Live preview · {sceneOptions.find(option => option.value === scene)?.label}</b>
-            </div>
             <div className={`${styles.toolbar} ${styles.previewBar}`}>
               <SegmentedControl<typeof mode>
                 label="Preview mode"
@@ -583,7 +580,7 @@ export default function PresetEditor() {
                 Preview {previewStatus}
               </p>
             </div>
-            <div className={styles.peekFrame} inert={pane === 'customize' && viewportClass === 'phone'}>
+            <div className={styles.peekFrame}>
             <PresetPreviewFrame
               result={compiled.result}
               view={{

@@ -317,7 +317,9 @@
    :where() keeps the helper at zero extra specificity, so an element's own display rule (such as a hidden rail) wins.
    Radix wraps the content in a display:table div that would grow to the widest unbreakable line; block lets content wrap and scroll on its own. */
 :where(.www-scroll) { display: flex; flex-direction: column; }
-.www-scroll > [data-slot='scroll-area-viewport'] { flex: 1 1 auto; min-block-size: 0; }
+/* The site's own scroll areas lay out their content themselves; only the scrollbar gutter stays. */
+.www-scroll > [data-slot='scroll-area-viewport'] { flex: 1 1 auto; min-block-size: 0; padding-block: 0; padding-inline-start: 0; }
+.www-scroll:not([data-overflow-y]) > [data-slot='scroll-area-viewport'] { padding-inline-end: 0; }
 .www-scroll > [data-slot='scroll-area-viewport'] > div { display: block !important; }
 .www-scroll-x > [data-slot='scroll-area-viewport'] > div { display: table !important; }
 /* catalog dialog */

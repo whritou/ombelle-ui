@@ -138,6 +138,14 @@ export type PresetGalleryProps = {
 }
 
 // The board's field trip photos as small 16:9 SVGs, one hue each: the gallery ships no image files.
+// The Carousel example's slides: each built-in style family, pictured in its own colours.
+const presetSlides = [
+  { id: 'ombelle', name: 'Ombelle', stable: true },
+  { id: 'flat', name: 'Flat', stable: true },
+  { id: 'minimalist', name: 'Minimalist', stable: true },
+  { id: 'neo-brutalism', name: 'Neo brutalism', stable: true },
+  { id: 'liquid-glass', name: 'Liquid glass', stable: false },
+] as const
 const fieldTripPhotos = [
   ['A lake below pine hills', 195], ['Sand dunes at dusk', 25], ['A city skyline at night', 240], ['A coastline', 200], ['A field of poppies', 95],
 ].map(([alt, hue]) => ({ alt: alt as string, src: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
@@ -473,10 +481,20 @@ export function PresetGallery({
       </section>)}
       {gate('carousel', 'Carousel', <section aria-label="Carousel" data-component="carousel">
         <h2>Carousel</h2>
-        <Carousel aria-label="UI kits">
+        <Carousel aria-label="Built-in presets" slidesPerView={2}>
           <CarouselContent>
-            {['Ombelle', 'Flat', 'Minimalist', 'Neo brutalism', 'Liquid glass'].map(kit => (
-              <CarouselItem key={kit}><Card><CardContent><p>{kit}</p></CardContent></Card></CarouselItem>
+            {presetSlides.map(kit => (
+              <CarouselItem key={kit.name}>
+                <Card className="preset-slide">
+                  {/* A small picture of the kit; the slide is named by its title below. */}
+                  <div className="preset-slide-shot" aria-hidden="true" data-kit={kit.id}>
+                    <span className="preset-slide-row"><span className="preset-slide-button">Get started</span><span className="preset-slide-button" data-outline="">Docs</span></span>
+                    <span className="preset-slide-input">you@studio.app</span>
+                    <span className="preset-slide-row"><span className="preset-slide-chip">Forms</span><span className="preset-slide-chip">Overlays</span></span>
+                  </div>
+                  <CardFooter className="preset-slide-meta"><strong>{kit.name}</strong><Badge variant={kit.stable ? 'secondary' : 'outline'}>{kit.stable ? 'Stable' : 'Experimental'}</Badge></CardFooter>
+                </Card>
+              </CarouselItem>
             ))}
           </CarouselContent>
           <CarouselPrevious />
@@ -1048,7 +1066,7 @@ export function PresetGallery({
                 <Progress shape="circle" size="lg" value={64} aria-label="Uploading preset"><ProgressValue /></Progress>
               </div>
               <div data-component="progress~circle-sm">
-                <Button variant="outline" size="sm" disabled><Progress shape="circle" size="sm" value={40} aria-label="Saving" />Saving</Button>
+                <Button variant="outline" size="sm" aria-disabled="true" aria-busy="true"><Progress shape="circle" size="sm" value={40} aria-label="Saving" />Saving</Button>
               </div>
             </div>
             <div className="preset-progress-label">

@@ -10,10 +10,38 @@ export function TooltipProvider({
   return <TooltipPrimitive.Provider data-slot="tooltip-provider" {...props} />
 }
 
+/**
+ * Closes an open tooltip when the pointer leaves the document. Both libraries keep a
+ * hover tooltip open while the pointer may be moving to it, and a document the pointer
+ * has left (an embedded preview, or the window's edge) sends no later move to close it.
+ */
+function useCloseOnDocumentLeave(open: boolean, close: () => void) {
+  React.useEffect(() => {
+    if (!open || typeof document === 'undefined') return
+    const root = document.documentElement
+    const leave = (event: MouseEvent) => {
+      if (!event.relatedTarget) close()
+    }
+    root.addEventListener('mouseleave', leave)
+    return () => root.removeEventListener('mouseleave', leave)
+  }, [open, close])
+}
+
 export function Tooltip({
+  open: openProp,
+  defaultOpen = false,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+  const [ownOpen, setOwnOpen] = React.useState(defaultOpen)
+  const open = openProp ?? ownOpen
+  const setOpen = React.useCallback((next: boolean) => {
+    if (openProp === undefined) setOwnOpen(next)
+    onOpenChange?.(next)
+  }, [openProp, onOpenChange])
+  const close = React.useCallback(() => setOpen(false), [setOpen])
+  useCloseOnDocumentLeave(open, close)
+  return <TooltipPrimitive.Root data-slot="tooltip" {...props} open={open} onOpenChange={setOpen} />
 }
 
 export function TooltipTrigger({

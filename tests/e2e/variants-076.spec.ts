@@ -409,7 +409,9 @@ for (const edition of ['radix', 'base'] as const) {
       const inView = async (n: number) => {
         await expect.poll(async () => {
           const [box, viewport] = [await slide(n).boundingBox(), await content.boundingBox()]
-          return Math.abs(box!.x - viewport!.x)
+          // Slides sit inside the viewport's padding, which keeps their borders and shadows whole.
+          const inset = await content.evaluate(element => parseFloat(getComputedStyle(element).paddingInlineStart))
+          return Math.abs(box!.x - viewport!.x - inset)
         }).toBeLessThanOrEqual(2)
       }
       return { carousel, thumbnail, slide, content, counter, inView }

@@ -157,3 +157,106 @@ body {
     padding: 16px;
   }
 }
+
+/* The Carousel example: each slide pictures one style family in its own colours,
+   whatever family the gallery itself uses. */
+.preset-slide[data-slot='card'] {
+  overflow: hidden;
+  padding: 0;
+  gap: 0;
+}
+.preset-slide-shot {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 10px;
+  min-block-size: 150px;
+  padding: 18px 20px;
+  background: var(--s-bg);
+  color: var(--s-ink);
+  font-family: var(--s-font);
+  font-size: 13px;
+}
+.preset-slide-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.preset-slide-button {
+  display: inline-flex;
+  align-items: center;
+  block-size: 32px;
+  padding-inline: 14px;
+  border: var(--s-bd);
+  border-radius: var(--s-r);
+  background: var(--s-pri);
+  color: var(--s-pfg);
+  box-shadow: var(--s-sh);
+  font-weight: 700;
+  text-transform: var(--s-tt, none);
+  white-space: nowrap;
+}
+.preset-slide-button[data-outline] {
+  background: var(--s-obg, transparent);
+  color: var(--s-ink);
+  box-shadow: var(--s-osh, none);
+}
+.preset-slide-input {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  block-size: 32px;
+  padding-inline: 12px;
+  border: var(--s-ibd);
+  border-radius: var(--s-ir);
+  background: var(--s-ibg);
+  color: var(--s-mut);
+}
+.preset-slide-chip {
+  display: inline-flex;
+  align-items: center;
+  block-size: 22px;
+  padding-inline: 9px;
+  border: var(--s-cbd, 0 solid transparent);
+  border-radius: var(--s-r);
+  background: var(--s-tint);
+  color: var(--s-ink);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: var(--s-tt, none);
+}
+.preset-slide-meta[data-slot='card-footer'] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  gap: 10px;
+  padding: 12px 14px;
+}
+.preset-slide-shot[data-kit='ombelle'] {
+  --s-bg: oklch(0.975 0.008 350); --s-ink: oklch(0.22 0.012 275); --s-mut: oklch(0.47 0.015 275); --s-pri: oklch(0.55 0.22 6); --s-pfg: #fff;
+  --s-r: 999px; --s-ir: 12px; --s-bd: 1.5px solid oklch(0.22 0.012 275); --s-sh: 3px 3px 0 oklch(0.22 0.012 275);
+  --s-ibg: #fff; --s-ibd: 1.5px solid oklch(0.22 0.012 275); --s-tint: oklch(0.93 0.045 6); --s-font: 'Archivo', sans-serif;
+}
+.preset-slide-shot[data-kit='flat'] {
+  --s-bg: #f3f5f9; --s-ink: #0f172a; --s-mut: #4a5568; --s-pri: #1d4ed8; --s-pfg: #fff; --s-r: 8px; --s-ir: 8px 8px 0 0;
+  --s-bd: 2px solid #1d4ed8; --s-sh: none; --s-osh: none; --s-ibg: #eceff5; --s-ibd: 0 solid transparent; --s-tint: #e3ebfd;
+  --s-font: 'Hanken Grotesk', sans-serif;
+}
+.preset-slide-shot[data-kit='flat'] .preset-slide-input { border-block-end: 2px solid #7c879b; }
+.preset-slide-shot[data-kit='minimalist'] {
+  --s-bg: #fafaf9; --s-ink: #111; --s-mut: #5f5f5a; --s-pri: #111; --s-pfg: #fff; --s-r: 4px; --s-ir: 0; --s-bd: 1px solid #111;
+  --s-sh: none; --s-ibg: transparent; --s-ibd: 0 solid transparent; --s-tint: #f1f1ef; --s-font: system-ui, sans-serif;
+}
+.preset-slide-shot[data-kit='minimalist'] .preset-slide-input { padding: 0; border-block-end: 1px solid #8c8c86; }
+.preset-slide-shot[data-kit='neo-brutalism'] {
+  --s-bg: #f4f4ef; --s-ink: #111; --s-mut: #45453f; --s-pri: #ffd23f; --s-pfg: #111; --s-r: 0; --s-ir: 0; --s-bd: 2.5px solid #111;
+  --s-sh: 3px 3px 0 #111; --s-obg: #fff; --s-osh: 3px 3px 0 #111; --s-ibg: #fff; --s-ibd: 2.5px solid #111; --s-tint: #a6f4ff;
+  --s-cbd: 2px solid #111; --s-tt: uppercase; --s-font: system-ui, sans-serif;
+}
+.preset-slide-shot[data-kit='liquid-glass'] {
+  --s-bg: linear-gradient(150deg, #15265e, #2167c5 55%, #6b52d9); --s-ink: #f6faff; --s-mut: #d3e2f5; --s-pri: rgb(72 132 255 / 0.82);
+  --s-pfg: #fff; --s-r: 999px; --s-ir: 18px; --s-bd: 1px solid rgb(255 255 255 / 0.5); --s-sh: inset 0 1px 2px rgb(255 255 255 / 0.45);
+  --s-obg: rgb(255 255 255 / 0.14); --s-ibg: rgb(255 255 255 / 0.14); --s-ibd: 1px solid rgb(255 255 255 / 0.28); --s-tint: rgb(255 255 255 / 0.16);
+  --s-font: 'Segoe UI', system-ui, sans-serif;
+}

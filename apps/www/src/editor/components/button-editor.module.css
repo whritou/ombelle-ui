@@ -201,8 +201,11 @@
   .mobileHiddenPreview, .mobileHiddenCode, .mobileHiddenRail { display: none; }
   .stateToggle { display: none; }
   .stateSelect { display: flex; flex: 1; min-width: 0; }
-  /* Customize pins a compact preview above the inspector. */
-  .primary.paneCustomize { order: -1; position: sticky; top: 0; z-index: 2; background: var(--background); padding-bottom: 4px; }
+  /* Customize keeps a compact preview above the inspector, and only the inspector scrolls, so nothing passes under the preview. */
+  .workspace:has(> .paneCustomize) { overflow: hidden; }
+  .workspace:has(> .paneCustomize) > .rail { display: flex; flex: 1; min-height: 0; }
+  .workspace:has(> .paneCustomize) .railScroll[data-slot='scroll-area'] { flex: 1; min-height: 0; }
+  .primary.paneCustomize { order: -1; flex: none; }
   .paneCustomize .previewSection { padding: .625rem; }
   .paneCustomize .viewControls { flex-wrap: nowrap; margin-bottom: .5rem; }
   .paneCustomize .viewControls > :not([data-slot='toggle-group'][aria-label='Preview mode'], .stateSelect) { display: none; }
@@ -230,10 +233,9 @@
   .root .getCode svg { display: none; }
 }
 
-/* Phone panes keep focused controls clear of the dock and, in Customize, of the pinned specimen. */
+/* Phone panes keep focused controls clear of the dock. */
 @media (max-width: 767px) {
   .workspace { padding-bottom: 112px; scroll-padding-bottom: 112px; }
-  .workspace:has(> .paneCustomize) { scroll-padding-top: 250px; }
 }
 @media (max-width: 767px) {
   /* The pane ends above the dock, so the browser scrolls a control the dock would cover into view. */

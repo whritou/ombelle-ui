@@ -99,10 +99,12 @@ export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', classNa
     setPosition,
     scrollTo: index => {
       const content = contentRef.current
-      const item = content?.querySelectorAll<HTMLElement>(':scope > [data-carousel-item]')[index]
-      if (!content || !item) return
+      const items = content?.querySelectorAll<HTMLElement>(':scope > [data-carousel-item]')
+      const item = items?.[index]
+      if (!content || !items || !item) return
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      content.scrollTo({ left: item.offsetLeft, behavior: reduce ? 'auto' : 'smooth' })
+      // Offsets count from the first slide, so the viewport's own inset is not scrolled past.
+      content.scrollTo({ left: item.offsetLeft - items[0]!.offsetLeft, behavior: reduce ? 'auto' : 'smooth' })
     },
     images: slides.images,
   }
@@ -138,8 +140,9 @@ export function CarouselContent({ className, children, onScroll, ...props }: Rea
     const slides = [...content.querySelectorAll<HTMLElement>(':scope > [data-carousel-item]')]
     const left = Math.abs(content.scrollLeft)
     let index = 0
+    const start = slides[0]?.offsetLeft ?? 0
     slides.forEach((slide, at) => {
-      if (Math.abs(slide.offsetLeft - left) < Math.abs(slides[index].offsetLeft - left)) index = at
+      if (Math.abs(slide.offsetLeft - start - left) < Math.abs(slides[index].offsetLeft - start - left)) index = at
     })
     const max = content.scrollWidth - content.clientWidth
     const atEnd = left >= max - 1

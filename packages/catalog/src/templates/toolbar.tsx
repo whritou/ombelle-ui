@@ -191,7 +191,7 @@ function OverflowEntries({ elements }: { elements: readonly HTMLElement[] }) {
         const entry = menuEntry(element)
         return entry.kind === 'toggle'
           ? (
-              <DropdownMenuPrimitive.CheckboxItem key={index} checked={entry.pressed} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
+              <DropdownMenuPrimitive.CheckboxItem key={index} checked={entry.pressed} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item" data-kind="toggle">
                 <span data-slot="toolbar-overflow-indicator">
                   <DropdownMenuPrimitive.ItemIndicator><CheckIcon aria-hidden="true" /></DropdownMenuPrimitive.ItemIndicator>
                 </span>
@@ -200,7 +200,6 @@ function OverflowEntries({ elements }: { elements: readonly HTMLElement[] }) {
             )
           : (
               <DropdownMenuPrimitive.Item key={index} disabled={entry.disabled} onSelect={() => element.click()} data-slot="toolbar-overflow-item">
-                <span data-slot="toolbar-overflow-indicator" />
                 {entry.label}
               </DropdownMenuPrimitive.Item>
             )
@@ -217,7 +216,6 @@ export type ToolbarOverflowItemProps = Omit<React.ComponentProps<typeof Dropdown
 export function ToolbarOverflowItem({ onSelect, destructive = false, className, children, ...props }: ToolbarOverflowItemProps) {
   return (
     <DropdownMenuPrimitive.Item {...props} onSelect={() => onSelect()} data-slot="toolbar-overflow-item" data-variant={destructive ? 'destructive' : undefined} className={cn(className)}>
-      <span data-slot="toolbar-overflow-indicator" />
       {children}
     </DropdownMenuPrimitive.Item>
   )

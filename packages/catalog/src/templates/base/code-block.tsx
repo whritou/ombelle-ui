@@ -168,9 +168,9 @@ export type CodeBlockCopyProps = {
   onCopied?(ok: boolean): void
 } & Omit<React.ComponentProps<'button'>, 'onClick' | 'children'>
 
-/** Shows "Copied" for 1.5 s after a successful copy; a polite live region announces the result. */
+/** Shows "Copied" (or "Copy failed") for 2 s after a copy; a polite live region announces the result. */
 export function CodeBlockCopy({ text, label, onCopied, className, ...props }: CodeBlockCopyProps) {
-  const [copied, setCopied] = React.useState(false)
+  const [copied, setCopied] = React.useState<boolean | null>(null)
   const [status, setStatus] = React.useState('')
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const mounted = React.useRef(false)
@@ -184,7 +184,7 @@ export function CodeBlockCopy({ text, label, onCopied, className, ...props }: Co
   // New text has not been copied.
   React.useEffect(() => {
     clearTimeout(timer.current)
-    setCopied(false)
+    setCopied(null)
     setStatus('')
   }, [text])
   const copy = async () => {
@@ -204,11 +204,11 @@ export function CodeBlockCopy({ text, label, onCopied, className, ...props }: Co
     setCopied(ok)
     setStatus(ok ? 'Copied' : 'Copy failed')
     // A write that settles after unmount starts no timer.
-    if (ok && mounted.current)
+    if (mounted.current)
       timer.current = setTimeout(() => {
-        setCopied(false)
+        setCopied(null)
         setStatus('')
-      }, 1500)
+      }, 2000)
     onCopied?.(ok)
   }
   return (
@@ -217,11 +217,12 @@ export function CodeBlockCopy({ text, label, onCopied, className, ...props }: Co
         {...props}
         type="button"
         data-slot="code-block-copy"
+        data-state={copied === null ? undefined : copied ? 'copied' : 'failed'}
         aria-label={label ?? 'Copy code'}
         className={cn(className)}
         onClick={() => void copy()}
       >
-        {copied ? 'Copied' : 'Copy'}
+        {copied === null ? 'Copy' : copied ? 'Copied' : 'Copy failed'}
       </button>
       <span role="status" aria-live="polite" data-slot="code-block-status" style={visuallyHidden}>
         {status}

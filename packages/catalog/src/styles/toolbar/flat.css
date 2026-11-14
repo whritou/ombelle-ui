@@ -127,8 +127,8 @@
   cursor: pointer;
   user-select: none;
 }
-[data-slot='toolbar-overflow-item'][data-inset],
-[data-slot='toolbar-overflow-item'] {
+/* Only toggle items carry a check box, so only they leave room for it. */
+[data-slot='toolbar-overflow-item'][data-kind='toggle'] {
   padding-inline-start: 2.125rem;
 }
 [data-slot='toolbar-overflow-item'] svg {

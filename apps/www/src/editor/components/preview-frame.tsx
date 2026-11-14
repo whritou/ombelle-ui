@@ -148,5 +148,5 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
 
   const url = previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)
   return <iframe ref={iframe} title={`${componentName} recipe preview`}
-    src={component ? `${url}?component=${encodeURIComponent(component)}` : url} sandbox="allow-scripts" style={{ height: previewFrameHeight(contentSize) }} />
+    src={component ? `${url}?component=${encodeURIComponent(component)}` : url} sandbox="allow-scripts" allow="clipboard-write" style={{ height: previewFrameHeight(contentSize) }} />
 }

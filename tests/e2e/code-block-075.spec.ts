@@ -130,7 +130,7 @@ for (const edition of ['radix', 'base'] as const) {
       await expect.poll(() => copied(page)).toEqual([source])
     })
 
-    test('Copy announces Copied and resets after 1.5 s, restarting on a second click', async ({ page }) => {
+    test('Copy announces Copied and resets after 2 s, restarting on a second click', async ({ page }) => {
       await page.clock.install()
       await open(page, edition)
       // Stop natural time, so only runFor moves the page's timers.
@@ -141,7 +141,7 @@ for (const edition of ['radix', 'base'] as const) {
       await copy.click()
       await expect(status).toHaveText('Copied')
       await expect(copy).toHaveText('Copied')
-      await page.clock.runFor(1499)
+      await page.clock.runFor(1999)
       await expect(copy).toHaveText('Copied')
       await page.clock.runFor(1)
       await expect(copy).toHaveText('Copy')
@@ -152,7 +152,7 @@ for (const edition of ['radix', 'base'] as const) {
       await page.clock.runFor(1000)
       await copy.click()
       await expect(status).toHaveText('Copied')
-      await page.clock.runFor(1499)
+      await page.clock.runFor(1999)
       await expect(copy).toHaveText('Copied')
       await expect(status).toHaveText('Copied')
       await page.clock.runFor(1)
@@ -167,13 +167,13 @@ for (const edition of ['radix', 'base'] as const) {
         const status = fixture.getByRole('status')
         await copy.click()
         await expect(status).toHaveText('Copy failed')
-        await expect(copy).toHaveText('Copy')
+        await expect(copy).toHaveText('Copy failed')
         // The region must change again, or a screen reader stays silent the second time.
         await watchStatus(page)
         await copy.click()
         await expect.poll(() => statusChanges(page)).toBeGreaterThan(0)
         await expect(status).toHaveText('Copy failed')
-        await expect(copy).toHaveText('Copy')
+        await expect(copy).toHaveText('Copy failed')
       })
     }
 

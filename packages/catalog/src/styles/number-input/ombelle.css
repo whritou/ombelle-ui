@@ -48,6 +48,9 @@
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.75rem;
   font-weight: 500;
+  /* A wide field must not squeeze the unit onto two lines. */
+  flex: none;
+  white-space: nowrap;
 }
 [data-slot='number-input-decrement'],
 [data-slot='number-input-increment'] {
