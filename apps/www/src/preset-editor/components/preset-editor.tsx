@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Download, Eye, ShieldCheck, SlidersHorizontal } from 'lucide-react'
-import type { StyleFamily } from '@ombelle/contracts'
+import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
 import { defaultSiteFamily, offeredStyleFamilies } from '../../snapshots/install-command'
 import {
   applyGlassTint,
@@ -49,7 +49,7 @@ import {
 import {
   accentSchemes,
   applyColorScheme,
-  baseSchemes,
+  paletteSchemes,
   resetColorScheme,
 } from '../schemes'
 import { PresetExportPanel, downloadPresetText } from './preset-export-panel'
@@ -506,7 +506,9 @@ export default function PresetEditor() {
                 commit(
                   resetColorScheme(
                     draft,
-                    group === 'accent' ? accentSchemes : baseSchemes,
+                    group === 'accent'
+                      ? accentSchemes
+                      : styleFamilies.flatMap((family) => paletteSchemes(family)),
                   ),
                   'scheme:' + group,
                 )
