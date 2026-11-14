@@ -247,6 +247,22 @@ export async function planTheme(
   }
   if (plan.diagnostics.length) change.action = 'conflict'
   plan.changes.unshift(change)
+  // A theme needs the packages its fonts import. Only presets that opt into
+  // registry fonts have any; every other preset keeps an empty dependency plan.
+  const installedPackages =
+    context.manager === 'bun'
+      ? (context.packageJson.dependencies ?? {})
+      : { ...context.packageJson.devDependencies, ...context.packageJson.dependencies }
+  plan.dependencyPlan = result.dependencies.filter(
+    (d) => installedPackages[d.name] !== d.version,
+  )
+  const fontPackages = result.dependencies.filter((d) => d.name.startsWith('@fontsource'))
+  if (!fullStyle && fontPackages.length)
+    plan.notices.push(
+      'The style file is not managed here, so import ' +
+        fontPackages.map((d) => d.name).join(', ') +
+        ' in your global CSS yourself',
+    )
   plan.managedDeclarations = records
   lock.managedDeclarations = records
   await appendState(plan, context, result, lock)

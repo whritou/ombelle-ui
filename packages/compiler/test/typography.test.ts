@@ -103,6 +103,8 @@ describe('compile with typography', () => {
     const result = await compileFonted(trio, ['card', 'kbd'])
     const tokens = art(result, 'styles/ui-tokens.css')
     expect(tokens.startsWith('@import')).toBe(true)
+    // The CLI installs ui-style.css, not ui-tokens.css, so the imports lead it too.
+    expect(art(result, 'styles/ui-style.css').startsWith('@import')).toBe(true)
     expect(tokens).toContain('--font-heading:')
     expect(tokens).toContain('--font-mono:')
     // The compiler formats CSS, which adds the trailing semicolon.
@@ -121,6 +123,7 @@ describe('compile with typography', () => {
   it('still emits the imports and dependencies when no components are installed', async () => {
     const result = await compileFonted(trio, [])
     expect(art(result, 'styles/ui-tokens.css').startsWith('@import')).toBe(true)
+    expect(art(result, 'styles/ui-style.css').startsWith('@import')).toBe(true)
     expect(result.dependencies.map((d) => d.name)).toEqual([
       '@fontsource-variable/fraunces',
       '@fontsource-variable/inter',
@@ -142,6 +145,7 @@ describe('compile with typography', () => {
       expect(tokens).not.toContain('--font-heading')
       expect(tokens).not.toContain('--font-mono')
       expect(art(result, 'styles/ui-style.css')).not.toContain('--font-heading')
+      expect(art(result, 'styles/ui-style.css').startsWith('@import')).toBe(false)
       expect(result.dependencies.some((d) => d.name.startsWith('@fontsource'))).toBe(false)
     },
   )

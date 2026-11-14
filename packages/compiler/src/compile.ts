@@ -165,7 +165,8 @@ export async function compile(input: {
     {
       logicalPath: 'styles/ui-style.css',
       kind: 'style',
-      content: prefixSharedRules(
+      // The CLI installs this file and not ui-tokens.css, so the font imports lead it too.
+      content: typography.imports.join('') + prefixSharedRules(
         catalog.styles[family] +
           (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : '') +
           fontRuleBlock(typography),
