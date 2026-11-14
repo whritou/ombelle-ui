@@ -12,7 +12,7 @@ import {
 
 const rose = accentSchemes.find((scheme) => scheme.id === 'rose')!
 // Each family joins this list as its palettes land.
-const familiesWithPalettes = ['flat'] as const
+const familiesWithPalettes = ['flat', 'minimalist', 'neo-brutalism', 'ombelle'] as const
 type Family = 'flat' | 'minimalist' | 'neo-brutalism' | 'ombelle'
 
 const rgb = (hex: string) =>
