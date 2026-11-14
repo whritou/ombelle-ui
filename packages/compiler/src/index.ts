@@ -1,5 +1,5 @@
 export * from './compile.js'
-export { resolveTypography, fontRuleBlock, type Typography } from './typography.js'
+export { resolveTypography, fontRuleBlock, stripFontImports, type Typography } from './typography.js'
 export * from './resolve.js'
 export * from './canonicalize.js'
 export * from './hash.js'

@@ -3,7 +3,7 @@ import { getCatalog } from '@ombelle/catalog'
 import { FoundationError } from '@ombelle/contracts'
 import { compile } from '../src/compile.js'
 import { compileRecipeStyles } from '../src/recipe-styles.js'
-import { fontRuleBlock, resolveTypography } from '../src/typography.js'
+import { fontRuleBlock, resolveTypography, stripFontImports } from '../src/typography.js'
 
 const sansStack = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
 const catalog = getCatalog('0.1.0')
@@ -170,5 +170,21 @@ describe('scoped button recipes', () => {
     expect(css).toContain('Inter Variable')
     expect(css).not.toContain('@import')
     expect(css).not.toContain('Roboto')
+  })
+})
+
+describe('stripFontImports', () => {
+  it('removes registry font imports and keeps every other rule', () => {
+    const css =
+      "@import '@fontsource-variable/inter';@import \"@fontsource/space-mono/400.css\";\n:root{--a:1}@import url('keep.css');"
+    const stripped = stripFontImports(css)
+    expect(stripped).not.toContain('@fontsource')
+    expect(stripped).toContain(':root{--a:1}')
+    expect(stripped).toContain("@import url('keep.css');")
+  })
+  it('strips the imports the compiler writes into the tokens and style files', async () => {
+    const result = await compileFonted(trio, [])
+    for (const path of ['styles/ui-tokens.css', 'styles/ui-style.css'])
+      expect(stripFontImports(art(result, path))).not.toContain('@fontsource')
   })
 })

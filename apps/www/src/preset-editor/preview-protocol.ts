@@ -1,4 +1,4 @@
-import { canonicalize, compile, sha256 } from '@ombelle/compiler'
+import { canonicalize, compile, sha256, stripFontImports } from '@ombelle/compiler'
 import {
   componentsWithStyleSupport,
   isStyleFamily,
@@ -202,6 +202,7 @@ export function presetRuntimeStyles(result: CompileResult): string {
   // Utilities using the mapping are already built from the generated entry.
   return result.artifacts
     .filter((a) => a.kind === 'style')
-    .map((a) => a.content.replace(/@theme inline\s*\{[^}]*\}/g, ''))
+    // The preview loads font files from its own bundle, and a browser cannot resolve a package import.
+    .map((a) => stripFontImports(a.content.replace(/@theme inline\s*\{[^}]*\}/g, '')))
     .join('\n')
 }
