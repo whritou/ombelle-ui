@@ -16,6 +16,7 @@ import {
 import { assertGlassContrast, glassTokens, withGlassOverrides } from './glass.js'
 import { glassMaterialActive } from './glass-contrast.js'
 import { normalizeColor } from './resolve.js'
+import { resolveTypography } from './typography.js'
 
 export function validateRecipeDarkSelector(value: string): string {
   if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
@@ -228,12 +229,7 @@ export function compileScopedButtonStyles(input: {
     '--shadow-x': d.shadowOffsetXPx + 'px',
     '--shadow-y': d.shadowOffsetYPx + 'px',
     '--control-height': d.density === 'compact' ? '2.25rem' : '2.5rem',
-    '--font-family':
-      d.fontFamilyId === 'system-serif'
-        ? 'Georgia, serif'
-        : d.fontFamilyId === 'system-mono'
-          ? 'monospace'
-          : "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    '--font-family': resolveTypography(d).family,
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
   if (data.styleFamily === 'liquid-glass') {
