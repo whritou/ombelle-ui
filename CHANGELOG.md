@@ -4,6 +4,7 @@
 
 ## 0.7.7 — 14 November 2026
 
+- Publish CLI 0.7.7: the website install commands now use it, so projects get the 0.7.7 style and behaviour fixes from npm. The registry tarball matches the tested candidate, and a fresh registry installation runs successfully.
 - Pagination: hovering the current page keeps its primary text colour; it took the hover colour of the other pages and dropped to 1.0–1.7:1 on the primary fill.
 - Scroll Area: content keeps 0.5rem by 0.75rem clear of the border, and while the area scrolls the viewport keeps a gutter as wide as the scrollbar, so the bar no longer covers badges and other content at the end of a line. Without a horizontal ScrollBar, content takes the viewport's width and wraps instead of running under the clipped edge.
 - Tooltip: a tooltip closes when the pointer leaves the page, as when it leaves an embedded preview; it stayed open because no later pointer move reached it. A tooltip closed by a click no longer stays on screen: its enter animation applied in the closed state too, so the library waited for an exit animation that never ended.
