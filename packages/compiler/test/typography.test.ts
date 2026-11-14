@@ -88,8 +88,8 @@ describe('fontRuleBlock', () => {
   })
   it('targets title slots with the heading font and code slots with the mono font', () => {
     const block = squash(fontRuleBlock(resolveTypography(trio)))
-    expect(block).toContain('[data-slot="card-title"]{font-family:var(--font-heading)}')
-    expect(block).toContain('[data-slot="kbd"]{font-family:var(--font-mono)}')
+    expect(block).toContain('[data-slot="card-title"]:not([hidden]){font-family:var(--font-heading)}')
+    expect(block).toContain('[data-slot="kbd"]:not([hidden]){font-family:var(--font-mono)}')
   })
   it('emits only the heading rules when only a heading font is set', () => {
     const block = squash(fontRuleBlock(resolveTypography({ headingFontFamilyId: 'fraunces' })))
@@ -109,7 +109,7 @@ describe('compile with typography', () => {
     expect(tokens).toContain('--font-mono:')
     // The compiler formats CSS, which adds the trailing semicolon.
     expect(squash(art(result, 'styles/ui-style.css'))).toContain(
-      '[data-slot="card-title"]{font-family:var(--font-heading);}',
+      '[data-slot="card-title"]:not([hidden]){font-family:var(--font-heading);}',
     )
     expect(result.dependencies).toEqual(
       expect.arrayContaining([
@@ -186,5 +186,22 @@ describe('stripFontImports', () => {
     const result = await compileFonted(trio, [])
     for (const path of ['styles/ui-tokens.css', 'styles/ui-style.css'])
       expect(stripFontImports(art(result, path))).not.toContain('@fontsource')
+  })
+})
+
+describe('heading line height for fonts with tall metrics', () => {
+  it('carries a title line height for Young Serif and Michroma only', () => {
+    expect(resolveTypography({ headingFontFamilyId: 'young-serif' }).headingLineHeight).toBe(1.5)
+    expect(resolveTypography({ headingFontFamilyId: 'michroma' }).headingLineHeight).toBe(1.5)
+    expect(resolveTypography({ headingFontFamilyId: 'fraunces' }).headingLineHeight).toBeUndefined()
+    expect(resolveTypography({ headingFontFamilyId: 'system-serif' }).headingLineHeight).toBeUndefined()
+    expect(resolveTypography({ fontFamilyId: 'inter' }).headingLineHeight).toBeUndefined()
+  })
+  it('adds the line height to the heading rules and leaves other fonts untouched', () => {
+    const tall = squash(fontRuleBlock(resolveTypography({ headingFontFamilyId: 'young-serif' })))
+    expect(tall).toContain('[data-slot="card-title"]:not([hidden]){font-family:var(--font-heading);line-height:1.5}')
+    const plain = squash(fontRuleBlock(resolveTypography({ headingFontFamilyId: 'fraunces' })))
+    expect(plain).toContain('[data-slot="card-title"]:not([hidden]){font-family:var(--font-heading)}')
+    expect(plain).not.toContain('line-height')
   })
 })

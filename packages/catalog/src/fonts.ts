@@ -9,6 +9,11 @@ export interface FontEntry {
   /** Static weights that are imported, or 'variable' for a variable font. */
   weights: readonly number[] | 'variable'
   license: 'OFL-1.1'
+  /**
+   * Minimum line height for titles set in this display font. Its glyph box is taller than the
+   * tight line height of the catalog titles, so the text would extend past its box.
+   */
+  displayLineHeight?: number
   fontsource: { package: string; version: string; imports: readonly string[] }
 }
 
@@ -77,9 +82,9 @@ export const fontRegistry: readonly FontEntry[] = [
   variable('fraunces', 'Fraunces', bodyAndDisplay, serif),
   variable('instrument-sans', 'Instrument Sans', bodyAndDisplay, sans),
   fixed('ibm-plex-mono', 'IBM Plex Mono', ['mono'], mono, [400, 600]),
-  fixed('young-serif', 'Young Serif', ['display'], serif, [400]),
+  { ...fixed('young-serif', 'Young Serif', ['display'], serif, [400]), displayLineHeight: 1.5 },
   variable('nunito', 'Nunito', bodyAndDisplay, sans),
-  fixed('michroma', 'Michroma', ['display'], sans, [400]),
+  { ...fixed('michroma', 'Michroma', ['display'], sans, [400]), displayLineHeight: 1.5 },
   variable('exo-2', 'Exo 2', bodyAndDisplay, sans),
   fixed('share-tech-mono', 'Share Tech Mono', ['mono'], mono, [400]),
 ]

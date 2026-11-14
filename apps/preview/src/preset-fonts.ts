@@ -55,6 +55,8 @@ export function loadPresetFonts(ids: readonly string[]): Promise<void> {
  * Audit pages only: the styles that put `<body>,<heading>,<mono>` (registry ids, empty for unset)
  * on every specimen, and the fonts to load for them. Recipe CSS pins its own --font-family, so
  * the override is !important, and slots match by suffix because recipe slots carry a prefix.
+ * Each recipe specimen renders its own <style> after this one, so the rules take one more
+ * specificity step than the compiler's own block.
  */
 export function auditFontStyles(list: string): { css: string; ids: string[] } {
   const [body, heading, mono] = list.split(',').map((id) => id.trim() || undefined)
@@ -65,9 +67,10 @@ export function auditFontStyles(list: string): { css: string; ids: string[] } {
     ...(typography.heading ? [`--font-heading:${typography.heading} !important`] : []),
     ...(typography.mono ? [`--font-mono:${typography.mono} !important`] : []),
   ].join(';')
-  const rule = (slot: string, token: string) => `[data-slot$="${slot}"]{font-family:var(${token})}`
+  const rule = (slot: string, token: string, extra = '') => `[data-slot$="${slot}"]:not([hidden]):not([hidden]){font-family:var(${token})${extra}}`
+  const leading = typography.headingLineHeight === undefined ? '' : `;line-height:${typography.headingLineHeight}`
   const rules = [
-    ...(typography.heading ? headingSlots.map((slot) => rule(slot, '--font-heading')) : []),
+    ...(typography.heading ? headingSlots.map((slot) => rule(slot, '--font-heading', leading)) : []),
     ...(typography.mono ? monoSlots.map((slot) => rule(slot, '--font-mono')) : []),
   ].join('')
   return { css: `:root,[data-ombelle-recipe]{${declarations}}` + rules, ids: presetFontIds(design) }

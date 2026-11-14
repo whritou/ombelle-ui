@@ -11,6 +11,8 @@ export type Typography = {
   family: string
   /** Value of --font-heading; set only when the preset sets headingFontFamilyId. */
   heading?: string
+  /** Title line height the heading font needs, when its glyph box is taller than the catalog titles. */
+  headingLineHeight?: number
   /** Value of --font-mono; set only when the preset sets monoFontFamilyId. */
   mono?: string
   /** CSS import lines for the registry fonts in use, deduplicated and sorted. */
@@ -93,9 +95,11 @@ export function resolveTypography(design: TypographyDesign): Typography {
   const packages = new Map<string, string>()
   for (const font of used.values())
     packages.set(font.fontsource.package, font.fontsource.version)
+  const headingLineHeight = fontById(design.headingFontFamilyId ?? '')?.displayLineHeight
   return {
     family,
     ...(heading === undefined ? {} : { heading }),
+    ...(headingLineHeight === undefined ? {} : { headingLineHeight }),
     ...(mono === undefined ? {} : { mono }),
     imports,
     dependencies: [...packages]
@@ -104,12 +108,17 @@ export function resolveTypography(design: TypographyDesign): Typography {
   }
 }
 
-/** Rules that apply the heading and mono fonts; empty unless the preset sets one of them. */
+/**
+ * Rules that apply the heading and mono fonts; empty unless the preset sets one of them.
+ * `:not([hidden])` only raises the specificity, so these win over a component's own title
+ * rule (such as its line height) whichever stylesheet loads last.
+ */
 export function fontRuleBlock(typography: Typography): string {
-  const rule = (slot: string, token: string) =>
-    `[data-slot="${slot}"]{font-family:var(${token})}`
+  const rule = (slot: string, token: string, extra = '') =>
+    `[data-slot="${slot}"]:not([hidden]){font-family:var(${token})${extra}}`
+  const leading = typography.headingLineHeight === undefined ? '' : `;line-height:${typography.headingLineHeight}`
   return [
-    ...(typography.heading === undefined ? [] : headingSlots.map((s) => rule(s, '--font-heading'))),
+    ...(typography.heading === undefined ? [] : headingSlots.map((s) => rule(s, '--font-heading', leading))),
     ...(typography.mono === undefined ? [] : monoSlots.map((s) => rule(s, '--font-mono'))),
   ].join('')
 }

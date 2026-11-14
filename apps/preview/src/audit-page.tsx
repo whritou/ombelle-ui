@@ -108,15 +108,7 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
   await stylesheets[`${folder}/preview.css`]!()
   // `?fonts=<body>,<heading>,<mono>` audits the page with those registry fonts (empty entries unset).
   const fonts = new URLSearchParams(window.location.search).get('fonts')
-  if (fonts) {
-    const audit = auditFontStyles(fonts)
-    const style = document.createElement('style')
-    style.dataset.auditFonts = fonts
-    style.textContent = audit.css
-    document.head.append(style)
-    await loadPresetFonts(audit.ids)
-    await document.fonts.ready
-  }
+  const audit = fonts ? auditFontStyles(fonts) : null
   // Ordinary components: all of them on Base pages; Button (no recipe) and the glass filter on Radix pages.
   const ordinaryNames = edition === 'base'
     ? Object.keys(editionModules).filter(path => path.startsWith(`${folder}/components/ui/`))
@@ -125,6 +117,15 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
   const recipes = data.specimens.filter(item => item.scope)
   const factories = Object.fromEntries(await Promise.all(recipes.map(async item =>
     [item.component, await scopedCatalogComponents[item.component as keyof typeof scopedCatalogComponents]()] as const)))
+  if (audit) {
+    // Appended after every component stylesheet has loaded, so these rules come last.
+    const style = document.createElement('style')
+    style.dataset.auditFonts = fonts!
+    style.textContent = audit.css
+    document.head.append(style)
+    await loadPresetFonts(audit.ids)
+    await document.fonts.ready
+  }
   document.documentElement.classList.toggle('dark', mode === 'dark')
   setGlassBackdrop(document.documentElement, data.backdrop[mode] ?? undefined)
   page.render(<AuditPage data={data} mode={mode} ordinary={ordinary} factories={factories} />)

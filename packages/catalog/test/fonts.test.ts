@@ -94,3 +94,12 @@ describe('preset schema font enums', () => {
     expect(schema.properties.schemaVersion.enum).toEqual(['1.0', '1.1'])
   })
 })
+
+describe('title line height', () => {
+  it('is declared for exactly the display fonts whose glyph box overflows the catalog titles', () => {
+    const declared = fontRegistry
+      .filter((font) => font.displayLineHeight !== undefined)
+      .map((font) => [font.id, font.displayLineHeight])
+    expect(declared.sort()).toEqual([['michroma', 1.5], ['young-serif', 1.5]])
+  })
+})
