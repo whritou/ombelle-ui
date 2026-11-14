@@ -167,7 +167,7 @@ describe('published installer compatibility', () => {
         name="Breadcrumb"
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.7 add --recipe')
+    expect(html).toContain('npx @ombelle-ui/cli@0.7.8 add --recipe')
     expect(html).toContain('Copy install command')
     expect(html).toContain('Download recipe JSON')
     expect(html).toContain('aria-label="Recipe JSON"')
@@ -208,7 +208,7 @@ describe('published installer compatibility', () => {
         origin="https://presets.example.test"
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.7')
+    expect(html).toContain('npx @ombelle-ui/cli@0.7.8')
     expect(html).toContain('Download preset JSON')
     expect(html).toContain('id="snapshot-json"')
   })
@@ -240,7 +240,7 @@ describe('published installer compatibility', () => {
     )
     expect(html).toContain('data-testid="preset-install-command"')
     expect(html).not.toContain('data-testid="preset-install-held"')
-    expect(html).toContain('0.7.7')
+    expect(html).toContain('0.7.8')
     expect(html).toContain(
       '<button type="button">Download preset JSON</button>',
     )
@@ -409,7 +409,7 @@ describe('font pairs', () => {
     expect(compatibility.fontsInstallNotice).toContain('requires CLI 0.7.8')
   })
 
-  it('shows no command and the notice for a published preset that uses font pairs', () => {
+  it('offers the install command for a published preset that uses font pairs now that 0.7.8 is published', () => {
     const snapshot: PresetSnapshot = {
       snapshotVersion: '1.0',
       id: 'ps_' + 'a'.repeat(32),
@@ -424,12 +424,12 @@ describe('font pairs', () => {
     const html = renderToStaticMarkup(
       <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" />,
     )
-    expect(html).toContain('requires CLI 0.7.8')
-    expect(html).not.toContain('npx @ombelle-ui/cli@0.7.7')
+    expect(html).not.toContain('requires CLI 0.7.8')
+    expect(html).toContain('npx @ombelle-ui/cli@0.7.8')
     expect(html).toContain('Download preset JSON')
   })
 
-  it('holds the export panel command for a preset that uses font pairs', async () => {
+  it('offers the export panel command for a preset that uses font pairs now that 0.7.8 is published', async () => {
     const draft = setPresetEdit(createPresetDraft('ombelle'), '/design/headingFontFamilyId', 'fraunces')
     const result = await compile({
       preset: fonted(),
@@ -445,8 +445,8 @@ describe('font pairs', () => {
         contrastWarning={false}
       />,
     )
-    expect(html).toContain('data-testid="preset-install-held"')
-    expect(html).toContain('requires CLI 0.7.8')
-    expect(html).not.toContain('data-testid="preset-install-command"')
+    expect(html).not.toContain('data-testid="preset-install-held"')
+    expect(html).toContain('data-testid="preset-install-command"')
+    expect(html).toContain('0.7.8')
   })
 })
