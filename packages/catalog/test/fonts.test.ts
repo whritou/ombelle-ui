@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { systemFontIds } from '@ombelle/contracts'
 import { fontById, fontRegistry } from '../src/fonts.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -70,5 +71,26 @@ describe('font registry', () => {
       expect(docs, font.id).toContain('`' + font.id + '`')
       expect(docs).toContain(font.license)
     }
+  })
+})
+
+describe('preset schema font enums', () => {
+  const schema = JSON.parse(
+    fs.readFileSync(path.join(here, '../../../schemas/preset.schema.json'), 'utf8'),
+  )
+  const enumOf = (key: string) => [...schema.properties.design.properties[key].enum].sort()
+  const idsWith = (role: 'display' | 'body' | 'mono') =>
+    fontRegistry.filter((font) => font.roles.includes(role)).map((font) => font.id)
+  it('lists the system ids plus every body font for fontFamilyId', () => {
+    expect(enumOf('fontFamilyId')).toEqual([...systemFontIds, ...idsWith('body')].sort())
+  })
+  it('lists the system ids plus every display font for headingFontFamilyId', () => {
+    expect(enumOf('headingFontFamilyId')).toEqual([...systemFontIds, ...idsWith('display')].sort())
+  })
+  it('lists system-mono plus every mono font for monoFontFamilyId', () => {
+    expect(enumOf('monoFontFamilyId')).toEqual(['system-mono', ...idsWith('mono')].sort())
+  })
+  it('accepts schema versions 1.0 and 1.1', () => {
+    expect(schema.properties.schemaVersion.enum).toEqual(['1.0', '1.1'])
   })
 })

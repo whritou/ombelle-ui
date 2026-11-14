@@ -19,7 +19,10 @@ export const presetSchema = {
   ],
   "properties": {
     "schemaVersion": {
-      "const": "1.0"
+      "enum": [
+        "1.0",
+        "1.1"
+      ]
     },
     "id": {
       "$ref": "#/$defs/slug"
@@ -75,7 +78,49 @@ export const presetSchema = {
           "enum": [
             "system-sans",
             "system-serif",
-            "system-mono"
+            "system-mono",
+            "dm-sans",
+            "geist",
+            "space-grotesk",
+            "work-sans",
+            "figtree",
+            "inter-tight",
+            "inter",
+            "fraunces",
+            "instrument-sans",
+            "nunito",
+            "exo-2"
+          ]
+        },
+        "headingFontFamilyId": {
+          "enum": [
+            "system-sans",
+            "system-serif",
+            "system-mono",
+            "dm-sans",
+            "geist",
+            "space-grotesk",
+            "work-sans",
+            "figtree",
+            "inter-tight",
+            "inter",
+            "fraunces",
+            "instrument-sans",
+            "nunito",
+            "exo-2",
+            "bricolage-grotesque",
+            "young-serif",
+            "michroma"
+          ]
+        },
+        "monoFontFamilyId": {
+          "enum": [
+            "system-mono",
+            "geist-mono",
+            "space-mono",
+            "jetbrains-mono",
+            "ibm-plex-mono",
+            "share-tech-mono"
           ]
         },
         "radiusRem": {

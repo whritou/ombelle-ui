@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "name", "revision", "catalogRelease", "compilerVersion", "platform", "styleFamily", "modes", "design"],
   "properties": {
-    "schemaVersion": {"const": "1.0"},
+    "schemaVersion": {"enum": ["1.0", "1.1"]},
     "id": {"$ref": "#/$defs/slug"},
     "name": {"type": "string", "minLength": 1, "maxLength": 80},
     "revision": {"type": "integer", "minimum": 1},
@@ -27,7 +27,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "fontFamilyId": {"enum": ["system-sans", "system-serif", "system-mono"]},
+        "fontFamilyId": {"enum": ["system-sans","system-serif","system-mono","dm-sans","geist","space-grotesk","work-sans","figtree","inter-tight","inter","fraunces","instrument-sans","nunito","exo-2"]},
+        "headingFontFamilyId": {"enum": ["system-sans","system-serif","system-mono","dm-sans","geist","space-grotesk","work-sans","figtree","inter-tight","inter","fraunces","instrument-sans","nunito","exo-2","bricolage-grotesque","young-serif","michroma"]},
+        "monoFontFamilyId": {"enum": ["system-mono","geist-mono","space-mono","jetbrains-mono","ibm-plex-mono","share-tech-mono"]},
         "radiusRem": {"type": "number", "minimum": 0, "maximum": 2},
         "density": {"enum": ["comfortable", "compact"]},
         "borderWidthPx": {"type": "number", "minimum": 0, "maximum": 4},
