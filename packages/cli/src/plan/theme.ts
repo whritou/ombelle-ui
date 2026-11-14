@@ -277,10 +277,12 @@ export async function planTheme(
     context.manager === 'bun'
       ? (context.packageJson.dependencies ?? {})
       : { ...context.packageJson.devDependencies, ...context.packageJson.dependencies }
-  plan.dependencyPlan = result.dependencies.filter(
+  // Only font packages: a theme never installs component dependencies, even when the caller
+  // compiled the preset with components and the result lists theirs.
+  const fontPackages = result.dependencies.filter((d) => d.name.startsWith('@fontsource'))
+  plan.dependencyPlan = fontPackages.filter(
     (d) => installedPackages[d.name] !== d.version,
   )
-  const fontPackages = result.dependencies.filter((d) => d.name.startsWith('@fontsource'))
   if (!fullStyle && fontPackages.length)
     plan.notices.push(
       'The style file is not managed here, so import ' +
