@@ -28,6 +28,11 @@
   --glass-inner-filter: none;
   --glass-inner-opacity: var(--glass-nested-opacity);
 }
+/* Closing has no animation: the enter animation kept a closed tooltip mounted, and visible,
+   while the library waited for an exit animation that never ended. */
+[data-slot='tooltip-content'][data-state='closed'] {
+  animation: none;
+}
 [data-slot='tooltip-arrow'] {
   fill: var(--popover);
   stroke: var(--border);
