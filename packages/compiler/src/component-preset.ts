@@ -2,6 +2,7 @@ import {
   FoundationError,
   isStyleFamily,
   styleSupport,
+  usesExtendedTypography,
   validatePreset,
   type Artifact,
   type ComponentPresetCompileResult,
@@ -26,6 +27,15 @@ export async function compileButtonPreset(input: {
   glassContrast?: 'enforce' | 'report'
 }): Promise<ComponentPresetCompileResult> {
   const raw = validatePreset(input.preset)
+  // A component preset installs one component and no packages, so it cannot carry a registry font:
+  // the Button would name a font that nothing installs. Fonts belong to the global preset.
+  for (const key of ['fontFamilyId', 'headingFontFamilyId', 'monoFontFamilyId'] as const)
+    if (usesExtendedTypography({ [key]: raw.design[key] }))
+      throw new FoundationError(
+        'INVALID_DATA',
+        'Component presets cannot use registry fonts; set them on the global preset',
+        '/design/' + key,
+      )
   const catalog = getCatalog(raw.catalogRelease)
   const preset = await resolvePreset(raw, catalog)
   const darkSelector = validateComponentPresetDarkSelector(
