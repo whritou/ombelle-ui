@@ -5,11 +5,12 @@ import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
 import { keepChoice } from '../../editor-shell/inspector'
 import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
-import type { PresetEditorDraft, PresetEditablePath } from '../model'
+import type { FontKey, PresetEditorDraft, PresetEditablePath } from '../model'
 import {
   colorKeys,
   designControlLabel,
   designControls,
+  fontChoiceIsStyleFont,
   fontLabel,
   glassControlHints,
   glassDesignControls,
@@ -353,7 +354,7 @@ export function DesignControls({
           )
         if (key === 'fontFamilyId' || optionalFontFields.includes(key) )
           return (
-            <div key={key} className="preset-choice">
+            <div key={key} className="preset-choice preset-font-row">
               <ControlRow label={control.label} htmlFor={fieldId(path)} edited={edited}>
                 <div className="preset-segmented-field">
                   <select
@@ -362,8 +363,11 @@ export function DesignControls({
                     aria-label={control.label}
                     value={value}
                     onChange={(event) =>
-                      // Choosing the unset option drops the edit, so the preset falls back to 1.0.
-                      event.target.value === '' ? onReset(path) : onEdit(path, event.target.value)
+                      // The style's own font is the default, so choosing it drops the edit; any other
+                      // choice, including "same as body", is explicit and overrides the style's font.
+                      fontChoiceIsStyleFont(draft.family, key as FontKey, event.target.value)
+                        ? onReset(path)
+                        : onEdit(path, event.target.value)
                     }
                   >
                     {unsetFontLabels[key] !== undefined && <option value="">{unsetFontLabels[key]}</option>}

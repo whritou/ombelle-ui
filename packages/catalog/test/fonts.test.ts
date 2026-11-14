@@ -2,8 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { systemFontIds } from '@ombelle/contracts'
-import { fontById, fontRegistry } from '../src/fonts.js'
+import { styleFamilies, systemFontIds } from '@ombelle/contracts'
+import { fontById, fontRegistry, styleFamilyFonts } from '../src/fonts.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const cssOf = (specifier: string) =>
@@ -101,5 +101,25 @@ describe('title line height', () => {
       .filter((font) => font.displayLineHeight !== undefined)
       .map((font) => [font.id, font.displayLineHeight])
     expect(declared.sort()).toEqual([['michroma', 1.5], ['young-serif', 1.5]])
+  })
+})
+
+describe('fonts each style family starts with', () => {
+  it('names a registry font in the right role for every family', () => {
+    expect(Object.keys(styleFamilyFonts).sort()).toEqual([...styleFamilies].sort())
+    for (const [family, fonts] of Object.entries(styleFamilyFonts)) {
+      expect(fontById(fonts.body)?.roles, `${family} body`).toContain('body')
+      expect(fontById(fonts.display)?.roles, `${family} display`).toContain('display')
+      expect(fontById(fonts.mono)?.roles, `${family} mono`).toContain('mono')
+    }
+  })
+  it('matches the pairings chosen for each family', () => {
+    expect(styleFamilyFonts).toEqual({
+      flat: { body: 'dm-sans', display: 'dm-sans', mono: 'geist-mono' },
+      minimalist: { body: 'geist', display: 'geist', mono: 'geist-mono' },
+      'neo-brutalism': { body: 'work-sans', display: 'space-grotesk', mono: 'space-mono' },
+      ombelle: { body: 'figtree', display: 'bricolage-grotesque', mono: 'geist-mono' },
+      'liquid-glass': { body: 'inter', display: 'inter-tight', mono: 'jetbrains-mono' },
+    })
   })
 })

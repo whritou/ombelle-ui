@@ -841,9 +841,21 @@
 .editor :global(.preset-segmented-field) button[aria-pressed] {
   padding-inline: 10px;
 }
-.editor :global(.preset-font-select) {
-  flex: 1 1 auto;
+/* The three font rows stack the same way: the label above a full-width select, so no option name is cut. */
+.editor :global(.preset-font-row) > div {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.editor :global(.preset-font-row) :global(.preset-segmented-field) {
+  width: 100%;
   min-width: 0;
+}
+.editor :global(.preset-font-select) {
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  text-overflow: ellipsis;
   min-height: 36px;
   padding: 0 8px;
   border: 1px solid var(--control);

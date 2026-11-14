@@ -8,7 +8,7 @@ import {
   sha256,
   rewriteModuleSpecifiers,
 } from '@ombelle/compiler'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalog, fontRegistry } from '@ombelle/catalog'
 import { supportedStyleFamilies } from '@ombelle/contracts'
 import {
   createPresetDraft,
@@ -72,6 +72,9 @@ async function project(kind: 'vite' | 'next') {
   for (const template of Object.values(getCatalog('0.1.0').templates))
     for (const dep of template.dependencies)
       pkg.dependencies[dep.name] = dep.version
+  // An editor export now carries its style's fonts, so the project already has the font packages.
+  for (const font of fontRegistry)
+    pkg.dependencies[font.fontsource.package] = font.fontsource.version
   await fs.writeFile(file, JSON.stringify(pkg))
   return root
 }
