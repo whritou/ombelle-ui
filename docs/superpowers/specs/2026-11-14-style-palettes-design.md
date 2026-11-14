@@ -73,8 +73,8 @@ Goal: each style offers palettes designed for it, complete in light and dark.
   applying then resetting returns the draft to the style default.
 - New contrast test: for each palette and mode, WCAG AA (4.5:1) for text pairs
   (`foreground/background`, `cardForeground/card`, `primaryForeground/primary`,
-  `secondaryForeground/secondary`, `mutedForeground/muted`, `accentForeground/accent`) and 3:1 for
-  `ring` and `border` against `background`. Reuse the catalog colour math if exported.
+  `secondaryForeground/secondary`, `mutedForeground/muted`, `accentForeground/accent`); `ring` at least 3:1 and `border` at least 1.1:1 against `background`
+  (the style defaults' own borders sit below 3:1). The contrast helper is `contrast.ts`.
 - Keep the check that palettes never touch `destructive` or `destructiveForeground`.
 
 ## Left to the builder
