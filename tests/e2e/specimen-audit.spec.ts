@@ -43,6 +43,10 @@ const overlays: Record<string, {
 }
 // Limit a run to some components, for example after a fix to them: OMBELLE_AUDIT_COMPONENTS=combobox,command
 const onlyComponents = process.env.OMBELLE_AUDIT_COMPONENTS?.split(',').map(id => id.trim()).filter(Boolean)
+// Audit with registry fonts, as <body>,<heading>,<mono>: OMBELLE_AUDIT_FONTS=inter,fraunces,jetbrains-mono
+const auditFonts = process.env.OMBELLE_AUDIT_FONTS
+// Limit a run to some families: OMBELLE_AUDIT_FAMILIES=ombelle,flat
+const onlyFamilies = process.env.OMBELLE_AUDIT_FAMILIES?.split(',').map(id => id.trim()).filter(Boolean)
 
 async function measure(page: Page, roots: Locator[], stop: Locator, prefix: string, counts: Record<AuditCheck, number>) {
   const findings: Finding[] = [...await findOverflow(roots), ...await findClipping(roots, stop), ...await findSpacing(roots), ...await findTargetSize(roots)]
@@ -57,7 +61,7 @@ async function measure(page: Page, roots: Locator[], stop: Locator, prefix: stri
   return findings
 }
 
-for (const family of styleFamilies)
+for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.includes(name)))
   for (const edition of editions)
     for (const mode of modes)
       test(`${family}/${edition}/${mode}: every specimen passes the measured checks`, async ({ page, browser }) => {
@@ -67,7 +71,7 @@ for (const family of styleFamilies)
         page.on('pageerror', error => errors.push(error.message))
         // Time runs normally; it is paused only while a toast is measured, so the toast stays open.
         await installClock(page)
-        await page.goto(`/audit/${family}/${edition}/?mode=${mode}`)
+        await page.goto(`/audit/${family}/${edition}/?mode=${mode}${auditFonts ? `&fonts=${encodeURIComponent(auditFonts)}` : ''}`)
         await expect(page.locator('main[data-audit-page]')).toHaveAttribute('data-ready', 'true', { timeout: 60000 })
         const sections = page.locator('section[data-audit]')
         // Toast first: the Radix toast is open from page load and its timer must not run out before it is measured.
@@ -174,10 +178,13 @@ for (const family of styleFamilies)
           experimentalFindings: experimental ? findings.length : 0,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         // A run limited to some components writes its findings apart and leaves the evidence file alone.
-        const partsDirectory = path.join(artifacts, onlyComponents?.length ? 'partial' : 'parts')
+        // A font or family run is never the standard evidence either.
+        const partial = Boolean(onlyComponents?.length || auditFonts || onlyFamilies?.length)
+        const partsDirectory = path.join(artifacts, partial ? 'partial' : 'parts')
         await fs.mkdir(partsDirectory, { recursive: true })
-        if (!onlyComponents?.length) await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
-        await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
+        if (!partial) await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
+        const fontTag = auditFonts ? '.' + auditFonts.replaceAll(',', '_') : ''
+        await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}${fontTag}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
         expect(new Set(components.map(id => id.split('~')[0]))).toHaveProperty('size', onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length)
         expect(errors, 'page errors').toEqual([])
         expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])

@@ -1,3 +1,5 @@
+import { headingSlots, monoSlots, resolveTypography } from '@ombelle/compiler'
+
 // Loads the self-hosted fonts a previewed preset uses. The compiled CSS imports them by
 // package name, which a browser cannot resolve, so the preview strips those imports and
 // loads the same Fontsource files from its own bundle, one font at a time.
@@ -47,4 +49,26 @@ export function loadPresetFonts(ids: readonly string[]): Promise<void> {
       return request
     }),
   ).then(() => undefined)
+}
+
+/**
+ * Audit pages only: the styles that put `<body>,<heading>,<mono>` (registry ids, empty for unset)
+ * on every specimen, and the fonts to load for them. Recipe CSS pins its own --font-family, so
+ * the override is !important, and slots match by suffix because recipe slots carry a prefix.
+ */
+export function auditFontStyles(list: string): { css: string; ids: string[] } {
+  const [body, heading, mono] = list.split(',').map((id) => id.trim() || undefined)
+  const design = { fontFamilyId: body, headingFontFamilyId: heading, monoFontFamilyId: mono }
+  const typography = resolveTypography(design)
+  const declarations = [
+    `--font-family:${typography.family} !important`,
+    ...(typography.heading ? [`--font-heading:${typography.heading} !important`] : []),
+    ...(typography.mono ? [`--font-mono:${typography.mono} !important`] : []),
+  ].join(';')
+  const rule = (slot: string, token: string) => `[data-slot$="${slot}"]{font-family:var(${token})}`
+  const rules = [
+    ...(typography.heading ? headingSlots.map((slot) => rule(slot, '--font-heading')) : []),
+    ...(typography.mono ? monoSlots.map((slot) => rule(slot, '--font-mono')) : []),
+  ].join('')
+  return { css: `:root,[data-ombelle-recipe]{${declarations}}` + rules, ids: presetFontIds(design) }
 }

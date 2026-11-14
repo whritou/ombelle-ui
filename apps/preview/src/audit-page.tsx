@@ -9,6 +9,7 @@ import { LiquidGlassFilter as RecipeGlassFilter } from './generated/catalog-reci
 import './glass-backdrop.css'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 import { renderSpecimen, type Primitives } from './render-specimen'
+import { auditFontStyles, loadPresetFonts } from './preset-fonts'
 
 type Module = Record<string, unknown>
 const stylesheets = import.meta.glob('./generated/editions/*/preview.css')
@@ -105,6 +106,17 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
   const data = (await load()).default
   const folder = `./generated/editions/${family}-${edition}`
   await stylesheets[`${folder}/preview.css`]!()
+  // `?fonts=<body>,<heading>,<mono>` audits the page with those registry fonts (empty entries unset).
+  const fonts = new URLSearchParams(window.location.search).get('fonts')
+  if (fonts) {
+    const audit = auditFontStyles(fonts)
+    const style = document.createElement('style')
+    style.dataset.auditFonts = fonts
+    style.textContent = audit.css
+    document.head.append(style)
+    await loadPresetFonts(audit.ids)
+    await document.fonts.ready
+  }
   // Ordinary components: all of them on Base pages; Button (no recipe) and the glass filter on Radix pages.
   const ordinaryNames = edition === 'base'
     ? Object.keys(editionModules).filter(path => path.startsWith(`${folder}/components/ui/`))
