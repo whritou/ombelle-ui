@@ -22,4 +22,4 @@ A pass means the build exited 0, the built CSS contained an `@font-face` for `In
 
 - Yarn modern (4.x) and Yarn Plug'n'Play were not run. The existing consumer matrix has a `pnp-vite` fixture, so a Plug'n'Play row should be checked in Task 8 if time allows, or recorded as unverified.
 - Only the build was checked. No page was loaded in a browser to confirm the font renders.
-- Only the variable build of one font was tried. Static Fontsource packages (for example `@fontsource/space-mono/400.css`) use a different file layout and are covered only by the later registry and consumer tests.
+- The first run used only the variable build of one font. A second run on 2026-11-14 repeated the same eight builds with a static font: `@fontsource/space-mono` 5.3.0, importing `@fontsource/space-mono/400.css` and `/700.css` from `ui-tokens.css`. All eight passed (npm, pnpm, Yarn Classic and Bun, Vite and Next), each emitting 6 `.woff2` files and a built stylesheet with an `@font-face` for `Space Mono`.

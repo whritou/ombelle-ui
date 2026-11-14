@@ -63,3 +63,19 @@ The three planned families do not exist yet, so their pairings were audited unde
 - **Consumer matrix rows.** The plan added `vite-fonts` and `next-fonts` consumer rows. I did not add them: the matrix size cascades into the foundation gate counts, the browser inventory and the CI evidence, and this machine cannot run that gate (it needs Yarn, Bun and the browser toolchain). The end-to-end check above, the spike and the CLI integration test cover the same chain for npm. This is a follow-up for the maintainer.
 - **Not covered:** Yarn Classic, modern Yarn, Plug'n'Play and Bun through the real CLI (only the spike's bare import build covers them), the pnpm CLI path (the pnpm launcher could not be resolved by the CLI here), macOS and Linux, any browser except Chromium, and any manual assistive-technology review. The full foundation gate (`pnpm check:foundation`) was not run.
 - **Deploying the live service and releasing the CLI** are maintainer steps; see the rollout order in `docs/snapshot-service-operations.md`.
+
+## After the branch review and the rebase onto 0.7.7
+
+The branch was rebased onto `origin/main` (0.7.7, `69dc9344`) with no conflicts. A fresh reviewer then read the whole branch and found one critical and several important problems. All were fixed with a test that failed first. To save time, only the focused tests were re-run for these changes, not the full suites.
+
+- **Rebase check (focused, not full suites):** `pnpm build:packages`, `pnpm typecheck` (after `pnpm generate:preview` regenerated the site's generated UI files), the compiler byte-identity guard, the font, contract, editor and preview-protocol unit tests, and the two font integration files all passed.
+- **Critical, fixed:** the hosted publish endpoint (`apps/www/src/snapshots/server/service.ts`) and the editor's retry store (`publication-storage.ts`) rejected `schemaVersion` 1.1, so publishing a font preset failed. Both now accept 1.0 and 1.1. Tests: a new case in `tests/integration/snapshot-api.test.ts` (publishes a font preset and returns it), a round trip in `publication-storage.test.ts`, and the existing check that `2.0` still returns 422.
+- **Important, fixed:**
+  - The site now holds the install command for a font preset until the published CLI is at least 0.7.8 (`fontsMinimumCli`, `fontsInstallBlocked`), on the export panel, Get code and the published page.
+  - `compileButtonPreset` rejects registry fonts at `/design/<field>`, because a component preset installs no packages.
+  - `theme add` removes the `--font-heading` and `--font-mono` tokens the new preset no longer sets, unless the user edited them or they existed before Ombelle managed them.
+  - The plan names the font packages the previous theme imported and the new one does not.
+  - The docs that said theme commands never install anything now name the font exception.
+- **Static fonts:** a static Fontsource package built through a bare CSS `@import` in all eight manager and framework combinations (see [font spike](font-spike.md)).
+- **Still open, and a release blocker for CLI 0.7.8:** font consumer rows in the matrix, the real CLI through pnpm, Yarn (including modern and Plug'n'Play) and Bun, and the foundation gate. These need a machine that can run the full gate.
+- **Deferred minors:** the unmanaged-style-file notice omits the missing rule block, older CLIs report a 1.1 snapshot as a resolution failure, a system id as display font declares 1.1, the audit override is stronger than the shipped cascade, no CLI test does a real font install, and pnpm re-sorted two `package.json` files.
