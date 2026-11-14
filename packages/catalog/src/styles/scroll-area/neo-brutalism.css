@@ -15,6 +15,18 @@
   block-size: 100%;
   border-radius: inherit;
   scrollbar-width: none;
+  /* Content keeps clear of the area's border. */
+  padding: 0.5rem 0.75rem;
+}
+/* While the area scrolls, a gutter as wide as the bar (and 4px) keeps content clear of it. */
+[data-slot='scroll-area-viewport']:is([data-overflow-y] > *) {
+  padding-inline-end: 20px;
+}
+/* Without a horizontal bar, content takes the viewport's width and wraps, instead of the
+   primitive's table or fit-content wrapper growing past it under a clipped edge. */
+[data-slot='scroll-area-viewport']:is(:not([data-horizontal]) > *) > * {
+  display: block !important;
+  min-inline-size: 0 !important;
 }
 [data-slot='scroll-area-viewport']::-webkit-scrollbar {
   display: none;

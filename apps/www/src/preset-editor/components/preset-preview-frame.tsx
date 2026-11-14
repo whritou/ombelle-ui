@@ -131,6 +131,8 @@ export function PresetPreviewFrame({
         title={title}
         src={previewFrameUrl('preset', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)}
         sandbox="allow-scripts"
+        // Code Block's Copy writes to the clipboard from inside the preview.
+        allow="clipboard-write"
         style={{
           // Block layout keeps the frame off the text baseline, whose font
           // metrics would put it at a fractional offset.

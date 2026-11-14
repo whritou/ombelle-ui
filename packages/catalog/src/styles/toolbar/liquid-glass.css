@@ -136,8 +136,8 @@
   cursor: pointer;
   user-select: none;
 }
-[data-slot='toolbar-overflow-item'][data-inset],
-[data-slot='toolbar-overflow-item'] {
+/* Only toggle items carry a check box, so only they leave room for it. */
+[data-slot='toolbar-overflow-item'][data-kind='toggle'] {
   padding-inline-start: 2.125rem;
 }
 [data-slot='toolbar-overflow-item'] svg {
@@ -192,8 +192,10 @@
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot='toolbar-overflow-content'] {
-    background:  
-        linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%),  
+    background:
+  
+        linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%),
+  
         color-mix(in srgb, var(--popover) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
     -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
     backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));

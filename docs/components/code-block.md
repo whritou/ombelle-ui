@@ -68,7 +68,7 @@ export function Config({ code }: { code: string }) {
 
 ### Copy
 
-- Copy calls `navigator.clipboard.writeText`. On success the label reads "Copied" for 1.5 s, and a visually hidden polite live region announces "Copied". A second click within 1.5 s restarts the timer.
+- Copy calls `navigator.clipboard.writeText`. On success the label reads "Copied" for 2 s, and a visually hidden polite live region announces "Copied"; on failure both read "Copy failed" for 2 s. A second click within 2 s restarts the timer. The website previews allow `clipboard-write` in their sandboxed frames.
 - When the clipboard is missing (for example on an insecure origin) or the write rejects, the region announces "Copy failed", the label stays "Copy", and no error escapes.
 - `CodeBlockCopy` takes `text`, `label` (its accessible name, "Copy code" by default) and `onCopied(ok)`, called after each attempt with `false` on failure. The timer is cleared on unmount.
 

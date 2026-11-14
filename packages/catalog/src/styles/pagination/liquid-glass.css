@@ -57,6 +57,8 @@
 }
 [data-slot='pagination-link'][href][aria-current='page']:hover {
   background: var(--primary);
+  /* The plain hover rule's text colour would otherwise stay on the primary fill. */
+  color: var(--primary-foreground);
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }

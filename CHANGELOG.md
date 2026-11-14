@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Pagination: hovering the current page keeps its primary text colour; it took the hover colour of the other pages and dropped to 1.0–1.7:1 on the primary fill.
+- Scroll Area: content keeps 0.5rem by 0.75rem clear of the border, and while the area scrolls the viewport keeps a gutter as wide as the scrollbar, so the bar no longer covers badges and other content at the end of a line. Without a horizontal ScrollBar, content takes the viewport's width and wraps instead of running under the clipped edge.
+- Tooltip: a tooltip closes when the pointer leaves the page, as when it leaves an embedded preview; it stayed open because no later pointer move reached it.
+- Item: when the content would be narrower than 9rem beside the actions, the actions wrap under it instead of breaking the title letter by letter.
+- Carousel: the slides sit 8px inside the scrolling viewport (20px in liquid glass), so their borders, offset shadows and focus rings are no longer cut at the edges.
+- Toolbar: plain items in the More menu no longer draw an empty check box; only toggle items keep the box and its indent.
+- Number Input: the unit stays on one line in a wide field.
+- Pagination and the other selected-state hovers were measured in every family: none now reads below 4.5:1.
+- Code Block: Copy reads "Copied" for 2 s (it was 1.5 s), and "Copy failed" for 2 s when the clipboard refuses. The website previews allow `clipboard-write`, so Copy works there.
+- Website: on a phone the preset editor's Customize pane no longer pins a preview card (Preview is its own pane, now edge to edge at the phone's width), and the component editors keep their compact preview fixed above an inspector that scrolls on its own, so no control passes beneath it. The Settings preview page fits a 320px screen in every family. Component pages space a component's examples apart and give Slider, Card, Scroll Area and Carousel a readable width; the Carousel example shows the built-in presets as on the design board.
+
 ## 0.7.6 — 13 November 2026
 
 - Publish CLI 0.7.6: the website install commands now use it, so projects can install the four new components, the Field and Checkbox parts and the new variants from npm. The registry tarball matches the tested candidate, and a fresh registry installation runs successfully.

@@ -4,7 +4,8 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: 'previous content next' 'dots dots dots';
   align-items: center;
-  gap: 14px 12px;
+  /* The slides' 8px inset brings the buttons back to 12px from them. */
+  gap: 14px 4px;
   min-inline-size: 0;
   font-family: var(--font-family);
 }
@@ -20,6 +21,9 @@
   scroll-behavior: smooth;
   scrollbar-width: none;
   border-radius: var(--radius);
+  /* A scroller clips at its padding box: the inset keeps slides' borders, shadows and focus rings whole. */
+  padding: 8px;
+  scroll-padding-inline: 8px;
 }
 [data-slot='carousel-content']::-webkit-scrollbar {
   display: none;

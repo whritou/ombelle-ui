@@ -261,6 +261,7 @@ function OverflowEntries({ elements }: { elements: readonly HTMLElement[] }) {
                   setTimeout(refresh)
                 }}
                 data-slot="toolbar-overflow-item"
+                data-kind="toggle"
                 render={(itemProps, state) => <div {...itemProps} data-state={state.checked ? 'checked' : 'unchecked'} />}
               >
                 <span data-slot="toolbar-overflow-indicator">
@@ -271,7 +272,6 @@ function OverflowEntries({ elements }: { elements: readonly HTMLElement[] }) {
             )
           : (
               <MenuPrimitive.Item key={index} disabled={entry.disabled} onClick={() => element.click()} data-slot="toolbar-overflow-item">
-                <span data-slot="toolbar-overflow-indicator" />
                 {entry.label}
               </MenuPrimitive.Item>
             )
@@ -288,7 +288,6 @@ export type ToolbarOverflowItemProps = Omit<Part<typeof MenuPrimitive.Item>, 'on
 export function ToolbarOverflowItem({ onSelect, destructive = false, className, children, ...props }: ToolbarOverflowItemProps) {
   return (
     <MenuPrimitive.Item {...props} onClick={() => onSelect()} data-slot="toolbar-overflow-item" data-variant={destructive ? 'destructive' : undefined} className={cn(className)}>
-      <span data-slot="toolbar-overflow-indicator" />
       {children}
     </MenuPrimitive.Item>
   )

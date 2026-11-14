@@ -35,6 +35,27 @@ export function useOverflowFocus(viewport: React.RefObject<HTMLElement | null>, 
   return overflowing
 }
 
+/**
+ * Whether the viewport's content is taller than the viewport, kept current by a
+ * ResizeObserver. The root carries it as `data-overflow-y`, so the styles can
+ * keep a gutter for the vertical bar and content never sits under it.
+ */
+function useVerticalOverflow(viewport: React.RefObject<HTMLElement | null>): boolean {
+  const [overflowing, setOverflowing] = React.useState(false)
+  React.useEffect(() => {
+    const element = viewport.current
+    if (!element) return
+    const measure = () => setOverflowing(element.scrollHeight > element.clientHeight)
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    if (element.firstElementChild) observer.observe(element.firstElementChild)
+    return () => observer.disconnect()
+  }, [viewport])
+  return overflowing
+}
+
 type Scrolling = { x: boolean; y: boolean }
 
 /** Which axes scrolled in the last half second, by any means: wheel, keyboard, touch or script. */
@@ -100,6 +121,7 @@ export function ScrollArea({
   // The vertical bar is always there; a horizontal ScrollBar child reports itself.
   const [horizontal, setHorizontal] = React.useState(false)
   const overflowing = useOverflowFocus(viewport, horizontal ? 'xy' : 'y')
+  const tall = useVerticalOverflow(viewport)
   const scrolling = useScrolling(viewport)
   const context = React.useMemo(() => ({ scrolling, setHorizontal }), [scrolling])
   // Radix shows a hover scrollbar only once the pointer enters, so the server
@@ -111,6 +133,8 @@ export function ScrollArea({
       <ScrollAreaPrimitive.Root
         type={hydrated ? 'hover' : 'scroll'}
         data-slot="scroll-area"
+        data-overflow-y={tall ? '' : undefined}
+        data-horizontal={horizontal ? '' : undefined}
         data-scrolling={scrolling.x || scrolling.y ? '' : undefined}
         className={cn(className)}
         {...(props as React.ComponentProps<typeof ScrollAreaPrimitive.Root>)}

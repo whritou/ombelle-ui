@@ -103,7 +103,8 @@ button[data-slot='item']:focus-visible {
 }
 [data-slot='item-content'] {
   display: flex;
-  flex: 1 1 0;
+  /* Below 9rem beside the actions, the actions wrap under the content instead of squeezing it. */
+  flex: 1 1 9rem;
   flex-direction: column;
   gap: 2px;
   min-inline-size: 0;

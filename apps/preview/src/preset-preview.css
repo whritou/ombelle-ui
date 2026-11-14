@@ -79,3 +79,19 @@ html[data-focus] .preset-gallery > section > .preset-stack,
 html[data-focus] .preset-gallery > .preset-form {
   inline-size: min(360px, calc(100vw - 48px));
 }
+/* A focused section stacks its examples (a component and its variants) with room
+   between them, centred like the rest of the preview. */
+html[data-focus] .preset-gallery > section:not([hidden]) {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+/* Components that fill their container get a readable width instead of their minimum. */
+html:is([data-focus='slider'], [data-focus='card'], [data-focus='scroll-area']) .preset-gallery > section:not([hidden]) {
+  inline-size: min(360px, calc(100vw - 48px));
+  justify-items: stretch;
+}
+html[data-focus='carousel'] .preset-gallery > section:not([hidden]) {
+  inline-size: min(560px, calc(100vw - 48px));
+  justify-items: stretch;
+}

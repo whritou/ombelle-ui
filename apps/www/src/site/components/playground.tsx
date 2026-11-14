@@ -31,7 +31,7 @@ export const familyOptions: { value: StyleFamily; label: string }[] = offeredSty
 }))
 const glassDocs = '/docs/style-families#liquid-glass'
 // Previews whose examples (and their extra appearances) need more room than the default frame.
-const tallPreviews: Partial<Record<ComponentId, number>> = { alert: 620, card: 560, table: 600, 'input-group': 520 }
+const tallPreviews: Partial<Record<ComponentId, number>> = { alert: 620, card: 560, table: 600, 'input-group': 520, carousel: 760 }
 const modeOptions = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },

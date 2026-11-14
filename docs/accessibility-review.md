@@ -212,7 +212,7 @@ Code Block is not part of the 36 PR5 entries either. Review it on the preview "C
 
 - **Package-manager tabs**: the tab list is announced with its name ("Package manager"), each manager as a tab and the selected one as selected; the arrow keys move between tabs and select them, Home and End jump to the ends, and the command below changes; Copy is named "Copy command" (or the page's own label) and copies the selected manager's command.
 - **Scrollable `pre`**: the code is one Tab stop announced as a region named "<title> source", or "Code" without a title; the arrow keys scroll it, and a long line scrolls inside it, not the page; line numbers are not read and are not part of a copied selection; several untitled blocks on one page share the name "Code".
-- **Copy announcement**: Copy is named "Copy <title>" or "Copy code"; after a click "Copied" is announced once and the label reads "Copied" for 1.5 s; when the clipboard is unavailable or refuses, "Copy failed" is announced and the label stays "Copy".
+- **Copy announcement**: Copy is named "Copy <title>" or "Copy code"; after a click "Copied" is announced once and the label reads "Copied" for 2 s; when the clipboard is unavailable or refuses, "Copy failed" is announced and the label reads "Copy failed" for 2 s.
 - **Token contrast**: every token colour is readable on the dark surface in both site and preview modes (at least 4.5:1, line numbers 3:1, as measured in the evidence); in forced colours the code is `CanvasText` on `Canvas` with a visible border, and the selected tab is `Highlight`.
 
 **Variants, batch 4a (0.7.5)**

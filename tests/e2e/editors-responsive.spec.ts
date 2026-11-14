@@ -110,12 +110,29 @@ for (const size of [{ width: 1440, height: 900 }, { width: 375, height: 812 }] a
     await page.keyboard.press('Escape')
     await expect(sheet).toBeHidden()
     await expect(switcher).toBeFocused()
-    if (size.width < 768) {
-      const sheetBox = page.getByRole('link', { name: 'All components', exact: true })
-      await expect(sheetBox).toHaveAttribute('href', '/editor/component')
-    }
+    // On a phone the Site menu stands for the back link, which shows only on a tablet.
+    if (size.width < 768) await expect(page.getByRole('button', { name: 'Site menu', exact: true })).toBeVisible()
   })
 }
+
+test('the component editor on a phone keeps its first style family below the pinned preview, before and after scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await open(page, editors[1].url)
+  const pinned = page.locator('main[data-editor-root] [class*="paneCustomize"]').first()
+  const first = page.getByRole('radiogroup', { name: 'Style family', exact: true }).getByRole('radio').first()
+  await expect(first).toBeVisible()
+  for (const scroll of [0, 400]) {
+    await page.getByRole('region', { name: 'Inspector controls' }).evaluate((element, top) => { element.scrollTop = top }, scroll)
+    await page.waitForTimeout(150)
+    const box = (await first.boundingBox())!
+    const top = (await pinned.boundingBox())!
+    if (scroll === 0) expect(box.y).toBeGreaterThanOrEqual(top.y + top.height - 1)
+    // Only the inspector scrolls, and it starts below the preview, so nothing passes beneath it.
+    const inspector = (await page.getByRole('region', { name: 'Inspector controls' }).boundingBox())!
+    expect(inspector.y).toBeGreaterThanOrEqual(top.y + top.height - 1)
+  }
+  await expectFitsViewport(page, 390)
+})
 
 test('the pinned specimen shows the Button inside its card on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
@@ -132,7 +149,7 @@ test('the pinned specimen shows the Button inside its card on a phone', async ({
 const presetDock = (page: Page) => page.getByRole('navigation', { name: 'Preset editor panes' })
 const presetPane = (page: Page, name: string) => presetDock(page).getByRole('radio', { name: new RegExp('^' + name) })
 
-test('the preset editor on a phone pins the live preview and moves between its panes', async ({ page }) => {
+test('the preset editor on a phone shows the live preview in its own pane and moves between its panes', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await open(page, editors[0].url)
   await expect(presetPane(page, 'Customize')).toHaveAttribute('aria-checked', 'true')
@@ -140,15 +157,15 @@ test('the preset editor on a phone pins the live preview and moves between its p
   await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toBeHidden()
   await expect(presetPane(page, 'Preview')).toBeVisible()
   await expect(presetPane(page, 'Checks')).toBeVisible()
-  const peek = page.getByRole('region', { name: 'Live preview' })
-  await expect(peek).toBeVisible()
-  const before = (await peek.boundingBox())!
-  expect(before.height).toBeLessThanOrEqual(130)
-  await page.locator('[class*="workbench"]').first().evaluate(element => { element.scrollTop += 600 })
-  await expect.poll(async () => Math.round((await peek.boundingBox())!.y)).toBe(Math.round(before.y))
+  // Customize is the controls alone: no preview card is pinned above them.
+  await expect(page.getByRole('region', { name: 'Live preview' })).toBeHidden()
   await presetPane(page, 'Preview').click()
   await expect(presetPane(page, 'Preview')).toHaveAttribute('aria-checked', 'true')
-  expect((await page.locator('iframe[title="Preset preview"], [aria-label="Preset preview"] iframe').first().boundingBox())!.height).toBeGreaterThan(300)
+  const frame = (await page.locator('iframe[title="Preset preview"], [aria-label="Preset preview"] iframe').first().boundingBox())!
+  expect(frame.height).toBeGreaterThan(300)
+  // The frame spans the screen, so the page previews at the phone's own width.
+  expect(frame.x).toBeLessThanOrEqual(1)
+  expect(frame.width).toBeGreaterThanOrEqual(373)
   await presetPane(page, 'Checks').click()
   await expect(page.getByRole('list', { name: 'Contrast results by mode' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Download preset JSON', exact: true })).toBeVisible()
@@ -302,7 +319,8 @@ for (const editor of editors) {
   test(`a focused control in the ${editor.name} stays clear of the pinned preview and the dock`, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 })
     await open(page, editor.url)
-    const pinned = page.locator('main[data-editor-root] [class*="paneCustomize"], main[data-editor-root] [class*="peek"]').first()
+    // The preset editor pins nothing; its controls start under the top bar.
+    const pinned = editor === editors[0] ? page.locator('main[data-editor-root] header').first() : page.locator('main[data-editor-root] [class*="paneCustomize"]').first()
     const dock = page.getByRole('navigation', { name: /editor panes$/ })
     const controls = page.locator('main[data-editor-root] [aria-label="Inspector controls"] :is(input, button):not(:disabled):visible')
     const count = await controls.count()

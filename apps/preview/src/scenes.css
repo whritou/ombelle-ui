@@ -109,15 +109,18 @@
 }
 .preset-scene .scene-fields {
   display: grid;
+  /* Tracks may shrink below their content's minimum, so one wide control cannot widen the card. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 .preset-scene .scene-field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 .preset-scene .scene-columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: 16px;
 }
 .preset-scene .scene-inline {
@@ -192,9 +195,15 @@ html[data-backdrop='glass'] .preset-scene :is(h1, .scene-header p) {
     0 0 6px var(--background),
     0 0 14px var(--background);
 }
+/* At phone widths the page fills the screen as on a phone: no backdrop margin or window frame. */
 @media (max-width: 480px) {
   .scene-stage {
-    padding: 12px;
+    padding: 0;
+  }
+  .scene-window {
+    border-width: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
   .preset-scene {
     padding: 16px;
