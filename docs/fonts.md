@@ -26,4 +26,16 @@ Roles: a font with `display` can be a heading font, `body` a body font, `mono` a
 | `exo-2` | Exo 2 | display, body | OFL-1.1 | `@fontsource-variable/exo-2` | 5.3.0 |
 | `share-tech-mono` | Share Tech Mono | mono | OFL-1.1 | `@fontsource/share-tech-mono` | 5.3.0 |
 
+## Fonts each style starts with in the editor
+
+The preset editor gives each style these fonts when it is chosen (`styleFamilyFonts` in `packages/catalog/src/fonts.ts`). A font you pick yourself overrides the style's and stays when you switch style; Reset in a picker returns it to the style's font. Built-in presets and the CLI do not use this table, so existing installs are unchanged.
+
+| Style | Body | Display | Code |
+|---|---|---|---|
+| Flat | DM Sans | same as body | Geist Mono |
+| Minimalist | Geist | same as body | Geist Mono |
+| Neo-brutalism | Work Sans | Space Grotesk | Space Mono |
+| Ombelle | Figtree | Bricolage Grotesque | Geist Mono |
+| Liquid glass | Inter | Inter Tight | JetBrains Mono |
+
 Licences and versions were read from the npm registry on 2026-11-14 (`npm view <package> version license`).

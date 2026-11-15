@@ -1,5 +1,5 @@
-import { expect, it } from 'vitest'
-import { getCatalog, startingPresetOrder } from '@ombelle/catalog'
+import { describe, expect, it } from 'vitest'
+import { getCatalog, startingPresetOrder, styleFamilyFonts } from '@ombelle/catalog'
 import { styleFamilies } from '@ombelle/contracts'
 import {
   createPresetDraft,
@@ -15,6 +15,7 @@ import {
   glassDesignControls,
   fontControlOptions,
   fontLabel,
+  fontChoiceIsStyleFont,
   presetFieldValue,
   presetGlassReport,
   previewComponentIds,
@@ -34,11 +35,20 @@ it.each(styleFamilies)(
       revision: '1',
     })
     const result = materializePreset(draft)
+    const fonts = styleFamilyFonts[family]
+    // A new draft carries its style's fonts, which is why it declares 1.1.
     expect(result).toEqual({
       ...base,
+      schemaVersion: '1.1',
       id: 'project_preset',
       name: 'Project preset',
       revision: 1,
+      design: {
+        ...base.design,
+        fontFamilyId: fonts.body,
+        ...(fonts.display === fonts.body ? {} : { headingFontFamilyId: fonts.display }),
+        monoFontFamilyId: fonts.mono,
+      },
     })
     result.modes.light.background = '#123456'
     expect(getCatalog('0.1.0').presets[family]).toEqual(base)
@@ -165,7 +175,12 @@ it('creates a valid liquid-glass draft based on builtin-liquid-glass', () => {
   expect(base.id).toBe('builtin-liquid-glass')
   const preset = materializePreset(draft)
   expect(preset.styleFamily).toBe('liquid-glass')
-  expect(preset.design).toEqual(base.design)
+  expect(preset.design).toEqual({
+    ...base.design,
+    fontFamilyId: 'inter',
+    headingFontFamilyId: 'inter-tight',
+    monoFontFamilyId: 'jetbrains-mono',
+  })
   expect(presetFieldValue(draft, '/design/glassOpacity')).toBe('0.57')
   expect(presetFieldValue(draft, '/design/glassBlurPx')).toBe('3')
   expect(presetFieldValue(draft, '/design/glassBackdropContrast')).toBe('0.45')
@@ -297,8 +312,11 @@ it('picking a starting point replaces every value', () => {
   const preset = materializePreset(draft)
   const relief = catalog.startingPresets['builtin-liquid-glass-relief']
   expect(preset.modes).toEqual(relief.modes)
-  for (const [key, value] of Object.entries(relief.design))
+  for (const [key, value] of Object.entries(relief.design)) {
+    // Starting points do not set fonts; the draft keeps its style's fonts.
+    if (['fontFamilyId', 'headingFontFamilyId', 'monoFontFamilyId'].includes(key)) continue
     expect(String(preset.design[key as keyof typeof preset.design] ?? 0), key).toBe(String(value))
+  }
   expect(matchingStartingPreset(draft)).toBe('builtin-liquid-glass-relief')
   expect(matchingStartingPreset(setPresetEdit(draft, '/design/glassHalo', '0.2'))).toBe(null)
   // The family base is a starting point too, and picking it clears the edits.
@@ -405,24 +423,23 @@ it('relabels the font controls and adds the display and code pickers', () => {
   expect(designControls.monoFontFamilyId.label).toBe('Code font')
 })
 
-it('declares schemaVersion 1.1 once a display font is chosen and 1.0 again when it is cleared', () => {
-  const draft = createPresetDraft('ombelle')
-  expect(materializePreset(draft).schemaVersion).toBe('1.0')
-  const withHeading = setPresetEdit(draft, '/design/headingFontFamilyId', 'fraunces')
-  const preset = materializePreset(withHeading)
-  expect(preset.schemaVersion).toBe('1.1')
-  expect(preset.design.headingFontFamilyId).toBe('fraunces')
-  const cleared = resetPresetField(withHeading, '/design/headingFontFamilyId')
-  const back = materializePreset(cleared)
+it('declares schemaVersion 1.0 again once every font is a system font or unset', () => {
+  let draft = createPresetDraft('ombelle')
+  expect(materializePreset(draft).schemaVersion).toBe('1.1')
+  draft = setPresetEdit(draft, '/design/fontFamilyId', 'system-sans')
+  draft = setPresetEdit(draft, '/design/headingFontFamilyId', '')
+  draft = setPresetEdit(draft, '/design/monoFontFamilyId', '')
+  const back = materializePreset(draft)
   expect(back.schemaVersion).toBe('1.0')
   expect('headingFontFamilyId' in back.design).toBe(false)
+  expect('monoFontFamilyId' in back.design).toBe(false)
 })
 
-it('reads an unset display and code font as an empty value', () => {
-  const draft = createPresetDraft('flat')
+it('reads an explicit empty display and code font as empty', () => {
+  let draft = setPresetEdit(createPresetDraft('ombelle'), '/design/headingFontFamilyId', '')
+  draft = setPresetEdit(draft, '/design/monoFontFamilyId', '')
   expect(presetFieldValue(draft, '/design/headingFontFamilyId')).toBe('')
   expect(presetFieldValue(draft, '/design/monoFontFamilyId')).toBe('')
-  expect(presetFieldValue(draft, '/design/fontFamilyId')).toBe('system-sans')
 })
 
 it('materializes a registry body font and code font under 1.1', () => {
@@ -433,4 +450,84 @@ it('materializes a registry body font and code font under 1.1', () => {
   expect(preset.schemaVersion).toBe('1.1')
   expect(preset.design.fontFamilyId).toBe('geist')
   expect(preset.design.monoFontFamilyId).toBe('geist-mono')
+})
+
+describe('the fonts a style family starts with', () => {
+  const fontsOf = (family: (typeof styleFamilies)[number]) => {
+    const { body, display, mono } = styleFamilyFonts[family]
+    return { body, display, mono }
+  }
+  it.each(styleFamilies)('a new %s draft carries its style fonts and declares 1.1', (family) => {
+    const { body, display, mono } = fontsOf(family)
+    const preset = materializePreset(createPresetDraft(family))
+    expect(preset.schemaVersion).toBe('1.1')
+    expect(preset.design.fontFamilyId).toBe(body)
+    expect(preset.design.monoFontFamilyId).toBe(mono)
+    // A display font equal to the body font is left unset: it already follows the body font.
+    expect(preset.design.headingFontFamilyId).toBe(display === body ? undefined : display)
+  })
+
+  it('shows the style fonts in the pickers and an empty display font when it matches the body font', () => {
+    const ombelle = createPresetDraft('ombelle')
+    expect(presetFieldValue(ombelle, '/design/fontFamilyId')).toBe('figtree')
+    expect(presetFieldValue(ombelle, '/design/headingFontFamilyId')).toBe('bricolage-grotesque')
+    expect(presetFieldValue(ombelle, '/design/monoFontFamilyId')).toBe('geist-mono')
+    expect(presetFieldValue(createPresetDraft('flat'), '/design/headingFontFamilyId')).toBe('')
+  })
+
+  it('lets a chosen font, including a system font, win over the style font', () => {
+    const draft = setPresetEdit(createPresetDraft('ombelle'), '/design/fontFamilyId', 'system-serif')
+    expect(materializePreset(draft).design.fontFamilyId).toBe('system-serif')
+    expect(presetFieldValue(draft, '/design/fontFamilyId')).toBe('system-serif')
+  })
+
+  it('lets an empty display or code font override the style font', () => {
+    let draft = setPresetEdit(createPresetDraft('ombelle'), '/design/headingFontFamilyId', '')
+    draft = setPresetEdit(draft, '/design/monoFontFamilyId', '')
+    const design = materializePreset(draft).design
+    expect('headingFontFamilyId' in design).toBe(false)
+    expect('monoFontFamilyId' in design).toBe(false)
+    expect(materializePreset(draft).schemaVersion).toBe('1.1')
+  })
+
+  it('returns to the style font when a chosen font is reset', () => {
+    const chosen = setPresetEdit(createPresetDraft('minimalist'), '/design/monoFontFamilyId', 'jetbrains-mono')
+    expect(presetFieldValue(chosen, '/design/monoFontFamilyId')).toBe('jetbrains-mono')
+    const reset = resetPresetField(chosen, '/design/monoFontFamilyId')
+    expect(presetFieldValue(reset, '/design/monoFontFamilyId')).toBe('geist-mono')
+  })
+
+  it('switching style changes the fonts that were not chosen and keeps the ones that were', () => {
+    const chosen = setPresetEdit(createPresetDraft('ombelle'), '/design/monoFontFamilyId', 'ibm-plex-mono')
+    const { draft, changes } = planPresetFamilyChange(chosen, 'neo-brutalism')
+    expect(presetFieldValue(draft, '/design/fontFamilyId')).toBe('work-sans')
+    expect(presetFieldValue(draft, '/design/headingFontFamilyId')).toBe('space-grotesk')
+    expect(presetFieldValue(draft, '/design/monoFontFamilyId')).toBe('ibm-plex-mono')
+    expect(changes.find((change) => change.path === '/design/fontFamilyId')).toEqual({
+      path: '/design/fontFamilyId',
+      before: 'figtree',
+      after: 'work-sans',
+    })
+  })
+
+  it('still matches a glass starting point whatever fonts the draft has', () => {
+    const cristal = applyStartingPreset(createPresetDraft('liquid-glass'), startingPresetOrder[0])
+    expect(matchingStartingPreset(cristal)).toBe(startingPresetOrder[0])
+    const withFont = setPresetEdit(cristal, '/design/fontFamilyId', 'system-mono')
+    expect(matchingStartingPreset(withFont)).toBe(startingPresetOrder[0])
+  })
+})
+
+describe('choosing a font in a picker', () => {
+  it('drops the edit when the chosen font is the style font and keeps it otherwise', () => {
+    expect(fontChoiceIsStyleFont('ombelle', 'fontFamilyId', 'figtree')).toBe(true)
+    expect(fontChoiceIsStyleFont('ombelle', 'fontFamilyId', 'inter')).toBe(false)
+    expect(fontChoiceIsStyleFont('ombelle', 'monoFontFamilyId', 'geist-mono')).toBe(true)
+    // "Same as body font" is a choice of its own wherever the style has a display font...
+    expect(fontChoiceIsStyleFont('ombelle', 'headingFontFamilyId', '')).toBe(false)
+    expect(fontChoiceIsStyleFont('ombelle', 'headingFontFamilyId', 'bricolage-grotesque')).toBe(true)
+    // ...and just the default where the display font already follows the body font.
+    expect(fontChoiceIsStyleFont('flat', 'headingFontFamilyId', '')).toBe(true)
+    expect(fontChoiceIsStyleFont('flat', 'headingFontFamilyId', 'fraunces')).toBe(false)
+  })
 })

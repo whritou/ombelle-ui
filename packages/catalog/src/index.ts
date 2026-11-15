@@ -14,7 +14,7 @@ import { runtimeDependencies } from './manifest.js'
 export { expansionExamples, baseToastExample } from './expansion-examples.js'
 export { knownShadcnUtilityHashes, shadcnBaseStyles, shadcnRadixStyles } from './shadcn.js'
 export { resolveRecipePreset } from './recipe-preset.js'
-export { fontById, fontRegistry, type FontEntry, type FontRole } from './fonts.js'
+export { fontById, fontRegistry, styleFamilyFonts, type FontEntry, type FontRole } from './fonts.js'
 export { glassTintPalettes, type GlassTintId, type GlassTintPalette } from './glass-tints.js'
 export { glassControlSlots, glassHaloSelector, glassHostedSlots, glassMarkSlots, glassSurfaceSlots } from './glass-recipes.js'
 /** The pinned icon package that recipe Buttons with an icon depend on. */

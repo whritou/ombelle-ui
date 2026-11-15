@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The preset editor now starts each style with its own fonts, so choosing a style shows them in the pickers and the preview: Flat DM Sans, Minimalist Geist, Neo-brutalism Work Sans with Space Grotesk headings and Space Mono code, Ombelle Figtree with Bricolage Grotesque headings, and Liquid glass Inter with Inter Tight headings and JetBrains Mono code. A preset exported from the editor therefore declares preset format 1.1 and needs CLI 0.7.8 or newer, which is published. Choosing a font yourself overrides the style's, switching style keeps it, and Reset returns the picker to the style's font. Built-in presets and existing installs are unchanged.
+- The three font pickers in the preset editor are stacked the same way, so they line up and show full font names.
+
 ## 0.7.8 — 14 November 2026
 
 - Publish CLI 0.7.8: the website install commands now use it, so projects can install font presets from npm. The registry tarball matched the tested candidate byte for byte.

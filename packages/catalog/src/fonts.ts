@@ -1,3 +1,5 @@
+import type { StyleFamily } from '@ombelle/contracts'
+
 export type FontRole = 'display' | 'body' | 'mono'
 export interface FontEntry {
   /** Kebab-case id; the value a preset stores. */
@@ -93,4 +95,16 @@ const byId = new Map(fontRegistry.map((font) => [font.id, font]))
 /** Registry ids only: the system font ids and unknown ids return undefined. */
 export function fontById(id: string): FontEntry | undefined {
   return byId.get(id)
+}
+
+/**
+ * The fonts the preset editor gives each style family when someone picks it. Built-in presets and
+ * installs are unchanged: a preset only uses these once the editor writes them into its design.
+ */
+export const styleFamilyFonts: Readonly<Record<StyleFamily, { body: string; display: string; mono: string }>> = {
+  flat: { body: 'dm-sans', display: 'dm-sans', mono: 'geist-mono' },
+  minimalist: { body: 'geist', display: 'geist', mono: 'geist-mono' },
+  'neo-brutalism': { body: 'work-sans', display: 'space-grotesk', mono: 'space-mono' },
+  ombelle: { body: 'figtree', display: 'bricolage-grotesque', mono: 'geist-mono' },
+  'liquid-glass': { body: 'inter', display: 'inter-tight', mono: 'jetbrains-mono' },
 }
