@@ -12,8 +12,8 @@
   "dependencies": {
     "@ombelle/catalog": "workspace:*",
     "@ombelle/contracts": "workspace:*",
-    "postcss": "8.5.31",
-    "postcss-selector-parser": "7.1.6",
-    "prettier": "3.9.10"
+    "postcss": "8.5.32",
+    "postcss-selector-parser": "7.2.1",
+    "prettier": "3.10.1"
   }
 }
