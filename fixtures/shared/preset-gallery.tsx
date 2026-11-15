@@ -141,6 +141,7 @@ export type PresetGalleryProps = {
 // The Carousel example's slides: each built-in style family, pictured in its own colours.
 const presetSlides = [
   { id: 'ombelle', name: 'Ombelle', stable: true },
+  { id: 'papier', name: 'Papier', stable: true },
   { id: 'flat', name: 'Flat', stable: true },
   { id: 'minimalist', name: 'Minimalist', stable: true },
   { id: 'neo-brutalism', name: 'Neo brutalism', stable: true },
@@ -1037,7 +1038,7 @@ export function PresetGallery({
             <AccordionItem value="families">
               <AccordionTrigger>Which families are stable?</AccordionTrigger>
               <AccordionContent>
-                Flat, minimalist, neo brutalism and ombelle. Liquid glass is
+                Flat, minimalist, neo brutalism, ombelle and papier. Liquid glass is
                 experimental.
               </AccordionContent>
             </AccordionItem>

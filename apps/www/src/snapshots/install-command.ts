@@ -149,6 +149,8 @@ export function installableRecipeInstallNotice(
 
 /** First published installer that accepts `ombelle` presets and codes. */
 export const ombelleMinimumCli = '0.4.0'
+/** Papier is installable from this release; the site offers it only once the published installer is at least this. */
+export const papierMinimumCli = '0.8.0'
 
 /** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
 export const glassMaterialMinimumCli = '0.5.0'
@@ -202,6 +204,7 @@ export function compareVersions(a: string, b: string): number {
  */
 export const siteFamilyOrder: readonly StyleFamily[] = [
   'ombelle',
+  'papier',
   'minimalist',
   'neo-brutalism',
   'flat',
@@ -222,7 +225,10 @@ export function offeredStyleFamilies(
   installer: { version: string } = publishedInstaller,
 ): readonly StyleFamily[] {
   const ombelle = compareVersions(installer.version, ombelleMinimumCli) >= 0
-  return siteFamilyOrder.filter((family) => family !== 'ombelle' || ombelle || family === current)
+  const papier = compareVersions(installer.version, papierMinimumCli) >= 0
+  return siteFamilyOrder.filter(
+    (family) => (family !== 'ombelle' || ombelle || family === current) && (family !== 'papier' || papier || family === current),
+  )
 }
 
 export function installerRunner(release?: { packageName: string; version: string }): string {

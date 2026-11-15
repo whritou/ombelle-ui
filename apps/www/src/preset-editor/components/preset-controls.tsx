@@ -107,6 +107,7 @@ export const familyNames: Record<StyleFamily, string> = {
   minimalist: 'Minimalist',
   'neo-brutalism': 'Neo-brutalism',
   ombelle: 'Ombelle',
+  papier: 'Papier',
   'liquid-glass': 'Liquid glass',
 }
 /** One pressed button per style family, each with a small sample of its look. */
