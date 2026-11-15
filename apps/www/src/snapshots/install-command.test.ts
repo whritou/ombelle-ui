@@ -3,7 +3,7 @@ import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
 // The source the site's generated Code Block is compiled from.
 import { commandRunners } from '../../../../packages/catalog/src/templates/code-block'
-import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, packageManagers, publishedInstaller, siteFamilyOrder, snapshotInstallCommand } from './install-command'
+import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, packageManagers, papierMinimumCli, publishedInstaller, siteFamilyOrder, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
@@ -122,6 +122,14 @@ it('compares x.y.z versions numerically', () => {
   expect(() => compareVersions('0.4', '0.4.0')).toThrow()
 })
 
+it('offers papier only from the 0.8.0 published installer and keeps a restored papier draft visible', () => {
+  expect(papierMinimumCli).toBe('0.8.0')
+  expect(offeredStyleFamilies(undefined, { version: '0.7.8' })).not.toContain('papier')
+  expect(offeredStyleFamilies(undefined, { version: '0.8.0' })).toContain('papier')
+  expect(offeredStyleFamilies('papier', { version: '0.7.8' })).toContain('papier')
+  expect(offeredStyleFamilies(undefined, { version: '0.8.0' })).toEqual(['ombelle', 'papier', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+})
+
 it('offers ombelle only from the minimum published installer', () => {
   expect(ombelleMinimumCli).toBe('0.4.0')
   expect(offeredStyleFamilies(undefined, { version: '0.3.1' })).not.toContain('ombelle')
@@ -150,7 +158,7 @@ it('holds back commands for glass material settings until the installer that acc
   expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, next)).toBe(false)
 })
 
-it('the site lists style families as Ombelle, Minimalist, Neo-Brutalism, Flat, Liquid Glass', () => {
+it('the site lists style families as Ombelle, Papier, Minimalist, Neo-Brutalism, Flat, Liquid Glass, hiding Papier until 0.8.0 is published', () => {
   expect(offeredStyleFamilies()).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(siteFamilyOrder).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+  expect(siteFamilyOrder).toEqual(['ombelle', 'papier', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
 })

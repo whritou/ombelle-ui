@@ -10,7 +10,7 @@ const { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselItem, 
 const CarouselImage = (ui as Record<string, unknown>).CarouselImage as React.FC<Record<string, unknown>>
 const CarouselThumbnails = (ui as Record<string, unknown>).CarouselThumbnails as React.FC<Record<string, unknown>>
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const tag = (html: string, pattern: string) => html.match(new RegExp(`<[^>]*${pattern}[^>]*>`))?.[0] ?? ''
 const tags = (html: string, pattern: string) => [...html.matchAll(new RegExp(`<[^>]*${pattern}[^>]*>`, 'g'))].map(match => match[0])
 const attr = (element: string, name: string) => element.match(new RegExp(` ${name}="([^"]*)"`))?.[1]

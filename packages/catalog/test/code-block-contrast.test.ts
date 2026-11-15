@@ -3,7 +3,7 @@ import postcss from 'postcss'
 import { describe, expect, it } from 'vitest'
 import { contrastRatio, parseColor } from '../src/templates/color-picker.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'] as const
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'] as const // Papier follows its theme instead of the shared dark surface; see papier-review-fixes.test.ts
 const tokens = ['comment', 'string', 'keyword', 'attr', 'property', 'punct'] as const
 
 /** The custom properties declared on the bare root rule, outside any at-rule. */

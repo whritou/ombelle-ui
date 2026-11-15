@@ -10,6 +10,7 @@ export const familyNames: Record<StyleFamily, string> = {
   minimalist: 'Minimalist',
   'neo-brutalism': 'Neo-brutalism',
   ombelle: 'Ombelle',
+  papier: 'Papier',
   'liquid-glass': 'Liquid glass',
 }
 

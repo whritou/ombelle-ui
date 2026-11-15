@@ -4,7 +4,7 @@ import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableSkeletonRows } from '../src/templates/table.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const block = (family: string) => {
   const css = readFileSync(new URL(`../src/styles/table/${family}.css`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   return css.slice(css.indexOf('/* 0.7.3 variants */'))

@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import * as radix from '../src/templates/tooltip.js'
 import * as base from '../src/templates/base/tooltip.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const editions = { radix, base } as const
 const css = (family: string) => {
   const text = readFileSync(new URL(`../src/styles/tooltip/${family}.css`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')

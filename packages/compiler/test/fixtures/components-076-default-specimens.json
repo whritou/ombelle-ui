@@ -388,5 +388,83 @@
         ]
       }
     ]
+  },
+  "papier/field": {
+    "tag": "Field",
+    "props": {
+      "required": true,
+      "invalid": false,
+      "disabled": false,
+      "orientation": "vertical"
+    },
+    "children": [
+      {
+        "tag": "FieldLabel",
+        "props": {},
+        "children": [
+          "Project name"
+        ]
+      },
+      {
+        "tag": "FieldControl",
+        "props": {},
+        "children": [
+          {
+            "tag": "input",
+            "props": {
+              "type": "text",
+              "placeholder": "acme-dashboard",
+              "data-field-input": ""
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "FieldDescription",
+        "props": {},
+        "children": [
+          "Shown in the CLI and the editor header."
+        ]
+      },
+      {
+        "tag": "FieldError",
+        "props": {},
+        "children": [
+          "Use lower case letters and dashes only."
+        ]
+      }
+    ]
+  },
+  "papier/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
   }
 }

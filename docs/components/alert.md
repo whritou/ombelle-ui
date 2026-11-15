@@ -1,6 +1,6 @@
 # Alert
 
-Alert shows a status, error, success, warning or information message with an optional icon, a title and a description. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode, and as an experimental liquid glass style. It has no client boundary and no dependency beyond the shared utility.
+Alert shows a status, error, success, warning or information message with an optional icon, a title and a description. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode, and as an experimental liquid glass style. It has no client boundary and no dependency beyond the shared utility.
 
 The `success`, `warning` and `info` variants require CLI 0.7.2 or later.
 

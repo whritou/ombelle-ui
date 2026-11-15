@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { getCatalog, getTemplate } from '../src/index.js'
 import { Card, CardAction, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '../src/templates/card.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const css = (family: string) => readFileSync(new URL(`../src/styles/card/${family}.css`, import.meta.url), 'utf8')
 const plans = (props: Record<string, unknown> = {}) => h(CardGroup, { name: 'plan', 'aria-label': 'Plan', defaultValue: 'team', ...props },
   h(CardOption, { value: 'starter', title: 'Starter', description: 'One project.' }),

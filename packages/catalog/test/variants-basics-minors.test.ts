@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { Alert, AlertDismiss, AlertTitle } from '../src/templates/alert.js'
 import { CardGroup, CardOption } from '../src/templates/card.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const style = (file: string) => readFileSync(new URL(`../src/styles/${file}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const source = (file: string) => readFileSync(new URL(`../src/templates/${file}`, import.meta.url), 'utf8')
 const block = (css: string) => css.slice(css.indexOf('/* 0.7.3 variants */'))

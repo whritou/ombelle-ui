@@ -90,3 +90,33 @@ it.each(['light', 'dark'] as const)('ombelle %s token pairs reach 4.5:1 and cont
   }
   expect(contrastRatio(compositeOver(m.ring, m.background), parseColor(m.background).rgb), `${mode} ring/background`).toBeGreaterThanOrEqual(3)
 })
+import papier from '../../packages/catalog/src/presets/papier.json'
+it.each(['light', 'dark'] as const)('papier %s token pairs reach 4.5:1 and control boundaries 3:1', (mode) => {
+  const m = papier.modes[mode] as Record<string, string>
+  for (const [f, b] of [
+    ['foreground', 'background'],
+    ['cardForeground', 'card'],
+    ['popoverForeground', 'popover'],
+    ['primaryForeground', 'primary'],
+    ['secondaryForeground', 'secondary'],
+    ['mutedForeground', 'background'],
+    ['mutedForeground', 'card'],
+    ['mutedForeground', 'muted'],
+    ['accentForeground', 'accent'],
+    ['destructiveForeground', 'destructive'],
+    ['successForeground', 'success'],
+    ['warningForeground', 'warning'],
+    ['infoForeground', 'info'],
+    ['foreground', 'success'],
+    ['foreground', 'warning'],
+    ['foreground', 'info'],
+  ])
+    expect(contrastRatio(parseColor(m[f]).rgb, parseColor(m[b]).rgb), `${mode} ${f}/${b}`).toBeGreaterThanOrEqual(4.5)
+  for (const surface of ['background', 'card', 'muted']) {
+    expect(contrastRatio(compositeOver(m.input, m[surface]), parseColor(m[surface]).rgb), `${mode} input/${surface}`).toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(compositeOver(m.border, m[surface]), parseColor(m[surface]).rgb), `${mode} border/${surface}`).toBeGreaterThanOrEqual(3)
+  }
+  expect(contrastRatio(compositeOver(m.ring, m.background), parseColor(m.background).rgb), `${mode} ring/background`).toBeGreaterThanOrEqual(3)
+  expect(contrastRatio(parseColor(m.destructive).rgb, parseColor(m.background).rgb), `${mode} destructive/background`).toBeGreaterThanOrEqual(4.5)
+  expect(contrastRatio(parseColor(m.primary).rgb, parseColor(m.background).rgb), `${mode} primary/background`).toBeGreaterThanOrEqual(4.5)
+})

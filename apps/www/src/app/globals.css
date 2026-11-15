@@ -194,6 +194,25 @@
   .o-switch[data-state="checked"] > span { transform: translateX(1.1rem); }
 
   /* Flat */
+  /* Papier: warm paper, 1px ink rules, a 2px stamp shadow, 2px radius, a double rule on top of cards. */
+  [data-style="papier"] { --background: #F3EDDF; --foreground: #1B2A41; --card: #FBF7EC; --primary: #B8301A; --primary-foreground: #FFFFFF; --accent: #E4DCC7; --accent-foreground: #1B2A41; --muted-foreground: #4F5B6E; --border: #1B2A41; --ring: #B8301A; --o-r: 0.125rem; --o-edge: #1B2A41; --o-shadow: #1B2A41; }
+  .dark [data-style="papier"] { --background: #16191F; --foreground: #EDE6D3; --card: #1D2128; --primary: #F0845F; --primary-foreground: #16191F; --accent: #2A2F38; --accent-foreground: #EDE6D3; --muted-foreground: #A9A596; --border: #EDE6D3; --ring: #F0845F; --o-edge: #EDE6D3; --o-shadow: #EDE6D3; }
+  [data-style="papier"] .o-card { border: 1px solid var(--o-edge); border-top: 5px double var(--o-edge); border-radius: var(--o-r); background: var(--card); }
+  [data-style="papier"] .o-btn { border: 1px solid var(--o-edge); border-radius: var(--o-r); font-weight: 600; box-shadow: 0 2px 0 var(--o-shadow); }
+  [data-style="papier"] .o-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 0 var(--o-shadow); }
+  [data-style="papier"] .o-btn:active { transform: translateY(2px); box-shadow: none; }
+  [data-style="papier"] .o-btn-ghost { background: var(--accent); color: var(--accent-foreground); }
+  [data-style="papier"] .o-input { border: 1px solid var(--o-edge); border-radius: var(--o-r); background: var(--card); box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--foreground) 14%, transparent); }
+  [data-style="papier"] .o-input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  [data-style="papier"] .o-badge { border: 1px solid var(--o-edge); border-radius: var(--o-r); background: var(--primary); color: var(--primary-foreground); font-weight: 600; }
+  [data-style="papier"] .o-badge-muted { background: var(--accent); color: var(--accent-foreground); }
+  [data-style="papier"] .o-tabs { border: 1px solid var(--o-edge); border-radius: var(--o-r); background: var(--accent); padding: 2px; }
+  [data-style="papier"] .o-tab { border-radius: var(--o-r); }
+  [data-style="papier"] .o-tab[data-state="active"] { background: var(--card); color: var(--foreground); border: 1px solid var(--o-edge); box-shadow: 0 1px 0 var(--o-shadow); }
+  [data-style="papier"] .o-switch { width: 3rem; height: 1.75rem; border: 1px solid var(--o-edge); border-radius: var(--o-r); background: var(--accent); }
+  [data-style="papier"] .o-switch[data-state="checked"] { background: var(--primary); }
+  [data-style="papier"] .o-switch > span { top: .1875rem; left: .1875rem; width: 1.1875rem; height: 1.1875rem; border-radius: 1px; background: var(--card); box-shadow: 0 1px 0 var(--o-shadow); }
+  [data-style="papier"] .o-switch[data-state="checked"] > span { transform: translateX(1.25rem); }
   /* Ombelle: catalog radius 0.75rem, 1.5px edges, and 3px offset shadows. */
   [data-style="ombelle"] { --o-r: 0.75rem; --o-edge: var(--foreground); --o-shadow: var(--foreground); }
   .dark [data-style="ombelle"] { --o-edge: color-mix(in oklab, var(--foreground) 80%, transparent); --o-shadow: color-mix(in oklab, var(--primary) 70%, transparent); }

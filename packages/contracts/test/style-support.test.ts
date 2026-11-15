@@ -14,9 +14,9 @@ const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'c
 const glassUnavailable: string[] = []
 
 describe('style support table', () => {
-  it('lists ombelle as the fourth stable family and widens styleFamilies', () => {
-    expect(supportedStyleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle'])
-    expect(styleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
+  it('lists papier as the fifth stable family and widens styleFamilies', () => {
+    expect(supportedStyleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier'])
+    expect(styleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'])
   })
   it('returns a status for every component and family pair', () => {
     for (const family of styleFamilies)
@@ -32,6 +32,10 @@ describe('style support table', () => {
     expect(componentsWithStyleSupport('liquid-glass', ['unavailable']).sort()).toEqual([...glassUnavailable].sort())
     expect(componentsWithStyleSupport('liquid-glass', ['stable'])).toEqual([])
     expect(componentsWithStyleSupport('flat', ['stable'])).toEqual([...supportedComponentIds])
+  })
+  it('marks papier stable for all fifty-seven components', () => {
+    for (const id of supportedComponentIds) expect(styleSupport(id, 'papier')).toBe('stable')
+    expect(isStyleFamily('papier')).toBe(true)
   })
   it('marks ombelle stable for all fifty-seven components', () => {
     expect(supportedComponentIds).toHaveLength(57)

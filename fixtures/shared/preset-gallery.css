@@ -238,6 +238,11 @@ body {
   --s-r: 999px; --s-ir: 12px; --s-bd: 1.5px solid oklch(0.22 0.012 275); --s-sh: 3px 3px 0 oklch(0.22 0.012 275);
   --s-ibg: #fff; --s-ibd: 1.5px solid oklch(0.22 0.012 275); --s-tint: oklch(0.93 0.045 6); --s-font: 'Archivo', sans-serif;
 }
+.preset-slide-shot[data-kit='papier'] {
+  --s-bg: #f3eddf; --s-ink: #1b2a41; --s-mut: #4f5b6e; --s-pri: #b8301a; --s-pfg: #fff;
+  --s-r: 2px; --s-ir: 2px; --s-bd: 1px solid #1b2a41; --s-sh: 0 2px 0 #1b2a41;
+  --s-ibg: #fffdf6; --s-ibd: 1px solid #1b2a41; --s-tint: #e4dcc7; --s-font: Georgia, serif;
+}
 .preset-slide-shot[data-kit='flat'] {
   --s-bg: #f3f5f9; --s-ink: #0f172a; --s-mut: #4a5568; --s-pri: #1d4ed8; --s-pfg: #fff; --s-r: 8px; --s-ir: 8px 8px 0 0;
   --s-bd: 2px solid #1d4ed8; --s-sh: none; --s-osh: none; --s-ibg: #eceff5; --s-ibd: 0 solid transparent; --s-tint: #e3ebfd;

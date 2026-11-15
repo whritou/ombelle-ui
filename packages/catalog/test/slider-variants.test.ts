@@ -13,7 +13,7 @@ type Edition = {
   stepValue(value: number, min: number, max: number, step: number): number
 }
 const editions = [['radix', radix], ['base', base]] as unknown as readonly (readonly ['radix' | 'base', Edition])[]
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 
 // Radix thumbs are span role="slider"; Base UI thumbs are native range inputs.
 const thumbs = (html: string) => [...html.matchAll(/<span[^>]*role="slider"[^>]*>|<input[^>]*type="range"[^>]*>/g)].map(match => match[0])
