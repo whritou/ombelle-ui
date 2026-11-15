@@ -13,7 +13,7 @@ artifacts, and preserve installer transaction and compatibility contracts.
 - [x] #139: reproduce each deferred component finding against current sources;
   add focused regressions, fix templates/editor behavior, build packages and
   run the affected component/browser tests; commit independently.
-- [ ] #140: verify glass limitations, fix remaining source and public catalog
+- [x] #140: verify glass limitations, fix remaining source and public catalog
   behavior; verify theme transitions and recipe halo; check hosted snapshot
   support and deployment state; commit independently.
 - [ ] #141: fix remaining font notices/versioning/cascade behavior, exercise a

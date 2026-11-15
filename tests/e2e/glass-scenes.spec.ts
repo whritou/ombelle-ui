@@ -10,6 +10,40 @@ const write = process.env.OMBELLE_WRITE_GLASS_SCENES === '1'
 const tolerance = 0.02
 const columns = 32, rows = 20
 
+test('a surface-scoped recipe halo works when root halo and motion are zero', async ({ page }) => {
+  await page.addInitScript(() => {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.documentElement.style.setProperty('--glass-halo', '0')
+      document.documentElement.style.setProperty('--glass-motion', '0')
+    })
+  })
+  await page.goto('/liquid-glass/?mode=light')
+  await expect(page.locator('main[data-ready="true"]')).toBeVisible({ timeout: 60000 })
+  const button = page.locator('[data-slot="button"]').first()
+  await button.evaluate(element => {
+    const surface = element as HTMLElement
+    surface.style.setProperty('--glass-halo', '0.8')
+    surface.style.setProperty('--glass-motion', '0')
+  })
+  await button.hover()
+  await expect(button).toHaveAttribute('data-halo-active', '')
+})
+
+test('the glass Tooltip arrow uses the same translucent material opacity', async ({ page }) => {
+  await page.goto('/editions/liquid-glass/radix/?mode=light')
+  await expect(page.getByTestId('variants-076')).toBeVisible({ timeout: 60000 })
+  await page.getByRole('button', { name: 'Project details', exact: true }).hover()
+  const arrow = page.locator('[data-slot="tooltip-arrow"]').first()
+  await expect(arrow).toBeVisible()
+  const alpha = await arrow.evaluate(element => {
+    const style = getComputedStyle(element)
+    return { fill: style.fill, opacity: style.getPropertyValue('--tooltip-glass-opacity').trim() }
+  })
+  expect(Number(alpha.opacity)).toBeGreaterThan(0)
+  expect(Number(alpha.opacity)).toBeLessThan(1)
+  expect(alpha.fill).toContain('/')
+})
+
 test('every glass scene matches its measured luminance range', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 })
   const measured: Record<string, Record<string, { low: number; high: number }>> = {}
