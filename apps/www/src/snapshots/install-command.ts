@@ -90,14 +90,30 @@ export function buttonRecipeInstallBlocked(
   return recipe.props?.variant === 'link-destructive' && compareVersions(installer.version, displayCatalogMinimumCli) < 0
 }
 
+/** First published installer whose recipe schemas accept the font fields. */
+export const recipeFontsMinimumCli = '0.8.0'
+export const recipeFontsInstallNotice = `This recipe uses fonts and requires CLI ${recipeFontsMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+
+/** Older recipe schemas reject `appearance.fonts` (catalog) and `overrides.fontFamilyId` (Button), even when empty. */
+export function recipeFontsInstallBlocked(
+  recipe: { appearance?: unknown; overrides?: unknown },
+  installer: { version: string } = publishedInstaller,
+): boolean {
+  if (compareVersions(installer.version, recipeFontsMinimumCli) >= 0) return false
+  const appearance = recipe.appearance as Record<string, unknown> | undefined
+  const overrides = recipe.overrides as Record<string, unknown> | undefined
+  return (appearance != null && appearance.fonts !== undefined) || (overrides != null && overrides.fontFamilyId !== undefined)
+}
+
 const semanticPaletteFields = ['success', 'successForeground', 'warning', 'warningForeground', 'info', 'infoForeground']
 
 /** Older recipe schemas reject added keys even when their value is false or a component default. */
 export function componentRecipeInstallBlocked(
-  recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown },
+  recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown; appearance?: unknown },
   installer: { version: string } = publishedInstaller,
 ): boolean {
   if (!catalogRecipeInstallerSupported(installer.version)) return true
+  if (recipeFontsInstallBlocked(recipe, installer)) return true
   if (needs076(recipe, installer)) return true
   if (catalog076Components.has(recipe.component)) return false
   if (catalog075Components.has(recipe.component)) return compareVersions(installer.version, catalog075MinimumCli) < 0
@@ -138,11 +154,13 @@ export function installableRecipeInstallNotice(
   if (recipe.schemaVersion === '2.0') {
     if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
     if (!componentRecipeInstallBlocked(recipe, installer)) return undefined
+    if (recipeFontsInstallBlocked(recipe, installer)) return recipeFontsInstallNotice
     if (needs076(recipe, installer)) return catalog076InstallNotice
     if (catalog075Components.has(recipe.component) || (usesVariants075(recipe) && compareVersions(installer.version, catalog075MinimumCli) < 0)) return catalog075InstallNotice
     return displayComponents.has(recipe.component) || (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0)
       ? displayCatalogInstallNotice : expandedCatalogInstallNotice
   }
+  if (recipeFontsInstallBlocked(recipe, installer)) return recipeFontsInstallNotice
   if (buttonRecipeInstallBlocked(recipe, installer)) return displayCatalogInstallNotice
   return recipeInstallBlocked(recipe, installer) ? glassMaterialInstallNotice : undefined
 }

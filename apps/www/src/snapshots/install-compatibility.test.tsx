@@ -15,6 +15,13 @@ import { PresetExportPanel } from '../preset-editor/components/preset-export-pan
 import { createPresetDraft, setPresetEdit } from '../preset-editor/model'
 import * as compatibility from './install-command'
 
+/** A catalog draft as older editors exported it, before recipes started with the style's fonts. */
+function legacyDraft(component: Parameters<typeof createCatalogDraft>[0]): ReturnType<typeof createCatalogDraft> {
+  const draft = createCatalogDraft(component)
+  const { fonts: _fonts, ...appearance } = (draft.recipe.appearance ?? {}) as { fonts?: unknown }
+  return { ...draft, recipe: { ...draft.recipe, appearance } } as ReturnType<typeof createCatalogDraft>
+}
+
 const current = { version: '0.7.1' }
 const next = { version: '0.7.2' }
 const newComponents = [
@@ -52,7 +59,7 @@ function recipeSnapshot(recipe: ComponentRecipe): InstallableRecipeSnapshot {
 
 describe('published installer compatibility', () => {
   it.each(newComponents)('holds %s recipes until CLI 0.7.2', (component) => {
-    const recipe = createCatalogDraft(component).recipe
+    const recipe = legacyDraft(component).recipe
     expect(compatibility.componentRecipeInstallBlocked(recipe, current)).toBe(
       true,
     )
@@ -73,7 +80,7 @@ describe('published installer compatibility', () => {
   it.each(addedProps)(
     'holds %s.%s even when the added value is a default or false',
     (component, key, value) => {
-      const original = createCatalogDraft(component).recipe
+      const original = legacyDraft(component).recipe
       const props = { ...original.props } as Record<string, unknown>
       // Older immutable recipes omit all newly introduced fields.
       for (const [candidate, field] of addedProps)
@@ -99,7 +106,7 @@ describe('published installer compatibility', () => {
   it.each(['success', 'warning', 'info'] as const)(
     'holds Alert %s while preserving default and destructive support',
     (variant) => {
-      const alert = createCatalogDraft('alert').recipe
+      const alert = legacyDraft('alert').recipe
       const expanded = {
         ...alert,
         props: { ...alert.props, variant },
@@ -124,7 +131,7 @@ describe('published installer compatibility', () => {
   )
 
   it('keeps original catalog recipe support gated at 0.6.0', () => {
-    const recipe = createCatalogDraft('input').recipe
+    const recipe = legacyDraft('input').recipe
     expect(
       compatibility.componentRecipeInstallBlocked(recipe, { version: '0.5.0' }),
     ).toBe(true)
@@ -159,7 +166,7 @@ describe('published installer compatibility', () => {
   })
 
   it('offers a new published recipe command alongside JSON export and editor navigation', () => {
-    const recipe = createCatalogDraft('breadcrumb').recipe
+    const recipe = legacyDraft('breadcrumb').recipe
     const html = renderToStaticMarkup(
       <PublishedRecipe
         snapshot={recipeSnapshot(recipe)}
@@ -174,8 +181,19 @@ describe('published installer compatibility', () => {
     expect(html).toContain('href="/editor/component/breadcrumb"')
   })
 
-  it('keeps a legacy published recipe command available', () => {
+  it('shows no command, only the notice and JSON download, for a published font recipe until CLI 0.8.0', () => {
     const recipe = createCatalogDraft('input').recipe
+    expect(recipe.appearance?.fonts).toBeDefined()
+    const html = renderToStaticMarkup(
+      <PublishedRecipe snapshot={recipeSnapshot(recipe)} origin="https://presets.example.test" name="Input" />,
+    )
+    expect(html).toContain('This recipe uses fonts and requires CLI 0.8.0')
+    expect(html).not.toContain('add --recipe')
+    expect(html).toContain('Download recipe JSON')
+  })
+
+  it('keeps a legacy published recipe command available', () => {
+    const recipe = legacyDraft('input').recipe
     const html = renderToStaticMarkup(
       <PublishedRecipe
         snapshot={recipeSnapshot(recipe)}
