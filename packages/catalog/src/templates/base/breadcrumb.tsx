@@ -110,7 +110,7 @@ export function BreadcrumbEllipsis({
 
 type Collapse = 'none' | 'auto'
 const CollapseContext = React.createContext<Collapse>('none')
-type Hidden = { count: number; links(): { label: string; href: string }[] }
+type Hidden = { count: number; links(): { label: string; href?: string }[] }
 const HiddenContext = React.createContext<Hidden | null>(null)
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect
 
@@ -214,8 +214,8 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
     }
   }, [recompute])
 
-  const hiddenLinks = React.useCallback(() => Array.from(list.current?.querySelectorAll<HTMLAnchorElement>(':scope > [data-breadcrumb-hidden] a[href]') ?? [])
-    .map(link => ({ label: link.textContent ?? '', href: link.getAttribute('href') ?? '' })), [])
+  const hiddenLinks = React.useCallback(() => Array.from(list.current?.querySelectorAll<HTMLLIElement>(':scope > [data-breadcrumb-hidden]:not([role="presentation"])') ?? [])
+    .map(item => ({ label: item.textContent ?? '', href: item.querySelector('a[href]')?.getAttribute('href') ?? undefined })), [])
 
   let itemIndex = -1
   let hideNextSeparator = false
@@ -252,7 +252,7 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
 
 /** The folded items, as links in trail order, behind a button named "Show N more". */
 function BreadcrumbOverflowMenu({ hidden, className }: { hidden: Hidden; className?: string }) {
-  const [links, setLinks] = React.useState<{ label: string; href: string }[]>([])
+  const [links, setLinks] = React.useState<{ label: string; href?: string }[]>([])
   return (
     <MenuPrimitive.Root onOpenChange={open => open && setLinks(hidden.links())}>
       <MenuPrimitive.Trigger
@@ -271,9 +271,9 @@ function BreadcrumbOverflowMenu({ hidden, className }: { hidden: Hidden; classNa
             style={{ '--radix-dropdown-menu-content-available-height': 'var(--available-height)' } as React.CSSProperties}
           >
             {links.map(link => (
-              <MenuPrimitive.LinkItem key={link.href + link.label} data-slot="breadcrumb-menu-item" href={link.href}>
+              link.href ? <MenuPrimitive.LinkItem key={link.href + link.label} data-slot="breadcrumb-menu-item" href={link.href}>
                 {link.label}
-              </MenuPrimitive.LinkItem>
+              </MenuPrimitive.LinkItem> : <MenuPrimitive.Item key={link.label} disabled data-slot="breadcrumb-menu-item">{link.label}</MenuPrimitive.Item>
             ))}
           </MenuPrimitive.Popup>
         </MenuPrimitive.Positioner>

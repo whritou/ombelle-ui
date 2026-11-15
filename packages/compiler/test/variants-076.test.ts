@@ -7,6 +7,8 @@ import defaults from './fixtures/variants-076-default-specimens.json'
 import { checkGeneratedTypes } from '../../../tests/helpers/generated-types.js'
 import { findShadowedNames } from './recipe-shadowing.js'
 import { variants076DefaultSpecimens } from './variants-076-defaults.js'
+import { ariaKeyShortcuts as radixKeys } from '../../catalog/src/templates/tooltip.js'
+import { ariaKeyShortcuts as baseKeys } from '../../catalog/src/templates/base/tooltip.js'
 
 const catalog = getCatalog('0.1.0')
 type Id = 'sheet' | 'card' | 'slider' | 'progress' | 'meter' | 'code-block' | 'tooltip' | 'carousel'
@@ -22,6 +24,15 @@ const specimen = (component: Id, props: Record<string, unknown> = {}, content: R
 const all = (node: RecipeSpecimen | string): RecipeSpecimen[] => typeof node === 'string' ? [] : [node, ...node.children.flatMap(all)]
 const find = (node: RecipeSpecimen, tag: string) => all(node).find(item => item.tag === tag)
 const tags = (node: RecipeSpecimen) => all(node).map(item => item.tag)
+
+it.each(['ctrl', 'control', 'cmd', 'command', '⌘', 'meta', 'alt', 'option', '⌥', 'shift', '⇧', 'esc', 'k', 'F12'])(
+  'keeps compiler and both Tooltip key mappings equal for %s', key => {
+    const keys = [key, 'z']
+    const compiled = find(specimen('tooltip', {}, { shortcut: keys.join('+') }), 'TooltipTrigger')!.props['aria-keyshortcuts']
+    expect(compiled).toBe(radixKeys(keys))
+    expect(compiled).toBe(baseKeys(keys))
+  },
+)
 // The board's diff, as in apps/preview projects.tsx, the preset gallery and the audit: context lines start with a space.
 const boardDiff = ' :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }\n'
 

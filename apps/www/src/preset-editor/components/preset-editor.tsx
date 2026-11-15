@@ -135,6 +135,7 @@ export default function PresetEditor() {
   const [confirmation, setConfirmation] = useState<
     (FamilyChange & { label: string; description: string; tone: 'default' | 'destructive' }) | null
   >(null)
+  const [confirmationOpen, setConfirmationOpen] = useState(false)
   const identityOpener = useRef<HTMLElement | null>(null),
     returnFocus = useRef<HTMLElement | null>(null)
   const [identityOpen, setIdentityOpen] = useState(false)
@@ -202,11 +203,12 @@ export default function PresetEditor() {
   }
   function finishConfirmation(accept: boolean) {
     if (accept && confirmation) commit(confirmation.draft, 'family/reset')
-    setConfirmation(null)
+    setConfirmationOpen(false)
   }
   function confirm(change: FamilyChange, label: string, description: string, tone: 'default' | 'destructive' = 'default') {
     returnFocus.current = document.activeElement as HTMLElement
     setConfirmation({ ...change, label, description, tone })
+    setConfirmationOpen(true)
   }
   function family(family: StyleFamily) {
     // Liquid glass has no Palette row: a carried palette would override Cristal with no one-click way back.
@@ -639,7 +641,7 @@ export default function PresetEditor() {
         { value: 'preview', label: 'Preview', icon: <Eye aria-hidden="true" /> },
         { value: 'checks', label: 'Checks', icon: <ShieldCheck aria-hidden="true" />, badge: warnings },
       ]} />
-      <AlertDialog open={confirmation !== null} onOpenChange={(open) => { if (!open) finishConfirmation(false) }}>
+      <AlertDialog open={confirmationOpen} onOpenChange={(open) => { if (!open) finishConfirmation(false) }}>
         <AlertDialogContent
           onCloseAutoFocus={(event) => {
             // Return to the control that asked, such as the family picker or the menu.

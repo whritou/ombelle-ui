@@ -616,7 +616,7 @@ function VariantsScenario075() {
         <Popover>
           <PopoverTrigger>Shadow help</PopoverTrigger>
           <PopoverContent aria-labelledby="v075-popover-title">
-            <PopoverArrow />
+            <React.Fragment><PopoverArrow /></React.Fragment>
             <PopoverTitle id="v075-popover-title">Shadow offset</PopoverTitle>
             <PopoverDescription>Applies to cards, buttons and menus in this family.</PopoverDescription>
           </PopoverContent>
@@ -664,14 +664,16 @@ const fieldTripPhotos = [
 
 /** The 0.7.6 variants, for tests/e2e/variants-076.spec.ts; later tasks add their parts here. */
 function VariantsScenario076() {
+  const [snapPoints, setSnapPoints] = React.useState([0.5, 0.9])
   const [wideAction, setWideAction] = React.useState(false)
   const [actionClicks, setActionClicks] = React.useState(0)
   return (
     <section aria-label="0.7.6 variants" data-testid="variants-076">
       <Sheet>
         <SheetTrigger render={<Button />}>Filters</SheetTrigger>
-        <SheetContent side="bottom" snapPoints={[0.5, 0.9]}>
+        <SheetContent side="bottom" snapPoints={snapPoints}>
           <SheetHandle label="Resize Filters" />
+          <button type="button" onClick={() => setSnapPoints([0.33, 0.66])}>Change snap points</button>
           <SheetHeader><SheetTitle>Filters</SheetTitle><SheetDescription>Settles on half or full height when released.</SheetDescription></SheetHeader>
         </SheetContent>
       </Sheet>
@@ -703,6 +705,7 @@ function VariantsScenario076() {
         <Card density="dense"><CardHeader><CardTitle>53</CardTitle><CardDescription>components</CardDescription></CardHeader></Card>
         <Card density="dense"><CardHeader><CardTitle>5</CardTitle><CardDescription>style families</CardDescription></CardHeader></Card>
       </div>
+      <Field><FieldLabel>Field slider</FieldLabel><Slider defaultValue={[25]}><SliderValue /></Slider></Field>
       <Slider data-testid="sv-radius" defaultValue={[12]} min={0} max={48} aria-labelledby="sv-radius-label" getValueText={(value) => `${value} px`}>
         <label id="sv-radius-label">Radius</label>
         <SliderValue />

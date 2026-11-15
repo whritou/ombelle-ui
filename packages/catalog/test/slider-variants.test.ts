@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import * as radix from '../src/templates/slider.js'
 import * as base from '../src/templates/base/slider.js'
 import { getCatalog, getTemplate } from '../src/index.js'
+import { Field } from '@base-ui/react/field'
 
 type Edition = {
   Slider: React.FC<Record<string, unknown>>
@@ -43,7 +44,13 @@ describe('stepValue', () => {
 })
 
 describe('SliderValue', () => {
-  it.each(editions)('%s reads the value through getValueText, beside the label, for the thumb', (_, ui) => {
+  it('preserves the Base UI Field label association with a readout', () => {
+    const html = renderToStaticMarkup(h(Field.Root, {}, h(Field.Label, {}, 'Volume'),
+      h(base.Slider, { defaultValue: [25] }, h(base.SliderValue))))
+    const fieldLabel = html.match(/<label[^>]*>/)![0]
+    expect(attr(thumbs(html)[0]!, 'id')).toBe(attr(fieldLabel, 'for'))
+  })
+  it.each(editions)('%s reads the value through getValueText, beside the label, for the thumb', (edition, ui) => {
     const html = renderToStaticMarkup(h(ui.Slider, { defaultValue: [12], max: 48, 'aria-labelledby': 'radius-label', getValueText: (value: number) => `${value} px` },
       label(), h(ui.SliderValue, { key: 'value' })))
     const readout = output(html)!
@@ -52,7 +59,7 @@ describe('SliderValue', () => {
     expect(attr(readout, 'data-slot')).toBe('slider-value')
     const [thumb] = thumbs(html)
     expect(attr(thumb!, 'id')).toBeTruthy()
-    expect(attr(readout, 'for')).toBe(attr(thumb!, 'id'))
+    expect(attr(readout, 'for')).toBe(edition === 'base' ? undefined : attr(thumb!, 'id'))
     expect(attr(thumb!, 'aria-valuetext')).toBe('12 px')
     expect(attr(thumb!, 'aria-labelledby')).toBe('radius-label')
     // The label, then the readout, in the header; the slider root after the header.
@@ -67,13 +74,13 @@ describe('SliderValue', () => {
     expect(attr(thumbs(html)[0]!, 'aria-valuetext')).toBe('40%')
   })
 
-  it.each(editions)('%s reads a range as two formatted values, each by its index', (_, ui) => {
+  it.each(editions)('%s reads a range as two formatted values, each by its index', (edition, ui) => {
     const html = renderToStaticMarkup(h(ui.Slider, { defaultValue: [20, 80], thumbLabels: ['Minimum', 'Maximum'] }, h(ui.SliderValue)))
     const readout = output(html)!
     expect(readout).toMatch(/>20 – 80<\/output>$/)
     const ids = thumbs(html).map(thumb => attr(thumb, 'id'))
     expect(ids.every(Boolean)).toBe(true)
-    expect(attr(readout, 'for')).toBe(ids.join(' '))
+    expect(attr(readout, 'for')).toBe(edition === 'base' ? undefined : ids.join(' '))
     const indexed = renderToStaticMarkup(h(ui.Slider, { defaultValue: [20, 80], thumbLabels: ['Minimum', 'Maximum'] },
       h(ui.SliderValue, { format: (value: number, index: number) => `${index ? 'max' : 'min'} ${value}` })))
     expect(output(indexed)).toMatch(/>min 20 – max 80<\/output>$/)
@@ -124,9 +131,9 @@ describe('SliderValue', () => {
     }
   })
 
-  it('shares the SliderValue code between the editions, as identical text', () => {
+  it('shares SliderValue formatting and editable input code between editions', () => {
     const source = (file: string) => readFileSync(new URL(`../src/templates/${file}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
-    const shared = (text: string) => text.slice(text.indexOf('// slider value'), text.indexOf('// end slider value'))
+    const shared = (text: string) => text.slice(text.indexOf('// slider value'), text.indexOf('function SliderField')) + text.slice(text.indexOf('type SliderValueInputProps'), text.indexOf('// end slider value'))
     const text = shared(source('slider.tsx'))
     expect(text).toContain('export function stepValue')
     expect(shared(source('base/slider.tsx'))).toBe(text)
