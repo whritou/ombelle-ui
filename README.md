@@ -132,3 +132,7 @@ pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.e
 ```
 
 This installs a separate native `Button`, its scoped CSS, and an example under preset ID/revision paths. It preserves saved project defaults, global theme, ordinary components, and recipes. Import the generated preset Button to use it; later ordinary additions continue to use project defaults. The local JSON slice supports flat, minimalist, and neo brutalism with exact catalog/compiler 0.1.0. Saved remote codes, an editor flow for component-only presets, other scoped components, portals, nested independently themed subtrees, and arbitrary consumer CSS/style overrides remain outside this slice. See [local usage and conflicts](docs/foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](docs/evidence/component-scoped-button-presets.md).
+
+## Contributing and license
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) first. Ask questions in [Discussions](https://github.com/whritou/ombelle-ui/discussions), and report security issues privately as described in [SECURITY.md](SECURITY.md). Ombelle UI is released under the [MIT License](LICENSE).
