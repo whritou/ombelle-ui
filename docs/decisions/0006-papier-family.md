@@ -37,4 +37,24 @@ Nothing rewrites installed files. A project adopts papier only by running `init 
 
 ## Verification status
 
-VERIFICATION_PLACEHOLDER
+Recorded on 15 November 2026 on Windows 11 with Node 24.19.0 and pnpm 11.25.0 through corepack, on branch `feat/style-papier`.
+
+Run on this machine and passing:
+
+- `pnpm build:packages` (which lints every Papier file against the catalog slots), `pnpm generate:preview`, `pnpm typecheck`.
+- `pnpm test:unit`: 252 files, 4446 tests. Three tests (`snapshot-cache` "bounds valid entries", `preview-protocol` glass backdrop, `generated-types` Base UI typecheck) time out only when the whole suite runs at once under load; each passes when run alone.
+- Catalog, compiler and contracts suites with Papier in every per-component family list (89 catalog files, 1492 tests), including the Papier review regression tests (`packages/catalog/test/papier-review-fixes.test.ts`) and the 57-file coverage and lint test (`papier-styles.test.ts`).
+- Integration tests that count families: `consumer-matrix`, `consumer-evidence`, `component-preset-evidence`, `recipe-evidence`, `foundation-groups`, `foundation-browser-inventory`, `contrast` (Papier token pairs in both modes). The stable-family hashes were re-recorded: only `papier/*` lines changed, the other families' bytes are identical.
+- `pnpm test:specimen-audit` for Papier (`OMBELLE_AUDIT_FAMILIES=papier`, radix and base, light and dark: focus, clipping, overflow, label spacing, target size, forced colors, axe). The default 300 second test timeout is too short for the axe pass on this machine, so it was run with `--timeout=1800000`. It passed after fixes to the Code Block token mapping, the dark-safe scrim tint on dialogs, sheets and alert dialogs, and the sheet resize grip focus colour, and again after the review fixes below.
+- The Calendar, Code Block, Display and 0.7.6 component e2e specs, rerun on their own: 76 passed. Two Code Block keyboard-scroll cases (radix and base) failed on a 31px horizontal page overflow on an Ombelle edition page; Ombelle files were not changed, and this was not compared against `main`.
+
+Whole-branch review: an independent reviewer found five defects (matched combobox text invisible in a highlighted row, two tab indicators, forced-colors overrides on checkbox, tabs and tooltip, a tooltip arrow drawn as a box, the destructive badge rule on soft and outline badges). Each was reproduced by a failing test first and fixed. Menu, select, command and combobox highlights now use the design's paper tint with a 2px ring instead of the ported solid primary fill, so that is not a deviation.
+
+Not run, so nothing here supports a claim about them:
+
+- The Papier consumer apps. The consumer pipeline has been failing in daily CI, and the plan is to fix it first and add Papier consumers after. The four Papier rows exist in the consumer matrix by derivation, and the counts in the evidence tests were updated, but no consumer app was prepared, built or browsed, and no consumer evidence file was regenerated. The parity browser spec was not run for Papier.
+- `pnpm check:foundation`, and the Yarn and Bun consumers (no native Bun executable is installed here).
+- Integration tests that need Bun or the npm registry (`bun-*`, `packed-cli`, `snapshot-journey`, `component-recipe-cli` and others) failed or timed out on this machine for those reasons.
+- Real-browser forced-colors rendering beyond the automated audit, and human keyboard or screen reader review.
+
+Known minor leftovers, deferred: a 1px double border for invalid inputs reads solid in forced colors; the table's dotted row dividers lose to the ported solid cell border; some Ombelle sizing remains (11px table head, separator label and badge text, pill meter cells, 2.5px component focus rings); link buttons ignore their size; disabled opacity is 0.5 on Button and Input and 0.45 on component controls; the alert's left rule is ink for success, warning and info; the dialog close button has no border in forced colors.
