@@ -18,6 +18,7 @@ import { ColorPicker } from '../../generated/ui/components/ui/color-picker'
 import { NumberInput } from '../../generated/ui/components/ui/number-input'
 import { RECIPE_COLOR_PATTERN, recipeColor, withGlassPreset, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { FamilyPicker } from './family-picker'
+import { FontSelect } from './font-select'
 import { designControlLabel, glassControlHints, glassDesignControls } from '../../preset-editor/model'
 import { GlassPresetSelect } from '../../site/glass-preset-select'
 import { glassPresetId } from '../../site/glass-presets'
@@ -383,6 +384,9 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
         {spacingSliders.map(slider)}
       </InspectorSection>
       <InspectorSection id="inspector-type" title="Typography">
+        <FontSelect role="fontFamilyId" value={recipe.overrides.fontFamilyId}
+          onChange={(id) => onChange(withRecipeOverride(recipe, 'fontFamilyId', id), 'overrides.fontFamilyId')} />
+        <FieldError diagnostic={diagnostic} path="/overrides/fontFamilyId" />
         {typeSliders.map(slider)}
         <div className="be-uppercase">
           <SwitchRow id="button-uppercase" label="Uppercase" checked={recipe.overrides.uppercase ?? false}

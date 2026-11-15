@@ -4,7 +4,9 @@ import { componentRecipeFields, defaultRecipeFields, styleSupport, type Componen
 import { siteFamilyOrder } from '../../snapshots/install-command'
 import { GlassPresetSelect } from '../../site/glass-preset-select'
 import { glassPresetId } from '../../site/glass-presets'
-import { changeCatalogFamily } from '../catalog-draft'
+import { changeCatalogFamily, withCatalogFont } from '../catalog-draft'
+import { componentRecipeFontRoles } from '@ombelle/compiler'
+import { FontSelect } from './font-select'
 import { FamilyPicker } from './family-picker'
 import { CatalogAppearance } from './catalog-appearance'
 import { NumberInput } from '../../generated/ui/components/ui/number-input'
@@ -18,6 +20,7 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
 }) {
   const family = resolveRecipePreset(recipe.presetRef).styleFamily
   const fields = componentRecipeFields(recipe.component)
+  const roles = componentRecipeFontRoles(recipe.component, family, recipe.presetRef.catalogRelease)
   const props: Record<string, unknown> = recipe.props
   const content: Record<string, unknown> = recipe.content
   const choices = (content.options ?? content.items ?? content.columns ?? []) as Item[]
@@ -62,6 +65,14 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
       if (key === 'collapsible' && props.type === 'multiple') return null
       return <Field key={key} field={field} value={props[key]} update={value => change('props', key, value)} />
     })}
+    <fieldset className="grid gap-2">
+      <legend>Fonts</legend>
+      <FontSelect role="fontFamilyId" value={recipe.appearance?.fonts?.fontFamilyId} onChange={id => update(withCatalogFont(recipe, 'fontFamilyId', id))} />
+      {roles.heading && <FontSelect role="headingFontFamilyId" value={recipe.appearance?.fonts?.headingFontFamilyId}
+        onChange={id => update(withCatalogFont(recipe, 'headingFontFamilyId', id))} />}
+      {roles.mono && <FontSelect role="monoFontFamilyId" value={recipe.appearance?.fonts?.monoFontFamilyId}
+        onChange={id => update(withCatalogFont(recipe, 'monoFontFamilyId', id))} />}
+    </fieldset>
     <CatalogAppearance recipe={recipe} glass={family === 'liquid-glass'} measured={measured} previewMode={previewMode} update={update} />
   </div>
 }

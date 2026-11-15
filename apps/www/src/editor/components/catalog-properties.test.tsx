@@ -50,3 +50,10 @@ it('edits the 0.7.6 lists that start empty, with Add and Remove', () => {
   expect(filled.match(/>Remove Fields \d<\/button>/g)).toHaveLength(2)
   expect(filled).toMatch(/<button[^>]*>Add Fields<\/button>/)
 })
+
+it.each([['card', true, false], ['badge', false, false], ['code-block', false, true]] as const)('%s offers the font pickers for the roles it shows', (component, heading, mono) => {
+  const html = panel(component)
+  expect(html).toContain('aria-label="Body font"')
+  expect(html.includes('aria-label="Display font"')).toBe(heading)
+  expect(html.includes('aria-label="Code font"')).toBe(mono)
+})

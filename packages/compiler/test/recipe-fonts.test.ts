@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compileComponentRecipe, compileRecipe } from '../src/index.js'
+import { componentRecipeFontRoles, compileComponentRecipe, compileRecipe } from '../src/index.js'
 import { catalogRecipeFixtures } from '../../../tests/helpers/catalog-recipe-fixtures.js'
 import button from '../../../examples/recipe.example.json'
 
@@ -46,5 +46,17 @@ describe('catalog recipe fonts', () => {
     const result = await compileComponentRecipe({ recipe: plain })
     expect(style(result)).not.toContain('@fontsource')
     expect(names(result).some((name) => name.startsWith('@fontsource'))).toBe(false)
+  })
+})
+
+describe('component font roles', () => {
+  it('counts a mono font as used when the component styles read it, not only for the mono slots', async () => {
+    const roles = (component: string) => componentRecipeFontRoles(component as never, 'ombelle')
+    expect(roles('card')).toEqual({ heading: true, mono: false })
+    const withMono = ['alert-dialog', 'carousel', 'code-block'].filter((component) => roles(component).mono)
+    expect(withMono.length).toBeGreaterThan(0)
+    const recipe = catalogRecipeFixtures().find((item) => item.component === withMono[0])!
+    const result = await compileComponentRecipe({ recipe: { ...recipe, appearance: { fonts: { monoFontFamilyId: 'ibm-plex-mono' } } } })
+    expect(names(result)).toContain('@fontsource/ibm-plex-mono')
   })
 })

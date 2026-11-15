@@ -24,6 +24,18 @@ export function styleFonts(family: StyleFamily): NonNullable<NonNullable<Compone
   return { fontFamilyId: body, headingFontFamilyId: display, monoFontFamilyId: mono }
 }
 
+type FontRole = keyof NonNullable<NonNullable<ComponentRecipe['appearance']>['fonts']>
+/** Sets one font role, or clears it with undefined; an empty fonts group and appearance are dropped. */
+export function withCatalogFont(recipe: ComponentRecipe, role: FontRole, id: string | undefined): ComponentRecipe {
+  const fonts = { ...recipe.appearance?.fonts }
+  if (id === undefined) delete fonts[role]
+  else fonts[role] = id
+  const { fonts: _old, ...appearance } = recipe.appearance ?? {}
+  const next = Object.keys(fonts).length ? { ...appearance, fonts } : appearance
+  const { appearance: _drop, ...rest } = recipe
+  return (Object.keys(next).length ? { ...rest, appearance: next } : rest) as ComponentRecipe
+}
+
 /** Moves the recipe to a style; its fonts follow the style unless someone picked others. */
 export function changeCatalogFamily(recipe: ComponentRecipe, family: StyleFamily, presetId?: StartingPresetId): ComponentRecipe {
   const previous = styleFonts(resolveRecipePreset(recipe.presetRef).styleFamily)

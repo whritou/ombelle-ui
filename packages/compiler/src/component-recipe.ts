@@ -1,7 +1,7 @@
 import {
   usesExtendedTypography, validateComponentRecipe, validateInstallableRecipe,
   type Artifact, type ComponentRecipeId, type ComponentRecipeCompileResult, type InstallableRecipeCompileResult,
-  type ComponentRecipeAppearance, type Preset,
+  type ComponentRecipeAppearance, type Preset, type StyleFamily,
 } from '@ombelle/contracts'
 import { getCatalog, getTemplate, resolveRecipePreset } from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
@@ -28,17 +28,26 @@ export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeA
 }
 
 /**
- * The fonts a recipe asks for, minus the roles the component has no slot for: a Card shows no code, so
- * its mono font would be imported and installed for nothing. An unnamed role keeps the preset's font.
+ * Which font roles a component shows: it has a heading slot, or code that reads --font-mono (through its
+ * style rules or a mono slot). The body font always applies. A role the component never shows is not
+ * imported or installed.
  */
-function withComponentRecipeFonts(preset: Preset, fonts: ComponentRecipeAppearance['fonts'], slots: readonly string[]): Preset {
+export function componentRecipeFontRoles(component: ComponentRecipeId, family: StyleFamily, catalogRelease = '0.1.0'): { heading: boolean; mono: boolean } {
+  const template = getTemplate(getCatalog(catalogRelease), component)
+  const slots = recipeTemplateSlots(template)
+  return {
+    heading: headingSlots.some(name => slots.includes(name)),
+    mono: monoSlots.some(name => slots.includes(name)) || (template.styles?.[family] ?? '').includes('--font-mono'),
+  }
+}
+
+function withComponentRecipeFonts(preset: Preset, fonts: ComponentRecipeAppearance['fonts'], roles: { heading: boolean; mono: boolean }): Preset {
   if (!fonts) return preset
   const { fontFamilyId, headingFontFamilyId, monoFontFamilyId } = fonts
-  const has = (names: readonly string[]) => names.some(name => slots.includes(name))
   const design = { ...preset.design,
     ...(fontFamilyId === undefined ? {} : { fontFamilyId }),
-    ...(headingFontFamilyId !== undefined && has(headingSlots) ? { headingFontFamilyId } : {}),
-    ...(monoFontFamilyId !== undefined && has(monoSlots) ? { monoFontFamilyId } : {}),
+    ...(headingFontFamilyId !== undefined && roles.heading ? { headingFontFamilyId } : {}),
+    ...(monoFontFamilyId !== undefined && roles.mono ? { monoFontFamilyId } : {}),
   // The recipe schema takes any id shape; the registry check in resolveTypography rejects unknown ones.
   } as Preset['design']
   // A preset may only name registry fonts from schema 1.1 on.
@@ -63,7 +72,7 @@ export async function compileComponentRecipe(input: CompileInput): Promise<Compo
   const catalog = getCatalog(catalogRelease)
   const template = getTemplate(catalog, data.component)
   const effectivePreset = withComponentRecipeFonts(
-    withComponentRecipeGlass(builtin, data.appearance?.glass), data.appearance?.fonts, recipeTemplateSlots(template))
+    withComponentRecipeGlass(builtin, data.appearance?.glass), data.appearance?.fonts, componentRecipeFontRoles(data.component, builtin.styleFamily as StyleFamily, catalogRelease))
   const typography = resolveTypography(effectivePreset.design)
   const result = await compile({
     preset: effectivePreset, catalogRelease, compilerVersion, componentIds: [data.component], glassContrast: 'report',
