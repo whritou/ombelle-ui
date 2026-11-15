@@ -174,21 +174,21 @@ describe('published installer compatibility', () => {
         name="Breadcrumb"
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.8 add --recipe')
+    expect(html).toContain('npx @ombelle-ui/cli@0.8.0 add --recipe')
     expect(html).toContain('Copy install command')
     expect(html).toContain('Download recipe JSON')
     expect(html).toContain('aria-label="Recipe JSON"')
     expect(html).toContain('href="/editor/component/breadcrumb"')
   })
 
-  it('shows no command, only the notice and JSON download, for a published font recipe until CLI 0.8.0', () => {
+  it('offers the install command for a published font recipe now that 0.8.0 is published', () => {
     const recipe = createCatalogDraft('input').recipe
     expect(recipe.appearance?.fonts).toBeDefined()
     const html = renderToStaticMarkup(
       <PublishedRecipe snapshot={recipeSnapshot(recipe)} origin="https://presets.example.test" name="Input" />,
     )
-    expect(html).toContain('This recipe uses fonts and requires CLI 0.8.0')
-    expect(html).not.toContain('add --recipe')
+    expect(html).not.toContain('This recipe uses fonts and requires CLI 0.8.0')
+    expect(html).toContain('npx @ombelle-ui/cli@0.8.0 add --recipe')
     expect(html).toContain('Download recipe JSON')
   })
 
@@ -226,7 +226,7 @@ describe('published installer compatibility', () => {
         origin="https://presets.example.test"
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.8')
+    expect(html).toContain('npx @ombelle-ui/cli@0.8.0')
     expect(html).toContain('Download preset JSON')
     expect(html).toContain('id="snapshot-json"')
   })
@@ -258,7 +258,7 @@ describe('published installer compatibility', () => {
     )
     expect(html).toContain('data-testid="preset-install-command"')
     expect(html).not.toContain('data-testid="preset-install-held"')
-    expect(html).toContain('0.7.8')
+    expect(html).toContain('0.8.0')
     expect(html).toContain(
       '<button type="button">Download preset JSON</button>',
     )
@@ -443,7 +443,7 @@ describe('font pairs', () => {
       <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" />,
     )
     expect(html).not.toContain('requires CLI 0.7.8')
-    expect(html).toContain('npx @ombelle-ui/cli@0.7.8')
+    expect(html).toContain('npx @ombelle-ui/cli@0.8.0')
     expect(html).toContain('Download preset JSON')
   })
 
@@ -465,6 +465,6 @@ describe('font pairs', () => {
     )
     expect(html).not.toContain('data-testid="preset-install-held"')
     expect(html).toContain('data-testid="preset-install-command"')
-    expect(html).toContain('0.7.8')
+    expect(html).toContain('0.8.0')
   })
 })
