@@ -1,6 +1,6 @@
 # Accordion
 
-Accordion stacks headings that each show or hide a section of content, built on the reviewed Radix Accordion primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
+Accordion stacks headings that each show or hide a section of content, built on the reviewed Radix Accordion primitive. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 

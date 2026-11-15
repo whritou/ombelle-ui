@@ -199,7 +199,7 @@ export async function validateRecipeConsumers(
     rows = object(value),
     refs = await references()
   if (
-    Object.keys(rows).length !== 38 ||
+    Object.keys(rows).length !== 42 ||
     !equal(Object.keys(rows).sort(), Object.keys(matrix).sort())
   )
     throw Error('Recipe consumer descriptor set mismatch')

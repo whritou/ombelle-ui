@@ -1,6 +1,6 @@
 # Progress
 
-Progress shows how far a task has got, or that it is running when the amount is unknown, built on the reviewed Radix Progress primitive. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
+Progress shows how far a task has got, or that it is running when the amount is unknown, built on the reviewed Radix Progress primitive. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 

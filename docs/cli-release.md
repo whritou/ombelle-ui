@@ -106,6 +106,8 @@ Release 0.4.0 in this order:
 
 The website offers the `ombelle` family only when its published installer version is at least `ombelleMinimumCli` (0.4.0, in `apps/www/src/snapshots/install-command.ts`), so deploying before step 2 keeps Ombelle hidden. The refreshed flat, minimalist and neo-brutalism built-in presets are not gated: a website deployed from `main` before step 2 publishes codes for the refreshed presets while its commands still name the older installer, which installs them with its older family stylesheets, so the result differs from the website preview. Keep to the order above.
 
+The website offers the `papier` family only when its published installer version is at least `papierMinimumCli` (0.8.0, in the same file), so deploying the website before CLI 0.8.0 is published keeps Papier hidden. A restored draft that already uses Papier keeps it selectable. See [Papier style family decision](decisions/0006-papier-family.md).
+
 Post-publication checks on 2026-11-02:
 
 - The registry tarball is byte-for-byte identical to the candidate (integrity `sha512-TAkxY7UE…BDJFxJQ==`).

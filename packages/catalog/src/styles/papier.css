@@ -184,3 +184,4 @@
 [data-slot="dialog-close"]:hover{background:var(--secondary);transform:none;box-shadow:none}
 [data-slot="dialog-close"]:active{transform:none;box-shadow:none}
 @media(forced-colors: active){[data-slot="dialog-content"]{border-top-style:double}[data-slot="button"][data-variant="outline"]{border-bottom-style:double;border-bottom-color:ButtonText}[data-slot="dialog-close"]{border-color:transparent}}
+[data-slot="button"]:focus-visible,[data-slot="dialog-close"]:focus-visible{outline-width:2px;outline-offset:3px}

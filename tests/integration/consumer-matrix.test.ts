@@ -26,7 +26,7 @@ it('keeps stable consumer ports unchanged when glass rows are appended',()=>{
 })
 it('allocates unique ports across all manager groups',()=>{
  const rows=consumerCases(),ports=Object.values(assignConsumerPorts(rows))
- expect(ports).toHaveLength(40);expect(new Set(ports).size).toBe(40);expect(ports).not.toContain(4173)
+ expect(ports).toHaveLength(44);expect(new Set(ports).size).toBe(44);expect(ports).not.toContain(4173)
  expect(()=>assignConsumerPorts([...rows,rows[0]])).toThrow()
  expect(()=>assignConsumerPorts(rows,65530)).toThrow()
 })

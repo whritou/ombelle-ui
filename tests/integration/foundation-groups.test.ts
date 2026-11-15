@@ -28,7 +28,7 @@ function specimenAudit() {
   const checks = (mode: string) => ({ overflow: 36, clipping: 36, spacing: 36, 'focus-visible': 40, 'target-size': 36, 'forced-colors': mode === 'light' ? 29 : 0, axe: 36 })
   return {
     schemaVersion: 1, node: 'v24.19.0', browser: { engine: 'chromium', version: '148.0.0.0', channel: 'bundled' },
-    configurations: ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
+    configurations: ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
       ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: supportedComponentIds.length, checks: checks(mode) })))),
     failures: 0,
   }
@@ -107,10 +107,10 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
 test('accepts a complete specimen audit', () => {
-  expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 20, specimens: 20 * supportedComponentIds.length })
+  expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 24, specimens: 24 * supportedComponentIds.length })
 })
 test.each([
-  ['19 configurations', (audit: any) => { audit.configurations.pop() }],
+  ['23 configurations', (audit: any) => { audit.configurations.pop() }],
   ['one specimen missing in one configuration', (audit: any) => { audit.configurations[3].specimens -= 1 }],
   ['a failure', (audit: any) => { audit.failures = 1 }],
   ['a duplicated configuration', (audit: any) => { audit.configurations[1] = { ...audit.configurations[0] } }],
@@ -194,9 +194,9 @@ test('accepts complete portable structural evidence without any consumer root de
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
   expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 687 } } })
-  expect(Object.keys(result.consumerMatrix)).toHaveLength(40)
-  expect(result.recipeEvidence.measurements).toHaveLength(160)
-  expect(result.componentPresetEvidence.measurements).toHaveLength(160)
+  expect(Object.keys(result.consumerMatrix)).toHaveLength(44)
+  expect(result.recipeEvidence.measurements).toHaveLength(250)
+  expect(result.componentPresetEvidence.measurements).toHaveLength(250)
 }, 420000) // Fixture discovery plus two independently bounded runtime inventories.
 test('rejects an absent group rather than accepting a passed status', async () => {
   const root = await fixture()

@@ -1,6 +1,6 @@
 # Table
 
-Table styles a native HTML table for tabular data. It provides a header, a footer, a caption, right-aligned numeric columns and a selected-row state, all inside a container that scrolls horizontally when the table is wider than its space. It is available in flat, minimalist, neo brutalism, and ombelle, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
+Table styles a native HTML table for tabular data. It provides a header, a footer, a caption, right-aligned numeric columns and a selected-row state, all inside a container that scrolls horizontally when the table is wider than its space. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
 
 ## Install and compose
 
