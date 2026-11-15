@@ -332,7 +332,7 @@ describe.each(editions)('%s Code Block diff', (_, ui) => {
   })
 })
 
-describe.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s Code Block diff styles', (family) => {
+describe.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'])('%s Code Block diff styles', (family) => {
   const css = readFileSync(new URL(`../src/styles/code-block/${family}.css`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
     .match(/\/\* 0\.7\.6 variants \*\/([^]*?)\/\* end 0\.7\.6 variants \*\//)?.[1] ?? ''
   it('tints added and removed lines, reserves a 28px marker column and drops the tints in forced colours', () => {

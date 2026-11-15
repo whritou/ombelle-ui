@@ -137,5 +137,5 @@
 }
 /* end 0.7.3 variants */
 /* papier layer */
-[data-slot='badge'][data-variant='destructive']{border-bottom:3px double var(--destructive-foreground)}
-@media (forced-colors: active){[data-slot='badge'][data-variant='destructive']{border-bottom-style:double;border-bottom-color:CanvasText}}
+[data-slot='badge'][data-variant='destructive']:not([data-appearance='soft']):not([data-appearance='outline']){border-bottom:3px double var(--destructive-foreground)}
+@media (forced-colors: active){[data-slot='badge'][data-variant='destructive']:not([data-appearance='soft']):not([data-appearance='outline']){border-bottom-style:double;border-bottom-color:CanvasText}}

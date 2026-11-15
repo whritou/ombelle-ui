@@ -254,6 +254,8 @@
 /* papier layer */
 [data-slot='tabs-list'][data-appearance='contained']{background:var(--secondary);border:var(--border-width) solid var(--border);border-radius:var(--radius);padding:2px;box-shadow:none}
 [data-slot='tabs-list'][data-appearance='contained'] [data-slot='tabs-trigger'][data-state='active']{background:var(--card);color:var(--card-foreground);border:var(--border-width) solid var(--border);box-shadow:0 1px 0 var(--border)}
-[data-slot='tabs-list'][data-appearance='underline'] [data-slot='tabs-trigger'][data-state='active']{border-bottom:4px double var(--primary);font-weight:600}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-state='active']{font-weight:600}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-state='active']::after{block-size:4px;background:transparent;border-block:1px solid currentColor}
+[data-slot='tabs-list'][data-appearance='underline'][data-orientation][data-orientation='vertical'] > [role='tab'][data-state='active']::after{inline-size:4px;background:transparent;border-block:0;border-inline:1px solid currentColor}
 [data-slot='tabs-list'][data-appearance='pills'] [data-slot='tabs-trigger'][data-state='active']{background:var(--foreground);color:var(--background)}
-@media (forced-colors: active){[data-slot='tabs-trigger'][data-state='active']{outline:2px solid Highlight;outline-offset:-2px}}
+@media (forced-colors: active){[data-slot='tabs-trigger'][data-state='active'],[data-slot='tabs-list'][data-appearance] [data-slot='tabs-trigger'][data-state='active']{background:Highlight;color:HighlightText;border-color:Highlight;forced-color-adjust:none;box-shadow:none}}

@@ -7,7 +7,7 @@ import * as base from '../src/templates/base/switch.js'
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const block = (family: string) => readFileSync(new URL(`../src/styles/switch/${family}.css`, import.meta.url), 'utf8')
   .match(/\/\* 0\.7\.5 variants \*\/([^]*?)\/\* end 0\.7\.5 variants \*\//)?.[1] ?? ''
 

@@ -94,5 +94,6 @@
 /* end 0.7.6 variants */
 /* papier layer */
 [data-slot='tooltip-content']{background: var(--foreground);color: var(--background);border:0;border-radius:var(--radius);box-shadow:2px 2px 0 color-mix(in oklab,var(--foreground) 14%,transparent)}
-[data-slot='tooltip-arrow']{fill:var(--foreground);background:var(--foreground)}
+[data-slot='tooltip-arrow']{fill:var(--foreground)}
 [data-slot='tooltip-shortcut-key']{font-family:var(--font-mono,ui-monospace,monospace)}
+@media (forced-colors: active){[data-slot='tooltip-content']{background:Canvas;color:CanvasText;border:1px solid CanvasText;box-shadow:none;forced-color-adjust:none}[data-slot='tooltip-arrow']{fill:Canvas;stroke:CanvasText;forced-color-adjust:none}}

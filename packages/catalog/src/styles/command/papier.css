@@ -251,3 +251,4 @@
 [data-slot='command']{border-top:5px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 2.5) calc(var(--shadow-y) * 2.5) 0 var(--shadow-color,var(--border))}
 [data-slot='command-shortcut']{font-family:var(--font-mono,ui-monospace,monospace)}
 [data-slot='command-group-heading']{font-weight:600;color:var(--muted-foreground)}
+[data-slot='command-item'][data-highlighted],[data-slot='command-item'][data-selected='true']{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}

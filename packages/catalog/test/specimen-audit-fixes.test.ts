@@ -65,7 +65,7 @@ describe('liquid glass Progress', () => {
 })
 
 describe('highlighted list and menu items show a 3:1 indicator', () => {
-  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s Select and Dropdown Menu items carry a 3:1 indicator', family => {
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'])('%s Select and Dropdown Menu items carry a 3:1 indicator', family => {
     for (const [file, selector] of [['select', "[data-slot='select-item'][data-highlighted]"], ['dropdown-menu', "[data-slot='dropdown-menu-item'][data-highlighted]"]]) {
       const rule = declarations(read(`${file}/${family}.css`), selector)
       if (family === 'ombelle') {
@@ -100,7 +100,7 @@ describe('liquid glass focus', () => {
 
 describe('Field preview control in forced colors', () => {
   // A family whose focus style removes the outline must draw one back in forced colors, where borders lose their colour.
-  it.each(['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle'])('%s draws a visible focus outline', family => {
+  it.each(['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle', 'papier'])('%s draws a visible focus outline', family => {
     let outline = ''
     postcss.parse(read(`field/${family}.css`)).walkAtRules('media', media => {
       if (!media.params.includes('forced-colors')) return
@@ -122,7 +122,7 @@ describe('Field preview control matches the board', () => {
 })
 
 describe('display components match the 0.7.3 boards', () => {
-  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle', 'papier']
   it.each(families)('%s Stepper titles are bold in every state', family => {
     expect(declarations(read(`stepper/${family}.css`), "[data-slot='stepper-title']")['font-weight']).toBe('700')
     expect(declarations(read(`stepper/${family}.css`), "[data-slot='stepper-title'][data-status='current']")['font-weight']).toBeUndefined()
@@ -140,7 +140,7 @@ describe('display components match the 0.7.3 boards', () => {
 })
 
 describe('form controls show focus where the audit measures it', () => {
-  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle', 'papier']
   const forcedRule = (css: string, selector: string) => {
     let outline: string | undefined
     postcss.parse(css).walkAtRules('media', media => {
@@ -172,7 +172,7 @@ describe('form controls show focus where the audit measures it', () => {
 })
 
 describe('form controls match the 0.7.3 boards', () => {
-  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle', 'papier']
   it.each(families)('%s remove buttons are round', family => {
     expect(declarations(read(`tag-input/${family}.css`), "[data-slot='tag-input-remove']")['border-radius']).toBe('50%')
     expect(declarations(read(`chip/${family}.css`), "[data-slot='chip-remove']")['border-radius']).toBe('50%')
@@ -191,7 +191,7 @@ describe('minimalist round remove buttons', () => {
 })
 
 describe('the 0.7.3 overlays match their boards', () => {
-  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'] as const
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'] as const
   it.each(families)('%s marks the matched text with an underline in the board colour', family => {
     const mark = declarations(read(`combobox/${family}.css`), "[data-slot='combobox-match']")
     expect(mark['text-decoration-color']).toBe(family === 'minimalist' ? 'var(--foreground)' : 'var(--primary)')
@@ -227,7 +227,7 @@ describe('the 0.7.3 calendar', () => {
 })
 
 describe('the 0.7.3 batch 6a variants', () => {
-  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
   it.each(families)('%s mixes destructive text with the foreground, so neo-brutalism light passes 4.5:1', family => {
     const mix = 'color-mix(in oklab, var(--destructive) 65%, var(--foreground))'
     expect(declarations(read(`${family}.css`), "[data-slot='button'][data-variant='link-destructive']").color).toBe(mix)
@@ -249,7 +249,7 @@ describe('the 0.7.3 card options', () => {
 })
 
 describe('the 0.7.3 batch 6b and 6c variants', () => {
-  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
   it.each(families)('%s lets a toast stack overflow its viewport, so peeking toasts keep their shadows', family => {
     expect(declarations(read(`toast/${family}.css`), "[data-slot='toast-viewport'][data-stack]").overflow).toBe('visible')
   })
@@ -290,7 +290,7 @@ describe('the 0.7.3 batch 6b and 6c variants', () => {
 })
 
 describe('the 0.7.5 primitives', () => {
-  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
   it.each(families)('%s Collapsible keeps the open chevron turned under reduced motion, so open and closed stay apart', family => {
     // Reduced motion removes the transition only: the end state is information.
     postcss.parse(read(`collapsible/${family}.css`)).walkAtRules('media', media => {
@@ -312,7 +312,7 @@ describe('the 0.7.5 primitives', () => {
       })
       return found
     }
-    it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle'])('%s fades the viewport end into the card without catching the pointer', family => {
+    it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier'])('%s fades the viewport end into the card without catching the pointer', family => {
       expect(fade(family)).toMatchObject({
         position: 'sticky', 'inset-block-end': '0', 'block-size': '28px', 'margin-block-start': '-28px', 'pointer-events': 'none', opacity: '0',
         // A consumer whose area sits on another surface sets --scroll-area-fade to that surface's colour.
@@ -373,7 +373,7 @@ describe('the 0.7.5 primitives', () => {
 })
 
 describe('editor inputs board comparison, measured on the edition pages against the 0.7.5 boards', () => {
-  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'] as const
+  const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'] as const
   it.each(families)('%s pads the Color Picker popover by 14px and sets its format value at weight 500 with 14px sides', family => {
     const css = read(`color-picker/${family}.css`)
     expect(declarations(css, "[data-slot='color-picker-content']").padding).toBe('0.875rem')
@@ -422,7 +422,7 @@ describe('0.7.6 components match their boards', () => {
   })
 
   it('Carousel arrows are 34px, as on the board', () => {
-    for (const family of ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])
+    for (const family of ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'])
       expect(px(declarations(read(`carousel/${family}.css`), "[data-slot='carousel-previous']")['block-size']!), family).toBe(34)
   })
 })
@@ -439,7 +439,7 @@ describe('0.7.6 audit findings', () => {
     expect(declarations(read('carousel/minimalist.css'), "[data-slot='carousel-dot']:focus-visible").outline).toBe('2px solid var(--ring)')
   })
 
-  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s grouped checkboxes keep the ring colour on their transparent row', family => {
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'])('%s grouped checkboxes keep the ring colour on their transparent row', family => {
     expect(declarations(read(`checkbox/${family}.css`), "[data-slot='checkbox-option'][data-checkbox-group-item] > :first-child:focus-visible")['outline-color'])
       .toBe(family === 'liquid-glass' ? 'var(--foreground)' : 'var(--ring)')
   })
@@ -450,7 +450,7 @@ describe('0.7.6 audit findings', () => {
 })
 
 describe('the 0.7.6 variants pass the specimen audit and match their boards', () => {
-  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle']
+  const families = ['flat', 'liquid-glass', 'minimalist', 'neo-brutalism', 'ombelle', 'papier']
   const action = "[data-slot='card-action'] > :where(button:not([data-slot]))"
   it.each(families)('%s keeps the ring numbers inside their box: a line height of 1 cut the glyphs', family => {
     expect(declarations(read(`progress/${family}.css`), "[data-slot='progress-ring-value']")['line-height']).toBe('normal')
@@ -509,7 +509,7 @@ describe('the 0.7.6 Card action in neo brutalism', () => {
 
 // The preset editor's dashboard preview, checked with axe (tests/e2e/preset-editor.spec.ts).
 describe('text on the preset preview pages reaches 4.5:1', () => {
-  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])(
+  it.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'])(
     '%s draws the selected tab count as an outline on the tab fill, not a lighter fill under white text',
     family => {
       const count = declarations(read(`tabs/${family}.css`), "[data-slot='tabs-count']:is([data-state='active'] > *)")

@@ -7,7 +7,7 @@ import * as base from '../src/templates/base/select.js'
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const block = (family: string) => {
   const css = readFileSync(new URL(`../src/styles/select/${family}.css`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   return css.slice(css.indexOf('/* 0.7.3 variants */'))

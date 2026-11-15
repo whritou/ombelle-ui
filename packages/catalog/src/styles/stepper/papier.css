@@ -112,5 +112,6 @@
   }
 }
 /* papier layer */
+[data-slot='stepper-title']{font-weight:700}
 [data-slot='stepper-indicator']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
 [data-slot='stepper-indicator'][data-status='current']{box-shadow:0 2px 0 var(--border)}

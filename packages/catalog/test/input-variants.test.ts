@@ -6,7 +6,7 @@ import { Input } from '../src/templates/input.js'
 import { Textarea } from '../src/templates/textarea.js'
 import { InputGroup, InputGroupAddon, InputGroupClear, InputGroupCount, InputGroupInput } from '../src/templates/input-group.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const block = (file: string) => {
   const css = readFileSync(new URL(`../src/styles/${file}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   return css.slice(css.indexOf('/* 0.7.3 variants */'))

@@ -7,7 +7,7 @@ import * as base from '../src/templates/base/button.js'
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
 const familyCss = (family: string) => readFileSync(new URL(`../src/styles/${family}.css`, import.meta.url), 'utf8')
 
 describe('Button 0.7.3 variants', () => {

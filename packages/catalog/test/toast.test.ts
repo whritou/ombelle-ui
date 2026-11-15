@@ -71,7 +71,7 @@ function luminance(hex: string) {
   return channels[0]! * 0.2126 + channels[1]! * 0.7152 + channels[2]! * 0.0722
 }
 
-describe.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'liquid-glass'])('%s Toast intent paint', family => {
+describe.each(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass'])('%s Toast intent paint', family => {
   const css = readFileSync(new URL(`../src/styles/toast/${family}.css`, import.meta.url), 'utf8')
   it.each([
     ['success', '#dcfce7', '#14532d'],

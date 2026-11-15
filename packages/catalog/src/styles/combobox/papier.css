@@ -289,4 +289,7 @@
 /* papier layer */
 [data-slot='combobox-field']{background:var(--card);border-radius:var(--radius);box-shadow:inset 0 -2px 0 color-mix(in oklab,var(--foreground) 14%,transparent)}
 [data-slot='combobox-content']{border-top:3px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color,var(--border))}
-[data-slot='combobox-match']{background:color-mix(in oklab,var(--primary) 22%,var(--background));color:inherit}
+[data-slot='combobox-match']{background:color-mix(in oklab,var(--ring) 22%,var(--background));color:inherit}
+/* Highlighted rows are solid primary and redefine --primary as currentColor, so the match is underlined there instead. */
+[data-slot='combobox-item'][data-highlighted],[data-slot='combobox-item'][data-selected='true'],[data-slot='combobox-create'][data-highlighted],[data-slot='combobox-create'][data-selected='true']{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
+[data-highlighted] [data-slot='combobox-match'],[data-selected='true'] [data-slot='combobox-match']{background:transparent;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}

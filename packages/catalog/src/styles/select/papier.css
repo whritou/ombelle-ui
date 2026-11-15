@@ -304,3 +304,5 @@
 [data-slot='select-trigger']:disabled{background:var(--secondary);box-shadow:none}
 [data-slot='select-content']{border-top:3px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color,var(--border))}
 [data-slot='select-label']{font-weight:600;color:var(--muted-foreground)}
+/* The design's highlight is a paper tint with a 2px ring, not a solid fill. */
+[data-slot='select-item'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}

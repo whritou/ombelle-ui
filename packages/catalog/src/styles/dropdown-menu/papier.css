@@ -227,3 +227,4 @@
 [data-slot='dropdown-menu-label']{font-weight:600;color:var(--muted-foreground)}
 [data-slot='dropdown-menu-shortcut']{font-family:var(--font-mono,ui-monospace,monospace)}
 [data-slot='dropdown-menu-separator']{background:color-mix(in oklab,var(--foreground) 14%,transparent)}
+[data-slot='dropdown-menu-item'][data-highlighted],[data-slot='dropdown-menu-checkbox-item'][data-highlighted],[data-slot='dropdown-menu-radio-item'][data-highlighted],[data-slot='dropdown-menu-sub-trigger'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
