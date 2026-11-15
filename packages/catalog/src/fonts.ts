@@ -106,5 +106,6 @@ export const styleFamilyFonts: Readonly<Record<StyleFamily, { body: string; disp
   minimalist: { body: 'geist', display: 'geist', mono: 'geist-mono' },
   'neo-brutalism': { body: 'work-sans', display: 'space-grotesk', mono: 'space-mono' },
   ombelle: { body: 'figtree', display: 'bricolage-grotesque', mono: 'geist-mono' },
+  papier: { body: 'instrument-sans', display: 'fraunces', mono: 'ibm-plex-mono' },
   'liquid-glass': { body: 'inter', display: 'inter-tight', mono: 'jetbrains-mono' },
 }
