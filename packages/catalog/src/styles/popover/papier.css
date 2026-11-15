@@ -35,9 +35,9 @@
   font-size: 0.8125rem;
 }
 [data-slot='popover-content'][data-state='open'] {
-  animation: papier-popover-enter var(--motion-duration) ease-out;
+  animation: ombelle-popover-enter var(--motion-duration) ease-out;
 }
-@keyframes papier-popover-enter {
+@keyframes ombelle-popover-enter {
   from {
     opacity: 0;
   }
@@ -92,4 +92,4 @@
 /* end 0.7.5 variants */
 /* papier layer */
 [data-slot='popover-content']{border-top:5px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 2) calc(var(--shadow-y) * 2) 0 var(--shadow-color,var(--border))}
-[data-slot='popover-title']{font-family:var(--font-heading,var(--font-family));font-weight:600}
+[data-slot='popover-title']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}

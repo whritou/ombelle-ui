@@ -57,13 +57,13 @@
   inline-size: 1.5px;
   block-size: 24px;
   background: var(--foreground);
-  animation: papier-otp-caret 1s steps(1) infinite;
+  animation: ombelle-otp-caret 1s steps(1) infinite;
 }
 [data-slot='input-otp-separator'] {
   inline-size: 12px;
   border-block-start: 2px solid var(--input);
 }
-@keyframes papier-otp-caret {
+@keyframes ombelle-otp-caret {
   50% {
     opacity: 0;
   }

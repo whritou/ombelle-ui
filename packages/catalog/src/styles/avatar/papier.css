@@ -151,5 +151,5 @@
 }
 /* end 0.7.3 variants */
 /* papier layer */
-[data-slot='avatar-fallback']{font-family:var(--font-heading,var(--font-family));font-weight:600}
+[data-slot='avatar-fallback']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
 [data-slot='avatar'][data-shape='square'],[data-slot='avatar'][data-shape='square'] [data-slot='avatar-image']{border-radius:var(--radius)}

@@ -92,5 +92,5 @@
 }
 /* papier layer */
 [data-slot='empty']{border:1px dashed var(--border);border-radius:var(--radius)}
-[data-slot='empty-title']{font-family:var(--font-heading,var(--font-family));font-weight:600}
+[data-slot='empty-title']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
 [data-slot='empty-media']{border:var(--border-width) solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:0 2px 0 var(--border)}

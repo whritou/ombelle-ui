@@ -5,7 +5,7 @@
   inline-size: 1.5rem;
   block-size: 1.5rem;
   vertical-align: middle;
-  animation: papier-spinner-turn 0.9s linear infinite;
+  animation: ombelle-spinner-turn 0.9s linear infinite;
 }
 [data-slot='spinner'][data-size='sm'] {
   inline-size: 1rem;
@@ -24,7 +24,7 @@
   stroke-width: 3;
   stroke-linecap: round;
 }
-@keyframes papier-spinner-turn {
+@keyframes ombelle-spinner-turn {
   to {
     transform: rotate(360deg);
   }

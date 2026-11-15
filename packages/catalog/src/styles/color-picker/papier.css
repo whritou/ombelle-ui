@@ -98,7 +98,7 @@
   outline-offset: 3px;
 }
 [data-slot='color-picker-content'][data-state='open'] {
-  animation: papier-color-picker-enter var(--motion-duration) ease-out;
+  animation: ombelle-color-picker-enter var(--motion-duration) ease-out;
 }
 @media (forced-colors: active) {
   [data-slot='color-picker-content'] {
@@ -373,7 +373,7 @@
     transition: none;
   }
 }
-@keyframes papier-color-picker-enter {
+@keyframes ombelle-color-picker-enter {
   from {
     opacity: 0;
   }

@@ -294,6 +294,6 @@
 [data-slot='card']{border-top:5px double var(--border);border-radius:var(--radius);box-shadow:none}
 [data-slot='card'][data-appearance='outlined']{border-top:var(--border-width) solid var(--border);background:transparent}
 [data-slot='card'][data-appearance='subtle']{background:var(--secondary);border-color:color-mix(in oklab,var(--border) 40%,transparent);border-top:var(--border-width) solid color-mix(in oklab,var(--border) 40%,transparent)}
-[data-slot='card-title']{font-family:var(--font-heading,var(--font-family));font-weight:600}
+[data-slot='card-title']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
 [data-slot='card-footer']{border-top:1px dotted var(--border)}
 [data-slot='card-option']:has(:checked){border-bottom:5px double var(--border)}

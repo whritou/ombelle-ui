@@ -102,11 +102,11 @@
 [data-slot='toast-action']:focus-visible,
 [data-slot='toast-close']:focus-visible,
 [data-slot='toast-viewport']:focus-visible { outline: 2.5px solid var(--ring); outline-offset: 2px; }
-[data-slot='toast'][data-state='open'] { animation: papier-toast-enter var(--motion-duration, 160ms) ease-out; }
+[data-slot='toast'][data-state='open'] { animation: ombelle-toast-enter var(--motion-duration, 160ms) ease-out; }
 [data-slot='toast'][data-swipe='move'] { transform: translate(var(--radix-toast-swipe-move-x), var(--radix-toast-swipe-move-y)); animation: none; }
 [data-slot='toast'][data-swipe='cancel'] { transform: translate(0, 0); transition: transform var(--motion-duration, 160ms) ease-out; }
 [data-slot='toast'][data-limited] { display: none; }
-@keyframes papier-toast-enter {
+@keyframes ombelle-toast-enter {
   from { opacity: 0; }
   to { opacity: 1; }
 }

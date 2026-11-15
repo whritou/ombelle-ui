@@ -19,7 +19,7 @@
   overflow-wrap: anywhere;
   box-shadow: calc(var(--shadow-x) * 2 / 3) calc(var(--shadow-y) * 2 / 3) 0
     var(--shadow-color, var(--border));
-  animation: papier-tooltip-enter var(--motion-duration) ease-out;
+  animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
 }
 /* Radix draws the arrow as polygon 0,0 30,0 15,10 in a 10x5 box (preserveAspectRatio none).
    The dash skips the 30-unit base so the outline stays open where the arrow meets the bubble;
@@ -38,7 +38,7 @@
   stroke-dasharray: 0 30 100;
   translate: 0 calc(var(--border-width) * -1);
 }
-@keyframes papier-tooltip-enter {
+@keyframes ombelle-tooltip-enter {
   from {
     opacity: 0;
   }
@@ -93,6 +93,6 @@
 }
 /* end 0.7.6 variants */
 /* papier layer */
-[data-slot='tooltip-content']{background:var(--foreground);color:var(--background);border:0;border-radius:var(--radius);box-shadow:2px 2px 0 color-mix(in oklab,var(--foreground) 14%,transparent)}
+[data-slot='tooltip-content']{background: var(--foreground);color: var(--background);border:0;border-radius:var(--radius);box-shadow:2px 2px 0 color-mix(in oklab,var(--foreground) 14%,transparent)}
 [data-slot='tooltip-arrow']{fill:var(--foreground);background:var(--foreground)}
 [data-slot='tooltip-shortcut-key']{font-family:var(--font-mono,ui-monospace,monospace)}

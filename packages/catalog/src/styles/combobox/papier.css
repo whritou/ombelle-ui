@@ -159,7 +159,7 @@
   cursor: not-allowed;
 }
 [data-slot='combobox-content'][data-state='open'] {
-  animation: papier-combobox-enter var(--motion-duration) ease-out;
+  animation: ombelle-combobox-enter var(--motion-duration) ease-out;
 }
 [data-slot='combobox-chevron'] {
   flex-shrink: 0;
@@ -219,7 +219,7 @@
 [data-slot='combobox-empty'][data-empty] {
   padding: 0.5rem 0.75rem;
 }
-@keyframes papier-combobox-enter {
+@keyframes ombelle-combobox-enter {
   from {
     opacity: 0;
   }

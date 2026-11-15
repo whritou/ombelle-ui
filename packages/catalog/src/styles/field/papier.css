@@ -187,5 +187,5 @@
 }
 /* end 0.7.6 parts */
 /* papier layer */
-[data-slot='field-legend']{font-family:var(--font-heading,var(--font-family));font-weight:600}
+[data-slot='field-legend']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
 [data-slot='field-set']{background:var(--card);border-radius:var(--radius)}

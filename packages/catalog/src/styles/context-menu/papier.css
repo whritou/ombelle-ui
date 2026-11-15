@@ -142,9 +142,9 @@
 }
 [data-slot='context-menu-content'][data-state='open'],
 [data-slot='context-menu-sub-content'][data-state='open'] {
-  animation: papier-context-menu-enter var(--motion-duration) ease-out;
+  animation: ombelle-context-menu-enter var(--motion-duration) ease-out;
 }
-@keyframes papier-context-menu-enter {
+@keyframes ombelle-context-menu-enter {
   from {
     opacity: 0;
   }

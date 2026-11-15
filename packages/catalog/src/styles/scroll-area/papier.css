@@ -44,12 +44,12 @@
     pointer-events: none;
     opacity: 0;
     background: linear-gradient(to bottom, transparent, var(--scroll-area-fade, var(--card)));
-    animation: papier-scroll-area-fade linear both;
+    animation: ombelle-scroll-area-fade linear both;
     animation-timeline: scroll(nearest block);
     animation-range: calc(100% - 28px) 100%;
   }
 }
-@keyframes papier-scroll-area-fade {
+@keyframes ombelle-scroll-area-fade {
   from {
     opacity: 1;
   }

@@ -29,9 +29,9 @@
 [data-slot='progress-indicator'][data-state='indeterminate'] {
   inline-size: 100%;
   opacity: 0.45;
-  animation: papier-progress-sweep calc(var(--motion-duration) * 10) ease-in-out infinite;
+  animation: ombelle-progress-sweep calc(var(--motion-duration) * 10) ease-in-out infinite;
 }
-@keyframes papier-progress-sweep {
+@keyframes ombelle-progress-sweep {
   from {
     inline-size: 40%;
     margin-inline-start: -40%;

@@ -5,7 +5,7 @@
   block-size: 0.75rem;
   border-radius: 999px;
   background: var(--muted);
-  animation: papier-skeleton-pulse calc(var(--motion-duration) * 10) ease-in-out infinite alternate;
+  animation: ombelle-skeleton-pulse calc(var(--motion-duration) * 10) ease-in-out infinite alternate;
 }
 [data-slot='skeleton'][data-shape='circle'] {
   flex-shrink: 0;
@@ -17,7 +17,7 @@
   block-size: 6rem;
   border-radius: var(--radius);
 }
-@keyframes papier-skeleton-pulse {
+@keyframes ombelle-skeleton-pulse {
   from {
     opacity: 1;
   }
@@ -39,4 +39,5 @@
 }
 /* papier layer */
 [data-slot='skeleton']{border:1px solid color-mix(in oklab,var(--foreground) 14%,transparent)}
+[data-slot='skeleton']:not([data-shape='circle']){border-radius:var(--radius)}
 @media (forced-colors: active){[data-slot='skeleton']{border-color:CanvasText}}

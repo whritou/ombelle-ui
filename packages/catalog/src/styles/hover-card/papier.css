@@ -22,9 +22,9 @@
   outline-offset: 3px;
 }
 [data-slot='hover-card-content'][data-state='open'] {
-  animation: papier-hover-card-enter var(--motion-duration) ease-out;
+  animation: ombelle-hover-card-enter var(--motion-duration) ease-out;
 }
-@keyframes papier-hover-card-enter {
+@keyframes ombelle-hover-card-enter {
   from {
     opacity: 0;
   }

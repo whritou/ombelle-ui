@@ -49,4 +49,4 @@
   }
 }
 /* papier layer */
-[data-slot='separator-label']{font-family:var(--font-heading,var(--font-family));font-style:italic;font-weight:500;color:var(--muted-foreground)}
+[data-slot='separator-label']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-style:italic;font-weight:500;color:var(--muted-foreground)}

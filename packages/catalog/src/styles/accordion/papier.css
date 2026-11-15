@@ -74,13 +74,13 @@
   line-height: 1.5;
 }
 [data-slot='accordion-content'][data-state='open'] {
-  animation: papier-accordion-open var(--motion-duration) ease-out;
+  animation: ombelle-accordion-open var(--motion-duration) ease-out;
 }
 [data-slot='accordion-content-inner'] {
   padding-block: 0.75rem 1rem;
   padding-inline: 1rem;
 }
-@keyframes papier-accordion-open {
+@keyframes ombelle-accordion-open {
   from {
     block-size: 0;
   }
@@ -158,5 +158,5 @@
 /* end 0.7.3 variants */
 /* papier layer */
 [data-slot='accordion'][data-appearance='bordered']{border-top:4px double var(--border);border-radius:var(--radius);background:var(--card)}
-[data-slot='accordion-trigger']{font-family:var(--font-heading,var(--font-family));font-weight:600}
+[data-slot='accordion-trigger']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
 [data-slot='accordion-item'] + [data-slot='accordion-item']{border-top-style:dotted}

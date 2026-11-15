@@ -252,7 +252,7 @@
 /* papier layer */
 [data-slot='calendar']{border-top:5px double var(--border);border-radius:var(--radius)}
 [data-slot='date-picker-content']{border-top:5px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color,var(--border))}
-[data-slot='calendar-caption']{font-family:var(--font-heading,var(--font-family));font-weight:600}
+[data-slot='calendar-caption']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
 [data-slot='calendar-day'][data-today] > [data-slot='calendar-day-button']{border-bottom:3px double var(--border)}
 [data-slot='calendar-day'][data-selected]:not([data-range-middle]) > [data-slot='calendar-day-button']{box-shadow:0 2px 0 var(--border)}
 [data-slot='calendar-day'][data-disabled] > [data-slot='calendar-day-button']{text-decoration:line-through}

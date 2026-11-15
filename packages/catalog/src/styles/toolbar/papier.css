@@ -186,7 +186,7 @@
     color-mix(in oklab, var(--border) 14%, transparent);
 }
 [data-slot='toolbar-overflow-content'][data-state='open'] {
-  animation: papier-dropdown-menu-enter var(--motion-duration) ease-out;
+  animation: ombelle-dropdown-menu-enter var(--motion-duration) ease-out;
 }
 [data-slot='toolbar-overflow-item'][data-highlighted],
 [data-slot='toolbar-overflow-item'][data-highlighted] {

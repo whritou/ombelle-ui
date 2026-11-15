@@ -218,4 +218,4 @@ button[data-slot='breadcrumb-ellipsis']:focus-visible {
 /* end 0.7.5 variants */
 /* papier layer */
 [data-slot='breadcrumb-link']{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
-[data-slot='breadcrumb-page']{font-family:var(--font-heading,var(--font-family));font-style:italic;font-weight:500}
+[data-slot='breadcrumb-page']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-style:italic;font-weight:500}

@@ -164,9 +164,9 @@
   block-size: 1rem;
 }
 [data-slot='select-content'][data-state='open'] {
-  animation: papier-select-enter var(--motion-duration) ease-out;
+  animation: ombelle-select-enter var(--motion-duration) ease-out;
 }
-@keyframes papier-select-enter {
+@keyframes ombelle-select-enter {
   from {
     opacity: 0;
   }
