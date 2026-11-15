@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { supportedComponentIds } from '@ombelle/contracts'
+import { supportedComponentIds, type ComponentId } from '@ombelle/contracts'
 import { lintCatalogStyles, previewSlots, templateSlots } from '../../../scripts/catalog-style-lint.ts'
 import { componentSlots } from '../src/component-slots.js'
 
@@ -12,14 +12,13 @@ const templates = 'packages/catalog/src/templates/'
 const inBase = ['button', 'input', 'dialog'] as const
 const componentIds = supportedComponentIds.filter(id => !(inBase as readonly string[]).includes(id))
 const read = (file: string) => fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n')
-const sourcesOf = (id: string) => [templates + id + '.tsx', templates + 'base/' + id + '.tsx'].filter(file => fs.existsSync(file)).map(read)
-const slotsOf = (id: string) => templateSlots(id, sourcesOf(id), componentSlots[id])
+const sourcesOf = (id: ComponentId) => [templates + id + '.tsx', templates + 'base/' + id + '.tsx'].filter(file => fs.existsSync(file)).map(read)
+const slotsOf = (id: ComponentId) => templateSlots(id, sourcesOf(id), componentSlots[id])
 const baseCss = () => (fs.existsSync(styles + 'papier.css') ? read(styles + 'papier.css') : '')
-const valuesIn = (id: string) =>
+const valuesIn = (id: ComponentId) =>
   [...new Set(sourcesOf(id).flatMap(source => Array.from(source.matchAll(/'([a-z][a-z0-9-]*)'/g), match => match[1])))]
 
-// Skipped until Task 11 registers the family; run it with PAPIER_STYLES=1 while the files are written.
-describe.skipIf(process.env.PAPIER_STYLES !== '1')('papier styles', () => {
+describe('papier styles', () => {
   it('has a family base file with reduced motion and the three base components', () => {
     const css = baseCss()
     expect(css).toContain('prefers-reduced-motion')
