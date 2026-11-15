@@ -30,7 +30,7 @@ The implementation agent visually inspected default light/dark pages beside flat
 
 One fresh whole-branch review found no critical issues and one important default-placeholder contrast defect. Tailwind's translucent placeholder default measured about 3.37:1 in light mode. A new rendered pseudo-element regression first reproduced the failure; an evidence regression also reproduced acceptance of missing placeholder samples. The fix uses the existing `muted-foreground` token at full opacity. All ten final app/mode rows now retain normal and focused placeholder contrast: approximately **7.24:1 light** and **12.04:1 dark**, above 4.5:1. Focused regressions, types, and the complete nine-stage gate passed after the fix. There was no second reviewer pass.
 
-One minor preview convenience remains deferred: choosing the Light/Dark header link drops `states=1`, closing the expanded state fixture. Direct URLs with `&states=1` continue to work; this does not affect installed component behavior.
+The Light/Dark preview header links preserve `states=1` and other query selections, keeping expanded fixtures open when switching color mode (issue #142).
 
 ## Repeatable human review checklist — pending
 

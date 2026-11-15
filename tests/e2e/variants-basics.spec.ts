@@ -1,5 +1,23 @@
 import { expect, test, type Page } from '@playwright/test'
 
+test('preview color mode links preserve expanded fixtures in both directions', async ({ page }) => {
+  await page.goto('/minimalist/?mode=light&states=1&cards=1#settings-heading')
+  const main = page.locator('main[data-ready="true"]')
+  await expect(main).toBeVisible({ timeout: 60000 })
+  for (const [label, mode] of [['Dark', 'dark'], ['Light', 'light']] as const) {
+    await page.getByRole('navigation', { name: 'Color mode' }).getByRole('link', { name: label, exact: true }).click()
+    await expect(main).toBeVisible()
+    const params = new URL(page.url()).searchParams
+    expect(params.get('mode')).toBe(mode)
+    expect(params.get('states')).toBe('1')
+    expect(params.get('cards')).toBe('1')
+    expect(new URL(page.url()).hash).toBe('#settings-heading')
+    await expect(page.locator('html')).toHaveAttribute('data-states', 'true')
+    await expect(page.getByTestId('state-fixture')).toBeVisible()
+    await expect(page.getByTestId('card-fixture')).toBeVisible()
+  }
+})
+
 // The 0.7.3 batch 6a variants in both editions, on the edition pages
 // (fixtures/shared/edition-scenario*.tsx, section "Variants").
 const open = async (page: Page, edition: string) => {

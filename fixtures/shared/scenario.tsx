@@ -22,6 +22,7 @@ import { TooltipFixture } from './tooltip-fixture'
 export default function Scenario() {
   const [ready, setReady] = React.useState(false)
   const [mode, setMode] = React.useState('light')
+  const [modeLinks, setModeLinks] = React.useState({ light: '?mode=light', dark: '?mode=dark' })
   const [states, setStates] = React.useState(false)
   const [recipes, setRecipes] = React.useState(false)
   const [componentPresets, setComponentPresets] = React.useState(false)
@@ -62,6 +63,11 @@ export default function Scenario() {
     document.documentElement.classList.toggle('dark', selected === 'dark')
     document.documentElement.style.colorScheme = selected
     setMode(selected)
+    const params = new URLSearchParams(window.location.search)
+    params.set('mode', 'light')
+    const light = '?' + params.toString() + window.location.hash
+    params.set('mode', 'dark')
+    setModeLinks({ light, dark: '?' + params.toString() + window.location.hash })
     setReady(true)
   }, [])
   return (
@@ -72,8 +78,8 @@ export default function Scenario() {
           <p>STYLE_FAMILY · {mode} mode</p>
         </div>
         <nav aria-label="Color mode">
-          <a href="?mode=light">Light</a>
-          <a href="?mode=dark">Dark</a>
+          <a href={modeLinks.light}>Light</a>
+          <a href={modeLinks.dark}>Dark</a>
         </nav>
       </header>
       <section
