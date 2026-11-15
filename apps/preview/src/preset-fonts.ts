@@ -1,4 +1,4 @@
-import { headingSlots, monoSlots, resolveTypography } from '@ombelle/compiler'
+import { fontRuleBlock, resolveTypography } from '@ombelle/compiler'
 
 // Loads the self-hosted fonts a previewed preset uses. The compiled CSS imports them by
 // package name, which a browser cannot resolve, so the preview strips those imports and
@@ -70,8 +70,7 @@ export function loadPresetFonts(ids: readonly string[]): Promise<void> {
  * Audit pages only: the styles that put `<body>,<heading>,<mono>` (registry ids, empty for unset)
  * on every specimen, and the fonts to load for them. Recipe CSS pins its own --font-family, so
  * the override is !important, and slots match by suffix because recipe slots carry a prefix.
- * Each recipe specimen renders its own <style> after this one, so the rules take one more
- * specificity step than the compiler's own block.
+ * Rules use the compiler's own specificity and are rendered after specimen styles.
  */
 export function auditFontStyles(list: string): { css: string; ids: string[] } {
   const [body, heading, mono] = list.split(',').map((id) => id.trim() || undefined)
@@ -82,11 +81,6 @@ export function auditFontStyles(list: string): { css: string; ids: string[] } {
     ...(typography.heading ? [`--font-heading:${typography.heading} !important`] : []),
     ...(typography.mono ? [`--font-mono:${typography.mono} !important`] : []),
   ].join(';')
-  const rule = (slot: string, token: string, extra = '') => `[data-slot$="${slot}"]:not([hidden]):not([hidden]){font-family:var(${token})${extra}}`
-  const leading = typography.headingLineHeight === undefined ? '' : `;line-height:${typography.headingLineHeight}`
-  const rules = [
-    ...(typography.heading ? headingSlots.map((slot) => rule(slot, '--font-heading', leading)) : []),
-    ...(typography.mono ? monoSlots.map((slot) => rule(slot, '--font-mono')) : []),
-  ].join('')
+  const rules = fontRuleBlock(typography).replaceAll('[data-slot="', '[data-slot$="')
   return { css: `:root,[data-ombelle-recipe]{${declarations}}` + rules, ids: presetFontIds(design) }
 }

@@ -47,7 +47,7 @@ it('accepts authored family focus widths and equivalent CSS colors but rejects t
   }
 })
 
-it('requires all 210 descriptor/preset installs and 250 app/host/preset/mode measurements', async () => {
+it('requires all 220 descriptor/preset installs and 250 app/host/preset/mode measurements', async () => {
   const { matrix, consumers } = await fixtures()
   await expect(
     validateComponentPresetConsumers(consumers, matrix),
@@ -66,7 +66,7 @@ it('requires all 210 descriptor/preset installs and 250 app/host/preset/mode mea
       (sum, row) => sum + Object.keys(row.presets).length,
       0,
     ),
-  ).toBe(210)
+  ).toBe(220)
 })
 it('rejects missing, duplicate, failed, stale, transformed or incomplete consumer records', async () => {
   const base = await fixtures(),

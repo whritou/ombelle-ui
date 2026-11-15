@@ -181,6 +181,9 @@ describe('extended typography and the schema version', () => {
     expect(presetSchemaVersion({})).toBe('1.0')
     expect(presetSchemaVersion({ fontFamilyId: 'system-serif' })).toBe('1.0')
     expect(presetSchemaVersion({ headingFontFamilyId: 'fraunces' })).toBe('1.1')
+    // These fields are new even when their values name system stacks.
+    expect(presetSchemaVersion({ headingFontFamilyId: 'system-serif' })).toBe('1.1')
+    expect(presetSchemaVersion({ monoFontFamilyId: 'system-mono' })).toBe('1.1')
     expect(presetSchemaVersion({ monoFontFamilyId: 'geist-mono' })).toBe('1.1')
     expect(presetSchemaVersion({ fontFamilyId: 'inter' })).toBe('1.1')
     expect(usesExtendedTypography({ fontFamilyId: 'system-sans' })).toBe(false)

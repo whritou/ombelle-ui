@@ -1,6 +1,6 @@
 import { supportedStyleFamilies, type StyleFamily } from '../packages/contracts/src/style-families.ts'
 import type { YarnFixtureId } from '../tests/helpers/yarn-project.js'
-export type ConsumerCase={id:string;family:StyleFamily;framework:'vite'|'next';manager:'npm'|'pnpm'|'yarn'|'bun';cliRuntime:'node'|'bun';yarnFixtureId?:YarnFixtureId;bunFormat?:'text'|'binary'}
+export type ConsumerCase={id:string;family:StyleFamily;framework:'vite'|'next';manager:'npm'|'pnpm'|'yarn'|'bun';cliRuntime:'node'|'bun';yarnFixtureId?:YarnFixtureId;bunFormat?:'text'|'binary';fonts?:boolean}
 export function consumerCases():readonly ConsumerCase[]{
  const rows:ConsumerCase[]=[]
  for(const manager of ['pnpm','npm'] as const)for(const framework of ['vite','next'] as const)for(const family of supportedStyleFamilies)rows.push({id:(manager==='npm'?'npm-':'')+framework+'-'+family,family,framework,manager,cliRuntime:'node'})
@@ -11,6 +11,8 @@ export function consumerCases():readonly ConsumerCase[]{
  }
  // Experimental rows are appended last so every existing consumer ID and port is unchanged.
  for(const framework of ['vite','next'] as const)rows.push({id:framework+'-liquid-glass',family:'liquid-glass',framework,manager:'pnpm',cliRuntime:'node'})
+ // Append font rows after the existing matrix so no established port changes.
+ for(const framework of ['vite','next'] as const)rows.push({id:framework+'-fonts',family:'ombelle',framework,manager:'pnpm',cliRuntime:'node',fonts:true})
  return rows
 }
 /** Rows for stable families: the only ones that carry recipe and component-preset evidence. */

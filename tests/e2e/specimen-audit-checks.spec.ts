@@ -8,6 +8,22 @@ const fixture = (page: Page, defect: string, clean: string, style = '') => page.
 <div data-case="defect">${defect}</div><div data-case="clean">${clean}</div>`)
 const both = (page: Page) => [page.locator('[data-case="defect"]'), page.locator('[data-case="clean"]')] as const
 
+for (const edition of ['radix', 'base']) {
+  test(`${edition}: font audit uses shipped rule specificity and tall heading metrics`, async ({ page }) => {
+    await page.goto(`/audit/ombelle/${edition}/?fonts=nunito,young-serif,geist-mono`)
+    await expect(page.locator('[data-audit-page][data-ready="true"]')).toBeVisible({ timeout: 60000 })
+    const title = page.locator('[data-audit="card"] [data-slot$="card-title"]').first()
+    const metrics = await title.evaluate(element => {
+      const style = getComputedStyle(element)
+      return { font: style.fontFamily, leading: parseFloat(style.lineHeight) / parseFloat(style.fontSize) }
+    })
+    expect(metrics.font).toContain('Young Serif')
+    expect(metrics.leading).toBeCloseTo(1.5)
+    const rules = await page.locator('style[data-audit-fonts]').textContent()
+    expect(rules).not.toContain(':not([hidden]):not([hidden])')
+  })
+}
+
 test('overflow: squeezed button text is reported', async ({ page }) => {
   await fixture(page, '<button style="inline-size:2rem;white-space:nowrap;overflow:hidden">Dismiss</button>',
     '<button aria-label="Dismiss" style="inline-size:2rem">×</button>')

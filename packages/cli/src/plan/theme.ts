@@ -12,7 +12,7 @@ import {
   type InstallPlan,
   type ManagedDeclaration,
 } from '@ombelle/contracts'
-import { sha256 } from '@ombelle/compiler'
+import { sha256, resolveTypography, fontRuleBlock } from '@ombelle/compiler'
 import { fontRegistry, getCatalog } from '@ombelle/catalog'
 import { readText } from '../project/inspect.js'
 import { portable } from '../project/paths.js'
@@ -296,9 +296,9 @@ export async function planTheme(
   )
   if (!fullStyle && fontPackages.length)
     plan.notices.push(
-      'The style file is not managed here, so import ' +
-        fontPackages.map((d) => d.name).join(', ') +
-        ' in your global CSS yourself',
+      'The style file is not managed here. Add these font imports and rules to your global CSS:\n' +
+        resolveTypography(result.preset.data.design).imports.join('\n') + '\n' +
+        fontRuleBlock(resolveTypography(result.preset.data.design)),
     )
   // The installer never removes packages. Name the font packages the previous theme imported
   // and this one does not, so they can be removed by hand.

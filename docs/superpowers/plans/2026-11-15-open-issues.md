@@ -16,7 +16,7 @@ artifacts, and preserve installer transaction and compatibility contracts.
 - [x] #140: verify glass limitations, fix remaining source and public catalog
   behavior; verify theme transitions and recipe halo; check hosted snapshot
   support and deployment state; commit independently.
-- [ ] #141: fix remaining font notices/versioning/cascade behavior, exercise a
+- [x] #141: fix remaining font notices/versioning/cascade behavior, exercise a
   real CLI font install, add font consumers and update gate inventories;
   verify focused CLI/compiler/consumer checks; commit independently.
 - [ ] #20: recheck the advisory and upstream tooling, remediate without

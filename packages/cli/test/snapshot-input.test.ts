@@ -74,6 +74,23 @@ it('classifies unsupported releases separately', async () => {
   expect(await runCli(['init', '--preset', reference, '--snapshot-origin', options.origin, '--preset-hash', options.expectedHash, '--dry-run', '--json'], { stdout: text => { output += text }, stderr: text => { output += text } })).toBe(3)
   expect(JSON.parse(output).error.code).toBe('UNSUPPORTED_RELEASE')
 })
+
+it.each(['1.2', '2.0'])('classifies unsupported preset schema %s as an upgrade requirement', async schemaVersion => {
+  const { options } = await setup(r => r.end(JSON.stringify({ ...snapshot, preset: { ...snapshot.preset, schemaVersion } })))
+  await expect(resolvePresetInput(reference, options)).rejects.toMatchObject({
+    code: 'UNSUPPORTED_RELEASE', nextAction: expect.stringMatching(/upgrade/i),
+  })
+})
+
+it('already resolves schema 1.1 font snapshots with the current CLI', async () => {
+  const preset = getCatalog('0.1.0').presets.ombelle
+  const normalized = await normalizePublishedPreset({ ...preset, schemaVersion: '1.1',
+    design: { ...preset.design, fontFamilyId: 'inter', headingFontFamilyId: 'fraunces' } })
+  const { options } = await setup(r => r.end(JSON.stringify({ ...snapshot, preset: normalized.data, presetHash: normalized.hash })))
+  options.expectedHash = normalized.hash
+  const result = await resolvePresetInput(reference, options)
+  expect(result.preset.schemaVersion).toBe('1.1')
+})
 it('rejects the wrong required hash even when the returned payload verifies itself', async () => {
   const { options } = await setup()
   await expect(resolvePresetInput(reference, { ...options, expectedHash: 'a'.repeat(64) })).rejects.toMatchObject({ code: 'RESOLUTION_FAILURE' })

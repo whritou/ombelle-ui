@@ -50,6 +50,15 @@ export async function fetchPublication<T>(url: URL, reference: string, verify: (
     try {
       return await verify(input)
     } catch (error) {
+      if (error instanceof FoundationError && /\/schemaVersion$/.test(error.path ?? '')) {
+        let version: unknown = input
+        for (const segment of error.path!.split('/').slice(1))
+          version = version && typeof version === 'object' ? (version as Record<string, unknown>)[segment] : undefined
+        const supported = error.path!.startsWith('/recipe/') ? ['1.0', '2.0'] : ['1.0', '1.1']
+        if (typeof version === 'string' && /^\d+\.\d+$/.test(version) && !supported.includes(version))
+          throw new FoundationError('UNSUPPORTED_RELEASE', `Snapshot schema ${version} is not supported`,
+            error.path, 'Upgrade the CLI to a release that supports this snapshot schema.')
+      }
       // The envelope schema pins releases. Preserve the CLI's release exit code
       // for an otherwise syntactically versioned unsupported release.
       if (

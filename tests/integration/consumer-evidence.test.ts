@@ -15,11 +15,11 @@ function validRows(): Record<string, ConsumerEvidence> {
     audit: { exitCode: 0, scope: c.manager === 'bun' ? 'all' : 'production' }, build: { exitCode: 0 },
   }]))
 }
-it('finalizes exactly forty rows including fifteen minimalist, four ombelle and two glass consumers', () => {
+it('finalizes exactly forty-six rows including the two font consumers', () => {
   const result = finalizeConsumerEvidence(cases, validRows())
-  expect(Object.keys(result)).toHaveLength(44)
+  expect(Object.keys(result)).toHaveLength(46)
   expect(Object.values(result).filter(r => r.family === 'minimalist')).toHaveLength(15)
-  expect(Object.values(result).filter(r => r.family === 'ombelle')).toHaveLength(4)
+  expect(Object.values(result).filter(r => r.family === 'ombelle')).toHaveLength(6)
   expect(Object.values(result).filter(r => r.family === 'liquid-glass')).toHaveLength(2)
 })
 it('retains ordinary and component preset source identities separately', () => {
@@ -48,7 +48,7 @@ it('retains every manager, framework, Yarn linker, and Bun lockfile descriptor',
     result[row.manager] = (result[row.manager] ?? 0) + 1
     return result
   }, {})
-  expect(counts).toEqual({ pnpm: 12, npm: 10, yarn: 6, bun: 16 })
+  expect(counts).toEqual({ pnpm: 14, npm: 10, yarn: 6, bun: 16 })
   expect(cases.filter(row => row.manager === 'yarn').map(row => row.yarnFixtureId)).toEqual([
     'classic-vite', 'modern-next', 'pnp-vite',
     'classic-vite', 'modern-next', 'pnp-vite',

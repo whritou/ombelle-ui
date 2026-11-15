@@ -40,3 +40,19 @@ it('plans only the font packages of a font preset, not the component dependencie
   const plan = await planTheme(await inspectProject(root), result)
   expect(plan.dependencyPlan).toEqual([{ name: '@fontsource-variable/inter', version: '5.3.0' }])
 })
+
+it('includes the missing font rules and exact imports when the style file is unmanaged', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const context = await inspectProject(root)
+  context.upstreamStyleSupported = false
+  const preset = structuredClone(catalog.presets.ombelle)
+  const result = await compileWith({ ...preset, schemaVersion: '1.1', design: {
+    ...preset.design, fontFamilyId: 'inter', headingFontFamilyId: 'fraunces', monoFontFamilyId: 'jetbrains-mono',
+  } }, [])
+  const plan = await planTheme(context, result)
+  const notice = plan.notices.join('\n')
+  expect(notice).toContain("@import '@fontsource-variable/fraunces';")
+  expect(notice).toContain('[data-slot="card-title"]:not([hidden]){font-family:var(--font-heading)}')
+  expect(notice).toContain('[data-slot="kbd"]:not([hidden]){font-family:var(--font-mono)}')
+})
