@@ -4,6 +4,7 @@
 
 ## 0.8.0 — 15 November 2026
 
+- Publish CLI 0.8.0: the website install commands now use it, so projects can install Papier and recipes that use fonts from npm. The registry tarball matched the tested candidate byte for byte.
 - Add the Papier style family, the fifth stable family: warm paper, 1px ink rules, 2px radius, a 0 by 2px stamp shadow that presses flat, double rules on top of cards, popovers and dialogs, ruled inputs and serif italic links, in light and dark, for all 57 components ([decision 0006](docs/decisions/0006-papier-family.md)). The built-in preset uses system fonts, so default headings use a serif fallback; the editors start Papier with Fraunces, Instrument Sans and IBM Plex Mono. The website offers Papier once the published installer is 0.8.0.
 - The preset editor offers per-style palettes for Flat, Minimalist, Neo-brutalism, Ombelle and Papier: complete light and dark colour sets designed for each style, shown with both modes in the swatch.
 - The component editors (Button and catalog) start recipes with the style's fonts and install them: a Button recipe can carry `overrides.fontFamilyId` and a catalog recipe `appearance.fonts`, the compiler imports each named Fontsource font and adds its package to the recipe's dependencies, and both editors get font pickers. Recipes without a font field compile to the same bytes as before; a recipe with one needs CLI 0.8.0.
