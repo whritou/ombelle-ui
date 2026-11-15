@@ -271,8 +271,6 @@
 }
 /* end 0.7.6 variants */
 /* papier layer */
-[data-slot='code-block']{border-top:4px double var(--border);border-radius:var(--radius);background:var(--card)}
-[data-slot='code-block-header']{background:var(--secondary)}
+[data-slot='code-block']{--code-block-background:var(--card);--code-block-foreground:var(--card-foreground);--code-block-comment:var(--muted-foreground);--code-block-string:var(--success-foreground,var(--card-foreground));--code-block-keyword:var(--destructive);--code-block-attr:var(--warning-foreground,var(--card-foreground));--code-block-property:var(--info-foreground,var(--card-foreground));--code-block-punct:var(--muted-foreground);--code-block-line-number:var(--muted-foreground);border-top:4px double var(--border);border-radius:var(--radius);box-shadow:none}
+[data-slot='code-block-header']{background:var(--secondary);border-block-end-color:var(--border)}
 [data-slot='code-block-title'],[data-slot='code-block-code']{font-family:var(--font-mono,ui-monospace,monospace)}
-[data-slot='code-block-line'][data-diff='added']{box-shadow:inset 3px 0 0 var(--success,currentColor)}
-[data-slot='code-block-line'][data-diff='removed']{box-shadow:inset 3px 0 0 var(--destructive)}

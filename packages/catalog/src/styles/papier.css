@@ -176,7 +176,7 @@
 [data-slot="input"]:disabled{background:var(--secondary);box-shadow:none}
 [data-slot="input"][aria-invalid="true"]{border-color:var(--destructive);border-width:var(--border-width);box-shadow:inset 0 -2px 0 var(--destructive)}
 [data-slot="input"][aria-invalid="true"]:focus-visible{border-color:var(--destructive);box-shadow:inset 0 -2px 0 var(--destructive)}
-[data-slot="dialog-overlay"]{background:color-mix(in oklab,var(--foreground) 45%,transparent)}
+[data-slot="dialog-overlay"]{background:oklch(22% 0.03 255 / 0.55)}
 [data-slot="dialog-content"]{border-top:5px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 2.5) calc(var(--shadow-y) * 2.5) 0 var(--shadow-color,var(--border))}
 [data-slot="dialog-title"]{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600;font-size:1.3125rem}
 [data-slot="dialog-footer"]{border-block-start:1px dotted var(--border);padding-block-start:0.75rem}

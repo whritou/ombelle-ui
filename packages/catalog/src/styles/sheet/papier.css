@@ -235,6 +235,9 @@
 /* Forced colours: the snap settle is unchanged; the handle keeps its 0.7.3 forced-colours rules. */
 /* end 0.7.6 variants */
 /* papier layer */
+[data-slot='sheet-overlay']{background:oklch(22% 0.03 255 / 0.55)}
 [data-slot='sheet-content']{border-radius:0;box-shadow:calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color,var(--border))}
 [data-slot='sheet-title']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
-[data-slot='sheet-resize-handle']{background:repeating-linear-gradient(var(--border) 0 3px,transparent 3px 6px)}
+/* The grip sits on the sheet edge (an ink or cream rule) beside a dark scrim: one mid-tone red keeps 3:1 against both. */
+[data-slot='sheet-resize-handle']:focus-visible{outline-color:#C2543A}
+[data-slot='sheet-resize-handle']:is(:hover,:focus-visible)::before{background:#C2543A}
