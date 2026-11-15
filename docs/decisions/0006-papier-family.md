@@ -21,7 +21,7 @@ Tokens live in `packages/catalog/src/presets/papier.json`. The family stylesheet
 
 - **Fonts.** The design uses Fraunces for headings, Instrument Sans for the interface and IBM Plex Mono for code. The built-in preset cannot name them: a component preset installs no packages, so `compileButtonPreset` rejects any preset that sets a font family, heading or mono font, and the stable-hash script compiles built-in presets that way. Papier therefore ships with `system-sans` only, and its CSS sets headings and links with `var(--font-heading, ui-serif, Georgia, "Times New Roman", serif)`. A project that sets a heading font (for example Fraunces from the editor's font pairs) overrides the fallback. Out of the box, Papier headings are the system serif, not Fraunces. Recommended pairing: Fraunces for headings and Instrument Sans for body.
 - **Destructive colour.** The design's destructive solid is `#5B1A14`; the preset uses `#7A1F12` (light) so invalid borders and destructive text stay clearly distinct from the ink-navy border.
-- **No Papier palettes.** The editor's per-style palettes are not defined for Papier yet; `palettes[family] ?? []` offers none. They follow once the palettes branch lands.
+- **Palettes.** The preset editor offers seven Papier palettes (Indigo, Sage, Ochre, Plum, Verdigris, Sepia, Graphite), each a full light and dark set that passes the same contrast tests as the other styles' palettes (`apps/www/src/preset-editor/schemes.ts`). They were added after the first review, once the palettes work was on this branch.
 
 ## Where it is offered
 
