@@ -6,7 +6,3 @@ allowBuilds:
 overrides:
   # Remove when @vercel/cli-config no longer pins the vulnerable Zod release.
   '@vercel/cli-config@0.3.5>zod': 4.6.7
-auditConfig:
-  ignoreGhsas:
-    - GHSA-gcqx-w48m-w2h4
-    - GHSA-g3hv-75wg-m249

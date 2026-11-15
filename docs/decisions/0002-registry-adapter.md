@@ -17,3 +17,30 @@ Audit update, 29 October 2026: `deepmerge` 4.3.1 is still its latest release and
 Audit update, 31 October 2026: a new moderate `minimatch` finding, [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249), affects every version below 11.0.1. It is reached only through the development-only shadcn → `ts-morph` → `@ts-morph/common` chain. The lockfile resolves `minimatch` 10.2.6. Even the latest `@ts-morph/common` (0.29.0, through `shadcn` 4.23.0) still declares `^10.0.1`, so no in-range release is patched. Forcing `minimatch` 11 through an override would leave `ts-morph`'s declared range and was rejected. The finding joins the scoped `auditConfig.ignoreGhsas` exception under the same review date, 30 November 2026, and rules, and the policy test lists it. At review, remove it if `@ts-morph/common` accepts a patched `minimatch` or shadcn drops the chain.
 
 `pnpm audit:workspace` runs a fresh `pnpm audit` against the configured registry for the current workspace lockfile, including production, development, optional, and transitive dependencies of the root, packages, and preview app. It applies no severity threshold and suppresses only the advisories listed under `auditConfig.ignoreGhsas` above. It returns a failing status for reported vulnerabilities or registry errors. CI runs it after the frozen install. This scope excludes standalone consumer trees, whose separately scoped audits remain part of the consumer matrix. A zero-finding result records the registry response at that time; it does not establish absence of unknown vulnerabilities, install-script risk, or a completed consumer/browser gate. Re-run before release.
+
+## 15 November 2026: replace the vulnerable development probe
+
+This update supersedes both audit exceptions and the runtime upstream API probe
+described above. `deepmerge` remains unpatched, and the latest shadcn 4.23.0 and
+`@shadcn/registry` 0.2.1 still depend on its affected range. The workspace now
+removes that development dependency rather than executing its installer or
+overriding it to an incompatible version.
+
+Compatibility is checked against the published upstream `registry.json` and
+`registry-item.json` JSON Schemas, retained verbatim with source URLs, normalized
+content hashes and their MIT license in `tests/fixtures/shadcn-schema`. Ajv checks
+the external schemas, independently of Ombelle's own types. A loopback test checks
+the index, component and theme payloads and exact source bytes; negative payloads
+prove that validation rejects defects. The eight preset styles of the reviewed
+4.22.1 release are retained as pinned upstream metadata.
+
+The genuine shadcn Vite/Next and Radix/Base fixture tests still verify installation
+paths, alias handling, CSS preservation and conflicts. Standalone consumer builds
+continue to verify shipped source. This tests Ombelle's supported standard
+registry/source contract; it does not claim execution of shadcn's private
+`addRegistryItems` implementation or its broader dependency side effects.
+
+`auditConfig.ignoreGhsas` is removed entirely. The audit policy test now prevents
+advisory exclusions and severity filtering. TLS verification and lifecycle-script
+disabling remain enabled. See [issue #20 evidence](../evidence/dependency-20.md)
+for the measured audit and compatibility outcomes.

@@ -19,7 +19,7 @@ artifacts, and preserve installer transaction and compatibility contracts.
 - [x] #141: fix remaining font notices/versioning/cascade behavior, exercise a
   real CLI font install, add font consumers and update gate inventories;
   verify focused CLI/compiler/consumer checks; commit independently.
-- [ ] #20: recheck the advisory and upstream tooling, remediate without
+- [x] #20: recheck the advisory and upstream tooling, remediate without
   suppressing audit findings, run registry compatibility and workspace audit;
   commit independently.
 - [ ] Run final relevant checks, review the complete diff, push the branch,
