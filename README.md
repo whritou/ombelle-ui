@@ -45,6 +45,12 @@ The six workspace packages are version **0.8.0**. The standalone public installe
 
 Use Node **24.19.0** and pnpm **11.25.0**.
 
+Unit tests default to at most four workers because compiler tests also spawn
+TypeScript processes. Set `OMBELLE_TEST_WORKERS` to a positive integer to change
+that budget (for example, `1` on a memory-constrained machine). Tests and setup
+hooks each have a 60-second timeout. Integration tests use their separate
+`OMBELLE_INTEGRATION_WORKERS` budget, also defaulting to four.
+
 ```powershell
 pnpm install --frozen-lockfile --ignore-scripts
 pnpm build:packages
