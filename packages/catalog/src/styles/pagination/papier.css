@@ -190,3 +190,6 @@
 /* papier layer */
 [data-slot='pagination-link'][aria-current='page']{background:var(--card);border-color:var(--border);box-shadow:0 2px 0 var(--border);font-weight:600}
 @media (forced-colors: active){[data-slot='pagination-link'][aria-current='page']{outline:2px solid Highlight;outline-offset:-2px}}
+[data-slot='pagination-link'][aria-current='page'],
+[data-slot='pagination-link'][href][aria-current='page']:hover{color:var(--foreground)}
+@media (forced-colors: active){[data-slot='pagination-link'][aria-current='page'],[data-slot='pagination-link'][href][aria-current='page']:hover{color:HighlightText}}

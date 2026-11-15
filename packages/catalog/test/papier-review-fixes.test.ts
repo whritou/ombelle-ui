@@ -60,3 +60,31 @@ describe('papier review fixes', () => {
       expect(css).toContain(token)
   })
 })
+
+describe('papier visual fixes after the first look', () => {
+  const base = () => squash(fs.readFileSync('packages/catalog/src/styles/papier.css', 'utf8').replace(/\r\n?/g, '\n'))
+
+  it('pagination: the current page keeps ink text on its light fill, hovered or not', () => {
+    const layer = squash(layerOf('pagination'))
+    expect(layer).toMatch(/\[aria-current='page'\][^{]*\{[^}]*color:var\(--foreground\)/)
+    expect(layer).toMatch(/\[href\]\[aria-current='page'\]:hover[^{]*\{[^}]*color:var\(--foreground\)/)
+  })
+
+  it('meter: only a plain or labelled bar track is framed; discrete cells and the ring are not', () => {
+    const layer = squash(layerOf('meter'))
+    expect(layer).toMatch(/meter-track'\]:not\(\[data-mode='discrete'\]\):not\(\[data-shape='circle'\]\)\{[^}]*border:/)
+    expect(layer).not.toMatch(/meter-track'\]\{[^}]*border:/)
+    expect(layer).toMatch(/meter-cell'\]\{[^}]*border-radius:var\(--radius\)/)
+  })
+
+  it('password field: the strength fill uses the dark status text colours, not the pale tints', () => {
+    const layer = squash(layerOf('password-field'))
+    expect(layer).toMatch(/strength-bar'\]>i\{[^}]*background:var\(--success-foreground/)
+    expect(layer).toMatch(/\[data-level='fair'\]>\*\)>i\{[^}]*background:var\(--warning-foreground/)
+  })
+
+  it('alert dialog: the dotted footer rule has room above the buttons', () => {
+    expect(squash(layerOf('alert-dialog'))).toMatch(/alert-dialog-footer'\]\{[^}]*padding-block-start:0\.75rem/)
+  })
+
+})

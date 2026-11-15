@@ -195,4 +195,4 @@
 [data-slot='alert-dialog-overlay']{background:oklch(22% 0.03 255 / 0.55)}
 [data-slot='alert-dialog-content']{border-top:5px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 2.5) calc(var(--shadow-y) * 2.5) 0 var(--shadow-color,var(--border))}
 [data-slot='alert-dialog-title']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:600}
-[data-slot='alert-dialog-footer']{border-top:1px dotted var(--border)}
+[data-slot='alert-dialog-footer']{border-top:1px dotted var(--border);padding-block-start:0.75rem}
