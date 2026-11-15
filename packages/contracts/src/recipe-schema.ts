@@ -202,6 +202,11 @@ export const recipeSchema = {
         "uppercase": {
           "type": "boolean"
         },
+        "fontFamilyId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$",
+          "description": "A system or registry body font id. A registry font is imported by the Button's stylesheet and its Fontsource package is added to the install; an omitted field keeps the preset's system font."
+        },
         "glassOpacity": {
           "type": "number",
           "minimum": 0.25,

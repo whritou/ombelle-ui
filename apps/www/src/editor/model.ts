@@ -1,4 +1,4 @@
-import { defaultGlassPresetId, getCatalog, resolveRecipePreset, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalog, resolveRecipePreset, styleFamilyFonts, type StartingPresetId } from '@ombelle/catalog'
 import {
   recipeColorRoles, recipeColorTokens, styleSupport, validateRecipe,
   type Preset, type Recipe, type RecipeButtonVariant, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole, type RecipeIcon, type StyleFamily,
@@ -32,6 +32,15 @@ export function withGlassPreset(recipe: Recipe, id: StartingPresetId): Recipe {
   return { ...recipe, presetRef: presetRef(getCatalog(recipe.presetRef.catalogRelease).startingPresets[id]) }
 }
 
+/**
+ * The style's own body font, which a recipe carries until someone picks another. A recipe names its
+ * font so the export imports it and installs its package; without it the Button would show the
+ * preset's system font in both the preview and the install.
+ */
+function styleFontOverrides(family: StyleFamily): Pick<Recipe['overrides'], 'fontFamilyId'> {
+  return { fontFamilyId: styleFamilyFonts[family].body }
+}
+
 export function createEditorDraft(family: StyleFamily): EditorDraft {
   return {
     storageVersion: 1,
@@ -43,7 +52,7 @@ export function createEditorDraft(family: StyleFamily): EditorDraft {
       presetRef: presetRefFor(family),
       props: { variant: 'default', size: 'default', type: 'button', disabled: false, loading: false },
       content: 'Save changes',
-      overrides: {},
+      overrides: styleFontOverrides(family),
     }),
   }
 }
@@ -59,11 +68,15 @@ export function updateDraftRecipe(draft: EditorDraft, recipe: unknown): EditorDr
 export function changeDraftFamily(draft: EditorDraft, family: StyleFamily): EditorDraft {
   // Glass material overrides apply only to liquid glass, and no other family shows them, so they are
   // dropped on the way out instead of staying hidden in the exported recipe. Undo brings them back.
-  const overrides =
+  const overrides: Recipe['overrides'] =
     family === 'liquid-glass'
-      ? draft.recipe.overrides
+      ? { ...draft.recipe.overrides }
       : Object.fromEntries(Object.entries(draft.recipe.overrides).filter(([key]) => !key.startsWith('glass')))
-  const ref = draftFamily(draft.recipe) === family ? draft.recipe.presetRef : presetRefFor(family)
+  const previous = draftFamily(draft.recipe)
+  const ref = previous === family ? draft.recipe.presetRef : presetRefFor(family)
+  // The font follows the style unless someone picked another one.
+  const font = overrides.fontFamilyId
+  if (font === undefined || font === styleFamilyFonts[previous].body) Object.assign(overrides, styleFontOverrides(family))
   return updateDraftRecipe(draft, { ...draft.recipe, presetRef: ref, overrides })
 }
 
@@ -79,7 +92,7 @@ export function resetDraftRecipe(draft: EditorDraft, start: Recipe): EditorDraft
     props: structuredClone(start.props),
     content: start.content,
     ...(start.icon ? { icon: structuredClone(start.icon) } : {}),
-    overrides: {},
+    overrides: styleFontOverrides(draftFamily(draft.recipe)),
   })
 }
 

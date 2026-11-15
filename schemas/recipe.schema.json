@@ -60,6 +60,7 @@
         "fontSizePx": {"type": "number", "minimum": 11, "maximum": 24},
         "letterSpacingEm": {"type": "number", "minimum": -0.05, "maximum": 0.2},
         "uppercase": {"type": "boolean"},
+        "fontFamilyId": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,39}$", "description": "A system or registry body font id. A registry font is imported by the Button's stylesheet and its Fontsource package is added to the install; an omitted field keeps the preset's system font."},
         "glassOpacity": {"type": "number", "minimum": 0.25, "maximum": 1, "description": "Liquid glass only, like every glass* override: replaces the preset's value on this Button and is checked for contrast warnings. Ignored by other style families."},
         "glassBlurPx": {"type": "number", "minimum": 0, "maximum": 40},
         "glassBackdropContrast": {"type": "number", "minimum": 0.3, "maximum": 1.6},

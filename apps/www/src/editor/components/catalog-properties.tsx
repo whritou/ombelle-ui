@@ -4,7 +4,9 @@ import { componentRecipeFields, defaultRecipeFields, styleSupport, type Componen
 import { siteFamilyOrder } from '../../snapshots/install-command'
 import { GlassPresetSelect } from '../../site/glass-preset-select'
 import { glassPresetId } from '../../site/glass-presets'
-import { catalogPresetRef } from '../catalog-draft'
+import { changeCatalogFamily, withCatalogFont } from '../catalog-draft'
+import { componentRecipeFontRoles } from '@ombelle/compiler'
+import { FontSelect } from './font-select'
 import { FamilyPicker } from './family-picker'
 import { CatalogAppearance } from './catalog-appearance'
 import { NumberInput } from '../../generated/ui/components/ui/number-input'
@@ -18,6 +20,7 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
 }) {
   const family = resolveRecipePreset(recipe.presetRef).styleFamily
   const fields = componentRecipeFields(recipe.component)
+  const roles = componentRecipeFontRoles(recipe.component, family, recipe.presetRef.catalogRelease)
   const props: Record<string, unknown> = recipe.props
   const content: Record<string, unknown> = recipe.content
   const choices = (content.options ?? content.items ?? content.columns ?? []) as Item[]
@@ -34,9 +37,9 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
   }
   return <div className="properties gap-4 py-4">
     <FamilyPicker value={family} families={siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable')}
-      onChange={style => update({ ...recipe, presetRef: catalogPresetRef(style) })} />
+      onChange={style => update(changeCatalogFamily(recipe, style))} />
     {family === 'liquid-glass' && <GlassPresetSelect value={glassPresetId(recipe.presetRef.id)}
-      onChange={id => update({ ...recipe, presetRef: catalogPresetRef(family, id ?? defaultGlassPresetId) })} />}
+      onChange={id => update(changeCatalogFamily(recipe, family, id ?? defaultGlassPresetId))} />}
     {Object.entries(fields.content).filter(([key]) => recipe.component !== 'separator' || key !== 'label' || !props.decorative).map(([key, field]) =>
       <Field key={key} field={field} value={content[key]} protectedIds={protectedIds}
         update={value => change('content', key, value)}
@@ -62,6 +65,14 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
       if (key === 'collapsible' && props.type === 'multiple') return null
       return <Field key={key} field={field} value={props[key]} update={value => change('props', key, value)} />
     })}
+    <fieldset className="grid gap-2">
+      <legend>Fonts</legend>
+      <FontSelect role="fontFamilyId" value={recipe.appearance?.fonts?.fontFamilyId} onChange={id => update(withCatalogFont(recipe, 'fontFamilyId', id))} />
+      {roles.heading && <FontSelect role="headingFontFamilyId" value={recipe.appearance?.fonts?.headingFontFamilyId}
+        onChange={id => update(withCatalogFont(recipe, 'headingFontFamilyId', id))} />}
+      {roles.mono && <FontSelect role="monoFontFamilyId" value={recipe.appearance?.fonts?.monoFontFamilyId}
+        onChange={id => update(withCatalogFont(recipe, 'monoFontFamilyId', id))} />}
+    </fieldset>
     <CatalogAppearance recipe={recipe} glass={family === 'liquid-glass'} measured={measured} previewMode={previewMode} update={update} />
   </div>
 }

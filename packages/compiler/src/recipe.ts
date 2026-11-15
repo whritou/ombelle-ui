@@ -19,9 +19,11 @@ import { canonicalize } from './canonicalize.js'
 import { sha256 } from './hash.js'
 import { resolvePreset } from './resolve.js'
 import {
+  buttonRecipeDesign,
   compileRecipeStyles,
   validateRecipeDarkSelector,
 } from './recipe-styles.js'
+import { resolveTypography } from './typography.js'
 import { renderRecipeButton } from './recipe-source.js'
 export async function compileRecipe(input: {
   recipe: unknown
@@ -108,6 +110,10 @@ export async function compileRecipe(input: {
         ({ name }) => name !== '@radix-ui/react-slot',
       ),
       ...(data.icon ? [{ ...recipeIconDependency }] : []),
+      // The font the recipe names is imported by its stylesheet, so its package installs with it.
+      ...(data.overrides.fontFamilyId === undefined
+        ? []
+        : resolveTypography(buttonRecipeDesign(preset.data.design, data.overrides)).dependencies),
     ],
     recipe,
     preset,

@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { validateRecipe } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
-import { withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
+import { changeDraftFamily, createEditorDraft, withRecipeColor, withRecipeIcon, withRecipeOverride } from '../model'
 import { glassControlHints } from '../../preset-editor/model'
 import { PropertiesPanel, VariantPicker, shownNumber } from './properties-panel'
 
@@ -169,4 +169,13 @@ it('picks the icon in a searchable combobox labelled Icon, showing None when the
   expect(input).toContain('value="None"')
   expect(html).toContain('for="button-icon"')
   expect(/<input[^>]*id="button-icon"[^>]*>/.exec(panel(withRecipeIcon(recipe, { name: 'arrow-right' })))![0]).toContain('value="Arrow right"')
+})
+
+it('offers the body font picker with the style font chosen and every body font listed', () => {
+  const papier = changeDraftFamily(createEditorDraft('flat'), 'papier').recipe
+  const html = renderToStaticMarkup(<PropertiesPanel recipe={papier} family="papier" onFamily={noop} diagnostic={null} onChange={noop} onDiagnostic={noop} />)
+  const select = html.match(/<select[^>]*aria-label="Body font"[^>]*>.*?<\/select>/)?.[0] ?? ''
+  expect(select).toContain('<option value="instrument-sans" selected="">Instrument Sans</option>')
+  expect(select).toContain('value="system-serif"')
+  expect(select).not.toContain('value="geist-mono"')
 })

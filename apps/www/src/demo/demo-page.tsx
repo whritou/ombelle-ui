@@ -6,7 +6,7 @@ import { styleSupport, validateRecipe, type ComponentId, type ComponentRecipe, t
 import exampleRecipe from '../../../../examples/recipe.example.json'
 import { siteFamilyOrder } from '../snapshots/install-command'
 import { editableComponents } from '../editor/editable-components'
-import { catalogPresetRef, createCatalogDraft } from '../editor/catalog-draft'
+import { changeCatalogFamily, createCatalogDraft } from '../editor/catalog-draft'
 import { changeDraftFamily, type EditorView } from '../editor/model'
 import { useCatalogCompiler } from '../editor/use-catalog-compiler'
 import { useCompiler } from '../editor/use-compiler'
@@ -84,7 +84,7 @@ function useMatrixOn(matrix: ReturnType<typeof useMatrixLayout>) {
 }
 
 function CatalogDemo({ family, component, name, view }: { family: StyleFamily; component: ComponentRecipe['component']; name: string; view: EditorView }) {
-  const recipe = useMemo(() => ({ ...createCatalogDraft(component).recipe, presetRef: catalogPresetRef(family) }), [component, family])
+  const recipe = useMemo(() => changeCatalogFamily(createCatalogDraft(component).recipe, family), [component, family])
   const { result } = useCatalogCompiler(recipe)
   const matrix = useMatrixLayout(component, recipe)
   useMatrixOn(matrix)
