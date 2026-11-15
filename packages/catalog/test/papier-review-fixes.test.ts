@@ -64,10 +64,11 @@ describe('papier review fixes', () => {
 describe('papier visual fixes after the first look', () => {
   const base = () => squash(fs.readFileSync('packages/catalog/src/styles/papier.css', 'utf8').replace(/\r\n?/g, '\n'))
 
-  it('pagination: the current page keeps ink text on its light fill, hovered or not', () => {
+  it('pagination: the current page has ink text on its light fill and primary foreground text when hovered', () => {
     const layer = squash(layerOf('pagination'))
     expect(layer).toMatch(/\[aria-current='page'\][^{]*\{[^}]*color:var\(--foreground\)/)
-    expect(layer).toMatch(/\[href\]\[aria-current='page'\]:hover[^{]*\{[^}]*color:var\(--foreground\)/)
+    // Hovered, the current page is the solid primary fill again, so its text is the primary foreground.
+    expect(layer).toMatch(/\[href\]\[aria-current='page'\]:hover\{[^}]*color:var\(--primary-foreground\)/)
   })
 
   it('meter: only a plain or labelled bar track is framed; discrete cells and the ring are not', () => {
@@ -87,4 +88,12 @@ describe('papier visual fixes after the first look', () => {
     expect(squash(layerOf('alert-dialog'))).toMatch(/alert-dialog-footer'\]\{[^}]*padding-block-start:0\.75rem/)
   })
 
+
+  it('dialog: the plain buttons a footer holds look like buttons, the last one primary, with one slot per selector', () => {
+    const css = squash(fs.readFileSync('packages/catalog/src/styles/papier.css', 'utf8').replace(/\r\n?/g, '\n'))
+    expect(css).toContain('[data-slot="dialog-footer"]>button:not([data-variant])')
+    expect(css).toContain('[data-slot="dialog-footer"]>button:not([data-variant]):last-child')
+    // The recipe scoper reads exactly one slot attribute per selector.
+    for (const selector of css.match(/\[data-slot="dialog-footer"\]>button[^{]*/g) ?? []) expect(selector.match(/data-slot/g)).toHaveLength(1)
+  })
 })
