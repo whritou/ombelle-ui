@@ -1,6 +1,6 @@
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { fontRegistry } from '@ombelle/catalog'
-import { auditFontStyles, fontLoaders, presetFontIds } from '../../apps/preview/src/preset-fonts.js'
+import { auditFontStyles, fontLoaders, presetFontIds, recipeFontIds } from '../../apps/preview/src/preset-fonts.js'
 
 it('has a loader for exactly the registry fonts', () => {
   expect(Object.keys(fontLoaders).sort()).toEqual(fontRegistry.map((font) => font.id).sort())
@@ -39,4 +39,19 @@ it('gives the audit the same title line height the compiler emits for a tall dis
     '[data-slot$="card-title"]:not([hidden]):not([hidden]){font-family:var(--font-heading);line-height:1.5}',
   )
   expect(auditFontStyles('inter,fraunces,').css).not.toContain('line-height')
+})
+
+describe('recipe fonts in the editor preview', () => {
+  const button = { overrides: { fontFamilyId: 'instrument-sans' } }
+  const recipe = { appearance: { fonts: { fontFamilyId: 'instrument-sans', headingFontFamilyId: 'fraunces', monoFontFamilyId: 'ibm-plex-mono' } } }
+  it('loads the registry fonts a Button or catalog recipe names, once each', () => {
+    expect(recipeFontIds({ type: 'render', state: { recipe: button } })).toEqual(['instrument-sans'])
+    expect(recipeFontIds({ type: 'catalog-render', result: { recipe: { data: recipe } } })).toEqual(['instrument-sans', 'fraunces', 'ibm-plex-mono'])
+    expect(recipeFontIds({ type: 'matrix-render', cells: [{ recipe: button }, { recipe: button }] })).toEqual(['instrument-sans'])
+    expect(recipeFontIds({ type: 'catalog-matrix-render', cells: [{ result: { recipe: { data: recipe } } }] })).toHaveLength(3)
+  })
+  it('loads nothing for system fonts, unknown ids or no message', () => {
+    expect(recipeFontIds(null)).toEqual([])
+    expect(recipeFontIds({ type: 'render', state: { recipe: { overrides: { fontFamilyId: 'system-sans' } } } })).toEqual([])
+  })
 })

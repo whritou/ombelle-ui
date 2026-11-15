@@ -82,6 +82,11 @@ function pruneEmptyAtRules(container: postcss.Container) {
   }
 }
 
+/** The design a Button recipe renders: the preset's, with the recipe's body font when it names one. */
+export function buttonRecipeDesign<D extends { fontFamilyId?: string }>(design: D, overrides: Recipe['overrides']): D {
+  return overrides.fontFamilyId === undefined ? design : { ...design, fontFamilyId: overrides.fontFamilyId }
+}
+
 export function compileScopedButtonStyles(input: {
   familyCss: string
   glassLabCss?: string
@@ -218,6 +223,8 @@ export function compileScopedButtonStyles(input: {
     comment.remove()
   })
   const d = data.design
+  // A recipe's body font replaces the preset's; its @import lines lead the file, so the font loads with the Button.
+  const typography = resolveTypography(buttonRecipeDesign(d, input.overrides))
   const light: Record<string, string> = {},
     darkTokens: Record<string, string> = {}
   for (const [k, v] of Object.entries(data.modes.light)) light[variable(k)] = v
@@ -229,7 +236,7 @@ export function compileScopedButtonStyles(input: {
     '--shadow-x': d.shadowOffsetXPx + 'px',
     '--shadow-y': d.shadowOffsetYPx + 'px',
     '--control-height': d.density === 'compact' ? '2.25rem' : '2.5rem',
-    '--font-family': resolveTypography(d).family,
+    '--font-family': typography.family,
     '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
   })
   if (data.styleFamily === 'liquid-glass') {
@@ -434,6 +441,7 @@ export function compileScopedButtonStyles(input: {
     ? block(scope + '[data-variant="' + variant + '"]', paint)
     : ''
   return (
+    (input.overrides.fontFamilyId === undefined ? '' : typography.imports.join('')) +
     tokens +
     root.toString() +
     painted +

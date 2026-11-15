@@ -36,6 +36,21 @@ export function presetFontIds(design: PresetFonts): string[] {
   return [...new Set(ids.filter((id): id is string => id !== undefined && id in fontLoaders))]
 }
 
+/**
+ * The registry fonts the recipes in a render message name. The compiled CSS imports them by package
+ * name, which an iframe cannot resolve, so the preview loads the same Fontsource files itself.
+ */
+export function recipeFontIds(message: { type: string; [key: string]: any } | null): string[] {
+  if (!message) return []
+  const recipes: unknown[] =
+    message.type === 'render' ? [message.state?.recipe]
+      : message.type === 'matrix-render' ? message.cells.map((cell: any) => cell.recipe)
+        : message.type === 'catalog-render' ? [message.result.recipe.data]
+          : message.type === 'catalog-matrix-render' ? message.cells.map((cell: any) => cell.result.recipe.data) : []
+  const fonts = recipes.flatMap((recipe: any) => [recipe?.overrides?.fontFamilyId, ...Object.values(recipe?.appearance?.fonts ?? {})])
+  return [...new Set(fonts.filter((id): id is string => typeof id === 'string' && id in fontLoaders))]
+}
+
 const loading = new Map<string, Promise<void>>()
 /** Loads each font's CSS once; later calls for the same id share the first request. */
 export function loadPresetFonts(ids: readonly string[]): Promise<void> {

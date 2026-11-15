@@ -78,6 +78,25 @@ export const componentRecipeSchema = {
             "$ref": "#/$defs/partAppearance"
           }
         },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "System or registry font ids. A registry font is imported by the component's stylesheet and its Fontsource package is added to the install, but only for a role the component has a slot for.",
+          "properties": {
+            "fontFamilyId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,39}$"
+            },
+            "headingFontFamilyId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,39}$"
+            },
+            "monoFontFamilyId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,39}$"
+            }
+          }
+        },
         "glass": {
           "type": "object",
           "additionalProperties": false,

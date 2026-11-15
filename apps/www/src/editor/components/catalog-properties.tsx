@@ -4,7 +4,7 @@ import { componentRecipeFields, defaultRecipeFields, styleSupport, type Componen
 import { siteFamilyOrder } from '../../snapshots/install-command'
 import { GlassPresetSelect } from '../../site/glass-preset-select'
 import { glassPresetId } from '../../site/glass-presets'
-import { catalogPresetRef } from '../catalog-draft'
+import { changeCatalogFamily } from '../catalog-draft'
 import { FamilyPicker } from './family-picker'
 import { CatalogAppearance } from './catalog-appearance'
 import { NumberInput } from '../../generated/ui/components/ui/number-input'
@@ -34,9 +34,9 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
   }
   return <div className="properties gap-4 py-4">
     <FamilyPicker value={family} families={siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable')}
-      onChange={style => update({ ...recipe, presetRef: catalogPresetRef(style) })} />
+      onChange={style => update(changeCatalogFamily(recipe, style))} />
     {family === 'liquid-glass' && <GlassPresetSelect value={glassPresetId(recipe.presetRef.id)}
-      onChange={id => update({ ...recipe, presetRef: catalogPresetRef(family, id ?? defaultGlassPresetId) })} />}
+      onChange={id => update(changeCatalogFamily(recipe, family, id ?? defaultGlassPresetId))} />}
     {Object.entries(fields.content).filter(([key]) => recipe.component !== 'separator' || key !== 'label' || !props.decorative).map(([key, field]) =>
       <Field key={key} field={field} value={content[key]} protectedIds={protectedIds}
         update={value => change('content', key, value)}

@@ -18,6 +18,7 @@ import { CatalogMatrixPreview, MatrixTable } from './matrix-preview'
 import type { ComponentRecipe } from '@ombelle/contracts'
 import { colorDimensions } from '../../www/src/editor/measured-color'
 import { CatalogRecipePreview } from './catalog-recipe-preview'
+import { loadPresetFonts, recipeFontIds } from './preset-fonts'
 import { previewSizeMessage, stageContentBlockSize } from '../../www/src/editor/preview-size'
 import './editor-preview.css'
 
@@ -115,6 +116,11 @@ function EditorPreview() {
     return () => observer.disconnect()
   }, [message, buttonModule])
 
+  // Only the fonts the recipes in view name are fetched, and each is fetched once.
+  const fontKey = recipeFontIds(message).join(',')
+  React.useEffect(() => {
+    if (fontKey) void loadPresetFonts(fontKey.split(','))
+  }, [fontKey])
   const buttonMessage = message?.type === 'render' ? message : null
   // The editors' "Preview transparency" toggle; the mirror holds the rules it switches on.
   const reducedTransparency = message?.type === 'render' ? message.state.reducedTransparency === true : message?.reducedTransparency === true

@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import badge from '../../../../examples/component-recipe.badge.json'
 import { componentRecipeComponents } from '@ombelle/contracts'
 import { resolveRecipePreset } from '@ombelle/catalog'
-import { catalogDraftKey, createCatalogDraft, restoreCatalogDraft } from './catalog-draft'
+import { catalogDraftKey, changeCatalogFamily, createCatalogDraft, restoreCatalogDraft } from './catalog-draft'
 
 it.each(componentRecipeComponents)('starts a fresh %s recipe in Ombelle', component => {
   expect(resolveRecipePreset(createCatalogDraft(component).recipe.presetRef).styleFamily).toBe('ombelle')
@@ -17,4 +17,13 @@ it('restores the matching draft and keeps invalid bytes recoverable', () => {
   expect(restoreCatalogDraft('badge', '{"broken": true}')).toEqual({
     status: 'recovery-required', recoveryText: '{"broken": true}',
   })
+})
+
+it.each(['card', 'badge'] as const)('starts a %s recipe with its style\'s fonts and moves them with the style', component => {
+  const draft = createCatalogDraft(component).recipe
+  expect(draft.appearance?.fonts).toEqual({ fontFamilyId: 'figtree', headingFontFamilyId: 'bricolage-grotesque', monoFontFamilyId: 'geist-mono' })
+  const papier = changeCatalogFamily(draft, 'papier')
+  expect(papier.appearance?.fonts).toEqual({ fontFamilyId: 'instrument-sans', headingFontFamilyId: 'fraunces', monoFontFamilyId: 'ibm-plex-mono' })
+  const picked = { ...papier, appearance: { fonts: { ...papier.appearance!.fonts, headingFontFamilyId: 'inter-tight' } } }
+  expect(changeCatalogFamily(picked, 'flat').appearance?.fonts?.headingFontFamilyId).toBe('inter-tight')
 })

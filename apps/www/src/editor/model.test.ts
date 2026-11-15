@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalog, styleFamilyFonts } from '@ombelle/catalog'
 import { styleFamilies, validateRecipe } from '@ombelle/contracts'
 import {
   baseColorRole, changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
@@ -19,7 +19,7 @@ describe('Button editor model', () => {
         schemaVersion: '1.0', id: 'button_recipe', revision: 1, component: 'button',
         presetRef: { id: preset.id, revision: preset.revision, catalogRelease: '0.1.0', compilerVersion: '0.1.0' },
         props: { variant: 'default', size: 'default', type: 'button', disabled: false, loading: false },
-        content: 'Save changes', overrides: {},
+        content: 'Save changes', overrides: { fontFamilyId: styleFamilyFonts[family].body },
       },
     })
     expect(validateRecipe(draft.recipe)).toEqual(draft.recipe)
@@ -31,7 +31,7 @@ describe('Button editor model', () => {
     expect(next.recipe.presetRef).toEqual({
       id: 'builtin-neo-brutalism', revision: 1, catalogRelease: '0.1.0', compilerVersion: '0.1.0',
     })
-    expect({ ...next.recipe, presetRef: original.recipe.presetRef }).toEqual(original.recipe)
+    expect({ ...next.recipe, presetRef: original.recipe.presetRef, overrides: original.recipe.overrides }).toEqual(original.recipe)
     expect(original.recipe.presetRef.id).toBe('builtin-flat')
   })
 
@@ -116,11 +116,11 @@ describe('Button editor model', () => {
   it('sets and clears color overrides without leaving empty groups', () => {
     const draft = createEditorDraft('neo-brutalism')
     const set = withRecipeColor(withRecipeColor(draft.recipe, 'light', 'background', '#ff0000'), 'dark', 'border', 'oklch(0.5 0.1 20)')
-    expect(set.overrides).toEqual({ colors: { light: { background: '#ff0000' }, dark: { border: 'oklch(0.5 0.1 20)' } } })
+    expect(set.overrides).toEqual({ ...draft.recipe.overrides, colors: { light: { background: '#ff0000' }, dark: { border: 'oklch(0.5 0.1 20)' } } })
     expect(updateDraftRecipe(draft, set).recipe.overrides).toEqual(set.overrides)
     const cleared = withRecipeColor(withRecipeColor(set, 'light', 'background', undefined), 'dark', 'border', undefined)
-    expect(cleared.overrides).toEqual({})
-    expect(draft.recipe.overrides).toEqual({})
+    expect(cleared.overrides).toEqual(draft.recipe.overrides)
+    expect(draft.recipe.overrides).toEqual({ fontFamilyId: 'work-sans' })
     expect(() => updateDraftRecipe(draft, withRecipeColor(draft.recipe, 'light', 'border', 'oklch(0.5 0.9 20)')))
       .toThrow(expect.objectContaining({ path: '/overrides/colors/light/border' }))
   })
@@ -135,7 +135,7 @@ describe('Button editor model', () => {
     const reset = resetDraftRecipe(edited, start)
     expect(reset.recipe.content).toBe(start.content)
     expect(reset.recipe.props).toEqual(start.props)
-    expect(reset.recipe.overrides).toEqual({})
+    expect(reset.recipe.overrides).toEqual({ fontFamilyId: 'figtree' })
     expect(draftFamily(reset.recipe)).toBe('ombelle')
     expect([reset.recipe.id, reset.recipe.revision]).toEqual([edited.recipe.id, edited.recipe.revision])
   })
@@ -151,13 +151,13 @@ describe('Button editor model', () => {
     const hover = withRecipeColor(base, 'dark', 'hoverForeground', '#123456')
     expect(recipeColor(hover, 'dark', 'hoverForeground')).toEqual({ value: '#123456', overridden: true })
     expect(updateDraftRecipe(draft, hover).recipe.overrides.colors).toEqual({ dark: { foreground: '#abcdef', hoverForeground: '#123456' } })
-    expect(withRecipeColor(withRecipeColor(hover, 'dark', 'hoverForeground', undefined), 'dark', 'foreground', undefined).overrides).toEqual({})
+    expect(withRecipeColor(withRecipeColor(hover, 'dark', 'hoverForeground', undefined), 'dark', 'foreground', undefined).overrides).toEqual(draft.recipe.overrides)
   })
   it('sets and removes layout and type overrides', () => {
     const draft = createEditorDraft('ombelle')
     const set = withRecipeOverride(withRecipeOverride(draft.recipe, 'paddingXPx', 18), 'uppercase', true)
-    expect(updateDraftRecipe(draft, set).recipe.overrides).toEqual({ paddingXPx: 18, uppercase: true })
-    expect(withRecipeOverride(set, 'paddingXPx', undefined).overrides).toEqual({ uppercase: true })
+    expect(updateDraftRecipe(draft, set).recipe.overrides).toEqual({ ...draft.recipe.overrides, paddingXPx: 18, uppercase: true })
+    expect(withRecipeOverride(set, 'paddingXPx', undefined).overrides).toEqual({ ...draft.recipe.overrides, uppercase: true })
     expect(() => updateDraftRecipe(draft, withRecipeOverride(draft.recipe, 'fontWeight', 450)))
       .toThrow(expect.objectContaining({ path: '/overrides/fontWeight' }))
     expect(() => updateDraftRecipe(draft, withRecipeOverride(draft.recipe, 'gapPx', 30)))
@@ -178,7 +178,7 @@ describe('Button editor model', () => {
       withRecipeColor(draft.recipe, 'light', 'pressedBackground', '#000000'), 'letterSpacingEm', 0.1), { name: 'plus', iconOnly: true }))
     const reset = resetDraftRecipe(edited, draft.recipe).recipe
     expect(reset).not.toHaveProperty('icon')
-    expect(reset.overrides).toEqual({})
+    expect(reset.overrides).toEqual({ fontFamilyId: expect.any(String) })
   })
 })
 
@@ -186,7 +186,26 @@ it('leaving liquid glass drops the glass material overrides the other families c
   const glass = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
   const tuned = updateDraftRecipe(glass, { ...glass.recipe, overrides: { ...glass.recipe.overrides, radiusRem: 1, glassHalo: 0.9, glassDepth: 0.4 } })
   const flat = changeDraftFamily(tuned, 'flat')
-  expect(flat.recipe.overrides).toEqual({ radiusRem: 1 })
+  expect(flat.recipe.overrides).toEqual({ radiusRem: 1, fontFamilyId: 'dm-sans' })
   // Staying in glass keeps them.
   expect(changeDraftFamily(tuned, 'liquid-glass').recipe.overrides).toMatchObject({ glassHalo: 0.9, glassDepth: 0.4 })
+})
+
+describe('Button editor style fonts', () => {
+  it.each(styleFamilies)('starts a %s draft with the style\'s body font', (family) => {
+    expect(createEditorDraft(family).recipe.overrides.fontFamilyId).toBe(styleFamilyFonts[family].body)
+  })
+
+  it('moves the font with the style until someone picks another', () => {
+    const papier = changeDraftFamily(createEditorDraft('flat'), 'papier')
+    expect(papier.recipe.overrides.fontFamilyId).toBe('instrument-sans')
+    const picked = updateDraftRecipe(papier, withRecipeOverride(papier.recipe, 'fontFamilyId', 'inter'))
+    expect(changeDraftFamily(picked, 'flat').recipe.overrides.fontFamilyId).toBe('inter')
+  })
+
+  it('keeps the style font when the recipe is reset', () => {
+    const draft = createEditorDraft('papier')
+    const edited = updateDraftRecipe(draft, withRecipeOverride(draft.recipe, 'radiusRem', 1))
+    expect(resetDraftRecipe(edited, draft.recipe).recipe.overrides).toEqual({ fontFamilyId: 'instrument-sans' })
+  })
 })

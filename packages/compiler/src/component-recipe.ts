@@ -1,5 +1,5 @@
 import {
-  validateComponentRecipe, validateInstallableRecipe,
+  usesExtendedTypography, validateComponentRecipe, validateInstallableRecipe,
   type Artifact, type ComponentRecipeId, type ComponentRecipeCompileResult, type InstallableRecipeCompileResult,
   type ComponentRecipeAppearance, type Preset,
 } from '@ombelle/contracts'
@@ -17,6 +17,7 @@ import { compileRecipe } from './recipe.js'
 import { resolvePreset } from './resolve.js'
 import { describeComponentRecipe, renderRecipeSpecimen, specimenExports, specimenUsesLocalIds } from './recipe-specimen.js'
 import { validateRecipeDarkSelector } from './recipe-styles.js'
+import { headingSlots, monoSlots, resolveTypography, stripFontImports } from './typography.js'
 
 type CompileInput = { recipe: unknown; darkSelector?: string }
 
@@ -24,6 +25,24 @@ export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeA
   return preset.styleFamily === 'liquid-glass' && glass && Object.keys(glass).length
     ? { ...preset, design: { ...preset.design, ...glass } }
     : preset
+}
+
+/**
+ * The fonts a recipe asks for, minus the roles the component has no slot for: a Card shows no code, so
+ * its mono font would be imported and installed for nothing. An unnamed role keeps the preset's font.
+ */
+function withComponentRecipeFonts(preset: Preset, fonts: ComponentRecipeAppearance['fonts'], slots: readonly string[]): Preset {
+  if (!fonts) return preset
+  const { fontFamilyId, headingFontFamilyId, monoFontFamilyId } = fonts
+  const has = (names: readonly string[]) => names.some(name => slots.includes(name))
+  const design = { ...preset.design,
+    ...(fontFamilyId === undefined ? {} : { fontFamilyId }),
+    ...(headingFontFamilyId !== undefined && has(headingSlots) ? { headingFontFamilyId } : {}),
+    ...(monoFontFamilyId !== undefined && has(monoSlots) ? { monoFontFamilyId } : {}),
+  // The recipe schema takes any id shape; the registry check in resolveTypography rejects unknown ones.
+  } as Preset['design']
+  // A preset may only name registry fonts from schema 1.1 on.
+  return { ...preset, ...(usesExtendedTypography(design) ? { schemaVersion: '1.1' as const } : {}), design }
 }
 
 export function componentRecipeExportName(component: ComponentRecipeId): string {
@@ -43,7 +62,9 @@ export async function compileComponentRecipe(input: CompileInput): Promise<Compo
   const { catalogRelease, compilerVersion } = data.presetRef
   const catalog = getCatalog(catalogRelease)
   const template = getTemplate(catalog, data.component)
-  const effectivePreset = withComponentRecipeGlass(builtin, data.appearance?.glass)
+  const effectivePreset = withComponentRecipeFonts(
+    withComponentRecipeGlass(builtin, data.appearance?.glass), data.appearance?.fonts, recipeTemplateSlots(template))
+  const typography = resolveTypography(effectivePreset.design)
   const result = await compile({
     preset: effectivePreset, catalogRelease, compilerVersion, componentIds: [data.component], glassContrast: 'report',
   })
@@ -77,7 +98,7 @@ export function ${name}() {
     { logicalPath: `${base}/${component}.tsx`, kind: 'component',
       content: source + definition },
     { logicalPath: `${base}/${component}.css`, kind: 'style',
-      content: compileComponentRecipeStyles({ styles: styles.map(artifact => artifact.content),
+      content: typography.imports.join('') + compileComponentRecipeStyles({ styles: styles.map(artifact => stripFontImports(artifact.content)),
         slots: recipeTemplateSlots(template), scope, theme: result.theme, darkSelector, glass, recipe: data }) },
     { logicalPath: `examples/recipes/${data.id}/r${data.revision}.tsx`, kind: 'usage',
       content: `import { ${name} } from '@/components/ui/${base}/${component}'\nexport function Example() { return <${name} /> }` },
@@ -93,5 +114,6 @@ export function ${name}() {
       })
       return { ...artifact, content, sha256: await sha256(content) }
     }))
-  return { artifacts, dependencies: template.dependencies, recipe, preset, scope, darkSelector, provenance }
+  const dependencies = [...template.dependencies, ...typography.dependencies.filter(font => !template.dependencies.some(({ name }) => name === font.name))]
+  return { artifacts, dependencies, recipe, preset, scope, darkSelector, provenance }
 }

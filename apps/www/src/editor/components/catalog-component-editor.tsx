@@ -8,7 +8,7 @@ import { siteFamilyOrder } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
-import { catalogDraftKey, catalogPresetRef, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
+import { catalogDraftKey, changeCatalogFamily, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
 import type { EditorView } from '../model'
@@ -49,8 +49,10 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const { result, error, pending } = useCatalogCompiler(recipe)
   // The catalog default for the same family and preset: what Changes and Get code compare to.
   const presetKey = JSON.stringify(recipe.presetRef)
-  const defaults = useMemo(() => [{ ...createCatalogDraft(recipe.component).recipe, presetRef: JSON.parse(presetKey) }],
-    [recipe.component, presetKey])
+  const defaults = useMemo(() => {
+    const start = createCatalogDraft(recipe.component).recipe
+    return [{ ...changeCatalogFamily(start, resolveRecipePreset(JSON.parse(presetKey)).styleFamily), presetRef: JSON.parse(presetKey) }]
+  }, [recipe.component, presetKey])
   const reference = useRecipeBatch('catalog', defaults).results?.[0] ?? null
   const [showChanges, setShowChanges] = useState(0)
   const key = catalogDraftKey(component)
@@ -105,7 +107,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
     <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
       back={{ label: 'All components', href: '/editor/component' }} switcher={<ComponentSwitcher current={component} />}
       commands={[familyCommands(siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
-        resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit({ ...recipe, presetRef: catalogPresetRef(style) }))]} status={status} revision={`r${recipe.revision}`}
+        resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit(changeCatalogFamily(recipe, style)))]} status={status} revision={`r${recipe.revision}`}
       nameField={{ id: `${component}-recipe-id`, label: 'Recipe ID', value: recipe.id, maxLength: 80, readOnly: true, onChange: () => {} }}
       undo={{ buttonRef: undoRef, disabled: !history.past.length || recovery !== null, onClick: () => {
         if (history.past.length === 1) focusAfterHistory.current = redoRef.current
