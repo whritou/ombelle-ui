@@ -185,3 +185,10 @@
 [data-slot="dialog-close"]:active{transform:none;box-shadow:none}
 @media(forced-colors: active){[data-slot="dialog-content"]{border-top-style:double}[data-slot="button"][data-variant="outline"]{border-bottom-style:double;border-bottom-color:ButtonText}[data-slot="dialog-close"]{border-color:transparent}}
 [data-slot="button"]:focus-visible,[data-slot="dialog-close"]:focus-visible{outline-width:2px;outline-offset:3px}
+/* A dialog footer often holds plain buttons (DialogClose without a Button around it, or a native button). Real Buttons always carry data-variant, so only plain ones match. */
+[data-slot="dialog-footer"] > button:not([data-variant]){box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-height:var(--control-height);padding:0 1.25rem;font:inherit;font-weight:600;cursor:pointer;border:var(--border-width) solid var(--border);border-bottom:4px double var(--border);border-radius:var(--radius);background:transparent;color:var(--foreground)}
+[data-slot="dialog-footer"] > button:not([data-variant]):hover{background:var(--secondary)}
+[data-slot="dialog-footer"] > button:not([data-variant]):last-child{margin-bottom:2px;border-bottom:var(--border-width) solid var(--border);background:var(--primary);color:var(--primary-foreground);box-shadow:var(--shadow-x) var(--shadow-y) 0 var(--shadow-color,var(--border))}
+[data-slot="dialog-footer"] > button:not([data-variant]):last-child:hover{background:var(--primary);filter:brightness(1.06)}
+[data-slot="dialog-footer"] > button:not([data-variant]):focus-visible{outline:2px solid var(--ring);outline-offset:3px}
+@media(forced-colors: active){[data-slot="dialog-footer"] > button:not([data-variant]){border-color:ButtonText;box-shadow:none}[data-slot="dialog-footer"] > button:not([data-variant]):focus-visible{outline-color:Highlight}}

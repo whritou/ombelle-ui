@@ -252,3 +252,5 @@
 /* papier layer */
 [data-slot='password-field-control']{background:var(--card);border-radius:var(--radius);box-shadow:inset 0 -2px 0 color-mix(in oklab,var(--foreground) 14%,transparent)}
 [data-slot='password-field-strength-bar']{border:var(--border-width) solid var(--border);border-radius:0}
+[data-slot='password-field-strength-bar'] > i{background:var(--success-foreground,var(--foreground))}
+[data-slot='password-field-strength-bar']:is([data-level='fair'] > *) > i{background:var(--warning-foreground,var(--foreground))}
