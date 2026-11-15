@@ -349,3 +349,48 @@ it('ombelle jumps instantly under reduced motion', async () => {
     expect(block(`components/ui/${c}.css`), c).toContain('transition:none')
   expect(block('components/ui/tooltip.css')).toContain('animation:none')
 })
+
+const papier = async () => {
+  const result = await compile({
+    preset: getCatalog('0.1.0').presets.papier,
+    componentIds: ['button', 'card', 'input', 'dialog', 'tabs', 'badge', 'tooltip'] as never,
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  return (path: string) =>
+    strip(result.artifacts.find((a) => a.logicalPath === path)!.content)
+}
+
+it('papier preset validates and carries the designed values', () => {
+  const p = getCatalog('0.1.0').presets.papier
+  expect(validatePreset(p).styleFamily).toBe('papier')
+  expect(p.id).toBe('builtin-papier')
+  expect(p.design).toEqual({
+    fontFamilyId: 'system-sans', radiusRem: 0.125, density: 'comfortable',
+    borderWidthPx: 1, shadowOffsetXPx: 0, shadowOffsetYPx: 2,
+    motion: 'full', transparency: 'reduced',
+  })
+  expect(p.modes.light.background).toBe('#F3EDDF')
+  expect(p.modes.light.primary).toBe('#B8301A')
+  expect(p.modes.dark.background).toBe('#16191F')
+})
+
+it('papier compiles deterministically and keeps the 2px radius on buttons', async () => {
+  const first = await papier()
+  const second = await papier()
+  const css = first('styles/ui-style.css')
+  expect(css).toBe(second('styles/ui-style.css'))
+  expect(css).not.toContain('border-radius:999px')
+  expect(css).toContain('[data-slot="button"][data-variant="outline"]{background:transparent')
+})
+
+it('papier outline buttons carry a double rule and dialogs a double rule on top', async () => {
+  const css = (await papier())('styles/ui-style.css')
+  expect(css).toContain('border-bottom:4pxdoublevar(--border)')
+  expect(css).toContain('border-top:5pxdoublevar(--border)')
+})
+
+it('papier headings fall back to a serif stack unless a heading font is set', async () => {
+  const css = (await papier())('styles/ui-style.css')
+  expect(css).toContain('var(--font-heading,ui-serif,Georgia')
+})
