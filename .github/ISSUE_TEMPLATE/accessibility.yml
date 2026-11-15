@@ -1,0 +1,27 @@
+name: Accessibility issue
+description: A keyboard, screen reader, contrast or motion problem.
+labels: [accessibility]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What is the barrier
+    validations:
+      required: true
+  - type: input
+    id: component
+    attributes:
+      label: Component, style family and edition
+    validations:
+      required: true
+  - type: textarea
+    id: at
+    attributes:
+      label: Assistive technology and browser
+      description: For example NVDA with Firefox, or keyboard only in Chromium.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true

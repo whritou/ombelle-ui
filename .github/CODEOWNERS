@@ -1,0 +1,8 @@
+# Default owner. Narrow this down as maintainers join.
+*                      @whritou
+/.github/              @whritou
+/packages/cli/         @whritou
+/packages/contracts/   @whritou
+/schemas/              @whritou
+/SECURITY.md           @whritou
+/LICENSE               @whritou
