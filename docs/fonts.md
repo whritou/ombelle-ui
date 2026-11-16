@@ -20,6 +20,7 @@ Roles: a font with `display` can be a heading font, `body` a body font, `mono` a
 | `fraunces` | Fraunces | display, body | OFL-1.1 | `@fontsource-variable/fraunces` | 5.3.0 |
 | `instrument-sans` | Instrument Sans | display, body | OFL-1.1 | `@fontsource-variable/instrument-sans` | 5.3.0 |
 | `ibm-plex-mono` | IBM Plex Mono | mono | OFL-1.1 | `@fontsource/ibm-plex-mono` | 5.3.0 |
+| `dm-mono` | DM Mono | mono | OFL-1.1 | `@fontsource/dm-mono` | 5.3.0 |
 | `young-serif` | Young Serif | display | OFL-1.1 | `@fontsource/young-serif` | 5.3.0 |
 | `nunito` | Nunito | display, body | OFL-1.1 | `@fontsource-variable/nunito` | 5.3.0 |
 | `michroma` | Michroma | display | OFL-1.1 | `@fontsource/michroma` | 5.3.0 |

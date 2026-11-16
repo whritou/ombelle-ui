@@ -84,6 +84,7 @@ export const fontRegistry: readonly FontEntry[] = [
   variable('fraunces', 'Fraunces', bodyAndDisplay, serif),
   variable('instrument-sans', 'Instrument Sans', bodyAndDisplay, sans),
   fixed('ibm-plex-mono', 'IBM Plex Mono', ['mono'], mono, [400, 600]),
+  fixed('dm-mono', 'DM Mono', ['mono'], mono, [400, 500]),
   { ...fixed('young-serif', 'Young Serif', ['display'], serif, [400]), displayLineHeight: 1.5 },
   variable('nunito', 'Nunito', bodyAndDisplay, sans),
   { ...fixed('michroma', 'Michroma', ['display'], sans, [400]), displayLineHeight: 1.5 },

@@ -37,6 +37,26 @@ describe('font registry', () => {
       expect(font.roles).toEqual(['mono'])
   })
 
+  it('registers dm-mono as a static mono font for Organic', () => {
+    expect(fontById('dm-mono')).toMatchObject({
+      id: 'dm-mono',
+      label: 'DM Mono',
+      stack: "'DM Mono', ui-monospace, monospace",
+      roles: ['mono'],
+      weights: [400, 500],
+      license: 'OFL-1.1',
+      fontsource: {
+        package: '@fontsource/dm-mono',
+        version: '5.3.0',
+        imports: ['@fontsource/dm-mono/400.css', '@fontsource/dm-mono/500.css'],
+      },
+    })
+    const schema = JSON.parse(
+      fs.readFileSync(path.join(here, '..', '..', '..', 'schemas', 'preset.schema.json'), 'utf8'),
+    )
+    expect(schema.properties.design.properties.monoFontFamilyId.enum).toContain('dm-mono')
+  })
+
   it('lets every body font also serve as a display font', () => {
     for (const font of fontRegistry.filter((f) => f.roles.includes('body')))
       expect(font.roles).toContain('display')

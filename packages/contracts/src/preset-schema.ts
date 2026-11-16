@@ -121,6 +121,7 @@ export const presetSchema = {
             "space-mono",
             "jetbrains-mono",
             "ibm-plex-mono",
+            "dm-mono",
             "share-tech-mono"
           ]
         },
