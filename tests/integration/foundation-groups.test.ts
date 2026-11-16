@@ -195,8 +195,8 @@ test('accepts complete portable structural evidence without any consumer root de
   const result = await aggregateFoundationEvidence(root, commit)
   expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 845 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(50)
-  expect(result.recipeEvidence.measurements).toHaveLength(250)
-  expect(result.componentPresetEvidence.measurements).toHaveLength(250)
+  expect(result.recipeEvidence.measurements).toHaveLength(360)
+  expect(result.componentPresetEvidence.measurements).toHaveLength(360)
 }, 420000) // Fixture discovery plus two independently bounded runtime inventories.
 test('rejects an absent group rather than accepting a passed status', async () => {
   const root = await fixture()

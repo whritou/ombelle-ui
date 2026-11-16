@@ -12,13 +12,13 @@ const expected = recipeMeasurementKeys().length
 it('accepts equivalent CSS color serializations while retaining dimensional and color parity', async () => {
   const data = await rows()
   data[0].computedStyles.color = 'color(srgb 0.0039215686 0.0078431373 0.0117647059)'
-  await expect(validateRecipeMeasurements(data)).resolves.toHaveLength(250)
+  await expect(validateRecipeMeasurements(data)).resolves.toHaveLength(360)
   data[0].computedStyles.color = 'rgb(100, 2, 3)'
   await expect(validateRecipeMeasurements(data)).rejects.toThrow('Recipe style differs across host/apps')
 })
 it('requires all attributable app/host/recipe/mode outcomes', async () => {
   const data = await rows()
-  expect(expected).toBe(250)
+  expect(expected).toBe(360)
   expect(data).toHaveLength(expected)
   await expect(validateRecipeMeasurements(data)).resolves.toHaveLength(expected)
 })
