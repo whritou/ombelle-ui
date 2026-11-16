@@ -269,4 +269,31 @@ describe('retro-futurism styles', () => {
       expect(rule(layerOf('stepper'), "[data-slot='stepper-indicator'][data-status='current']")).toContain('inset 0 0 0 3px var(--primary)')
     })
   })
+
+  describe('navigation board', () => {
+    it('contained tabs are a pill track whose selected tab has an outline and no key shadow', () => {
+      const css = layerOf('tabs')
+      expect(rule(css, "[data-slot='tabs-list']")).toContain('border-radius:var(--rf-pill)')
+      const active = rule(css, "[data-slot='tabs-trigger'][data-state='active']")
+      expect(active).toContain('0 0 0 2px var(--border)')
+      expect(active).not.toMatch(/--rf-e1|--rf-key/)
+    })
+
+    it('underline tabs mark the selected tab with a 6px primary bar', () => {
+      expect(rule(layerOf('tabs'), "[data-slot='tabs-list'][data-appearance='underline'][data-orientation] > [role='tab'][data-state='active']::after")).toMatch(/block-size:6px[^}]*background:var\(--primary\)/)
+    })
+
+    it('pill tabs and the current page sit on an outline and a 3px key', () => {
+      expect(rule(layerOf('tabs'), "[data-slot='tabs-list'][data-appearance='pills'] [data-slot='tabs-trigger'][data-state='active']")).toContain('inset 0 0 0 2px var(--border),0 3px 0 var(--rf-key)')
+      expect(rule(layerOf('pagination'), "[data-slot='pagination-link'][aria-current='page']")).toContain('inset 0 0 0 2px var(--border),0 3px 0 var(--rf-key)')
+    })
+
+    it('highlighted menu rows use the accent and keep a 2px ring', () => {
+      for (const id of ['dropdown-menu', 'context-menu']) {
+        const highlighted = rule(layerOf(id), `[data-slot='${id}-item'][data-highlighted],[data-slot='${id}-checkbox-item'][data-highlighted],[data-slot='${id}-radio-item'][data-highlighted],[data-slot='${id}-sub-trigger'][data-highlighted]`)
+        expect(highlighted).toContain('background:var(--accent)')
+        expect(highlighted).toContain('outline:2px solid var(--ring)')
+      }
+    })
+  })
 })
