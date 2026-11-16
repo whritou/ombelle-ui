@@ -18,8 +18,8 @@ let base: Promise<Record<string, Record<string, any>>> | undefined
 const collectedDefinitions = new Map<string, { name: string; file: string }[]>()
 function browserResults() {
   return {
-    stats: { expected: 845, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
-    suites: Object.entries({ 'badge.spec.ts': 50, 'card.spec.ts': 50, 'checkbox.spec.ts': 50, 'component-presets.spec.ts': 52, 'editor.spec.ts': 19, 'catalog-editors.spec.ts': 24, 'forms.spec.ts': 50, 'keyboard.spec.ts': 50, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 10, 'preset-editor.spec.ts': 51, 'recipes.spec.ts': 52, 'snapshot-presets.spec.ts': 30, 'recipe-snapshots.spec.ts': 8, 'switch.spec.ts': 50, 'tabs.spec.ts': 50, 'tooltip.spec.ts': 50, 'liquid-glass.spec.ts': 40, 'edition-parity.spec.ts': 140, 'glass-backdrops.spec.ts': 3, 'editor-commands.spec.ts': 4 }).map(([file, count]) => ({
+    stats: { expected: 1011, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
+    suites: Object.entries({ 'badge.spec.ts': 60, 'card.spec.ts': 60, 'checkbox.spec.ts': 60, 'component-presets.spec.ts': 74, 'editor.spec.ts': 19, 'catalog-editors.spec.ts': 24, 'forms.spec.ts': 60, 'keyboard.spec.ts': 60, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 12, 'preset-editor.spec.ts': 58, 'recipes.spec.ts': 74, 'snapshot-presets.spec.ts': 34, 'recipe-snapshots.spec.ts': 9, 'switch.spec.ts': 60, 'tabs.spec.ts': 60, 'tooltip.spec.ts': 60, 'liquid-glass.spec.ts': 40, 'edition-parity.spec.ts': 168, 'glass-backdrops.spec.ts': 3, 'editor-commands.spec.ts': 4 }).map(([file, count]) => ({
       file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
     })),
   }
@@ -124,7 +124,7 @@ test.each([
 })
 
 test('accepts complete browser evidence including edition parity and glass backdrops', () => {
-  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 845 })
+  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 1011 })
 })
 
 test('rejects omitted recipe publication browser cases even when totals match the old inventory', () => {
@@ -193,7 +193,7 @@ test('accepts complete portable structural evidence without any consumer root de
   const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
   const result = await aggregateFoundationEvidence(root, commit)
-  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 845 } } })
+  expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 1011 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(50)
   expect(result.recipeEvidence.measurements).toHaveLength(360)
   expect(result.componentPresetEvidence.measurements).toHaveLength(360)
