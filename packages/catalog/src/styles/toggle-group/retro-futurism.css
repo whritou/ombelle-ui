@@ -1,0 +1,110 @@
+/* retro-futurism Toggle Group */
+[data-slot='toggle-group'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-family);
+}
+[data-slot='toggle-group'][data-variant='segmented'] {
+  gap: 4px;
+  padding: 4px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--rf-r2);
+  background: var(--muted);
+  box-shadow: var(--rf-e1);
+}
+[data-slot='toggle-group'][data-variant='toolbar'] {
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  border-radius: var(--rf-r2);
+  background: var(--card);
+}
+[data-slot='toggle-group'][data-orientation='vertical'] {
+  flex-direction: column;
+  align-items: stretch;
+}
+[data-slot='toggle-group-item'] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  background: transparent;
+  color: var(--foreground);
+  font: 600 14px/1 var(--font-family);
+  cursor: pointer;
+}
+[data-slot='toggle-group-item'] > svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+[data-slot='toggle-group-item'][data-variant='segmented'] {
+  min-block-size: 34px;
+  padding: 0 16px;
+  border: 1.5px solid transparent;
+  border-radius: var(--rf-r2);
+}
+[data-slot='toggle-group-item'][data-variant='segmented'][data-state='on'] {
+  border-color: var(--rf-rule);
+  background: var(--card);
+  font-weight:600;
+}
+[data-slot='toggle-group-item'][data-variant='toolbar'] {
+  min-inline-size: 42px;
+  min-block-size: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-inline-end: 1.5px solid var(--rf-rule);
+  border-radius: 0;
+}
+[data-slot='toggle-group-item'][data-variant='toolbar']:last-child {
+  border-inline-end: 0;
+}
+[data-slot='toggle-group-item'][data-variant='toolbar'][data-state='on'] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+/* The toolbar clips its items, so the ring sits inside them, in their own text colour. */
+[data-slot='toggle-group-item']:focus-visible {
+  outline: 2.5px solid currentColor;
+  outline-offset: -4px;
+}
+[data-slot='toggle-group-item']:disabled,
+[data-slot='toggle-group-item'][data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (forced-colors: active) {
+  [data-slot='toggle-group'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+  [data-slot='toggle-group-item'] {
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+  [data-slot='toggle-group-item'][data-state='on'] {
+    background: Highlight;
+    color: HighlightText;
+  }
+  [data-slot='toggle-group-item']:focus-visible {
+    outline-color: Highlight;
+  }
+}
+/* retro-futurism layer */
+[data-slot='toggle-group'][data-variant='segmented']{padding:4px;gap:3px;border:0;border-radius:var(--rf-r3);background:var(--muted);box-shadow:none}
+[data-slot='toggle-group'][data-variant='toolbar']{overflow:visible;gap:8px;border:0;background:transparent}
+[data-slot='toggle-group-item'][data-variant='segmented']{min-block-size:36px;border:0;border-radius:var(--rf-r2);font-weight:700}
+[data-slot='toggle-group-item'][data-variant='segmented'][data-state='on']{background:var(--card);color:var(--card-foreground);box-shadow:var(--rf-e1)}
+[data-slot='toggle-group-item'][data-variant='toolbar']{min-block-size:42px;border:0;border-radius:var(--rf-r2);box-shadow:inset 0 0 0 2px var(--border)}
+[data-slot='toggle-group-item'][data-variant='toolbar']:last-child{border-inline-end:0}
+[data-slot='toggle-group-item'][data-variant='toolbar'][data-state='on']{background:var(--primary);color:var(--primary-foreground);box-shadow:var(--rf-e1)}
+[data-slot='toggle-group-item']:focus-visible{outline:3px solid currentColor;outline-offset:2px}
+@media (forced-colors: active){[data-slot='toggle-group-item'][data-variant='toolbar']{border:2px solid CanvasText;box-shadow:none}[data-slot='toggle-group-item'][data-state='on']{border-color:Highlight;outline:2px solid Highlight;outline-offset:-2px}}
+[data-slot='toggle-group'][data-variant='segmented']{border-radius:var(--rf-pill);background:var(--muted);box-shadow:inset 0 0 0 2px var(--border)}
+[data-slot='toggle-group-item'][data-variant='segmented']{border-radius:var(--rf-pill)}
+[data-slot='toggle-group-item'][data-variant='segmented'][data-state='on']{background:var(--card);color:var(--card-foreground);box-shadow:0 0 0 2px var(--border)}
+[data-slot='toggle-group-item'][data-variant='toolbar']{border-radius:var(--rf-pill);box-shadow:inset 0 0 0 2px var(--border)}
+[data-slot='toggle-group-item'][data-variant='toolbar'][data-state='on']{background:var(--primary);color:var(--primary-foreground);box-shadow:inset 0 0 0 2px var(--border),0 3px 0 var(--rf-key)}
+@media (forced-colors: active){[data-slot='toggle-group'][data-variant='segmented']{border:2px solid CanvasText;box-shadow:none}[data-slot='toggle-group-item'][data-variant='segmented'][data-state='on']{border:2px solid Highlight;box-shadow:none}}

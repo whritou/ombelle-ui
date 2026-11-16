@@ -67,14 +67,23 @@ describe('retro-futurism styles', () => {
 
   // The last matching rule outside forced colors is the one that applies.
   const rule = (css: string, selector: string) => {
-    css = css.replace(/@media\s*\(forced-colors:\s*active\)\s*\{[\s\S]*?\n\}/g, '')
+    for (let at = css.search(/@media\s*\(forced-colors:\s*active\)/); at >= 0; at = css.search(/@media\s*\(forced-colors:\s*active\)/)) {
+      let depth = 0
+      let end = css.indexOf('{', at)
+      do {
+        if (css[end] === '{') depth++
+        else if (css[end] === '}') depth--
+        end++
+      } while (depth > 0 && end < css.length)
+      css = css.slice(0, at) + css.slice(end)
+    }
     const at = css.lastIndexOf(selector + '{')
     return at < 0 ? '' : css.slice(at, css.indexOf('}', at))
   }
 
   it('base declares every shared --rf property once', () => {
     const css = baseCss()
-    for (const name of ['--rf-key', '--rf-r1', '--rf-r2', '--rf-r3', '--rf-r4', '--rf-pill', '--rf-e1', '--rf-e2', '--rf-e3', '--rf-pri2', '--rf-sec2', '--rf-dst2', '--rf-sun', '--rf-band', '--rf-stripes', '--rf-scan', '--rf-sun-mask'])
+    for (const name of ['--rf-key', '--rf-r1', '--rf-r2', '--rf-r3', '--rf-r4', '--rf-pill', '--rf-e1', '--rf-e2', '--rf-e3', '--rf-pri2', '--rf-sec2', '--rf-dst2', '--rf-sun', '--rf-band', '--rf-stripes', '--rf-scan', '--rf-sun-mask', '--rf-rule'])
       expect(css.split(name + ':').length - 1, name).toBe(1)
   })
 
@@ -98,5 +107,49 @@ describe('retro-futurism styles', () => {
     const before = rule(baseCss(), '[data-slot="dialog-content"]::before')
     expect(before).toContain('var(--rf-stripes)')
     expect(before).not.toMatch(/inset[^;]*:-|inset[^;]*: -/)
+  })
+
+  const layerOf = (id: string) => {
+    const file = styles + id + '/retro-futurism.css'
+    return fs.existsSync(file) ? read(file).split('/* retro-futurism layer */')[1] ?? '' : ''
+  }
+
+  describe('actions board', () => {
+    it('button group draws one outline and key shadow with pill ends and 2px seams', () => {
+      const css = layerOf('button-group')
+      const group = rule(css, "[data-slot='button-group']")
+      expect(group).toContain('border:2px solid var(--border)')
+      expect(group).toContain('border-radius:var(--rf-pill)')
+      expect(group).toContain('box-shadow:var(--rf-e1)')
+      expect(rule(css, "[data-slot='button-group'][data-orientation='vertical']")).toContain('border-radius:24px')
+      expect(css).toMatch(/border-inline-start:2px solid var\(--border\)/)
+      expect(css).toMatch(/:focus-visible\{[^}]*outline-offset:-\d+px/)
+    })
+
+    it('a pressed toggle gets an outline and no key shadow', () => {
+      const on = rule(layerOf('toggle'), "[data-slot='toggle'][data-state='on']")
+      expect(on).toContain('inset 0 0 0 2px var(--border)')
+      expect(on).not.toContain('--rf-e1')
+      expect(on).not.toContain('--rf-key')
+    })
+
+    it('segmented selection has no key shadow and toolbar-style selection sits on one', () => {
+      const css = layerOf('toggle-group')
+      expect(rule(css, "[data-slot='toggle-group-item'][data-variant='segmented'][data-state='on']")).not.toMatch(/--rf-e1|--rf-key/)
+      expect(rule(css, "[data-slot='toggle-group-item'][data-variant='toolbar'][data-state='on']")).toContain('0 3px 0 var(--rf-key)')
+      expect(rule(css, "[data-slot='toggle-group'][data-variant='segmented']")).toContain('border-radius:var(--rf-pill)')
+    })
+
+    it('badges are pills and destructive solid keeps an inner ring', () => {
+      const css = layerOf('badge')
+      expect(rule(css, "[data-slot='badge']")).toContain('border-radius:var(--rf-pill)')
+      expect(css).toMatch(/\[data-variant='destructive'\][^{]*\{[^}]*inset 0 0 0 2px/)
+    })
+
+    it('kbd is a key cap with a 2px outline and a 3px base', () => {
+      const kbd = rule(layerOf('kbd'), "[data-slot='kbd']")
+      expect(kbd).toContain('inset 0 0 0 2px var(--border)')
+      expect(kbd).toContain('0 3px 0 var(--rf-key)')
+    })
   })
 })
