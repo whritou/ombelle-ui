@@ -25,3 +25,8 @@ Verification on Windows, Node 24.19.0 and pnpm 11.25.0:
 
 The earlier deferred lists in `variants-075.md` and `variants-076.md` describe
 their original review dates; this record supersedes those listed findings.
+
+Final full-suite review also refreshed the older style-baseline Dialog hashes in
+all three recorded families. Only Dialog source changed there, matching the
+reviewed subtree/character-data observer correction. The six affected compiler
+files passed all 70 tests with Node 24.19.0 after this update.

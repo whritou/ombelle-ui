@@ -10,7 +10,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "4e4b851aca913f3d65b8c043f9ca96f38db8983c11110905c411db12c3d2aa0e"
+          "sha256": "ed961546797542e3ce187a39f85a1866a417433481f3bdc6b6947a1dbd7d9cdf"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -51,7 +51,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "4e4b851aca913f3d65b8c043f9ca96f38db8983c11110905c411db12c3d2aa0e"
+          "sha256": "ed961546797542e3ce187a39f85a1866a417433481f3bdc6b6947a1dbd7d9cdf"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -92,7 +92,7 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "4e4b851aca913f3d65b8c043f9ca96f38db8983c11110905c411db12c3d2aa0e"
+          "sha256": "ed961546797542e3ce187a39f85a1866a417433481f3bdc6b6947a1dbd7d9cdf"
         },
         {
           "logicalPath": "components/ui/input.tsx",
@@ -358,6 +358,13 @@
       ],
       "spec": "docs/superpowers/specs/2026-11-12-variants-075-design.md",
       "reason": "0.7.5 Dialog body, footer and sizes"
+    },
+    {
+      "logicalPaths": [
+        "components/ui/dialog.tsx"
+      ],
+      "spec": "docs/evidence/deferred-components-139.md",
+      "reason": "Observe nested text and character data changes when measuring DialogBody overflow (#139)"
     }
   ]
 }
