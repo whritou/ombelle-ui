@@ -67,6 +67,25 @@ it('flat surfaces keep a boundary in forced-colors mode', async () => {
   expect(forced('components/ui/tabs.css')).toContain('border:1pxsolidButtonText')
 })
 
+it('organic outlines keep a real boundary in forced-colors mode', async () => {
+  const organic = getCatalog('0.1.0').presets.organic
+  const result = await compile({
+    preset: organic,
+    componentIds: ['badge', 'button', 'card', 'chip', 'item', 'kbd', 'toggle'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  const forced = (path: string) =>
+    squash(result.artifacts.find((a) => a.logicalPath === path)!.content)
+      .split('@media(forced-colors:active){')
+      .slice(1)
+      .join('')
+  expect(forced('styles/ui-style.css')).toContain('[data-slot="button"][data-variant="outline"]{border:2pxsolidButtonText')
+  for (const id of ['badge', 'card', 'chip', 'item', 'toggle'])
+    expect(forced('components/ui/' + id + '.css'), id).toContain('border:2pxsolidCanvasText')
+  expect(forced('components/ui/kbd.css')).toContain('border:1.5pxsolidCanvasText')
+})
+
 const strip = (css: string) =>
   css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, '').replace(/'/g, '"')
 // Declarations of every base rule whose selector list is exactly `selector`, joined.
