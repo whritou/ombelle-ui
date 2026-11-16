@@ -56,3 +56,18 @@ it('includes the missing font rules and exact imports when the style file is unm
   expect(notice).toContain('[data-slot="card-title"]:not([hidden]){font-family:var(--font-heading)}')
   expect(notice).toContain('[data-slot="kbd"]:not([hidden]){font-family:var(--font-mono)}')
 })
+
+it('includes unmanaged role rules even when every selected font is a system font', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const context = await inspectProject(root)
+  context.upstreamStyleSupported = false
+  const preset = structuredClone(catalog.presets.flat)
+  const result = await compileWith({ ...preset, schemaVersion: '1.1', design: {
+    ...preset.design, headingFontFamilyId: 'system-serif', monoFontFamilyId: 'system-mono',
+  } }, [])
+  const plan = await planTheme(context, result)
+  expect(plan.dependencyPlan).toEqual([])
+  expect(plan.notices.join('\n')).toContain('[data-slot="card-title"]:not([hidden]){font-family:var(--font-heading)}')
+  expect(plan.notices.join('\n')).toContain('[data-slot="kbd"]:not([hidden]){font-family:var(--font-mono)}')
+})

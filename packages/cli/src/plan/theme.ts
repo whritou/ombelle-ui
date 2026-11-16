@@ -294,11 +294,11 @@ export async function planTheme(
   plan.dependencyPlan = fontPackages.filter(
     (d) => installedPackages[d.name] !== d.version,
   )
-  if (!fullStyle && fontPackages.length)
+  const typography = resolveTypography(result.preset.data.design)
+  const fontCss = [...typography.imports, fontRuleBlock(typography)].filter(Boolean).join('\n')
+  if (!fullStyle && fontCss)
     plan.notices.push(
-      'The style file is not managed here. Add these font imports and rules to your global CSS:\n' +
-        resolveTypography(result.preset.data.design).imports.join('\n') + '\n' +
-        fontRuleBlock(resolveTypography(result.preset.data.design)),
+      'The style file is not managed here. Add this font CSS to your global CSS:\n' + fontCss,
     )
   // The installer never removes packages. Name the font packages the previous theme imported
   // and this one does not, so they can be removed by hand.

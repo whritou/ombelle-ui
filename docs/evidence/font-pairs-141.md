@@ -29,6 +29,12 @@ Verification on Windows, Node 24.19.0 and pnpm 11.25.0:
   and 1.5 heading line height in Edge (2 browser tests).
 - Package build and workspace typecheck passed.
 
+Final review found an additional system-only unmanaged-style case: role rules
+are required even when no Fontsource package is installed. Its new regression
+failed with an empty notice, then all four theme-font planner tests passed after
+the notice was gated on required CSS rather than package count. The post-rebase
+stable-artifact checks also passed with current main's updated dependencies.
+
 This is focused evidence for the two new rows. The complete 46-consumer foundation
 gate and Yarn/Bun font consumers were not run or claimed here. This record
 supersedes the corresponding deferred entries in the original font-pairs evidence.
