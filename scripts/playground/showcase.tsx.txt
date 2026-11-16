@@ -1,0 +1,71 @@
+'use client'
+import * as React from 'react'
+import {Button} from '@/components/ui/__BUTTON__'
+import {Card,CardHeader,CardTitle,CardContent} from '@/components/ui/card'
+import {Badge} from '@/components/ui/badge'
+import {Progress} from '@/components/ui/progress'
+import {Tabs,TabsList,TabsTrigger,TabsContent} from '@/components/ui/tabs'
+import {Table,TableHeader,TableBody,TableRow,TableHead,TableCell} from '@/components/ui/table'
+import {Input} from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
+import {Checkbox} from '@/components/ui/checkbox'
+import {Switch} from '@/components/ui/switch'
+import {NativeSelect,NativeSelectOption} from '@/components/ui/native-select'
+import {Dialog,DialogContent,DialogTitle,DialogDescription,DialogHeader,DialogFooter} from '@/components/ui/dialog'
+import './playground.css'
+/*SHADCN_IMPORT*/
+/*EXAMPLE_IMPORTS*/
+const examples=[
+/*EXAMPLE_ITEMS*/
+]
+class ExampleBoundary extends React.Component<{children:React.ReactNode},{error:string}> {
+ state={error:''}
+ static getDerivedStateFromError(error:Error){return {error:error.message}}
+ render(){return this.state.error?<p role="alert" data-example-error>{this.state.error}</p>:this.props.children}
+}
+export default function Playground(){
+ const [view,setView]=React.useState('home'),[search,setSearch]=React.useState(''),[dark,setDark]=React.useState(false),[ready,setReady]=React.useState(false)
+ React.useEffect(()=>{
+  const sync=()=>{const p=new URLSearchParams(location.search);setView(p.get('view')??'home');setSearch(p.get('component')??'')}
+  sync();setReady(true);window.addEventListener('popstate',sync)
+  return ()=>window.removeEventListener('popstate',sync)
+ },[])
+ function theme(){setDark(!dark);document.documentElement.classList.toggle('dark',!dark)}
+ function navigate(next:string){setView(next);setSearch('');history.pushState({},'', '?view='+next)}
+ return <div className="pg-shell" data-playground-ready={ready}>
+  <aside className="pg-sidebar"><a className="pg-brand" href="?view=home">Ombelle<span>Local playground</span></a>
+   <nav aria-label="Playground">{['home','gallery','dashboard','settings'].map(v=><button key={v} onClick={()=>navigate(v)} aria-current={view===v?'page':undefined}>{v[0].toUpperCase()+v.slice(1)}</button>)}</nav>
+   <p className="pg-project">__PROJECT__</p><p>Installed source, working examples.</p>
+   <button className="pg-theme" onClick={theme}>{dark?'Light mode':'Dark mode'}</button>
+  </aside>
+  <main className="pg-main">
+   {view==='home'&&<><h1>A place to try<br/>every detail.</h1><p className="pg-intro">Explore your installed Ombelle components, then see how they work together in real interfaces.</p>
+    <div className="pg-paths">{[['gallery','Component gallery','Browse '+examples.length+' installed components.'],['dashboard','Dashboard','Explore a project overview.'],['settings','Settings','Edit preferences and save changes.']].map(([v,title,body])=><a key={v} href={'?view='+v}><h2>{title}</h2><p>{body}</p></a>)}</div>
+    {/*SHADCN_COMPARE*/}
+   </>}
+   {view==='gallery'&&<><h1>Component gallery</h1><p>Every example uses the source installed in this project.</p><label className="pg-search">Filter components<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name" /></label>
+    <div className="pg-index">{examples.filter(e=>e.id.includes(search.toLowerCase())).map(e=><a key={e.id} href={'?view=gallery&component='+e.id+'#component-'+e.id}>{e.id}</a>)}</div>
+    <div className="pg-gallery">{examples.filter(e=>e.id.includes(search.toLowerCase())).map(e=><section className="pg-specimen" id={'component-'+e.id} data-component={e.id} key={e.id}><header><h2>{e.id}</h2><a aria-label={'Link to '+e.id} href={'?view=gallery&component='+e.id+'#component-'+e.id}>Permalink</a></header><div className="pg-stage"><ExampleBoundary>{e.render()}</ExampleBoundary></div></section>)}</div>
+   </>}
+   {view==='dashboard'&&<Dashboard/>}
+   {view==='settings'&&<Settings/>}
+  </main>
+ </div>
+}
+function Dashboard(){
+ const [done,setDone]=React.useState(false)
+ return <><h1>Project overview</h1><p>Ombelle release workspace</p><div className="pg-metrics">
+  <Card><CardHeader><CardTitle>Release readiness</CardTitle></CardHeader><CardContent><p>{done?'100%':'72%'}</p><Progress aria-label="Release readiness" value={done?100:72}/><Button onClick={()=>setDone(!done)}>{done?'Reopen review':'Complete review'}</Button></CardContent></Card>
+  <Card><CardHeader><CardTitle>Environment</CardTitle></CardHeader><CardContent><Badge>Local</Badge><p>Your components run from installed source.</p></CardContent></Card>
+ </div><Tabs defaultValue="tasks"><TabsList><TabsTrigger value="tasks">Tasks</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList><TabsContent value="tasks"><Table><TableHeader><TableRow><TableHead>Work</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Component review</TableCell><TableCell>{done?'Complete':'In progress'}</TableCell></TableRow><TableRow><TableCell>Theme installation</TableCell><TableCell>Complete</TableCell></TableRow></TableBody></Table></TabsContent><TabsContent value="activity">Preset installed. Component source generated. Ready to explore.</TabsContent></Tabs></>
+}
+function Settings(){
+ const [name,setName]=React.useState('Ombelle workspace'),[email,setEmail]=React.useState(true),[digest,setDigest]=React.useState(true),[open,setOpen]=React.useState(false),[saved,setSaved]=React.useState('')
+ return <><h1>Workspace settings</h1><p>Try a form made from your installed components.</p><form className="pg-form" onSubmit={e=>{e.preventDefault();setOpen(true)}}>
+  <div><Label htmlFor="workspace-name">Workspace name</Label><Input id="workspace-name" value={name} required onChange={e=>setName(e.target.value)}/></div>
+  <div><Label htmlFor="workspace-region">Region</Label><NativeSelect id="workspace-region" defaultValue="eu"><NativeSelectOption value="eu">Europe</NativeSelectOption><NativeSelectOption value="us">Americas</NativeSelectOption></NativeSelect></div>
+  <div className="pg-inline"><Checkbox id="digest" checked={digest} onCheckedChange={v=>setDigest(v===true)}/><Label htmlFor="digest">Weekly digest</Label></div>
+  <div className="pg-inline"><Switch id="notifications" checked={email} onCheckedChange={setEmail}/><Label htmlFor="notifications">Email notifications</Label></div>
+  <Button type="submit">Save settings</Button><p role="status">{saved}</p>
+ </form><Dialog open={open} onOpenChange={setOpen}><DialogContent><DialogHeader><DialogTitle>Save workspace settings?</DialogTitle><DialogDescription>Apply these preferences to this local demo.</DialogDescription></DialogHeader><DialogFooter><Button onClick={()=>setOpen(false)}>Cancel</Button><Button onClick={()=>{setSaved('Saved '+name);setOpen(false)}}>Confirm save</Button></DialogFooter></DialogContent></Dialog></>
+}
