@@ -8,8 +8,8 @@ artifacts, and preserve installer transaction and compatibility contracts.
 **Requirements:** GitHub issues #139–143 and #20; repository AGENTS.md.
 **Execution:** Implement in this session, one issue at a time as requested.
 
-- [x] #142: preserve preview selections; browser regression and typecheck; commit 3e5eeac1.
-- [x] #143: budget unit workers and synchronize publication tests; full unit suite and typecheck; commit d18c647a.
+- [x] #142: preserve preview selections; browser regression and typecheck; commit 010691a1.
+- [x] #143: budget unit workers and synchronize publication tests; full unit suite and typecheck; commit 18cc16e3.
 - [x] #139: reproduce each deferred component finding against current sources;
   add focused regressions, fix templates/editor behavior, build packages and
   run the affected component/browser tests; commit independently.
@@ -22,8 +22,10 @@ artifacts, and preserve installer transaction and compatibility contracts.
 - [x] #20: recheck the advisory and upstream tooling, remediate without
   suppressing audit findings, run registry compatibility and workspace audit;
   commit independently.
-- [ ] Run final relevant checks, review the complete diff, push the branch,
+- [x] Run final relevant checks, review the complete diff, push the branch,
   create and attach a PR with issue links and exact verification limits.
 
 Review focus: nested React fragments, explicit accessibility IDs, changes after
 mount, installer scope/conflicts, and measured consumer inventory counts.
+
+Final checks and Windows cache limitations: [verification record](../../evidence/open-issues-final-verification.md). PR submitted as a draft pending healthy Windows cache verification.
