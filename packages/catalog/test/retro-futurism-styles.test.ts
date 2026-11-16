@@ -321,4 +321,27 @@ describe('retro-futurism styles', () => {
       expect(rule(css, "[data-slot='tooltip-arrow']")).toContain('fill:var(--foreground)')
     })
   })
+
+  describe('data board', () => {
+    it('the table header row is the sunset band with primary-foreground text, and wide tables scroll', () => {
+      const css = layerOf('table')
+      expect(rule(css, "[data-slot='table-header'] > [data-slot='table-row']")).toContain('background:var(--rf-band)')
+      const head = rule(css, "[data-slot='table-head']")
+      expect(head).toContain('background:transparent')
+      expect(head).toContain('color:var(--primary-foreground)')
+      expect(rule(css, "[data-slot='table-container']")).toContain('overflow-x:auto')
+    })
+
+    it('the code block header has a 2px bottom border and diff lines keep their inset marker', () => {
+      const css = layerOf('code-block')
+      expect(rule(css, "[data-slot='code-block-header']")).toContain('border-block-end:2px solid var(--border)')
+      expect(rule(css, "[data-slot='code-block-line'][data-diff='added']")).toContain('inset 4px 0 0')
+    })
+
+    it('the current carousel dot is an outlined primary pill', () => {
+      const dot = rule(layerOf('carousel'), "[data-slot='carousel-dot'][aria-current='true']::before")
+      expect(dot).toContain('background:var(--primary)')
+      expect(dot).toContain('inset 0 0 0 2px var(--border)')
+    })
+  })
 })
