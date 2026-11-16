@@ -48,13 +48,20 @@
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot='tooltip-content'] {
+    --tooltip-glass-opacity: var(--glass-inner-opacity, var(--glass-opacity));
     background:
       linear-gradient(to bottom, color-mix(in srgb, white calc(var(--glass-sheen) * 100%), transparent), transparent 60%),
       color-mix(in srgb, var(--popover) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
     -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
     backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
   }
+  [data-slot='tooltip-arrow'] {
+    fill: color-mix(in srgb, var(--popover) calc(var(--tooltip-glass-opacity) * 100%), transparent);
+  }
   @media (prefers-reduced-transparency: reduce) {
+    [data-slot='tooltip-arrow'] {
+      fill: var(--popover);
+    }
     [data-slot='tooltip-content'] {
       background: var(--popover);
       -webkit-backdrop-filter: none;

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config'
+import { workerBudget } from './scripts/worker-budget.js'
 // Catalog templates import a colocated stylesheet that only exists once the
 // component is installed, so tests that render them get an empty module.
 const stubId = '\0ombelle-template-stylesheet-stub'
@@ -21,6 +22,8 @@ const templateStylesheetStub = {
 export default defineConfig({
   plugins: [templateStylesheetStub],
   test: {
+    // Compiler tests also spawn tsc processes; CPU count alone overcommits memory.
+    maxWorkers: workerBudget('OMBELLE_TEST_WORKERS', process.env.OMBELLE_TEST_WORKERS, 4),
     include: [
       'packages/**/*.test.ts',
       'packages/**/*.test.tsx',
@@ -29,6 +32,7 @@ export default defineConfig({
       'tests/integration/**/*.test.ts',
     ],
     testTimeout: 60000,
+    hookTimeout: 60000,
   },
   resolve: {
     alias: {

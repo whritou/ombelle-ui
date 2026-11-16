@@ -133,8 +133,8 @@ export function PopoverDescription({
 // The arrow is 20 x 10: it fills the 10px gap PopoverContent leaves when it holds one.
 const ARROW_WIDTH = 20
 const ARROW_HEIGHT = 10
-const hasArrow = (children: React.ReactNode) =>
-  React.Children.toArray(children).some(child => React.isValidElement(child) && child.type === PopoverArrow)
+const hasArrow = (children: React.ReactNode): boolean =>
+  React.Children.toArray(children).some(child => React.isValidElement<{ children?: React.ReactNode }>(child) && (child.type === PopoverArrow || (child.type === React.Fragment && hasArrow(child.props.children))))
 // Base UI places the arrow along the edge; its distance from the content and its turn come from the side.
 // The shape points down, and its base overlaps the content's border.
 const overlap = 'calc(var(--border-width, 1px) - ' + ARROW_HEIGHT + 'px)'

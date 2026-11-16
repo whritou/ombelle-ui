@@ -12,7 +12,7 @@ import {
   type InstallPlan,
   type ManagedDeclaration,
 } from '@ombelle/contracts'
-import { sha256 } from '@ombelle/compiler'
+import { sha256, resolveTypography, fontRuleBlock } from '@ombelle/compiler'
 import { fontRegistry, getCatalog } from '@ombelle/catalog'
 import { readText } from '../project/inspect.js'
 import { portable } from '../project/paths.js'
@@ -46,6 +46,17 @@ function assertFamilySwitch(context: ProjectContext, result: CompileResult): voi
   if (!installed.size) return
   const target = result.preset.data.styleFamily
   const ids = supportedComponentIds.filter((id) => installed.has(id))
+  const previous = context.preset?.styleFamily
+  if (previous && previous !== target && previous !== 'liquid-glass' && target !== 'liquid-glass' && context.lock) {
+    const templates = getCatalog(context.lock.catalogRelease).templates
+    const stranded = ids.filter(id =>
+      installed.get(id)?.some(file => file.endsWith('.css')) &&
+      templates[id].styles?.[previous] !== templates[id].styles?.[target])
+    if (stranded.length)
+      throw new FoundationError('STYLE_UNAVAILABLE',
+        'Installed components carry ' + previous + ' styles: ' + stranded.join(', ') + '.', '/styleFamily',
+        'Remove ' + stranded.join(', ') + ', switch the theme, then add them again.')
+  }
   if (target === 'liquid-glass') {
     const blocked = ids.filter((id) => styleSupport(id, target) === 'unavailable')
     if (blocked.length)
@@ -283,11 +294,11 @@ export async function planTheme(
   plan.dependencyPlan = fontPackages.filter(
     (d) => installedPackages[d.name] !== d.version,
   )
-  if (!fullStyle && fontPackages.length)
+  const typography = resolveTypography(result.preset.data.design)
+  const fontCss = [...typography.imports, fontRuleBlock(typography)].filter(Boolean).join('\n')
+  if (!fullStyle && fontCss)
     plan.notices.push(
-      'The style file is not managed here, so import ' +
-        fontPackages.map((d) => d.name).join(', ') +
-        ' in your global CSS yourself',
+      'The style file is not managed here. Add this font CSS to your global CSS:\n' + fontCss,
     )
   // The installer never removes packages. Name the font packages the previous theme imported
   // and this one does not, so they can be removed by hand.

@@ -65,8 +65,8 @@ function OrdinarySpecimen({ item, primitives, edition }: { item: AuditSpecimen; 
   return renderSpecimen(item.specimen, primitives, id)
 }
 
-function AuditPage({ data, mode, ordinary, factories }: {
-  data: AuditData; mode: 'light' | 'dark'; ordinary: Primitives; factories: Record<string, Module>
+function AuditPage({ data, mode, ordinary, factories, fontCss }: {
+  data: AuditData; mode: 'light' | 'dark'; ordinary: Primitives; factories: Record<string, Module>; fontCss?: string
 }) {
   const main = React.useRef<HTMLElement>(null)
   const glass = data.family === 'liquid-glass'
@@ -95,6 +95,7 @@ function AuditPage({ data, mode, ordinary, factories }: {
           : <OrdinarySpecimen item={item} primitives={ordinary} edition={data.edition} />}
       </div>
     </section>)}
+    {fontCss && <style data-audit-fonts="">{fontCss}</style>}
   </main>
 }
 
@@ -118,15 +119,10 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
   const factories = Object.fromEntries(await Promise.all(recipes.map(async item =>
     [item.component, await scopedCatalogComponents[item.component as keyof typeof scopedCatalogComponents]()] as const)))
   if (audit) {
-    // Appended after every component stylesheet has loaded, so these rules come last.
-    const style = document.createElement('style')
-    style.dataset.auditFonts = fonts!
-    style.textContent = audit.css
-    document.head.append(style)
     await loadPresetFonts(audit.ids)
     await document.fonts.ready
   }
   document.documentElement.classList.toggle('dark', mode === 'dark')
   setGlassBackdrop(document.documentElement, data.backdrop[mode] ?? undefined)
-  page.render(<AuditPage data={data} mode={mode} ordinary={ordinary} factories={factories} />)
+  page.render(<AuditPage data={data} mode={mode} ordinary={ordinary} factories={factories} fontCss={audit?.css} />)
 }

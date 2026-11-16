@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { createElement as h } from 'react'
+import { createElement as h, Fragment } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as radix from '../src/templates/progress.js'
 import * as base from '../src/templates/base/progress.js'
@@ -30,6 +30,18 @@ describe('progressValueText', () => {
 })
 
 describe('Progress label and value', () => {
+  it.each(editions)('%s preserves explicit label IDs inside nested fragments', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.Progress, { value: 50 }, h(Fragment, {},
+      h(Fragment, {}, h(ui.ProgressLabel, { id: 'upload-label' }, 'Upload')),
+      h(ui.ProgressValue, { format: value => `${value} files` }))))
+    expect(attr(html, 'progress', 'aria-labelledby')).toBe('upload-label')
+    expect(attr(html, 'progress-label', 'id')).toBe('upload-label')
+    expect(attr(html, 'progress', 'aria-valuetext')).toBe('50 files')
+  })
+  it.each(editions)('%s omits an indeterminate ring number', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.Progress, { shape: 'circle', value: null }, h(ui.ProgressValue)))
+    expect(html).not.toContain('data-slot="progress-ring-value"')
+  })
   it.each(editions)('%s names the bar by its label and gives it the value text', (_, ui) => {
     const html = labelled(ui)
     expect(html.startsWith('<div data-slot="progress-field"')).toBe(true)
@@ -141,7 +153,7 @@ describe('Progress shape circle', () => {
     expect(dash(html, 'progress-ring-indicator')).toBe('25 100')
     expect(attr(html, 'progress', 'aria-valuetext')).toBeUndefined()
     expect(attr(html, 'progress', 'data-state')).toBe('indeterminate')
-    expect(ring(ui, { value: null }, true)).toMatch(/data-slot="progress-ring-value"[^>]*><\/span>/)
+    expect(ring(ui, { value: null }, true)).not.toContain('data-slot="progress-ring-value"')
   })
 
   it.each(editions)('%s clamps a value past the maximum and keeps size and tone', (_, ui) => {

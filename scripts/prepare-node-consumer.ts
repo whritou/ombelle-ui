@@ -22,6 +22,7 @@ import { componentPresetReferenceBank } from '../tests/helpers/component-preset-
 import {
   consumerAddBatches,
   compileConsumerReference,
+  consumerPreset,
 } from './consumer-components.js'
 export type ArtifactProof = {
   path: string
@@ -42,6 +43,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
   if (
     spec.manager === 'bun' ||
     spec.cliRuntime !== 'node' ||
+    (spec.fonts && spec.manager !== 'pnpm') ||
     (spec.manager === 'yarn' && !spec.yarnFixtureId)
   )
     throw new Error('Invalid Node-manager consumer descriptor')
@@ -101,6 +103,10 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       await fs.cp(path.resolve('fixtures', spec.framework), root, {
         recursive: true,
       })
+      if (spec.fonts) {
+        for (const file of ['package.json', 'pnpm-lock.yaml'])
+          await fs.copyFile(path.resolve('fixtures/fonts', spec.framework, file), path.join(root, file))
+      }
       const pkgPath = path.join(root, 'package.json'),
         pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'))
       pkg.packageManager = spec.manager + '@' + version
@@ -144,10 +150,14 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       path.join(root, 'src/index.css'),
       '\n.user-consumer-style { color:hotpink; }\n',
     )
-    const preset = path.resolve(
+    let preset = path.resolve(
       'packages/catalog/src/presets',
       spec.family + '.json',
     )
+    if (spec.fonts) {
+      preset = path.join(root, 'consumer-font-preset.json')
+      await fs.writeFile(preset, JSON.stringify(await consumerPreset(spec.family, true)))
+    }
     let presetHash: unknown
     for (const args of [
       ['init', '--preset', preset],
@@ -190,7 +200,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
       componentPresetBank = glass
         ? undefined
         : await componentPresetReferenceBank()
-    const canonical = await compileConsumerReference(spec.family)
+    const canonical = await compileConsumerReference(spec.family, spec.fonts)
     const installed = jsonRecord(
       JSON.parse(
         await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'),

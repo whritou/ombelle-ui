@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest'
-import { registryItemSchema, registrySchema } from 'shadcn/schema'
+import { registryItemSchema, registrySchema } from '../../../tests/helpers/upstream-schema.js'
 import { compile } from '@ombelle/compiler'
 import example from '../../../examples/preset.example.json'
 import { buildRegistry } from '../src/registry/build.js'

@@ -8,7 +8,26 @@ import { inspectProject } from '../src/project/inspect.js'
 import { planTheme } from '../src/plan/theme.js'
 import type { InstallPlan } from '@ombelle/contracts'
 import { applyPlan } from '../src/apply/transaction.js'
+import { planAdd } from '../src/plan/components.js'
+import { getCatalog } from '@ombelle/catalog'
 const roots: string[] = []
+
+it('refuses a stable family switch that would strand installed colocated CSS', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const build = (family: 'flat' | 'minimalist', ids: ('card')[] = []) => compile({
+    preset: getCatalog('0.1.0').presets[family], componentIds: ids,
+    catalogRelease: '0.1.0', compilerVersion: '0.1.0',
+  })
+  await materialize(await planTheme(await inspectProject(root), await build('flat')))
+  await materialize(await planAdd(await inspectProject(root), await build('flat', ['card'])))
+  const css = await fs.readFile(root + '/src/components/ui/card.css', 'utf8')
+  await expect(planTheme(await inspectProject(root), await build('minimalist'))).rejects.toMatchObject({
+    code: 'STYLE_UNAVAILABLE', path: '/styleFamily',
+  })
+  expect(await fs.readFile(root + '/src/components/ui/card.css', 'utf8')).toBe(css)
+  await expect(planTheme(await inspectProject(root), await build('flat'))).resolves.toBeDefined()
+})
 afterEach(async () => {
   vi.restoreAllMocks()
   for (const root of roots.splice(0))

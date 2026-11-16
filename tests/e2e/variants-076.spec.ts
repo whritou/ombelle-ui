@@ -9,6 +9,22 @@ const open = async (page: Page, edition: string) => {
 }
 
 for (const edition of ['radix', 'base'] as const) {
+  test(`${edition}: snap points changed while open reseed the sheet`, async ({ page }) => {
+    const section = await open(page, edition)
+    await section.getByRole('button', { name: 'Filters', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Filters', exact: true })
+    await dialog.getByRole('button', { name: 'Change snap points' }).click()
+    await expect(dialog.getByRole('separator', { name: 'Resize Filters' })).toHaveAttribute('aria-valuenow', '33')
+  })
+  if (edition === 'base') test(`${edition}: SliderValue keeps its native input associated`, async ({ page }) => {
+    await open(page, edition)
+    const label = page.getByText('Field slider', { exact: true })
+    const field = label.locator('..')
+    const thumb = field.getByRole('slider')
+    await label.click()
+    await expect(thumb).toBeFocused()
+    await expect(field.locator('output')).toHaveAttribute('for', await thumb.getAttribute('id') ?? '')
+  })
   test.describe(`${edition} Sheet snap points`, () => {
     const setup = async (page: Page) => {
       const section = await open(page, edition)

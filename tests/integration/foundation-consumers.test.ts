@@ -3,8 +3,25 @@ import path from 'node:path'
 import { afterEach, expect, test, vi } from 'vitest'
 import { prepareNodeConsumer } from '../../scripts/prepare-node-consumer.js'
 import { managerEntry } from '../../packages/cli/src/apply/manager.js'
+import { runNative } from '../helpers/bun-command.js'
 
 afterEach(() => vi.unstubAllEnvs())
+
+test.each(['vite', 'next'] as const)('prepares, audits and builds the %s fonts consumer', async framework => {
+  const entry = await managerEntry('pnpm')
+  vi.stubEnv('npm_execpath', entry)
+  const row = await prepareNodeConsumer({ id: framework + '-fonts', family: 'ombelle', framework,
+    manager: 'pnpm', cliRuntime: 'node', fonts: true })
+  try {
+    const css = await fs.readFile(path.join(row.root, 'src/styles/ui-style.css'), 'utf8')
+    for (const font of ['inter', 'fraunces', 'jetbrains-mono']) expect(css).toContain('@fontsource-variable/' + font)
+    expect(row.audit.code).toBe(0)
+    const built = await runNative(row.cliRuntime.executable, [entry, 'run', 'build'], row.root, { NEXT_TELEMETRY_DISABLED: '1' })
+    expect(built.code, built.output).toBe(0)
+  } finally {
+    await fs.rm(row.root, { recursive: true, force: true })
+  }
+}, 360000)
 
 // Exercise the nightly preparation path, including the real CLI, frozen lock,
 // dependency versions on disk, and audit. Preview contains more components

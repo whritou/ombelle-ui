@@ -28,10 +28,18 @@ it('publishes only an explicitly confirmed recipe and suppresses duplicate reque
 it.each(['edit', 'cancel', 'dispose'] as const)('retires an in-flight success after %s', async mode => {
   const { result, snapshot } = await fixture()
   let reply!: (value: Response) => void
-  const fetcher = vi.fn(() => new Promise<Response>(resolve => { reply = resolve }))
+  let requestStarted!: () => void
+  const started = new Promise<void>(resolve => { requestStarted = resolve })
+  const fetcher = vi.fn(() => new Promise<Response>(resolve => {
+    reply = resolve
+    requestStarted()
+  }))
   const c = createRecipePublicationController({ fetch: fetcher })
   c.update(result.recipe, true); c.confirm(); const pending = c.publish()
-  await vi.waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1))
+  // Normalization compiles asynchronously before transport starts. Wait for the
+  // request itself rather than imposing waitFor's separate one-second deadline.
+  await started
+  expect(fetcher).toHaveBeenCalledTimes(1)
   if (mode === 'edit') c.update((await normalizePublishedRecipe({ ...example, content: 'new content' })).recipe, true)
   else if (mode === 'cancel') c.cancel()
   else c.dispose()

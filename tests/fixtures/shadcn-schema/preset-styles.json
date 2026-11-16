@@ -1,0 +1,13 @@
+{
+  "package": "shadcn@4.22.1",
+  "styles": [
+    "nova",
+    "vega",
+    "maia",
+    "lyra",
+    "mira",
+    "luma",
+    "sera",
+    "rhea"
+  ]
+}

@@ -20,6 +20,12 @@ function ringDash(percent: number | undefined) {
   return `${percent === undefined ? 25 : Number(percent.toFixed(2))} 100`
 }
 
+function progressParts(children: React.ReactNode): React.ReactNode[] {
+  return React.Children.toArray(children).flatMap(child =>
+    React.isValidElement<{ children?: React.ReactNode }>(child) && child.type === React.Fragment
+      ? progressParts(child.props.children) : [child])
+}
+
 const ProgressLabelId = React.createContext<string | undefined>(undefined)
 const ProgressText = React.createContext<string | undefined>(undefined)
 
@@ -53,7 +59,7 @@ export function Progress({
   children,
   ...props
 }: ProgressProps) {
-  const labelId = React.useId() + '-label'
+  const generatedLabelId = React.useId() + '-label'
   const percent =
     value === null || value === undefined
       ? undefined
@@ -64,8 +70,9 @@ export function Progress({
       : value >= max
         ? 'complete'
         : 'loading'
-  const items = React.Children.toArray(children)
-  const label = items.find(child => React.isValidElement(child) && child.type === ProgressLabel)
+  const items = progressParts(children)
+  const label = items.find((child): child is React.ReactElement<React.ComponentProps<'span'>> => React.isValidElement(child) && child.type === ProgressLabel)
+  const labelId = label?.props.id ?? generatedLabelId
   const readout = items.find((child): child is React.ReactElement<ProgressValueProps> =>
     React.isValidElement(child) && child.type === ProgressValue)
   const text = progressValueText(value, max, readout?.props.format)
@@ -92,7 +99,7 @@ export function Progress({
             <circle data-slot="progress-ring-track" cx="32" cy="32" r="26" pathLength="100" />
             <circle data-slot="progress-ring-indicator" cx="32" cy="32" r="26" pathLength="100" strokeDasharray={ringDash(percent)} />
           </svg>
-          {readout && <span data-slot="progress-ring-value" aria-hidden="true">{text}</span>}
+          {readout && text !== undefined && <span data-slot="progress-ring-value" aria-hidden="true">{text}</span>}
         </>
       ) : (
         <ProgressPrimitive.Indicator

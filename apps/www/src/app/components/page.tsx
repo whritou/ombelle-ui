@@ -1,5 +1,6 @@
 import { ComponentDirectory } from '../../site/components/directory'
 import { familyList } from '../../site/families'
+import { SupportMatrix } from '../../site/components/support-matrix'
 
 export const metadata = {
   title: 'Components · Ombelle UI',
@@ -15,6 +16,7 @@ export default function ComponentsPage() {
         Explore the Ombelle catalog in light and dark mode. Choose a Liquid Glass preset to use it when opening a component preview.
       </p>
       <ComponentDirectory />
+      <SupportMatrix />
     </main>
   )
 }

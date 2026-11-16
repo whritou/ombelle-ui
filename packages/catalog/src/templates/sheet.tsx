@@ -207,6 +207,8 @@ function useSheetSizing({ resizable, side, defaultSize, minSize, maxSize, onSize
   // A snap sheet starts at its first point; any other bottom sheet follows its content until a handle sets it.
   const first = points ? snapHeight(points[0]!) : undefined
   const [height, setHeight] = React.useState<number | undefined>(first)
+  const pointsKey = points?.join(',')
+  React.useEffect(() => { setHeight(first) }, [pointsKey, first])
   const [width, setWidth] = React.useState(defaultSize)
   // The window's width, followed while the sheet is open, so the bounds and the separator's value stay true.
   const [viewport, setViewport] = React.useState<number>()

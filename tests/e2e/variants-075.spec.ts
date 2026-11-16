@@ -9,6 +9,31 @@ const open = async (page: Page, edition: string) => {
 }
 
 for (const edition of ['radix', 'base'] as const) {
+  test(`${edition}: folded text-only breadcrumbs remain visible in the menu`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 800 })
+    await open(page, edition)
+    const nav = page.getByRole('navigation', { name: 'Component path' })
+    const more = nav.getByRole('button', { name: /^Show \d+ more$/ })
+    await expect(more).toBeVisible()
+    const text = await nav.locator('[data-breadcrumb-hidden][data-slot="breadcrumb-item"] a').first().evaluate(link => {
+      const span = document.createElement('span')
+      span.textContent = link.textContent
+      link.replaceWith(span)
+      return span.textContent!
+    })
+    await more.click()
+    await expect(page.getByRole('menu').getByText(text, { exact: true })).toBeVisible()
+    await expect(page.getByRole('menu').getByText(text, { exact: true })).toHaveAttribute('aria-disabled', 'true')
+  })
+  test(`${edition}: DialogBody remeasures text-node edits`, async ({ page }) => {
+    const section = await open(page, edition)
+    await section.getByRole('button', { name: 'Export preset' }).click()
+    const body = page.getByRole('dialog', { name: 'Export preset' }).locator('[data-slot="dialog-body"]')
+    await body.evaluate(element => element.replaceChildren(document.createTextNode('Short text')))
+    await expect(body).not.toHaveAttribute('data-overflowing')
+    await body.evaluate(element => { element.firstChild!.textContent = 'Long description '.repeat(3000) })
+    await expect(body).toHaveAttribute('data-overflowing', '')
+  })
   test.describe(edition, () => {
     test('a CheckboxOption is named by its title and described by its description', async ({ page }) => {
       const section = await open(page, edition)

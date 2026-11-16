@@ -75,6 +75,24 @@ it('plans pinned font dependencies for a font preset without writing anything', 
   expect(await fs.readFile(path.join(root, 'package.json'), 'utf8')).toBe(before)
 })
 
+it('really installs pinned fonts through the CLI with lifecycle scripts disabled', async () => {
+  const { root, trio, command } = await setup(false)
+  const packageFile = path.join(root, 'package.json')
+  const pkg = JSON.parse(await fs.readFile(packageFile, 'utf8'))
+  pkg.scripts = { postinstall: `node -e "require('node:fs').writeFileSync('font-install-script-ran','unexpected')"` }
+  await fs.writeFile(packageFile, JSON.stringify(pkg))
+  const applied = await command(['init', '--preset', trio, '--yes'])
+  expect(applied.code, applied.output).toBe(0)
+  const installed = JSON.parse(await fs.readFile(packageFile, 'utf8'))
+  for (const name of ['inter', 'fraunces', 'jetbrains-mono']) {
+    expect(installed.dependencies['@fontsource-variable/' + name]).toBe('5.3.0')
+    const fontRoot = path.join(root, 'node_modules/@fontsource-variable', name)
+    expect(await fs.readFile(path.join(fontRoot, 'index.css'), 'utf8')).toContain('@font-face')
+    expect((await fs.readdir(path.join(fontRoot, 'files'))).some(file => file.endsWith('.woff2'))).toBe(true)
+  }
+  await expect(fs.stat(path.join(root, 'font-install-script-ran'))).rejects.toMatchObject({ code: 'ENOENT' })
+}, 240000)
+
 it('writes the font imports first in the installed style file and the font tokens in the global css', async () => {
   const { root, trio, command } = await setup(true)
   const applied = await command(['init', '--preset', trio, '--yes'])

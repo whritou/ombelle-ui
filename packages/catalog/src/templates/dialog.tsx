@@ -81,7 +81,7 @@ export function DialogBody({ className, ref, ...props }: React.ComponentProps<'d
       measure()
     }
     const mutations = new MutationObserver(watch)
-    mutations.observe(body, { childList: true })
+    mutations.observe(body, { childList: true, subtree: true, characterData: true })
     watch()
     return () => {
       resize.disconnect()

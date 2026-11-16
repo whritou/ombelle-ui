@@ -17,14 +17,23 @@ export function consumerAddBatches(family: StyleFamily): ComponentId[][] {
       ]
 }
 
-export async function compileConsumerReference(family: StyleFamily) {
-  return compile({
-    preset: JSON.parse(
+export async function consumerPreset(family: StyleFamily, fonts = false) {
+  const preset = JSON.parse(
       await fs.readFile(
         'packages/catalog/src/presets/' + family + '.json',
         'utf8',
       ),
-    ),
+    )
+  if (fonts) {
+    preset.schemaVersion = '1.1'
+    Object.assign(preset.design, { fontFamilyId: 'inter', headingFontFamilyId: 'fraunces', monoFontFamilyId: 'jetbrains-mono' })
+  }
+  return preset
+}
+
+export async function compileConsumerReference(family: StyleFamily, fonts = false) {
+  return compile({
+    preset: await consumerPreset(family, fonts),
     componentIds: consumerAddBatches(family).flat(),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',

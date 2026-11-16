@@ -105,7 +105,7 @@ export function refracts(material: { width: number; strength: number } | undefin
   return material === undefined || (material.width > 0 && material.strength > 0)
 }
 
-/** The pointer listener runs only when the preset uses it: a halo or a shine that travels. */
+/** Pointer updates apply only when the surface uses a halo or a travelling shine. */
 export function tracksPointer(halo: number, motion: number) {
   return halo > 0 || motion > 0
 }
@@ -134,9 +134,6 @@ export function LiquidGlassFilter() {
   const [material, setMaterial] = React.useState<{ width: number; strength: number; url?: string }>()
   const [chromium, setChromium] = React.useState(false)
   React.useEffect(() => {
-    const tokens = getComputedStyle(document.documentElement)
-    // Presets without a halo or travelling shine pay nothing per pointer move.
-    if (!tracksPointer(readNumber(tokens, '--glass-halo'), readNumber(tokens, '--glass-motion'))) return
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
     let current: PointerSurface | null = null
     let frame = 0
@@ -145,7 +142,12 @@ export function LiquidGlassFilter() {
     const flush = () => {
       frame = 0
       if (!last) return
-      const surface = glassSurfaceFor(last.target)
+      let surface = glassSurfaceFor(last.target)
+      if (surface) {
+        // Recipes override material on their own surface, independently of root tokens.
+        const tokens = getComputedStyle(surface as unknown as Element)
+        if (!tracksPointer(readNumber(tokens, '--glass-halo'), readNumber(tokens, '--glass-motion'))) surface = null
+      }
       if (surface !== current) clearGlassPointer(current)
       current = surface
       if (surface) applyGlassPointer(surface, last.clientX, last.clientY, motion.matches)

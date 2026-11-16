@@ -253,6 +253,8 @@ Every catalog component can be planned in a glass project. The refusal remains f
 - **Into glass.** If any installed component is unavailable for liquid glass, switching to a glass preset fails with `STYLE_UNAVAILABLE` at `/componentIds`. The message names the installed unavailable components and lists the experimental glass components. No catalog component is unavailable in glass now, so this check no longer blocks a switch into glass.
 - **Out of glass.** Accordion, Alert, Avatar, Badge, Card, Checkbox, Dropdown Menu, Label, Native Select, Popover, Progress, Radio Group, Select, Separator, Skeleton, Switch, Table, Tabs, Textarea, and Tooltip install colocated glass CSS, such as `components/ui/card.css`, that depends on the `--glass-*` tokens and the contrast bound. If any of them is installed in a glass project, switching to a stable preset fails with `STYLE_UNAVAILABLE` at `/styleFamily`, naming the components and their CSS files. Remove them, switch the theme, then add them again. Button, Dialog, and Input keep their glass rules in `ui-style.css`, which the switch rewrites, so they do not block it.
 
+Stable-to-stable family switches also refuse installed colocated CSS when the target family has different rules. Remove those components, switch the theme, then add them again; theme operations preserve existing component source.
+
 Re-applying another glass preset to a glass project is not a family switch. It still runs the contrast bound.
 
 ## Editors
@@ -276,14 +278,14 @@ The generated stylesheet adds the lab paint for presets that enable the material
 - no human visual, keyboard or screen-reader review
 - contrast is estimated for the declared text pairs, and consumer content needs its own checks
 - browsers outside the recorded run were not tested
-- the hosted snapshot service must be redeployed before glass codes resolve publicly
+- production deploys from `main`; current deployment status and the read-only API check are recorded in [issue #140 evidence](../evidence/liquid-glass-140.md)
 
 Further known limitations:
 
-- In a consuming app, a Button recipe's pointer halo lights only when the page's preset also turns the halo or motion on. `LiquidGlassFilter` attaches its pointer listener from the root tokens, and a recipe's tokens are scoped to its Button. The Button editor supplies those tokens in its preview iframe.
-- The Tooltip arrow stays opaque while the content is translucent, so a seam is visible between them.
+- `LiquidGlassFilter` reads halo and motion from the hovered surface, so component-scoped recipes work independently of the root preset.
+- The Tooltip arrow uses the content's material opacity; reduced transparency and forced colors retain opaque fills.
 - With `transparency: "reduced"`, glass presets must still reach 4.5:1 on their opaque surfaces. This is stricter than the stable families.
 - The contrast bound assumes the glass element filters the page itself; see [contrast bound](#contrast-bound) for the ancestors it does not cover.
-- There is no public catalog page that shows the stable, experimental, and unavailable matrix yet.
+- The public `/components` page includes the full stable, experimental, and unavailable support matrix, derived from the contracts.
 
 Component-scoped presets and recipes remain Button-only. See the [design](../superpowers/specs/2026-11-03-liquid-glass-design.md) for the full decisions.

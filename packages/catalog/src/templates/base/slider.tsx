@@ -40,19 +40,7 @@ export function Slider({ children, ...props }: SliderProps) {
   return <SliderField {...props} valueElement={value} header={parts.filter(part => part !== value)} />
 }
 
-type SliderControlProps = Omit<SliderProps, 'children'> & { thumbIds?: string[] }
-
-// Base UI generates the id of a thumb's range input; with a SliderValue, the input takes the id the
-// readout's htmlFor names, so the pair is linked in server-rendered markup too.
-const withInputId = (id: string) => (props: React.ComponentProps<'div'>) => {
-  const inner = props.children as React.ReactElement<{ children?: React.ReactNode }>
-  return (
-    <div {...props}>
-      {React.Children.map(inner.props.children, child =>
-        React.isValidElement(child) && child.type === 'input' ? React.cloneElement(child as React.ReactElement<{ id?: string }>, { id }) : child)}
-    </div>
-  )
-}
+type SliderControlProps = Omit<SliderProps, 'children'>
 
 function SliderControl({
   className,
@@ -68,7 +56,6 @@ function SliderControl({
   name,
   thumbLabels,
   getValueText,
-  thumbIds,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'aria-describedby': ariaDescribedBy,
@@ -110,7 +97,6 @@ function SliderControl({
               aria-labelledby={!thumbLabels?.[index] && values.length === 1 ? ariaLabelledBy : undefined}
               aria-valuetext={getValueText?.(thumbValue, index)}
               aria-describedby={ariaDescribedBy}
-              render={thumbIds?.[index] ? withInputId(thumbIds[index]) : undefined}
             />
           ))}
         </SliderPrimitive.Track>
@@ -166,12 +152,19 @@ function SliderField({
   step = 1,
   getValueText,
   ...props
-}: Omit<SliderControlProps, 'thumbIds'> & { valueElement: React.ReactElement<SliderValueProps>; header: React.ReactNode[] }) {
+}: SliderControlProps & { valueElement: React.ReactElement<SliderValueProps>; header: React.ReactNode[] }) {
   const { format, editable, className: valueClassName, ...outputProps } = valueElement.props
   const [own, setOwn] = React.useState<number[]>(defaultValue ?? [min])
   const values = value ?? own
-  const id = React.useId()
-  const thumbIds = values.map((_, index) => `${id}-thumb-${index}`)
+  const fieldRef = React.useRef<HTMLDivElement>(null)
+  const [inputIds, setInputIds] = React.useState<string>()
+  // Base UI owns input IDs (including Field's control ID). Read them after mount
+  // instead of replacing native inputs through the thumb's render prop.
+  React.useEffect(() => {
+    const ids = Array.from(fieldRef.current?.querySelectorAll<HTMLInputElement>('input[type="range"]') ?? [])
+      .map(input => input.id).filter(Boolean).join(' ') || undefined
+    setInputIds(previous => previous === ids ? previous : ids)
+  })
   const text = format ?? getValueText ?? String
   const change = (next: number[]) => {
     if (value === undefined) setOwn(next)
@@ -179,11 +172,11 @@ function SliderField({
   }
   const field = editable && values.length === 1
   return (
-    <div data-slot="slider-field" data-slider-editable={field ? '' : undefined}>
+    <div ref={fieldRef} data-slot="slider-field" data-slider-editable={field ? '' : undefined}>
       <div data-slot="slider-header">
         {header}
         {field ? null : (
-          <output {...outputProps} data-slot="slider-value" htmlFor={thumbIds.join(' ')} aria-live="off" className={cn(valueClassName)}>
+          <output {...outputProps} data-slot="slider-value" htmlFor={inputIds} aria-live="off" className={cn(valueClassName)}>
             {values.length > 1 ? `${text(values[0]!, 0)} – ${text(values[1]!, 1)}` : text(values[0]!, 0)}
           </output>
         )}
@@ -197,7 +190,6 @@ function SliderField({
         max={max}
         step={step}
         getValueText={getValueText ?? format}
-        thumbIds={thumbIds}
       />
       {field ? (
         <SliderValueInput
