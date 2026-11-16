@@ -151,7 +151,6 @@
 [data-slot="button"]:focus-visible,[data-slot="dialog-close"]:focus-visible,[data-slot="input"]:focus-visible{outline:3px solid var(--ring);outline-offset:3px}
 [data-slot="button"]:disabled{opacity:0.5;cursor:not-allowed;box-shadow:none;transform:none;border-style:none}
 [data-slot="button"][data-variant="outline"]:disabled{box-shadow:inset 0 0 0 2px var(--border)}
-[data-slot="button"][aria-busy="true"]{cursor:progress;opacity:0.85}
 [data-slot="input"]{min-height:2.75rem;padding:0 1rem;border:2px solid var(--o-line);border-radius:var(--o-r2);background:var(--card);color:var(--foreground);font-size:0.9375rem;font-weight:500;box-shadow:inset 0 2px 4px -2px var(--o-sh);transition:border-color var(--motion-duration),border-radius 0.4s}
 [data-slot="input"][data-size="sm"]{min-height:2.25rem;padding-inline:0.8125rem;font-size:0.875rem}
 [data-slot="input"][data-size="lg"]{min-height:3.25rem;padding-inline:1.125rem;font-size:1rem}
