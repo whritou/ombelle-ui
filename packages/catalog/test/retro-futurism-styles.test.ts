@@ -296,4 +296,29 @@ describe('retro-futurism styles', () => {
       }
     })
   })
+
+  describe('overlays board', () => {
+    it('the alert dialog carries the stripes band inside its box and stays fixed and scrollable', () => {
+      const file = read(styles + 'alert-dialog/retro-futurism.css')
+      const before = rule(layerOf('alert-dialog'), "[data-slot='alert-dialog-content']::before")
+      expect(before).toContain('var(--rf-stripes)')
+      expect(before).not.toMatch(/inset[^;]*:-/)
+      expect(file).toMatch(/position:\s*fixed/)
+      expect(file).toMatch(/overflow(-y)?:\s*auto/)
+    })
+
+    it('sheets get a 2px outline and no stripes', () => {
+      const css = layerOf('sheet')
+      expect(rule(css, "[data-slot='sheet-content']")).toContain('box-shadow:0 0 0 2px var(--border)')
+      expect(css).not.toContain('--rf-stripes')
+    })
+
+    it('tooltips are pills on a primary key and keep their arrow', () => {
+      const css = layerOf('tooltip')
+      const content = rule(css, "[data-slot='tooltip-content']")
+      expect(content).toContain('border-radius:var(--rf-pill)')
+      expect(content).toContain('0 3px 0 var(--primary)')
+      expect(rule(css, "[data-slot='tooltip-arrow']")).toContain('fill:var(--foreground)')
+    })
+  })
 })
