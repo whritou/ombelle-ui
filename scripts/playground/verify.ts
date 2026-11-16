@@ -1,3 +1,4 @@
+import { verifyExampleLayout } from './example-layout.js'
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import { chromium, expect } from '@playwright/test'
@@ -44,6 +45,7 @@ export async function verifyProject(
         supportedComponentIds.length,
       )
       await expect(page.locator('[data-example-error]')).toHaveCount(0)
+      await verifyExampleLayout(page)
       for (const id of supportedComponentIds)
         await expect(
           page.locator('[data-component="' + id + '"]'),

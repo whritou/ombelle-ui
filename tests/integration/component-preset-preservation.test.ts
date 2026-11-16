@@ -81,4 +81,4 @@ it('records and preserves existing usage files across successful scoped preset i
 
   for (const [file, hash] of expectedUsageHashes)
     expect(await sha256(await fs.readFile(path.join(root, file), 'utf8'))).toBe(hash)
-})
+}, 180000) // Full recipe setup plus each preset's dry-run/apply/repeat/conflict checks: measured over 120 s locally.
