@@ -1,0 +1,166 @@
+/* organic Meter */
+[data-slot='meter'] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px 12px;
+  min-inline-size: 0;
+  font-family: var(--font-family);
+}
+[data-slot='meter-label'] {
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 600;
+}
+[data-slot='meter-value'] {
+  justify-self: end;
+  color: var(--foreground);
+  font: 500 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+[data-slot='meter-track'] {
+  grid-column: 1 / -1;
+  display: flex;
+  block-size: 12px;
+  border-radius: var(--o-r4);
+  background: var(--muted);
+}
+[data-slot='meter-track'][data-mode='discrete'] {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 4px;
+  background: transparent;
+}
+[data-slot='meter-track'][data-mode='labelled'] {
+  gap: 3px;
+  block-size: 14px;
+  background: transparent;
+}
+[data-slot='meter-cell'] {
+  box-sizing: border-box;
+  block-size: 100%;
+  border: 1.5px solid color-mix(in oklab, var(--foreground) 12%, var(--card));
+  border-radius: var(--o-r4);
+  background: var(--muted);
+}
+[data-slot='meter-cell'][data-state='filled'] {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+[data-slot='meter-cell'][data-warning] {
+  border-color: var(--warning-foreground, oklch(60% 0.14 75));
+  background: var(--warning-foreground, oklch(60% 0.14 75));
+}
+[data-slot='meter-segment'] {
+  box-sizing: border-box;
+  block-size: 100%;
+  border: 1.5px solid var(--o-line);
+  border-radius: var(--o-r4);
+  background: var(--primary);
+}
+[data-slot='meter-segment'][data-tone='info'],
+[data-slot='meter-legend-item'][data-tone='info'] > i {
+  background: var(--info-foreground, oklch(50% 0.14 250));
+}
+[data-slot='meter-segment'][data-tone='success'],
+[data-slot='meter-legend-item'][data-tone='success'] > i {
+  background: var(--success-foreground, oklch(50% 0.13 150));
+}
+[data-slot='meter-segment'][data-tone='warning'],
+[data-slot='meter-legend-item'][data-tone='warning'] > i {
+  background: var(--warning-foreground, oklch(60% 0.14 75));
+}
+[data-slot='meter-segment'][data-rest] {
+  flex: 1;
+  border-color: color-mix(in oklab, var(--foreground) 12%, var(--card));
+  background: var(--muted);
+}
+[data-slot='meter-legend'] {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+[data-slot='meter-legend-item'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+[data-slot='meter-legend-item'] > i {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--o-r1);
+  background: var(--primary);
+}
+@media (forced-colors: active) {
+  [data-slot='meter-cell'],
+  [data-slot='meter-segment'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+  [data-slot='meter-cell'][data-state='filled'],
+  [data-slot='meter-segment']:not([data-rest]),
+  [data-slot='meter-legend-item'] > i {
+    background: Highlight;
+  }
+}
+/* 0.7.6 variants */
+[data-slot='meter-track'][data-shape='circle'] {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  justify-self: start;
+  inline-size: 72px;
+  block-size: 72px;
+  border-radius: 0;
+  background: transparent;
+}
+[data-slot='meter-ring'] {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  rotate: -90deg;
+}
+[data-slot='meter-ring-track'],
+[data-slot='meter-ring-indicator'] {
+  fill: none;
+  stroke-width: 6;
+}
+[data-slot='meter-ring-track'] {
+  stroke: var(--muted);
+}
+[data-slot='meter-ring-indicator'] {
+  stroke: var(--primary);
+  stroke-linecap: round;
+}
+[data-slot='meter-ring-value'] {
+  position: relative;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight:600;
+  font-variant-numeric: tabular-nums;
+  line-height: normal;
+}
+@media (forced-colors: active) {
+  [data-slot='meter-ring-indicator'] {
+    stroke: Highlight;
+  }
+  [data-slot='meter-ring-track'] {
+    stroke: GrayText;
+  }
+}
+/* end 0.7.6 variants */
+/* organic layer */
+[data-slot='meter-track']{background:var(--secondary)}
+[data-slot='meter-track'][data-mode='discrete'],[data-slot='meter-track'][data-mode='labelled']{background:transparent}
+[data-slot='meter-cell']{border:0;border-radius:8px 7px 9px 7px/7px 9px 7px 8px;background:var(--secondary)}
+[data-slot='meter-cell'][data-state='filled']{background:var(--primary)}
+[data-slot='meter-cell'][data-warning]{background:var(--warning-foreground,var(--primary))}
+[data-slot='meter-segment']{border:0;border-radius:99px}
+[data-slot='meter-segment'][data-rest]{background:var(--secondary)}
+[data-slot='meter-legend-item'] > i{border-radius:50%}
+[data-slot='meter-value']{font-family:var(--font-mono,ui-monospace,monospace)}
+@media (forced-colors: active){[data-slot='meter-cell']{border:1px solid CanvasText}[data-slot='meter-segment']{border:1px solid CanvasText}}

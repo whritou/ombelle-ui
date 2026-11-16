@@ -272,4 +272,4 @@
 [data-slot='toolbar-overflow-item'][data-variant='destructive'][data-highlighted]{background:var(--destructive);color:var(--destructive-foreground)}
 [data-slot='toolbar-overflow-indicator']{border-radius:7px}
 [data-slot='toolbar-overflow-separator']{border-block-start:2px solid var(--o-line)}
-@media (forced-colors: active){[data-slot='toolbar-toggle-item']:is([data-state='on'],[aria-pressed='true']){border:2px solid Highlight;box-shadow:none}[data-slot='toolbar-overflow-content']{border:2px solid CanvasText;box-shadow:none}}
+@media (forced-colors: active){[data-slot='toolbar']{border:2px solid CanvasText;box-shadow:none}[data-slot='toolbar-toggle-item']:is([data-state='on'],[aria-pressed='true']){border:2px solid Highlight;box-shadow:none}[data-slot='toolbar-overflow-content']{border:2px solid CanvasText;box-shadow:none}}
