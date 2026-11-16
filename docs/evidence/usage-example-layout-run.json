@@ -1,0 +1,135 @@
+{
+  "recordedAt": "2026-11-16T13:26:57.134Z",
+  "base": "8dac8920",
+  "environment": {
+    "node": "v24.19.0",
+    "pnpm": "11.25.0",
+    "platform": "win32",
+    "browserChannel": "msedge"
+  },
+  "stats": {
+    "startTime": "2026-11-16T13:24:06.401Z",
+    "duration": 103826.81199999999,
+    "expected": 28,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "matrix": [
+    {
+      "title": "flat radix light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "flat radix dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "flat base light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "flat base dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "minimalist radix light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "minimalist radix dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "minimalist base light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "minimalist base dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "neo-brutalism radix light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "neo-brutalism radix dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "neo-brutalism base light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "neo-brutalism base dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "ombelle radix light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "ombelle radix dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "ombelle base light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "ombelle base dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "papier radix light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "papier radix dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "papier base light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "papier base dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "organic radix light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "organic radix dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "organic base light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "organic base dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "liquid-glass radix light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "liquid-glass radix dark spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "liquid-glass base light spaces independent examples",
+      "passed": true
+    },
+    {
+      "title": "liquid-glass base dark spaces independent examples",
+      "passed": true
+    }
+  ],
+  "changedExampleArtifacts": 168,
+  "componentAndStyleArtifactsUnchanged": true,
+  "scope": "Generated usage example layout and toast close controls; all seven families, both editions, light/dark. No global component margins added."
+}

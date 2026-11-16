@@ -39,7 +39,9 @@
     "check:foundation:quality": "node --import tsx scripts/check-foundation.mjs --group quality",
     "check:foundation:consumers": "node --import tsx scripts/check-foundation.mjs --group consumers",
     "check:foundation:aggregate": "node --import tsx scripts/check-foundation.mjs --aggregate",
-    "playground": "tsx scripts/playground/main.ts"
+    "playground": "tsx scripts/playground/main.ts",
+    "generate:usage-audit": "tsx scripts/generate-usage-audit.ts",
+    "test:usage-examples": "playwright test -c playwright.usage-examples.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
