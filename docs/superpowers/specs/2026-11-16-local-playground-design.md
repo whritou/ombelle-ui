@@ -1,12 +1,12 @@
 # Four-project local playground
 
-Status: proposed written spec after in-chat design approval; implementation awaits written-spec review.
+Status: approved and implemented. See ../../evidence/local-playground.md for measured results and the documented workspace-location adjustment.
 
 ## Outcome
 Provide persistent next-fresh, next-shadcn, vite-fresh and vite-shadcn projects with Ombelle installed, every supported component visible, interactive feature pages, automatic evidence and management/uninstall commands.
 
 ## Setup
-Expose pnpm playground <command>. Default storage is .artifacts/playground with projects, state, baselines and runs directories. Allow --root. Reuse checked-in framework scaffolds and genuine Radix shadcn fixtures; report provenance and normalization. Fresh rows begin without shadcn configuration, existing UI components or Ombelle state. Retain framework/Tailwind/alias essentials. Require pinned Node/pnpm, build packages first, and use the built local CLI. Default preset is ombelle.json; support --preset <local-json>. Fresh rows use init, shadcn rows theme add. Install all supportedComponentIds, preserving the shadcn Button through --beside. Record dry-run plans before apply. All dependency installs disable lifecycle scripts.
+Expose pnpm playground <command>. Default storage is a stable ombelle-playground-<checkout-hash> directory under the OS temporary directory, with projects, state, baselines and runs directories. Allow --root. Reuse checked-in framework scaffolds and genuine Radix shadcn fixtures; report provenance and normalization. Fresh rows begin without shadcn configuration, existing UI components or Ombelle state. Retain framework/Tailwind/alias essentials. Require pinned Node/pnpm, build packages first, and use the built local CLI. Default preset is ombelle.json; support --preset <local-json>. Fresh rows use init, shadcn rows theme add. Install all supportedComponentIds, preserving the shadcn Button through --beside. Record dry-run plans before apply. All dependency installs disable lifecycle scripts.
 
 ## Commands
 Commands accept --project <id|all>, default all except dev (one project required).

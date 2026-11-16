@@ -142,3 +142,7 @@ This installs a separate native `Button`, its scoped CSS, and an example under p
 ## Contributing and license
 
 Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) first. Ask questions in [Discussions](https://github.com/whritou/ombelle-ui/discussions), and report security issues privately as described in [SECURITY.md](SECURITY.md). Ombelle UI is released under the [MIT License](LICENSE).
+
+## Local playground
+
+Run `pnpm playground setup` to create fresh and shadcn-initialized Next.js and Vite apps with the Ombelle preset, all components, interactive pages and automatic step reports. See [local playground commands and recovery](docs/local-playground.md).

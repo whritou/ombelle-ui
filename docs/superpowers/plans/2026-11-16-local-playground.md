@@ -12,7 +12,7 @@
 
 ## Global Constraints
 - Default projects: next-fresh, next-shadcn, vite-fresh, vite-shadcn.
-- Default root: .artifacts/playground; accept --root and --project <id|all>.
+- Default root: stable OS temporary ombelle-playground-<checkout-hash> directory; accept --root and --project <id|all>.
 - Default preset: packages/catalog/src/presets/ombelle.json.
 - All dependency installs disable lifecycle scripts.
 - Preserve the shadcn Button through --beside.
@@ -88,3 +88,9 @@
 
 ## Execution handoff
 Recommended method: native execution in this chat. These five tasks share lifecycle/report interfaces, and implementing them sequentially avoids repeated context transfer. Delegation is optional and requires the user's selection. Written-plan review and execution-method selection precede implementation.
+
+## Execution result
+
+Completed natively. Focused checks: 14 tests and TypeScript validation passed. All four apps passed real setup, production builds, browser checks, baseline uninstall/hash verification, and reinstall/build. Dev/stop, repeat add, theme, status, report and clean were exercised. See [measured evidence](../../evidence/local-playground.md).
+
+Rulings: use a stable external temporary root because the real installer rejects all workspace ancestors; use authenticated server controls rather than saved PIDs; prefer real child-process and recorded consumer tests over a fully mocked lifecycle dispatcher. Reports retain the failed development attempts.

@@ -1,0 +1,211 @@
+{
+  "recordedAt": "2026-11-16T09:53:45.401Z",
+  "environment": {
+    "node": "v24.19.0",
+    "pnpm": "11.25.0",
+    "platform": "win32"
+  },
+  "root": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b",
+  "matrix": [
+    {
+      "id": "next-fresh",
+      "frameworkVersion": "16.4.2",
+      "browser": "157.0.4341.60",
+      "channel": "msedge",
+      "componentCount": 57,
+      "build": "passed",
+      "browserChecks": "passed",
+      "pageErrors": [],
+      "shadcnButtonPreserved": null
+    },
+    {
+      "id": "next-shadcn",
+      "frameworkVersion": "16.4.3",
+      "browser": "157.0.4341.60",
+      "channel": "msedge",
+      "componentCount": 57,
+      "build": "passed",
+      "browserChecks": "passed",
+      "pageErrors": [],
+      "shadcnButtonPreserved": true
+    },
+    {
+      "id": "vite-fresh",
+      "frameworkVersion": "8.3.4",
+      "browser": "157.0.4341.60",
+      "channel": "msedge",
+      "componentCount": 57,
+      "build": "passed",
+      "browserChecks": "passed",
+      "pageErrors": [],
+      "shadcnButtonPreserved": null
+    },
+    {
+      "id": "vite-shadcn",
+      "frameworkVersion": "8.3.5",
+      "browser": "157.0.4341.60",
+      "channel": "msedge",
+      "componentCount": 57,
+      "build": "passed",
+      "browserChecks": "passed",
+      "pageErrors": [],
+      "shadcnButtonPreserved": true
+    }
+  ],
+  "observed": {
+    "setup": {
+      "status": "passed",
+      "run": "2026-11-16T09-38-23-519Z-ec34959b",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-38-23-519Z-ec34959b\\report.md"
+    },
+    "verify": {
+      "status": "passed",
+      "run": "2026-11-16T09-50-31-843Z-7cf7b025",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-50-31-843Z-7cf7b025\\report.md"
+    },
+    "uninstall": {
+      "status": "passed",
+      "run": "2026-11-16T09-45-03-144Z-78924be0",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-45-03-144Z-78924be0\\report.md"
+    },
+    "install": {
+      "status": "passed",
+      "run": "2026-11-16T09-45-34-184Z-7e386d95",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-45-34-184Z-7e386d95\\report.md"
+    },
+    "clean": {
+      "status": "passed",
+      "run": "2026-11-16T09-36-57-685Z-e80c4be5",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-36-57-685Z-e80c4be5\\report.md"
+    },
+    "dev": {
+      "status": "passed",
+      "run": "2026-11-16T09-49-41-340Z-efb38123",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-49-41-340Z-efb38123\\report.md"
+    },
+    "stop": {
+      "status": "passed",
+      "run": "2026-11-16T09-50-15-508Z-6337a397",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-50-15-508Z-6337a397\\report.md"
+    },
+    "add": {
+      "status": "passed",
+      "run": "2026-11-16T09-51-40-286Z-5a78ecdd",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-51-40-286Z-5a78ecdd\\report.md"
+    },
+    "theme": {
+      "status": "passed",
+      "run": "2026-11-16T09-52-34-681Z-ca8607ef",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-52-34-681Z-ca8607ef\\report.md"
+    },
+    "status": {
+      "status": "passed",
+      "run": "2026-11-16T09-53-26-463Z-43ecff4e",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-53-26-463Z-43ecff4e\\report.md"
+    },
+    "report": {
+      "status": "passed",
+      "run": "2026-11-16T09-53-21-283Z-b541eafd",
+      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-53-21-283Z-b541eafd\\report.md"
+    }
+  },
+  "restoration": [
+    {
+      "id": "next-fresh",
+      "status": "passed",
+      "baselineFiles": 9
+    },
+    {
+      "id": "next-shadcn",
+      "status": "passed",
+      "baselineFiles": 25
+    },
+    {
+      "id": "vite-fresh",
+      "status": "passed",
+      "baselineFiles": 9
+    },
+    {
+      "id": "vite-shadcn",
+      "status": "passed",
+      "baselineFiles": 22
+    }
+  ],
+  "failedAttempts": [
+    {
+      "run": "2026-11-16T09-33-51-172Z-be16318c",
+      "command": "verify",
+      "failures": [
+        {
+          "project": "next-fresh",
+          "step": "browser verification",
+          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+        },
+        {
+          "project": "next-shadcn",
+          "step": "browser verification",
+          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+        },
+        {
+          "project": "vite-fresh",
+          "step": "browser verification",
+          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+        },
+        {
+          "project": "vite-shadcn",
+          "step": "browser verification",
+          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+        }
+      ]
+    },
+    {
+      "run": "2026-11-16T09-35-05-319Z-edb59599",
+      "command": "verify",
+      "failures": [
+        {
+          "project": "next-fresh",
+          "step": "browser verification",
+          "error": "expect(locator).toHaveCount(expected) failed\n\nLocator:  locator('[data-component]')\nExpected: 1\nReceived: 2\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" locator('[data-component]') with timeout 5000ms\n  - waiting for locator('[data-component]')\n    14 × locator resolved to 2 elements\n       - unexpected value \"2\"\n"
+        },
+        {
+          "project": "next-shadcn",
+          "step": "browser verification",
+          "error": "expect(locator).toHaveCount(expected) failed\n\nLocator:  locator('[data-component]')\nExpected: 1\nReceived: 2\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" locator('[data-component]') with timeout 5000ms\n  - waiting for locator('[data-component]')\n    14 × locator resolved to 2 elements\n       - unexpected value \"2\"\n"
+        },
+        {
+          "project": "vite-fresh",
+          "step": "browser verification",
+          "error": "expect(locator).toHaveCount(expected) failed\n\nLocator:  locator('[data-component]')\nExpected: 1\nReceived: 2\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" locator('[data-component]') with timeout 5000ms\n  - waiting for locator('[data-component]')\n    14 × locator resolved to 2 elements\n       - unexpected value \"2\"\n"
+        },
+        {
+          "project": "vite-shadcn",
+          "step": "browser verification",
+          "error": "expect(locator).toHaveCount(expected) failed\n\nLocator:  locator('[data-component]')\nExpected: 1\nReceived: 2\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" locator('[data-component]') with timeout 5000ms\n  - waiting for locator('[data-component]')\n    14 × locator resolved to 2 elements\n       - unexpected value \"2\"\n"
+        }
+      ]
+    },
+    {
+      "run": "2026-11-16T09-36-36-986Z-05524aa5",
+      "command": "uninstall",
+      "failures": [
+        {
+          "project": "next-fresh",
+          "step": "restore baseline",
+          "error": "Refusing modified managed file: tsconfig.json"
+        }
+      ]
+    },
+    {
+      "run": "2026-11-16T09-47-49-528Z-1211f10c",
+      "command": "dev",
+      "failures": [
+        {
+          "project": "vite-fresh",
+          "step": "development server",
+          "error": "record is not defined"
+        }
+      ]
+    }
+  ],
+  "scope": "Focused tests and four local consumer apps; not the full foundation gate."
+}

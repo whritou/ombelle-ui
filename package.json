@@ -38,7 +38,8 @@
     "check:foundation": "node --import tsx scripts/check-foundation.mjs",
     "check:foundation:quality": "node --import tsx scripts/check-foundation.mjs --group quality",
     "check:foundation:consumers": "node --import tsx scripts/check-foundation.mjs --group consumers",
-    "check:foundation:aggregate": "node --import tsx scripts/check-foundation.mjs --aggregate"
+    "check:foundation:aggregate": "node --import tsx scripts/check-foundation.mjs --aggregate",
+    "playground": "tsx scripts/playground/main.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

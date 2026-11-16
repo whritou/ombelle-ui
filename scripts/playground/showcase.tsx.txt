@@ -24,14 +24,14 @@ class ExampleBoundary extends React.Component<{children:React.ReactNode},{error:
  render(){return this.state.error?<p role="alert" data-example-error>{this.state.error}</p>:this.props.children}
 }
 export default function Playground(){
- const [view,setView]=React.useState('home'),[search,setSearch]=React.useState(''),[dark,setDark]=React.useState(false),[ready,setReady]=React.useState(false)
+ const [view,setView]=React.useState('home'),[search,setSearch]=React.useState(''),[exact,setExact]=React.useState(false),[dark,setDark]=React.useState(false),[ready,setReady]=React.useState(false)
  React.useEffect(()=>{
-  const sync=()=>{const p=new URLSearchParams(location.search);setView(p.get('view')??'home');setSearch(p.get('component')??'')}
+  const sync=()=>{const p=new URLSearchParams(location.search);setView(p.get('view')??'home');setSearch(p.get('component')??'');setExact(p.has('component'))}
   sync();setReady(true);window.addEventListener('popstate',sync)
   return ()=>window.removeEventListener('popstate',sync)
  },[])
  function theme(){setDark(!dark);document.documentElement.classList.toggle('dark',!dark)}
- function navigate(next:string){setView(next);setSearch('');history.pushState({},'', '?view='+next)}
+ function navigate(next:string){setView(next);setSearch('');setExact(false);history.pushState({},'', '?view='+next)}
  return <div className="pg-shell" data-playground-ready={ready}>
   <aside className="pg-sidebar"><a className="pg-brand" href="?view=home">Ombelle<span>Local playground</span></a>
    <nav aria-label="Playground">{['home','gallery','dashboard','settings'].map(v=><button key={v} onClick={()=>navigate(v)} aria-current={view===v?'page':undefined}>{v[0].toUpperCase()+v.slice(1)}</button>)}</nav>
@@ -43,9 +43,9 @@ export default function Playground(){
     <div className="pg-paths">{[['gallery','Component gallery','Browse '+examples.length+' installed components.'],['dashboard','Dashboard','Explore a project overview.'],['settings','Settings','Edit preferences and save changes.']].map(([v,title,body])=><a key={v} href={'?view='+v}><h2>{title}</h2><p>{body}</p></a>)}</div>
     {/*SHADCN_COMPARE*/}
    </>}
-   {view==='gallery'&&<><h1>Component gallery</h1><p>Every example uses the source installed in this project.</p><label className="pg-search">Filter components<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name" /></label>
-    <div className="pg-index">{examples.filter(e=>e.id.includes(search.toLowerCase())).map(e=><a key={e.id} href={'?view=gallery&component='+e.id+'#component-'+e.id}>{e.id}</a>)}</div>
-    <div className="pg-gallery">{examples.filter(e=>e.id.includes(search.toLowerCase())).map(e=><section className="pg-specimen" id={'component-'+e.id} data-component={e.id} key={e.id}><header><h2>{e.id}</h2><a aria-label={'Link to '+e.id} href={'?view=gallery&component='+e.id+'#component-'+e.id}>Permalink</a></header><div className="pg-stage"><ExampleBoundary>{e.render()}</ExampleBoundary></div></section>)}</div>
+   {view==='gallery'&&<><h1>Component gallery</h1><p>Every example uses the source installed in this project.</p><label className="pg-search">Filter components<input value={search} onChange={e=>{setSearch(e.target.value);setExact(false)}} placeholder="Search by name" /></label>
+    <div className="pg-index">{examples.filter(e=>(exact?e.id===search:e.id.includes(search.toLowerCase()))).map(e=><a key={e.id} href={'?view=gallery&component='+e.id+'#component-'+e.id}>{e.id}</a>)}</div>
+    <div className="pg-gallery">{examples.filter(e=>(exact?e.id===search:e.id.includes(search.toLowerCase()))).map(e=><section className="pg-specimen" id={'component-'+e.id} data-component={e.id} key={e.id}><header><h2>{e.id}</h2><a aria-label={'Link to '+e.id} href={'?view=gallery&component='+e.id+'#component-'+e.id}>Permalink</a></header><div className="pg-stage"><ExampleBoundary>{e.render()}</ExampleBoundary></div></section>)}</div>
    </>}
    {view==='dashboard'&&<Dashboard/>}
    {view==='settings'&&<Settings/>}
