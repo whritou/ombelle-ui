@@ -61,7 +61,7 @@ it('generates deterministic reviewed source, fixture and Tailwind mappings', asy
   expect(css).toContain('--color-primary:var(--primary)')
   expect(css).not.toContain('#FFFFFF')
   expect(css).toContain('@custom-variant dark')
-})
+}, 180000) // Generation compiles every family's gallery, so it grows with the catalog: about 28 s here, over 60 s on a CI runner with six families.
 it('removes only known stylesheet imports and rewrites imports without touching text literals', async () => {
   const source =
     "import './card.css'\nimport {cn} from '@/lib/utils'\nexport const text = '@/lib/utils'\n"
