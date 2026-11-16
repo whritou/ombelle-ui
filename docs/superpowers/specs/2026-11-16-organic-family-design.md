@@ -33,8 +33,8 @@ shipped, stable family, the same way Papier was shipped.
 
 - No new components or variants. The catalog stays at 57.
 - No change to the output bytes of the other stable families, nor to liquid glass.
-- No new fonts in the registry. Young Serif and Nunito are already there; the mono is JetBrains Mono (see
-  Calls made).
+- No fonts beyond the design's three. Young Serif and Nunito are already in the registry; DM Mono is added
+  (see Calls made).
 - No version bump, npm publish, tag or PR unless asked.
 - No claim of real-browser forced colors, human keyboard or screen reader review, or of consumer apps beyond
   what is actually run.
@@ -107,7 +107,7 @@ Commits on the branch, in this order. Every commit passes `pnpm test:unit`.
    with this design. Checkpoint after the first three boards.
 3. **Registration and wiring**, following the Papier commit: `supportedStyleFamilies` (append after `papier`),
    `styleSupport` stable for every component, `styleFamilyFonts.organic` (body `nunito`, display
-   `young-serif`, mono `jetbrains-mono`), family pickers and chips in both editors, preview gallery and the
+   `young-serif`, mono `dm-mono`), family pickers and chips in both editors, preview gallery and the
    `/organic/` route in `apps/preview`, recipe fixtures (`rc_organic_button`), recipe and component-preset
    evidence scripts, consumer matrix rows (`vite-organic`, `next-organic`, `npm-vite-organic`,
    `npm-next-organic`: 44 to 48 rows), the published-CLI gate `organicMinimumCli = '0.8.1'` in
@@ -131,7 +131,8 @@ Commits on the branch, in this order. Every commit passes `pnpm test:unit`.
 
 ## Calls made (mine, for you to check)
 
-- **Mono font:** JetBrains Mono, already in the registry, in place of the canvas's DM Mono.
+- **Mono font:** DM Mono, as drawn in the canvas (the user chose the design's fonts). Young Serif and Nunito
+  are already in the registry; DM Mono is not, so it is added as a static Fontsource font (400 and 500).
 - **Heading weight:** 400 everywhere (Young Serif is single-weight).
 - **Palettes:** seven, matching Papier.
 - **Preset radius token:** nominal, since the shapes are fixed values in the CSS.
