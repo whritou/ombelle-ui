@@ -72,7 +72,7 @@ const ringCss = (family: string) => readFileSync(new URL(`../src/styles/meter/${
   .match(/\/\* 0\.7\.6 variants \*\/([^]*?)\/\* end 0\.7\.6 variants \*\//)?.[1] ?? ''
 const slotAttr = (html: string, slot: string, name: string) =>
   html.match(new RegExp(`<[^>]*data-slot="${slot}"[^>]*>`))?.[0].match(new RegExp(` ${name}="([^"]*)"`))?.[1]
-const meterFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const meterFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 
 describe('Meter shape circle', () => {
   it.each(editions)('%s draws the total as a ring and leaves the meter reading alone', (_, ui) => {

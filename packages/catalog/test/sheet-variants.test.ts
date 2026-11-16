@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Children, cloneElement, createElement as h, type ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const source = (file: string) => readFileSync(new URL(`../src/templates/${file}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const shared = (text: string) => text.slice(text.indexOf('// sheet size hook'), text.indexOf('// end sheet size hook'))
 const block = (family: string) => {

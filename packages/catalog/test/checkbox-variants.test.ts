@@ -7,7 +7,7 @@ import * as base from '../src/templates/base/checkbox.js'
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const css = (family: string) => readFileSync(new URL(`../src/styles/checkbox/${family}.css`, import.meta.url), 'utf8')
 const block = (family: string) => css(family).match(/\/\* 0\.7\.5 variants \*\/([^]*?)\/\* end 0\.7\.5 variants \*\//)?.[1] ?? ''
 const attr = (html: string, slot: string, name: string) =>

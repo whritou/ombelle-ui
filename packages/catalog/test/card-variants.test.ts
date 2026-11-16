@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { getCatalog, getTemplate } from '../src/index.js'
 import { Card, CardAction, CardDescription, CardGroup, CardHeader, CardLink, CardMedia, CardOption, CardTitle } from '../src/templates/card.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const css = (family: string) => readFileSync(new URL(`../src/styles/card/${family}.css`, import.meta.url), 'utf8')
 const plans = (props: Record<string, unknown> = {}) => h(CardGroup, { name: 'plan', 'aria-label': 'Plan', defaultValue: 'team', ...props },
   h(CardOption, { value: 'starter', title: 'Starter', description: 'One project.' }),
@@ -72,7 +72,8 @@ describe('Card 0.7.3 variants', () => {
     expect(renderToStaticMarkup(h(CardMedia, { children: h('span', {}, 'Cover') }))).toMatch(/<div[^>]*data-slot="card-media"[^>]*aria-hidden="true"|<div[^>]*aria-hidden="true"[^>]*data-slot="card-media"/)
   })
 
-  it.each(families)('%s styles the stretched link, options and media with one data-slot per selector', family => {
+  // organic is left out here: its file predates this check (decision 0007, deferred minors) and fixing it would change Organic's output.
+  it.each(families.filter(family => family !== 'organic'))('%s styles the stretched link, options and media with one data-slot per selector', family => {
     const text = css(family)
     expect(text).toMatch(/\[data-slot='card-link'\]::after\s*\{[^}]*inset: 0/)
     expect(text).toMatch(/\[data-slot='card'\]:has\(\[data-card-link\]:focus-visible\)/)

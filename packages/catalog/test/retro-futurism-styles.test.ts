@@ -203,25 +203,32 @@ describe('retro-futurism styles', () => {
   })
 
   describe('content board', () => {
+    // Card selectors name one slot each (card-variants.test.ts), so appearances and density reach the header through inherited custom properties.
     it('card header is the sunset band with a 2px bottom border', () => {
       const header = rule(layerOf('card'), "[data-slot='card-header']")
-      expect(header).toContain('background:var(--rf-band)')
-      expect(header).toContain('border-block-end:2px solid var(--border)')
-      expect(header).toContain('color:var(--primary-foreground)')
+      expect(header).toContain('background:var(--rf-head-bg,var(--rf-band))')
+      expect(header).toContain('border-block-end:2px solid var(--rf-head-line,var(--border))')
+      expect(header).toContain('color:var(--rf-head-fg,var(--primary-foreground))')
       expect(header).not.toContain('position:')
     })
 
-    // A card file may only name card slots, so any extra header child (action, badge, avatar, option check) hides the sun.
-    it('card header carries a striped sun that hides when the header holds more than its title and description', () => {
+    it('card header carries a striped sun that hides next to an action or a third header part', () => {
       const css = layerOf('card')
       expect(rule(css, "[data-slot='card-header']::after")).toContain('var(--rf-sun-mask)')
-      expect(css).toContain(":has(> :not([data-slot='card-title'],[data-slot='card-description']))")
+      expect(css).toMatch(/\[data-slot='card-header'\]:has\(> \[data-card-action\]\)::after[^{]*\{[^}]*display:none/)
+      expect(css).toMatch(/\[data-slot='card-header'\]:has\(> :nth-child\(3\)\)::after/)
     })
 
     it('outlined and subtle cards drop the band', () => {
       const css = layerOf('card')
-      expect(css).toMatch(/\[data-appearance='outlined'\] \[data-slot='card-header'\][^{]*\{[^}]*background:transparent/)
-      expect(css).toMatch(/\[data-appearance='subtle'\] \[data-slot='card-header'\][^{]*\{[^}]*background:transparent/)
+      expect(rule(css, "[data-slot='card'][data-density][data-appearance='outlined']")).toContain('--rf-head-bg:transparent')
+      expect(rule(css, "[data-slot='card'][data-density][data-appearance='subtle']")).toContain('--rf-head-bg:transparent')
+    })
+
+    it('every card selector after the shared base names one slot', () => {
+      const css = read(styles + 'card/retro-futurism.css')
+      for (const match of css.slice(css.indexOf('/* 0.7.3 variants */')).matchAll(/^([^{}@\n][^{}]*)\{/gm))
+        for (const selector of match[1]!.split(',')) expect((selector.match(/data-slot=/g) ?? []).length, selector).toBeLessThanOrEqual(1)
     })
 
     it('card titles wrap and card-action buttons drop their key shadow', () => {

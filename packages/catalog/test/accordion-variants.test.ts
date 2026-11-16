@@ -7,7 +7,7 @@ import * as base from '../src/templates/base/accordion.js'
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const css = (family: string) => readFileSync(new URL(`../src/styles/accordion/${family}.css`, import.meta.url), 'utf8')
 const faq = (ui: Ui, props: Record<string, unknown>) => h(ui.Accordion, { type: 'single', collapsible: true, defaultValue: 'export', ...props } as never,
   h(ui.AccordionItem, { value: 'export' }, h(ui.AccordionTrigger, {}, 'Can I export a preset?'), h(ui.AccordionContent, {}, 'Yes.')),

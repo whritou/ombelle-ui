@@ -7,7 +7,7 @@ import * as base from '../src/templates/base/alert-dialog.js'
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const block = (family: string) => readFileSync(new URL(`../src/styles/alert-dialog/${family}.css`, import.meta.url), 'utf8')
   .match(/\/\* 0\.7\.5 variants \*\/([^]*?)\/\* end 0\.7\.5 variants \*\//)?.[1] ?? ''
 const tag = (html: string, slot: string) => html.match(new RegExp(`<[^>]*data-slot="${slot}"[^>]*>`))?.[0] ?? ''

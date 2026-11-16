@@ -8,7 +8,7 @@ import { Pagination, PaginationCompact, PaginationPageSize } from '../src/templa
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const block = (file: string) => {
   const css = readFileSync(new URL(`../src/styles/${file}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   return css.slice(css.indexOf('/* 0.7.3 variants */'))

@@ -82,7 +82,7 @@
   padding-block: 1px;
   padding-inline: 6px;
   border: 1px solid color-mix(in oklab, currentColor 45%, transparent);
-  border-radius: var(--rf-r1);
+  border-radius: 4px;
   font: 500 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 @media (forced-colors: active) {
@@ -94,6 +94,6 @@
 /* retro-futurism layer */
 [data-slot='tooltip-content']{background: var(--foreground);color: var(--background);border:0;border-radius:var(--rf-r2);font-weight:700;box-shadow:0 3px 0 var(--rf-key)}
 [data-slot='tooltip-arrow']{fill:var(--foreground);stroke:none}
-[data-slot='tooltip-shortcut-key']{font-family:var(--font-mono,ui-monospace,monospace);border-radius:var(--rf-r1)}
+[data-slot='tooltip-shortcut-key']{font-family:var(--font-mono,ui-monospace,monospace)}
 @media (forced-colors: active){[data-slot='tooltip-content']{background:Canvas;color:CanvasText;border:2px solid CanvasText;box-shadow:none;forced-color-adjust:none}[data-slot='tooltip-arrow']{fill:Canvas;stroke:CanvasText;forced-color-adjust:none}}
 [data-slot='tooltip-content']{border-radius:var(--rf-pill);box-shadow:0 3px 0 var(--primary)}

@@ -7,7 +7,7 @@ import * as base from '../src/templates/base/avatar.js'
 
 type Ui = typeof radix
 const editions = [['radix', radix], ['base', base as unknown as Ui]] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const css = (family: string) => readFileSync(new URL(`../src/styles/avatar/${family}.css`, import.meta.url), 'utf8')
 const source = (edition: string) => readFileSync(new URL(`../src/templates/${edition === 'radix' ? '' : 'base/'}avatar.tsx`, import.meta.url), 'utf8')
 

@@ -290,26 +290,22 @@
 /* end 0.7.6 variants */
 /* retro-futurism layer */
 [data-slot='card']{position:relative;isolation:isolate;overflow:hidden;border:2px solid var(--border);border-radius:var(--rf-r4);background:var(--card);box-shadow:0 6px 0 var(--rf-key);margin-block-end:6px}
-[data-slot='card'][data-density][data-appearance='outlined']{border:2px solid var(--border);background:transparent;box-shadow:none;margin-block-end:0}
-[data-slot='card'][data-density][data-appearance='subtle']{border:2px solid transparent;background:var(--muted);box-shadow:none;margin-block-end:0}
-[data-slot='card'] > [data-slot='card-header']:first-child{margin-block-start:calc(-1 * var(--card-padding))}
-[data-slot='card-header']{padding-block:14px 16px;padding-inline-end:4.25rem;background:var(--rf-band);color:var(--primary-foreground);border-block-end:2px solid var(--border)}
-[data-slot='card-header'] [data-slot='card-description']{color:inherit;font-weight:600}
+[data-slot='card'][data-density][data-appearance='outlined']{--rf-head-bg:transparent;--rf-head-fg:var(--foreground);--rf-desc:var(--muted-foreground);border:2px solid var(--border);background:transparent;box-shadow:none;margin-block-end:0}
+[data-slot='card'][data-density][data-appearance='subtle']{--rf-head-bg:transparent;--rf-head-fg:var(--foreground);--rf-head-line:transparent;--rf-desc:var(--muted-foreground);border:2px solid transparent;background:var(--muted);box-shadow:none;margin-block-end:0}
+[data-slot='card'][data-density='dense']{--rf-head-pad:11px 12px;--rf-sun-size:26px;--rf-sun-top:11px;--rf-sun-end:16px;--rf-title-size:0.875rem}
+[data-slot='card']:has(> [data-card-media]){--rf-sun-display:none}
+[data-slot='card-header']:first-child{margin-block-start:calc(-1 * var(--card-padding))}
+[data-slot='card-header']{padding-block:var(--rf-head-pad,14px 16px);padding-inline-end:4.25rem;background:var(--rf-head-bg,var(--rf-band));color:var(--rf-head-fg,var(--primary-foreground));border-block-end:2px solid var(--rf-head-line,var(--border))}
+[data-slot='card-description']{color:var(--rf-desc,inherit);font-weight:600}
 [data-slot='card-header'] :is(button,a):is([data-variant='ghost'],[data-variant='link']){color:inherit}
-[data-slot='card-header']::after{content:"";position:absolute;inset-block-start:14px;inset-inline-end:20px;inline-size:34px;block-size:34px;border-radius:50%;background:var(--rf-sun);-webkit-mask:var(--rf-sun-mask);mask:var(--rf-sun-mask);pointer-events:none}
-[data-slot='card-header']:has(> :not([data-slot='card-title'],[data-slot='card-description'])){padding-inline-end:var(--card-padding)}
-[data-slot='card-header']:has(> :not([data-slot='card-title'],[data-slot='card-description']))::after,[data-slot='card']:has(> [data-card-media]) [data-slot='card-header']::after{display:none}
-[data-slot='card'][data-density][data-appearance='outlined'] [data-slot='card-header']{background:transparent;color:var(--foreground)}
-[data-slot='card'][data-density][data-appearance='subtle'] [data-slot='card-header']{background:transparent;color:var(--foreground);border-block-end-color:transparent}
-[data-slot='card'][data-density][data-appearance] [data-slot='card-header'] [data-slot='card-description']{color:var(--muted-foreground)}
-[data-slot='card'][data-density='dense'] [data-slot='card-header']{padding-block:11px 12px}
-[data-slot='card'][data-density='dense'] [data-slot='card-header']::after{inline-size:26px;block-size:26px;inset-block-start:11px;inset-inline-end:16px}
-[data-slot='card-title']{font-family:var(--font-heading,system-ui,sans-serif);font-weight:400;font-size:1rem;line-height:1.35;overflow-wrap:anywhere}
-[data-slot='card'][data-density='dense'] [data-slot='card-title']{font-size:0.875rem}
+[data-slot='card-header']::after{content:"";display:var(--rf-sun-display,block);position:absolute;inset-block-start:var(--rf-sun-top,14px);inset-inline-end:var(--rf-sun-end,20px);inline-size:var(--rf-sun-size,34px);block-size:var(--rf-sun-size,34px);border-radius:50%;background:var(--rf-sun);-webkit-mask:var(--rf-sun-mask);mask:var(--rf-sun-mask);pointer-events:none}
+[data-slot='card-header']:has(> [data-card-action]),[data-slot='card-header']:has(> :nth-child(3)){padding-inline-end:var(--card-padding)}
+[data-slot='card-header']:has(> [data-card-action])::after,[data-slot='card-header']:has(> :nth-child(3))::after{display:none}
+[data-slot='card-title']{font-family:var(--font-heading,system-ui,sans-serif);font-weight:400;font-size:var(--rf-title-size,1rem);line-height:1.35;overflow-wrap:anywhere}
 [data-slot='card-footer']{border-top:0}
 [data-slot='card-action'] :is(button,a){margin-block-end:0;box-shadow:none}
 [data-slot='card-action'] > :where(button:not([data-slot])){border:2px solid var(--border);border-radius:50%;background:var(--card);color:var(--card-foreground);box-shadow:none}
 [data-slot='card-option']{border:0;border-radius:var(--rf-r4);background:var(--card);box-shadow:inset 0 0 0 2px var(--border)}
 [data-slot='card-option']:has(:checked){border:0;background:color-mix(in oklab,var(--primary) 14%,var(--card));box-shadow:inset 0 0 0 3px var(--primary),0 4px 0 var(--primary)}
 [data-slot='card-option']:has(:focus-visible){outline:3px solid var(--ring);outline-offset:3px}
-@media (forced-colors: active){[data-slot='card'],[data-slot='card-option']{border:2px solid CanvasText;box-shadow:none}[data-slot='card'][data-density][data-appearance='outlined'],[data-slot='card'][data-density][data-appearance='subtle']{border:2px solid CanvasText;background:Canvas;box-shadow:none}[data-slot='card-option']:has(:checked){border:3px solid Highlight}[data-slot='card-header']{background:Canvas;color:CanvasText;border-block-end:2px solid CanvasText}[data-slot='card-header'] [data-slot='card-description']{color:CanvasText}[data-slot='card-header']::after{display:none}}
+@media (forced-colors: active){[data-slot='card'],[data-slot='card-option']{border:2px solid CanvasText;box-shadow:none}[data-slot='card'][data-density][data-appearance='outlined'],[data-slot='card'][data-density][data-appearance='subtle']{border:2px solid CanvasText;background:Canvas;box-shadow:none}[data-slot='card-option']:has(:checked){border:3px solid Highlight}[data-slot='card-header']{background:Canvas;color:CanvasText;border-block-end:2px solid CanvasText}[data-slot='card-description']{color:CanvasText}[data-slot='card-header']::after{display:none}}
