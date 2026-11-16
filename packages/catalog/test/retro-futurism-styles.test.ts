@@ -77,7 +77,8 @@ describe('retro-futurism styles', () => {
       } while (depth > 0 && end < css.length)
       css = css.slice(0, at) + css.slice(end)
     }
-    const at = css.lastIndexOf(selector + '{')
+    let at = css.lastIndexOf(selector + '{')
+    while (at > 0 && !['}', '\n'].includes(css[at - 1] ?? '')) at = css.lastIndexOf(selector + '{', at - 1)
     return at < 0 ? '' : css.slice(at, css.indexOf('}', at))
   }
 
@@ -167,6 +168,37 @@ describe('retro-futurism styles', () => {
       const button = rule(layerOf('input-group'), "[data-slot='input-group-button']")
       expect(button).toContain('box-shadow:none')
       expect(button).toContain('margin-block-end:0')
+    })
+  })
+
+  describe('choice controls board', () => {
+    it('checkbox boxes are 6px squares with invalid and checked-card rules', () => {
+      const css = layerOf('checkbox')
+      expect(rule(css, "[data-slot='checkbox']")).toContain('border-radius:6px')
+      expect(css).toContain("[data-slot='checkbox'][aria-invalid='true']")
+      expect(css).toMatch(/\[data-appearance='card'\]:has\(> \[data-state='checked'\]\)/)
+    })
+
+    it('switch track is a pill and the checked thumb is a sun', () => {
+      const css = layerOf('switch')
+      expect(rule(css, "[data-slot='switch']")).toContain('border-radius:var(--rf-pill)')
+      expect(rule(css, "[data-slot='switch-thumb'][data-state='checked']")).toContain('var(--rf-sun)')
+    })
+
+    it('slider fill is striped and the thumb is an outlined sun disc', () => {
+      const css = layerOf('slider')
+      expect(rule(css, "[data-slot='slider-range']")).toContain('repeating-linear-gradient')
+      const thumb = rule(css, "[data-slot='slider-thumb']")
+      expect(thumb).toContain('background:var(--rf-sun)')
+      expect(thumb).toContain('border:2px solid var(--border)')
+      expect(thumb).toContain('border-radius:50%')
+    })
+
+    it('calendar selection is a disc, range ends round and the middle square', () => {
+      const css = layerOf('calendar')
+      expect(rule(css, "[data-slot='calendar-day-button']")).toContain('border-radius:50%')
+      expect(rule(css, "[data-slot='calendar-day'][data-range-start]")).toContain('var(--rf-pill)')
+      expect(rule(css, "[data-slot='calendar-day'][data-range-middle]")).not.toContain('radius')
     })
   })
 })
