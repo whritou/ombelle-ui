@@ -19,6 +19,11 @@ const COPY: Record<StyleKey, { tag: string; title: string; body: string }> = {
     title: 'Organic',
     body: 'Soft, uneven shapes in moss and cream. Corners shift under your cursor, cards carry a tinted blob, links wave.',
   },
+  'retro-futurism': {
+    tag: 'Style 07',
+    title: 'Retro futurism',
+    body: 'Space-age pills in rocket orange and indigo. Two-tone fills drop onto a hard key shadow, cards wear a sunset band and a striped sun.',
+  },
   flat: {
     tag: 'Style 04',
     title: 'Flat',
@@ -40,6 +45,7 @@ const SECTION_TONE: Record<StyleKey, { section: string; heading: string; sub: st
   ombelle: { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
   papier: { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
   organic: { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
+  'retro-futurism': { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
   flat: { section: 'bg-muted', heading: 'text-foreground', sub: 'text-muted-foreground' },
   minimal: { section: 'bg-background', heading: 'text-foreground', sub: 'text-muted-foreground' },
   brutal: { section: 'bg-primary', heading: 'text-primary-foreground', sub: 'text-primary-foreground' },

@@ -3,7 +3,7 @@ import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
 // The source the site's generated Code Block is compiled from.
 import { commandRunners } from '../../../../packages/catalog/src/templates/code-block'
-import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, organicMinimumCli, packageManagers, papierMinimumCli, publishedInstaller, siteFamilyOrder, snapshotInstallCommand } from './install-command'
+import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, organicMinimumCli, packageManagers, retroFuturismMinimumCli, papierMinimumCli, publishedInstaller, siteFamilyOrder, snapshotInstallCommand } from './install-command'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
@@ -168,5 +168,13 @@ it('holds back commands for glass material settings until the installer that acc
 
 it('the site lists style families as Ombelle, Papier, Organic, Minimalist, Neo-Brutalism, Flat, Liquid Glass now that 0.8.1 is published', () => {
   expect(offeredStyleFamilies()).toEqual(['ombelle', 'papier', 'organic', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(siteFamilyOrder).toEqual(['ombelle', 'papier', 'organic', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+  expect(siteFamilyOrder).toEqual(['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+})
+
+it('offers retro-futurism only from the 0.8.2 published installer and keeps a restored retro-futurism draft visible', () => {
+  expect(retroFuturismMinimumCli).toBe('0.8.2')
+  expect(offeredStyleFamilies(undefined, { version: '0.8.1' })).not.toContain('retro-futurism')
+  expect(offeredStyleFamilies(undefined, { version: '0.8.2' })).toContain('retro-futurism')
+  expect(offeredStyleFamilies('retro-futurism', { version: '0.8.1' })).toContain('retro-futurism')
+  expect(offeredStyleFamilies(undefined, { version: '0.8.2' })).toEqual(['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
 })

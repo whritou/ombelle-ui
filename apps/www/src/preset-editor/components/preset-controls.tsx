@@ -110,6 +110,7 @@ export const familyNames: Record<StyleFamily, string> = {
   ombelle: 'Ombelle',
   papier: 'Papier',
   organic: 'Organic',
+  'retro-futurism': 'Retro futurism',
   'liquid-glass': 'Liquid glass',
 }
 /** One pressed button per style family, each with a small sample of its look. */

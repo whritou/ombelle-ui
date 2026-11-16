@@ -16,6 +16,7 @@ const proseNames: Record<StableStyleFamily, string> = {
   ombelle: 'Ombelle',
   papier: 'Papier',
   organic: 'Organic',
+  'retro-futurism': 'Retro futurism',
 }
 
 export const familyHeadings: Record<StableStyleFamily, string> = {
@@ -25,6 +26,7 @@ export const familyHeadings: Record<StableStyleFamily, string> = {
   ombelle: 'Ombelle',
   papier: 'Papier',
   organic: 'Organic',
+  'retro-futurism': 'Retro futurism',
 }
 
 /** "flat, minimalist and neo-brutalism" for the given families. */

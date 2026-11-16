@@ -6,8 +6,8 @@ import { useId, useState } from 'react'
 import { ToggleGroup } from '../toggle-group'
 import { familyHeadings, siteStableFamilies } from '../families'
 
-export type StyleKey = 'ombelle' | 'papier' | 'organic' | 'flat' | 'minimal' | 'brutal'
-const styleKeys = { ombelle: 'ombelle', papier: 'papier', organic: 'organic', flat: 'flat', minimalist: 'minimal', 'neo-brutalism': 'brutal' } as const
+export type StyleKey = 'ombelle' | 'papier' | 'organic' | 'retro-futurism' | 'flat' | 'minimal' | 'brutal'
+const styleKeys = { ombelle: 'ombelle', papier: 'papier', organic: 'organic', 'retro-futurism': 'retro-futurism', flat: 'flat', minimalist: 'minimal', 'neo-brutalism': 'brutal' } as const
 export const STYLES: { value: StyleKey; label: string }[] = siteStableFamilies.map(family => ({ value: styleKeys[family], label: familyHeadings[family] }))
 export const defaultShowcaseStyle = STYLES[0]!.value
 

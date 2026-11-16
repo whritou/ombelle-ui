@@ -232,6 +232,25 @@
   [data-style="organic"] .o-switch[data-state="checked"] { background: var(--primary); box-shadow: none; }
   [data-style="organic"] .o-switch > span { top: .1875rem; left: .1875rem; width: 1.375rem; height: 1.375rem; border-radius: 50% 48% 52% 50% / 52% 50% 48% 50%; background: var(--border); box-shadow: 0 3px 6px -2px var(--o-shadow); }
   [data-style="organic"] .o-switch[data-state="checked"] > span { transform: translateX(1.25rem); background: var(--primary-foreground); }
+  /* Retro futurism: rocket orange on cream and indigo, pills on a hard key shadow, two-tone scanline fills, a sunset band on cards. */
+  [data-style="retro-futurism"] { --background: #F6EFE3; --foreground: #2A1B4D; --card: #FFFAF0; --primary: #C23B1B; --primary-foreground: #FFFFFF; --accent: #ECDFF0; --accent-foreground: #2A1B4D; --muted-foreground: #5A4B7A; --border: #2A1B4D; --ring: #2A1B4D; --rf-g2: #8C1D5B; --rf-sun: #F2B134; }
+  .dark [data-style="retro-futurism"] { --background: #150B2E; --foreground: #FFF1F8; --card: #22123F; --primary: #FF8A4C; --primary-foreground: #1A0B2E; --accent: #35205A; --accent-foreground: #FFF1F8; --muted-foreground: #BFA9E0; --border: #C9B5EA; --ring: #3DE6E0; --rf-g2: #FF6FB1; --rf-sun: #FFD36B; }
+  [data-style="retro-futurism"] .o-card { border: 2px solid var(--border); border-radius: 28px; background: linear-gradient(90deg, var(--primary), var(--rf-g2)) top / 100% 14px no-repeat, var(--card); box-shadow: 0 6px 0 var(--border); }
+  [data-style="retro-futurism"] .o-btn { border: 2px solid var(--border); border-radius: 999px; font-weight: 700; background: repeating-linear-gradient(180deg, transparent 0 2px, rgb(0 0 0 / .14) 2px 3px) bottom / 100% 48% no-repeat, linear-gradient(180deg, var(--primary) 0 52%, color-mix(in oklab, var(--primary) 84%, #000) 52%); box-shadow: 0 4px 0 var(--border); transition: transform .12s, box-shadow .12s, filter .12s; }
+  [data-style="retro-futurism"] .o-btn:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 5px 0 var(--border); }
+  [data-style="retro-futurism"] .o-btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--border); }
+  [data-style="retro-futurism"] .o-btn-ghost { background: var(--card); color: var(--foreground); }
+  [data-style="retro-futurism"] .o-input { border: 2px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: inset 0 3px 0 color-mix(in oklab, var(--border) 18%, transparent); }
+  [data-style="retro-futurism"] .o-input:focus-visible { border-color: var(--primary); outline: 3px solid var(--ring); outline-offset: 2px; }
+  [data-style="retro-futurism"] .o-badge { border: 0; border-radius: 999px; background: var(--primary); color: var(--primary-foreground); font-weight: 800; }
+  [data-style="retro-futurism"] .o-badge-muted { background: var(--accent); color: var(--accent-foreground); }
+  [data-style="retro-futurism"] .o-tabs { border: 0; border-radius: 999px; background: var(--accent); padding: 4px; box-shadow: inset 0 0 0 2px var(--border); }
+  [data-style="retro-futurism"] .o-tab { border-radius: 999px; font-weight: 700; }
+  [data-style="retro-futurism"] .o-tab[data-state="active"] { background: var(--card); color: var(--foreground); box-shadow: 0 0 0 2px var(--border); }
+  [data-style="retro-futurism"] .o-switch { width: 3rem; height: 1.75rem; border: 0; border-radius: 999px; background: var(--accent); box-shadow: inset 0 0 0 2px var(--border); }
+  [data-style="retro-futurism"] .o-switch[data-state="checked"] { background: var(--primary); }
+  [data-style="retro-futurism"] .o-switch > span { top: .1875rem; left: .1875rem; width: 1.375rem; height: 1.375rem; border-radius: 50%; background: var(--border); }
+  [data-style="retro-futurism"] .o-switch[data-state="checked"] > span { transform: translateX(1.25rem); background: var(--rf-sun); box-shadow: inset 0 0 0 2px var(--border); }
   /* Ombelle: catalog radius 0.75rem, 1.5px edges, and 3px offset shadows. */
   [data-style="ombelle"] { --o-r: 0.75rem; --o-edge: var(--foreground); --o-shadow: var(--foreground); }
   .dark [data-style="ombelle"] { --o-edge: color-mix(in oklab, var(--foreground) 80%, transparent); --o-shadow: color-mix(in oklab, var(--primary) 70%, transparent); }
