@@ -1,6 +1,6 @@
 # Separator
 
-Separator draws a horizontal or vertical rule, optionally with a centred label such as "or". It is built on the reviewed Radix Separator primitive and is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass).
+Separator draws a horizontal or vertical rule, optionally with a centred label such as "or". It is built on the reviewed Radix Separator primitive and is available in flat, minimalist, neo brutalism, ombelle, papier, and organic, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass).
 
 ## Install and compose
 

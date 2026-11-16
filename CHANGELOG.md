@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add the Organic style family, the sixth stable family, for all 57 components in light and dark: moss and cream with a clay accent, Young Serif headings, Nunito text and DM Mono code, uneven corners that shift on hover, soft shadows, a tinted blob on cards and dialogs, wavy links and pill progress. The preset schema gains `organic` in `styleFamily`, which older CLIs reject, and the website offers Organic only once the published installer is 0.8.1. See decision 0007.
+- Add seven Organic palettes (Fern, Terracotta, Lichen, Heather, Seaglass, Marigold, Bark) to the preset editor, each a complete light and dark set.
+- Add DM Mono to the font registry as a static mono font (400 and 500), and start Organic with Nunito, Young Serif and DM Mono in both editors.
+
 ## 0.8.0 — 15 November 2026
 
 - Publish CLI 0.8.0: the website install commands now use it, so projects can install Papier and recipes that use fonts from npm. The registry tarball matched the tested candidate byte for byte.

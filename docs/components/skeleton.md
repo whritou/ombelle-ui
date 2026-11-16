@@ -1,6 +1,6 @@
 # Skeleton
 
-Skeleton is a decorative placeholder shaped like the content that is loading. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
+Skeleton is a decorative placeholder shaped like the content that is loading. It is available in flat, minimalist, neo brutalism, ombelle, papier, and organic, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
 
 ## Install and compose
 

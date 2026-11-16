@@ -132,7 +132,7 @@ Styles cannot change semantics or keyboard expectations. A neo brutalist Dialog 
 | Tabs | Root, list, trigger, content, orientation | Active, inactive, focus, disabled | Reviewed tabs primitive | Experimental |
 | Tooltip | Provider, trigger, content | Keyboard, hover, dismissal | Reviewed tooltip primitive | Experimental |
 
-Flat, minimalist, neo brutalism, ombelle, and papier target stable status across all rows. Stable status is awarded after testing, not merely because the primitive is accessible by default. Native Select is an explicitly named browser-control alternative; a fully custom Select is a later component.
+Flat, minimalist, neo brutalism, ombelle, papier, and organic target stable status across all rows. Stable status is awarded after testing, not merely because the primitive is accessible by default. Native Select is an explicitly named browser-control alternative; a fully custom Select is a later component.
 
 ## Style families
 

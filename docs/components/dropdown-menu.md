@@ -1,6 +1,6 @@
 # Dropdown Menu
 
-Dropdown Menu shows a list of actions from a trigger, built on the reviewed Radix Dropdown Menu primitive. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode, and as an experimental liquid glass style. The template is a client component.
+Dropdown Menu shows a list of actions from a trigger, built on the reviewed Radix Dropdown Menu primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, and organic, in light and dark mode, and as an experimental liquid glass style. The template is a client component.
 
 ## Install and compose
 

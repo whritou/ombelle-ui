@@ -1,6 +1,6 @@
 # Select
 
-Select is a custom single-value listbox built on the reviewed Radix Select primitive. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component. Use [Native Select](native-select.md) when you need the platform picker, native form autofill, or no JavaScript.
+Select is a custom single-value listbox built on the reviewed Radix Select primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, and organic, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component. Use [Native Select](native-select.md) when you need the platform picker, native form autofill, or no JavaScript.
 
 ## Install and compose
 
