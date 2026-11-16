@@ -1,0 +1,157 @@
+/* organic Avatar */
+[data-slot='avatar'] {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: var(--border-width) solid var(--o-line);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight:600;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+}
+[data-slot='avatar'][data-size='sm'] {
+  inline-size: 2rem;
+  block-size: 2rem;
+  font-size: 0.6875rem;
+}
+[data-slot='avatar'][data-size='lg'] {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  font-size: 1.125rem;
+  box-shadow: var(--o-e1);
+}
+[data-slot='avatar'][data-variant='primary'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-slot='avatar'][data-variant='secondary'] {
+  background: var(--muted);
+  color: var(--foreground);
+}
+[data-slot='avatar-image'] {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+[data-slot='avatar-fallback'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+}
+[data-slot='avatar-status'] {
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 1;
+  inset-block-end: -1px;
+  inset-inline-end: -1px;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: oklch(62% 0.15 150);
+}
+[data-slot='avatar-status'][data-status='offline'] {
+  background: var(--muted-foreground);
+}
+[data-slot='avatar-group'] {
+  display: inline-flex;
+  align-items: center;
+}
+[data-slot='avatar-group'] > [data-slot='avatar'] {
+  outline: 2px solid var(--card);
+}
+[data-slot='avatar-group'] > [data-slot='avatar'] + [data-slot='avatar'] {
+  margin-inline-start: -0.625rem;
+}
+@media (forced-colors: active) {
+  [data-slot='avatar'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='avatar-status'] {
+    background: CanvasText;
+    border-color: Canvas;
+  }
+  [data-slot='avatar-status'][data-status='offline'] {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+  [data-slot='avatar-group'] > [data-slot='avatar'] {
+    outline-color: Canvas;
+  }
+}
+/* 0.7.3 variants */
+[data-slot='avatar'][data-shape='square'] {
+  border-radius: calc(var(--radius) * 0.5);
+}
+[data-slot='avatar-overflow'] {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: var(--border-width) solid var(--o-line);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight:600;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+}
+[data-slot='avatar-overflow'][data-size='sm'] {
+  inline-size: 2rem;
+  block-size: 2rem;
+  font-size: 0.6875rem;
+}
+[data-slot='avatar-overflow'][data-size='lg'] {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  font-size: 1.125rem;
+  box-shadow: var(--o-e1);
+}
+[data-slot='avatar-overflow'][data-size] {
+  outline: 2px solid var(--card);
+  background: var(--muted);
+  color: var(--foreground);
+}
+[data-slot='avatar-overflow']:not(:first-child):is([role='group'] > *) {
+  margin-inline-start: -0.625rem;
+}
+@media (forced-colors: active) {
+  [data-slot='avatar-overflow'] {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    outline-color: Canvas;
+  }
+}
+/* end 0.7.3 variants */
+/* organic layer */
+[data-slot='avatar'],[data-slot='avatar-overflow']{border:0;border-radius:var(--o-rr);box-shadow:none}
+[data-slot='avatar'][data-size='lg'],[data-slot='avatar-overflow'][data-size='lg']{box-shadow:none}
+[data-slot='avatar'][data-shape='square'],[data-slot='avatar'][data-shape='square'] [data-slot='avatar-image']{border-radius:34% 30% 36% 30%/30% 36% 30% 34%}
+[data-slot='avatar-fallback']{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:400}
+[data-slot='avatar-status']{border-width:3px;border-color:var(--background)}
+@media (forced-colors: active){[data-slot='avatar'],[data-slot='avatar-overflow']{border:1px solid CanvasText}}
