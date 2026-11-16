@@ -201,4 +201,42 @@ describe('retro-futurism styles', () => {
       expect(rule(css, "[data-slot='calendar-day'][data-range-middle]")).not.toContain('radius')
     })
   })
+
+  describe('content board', () => {
+    it('card header is the sunset band with a 2px bottom border', () => {
+      const header = rule(layerOf('card'), "[data-slot='card-header']")
+      expect(header).toContain('background:var(--rf-band)')
+      expect(header).toContain('border-block-end:2px solid var(--border)')
+      expect(header).toContain('color:var(--primary-foreground)')
+      expect(header).not.toContain('position:')
+    })
+
+    // A card file may only name card slots, so any extra header child (action, badge, avatar, option check) hides the sun.
+    it('card header carries a striped sun that hides when the header holds more than its title and description', () => {
+      const css = layerOf('card')
+      expect(rule(css, "[data-slot='card-header']::after")).toContain('var(--rf-sun-mask)')
+      expect(css).toContain(":has(> :not([data-slot='card-title'],[data-slot='card-description']))")
+    })
+
+    it('outlined and subtle cards drop the band', () => {
+      const css = layerOf('card')
+      expect(css).toMatch(/\[data-appearance='outlined'\] \[data-slot='card-header'\][^{]*\{[^}]*background:transparent/)
+      expect(css).toMatch(/\[data-appearance='subtle'\] \[data-slot='card-header'\][^{]*\{[^}]*background:transparent/)
+    })
+
+    it('card titles wrap and card-action buttons drop their key shadow', () => {
+      const css = layerOf('card')
+      expect(rule(css, "[data-slot='card-title']")).toContain('overflow-wrap:anywhere')
+      const action = rule(css, "[data-slot='card-action'] :is(button,a)")
+      expect(action).toContain('margin-block-end:0')
+      expect(action).toContain('box-shadow:none')
+    })
+
+    it('separator is a 2px rule with a 13px heading-font label and no striped variant', () => {
+      const css = layerOf('separator')
+      expect(rule(css, "[data-slot='separator'][data-orientation='horizontal']")).toContain('2px solid')
+      expect(rule(css, "[data-slot='separator-label']")).toContain('font-size:0.8125rem')
+      expect(css).not.toContain('--rf-stripes')
+    })
+  })
 })
