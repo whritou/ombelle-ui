@@ -267,7 +267,7 @@
 [data-slot='toolbar-separator']{background:var(--o-line);border-radius:2px;inline-size:3px;margin-inline:4px}
 [data-slot='toolbar-overflow-content']{border:0;border-radius:var(--o-r3);box-shadow:var(--o-e3);padding:6px}
 [data-slot='toolbar-overflow-item']{border-radius:14px 12px 15px 12px/12px 15px 12px 14px;font-weight:600}
-[data-slot='toolbar-overflow-item'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground)}
+[data-slot='toolbar-overflow-item'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='toolbar-overflow-item'][data-highlighted] > *{color:inherit}
 [data-slot='toolbar-overflow-item'][data-variant='destructive'][data-highlighted]{background:var(--destructive);color:var(--destructive-foreground)}
 [data-slot='toolbar-overflow-indicator']{border-radius:7px}

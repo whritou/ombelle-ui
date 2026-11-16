@@ -303,6 +303,6 @@
 [data-slot='select-content']{border:0;border-radius:24px 20px 26px 18px/18px 26px 20px 24px;background:var(--popover);box-shadow:var(--o-e3);padding:6px}
 [data-slot='select-label']{font-weight:700;color:var(--muted-foreground)}
 [data-slot='select-item']{border-radius:14px 12px 15px 12px/12px 15px 12px 14px;font-weight:600}
-[data-slot='select-item'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground)}
+[data-slot='select-item'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='select-separator']{block-size:2px;border-radius:2px;background:var(--o-line)}
 @media (forced-colors: active){[data-slot='select-content']{border:2px solid CanvasText;box-shadow:none}[data-slot='select-item'][data-highlighted]{background:Highlight;color:HighlightText}}

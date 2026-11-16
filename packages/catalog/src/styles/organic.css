@@ -161,7 +161,7 @@
 [data-slot="input"]:disabled{opacity:0.5;background:var(--secondary);box-shadow:none;cursor:not-allowed;border-style:solid}
 [data-slot="dialog-overlay"]{background:oklch(24% 0.035 140 / 0.5)}
 [data-slot="dialog-content"]{overflow:hidden;border:0;border-radius:var(--o-r4);box-shadow:0 34px 56px -26px var(--o-sh),0 0 0 1px var(--o-line);padding:1.75rem}
-[data-slot="dialog-content"]::before{content:"";position:absolute;inset-block-start:-2.75rem;inset-inline-end:-2rem;inline-size:7.5rem;block-size:7.5rem;background:var(--secondary);border-radius:58% 42% 55% 45%/50% 60% 40% 50%;opacity:0.8;z-index:-1;pointer-events:none}
+[data-slot="dialog-content"]::before{content:"";position:absolute;inset-block-start:0;inset-inline-end:0;inline-size:7.5rem;block-size:5.5rem;background:var(--secondary);border-radius:0 0 0 70%/0 0 0 90%;opacity:0.8;z-index:-1;pointer-events:none}
 [data-slot="dialog-title"]{font-family:var(--font-heading,ui-serif,Georgia,"Times New Roman",serif);font-weight:400;font-size:1.4375rem;line-height:1.2}
 [data-slot="dialog-description"]{font-weight:500}
 [data-slot="dialog-footer"]{border-block-start:0;padding-block-start:0.75rem}

@@ -250,7 +250,7 @@
 [data-slot='command']{border:0;border-radius:var(--o-r4);background:var(--popover);box-shadow:var(--o-e3);overflow:hidden}
 [data-slot='command-search']{border-block-end:2px solid var(--o-line)}
 [data-slot='command-item']{border-radius:14px 12px 15px 12px/12px 15px 12px 14px;font-weight:600}
-[data-slot='command-item'][data-highlighted],[data-slot='command-item'][data-selected='true']{background:var(--secondary);color:var(--secondary-foreground)}
+[data-slot='command-item'][data-highlighted],[data-slot='command-item'][data-selected='true']{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='command-separator']{border-block-start:2px solid var(--o-line);border-radius:2px}
 [data-slot='command-shortcut']{font-family:var(--font-mono,ui-monospace,monospace)}
 [data-slot='command-group-heading']{font-weight:700;color:var(--muted-foreground)}

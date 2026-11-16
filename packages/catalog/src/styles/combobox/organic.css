@@ -291,6 +291,6 @@
 [data-slot='combobox-content']{border:0;border-radius:24px 20px 26px 18px/18px 26px 20px 24px;background:var(--popover);box-shadow:var(--o-e3);padding:6px}
 [data-slot='combobox-match']{background:var(--warning);color:inherit;border-radius:5px;padding:0 3px}
 [data-slot='combobox-item'],[data-slot='combobox-create']{border-radius:14px 12px 15px 12px/12px 15px 12px 14px;font-weight:600}
-[data-slot='combobox-item'][data-highlighted],[data-slot='combobox-item'][data-selected='true'],[data-slot='combobox-create'][data-highlighted],[data-slot='combobox-create'][data-selected='true']{background:var(--secondary);color:var(--secondary-foreground)}
+[data-slot='combobox-item'][data-highlighted],[data-slot='combobox-item'][data-selected='true'],[data-slot='combobox-create'][data-highlighted],[data-slot='combobox-create'][data-selected='true']{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-highlighted] [data-slot='combobox-match'],[data-selected='true'] [data-slot='combobox-match']{background:transparent;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 @media (forced-colors: active){[data-slot='combobox-content']{border:2px solid CanvasText;box-shadow:none}[data-slot='combobox-item'][data-highlighted],[data-slot='combobox-item'][data-selected='true']{background:Highlight;color:HighlightText}}

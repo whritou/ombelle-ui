@@ -222,5 +222,5 @@ button[data-slot='breadcrumb-ellipsis']:focus-visible {
 button[data-slot='breadcrumb-ellipsis']{border:0;border-radius:99px;background:var(--secondary);color:var(--secondary-foreground)}
 [data-slot='breadcrumb-menu']{border:0;border-radius:24px 20px 26px 18px/18px 26px 20px 24px;box-shadow:var(--o-e3);padding:6px}
 [data-slot='breadcrumb-menu-item']{border-radius:14px 12px 15px 12px/12px 15px 12px 14px;font-weight:600}
-[data-slot='breadcrumb-menu-item'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground)}
+[data-slot='breadcrumb-menu-item'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 @media (forced-colors: active){[data-slot='breadcrumb-menu']{border:2px solid CanvasText;box-shadow:none}button[data-slot='breadcrumb-ellipsis']{border:2px solid ButtonText}[data-slot='breadcrumb-page']{border:0}}

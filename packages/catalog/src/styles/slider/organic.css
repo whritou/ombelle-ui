@@ -172,7 +172,7 @@
 [data-slot='slider-track']{border:0;border-radius:99px;background:var(--secondary);block-size:8px}
 [data-slot='slider-track'][data-orientation='vertical']{inline-size:8px;block-size:auto}
 [data-slot='slider-range']{border:0;border-radius:99px 80px 90px 99px;background:var(--primary)}
-[data-slot='slider-thumb']{inline-size:22px;block-size:22px;border:4px solid var(--primary);border-radius:50% 48% 52% 50%/52% 50% 48% 50%;background:var(--card);box-shadow:0 4px 8px -3px var(--o-sh)}
+[data-slot='slider-thumb']{inline-size:22px;block-size:22px;border:3px solid var(--primary);border-radius:50% 48% 52% 50%/52% 50% 48% 50%;background:var(--card);box-shadow:0 4px 8px -3px var(--o-sh)}
 [data-slot='slider-thumb']:focus-visible{outline:3px solid var(--ring);outline-offset:3px}
 [data-slot='slider-value']{font-family:var(--font-mono,ui-monospace,monospace);font-weight:500}
 [data-slot='slider-value-input']{border-width:2px;border-radius:var(--o-r1);background:var(--card);font-family:var(--font-mono,ui-monospace,monospace);box-shadow:inset 0 2px 4px -2px var(--o-sh)}
