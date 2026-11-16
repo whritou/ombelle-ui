@@ -64,4 +64,39 @@ describe('retro-futurism styles', () => {
     const surfaces = blocks(css).filter(block => /background(-color)?\s*:[^;]*var\(--secondary\)/.test(block) && !block.includes('var(--secondary-foreground)'))
     expect(surfaces).toEqual([])
   })
+
+  // The last matching rule outside forced colors is the one that applies.
+  const rule = (css: string, selector: string) => {
+    css = css.replace(/@media\s*\(forced-colors:\s*active\)\s*\{[\s\S]*?\n\}/g, '')
+    const at = css.lastIndexOf(selector + '{')
+    return at < 0 ? '' : css.slice(at, css.indexOf('}', at))
+  }
+
+  it('base declares every shared --rf property once', () => {
+    const css = baseCss()
+    for (const name of ['--rf-key', '--rf-r1', '--rf-r2', '--rf-r3', '--rf-r4', '--rf-pill', '--rf-e1', '--rf-e2', '--rf-e3', '--rf-pri2', '--rf-sec2', '--rf-dst2', '--rf-sun', '--rf-band', '--rf-stripes', '--rf-scan', '--rf-sun-mask'])
+      expect(css.split(name + ':').length - 1, name).toBe(1)
+  })
+
+  it('base draws the button as a two-tone pill on a 4px key shadow', () => {
+    const button = rule(baseCss(), '[data-slot="button"]')
+    expect(button).toContain('border-radius:var(--rf-pill)')
+    expect(button).toContain('box-shadow:var(--rf-e1)')
+    expect(button).toContain('margin-block-end:4px')
+    expect(button).toContain('var(--rf-scan)')
+    expect(rule(baseCss(), '[data-slot="button"]:not(:disabled):active')).toContain('translateY(4px)')
+  })
+
+  it('base removes the key-shadow margin inside card actions and on the dialog close', () => {
+    const css = baseCss()
+    const tight = rule(css, '[data-slot="card-action"] [data-slot="button"],[data-slot="dialog-close"]')
+    expect(tight).toContain('margin-block-end:0')
+    expect(tight).toContain('box-shadow:none')
+  })
+
+  it('base draws the dialog stripes inside the dialog box', () => {
+    const before = rule(baseCss(), '[data-slot="dialog-content"]::before')
+    expect(before).toContain('var(--rf-stripes)')
+    expect(before).not.toMatch(/inset[^;]*:-|inset[^;]*: -/)
+  })
 })
