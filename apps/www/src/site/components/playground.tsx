@@ -23,6 +23,7 @@ const familyLabels: Record<StyleFamily, string> = {
   'neo-brutalism': 'Neo-Brutalism',
   ombelle: 'Ombelle',
   papier: 'Papier',
+  organic: 'Organic',
   'liquid-glass': 'Liquid Glass',
 }
 // Same gate as the editors: only families the published installer can install.

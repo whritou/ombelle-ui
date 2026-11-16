@@ -213,6 +213,25 @@
   [data-style="papier"] .o-switch[data-state="checked"] { background: var(--primary); }
   [data-style="papier"] .o-switch > span { top: .1875rem; left: .1875rem; width: 1.1875rem; height: 1.1875rem; border-radius: 1px; background: var(--card); box-shadow: 0 1px 0 var(--o-shadow); }
   [data-style="papier"] .o-switch[data-state="checked"] > span { transform: translateX(1.25rem); }
+  /* Organic: moss and cream, corners that never match and shift on hover, soft shadows, a tinted blob on cards. */
+  [data-style="organic"] { --background: #EEEBDC; --foreground: #26301F; --card: #F8F6EA; --primary: #3F6B3A; --primary-foreground: #FFFFFF; --accent: #DCE3C4; --accent-foreground: #26301F; --muted-foreground: #55604A; --border: #6F7F5E; --ring: #3F6B3A; --o-r: 1.25rem; --o-edge: color-mix(in oklab, #6F7F5E 42%, transparent); --o-shadow: rgba(52, 70, 40, .4); }
+  .dark [data-style="organic"] { --background: #1B2118; --foreground: #E9EBD8; --card: #232B1F; --primary: #9FCB8A; --primary-foreground: #14200F; --accent: #33402C; --accent-foreground: #E9EBD8; --muted-foreground: #A8B397; --border: #7F9170; --ring: #9FCB8A; --o-edge: color-mix(in oklab, #7F9170 42%, transparent); --o-shadow: rgba(0, 0, 0, .55); }
+  [data-style="organic"] .o-card { border: 0; border-radius: 36px 28px 40px 30px / 30px 40px 28px 36px; background: var(--card); box-shadow: 0 20px 30px -22px var(--o-shadow), 0 0 0 1px var(--o-edge); }
+  [data-style="organic"] .o-btn { border: 0; border-radius: 26px 22px 28px 20px / 22px 28px 22px 26px; font-weight: 700; box-shadow: 0 8px 14px -8px var(--o-shadow); transition: border-radius .4s, transform .15s, box-shadow .15s; }
+  [data-style="organic"] .o-btn:hover { border-radius: 22px 28px 20px 26px / 28px 22px 26px 22px; transform: translateY(-2px); box-shadow: 0 12px 18px -8px var(--o-shadow); }
+  [data-style="organic"] .o-btn:active { transform: scale(.96); box-shadow: 0 2px 6px -3px var(--o-shadow); }
+  [data-style="organic"] .o-btn-ghost { background: var(--accent); color: var(--accent-foreground); box-shadow: none; }
+  [data-style="organic"] .o-input { border: 2px solid var(--o-edge); border-radius: 18px 14px 20px 14px / 14px 20px 14px 18px; background: var(--card); box-shadow: inset 0 2px 4px -2px var(--o-shadow); }
+  [data-style="organic"] .o-input:focus-visible { border-color: var(--primary); outline: 3px solid var(--ring); outline-offset: 2px; }
+  [data-style="organic"] .o-badge { border: 0; border-radius: 999px 90px 999px 94px; background: var(--primary); color: var(--primary-foreground); font-weight: 800; }
+  [data-style="organic"] .o-badge-muted { background: var(--accent); color: var(--accent-foreground); }
+  [data-style="organic"] .o-tabs { border: 0; border-radius: 26px 22px 28px 20px / 22px 28px 22px 26px; background: var(--accent); padding: 4px; }
+  [data-style="organic"] .o-tab { border-radius: 18px 14px 20px 14px / 14px 20px 14px 18px; font-weight: 700; }
+  [data-style="organic"] .o-tab[data-state="active"] { background: var(--card); color: var(--foreground); box-shadow: 0 8px 14px -8px var(--o-shadow); }
+  [data-style="organic"] .o-switch { width: 3rem; height: 1.75rem; border: 0; border-radius: 999px 90px 999px 94px; background: var(--accent); box-shadow: inset 0 0 0 2px var(--border); }
+  [data-style="organic"] .o-switch[data-state="checked"] { background: var(--primary); box-shadow: none; }
+  [data-style="organic"] .o-switch > span { top: .1875rem; left: .1875rem; width: 1.375rem; height: 1.375rem; border-radius: 50% 48% 52% 50% / 52% 50% 48% 50%; background: var(--border); box-shadow: 0 3px 6px -2px var(--o-shadow); }
+  [data-style="organic"] .o-switch[data-state="checked"] > span { transform: translateX(1.25rem); background: var(--primary-foreground); }
   /* Ombelle: catalog radius 0.75rem, 1.5px edges, and 3px offset shadows. */
   [data-style="ombelle"] { --o-r: 0.75rem; --o-edge: var(--foreground); --o-shadow: var(--foreground); }
   .dark [data-style="ombelle"] { --o-edge: color-mix(in oklab, var(--foreground) 80%, transparent); --o-shadow: color-mix(in oklab, var(--primary) 70%, transparent); }

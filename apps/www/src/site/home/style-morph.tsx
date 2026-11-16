@@ -14,6 +14,11 @@ const COPY: Record<StyleKey, { tag: string; title: string; body: string }> = {
     title: 'Papier',
     body: 'Warm paper, ink rules and a serif voice. Buttons press like a stamp, cards carry a double rule on top.',
   },
+  organic: {
+    tag: 'Style 06',
+    title: 'Organic',
+    body: 'Soft, uneven shapes in moss and cream. Corners shift under your cursor, cards carry a tinted blob, links wave.',
+  },
   flat: {
     tag: 'Style 04',
     title: 'Flat',
@@ -34,6 +39,7 @@ const COPY: Record<StyleKey, { tag: string; title: string; body: string }> = {
 const SECTION_TONE: Record<StyleKey, { section: string; heading: string; sub: string }> = {
   ombelle: { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
   papier: { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
+  organic: { section: 'bg-accent/40', heading: 'text-foreground', sub: 'text-muted-foreground' },
   flat: { section: 'bg-muted', heading: 'text-foreground', sub: 'text-muted-foreground' },
   minimal: { section: 'bg-background', heading: 'text-foreground', sub: 'text-muted-foreground' },
   brutal: { section: 'bg-primary', heading: 'text-primary-foreground', sub: 'text-primary-foreground' },

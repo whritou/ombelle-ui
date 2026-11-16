@@ -35,6 +35,7 @@ if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
     'neo-brutalism': () => import('./generated/neo-brutalism/entry'),
     ombelle: () => import('./generated/ombelle/entry'),
     papier: () => import('./generated/papier/entry'),
+    organic: () => import('./generated/organic/entry'),
     'liquid-glass': () => import('./generated/liquid-glass/entry'),
   }
   const load = family ? entries[family] : undefined
@@ -42,6 +43,6 @@ if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
     const { default: Scenario } = await load()
     createRoot(document.getElementById('root')!).render(<Scenario />)
   } else {
-    createRoot(document.getElementById('root')!).render(<main><h1>Unknown style family</h1><p>Choose flat, minimalist, neo brutalism, ombelle, papier, or liquid glass.</p></main>)
+    createRoot(document.getElementById('root')!).render(<main><h1>Unknown style family</h1><p>Choose flat, minimalist, neo brutalism, ombelle, papier, organic, or liquid glass.</p></main>)
   }
 }

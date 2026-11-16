@@ -6,6 +6,7 @@ export const scopedButtonFocusContract = {
   'neo-brutalism': { minimumWidth: 3, style: 'dashed', offset: 4 },
   ombelle: { minimumWidth: 2, style: 'solid', offset: 3 },
   papier: { minimumWidth: 2, style: 'solid', offset: 3 },
+  organic: { minimumWidth: 3, style: 'solid', offset: 3 },
 } as const
 
 export function scopedButtonFocus(family: string) {

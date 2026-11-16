@@ -123,7 +123,7 @@ export function validateBrowserResults(result) {
   return result.stats
 }
 
-const auditFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const auditFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'liquid-glass']
 const auditChecks = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
 /** The specimen audit must cover every family, edition and mode, measure every check, and record no failure. */
 export function validateSpecimenAudit(result) {

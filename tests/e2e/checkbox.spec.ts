@@ -42,7 +42,7 @@ for (const family of supportedStyleFamilies)
         await expect(disabled).toBeDisabled()
         await expect(disabled).toHaveCSS('opacity', {
           flat: '0.45', minimalist: '0.4', 'neo-brutalism': '1',
-          ombelle: '0.45', papier: '0.45', 'liquid-glass': '0.5',
+          ombelle: '0.45', papier: '0.45', organic: '0.45', 'liquid-glass': '0.5',
         }[family])
         await expect(invalid).toHaveAttribute('aria-invalid', 'true')
         const invalidStyle = await invalid.evaluate((element) => {
