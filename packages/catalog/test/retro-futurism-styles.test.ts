@@ -152,4 +152,20 @@ describe('retro-futurism styles', () => {
       expect(kbd).toContain('0 3px 0 var(--rf-key)')
     })
   })
+
+  describe('text fields board', () => {
+    it('OTP slots are separate 12px cells', () => {
+      expect(rule(layerOf('input-otp'), "[data-slot='input-otp-slot']")).toContain('border-radius:12px')
+    })
+
+    it('password strength bars are pills', () => {
+      expect(rule(layerOf('password-field'), "[data-slot='password-field-strength-bar']")).toContain('border-radius:var(--rf-pill)')
+    })
+
+    it('an input-group button has no key shadow and no block-end margin', () => {
+      const button = rule(layerOf('input-group'), "[data-slot='input-group-button']")
+      expect(button).toContain('box-shadow:none')
+      expect(button).toContain('margin-block-end:0')
+    })
+  })
 })

@@ -1,0 +1,304 @@
+/* retro-futurism Input Group */
+[data-slot='input-group'] {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--control-height, 2.5rem);
+  /* Clips the addon fill to the group's corners. */
+  overflow: clip;
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--foreground);
+  transition: background-color var(--motion-duration), border-color var(--motion-duration);
+}
+[data-slot='input-group-input'],
+[data-slot='input-group-textarea'] {
+  box-sizing: border-box;
+  grid-column: 2;
+  grid-row: 2;
+  inline-size: 100%;
+  min-inline-size: 0;
+  border: 0;
+  border-radius: inherit;
+  padding: 0.625rem 0.75rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  box-shadow: none;
+}
+[data-slot='input-group-input'] {
+  min-block-size: var(--control-height, 2.5rem);
+}
+[data-slot='input-group-textarea'] {
+  min-block-size: 6rem;
+  field-sizing: content;
+  resize: vertical;
+}
+[data-slot='input-group-input']::placeholder,
+[data-slot='input-group-textarea']::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+[data-slot='input-group-input']:focus-visible,
+[data-slot='input-group-textarea']:focus-visible {
+  outline: none;
+}
+[data-slot='input-group-addon'] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-inline-size: 0;
+  padding: 0.375rem 0.75rem;
+  color: var(--muted-foreground);
+}
+[data-slot='input-group-addon'][data-align='inline-start'] {
+  grid-column: 1;
+  grid-row: 2;
+  padding-inline-end: 0;
+}
+[data-slot='input-group-addon'][data-align='inline-end'] {
+  grid-column: 3;
+  grid-row: 2;
+  padding-inline-start: 0;
+}
+[data-slot='input-group-addon'][data-align='block-start'] {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  padding-block-end: 0;
+}
+[data-slot='input-group-addon'][data-align='block-end'] {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  padding-block-start: 0;
+}
+[data-slot='input-group-text'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+}
+[data-slot='input-group-addon'] svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex-shrink: 0;
+}
+[data-slot='input-group-button'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-block-size: 2rem;
+  padding: 0 0.75rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--rf-r2);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight:600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+[data-slot='input-group-button']:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--primary) 88%, var(--foreground));
+}
+/* An icon-only button (an svg with an accessible name) stays a quiet ghost. */
+[data-slot='input-group-button']:is([aria-label], [aria-labelledby]):has(> svg) {
+  padding: 0.25rem 0.5rem;
+  border-color: transparent;
+  border-radius: calc(var(--radius) * 0.75);
+  background: transparent;
+  color: var(--foreground);
+  font-size: inherit;
+  font-weight: 500;
+}
+[data-slot='input-group-button']:is([aria-label], [aria-labelledby]):has(> svg):hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='input-group-button']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+[data-slot='input-group-input']:disabled,
+[data-slot='input-group-textarea']:disabled {
+  cursor: not-allowed;
+  color: var(--muted-foreground);
+}
+[data-slot='input-group-button']:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+[data-slot='input-group'] {
+  border: var(--border-width) solid var(--input);
+  border-radius: var(--rf-r2);
+  background: var(--card);
+  box-shadow: inset 0 2px 0 color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+[data-slot='input-group']:focus-within {
+  outline: 2.5px solid var(--ring);
+  outline-offset: 3px;
+  border-color: var(--ring);
+  box-shadow: none;
+}
+[data-slot='input-group']:has(> :is(input, textarea)[aria-invalid='true']) {
+  border-color: var(--destructive);
+  border-width: max(var(--border-width), 2px);
+  box-shadow: none;
+}
+[data-slot='input-group']:has(> :is(input, textarea):disabled) {
+  background: var(--muted);
+  border-style: dashed;
+  box-shadow: none;
+}
+/* 0.7.2 board: a text or icon addon is a muted cell with a divider toward the field; addons that hold a control stay clear. */
+[data-slot='input-group-addon']:is([data-align='inline-start'], [data-align='inline-end'], [data-align='block-end']):not(:has(button, input, select, textarea)) {
+  align-self: stretch;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+[data-slot='input-group-addon'][data-align='inline-start']:not(:has(button, input, select, textarea)) {
+  padding-inline-end: 0.75rem;
+  border-inline-end: var(--border-width) solid color-mix(in oklab, var(--border) 14%, transparent);
+}
+[data-slot='input-group-addon'][data-align='inline-end']:not(:has(button, input, select, textarea)) {
+  padding-inline-start: 0.75rem;
+  border-inline-start: var(--border-width) solid color-mix(in oklab, var(--border) 14%, transparent);
+}
+[data-slot='input-group-addon'][data-align='block-end']:not(:has(button, input, select, textarea)) {
+  padding: 0.5rem 0.75rem;
+  border-block-start: var(--border-width) solid color-mix(in oklab, var(--border) 14%, transparent);
+  font-size: 0.75rem;
+}
+/* A button addon sits 0.25rem inside the group's edge, like the board's inline action. */
+[data-slot='input-group-addon']:is([data-align='inline-start'], [data-align='inline-end']):has(> [data-slot='input-group-button']) {
+  padding-block: 0.25rem;
+}
+[data-slot='input-group-addon'][data-align='inline-start']:has(> [data-slot='input-group-button']) {
+  padding-inline-start: 0.25rem;
+}
+[data-slot='input-group-addon'][data-align='inline-end']:has(> [data-slot='input-group-button']) {
+  padding-inline-end: 0.25rem;
+}
+@media (forced-colors: active) {
+  [data-slot='input-group'] {
+    background: Field;
+    color: FieldText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  [data-slot='input-group']:focus-within {
+    border-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+    background: Field;
+    box-shadow: none;
+  }
+  [data-slot='input-group-addon'] {
+    color: FieldText;
+  }
+  [data-slot='input-group-addon'][data-align]:not(:has(button, input, select, textarea)) {
+    background: Field;
+  }
+  [data-slot='input-group-input']::placeholder,
+  [data-slot='input-group-textarea']::placeholder {
+    color: GrayText;
+  }
+  [data-slot='input-group']:has(> :is(input, textarea)[aria-invalid='true']) {
+    border: 3px double CanvasText;
+    background: Field;
+    box-shadow: none;
+  }
+  [data-slot='input-group']:has(> :is(input, textarea):disabled) {
+    border-color: GrayText;
+    background: Field;
+    box-shadow: none;
+  }
+  [data-slot='input-group-input']:disabled,
+  [data-slot='input-group-textarea']:disabled,
+  [data-slot='input-group-button']:disabled {
+    color: GrayText;
+  }
+  [data-slot='input-group-button'] {
+    color: ButtonText;
+    border-color: ButtonText;
+    background: ButtonFace;
+  }
+  [data-slot='input-group-button']:focus-visible {
+    outline-color: Highlight;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='input-group'] {
+    transition: none;
+  }
+}
+/* 0.7.3 variants */
+[data-slot='input-group-clear'] {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+[data-slot='input-group-clear'] svg {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
+[data-slot='input-group-clear']:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+[data-slot='input-group-clear']:focus-visible {
+  outline: 2.5px solid var(--ring);
+  outline-offset: 3px;
+}
+/* Only the Clear button's own group: its field is a direct child, and Clear sits in an addon or beside it. */
+[data-slot='input-group-clear']:is([role='group']:has(> :placeholder-shown) > *, [role='group']:has(> :placeholder-shown) > * > *) {
+  display: none;
+}
+/* Nor on a disabled or read-only field, which the user cannot clear. */
+[data-slot='input-group-clear']:is([role='group']:has(> :is(input, textarea):is(:disabled, :read-only)) > *, [role='group']:has(> :is(input, textarea):is(:disabled, :read-only)) > * > *) {
+  display: none;
+}
+[data-slot='input-group-count'] {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+[data-slot='input-group-count'][data-over] {
+  color: color-mix(in oklab, var(--destructive) 65%, var(--foreground));
+  font-weight:600;
+}
+@media (forced-colors: active) {
+  [data-slot='input-group-clear'] {
+    color: ButtonText;
+  }
+  [data-slot='input-group-count'][data-over] {
+    color: CanvasText;
+    text-decoration-line: underline;
+  }
+}
+/* end 0.7.3 variants */
+/* retro-futurism layer */
+[data-slot='input-group']{border-width:2px;border-radius:var(--rf-r2);background:var(--card);overflow:hidden;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent);transition:border-color var(--motion-duration),border-radius 0.4s}
+[data-slot='input-group']:focus-within{border-color:var(--primary);border-radius:var(--rf-r3);outline:3px solid var(--ring);outline-offset:2px;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent)}
+[data-slot='input-group']:has(> :is(input, textarea)[aria-invalid='true']){border-color:var(--destructive);box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent)}
+[data-slot='input-group']:has(> :is(input, textarea):disabled){box-shadow:none}
+[data-slot='input-group-addon']{background:var(--muted);color:var(--muted-foreground);font-weight:600}
+[data-slot='input-group-button']{border-radius:var(--rf-r2)}
+[data-slot='input-group-button']{border-radius:var(--rf-pill);margin-block-end:0;box-shadow:none}
+[data-slot='input-group-addon']{color:var(--muted-foreground)}
