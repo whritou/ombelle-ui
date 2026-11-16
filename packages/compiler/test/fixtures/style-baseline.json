@@ -26,7 +26,7 @@
         },
         {
           "logicalPath": "examples/input.tsx",
-          "sha256": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965"
+          "sha256": "3afba8ec8c7ac0a1f60ff6672ca782d096dc05485eb834fb2572231a436b8908"
         },
         {
           "logicalPath": "lib/utils.ts",
@@ -67,7 +67,7 @@
         },
         {
           "logicalPath": "examples/input.tsx",
-          "sha256": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965"
+          "sha256": "3afba8ec8c7ac0a1f60ff6672ca782d096dc05485eb834fb2572231a436b8908"
         },
         {
           "logicalPath": "lib/utils.ts",
@@ -108,7 +108,7 @@
         },
         {
           "logicalPath": "examples/input.tsx",
-          "sha256": "69743d71e456422c92f348a729ddadf6499555d027cd805081c2401d37d4c965"
+          "sha256": "3afba8ec8c7ac0a1f60ff6672ca782d096dc05485eb834fb2572231a436b8908"
         },
         {
           "logicalPath": "lib/utils.ts",
@@ -365,6 +365,17 @@
       ],
       "spec": "docs/evidence/deferred-components-139.md",
       "reason": "Observe nested text and character data changes when measuring DialogBody overflow (#139)"
+    },
+    {
+      "reason": "installed usage example layout",
+      "families": [
+        "flat",
+        "neo-brutalism",
+        "ombelle"
+      ],
+      "logicalPaths": [
+        "examples/input.tsx"
+      ]
     }
   ]
 }

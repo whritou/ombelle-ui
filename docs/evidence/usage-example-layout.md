@@ -20,3 +20,11 @@ This is a focused usage-example audit, not the complete foundation gate or a new
 ## Compact ButtonGroup regression
 
 A follow-up screenshot exposed grid stretching: the Install group had about 726 px of empty trailing shadow. The Install and History example groups now opt out of stretch through example-local alignment; Website stays flexible. The browser audit additionally compares each compact group edge with its visible control bounds, accounting for its own padding and borders. All 28 style/edition/mode cases were rerun; 41 compiler/layout/hash checks and TypeScript validation passed. Component styles remain unchanged.
+
+## CI contract follow-up
+
+PR #157 exposed older contracts outside the initial focused suite. The historical style baseline now records the deliberately changed Input usage hash for its three recorded families; all component and style hashes remain pinned. Edition parity still compares every shared artifact except the intentionally different ButtonGroup usage, which is checked for the correct native composition in each edition.
+
+The usage-example browser spec is excluded from the default foundation inventory, like the other dedicated browser suites. A collection regression checks that its own config still collects all 28 cases. The complete source-derived foundation inventory remains validated unchanged.
+
+The scoped-preset preservation test performs recipe setup and every preset dry-run/apply/repeat/conflict/preservation path. It passed in about 122 seconds locally with a temporary 180-second budget; its test-specific budget is now 180 seconds, matching similar integration scenarios. Assertions and per-command limits are unchanged.

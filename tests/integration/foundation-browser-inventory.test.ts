@@ -70,3 +70,16 @@ test('the foundation evidence contract accepts the complete current Playwright i
     await fs.rm(root, { recursive: true, force: true })
   }
 }, 90000)
+
+test('usage example layouts remain a complete separately collected browser suite', async () => {
+  const {stdout}=await promisify(execFile)(process.execPath,[
+    path.resolve('node_modules/@playwright/test/cli.js'),'test','--config',
+    path.resolve('playwright.usage-examples.config.ts'),'--list','--reporter=json',
+  ],{cwd:os.tmpdir(),windowsHide:true,timeout:60000,maxBuffer:8*1024*1024})
+  const result=JSON.parse(stdout)
+  const files:string[]=[]
+  const collect=(suite:any)=>{for(const spec of suite.specs??[])files.push(spec.file.replaceAll('\\','/').split('/').at(-1));for(const child of suite.suites??[])collect(child)}
+  for(const suite of result.suites)collect(suite)
+  expect(files).toHaveLength(28)
+  expect(new Set(files)).toEqual(new Set(['usage-example-layout.spec.ts']))
+},90000)
