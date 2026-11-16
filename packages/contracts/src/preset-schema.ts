@@ -52,6 +52,7 @@ export const presetSchema = {
         "neo-brutalism",
         "ombelle",
         "papier",
+        "organic",
         "liquid-glass"
       ]
     },
@@ -121,6 +122,7 @@ export const presetSchema = {
             "space-mono",
             "jetbrains-mono",
             "ibm-plex-mono",
+            "dm-mono",
             "share-tech-mono"
           ]
         },

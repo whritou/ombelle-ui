@@ -1,6 +1,6 @@
 # Radio Group
 
-Radio Group picks one value from a set, built on the reviewed Radix Radio Group primitive. It is available in flat, minimalist, neo brutalism, ombelle, and papier, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
+Radio Group picks one value from a set, built on the reviewed Radix Radio Group primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, and organic, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 

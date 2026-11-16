@@ -1,7 +1,7 @@
 import type { ComponentId } from './component-ids.js'
 
 // Kept free of runtime imports: scripts load this file directly with Node.
-export const supportedStyleFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier'] as const
+export const supportedStyleFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic'] as const
 export const styleFamilies = [...supportedStyleFamilies, 'liquid-glass'] as const
 export type StyleFamily = typeof styleFamilies[number]
 export type StableStyleFamily = typeof supportedStyleFamilies[number]

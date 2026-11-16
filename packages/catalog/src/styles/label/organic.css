@@ -1,0 +1,32 @@
+/* organic Label */
+[data-slot='label'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  font-weight:600;
+  letter-spacing:normal;
+  line-height: 1.25;
+  text-transform:none;
+}
+[data-slot='label'] > [aria-hidden='true'] {
+  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--destructive);
+  line-height: 1.25;
+}
+@media (forced-colors: active) {
+  [data-slot='label'] {
+    color: CanvasText;
+  }
+  [data-slot='label'] > [aria-hidden='true'] {
+    background: none;
+    color: CanvasText;
+  }
+}
+/* organic layer */
+[data-slot='label']{font-weight:700}

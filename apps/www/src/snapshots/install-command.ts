@@ -169,6 +169,8 @@ export function installableRecipeInstallNotice(
 export const ombelleMinimumCli = '0.4.0'
 /** Papier is installable from this release; the site offers it only once the published installer is at least this. */
 export const papierMinimumCli = '0.8.0'
+/** Organic is installable from this release; the site offers it only once the published installer is at least this. */
+export const organicMinimumCli = '0.8.1'
 
 /** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
 export const glassMaterialMinimumCli = '0.5.0'
@@ -223,6 +225,7 @@ export function compareVersions(a: string, b: string): number {
 export const siteFamilyOrder: readonly StyleFamily[] = [
   'ombelle',
   'papier',
+  'organic',
   'minimalist',
   'neo-brutalism',
   'flat',
@@ -244,8 +247,9 @@ export function offeredStyleFamilies(
 ): readonly StyleFamily[] {
   const ombelle = compareVersions(installer.version, ombelleMinimumCli) >= 0
   const papier = compareVersions(installer.version, papierMinimumCli) >= 0
+  const organic = compareVersions(installer.version, organicMinimumCli) >= 0
   return siteFamilyOrder.filter(
-    (family) => (family !== 'ombelle' || ombelle || family === current) && (family !== 'papier' || papier || family === current),
+    (family) => (family !== 'ombelle' || ombelle || family === current) && (family !== 'papier' || papier || family === current) && (family !== 'organic' || organic || family === current),
   )
 }
 

@@ -21,6 +21,8 @@ export const fontLoaders: Record<string, () => Promise<unknown>> = {
   'instrument-sans': () => import('@fontsource-variable/instrument-sans'),
   'ibm-plex-mono': () =>
     Promise.all([import('@fontsource/ibm-plex-mono/400.css'), import('@fontsource/ibm-plex-mono/600.css')]),
+  'dm-mono': () =>
+    Promise.all([import('@fontsource/dm-mono/400.css'), import('@fontsource/dm-mono/500.css')]),
   'young-serif': () => import('@fontsource/young-serif/400.css'),
   nunito: () => import('@fontsource-variable/nunito'),
   michroma: () => import('@fontsource/michroma/400.css'),

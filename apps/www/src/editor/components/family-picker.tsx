@@ -11,6 +11,7 @@ export const familyNames: Record<StyleFamily, string> = {
   'neo-brutalism': 'Neo-brutalism',
   ombelle: 'Ombelle',
   papier: 'Papier',
+  organic: 'Organic',
   'liquid-glass': 'Liquid glass',
 }
 

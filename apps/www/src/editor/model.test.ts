@@ -197,6 +197,8 @@ describe('Button editor style fonts', () => {
   })
 
   it('moves the font with the style until someone picks another', () => {
+    const organic = changeDraftFamily(createEditorDraft('flat'), 'organic')
+    expect(organic.recipe.overrides.fontFamilyId).toBe('nunito')
     const papier = changeDraftFamily(createEditorDraft('flat'), 'papier')
     expect(papier.recipe.overrides.fontFamilyId).toBe('instrument-sans')
     const picked = updateDraftRecipe(papier, withRecipeOverride(papier.recipe, 'fontFamilyId', 'inter'))

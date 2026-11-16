@@ -243,6 +243,11 @@ body {
   --s-r: 2px; --s-ir: 2px; --s-bd: 1px solid #1b2a41; --s-sh: 0 2px 0 #1b2a41;
   --s-ibg: #fffdf6; --s-ibd: 1px solid #1b2a41; --s-tint: #e4dcc7; --s-font: Georgia, serif;
 }
+.preset-slide-shot[data-kit='organic'] {
+  --s-bg: #eeebdc; --s-ink: #26301f; --s-mut: #55604a; --s-pri: #3f6b3a; --s-pfg: #fff;
+  --s-r: 22px 18px 24px 16px; --s-ir: 16px 12px 18px 12px; --s-bd: 0 solid transparent; --s-sh: 0 8px 14px -8px rgba(52, 70, 40, .45);
+  --s-ibg: #fcfbf2; --s-ibd: 2px solid #b5bda5; --s-tint: #dce3c4; --s-font: 'Nunito', sans-serif;
+}
 .preset-slide-shot[data-kit='flat'] {
   --s-bg: #f3f5f9; --s-ink: #0f172a; --s-mut: #4a5568; --s-pri: #1d4ed8; --s-pfg: #fff; --s-r: 8px; --s-ir: 8px 8px 0 0;
   --s-bd: 2px solid #1d4ed8; --s-sh: none; --s-osh: none; --s-ibg: #eceff5; --s-ibd: 0 solid transparent; --s-tint: #e3ebfd;

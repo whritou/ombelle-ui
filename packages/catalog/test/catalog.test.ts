@@ -85,7 +85,7 @@ describe('catalog contract', () => {
         expect(css).toContain(rule)
       // Minimalist paints its tooltip with the card surface, ombelle and neo-brutalism with
       // primary, flat as an inverted foreground block; the others use popover.
-      if (family === 'flat' || family === 'papier') {
+      if (family === 'flat' || family === 'papier' || family === 'organic') {
         expect(css).toContain('background: var(--foreground)')
         expect(css).toContain('color: var(--background)')
       } else {
@@ -397,6 +397,7 @@ describe('catalog contract', () => {
       'neo-brutalism',
       'ombelle',
       'papier',
+      'organic',
       'liquid-glass',
     ])
     for (const family of supportedStyleFamilies) {
@@ -421,6 +422,7 @@ describe('catalog contract', () => {
         'neo-brutalism',
         'ombelle',
         'papier',
+        'organic',
         'liquid-glass',
       ])
       for (const family of supportedStyleFamilies)
@@ -629,7 +631,7 @@ describe('catalog contract', () => {
     for (const family of supportedStyleFamilies) {
       // Families with hard offset shadows also carry the optional shadowColor token.
       expect(Object.keys(c.presets[family].modes.light)).toHaveLength(
-        family === 'papier' ? 26 : family === 'neo-brutalism' || family === 'ombelle' ? 20 : 19,
+        family === 'papier' || family === 'organic' ? 26 : family === 'neo-brutalism' || family === 'ombelle' ? 20 : 19,
       )
       for (const token of c.styles[family].matchAll(/var\(--([a-z-]+)\)/g))
         expect([

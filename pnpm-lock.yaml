@@ -125,6 +125,9 @@ importers:
       '@fontsource-variable/work-sans':
         specifier: 5.3.0
         version: 5.3.0
+      '@fontsource/dm-mono':
+        specifier: 5.3.0
+        version: 5.3.0
       '@fontsource/ibm-plex-mono':
         specifier: 5.3.0
         version: 5.3.0
@@ -503,6 +506,9 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       '@fontsource-variable/work-sans':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/dm-mono':
         specifier: 5.3.0
         version: 5.3.0
       '@fontsource/ibm-plex-mono':
@@ -917,6 +923,9 @@ packages:
 
   '@fontsource-variable/work-sans@5.3.0':
     resolution: {integrity: sha512-le8h/OIIuhm5Z7TdvuMw0yKg2gaCZUiMec8zaumsVVjzeJRBPEF0bQI/MkaZDHCVzZDvZoP/O2LiGOSfDLSbaw==}
+
+  '@fontsource/dm-mono@5.3.0':
+    resolution: {integrity: sha512-OINjI8C1S/wpchhQxl7njZdMn4+hnDCpQ4YtvvOpKNARo+0J8O1x1IcrChxNjHOhfVv1by8C/FQoy3hXK+C1Ug==}
 
   '@fontsource/ibm-plex-mono@5.3.0':
     resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
@@ -3172,6 +3181,8 @@ snapshots:
   '@fontsource-variable/space-grotesk@5.3.0': {}
 
   '@fontsource-variable/work-sans@5.3.0': {}
+
+  '@fontsource/dm-mono@5.3.0': {}
 
   '@fontsource/ibm-plex-mono@5.3.0': {}
 

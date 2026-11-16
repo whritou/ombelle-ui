@@ -29,17 +29,17 @@ it('loads the foundation evidence validator through native Node without loader a
   )
   expect(result.code, result.output).toBe(0)
   expect(result.output).toContain(
-    'Expected all 250 component preset measurements',
+    'Expected all 360 component preset measurements',
   )
 })
 
 // Structural fixtures only; synthetic success records never enter retained run evidence.
 it('accepts authored family focus widths and equivalent CSS colors but rejects thinner focus', async () => {
   const rows = await measurements()
-  const widths: Record<string, number> = { 'builtin-flat': 2, 'builtin-minimalist': 1, 'builtin-neo-brutalism': 3, 'builtin-ombelle': 2, 'builtin-papier': 2 }
+  const widths: Record<string, number> = { 'builtin-flat': 2, 'builtin-minimalist': 1, 'builtin-neo-brutalism': 3, 'builtin-ombelle': 2, 'builtin-papier': 2, 'builtin-organic': 3 }
   for (const row of rows) row.focusOutlineWidth = widths[row.presetId]
   rows[0].computedStyles.color = 'color(srgb 0.0039215686 0.0078431373 0.0117647059)'
-  await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(250)
+  await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(360)
   for (const presetId of Object.keys(widths)) {
     const altered = structuredClone(rows)
     altered.find(row => row.presetId === presetId)!.focusOutlineWidth = widths[presetId] - 1
@@ -47,14 +47,14 @@ it('accepts authored family focus widths and equivalent CSS colors but rejects t
   }
 })
 
-it('requires all 220 descriptor/preset installs and 250 app/host/preset/mode measurements', async () => {
+it('requires all 288 descriptor/preset installs and 360 app/host/preset/mode measurements', async () => {
   const { matrix, consumers } = await fixtures()
   await expect(
     validateComponentPresetConsumers(consumers, matrix),
   ).resolves.toBeUndefined()
   await expect(
     validateComponentPresetMeasurements(await measurements()),
-  ).resolves.toHaveLength(250)
+  ).resolves.toHaveLength(360)
   await expect(
     finalizeComponentPresetEvidence(
       { measurements: await measurements(), consumers },
@@ -66,7 +66,7 @@ it('requires all 220 descriptor/preset installs and 250 app/host/preset/mode mea
       (sum, row) => sum + Object.keys(row.presets).length,
       0,
     ),
-  ).toBe(220)
+  ).toBe(288)
 })
 it('rejects missing, duplicate, failed, stale, transformed or incomplete consumer records', async () => {
   const base = await fixtures(),
@@ -212,7 +212,7 @@ it('compares normalized screenshot pixels while retaining exact PNG hashes', asy
   const rows = await measurements()
   rows[30].screenshotHash = 'e'.repeat(64)
   await expect(validateComponentPresetMeasurements(rows)).resolves.toHaveLength(
-    250,
+    360,
   )
 
   const pixels = Buffer.from(rows[30].normalizedScreenshot.pixels, 'base64')

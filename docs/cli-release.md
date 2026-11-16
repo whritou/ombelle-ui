@@ -120,6 +120,8 @@ The website offers the `ombelle` family only when its published installer versio
 
 The website offers the `papier` family only when its published installer version is at least `papierMinimumCli` (0.8.0, in the same file), so deploying the website before CLI 0.8.0 is published keeps Papier hidden. A restored draft that already uses Papier keeps it selectable. See [Papier style family decision](decisions/0006-papier-family.md).
 
+The website offers the `organic` family only when its published installer version is at least `organicMinimumCli` (0.8.1, in the same file), so deploying the website before CLI 0.8.1 is published keeps Organic hidden. A restored draft that already uses Organic keeps it selectable. See [Organic style family decision](decisions/0007-organic-family.md).
+
 Post-publication checks on 2026-11-02:
 
 - The registry tarball is byte-for-byte identical to the candidate (integrity `sha512-TAkxY7UE…BDJFxJQ==`).

@@ -17,8 +17,8 @@ import {
 
 const rose = accentSchemes.find((scheme) => scheme.id === 'rose')!
 // Each family joins this list as its palettes land.
-const familiesWithPalettes = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier'] as const
-type Family = 'flat' | 'minimalist' | 'neo-brutalism' | 'ombelle' | 'papier'
+const familiesWithPalettes = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic'] as const
+type Family = 'flat' | 'minimalist' | 'neo-brutalism' | 'ombelle' | 'papier' | 'organic'
 
 const rgb = (color: string) => {
   const { r, g, b } = parseColor(color)!.rgb
@@ -94,7 +94,7 @@ describe.each(familiesWithPalettes)('%s palettes', (family: Family) => {
 
   it("survives another family's palette and old Slate edits, and resets them", () => {
     const other =
-      (['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier'] as const)
+      (['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic'] as const)
         .filter((f) => f !== family)
         .flatMap((f) => paletteSchemes(f))[0] ?? palettes[1]!
     let draft = applyColorScheme(createPresetDraft(family), other)

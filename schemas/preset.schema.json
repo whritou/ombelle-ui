@@ -13,7 +13,7 @@
     "catalogRelease": {"$ref": "#/$defs/release"},
     "compilerVersion": {"$ref": "#/$defs/release"},
     "platform": {"const": "react-web"},
-    "styleFamily": {"enum": ["flat", "minimalist", "neo-brutalism", "ombelle", "papier", "liquid-glass"]},
+    "styleFamily": {"enum": ["flat", "minimalist", "neo-brutalism", "ombelle", "papier", "organic", "liquid-glass"]},
     "modes": {
       "type": "object",
       "additionalProperties": false,
@@ -29,7 +29,7 @@
       "properties": {
         "fontFamilyId": {"enum": ["system-sans","system-serif","system-mono","dm-sans","geist","space-grotesk","work-sans","figtree","inter-tight","inter","fraunces","instrument-sans","nunito","exo-2"]},
         "headingFontFamilyId": {"enum": ["system-sans","system-serif","system-mono","dm-sans","geist","space-grotesk","work-sans","figtree","inter-tight","inter","fraunces","instrument-sans","nunito","exo-2","bricolage-grotesque","young-serif","michroma"]},
-        "monoFontFamilyId": {"enum": ["system-mono","geist-mono","space-mono","jetbrains-mono","ibm-plex-mono","share-tech-mono"]},
+        "monoFontFamilyId": {"enum": ["system-mono","geist-mono","space-mono","jetbrains-mono","ibm-plex-mono","dm-mono","share-tech-mono"]},
         "radiusRem": {"type": "number", "minimum": 0, "maximum": 2},
         "density": {"enum": ["comfortable", "compact"]},
         "borderWidthPx": {"type": "number", "minimum": 0, "maximum": 4},

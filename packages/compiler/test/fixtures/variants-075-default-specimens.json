@@ -1159,296 +1159,6 @@
       }
     ]
   },
-  "liquid-glass/checkbox": {
-    "tag": "div",
-    "props": {
-      "className": "flex items-center gap-2"
-    },
-    "children": [
-      {
-        "tag": "Checkbox",
-        "props": {
-          "id": {
-            "localId": "-control"
-          },
-          "disabled": false,
-          "required": false,
-          "defaultChecked": false
-        },
-        "children": []
-      },
-      {
-        "tag": "label",
-        "props": {
-          "htmlFor": {
-            "localId": "-control"
-          }
-        },
-        "children": [
-          "Accept terms"
-        ]
-      }
-    ]
-  },
-  "liquid-glass/switch": {
-    "tag": "div",
-    "props": {
-      "className": "flex items-center gap-2"
-    },
-    "children": [
-      {
-        "tag": "Switch",
-        "props": {
-          "id": {
-            "localId": "-control"
-          },
-          "disabled": false,
-          "defaultChecked": false
-        },
-        "children": [
-          {
-            "tag": "SwitchThumb",
-            "props": {},
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "label",
-        "props": {
-          "htmlFor": {
-            "localId": "-control"
-          }
-        },
-        "children": [
-          "Enable notifications"
-        ]
-      }
-    ]
-  },
-  "liquid-glass/progress": {
-    "tag": "Progress",
-    "props": {
-      "value": 25,
-      "max": 100,
-      "aria-label": "Upload progress"
-    },
-    "children": []
-  },
-  "liquid-glass/popover": {
-    "tag": "Popover",
-    "props": {},
-    "children": [
-      {
-        "tag": "PopoverTrigger",
-        "props": {
-          "type": "button"
-        },
-        "children": [
-          "Details"
-        ]
-      },
-      {
-        "tag": "PopoverContent",
-        "props": {
-          "side": "bottom",
-          "align": "center",
-          "aria-labelledby": {
-            "localId": "-title"
-          }
-        },
-        "children": [
-          {
-            "tag": "PopoverTitle",
-            "props": {
-              "id": {
-                "localId": "-title"
-              }
-            },
-            "children": [
-              "Project details"
-            ]
-          },
-          {
-            "tag": "PopoverDescription",
-            "props": {},
-            "children": [
-              "Review the project."
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "liquid-glass/dialog": {
-    "tag": "Dialog",
-    "props": {},
-    "children": [
-      {
-        "tag": "DialogTrigger",
-        "props": {
-          "type": "button"
-        },
-        "children": [
-          "Open dialog"
-        ]
-      },
-      {
-        "tag": "DialogContent",
-        "props": {},
-        "children": [
-          {
-            "tag": "DialogHeader",
-            "props": {},
-            "children": [
-              {
-                "tag": "DialogTitle",
-                "props": {},
-                "children": [
-                  "Project details"
-                ]
-              },
-              {
-                "tag": "DialogDescription",
-                "props": {},
-                "children": [
-                  "Review the project details."
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "liquid-glass/alert-dialog": {
-    "tag": "AlertDialog",
-    "props": {},
-    "children": [
-      {
-        "tag": "AlertDialogTrigger",
-        "props": {
-          "type": "button"
-        },
-        "children": [
-          "Delete project"
-        ]
-      },
-      {
-        "tag": "AlertDialogContent",
-        "props": {},
-        "children": [
-          {
-            "tag": "AlertDialogHeader",
-            "props": {},
-            "children": [
-              {
-                "tag": "AlertDialogTitle",
-                "props": {},
-                "children": [
-                  "Delete this project?"
-                ]
-              },
-              {
-                "tag": "AlertDialogDescription",
-                "props": {},
-                "children": [
-                  "This action cannot be undone."
-                ]
-              }
-            ]
-          },
-          {
-            "tag": "AlertDialogFooter",
-            "props": {},
-            "children": [
-              {
-                "tag": "AlertDialogCancel",
-                "props": {},
-                "children": [
-                  "Cancel"
-                ]
-              },
-              {
-                "tag": "AlertDialogAction",
-                "props": {},
-                "children": [
-                  "Delete project"
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "liquid-glass/breadcrumb": {
-    "tag": "Breadcrumb",
-    "props": {
-      "aria-label": "Breadcrumb"
-    },
-    "children": [
-      {
-        "tag": "BreadcrumbList",
-        "props": {},
-        "children": [
-          {
-            "tag": "BreadcrumbItem",
-            "props": {},
-            "children": [
-              {
-                "tag": "BreadcrumbLink",
-                "props": {
-                  "href": "/"
-                },
-                "children": [
-                  "Home"
-                ]
-              }
-            ]
-          },
-          {
-            "tag": "BreadcrumbSeparator",
-            "props": {},
-            "children": []
-          },
-          {
-            "tag": "BreadcrumbItem",
-            "props": {},
-            "children": [
-              {
-                "tag": "BreadcrumbLink",
-                "props": {
-                  "href": "/projects"
-                },
-                "children": [
-                  "Projects"
-                ]
-              }
-            ]
-          },
-          {
-            "tag": "BreadcrumbSeparator",
-            "props": {},
-            "children": []
-          },
-          {
-            "tag": "BreadcrumbItem",
-            "props": {},
-            "children": [
-              {
-                "tag": "BreadcrumbPage",
-                "props": {},
-                "children": [
-                  "Website refresh"
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
   "papier/checkbox": {
     "tag": "div",
     "props": {
@@ -1673,6 +1383,586 @@
     ]
   },
   "papier/breadcrumb": {
+    "tag": "Breadcrumb",
+    "props": {
+      "aria-label": "Breadcrumb"
+    },
+    "children": [
+      {
+        "tag": "BreadcrumbList",
+        "props": {},
+        "children": [
+          {
+            "tag": "BreadcrumbItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "BreadcrumbLink",
+                "props": {
+                  "href": "/"
+                },
+                "children": [
+                  "Home"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "BreadcrumbSeparator",
+            "props": {},
+            "children": []
+          },
+          {
+            "tag": "BreadcrumbItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "BreadcrumbLink",
+                "props": {
+                  "href": "/projects"
+                },
+                "children": [
+                  "Projects"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "BreadcrumbSeparator",
+            "props": {},
+            "children": []
+          },
+          {
+            "tag": "BreadcrumbItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "BreadcrumbPage",
+                "props": {},
+                "children": [
+                  "Website refresh"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "organic/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
+  },
+  "organic/switch": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Switch",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "defaultChecked": false
+        },
+        "children": [
+          {
+            "tag": "SwitchThumb",
+            "props": {},
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Enable notifications"
+        ]
+      }
+    ]
+  },
+  "organic/progress": {
+    "tag": "Progress",
+    "props": {
+      "value": 25,
+      "max": 100,
+      "aria-label": "Upload progress"
+    },
+    "children": []
+  },
+  "organic/popover": {
+    "tag": "Popover",
+    "props": {},
+    "children": [
+      {
+        "tag": "PopoverTrigger",
+        "props": {
+          "type": "button"
+        },
+        "children": [
+          "Details"
+        ]
+      },
+      {
+        "tag": "PopoverContent",
+        "props": {
+          "side": "bottom",
+          "align": "center",
+          "aria-labelledby": {
+            "localId": "-title"
+          }
+        },
+        "children": [
+          {
+            "tag": "PopoverTitle",
+            "props": {
+              "id": {
+                "localId": "-title"
+              }
+            },
+            "children": [
+              "Project details"
+            ]
+          },
+          {
+            "tag": "PopoverDescription",
+            "props": {},
+            "children": [
+              "Review the project."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "organic/dialog": {
+    "tag": "Dialog",
+    "props": {},
+    "children": [
+      {
+        "tag": "DialogTrigger",
+        "props": {
+          "type": "button"
+        },
+        "children": [
+          "Open dialog"
+        ]
+      },
+      {
+        "tag": "DialogContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "DialogHeader",
+            "props": {},
+            "children": [
+              {
+                "tag": "DialogTitle",
+                "props": {},
+                "children": [
+                  "Project details"
+                ]
+              },
+              {
+                "tag": "DialogDescription",
+                "props": {},
+                "children": [
+                  "Review the project details."
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "organic/alert-dialog": {
+    "tag": "AlertDialog",
+    "props": {},
+    "children": [
+      {
+        "tag": "AlertDialogTrigger",
+        "props": {
+          "type": "button"
+        },
+        "children": [
+          "Delete project"
+        ]
+      },
+      {
+        "tag": "AlertDialogContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "AlertDialogHeader",
+            "props": {},
+            "children": [
+              {
+                "tag": "AlertDialogTitle",
+                "props": {},
+                "children": [
+                  "Delete this project?"
+                ]
+              },
+              {
+                "tag": "AlertDialogDescription",
+                "props": {},
+                "children": [
+                  "This action cannot be undone."
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "AlertDialogFooter",
+            "props": {},
+            "children": [
+              {
+                "tag": "AlertDialogCancel",
+                "props": {},
+                "children": [
+                  "Cancel"
+                ]
+              },
+              {
+                "tag": "AlertDialogAction",
+                "props": {},
+                "children": [
+                  "Delete project"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "organic/breadcrumb": {
+    "tag": "Breadcrumb",
+    "props": {
+      "aria-label": "Breadcrumb"
+    },
+    "children": [
+      {
+        "tag": "BreadcrumbList",
+        "props": {},
+        "children": [
+          {
+            "tag": "BreadcrumbItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "BreadcrumbLink",
+                "props": {
+                  "href": "/"
+                },
+                "children": [
+                  "Home"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "BreadcrumbSeparator",
+            "props": {},
+            "children": []
+          },
+          {
+            "tag": "BreadcrumbItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "BreadcrumbLink",
+                "props": {
+                  "href": "/projects"
+                },
+                "children": [
+                  "Projects"
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "BreadcrumbSeparator",
+            "props": {},
+            "children": []
+          },
+          {
+            "tag": "BreadcrumbItem",
+            "props": {},
+            "children": [
+              {
+                "tag": "BreadcrumbPage",
+                "props": {},
+                "children": [
+                  "Website refresh"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "liquid-glass/checkbox": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Checkbox",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "required": false,
+          "defaultChecked": false
+        },
+        "children": []
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Accept terms"
+        ]
+      }
+    ]
+  },
+  "liquid-glass/switch": {
+    "tag": "div",
+    "props": {
+      "className": "flex items-center gap-2"
+    },
+    "children": [
+      {
+        "tag": "Switch",
+        "props": {
+          "id": {
+            "localId": "-control"
+          },
+          "disabled": false,
+          "defaultChecked": false
+        },
+        "children": [
+          {
+            "tag": "SwitchThumb",
+            "props": {},
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "label",
+        "props": {
+          "htmlFor": {
+            "localId": "-control"
+          }
+        },
+        "children": [
+          "Enable notifications"
+        ]
+      }
+    ]
+  },
+  "liquid-glass/progress": {
+    "tag": "Progress",
+    "props": {
+      "value": 25,
+      "max": 100,
+      "aria-label": "Upload progress"
+    },
+    "children": []
+  },
+  "liquid-glass/popover": {
+    "tag": "Popover",
+    "props": {},
+    "children": [
+      {
+        "tag": "PopoverTrigger",
+        "props": {
+          "type": "button"
+        },
+        "children": [
+          "Details"
+        ]
+      },
+      {
+        "tag": "PopoverContent",
+        "props": {
+          "side": "bottom",
+          "align": "center",
+          "aria-labelledby": {
+            "localId": "-title"
+          }
+        },
+        "children": [
+          {
+            "tag": "PopoverTitle",
+            "props": {
+              "id": {
+                "localId": "-title"
+              }
+            },
+            "children": [
+              "Project details"
+            ]
+          },
+          {
+            "tag": "PopoverDescription",
+            "props": {},
+            "children": [
+              "Review the project."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "liquid-glass/dialog": {
+    "tag": "Dialog",
+    "props": {},
+    "children": [
+      {
+        "tag": "DialogTrigger",
+        "props": {
+          "type": "button"
+        },
+        "children": [
+          "Open dialog"
+        ]
+      },
+      {
+        "tag": "DialogContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "DialogHeader",
+            "props": {},
+            "children": [
+              {
+                "tag": "DialogTitle",
+                "props": {},
+                "children": [
+                  "Project details"
+                ]
+              },
+              {
+                "tag": "DialogDescription",
+                "props": {},
+                "children": [
+                  "Review the project details."
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "liquid-glass/alert-dialog": {
+    "tag": "AlertDialog",
+    "props": {},
+    "children": [
+      {
+        "tag": "AlertDialogTrigger",
+        "props": {
+          "type": "button"
+        },
+        "children": [
+          "Delete project"
+        ]
+      },
+      {
+        "tag": "AlertDialogContent",
+        "props": {},
+        "children": [
+          {
+            "tag": "AlertDialogHeader",
+            "props": {},
+            "children": [
+              {
+                "tag": "AlertDialogTitle",
+                "props": {},
+                "children": [
+                  "Delete this project?"
+                ]
+              },
+              {
+                "tag": "AlertDialogDescription",
+                "props": {},
+                "children": [
+                  "This action cannot be undone."
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "AlertDialogFooter",
+            "props": {},
+            "children": [
+              {
+                "tag": "AlertDialogCancel",
+                "props": {},
+                "children": [
+                  "Cancel"
+                ]
+              },
+              {
+                "tag": "AlertDialogAction",
+                "props": {},
+                "children": [
+                  "Delete project"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "liquid-glass/breadcrumb": {
     "tag": "Breadcrumb",
     "props": {
       "aria-label": "Breadcrumb"

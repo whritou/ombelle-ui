@@ -1,0 +1,98 @@
+/* organic Tooltip */
+[data-slot='tooltip-trigger']:focus-visible {
+  outline: 2.5px solid var(--ring);
+  outline-offset: 3px;
+}
+[data-slot='tooltip-content'] {
+  z-index: 50;
+  max-inline-size: min(20rem, var(--radix-tooltip-content-available-width));
+  padding-block: 0.375rem;
+  padding-inline: 0.6875rem;
+  border: var(--border-width) solid var(--o-line);
+  border-radius: max(0px, calc(var(--radius) - 2px));
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  font-weight:600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  box-shadow: var(--o-e1);
+  animation: ombelle-tooltip-enter var(--motion-duration) ease-out;
+}
+/* Radix draws the arrow as polygon 0,0 30,0 15,10 in a 10x5 box (preserveAspectRatio none).
+   The dash skips the 30-unit base so the outline stays open where the arrow meets the bubble;
+   the arrow moves up by one border width so its fill covers the bubble border at the mouth.
+   The stroke is in user units: x2.35 gives about one border width on screen. */
+/* Closing has no animation: the enter animation kept a closed tooltip mounted, and visible,
+   while the library waited for an exit animation that never ended. */
+[data-slot='tooltip-content'][data-state='closed'] {
+  animation: none;
+}
+[data-slot='tooltip-arrow'] {
+  overflow: visible;
+  fill: var(--primary);
+  stroke: var(--border);
+  stroke-width: calc(var(--border-width) * 2.35);
+  stroke-dasharray: 0 30 100;
+  translate: 0 calc(var(--border-width) * -1);
+}
+@keyframes ombelle-tooltip-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='tooltip-content'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+  [data-slot='tooltip-arrow'] {
+    fill: Canvas;
+    stroke: CanvasText;
+    forced-color-adjust: none;
+  }
+  [data-slot='tooltip-trigger']:focus-visible {
+    outline-color: Highlight;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='tooltip-content'] {
+    animation: none;
+  }
+}
+/* 0.7.6 variants */
+[data-slot='tooltip-content']:has(> [data-tooltip-shortcut]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline-end: 8px;
+}
+[data-slot='tooltip-shortcut'] {
+  display: inline-flex;
+  gap: 3px;
+}
+[data-slot='tooltip-shortcut-key'] {
+  padding-block: 1px;
+  padding-inline: 6px;
+  border: 1px solid color-mix(in oklab, currentColor 45%, transparent);
+  border-radius: var(--o-r1);
+  font: 500 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (forced-colors: active) {
+  [data-slot='tooltip-shortcut-key'] {
+    border-color: CanvasText;
+  }
+}
+/* end 0.7.6 variants */
+/* organic layer */
+[data-slot='tooltip-content']{background: var(--foreground);color: var(--background);border:0;border-radius:16px 13px 17px 12px/13px 17px 12px 16px;font-weight:700;box-shadow:0 10px 18px -8px var(--o-sh)}
+[data-slot='tooltip-arrow']{fill:var(--foreground);stroke:none}
+[data-slot='tooltip-shortcut-key']{font-family:var(--font-mono,ui-monospace,monospace);border-radius:var(--o-r1)}
+@media (forced-colors: active){[data-slot='tooltip-content']{background:Canvas;color:CanvasText;border:2px solid CanvasText;box-shadow:none;forced-color-adjust:none}[data-slot='tooltip-arrow']{fill:Canvas;stroke:CanvasText;forced-color-adjust:none}}
