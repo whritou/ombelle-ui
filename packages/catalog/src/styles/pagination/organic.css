@@ -1,0 +1,197 @@
+/* organic Pagination */
+[data-slot='pagination'] {
+  min-inline-size: 0;
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+[data-slot='pagination-content'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+[data-slot='pagination-item'] {
+  display: inline-flex;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+[data-slot='pagination-link'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  box-sizing: border-box;
+  min-inline-size: 2.375rem;
+  min-block-size: 2.375rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.625rem;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--o-r2);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+[data-slot='pagination-link'][href] {
+  cursor: pointer;
+}
+[data-slot='pagination-link'][href]:not([data-disabled]):hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='pagination-link'][aria-current='page'] {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight:600;
+}
+[data-slot='pagination-link'][href][aria-current='page']:hover {
+  background: var(--primary);
+  /* The plain hover rule's text colour would otherwise stay on the primary fill. */
+  color: var(--primary-foreground);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+[data-slot='pagination-link']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+[data-slot='pagination-link'] > svg {
+  flex-shrink: 0;
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+[data-slot='pagination-link']:dir(rtl) > svg {
+  transform: rotate(180deg);
+}
+[data-slot='pagination-ellipsis'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 2.375rem;
+  padding-inline: 0.25rem;
+  color: var(--muted-foreground);
+}
+[data-slot='pagination-link'] {
+  border-radius: var(--o-r2);
+}
+[data-slot='pagination-link'][aria-current='page'],
+[data-slot='pagination-link'][href][aria-current='page']:hover {
+  border-color: var(--o-line);
+  box-shadow: var(--o-e1);
+}
+[data-slot='pagination-link'][data-disabled] {
+  border-color: var(--o-line);
+  border-style: dashed;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+@media (forced-colors: active) {
+  [data-slot='pagination-content'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='pagination-link'],
+  [data-slot='pagination-link'][href]:not([data-disabled]):hover {
+    background: Canvas;
+    color: LinkText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+  [data-slot='pagination-link'][aria-current='page'],
+  [data-slot='pagination-link'][href][aria-current='page']:hover {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+    forced-color-adjust: none;
+    box-shadow: none;
+  }
+  [data-slot='pagination-link'][data-disabled] {
+    background: Canvas;
+    color: GrayText;
+    border-color: GrayText;
+    forced-color-adjust: auto;
+    box-shadow: none;
+  }
+  [data-slot='pagination-link']:focus-visible {
+    outline-color: Highlight;
+  }
+  [data-slot='pagination-ellipsis'] {
+    color: CanvasText;
+  }
+}
+/* 0.7.3 variants */
+/* A compact end without an href is a button: it takes the link's pointer and hover. */
+[data-slot='pagination-link']:is(button) {
+  cursor: pointer;
+}
+[data-slot='pagination-link']:is(button):not(:disabled):hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='pagination-compact'] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+}
+[data-slot='pagination-compact'] > strong {
+  font-weight:600;
+  font-variant-numeric: tabular-nums;
+}
+[data-slot='pagination-page-size'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-family);
+  font-size: 0.8125rem;
+}
+[data-slot='pagination-page-size'] > select {
+  box-sizing: border-box;
+  min-block-size: 2.125rem;
+  padding-block: 0;
+  padding-inline: 0.625rem;
+  border: var(--border-width) solid var(--o-line);
+  border-radius: calc(var(--radius) * 0.5);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 600;
+}
+[data-slot='pagination-page-size'] > select:focus-visible {
+  outline: 2.5px solid var(--ring);
+  outline-offset: 3px;
+}
+@media (forced-colors: active) {
+  [data-slot='pagination-page-size'] > select {
+    border: 1px solid ButtonText;
+  }
+}
+/* end 0.7.3 variants */
+/* organic layer */
+[data-slot='pagination-link']{min-inline-size:2.5rem;min-block-size:2.5rem;border:0;border-radius:var(--o-rr);font-weight:700;transition:background-color var(--motion-duration)}
+[data-slot='pagination-link'][href]:not([data-disabled]):hover{background:var(--secondary)}
+[data-slot='pagination-link'][aria-current='page']{background:var(--primary);color:var(--primary-foreground);box-shadow:var(--o-e1);font-weight:800}
+[data-slot='pagination-link'][href][aria-current='page']:hover{background:var(--primary);color:var(--primary-foreground);box-shadow:var(--o-e1)}
+[data-slot='pagination-link'][data-disabled]{border-style:none;background:transparent;opacity:0.4}
+[data-slot='pagination-link']:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+[data-slot='pagination-page-size'] > select{border-width:2px;border-radius:var(--o-r2)}
+@media (forced-colors: active){[data-slot='pagination-link'][aria-current='page'],[data-slot='pagination-link'][href][aria-current='page']:hover{background:Highlight;color:HighlightText;border:2px solid Highlight;box-shadow:none}[data-slot='pagination-link'][data-disabled]{border:2px solid GrayText}}
