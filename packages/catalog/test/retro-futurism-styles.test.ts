@@ -96,9 +96,10 @@ describe('retro-futurism styles', () => {
     expect(rule(baseCss(), '[data-slot="button"]:not(:disabled):active')).toContain('translateY(4px)')
   })
 
-  it('base removes the key-shadow margin inside card actions and on the dialog close', () => {
+  // The button recipe compiler accepts only one slot per selector in the base, so card actions are handled in card/.
+  it('base removes the key-shadow margin on the dialog close', () => {
     const css = baseCss()
-    const tight = rule(css, '[data-slot="card-action"] [data-slot="button"],[data-slot="dialog-close"]')
+    const tight = rule(css, '[data-slot="dialog-close"]')
     expect(tight).toContain('margin-block-end:0')
     expect(tight).toContain('box-shadow:none')
   })

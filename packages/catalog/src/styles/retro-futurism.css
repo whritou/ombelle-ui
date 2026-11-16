@@ -150,7 +150,6 @@
 [data-slot="button"]:focus-visible,[data-slot="dialog-close"]:focus-visible,[data-slot="input"]:focus-visible{outline:3px solid var(--ring);outline-offset:4px}
 [data-slot="button"]:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;filter:none;transform:translateY(4px)}
 [data-slot="button"][data-variant="ghost"]:disabled,[data-slot="button"][data-variant="link"]:disabled,[data-slot="button"][data-variant="link-destructive"]:disabled{transform:none}
-[data-slot="card-action"] [data-slot="button"],[data-slot="dialog-close"]{margin-block-end:0;box-shadow:none}
 [data-slot="input"]{min-height:2.75rem;padding:0 1rem;border:2px solid var(--input);border-radius:var(--rf-r2);background:var(--card);color:var(--foreground);font-size:0.9375rem;font-weight:500;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent);transition:border-color var(--motion-duration)}
 [data-slot="input"][data-size="sm"]{min-height:2.25rem;padding-inline:0.8125rem;font-size:0.875rem}
 [data-slot="input"][data-size="lg"]{min-height:3.25rem;padding-inline:1.125rem;font-size:1rem}
@@ -166,7 +165,7 @@
 [data-slot="dialog-description"]{font-weight:500}
 [data-slot="dialog-footer"]{border-block-start:0;padding-block-start:0.75rem}
 [data-slot="dialog-footer"]:is(:has(> [data-dialog-body][data-overflowing]) > *){border-block-start:2px solid var(--border)}
-[data-slot="dialog-close"]{inset-block-start:1.75rem;min-width:2.375rem;min-height:2.375rem;padding:0;border:2px solid transparent;border-radius:var(--rf-pill);background:transparent;color:var(--foreground);cursor:pointer;transition:background-color var(--motion-duration)}
+[data-slot="dialog-close"]{margin-block-end:0;box-shadow:none;inset-block-start:1.75rem;min-width:2.375rem;min-height:2.375rem;padding:0;border:2px solid transparent;border-radius:var(--rf-pill);background:transparent;color:var(--foreground);cursor:pointer;transition:background-color var(--motion-duration)}
 [data-slot="dialog-close"]:hover{background:var(--accent);color:var(--accent-foreground);transform:none}
 [data-slot="dialog-close"]:active{background:color-mix(in srgb,var(--accent) 88%,var(--foreground));transform:none}
 /* A dialog footer often holds plain buttons (DialogClose without a Button around it, or a native button). Real Buttons always carry data-variant, so only plain ones match. */
