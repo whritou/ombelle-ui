@@ -7,7 +7,7 @@
   gap: 6px;
   min-block-size: 42px;
   padding: 6px 8px;
-  border: 1.5px solid var(--o-line);
+  border: 1.5px solid var(--input);
   border-radius: var(--o-r2);
   background: var(--card);
   color: var(--foreground);

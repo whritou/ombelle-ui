@@ -75,7 +75,7 @@
 [data-slot='toggle'][data-size='sm']{min-inline-size:34px;min-block-size:34px}
 [data-slot='toggle'][data-size='default']{min-inline-size:42px;min-block-size:42px}
 [data-slot='toggle'][data-size='lg']{min-inline-size:50px;min-block-size:50px}
-[data-slot='toggle'][data-variant='outline']{box-shadow:inset 0 0 0 2px var(--o-line)}
+[data-slot='toggle'][data-variant='outline']{box-shadow:inset 0 0 0 2px var(--input)}
 [data-slot='toggle']:hover:not(:disabled){background:var(--secondary);color:var(--secondary-foreground);border-radius:var(--o-r3h)}
 [data-slot='toggle'][data-state='on']{background:var(--secondary);color:var(--secondary-foreground);box-shadow:inset 0 0 0 2px var(--border)}
 [data-slot='toggle']:focus-visible{outline:3px solid var(--ring);outline-offset:2px}

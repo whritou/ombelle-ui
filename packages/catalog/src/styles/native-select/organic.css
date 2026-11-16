@@ -12,7 +12,7 @@
   min-height: var(--control-height);
   font-family: var(--font-family);
   font-size: 0.875rem;
-  border: var(--border-width) solid var(--o-line);
+  border: var(--border-width) solid var(--input);
   border-radius: var(--o-r2);
   padding: 0 0.875rem;
   background: var(--card);

@@ -261,4 +261,4 @@
 [data-slot='calendar-day'][data-range-start]{border-start-start-radius:99px;border-end-start-radius:99px}
 [data-slot='calendar-day'][data-range-end]{border-start-end-radius:99px;border-end-end-radius:99px}
 [data-slot='calendar-day'][data-disabled] > [data-slot='calendar-day-button']{text-decoration:line-through}
-@media (forced-colors: active){[data-slot='calendar'],[data-slot='date-picker-content']{border:2px solid CanvasText;box-shadow:none}[data-slot='calendar-day'][data-today] > [data-slot='calendar-day-button']{border:2px solid CanvasText;box-shadow:none}}
+@media (forced-colors: active){[data-slot='calendar-day'][data-range-middle]{background:Highlight}[data-slot='calendar-day'][data-range-middle] > [data-slot='calendar-day-button']{color:HighlightText}[data-slot='calendar-day'][data-selected]:not([data-range-middle]) > [data-slot='calendar-day-button']{background:Highlight;color:HighlightText;border-color:Highlight}[data-slot='calendar'],[data-slot='date-picker-content']{border:2px solid CanvasText;box-shadow:none}[data-slot='calendar-day'][data-today] > [data-slot='calendar-day-button']{border:2px solid CanvasText;box-shadow:none}}

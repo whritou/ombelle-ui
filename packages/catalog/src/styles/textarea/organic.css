@@ -9,7 +9,7 @@
   font-family: var(--font-family);
   font-size: 0.875rem;
   line-height: 1.45;
-  border: var(--border-width) solid var(--o-line);
+  border: var(--border-width) solid var(--input);
   border-radius: var(--o-r2);
   padding: 0.625rem 0.75rem;
   background: var(--card);

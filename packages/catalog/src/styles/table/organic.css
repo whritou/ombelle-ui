@@ -169,7 +169,7 @@
 }
 /* end 0.7.3 variants */
 /* organic layer */
-[data-slot='table-container']{border:0;border-radius:var(--o-r4);background:var(--card);box-shadow:var(--o-e2);overflow:hidden}
+[data-slot='table-container']{border:0;border-radius:var(--o-r4);background:var(--card);box-shadow:var(--o-e2);overflow-x:auto}
 [data-slot='table-head']{border-block-end:0;background:var(--secondary);color:var(--muted-foreground);font-weight:800}
 [data-slot='table-cell']{border-block-start:2px solid var(--o-line);font-weight:600}
 [data-slot='table-caption']{border-block-start:2px solid var(--o-line)}

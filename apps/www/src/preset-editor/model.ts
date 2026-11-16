@@ -1,3 +1,4 @@
+import { compareVersions, organicMinimumCli, publishedInstaller } from '../snapshots/install-command'
 import { defaultGlassPresetId, fontById, fontRegistry, getCatalog, styleFamilyFonts, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
 import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler'
 import {
@@ -33,8 +34,13 @@ export const colorKeys = [
   'input',
   'ring',
 ] as const
+/** Fonts a preset can only name once the published installer's schema knows them. */
+const fontMinimumCli: Readonly<Record<string, string>> = { 'dm-mono': organicMinimumCli }
 const fontIdsWith = (role: 'display' | 'body' | 'mono') =>
-  fontRegistry.filter((font) => font.roles.includes(role)).map((font) => font.id)
+  fontRegistry
+    .filter((font) => font.roles.includes(role))
+    .filter((font) => !fontMinimumCli[font.id] || compareVersions(publishedInstaller.version, fontMinimumCli[font.id]!) >= 0)
+    .map((font) => font.id)
 /** The ids each font picker offers: the system stacks plus the registry fonts with the matching role. */
 export const fontControlOptions = {
   fontFamilyId: [...systemFontIds, ...fontIdsWith('body')],

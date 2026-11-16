@@ -1,3 +1,4 @@
+import { compareVersions, organicMinimumCli, publishedInstaller } from '../snapshots/install-command'
 import { describe, expect, it } from 'vitest'
 import { getCatalog, startingPresetOrder, styleFamilyFonts } from '@ombelle/catalog'
 import { styleFamilies } from '@ombelle/contracts'
@@ -400,6 +401,8 @@ it.each(startingPresetOrder)('leaving liquid glass from %s returns to Ombelle de
 
 it('offers fonts by role', () => {
   expect(fontControlOptions.monoFontFamilyId).toContain('jetbrains-mono')
+  // DM Mono needs a schema the published installer may not have yet: it is offered once the installer is 0.8.1.
+  expect(fontControlOptions.monoFontFamilyId.includes('dm-mono')).toBe(compareVersions(publishedInstaller.version, organicMinimumCli) >= 0)
   expect(fontControlOptions.monoFontFamilyId).toContain('system-mono')
   expect(fontControlOptions.monoFontFamilyId).not.toContain('inter')
   expect(fontControlOptions.headingFontFamilyId).toContain('young-serif')

@@ -163,4 +163,4 @@
 [data-slot='meter-segment'][data-rest]{background:var(--secondary)}
 [data-slot='meter-legend-item'] > i{border-radius:50%}
 [data-slot='meter-value']{font-family:var(--font-mono,ui-monospace,monospace)}
-@media (forced-colors: active){[data-slot='meter-cell']{border:1px solid CanvasText}[data-slot='meter-segment']{border:1px solid CanvasText}}
+@media (forced-colors: active){[data-slot='meter-cell'][data-state='filled'],[data-slot='meter-cell'][data-warning],[data-slot='meter-segment']{background:Highlight}[data-slot='meter-segment'][data-rest]{background:Canvas}[data-slot='meter-cell']{border:1px solid CanvasText}[data-slot='meter-segment']{border:1px solid CanvasText}}

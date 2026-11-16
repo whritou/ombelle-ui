@@ -242,4 +242,4 @@
 [data-slot='carousel-dot'][aria-current='true']::before{background:var(--primary);box-shadow:none}
 [data-slot='carousel-item']:is([data-variant='image'] > * > *){border:0;border-radius:var(--o-r4)}
 [data-slot='carousel-thumbnail']{border:0;border-radius:var(--o-r3);overflow:hidden}
-@media (forced-colors: active){[data-slot='carousel-previous'],[data-slot='carousel-next']{border:2px solid ButtonText;box-shadow:none}[data-slot='carousel-thumbnail']{border:2px solid CanvasText}}
+@media (forced-colors: active){[data-slot='carousel-dot']::before{background:CanvasText;box-shadow:none}[data-slot='carousel-dot'][aria-current='true']::before{background:Highlight}[data-slot='carousel-previous'],[data-slot='carousel-next']{border:2px solid ButtonText;box-shadow:none}[data-slot='carousel-thumbnail']{border:2px solid CanvasText}}

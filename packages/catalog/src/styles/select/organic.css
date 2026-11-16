@@ -10,7 +10,7 @@
   min-block-size: var(--control-height);
   padding-block: 0.5rem;
   padding-inline: 0.875rem;
-  border: var(--border-width) solid var(--o-line);
+  border: var(--border-width) solid var(--input);
   border-radius: var(--o-r2);
   background: var(--card);
   color: var(--card-foreground);
