@@ -52,6 +52,7 @@ export const presetSchema = {
         "neo-brutalism",
         "ombelle",
         "papier",
+        "organic",
         "liquid-glass"
       ]
     },

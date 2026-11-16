@@ -70,6 +70,9 @@ describe('preset contract', () => {
   it('accepts papier as a style family', () => {
     expect(validatePreset({ ...example, styleFamily: 'papier' }).styleFamily).toBe('papier')
   })
+  it('accepts organic as a style family', () => {
+    expect(validatePreset({ ...example, styleFamily: 'organic' }).styleFamily).toBe('organic')
+  })
   it('accepts ombelle as a style family', () => {
     expect(validatePreset({ ...example, styleFamily: 'ombelle' }).styleFamily).toBe('ombelle')
   })
