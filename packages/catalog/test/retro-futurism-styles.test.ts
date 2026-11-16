@@ -239,4 +239,34 @@ describe('retro-futurism styles', () => {
       expect(css).not.toContain('--rf-stripes')
     })
   })
+
+  describe('status board', () => {
+    it('alerts draw a 2px outline and a 4px key in their tone, and compact alerts are pills', () => {
+      const css = layerOf('alert')
+      expect(rule(css, "[data-slot='alert']")).toMatch(/box-shadow:inset 0 0 0 2px var\(--rf-tone\),0 4px 0 var\(--rf-tone\)/)
+      for (const variant of ['destructive', 'success', 'warning', 'info']) expect(rule(css, `[data-slot='alert'][data-variant='${variant}']`)).toContain('--rf-tone:')
+      expect(rule(css, "[data-slot='alert'][data-layout='compact']")).toContain('border-radius:var(--rf-pill)')
+    })
+
+    it('the toast shadow stays inside the 8px padding of its viewport', () => {
+      const shadow = rule(layerOf('toast'), "[data-slot='toast']").match(/box-shadow:([^;]+)/)?.[1] ?? ''
+      for (const part of shadow.split(/,(?![^(]*\))/)) {
+        const [x = 0, y = 0, blur = 0, spread = 0] = (part.match(/-?[\d.]+px/g) ?? []).map(parseFloat)
+        expect(Math.abs(x) + Math.abs(y) + blur + spread, part).toBeLessThanOrEqual(8)
+      }
+    })
+
+    it('progress and meter tracks have a 2px border and striped fills per tone', () => {
+      const progress = layerOf('progress')
+      expect(rule(progress, "[data-slot='progress']")).toContain('border:2px solid var(--border)')
+      expect(rule(progress, "[data-slot='progress-indicator']")).toContain('repeating-linear-gradient')
+      for (const tone of ['success', 'warning', 'destructive'])
+        expect(rule(progress, `[data-slot='progress-indicator']:is([data-tone='${tone}'] > *)`)).toContain('repeating-linear-gradient')
+      expect(rule(layerOf('meter'), "[data-slot='meter-track']")).toContain('border:2px solid var(--border)')
+    })
+
+    it('the current step ring uses the primary', () => {
+      expect(rule(layerOf('stepper'), "[data-slot='stepper-indicator'][data-status='current']")).toContain('inset 0 0 0 3px var(--primary)')
+    })
+  })
 })
