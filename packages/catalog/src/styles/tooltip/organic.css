@@ -92,7 +92,7 @@
 }
 /* end 0.7.6 variants */
 /* organic layer */
-[data-slot='tooltip-content']{background:var(--foreground);color:var(--background);border:0;border-radius:16px 13px 17px 12px/13px 17px 12px 16px;font-weight:700;box-shadow:0 10px 18px -8px var(--o-sh)}
+[data-slot='tooltip-content']{background: var(--foreground);color: var(--background);border:0;border-radius:16px 13px 17px 12px/13px 17px 12px 16px;font-weight:700;box-shadow:0 10px 18px -8px var(--o-sh)}
 [data-slot='tooltip-arrow']{fill:var(--foreground);stroke:none}
 [data-slot='tooltip-shortcut-key']{font-family:var(--font-mono,ui-monospace,monospace);border-radius:var(--o-r1)}
 @media (forced-colors: active){[data-slot='tooltip-content']{background:Canvas;color:CanvasText;border:2px solid CanvasText;box-shadow:none;forced-color-adjust:none}[data-slot='tooltip-arrow']{fill:Canvas;stroke:CanvasText;forced-color-adjust:none}}

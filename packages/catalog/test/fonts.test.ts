@@ -140,6 +140,7 @@ describe('fonts each style family starts with', () => {
       'neo-brutalism': { body: 'work-sans', display: 'space-grotesk', mono: 'space-mono' },
       ombelle: { body: 'figtree', display: 'bricolage-grotesque', mono: 'geist-mono' },
       papier: { body: 'instrument-sans', display: 'fraunces', mono: 'ibm-plex-mono' },
+      organic: { body: 'nunito', display: 'young-serif', mono: 'dm-mono' },
       'liquid-glass': { body: 'inter', display: 'inter-tight', mono: 'jetbrains-mono' },
     })
   })
