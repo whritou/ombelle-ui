@@ -90,6 +90,28 @@ export async function verifyExampleLayout(page: Page) {
       'checkbox label gap',
     ).toBeGreaterThanOrEqual(7.5)
   }
+  for (const label of ['Install', 'History']) {
+    const compact = page
+      .locator('[data-component="button-group"]')
+      .getByRole('group', { name: label, exact: true })
+    const blank = await compact.evaluate((element) => {
+      const box = element.getBoundingClientRect(),
+        css = getComputedStyle(element)
+      const children = Array.from(element.children)
+        .map((child) => child.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.height > 0)
+      return (
+        box.right -
+        Math.max(...children.map((r) => r.right)) -
+        (parseFloat(css.paddingRight) || 0) -
+        (parseFloat(css.borderRightWidth) || 0)
+      )
+    })
+    expect(
+      blank,
+      label + ' group fits its visible controls',
+    ).toBeLessThanOrEqual(1)
+  }
   const joined = page.locator(
     '[data-component="button-group"] [aria-label="History"] [data-slot="button"]',
   )

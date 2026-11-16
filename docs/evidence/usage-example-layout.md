@@ -16,3 +16,7 @@ Validation:
 Screenshots and full browser JSON remain in .artifacts/usage-examples. The compact recorded matrix is [usage-example-layout-run.json](usage-example-layout-run.json). Reproduction commands and the distinction between example layout and internal component spacing are documented in [usage examples](../components/usage-examples.md).
 
 This is a focused usage-example audit, not the complete foundation gate or a new specimen audit. No component stylesheet or component template changed.
+
+## Compact ButtonGroup regression
+
+A follow-up screenshot exposed grid stretching: the Install group had about 726 px of empty trailing shadow. The Install and History example groups now opt out of stretch through example-local alignment; Website stays flexible. The browser audit additionally compares each compact group edge with its visible control bounds, accounting for its own padding and borders. All 28 style/edition/mode cases were rerun; 41 compiler/layout/hash checks and TypeScript validation passed. Component styles remain unchanged.
