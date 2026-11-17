@@ -39,6 +39,7 @@ The preset editor gives each style these fonts when it is chosen (`styleFamilyFo
 | Ombelle | Figtree | Bricolage Grotesque | Geist Mono |
 | Papier | Instrument Sans | Fraunces | IBM Plex Mono |
 | Organic | Nunito | Young Serif | DM Mono |
+| Retro futurism | Exo 2 | Michroma | Space Mono |
 | Liquid glass | Inter | Inter Tight | JetBrains Mono |
 
 Licences and versions were read from the npm registry on 2026-11-14 (`npm view <package> version license`).

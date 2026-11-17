@@ -1,6 +1,6 @@
 # Popover
 
-Popover is a non-modal panel anchored to a trigger, built on the reviewed Radix Popover primitive. Use it for short forms, share links and details that the user dismisses by clicking away. It is available in flat, minimalist, neo brutalism, ombelle, papier, and organic, in light and dark mode, and as an experimental liquid glass style. The template is a client component. Use [Dialog](../03-components-styles-accessibility.md) for anything that needs a decision or blocks the page.
+Popover is a non-modal panel anchored to a trigger, built on the reviewed Radix Popover primitive. Use it for short forms, share links and details that the user dismisses by clicking away. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode, and as an experimental liquid glass style. The template is a client component. Use [Dialog](../03-components-styles-accessibility.md) for anything that needs a decision or blocks the page.
 
 ## Install and compose
 

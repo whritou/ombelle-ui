@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add the Retro futurism style family, the seventh stable family, for all 57 components in light and dark: cream and indigo (a violet night sky in dark) with a rocket-orange primary and a lagoon-teal secondary, Michroma headings, Exo 2 text and Space Mono code, pill controls with a 2px outline and a hard key shadow that they drop onto when pressed, two-tone scanline fills, a sunset band with a striped sun on cards and table headers, a striped band on dialogs, and striped progress and slider fills. The preset schema gains `retro-futurism` in `styleFamily`, which older CLIs reject, and the website offers Retro futurism only once the published installer is 0.8.2. See decision 0008.
+- Add seven Retro futurism palettes (Sunset, Orbit, Neon, Lunar, Atomic, Aurora, Cosmos) to the preset editor, each a complete light and dark set, and start Retro futurism with Exo 2, Michroma and Space Mono in both editors.
+
 ## 0.8.1 — 16 November 2026
 
 - Publish CLI 0.8.1: the website now offers Organic and DM Mono, and its install commands use it. The registry tarball matched the tested candidate byte for byte.
