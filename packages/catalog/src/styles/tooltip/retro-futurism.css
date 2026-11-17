@@ -96,4 +96,4 @@
 [data-slot='tooltip-arrow']{fill:var(--foreground);stroke:none}
 [data-slot='tooltip-shortcut-key']{font-family:var(--font-mono,ui-monospace,monospace)}
 @media (forced-colors: active){[data-slot='tooltip-content']{background:Canvas;color:CanvasText;border:2px solid CanvasText;box-shadow:none;forced-color-adjust:none}[data-slot='tooltip-arrow']{fill:Canvas;stroke:CanvasText;forced-color-adjust:none}}
-[data-slot='tooltip-content']{border-radius:var(--rf-pill);box-shadow:0 3px 0 var(--primary)}
+[data-slot='tooltip-content']{border-radius:1rem;box-shadow:0 3px 0 var(--primary)}

@@ -321,10 +321,11 @@ describe('retro-futurism styles', () => {
       expect(css).not.toContain('--rf-stripes')
     })
 
-    it('tooltips are pills on a primary key and keep their arrow', () => {
+    it('tooltips are rounded on a primary key and keep their arrow', () => {
       const css = layerOf('tooltip')
       const content = rule(css, "[data-slot='tooltip-content']")
-      expect(content).toContain('border-radius:var(--rf-pill)')
+      // A fixed 1rem radius is a pill on one line and keeps wrapped text inside (final review).
+      expect(content).toContain('border-radius:1rem')
       expect(content).toContain('0 3px 0 var(--primary)')
       expect(rule(css, "[data-slot='tooltip-arrow']")).toContain('fill:var(--foreground)')
     })
