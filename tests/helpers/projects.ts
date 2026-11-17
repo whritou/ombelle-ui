@@ -20,7 +20,7 @@ export async function createProject(kind: 'vite' | 'next'): Promise<string> {
         'react-dom': '19.3.1',
         tailwindcss: '4.3.3',
         [kind === 'vite' ? 'vite' : 'next']:
-          kind === 'vite' ? '8.3.4' : '16.4.2',
+          kind === 'vite' ? '8.3.4' : '16.4.5',
       },
     }),
   )
