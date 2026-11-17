@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Draw calendar days from the neighbouring month in the muted text colour at full opacity in every family. They were the day button's foreground faded to 60% opacity, which measured 3.8 to 4.5:1 on light palettes in Ombelle, Papier, Organic, Retro futurism and Flat. Disabled days keep their dimmed, struck-through look.
+
 ## 0.8.2 — 17 November 2026
 
 - Publish CLI 0.8.2: the website and both editors now offer Retro futurism, and its install commands use it. The registry tarball matched the tested candidate byte for byte.
