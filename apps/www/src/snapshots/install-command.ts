@@ -3,7 +3,7 @@ import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSou
 import { usesExtendedTypography, type PresetTypography } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
-export const publishedInstaller = { packageName: publicCliPackageName, version: '0.8.1' } as const
+export const publishedInstaller = { packageName: publicCliPackageName, version: '0.8.2' } as const
 export const catalogRecipeMinimumCli = '0.6.0'
 export const catalogRecipesAvailable = catalogRecipeInstallerSupported(publishedInstaller.version) ||
   (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES === '1')
