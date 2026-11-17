@@ -56,5 +56,6 @@ export const supportedComponentIds = [
   'carousel',
   'aspect-ratio',
   'toolbar',
+  'prose',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

@@ -4546,6 +4546,45 @@ export const componentRecipeSchema = {
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "prose"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "measure": {
+              "enum": [
+                "narrow",
+                "default",
+                "wide"
+              ],
+              "default": "default",
+              "title": "Measure"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Heading",
+              "maxLength": 200,
+              "default": "Building an app shell",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

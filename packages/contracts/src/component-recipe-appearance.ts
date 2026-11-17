@@ -44,6 +44,7 @@ export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = 
   carousel: [layout('carousel-content', 'Slides'), mark('carousel-dot', 'Dot')],
   'aspect-ratio': [surface('aspect-ratio', 'Frame')],
   toolbar: [surface('toolbar', 'Toolbar'), mark('toolbar-toggle-item', 'Toggle')],
+  prose: [text('prose', 'Text'), text('prose-lead', 'Lead')],
   'color-picker': [surface('color-picker-trigger', 'Trigger'), surface('color-picker-content', 'Panel', 'popover'), mark('color-picker-area-thumb', 'Marker')],
   'context-menu': [surface('context-menu-content', 'Menu', 'popover'), surface('context-menu-item', 'Item')],
   'input-group': [surface('input-group', 'Group', 'background'), text('input-group-input', 'Input'), text('input-group-textarea', 'Textarea'), layout('input-group-addon', 'Addon'), text('input-group-text', 'Addon text'), surface('input-group-button', 'Action')],

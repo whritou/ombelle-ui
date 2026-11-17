@@ -40,6 +40,7 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'carousel',
   'aspect-ratio',
   'toolbar',
+  'prose',
   'input-group',
   'sheet',
   'alert-dialog',

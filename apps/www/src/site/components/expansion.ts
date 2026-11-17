@@ -206,4 +206,10 @@ export const expansionDocs = {
     states: 'Default, pressed, focus, disabled, overflowing, menu open', basis: 'Reviewed Radix Toolbar and Dropdown Menu; Base UI Toolbar, Toggle Group and Menu in the Base UI edition', client: true,
     usage: expansionExamples.toolbar, minimumCli: '0.7.6',
   },
+  prose: {
+    name: 'Prose', description: 'Styles the headings, paragraphs, lists, quotes, code and tables written inside it, for guides and articles.',
+    api: 'Prose (measure narrow, default or wide), ProseLead',
+    states: 'Narrow, default and wide measure, long words and URLs, a wide table that scrolls, nested Code Block', basis: 'CSS on the elements inside one slot, one server template for both editions', client: false,
+    usage: expansionExamples.prose, minimumCli: '0.9.0',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

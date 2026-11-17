@@ -244,7 +244,7 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
 })
 
 it('requests only components the family supports', () => {
-  expect(previewComponentIds('flat')).toHaveLength(57)
+  expect(previewComponentIds('flat')).toHaveLength(58)
   expect(previewComponentIds('liquid-glass')).toEqual([
     'alert',
     'accordion',
@@ -303,6 +303,7 @@ it('requests only components the family supports', () => {
     'carousel',
     'aspect-ratio',
     'toolbar',
+    'prose',
   ])
 })
 

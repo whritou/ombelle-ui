@@ -149,10 +149,15 @@ async function writeEdition(family: (typeof styleFamilies)[number], edition: Edi
     root + '/components-076-scenario.tsx',
     (await fs.readFile('fixtures/shared/components-076-scenario.tsx', 'utf8')).replaceAll('@/components/ui', './components/ui'),
   )
+  // The 0.9 app shell fixture, shared by both editions' scenarios.
+  await fs.writeFile(
+    root + '/app-shell-09-scenario.tsx',
+    (await fs.readFile('fixtures/shared/app-shell-09-scenario.tsx', 'utf8')).replaceAll('@/components/ui', './components/ui'),
+  )
   await fs.writeFile(
     root + '/preview.css',
     // The audit pages render specimens from ../../audit/*.json, whose layout classes Tailwind must see.
-    '@import "../../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n@source "./components-076-scenario.tsx";\n@source "../../audit";\n',
+    '@import "../../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n@source "./components-076-scenario.tsx";\n@source "./app-shell-09-scenario.tsx";\n@source "../../audit";\n',
   )
   await fs.writeFile(root + '/entry.tsx', "import './preview.css'\nexport { default } from './scenario'\n")
 }

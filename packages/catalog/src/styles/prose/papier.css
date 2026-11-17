@@ -1,0 +1,167 @@
+/* papier Prose */
+/* Element styles sit at the prose slot's specificity, so a className can override them, and skip nested catalog components. */
+[data-slot='prose'] {
+  box-sizing: border-box;
+  max-inline-size: 72ch;
+  min-inline-size: 0;
+  color: var(--foreground);
+  font-family: var(--font-family);
+  overflow-wrap: break-word;
+  font-size:1.03125rem;
+  line-height:1.7;
+}
+[data-slot='prose'][data-measure='narrow'] {
+  max-inline-size: 60ch;
+}
+[data-slot='prose'][data-measure='wide'] {
+  max-inline-size: 88ch;
+}
+[data-slot='prose'] :where(*):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block:0;
+}
+[data-slot='prose'] :where(p):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(ul):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(ol):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(dl):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(figure):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(pre):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(table):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-end:1.25rem;
+}
+[data-slot='prose'] :where(h1):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font:600 3rem/1.04 var(--font-heading, var(--font-family));
+  letter-spacing:-0.01em;
+  margin-block-end:1rem;
+  text-wrap:balance;
+}
+[data-slot='prose'] :where(h2):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font:600 1.875rem/1.15 var(--font-heading, var(--font-family));
+  padding-block-start:1rem;
+  border-block-start:4px double var(--border);
+  margin-block:2.5rem 0.875rem;
+  text-wrap:balance;
+}
+[data-slot='prose'] :where(h3):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font:600 1.375rem/1.25 var(--font-heading, var(--font-family));
+  margin-block:2rem 0.625rem;
+}
+[data-slot='prose'] :where(h4):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font:italic 600 1.0625rem/1.4 var(--font-heading, var(--font-family));
+  margin-block:1.5rem 0.5rem;
+}
+[data-slot='prose-lead'] {
+  margin-block: 0 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 1.1875em;
+  line-height: 1.55;
+}
+[data-slot='prose'] :where(a):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  color:var(--foreground);
+  text-decoration-line:underline;
+  text-decoration-thickness:2px;
+  text-decoration-color:var(--primary);
+  text-underline-offset:4px;
+}
+[data-slot='prose'] :where(ul):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(ol):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding-inline-start:1.625rem;
+}
+[data-slot='prose'] :where(li + li):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-start:0.375rem;
+}
+[data-slot='prose'] :where(li > ul):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(li > ol):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block:0.375rem 0;
+}
+[data-slot='prose'] :where(li::marker):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  color:var(--muted-foreground);
+}
+[data-slot='prose'] :where(ol > li::marker):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font:600 1.0625rem var(--font-heading, var(--font-family));
+  color:color-mix(in oklab, var(--primary) 80%, var(--foreground));
+}
+[data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding-block:0.25rem;
+  padding-inline-start:1.5rem;
+  border-inline-start:4px double var(--border);
+  font:italic 500 1.3125rem/1.5 var(--font-heading, var(--font-family));
+  margin-inline:0;
+}
+[data-slot='prose'] :where(blockquote footer):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(figcaption):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-start:0.375rem;
+  color:var(--muted-foreground);
+  font-size:0.8125rem;
+  font-style:normal;
+}
+[data-slot='prose'] :where(:not(pre) > code):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding:0.0625rem 0.3125rem;
+  border:1px solid var(--border);
+  border-radius:2px;
+  background:var(--secondary);
+  font:500 0.86em var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  overflow-wrap:anywhere;
+}
+[data-slot='prose'] :where(kbd):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding:0.0625rem 0.375rem;
+  border:1px solid var(--border);
+  border-block-end-width:2px;
+  border-radius:calc(var(--radius) * 0.5);
+  background:var(--muted);
+  font:600 0.8em var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+[data-slot='prose'] :where(pre):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  max-inline-size:100%;
+  overflow-x:auto;
+  padding:1rem;
+  border:var(--border-width) solid var(--border);
+  border-radius:var(--radius);
+  background:var(--muted);
+  font:400 0.875em/1.6 var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+[data-slot='prose'] :where(hr):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  inline-size:140px;
+  margin-inline:auto;
+  border:0;
+  border-block-start:4px double var(--border);
+  margin-block:2.25rem;
+}
+[data-slot='prose'] :where(img):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(video):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  display:block;
+  max-inline-size:100%;
+  block-size:auto;
+  border-radius:var(--radius);
+}
+[data-slot='prose'] :where(table):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  display:block;
+  max-inline-size:100%;
+  overflow-x:auto;
+  border-collapse:collapse;
+  font-size:0.9375em;
+}
+[data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)),
+[data-slot='prose'] :where(td):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding:0.5rem 0.75rem;
+  border-block-end:1px solid var(--border);
+  text-align:start;
+  vertical-align:top;
+}
+[data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font-weight:700;
+  white-space:nowrap;
+}
+@media (forced-colors: active) {
+  [data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)),
+  [data-slot='prose'] :where(hr):where(:not([data-slot], [data-prose] [data-slot] *)),
+  [data-slot='prose'] :where(:not(pre) > code):where(:not([data-slot], [data-prose] [data-slot] *)),
+  [data-slot='prose'] :where(kbd):where(:not([data-slot], [data-prose] [data-slot] *)),
+  [data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)),
+  [data-slot='prose'] :where(td):where(:not([data-slot], [data-prose] [data-slot] *)) {
+    border-color:CanvasText;
+  }
+  [data-slot='prose'] :where(a):where(:not([data-slot], [data-prose] [data-slot] *)) {
+    color:LinkText;
+  }
+}

@@ -38,7 +38,7 @@ const normalize = (css: string) =>
 
 describe('liquid-glass compile', () => {
   it('compiles the fifty-seven experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -79,6 +79,7 @@ describe('liquid-glass compile', () => {
       'components/ui/password-field.css',
       'components/ui/popover.css',
       'components/ui/progress.css',
+      'components/ui/prose.css',
       'components/ui/radio-group.css',
       'components/ui/scroll-area.css',
       'components/ui/select.css',

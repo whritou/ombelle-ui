@@ -226,6 +226,14 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     }
     case 'aspect-ratio':
       return node('AspectRatio', { ratio: ratios[props.ratio ?? '16/9'] }, node('span', {}, content.label))
+    case 'prose':
+      // A fixed article under the recipe's heading: Prose styles the elements written inside it.
+      return node('Prose', { measure: props.measure },
+        node('h2', {}, content.label),
+        node('ProseLead', {}, 'A sidebar, a header and a content area that reads well at any width.'),
+        node('p', {}, 'Add the ', node('code', {}, 'sidebar'), ' component, then wrap the layout in ', node('a', { href: '#provider' }, 'SidebarProvider'), '.'),
+        node('ul', {}, node('li', {}, 'Collapses to icons on desktop'), node('li', {}, 'Opens as a sheet on phones')),
+        node('blockquote', {}, 'Keep navigation where people expect it.'))
     case 'toolbar': {
       const toggles = props.toggles ?? 'single'
       const items = content.items

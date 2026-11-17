@@ -16,6 +16,7 @@ const editedFields = {
   'number-input': 'label', 'color-picker': 'label',
   'code-block': 'title',
   'password-field': 'label', carousel: 'label', 'aspect-ratio': 'label', toolbar: 'label',
+  prose: 'label',
 } as const satisfies Record<Exclude<ComponentRecipe['component'], 'accordion' | 'tabs' | 'stepper'>, string>
 
 export function catalogRecipeFixtures(): readonly ComponentRecipe[] {

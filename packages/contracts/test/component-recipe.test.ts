@@ -676,3 +676,10 @@ it('keeps the 0.7.6 fields out of the default recipe fields', () => {
   expect(defaultRecipeFields(componentRecipeFields('tooltip').content)).not.toHaveProperty('shortcut')
   expect(validateComponentRecipe(variants076Draft('tooltip')).content).not.toHaveProperty('shortcut')
 })
+
+it('accepts the default 0.9 prose recipe with its documented defaults, and rejects an unknown measure', () => {
+  expect(validateComponentRecipe(draft076('prose')).component).toBe('prose')
+  expect(defaultRecipeFields(componentRecipeFields('prose').props)).toEqual({ measure: 'default' })
+  expect(defaultRecipeFields(componentRecipeFields('prose').content)).toEqual({ label: 'Building an app shell' })
+  expect(() => validateComponentRecipe(draft076('prose', { measure: 'huge' }))).toThrow()
+})

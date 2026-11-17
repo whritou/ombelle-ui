@@ -614,6 +614,7 @@ describe('catalog contract', () => {
       'carousel',
       'aspect-ratio',
       'toolbar',
+      'prose',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)
