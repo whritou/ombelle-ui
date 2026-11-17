@@ -5,6 +5,10 @@ import { describe, expect, it } from 'vitest'
 const styles = 'packages/catalog/src/styles/'
 const read = (file: string) => fs.readFileSync(styles + file, 'utf8').replace(/\r\n?/g, '\n')
 const layer = (id: string) => read(id + '/retro-futurism.css').split('/* retro-futurism layer */')[1] ?? ''
+const retroComponentIds = fs
+  .readdirSync(styles, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && fs.existsSync(styles + entry.name + '/retro-futurism.css'))
+  .map((entry) => entry.name)
 // Every rule with exactly this selector, outside forced-colors blocks, joined in cascade order.
 const withoutForcedColors = (css: string) => {
   for (let at = css.search(/@media\s*\(forced-colors:\s*active\)/); at >= 0; at = css.search(/@media\s*\(forced-colors:\s*active\)/)) {
@@ -109,7 +113,14 @@ describe('retro-futurism deferred review minors', () => {
   it('keeps a card description muted outside a banded header', () => {
     const css = layer('card')
     expect(block(css, "[data-slot='card-description']")).toContain('color:var(--rf-desc,var(--muted-foreground))')
-    expect(block(css, "[data-slot='card-header']")).toContain('--rf-desc:var(--rf-head-desc,inherit)')
+    // In a banded header the description takes the header text colour (primary-foreground on the band).
+    // `inherit` in a custom property copies the parent's unset --rf-desc, which fell back to the muted
+    // colour and left the description at 1.1:1 on the band; currentColor resolves to the header colour.
+    expect(block(css, "[data-slot='card-header']")).toContain('--rf-desc:var(--rf-head-desc,currentColor)')
+  })
+
+  it('never sets a retro-futurism custom property to inherit', () => {
+    for (const id of retroComponentIds) expect(layer(id), id).not.toMatch(/--[\w-]+:[^;{}]*\binherit\b/)
   })
 
   it('draws a link underline in the card header in the header text colour', () => {
