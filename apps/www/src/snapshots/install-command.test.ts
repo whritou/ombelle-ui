@@ -166,7 +166,7 @@ it('holds back commands for glass material settings until the installer that acc
   expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, next)).toBe(false)
 })
 
-it('the site lists style families as Ombelle, Papier, Organic, Retro futurism, Minimalist, Neo-Brutalism, Flat, Liquid Glass now that 0.8.2 is published', () => {
+it('the site lists style families as Ombelle, Papier, Organic, Retro futurism, Minimalist, Neo-Brutalism, Flat, Liquid Glass now that 0.8.3 is published', () => {
   expect(offeredStyleFamilies()).toEqual(['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
   expect(siteFamilyOrder).toEqual(['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
 })
