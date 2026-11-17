@@ -1,6 +1,6 @@
 # 0.9 app shell: Sidebar, Navigation Menu, Resizable, Data Table, Menubar and Prose, and the website rebuilt on them
 
-0.9 adds the six app shell components to the catalog, in both editions (Radix and Base UI) and all seven style families. It then rebuilds the website's own header, docs and component navigation, editor layout and support tables on them. The work is done in two tracks: the catalog first, then the site.
+0.9 adds the six app shell components to the catalog, in both editions (Radix and Base UI) and all eight style families. It then rebuilds the website's own header, docs and component navigation, editor layout and support tables on them. The work is done in two tracks: the catalog first, then the site.
 
 ## Intent
 
@@ -20,7 +20,7 @@ Decisions taken in brainstorming (17 November 2026):
 - **Use the new components as much as possible, even where that changes how the site works.** Wherever one of the six fits a hand-built part of the site, it replaces it. Behaviour may change; keyboard access may not be lost.
 - **Both editor side panels become Sidebars:** the preset editor's Review drawer and the component editors' inspector.
 - **Catalog first, then the site.** Track 1 ships all six components in the catalog. Track 2 rebuilds the site on them and branches from track 1.
-- **Retro futurism is out of scope.** It is planned as 0.8.2, but it is not a family in the code. Whichever of 0.8.2 and 0.9 lands second draws these six components in Retro futurism, using the `*09*` Retro futurism boards.
+- **Retro futurism is in scope.** It shipped in 0.8.2 (#163) while this doc was being written, so these six components are drawn in it too, from the `RetroFuturism09*` boards. It brings the count to eight families.
 
 Calls I made, which were not discussed:
 
@@ -35,11 +35,10 @@ Calls I made, which were not discussed:
 ## Goals, non-goals, anti-goals
 
 - **Goals:**
-  - Six components that match their boards in all seven families and pass the specimen audit and accessibility checks in both editions.
+  - Six components that match their boards in all eight families and pass the specimen audit and accessibility checks in both editions.
   - A website whose header, docs and component navigation, editor layout, editor top bar, guide text and support tables are built from them.
   - Every hand-built part of the site that one of the six components can take over is moved onto it. The editors may change behaviour where a component takes over, but every action stays reachable by keyboard.
 - **Non-goals:**
-  - Retro futurism.
   - 1.0 blocks: a full dashboard or app template is not a component.
   - Releasing or bumping the CLI.
   - Restyling the site.
@@ -58,7 +57,7 @@ The 0.7.5 and 0.7.6 conventions carry over. Read the "Shared conventions" sectio
 
 - **Files per component:**
   - The Radix template `packages/catalog/src/templates/<id>.tsx`, and a Base UI template `templates/base/<id>.tsx` only where the primitive differs.
-  - `styles/<id>/<family>.css` for each of the seven families: flat, liquid-glass, minimalist, neo-brutalism, ombelle, organic and papier.
+  - `styles/<id>/<family>.css` for each of the eight families: flat, liquid-glass, minimalist, neo-brutalism, ombelle, organic, papier and retro-futurism.
   - Registration in `packages/contracts/src/component-ids.ts` and `style-families.ts`, and in `packages/catalog/src/component-slots.ts`, `index.ts` and `expansion-examples.ts`.
   - Tests in `packages/catalog/test/<id>.test.ts`.
 - **Parts** follow shadcn names, forward native props, refs, `className` and `style`, and carry a `data-slot` named after the part.
@@ -289,7 +288,6 @@ Record the environment of each check.
 
 ## Out of scope
 
-- Retro futurism, which arrives with 0.8.2 or whichever of the two lands second.
 - Blocks (1.0), Chart, and Tabs as links.
 - A CLI component dependency graph.
 - Server-side Data Table recipes and virtualised rows.
