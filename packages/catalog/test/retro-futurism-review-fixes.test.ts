@@ -5,10 +5,25 @@ import { describe, expect, it } from 'vitest'
 const styles = 'packages/catalog/src/styles/'
 const read = (file: string) => fs.readFileSync(styles + file, 'utf8').replace(/\r\n?/g, '\n')
 const layer = (id: string) => read(id + '/retro-futurism.css').split('/* retro-futurism layer */')[1] ?? ''
-const block = (css: string, selector: string) => {
-  const at = css.lastIndexOf(selector + '{')
-  return at < 0 ? '' : css.slice(at, css.indexOf('}', at))
+// Every rule with exactly this selector, outside forced-colors blocks, joined in cascade order.
+const withoutForcedColors = (css: string) => {
+  for (let at = css.search(/@media\s*\(forced-colors:\s*active\)/); at >= 0; at = css.search(/@media\s*\(forced-colors:\s*active\)/)) {
+    let depth = 0
+    let end = css.indexOf('{', at)
+    do {
+      if (css[end] === '{') depth++
+      else if (css[end] === '}') depth--
+      end++
+    } while (depth > 0 && end < css.length)
+    css = css.slice(0, at) + css.slice(end)
+  }
+  return css
 }
+const block = (css: string, selector: string) =>
+  [...withoutForcedColors(css).matchAll(/(^|[}\n])([^{}]+)\{([^{}]*)\}/g)]
+    .filter(match => match[2]!.trim() === selector)
+    .map(match => selector + '{' + match[3])
+    .join('\n')
 
 describe('retro-futurism specimen audit fixes', () => {
   // The indigo ring drawn inside an orange button measured under 3:1, so the group no longer clips its children.
@@ -61,3 +76,57 @@ describe('retro-futurism final review fixes', () => {
     expect(block(layer('tooltip'), "[data-slot='tooltip-content']")).toContain('border-radius:1rem')
   })
 })
+
+describe('retro-futurism deferred review minors', () => {
+  // Fields keep their 14px corners on focus, like the base Input; only the ring changes.
+  it.each([
+    ['textarea', "[data-slot='textarea']:focus-visible"],
+    ['select', "[data-slot='select-trigger']:focus-visible,[data-slot='select-trigger'][aria-expanded='true']"],
+    ['native-select', "[data-slot='native-select']:focus-visible"],
+    ['combobox', "[data-slot='combobox-field']:focus-within"],
+    ['input-group', "[data-slot='input-group']:focus-within"],
+    ['password-field', "[data-slot='password-field-control']:focus-within"],
+    ['input-otp', "[data-slot='input-otp-slot'][data-active],[data-slot='input-otp-slot']:focus"],
+  ])('%s keeps its corners when focused', (id, selector) => {
+    const focus = block(layer(id), selector)
+    expect(focus).toContain('outline:3px solid var(--ring)')
+    expect(focus).not.toContain('--rf-r3')
+    expect(read(id + '/retro-futurism.css')).not.toMatch(/border-radius 0\.4s/)
+  })
+
+  // --rf-e2 reaches 8px below its box (6px offset plus 2px spread); siblings must not cover it.
+  it.each([
+    ['toolbar', "[data-slot='toolbar']"],
+    ['table', "[data-slot='table-container']"],
+    ['accordion', "[data-slot='accordion'][data-appearance='bordered']"],
+    ['scroll-area', "[data-slot='scroll-area']"],
+    ['code-block', "[data-slot='code-block']"],
+    ['aspect-ratio', "[data-slot='aspect-ratio']"],
+  ])('%s leaves room for its 8px key shadow', (id, selector) => {
+    expect(block(layer(id), selector)).toContain('margin-block-end:8px')
+  })
+
+  it('keeps a card description muted outside a banded header', () => {
+    const css = layer('card')
+    expect(block(css, "[data-slot='card-description']")).toContain('color:var(--rf-desc,var(--muted-foreground))')
+    expect(block(css, "[data-slot='card-header']")).toContain('--rf-desc:var(--rf-head-desc,inherit)')
+  })
+
+  it('draws a link underline in the card header in the header text colour', () => {
+    expect(block(layer('card'), "[data-slot='card-header'] :is(button,a):is([data-variant='ghost'],[data-variant='link'])")).toContain('text-decoration-color:currentColor')
+  })
+
+  it('draws one outline on item media and keeps item boundaries in forced colours', () => {
+    const css = layer('item')
+    expect(block(css, "[data-slot='item-media'][data-variant='icon'],[data-slot='item-media'][data-variant='image']")).toContain('border:0')
+    expect(css.match(/\[data-slot='item'\]:hover\{/g)).toHaveLength(1)
+    const forced = css.split('@media (forced-colors: active)').slice(1).join('')
+    expect(forced).toMatch(/\[data-slot='item-media'\]\[data-variant='image'\][^{]*\{[^}]*border:2px solid CanvasText/)
+    expect(forced).toMatch(/\[data-item-action\][^{]*\{[^}]*border:2px solid (CanvasText|ButtonText)/)
+  })
+
+  it('rounds compact alerts with a fixed radius so wrapped text stays inside', () => {
+    expect(block(layer('alert'), "[data-slot='alert'][data-layout='compact']")).toContain('border-radius:1.375rem')
+  })
+})
+

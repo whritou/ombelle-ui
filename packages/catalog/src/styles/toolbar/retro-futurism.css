@@ -273,7 +273,7 @@
 [data-slot='toolbar-overflow-indicator']{border-radius:7px}
 [data-slot='toolbar-overflow-separator']{border-block-start:2px solid var(--rf-rule)}
 @media (forced-colors: active){[data-slot='toolbar']{border:2px solid CanvasText;box-shadow:none}[data-slot='toolbar-toggle-item']:is([data-state='on'],[aria-pressed='true']){border:2px solid Highlight;box-shadow:none}[data-slot='toolbar-overflow-content']{border:2px solid CanvasText;box-shadow:none}}
-[data-slot='toolbar']{border-radius:var(--rf-pill);padding:6px 12px;margin-block-end:6px}
+[data-slot='toolbar']{border-radius:var(--rf-pill);padding:6px 12px;margin-block-end:8px}
 [data-slot='toolbar-button'],[data-slot='toolbar-link'],[data-slot='toolbar-toggle-item'],[data-slot='toolbar-overflow-trigger']{border-radius:var(--rf-pill)}
 [data-slot='toolbar-link']{text-decoration-thickness:2px}
 [data-slot='toolbar-separator']{inline-size:2px;border-radius:0}

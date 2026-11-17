@@ -180,7 +180,6 @@ button[data-slot='item']:focus-visible {
 }
 /* retro-futurism layer */
 [data-slot='item']{border-radius:var(--rf-r3);font-weight:500;transition:border-radius 0.4s,background-color 0.15s}
-[data-slot='item']:hover{border-radius:var(--rf-r3)}
 [data-slot='item'][data-variant='outline']{border:0;background:transparent;box-shadow:inset 0 0 0 2px var(--input)}
 [data-slot='item'][data-variant='muted']{background:var(--muted)}
 [data-slot='item-media'][data-variant='image']{border:0;border-radius:var(--rf-r2);background:var(--muted)}
@@ -191,5 +190,6 @@ button[data-slot='item']:focus-visible {
 @media (forced-colors: active){[data-slot='item'][data-variant='outline']{border:2px solid CanvasText;box-shadow:none}[data-slot='item-separator']{background:CanvasText}}
 [data-slot='item']:hover{border-radius:var(--rf-r3)}
 [data-slot='item'][data-variant='outline']{box-shadow:inset 0 0 0 2px var(--border)}
-[data-slot='item-media'][data-variant='icon'],[data-slot='item-media'][data-variant='image']{box-shadow:inset 0 0 0 2px var(--border)}
+[data-slot='item-media'][data-variant='icon'],[data-slot='item-media'][data-variant='image']{border:0;box-shadow:inset 0 0 0 2px var(--border)}
 [data-item-action]{box-shadow:inset 0 0 0 2px var(--border)}
+@media (forced-colors: active){[data-slot='item-media'][data-variant='icon'],[data-slot='item-media'][data-variant='image']{border:2px solid CanvasText;box-shadow:none}[data-item-action]{border:2px solid ButtonText;box-shadow:none}}

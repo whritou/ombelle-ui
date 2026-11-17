@@ -166,3 +166,4 @@
 [data-slot='accordion-trigger']:is([data-appearance='flush'] *):hover{background:transparent;text-decoration:underline var(--primary) 1.5px;text-underline-offset:6px}
 @media (forced-colors: active){[data-slot='accordion'][data-appearance='bordered']{border:2px solid CanvasText;box-shadow:none}[data-slot='accordion'][data-appearance='bordered'] [data-slot='accordion-item'] + [data-slot='accordion-item']{border-block-start-color:CanvasText}}
 [data-slot='accordion-trigger']{font-size:0.875rem;line-height:1.4}
+[data-slot='accordion'][data-appearance='bordered']{margin-block-end:8px}

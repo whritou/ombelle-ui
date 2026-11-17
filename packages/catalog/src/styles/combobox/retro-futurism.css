@@ -286,8 +286,8 @@
 }
 /* end 0.7.5 scrollbars */
 /* retro-futurism layer */
-[data-slot='combobox-field']{border-width:2px;border-radius:var(--rf-r2);background:var(--card);box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent);transition:border-color var(--motion-duration),border-radius 0.4s}
-[data-slot='combobox-field']:focus-within{border-color:var(--primary);border-radius:var(--rf-r3);outline:3px solid var(--ring);outline-offset:2px;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent)}
+[data-slot='combobox-field']{border-width:2px;border-radius:var(--rf-r2);background:var(--card);box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent);transition:border-color var(--motion-duration)}
+[data-slot='combobox-field']:focus-within{border-color:var(--primary);outline:3px solid var(--ring);outline-offset:2px;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent)}
 [data-slot='combobox-content']{border:0;border-radius:var(--rf-r3);background:var(--popover);box-shadow:var(--rf-e3);padding:6px}
 [data-slot='combobox-match']{background:var(--warning);color:inherit;border-radius:5px;padding:0 3px}
 [data-slot='combobox-item'],[data-slot='combobox-create']{border-radius:var(--rf-r2);font-weight:600}

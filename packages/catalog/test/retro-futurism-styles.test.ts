@@ -249,11 +249,12 @@ describe('retro-futurism styles', () => {
   })
 
   describe('status board', () => {
-    it('alerts draw a 2px outline and a 4px key in their tone, and compact alerts are pills', () => {
+    it('alerts draw a 2px outline and a 4px key in their tone, and compact alerts are rounded', () => {
       const css = layerOf('alert')
       expect(rule(css, "[data-slot='alert']")).toMatch(/box-shadow:inset 0 0 0 2px var\(--rf-tone\),0 4px 0 var\(--rf-tone\)/)
       for (const variant of ['destructive', 'success', 'warning', 'info']) expect(rule(css, `[data-slot='alert'][data-variant='${variant}']`)).toContain('--rf-tone:')
-      expect(rule(css, "[data-slot='alert'][data-layout='compact']")).toContain('border-radius:var(--rf-pill)')
+      // A fixed radius reads as a pill on one line and keeps wrapped text inside (deferred review minor).
+      expect(rule(css, "[data-slot='alert'][data-layout='compact']")).toContain('border-radius:1.375rem')
     })
 
     it('the toast shadow stays inside the 8px padding of its viewport', () => {

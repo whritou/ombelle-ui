@@ -296,9 +296,9 @@
 }
 /* end 0.7.5 scrollbars */
 /* retro-futurism layer */
-[data-slot='select-trigger']{border-width:2px;border-radius:var(--rf-r2);background:var(--card);font-weight:500;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent);transition:border-color var(--motion-duration),border-radius 0.4s}
+[data-slot='select-trigger']{border-width:2px;border-radius:var(--rf-r2);background:var(--card);font-weight:500;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent);transition:border-color var(--motion-duration)}
 [data-slot='select-trigger']:not(:disabled):hover{border-color:var(--primary)}
-[data-slot='select-trigger']:focus-visible,[data-slot='select-trigger'][aria-expanded='true']{border-color:var(--primary);border-radius:var(--rf-r3);outline:3px solid var(--ring);outline-offset:2px}
+[data-slot='select-trigger']:focus-visible,[data-slot='select-trigger'][aria-expanded='true']{border-color:var(--primary);outline:3px solid var(--ring);outline-offset:2px}
 [data-slot='select-trigger']:disabled{background:var(--muted);box-shadow:none}
 [data-slot='select-content']{border:0;border-radius:var(--rf-r3);background:var(--popover);box-shadow:var(--rf-e3);padding:6px}
 [data-slot='select-label']{font-weight:700;color:var(--muted-foreground)}

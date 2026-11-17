@@ -116,8 +116,7 @@
 }
 /* retro-futurism layer */
 [data-slot='input-otp-slot']{border-width:2px;border-radius:var(--rf-r2);background:var(--card);font-family:var(--font-mono,ui-monospace,monospace);font-weight:500;box-shadow:inset 0 3px 0 color-mix(in oklab,var(--border) 18%,transparent)}
-[data-slot='input-otp-slot'][data-active],[data-slot='input-otp-slot']:focus{border-color:var(--primary);border-radius:var(--rf-r3);outline:3px solid var(--ring);outline-offset:2px}
-[data-slot='input-otp']:has([data-input-otp]:focus-visible){border-radius:var(--rf-r3)}
+[data-slot='input-otp-slot'][data-active],[data-slot='input-otp-slot']:focus{border-color:var(--primary);outline:3px solid var(--ring);outline-offset:2px}
 [data-slot='input-otp-separator']{block-size:4px;border:0;border-radius:2px;background:var(--border)}
 @media (forced-colors: active){[data-slot='input-otp-separator']{background:CanvasText}}
 [data-slot='input-otp-slot']{border-radius:12px}

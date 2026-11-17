@@ -130,3 +130,4 @@
 @media (forced-colors: active){[data-slot='scroll-area']{border:2px solid CanvasText;box-shadow:none}[data-slot='scroll-area-thumb']{background:CanvasText;opacity:1}}
 [data-slot='scroll-area']{border-radius:var(--rf-r3)}
 [data-slot='scroll-area-thumb']{border-radius:var(--rf-pill)}
+[data-slot='scroll-area']{margin-block-end:8px}
