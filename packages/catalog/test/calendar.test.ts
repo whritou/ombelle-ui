@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -102,5 +103,26 @@ describe('date helpers', () => {
     const range = ui.formatDate({ from: new Date(2026, 10, 12), to: new Date(2026, 11, 3) }, { dateStyle: 'medium' }, 'en-US')
     expect(range).toContain('Nov 12')
     expect(range).toContain('Dec 3')
+  })
+})
+
+// Days of the neighbouring month stay clickable, so their text needs 4.5:1. Dimming them with opacity faded the
+// day button's own foreground colour to 3.8-4.5:1 on light palettes in five families; the button now takes the
+// muted text colour at full opacity. Disabled days keep their opacity: inactive controls are exempt.
+describe('Calendar outside days', () => {
+  const families = fs.readdirSync('packages/catalog/src/styles/calendar').filter(file => file.endsWith('.css'))
+  const rule = (css: string, selector: string) =>
+    [...css.replace(/\r\n?/g, '\n').matchAll(/(^|[}\n])([^{}@]+)\{([^{}]*)\}/g)]
+      .filter(match => match[2]!.trim() === selector).map(match => match[3]!.replace(/\s+/g, '')).join(';')
+
+  it('covers every style family', () => {
+    expect(families.length).toBeGreaterThanOrEqual(8)
+  })
+
+  it.each(families)('%s draws outside days in the muted colour at full opacity', file => {
+    const css = fs.readFileSync('packages/catalog/src/styles/calendar/' + file, 'utf8')
+    expect(rule(css, "[data-slot='calendar-day'][data-outside]")).not.toContain('opacity')
+    expect(rule(css, "[data-slot='calendar-day-button']:is([data-outside] > *)")).toContain('color:var(--muted-foreground)')
+    expect(rule(css, "[data-slot='calendar-day'][data-disabled]")).toContain('opacity:0.45')
   })
 })

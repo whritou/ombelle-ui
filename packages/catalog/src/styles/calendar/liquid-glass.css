@@ -154,7 +154,9 @@
 }
 [data-slot='calendar-day'][data-outside] {
   color: var(--muted-foreground);
-  opacity: 0.6;
+}
+[data-slot='calendar-day-button']:is([data-outside] > *) {
+  color: var(--muted-foreground);
 }
 [data-slot='calendar-day'][data-disabled] {
   color: var(--muted-foreground);
