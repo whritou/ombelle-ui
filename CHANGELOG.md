@@ -2,9 +2,7 @@
 
 ## Unreleased
 
-## 0.8.3 — 17 November 2026
-
-- Fix the Retro futurism Card description in a banded header, which kept the muted text colour on the sunset band (about 1.1:1 in every palette and mode); it now takes the header text colour. Outlined and subtle cards keep their muted description.
+- Fix the Retro futurism Card description in a banded header, which kept the muted text colour on the sunset band (about 1.1:1 in every palette and mode); it now takes the header text colour. Outlined and subtle cards keep their muted description. Installer 0.8.2 still ships the unreadable description until the next release.
 - Draw calendar days from the neighbouring month in the muted text colour at full opacity in every family. They were the day button's foreground faded to 60% opacity, which measured 3.8 to 4.5:1 on light palettes in Ombelle, Papier, Organic, Retro futurism and Flat. Disabled days keep their dimmed, struck-through look.
 
 ## 0.8.2 — 17 November 2026
