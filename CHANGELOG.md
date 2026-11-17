@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix the Retro futurism Card description in a banded header, which kept the muted text colour on the sunset band (about 1.1:1 in every palette and mode); it now takes the header text colour. Outlined and subtle cards keep their muted description. Installer 0.8.2 still ships the unreadable description until the next release.
+
 ## 0.8.2 — 17 November 2026
 
 - Publish CLI 0.8.2: the website and both editors now offer Retro futurism, and its install commands use it. The registry tarball matched the tested candidate byte for byte.
