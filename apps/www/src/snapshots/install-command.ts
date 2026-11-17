@@ -48,6 +48,13 @@ export const catalog076MinimumCli = '0.7.6'
 export const catalog076InstallNotice = `This recipe requires CLI ${catalog076MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
 // The 0.7.6 additions: new components.
 const catalog076Components = new Set(['password-field', 'carousel', 'aspect-ratio', 'toolbar'])
+export const catalog09MinimumCli = '0.9.0'
+export const catalog09InstallNotice = `This recipe requires CLI ${catalog09MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+// The 0.9 app shell components.
+const catalog09Components = new Set(['prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'])
+function needs09(recipe: Pick<ComponentRecipe, 'component'>, installer: { version: string }): boolean {
+  return catalog09Components.has(recipe.component) && compareVersions(installer.version, catalog09MinimumCli) < 0
+}
 // The 0.7.6 fields, in props or content, that older recipe schemas reject.
 const variantRecipeFields076: Readonly<Record<string, readonly string[]>> = {
   field: ['form', 'fieldset', 'legend', 'fields'], checkbox: ['group', 'legend', 'options'],
@@ -114,6 +121,8 @@ export function componentRecipeInstallBlocked(
 ): boolean {
   if (!catalogRecipeInstallerSupported(installer.version)) return true
   if (recipeFontsInstallBlocked(recipe, installer)) return true
+  if (needs09(recipe, installer)) return true
+  if (catalog09Components.has(recipe.component)) return false
   if (needs076(recipe, installer)) return true
   if (catalog076Components.has(recipe.component)) return false
   if (catalog075Components.has(recipe.component)) return compareVersions(installer.version, catalog075MinimumCli) < 0
@@ -155,6 +164,7 @@ export function installableRecipeInstallNotice(
     if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
     if (!componentRecipeInstallBlocked(recipe, installer)) return undefined
     if (recipeFontsInstallBlocked(recipe, installer)) return recipeFontsInstallNotice
+    if (needs09(recipe, installer)) return catalog09InstallNotice
     if (needs076(recipe, installer)) return catalog076InstallNotice
     if (catalog075Components.has(recipe.component) || (usesVariants075(recipe) && compareVersions(installer.version, catalog075MinimumCli) < 0)) return catalog075InstallNotice
     return displayComponents.has(recipe.component) || (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0)

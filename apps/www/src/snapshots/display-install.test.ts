@@ -23,6 +23,15 @@ it.each(['password-field', 'carousel', 'aspect-ratio', 'toolbar'] as const)('req
   expect(installableRecipeInstallNotice({ schemaVersion: '2.0', component, props: {} } as never, { version: '0.7.5' })).toBe(catalog076InstallNotice)
 })
 
+it.each(['prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'] as const)('requires CLI 0.9.0 for %s recipes', async component => {
+  const { catalog09InstallNotice, catalog09MinimumCli } = await import('./install-command')
+  expect(catalog09MinimumCli).toBe('0.9.0')
+  expect(componentRecipeInstallBlocked({ component, props: {} }, { version: '0.8.3' })).toBe(true)
+  expect(componentRecipeInstallBlocked({ component, props: {} }, { version: '0.9.0' })).toBe(false)
+  expect(installableRecipeInstallNotice({ schemaVersion: '2.0', component, props: {} } as never, { version: '0.8.3' })).toBe(catalog09InstallNotice)
+  expect(installableRecipeInstallNotice({ schemaVersion: '2.0', component, props: {} } as never, { version: '0.9.0' })).toBeUndefined()
+})
+
 it.each([
   ['field', { fieldset: 'default' }, { legend: 'x' }],
   ['field', { form: 'summary' }, {}],
