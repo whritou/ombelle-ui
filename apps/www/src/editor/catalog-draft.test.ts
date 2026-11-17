@@ -26,6 +26,8 @@ it.each(['card', 'badge'] as const)('starts a %s recipe with its style\'s fonts 
   expect(papier.appearance?.fonts).toEqual({ fontFamilyId: 'instrument-sans', headingFontFamilyId: 'fraunces', monoFontFamilyId: 'ibm-plex-mono' })
   const organic = changeCatalogFamily(draft, 'organic')
   expect(organic.appearance?.fonts).toEqual({ fontFamilyId: 'nunito', headingFontFamilyId: 'young-serif', monoFontFamilyId: 'dm-mono' })
+  const retro = changeCatalogFamily(draft, 'retro-futurism')
+  expect(retro.appearance?.fonts).toEqual({ fontFamilyId: 'exo-2', headingFontFamilyId: 'michroma', monoFontFamilyId: 'space-mono' })
   const picked = { ...papier, appearance: { fonts: { ...papier.appearance!.fonts, headingFontFamilyId: 'inter-tight' } } }
   expect(changeCatalogFamily(picked, 'flat').appearance?.fonts?.headingFontFamilyId).toBe('inter-tight')
 })

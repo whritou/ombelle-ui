@@ -1,0 +1,96 @@
+/* retro-futurism Popover */
+[data-slot='popover-content'] {
+  box-sizing: border-box;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  inline-size: min(22rem, var(--radix-popover-content-available-width, 100vw));
+  max-block-size: var(--radix-popover-content-available-height);
+  overflow: auto;
+  padding: 1.125rem;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--rf-r2);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  box-shadow: var(--rf-e1);
+}
+[data-slot='popover-content']:focus-visible {
+  outline: 2.5px solid var(--ring);
+  outline-offset: 3px;
+}
+[data-slot='popover-title'] {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight:600;
+  line-height: 1.3;
+}
+[data-slot='popover-description'] {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+[data-slot='popover-content'][data-state='open'] {
+  animation: ombelle-popover-enter var(--motion-duration) ease-out;
+}
+@keyframes ombelle-popover-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='popover-content'] {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='popover-description'] {
+    color: CanvasText;
+  }
+  [data-slot='popover-content']:focus-visible {
+    outline-color: Highlight;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='popover-content'][data-state='open'] {
+    animation: none;
+  }
+}
+/* 0.7.5 variants */
+[data-slot='popover-arrow'] {
+  fill: var(--popover);
+  overflow: visible;
+}
+[data-popover-arrow-fill] {
+  stroke: none;
+}
+[data-popover-arrow-edge] {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: var(--border-width);
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
+@media (forced-colors: active) {
+  [data-slot='popover-arrow'] {
+    fill: Canvas;
+    forced-color-adjust: none;
+  }
+  [data-popover-arrow-edge] {
+    stroke: CanvasText;
+    stroke-width: 1px;
+  }
+}
+/* end 0.7.5 variants */
+/* retro-futurism layer */
+[data-slot='popover-content']{border:0;border-radius:var(--rf-r3);box-shadow:var(--rf-e3)}
+[data-slot='popover-title']{font-family:var(--font-heading,system-ui,sans-serif);font-weight:400;font-size:0.875rem}
+[data-popover-arrow-edge]{stroke:none}
+@media (forced-colors: active){[data-slot='popover-content']{border:2px solid CanvasText;box-shadow:none}}

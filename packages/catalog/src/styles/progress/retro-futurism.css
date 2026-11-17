@@ -1,0 +1,235 @@
+/* retro-futurism Progress */
+[data-slot='progress'] {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  inline-size: 100%;
+  block-size: 1rem;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--rf-r4);
+  background: var(--card);
+  box-shadow: var(--rf-e1);
+}
+[data-slot='progress-indicator'] {
+  flex-shrink: 0;
+  block-size: 100%;
+  inline-size: 0;
+  background: var(--primary);
+  border-inline-end: var(--border-width) solid var(--rf-rule);
+  transition: inline-size var(--motion-duration) ease-out;
+}
+[data-slot='progress-indicator'][data-state='complete'] {
+  background: oklch(62% 0.15 150);
+  border-inline-end: 0;
+}
+/* Indeterminate: a segment sweeps across. At rest (reduced-motion presets or the
+   OS setting) the whole track is a faded fill, so it never reads as an amount. */
+[data-slot='progress-indicator'][data-state='indeterminate'] {
+  inline-size: 100%;
+  opacity: 0.45;
+  animation: ombelle-progress-sweep calc(var(--motion-duration) * 10) ease-in-out infinite;
+}
+@keyframes ombelle-progress-sweep {
+  from {
+    inline-size: 40%;
+    margin-inline-start: -40%;
+    opacity: 1;
+  }
+  to {
+    inline-size: 40%;
+    margin-inline-start: 100%;
+    opacity: 1;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='progress'] {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='progress-indicator'],
+  [data-slot='progress-indicator'][data-state='complete'] {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='progress-indicator'] {
+    transition: none;
+  }
+  [data-slot='progress-indicator'][data-state='indeterminate'] {
+    animation: none;
+  }
+}
+/* 0.7.5 variants */
+[data-slot='progress'][data-size='sm'] {
+  block-size: 0.5rem;
+}
+[data-slot='progress'][data-size='lg'] {
+  block-size: 1.5rem;
+}
+[data-slot='progress-indicator']:is([data-tone='success'] > *) {
+  background: var(--success-foreground, oklch(50% 0.13 150));
+}
+[data-slot='progress-indicator']:is([data-tone='warning'] > *) {
+  background: var(--warning-foreground, oklch(60% 0.14 75));
+}
+[data-slot='progress-indicator']:is([data-tone='destructive'] > *) {
+  background: var(--destructive);
+}
+[data-slot='progress-field'] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-inline-size: 0;
+}
+[data-slot='progress-header'] {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+[data-slot='progress-label'] {
+  min-inline-size: 0;
+}
+[data-slot='progress-value'] {
+  flex-shrink: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+@media (forced-colors: active) {
+  [data-slot='progress-indicator']:is([data-tone] > *) {
+    background: Highlight;
+  }
+}
+/* end 0.7.5 variants */
+/* 0.7.6 variants */
+[data-slot='progress'][data-shape='circle'] {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  align-self: flex-start;
+  inline-size: 48px;
+  block-size: 48px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+/* Inside a button the ring sits on the label's line, not at the top of the button. */
+[data-slot='progress'][data-shape='circle']:is(button > *) {
+  align-self: center;
+}
+[data-slot='progress'][data-shape='circle'][data-size='sm'] {
+  inline-size: 18px;
+  block-size: 18px;
+}
+[data-slot='progress'][data-shape='circle'][data-size='lg'] {
+  inline-size: 96px;
+  block-size: 96px;
+}
+[data-slot='progress-field'][data-progress-shape='circle'] {
+  align-items: flex-start;
+}
+[data-slot='progress-ring'] {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  rotate: -90deg;
+}
+[data-slot='progress-ring-track'],
+[data-slot='progress-ring-indicator'] {
+  fill: none;
+  stroke-width: 6;
+}
+[data-slot='progress-ring-track']:is([data-size='sm'] > * > *),
+[data-slot='progress-ring-indicator']:is([data-size='sm'] > * > *) {
+  stroke-width: 8;
+}
+[data-slot='progress-ring-track'] {
+  stroke: var(--muted);
+}
+[data-slot='progress-ring-indicator'] {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  transition: stroke-dasharray var(--motion-duration, 150ms) ease-out;
+}
+[data-slot='progress-ring-indicator']:is([data-tone='success'] > * > *) {
+  stroke: var(--success-foreground, oklch(50% 0.13 150));
+}
+[data-slot='progress-ring-indicator']:is([data-tone='warning'] > * > *) {
+  stroke: var(--warning-foreground, oklch(60% 0.14 75));
+}
+[data-slot='progress-ring-indicator']:is([data-tone='destructive'] > * > *) {
+  stroke: var(--destructive);
+}
+[data-slot='progress-ring-value'] {
+  position: relative;
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  font-weight:600;
+  font-variant-numeric: tabular-nums;
+  line-height: normal;
+}
+[data-slot='progress-ring-value']:is([data-size='lg'] > *) {
+  font-size: 16px;
+}
+[data-slot='progress-ring-value']:is([data-size='sm'] > *) {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot='progress-ring']:is([data-state='indeterminate'] > *) {
+    animation: progress-ring-spin calc(var(--motion-duration, 150ms) * 20 / 3) linear infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='progress-ring-indicator'] {
+    transition: none;
+  }
+}
+@keyframes progress-ring-spin {
+  from {
+    rotate: -90deg;
+  }
+  to {
+    rotate: 270deg;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='progress-ring-indicator'],
+  [data-slot='progress-ring-indicator']:is([data-tone] > * > *) {
+    stroke: Highlight;
+  }
+  [data-slot='progress-ring-track'] {
+    stroke: GrayText;
+  }
+}
+/* end 0.7.6 variants */
+/* retro-futurism layer */
+[data-slot='progress']{block-size:0.875rem;border:0;border-radius:var(--rf-pill);background:var(--muted);box-shadow:none;overflow:hidden}
+[data-slot='progress'][data-size='sm']{block-size:0.4375rem}
+[data-slot='progress'][data-size='lg']{block-size:1.25rem}
+[data-slot='progress'][data-shape='circle']{block-size:48px;border:0;border-radius:0;background:transparent}
+[data-slot='progress'][data-shape='circle'][data-size='sm']{block-size:18px}
+[data-slot='progress'][data-shape='circle'][data-size='lg']{block-size:96px}
+[data-slot='progress-indicator']{border-inline-end:0;border-radius:var(--rf-pill)}
+[data-slot='progress-indicator'][data-state='complete']{background:var(--success-foreground,var(--primary))}
+@media (forced-colors: active){[data-slot='progress']{border:1px solid CanvasText}[data-slot='progress'][data-shape='circle']{border:0}}
+[data-slot='progress']{block-size:1rem;border:2px solid var(--border);border-radius:var(--rf-pill);background:var(--muted)}
+[data-slot='progress'][data-size='sm']{block-size:0.625rem}
+[data-slot='progress'][data-size='lg']{block-size:1.375rem}
+[data-slot='progress'][data-shape='circle']{border:0;background:transparent}
+[data-slot='progress-indicator']{border-radius:var(--rf-pill);background:repeating-linear-gradient(90deg,var(--primary) 0 12px,var(--destructive) 12px 24px)}
+[data-slot='progress-indicator']:is([data-tone='success'] > *){background:repeating-linear-gradient(90deg,var(--success-foreground,var(--primary)) 0 12px,color-mix(in oklab,var(--success-foreground,var(--primary)) 75%,#000) 12px 24px)}
+[data-slot='progress-indicator'][data-state='complete']{background:repeating-linear-gradient(90deg,var(--success-foreground,var(--primary)) 0 12px,color-mix(in oklab,var(--success-foreground,var(--primary)) 75%,#000) 12px 24px)}
+[data-slot='progress-indicator']:is([data-tone='warning'] > *){background:repeating-linear-gradient(90deg,var(--rf-sun) 0 12px,color-mix(in oklab,var(--rf-sun) 80%,#000) 12px 24px)}
+[data-slot='progress-indicator']:is([data-tone='destructive'] > *){background:repeating-linear-gradient(90deg,var(--destructive) 0 12px,var(--rf-dst2) 12px 24px)}
+@media (forced-colors: active){[data-slot='progress']{border:2px solid CanvasText}[data-slot='progress'][data-shape='circle']{border:0}[data-slot='progress-indicator'],[data-slot='progress-indicator']:is([data-tone] > *){background:Highlight}}

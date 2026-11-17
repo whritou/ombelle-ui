@@ -1,6 +1,6 @@
 # Avatar
 
-Avatar shows a person's image, with their initials as a fallback while the image loads or when it fails, built on the reviewed Radix Avatar primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, and organic, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
+Avatar shows a person's image, with their initials as a fallback while the image loads or when it fails, built on the reviewed Radix Avatar primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 

@@ -67,6 +67,29 @@ it('flat surfaces keep a boundary in forced-colors mode', async () => {
   expect(forced('components/ui/tabs.css')).toContain('border:1pxsolidButtonText')
 })
 
+it('retro-futurism outlines and bands keep a real boundary in forced-colors mode', async () => {
+  const preset = getCatalog('0.1.0').presets['retro-futurism']
+  const result = await compile({
+    preset,
+    componentIds: ['alert-dialog', 'badge', 'button', 'button-group', 'card', 'chip', 'dialog', 'input-group', 'item', 'kbd', 'table', 'toggle'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  const forced = (path: string) =>
+    squash(result.artifacts.find((a) => a.logicalPath === path)!.content)
+      .split('@media(forced-colors:active){')
+      .slice(1)
+      .join('')
+  expect(forced('styles/ui-style.css')).toContain('border:2pxsolidButtonText')
+  expect(forced('styles/ui-style.css')).toContain('[data-slot="dialog-content"]::before{background:CanvasText')
+  for (const id of ['badge', 'button-group', 'card', 'chip', 'item', 'kbd', 'toggle'])
+    expect(forced('components/ui/' + id + '.css'), id).toMatch(/border:2pxsolid(CanvasText|ButtonText)/)
+  expect(forced('components/ui/card.css')).toContain('[data-slot="card-header"]{background:Canvas;color:CanvasText;border-block-end:2pxsolidCanvasText')
+  expect(forced('components/ui/table.css')).toContain('[data-slot="table-head"]{color:CanvasText;border-block-end:2pxsolidCanvasText')
+  expect(forced('components/ui/input-group.css')).toMatch(/CanvasText|ButtonText/)
+  expect(forced('components/ui/alert-dialog.css')).toContain('[data-slot="alert-dialog-content"]::before{display:block;background:CanvasText')
+})
+
 it('organic outlines keep a real boundary in forced-colors mode', async () => {
   const organic = getCatalog('0.1.0').presets.organic
   const result = await compile({

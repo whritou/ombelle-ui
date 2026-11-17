@@ -171,6 +171,8 @@ export const ombelleMinimumCli = '0.4.0'
 export const papierMinimumCli = '0.8.0'
 /** Organic is installable from this release; the site offers it only once the published installer is at least this. */
 export const organicMinimumCli = '0.8.1'
+/** Retro futurism is installable from this release; the site offers it only once the published installer is at least this. */
+export const retroFuturismMinimumCli = '0.8.2'
 
 /** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
 export const glassMaterialMinimumCli = '0.5.0'
@@ -226,6 +228,7 @@ export const siteFamilyOrder: readonly StyleFamily[] = [
   'ombelle',
   'papier',
   'organic',
+  'retro-futurism',
   'minimalist',
   'neo-brutalism',
   'flat',
@@ -248,8 +251,9 @@ export function offeredStyleFamilies(
   const ombelle = compareVersions(installer.version, ombelleMinimumCli) >= 0
   const papier = compareVersions(installer.version, papierMinimumCli) >= 0
   const organic = compareVersions(installer.version, organicMinimumCli) >= 0
+  const retroFuturism = compareVersions(installer.version, retroFuturismMinimumCli) >= 0
   return siteFamilyOrder.filter(
-    (family) => (family !== 'ombelle' || ombelle || family === current) && (family !== 'papier' || papier || family === current) && (family !== 'organic' || organic || family === current),
+    (family) => (family !== 'ombelle' || ombelle || family === current) && (family !== 'papier' || papier || family === current) && (family !== 'organic' || organic || family === current) && (family !== 'retro-futurism' || retroFuturism || family === current),
   )
 }
 

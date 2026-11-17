@@ -80,6 +80,6 @@ test('usage example layouts remain a complete separately collected browser suite
   const files:string[]=[]
   const collect=(suite:any)=>{for(const spec of suite.specs??[])files.push(spec.file.replaceAll('\\','/').split('/').at(-1));for(const child of suite.suites??[])collect(child)}
   for(const suite of result.suites)collect(suite)
-  expect(files).toHaveLength(28)
+  expect(files).toHaveLength(32) // four cases (radix and base, light and dark) for each of the eight style families
   expect(new Set(files)).toEqual(new Set(['usage-example-layout.spec.ts']))
 },90000)

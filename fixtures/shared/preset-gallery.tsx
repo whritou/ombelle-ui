@@ -143,6 +143,7 @@ const presetSlides = [
   { id: 'ombelle', name: 'Ombelle', stable: true },
   { id: 'papier', name: 'Papier', stable: true },
   { id: 'organic', name: 'Organic', stable: true },
+  { id: 'retro-futurism', name: 'Retro futurism', stable: true },
   { id: 'flat', name: 'Flat', stable: true },
   { id: 'minimalist', name: 'Minimalist', stable: true },
   { id: 'neo-brutalism', name: 'Neo brutalism', stable: true },
@@ -1039,7 +1040,7 @@ export function PresetGallery({
             <AccordionItem value="families">
               <AccordionTrigger>Which families are stable?</AccordionTrigger>
               <AccordionContent>
-                Flat, minimalist, neo brutalism, ombelle, papier and organic. Liquid glass is
+                Flat, minimalist, neo brutalism, ombelle, papier, organic and retro futurism. Liquid glass is
                 experimental.
               </AccordionContent>
             </AccordionItem>

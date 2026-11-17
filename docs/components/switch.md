@@ -1,6 +1,6 @@
 # Switch
 
-Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, neo-brutalism, ombelle, papier, and organic in light and dark modes through semantic tokens. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
+Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, neo-brutalism, ombelle, papier, organic, and retro futurism in light and dark modes through semantic tokens. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 

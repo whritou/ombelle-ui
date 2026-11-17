@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { canonicalize } from '@ombelle/compiler'
 import { resolveRecipePreset } from '@ombelle/catalog'
 import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@ombelle/contracts'
-import { siteFamilyOrder } from '../../snapshots/install-command'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
 import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
@@ -106,7 +106,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   return <main className={styles.root} aria-label={`${name} editor`} data-editor-root="">
     <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
       back={{ label: 'All components', href: '/editor/component' }} switcher={<ComponentSwitcher current={component} />}
-      commands={[familyCommands(siteFamilyOrder.filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
+      commands={[familyCommands(offeredStyleFamilies(resolveRecipePreset(recipe.presetRef).styleFamily).filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
         resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit(changeCatalogFamily(recipe, style)))]} status={status} revision={`r${recipe.revision}`}
       nameField={{ id: `${component}-recipe-id`, label: 'Recipe ID', value: recipe.id, maxLength: 80, readOnly: true, onChange: () => {} }}
       undo={{ buttonRef: undoRef, disabled: !history.past.length || recovery !== null, onClick: () => {

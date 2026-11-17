@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../../examples/recipe.example.json'
-import { defaultSiteFamily, siteFamilyOrder } from '../../snapshots/install-command'
+import { defaultSiteFamily, offeredStyleFamilies } from '../../snapshots/install-command'
 import { changeDraftFamily, draftFamily, experimentalNotice, resetDraftRecipe, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
 import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
@@ -211,7 +211,7 @@ export function ButtonEditor() {
 
   return <main className={styles.root} aria-label="Button editor" data-editor-root="">
     <EditorTopBar
-      commands={[familyCommands(siteFamilyOrder, draftFamily(draft.recipe), familyNames, chooseFamily)]}
+      commands={[familyCommands(offeredStyleFamilies(draftFamily(draft.recipe)), draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}
       back={{ label: 'All components', href: '/editor/component' }}
       switcher={<ComponentSwitcher current="button" />}

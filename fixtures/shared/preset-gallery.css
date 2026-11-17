@@ -248,6 +248,11 @@ body {
   --s-r: 22px 18px 24px 16px; --s-ir: 16px 12px 18px 12px; --s-bd: 0 solid transparent; --s-sh: 0 8px 14px -8px rgba(52, 70, 40, .45);
   --s-ibg: #fcfbf2; --s-ibd: 2px solid #b5bda5; --s-tint: #dce3c4; --s-font: 'Nunito', sans-serif;
 }
+.preset-slide-shot[data-kit='retro-futurism'] {
+  --s-bg: #f6efe3; --s-ink: #2a1b4d; --s-mut: #5a4b7a; --s-pri: #c23b1b; --s-pfg: #fff;
+  --s-r: 999px; --s-ir: 14px; --s-bd: 2px solid #2a1b4d; --s-sh: 0 4px 0 #2a1b4d;
+  --s-ibg: #fffdf7; --s-ibd: 2px solid #2a1b4d; --s-tint: #ecdff0; --s-font: 'Exo 2', sans-serif;
+}
 .preset-slide-shot[data-kit='flat'] {
   --s-bg: #f3f5f9; --s-ink: #0f172a; --s-mut: #4a5568; --s-pri: #1d4ed8; --s-pfg: #fff; --s-r: 8px; --s-ir: 8px 8px 0 0;
   --s-bd: 2px solid #1d4ed8; --s-sh: none; --s-osh: none; --s-ibg: #eceff5; --s-ibd: 0 solid transparent; --s-tint: #e3ebfd;

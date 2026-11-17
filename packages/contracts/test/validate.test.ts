@@ -70,6 +70,10 @@ describe('preset contract', () => {
   it('accepts papier as a style family', () => {
     expect(validatePreset({ ...example, styleFamily: 'papier' }).styleFamily).toBe('papier')
   })
+  it('accepts retro-futurism as a style family', () => {
+    expect(validatePreset({ ...example, styleFamily: 'retro-futurism' }).styleFamily).toBe('retro-futurism')
+  })
+
   it('accepts organic as a style family', () => {
     expect(validatePreset({ ...example, styleFamily: 'organic' }).styleFamily).toBe('organic')
   })

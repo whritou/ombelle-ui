@@ -130,6 +130,8 @@ The website offers the `papier` family only when its published installer version
 
 The website offers the `organic` family only when its published installer version is at least `organicMinimumCli` (0.8.1, in the same file), so deploying the website before CLI 0.8.1 is published keeps Organic hidden. A restored draft that already uses Organic keeps it selectable. See [Organic style family decision](decisions/0007-organic-family.md).
 
+The website offers the `retro-futurism` family only when its published installer version is at least `retroFuturismMinimumCli` (0.8.2, in the same file), so deploying the website before CLI 0.8.2 is published keeps Retro futurism hidden. A restored draft that already uses Retro futurism keeps it selectable. See [Retro futurism style family decision](decisions/0008-retro-futurism-family.md).
+
 Post-publication checks on 2026-11-02:
 
 - The registry tarball is byte-for-byte identical to the candidate (integrity `sha512-TAkxY7UE…BDJFxJQ==`).

@@ -1,0 +1,33 @@
+/* retro-futurism Kbd */
+[data-slot='kbd-group'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+[data-slot='kbd'] {
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  white-space: nowrap;
+  min-inline-size: 22px;
+  block-size: 22px;
+  padding-inline: 6px;
+  border: 1.5px solid var(--border);
+  border-block-end-width: 3px;
+  border-radius: var(--rf-r1);
+  background: var(--card);
+  color: var(--foreground);
+  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (forced-colors: active) {
+  [data-slot='kbd'] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+/* retro-futurism layer */
+[data-slot='kbd']{font-family:var(--font-mono,ui-monospace,monospace);font-weight:500;min-inline-size:26px;block-size:26px;border:0;border-radius:var(--rf-r1);background:var(--card);color:var(--card-foreground);box-shadow:inset 0 0 0 1.5px var(--border),0 3px 0 var(--rf-rule)}
+@media (forced-colors: active){[data-slot='kbd']{border:1.5px solid CanvasText;border-block-end-width:3px;box-shadow:none}}
+[data-slot='kbd']{border-radius:7px;box-shadow:inset 0 0 0 2px var(--border),0 3px 0 var(--rf-key)}
+@media (forced-colors: active){[data-slot='kbd']{border:2px solid CanvasText;border-block-end-width:4px;box-shadow:none}}

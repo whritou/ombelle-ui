@@ -24,6 +24,7 @@ const familyLabels: Record<StyleFamily, string> = {
   ombelle: 'Ombelle',
   papier: 'Papier',
   organic: 'Organic',
+  'retro-futurism': 'Retro futurism',
   'liquid-glass': 'Liquid Glass',
 }
 // Same gate as the editors: only families the published installer can install.

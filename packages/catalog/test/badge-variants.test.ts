@@ -4,7 +4,7 @@ import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Badge } from '../src/templates/badge.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const css = (family: string) => readFileSync(new URL(`../src/styles/badge/${family}.css`, import.meta.url), 'utf8')
 
 describe('Badge 0.7.3 variants', () => {

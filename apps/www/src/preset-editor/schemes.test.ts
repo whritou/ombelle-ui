@@ -17,8 +17,8 @@ import {
 
 const rose = accentSchemes.find((scheme) => scheme.id === 'rose')!
 // Each family joins this list as its palettes land.
-const familiesWithPalettes = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic'] as const
-type Family = 'flat' | 'minimalist' | 'neo-brutalism' | 'ombelle' | 'papier' | 'organic'
+const familiesWithPalettes = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism'] as const
+type Family = 'flat' | 'minimalist' | 'neo-brutalism' | 'ombelle' | 'papier' | 'organic' | 'retro-futurism'
 
 const rgb = (color: string) => {
   const { r, g, b } = parseColor(color)!.rgb
@@ -94,7 +94,7 @@ describe.each(familiesWithPalettes)('%s palettes', (family: Family) => {
 
   it("survives another family's palette and old Slate edits, and resets them", () => {
     const other =
-      (['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic'] as const)
+      (['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism'] as const)
         .filter((f) => f !== family)
         .flatMap((f) => paletteSchemes(f))[0] ?? palettes[1]!
     let draft = applyColorScheme(createPresetDraft(family), other)
@@ -154,5 +154,27 @@ describe.each(familiesWithPalettes)('%s palettes', (family: Family) => {
     expect(presetFieldValue(draft, '/modes/light/background')).toBe(first.light.background)
     draft = applyColorScheme(draft, first)
     expect(presetFieldValue(draft, '/modes/light/primary')).toBe(first.light.primary)
+  })
+})
+
+describe('retro-futurism palettes', () => {
+  const palettes = paletteSchemes('retro-futurism')
+  const draft = createPresetDraft('retro-futurism')
+
+  it('offers Sunset, Orbit, Neon, Lunar, Atomic, Aurora and Cosmos', () => {
+    expect(palettes.map((p) => p.id)).toEqual(['sunset', 'orbit', 'neon', 'lunar', 'atomic', 'aurora', 'cosmos'])
+  })
+
+  // The card and table header band runs from primary to the preset destructive, with primary-foreground text.
+  it.each(palettes.map((p) => [p.label, p] as const))('%s keeps the sunset band text legible at both ends', (_name, palette) => {
+    for (const mode of ['light', 'dark'] as const) {
+      const destructive = presetFieldValue(draft, `/modes/${mode}/destructive`) as string
+      expect(ratio(palette[mode].primaryForeground!, palette[mode].primary!), `${mode} band start`).toBeGreaterThanOrEqual(4.5)
+      expect(ratio(palette[mode].primaryForeground!, destructive), `${mode} band end`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it.each(palettes.map((p) => [p.label, p] as const))('%s keeps a saturated secondary fill apart from its soft surfaces', (_name, palette) => {
+    for (const mode of ['light', 'dark'] as const) expect(ratio(palette[mode].secondary!, palette[mode].muted!), mode).toBeGreaterThanOrEqual(2.5)
   })
 })

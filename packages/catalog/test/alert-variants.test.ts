@@ -4,7 +4,7 @@ import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Alert, AlertActions, AlertDescription, AlertDismiss, AlertTitle } from '../src/templates/alert.js'
 
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const css = (family: string) => readFileSync(new URL(`../src/styles/alert/${family}.css`, import.meta.url), 'utf8')
 
 describe('Alert 0.7.3 variants', () => {

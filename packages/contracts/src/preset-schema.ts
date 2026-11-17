@@ -53,6 +53,7 @@ export const presetSchema = {
         "ombelle",
         "papier",
         "organic",
+        "retro-futurism",
         "liquid-glass"
       ]
     },

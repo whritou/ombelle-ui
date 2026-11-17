@@ -13,7 +13,7 @@ const editions = [
   ['radix', radixCheckbox, radixField],
   ['base', baseCheckbox as unknown as Ui, baseField as unknown as FieldUi],
 ] as const
-const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'liquid-glass']
+const families = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const block = (component: string, family: string) =>
   readFileSync(new URL(`../src/styles/${component}/${family}.css`, import.meta.url), 'utf8')
     .match(/\/\* 0\.7\.6 parts \*\/([^]*?)\/\* end 0\.7\.6 parts \*\//)?.[1] ?? ''

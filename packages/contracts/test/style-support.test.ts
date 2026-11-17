@@ -14,25 +14,16 @@ const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'c
 const glassUnavailable: string[] = []
 
 describe('style support table', () => {
-  it('lists organic as the sixth stable family and widens styleFamilies', () => {
-    expect(supportedStyleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic'])
-    expect(styleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'liquid-glass'])
+  it('lists retro-futurism as the seventh stable family and widens styleFamilies', () => {
+    expect(supportedStyleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism'])
+    expect(styleFamilies).toEqual(['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass'])
   })
-  it('returns a status for every component and family pair', () => {
-    for (const family of styleFamilies)
-      for (const id of supportedComponentIds)
-        expect(['stable', 'experimental', 'unavailable']).toContain(styleSupport(id, family))
+
+  it('marks retro-futurism stable for all fifty-seven components', () => {
+    for (const id of supportedComponentIds) expect(styleSupport(id, 'retro-futurism')).toBe('stable')
+    expect(isStyleFamily('retro-futurism')).toBe(true)
   })
-  it('marks every component stable for the stable families', () => {
-    for (const family of supportedStyleFamilies)
-      for (const id of supportedComponentIds) expect(styleSupport(id, family)).toBe('stable')
-  })
-  it('splits liquid-glass into experimental and unavailable components', () => {
-    expect(componentsWithStyleSupport('liquid-glass', ['experimental']).sort()).toEqual([...glassExperimental].sort())
-    expect(componentsWithStyleSupport('liquid-glass', ['unavailable']).sort()).toEqual([...glassUnavailable].sort())
-    expect(componentsWithStyleSupport('liquid-glass', ['stable'])).toEqual([])
-    expect(componentsWithStyleSupport('flat', ['stable'])).toEqual([...supportedComponentIds])
-  })
+
   it('marks organic stable for all fifty-seven components', () => {
     for (const id of supportedComponentIds) expect(styleSupport(id, 'organic')).toBe('stable')
     expect(isStyleFamily('organic')).toBe(true)

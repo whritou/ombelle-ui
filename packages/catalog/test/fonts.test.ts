@@ -141,6 +141,7 @@ describe('fonts each style family starts with', () => {
       ombelle: { body: 'figtree', display: 'bricolage-grotesque', mono: 'geist-mono' },
       papier: { body: 'instrument-sans', display: 'fraunces', mono: 'ibm-plex-mono' },
       organic: { body: 'nunito', display: 'young-serif', mono: 'dm-mono' },
+      'retro-futurism': { body: 'exo-2', display: 'michroma', mono: 'space-mono' },
       'liquid-glass': { body: 'inter', display: 'inter-tight', mono: 'jetbrains-mono' },
     })
   })

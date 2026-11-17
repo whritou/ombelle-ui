@@ -9,6 +9,7 @@ const familyNames = {
   ombelle: 'Ombelle',
   papier: 'Papier',
   organic: 'Organic',
+  'retro-futurism': 'Retro futurism',
   'liquid-glass': 'Liquid glass',
 } as const
 
