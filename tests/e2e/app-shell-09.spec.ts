@@ -36,6 +36,62 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(nav.getByRole('link', { name: 'Blog' })).toHaveAttribute('aria-current', 'page')
     })
 
+    test('Sidebar collapses to icons, keeping names, and shows tooltips on focus', async ({ page }) => {
+      const sidebar = (await open(page, edition)).getByTestId('s09-sidebar')
+      const root = sidebar.locator('[data-slot="sidebar"]')
+      await expect(root).toHaveAttribute('data-state', 'expanded')
+      await sidebar.getByRole('button', { name: 'Toggle sidebar' }).click()
+      await expect(root).toHaveAttribute('data-state', 'collapsed')
+      await expect(root).toHaveAttribute('data-collapsible', 'icon')
+      const overview = sidebar.getByRole('link', { name: 'Overview' })
+      await expect(overview).toHaveAttribute('aria-current', 'page')
+      // Reach the item with the keyboard: Base UI shows tooltips on keyboard focus, not after a click.
+      await sidebar.getByRole('link', { name: 'Projects' }).focus()
+      await page.keyboard.press('Shift+Tab')
+      await expect(overview).toBeFocused()
+      await expect(page.locator('[data-slot="sidebar-tooltip"]')).toContainText('Overview')
+      // Labels take no room: the item is about as wide as the icon strip.
+      expect((await overview.boundingBox())!.width).toBeLessThan(80)
+    })
+
+    test('Sidebar keeps a closed group out of the Tab order', async ({ page }) => {
+      const sidebar = (await open(page, edition)).getByTestId('s09-sidebar')
+      await expect(sidebar.getByRole('link', { name: 'Old presets' })).toBeHidden()
+      await sidebar.getByRole('button', { name: 'Archive' }).click()
+      await expect(sidebar.getByRole('link', { name: 'Old presets' })).toBeVisible()
+      await sidebar.getByRole('button', { name: 'Archive' }).click()
+      await expect(sidebar.getByRole('link', { name: 'Old presets' })).toBeHidden()
+    })
+
+    test('Ctrl/Cmd+B toggles the sidebar, but not while typing in an input, textarea or contenteditable', async ({ page }) => {
+      const sidebar = (await open(page, edition)).getByTestId('s09-sidebar')
+      const root = sidebar.locator('[data-slot="sidebar"]')
+      await sidebar.getByRole('button', { name: 'Toggle sidebar' }).focus()
+      await page.keyboard.press('ControlOrMeta+b')
+      await expect(root).toHaveAttribute('data-state', 'collapsed')
+      await page.keyboard.press('ControlOrMeta+b')
+      await expect(root).toHaveAttribute('data-state', 'expanded')
+      for (const name of ['Preset name', 'Notes', 'Caption']) {
+        await sidebar.getByRole('textbox', { name }).focus()
+        await page.keyboard.press('ControlOrMeta+b')
+        await expect(root).toHaveAttribute('data-state', 'expanded')
+      }
+    })
+
+    test('below 768 px the trigger opens a modal sheet that keeps focus and closes when a link is followed', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 800 })
+      const sidebar = (await open(page, edition)).getByTestId('s09-sidebar')
+      await sidebar.getByRole('button', { name: 'Toggle sidebar' }).click()
+      const sheet = page.getByRole('dialog', { name: 'Workspace' })
+      await expect(sheet).toBeVisible()
+      for (let step = 0; step < 12; step++) {
+        await page.keyboard.press('Tab')
+        expect(await sheet.evaluate(element => element.contains(document.activeElement))).toBe(true)
+      }
+      await sheet.getByRole('link', { name: 'Projects' }).click()
+      await expect(sheet).toBeHidden()
+    })
+
     test('Prose keeps long URLs, words and tables inside its box at 320 px', async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 800 })
       const section = await open(page, edition)

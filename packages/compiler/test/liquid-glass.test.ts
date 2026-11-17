@@ -38,7 +38,7 @@ const normalize = (css: string) =>
 
 describe('liquid-glass compile', () => {
   it('compiles the fifty-seven experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'scroll-area', 'select', 'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -86,6 +86,7 @@ describe('liquid-glass compile', () => {
       'components/ui/select.css',
       'components/ui/separator.css',
       'components/ui/sheet.css',
+      'components/ui/sidebar.css',
       'components/ui/skeleton.css',
       'components/ui/slider.css',
       'components/ui/spinner.css',

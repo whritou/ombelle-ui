@@ -218,4 +218,10 @@ export const expansionDocs = {
     states: 'Closed, panel open, current page, focus, hover, narrow screen (one column panel)', basis: 'Reviewed Radix Navigation Menu; Base UI Navigation Menu in the Base UI edition', client: true,
     usage: expansionExamples['navigation-menu'], minimumCli: '0.9.0',
   },
+  sidebar: {
+    name: 'Sidebar', description: 'An app or docs sidebar that collapses to icons or slides away on desktop, opens as a sheet on phones and toggles with Ctrl or Cmd + B.',
+    api: 'SidebarProvider (open, defaultOpen, onOpenChange, mobileBreakpoint, shortcut), Sidebar (side, variant sidebar, floating or inset, collapsible offcanvas, icon or none, label), SidebarTrigger, SidebarRail, SidebarInset, SidebarHeader, SidebarContent, SidebarFooter, SidebarInput, SidebarGroup, SidebarGroupLabel, SidebarGroupAction, SidebarGroupContent, SidebarGroupCollapsible, SidebarGroupCollapsibleTrigger, SidebarGroupCollapsibleContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton (href, isActive, tooltip), SidebarMenuAction, SidebarMenuBadge, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, useSidebar',
+    states: 'Expanded, collapsed to icons, slid away, phone sheet, current item, hover, focus, before hydration on a phone', basis: 'Radix Dialog, Tooltip and Collapsible; Base UI Dialog, Tooltip and Collapsible in the Base UI edition', client: true,
+    usage: expansionExamples.sidebar, minimumCli: '0.9.0',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

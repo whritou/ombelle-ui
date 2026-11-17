@@ -245,6 +245,19 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
             : [node('NavigationMenuLink', { href: item.href, variant: 'trigger' }, item.label)]))),
           ...(props.indicator === false ? [] : [node('NavigationMenuIndicator', {})])))
     }
+    case 'sidebar': {
+      // Recipes carry no icon set, so each item shows its initial; collapsed to icons, the tooltip names it.
+      const item = (text: string, active: boolean) => node('SidebarMenuItem', {}, node('SidebarMenuButton', { isActive: active, tooltip: text },
+        node('span', { 'aria-hidden': 'true', 'data-sidebar-initial': '' }, text.slice(0, 1)), node('span', {}, text)))
+      return node('SidebarProvider', { className: '[--sidebar-height:26rem]' },
+        node('Sidebar', { collapsible: props.collapsible, side: props.side, variant: props.variant, label: content.label },
+          node('SidebarHeader', {}, node('strong', {}, content.label)),
+          node('SidebarContent', {}, ...content.groups.map((group, index) => node('SidebarGroup', { 'aria-label': group.label },
+            node('SidebarGroupLabel', {}, group.label),
+            node('SidebarGroupContent', {}, node('SidebarMenu', {}, ...group.items.map((text, at) => item(text, index === 0 && at === 0))))))),
+          ...(props.collapsible === 'none' ? [] : [node('SidebarRail', {})])),
+        node('SidebarInset', {}, node('div', { className: 'flex items-center gap-2 p-3' }, node('SidebarTrigger', {}), node('span', {}, content.label))))
+    }
     case 'toolbar': {
       const toggles = props.toggles ?? 'single'
       const items = content.items

@@ -1,5 +1,7 @@
 import * as React from 'react'
 import { Prose, ProseLead } from '@/components/ui/prose'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupCollapsible, SidebarGroupCollapsibleContent, SidebarGroupCollapsibleTrigger, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarInset, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger } from '@/components/ui/sidebar'
+import { Box, FolderOpen, LayoutDashboard, Palette } from 'lucide-react'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu'
 
 // The 0.9 app shell components in both editions (tests/e2e/app-shell-09.spec.ts).
@@ -71,10 +73,63 @@ function SiteNavigation() {
   )
 }
 
+const workspace = [
+  { href: '#overview', label: 'Overview', icon: LayoutDashboard },
+  { href: '#projects', label: 'Projects', icon: FolderOpen },
+  { href: '#presets', label: 'Presets', icon: Palette },
+  { href: '#components', label: 'Components', icon: Box },
+]
+
+function EditorSidebar() {
+  return (
+    <div data-testid="s09-sidebar" style={{ border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <SidebarProvider style={{ '--sidebar-height': '24rem' } as React.CSSProperties}>
+        <Sidebar collapsible="icon" label="Workspace">
+          <SidebarHeader><SidebarInput aria-label="Search the workspace" placeholder="Search" /></SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup aria-label="Workspace">
+              <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {workspace.map((item, index) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton href={item.href} isActive={index === 0} tooltip={item.label}>
+                        <item.icon aria-hidden="true" /><span>{item.label}</span>
+                      </SidebarMenuButton>
+                      {item.label === 'Presets' ? <SidebarMenuBadge>12</SidebarMenuBadge> : null}
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarGroupCollapsible>
+              <SidebarGroupCollapsibleTrigger>Archive</SidebarGroupCollapsibleTrigger>
+              <SidebarGroupCollapsibleContent>
+                <SidebarMenu><SidebarMenuItem><SidebarMenuButton href="#old-presets"><span>Old presets</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+              </SidebarGroupCollapsibleContent>
+            </SidebarGroupCollapsible>
+          </SidebarContent>
+          <SidebarFooter><span>Signed in</span></SidebarFooter>
+          <SidebarRail />
+        </Sidebar>
+        <SidebarInset>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem' }}>
+            <SidebarTrigger />
+            <input aria-label="Preset name" defaultValue="" />
+            <textarea aria-label="Notes" rows={1} />
+            <div contentEditable suppressContentEditableWarning aria-label="Caption" role="textbox" style={{ minInlineSize: '6rem', border: '1px solid var(--border)' }} />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
+  )
+}
+
 export function AppShellScenario09() {
   return (
     <section aria-label="0.9 app shell" data-testid="app-shell-09" style={{ display: 'grid', gap: '1.5rem', minInlineSize: 0 }}>
       <SiteNavigation />
+      <EditorSidebar />
       <ProseArticle />
     </section>
   )

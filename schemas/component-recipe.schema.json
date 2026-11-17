@@ -4757,6 +4757,127 @@
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "sidebar"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "collapsible": {
+              "enum": [
+                "offcanvas",
+                "icon",
+                "none"
+              ],
+              "default": "icon",
+              "title": "Collapsible"
+            },
+            "side": {
+              "enum": [
+                "left",
+                "right"
+              ],
+              "default": "left",
+              "title": "Side"
+            },
+            "variant": {
+              "enum": [
+                "sidebar",
+                "floating",
+                "inset"
+              ],
+              "default": "sidebar",
+              "title": "Variant"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Header label",
+              "maxLength": 200,
+              "default": "Ombelle",
+              "pattern": "\\S"
+            },
+            "groups": {
+              "type": "array",
+              "title": "Groups",
+              "minItems": 0,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Group",
+                    "pattern": "\\S"
+                  },
+                  "items": {
+                    "type": "array",
+                    "title": "Items",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "items": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "pattern": "\\S"
+                    },
+                    "default": [
+                      "Item"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "items"
+                ]
+              },
+              "default": [
+                {
+                  "id": "workspace",
+                  "label": "Workspace",
+                  "items": [
+                    "Overview",
+                    "Projects",
+                    "Presets",
+                    "Components"
+                  ]
+                },
+                {
+                  "id": "settings",
+                  "label": "Settings",
+                  "items": [
+                    "Account",
+                    "Billing"
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "groups"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

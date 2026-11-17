@@ -691,3 +691,10 @@ it('accepts the default 0.9 navigation menu recipe and rejects one without items
   expect(() => validateComponentRecipe(draft076('navigation-menu', {}, { label: ' ' }))).toThrow(expect.objectContaining({ path: '/content/label' }))
   expect(() => validateComponentRecipe(draft076('navigation-menu', {}, { items: Array(6).fill({ id: 'docs', label: 'Docs', href: '/docs', links: [] }) }))).toThrow()
 })
+
+it('accepts the default 0.9 sidebar recipe and rejects one without groups', () => {
+  expect(validateComponentRecipe(draft076('sidebar')).component).toBe('sidebar')
+  expect(defaultRecipeFields(componentRecipeFields('sidebar').props)).toEqual({ collapsible: 'icon', side: 'left', variant: 'sidebar' })
+  expect(() => validateComponentRecipe(draft076('sidebar', {}, { groups: [] }))).toThrow(expect.objectContaining({ path: '/content/groups' }))
+  expect(() => validateComponentRecipe(draft076('sidebar', { collapsible: 'drawer' }))).toThrow()
+})
