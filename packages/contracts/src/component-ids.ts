@@ -57,5 +57,6 @@ export const supportedComponentIds = [
   'aspect-ratio',
   'toolbar',
   'prose',
+  'navigation-menu',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

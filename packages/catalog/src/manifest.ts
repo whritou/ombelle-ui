@@ -24,6 +24,7 @@ export const runtimeDependencies = {
   '@radix-ui/react-toggle': '1.2.1',
   '@radix-ui/react-toggle-group': '1.2.1',
   '@radix-ui/react-toolbar': '1.2.1',
+  '@radix-ui/react-navigation-menu': '1.4.1',
   '@radix-ui/react-tooltip': '1.4.1',
   'cmdk': '1.1.1',
   'date-fns': '4.4.0',

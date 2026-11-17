@@ -212,4 +212,10 @@ export const expansionDocs = {
     states: 'Narrow, default and wide measure, long words and URLs, a wide table that scrolls, nested Code Block', basis: 'CSS on the elements inside one slot, one server template for both editions', client: false,
     usage: expansionExamples.prose, minimumCli: '0.9.0',
   },
+  'navigation-menu': {
+    name: 'Navigation Menu', description: 'A website header: links and triggers whose panels open on hover or click, with arrow keys between items and Escape to close.',
+    api: 'NavigationMenu (viewport, value, defaultValue, onValueChange), NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink (href, active, variant default or trigger), NavigationMenuIndicator, NavigationMenuViewport',
+    states: 'Closed, panel open, current page, focus, hover, narrow screen (one column panel)', basis: 'Reviewed Radix Navigation Menu; Base UI Navigation Menu in the Base UI edition', client: true,
+    usage: expansionExamples['navigation-menu'], minimumCli: '0.9.0',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

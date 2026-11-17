@@ -234,6 +234,17 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('p', {}, 'Add the ', node('code', {}, 'sidebar'), ' component, then wrap the layout in ', node('a', { href: '#provider' }, 'SidebarProvider'), '.'),
         node('ul', {}, node('li', {}, 'Collapses to icons on desktop'), node('li', {}, 'Opens as a sheet on phones')),
         node('blockquote', {}, 'Keep navigation where people expect it.'))
+    case 'navigation-menu': {
+      // A panel per item with links; an item without links is a top-level link drawn like a trigger.
+      const link = (item: { label: string; href: string; description?: string }) =>
+        node('NavigationMenuLink', { href: item.href }, node('span', {}, item.label), ...(item.description ? [node('p', {}, item.description)] : []))
+      return node('NavigationMenu', { 'aria-label': content.label, viewport: props.viewport },
+        node('NavigationMenuList', {},
+          ...content.items.map(item => node('NavigationMenuItem', {}, ...(item.links.length
+            ? [node('NavigationMenuTrigger', {}, item.label), node('NavigationMenuContent', {}, ...item.links.map(link))]
+            : [node('NavigationMenuLink', { href: item.href, variant: 'trigger' }, item.label)]))),
+          ...(props.indicator === false ? [] : [node('NavigationMenuIndicator', {})])))
+    }
     case 'toolbar': {
       const toggles = props.toggles ?? 'single'
       const items = content.items

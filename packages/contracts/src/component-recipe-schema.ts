@@ -4585,6 +4585,188 @@ export const componentRecipeSchema = {
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "navigation-menu"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "indicator": {
+              "type": "boolean",
+              "default": true,
+              "title": "Indicator"
+            },
+            "viewport": {
+              "type": "boolean",
+              "default": true,
+              "title": "Viewport"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Main",
+              "pattern": "\\S"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 0,
+              "maxItems": 5,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Item",
+                    "pattern": "\\S"
+                  },
+                  "href": {
+                    "type": "string",
+                    "title": "Link",
+                    "maxLength": 200,
+                    "default": "/",
+                    "pattern": "^(/|#|https?://)"
+                  },
+                  "links": {
+                    "type": "array",
+                    "title": "Links",
+                    "minItems": 0,
+                    "maxItems": 6,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                          "default": "",
+                          "title": "Item ID"
+                        },
+                        "label": {
+                          "type": "string",
+                          "title": "Label",
+                          "maxLength": 200,
+                          "default": "Link",
+                          "pattern": "\\S"
+                        },
+                        "href": {
+                          "type": "string",
+                          "title": "Link",
+                          "maxLength": 200,
+                          "default": "/",
+                          "pattern": "^(/|#|https?://)"
+                        },
+                        "description": {
+                          "type": "string",
+                          "title": "Description",
+                          "maxLength": 200,
+                          "default": ""
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "label",
+                        "href",
+                        "description"
+                      ]
+                    },
+                    "default": []
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "href",
+                  "links"
+                ]
+              },
+              "default": [
+                {
+                  "id": "docs",
+                  "label": "Docs",
+                  "href": "/docs",
+                  "links": [
+                    {
+                      "id": "introduction",
+                      "label": "Introduction",
+                      "href": "/docs",
+                      "description": "What Ombelle is and how it works"
+                    },
+                    {
+                      "id": "installation",
+                      "label": "Installation",
+                      "href": "/docs/installation",
+                      "description": "Add Ombelle to a project"
+                    },
+                    {
+                      "id": "theming",
+                      "label": "Theming",
+                      "href": "/docs/theming",
+                      "description": "Presets, families and tokens"
+                    }
+                  ]
+                },
+                {
+                  "id": "components",
+                  "label": "Components",
+                  "href": "/components",
+                  "links": [
+                    {
+                      "id": "button",
+                      "label": "Button",
+                      "href": "/components/button",
+                      "description": ""
+                    },
+                    {
+                      "id": "sidebar",
+                      "label": "Sidebar",
+                      "href": "/components/sidebar",
+                      "description": ""
+                    },
+                    {
+                      "id": "data-table",
+                      "label": "Data Table",
+                      "href": "/components/data-table",
+                      "description": ""
+                    }
+                  ]
+                },
+                {
+                  "id": "blog",
+                  "label": "Blog",
+                  "href": "/blog",
+                  "links": []
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "items"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

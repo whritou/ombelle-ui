@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Prose, ProseLead } from '@/components/ui/prose'
+import { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu'
 
 // The 0.9 app shell components in both editions (tests/e2e/app-shell-09.spec.ts).
 // scripts/generate-preview.ts copies this file next to each edition's scenario.
@@ -34,9 +35,46 @@ function ProseArticle() {
   )
 }
 
+const docLinks = [
+  { href: '#introduction', title: 'Introduction', description: 'What Ombelle is and how it works' },
+  { href: '#installation', title: 'Installation', description: 'Add Ombelle to a project' },
+  { href: '#theming', title: 'Theming', description: 'Presets, families and tokens' },
+]
+
+function SiteNavigation() {
+  return (
+    <div data-testid="s09-nav" style={{ minBlockSize: '18rem' }}>
+      <NavigationMenu aria-label="Main">
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>Docs</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              {docLinks.map(link => (
+                <NavigationMenuLink key={link.href} href={link.href}><span>{link.title}</span><p>{link.description}</p></NavigationMenuLink>
+              ))}
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <NavigationMenuLink href="#button"><span>Button</span></NavigationMenuLink>
+              <NavigationMenuLink href="#sidebar"><span>Sidebar</span></NavigationMenuLink>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink href="#blog" variant="trigger" active>Blog</NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuIndicator />
+        </NavigationMenuList>
+      </NavigationMenu>
+    </div>
+  )
+}
+
 export function AppShellScenario09() {
   return (
     <section aria-label="0.9 app shell" data-testid="app-shell-09" style={{ display: 'grid', gap: '1.5rem', minInlineSize: 0 }}>
+      <SiteNavigation />
       <ProseArticle />
     </section>
   )

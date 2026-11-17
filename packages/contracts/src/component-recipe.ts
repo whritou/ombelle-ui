@@ -113,6 +113,11 @@ function validateComposition(recipe: ComponentRecipe): void {
       if (recipe.props.toggles === 'multiple' && recipe.content.items.length < 2)
         reject('A toolbar with multiple toggles needs at least two items', '/content/items')
       break
+    case 'navigation-menu':
+      if (recipe.content.label.trim() === '') reject('Name the navigation menu', '/content/label')
+      if (recipe.content.items.length === 0) reject('A navigation menu needs an item', '/content/items')
+      references(recipe.content.items, [], '/content/items')
+      break
     case 'carousel':
       if (recipe.content.label.trim() === '') reject('Name the carousel', '/content/label')
       if (recipe.props.thumbnails && recipe.props.variant !== 'image') reject('Thumbnails need the image variant; set variant to image or turn thumbnails off', '/props/thumbnails')

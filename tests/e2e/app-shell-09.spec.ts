@@ -10,6 +10,32 @@ const open = async (page: Page, edition: string, family = 'ombelle') => {
 
 for (const edition of ['radix', 'base'] as const) {
   test.describe(edition, () => {
+    test('Navigation Menu opens a panel on click, closes on Escape and returns focus to the trigger', async ({ page }) => {
+      const nav = (await open(page, edition)).getByTestId('s09-nav')
+      const trigger = nav.getByRole('button', { name: 'Docs' })
+      await trigger.click()
+      await expect(page.getByRole('link', { name: /Installation/ })).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('link', { name: /Installation/ })).toBeHidden()
+      await expect(trigger).toBeFocused()
+    })
+
+    test('Navigation Menu opens a panel on hover', async ({ page }) => {
+      const nav = (await open(page, edition)).getByTestId('s09-nav')
+      await nav.getByRole('button', { name: 'Components' }).hover()
+      await expect(page.getByRole('link', { name: 'Sidebar' })).toBeVisible()
+    })
+
+    test('Navigation Menu arrow keys move between top-level items, and the current link is marked', async ({ page }) => {
+      const nav = (await open(page, edition)).getByTestId('s09-nav')
+      await nav.getByRole('button', { name: 'Docs' }).focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(nav.getByRole('button', { name: 'Components' })).toBeFocused()
+      await page.keyboard.press('ArrowRight')
+      await expect(nav.getByRole('link', { name: 'Blog' })).toBeFocused()
+      await expect(nav.getByRole('link', { name: 'Blog' })).toHaveAttribute('aria-current', 'page')
+    })
+
     test('Prose keeps long URLs, words and tables inside its box at 320 px', async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 800 })
       const section = await open(page, edition)
