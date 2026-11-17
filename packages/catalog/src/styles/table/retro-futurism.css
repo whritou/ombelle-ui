@@ -183,3 +183,4 @@
 [data-slot='table-head']{background:transparent;color:var(--primary-foreground);border-block-end:2px solid var(--border)}
 [data-slot='table-head'] :is(button,a){color:inherit}
 @media (forced-colors: active){[data-slot='table-header'] > [data-slot='table-row']{background:Canvas}[data-slot='table-head']{color:CanvasText;border-block-end:2px solid CanvasText}}
+[data-slot='table-head'] :is(button,a):focus-visible{outline-color:var(--primary-foreground)}

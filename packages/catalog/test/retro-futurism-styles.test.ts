@@ -125,7 +125,8 @@ describe('retro-futurism styles', () => {
       expect(group).toContain('box-shadow:var(--rf-e1)')
       expect(rule(css, "[data-slot='button-group'][data-orientation='vertical']")).toContain('border-radius:24px')
       expect(css).toMatch(/border-inline-start:2px solid var\(--border\)/)
-      expect(css).toMatch(/:focus-visible\{[^}]*outline-offset:-\d+px/)
+      // The audit measured an inset ring under 3:1 on the orange fill, so the group no longer clips its children (review fixes).
+      expect(rule(css, "[data-slot='button-group']")).not.toContain('overflow:hidden')
     })
 
     it('a pressed toggle gets an outline and no key shadow', () => {

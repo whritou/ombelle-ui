@@ -309,3 +309,4 @@
 [data-slot='card-option']:has(:checked){border:0;background:color-mix(in oklab,var(--primary) 14%,var(--card));box-shadow:inset 0 0 0 3px var(--primary),0 4px 0 var(--primary)}
 [data-slot='card-option']:has(:focus-visible){outline:3px solid var(--ring);outline-offset:3px}
 @media (forced-colors: active){[data-slot='card'],[data-slot='card-option']{border:2px solid CanvasText;box-shadow:none}[data-slot='card'][data-density][data-appearance='outlined'],[data-slot='card'][data-density][data-appearance='subtle']{border:2px solid CanvasText;background:Canvas;box-shadow:none}[data-slot='card-option']:has(:checked){border:3px solid Highlight}[data-slot='card-header']{background:Canvas;color:CanvasText;border-block-end:2px solid CanvasText}[data-slot='card-description']{color:CanvasText}[data-slot='card-header']::after{display:none}}
+[data-slot='card-header'] :is(button,a):focus-visible{outline-color:var(--rf-head-fg,var(--primary-foreground))}
