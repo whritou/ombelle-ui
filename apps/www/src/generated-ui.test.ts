@@ -23,10 +23,11 @@ const stylelessComponents = new Set<string>(['button', 'dialog'])
 
 // Set inline by the component itself (Collapsible Content), so the site never defines it.
 // Set at run time: Collapsible's height, and Radix's on an open menu.
-const setByComponent = new Set(['--collapsible-height', '--radix-dropdown-menu-content-available-height'])
+const setByComponent = new Set(['--collapsible-height', '--radix-dropdown-menu-content-available-height', '--radix-menubar-content-available-height', '--radix-tooltip-content-available-width'])
 
 it('compiles the same catalog component sources on every build', async () => {
   expect(wwwUiComponents).toContain('code-block')
+  for (const id of ['prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table']) expect(wwwUiComponents).toContain(id)
   const [a, b] = await Promise.all([1, 2].map(() => fs.mkdtemp(path.join(os.tmpdir(), 'www-ui-'))))
   await generateWwwUi(a!)
   await generateWwwUi(b!)
