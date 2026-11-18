@@ -140,3 +140,30 @@ test.describe('preset editor review drawer', () => {
     await expect.poll(state).toBe(before)
   })
 })
+
+test.describe('folding inspector', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+  test('folds to one named icon per section, and an icon unfolds it at its section with focus on its first control', async ({ page }) => {
+    await page.goto(`${site}/editor/component/button`)
+    await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 60000 })
+    await page.getByRole('button', { name: 'Fold button inspector' }).click()
+    const rail = page.getByRole('group', { name: 'Button inspector sections' })
+    await expect(rail.getByRole('button', { name: 'Colors' })).toBeVisible()
+    expect(await rail.getByRole('listitem').count()).toBeGreaterThan(3)
+    // The preview takes the room the inspector gave up.
+    expect((await page.locator('[data-editor-split-group] > [data-panel]').first().boundingBox())!.width).toBeLessThan(100)
+    await rail.getByRole('button', { name: 'Colors' }).click()
+    await expect(page.getByRole('button', { name: 'Fold button inspector' })).toBeVisible()
+    await expect.poll(() => page.evaluate(() => document.activeElement?.closest('section')?.getAttribute('aria-labelledby'))).toBe('inspector-colors')
+  })
+
+  test('Ctrl/Cmd+B folds and unfolds the inspector in the component editor', async ({ page }) => {
+    await page.goto(`${site}/editor/component/sidebar`)
+    await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 60000 })
+    await page.locator('body').click({ position: { x: 5, y: 5 } })
+    await page.keyboard.press('ControlOrMeta+b')
+    await expect(page.getByRole('button', { name: 'Unfold sidebar inspector' })).toBeVisible()
+    await page.keyboard.press('ControlOrMeta+b')
+    await expect(page.getByRole('button', { name: 'Fold sidebar inspector' })).toBeVisible()
+  })
+})

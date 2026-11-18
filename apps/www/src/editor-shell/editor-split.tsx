@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type ReactNode } from 'react'
-import type { GroupImperativeHandle } from 'react-resizable-panels'
+import type { GroupImperativeHandle, PanelImperativeHandle } from 'react-resizable-panels'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup, readSavedLayout } from '../generated/ui/components/ui/resizable'
 
 /** The browser's local storage, or nothing on the server and when the browser blocks it. */
@@ -20,7 +20,7 @@ function storage(): Storage | null {
  * hides the handle, so the tablet and phone structures stay as they were. The remembered split is applied
  * through the group's API after hydration, and saved when the user resizes.
  */
-export function EditorSplit({ id, className, inspector, children, after }: {
+export function EditorSplit({ id, className, inspector, children, after, collapsed = false, onCollapsedChange }: {
   /** Storage key for the remembered split, such as "ombelle-editor-component". */
   id: string
   className?: string
@@ -28,7 +28,18 @@ export function EditorSplit({ id, className, inspector, children, after }: {
   children: ReactNode
   /** Rendered after the split, outside it, such as the preset editor's review drawer. */
   after?: ReactNode
+  /** Folds the inspector panel to its icon rail's width. */
+  collapsed?: boolean
+  /** Called when dragging the handle folds or unfolds the inspector panel. */
+  onCollapsedChange?(collapsed: boolean): void
 }) {
+  const inspectorPanel = useRef<PanelImperativeHandle | null>(null)
+  useEffect(() => {
+    const panel = inspectorPanel.current
+    if (!panel || panel.isCollapsed() === collapsed) return
+    if (collapsed) panel.collapse()
+    else panel.expand()
+  }, [collapsed])
   const group = useRef<GroupImperativeHandle | null>(null)
   // Read before the group reports its first layout, which would otherwise overwrite the saved one.
   const saved = useRef<string | null | undefined>(undefined)
@@ -43,7 +54,8 @@ export function EditorSplit({ id, className, inspector, children, after }: {
     <div className={className} data-editor-split="">
       <ResizablePanelGroup direction="horizontal" groupRef={group} data-editor-split-group=""
         onLayoutChanged={layout => { try { storage()?.setItem(id, JSON.stringify(layout)) } catch { /* Blocked storage keeps the split for this visit. */ } }}>
-        <ResizablePanel id="inspector" defaultSize="27%" minSize="20%" maxSize="45%">{inspector}</ResizablePanel>
+        <ResizablePanel id="inspector" defaultSize="27%" minSize="20%" maxSize="45%" collapsible collapsedSize="4.25rem" panelRef={inspectorPanel}
+          onResize={() => { const folded = inspectorPanel.current?.isCollapsed() ?? false; if (folded !== collapsed) onCollapsedChange?.(folded) }}>{inspector}</ResizablePanel>
         <ResizableHandle withHandle aria-label="Resize the inspector and the preview" />
         <ResizablePanel id="main" defaultSize="73%" minSize="40%">{children}</ResizablePanel>
       </ResizablePanelGroup>

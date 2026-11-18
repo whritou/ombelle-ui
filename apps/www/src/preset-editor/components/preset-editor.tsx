@@ -75,6 +75,7 @@ import {
   EditorDock,
   useViewportClass,
   EditorSplit,
+  EditorInspector,
   focusHistoryTarget,
   returnTarget,
   visibleMoreActions,
@@ -155,6 +156,8 @@ export default function PresetEditor() {
   const [reviewSheetOpen, setReviewSheetOpen] = useState(false)
   const reviewOpener = useRef<HTMLButtonElement>(null)
   const viewportClass = useViewportClass()
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false)
+  const foldInspector = inspectorCollapsed && viewportClass === 'desktop'
   const previousViewport = useRef(viewportClass)
   useEffect(() => {
     // A review open on a wider screen stays in view: the phone shows its Checks pane.
@@ -476,9 +479,9 @@ export default function PresetEditor() {
           <GlassPanel report={glassReport} />
         </div>
       )}
-      <EditorSplit id="ombelle-editor-preset" className={styles.workbench} inspector={
+      <EditorSplit collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed} id="ombelle-editor-preset" className={styles.workbench} inspector={
         <section aria-label="Preset inspector" className={`${styles.panel} ${pane !== 'customize' ? styles.phoneHidden : ''}`}>
-          <ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
+          <EditorInspector label="Preset inspector" shortcut={false} collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed}><ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
           <div className={styles.panelContent}>
           <InspectorSection id="inspector-family" title="Style family">
             <FamilyPicker value={draft.family} onChange={family} />
@@ -522,7 +525,7 @@ export default function PresetEditor() {
             <DesignControls {...controlProps} section="depth" />
           </InspectorSection>
           </div>
-          </ScrollArea>
+          </ScrollArea></EditorInspector>
         </section>
       } after={viewportClass === 'desktop' && <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
           <ReviewDrawer

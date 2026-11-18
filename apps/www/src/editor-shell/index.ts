@@ -9,3 +9,4 @@ export { desktopQuery, phoneQuery, tabletQuery, useViewportClass, viewportClass,
 export { EditorDock, type DockTab } from './dock'
 export { focusHistoryTarget, phoneMoreAttribute, returnTarget, visibleMoreActions } from './history-focus'
 export { EditorSplit } from './editor-split'
+export { EditorInspector } from './editor-inspector'

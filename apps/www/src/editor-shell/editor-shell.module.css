@@ -953,3 +953,51 @@
   display: flex;
   flex-direction: column;
 }
+
+/* The inspector on a left Sidebar: it fills its pane, and on the desktop folds to a rail of section icons. */
+.inspectorProvider {
+  min-block-size: 0;
+  block-size: 100%;
+  inline-size: 100%;
+}
+.inspectorSidebar[data-slot='sidebar'] {
+  inline-size: 100%;
+}
+.inspectorSidebar[data-slot='sidebar'][data-collapsible='icon'] {
+  inline-size: var(--sidebar-width-icon);
+}
+.inspectorSidebar[data-slot='sidebar'] > [data-sidebar-inner] {
+  min-inline-size: 0;
+  border: 0;
+  background: transparent;
+}
+.inspectorBar {
+  display: flex;
+  justify-content: flex-end;
+  padding-block-end: 4px;
+}
+.inspectorRail[data-slot='sidebar-menu'] {
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.inspectorRail[data-slot='sidebar-menu'] > li {
+  list-style: none;
+}
+.inspectorContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-block-size: 0;
+}
+.inspectorContent[hidden] {
+  display: none;
+}
+/* Folding is a desktop layout; below 1200px the inspector stays open and its fold button is not shown. */
+@media (max-width: 1199px) {
+  .inspectorBar {
+    display: none;
+  }
+}

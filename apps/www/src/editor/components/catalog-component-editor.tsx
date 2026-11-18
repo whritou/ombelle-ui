@@ -7,7 +7,7 @@ import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@om
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, EditorSplit } from '../../editor-shell'
+import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, EditorSplit, EditorInspector, useViewportClass } from '../../editor-shell'
 import { catalogDraftKey, changeCatalogFamily, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
@@ -103,6 +103,9 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
     past: [...previous.past, previous.present].slice(-HISTORY_LIMIT), present: previous.future[0], future: previous.future.slice(1),
   }) : previous)
 
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false)
+  const inspectorViewport = useViewportClass()
+  const foldInspector = inspectorCollapsed && inspectorViewport === 'desktop'
   return <main className={styles.root} aria-label={`${name} editor`} data-editor-root="">
     <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
       back={{ label: 'All components', href: '/editor/component' }} switcher={<ComponentSwitcher current={component} />}
@@ -145,14 +148,14 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
       </div>
     </section> : <>
       <ComponentEditorDock name={name} pane={view.panel} matrix={matrix} onChange={pane => switchPane(pane, view.panel, matrix, setView)} />
-      <EditorSplit id="ombelle-editor-component" className={styles.workspace} inspector={
+      <EditorSplit collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed} id="ombelle-editor-component" className={styles.workspace} inspector={
         <aside className={paneClasses(view.panel).rail} aria-label={`${name} inspector`}>
-          <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
+          <EditorInspector label={`${name} inspector`} collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed}><ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
             <div className={styles.railContent}>
               <CatalogProperties recipe={recipe} measured={measured} previewMode={view.mode} update={edit} />
               {error && <p role="alert" className="fieldError">{error}</p>}
             </div>
-          </ScrollArea>
+          </ScrollArea></EditorInspector>
         </aside>
       }>
         <div className={paneClasses(view.panel).primary}>
