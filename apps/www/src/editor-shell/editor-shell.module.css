@@ -932,3 +932,24 @@
 .siteMenuLinks a:hover {
   background: var(--muted);
 }
+
+/* The desktop drawer sits in a Sidebar: the slot draws the frame, so the Sidebar's own panel stays plain. */
+.drawerProvider {
+  --sidebar-height: 100%;
+  min-block-size: 0;
+  block-size: 100%;
+  inline-size: auto;
+}
+.drawerProvider [data-slot='sidebar'] > [data-sidebar-inner] {
+  border: 0;
+  background: transparent;
+}
+.rail[data-slot='sidebar'] > [data-sidebar-inner] {
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+}
+.drawer[data-slot='sidebar'] > [data-sidebar-inner] {
+  display: flex;
+  flex-direction: column;
+}

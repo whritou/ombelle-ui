@@ -634,7 +634,7 @@ export default function PresetEditor() {
             <SheetDescription className={styles.srOnly}>Contrast checks and the preset export.</SheetDescription>
           </SheetHeader>
           <ReviewDrawer label="Review" open onOpenChange={(open) => { if (!open) setReviewSheetOpen(false) }}
-            activeTab={drawerTab} onTabChange={setDrawerTab} tabs={reviewTabs} />
+            activeTab={drawerTab} onTabChange={setDrawerTab} tabs={reviewTabs} embedded />
         </SheetContent>
       </Sheet>
       <EditorDock<typeof pane> label="Preset editor panes" value={pane} onChange={setPane} tabs={[

@@ -24,7 +24,11 @@ it('open ReviewDrawer renders tabs and a close button', () => {
   )
   expect(html).toContain('role="tablist"')
   // The drawer and its tablist have distinct names, and the open tab's badge stays out of its name.
-  expect(html).toContain('<aside aria-label="Review"')
+  // On the desktop the drawer is a right-hand Sidebar, a complementary region named by its label.
+  expect(html).toMatch(/data-slot="sidebar"[^>]*data-side="right"/)
+  const root = html.match(/<div[^>]*data-slot="sidebar"[^>]*>/)?.[0] ?? ''
+  expect(root).toContain('role="complementary"')
+  expect(root).toContain('aria-label="Review"')
   expect(html).toContain('role="tablist" aria-label="Review sections"')
   expect(html).toMatch(/role="tab"[^>]*>Checks<span[^>]*aria-hidden="true"[^>]*>1<\/span>/)
   expect(html.match(/aria-selected="true"/g)).toHaveLength(1)
@@ -43,4 +47,21 @@ it('gives each focus target an id that matches where focus is restored', () => {
   )
   expect(closed).toContain(`id="${drawerFocusId(false, 'checks')}"`)
   expect(open).toContain(`id="${drawerFocusId(true, 'checks')}"`)
+})
+
+it('closed, the drawer is a Sidebar collapsed to its icon rail, whose buttons carry the tooltip', () => {
+  const html = renderToStaticMarkup(
+    <ReviewDrawer label="Review" open={false} onOpenChange={noop} activeTab="checks" onTabChange={noop} tabs={tabs} />,
+  )
+  expect(html).toMatch(/data-slot="sidebar"[^>]*data-state="collapsed"/)
+  expect(html).toContain('data-collapsible="icon"')
+  expect(html).toMatch(/<button[^>]*data-slot="sidebar-menu-button"[^>]*>|<button[^>]*aria-label="Open checks: 1 warning"[^>]*data-slot="sidebar-menu-button"/)
+})
+
+it('embedded in the tablet sheet, the drawer keeps its plain aside', () => {
+  const html = renderToStaticMarkup(
+    <ReviewDrawer label="Review" open onOpenChange={noop} activeTab="checks" onTabChange={noop} tabs={tabs} embedded />,
+  )
+  expect(html).toContain('<aside aria-label="Review"')
+  expect(html).not.toContain('data-slot="sidebar"')
 })

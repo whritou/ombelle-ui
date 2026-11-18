@@ -120,3 +120,23 @@ test.describe('desktop editors', () => {
     })
   }
 })
+
+test.describe('preset editor review drawer', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+  test('Ctrl/Cmd+B toggles the Review drawer, but not while typing in an inspector field', async ({ page }) => {
+    await page.goto(`${site}/editor/preset`)
+    const drawer = page.getByRole('complementary', { name: 'Review' })
+    await expect(drawer).toBeVisible({ timeout: 60000 })
+    await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 60000 })
+    const state = () => drawer.getAttribute('data-state')
+    const before = await state()
+    await page.locator('body').click({ position: { x: 5, y: 5 } })
+    await page.keyboard.press('ControlOrMeta+b')
+    await expect.poll(state).not.toBe(before)
+    await page.keyboard.press('ControlOrMeta+b')
+    await expect.poll(state).toBe(before)
+    await page.getByRole('textbox').first().focus()
+    await page.keyboard.press('ControlOrMeta+b')
+    await expect.poll(state).toBe(before)
+  })
+})
