@@ -29,6 +29,20 @@ build time, so its single choices are radio groups with one Tab stop. See the
 [form controls design](superpowers/specs/2026-11-10-form-controls-design.md)
 and the [evidence](evidence/form-controls-073.md).
 
+The 0.9 app shell adds [Sidebar](components/sidebar.md),
+[Navigation Menu](components/navigation-menu.md), [Resizable](components/resizable.md),
+[Data Table](components/data-table.md), [Menubar](components/menubar.md) and
+[Prose](components/prose.md), in all eight families with Radix and Base UI
+editions and recipe editors. A Sidebar collapses to icons that keep their names
+as tooltips, opens as a modal sheet on phones, shows its links inline before
+hydration, and toggles with Ctrl or Cmd + B except while typing. A Resizable
+handle is a separator the arrow keys move, with a hit area of at least 24 px.
+A Data Table's sorted headers carry aria-sort and its selection count is
+announced. Each component draws the looks it borrows (sheet, tooltip, menus,
+table) under its own slots. Liquid glass remains experimental. Installing them
+needs CLI 0.9.0. See the [design](superpowers/specs/2026-11-17-app-shell-09-design.md)
+and the [evidence](evidence/app-shell-09.md).
+
 The 0.7.6 components add [Password Field](components/password-field.md),
 [Carousel](components/carousel.md), [Aspect Ratio](components/aspect-ratio.md)
 and [Toolbar](components/toolbar.md), and the parts

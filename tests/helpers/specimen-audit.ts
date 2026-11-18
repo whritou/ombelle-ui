@@ -202,10 +202,13 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   // "before" shows a neighbour highlighted, "after" the target. Other controls are compared blurred vs focused.
   const keys = await target.evaluate(element => {
     if (!element.matches('[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]')) return null
-    const items = [...(element.closest('[role=listbox], [role=menu]') ?? document).querySelectorAll(
+    const container = element.closest('[role=listbox], [role=menu], [role=menubar]')
+    const items = [...(container ?? document).querySelectorAll(
       '[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]')].filter(item => item.getClientRects().length)
     if (items.length < 2) return null
-    return items.indexOf(element) === items.length - 1 ? ['ArrowUp', 'ArrowDown'] : ['ArrowDown', 'ArrowUp']
+    // A menubar's triggers sit in a row: Left and Right move between them, and Down would open a menu.
+    const [back, next] = container?.matches('[role=menubar]') ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown']
+    return items.indexOf(element) === items.length - 1 ? [back, next] : [next, back]
   })
   // A text field that draws no ring of its own may be ringed by a :focus-within wrapper inside the specimen
   // (Input Group, Tag Input): the ring is then measured around that wrapper, as findForcedColors accepts it.

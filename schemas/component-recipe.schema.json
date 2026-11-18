@@ -4536,6 +4536,566 @@
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "prose"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "measure": {
+              "enum": [
+                "narrow",
+                "default",
+                "wide"
+              ],
+              "default": "default",
+              "title": "Measure"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Heading",
+              "maxLength": 200,
+              "default": "Building an app shell",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "navigation-menu"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "indicator": {
+              "type": "boolean",
+              "default": true,
+              "title": "Indicator"
+            },
+            "viewport": {
+              "type": "boolean",
+              "default": true,
+              "title": "Viewport"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Main",
+              "pattern": "\\S"
+            },
+            "items": {
+              "type": "array",
+              "title": "Items",
+              "minItems": 0,
+              "maxItems": 5,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Item",
+                    "pattern": "\\S"
+                  },
+                  "href": {
+                    "type": "string",
+                    "title": "Link",
+                    "maxLength": 200,
+                    "default": "/",
+                    "pattern": "^(/|#|https?://)"
+                  },
+                  "links": {
+                    "type": "array",
+                    "title": "Links",
+                    "minItems": 0,
+                    "maxItems": 6,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                          "default": "",
+                          "title": "Item ID"
+                        },
+                        "label": {
+                          "type": "string",
+                          "title": "Label",
+                          "maxLength": 200,
+                          "default": "Link",
+                          "pattern": "\\S"
+                        },
+                        "href": {
+                          "type": "string",
+                          "title": "Link",
+                          "maxLength": 200,
+                          "default": "/",
+                          "pattern": "^(/|#|https?://)"
+                        },
+                        "description": {
+                          "type": "string",
+                          "title": "Description",
+                          "maxLength": 200,
+                          "default": ""
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "id",
+                        "label",
+                        "href",
+                        "description"
+                      ]
+                    },
+                    "default": []
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "href",
+                  "links"
+                ]
+              },
+              "default": [
+                {
+                  "id": "docs",
+                  "label": "Docs",
+                  "href": "/docs",
+                  "links": [
+                    {
+                      "id": "introduction",
+                      "label": "Introduction",
+                      "href": "/docs",
+                      "description": "What Ombelle is and how it works"
+                    },
+                    {
+                      "id": "installation",
+                      "label": "Installation",
+                      "href": "/docs/installation",
+                      "description": "Add Ombelle to a project"
+                    },
+                    {
+                      "id": "theming",
+                      "label": "Theming",
+                      "href": "/docs/theming",
+                      "description": "Presets, families and tokens"
+                    }
+                  ]
+                },
+                {
+                  "id": "components",
+                  "label": "Components",
+                  "href": "/components",
+                  "links": [
+                    {
+                      "id": "button",
+                      "label": "Button",
+                      "href": "/components/button",
+                      "description": ""
+                    },
+                    {
+                      "id": "sidebar",
+                      "label": "Sidebar",
+                      "href": "/components/sidebar",
+                      "description": ""
+                    },
+                    {
+                      "id": "data-table",
+                      "label": "Data Table",
+                      "href": "/components/data-table",
+                      "description": ""
+                    }
+                  ]
+                },
+                {
+                  "id": "blog",
+                  "label": "Blog",
+                  "href": "/blog",
+                  "links": []
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "items"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "sidebar"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "collapsible": {
+              "enum": [
+                "offcanvas",
+                "icon",
+                "none"
+              ],
+              "default": "icon",
+              "title": "Collapsible"
+            },
+            "side": {
+              "enum": [
+                "left",
+                "right"
+              ],
+              "default": "left",
+              "title": "Side"
+            },
+            "variant": {
+              "enum": [
+                "sidebar",
+                "floating",
+                "inset"
+              ],
+              "default": "sidebar",
+              "title": "Variant"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Header label",
+              "maxLength": 200,
+              "default": "Ombelle",
+              "pattern": "\\S"
+            },
+            "groups": {
+              "type": "array",
+              "title": "Groups",
+              "minItems": 0,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Group",
+                    "pattern": "\\S"
+                  },
+                  "items": {
+                    "type": "array",
+                    "title": "Items",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "items": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "pattern": "\\S"
+                    },
+                    "default": [
+                      "Item"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "items"
+                ]
+              },
+              "default": [
+                {
+                  "id": "workspace",
+                  "label": "Workspace",
+                  "items": [
+                    "Overview",
+                    "Projects",
+                    "Presets",
+                    "Components"
+                  ]
+                },
+                {
+                  "id": "settings",
+                  "label": "Settings",
+                  "items": [
+                    "Account",
+                    "Billing"
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "groups"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "resizable"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ],
+              "default": "horizontal",
+              "title": "Direction"
+            },
+            "withHandle": {
+              "type": "boolean",
+              "default": true,
+              "title": "Grip"
+            },
+            "panels": {
+              "enum": [
+                2,
+                3
+              ],
+              "default": 2,
+              "title": "Panels"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "title": "Panel labels",
+              "minItems": 2,
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              },
+              "default": [
+                "Preview",
+                "Controls"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "labels"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "menubar"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "shortcuts": {
+              "type": "boolean",
+              "default": true,
+              "title": "Shortcuts"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Editor",
+              "pattern": "\\S"
+            },
+            "menus": {
+              "type": "array",
+              "title": "Menus",
+              "minItems": 0,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Group",
+                    "pattern": "\\S"
+                  },
+                  "items": {
+                    "type": "array",
+                    "title": "Items",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "items": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "pattern": "\\S"
+                    },
+                    "default": [
+                      "Item"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "items"
+                ]
+              },
+              "default": [
+                {
+                  "id": "file",
+                  "label": "File",
+                  "items": [
+                    "New preset",
+                    "Open…",
+                    "Download JSON"
+                  ]
+                },
+                {
+                  "id": "edit",
+                  "label": "Edit",
+                  "items": [
+                    "Undo",
+                    "Redo",
+                    "Reset"
+                  ]
+                },
+                {
+                  "id": "view",
+                  "label": "View",
+                  "items": [
+                    "Light",
+                    "Dark",
+                    "Grid"
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "menus"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "data-table"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "selection": {
+              "type": "boolean",
+              "default": true,
+              "title": "Row selection"
+            },
+            "columnVisibility": {
+              "type": "boolean",
+              "default": true,
+              "title": "Column visibility"
+            },
+            "facets": {
+              "type": "boolean",
+              "default": true,
+              "title": "Faceted filters"
+            },
+            "pagination": {
+              "type": "boolean",
+              "default": true,
+              "title": "Pagination"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Caption",
+              "maxLength": 200,
+              "default": "Components",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

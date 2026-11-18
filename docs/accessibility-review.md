@@ -243,6 +243,12 @@ Review these on the preview "0.7.6 components" section of the edition pages, the
 - **Image Carousel**: each slide's image is announced with its alt text; the thumbnails are a group named "Choose an image", each button named by its image's alt text and the current one announced as current; activating a thumbnail moves to its slide and the current mark follows; images from the third slide load lazily without changing what is announced; below 640px the thumbnails scroll sideways and every one stays reachable with Tab.
 - **Aspect Ratio**: the frame adds no role or name; its media keeps its own alt text.
 - **Toolbar**: the toolbar is one Tab stop announced with its name; the arrow keys, Home and End move between items; toggles announce their state; when items overflow, the More button is announced with its menu, which lists the hidden items in order with toggles as checkable items, and focus never lands on a hidden item.
+- **Prose**: headings keep their levels; links keep their underline and are announced as links; a wide table scrolls inside its box without hiding headers from assistive technology.
+- **Navigation Menu**: the navigation is announced with its name; triggers are buttons announced as expanded or collapsed; the arrow keys move between top-level items and Escape closes a panel, returning focus to its trigger; the current page's link is announced as current.
+- **Sidebar**: the sidebar is a navigation region with its name; the trigger is announced as expanded or collapsed; collapsed to icons, each item keeps its name and shows it as a tooltip on focus; the current item is announced as current; on phones the sheet is a modal dialog with its name that keeps focus; Ctrl or Cmd + B toggles it except while typing.
+- **Resizable**: each handle is a separator with its value, named when there are several; the arrow keys, Home and End resize; a pointer can grab it within 12 px of its line.
+- **Menubar**: the bar is one Tab stop announced as a menubar with its name; the arrow keys move between menus and open the neighbouring menu while one is open; checkbox and radio items announce their state; Escape returns focus to the trigger; shortcuts are shown as text only.
+- **Data Table**: sorted headers announce their order; the search field and facet popover are named; the selection count and "No results." are announced politely; row checkboxes and row actions are named.
 
 ## Results
 
@@ -399,6 +405,12 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | Aspect Ratio | | | | | | | | | | |
 | Toolbar and More menu | | | | | | | | | | |
 | Editor top bar toolbar | | | | | | | | | | |
+| Prose | | | | | | | | | | |
+| Navigation Menu | | | | | | | | | | |
+| Sidebar and phone sheet | | | | | | | | | | |
+| Resizable | | | | | | | | | | |
+| Menubar | | | | | | | | | | |
+| Data Table | | | | | | | | | | |
 
 ### Findings
 

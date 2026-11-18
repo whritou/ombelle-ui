@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add the 0.9 app shell components in all eight families, in the Radix and Base UI editions, with recipes and component editors: Sidebar (collapses to icons or slides away, a sheet on phones, Ctrl or Cmd + B), Navigation Menu, Resizable (react-resizable-panels 4.17.0), Data Table (TanStack Table 9.3.1), Menubar and Prose. Installing them needs CLI 0.9.0.
+- Show them together in a new Workspace preview scene and in the preset gallery.
+
 ## 0.8.3 — 17 November 2026
 
 - Publish CLI 0.8.3: the website's install commands now use it. The registry tarball matched the tested candidate byte for byte.

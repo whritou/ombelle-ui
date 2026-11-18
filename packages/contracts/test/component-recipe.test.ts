@@ -676,3 +676,49 @@ it('keeps the 0.7.6 fields out of the default recipe fields', () => {
   expect(defaultRecipeFields(componentRecipeFields('tooltip').content)).not.toHaveProperty('shortcut')
   expect(validateComponentRecipe(variants076Draft('tooltip')).content).not.toHaveProperty('shortcut')
 })
+
+it('accepts the default 0.9 prose recipe with its documented defaults, and rejects an unknown measure', () => {
+  expect(validateComponentRecipe(draft076('prose')).component).toBe('prose')
+  expect(defaultRecipeFields(componentRecipeFields('prose').props)).toEqual({ measure: 'default' })
+  expect(defaultRecipeFields(componentRecipeFields('prose').content)).toEqual({ label: 'Building an app shell' })
+  expect(() => validateComponentRecipe(draft076('prose', { measure: 'huge' }))).toThrow()
+})
+
+it('accepts the default 0.9 navigation menu recipe and rejects one without items or a label', () => {
+  expect(validateComponentRecipe(draft076('navigation-menu')).component).toBe('navigation-menu')
+  expect(defaultRecipeFields(componentRecipeFields('navigation-menu').props)).toEqual({ indicator: true, viewport: true })
+  expect(() => validateComponentRecipe(draft076('navigation-menu', {}, { items: [] }))).toThrow(expect.objectContaining({ path: '/content/items' }))
+  expect(() => validateComponentRecipe(draft076('navigation-menu', {}, { label: ' ' }))).toThrow(expect.objectContaining({ path: '/content/label' }))
+  expect(() => validateComponentRecipe(draft076('navigation-menu', {}, { items: Array(6).fill({ id: 'docs', label: 'Docs', href: '/docs', links: [] }) }))).toThrow()
+})
+
+it('accepts the default 0.9 resizable recipe and rejects labels that do not match the panel count', () => {
+  expect(validateComponentRecipe(draft076('resizable')).component).toBe('resizable')
+  expect(defaultRecipeFields(componentRecipeFields('resizable').props)).toEqual({ direction: 'horizontal', withHandle: true, panels: 2 })
+  expect(() => validateComponentRecipe(draft076('resizable', { panels: 3 }, { labels: ['Preview', 'Controls'] }))).toThrow(expect.objectContaining({ path: '/content/labels' }))
+  expect(validateComponentRecipe(draft076('resizable', { panels: 3 }, { labels: ['Files', 'Preview', 'Controls'] })).component).toBe('resizable')
+  expect(() => validateComponentRecipe(draft076('resizable', { panels: 4 }))).toThrow()
+})
+
+it('accepts the default 0.9 menubar recipe and rejects one without menus or a label', () => {
+  expect(validateComponentRecipe(draft076('menubar')).component).toBe('menubar')
+  expect(defaultRecipeFields(componentRecipeFields('menubar').props)).toEqual({ shortcuts: true })
+  expect(defaultRecipeFields(componentRecipeFields('menubar').content).menus).toHaveLength(3)
+  expect(() => validateComponentRecipe(draft076('menubar', {}, { menus: [] }))).toThrow(expect.objectContaining({ path: '/content/menus' }))
+  expect(() => validateComponentRecipe(draft076('menubar', {}, { label: '' }))).toThrow(expect.objectContaining({ path: '/content/label' }))
+  expect(() => validateComponentRecipe(draft076('menubar', {}, { menus: Array(5).fill({ id: 'file', label: 'File', items: ['New'] }) }))).toThrow()
+})
+
+it('accepts the default 0.9 data table recipe and rejects an empty caption', () => {
+  expect(validateComponentRecipe(draft076('data-table')).component).toBe('data-table')
+  expect(defaultRecipeFields(componentRecipeFields('data-table').content)).toEqual({ label: 'Components' })
+  expect(() => validateComponentRecipe(draft076('data-table', {}, { label: ' ' }))).toThrow(expect.objectContaining({ path: '/content/label' }))
+  expect(() => validateComponentRecipe(draft076('data-table', { pages: true }))).toThrow()
+})
+
+it('accepts the default 0.9 sidebar recipe and rejects one without groups', () => {
+  expect(validateComponentRecipe(draft076('sidebar')).component).toBe('sidebar')
+  expect(defaultRecipeFields(componentRecipeFields('sidebar').props)).toEqual({ collapsible: 'icon', side: 'left', variant: 'sidebar' })
+  expect(() => validateComponentRecipe(draft076('sidebar', {}, { groups: [] }))).toThrow(expect.objectContaining({ path: '/content/groups' }))
+  expect(() => validateComponentRecipe(draft076('sidebar', { collapsible: 'drawer' }))).toThrow()
+})

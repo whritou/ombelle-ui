@@ -206,4 +206,40 @@ export const expansionDocs = {
     states: 'Default, pressed, focus, disabled, overflowing, menu open', basis: 'Reviewed Radix Toolbar and Dropdown Menu; Base UI Toolbar, Toggle Group and Menu in the Base UI edition', client: true,
     usage: expansionExamples.toolbar, minimumCli: '0.7.6',
   },
+  prose: {
+    name: 'Prose', description: 'Styles the headings, paragraphs, lists, quotes, code and tables written inside it, for guides and articles.',
+    api: 'Prose (measure narrow, default or wide), ProseLead',
+    states: 'Narrow, default and wide measure, long words and URLs, a wide table that scrolls, nested Code Block', basis: 'CSS on the elements inside one slot, one server template for both editions', client: false,
+    usage: expansionExamples.prose, minimumCli: '0.9.0',
+  },
+  'navigation-menu': {
+    name: 'Navigation Menu', description: 'A website header: links and triggers whose panels open on hover or click, with arrow keys between items and Escape to close.',
+    api: 'NavigationMenu (viewport, value, defaultValue, onValueChange), NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink (href, active, variant default or trigger), NavigationMenuIndicator, NavigationMenuViewport',
+    states: 'Closed, panel open, current page, focus, hover, narrow screen (one column panel)', basis: 'Reviewed Radix Navigation Menu; Base UI Navigation Menu in the Base UI edition', client: true,
+    usage: expansionExamples['navigation-menu'], minimumCli: '0.9.0',
+  },
+  sidebar: {
+    name: 'Sidebar', description: 'An app or docs sidebar that collapses to icons or slides away on desktop, opens as a sheet on phones and toggles with Ctrl or Cmd + B.',
+    api: 'SidebarProvider (open, defaultOpen, onOpenChange, mobileBreakpoint, shortcut), Sidebar (side, variant sidebar, floating or inset, collapsible offcanvas, icon or none, label), SidebarTrigger, SidebarRail, SidebarInset, SidebarHeader, SidebarContent, SidebarFooter, SidebarInput, SidebarGroup, SidebarGroupLabel, SidebarGroupAction, SidebarGroupContent, SidebarGroupCollapsible, SidebarGroupCollapsibleTrigger, SidebarGroupCollapsibleContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton (href, isActive, tooltip), SidebarMenuAction, SidebarMenuBadge, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, useSidebar',
+    states: 'Expanded, collapsed to icons, slid away, phone sheet, current item, hover, focus, before hydration on a phone', basis: 'Radix Dialog, Tooltip and Collapsible; Base UI Dialog, Tooltip and Collapsible in the Base UI edition', client: true,
+    usage: expansionExamples.sidebar, minimumCli: '0.9.0',
+  },
+  resizable: {
+    name: 'Resizable', description: 'Panels side by side or stacked, with handles a pointer drags and the arrow keys move; a layout can be remembered and a panel can fold to a strip.',
+    api: 'ResizablePanelGroup (direction, autoSaveId, onLayoutChanged), ResizablePanel (defaultSize, minSize, maxSize, collapsible, collapsedSize, panelRef), ResizableHandle (withHandle)',
+    states: 'Default, handle hover, handle focus, dragging, collapsed panel, vertical', basis: 'react-resizable-panels, one template for both editions', client: true,
+    usage: expansionExamples.resizable, minimumCli: '0.9.0',
+  },
+  menubar: {
+    name: 'Menubar', description: 'A row of menus such as File, Edit and View, with one Tab stop, arrow keys between menus, checkbox and radio items, submenus and shortcut hints.',
+    api: 'Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarGroup, MenubarLabel, MenubarItem (inset, variant default or destructive), MenubarCheckboxItem, MenubarRadioGroup, MenubarRadioItem, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubTrigger, MenubarSubContent',
+    states: 'Closed, menu open, item highlighted, checked, disabled, submenu open, destructive item', basis: 'Reviewed Radix Menubar; Base UI Menubar and Menu in the Base UI edition', client: true,
+    usage: expansionExamples.menubar, minimumCli: '0.9.0',
+  },
+  'data-table': {
+    name: 'Data Table', description: 'A table with sorting, a text filter, faceted filters, row selection, column visibility, row actions and pages, drawn like Table.',
+    api: 'DataTable (columns, data, state and on…Change, selectable, filterColumn, filterLabel, facets, columnVisibility, pagination, pageSize, toolbar, emptyLabel, caption), DataTableColumnHeader, DataTableToolbar, DataTableFilter, DataTableFacetedFilter, DataTableViewOptions, DataTablePagination, DataTableRowActions, DataTableRowAction, selectColumn, actionsColumn, dataTableColumns, useDataTable',
+    states: 'Default, sorted ascending and descending, filtered, no results, rows selected, columns hidden, first and last page', basis: 'TanStack Table with reviewed Radix Dropdown Menu and Popover; Base UI Menu and Popover in the Base UI edition', client: true,
+    usage: expansionExamples['data-table'], minimumCli: '0.9.0',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

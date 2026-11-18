@@ -58,6 +58,12 @@ const slideImage = (index: number) => {
   return 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
     + `<rect width='16' height='9' fill='hsl(${hue} 70% 82%)'/><path d='M0 6.5Q5 3.5 10 6t6-1V9H0z' fill='hsl(${hue} 45% 38%)'/></svg>`)
 }
+// The Data Table specimen's rows: catalog components, their kind and their glass status.
+const dataTableRows = [
+  ['Accordion', 'Disclosure', 'Stable'], ['Button', 'Action', 'Stable'], ['Calendar', 'Date', 'Stable'], ['Data Table', 'Data', 'Stable'],
+  ['Dialog', 'Overlay', 'Stable'], ['Menubar', 'Navigation', 'Stable'], ['Navigation Menu', 'Navigation', 'Stable'], ['Prose', 'Typography', 'Stable'],
+  ['Resizable', 'Layout', 'Stable'], ['Sidebar', 'Navigation', 'Stable'], ['Liquid glass Sheet', 'Overlay', 'Experimental'], ['Liquid glass Toolbar', 'Action', 'Experimental'],
+].map(([name, kind, status]) => ({ name: name!, kind: kind!, status: status! }))
 // The Ombelle preset's primary foreground in light and dark.
 const primaryForeground = { light: 'oklch(0.99 0 0)', dark: 'oklch(0.16 0.01 275)' } as const
 
@@ -226,6 +232,64 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
     }
     case 'aspect-ratio':
       return node('AspectRatio', { ratio: ratios[props.ratio ?? '16/9'] }, node('span', {}, content.label))
+    case 'prose':
+      // A fixed article under the recipe's heading: Prose styles the elements written inside it.
+      return node('Prose', { measure: props.measure },
+        node('h2', {}, content.label),
+        node('ProseLead', {}, 'A sidebar, a header and a content area that reads well at any width.'),
+        node('p', {}, 'Add the ', node('code', {}, 'sidebar'), ' component, then wrap the layout in ', node('a', { href: '#provider' }, 'SidebarProvider'), '.'),
+        node('ul', {}, node('li', {}, 'Collapses to icons on desktop'), node('li', {}, 'Opens as a sheet on phones')),
+        node('blockquote', {}, 'Keep navigation where people expect it.'))
+    case 'navigation-menu': {
+      // A panel per item with links; an item without links is a top-level link drawn like a trigger.
+      const link = (item: { label: string; href: string; description?: string }) =>
+        node('NavigationMenuLink', { href: item.href }, node('span', {}, item.label), ...(item.description ? [node('p', {}, item.description)] : []))
+      return node('NavigationMenu', { 'aria-label': content.label, viewport: props.viewport },
+        node('NavigationMenuList', {},
+          ...content.items.map(item => node('NavigationMenuItem', {}, ...(item.links.length
+            ? [node('NavigationMenuTrigger', {}, item.label), node('NavigationMenuContent', {}, ...item.links.map(link))]
+            : [node('NavigationMenuLink', { href: item.href, variant: 'trigger' }, item.label)]))),
+          ...(props.indicator === false ? [] : [node('NavigationMenuIndicator', {})])))
+    }
+    case 'sidebar': {
+      // Recipes carry no icon set, so each item shows its initial; collapsed to icons, the tooltip names it.
+      const item = (text: string, active: boolean) => node('SidebarMenuItem', {}, node('SidebarMenuButton', { isActive: active, tooltip: text },
+        node('span', { 'aria-hidden': 'true', 'data-sidebar-initial': '' }, text.slice(0, 1)), node('span', {}, text)))
+      return node('SidebarProvider', { className: '[--sidebar-height:26rem]' },
+        node('Sidebar', { collapsible: props.collapsible, side: props.side, variant: props.variant, label: content.label },
+          node('SidebarHeader', {}, node('strong', {}, content.label)),
+          node('SidebarContent', {}, ...content.groups.map((group, index) => node('SidebarGroup', { 'aria-label': group.label },
+            node('SidebarGroupLabel', {}, group.label),
+            node('SidebarGroupContent', {}, node('SidebarMenu', {}, ...group.items.map((text, at) => item(text, index === 0 && at === 0))))))),
+          ...(props.collapsible === 'none' ? [] : [node('SidebarRail', {})])),
+        node('SidebarInset', {}, node('div', { className: 'flex items-center gap-2 p-3' }, node('SidebarTrigger', {}), node('span', {}, content.label))))
+    }
+    case 'resizable': {
+      // Equal panels, each showing its label, in a frame the specimen can size.
+      const size = Math.floor(100 / content.labels.length)
+      const panels = content.labels.flatMap((text, index) => [
+        ...(index ? [node('ResizableHandle', { withHandle: props.withHandle })] : []),
+        node('ResizablePanel', { defaultSize: `${size}%`, minSize: '15%' }, node('div', { className: 'flex h-full items-center justify-center p-4' }, text)),
+      ])
+      return node('div', { className: 'h-64 rounded-[var(--radius)] border border-[var(--border)]' },
+        node('ResizablePanelGroup', { direction: props.direction }, ...panels))
+    }
+    case 'menubar':
+      // Shortcuts are shown, not bound: each item shows Ctrl and its initial when the recipe asks for them.
+      return node('Menubar', { 'aria-label': content.label }, ...content.menus.map(menu => node('MenubarMenu', {},
+        node('MenubarTrigger', {}, menu.label),
+        node('MenubarContent', {}, ...menu.items.map(text => node('MenubarItem', {}, text,
+          ...(props.shortcuts === false ? [] : [node('MenubarShortcut', {}, `Ctrl+${text.slice(0, 1).toUpperCase()}`)])))))))
+    case 'data-table':
+      // Fixed rows: the catalog's own components, so sorting, filtering and pages have something to show.
+      return node('DataTable', {
+        'aria-label': content.label, caption: content.label, pageSize: 5,
+        columns: [{ accessorKey: 'name', header: 'Component' }, { accessorKey: 'kind', header: 'Kind' }, { accessorKey: 'status', header: 'Status' }],
+        data: dataTableRows,
+        selectable: props.selection, columnVisibility: props.columnVisibility, pagination: props.pagination,
+        filterColumn: 'name', filterLabel: 'Filter components',
+        facets: props.facets === false ? [] : [{ column: 'status', title: 'Status' }],
+      })
     case 'toolbar': {
       const toggles = props.toggles ?? 'single'
       const items = content.items

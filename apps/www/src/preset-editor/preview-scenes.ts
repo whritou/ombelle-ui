@@ -6,15 +6,17 @@ export const sceneOptions: { value: PresetScene; label: string }[] = [
   { value: 'projects', label: 'Projects' },
   { value: 'settings', label: 'Settings' },
   { value: 'sign-in', label: 'Sign in' },
+  { value: 'workspace', label: 'Workspace' },
 ]
 
 /** The catalog components each preview page uses, shown under the frame. */
 export const sceneComponents: Record<PresetScene, string> = {
-  gallery: 'All fifty-seven catalog components',
+  gallery: 'All sixty-three catalog components',
   dashboard:
     'Alert, Popover, Input, Dialog, Label, Avatar, Progress, Tabs, Card, Badge, Button, Switch, Tooltip, Dropdown Menu, Table, Stepper',
   projects: 'Breadcrumb, Input Group, Sheet, Chip, Alert, Card, Tabs, Table, Badge, Pagination, Button, Meter, Empty State, Combobox, Hover Card, Context Menu, Calendar, Avatar, Toggle, Item, Scroll Area, Code Block, Toolbar, Carousel, Aspect Ratio',
   settings:
     'Tabs, Card, Label, Input, Select, Native Select, Textarea, Toast, Checkbox, Switch, Radio Group, Input Group, Alert, Alert Dialog, Separator, Skeleton, Accordion, Button, Field, Kbd, Spinner, Tag Input, Toggle Group, Slider, Input OTP, Combobox, Command, Collapsible, Button Group, Color Picker, Number Input, Password Field',
   'sign-in': 'Card, Alert, Label, Input, Checkbox, Button, Separator',
+  workspace: 'Navigation Menu, Menubar, Sidebar, Resizable, Data Table, Prose',
 }

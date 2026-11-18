@@ -4,6 +4,7 @@ import { DashboardScene } from './dashboard'
 import { ProjectsScene } from './projects'
 import { SettingsScene } from './settings'
 import { SignInScene } from './sign-in'
+import { WorkspaceScene } from './workspace'
 import type { SceneProps } from './shared'
 
 export type { SceneProps } from './shared'
@@ -15,6 +16,7 @@ const pages = {
   projects: ProjectsScene,
   settings: SettingsScene,
   'sign-in': SignInScene,
+  workspace: WorkspaceScene,
 } satisfies Record<ScenePage, (props: SceneProps) => React.ReactNode>
 
 const addresses: Record<ScenePage, string> = {
@@ -22,6 +24,7 @@ const addresses: Record<ScenePage, string> = {
   projects: 'acme.app/projects',
   settings: 'acme.app/settings',
   'sign-in': 'acme.app/sign-in',
+  workspace: 'acme.app/releases',
 }
 
 /** Shows a scene as a page in a browser window on a dotted stage. */

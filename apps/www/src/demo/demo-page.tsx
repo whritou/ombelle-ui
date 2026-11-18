@@ -26,7 +26,7 @@ type Mode = 'light' | 'dark'
 type Width = 'wide' | 'narrow'
 type Page = { kind: 'scene'; id: PresetScene; label: string } | { kind: 'component'; id: ComponentId; label: string }
 
-const sceneLabels: Record<PresetScene, string> = { gallery: 'Gallery', dashboard: 'Dashboard', projects: 'Projects', settings: 'Settings', 'sign-in': 'Sign-in' }
+const sceneLabels: Record<PresetScene, string> = { gallery: 'Gallery', dashboard: 'Dashboard', projects: 'Projects', settings: 'Settings', 'sign-in': 'Sign-in', workspace: 'Workspace' }
 /** Every page the demo shows: the preset scenes, then every component editor in alphabetical order. */
 export const demoPages: readonly Page[] = [
   ...presetScenes.map((id) => ({ kind: 'scene' as const, id, label: sceneLabels[id] })),

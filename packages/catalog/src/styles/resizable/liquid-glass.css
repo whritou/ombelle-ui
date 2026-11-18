@@ -1,0 +1,82 @@
+/* liquid-glass Resizable */
+[data-slot='resizable-panel-group'] {
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+  font-family: var(--font-family);
+}
+[data-slot='resizable-panel'] {
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+[data-slot='resizable-handle'] {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: max(1px, var(--border-width));
+  background: var(--border);
+  outline: none;
+  transition: background-color var(--motion-duration, 0.2s);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] {
+  --resizable-grip-inline: 1.5rem;
+  --resizable-grip-block: 0.75rem;
+  inline-size: auto;
+  block-size: max(1px, var(--border-width));
+}
+[data-slot='resizable-handle']:hover,
+[data-slot='resizable-handle']:focus-visible {
+  background: var(--primary);
+}
+[data-slot='resizable-handle']::after {
+  position: absolute;
+  inset-block: 2px;
+  inset-inline: -4px;
+  border-radius: 4px;
+  content: '';
+  pointer-events: none;
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal']::after {
+  inset-block: -4px;
+  inset-inline: 2px;
+}
+[data-slot='resizable-handle']:focus-visible::after {
+  outline: 2px solid var(--foreground);
+  outline-offset: 0;
+}
+[data-slot='resizable-handle-grip'] {
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  inline-size: var(--resizable-grip-inline, 0.75rem);
+  block-size: var(--resizable-grip-block, 1.5rem);
+  border: max(1px, var(--border-width)) solid var(--border);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, var(--muted-foreground) 1px, transparent 1.5px) center / 4px 5px,
+    var(--card);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='resizable-handle'] {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  [data-slot='resizable-handle'] {
+    background: CanvasText;
+  }
+  [data-slot='resizable-handle']:is(:hover, :focus-visible) {
+    background: Highlight;
+  }
+  [data-slot='resizable-handle']:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 0;
+  }
+  [data-slot='resizable-handle-grip'] {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+}

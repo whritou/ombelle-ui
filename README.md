@@ -1,12 +1,14 @@
 # Ombelle UI foundation
 
-The catalog now includes **57 components**. The next release, 0.7.6, adds
-Password Field, Carousel, Aspect Ratio and Toolbar, and Form, Fieldset and
-Checkbox Group parts in Field and Checkbox, in all five families with both
-editions and recipe editors; installing them needs CLI **0.7.6**, which is not
-published yet. See the
-[components design](docs/superpowers/specs/2026-11-13-components-076-design.md)
-and [evidence](docs/evidence/components-076.md).
+The catalog now includes **63 components**. The next release, 0.9, adds the app
+shell: Sidebar, Navigation Menu, Resizable, Data Table, Menubar and Prose, in all
+eight families with both editions and recipe editors; installing them needs CLI
+**0.9.0**, which is not published yet. See the
+[app shell design](docs/superpowers/specs/2026-11-17-app-shell-09-design.md)
+and [evidence](docs/evidence/app-shell-09.md).
+
+Release 0.7.6 added Password Field, Carousel, Aspect Ratio and Toolbar, and Form,
+Fieldset and Checkbox Group parts in Field and Checkbox.
 
 Release 0.7.5 adds Toggle,
 Collapsible, Scroll Area, Button Group and Item, then Number Input and Color
