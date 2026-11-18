@@ -10,7 +10,11 @@ export const segment = (page: Page, group: string, option: string) =>
  */
 export async function openExport(page: Page): Promise<void> {
   const tab = page.getByRole('tab', { name: 'Export', exact: true })
-  if (!(await tab.count())) await page.getByRole('button', { name: /^Open export/ }).click()
+  // A click before the page hydrates does nothing, so try again until the drawer shows its tabs.
+  await expect(async () => {
+    if (!(await tab.count())) await page.getByRole('button', { name: /^Open export/ }).click()
+    await expect(tab).toBeVisible({ timeout: 1000 })
+  }).toPass({ timeout: 30000 })
   if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click()
   await expect(tab).toHaveAttribute('aria-selected', 'true')
 }

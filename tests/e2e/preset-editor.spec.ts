@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { editorActionItem } from '../helpers/button-editor-ui'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -63,8 +64,7 @@ async function ready(page: Page) {
 const familyButton = (page: Page, name: string) =>
   segment(page, 'Style family', name)
 async function chooseMenuItem(page: Page, name: string) {
-  await page.getByRole('button', { name: 'More actions', exact: true }).click()
-  await page.getByRole('menuitem', { name, exact: true }).click()
+  await (await editorActionItem(page, name)).click()
 }
 async function download(page: Page) {
   await openExport(page)
@@ -370,8 +370,7 @@ test('preserves explicit edits through confirmed and cancelled family changes', 
     'invalid',
   )
   // The ID & revision dialog is a catalog Dialog, rendered only while open.
-  await page.getByRole('button', { name: 'More actions', exact: true }).click()
-  await page.getByRole('menuitem', { name: 'ID & revision…' }).click()
+  await (await editorActionItem(page, 'ID & revision…')).click()
   const identity = page.getByRole('dialog', { name: 'ID & revision' })
   await expect(identity.getByLabel('Preset id', { exact: true })).toHaveValue(
     'project_preset',
@@ -480,10 +479,9 @@ test('blocks stale exports during invalid edits and delayed compilation', async 
     page.getByRole('button', { name: 'Download preset JSON' }),
   ).toBeDisabled()
   // The top bar's Download JSON is disabled for the same stale draft.
-  await page.getByRole('button', { name: 'More actions', exact: true }).click()
-  await expect(page.getByRole('menuitem', { name: 'Download JSON', exact: true })).toBeDisabled()
+  await expect(await editorActionItem(page, 'Download JSON')).toBeDisabled()
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('menu', { name: 'More actions' })).toBeHidden()
+  await expect(page.getByRole('menu')).toHaveCount(0)
   await expect(page.locator('#preset-error')).toContainText('finite number')
   await page.getByLabel('Corner radius', { exact: true }).fill('1.1')
   await expect(
@@ -1038,40 +1036,31 @@ test('names warnings on the closed drawer rail and edits the failing token from 
   await expect(page.locator('#preset-color-panel-mutedForeground')).toBeVisible()
   await expect(page.locator('#preset-modes-light-mutedForeground')).toBeFocused()
 })
-test('navigates the overflow menu by keyboard and returns focus after closing ID & revision', async ({ page }) => {
+test('navigates the File menu by keyboard and returns focus after closing ID & revision', async ({ page }) => {
   await page.goto(url)
   await ready(page)
-  const more = page.getByRole('button', { name: 'More actions', exact: true })
+  const file = page.getByRole('menubar', { name: 'Editor menus' }).getByRole('menuitem', { name: 'File', exact: true })
   const dialog = page.getByRole('dialog', { name: 'ID & revision' })
   const item = (name: string) => page.getByRole('menuitem', { name, exact: true })
-  const menu = page.getByRole('menu', { name: 'More actions' })
   // Menu keyboard pattern: opening focuses the first item; arrows wrap; Home/End; Escape returns to the trigger.
-  await more.focus()
+  await file.focus()
   await page.keyboard.press('Enter')
   await expect(item('Download JSON')).toBeFocused()
   await page.keyboard.press('ArrowDown')
   await expect(item('ID & revision…')).toBeFocused()
-  await page.keyboard.press('End')
-  await expect(item('Reset all tokens…')).toBeFocused()
-  await page.keyboard.press('ArrowDown')
-  await expect(item('Download JSON')).toBeFocused()
-  await page.keyboard.press('ArrowUp')
-  await expect(item('Reset all tokens…')).toBeFocused()
   await page.keyboard.press('Home')
   await expect(item('Download JSON')).toBeFocused()
   await page.keyboard.press('Escape')
-  await expect(menu).toBeHidden()
-  await expect(more).toBeFocused()
+  await expect(page.getByRole('menu')).toHaveCount(0)
+  await expect(file).toBeFocused()
+  // Resets are in the Edit menu.
+  await page.keyboard.press('ArrowRight')
   await page.keyboard.press('Enter')
+  await expect(item('Reset all tokens…')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await file.click()
   await item('ID & revision…').click()
   await expect(dialog).toBeVisible()
   await dialog.getByRole('button', { name: 'Done', exact: true }).click()
   await expect(dialog).toBeHidden()
-  await expect(more).toBeFocused()
-  await more.click()
-  await page.getByRole('menuitem', { name: 'ID & revision…', exact: true }).click()
-  await expect(dialog).toBeVisible()
-  await page.keyboard.press('Escape')
-  await expect(dialog).toBeHidden()
-  await expect(more).toBeFocused()
 })

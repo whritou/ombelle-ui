@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { editorActionItem } from '../helpers/button-editor-ui'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import { inflateSync } from 'node:zlib'
@@ -669,11 +670,10 @@ for (const mode of modes) {
     await expect(page.getByTestId('preset-install-command')).toHaveText(`npx ${publishedInstaller.packageName}@${publishedInstaller.version} init --preset ./project-preset.json`)
     for (const action of actions) await expect(action).toBeEnabled()
     const expectMenuDownload = async () => {
-      await page.getByRole('button', { name: 'More actions', exact: true }).click()
-      const item = page.getByRole('menuitem', { name: 'Download JSON', exact: true })
+      const item = await editorActionItem(page, 'Download JSON')
       await expect(item).toBeEnabled()
       await page.keyboard.press('Escape')
-      await expect(page.getByRole('menu', { name: 'More actions' })).toBeHidden()
+      await expect(page.getByRole('menu')).toHaveCount(0)
     }
     await expectMenuDownload()
     await expect(readout.locator('li')).toHaveCount(0)

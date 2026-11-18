@@ -14,9 +14,21 @@ import { Button } from '../generated/ui/components/ui/button'
 import { ButtonGroup } from '../generated/ui/components/ui/button-group'
 import { Toolbar, ToolbarButton, ToolbarOverflow, ToolbarOverflowItem } from '../generated/ui/components/ui/toolbar'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../generated/ui/components/ui/breadcrumb'
+import { Menubar, MenubarContent, MenubarGroup, MenubarItem, MenubarLabel, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarSeparator, MenubarShortcut, MenubarTrigger } from '../generated/ui/components/ui/menubar'
 
 // The palette and its command menu load on first open, so they add nothing to the first page load.
 const CommandPalette = dynamic(() => import('./command-palette'), { ssr: false })
+
+/** One preview control in the desktop View menu, as a group of radio items. */
+export type ViewGroup = {
+  label: string
+  value: string
+  options: readonly { value: string; label: string }[]
+  onChange(value: string): void
+}
+
+/** Actions that undo work go to Edit; the rest, downloads and details, to File. */
+export const editMenuItem = (item: OverflowItem) => /reset|clear|restore/.test(item.id)
 
 /** An action in the top bar's menu. */
 export type OverflowItem = {
@@ -47,6 +59,7 @@ export function EditorTopBar({
   back,
   switcher,
   links,
+  view = [],
 }: {
   /** The trail, ending with the current page; an ancestor with an href is a link. */
   crumbs: readonly (string | { label: string; href: string })[]
@@ -74,6 +87,8 @@ export function EditorTopBar({
   switcher?: ReactNode
   /** Links the phone's More actions sheet lists, such as the editor's guide. */
   links?: readonly MoreLink[]
+  /** The preview controls the desktop View menu offers, as radio groups. */
+  view?: readonly ViewGroup[]
 }) {
   const [moreOpen, setMoreOpen] = useState(false)
   const moreButton = useRef<HTMLButtonElement>(null)
@@ -174,6 +189,8 @@ export function EditorTopBar({
             <span className={styles.commandsKeys}><kbd>Ctrl</kbd> <kbd>K</kbd></span>
           </ToolbarButton>
         )}
+        {/* Below 1200px the actions are this overflow menu; from 1200px the File / Edit / View menubar. Both render
+            at every width and CSS picks one, so nothing swaps when the viewport class settles after hydration. */}
         <ToolbarOverflow label={menu.label}>
           {menu.items.map((item) => (
             <ToolbarOverflowItem key={item.id} onSelect={item.onSelect} destructive={item.destructive} disabled={item.disabled}>
@@ -182,6 +199,46 @@ export function EditorTopBar({
           ))}
         </ToolbarOverflow>
         </Toolbar>
+        {/* From 1200px the actions and the preview controls are a File / Edit / View menubar. */}
+        {(
+          <Menubar aria-label="Editor menus" className={styles.menubar}>
+            <MenubarMenu>
+              <MenubarTrigger>File</MenubarTrigger>
+              <MenubarContent>
+                {menu.items.filter(item => !editMenuItem(item)).map(item => (
+                  <MenubarItem key={item.id} onSelect={item.onSelect} disabled={item.disabled} variant={item.destructive ? 'destructive' : 'default'}>{item.label}</MenubarItem>
+                ))}
+              </MenubarContent>
+            </MenubarMenu>
+            <MenubarMenu>
+              <MenubarTrigger>Edit</MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem disabled={undo.disabled} onSelect={undo.onClick}>Undo<MenubarShortcut>Ctrl+Z</MenubarShortcut></MenubarItem>
+                <MenubarItem disabled={redo.disabled} onSelect={redo.onClick}>Redo<MenubarShortcut>Shift+Ctrl+Z</MenubarShortcut></MenubarItem>
+                {menu.items.some(editMenuItem) && <MenubarSeparator />}
+                {menu.items.filter(editMenuItem).map(item => (
+                  <MenubarItem key={item.id} onSelect={item.onSelect} disabled={item.disabled} variant={item.destructive ? 'destructive' : 'default'}>{item.label}</MenubarItem>
+                ))}
+              </MenubarContent>
+            </MenubarMenu>
+            {view.length > 0 && (
+              <MenubarMenu>
+                <MenubarTrigger>View</MenubarTrigger>
+                <MenubarContent>
+                  {view.map((group, index) => (
+                    <MenubarGroup key={group.label} aria-label={group.label}>
+                      {index > 0 && <MenubarSeparator />}
+                      <MenubarLabel>{group.label}</MenubarLabel>
+                      <MenubarRadioGroup value={group.value} onValueChange={value => group.onChange(String(value))}>
+                        {group.options.map(option => <MenubarRadioItem key={option.value} value={option.value}>{option.label}</MenubarRadioItem>)}
+                      </MenubarRadioGroup>
+                    </MenubarGroup>
+                  ))}
+                </MenubarContent>
+              </MenubarMenu>
+            )}
+          </Menubar>
+        )}
         <Button ref={moreButton} variant="ghost" size="icon" className={`${styles.iconButton} ${styles.phoneMore}`} aria-label="More actions" data-phone-more=""
           aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen(true)}>
           <Ellipsis aria-hidden="true" size={18} />

@@ -23,7 +23,7 @@ import { useRecipeBatch } from '../use-recipe-batch'
 import { changesSummaryFor } from './changes-summary'
 import { MatrixControls } from './matrix-controls'
 import { useMatrixLayout } from '../use-matrix-layout'
-import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem, EditorSplit, EditorInspector, useViewportClass } from '../../editor-shell'
+import { EditorTopBar, previewLayoutOptions, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem, EditorSplit, EditorInspector, useViewportClass } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
@@ -213,7 +213,13 @@ export function ButtonEditor() {
   const inspectorViewport = useViewportClass()
   const foldInspector = inspectorCollapsed && inspectorViewport === 'desktop'
   return <main className={styles.root} aria-label="Button editor" data-editor-root="">
-    <EditorTopBar
+    <EditorTopBar view={[
+        { label: 'Preview mode', value: view.mode, options: previewModeOptions, onChange: mode => setView(previous => ({ ...previous, mode: mode as EditorView['mode'] })) },
+        ...(glassFamily && transparencySupported ? [{ label: 'Preview transparency', value: transparency, options: previewTransparencyOptions, onChange: (value: string) => setTransparency(value as 'auto' | 'reduced') }] : []),
+        ...(matrix.available ? [{ label: 'Preview layout', value: matrix.layout, options: previewLayoutOptions, onChange: (value: string) => matrix.setLayout(value as 'single' | 'matrix') }] : []),
+        { label: 'Preview width', value: view.viewport, options: previewWidthOptions('Narrow'), onChange: viewport => setView(previous => ({ ...previous, viewport: viewport as EditorView['viewport'] })) },
+        { label: 'Preview state', value: view.forcedState, options: forcedStates, onChange: forcedState => setView(previous => ({ ...previous, forcedState: forcedState as EditorView['forcedState'] })) },
+      ]}
       commands={[familyCommands(offeredStyleFamilies(draftFamily(draft.recipe)), draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}
       back={{ label: 'All components', href: '/editor/component' }}

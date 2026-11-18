@@ -1001,3 +1001,17 @@
     display: none;
   }
 }
+
+/* The desktop menubar sits in the bar like its other controls: no frame of its own. */
+.menubar[data-slot='menubar'] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+@media (min-width: 1200px) {
+  .actionsToolbar [data-slot='toolbar-overflow-trigger'] { display: none !important; }
+}
+@media (max-width: 1199px) {
+  .menubar[data-slot='menubar'] { display: none; }
+}

@@ -7,7 +7,7 @@ import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@om
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, EditorSplit, EditorInspector, useViewportClass } from '../../editor-shell'
+import { EditorTopBar, previewLayoutOptions, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, EditorSplit, EditorInspector, useViewportClass } from '../../editor-shell'
 import { catalogDraftKey, changeCatalogFamily, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
@@ -107,7 +107,12 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const inspectorViewport = useViewportClass()
   const foldInspector = inspectorCollapsed && inspectorViewport === 'desktop'
   return <main className={styles.root} aria-label={`${name} editor`} data-editor-root="">
-    <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
+    <EditorTopBar view={[
+        { label: 'Preview mode', value: view.mode, options: previewModeOptions, onChange: mode => setView(previous => ({ ...previous, mode: mode as typeof previous.mode })) },
+        ...(glassFamily && transparencySupported ? [{ label: 'Preview transparency', value: transparency, options: previewTransparencyOptions, onChange: (value: string) => setTransparency(value as 'auto' | 'reduced') }] : []),
+        ...(matrix.available ? [{ label: 'Preview layout', value: matrix.layout, options: previewLayoutOptions, onChange: (value: string) => matrix.setLayout(value as 'single' | 'matrix') }] : []),
+        { label: 'Preview width', value: view.viewport, options: previewWidthOptions('Narrow'), onChange: viewport => setView(previous => ({ ...previous, viewport: viewport as typeof previous.viewport })) },
+      ]} crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
       back={{ label: 'All components', href: '/editor/component' }} switcher={<ComponentSwitcher current={component} />}
       commands={[familyCommands(offeredStyleFamilies(resolveRecipePreset(recipe.presetRef).styleFamily).filter(style => styleSupport(recipe.component, style) !== 'unavailable'),
         resolveRecipePreset(recipe.presetRef).styleFamily, familyNames, style => edit(changeCatalogFamily(recipe, style)))]} status={status} revision={`r${recipe.revision}`}

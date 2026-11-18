@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { editorActionItem } from '../helpers/button-editor-ui'
 import AxeBuilder from '@axe-core/playwright'
 import { catalogDraftKey, catalogPresetRef, createCatalogDraft } from '../../apps/www/src/editor/catalog-draft.js'
 import { createEditorDraft } from '../../apps/www/src/editor/model.js'
@@ -19,8 +20,7 @@ async function seed(page: Page, entries: [string, string][]) {
 }
 
 async function chooseMenuItem(page: Page, name: string) {
-  await page.getByRole('button', { name: 'More actions', exact: true }).click()
-  await page.getByRole('menuitem', { name, exact: true }).click()
+  await (await editorActionItem(page, name)).click()
 }
 
 // The computed background through a canvas, as the preview's measurement reads OKLCH and other syntaxes.

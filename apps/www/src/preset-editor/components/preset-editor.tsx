@@ -303,7 +303,13 @@ export default function PresetEditor() {
   const warningText = warnings ? `, ${warnings} ${warnings === 1 ? 'warning' : 'warnings'}` : ''
   return (
     <main className={styles.editor} aria-label="Preset editor" data-editor-root="">
-      <EditorTopBar
+      <EditorTopBar view={[
+        { label: 'Preview mode', value: mode, options: previewModeOptions, onChange: value => setMode(value as typeof mode) },
+        ...(glass && transparencySupported ? [{ label: 'Preview transparency', value: transparency, options: previewTransparencyOptions, onChange: (value: string) => setTransparency(value as 'auto' | 'reduced') }] : []),
+        { label: 'Preview page', value: scene, options: sceneOptions, onChange: value => setScene(value as PresetScene) },
+        ...(glass ? [{ label: 'Preview backdrop', value: backdrop, options: backdropOptions, onChange: (value: string) => setBackdropOverride(value as PresetBackdrop) }] : []),
+        { label: 'Preview width', value: viewport, options: previewWidthOptions('320 px'), onChange: value => setViewport(value as typeof viewport) },
+      ]}
         commands={[familyCommands(offeredStyleFamilies(draft.family), draft.family, familyNames, family)]}
         crumbs={['Presets']}
         nameField={{

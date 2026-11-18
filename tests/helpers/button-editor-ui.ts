@@ -20,23 +20,39 @@ export const menuItem = (page: Page, name: string) => page.getByRole('menuitem',
 /** A Disabled or Loading switch of the inspector. */
 export const toggle = (page: Page, name: 'Disabled' | 'Loading') => page.getByRole('switch', { name, exact: true })
 
-/** Opens the "More actions" menu; safe to call when it is already open. */
+/** Opens the "More actions" menu below 1200px; safe to call when it is already open. */
 export async function openMoreActions(page: Page) {
   const menu = page.getByRole('menu', { name: 'More actions' })
   if (!(await menu.isVisible())) await moreActions(page).click()
   await expect(menu).toBeVisible()
 }
 
-/** Opens the menu, returns the named item, and leaves the menu open for the caller to act on. */
-export async function openMenuItem(page: Page, name: string): Promise<Locator> {
+/**
+ * Opens the menu holding the named action and returns its item, leaving the menu open: from 1200px the
+ * top bar's File menu, or Edit for resets; below it, the More actions menu.
+ */
+export async function editorActionItem(page: Page, name: string): Promise<Locator> {
+  const bar = page.getByRole('menubar', { name: 'Editor menus' })
+  if (await bar.isVisible()) {
+    const item = menuItem(page, name)
+    if (await item.isVisible()) return item
+    await bar.getByRole('menuitem', { name: /reset|clear|restore/i.test(name) ? 'Edit' : 'File', exact: true }).click()
+    return item
+  }
   await openMoreActions(page)
   return menuItem(page, name)
 }
 
+/** Opens the menu, returns the named item, and leaves the menu open for the caller to act on. */
+export async function openMenuItem(page: Page, name: string): Promise<Locator> {
+  return editorActionItem(page, name)
+}
+
+/** Closes whichever action menu is open. */
 export async function closeMoreActions(page: Page) {
-  const menu = page.getByRole('menu', { name: 'More actions' })
+  const menu = page.getByRole('menu').first()
   if (await menu.isVisible()) await page.keyboard.press('Escape')
-  await expect(menu).toBeHidden()
+  await expect(page.getByRole('menu')).toHaveCount(0)
 }
 
 /** Asserts the recipe JSON download is available, then closes the menu again. */
