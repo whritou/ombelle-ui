@@ -75,7 +75,7 @@ export function WorkspaceScene(props: SceneProps) {
                     {places.map((place, index) => (
                       <SidebarMenuItem key={place}>
                         <SidebarMenuButton href={`#${place.toLowerCase()}`} isActive={index === 1} tooltip={place}>
-                          <span aria-hidden="true">{place.slice(0, 1)}</span><span>{place}</span>
+                          <span aria-hidden="true" data-sidebar-initial="">{place.slice(0, 1)}</span><span>{place}</span>
                         </SidebarMenuButton>
                         {place === 'Releases' ? <SidebarMenuBadge>7</SidebarMenuBadge> : null}
                       </SidebarMenuItem>

@@ -55,13 +55,46 @@ describe('Sidebar', () => {
     const root = tag(renderToStaticMarkup(shell(ui, { defaultOpen: false }, { collapsible: 'icon' })), 'data-slot="sidebar"')
     expect(root).toContain('data-state="collapsed"')
     expect(root).toContain('data-collapsible="icon"')
+    // Before hydration a phone shows the sidebar inline, so a closed off-canvas sidebar must not be inert yet.
     const hidden = tag(renderToStaticMarkup(shell(ui, { defaultOpen: false }, { collapsible: 'offcanvas' })), 'data-slot="sidebar"')
-    expect(hidden).toContain('inert')
+    expect(hidden).not.toContain('inert')
+    expect(hidden).not.toContain('data-hydrated')
   })
 
   it.each(editions)('%s names the trigger and reports whether the sidebar is open', (_, ui) => {
     const trigger = tag(renderToStaticMarkup(shell(ui)), 'data-slot="sidebar-trigger"')
     expect(trigger).toContain('aria-expanded="true"')
     expect(renderToStaticMarkup(shell(ui))).toContain('Toggle sidebar')
+  })
+})
+
+describe('Sidebar review fixes', () => {
+  it('limits the phone layout to before hydration in every family, so a custom mobileBreakpoint is not fought by CSS', () => {
+    for (const [family, css] of Object.entries(getTemplate(getCatalog('0.1.0'), 'sidebar').styles!)) {
+      const phone = css!.slice(css!.indexOf('@media (max-width: 767.98px)'))
+      expect(phone, family).toContain(":not([data-hydrated])")
+    }
+  })
+
+  it('keeps text initials visible when collapsed to icons', () => {
+    for (const [family, css] of Object.entries(getTemplate(getCatalog('0.1.0'), 'sidebar').styles!))
+      expect(css, family).toMatch(/\[data-sidebar-initial\][^{]*\{[^}]*font-size:/)
+  })
+
+  it('radix renders a framework link through asChild, with the button look and the current page', () => {
+    const html = renderToStaticMarkup(h(radix.SidebarProvider, null, h(radix.Sidebar, null,
+      h(radix.SidebarMenuButton, { asChild: true, isActive: true }, h('a', { href: '/docs', 'data-router': '' }, 'Docs')))))
+    expect(html.match(/<a /g)).toHaveLength(1)
+    expect(tag(html, 'data-router')).toContain('data-slot="sidebar-menu-button"')
+    expect(tag(html, 'data-router')).toContain('aria-current="page"')
+  })
+
+  it('base renders a framework link through render, with the button look and the current page', () => {
+    const html = renderToStaticMarkup(h(base.SidebarProvider, null, h(base.Sidebar, null,
+      h((base as any).SidebarMenuButton, { render: h('a', { href: '/docs', 'data-router': '' }), isActive: true }, 'Docs'))))
+    expect(html.match(/<a /g)).toHaveLength(1)
+    expect(tag(html, 'data-router')).toContain('data-slot="sidebar-menu-button"')
+    expect(tag(html, 'data-router')).toContain('aria-current="page"')
+    expect(html).toContain('>Docs</a>')
   })
 })

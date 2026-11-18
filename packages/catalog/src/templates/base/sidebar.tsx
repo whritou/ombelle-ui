@@ -15,6 +15,8 @@ type SidebarState = {
   setOpenMobile(open: boolean): void
   isMobile: boolean
   toggleSidebar(): void
+  /** True after the first render in the browser: the phone CSS and inert apply only from then on. */
+  hydrated: boolean
 }
 
 const SidebarContext = React.createContext<SidebarState | null>(null)
@@ -57,6 +59,8 @@ export type SidebarProviderProps = React.ComponentProps<'div'> & {
 
 export function SidebarProvider({ open: openProp, defaultOpen = true, onOpenChange, mobileBreakpoint = 768, shortcut = true, className, style, children, ...props }: SidebarProviderProps) {
   const isMobile = useIsMobile(mobileBreakpoint)
+  const [hydrated, setHydrated] = React.useState(false)
+  React.useEffect(() => setHydrated(true), [])
   const [openMobile, setOpenMobile] = React.useState(false)
   const [internal, setInternal] = React.useState(defaultOpen)
   const open = openProp ?? internal
@@ -75,12 +79,12 @@ export function SidebarProvider({ open: openProp, defaultOpen = true, onOpenChan
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [shortcut, toggleSidebar])
-  const value = React.useMemo<SidebarState>(() => ({ state: open ? 'expanded' : 'collapsed', open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar }),
-    [open, setOpen, openMobile, isMobile, toggleSidebar])
+  const value = React.useMemo<SidebarState>(() => ({ state: open ? 'expanded' : 'collapsed', open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar, hydrated }),
+    [open, setOpen, openMobile, isMobile, toggleSidebar, hydrated])
   return (
     <SidebarContext.Provider value={value}>
       <TooltipPrimitive.Provider delay={0}>
-        <div {...props} data-slot="sidebar-wrapper" data-mobile={isMobile ? '' : undefined} className={cn(className)} style={style}>{children}</div>
+        <div {...props} data-slot="sidebar-wrapper" data-mobile={isMobile ? '' : undefined} data-hydrated={hydrated ? '' : undefined} className={cn(className)} style={style}>{children}</div>
       </TooltipPrimitive.Provider>
     </SidebarContext.Provider>
   )
@@ -96,7 +100,7 @@ export type SidebarProps = React.ComponentProps<'div'> & {
 }
 
 export function Sidebar({ side = 'left', variant = 'sidebar', collapsible = 'offcanvas', label = 'Sidebar', className, children, ...props }: SidebarProps) {
-  const { state, isMobile, openMobile, setOpenMobile } = useSidebar()
+  const { state, isMobile, openMobile, setOpenMobile, hydrated } = useSidebar()
   if (isMobile)
     return (
       <DialogPrimitive.Root open={openMobile} onOpenChange={open => setOpenMobile(open)}>
@@ -113,7 +117,7 @@ export function Sidebar({ side = 'left', variant = 'sidebar', collapsible = 'off
   const hidden = collapsible === 'offcanvas' && state === 'collapsed'
   return (
     <div {...props} data-slot="sidebar" data-state={collapsible === 'none' ? 'expanded' : state} data-collapsible={state === 'collapsed' ? collapsible : ''}
-      data-side={side} data-variant={variant} aria-label={props['aria-label'] ?? label} role={props.role ?? 'navigation'} inert={hidden || undefined} className={cn(className)}>
+      data-side={side} data-variant={variant} aria-label={props['aria-label'] ?? label} role={props.role ?? 'navigation'} data-hydrated={hydrated ? '' : undefined} inert={(hidden && hydrated) || undefined} className={cn(className)}>
       <div data-sidebar-inner="">{children}</div>
     </div>
   )
@@ -210,14 +214,24 @@ export type SidebarMenuButtonProps = Omit<React.ComponentProps<'button'> & React
   /** Renders a link instead of a button. */
   href?: string
   type?: 'button' | 'submit' | 'reset'
+  /** Renders this element, such as a framework link, with the item's look and the children: Base UI render. */
+  render?: React.ReactElement<Record<string, unknown>>
+}
+
+/** Passes the item's props to its only child element, merging class names. */
+function MenuButtonSlot({ children, className, ...props }: { children?: React.ReactNode; className?: string } & Record<string, unknown>) {
+  if (!React.isValidElement<Record<string, unknown>>(children)) return null
+  return React.cloneElement(children, { ...props, ...children.props, className: cn(className, children.props.className as string) })
 }
 
 /** An item: a link when it has an href, otherwise a button. Collapsed to icons, its label hides and the tooltip names it. */
-export function SidebarMenuButton({ isActive = false, tooltip, href, type = 'button', className, children, ...props }: SidebarMenuButtonProps) {
+export function SidebarMenuButton({ isActive = false, tooltip, href, type = 'button', render, className, children, ...props }: SidebarMenuButtonProps) {
   const { state, isMobile } = useSidebar()
   const [tip, setTip] = React.useState(false)
   const active = { 'data-active': isActive ? '' : undefined, 'aria-current': isActive ? ('page' as const) : undefined }
-  const element = href !== undefined
+  const element = render
+    ? <MenuButtonSlot {...props} {...active} data-slot="sidebar-menu-button" className={cn(className)}>{React.cloneElement(render, {}, children)}</MenuButtonSlot>
+    : href !== undefined
     ? <a {...(props as React.ComponentProps<'a'>)} {...active} href={href} data-slot="sidebar-menu-button" className={cn(className)}>{children}</a>
     : <button {...(props as React.ComponentProps<'button'>)} {...active} type={type} data-slot="sidebar-menu-button" className={cn(className)}>{children}</button>
   if (!tooltip) return element

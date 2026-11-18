@@ -379,6 +379,7 @@
   font-size: 1rem;
 }
 [data-slot='data-table'] {
+  position: relative;
   display: grid;
   gap: 0.75rem;
   min-inline-size: 0;
@@ -498,6 +499,15 @@
   gap: 0.5rem;
   color: var(--muted-foreground);
   font-size: 0.8125rem;
+}
+[data-slot='data-table-status'] {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 [data-slot='data-table-selection'] {
   flex: 1;

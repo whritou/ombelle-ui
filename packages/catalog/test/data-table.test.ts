@@ -26,7 +26,7 @@ describe('Data Table', () => {
       parts: ['DataTableToolbar', 'DataTableRowActions', 'DataTableRowAction'],
       slots: ['data-table', 'data-table-container', 'data-table-table', 'data-table-caption', 'data-table-header', 'data-table-body', 'data-table-row', 'data-table-head', 'data-table-cell',
         'data-table-sort', 'data-table-toolbar', 'data-table-filter', 'data-table-button', 'data-table-menu', 'data-table-menu-label', 'data-table-menu-item', 'data-table-menu-indicator',
-        'data-table-count', 'data-table-pagination', 'data-table-selection', 'data-table-row-actions'],
+        'data-table-count', 'data-table-pagination', 'data-table-selection', 'data-table-status', 'data-table-row-actions'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-dropdown-menu', version: '2.2.1' }, { name: '@radix-ui/react-popover', version: '1.3.1' },
         { name: '@tanstack/react-table', version: '9.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='data-table-container']", "[data-slot='data-table-head']", "[data-slot='data-table-cell']", "[data-slot='data-table-menu']", "[data-slot='data-table-pagination']"],
@@ -42,7 +42,7 @@ describe('Data Table', () => {
   })
 
   it.each(editions)('%s renders the first page as plain table rows', (_, ui) => {
-    const html = renderToStaticMarkup(h(ui.DataTable<Preset>, { columns: columns(ui), data: presets, pageSize: 10, 'aria-label': 'Presets' }))
+    const html = renderToStaticMarkup(h(ui.DataTable<Preset>, { columns: columns(ui), data: presets, pagination: true, pageSize: 10, 'aria-label': 'Presets' }))
     const body = html.slice(html.indexOf('data-slot="data-table-body"'))
     expect(body.match(/data-slot="data-table-row"/g)).toHaveLength(10)
     expect(html).toContain('Preset 01')
@@ -82,5 +82,23 @@ describe('facetFilter', () => {
     expect(radix.facetFilter(row('Stable'), 'status', ['Experimental'])).toBe(false)
     expect(radix.facetFilter(row('Stable'), 'status', [])).toBe(true)
     expect(radix.facetFilter(row('Stable'), 'status', undefined)).toBe(true)
+  })
+})
+
+describe('Data Table review fixes', () => {
+  const body = (html: string) => html.slice(html.indexOf('data-slot="data-table-body"'))
+  it.each(editions)('%s shows every row when pagination is off, and still reports the selection count when rows are selectable', (_, ui) => {
+    const html = renderToStaticMarkup(h(ui.DataTable<Preset>, { columns: columns(ui), data: presets, selectable: true }))
+    expect(body(html).match(/data-slot="data-table-row"/g)).toHaveLength(25)
+    expect(html).toContain('0 of 25 row(s) selected.')
+  })
+
+  it.each(editions)('%s announces "No results." from a live region that stays on the page, and keeps the empty cell a plain cell', (_, ui) => {
+    const empty = renderToStaticMarkup(h(ui.DataTable<Preset>, { columns: columns(ui), data: [] }))
+    expect(tag(empty, 'data-data-table-empty')).not.toContain('role=')
+    expect(tag(empty, 'data-slot="data-table-status"')).toContain('role="status"')
+    expect(empty).toMatch(/data-slot="data-table-status"[^>]*>No results\.</)
+    const full = renderToStaticMarkup(h(ui.DataTable<Preset>, { columns: columns(ui), data: presets }))
+    expect(tag(full, 'data-slot="data-table-status"')).toContain('role="status"')
   })
 })

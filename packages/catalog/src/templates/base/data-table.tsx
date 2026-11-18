@@ -97,7 +97,7 @@ export type DataTableProps<TData extends RowData> = {
   columnVisibility?: boolean
   /** The selection count and page buttons below the table. */
   pagination?: boolean
-  /** Rows per page; 0 shows every row with no pagination. */
+  /** Rows per page when pagination is on; 0 shows every row. */
   pageSize?: number
   emptyLabel?: string
   caption?: React.ReactNode
@@ -119,13 +119,16 @@ export function DataTable<TData extends RowData>({ columns: columnsProp, data, s
     })
     return selectable ? [selectColumn<TData>(), ...described] : described
   }, [columnsProp, selectable, facets])
+  const paginate = pagination && pageSize > 0
   const table = useTable({
     features: dataTableFeatures,
     columns,
     data,
     getRowId,
     state,
-    initialState: { pagination: { pageIndex: 0, pageSize: pageSize || Math.max(data.length, 1) }, ...initialState },
+    initialState: { pagination: { pageIndex: 0, pageSize: pageSize || 10 }, ...initialState },
+    // Without pagination every row shows: the page model is skipped, not just the pager.
+    manualPagination: !paginate,
     ...(onSortingChange ? { onSortingChange } : {}),
     ...(onColumnFiltersChange ? { onColumnFiltersChange } : {}),
     ...(onRowSelectionChange ? { onRowSelectionChange } : {}),
@@ -176,13 +179,15 @@ export function DataTable<TData extends RowData>({ columns: columnsProp, data, s
                 </tr>
               )) : (
                 <tr data-slot="data-table-row">
-                  <td data-slot="data-table-cell" data-data-table-empty="" colSpan={visible} role="status">{emptyLabel}</td>
+                  <td data-slot="data-table-cell" data-data-table-empty="" colSpan={visible}>{emptyLabel}</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        {pagination ? <DataTablePagination table={table} /> : null}
+        {/* Always on the page, so screen readers announce "No results." when a filter empties the table. */}
+        <p data-slot="data-table-status" role="status">{rows.length ? '' : emptyLabel}</p>
+        {paginate ? <DataTablePagination table={table} /> : selectable ? <DataTableSelection table={table} /> : null}
       </div>
     </TableContext.Provider>
   )
@@ -281,14 +286,18 @@ export function DataTableFacetedFilter<TData extends RowData>({ column, title, o
   )
 }
 
-/** "2 of 40 row(s) selected.", announced politely, then page buttons. */
-export function DataTablePagination<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
+/** "2 of 40 row(s) selected.", announced politely; it counts selected rows a filter hides. */
+export function DataTableSelection<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
   const selected = Object.values(table.state.rowSelection ?? {}).filter(Boolean).length
-  const total = table.getCoreRowModel().rows.length
+  return <p data-slot="data-table-selection" aria-live="polite">{selected} of {table.getCoreRowModel().rows.length} row(s) selected.</p>
+}
+
+/** The selection count, then the page and page buttons. */
+export function DataTablePagination<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
   const pages = Math.max(table.getPageCount(), 1)
   return (
     <div data-slot="data-table-pagination">
-      <p data-slot="data-table-selection" aria-live="polite">{selected} of {total} row(s) selected.</p>
+      <DataTableSelection table={table} />
       <p data-data-table-page="">Page {table.state.pagination.pageIndex + 1} of {pages}</p>
       <button type="button" data-slot="data-table-button" aria-label="Previous page" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>
         <ChevronLeftIcon aria-hidden="true" />

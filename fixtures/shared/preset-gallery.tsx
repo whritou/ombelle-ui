@@ -588,7 +588,7 @@ export function PresetGallery({
                   <SidebarMenu>
                     {['Overview', 'Projects', 'Presets'].map((item, index) => (
                       <SidebarMenuItem key={item}>
-                        <SidebarMenuButton href={`#${item.toLowerCase()}`} isActive={index === 0} tooltip={item}><span aria-hidden="true">{item.slice(0, 1)}</span><span>{item}</span></SidebarMenuButton>
+                        <SidebarMenuButton href={`#${item.toLowerCase()}`} isActive={index === 0} tooltip={item}><span aria-hidden="true" data-sidebar-initial="">{item.slice(0, 1)}</span><span>{item}</span></SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
                   </SidebarMenu>

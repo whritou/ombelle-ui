@@ -431,6 +431,15 @@
   outline: 2px solid currentColor;
   outline-offset: -2px;
 }
+/* A text initial stands in for an icon, so it keeps its size when labels collapse to nothing. */
+[data-sidebar-initial] {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
 [data-slot='sidebar-menu-action'] {
   position: absolute;
   inset-block-start: 50%;
@@ -493,13 +502,13 @@
   flex-direction: column;
   min-block-size: 0;
 }
-/* Before hydration a phone shows the sidebar inline above the page; afterwards it is a sheet. */
+/* Before hydration a phone shows the sidebar inline above the page; afterwards it is a sheet, or the desktop layout when mobileBreakpoint is smaller. */
 @media (max-width: 767.98px) {
-  [data-slot='sidebar-wrapper'] {
+  [data-slot='sidebar-wrapper']:not([data-hydrated]) {
     flex-direction: column;
   }
-  [data-slot='sidebar'],
-  [data-slot='sidebar'][data-collapsible] {
+  [data-slot='sidebar']:not([data-hydrated]),
+  [data-slot='sidebar'][data-collapsible]:not([data-hydrated]) {
     --sidebar-text: 0.875rem;
     --sidebar-hide: initial;
     --sidebar-justify: flex-start;
@@ -507,8 +516,8 @@
     inline-size: auto;
     visibility: visible;
   }
-  [data-slot='sidebar'] > [data-sidebar-inner],
-  [data-slot='sidebar'][data-collapsible] > [data-sidebar-inner] {
+  [data-slot='sidebar']:not([data-hydrated]) > [data-sidebar-inner],
+  [data-slot='sidebar'][data-collapsible]:not([data-hydrated]) > [data-sidebar-inner] {
     position: static;
     inline-size: auto;
     block-size: auto;

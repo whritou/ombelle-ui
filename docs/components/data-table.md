@@ -29,10 +29,10 @@ export function Presets({ data }: { data: Preset[] }) {
 ## API and accessibility
 
 - `DataTable` takes TanStack Table column definitions and `data`. A string `header` becomes a sort button; the header cell carries `aria-sort` while sorted, and clicks cycle ascending, descending and unsorted.
-- Declarative extras: `selectable` (a checkbox column; the header checkbox selects the rows on the current page only), `filterColumn` and `filterLabel` (a search field), `facets` (a popover of checkbox values per column, keeping rows that match any checked value; values and counts come from the data unless you pass `options`), `columnVisibility` (a View menu), `pagination` and `pageSize`.
+- Declarative extras: `selectable` (a checkbox column; the header checkbox selects the rows on the current page only), `filterColumn` and `filterLabel` (a search field), `facets` (a popover of checkbox values per column, keeping rows that match any checked value; values and counts come from the data unless you pass `options`), `columnVisibility` (a View menu), `pagination` and `pageSize`. Without `pagination`, every row shows; with `selectable`, the selection count still shows.
 - For full control pass `toolbar={table => …}`, and compose `DataTableToolbar`, `DataTableFilter`, `DataTableFacetedFilter`, `DataTableViewOptions`, `DataTablePagination`, `DataTableColumnHeader`, `selectColumn()`, `actionsColumn()` and `dataTableColumns<T>()` yourself. `useDataTable()` returns the table inside it.
 - Every state can be controlled with `state` and the matching `onSortingChange`, `onColumnFiltersChange`, `onRowSelectionChange`, `onColumnVisibilityChange` and `onPaginationChange`, to move sorting, filters or pages to a server.
-- The selection count, "2 of 40 row(s) selected.", is announced politely and counts selected rows a filter hides. With no rows, "No results." spans every column and is announced.
+- The selection count, "2 of 40 row(s) selected.", is announced politely and counts selected rows a filter hides. With no rows, "No results." spans every column, and a status region that stays on the page announces it.
 - The first page renders as plain table HTML before hydration.
 - Data Table draws its own table under `data-table-*` slots, with each family's Table styles; it does not install or change Table.
 
