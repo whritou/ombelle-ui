@@ -77,6 +77,7 @@ import {
   EditorSplit,
   EditorInspector,
   focusHistoryTarget,
+  openMenubarTrigger,
   returnTarget,
   visibleMoreActions,
 } from '../../editor-shell'
@@ -210,7 +211,8 @@ export default function PresetEditor() {
     setConfirmationOpen(false)
   }
   function confirm(change: FamilyChange, label: string, description: string, tone: 'default' | 'destructive' = 'default') {
-    returnFocus.current = document.activeElement as HTMLElement
+    // From a menubar item, return to its File or Edit trigger: the item is gone once the menu closes.
+    returnFocus.current = openMenubarTrigger() ?? (document.activeElement as HTMLElement)
     setConfirmation({ ...change, label, description, tone })
     setConfirmationOpen(true)
   }

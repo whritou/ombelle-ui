@@ -2,10 +2,8 @@
 
 import { styleFamilies, styleSupport } from '@ombelle/contracts'
 import { DataTable, type DataTableColumn } from '../../generated/ui/components/ui/data-table'
-import { familyHeadings } from '../families'
+import { familyColumnTitle, supportLabels } from './matrix-labels'
 import { componentDocs } from './catalog'
-
-const labels = { stable: 'Stable', experimental: 'Experimental', unavailable: 'Unavailable' } as const
 
 type MatrixRow = { id: string; name: string } & Record<string, string>
 
@@ -14,7 +12,7 @@ export function matrixRows(): MatrixRow[] {
   return componentDocs.map(doc => ({
     id: doc.id,
     name: doc.name,
-    ...Object.fromEntries(styleFamilies.map(family => [family, labels[styleSupport(doc.id, family)]])),
+    ...Object.fromEntries(styleFamilies.map(family => [family, supportLabels[styleSupport(doc.id, family)]])),
   }))
 }
 
@@ -22,7 +20,7 @@ export function matrixRows(): MatrixRow[] {
 export function matrixColumns(): DataTableColumn<MatrixRow>[] {
   return [
     { accessorKey: 'name', header: 'Component', enableHiding: false, cell: ({ row }) => <a href={`/components/${row.original.id}`} className="underline underline-offset-4">{row.original.name}</a> },
-    ...styleFamilies.map((family): DataTableColumn<MatrixRow> => ({ accessorKey: family, header: family === 'liquid-glass' ? 'Liquid Glass' : familyHeadings[family] })),
+    ...styleFamilies.map((family): DataTableColumn<MatrixRow> => ({ accessorKey: family, header: familyColumnTitle(family) })),
   ]
 }
 

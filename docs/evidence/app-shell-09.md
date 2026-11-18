@@ -70,7 +70,7 @@ The components directory is grouped by category, then alphabetical. The home pag
 | `pnpm typecheck` | Pass |
 | `pnpm test:unit` | Pass |
 | `pnpm test:integration` | Pass for this work after three tests were brought up to date (below). The rest of the failures are this machine: no Bun ("Cannot resolve a supported native bun executable"), pnpm only through corepack ("Cannot locate a pnpm JavaScript entry"), Windows `tar` in `packed-cli`, and the shared snapshot cache in `snapshot-journey` and `component-recipe-cli` |
-| Site browser tests (`playwright.site.config.ts`: site shell, responsive editors, axe) | 69 pass |
+| Site browser tests (`pnpm test:site`: site shell, responsive editors, axe) | 76 pass (the full run, then the split and drawer tests again after their last fixes) |
 | axe, at 1440 px with the header's Components panel open and at 375 px: `/`, `/docs`, `/docs/getting-started`, `/components`, `/components/data-table`, `/editor/preset`, `/editor/component/button` | 14 pass |
 
 Integration tests brought up to date for the 0.9 components:
@@ -85,6 +85,18 @@ axe first reported two things, both fixed or scoped:
 
 - The Components pages nested a `<main>` inside the Sidebar inset, which is the page's `<main>`; they now use a `<div>`.
 - Radix Navigation Menu renders a hidden focus proxy (`aria-hidden`, `tabindex="0"`) after an open trigger to move Tab into the panel. axe reports it as `aria-hidden-focus`. The site check leaves out only that element.
+
+### Final review fixes
+
+A whole-branch review found no critical issues. Fixed:
+
+- Dialogs opened from the desktop File or Edit menu (ID & revision, Reset all tokens) returned focus to nothing, because the menu item is gone once the menu closes. Focus now returns to the File or Edit trigger, and the preset keyboard test checks it after Done, Escape and Cancel.
+- A saved split under other panel ids, or malformed, made the resizable group throw and unmounted the editor. It is now dropped and the default split loads. The panels are named `editor-inspector` and `editor-main`, so no DOM id repeats the page's `main` skip-link target. A split reported while the editor is below 1200 px, where it is flattened, is no longer saved over the desktop one.
+- Ctrl or Cmd + B folded the component inspector unseen below 1200 px, and the fold appeared on returning to desktop. It now works only from 1200 px. On the docs and components pages it is off: from 768 px nothing on screen would bring the navigation back.
+- The site suite has its own script, `pnpm test:site`. Like the other separate browser configurations, it is not in `pnpm check:foundation` or CI.
+- The support matrix shows the plain table while its Data Table loads; the Edit menu shows ⌘Z and ⇧⌘Z on Apple platforms.
+
+Not changed: following a link in the docs sheet on a phone is a full page load, so focus starts at the top of the new page, not in its main content (the plan's Review Focus 5). The skip link is the first stop.
 
 ### First Load JS
 

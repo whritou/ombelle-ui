@@ -45,6 +45,12 @@ type HistoryAction = {
   buttonRef: Ref<HTMLButtonElement>
 }
 
+/** Undo and Redo's keys as this platform writes them. Only read inside an open menu, which renders in the browser. */
+function historyKeys() {
+  const mac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+  return mac ? { undo: '⌘Z', redo: '⇧⌘Z' } : { undo: 'Ctrl+Z', redo: 'Shift+Ctrl+Z' }
+}
+
 export function EditorTopBar({
   crumbs,
   nameField,
@@ -213,8 +219,8 @@ export function EditorTopBar({
             <MenubarMenu>
               <MenubarTrigger>Edit</MenubarTrigger>
               <MenubarContent>
-                <MenubarItem disabled={undo.disabled} onSelect={undo.onClick}>Undo<MenubarShortcut>Ctrl+Z</MenubarShortcut></MenubarItem>
-                <MenubarItem disabled={redo.disabled} onSelect={redo.onClick}>Redo<MenubarShortcut>Shift+Ctrl+Z</MenubarShortcut></MenubarItem>
+                <MenubarItem disabled={undo.disabled} onSelect={undo.onClick}>Undo<MenubarShortcut>{historyKeys().undo}</MenubarShortcut></MenubarItem>
+                <MenubarItem disabled={redo.disabled} onSelect={redo.onClick}>Redo<MenubarShortcut>{historyKeys().redo}</MenubarShortcut></MenubarItem>
                 {menu.items.some(editMenuItem) && <MenubarSeparator />}
                 {menu.items.filter(editMenuItem).map(item => (
                   <MenubarItem key={item.id} onSelect={item.onSelect} disabled={item.disabled} variant={item.destructive ? 'destructive' : 'default'}>{item.label}</MenubarItem>

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { componentEditorLink } from '../editor/editable-components'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '../generated/ui/components/ui/navigation-menu'
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../generated/ui/components/ui/sheet'
-import { categoryNames } from './components/component-names'
+import { categoryAnchor, categoryNames } from './components/component-names'
 import { documentationGuides } from './docs/navigation'
 import { GithubIcon, Logo } from './logo'
 import { primaryLinks, repository } from './links'
@@ -51,7 +51,7 @@ export function SiteHeader() {
               <NavigationMenuContent>
                 <NavigationMenuLink href="/components" active={pathname === '/components'}><span>All components</span><p>The catalog, by category, with live previews</p></NavigationMenuLink>
                 {categoryNames().map(group => (
-                  <NavigationMenuLink key={group.title} href={`/components#category-${group.title.toLowerCase().replace(' ', '-')}`}><span>{group.title}</span><p>{group.names.join(', ')}</p></NavigationMenuLink>
+                  <NavigationMenuLink key={group.title} href={`/components#${categoryAnchor(group.title)}`}><span>{group.title}</span><p>{group.names.join(', ')}</p></NavigationMenuLink>
                 ))}
               </NavigationMenuContent>
             </NavigationMenuItem>

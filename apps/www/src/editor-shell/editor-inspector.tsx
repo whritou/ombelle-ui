@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Box, Droplet, Layers, LayoutGrid, Palette, PanelLeftClose, PanelLeftOpen, Ruler, Shapes, Smile, Sparkles, StretchHorizontal, Type, type LucideIcon } from 'lucide-react'
 import { Sidebar, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '../generated/ui/components/ui/sidebar'
+import { useViewportClass } from './breakpoints'
 import styles from './editor-shell.module.css'
 
 /** Each inspector section's icon in the folded rail, by the last word of its heading id. */
@@ -45,8 +46,10 @@ export function EditorInspector({ label, collapsed, onCollapsedChange, shortcut 
     heading?.closest('section')?.querySelector<HTMLElement>('input:not([type="hidden"]), select, textarea, button, [tabindex]:not([tabindex="-1"])')?.focus()
     setReveal(null)
   }, [collapsed, reveal])
+  // The inspector folds only from 1200 px; below it the shortcut would fold it unseen, so it stays off there.
+  const desktop = useViewportClass() === 'desktop'
   return (
-    <SidebarProvider open={!collapsed} onOpenChange={open => onCollapsedChange(!open)} shortcut={shortcut} mobileBreakpoint={0}
+    <SidebarProvider open={!collapsed} onOpenChange={open => onCollapsedChange(!open)} shortcut={shortcut && desktop} mobileBreakpoint={0}
       className={styles.inspectorProvider} style={{ '--sidebar-width': '100%', '--sidebar-width-icon': '3.25rem', '--sidebar-height': '100%' } as CSSProperties}>
       <Sidebar side="left" collapsible="icon" label={`${label} sections`} role="group" className={styles.inspectorSidebar}>
         <div className={styles.inspectorBar}>

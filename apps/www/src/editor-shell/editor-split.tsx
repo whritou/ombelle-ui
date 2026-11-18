@@ -13,6 +13,11 @@ function storage(): Storage | null {
   }
 }
 
+/** The panel ids, sorted; they are DOM ids too, so they must not repeat the page's `main` skip-link target. */
+const splitPanels = ['editor-inspector', 'editor-main']
+/** The width from which the split lays out its panels. */
+const splitMedia = '(min-width: 1200px)'
+
 /**
  * The editors' inspector and main area, split by a handle that the pointer drags and the arrow keys move.
  * The same tree renders at every width, so nothing remounts when the viewport class settles after hydration:
@@ -48,16 +53,39 @@ export function EditorSplit({ id, className, inspector, children, after, collaps
     saved.current = store ? readSavedLayout(store, id) : null
   }
   useEffect(() => {
-    if (saved.current) group.current?.setLayout(JSON.parse(saved.current))
-  }, [])
+    if (!saved.current) return
+    let layout: Record<string, number>
+    try {
+      layout = JSON.parse(saved.current) as Record<string, number>
+      // A split saved under other panel ids (an older layout) is dropped, never applied: the group would throw.
+      if (Object.keys(layout).sort().join() !== splitPanels.join()) throw new Error('stale split')
+    } catch {
+      try { storage()?.removeItem(id) } catch { /* Blocked storage has nothing to drop. */ }
+      return
+    }
+    // The split lays out only from 1200 px; below it the group has no width, so the split waits for desktop.
+    const media = window.matchMedia(splitMedia)
+    let applied = false
+    const apply = () => {
+      if (applied || !media.matches) return
+      try { group.current?.setLayout(layout); applied = true } catch { /* The default split stays. */ }
+    }
+    apply()
+    media.addEventListener('change', apply)
+    return () => media.removeEventListener('change', apply)
+  }, [id])
   return (
     <div className={className} data-editor-split="">
       <ResizablePanelGroup direction="horizontal" groupRef={group} data-editor-split-group=""
-        onLayoutChanged={layout => { try { storage()?.setItem(id, JSON.stringify(layout)) } catch { /* Blocked storage keeps the split for this visit. */ } }}>
-        <ResizablePanel id="inspector" defaultSize="27%" minSize="20%" maxSize="45%" collapsible collapsedSize="4.25rem" panelRef={inspectorPanel}
+        onLayoutChanged={layout => {
+          // Below 1200 px the split is flattened and has no width, so whatever it reports is not the user's split.
+          if (!window.matchMedia(splitMedia).matches) return
+          try { storage()?.setItem(id, JSON.stringify(layout)) } catch { /* Blocked storage keeps the split for this visit. */ }
+        }}>
+        <ResizablePanel id="editor-inspector" defaultSize="27%" minSize="20%" maxSize="45%" collapsible collapsedSize="4.25rem" panelRef={inspectorPanel}
           onResize={() => { const folded = inspectorPanel.current?.isCollapsed() ?? false; if (folded !== collapsed) onCollapsedChange?.(folded) }}>{inspector}</ResizablePanel>
         <ResizableHandle withHandle aria-label="Resize the inspector and the preview" />
-        <ResizablePanel id="main" defaultSize="73%" minSize="40%">{children}</ResizablePanel>
+        <ResizablePanel id="editor-main" defaultSize="73%" minSize="40%">{children}</ResizablePanel>
       </ResizablePanelGroup>
       {after}
     </div>

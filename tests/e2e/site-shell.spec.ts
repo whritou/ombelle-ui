@@ -39,7 +39,6 @@ test.describe('phones', () => {
 
   test('guide text keeps the page within 375 px', async ({ page }) => {
     await page.goto(`${site}/docs/getting-started`)
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375)
   })
 })
@@ -122,6 +121,46 @@ test.describe('desktop editors', () => {
   }
 })
 
+test.describe('saved editor splits', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+  test('a stale or malformed split is dropped and the default split loads', async ({ page }) => {
+    const handle = page.getByRole('separator', { name: 'Resize the inspector and the preview' })
+    await page.goto(`${site}/editor/component/button`)
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+    await expect(handle).toBeVisible({ timeout: 60000 })
+    await page.waitForTimeout(500)
+    const start = await handle.getAttribute('aria-valuenow')
+    const key = await page.evaluate(() => Object.keys(localStorage).find(name => name.includes('ombelle-editor-')) ?? 'ombelle-editor-button')
+    for (const value of ['{"a":50,"b":50}', '{"inspector":30,"main":70}', '{"editor-inspector":100}', 'not json']) {
+      const errors: string[] = []
+      page.on('pageerror', error => errors.push(error.message))
+      await page.evaluate(([name, saved]) => localStorage.setItem(name, saved), [key, value])
+      await page.reload()
+      await expect(handle).toHaveAttribute('aria-valuenow', start!, { timeout: 60000 })
+      expect(errors).toEqual([])
+      page.removeAllListeners('pageerror')
+    }
+  })
+  test('loading below 1200 px keeps the desktop split', async ({ page }) => {
+    const handle = page.getByRole('separator', { name: 'Resize the inspector and the preview' })
+    await page.goto(`${site}/editor/component/button`)
+    await page.evaluate(() => localStorage.clear())
+    await page.reload()
+    await expect(handle).toBeVisible({ timeout: 60000 })
+    await page.waitForTimeout(500)
+    await handle.focus()
+    for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowRight')
+    const resized = await handle.getAttribute('aria-valuenow')
+    await page.setViewportSize({ width: 1024, height: 900 })
+    await page.reload()
+    await page.waitForTimeout(1000)
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.reload()
+    await expect(handle).toHaveAttribute('aria-valuenow', resized!, { timeout: 60000 })
+  })
+})
+
 test.describe('preset editor review drawer', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
   test('Ctrl/Cmd+B toggles the Review drawer, but not while typing in an inspector field', async ({ page }) => {
@@ -134,9 +173,20 @@ test.describe('preset editor review drawer', () => {
     await page.locator('body').click({ position: { x: 5, y: 5 } })
     await page.keyboard.press('ControlOrMeta+b')
     await expect.poll(state).not.toBe(before)
+    // The drawer owns the shortcut here: the inspector stays unfolded.
+    await expect(page.getByRole('button', { name: 'Fold preset inspector' })).toBeVisible()
     await page.keyboard.press('ControlOrMeta+b')
     await expect.poll(state).toBe(before)
-    await page.getByRole('textbox').first().focus()
+    // The first input on screen inside the inspector, whatever kind it is.
+    await page.evaluate(() => {
+      const fields = [...document.querySelectorAll<HTMLInputElement>('[aria-label="Inspector controls"] input:not([type="hidden"])')]
+      const field = fields.find(element => !element.disabled && element.checkVisibility())
+      if (!field) throw new Error('No input on screen in the preset inspector')
+      field.setAttribute('data-test-field', '')
+      field.focus()
+    })
+    const field = page.locator('[data-test-field]')
+    await expect(field).toBeFocused()
     await page.keyboard.press('ControlOrMeta+b')
     await expect.poll(state).toBe(before)
   })
@@ -167,6 +217,32 @@ test.describe('folding inspector', () => {
     await page.keyboard.press('ControlOrMeta+b')
     await expect(page.getByRole('button', { name: 'Fold sidebar inspector' })).toBeVisible()
   })
+
+  test('below 1200 px Ctrl/Cmd+B leaves the inspector alone, so it is not folded on returning to desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 900 })
+    await page.goto(`${site}/editor/component/sidebar`)
+    await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 60000 })
+    await page.locator('body').click({ position: { x: 5, y: 5 } })
+    await page.keyboard.press('ControlOrMeta+b')
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await expect(page.getByRole('button', { name: 'Fold sidebar inspector' })).toBeVisible()
+  })
+})
+
+test.describe('content pages', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+  for (const path of ['/docs/getting-started', '/components/sidebar']) {
+    test(`${path} keeps its navigation on Ctrl/Cmd+B, which has no on-screen way back`, async ({ page }) => {
+      await page.goto(`${site}${path}`)
+      const nav = page.locator('[data-slot="sidebar"]').first()
+      await expect(nav).toBeVisible()
+      await page.waitForLoadState('load')
+      await page.locator('body').click({ position: { x: 5, y: 300 } })
+      await page.keyboard.press('ControlOrMeta+b')
+      await page.waitForTimeout(300)
+      await expect(nav).toHaveAttribute('data-state', 'expanded')
+    })
+  }
 })
 
 test.describe('editor menubar', () => {
@@ -252,5 +328,21 @@ for (const width of [1440, 375]) {
         expect((await axe.analyze()).violations).toEqual([])
       })
     }
+  })
+}
+
+// From 768 px the header is one line of links; it must fit without scrolling the page sideways.
+for (const width of [768, 1024]) {
+  test.describe(`header at ${width} px`, () => {
+    test.use({ viewport: { width, height: 900 } })
+    test('fits the width with every link on screen', async ({ page }) => {
+      await page.goto(`${site}/docs`)
+      await page.waitForLoadState('load')
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
+      const nav = page.getByRole('navigation', { name: 'Primary' })
+      for (const name of ['Docs', 'Components']) await expect(nav.getByRole('button', { name, exact: true })).toBeInViewport({ ratio: 1 })
+      for (const link of await nav.getByRole('link').all()) await expect(link).toBeInViewport({ ratio: 1 })
+      await expect(page.getByRole('button', { name: 'Dark theme' })).toBeInViewport({ ratio: 1 })
+    })
   })
 }

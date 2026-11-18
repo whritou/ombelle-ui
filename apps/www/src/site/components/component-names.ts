@@ -85,3 +85,8 @@ export const componentNames: Readonly<Record<ComponentId, string>> = {
 export function categoryNames(): { title: string; names: string[] }[] {
   return componentCategories.map(category => ({ title: category.title, names: category.ids.map(id => componentNames[id]).sort((a, b) => a.localeCompare(b)) }))
 }
+
+/** A category's anchor on the components page, such as "category-data-display". */
+export function categoryAnchor(title: string): string {
+  return `category-${title.toLowerCase().replaceAll(' ', '-')}`
+}

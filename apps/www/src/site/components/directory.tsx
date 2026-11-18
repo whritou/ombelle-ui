@@ -7,6 +7,7 @@ import { styleSupport } from '@ombelle/contracts'
 import { GlassPresetSelect } from '../glass-preset-select'
 import { componentInstallable } from './catalog'
 import { componentGroups } from './categories'
+import { categoryAnchor } from './component-names'
 
 export function ComponentDirectory() {
   const [glass, setGlass] = useState<StartingPresetId>()
@@ -16,8 +17,8 @@ export function ComponentDirectory() {
         <GlassPresetSelect value={glass} onChange={setGlass} allowNone />
       </div>
       {componentGroups().map(group => (
-      <section key={group.title} aria-labelledby={`category-${group.title.toLowerCase().replace(' ', '-')}`} className="mt-10">
-      <h2 id={`category-${group.title.toLowerCase().replace(' ', '-')}`} className="font-display text-2xl font-black">{group.title}</h2>
+      <section key={group.title} aria-labelledby={categoryAnchor(group.title)} className="mt-10">
+      <h2 id={categoryAnchor(group.title)} className="font-display text-2xl font-black">{group.title}</h2>
       <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {group.docs.map(doc => {
           const hasGlass = styleSupport(doc.id, 'liquid-glass') === 'experimental'

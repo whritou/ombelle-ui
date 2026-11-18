@@ -190,6 +190,8 @@ pnpm prepare:base-consumers
 pnpm test:base-consumers
 ```
 
+`pnpm test:site` checks the website's own shell on the 0.9 components: the docs and components navigation, the header, the editors' split, inspector, Review drawer and menubar, saved splits, Ctrl or Cmd + B, header widths from 768 px, and axe on the main pages at 1440 and 375 px. It starts the website and the preview only. Run `pnpm build:packages` and `pnpm generate:preview` first; set `OMBELLE_BROWSER_CHANNEL` to use an installed browser. It is not part of `pnpm check:foundation`.
+
 `pnpm test:editions` compares every ported component's computed styles between editions in the preview app.
 
 `pnpm test:specimen-audit` measures every catalog specimen, as installed, on the generated audit pages (`/audit/<family>/<edition>/?mode=light|dark`): overflow, clipping, label spacing, focus visibility, target size, forced colors and axe rules, in 20 configurations. It first runs self-tests that plant each defect and require the check to find it. Run `pnpm build:packages` and `pnpm generate:preview` first, and do not rebuild while it runs: the preview server reloads the pages. Set `OMBELLE_BROWSER_CHANNEL` to use an installed browser. Screenshots go to `.artifacts/specimen-audit/` and the evidence to `.artifacts/specimen-audit.json`; the foundation `consumers` group runs it and rejects incomplete or failing evidence. Liquid glass is experimental: its findings are recorded in the evidence and test report but only page errors fail it. See the [specimen audit evidence](evidence/specimen-audit.md).
