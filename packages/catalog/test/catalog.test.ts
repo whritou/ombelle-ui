@@ -619,6 +619,7 @@ describe('catalog contract', () => {
       'sidebar',
       'resizable',
       'menubar',
+      'data-table',
     ])
     for (const id of supportedComponentIds)
       if (c.templates[id].styles)

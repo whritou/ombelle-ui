@@ -709,6 +709,13 @@ it('accepts the default 0.9 menubar recipe and rejects one without menus or a la
   expect(() => validateComponentRecipe(draft076('menubar', {}, { menus: Array(5).fill({ id: 'file', label: 'File', items: ['New'] }) }))).toThrow()
 })
 
+it('accepts the default 0.9 data table recipe and rejects an empty caption', () => {
+  expect(validateComponentRecipe(draft076('data-table')).component).toBe('data-table')
+  expect(defaultRecipeFields(componentRecipeFields('data-table').content)).toEqual({ label: 'Components' })
+  expect(() => validateComponentRecipe(draft076('data-table', {}, { label: ' ' }))).toThrow(expect.objectContaining({ path: '/content/label' }))
+  expect(() => validateComponentRecipe(draft076('data-table', { pages: true }))).toThrow()
+})
+
 it('accepts the default 0.9 sidebar recipe and rejects one without groups', () => {
   expect(validateComponentRecipe(draft076('sidebar')).component).toBe('sidebar')
   expect(defaultRecipeFields(componentRecipeFields('sidebar').props)).toEqual({ collapsible: 'icon', side: 'left', variant: 'sidebar' })

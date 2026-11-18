@@ -5046,6 +5046,56 @@
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "data-table"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "selection": {
+              "type": "boolean",
+              "default": true,
+              "title": "Row selection"
+            },
+            "columnVisibility": {
+              "type": "boolean",
+              "default": true,
+              "title": "Column visibility"
+            },
+            "facets": {
+              "type": "boolean",
+              "default": true,
+              "title": "Faceted filters"
+            },
+            "pagination": {
+              "type": "boolean",
+              "default": true,
+              "title": "Pagination"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Caption",
+              "maxLength": 200,
+              "default": "Components",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

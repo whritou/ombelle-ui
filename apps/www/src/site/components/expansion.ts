@@ -236,4 +236,10 @@ export const expansionDocs = {
     states: 'Closed, menu open, item highlighted, checked, disabled, submenu open, destructive item', basis: 'Reviewed Radix Menubar; Base UI Menubar and Menu in the Base UI edition', client: true,
     usage: expansionExamples.menubar, minimumCli: '0.9.0',
   },
+  'data-table': {
+    name: 'Data Table', description: 'A table with sorting, a text filter, faceted filters, row selection, column visibility, row actions and pages, drawn like Table.',
+    api: 'DataTable (columns, data, state and on…Change, selectable, filterColumn, filterLabel, facets, columnVisibility, pagination, pageSize, toolbar, emptyLabel, caption), DataTableColumnHeader, DataTableToolbar, DataTableFilter, DataTableFacetedFilter, DataTableViewOptions, DataTablePagination, DataTableRowActions, DataTableRowAction, selectColumn, actionsColumn, dataTableColumns, useDataTable',
+    states: 'Default, sorted ascending and descending, filtered, no results, rows selected, columns hidden, first and last page', basis: 'TanStack Table with reviewed Radix Dropdown Menu and Popover; Base UI Menu and Popover in the Base UI edition', client: true,
+    usage: expansionExamples['data-table'], minimumCli: '0.9.0',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

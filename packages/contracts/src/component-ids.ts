@@ -61,5 +61,6 @@ export const supportedComponentIds = [
   'sidebar',
   'resizable',
   'menubar',
+  'data-table',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]

@@ -58,6 +58,12 @@ const slideImage = (index: number) => {
   return 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
     + `<rect width='16' height='9' fill='hsl(${hue} 70% 82%)'/><path d='M0 6.5Q5 3.5 10 6t6-1V9H0z' fill='hsl(${hue} 45% 38%)'/></svg>`)
 }
+// The Data Table specimen's rows: catalog components, their kind and their glass status.
+const dataTableRows = [
+  ['Accordion', 'Disclosure', 'Stable'], ['Button', 'Action', 'Stable'], ['Calendar', 'Date', 'Stable'], ['Data Table', 'Data', 'Stable'],
+  ['Dialog', 'Overlay', 'Stable'], ['Menubar', 'Navigation', 'Stable'], ['Navigation Menu', 'Navigation', 'Stable'], ['Prose', 'Typography', 'Stable'],
+  ['Resizable', 'Layout', 'Stable'], ['Sidebar', 'Navigation', 'Stable'], ['Liquid glass Sheet', 'Overlay', 'Experimental'], ['Liquid glass Toolbar', 'Action', 'Experimental'],
+].map(([name, kind, status]) => ({ name: name!, kind: kind!, status: status! }))
 // The Ombelle preset's primary foreground in light and dark.
 const primaryForeground = { light: 'oklch(0.99 0 0)', dark: 'oklch(0.16 0.01 275)' } as const
 
@@ -274,6 +280,16 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
         node('MenubarTrigger', {}, menu.label),
         node('MenubarContent', {}, ...menu.items.map(text => node('MenubarItem', {}, text,
           ...(props.shortcuts === false ? [] : [node('MenubarShortcut', {}, `Ctrl+${text.slice(0, 1).toUpperCase()}`)])))))))
+    case 'data-table':
+      // Fixed rows: the catalog's own components, so sorting, filtering and pages have something to show.
+      return node('DataTable', {
+        'aria-label': content.label, caption: content.label, pageSize: 5,
+        columns: [{ accessorKey: 'name', header: 'Component' }, { accessorKey: 'kind', header: 'Kind' }, { accessorKey: 'status', header: 'Status' }],
+        data: dataTableRows,
+        selectable: props.selection, columnVisibility: props.columnVisibility, pagination: props.pagination,
+        filterColumn: 'name', filterLabel: 'Filter components',
+        facets: props.facets === false ? [] : [{ column: 'status', title: 'Status' }],
+      })
     case 'toolbar': {
       const toggles = props.toggles ?? 'single'
       const items = content.items

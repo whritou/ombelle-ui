@@ -4,6 +4,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupColla
 import { Box, FolderOpen, LayoutDashboard, Palette } from 'lucide-react'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { Menubar, MenubarCheckboxItem, MenubarContent, MenubarItem, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger, MenubarTrigger } from '@/components/ui/menubar'
+import { DataTable, DataTableRowAction, DataTableRowActions, actionsColumn, type DataTableColumn } from '@/components/ui/data-table'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu'
 
 // The 0.9 app shell components in both editions (tests/e2e/app-shell-09.spec.ts).
@@ -187,6 +188,34 @@ function EditorMenubar() {
   )
 }
 
+type PresetRow = { name: string; family: string; status: string }
+const families = ['Ombelle', 'Flat', 'Papier', 'Organic']
+const presetRows: PresetRow[] = Array.from({ length: 40 }, (_, index) => ({
+  name: `Preset ${String(index + 1).padStart(2, '0')}`,
+  family: families[index % families.length]!,
+  status: index % 5 === 4 ? 'Experimental' : 'Stable',
+}))
+const presetColumns: DataTableColumn<PresetRow>[] = [
+  { accessorKey: 'name', header: 'Name' },
+  { accessorKey: 'family', header: 'Family' },
+  { accessorKey: 'status', header: 'Status' },
+  actionsColumn<PresetRow>(row => (
+    <DataTableRowActions label={`Actions for ${row.original.name}`}>
+      <DataTableRowAction>Open</DataTableRowAction>
+      <DataTableRowAction variant="destructive">Delete</DataTableRowAction>
+    </DataTableRowActions>
+  )),
+]
+
+function PresetTable() {
+  return (
+    <div data-testid="s09-data-table">
+      <DataTable aria-label="Presets" columns={presetColumns} data={presetRows} getRowId={row => row.name} selectable filterColumn="name" filterLabel="Filter presets"
+        facets={[{ column: 'status', title: 'Status' }]} columnVisibility pagination pageSize={10} />
+    </div>
+  )
+}
+
 export function AppShellScenario09() {
   return (
     <section aria-label="0.9 app shell" data-testid="app-shell-09" style={{ display: 'grid', gap: '1.5rem', minInlineSize: 0 }}>
@@ -194,6 +223,7 @@ export function AppShellScenario09() {
       <EditorSidebar />
       <SplitPanes />
       <EditorMenubar />
+      <PresetTable />
       <ProseArticle />
     </section>
   )

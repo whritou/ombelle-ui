@@ -38,7 +38,7 @@ const normalize = (css: string) =>
 
 describe('liquid-glass compile', () => {
   it('compiles the fifty-seven experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'menubar', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
+    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'data-table', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'menubar', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -63,6 +63,7 @@ describe('liquid-glass compile', () => {
       'components/ui/combobox.css',
       'components/ui/command.css',
       'components/ui/context-menu.css',
+      'components/ui/data-table.css',
       'components/ui/dropdown-menu.css',
       'components/ui/empty.css',
       'components/ui/field.css',

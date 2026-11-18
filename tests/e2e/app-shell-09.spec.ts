@@ -209,6 +209,87 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(after).toBeFocused()
     })
 
+    test('Data Table: a sortable header cycles ascending, descending and unsorted', async ({ page }) => {
+      const grid = (await open(page, edition)).getByTestId('s09-data-table')
+      const header = grid.getByRole('columnheader', { name: 'Name' })
+      const sort = header.getByRole('button', { name: 'Name' })
+      await expect(header).not.toHaveAttribute('aria-sort', /.+/)
+      await sort.click()
+      await expect(header).toHaveAttribute('aria-sort', 'ascending')
+      await sort.click()
+      await expect(header).toHaveAttribute('aria-sort', 'descending')
+      await expect(grid.getByRole('row').nth(1)).toContainText('Preset 40')
+      await sort.click()
+      await expect(header).not.toHaveAttribute('aria-sort', /.+/)
+    })
+
+    test('Data Table: the text filter and a facet narrow the rows, and no match shows No results.', async ({ page }) => {
+      const grid = (await open(page, edition)).getByTestId('s09-data-table')
+      await grid.getByRole('searchbox', { name: 'Filter presets' }).fill('Preset 0')
+      await expect(grid.getByRole('cell', { name: 'Preset 09', exact: true })).toBeVisible()
+      await expect(grid.getByRole('cell', { name: 'Preset 10', exact: true })).toHaveCount(0)
+      await grid.getByRole('searchbox', { name: 'Filter presets' }).fill('')
+      await grid.locator('[data-slot="data-table-toolbar"]').getByRole('button', { name: 'Status' }).click()
+      await page.getByRole('checkbox', { name: /Experimental/ }).check()
+      await page.keyboard.press('Escape')
+      await expect(grid.getByRole('cell', { name: 'Stable' })).toHaveCount(0)
+      await expect(grid.getByRole('cell', { name: 'Experimental' }).first()).toBeVisible()
+      await grid.getByRole('searchbox', { name: 'Filter presets' }).fill('nothing matches this')
+      await expect(grid.getByRole('status')).toHaveText('No results.')
+    })
+
+    test('Data Table: select one and select all on the page; the count is announced', async ({ page }) => {
+      const grid = (await open(page, edition)).getByTestId('s09-data-table')
+      const count = grid.locator('[data-slot="data-table-selection"]')
+      await expect(count).toHaveAttribute('aria-live', 'polite')
+      await grid.getByRole('row', { name: /Preset 03/ }).getByRole('checkbox').check()
+      await expect(count).toHaveText('1 of 40 row(s) selected.')
+      await grid.getByRole('checkbox', { name: 'Select all rows on this page' }).check()
+      await expect(count).toHaveText('10 of 40 row(s) selected.')
+    })
+
+    test('Data Table: selection survives a filter that hides the selected rows', async ({ page }) => {
+      const grid = (await open(page, edition)).getByTestId('s09-data-table')
+      const count = grid.locator('[data-slot="data-table-selection"]')
+      await grid.getByRole('row', { name: /Preset 01/ }).getByRole('checkbox').check()
+      await grid.getByRole('row', { name: /Preset 02/ }).getByRole('checkbox').check()
+      await grid.getByRole('searchbox', { name: 'Filter presets' }).fill('Preset 3')
+      await expect(count).toHaveText('2 of 40 row(s) selected.')
+      await grid.getByRole('searchbox', { name: 'Filter presets' }).fill('')
+      await expect(grid.getByRole('row', { name: /Preset 01/ }).getByRole('checkbox')).toBeChecked()
+      await expect(grid.getByRole('row', { name: /Preset 02/ }).getByRole('checkbox')).toBeChecked()
+    })
+
+    test('Data Table: the View menu hides and shows a column', async ({ page }) => {
+      const grid = (await open(page, edition)).getByTestId('s09-data-table')
+      await grid.getByRole('button', { name: 'View' }).click()
+      await page.getByRole('menuitemcheckbox', { name: 'Family' }).click()
+      await page.keyboard.press('Escape')
+      await expect(grid.getByRole('columnheader', { name: 'Family' })).toHaveCount(0)
+      await grid.getByRole('button', { name: 'View' }).click()
+      await page.getByRole('menuitemcheckbox', { name: 'Family' }).click()
+      await page.keyboard.press('Escape')
+      await expect(grid.getByRole('columnheader', { name: 'Family' })).toBeVisible()
+    })
+
+    test('Data Table: pages move, and Previous is disabled on the first page', async ({ page }) => {
+      const grid = (await open(page, edition)).getByTestId('s09-data-table')
+      await expect(grid.getByRole('button', { name: 'Previous page' })).toBeDisabled()
+      await grid.getByRole('button', { name: 'Next page' }).click()
+      await expect(grid.getByText('Page 2 of 4')).toBeVisible()
+      await expect(grid.getByRole('cell', { name: 'Preset 11', exact: true })).toBeVisible()
+      await expect(grid.getByRole('button', { name: 'Previous page' })).toBeEnabled()
+    })
+
+    test('Data Table: the row actions menu opens with the keyboard', async ({ page }) => {
+      const grid = (await open(page, edition)).getByTestId('s09-data-table')
+      await grid.getByRole('button', { name: 'Actions for Preset 01' }).focus()
+      await page.keyboard.press('Enter')
+      await expect(page.getByRole('menuitem', { name: 'Open' })).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(grid.getByRole('button', { name: 'Actions for Preset 01' })).toBeFocused()
+    })
+
     test('Prose keeps long URLs, words and tables inside its box at 320 px', async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 800 })
       const section = await open(page, edition)
