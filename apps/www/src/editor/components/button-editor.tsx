@@ -23,7 +23,7 @@ import { useRecipeBatch } from '../use-recipe-batch'
 import { changesSummaryFor } from './changes-summary'
 import { MatrixControls } from './matrix-controls'
 import { useMatrixLayout } from '../use-matrix-layout'
-import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
+import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem, EditorSplit } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
@@ -255,7 +255,7 @@ export function ButtonEditor() {
         {preservedRecoveries.length} previous invalid draft{preservedRecoveries.length === 1 ? ' is' : 's are'} preserved on this device. Download {preservedRecoveries.length === 1 ? 'it' : 'them'} from More actions.
       </p>}
       <ComponentEditorDock name="Button" pane={view.panel} matrix={matrix} onChange={(pane) => switchPane(pane, view.panel, matrix, setView)} />
-      <div className={styles.workspace}>
+      <EditorSplit id="ombelle-editor-button" className={styles.workspace} inspector={
         <aside className={panes.rail} aria-label="Button inspector">
           <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
           <div className={styles.railContent}>
@@ -264,6 +264,7 @@ export function ButtonEditor() {
           </div>
         </ScrollArea>
         </aside>
+      }>
         <div className={panes.primary}>
           <section className={panes.preview} aria-labelledby="preview-title">
             <h2 id="preview-title" className={styles.srOnly}>Live preview</h2>
@@ -299,7 +300,7 @@ export function ButtonEditor() {
               notice={experimentalNotice(draftFamily(draft.recipe))} />
           </div>
         </div>
-      </div>
+      </EditorSplit>
     </>}
   </main>
 }

@@ -8,3 +8,4 @@ export { previewLayoutOptions, previewModeOptions, previewTransparencyOptions, p
 export { desktopQuery, phoneQuery, tabletQuery, useViewportClass, viewportClass, type ViewportClass } from './breakpoints'
 export { EditorDock, type DockTab } from './dock'
 export { focusHistoryTarget, phoneMoreAttribute, returnTarget, visibleMoreActions } from './history-focus'
+export { EditorSplit } from './editor-split'

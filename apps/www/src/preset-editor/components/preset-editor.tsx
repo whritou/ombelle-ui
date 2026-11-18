@@ -74,6 +74,7 @@ import {
   useDrawerState,
   EditorDock,
   useViewportClass,
+  EditorSplit,
   focusHistoryTarget,
   returnTarget,
   visibleMoreActions,
@@ -475,7 +476,7 @@ export default function PresetEditor() {
           <GlassPanel report={glassReport} />
         </div>
       )}
-      <div className={styles.workbench}>
+      <EditorSplit id="ombelle-editor-preset" className={styles.workbench} inspector={
         <section aria-label="Preset inspector" className={`${styles.panel} ${pane !== 'customize' ? styles.phoneHidden : ''}`}>
           <ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
           <div className={styles.panelContent}>
@@ -523,6 +524,16 @@ export default function PresetEditor() {
           </div>
           </ScrollArea>
         </section>
+      } after={viewportClass === 'desktop' && <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
+          <ReviewDrawer
+            label="Review"
+            open={drawerOpen}
+            onOpenChange={setDrawerOpen}
+            activeTab={drawerTab}
+            onTabChange={setDrawerTab}
+            tabs={reviewTabs}
+          />
+        </div>}>
         {/* On a phone the preview is its own pane, reached from the dock. */}
         <div className={`${styles.canvas} ${pane !== 'preview' ? styles.phoneHidden : ''}`}>
           <section className={styles.preview} aria-label="Live preview">
@@ -614,17 +625,7 @@ export default function PresetEditor() {
             </Collapsible>
           </section>
         )}
-        {viewportClass === 'desktop' && <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
-          <ReviewDrawer
-            label="Review"
-            open={drawerOpen}
-            onOpenChange={setDrawerOpen}
-            activeTab={drawerTab}
-            onTabChange={setDrawerTab}
-            tabs={reviewTabs}
-          />
-        </div>}
-      </div>
+      </EditorSplit>
       <Sheet open={viewportClass === 'tablet' && reviewSheetOpen} onOpenChange={setReviewSheetOpen}>
         <SheetContent side="bottom" aria-label="Checks and export" className={styles.reviewSheet}
           onCloseAutoFocus={(event) => { event.preventDefault(); returnTarget(reviewOpener.current)?.focus() }}>

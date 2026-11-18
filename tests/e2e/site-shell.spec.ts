@@ -93,3 +93,30 @@ for (const width of [375, 1440]) {
     })
   })
 }
+
+test.describe('desktop editors', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+  for (const path of ['/editor/component/button', '/editor/component/sidebar', '/editor/preset']) {
+    test(`${path} splits the inspector and the preview with a keyboard-resizable handle that survives a reload`, async ({ page }) => {
+      await page.goto(`${site}${path}`)
+      await page.evaluate(() => localStorage.clear())
+      await page.reload()
+      const handle = page.getByRole('separator', { name: 'Resize the inspector and the preview' })
+      await expect(handle).toBeVisible({ timeout: 60000 })
+      // The saved layout is applied after hydration, which remounts the split once.
+      await expect(page.locator('[data-editor-split]')).toBeVisible()
+      await page.waitForTimeout(500)
+      const start = Number(await handle.getAttribute('aria-valuenow'))
+      await handle.focus()
+      for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowRight')
+      const resized = Number(await handle.getAttribute('aria-valuenow'))
+      expect(resized).toBeGreaterThan(start)
+      await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some(key => key.includes('ombelle-editor-')))).toBe(true)
+      await page.reload()
+      await expect(page.getByRole('separator', { name: 'Resize the inspector and the preview' })).toHaveAttribute('aria-valuenow', String(resized), { timeout: 60000 })
+      await page.evaluate(() => { for (const key of Object.keys(localStorage)) if (key.includes('ombelle-editor-')) localStorage.removeItem(key) })
+      await page.reload()
+      await expect(page.getByRole('separator', { name: 'Resize the inspector and the preview' })).toHaveAttribute('aria-valuenow', String(start), { timeout: 60000 })
+    })
+  }
+})

@@ -1175,7 +1175,7 @@
     scroll-padding-bottom: 112px;
   }
   /* Preview: the frame fills the pane between the toolbar and the dock, and its page scrolls inside. */
-  .workbench:has(> .canvas:not(.phoneHidden)) {
+  .workbench:has(.canvas:not(.phoneHidden)) {
     overflow: hidden;
   }
   .canvas {
@@ -1191,7 +1191,7 @@
     flex-direction: column;
   }
   /* The frame spans the screen edge to edge, so the page previews at the phone's own width. */
-  .workbench:has(> .canvas:not(.phoneHidden)) {
+  .workbench:has(.canvas:not(.phoneHidden)) {
     margin-inline: -16px;
   }
   .canvas .peekFrame > section > p {
@@ -1234,4 +1234,23 @@
 /* The editor's pill buttons skip the Collapsible header: its rounded box clips a square header. */
 .editor [data-slot='collapsible-trigger'] {
   border-radius: 0;
+}
+
+/* From 1200px the inspector and the preview are split by a handle, and each pane scrolls on its own. */
+@media (min-width: 1200px) {
+  .workbench[data-editor-split] { display: flex; gap: 16px; align-items: stretch; block-size: calc(100dvh - var(--editor-bar-height, 0px) - 32px); }
+  .workbench[data-editor-split] > [data-editor-split-group] { flex: 1; min-inline-size: 0; }
+  [data-editor-split] .panel { position: static; display: flex; block-size: 100%; padding-inline-end: 10px; }
+  [data-editor-split] .panelScroll[data-slot='scroll-area'] { flex: 1; min-height: 0; max-height: none; }
+  [data-editor-split] .canvas { block-size: 100%; overflow-y: auto; padding-inline-start: 10px; }
+  [data-editor-split] > .drawerSlot { position: static; max-height: none; }
+}
+
+/* Below 1200px the split is flattened: its group and panels drop out of the layout, so the inspector and the
+   main area are the grid's own items again, and the handle is not shown or focusable. */
+@media (max-width: 1199px) {
+  .workbench > [data-editor-split-group],
+  .workbench > [data-editor-split-group] > [data-panel],
+  .workbench > [data-editor-split-group] > [data-panel] > div { display: contents !important; }
+  .workbench > [data-editor-split-group] > [data-separator] { display: none !important; }
 }

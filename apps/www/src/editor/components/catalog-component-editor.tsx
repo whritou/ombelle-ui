@@ -7,7 +7,7 @@ import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@om
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import { RecipeGetCode } from '../../recipe-snapshots/components/recipe-get-code'
-import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport } from '../../editor-shell'
+import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, EditorSplit } from '../../editor-shell'
 import { catalogDraftKey, changeCatalogFamily, createCatalogDraft, restoreCatalogDraft } from '../catalog-draft'
 import { familyNames } from './family-picker'
 import { HISTORY_LIMIT } from '../history'
@@ -145,7 +145,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
       </div>
     </section> : <>
       <ComponentEditorDock name={name} pane={view.panel} matrix={matrix} onChange={pane => switchPane(pane, view.panel, matrix, setView)} />
-      <div className={styles.workspace}>
+      <EditorSplit id="ombelle-editor-component" className={styles.workspace} inspector={
         <aside className={paneClasses(view.panel).rail} aria-label={`${name} inspector`}>
           <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
             <div className={styles.railContent}>
@@ -154,6 +154,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
             </div>
           </ScrollArea>
         </aside>
+      }>
         <div className={paneClasses(view.panel).primary}>
           <section className={paneClasses(view.panel).preview} aria-label="Live preview">
             <div className={styles.viewControls}>
@@ -176,7 +177,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
               reference={reference} showChanges={showChanges} />
           </div>
         </div>
-      </div>
+      </EditorSplit>
     </>}
   </main>
 }
