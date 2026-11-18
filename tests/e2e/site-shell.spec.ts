@@ -201,3 +201,34 @@ test.describe('editor menubar', () => {
     await page.keyboard.press('Escape')
   })
 })
+
+test.describe('support matrix', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+  test('opens as a Data Table that sorts by component, hides a family column and filters by name', async ({ page }) => {
+    await page.goto(`${site}/components`)
+    await expect(page.locator('[data-slot="sidebar-wrapper"][data-hydrated]')).toBeAttached()
+    await page.getByText('Component support by style family').click()
+    const table = page.getByRole('table', { name: 'Support for every catalog component in each style family' })
+    await expect(table).toBeVisible({ timeout: 30000 })
+    const header = table.getByRole('columnheader', { name: 'Component' })
+    await header.getByRole('button', { name: 'Component' }).click()
+    await expect(header).toHaveAttribute('aria-sort', 'ascending')
+    await header.getByRole('button', { name: 'Component' }).click()
+    await expect(header).toHaveAttribute('aria-sort', 'descending')
+    await page.getByRole('button', { name: 'View' }).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Papier' }).click()
+    await page.keyboard.press('Escape')
+    await expect(table.getByRole('columnheader', { name: 'Papier' })).toHaveCount(0)
+    await page.getByRole('searchbox', { name: 'Filter components' }).fill('no component has this name')
+    await expect(page.getByRole('status').filter({ hasText: 'No results.' })).toBeAttached()
+  })
+})
+
+test.describe('support matrix without JavaScript', () => {
+  test.use({ javaScriptEnabled: false })
+  test('renders as a plain table', async ({ page }) => {
+    await page.goto(`${site}/components`)
+    await page.getByText('Component support by style family').click()
+    await expect(page.getByRole('rowheader', { name: 'Sidebar' })).toBeVisible()
+  })
+})
