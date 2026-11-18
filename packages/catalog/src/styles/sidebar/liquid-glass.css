@@ -187,20 +187,20 @@
   inline-size: 1rem;
   block-size: 1rem;
 }
-[data-slot='sidebar-menu-button']:is(:hover, [data-active]),
-[data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]) {
+[data-slot='sidebar-menu-button']:hover,
+[data-slot='sidebar-menu-sub-button']:hover {
   background: var(--accent);
   color: var(--accent-foreground);
 }
-[data-slot='sidebar-menu-button']:is(:hover, [data-active]),
-[data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]) {
+[data-slot='sidebar-menu-button']:hover,
+[data-slot='sidebar-menu-sub-button']:hover {
   /* The highlight tint alone is below 3:1 against the menu: a ring marks the item reached with the keyboard. */
   outline: 2px solid var(--foreground);
   outline-offset: -2px;
 }
 @media (forced-colors: active) {
-  [data-slot='sidebar-menu-button']:is(:hover, [data-active]),
-  [data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]) {
+  [data-slot='sidebar-menu-button']:hover,
+  [data-slot='sidebar-menu-sub-button']:hover {
     background: Highlight;
     color: HighlightText;
     forced-color-adjust: none;
@@ -489,6 +489,8 @@
 }
 [data-slot='sidebar-menu-button'][data-active],
 [data-slot='sidebar-menu-sub-button'][data-active] {
+  background: var(--accent);
+  color: var(--accent-foreground);
   font-weight: 600;
 }
 [data-slot='sidebar-menu-button']:focus-visible,
@@ -526,9 +528,9 @@
 [data-slot='sidebar-rail'] {
   position: absolute;
   inset-block: 0;
-  inset-inline-end: -4px;
+  inset-inline-end: 0;
   z-index: 2;
-  inline-size: 8px;
+  inline-size: 6px;
   padding: 0;
   border: 0;
   background: transparent;

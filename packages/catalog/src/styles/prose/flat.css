@@ -30,13 +30,13 @@
   margin-block-end:1.25rem;
 }
 [data-slot='prose'] :where(h1):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  font:800 2.625rem/1.1 var(--font-heading, var(--font-family));
+  font:800 2.625rem/1.3 var(--font-heading, var(--font-family));
   letter-spacing:-0.025em;
   margin-block-end:1rem;
   text-wrap:balance;
 }
 [data-slot='prose'] :where(h2):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  font:800 1.625rem/1.2 var(--font-heading, var(--font-family));
+  font:800 1.625rem/1.3 var(--font-heading, var(--font-family));
   letter-spacing:-0.015em;
   padding-block-end:0.625rem;
   border-block-end:2px solid var(--border);

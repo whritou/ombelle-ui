@@ -149,13 +149,13 @@
   inline-size: 1rem;
   block-size: 1rem;
 }
-[data-slot='sidebar-menu-button']:is(:hover, [data-active]),
-[data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]) {
+[data-slot='sidebar-menu-button']:hover,
+[data-slot='sidebar-menu-sub-button']:hover {
   background: var(--accent);
   color: var(--accent-foreground);
 }
-[data-slot='sidebar-menu-button']:is(:hover, [data-active]),
-[data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]) {
+[data-slot='sidebar-menu-button']:hover,
+[data-slot='sidebar-menu-sub-button']:hover {
   /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
      the keyboard; the primary foreground keeps its text readable. */
   background: var(--primary);
@@ -165,16 +165,16 @@
   outline-offset: -2px;
 }
 @media (forced-colors: active) {
-  [data-slot='sidebar-menu-button']:is(:hover, [data-active]),
-  [data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]) {
+  [data-slot='sidebar-menu-button']:hover,
+  [data-slot='sidebar-menu-sub-button']:hover {
     background: Highlight;
     color: HighlightText;
     forced-color-adjust: none;
   }
 }
 [data-slot='sidebar-menu-button'],[data-slot='sidebar-menu-sub-button']{border-radius:14px 12px 15px 12px/12px 15px 12px 14px;font-weight:600}
-[data-slot='sidebar-menu-button']:is(:hover, [data-active]),[data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]){background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
-@media (forced-colors: active){[data-slot='sidebar-menu-button']:is(:hover, [data-active]),[data-slot='sidebar-menu-sub-button']:is(:hover, [data-active]){background:Highlight;color:HighlightText}}
+[data-slot='sidebar-menu-button']:hover,[data-slot='sidebar-menu-sub-button']:hover{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
+@media (forced-colors: active){[data-slot='sidebar-menu-button']:hover,[data-slot='sidebar-menu-sub-button']:hover{background:Highlight;color:HighlightText}}
 [data-slot='sidebar-trigger'],
 [data-slot='sidebar-group-action'],
 [data-slot='sidebar-menu-action'] {
@@ -441,11 +441,13 @@
 }
 [data-slot='sidebar-menu-button'][data-active],
 [data-slot='sidebar-menu-sub-button'][data-active] {
+  background: var(--accent);
+  color: var(--accent-foreground);
   font-weight: 600;
 }
 [data-slot='sidebar-menu-button']:focus-visible,
 [data-slot='sidebar-menu-sub-button']:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid currentColor;
   outline-offset: -2px;
 }
 [data-slot='sidebar-menu-action'] {
@@ -478,9 +480,9 @@
 [data-slot='sidebar-rail'] {
   position: absolute;
   inset-block: 0;
-  inset-inline-end: -4px;
+  inset-inline-end: 0;
   z-index: 2;
-  inline-size: 8px;
+  inline-size: 6px;
   padding: 0;
   border: 0;
   background: transparent;

@@ -30,7 +30,19 @@
 [data-slot='resizable-handle']:focus-visible {
   background: var(--primary);
 }
-[data-slot='resizable-handle']:focus-visible {
+[data-slot='resizable-handle']::after {
+  position: absolute;
+  inset-block: 2px;
+  inset-inline: -4px;
+  border-radius: 4px;
+  content: '';
+  pointer-events: none;
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal']::after {
+  inset-block: -4px;
+  inset-inline: 2px;
+}
+[data-slot='resizable-handle']:focus-visible::after {
   outline: 2px solid var(--foreground);
   outline-offset: 0;
 }
@@ -58,6 +70,10 @@
   }
   [data-slot='resizable-handle']:is(:hover, :focus-visible) {
     background: Highlight;
+  }
+  [data-slot='resizable-handle']:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 0;
   }
   [data-slot='resizable-handle-grip'] {
     border-color: CanvasText;

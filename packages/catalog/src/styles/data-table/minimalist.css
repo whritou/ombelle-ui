@@ -390,15 +390,23 @@
   background: var(--accent);
   color: var(--accent-foreground);
 }
-[data-slot='data-table-sort']:focus-visible,
+[data-slot='data-table-sort']:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 0;
+}
 [data-slot='data-table-filter']:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+[data-slot='data-table-cell'] > [data-data-table-select]:focus-visible,
+[data-slot='data-table-head'] > [data-data-table-select]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
 [data-slot='data-table-head'][data-select],
 [data-slot='data-table-cell'][data-select] {
   inline-size: 2.5rem;
-  padding-inline-end: 0;
+  padding-inline: 0.75rem 0;
 }
 [data-slot='data-table-head'][data-actions],
 [data-slot='data-table-cell'][data-actions] {
