@@ -15,21 +15,80 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  inline-size: max(1px, var(--border-width));
-  background: var(--border);
+  inline-size: 0.75rem;
+  background: transparent;
   outline: none;
-  transition: background-color var(--motion-duration, 0.2s);
 }
 [data-slot='resizable-handle'][aria-orientation='horizontal'] {
-  --resizable-grip-inline: 1.5rem;
+  --resizable-grip-inline: 1.875rem;
   --resizable-grip-block: 0.75rem;
   inline-size: auto;
-  block-size: max(1px, var(--border-width));
+  block-size: 0.75rem;
 }
-[data-slot='resizable-handle']:hover,
-[data-slot='resizable-handle']:focus-visible {
+/* The line sits in the middle of the 12px handle, so the pointer has room to land on it. */
+[data-slot='resizable-handle']::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: 1.5px;
+  margin-inline-start: -0.75px;
+  background: var(--border);
+  content: '';
+  transition: background-color var(--motion-duration, 0.2s), inline-size var(--motion-duration, 0.2s), margin-inline-start var(--motion-duration, 0.2s);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal']::before {
+  inset-block: 50% auto;
+  inset-inline: 0;
+  inline-size: auto;
+  block-size: 1.5px;
+  margin: -0.75px 0 0;
+}
+/* Pointer hover, keyboard focus and dragging thicken the line to 3px in the primary colour. */
+[data-slot='resizable-handle']:is(:hover, [data-separator='hover'], [data-separator='focus'], [data-separator='active'])::before {
+  inline-size: 3px;
+  margin-inline-start: -1.5px;
   background: var(--primary);
 }
+[data-slot='resizable-handle'][aria-orientation='horizontal']:is(:hover, [data-separator='hover'], [data-separator='focus'], [data-separator='active'])::before {
+  inline-size: auto;
+  block-size: 3px;
+  margin: -1.5px 0 0;
+}
+[data-slot='resizable-handle'][data-separator='focus']::before {
+  background: var(--ring);
+}
+[data-slot='resizable-handle-grip'] {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--resizable-grip-inline, 0.75rem);
+  block-size: var(--resizable-grip-block, 1.875rem);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: calc(var(--shadow-x) * 2 / 3) calc(var(--shadow-y) * 2 / 3) 0 var(--shadow-color, var(--border));
+  transition: background-color var(--motion-duration, 0.2s), box-shadow var(--motion-duration, 0.2s), translate var(--motion-duration, 0.2s);
+}
+/* Two short bars, the board's grip mark. */
+[data-slot='resizable-handle-grip']::after {
+  inline-size: 5px;
+  block-size: 12px;
+  border-inline: 1.5px solid var(--muted-foreground);
+  content: '';
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] [data-slot='resizable-handle-grip']::after {
+  inline-size: 12px;
+  block-size: 5px;
+  border-inline: 0;
+  border-block: 1.5px solid var(--muted-foreground);
+}
+[data-slot='resizable-handle']:is(:hover, [data-separator='hover']) [data-slot='resizable-handle-grip'] {
+  background: var(--accent);
+}
+/* Keyboard focus rings the handle along its length, inside the panel group's clip, so the ring is measurable. */
 [data-slot='resizable-handle']::after {
   position: absolute;
   inset-block: 2px;
@@ -43,32 +102,29 @@
   inset-inline: 2px;
 }
 [data-slot='resizable-handle']:focus-visible::after {
-  outline: 2px solid var(--ring);
+  outline: 2.5px solid var(--ring);
   outline-offset: 0;
 }
-[data-slot='resizable-handle-grip'] {
-  z-index: 1;
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-  inline-size: var(--resizable-grip-inline, 0.75rem);
-  block-size: var(--resizable-grip-block, 1.5rem);
-  border: max(1px, var(--border-width)) solid var(--border);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle, var(--muted-foreground) 1px, transparent 1.5px) center / 4px 5px,
-    var(--card);
+/* Dragging: the grip fills with the primary colour and drops onto its shadow. */
+[data-slot='resizable-handle'][data-separator='active'] [data-slot='resizable-handle-grip'] {
+  translate: 2px 2px;
+  background: var(--primary);
+  box-shadow: 0 0 0 var(--border);
+}
+[data-slot='resizable-handle'][data-separator='active'] [data-slot='resizable-handle-grip']::after {
+  border-color: var(--primary-foreground);
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='resizable-handle'] {
+  [data-slot='resizable-handle']::before,
+  [data-slot='resizable-handle-grip'] {
     transition: none;
   }
 }
 @media (forced-colors: active) {
-  [data-slot='resizable-handle'] {
+  [data-slot='resizable-handle']::before {
     background: CanvasText;
   }
-  [data-slot='resizable-handle']:is(:hover, :focus-visible) {
+  [data-slot='resizable-handle']:is(:hover, [data-separator='hover'], [data-separator='focus'], [data-separator='active'])::before {
     background: Highlight;
   }
   [data-slot='resizable-handle']:focus-visible {
@@ -78,5 +134,9 @@
   [data-slot='resizable-handle-grip'] {
     border-color: CanvasText;
     background: Canvas;
+    box-shadow: none;
+  }
+  [data-slot='resizable-handle-grip']::after {
+    border-color: CanvasText;
   }
 }

@@ -50,7 +50,7 @@ export function EditorInspector({ label, collapsed, onCollapsedChange, shortcut 
   const desktop = useViewportClass() === 'desktop'
   return (
     <SidebarProvider open={!collapsed} onOpenChange={open => onCollapsedChange(!open)} shortcut={shortcut && desktop} mobileBreakpoint={0}
-      className={styles.inspectorProvider} style={{ '--sidebar-width': '100%', '--sidebar-width-icon': '3.25rem', '--sidebar-height': '100%' } as CSSProperties}>
+      className={styles.inspectorProvider} style={{ '--sidebar-width': '100%', '--sidebar-width-icon': '4rem', '--sidebar-height': '100%' } as CSSProperties}>
       <Sidebar side="left" collapsible="icon" label={`${label} sections`} role="group" className={styles.inspectorSidebar}>
         <div className={styles.inspectorBar}>
           <SidebarTrigger className={styles.inspectorToggle} aria-label={collapsed ? `Unfold ${label.toLowerCase()}` : `Fold ${label.toLowerCase()}`}>

@@ -65,7 +65,7 @@ export function ReviewDrawer({
     ? <aside aria-label={label} className={open ? styles.drawer : styles.rail}>{content}</aside>
     : (
       <SidebarProvider open={open} onOpenChange={onOpenChange} shortcut={shortcut} className={styles.drawerProvider}
-        style={{ '--sidebar-width': '21rem', '--sidebar-width-icon': '3.25rem', '--sidebar-height': '100%' } as CSSProperties}>
+        style={{ '--sidebar-width': '21rem', '--sidebar-width-icon': '4rem', '--sidebar-height': '100%' } as CSSProperties}>
         <Sidebar side="right" collapsible="icon" label={label} role="complementary" className={open ? styles.drawer : styles.rail}>{content}</Sidebar>
       </SidebarProvider>
     )
