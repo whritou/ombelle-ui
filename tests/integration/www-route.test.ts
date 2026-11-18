@@ -67,8 +67,9 @@ it('renders the public landing page with editor links and the published installe
   // The landing matrix links to the whole current catalog, including preview-only additions.
   expect(html).toContain(`Explore all ${supportedComponentIds.length} components`)
   expect(html).not.toContain('not available in glass')
-  // The 0.7.6 components need CLI 0.7.6: until it is published, the glass note says some components need it.
-  if (compareVersions(publishedInstaller.version, catalog076MinimumCli) < 0) expect(html).toContain('need a newer installer')
+  // The 0.7.6 components need CLI 0.7.6 and the 0.9 app shell components CLI 0.9.0: until both are published, the
+  // glass note says some components need a newer installer.
+  if (compareVersions(publishedInstaller.version, catalog076MinimumCli) < 0 || compareVersions(publishedInstaller.version, '0.9.0') < 0) expect(html).toContain('need a newer installer')
   else expect(html).not.toContain('need a newer installer')
   expect(html).not.toMatch(/coming soon/i)
   expect(html).not.toContain('ombelle@alpha')

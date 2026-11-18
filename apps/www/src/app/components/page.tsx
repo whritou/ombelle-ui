@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function ComponentsPage() {
   return (
-    <main className="min-w-0 py-10">
+    <div className="min-w-0 py-10">
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Components</p>
       <h1 className="mt-3 text-4xl font-black md:text-5xl">Components</h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
@@ -17,6 +17,6 @@ export default function ComponentsPage() {
       </p>
       <ComponentDirectory />
       <SupportMatrix />
-    </main>
+    </div>
   )
 }

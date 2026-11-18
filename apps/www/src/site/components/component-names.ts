@@ -1,0 +1,87 @@
+import type { ComponentId } from '@ombelle/contracts'
+
+// Names only: the site header lists categories on every page, so this file must not import the catalog docs.
+
+/** The component directory's categories, in the order the site lists them. Every catalog component is in exactly one. */
+export const componentCategories: readonly { title: string; ids: readonly ComponentId[] }[] = [
+  { title: 'Actions', ids: ['button', 'button-group', 'toggle', 'toggle-group', 'toolbar'] },
+  { title: 'Forms', ids: ['calendar', 'checkbox', 'color-picker', 'combobox', 'field', 'input', 'input-group', 'input-otp', 'label', 'native-select', 'number-input', 'password-field', 'radio-group', 'select', 'slider', 'switch', 'tag-input', 'textarea'] },
+  { title: 'Navigation', ids: ['breadcrumb', 'command', 'menubar', 'navigation-menu', 'pagination', 'sidebar', 'stepper', 'tabs'] },
+  { title: 'Overlays', ids: ['alert-dialog', 'context-menu', 'dialog', 'dropdown-menu', 'hover-card', 'popover', 'sheet', 'toast', 'tooltip'] },
+  { title: 'Data display', ids: ['avatar', 'badge', 'card', 'carousel', 'chip', 'code-block', 'data-table', 'empty', 'item', 'kbd', 'table'] },
+  { title: 'Feedback', ids: ['alert', 'meter', 'progress', 'skeleton', 'spinner'] },
+  { title: 'Layout', ids: ['accordion', 'aspect-ratio', 'collapsible', 'resizable', 'scroll-area', 'separator'] },
+  { title: 'Typography', ids: ['prose'] },
+]
+
+/** Each catalog component's display name; a test keeps it equal to the catalog docs. */
+export const componentNames: Readonly<Record<ComponentId, string>> = {
+  accordion: 'Accordion',
+  alert: 'Alert',
+  'alert-dialog': 'Alert Dialog',
+  'aspect-ratio': 'Aspect Ratio',
+  avatar: 'Avatar',
+  badge: 'Badge',
+  breadcrumb: 'Breadcrumb',
+  button: 'Button',
+  'button-group': 'Button Group',
+  calendar: 'Calendar',
+  card: 'Card',
+  carousel: 'Carousel',
+  checkbox: 'Checkbox',
+  chip: 'Chip',
+  'code-block': 'Code Block',
+  collapsible: 'Collapsible',
+  'color-picker': 'Color Picker',
+  combobox: 'Combobox',
+  command: 'Command',
+  'context-menu': 'Context Menu',
+  'data-table': 'Data Table',
+  dialog: 'Dialog',
+  'dropdown-menu': 'Dropdown Menu',
+  empty: 'Empty State',
+  field: 'Field',
+  'hover-card': 'Hover Card',
+  input: 'Input',
+  'input-group': 'Input Group',
+  'input-otp': 'Input OTP',
+  item: 'Item',
+  kbd: 'Kbd',
+  label: 'Label',
+  menubar: 'Menubar',
+  meter: 'Meter',
+  'native-select': 'Native Select',
+  'navigation-menu': 'Navigation Menu',
+  'number-input': 'Number Input',
+  pagination: 'Pagination',
+  'password-field': 'Password Field',
+  popover: 'Popover',
+  progress: 'Progress',
+  prose: 'Prose',
+  'radio-group': 'Radio Group',
+  resizable: 'Resizable',
+  'scroll-area': 'Scroll Area',
+  select: 'Select',
+  separator: 'Separator',
+  sheet: 'Sheet',
+  sidebar: 'Sidebar',
+  skeleton: 'Skeleton',
+  slider: 'Slider',
+  spinner: 'Spinner',
+  stepper: 'Stepper',
+  switch: 'Switch',
+  table: 'Table',
+  tabs: 'Tabs',
+  'tag-input': 'Tag Input',
+  textarea: 'Textarea',
+  toast: 'Toast',
+  toggle: 'Toggle',
+  'toggle-group': 'Toggle Group',
+  toolbar: 'Toolbar',
+  tooltip: 'Tooltip',
+}
+
+/** The categories with their components' names, alphabetical inside each. */
+export function categoryNames(): { title: string; names: string[] }[] {
+  return componentCategories.map(category => ({ title: category.title, names: category.ids.map(id => componentNames[id]).sort((a, b) => a.localeCompare(b)) }))
+}

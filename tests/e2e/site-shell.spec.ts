@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 
 // The website's own shell on the 0.9 components (docs/superpowers/plans/2026-11-17-app-shell-09-site.md).
 const site = 'http://127.0.0.1:3000'
@@ -232,3 +233,24 @@ test.describe('support matrix without JavaScript', () => {
     await expect(page.getByRole('rowheader', { name: 'Sidebar' })).toBeVisible()
   })
 })
+
+// The pages rebuilt on the app shell components pass axe at desktop and phone widths, with the header panel open.
+for (const width of [1440, 375]) {
+  test.describe(`axe at ${width} px`, () => {
+    test.use({ viewport: { width, height: 900 } })
+    for (const path of ['/', '/docs', '/docs/getting-started', '/components', '/components/data-table', '/editor/preset', '/editor/component/button']) {
+      test(`${path} has no violations`, async ({ page }) => {
+        await page.goto(`${site}${path}`)
+        await page.waitForLoadState('load')
+        if (width === 1440) {
+          await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'Components' }).click()
+          await expect(page.getByRole('link', { name: /^All components/ })).toBeVisible()
+        }
+        // Radix Navigation Menu puts a hidden focus proxy (aria-hidden, tabindex 0) after the open trigger, which moves
+        // Tab into the panel; axe reports it as aria-hidden-focus. Only that element is left out.
+        const axe = new AxeBuilder({ page }).exclude('[data-slot="navigation-menu"] li > span[aria-hidden="true"][tabindex="0"]')
+        expect((await axe.analyze()).violations).toEqual([])
+      })
+    }
+  })
+}
