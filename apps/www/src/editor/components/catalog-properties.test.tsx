@@ -65,3 +65,15 @@ it('offers a family in the component editor only once the published installer ca
   expect(html.includes('Retro futurism')).toBe(compareVersions(publishedInstaller.version, retroFuturismMinimumCli) >= 0)
   expect(html).toContain('Organic')
 })
+
+it('edits the 0.9 menus, groups and navigation links as lists with Add and Remove', () => {
+  const menubar = panel('menubar')
+  expect(menubar).toContain('Menus 3')
+  expect(menubar).toContain('Add item')
+  expect(menubar).toContain('Add Items')
+  const navigation = panel('navigation-menu')
+  expect(navigation).toContain('Items 1')
+  expect(navigation).toContain('Links 1')
+  const resizable = panel('resizable')
+  expect(resizable).toContain('Add Panel labels')
+})

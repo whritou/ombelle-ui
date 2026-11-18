@@ -267,3 +267,19 @@ html[data-backdrop='glass'] .preset-scene :is(h1, .scene-header p) {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* The Workspace scene: a sidebar and a split inside the page frame. */
+.preset-scene .scene-workspace {
+  min-block-size: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+}
+.preset-scene .scene-workspace-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-block-end: var(--border-width) solid var(--border);
+  font-weight: 600;
+}

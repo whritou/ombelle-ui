@@ -128,6 +128,12 @@ import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFie
 import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselImage, CarouselItem, CarouselNext, CarouselPrevious, CarouselThumbnails } from '@/components/ui/carousel'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
 import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
+import { Prose, ProseLead } from '@/components/ui/prose'
+import { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu'
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarShortcut, MenubarTrigger } from '@/components/ui/menubar'
+import { DataTable } from '@/components/ui/data-table'
 import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
 
 // Family-independent: callers pass the component ids their family cannot
@@ -542,6 +548,80 @@ export function PresetGallery({
           <ToolbarLink href="#preview">Open preview</ToolbarLink>
           <ToolbarOverflow />
         </Toolbar>
+      </section>)}
+      {gate('prose', 'Prose', <section aria-label="Prose" data-component="prose">
+        <h2>Prose</h2>
+        <Prose measure="narrow">
+          <h3>Building an app shell</h3>
+          <ProseLead>A sidebar, a header and a content area that reads well at any width.</ProseLead>
+          <p>Add the <code>sidebar</code> component and read <a href="#install">the install guide</a>.</p>
+          <ul><li>Collapses to icons</li><li>Opens as a sheet on phones</li></ul>
+          <blockquote>Keep navigation where people expect it.</blockquote>
+        </Prose>
+      </section>)}
+      {gate('navigation-menu', 'Navigation Menu', <section aria-label="Navigation Menu" data-component="navigation-menu">
+        <h2>Navigation Menu</h2>
+        <NavigationMenu aria-label="Gallery site">
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Docs</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <NavigationMenuLink href="#introduction"><span>Introduction</span><p>What Ombelle is</p></NavigationMenuLink>
+                <NavigationMenuLink href="#theming"><span>Theming</span><p>Presets and tokens</p></NavigationMenuLink>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem><NavigationMenuLink href="#components" variant="trigger" active>Components</NavigationMenuLink></NavigationMenuItem>
+            <NavigationMenuItem><NavigationMenuLink href="#blog" variant="trigger">Blog</NavigationMenuLink></NavigationMenuItem>
+            <NavigationMenuIndicator />
+          </NavigationMenuList>
+        </NavigationMenu>
+      </section>)}
+      {gate('sidebar', 'Sidebar', <section aria-label="Sidebar" data-component="sidebar">
+        <h2>Sidebar</h2>
+        <SidebarProvider style={{ '--sidebar-height': '18rem', border: '1px solid var(--border)' } as React.CSSProperties}>
+          <Sidebar collapsible="icon" label="Gallery workspace">
+            <SidebarHeader><strong>Ombelle</strong></SidebarHeader>
+            <SidebarContent>
+              <SidebarGroup aria-label="Workspace">
+                <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {['Overview', 'Projects', 'Presets'].map((item, index) => (
+                      <SidebarMenuItem key={item}>
+                        <SidebarMenuButton href={`#${item.toLowerCase()}`} isActive={index === 0} tooltip={item}><span aria-hidden="true">{item.slice(0, 1)}</span><span>{item}</span></SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+          <SidebarInset><div style={{ padding: '0.75rem' }}><SidebarTrigger /></div></SidebarInset>
+        </SidebarProvider>
+      </section>)}
+      {gate('resizable', 'Resizable', <section aria-label="Resizable" data-component="resizable">
+        <h2>Resizable</h2>
+        <div style={{ blockSize: '10rem', border: '1px solid var(--border)' }}>
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel defaultSize="60%" minSize="20%"><div style={{ padding: '1rem' }}>Preview</div></ResizablePanel>
+            <ResizableHandle withHandle aria-label="Resize preview and controls" />
+            <ResizablePanel defaultSize="40%" minSize="20%"><div style={{ padding: '1rem' }}>Controls</div></ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+      </section>)}
+      {gate('menubar', 'Menubar', <section aria-label="Menubar" data-component="menubar">
+        <h2>Menubar</h2>
+        <Menubar aria-label="Gallery editor">
+          <MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Download JSON<MenubarShortcut>Ctrl+S</MenubarShortcut></MenubarItem></MenubarContent></MenubarMenu>
+          <MenubarMenu><MenubarTrigger>Edit</MenubarTrigger><MenubarContent><MenubarItem>Undo<MenubarShortcut>Ctrl+Z</MenubarShortcut></MenubarItem></MenubarContent></MenubarMenu>
+          <MenubarMenu><MenubarTrigger>View</MenubarTrigger><MenubarContent><MenubarItem>Grid</MenubarItem></MenubarContent></MenubarMenu>
+        </Menubar>
+      </section>)}
+      {gate('data-table', 'Data Table', <section aria-label="Data Table" data-component="data-table">
+        <h2>Data Table</h2>
+        <DataTable aria-label="Gallery presets" columns={[{ accessorKey: 'name', header: 'Preset' }, { accessorKey: 'status', header: 'Status' }]}
+          data={[{ name: 'Ombelle', status: 'Stable' }, { name: 'Papier', status: 'Stable' }, { name: 'Cristal', status: 'Experimental' }]}
+          selectable filterColumn="name" filterLabel="Filter presets" facets={[{ column: 'status', title: 'Status' }]} columnVisibility pagination pageSize={5} />
       </section>)}
       {gate('code-block', 'Code Block', <section aria-label="Code Block" data-component="code-block">
         <h2>Code Block</h2>
