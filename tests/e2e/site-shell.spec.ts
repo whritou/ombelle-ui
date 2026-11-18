@@ -51,3 +51,45 @@ test('the components sidebar lists every component and marks the current one', a
   await expect(nav.locator('a[href^="/components/"]')).toHaveCount(63)
   await expect(nav.getByRole('group', { name: 'Navigation' }).getByRole('link')).toHaveText(['Breadcrumb', 'Command', 'Menubar', 'Navigation Menu', 'Pagination', 'Sidebar', 'Stepper', 'Tabs'])
 })
+
+test.describe('header', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+  test('panels open by click and by keyboard, and Escape closes them', async ({ page }) => {
+    await page.goto(`${site}/`)
+    const header = page.getByRole('navigation', { name: 'Primary' })
+    await expect(page.locator('[data-slot="navigation-menu"]')).toBeVisible()
+    await header.getByRole('button', { name: 'Docs' }).click()
+    await expect(page.getByRole('link', { name: /Installation and CLI/ })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('link', { name: /Installation and CLI/ })).toBeHidden()
+    await header.getByRole('button', { name: 'Components' }).focus()
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('link', { name: /All components/ })).toBeVisible()
+  })
+
+  test('marks the current section', async ({ page }) => {
+    await page.goto(`${site}/docs/presets`)
+    const header = page.getByRole('navigation', { name: 'Primary' })
+    await expect(header.getByRole('button', { name: 'Docs' })).toHaveAttribute('data-current', '')
+    await expect(header.getByRole('button', { name: 'Components' })).not.toHaveAttribute('data-current', /.*/)
+  })
+
+  test('is not pinned on editor pages, and is hidden there below 1200 px', async ({ page }) => {
+    await page.goto(`${site}/editor/preset`)
+    await expect(page.locator('header').first()).toHaveCSS('position', 'relative')
+    await page.setViewportSize({ width: 1100, height: 900 })
+    await expect(page.locator('header').first()).toBeHidden()
+  })
+})
+
+for (const width of [375, 1440]) {
+  test.describe(`${width} px without JavaScript`, () => {
+    test.use({ javaScriptEnabled: false, viewport: { width, height: 900 } })
+    test('Docs and Components are reachable through plain links on the home page', async ({ page }) => {
+      await page.goto(`${site}/`)
+      for (const href of ['/docs', '/components']) await expect(page.locator(`footer a[href="${href}"]`)).toBeVisible()
+      await page.locator('footer a[href="/docs"]').click()
+      await expect(page).toHaveURL(/\/docs$/)
+    })
+  })
+}

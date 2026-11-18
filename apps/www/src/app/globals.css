@@ -602,3 +602,17 @@
 .site-sidebar > [data-sidebar-inner] {
   inset-block-start: 4rem;
 }
+
+/* The header's Docs and Components triggers stay marked while their section is open. */
+.site-header-menu [data-slot='navigation-menu-trigger'][data-current] {
+  color: var(--foreground);
+  font-weight: 700;
+}
+/* The header panels open under the menu, which starts mid-header, so they stay narrow enough to fit. */
+.site-header-menu [data-slot='navigation-menu-content'] {
+  inline-size: min(38rem, calc(100vw - 30rem));
+}
+.site-header-menu [data-slot='navigation-menu-list'] {
+  flex-wrap: nowrap;
+  gap: 0;
+}
