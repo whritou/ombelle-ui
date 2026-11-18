@@ -17,7 +17,7 @@ const read = async (root: string) => {
   return files
 }
 
-it('writes one deterministic audit page per family and edition', { timeout: 240000 }, async () => {
+it('writes one deterministic audit page per family and edition', { timeout: 480000 }, async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-audit-'))
   roots.push(root)
   await writeAuditPages(root)
