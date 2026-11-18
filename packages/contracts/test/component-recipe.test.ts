@@ -700,6 +700,15 @@ it('accepts the default 0.9 resizable recipe and rejects labels that do not matc
   expect(() => validateComponentRecipe(draft076('resizable', { panels: 4 }))).toThrow()
 })
 
+it('accepts the default 0.9 menubar recipe and rejects one without menus or a label', () => {
+  expect(validateComponentRecipe(draft076('menubar')).component).toBe('menubar')
+  expect(defaultRecipeFields(componentRecipeFields('menubar').props)).toEqual({ shortcuts: true })
+  expect(defaultRecipeFields(componentRecipeFields('menubar').content).menus).toHaveLength(3)
+  expect(() => validateComponentRecipe(draft076('menubar', {}, { menus: [] }))).toThrow(expect.objectContaining({ path: '/content/menus' }))
+  expect(() => validateComponentRecipe(draft076('menubar', {}, { label: '' }))).toThrow(expect.objectContaining({ path: '/content/label' }))
+  expect(() => validateComponentRecipe(draft076('menubar', {}, { menus: Array(5).fill({ id: 'file', label: 'File', items: ['New'] }) }))).toThrow()
+})
+
 it('accepts the default 0.9 sidebar recipe and rejects one without groups', () => {
   expect(validateComponentRecipe(draft076('sidebar')).component).toBe('sidebar')
   expect(defaultRecipeFields(componentRecipeFields('sidebar').props)).toEqual({ collapsible: 'icon', side: 'left', variant: 'sidebar' })

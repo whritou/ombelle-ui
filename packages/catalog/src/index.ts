@@ -98,6 +98,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   'navigation-menu': ['@radix-ui/react-navigation-menu', 'lucide-react'],
   sidebar: ['@radix-ui/react-dialog', '@radix-ui/react-tooltip', '@radix-ui/react-collapsible', 'lucide-react'],
   resizable: ['react-resizable-panels'],
+  menubar: ['@radix-ui/react-menubar', 'lucide-react'],
   toolbar: ['@radix-ui/react-toolbar', '@radix-ui/react-dropdown-menu', 'lucide-react'],
   'color-picker': ['@radix-ui/react-popover', '@radix-ui/react-slider', 'lucide-react'],
   'code-block': ['@radix-ui/react-tabs'],

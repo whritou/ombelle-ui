@@ -48,6 +48,7 @@ export const componentRecipeParts: Record<ComponentRecipeId, readonly Part[]> = 
   'navigation-menu': [surface('navigation-menu-trigger', 'Trigger'), surface('navigation-menu-viewport', 'Panel', 'popover')],
   sidebar: [surface('sidebar', 'Sidebar', 'card'), surface('sidebar-menu-button', 'Item')],
   resizable: [layout('resizable-panel', 'Panel'), mark('resizable-handle', 'Handle')],
+  menubar: [surface('menubar', 'Bar'), surface('menubar-content', 'Menu', 'popover')],
   'color-picker': [surface('color-picker-trigger', 'Trigger'), surface('color-picker-content', 'Panel', 'popover'), mark('color-picker-area-thumb', 'Marker')],
   'context-menu': [surface('context-menu-content', 'Menu', 'popover'), surface('context-menu-item', 'Item')],
   'input-group': [surface('input-group', 'Group', 'background'), text('input-group-input', 'Input'), text('input-group-textarea', 'Textarea'), layout('input-group-addon', 'Addon'), text('input-group-text', 'Addon text'), surface('input-group-button', 'Action')],

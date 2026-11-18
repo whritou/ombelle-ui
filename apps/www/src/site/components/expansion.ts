@@ -230,4 +230,10 @@ export const expansionDocs = {
     states: 'Default, handle hover, handle focus, dragging, collapsed panel, vertical', basis: 'react-resizable-panels, one template for both editions', client: true,
     usage: expansionExamples.resizable, minimumCli: '0.9.0',
   },
+  menubar: {
+    name: 'Menubar', description: 'A row of menus such as File, Edit and View, with one Tab stop, arrow keys between menus, checkbox and radio items, submenus and shortcut hints.',
+    api: 'Menubar, MenubarMenu, MenubarTrigger, MenubarContent, MenubarGroup, MenubarLabel, MenubarItem (inset, variant default or destructive), MenubarCheckboxItem, MenubarRadioGroup, MenubarRadioItem, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubTrigger, MenubarSubContent',
+    states: 'Closed, menu open, item highlighted, checked, disabled, submenu open, destructive item', basis: 'Reviewed Radix Menubar; Base UI Menubar and Menu in the Base UI edition', client: true,
+    usage: expansionExamples.menubar, minimumCli: '0.9.0',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

@@ -125,6 +125,11 @@ function validateComposition(recipe: ComponentRecipe): void {
     case 'resizable':
       if (recipe.content.labels.length !== (recipe.props.panels ?? 2)) reject('Give one label per panel', '/content/labels')
       break
+    case 'menubar':
+      if (recipe.content.label.trim() === '') reject('Name the menubar', '/content/label')
+      if (recipe.content.menus.length === 0) reject('A menubar needs a menu', '/content/menus')
+      references(recipe.content.menus, [], '/content/menus')
+      break
     case 'carousel':
       if (recipe.content.label.trim() === '') reject('Name the carousel', '/content/label')
       if (recipe.props.thumbnails && recipe.props.variant !== 'image') reject('Thumbnails need the image variant; set variant to image or turn thumbnails off', '/props/thumbnails')

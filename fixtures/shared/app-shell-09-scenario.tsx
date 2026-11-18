@@ -3,6 +3,7 @@ import { Prose, ProseLead } from '@/components/ui/prose'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupCollapsible, SidebarGroupCollapsibleContent, SidebarGroupCollapsibleTrigger, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarInset, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger } from '@/components/ui/sidebar'
 import { Box, FolderOpen, LayoutDashboard, Palette } from 'lucide-react'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
+import { Menubar, MenubarCheckboxItem, MenubarContent, MenubarItem, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger, MenubarTrigger } from '@/components/ui/menubar'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu'
 
 // The 0.9 app shell components in both editions (tests/e2e/app-shell-09.spec.ts).
@@ -138,12 +139,61 @@ function SplitPanes() {
   )
 }
 
+function EditorMenubar() {
+  const [grid, setGrid] = React.useState(true)
+  const [mode, setMode] = React.useState('light')
+  return (
+    <div data-testid="s09-menubar" style={{ display: 'grid', gap: '0.5rem', justifyItems: 'start' }}>
+      <Menubar aria-label="Editor">
+        <MenubarMenu>
+          <MenubarTrigger>File</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem>New preset<MenubarShortcut>Ctrl+N</MenubarShortcut></MenubarItem>
+            <MenubarItem>Download JSON<MenubarShortcut>Ctrl+S</MenubarShortcut></MenubarItem>
+            <MenubarSeparator />
+            <MenubarSub>
+              <MenubarSubTrigger>Export</MenubarSubTrigger>
+              <MenubarSubContent>
+                <MenubarItem>CSS variables</MenubarItem>
+                <MenubarItem>Tailwind theme</MenubarItem>
+              </MenubarSubContent>
+            </MenubarSub>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger>Edit</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem>Undo<MenubarShortcut>Ctrl+Z</MenubarShortcut></MenubarItem>
+            <MenubarItem>Redo</MenubarItem>
+            <MenubarSeparator />
+            <MenubarItem variant="destructive">Reset</MenubarItem>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger>View</MenubarTrigger>
+          <MenubarContent>
+            <MenubarCheckboxItem checked={grid} onCheckedChange={value => setGrid(value === true)}>Grid</MenubarCheckboxItem>
+            <MenubarSeparator />
+            <MenubarRadioGroup value={mode} onValueChange={value => setMode(String(value))}>
+              <MenubarRadioItem value="light">Light</MenubarRadioItem>
+              <MenubarRadioItem value="dark">Dark</MenubarRadioItem>
+            </MenubarRadioGroup>
+          </MenubarContent>
+        </MenubarMenu>
+      </Menubar>
+      <output data-testid="s09-menubar-state">{`grid ${grid ? 'on' : 'off'}, ${mode}`}</output>
+      <button type="button">After the menubar</button>
+    </div>
+  )
+}
+
 export function AppShellScenario09() {
   return (
     <section aria-label="0.9 app shell" data-testid="app-shell-09" style={{ display: 'grid', gap: '1.5rem', minInlineSize: 0 }}>
       <SiteNavigation />
       <EditorSidebar />
       <SplitPanes />
+      <EditorMenubar />
       <ProseArticle />
     </section>
   )

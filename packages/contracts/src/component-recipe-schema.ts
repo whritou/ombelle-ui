@@ -4947,6 +4947,115 @@ export const componentRecipeSchema = {
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "menubar"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "shortcuts": {
+              "type": "boolean",
+              "default": true,
+              "title": "Shortcuts"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "title": "Label",
+              "maxLength": 200,
+              "default": "Editor",
+              "pattern": "\\S"
+            },
+            "menus": {
+              "type": "array",
+              "title": "Menus",
+              "minItems": 0,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+                    "default": "",
+                    "title": "Item ID"
+                  },
+                  "label": {
+                    "type": "string",
+                    "title": "Label",
+                    "maxLength": 200,
+                    "default": "Group",
+                    "pattern": "\\S"
+                  },
+                  "items": {
+                    "type": "array",
+                    "title": "Items",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "items": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "pattern": "\\S"
+                    },
+                    "default": [
+                      "Item"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "items"
+                ]
+              },
+              "default": [
+                {
+                  "id": "file",
+                  "label": "File",
+                  "items": [
+                    "New preset",
+                    "Open…",
+                    "Download JSON"
+                  ]
+                },
+                {
+                  "id": "edit",
+                  "label": "Edit",
+                  "items": [
+                    "Undo",
+                    "Redo",
+                    "Reset"
+                  ]
+                },
+                {
+                  "id": "view",
+                  "label": "View",
+                  "items": [
+                    "Light",
+                    "Dark",
+                    "Grid"
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "label",
+            "menus"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

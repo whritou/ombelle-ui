@@ -152,6 +152,63 @@ for (const edition of ['radix', 'base'] as const) {
       expect(errors).toEqual([])
     })
 
+    test('Menubar has one Tab stop and arrow keys move across its menus', async ({ page }) => {
+      const bar = (await open(page, edition)).getByTestId('s09-menubar')
+      await bar.getByRole('menuitem', { name: 'File' }).focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(bar.getByRole('menuitem', { name: 'Edit' })).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect(bar.getByRole('button', { name: 'After the menubar' })).toBeFocused()
+    })
+
+    test('Menubar: with a menu open, Left and Right open the neighbouring menu, and Escape returns focus', async ({ page }) => {
+      const bar = (await open(page, edition)).getByTestId('s09-menubar')
+      const file = bar.getByRole('menuitem', { name: 'File' })
+      await file.click()
+      await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeVisible()
+      await page.keyboard.press('ArrowRight')
+      await expect(page.getByRole('menuitem', { name: /Undo/ })).toBeVisible()
+      await page.keyboard.press('ArrowLeft')
+      await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeHidden()
+      await expect(file).toBeFocused()
+    })
+
+    test('Menubar checkbox and radio items toggle and report aria-checked', async ({ page }) => {
+      const bar = (await open(page, edition)).getByTestId('s09-menubar')
+      const view = bar.getByRole('menuitem', { name: 'View' })
+      await view.click()
+      await expect(page.getByRole('menuitemcheckbox', { name: 'Grid' })).toHaveAttribute('aria-checked', 'true')
+      await page.getByRole('menuitemcheckbox', { name: 'Grid' }).click()
+      await expect(bar.getByTestId('s09-menubar-state')).toHaveText('grid off, light')
+      if (!(await page.getByRole('menuitemradio', { name: 'Dark' }).isVisible())) await view.click()
+      await page.getByRole('menuitemradio', { name: 'Dark' }).click()
+      await expect(bar.getByTestId('s09-menubar-state')).toHaveText('grid off, dark')
+      if (!(await page.getByRole('menuitemradio', { name: 'Dark' }).isVisible())) await view.click()
+      await expect(page.getByRole('menuitemradio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
+    })
+
+    test('Menubar submenu opens with ArrowRight and closes with ArrowLeft', async ({ page }) => {
+      const bar = (await open(page, edition)).getByTestId('s09-menubar')
+      await bar.getByRole('menuitem', { name: 'File' }).click()
+      const exportItem = page.getByRole('menuitem', { name: 'Export' })
+      await exportItem.focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(page.getByRole('menuitem', { name: 'CSS variables' })).toBeVisible()
+      await page.keyboard.press('ArrowLeft')
+      await expect(page.getByRole('menuitem', { name: 'CSS variables' })).toBeHidden()
+      await expect(exportItem).toBeFocused()
+    })
+
+    test('Menubar: pressing Alt alone does not move focus to the menubar', async ({ page }) => {
+      const bar = (await open(page, edition)).getByTestId('s09-menubar')
+      const after = bar.getByRole('button', { name: 'After the menubar' })
+      await after.focus()
+      await page.keyboard.press('Alt')
+      await expect(after).toBeFocused()
+    })
+
     test('Prose keeps long URLs, words and tables inside its box at 320 px', async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 800 })
       const section = await open(page, edition)

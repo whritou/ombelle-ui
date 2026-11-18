@@ -19,6 +19,7 @@ const editedFields = {
   prose: 'label',
   'navigation-menu': 'label',
   sidebar: 'label',
+  menubar: 'label',
 } as const satisfies Record<Exclude<ComponentRecipe['component'], 'accordion' | 'tabs' | 'stepper' | 'resizable'>, string>
 
 export function catalogRecipeFixtures(): readonly ComponentRecipe[] {

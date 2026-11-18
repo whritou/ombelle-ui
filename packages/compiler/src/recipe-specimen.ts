@@ -268,6 +268,12 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
       return node('div', { className: 'h-64 rounded-[var(--radius)] border border-[var(--border)]' },
         node('ResizablePanelGroup', { direction: props.direction }, ...panels))
     }
+    case 'menubar':
+      // Shortcuts are shown, not bound: each item shows Ctrl and its initial when the recipe asks for them.
+      return node('Menubar', { 'aria-label': content.label }, ...content.menus.map(menu => node('MenubarMenu', {},
+        node('MenubarTrigger', {}, menu.label),
+        node('MenubarContent', {}, ...menu.items.map(text => node('MenubarItem', {}, text,
+          ...(props.shortcuts === false ? [] : [node('MenubarShortcut', {}, `Ctrl+${text.slice(0, 1).toUpperCase()}`)])))))))
     case 'toolbar': {
       const toggles = props.toggles ?? 'single'
       const items = content.items
