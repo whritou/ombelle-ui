@@ -692,6 +692,14 @@ it('accepts the default 0.9 navigation menu recipe and rejects one without items
   expect(() => validateComponentRecipe(draft076('navigation-menu', {}, { items: Array(6).fill({ id: 'docs', label: 'Docs', href: '/docs', links: [] }) }))).toThrow()
 })
 
+it('accepts the default 0.9 resizable recipe and rejects labels that do not match the panel count', () => {
+  expect(validateComponentRecipe(draft076('resizable')).component).toBe('resizable')
+  expect(defaultRecipeFields(componentRecipeFields('resizable').props)).toEqual({ direction: 'horizontal', withHandle: true, panels: 2 })
+  expect(() => validateComponentRecipe(draft076('resizable', { panels: 3 }, { labels: ['Preview', 'Controls'] }))).toThrow(expect.objectContaining({ path: '/content/labels' }))
+  expect(validateComponentRecipe(draft076('resizable', { panels: 3 }, { labels: ['Files', 'Preview', 'Controls'] })).component).toBe('resizable')
+  expect(() => validateComponentRecipe(draft076('resizable', { panels: 4 }))).toThrow()
+})
+
 it('accepts the default 0.9 sidebar recipe and rejects one without groups', () => {
   expect(validateComponentRecipe(draft076('sidebar')).component).toBe('sidebar')
   expect(defaultRecipeFields(componentRecipeFields('sidebar').props)).toEqual({ collapsible: 'icon', side: 'left', variant: 'sidebar' })

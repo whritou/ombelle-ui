@@ -19,7 +19,7 @@ const editedFields = {
   prose: 'label',
   'navigation-menu': 'label',
   sidebar: 'label',
-} as const satisfies Record<Exclude<ComponentRecipe['component'], 'accordion' | 'tabs' | 'stepper'>, string>
+} as const satisfies Record<Exclude<ComponentRecipe['component'], 'accordion' | 'tabs' | 'stepper' | 'resizable'>, string>
 
 export function catalogRecipeFixtures(): readonly ComponentRecipe[] {
   return componentRecipeComponents.map(id => {
@@ -27,6 +27,10 @@ export function catalogRecipeFixtures(): readonly ComponentRecipe[] {
     if (recipe.component === 'stepper') {
       const [first, ...steps] = recipe.content.steps
       return validateComponentRecipe({ ...recipe, content: { steps: [{ ...first, title: `Edited ${id}` }, ...steps] } })
+    }
+    if (recipe.component === 'resizable') {
+      const [first, ...labels] = recipe.content.labels
+      return validateComponentRecipe({ ...recipe, content: { labels: [`Edited ${first}`, ...labels] } })
     }
     if (recipe.component === 'accordion' || recipe.component === 'tabs') {
       const [first, ...items] = recipe.content.items

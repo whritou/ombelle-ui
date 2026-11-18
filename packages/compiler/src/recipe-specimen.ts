@@ -258,6 +258,16 @@ export function describeComponentRecipe(recipe: ComponentRecipe): RecipeSpecimen
           ...(props.collapsible === 'none' ? [] : [node('SidebarRail', {})])),
         node('SidebarInset', {}, node('div', { className: 'flex items-center gap-2 p-3' }, node('SidebarTrigger', {}), node('span', {}, content.label))))
     }
+    case 'resizable': {
+      // Equal panels, each showing its label, in a frame the specimen can size.
+      const size = Math.floor(100 / content.labels.length)
+      const panels = content.labels.flatMap((text, index) => [
+        ...(index ? [node('ResizableHandle', { withHandle: props.withHandle })] : []),
+        node('ResizablePanel', { defaultSize: `${size}%`, minSize: '15%' }, node('div', { className: 'flex h-full items-center justify-center p-4' }, text)),
+      ])
+      return node('div', { className: 'h-64 rounded-[var(--radius)] border border-[var(--border)]' },
+        node('ResizablePanelGroup', { direction: props.direction }, ...panels))
+    }
     case 'toolbar': {
       const toggles = props.toggles ?? 'single'
       const items = content.items

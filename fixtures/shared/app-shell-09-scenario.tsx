@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Prose, ProseLead } from '@/components/ui/prose'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupCollapsible, SidebarGroupCollapsibleContent, SidebarGroupCollapsibleTrigger, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarInset, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger } from '@/components/ui/sidebar'
 import { Box, FolderOpen, LayoutDashboard, Palette } from 'lucide-react'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu'
 
 // The 0.9 app shell components in both editions (tests/e2e/app-shell-09.spec.ts).
@@ -125,11 +126,24 @@ function EditorSidebar() {
   )
 }
 
+function SplitPanes() {
+  return (
+    <div data-testid="s09-resizable" style={{ blockSize: '14rem', inlineSize: '40rem', maxInlineSize: '100%', border: '1px solid var(--border)' }}>
+      <ResizablePanelGroup direction="horizontal" autoSaveId="s09-split">
+        <ResizablePanel id="preview" defaultSize="60%" minSize="20%"><div style={{ padding: '1rem' }}>Preview</div></ResizablePanel>
+        <ResizableHandle withHandle aria-label="Resize preview and controls" />
+        <ResizablePanel id="controls" defaultSize="40%" minSize="20%" collapsible collapsedSize="8%"><div data-testid="s09-controls" style={{ padding: '1rem' }}>Controls</div></ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  )
+}
+
 export function AppShellScenario09() {
   return (
     <section aria-label="0.9 app shell" data-testid="app-shell-09" style={{ display: 'grid', gap: '1.5rem', minInlineSize: 0 }}>
       <SiteNavigation />
       <EditorSidebar />
+      <SplitPanes />
       <ProseArticle />
     </section>
   )

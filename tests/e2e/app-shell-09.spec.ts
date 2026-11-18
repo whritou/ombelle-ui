@@ -92,6 +92,66 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(sheet).toBeHidden()
     })
 
+    test('Resizable: arrow keys resize, Home and End jump to the limits', async ({ page }) => {
+      await page.evaluate(() => localStorage.clear()).catch(() => {})
+      const area = (await open(page, edition)).getByTestId('s09-resizable')
+      const handle = area.getByRole('separator')
+      const value = async () => Number(await handle.getAttribute('aria-valuenow'))
+      await handle.focus()
+      const start = await value()
+      await page.keyboard.press('ArrowLeft')
+      expect(await value()).toBeLessThan(start)
+      await page.keyboard.press('Home')
+      expect(await value()).toBeCloseTo(Number(await handle.getAttribute('aria-valuemin')), 0)
+      await page.keyboard.press('End')
+      expect(await value()).toBeCloseTo(Number(await handle.getAttribute('aria-valuemax')), 0)
+    })
+
+    test('Resizable: the handle can be grabbed 10px away from its line, and a collapsible panel folds', async ({ page }) => {
+      const area = (await open(page, edition)).getByTestId('s09-resizable')
+      await page.evaluate(() => localStorage.clear())
+      await page.reload()
+      await expect(area).toBeVisible({ timeout: 60000 })
+      const handle = area.getByRole('separator')
+      const box = (await handle.boundingBox())!
+      const before = Number(await handle.getAttribute('aria-valuenow'))
+      await page.mouse.move(box.x + box.width / 2 + 10, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x - 60, box.y + box.height / 2, { steps: 5 })
+      await page.mouse.up()
+      expect(Number(await handle.getAttribute('aria-valuenow'))).toBeLessThan(before)
+      const frame = (await area.boundingBox())!
+      const grab = (await handle.boundingBox())!
+      await page.mouse.move(grab.x + grab.width / 2, grab.y + grab.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(frame.x + frame.width - 2, grab.y + grab.height / 2, { steps: 10 })
+      await page.mouse.up()
+      const controls = (await area.getByTestId('s09-controls').evaluate(element => element.parentElement!.getBoundingClientRect().width))
+      expect(controls).toBeLessThan(frame.width * 0.12)
+    })
+
+    test('Resizable: a saved layout comes back after reload, and a corrupt one falls back to the defaults', async ({ page }) => {
+      const errors: string[] = []
+      page.on('pageerror', error => errors.push(error.message))
+      const area = (await open(page, edition)).getByTestId('s09-resizable')
+      await page.evaluate(() => localStorage.clear())
+      await page.reload()
+      await expect(area).toBeVisible({ timeout: 60000 })
+      const handle = area.getByRole('separator')
+      await handle.focus()
+      for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowLeft')
+      const resized = await handle.getAttribute('aria-valuenow')
+      await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some(key => key.includes('s09-split')))).toBe(true)
+      await page.reload()
+      await expect(area.getByRole('separator')).toHaveAttribute('aria-valuenow', resized!)
+      for (const bad of ['{bad', JSON.stringify({ preview: 150, controls: 100 })]) {
+        await page.evaluate(value => { for (const key of Object.keys(localStorage)) if (key.includes('s09-split')) localStorage.setItem(key, value) }, bad)
+        await page.reload()
+        await expect(area.getByRole('separator')).toHaveAttribute('aria-valuenow', '60')
+      }
+      expect(errors).toEqual([])
+    })
+
     test('Prose keeps long URLs, words and tables inside its box at 320 px', async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 800 })
       const section = await open(page, edition)

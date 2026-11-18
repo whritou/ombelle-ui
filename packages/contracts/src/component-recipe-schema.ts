@@ -4888,6 +4888,65 @@ export const componentRecipeSchema = {
           ]
         }
       }
+    },
+    {
+      "properties": {
+        "component": {
+          "const": "resizable"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ],
+              "default": "horizontal",
+              "title": "Direction"
+            },
+            "withHandle": {
+              "type": "boolean",
+              "default": true,
+              "title": "Grip"
+            },
+            "panels": {
+              "enum": [
+                2,
+                3
+              ],
+              "default": 2,
+              "title": "Panels"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "title": "Panel labels",
+              "minItems": 2,
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "\\S"
+              },
+              "default": [
+                "Preview",
+                "Controls"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "labels"
+          ]
+        }
+      }
     }
   ],
   "$defs": {

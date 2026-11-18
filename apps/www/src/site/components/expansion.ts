@@ -224,4 +224,10 @@ export const expansionDocs = {
     states: 'Expanded, collapsed to icons, slid away, phone sheet, current item, hover, focus, before hydration on a phone', basis: 'Radix Dialog, Tooltip and Collapsible; Base UI Dialog, Tooltip and Collapsible in the Base UI edition', client: true,
     usage: expansionExamples.sidebar, minimumCli: '0.9.0',
   },
+  resizable: {
+    name: 'Resizable', description: 'Panels side by side or stacked, with handles a pointer drags and the arrow keys move; a layout can be remembered and a panel can fold to a strip.',
+    api: 'ResizablePanelGroup (direction, autoSaveId, onLayoutChanged), ResizablePanel (defaultSize, minSize, maxSize, collapsible, collapsedSize, panelRef), ResizableHandle (withHandle)',
+    states: 'Default, handle hover, handle focus, dragging, collapsed panel, vertical', basis: 'react-resizable-panels, one template for both editions', client: true,
+    usage: expansionExamples.resizable, minimumCli: '0.9.0',
+  },
 } satisfies Record<keyof typeof expansionExamples, Omit<ComponentDoc, 'id'>>

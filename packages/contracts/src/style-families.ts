@@ -43,6 +43,7 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'prose',
   'navigation-menu',
   'sidebar',
+  'resizable',
   'input-group',
   'sheet',
   'alert-dialog',

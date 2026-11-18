@@ -59,5 +59,6 @@ export const supportedComponentIds = [
   'prose',
   'navigation-menu',
   'sidebar',
+  'resizable',
 ] as const
 export type ComponentId = (typeof supportedComponentIds)[number]
