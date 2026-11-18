@@ -326,19 +326,6 @@
   }
 
   /* Long-form pages (privacy, security, snapshot states). */
-  .prose-doc { color: var(--muted-foreground); line-height: 1.7; }
-  .prose-doc h2 { margin-top: 2.75rem; color: var(--foreground); font-size: 1.5rem; font-weight: 800; line-height: 1.2; }
-  .prose-doc p, .prose-doc ul, .prose-doc ol, .prose-doc dl { margin-top: 1rem; }
-  .prose-doc ul { list-style: disc; padding-left: 1.25rem; }
-  .prose-doc ol { list-style: decimal; padding-left: 1.5rem; }
-  .prose-doc dt { margin-top: 1rem; color: var(--foreground); font-weight: 700; }
-  .prose-doc dd { margin-top: .25rem; }
-  .prose-doc li + li { margin-top: .5rem; }
-  .prose-doc a { color: var(--foreground); font-weight: 600; text-decoration: underline; text-decoration-color: var(--primary); text-underline-offset: 4px; }
-  .prose-doc a:hover { color: var(--primary); }
-  .prose-doc code { border-radius: .375rem; background: var(--muted); padding: .1rem .35rem; color: var(--foreground); font-family: var(--font-mono); font-size: .85em; overflow-wrap: anywhere; }
-  .prose-doc pre code { border-radius: 0; background: transparent; padding: 0; font-size: inherit; overflow-wrap: normal; }
-  .prose-doc strong { color: var(--foreground); }
 }
 
 @keyframes float-slow { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
@@ -608,4 +595,10 @@
   body:has([data-editor-root]) [data-editor-root] [data-slot='number-input'] {
     min-block-size: 44px;
   }
+}
+
+
+/* The docs and component directory sidebars sit below the pinned 4rem header. */
+.site-sidebar > [data-sidebar-inner] {
+  inset-block-start: 4rem;
 }

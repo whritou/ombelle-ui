@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Prose } from '../generated/ui/components/ui/prose'
 
 /** Shell for long-form and status pages: eyebrow, one h1, lead and prose body. */
 export function DocPage({ eyebrow, title, lead, children }: {
@@ -14,7 +15,7 @@ export function DocPage({ eyebrow, title, lead, children }: {
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
         <h1 className="mt-3 text-4xl font-black leading-[1.02] md:text-6xl">{title}</h1>
         {lead && <div className="mt-5 text-lg text-muted-foreground">{lead}</div>}
-        <div className="prose-doc mt-10">{children}</div>
+        <Prose className="mt-10">{children}</Prose>
       </div>
     </main>
   )
