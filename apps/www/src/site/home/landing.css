@@ -2835,11 +2835,13 @@ button.ol-pal:hover {
 }
 
 /* ---------- editions and the mini editor ---------- */
+/* Code wraps instead of scrolling: a scrolling box would need to be a keyboard stop, and on a
+   phone the import line is wider than the card. */
 .ol-codeb {
   padding: 16px 20px;
-  overflow-x: auto;
   font: 400 13px/1.9 var(--mono);
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .ol-codeb .hl {

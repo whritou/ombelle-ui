@@ -37,6 +37,17 @@ test.describe('phones', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Global presets' })).toBeVisible()
   })
 
+  test('the site menu sheet has one Close button, and it closes the sheet', async ({ page }) => {
+    await page.goto(`${site}/docs`)
+    await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+    const sheet = page.getByRole('dialog', { name: 'Menu', exact: true })
+    await expect(sheet).toBeVisible()
+    // The sheet draws its own Close button; the header must not add a second one beside it.
+    await expect(sheet.getByRole('button', { name: /close/i })).toHaveCount(1)
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toBeHidden()
+  })
+
   test('guide text keeps the page within 375 px', async ({ page }) => {
     await page.goto(`${site}/docs/getting-started`)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375)
