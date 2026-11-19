@@ -115,7 +115,28 @@ Measured with `scripts/measure-www-first-load.mjs` after `next build`, gzip, bef
 
 Six routes are over the 10 kB budget. The first measurement had `/docs` at +368 kB: the header's Components panel imported the whole component catalog to list names. It now reads a names-only map that a unit test keeps equal to the catalog. What remains is the shell itself, rendered on first paint: Sidebar (with its Tooltip, Dialog and Collapsible primitives) on the docs and component pages, and Resizable, two Sidebars and Menubar in the editors. Splitting them out would delay the page layout, so they were not split. The support matrix's Data Table is split and loads only when its section opens.
 
+## Board alignment pass
+
+After the first site review, the new components were found to differ from their boards in shape and contrast. The Navigation Menu, Sidebar and Menubar had borrowed the Dropdown Menu's hover, a primary fill. On it the two-line link descriptions and the shortcuts stayed muted grey, which is unreadable, and the boards draw an accent fill with a border. Links were pills where the board has 14px corners, triggers were 34px where the board has 38px, the current page was a fill where the board underlines it, and the collapsed Sidebar rail used 16px icons in an oval where the board has a 64px rail of 40px round buttons.
+
+Each family's six stylesheets were rewritten from its `*09Shell` and `*09Data` boards, Ombelle by hand and the other seven from patches written by one agent per family. Those agents could not build or render: seven parallel `pnpm install` runs stalled, so their patches were applied, built and audited here.
+
+| Check | Result |
+| --- | --- |
+| `pnpm build:packages` with the catalog style lint | Pass |
+| Specimen audit, six components, eight families, both editions, light and dark | Pass after the fixes below |
+| `tests/e2e/app-shell-09.spec.ts` | 48 pass |
+| Compiler and catalog tests | 2170 pass |
+
+Fixed after the first audit of the patches:
+
+- Prose h2 overflowed its line box in Papier, Organic, Flat and Neo-brutalism (line height below 1.3, as in Ombelle earlier); h2 is 1.3 in all of them.
+- A Resizable handle's own focus outline was cut by the panel group in Flat, Minimalist and Neo-brutalism (2, 5 and 6px); the ring is now a pseudo-element along the handle, as in Ombelle. Organic's ring was 17 pixels short of the audit's minimum and moved from the grip to the handle too.
+- Minimalist's Data Table checkboxes had a focus ring in `currentColor`, which is white on the primary foreground and drew nothing on a light page, and the next column's sort button covered 2px of the select-all box; the ring uses `--ring` and the select column is 44px.
+
+The site's Ombelle header, folded editor rail and File menu were checked in screenshots: accent hover with a readable description, round 40px rail buttons with 18px icons, an inverted open menu trigger.
+
 ## Not done
 
-- **Board comparison by computed styles.** The design asks for each family's computed styles to be compared with its `*09Shell` and `*09Data` boards. Each component's family CSS instead starts from the same family's existing styles for the look it borrows (Toolbar, Dropdown Menu, Sheet, Tooltip, Input, Table), which the boards were drawn from; the comparison itself was not run. Differences from the boards are therefore not recorded here.
+- **A property-by-property comparison with every board.** The alignment pass below was written from the boards' own stylesheets and checked with the specimen audit, the browser tests and screenshots of the open Navigation Menu in all eight families (and the site's header, folded editor rail and menubar for Ombelle). It did not measure every board property against every live state in every family, and the sidebar, menubar, Data Table and Prose were not compared by screenshot outside Ombelle.
 - The Workspace preview scene is type-checked but was not opened in the preset editor.

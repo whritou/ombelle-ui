@@ -1,5 +1,5 @@
 /* liquid-glass Prose */
-/* Element styles sit at the prose slot's specificity, so a className can override them, and skip nested catalog components. */
+/* Element styles sit at the prose slot's specificity, so a className can override them, and skip nested catalog components. Sizes and rhythm are measured from the Liquid glass 0.9 board. */
 [data-slot='prose'] {
   box-sizing: border-box;
   max-inline-size: 72ch;
@@ -27,38 +27,36 @@
 [data-slot='prose'] :where(figure):where(:not([data-slot], [data-prose] [data-slot] *)),
 [data-slot='prose'] :where(pre):where(:not([data-slot], [data-prose] [data-slot] *)),
 [data-slot='prose'] :where(table):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  margin-block-end:1.25rem;
+  margin-block-end:1rem;
 }
 [data-slot='prose'] :where(h1):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  font:650 2.5rem/1.3 var(--font-heading, var(--font-family));
+  font:650 2.5rem/1.15 var(--font-heading, var(--font-family));
   letter-spacing:-0.045em;
-  margin-block-end:1rem;
+  margin-block-end:0.75rem;
   text-wrap:balance;
 }
 [data-slot='prose'] :where(h2):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  font:650 1.625rem/1.3 var(--font-heading, var(--font-family));
+  font:650 1.625rem/1.25 var(--font-heading, var(--font-family));
   letter-spacing:-0.03em;
   padding-block-end:0.5rem;
   border-block-end:1px solid var(--border);
-  margin-block:2.5rem 0.875rem;
+  margin-block:2.25rem 0.75rem;
   text-wrap:balance;
 }
 [data-slot='prose'] :where(h3):where(:not([data-slot], [data-prose] [data-slot] *)) {
   font:650 1.25rem/1.3 var(--font-heading, var(--font-family));
   letter-spacing:-0.02em;
-  margin-block:2rem 0.625rem;
+  margin-block:1.75rem 0.625rem;
 }
 [data-slot='prose'] :where(h4):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  font:650 0.8125rem/1.4 var(--font-heading, var(--font-family));
-  text-transform:uppercase;
-  letter-spacing:0.06em;
+  font:650 1rem/1.4 var(--font-heading, var(--font-family));
   margin-block:1.5rem 0.5rem;
 }
 [data-slot='prose-lead'] {
-  margin-block: 0 1.5rem;
+  margin-block: 0 1.25rem;
   color: var(--muted-foreground);
-  font-size: 1.1875em;
-  line-height: 1.55;
+  font-size: 1.2em;
+  line-height: 1.6;
 }
 [data-slot='prose'] :where(a):where(:not([data-slot], [data-prose] [data-slot] *)) {
   color:color-mix(in oklab, var(--primary) 75%, var(--foreground));
@@ -89,7 +87,22 @@
   border-start-end-radius:14px;
   border-end-end-radius:14px;
   background:var(--card);
+  box-shadow:inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), 0 6px 16px -10px color-mix(in srgb, var(--foreground) 45%, transparent);
   margin-inline:0;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)) {
+    background:color-mix(in srgb, var(--card) calc(var(--glass-opacity) * 100%), transparent);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)) {
+      background:var(--card);
+      -webkit-backdrop-filter:none;
+      backdrop-filter:none;
+    }
+  }
 }
 [data-slot='prose'] :where(blockquote footer):where(:not([data-slot], [data-prose] [data-slot] *)),
 [data-slot='prose'] :where(figcaption):where(:not([data-slot], [data-prose] [data-slot] *)) {
@@ -103,16 +116,23 @@
   border:1px solid var(--border);
   border-radius:7px;
   background:var(--muted);
+  color:var(--foreground);
   font:500 0.86em var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
   overflow-wrap:anywhere;
 }
 [data-slot='prose'] :where(kbd):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  padding:0.0625rem 0.375rem;
+  display:inline-grid;
+  place-items:center;
+  min-inline-size:22px;
+  min-block-size:22px;
+  padding:0 6px;
+  vertical-align:1px;
   border:1px solid var(--border);
   border-block-end-width:2px;
-  border-radius:calc(var(--radius) * 0.5);
-  background:var(--muted);
-  font:600 0.8em var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  border-radius:8px;
+  background:var(--card);
+  color:var(--foreground);
+  font:600 11px/1 var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
 }
 [data-slot='prose'] :where(pre):where(:not([data-slot], [data-prose] [data-slot] *)) {
   max-inline-size:100%;
@@ -127,7 +147,7 @@
   block-size:1px;
   border:0;
   background:var(--border);
-  margin-block:2.25rem;
+  margin-block:2rem;
 }
 [data-slot='prose'] :where(img):where(:not([data-slot], [data-prose] [data-slot] *)),
 [data-slot='prose'] :where(video):where(:not([data-slot], [data-prose] [data-slot] *)) {
@@ -140,18 +160,28 @@
   display:block;
   max-inline-size:100%;
   overflow-x:auto;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--card);
+  box-shadow:inset 0 1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent)), 0 6px 16px -10px color-mix(in srgb, var(--foreground) 45%, transparent);
   border-collapse:collapse;
-  font-size:0.9375em;
+  font-size:0.8125rem;
+  line-height:1.45;
 }
 [data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)),
 [data-slot='prose'] :where(td):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  padding:0.5rem 0.75rem;
+  padding:0.75rem;
   border-block-end:1px solid var(--border);
   text-align:start;
-  vertical-align:top;
+  vertical-align:middle;
+}
+[data-slot='prose'] :where(tr:last-child > td):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  border-block-end:0;
 }
 [data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  font-weight:700;
+  background:var(--muted);
+  color:var(--muted-foreground);
+  font-weight:600;
   white-space:nowrap;
 }
 @media (forced-colors: active) {

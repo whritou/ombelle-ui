@@ -21,30 +21,60 @@
   transition: background-color var(--motion-duration, 0.2s);
 }
 [data-slot='resizable-handle'][aria-orientation='horizontal'] {
-  --resizable-grip-inline: 1.5rem;
+  --resizable-grip-inline: 1.375rem;
   --resizable-grip-block: 0.75rem;
   inline-size: auto;
   block-size: max(1px, var(--border-width));
 }
 [data-slot='resizable-handle']:hover,
+[data-slot='resizable-handle'][data-separator='hover'] {
+  background: var(--input);
+}
+[data-slot='resizable-handle']:hover > [data-slot='resizable-handle-grip'],
+[data-slot='resizable-handle'][data-separator='hover'] > [data-slot='resizable-handle-grip'] {
+  border-color: var(--input);
+}
+/* Keyboard focus: ink hairline, the 1px ring 4px out. */
 [data-slot='resizable-handle']:focus-visible {
-  background: var(--primary);
+  background: var(--foreground);
+}
+[data-slot='resizable-handle']:focus-visible::after {
+  outline: 2px solid var(--ring);
+  outline-offset: 0;
+}
+[data-slot='resizable-handle']:focus-visible > [data-slot='resizable-handle-grip'] {
+  border-color: var(--foreground);
+}
+/* Dragging: a 2px ink hairline and an ink grip. */
+[data-slot='resizable-handle'][data-separator='active'] {
+  background: var(--foreground);
+  inline-size: 2px;
+}
+[data-slot='resizable-handle'][data-separator='active'][aria-orientation='horizontal'] {
+  inline-size: auto;
+  block-size: 2px;
+}
+[data-slot='resizable-handle'][data-separator='active'] > [data-slot='resizable-handle-grip'] {
+  border-color: var(--primary);
+  background:
+    linear-gradient(90deg, var(--primary-foreground) 0 1px, transparent 1px 3px, var(--primary-foreground) 3px 4px) center / 4px 10px no-repeat,
+    var(--primary);
+}
+[data-slot='resizable-handle'][data-separator='active'][aria-orientation='horizontal'] > [data-slot='resizable-handle-grip'] {
+  background:
+    linear-gradient(180deg, var(--primary-foreground) 0 1px, transparent 1px 3px, var(--primary-foreground) 3px 4px) center / 10px 4px no-repeat,
+    var(--primary);
 }
 [data-slot='resizable-handle']::after {
   position: absolute;
-  inset-block: 2px;
+  inset-block: 0;
   inset-inline: -4px;
-  border-radius: 4px;
   content: '';
   pointer-events: none;
 }
 [data-slot='resizable-handle'][aria-orientation='horizontal']::after {
   inset-block: -4px;
-  inset-inline: 2px;
-}
-[data-slot='resizable-handle']:focus-visible::after {
-  outline: 2px solid var(--ring);
-  outline-offset: 0;
+  inset-inline: 0;
 }
 [data-slot='resizable-handle-grip'] {
   z-index: 1;
@@ -52,11 +82,17 @@
   display: flex;
   flex: none;
   inline-size: var(--resizable-grip-inline, 0.75rem);
-  block-size: var(--resizable-grip-block, 1.5rem);
+  block-size: var(--resizable-grip-block, 1.375rem);
   border: max(1px, var(--border-width)) solid var(--border);
   border-radius: 2px;
+  /* Two 1px lines, 2px apart, like the board's grip. */
   background:
-    radial-gradient(circle, var(--muted-foreground) 1px, transparent 1.5px) center / 4px 5px,
+    linear-gradient(90deg, var(--input) 0 1px, transparent 1px 3px, var(--input) 3px 4px) center / 4px 10px no-repeat,
+    var(--card);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] > [data-slot='resizable-handle-grip'] {
+  background:
+    linear-gradient(180deg, var(--input) 0 1px, transparent 1px 3px, var(--input) 3px 4px) center / 10px 4px no-repeat,
     var(--card);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -68,7 +104,7 @@
   [data-slot='resizable-handle'] {
     background: CanvasText;
   }
-  [data-slot='resizable-handle']:is(:hover, :focus-visible) {
+  [data-slot='resizable-handle']:is(:hover, :focus-visible, [data-separator='hover'], [data-separator='active']) {
     background: Highlight;
   }
   [data-slot='resizable-handle']:focus-visible {
@@ -79,4 +115,13 @@
     border-color: CanvasText;
     background: Canvas;
   }
+}
+
+/* The grip never outgrows its handle: a shadow or ring around it must stay inside the panel group. */
+[data-slot='resizable-handle-grip'] {
+  max-block-size: calc(100% - 12px);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] > [data-slot='resizable-handle-grip'] {
+  max-block-size: none;
+  max-inline-size: calc(100% - 12px);
 }

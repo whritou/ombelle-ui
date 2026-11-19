@@ -165,3 +165,88 @@
     color:LinkText;
   }
 }
+
+/* papier board layer: 16.5px reading text on a 1.7 line, tight serif headings (1.04 to 1.3 leading), a serif lead in the text colour, and 16px paragraph rhythm. */
+[data-slot='prose'] {
+  font-size: 1.03125rem;
+  line-height: 1.7;
+}
+[data-slot='prose'] :where(p, ul, ol, dl, figure, pre, table):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-end: 1rem;
+}
+[data-slot='prose'] :where(h1):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font: 600 3rem/1.04 var(--font-heading, var(--font-family));
+  margin-block-end: 0;
+}
+[data-slot='prose'] :where(h2):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font: 600 1.875rem/1.3 var(--font-heading, var(--font-family));
+  margin-block: 2.75rem 1rem;
+}
+[data-slot='prose'] :where(h3):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font: 600 1.375rem/1.25 var(--font-heading, var(--font-family));
+  margin-block: 2.125rem 0.625rem;
+}
+[data-slot='prose'] :where(h4):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font: italic 500 1.1875rem/1.3 var(--font-heading, var(--font-family));
+  margin-block: 1.625rem 0.5rem;
+}
+[data-slot='prose-lead'] {
+  margin-block: 1.125rem 1rem;
+  color: var(--foreground);
+  font-family: var(--font-heading, var(--font-family));
+  font-size: 1.3125rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+[data-slot='prose'] :where(ul, ol):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding-inline-start: 1.75rem;
+}
+[data-slot='prose'] :where(ul):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  list-style: square;
+}
+[data-slot='prose'] :where(ol > li):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding-inline-start: 4px;
+}
+[data-slot='prose'] :where(li + li):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-start: 0.5rem;
+}
+[data-slot='prose'] :where(li > ul, li > ol):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block: 0.5rem 0;
+}
+[data-slot='prose'] :where(ol > li::marker):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font: 600 1.0625rem var(--font-heading, var(--font-family));
+  color: color-mix(in oklab, var(--primary) 80%, var(--foreground));
+}
+[data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block: 1.75rem;
+  padding-block: 0.25rem;
+  padding-inline-start: 1.5rem;
+  font: italic 500 1.3125rem/1.5 var(--font-heading, var(--font-family));
+}
+[data-slot='prose'] :where(blockquote footer, figcaption):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  display: block;
+  margin-block-start: 0.625rem;
+  font: normal 400 0.84375rem/1.5 var(--font-family);
+}
+[data-slot='prose'] :where(:not(pre) > code):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding: 1px 5px;
+  border: 1px solid color-mix(in oklab, var(--border) 22%, transparent);
+  background: var(--secondary);
+}
+[data-slot='prose'] :where(hr):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block: 2.75rem 1.75rem;
+}
+[data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  border-block-end: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+[data-slot='prose'] :where(td):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  border-block-end: 1px dotted color-mix(in oklab, var(--border) 22%, transparent);
+}
+[data-slot='prose'] :where(th, td):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding-block: 0.625rem;
+  padding-inline: 0.875rem;
+}

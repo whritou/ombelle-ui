@@ -4,6 +4,7 @@
 
 - Add the 0.9 app shell components in all eight families, in the Radix and Base UI editions, with recipes and component editors: Sidebar (collapses to icons or slides away, a sheet on phones, Ctrl or Cmd + B), Navigation Menu, Resizable (react-resizable-panels 4.17.0), Data Table (TanStack Table 9.3.1), Menubar and Prose. Installing them needs CLI 0.9.0.
 - Show them together in a new Workspace preview scene and in the preset gallery.
+- Align the six components with their design boards in all eight families: readable hover states (an accent fill with a border, not a primary one that hid link descriptions and shortcuts), board-sized triggers and items, a primary underline for the current page, a 64px icon rail of 40px round buttons, and board handles for Resizable.
 - Rebuild the website on them: the Docs and Components navigation is a Sidebar (a sheet on phones), guides use Prose, the header is a Navigation Menu with Docs and Components panels, the desktop editors are resizable with folding inspector and Review sidebars, the editor top bar gains File, Edit and View menus from 1200px, and the Components page's support matrix is a sortable, filterable Data Table. The components directory is grouped by category.
 
 ## 0.8.3 — 17 November 2026

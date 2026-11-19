@@ -1,16 +1,18 @@
 /* neo-brutalism Menubar */
-/* The bar and its triggers draw like the family's Toolbar; the menus like its Dropdown Menu. */
+/* Drawn from the Neo brutalism 0.9 board: a 50px bar of 36px caps triggers on a 2.5px transparent border (muted fill and ink border on hover, ink on primary with a hard shadow when open), over menus of 40px items. */
 [data-slot='menubar'] {
   box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 4px;
+  min-block-size: 50px;
   min-inline-size: 0;
-  padding: 4px;
+  padding-block: 4px;
+  padding-inline: 10px;
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
-  color: var(--foreground);
+  color: var(--card-foreground);
   font-family: var(--font-family);
   box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow-color, var(--border));
 }
@@ -27,16 +29,18 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  block-size: 34px;
-  min-inline-size: 34px;
-  padding-inline: 10px;
-  border: 0;
+  block-size: 36px;
+  min-inline-size: 36px;
+  padding-inline: 12px;
+  border: var(--border-width) solid transparent;
   border-radius: var(--radius);
   background: transparent;
-  color: var(--foreground);
+  color: var(--card-foreground);
   font: inherit;
   font-size: 13px;
   font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color var(--motion-duration, 0.2s), color var(--motion-duration, 0.2s);
@@ -45,16 +49,20 @@
   inline-size: 16px;
   block-size: 16px;
 }
-[data-slot='menubar-trigger']:hover {
+[data-slot='menubar-trigger']:hover,
+[data-slot='menubar-trigger'][data-highlighted] {
   background: var(--muted);
+  border-color: var(--border);
 }
 [data-slot='menubar-trigger'][data-disabled] {
-  opacity: 0.5;
+  border: var(--border-width) dashed var(--muted-foreground);
+  background: transparent;
+  color: var(--muted-foreground);
   cursor: not-allowed;
 }
 [data-slot='menubar-trigger']:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 2px;
+  outline: 3px dashed var(--ring);
+  outline-offset: 3px;
 }
 @media (prefers-reduced-motion: reduce) {
   [data-slot='menubar-trigger'] {
@@ -62,16 +70,27 @@
   }
 }
 [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
-  background: var(--accent);
-  color: var(--accent-foreground);
+  background: var(--primary);
+  border-color: var(--border);
+  color: var(--primary-foreground);
+  box-shadow: calc(var(--shadow-x) - 1px) calc(var(--shadow-y) - 1px) 0 var(--shadow-color, var(--border));
 }
 @media (forced-colors: active) {
+  [data-slot='menubar-trigger']:hover,
+  [data-slot='menubar-trigger'][data-highlighted] {
+    border-color: CanvasText;
+  }
   [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
     background: Highlight;
     color: HighlightText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  [data-slot='menubar-trigger'][data-disabled] {
+    border-color: GrayText;
+    color: GrayText;
   }
 }
-/* neo-brutalism Dropdown Menu */
 [data-slot='menubar-content'],
 [data-slot='menubar-sub-content'] {
   box-sizing: border-box;
@@ -100,6 +119,7 @@
   color: var(--accent-foreground);
   font-size: 0.6875rem;
   font-weight: 900;
+  line-height: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -124,7 +144,7 @@
 [data-slot='menubar-sub-trigger'][data-inset],
 [data-slot='menubar-checkbox-item'],
 [data-slot='menubar-radio-item'] {
-  padding-inline-start: 2.5rem;
+  padding-inline-start: 2.625rem;
 }
 [data-slot='menubar-item'] svg,
 [data-slot='menubar-sub-trigger'] svg {
@@ -165,7 +185,7 @@
 [data-slot='menubar-item-indicator'] {
   box-sizing: border-box;
   position: absolute;
-  inset-inline-start: 0.625rem;
+  inset-inline-start: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -192,8 +212,8 @@
   background: var(--muted);
 }
 [data-slot='menubar-item-indicator'] svg {
-  inline-size: 0.875rem;
-  block-size: 0.875rem;
+  inline-size: 0.8125rem;
+  block-size: 0.8125rem;
   stroke-width: 4;
   stroke-linecap: square;
   stroke-linejoin: miter;
@@ -206,15 +226,20 @@
   background: currentColor;
 }
 [data-slot='menubar-shortcut'] {
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 22px;
+  block-size: 22px;
   margin-inline-start: auto;
-  padding-block: 1px;
-  padding-inline: 0.375rem;
-  border: 2px solid var(--border);
+  padding-inline: 6px;
+  border: var(--border-width) solid var(--border);
   background: var(--card);
   color: var(--card-foreground);
-  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-family: var(--font-mono, ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace);
   font-size: 0.6875rem;
   font-weight: 700;
+  line-height: 1;
 }
 [data-slot='menubar-sub-icon'] {
   margin-inline-start: auto;
@@ -291,14 +316,4 @@
   flex-wrap: wrap;
   inline-size: max-content;
   max-inline-size: 100%;
-}
-[data-slot='menubar-trigger'] {
-  outline-offset: 2px;
-}
-[data-slot='menubar-trigger'][data-highlighted]:not(:is([data-state='open'], [data-popup-open])) {
-  background: var(--muted);
-}
-[data-slot='menubar-shortcut'] {
-  margin-inline-start: auto;
-  padding-inline-start: 1.5rem;
 }

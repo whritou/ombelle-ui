@@ -224,26 +224,6 @@
     opacity: 1;
   }
 }
-[data-slot='menubar-item'][data-highlighted],
-[data-slot='menubar-checkbox-item'][data-highlighted],
-[data-slot='menubar-radio-item'][data-highlighted],
-[data-slot='menubar-sub-trigger'][data-highlighted] {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
-  /* Invisible here; forced colors draw it, since they drop the fill. */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-}
-/* Indicators and shortcuts drawn in primary or muted colours follow the item's text instead. */
-[data-slot='menubar-item'][data-highlighted] > *,
-[data-slot='menubar-checkbox-item'][data-highlighted] > *,
-[data-slot='menubar-radio-item'][data-highlighted] > *,
-[data-slot='menubar-sub-trigger'][data-highlighted] > * {
-  --primary: currentColor;
-  --muted-foreground: currentColor;
-}
 @media (forced-colors: active) {
   [data-slot='menubar-content'],
   [data-slot='menubar-sub-content'] {
@@ -299,7 +279,6 @@
 [data-slot='menubar-label']{font-weight:600;color:var(--muted-foreground)}
 [data-slot='menubar-shortcut']{font-family:var(--font-mono,ui-monospace,monospace)}
 [data-slot='menubar-separator']{background:color-mix(in oklab,var(--foreground) 14%,transparent)}
-[data-slot='menubar-item'][data-highlighted],[data-slot='menubar-checkbox-item'][data-highlighted],[data-slot='menubar-radio-item'][data-highlighted],[data-slot='menubar-sub-trigger'][data-highlighted]{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='menubar'] {
   flex-wrap: wrap;
   inline-size: max-content;
@@ -314,4 +293,136 @@
 [data-slot='menubar-shortcut'] {
   margin-inline-start: auto;
   padding-inline-start: 1.5rem;
+}
+
+/* papier board layer: a 30px-trigger bar with a double top rule; the open trigger inverts to ink on paper; menus are 3px-double-topped cards with 34px rows, a 2px hard shadow and italic serif labels. */
+[data-slot='menubar'] {
+  gap: 2px;
+  padding: 3px;
+  border-block-start: 3px double var(--border);
+}
+[data-slot='menubar-trigger'] {
+  block-size: 30px;
+  min-inline-size: 0;
+  padding-inline: 12px;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+}
+[data-slot='menubar-trigger']:hover,
+[data-slot='menubar-trigger'][data-highlighted]:not(:is([data-state='open'], [data-popup-open])) {
+  background: var(--secondary);
+}
+[data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
+  background: var(--foreground);
+  color: var(--background);
+}
+[data-slot='menubar-trigger']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+[data-slot='menubar-content'],
+[data-slot='menubar-sub-content'] {
+  min-inline-size: 220px;
+  padding: 4px;
+  background: var(--card);
+  color: var(--card-foreground);
+  border-block-start: 3px double var(--border);
+  box-shadow: calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color, var(--border));
+}
+@media (forced-colors: active) {
+  [data-slot='menubar-content'],
+  [data-slot='menubar-sub-content'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+}
+[data-slot='menubar-item'],
+[data-slot='menubar-checkbox-item'],
+[data-slot='menubar-radio-item'],
+[data-slot='menubar-sub-trigger'] {
+  gap: 10px;
+  min-block-size: 34px;
+  padding-block: 0;
+  padding-inline: 10px;
+  border-radius: calc(var(--radius) / 2);
+  font-size: 14.5px;
+  font-weight: 400;
+}
+[data-slot='menubar-label'][data-inset],
+[data-slot='menubar-item'][data-inset],
+[data-slot='menubar-sub-trigger'][data-inset],
+[data-slot='menubar-checkbox-item'],
+[data-slot='menubar-radio-item'] {
+  padding-inline-start: 34px;
+}
+[data-slot='menubar-item'][data-highlighted],
+[data-slot='menubar-checkbox-item'][data-highlighted],
+[data-slot='menubar-radio-item'][data-highlighted],
+[data-slot='menubar-sub-trigger'][data-highlighted],
+[data-slot='menubar-sub-trigger'][data-state='open'] {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+/* A highlighted item is also the keyboard position, so it carries the ring; the fill alone is below 3:1 against the card. */
+[data-slot='menubar-item'][data-highlighted],
+[data-slot='menubar-checkbox-item'][data-highlighted],
+[data-slot='menubar-radio-item'][data-highlighted],
+[data-slot='menubar-sub-trigger'][data-highlighted] {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+[data-slot='menubar-item'][data-variant='destructive'] {
+  color: var(--destructive);
+}
+[data-slot='menubar-item'][data-variant='destructive'][data-highlighted] {
+  background: var(--secondary);
+  color: var(--destructive);
+}
+[data-slot='menubar-item'][data-disabled],
+[data-slot='menubar-checkbox-item'][data-disabled],
+[data-slot='menubar-radio-item'][data-disabled],
+[data-slot='menubar-sub-trigger'][data-disabled] {
+  opacity: 0.45;
+}
+[data-slot='menubar-label'] {
+  padding-block: 8px 4px;
+  padding-inline: 10px;
+  font-family: var(--font-heading, ui-serif, Georgia, 'Times New Roman', serif);
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 500;
+}
+[data-slot='menubar-label'][data-inset] {
+  padding-inline-start: 34px;
+}
+[data-slot='menubar-item-indicator'] {
+  inset-inline-start: 10px;
+  inline-size: 16px;
+  block-size: 16px;
+  background: var(--card);
+}
+[data-slot='menubar-item-indicator'] svg {
+  inline-size: 12px;
+  block-size: 12px;
+}
+[data-slot='menubar-shortcut'] {
+  padding-inline-start: 18px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+[data-slot='menubar-separator'] {
+  block-size: 1px;
+  margin-block: 4px;
+  margin-inline: -4px;
+  border: 0;
+  background: color-mix(in oklab, var(--border) 22%, transparent);
 }

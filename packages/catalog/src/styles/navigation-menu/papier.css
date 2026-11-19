@@ -80,7 +80,6 @@
     box-shadow: none;
   }
 }
-[data-slot='navigation-menu-viewport']{border-top:3px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color,var(--border))}
 [data-slot='navigation-menu-link'][data-variant='default'] {
   position: relative;
   display: flex;
@@ -99,23 +98,6 @@
   background: var(--accent);
   color: var(--accent-foreground);
 }
-[data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
-  /* Invisible here; forced colors draw it, since they drop the fill. */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-}
-@media (forced-colors: active) {
-  [data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
-    background: Highlight;
-    color: HighlightText;
-    forced-color-adjust: none;
-  }
-}
-[data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible){background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='navigation-menu'] {
   position: relative;
   display: flex;
@@ -241,4 +223,140 @@
   [data-slot='navigation-menu-indicator'] > [data-navigation-menu-arrow] {
     border-color: CanvasText;
   }
+}
+
+/* papier board layer: triggers are 40px with a double underline for the current page; the panel is a card with a double top rule and a hard shadow; links are 2px-radius cards that fill with the accent and a rule border. */
+[data-slot='navigation-menu-trigger'],
+[data-slot='navigation-menu-link'][data-variant='trigger'] {
+  position: relative;
+  block-size: 40px;
+  min-inline-size: 0;
+  padding-inline: 14px;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 500;
+}
+[data-slot='navigation-menu-trigger'] > svg,
+[data-slot='navigation-menu-link'][data-variant='trigger'] > svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+[data-slot='navigation-menu-trigger']:hover,
+[data-slot='navigation-menu-link'][data-variant='trigger']:hover {
+  background: var(--secondary);
+}
+[data-slot='navigation-menu-trigger']:focus-visible,
+[data-slot='navigation-menu-link'][data-variant='trigger']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='navigation-menu-trigger']:is([data-state='open'], [data-popup-open]) {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-color: var(--border);
+  box-shadow: 0 var(--border-width) 0 var(--border);
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page'] {
+  background: transparent;
+  color: var(--foreground);
+  font-weight: 600;
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']:hover {
+  background: var(--secondary);
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']::after {
+  content: '';
+  position: absolute;
+  inset-inline: 14px;
+  inset-block-end: -1px;
+  border-block-start: 4px double var(--primary);
+}
+@media (forced-colors: active) {
+  [data-slot='navigation-menu-trigger']:is([data-state='open'], [data-popup-open]) {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  [data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page'] {
+    background: Canvas;
+    color: CanvasText;
+  }
+  [data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']::after {
+    border-block-start-color: Highlight;
+  }
+}
+[data-slot='navigation-menu-viewport'] {
+  gap: 6px;
+  padding: 10px;
+  border-block-start: 5px double var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: calc(var(--shadow-y) * 2.5) calc(var(--shadow-y) * 2.5) 0 var(--shadow-color, var(--border));
+  margin-block-start: 12px;
+}
+[data-navigation-menu-popup] > [data-slot='navigation-menu-viewport'] {
+  margin-block-start: 0;
+}
+[data-slot='navigation-menu-content'] {
+  gap: 6px;
+}
+[data-slot='navigation-menu-link'][data-variant='default'] {
+  gap: 2px;
+  min-block-size: 0;
+  padding: 10px 12px;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 15px;
+}
+[data-slot='navigation-menu-link'][data-variant='default'] > :is(p, small, [data-navigation-menu-description]) {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+/* The accent fill keeps the description readable: it stays the muted foreground, which is 5:1 on the accent. */
+[data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: color-mix(in oklab, var(--border) 22%, transparent);
+}
+[data-slot='navigation-menu-link'][data-variant='default']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+@media (forced-colors: active) {
+  [data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) > :is(p, small, [data-navigation-menu-description]) {
+    color: HighlightText;
+  }
+  [data-slot='navigation-menu-viewport'] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+
+/* The pointer is a 45-degree corner resting on the panel's top edge, centred on its trigger: its centre sits on the
+   bottom of the 8px indicator, which is the panel's edge, so only the tip above it shows. */
+[data-slot='navigation-menu-indicator'] > [data-navigation-menu-arrow] {
+  inset-block-start: calc(100% - 5.5px);
+  inline-size: 11px;
+  block-size: 11px;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border: 0;
+  border-inline-start: var(--border-width) solid var(--border);
+  border-block-start: var(--border-width) solid var(--border);
+}
+/* This family stands its panel 12px below the list, so the indicator spans that gap and the pointer meets the edge. */
+[data-slot='navigation-menu-indicator'] {
+  block-size: 12px;
 }

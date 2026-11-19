@@ -77,10 +77,6 @@
 [data-slot='prose'] :where(li > ol):where(:not([data-slot], [data-prose] [data-slot] *)) {
   margin-block:0.375rem 0;
 }
-[data-slot='prose'] :where(li::marker):where(:not([data-slot], [data-prose] [data-slot] *)) {
-  color:color-mix(in oklab, var(--primary) 80%, var(--foreground));
-  font-weight:800;
-}
 [data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)) {
   padding:1.125rem 1.625rem;
   border-start-end-radius:22px;
@@ -164,5 +160,123 @@
   }
   [data-slot='prose'] :where(a):where(:not([data-slot], [data-prose] [data-slot] *)) {
     color:LinkText;
+  }
+}
+/* Board alignment (RetroFuturism09Data): spacing, heading sizes, kbd chips, code blocks and tables as drawn on the board. */
+[data-slot='prose'] :where(p, ul, ol, dl, figure):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-end: 1.125rem;
+}
+[data-slot='prose'] :where(blockquote):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block: 1.625rem;
+}
+[data-slot='prose'] :where(table):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-end: 1.5rem;
+}
+[data-slot='prose'] :where(h1):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  line-height: 1.2;
+  margin-block-end: 0.75rem;
+}
+[data-slot='prose'] :where(h2):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  box-shadow: inset 0 -2px 0 var(--rf-rule);
+  margin-block: 2.5rem 1.125rem;
+}
+[data-slot='prose'] :where(h3):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font-size: 1.0625rem;
+  margin-block: 1.875rem 0.625rem;
+}
+[data-slot='prose'] :where(h4):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  font: 800 1rem/1.4 var(--font-family);
+  text-transform: none;
+  letter-spacing: normal;
+  margin-block: 1.625rem 0.5rem;
+}
+[data-slot='prose-lead'] {
+  line-height: 1.6;
+}
+[data-slot='prose'] :where(ul, ol):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding-inline-start: 1.75rem;
+}
+[data-slot='prose'] :where(li + li):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-start: 0.375rem;
+}
+[data-slot='prose'] :where(li):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding-inline-start: 0.25rem;
+}
+[data-slot='prose'] :where(li > ul):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  list-style: circle;
+}
+[data-slot='prose'] :where(li):where(:not([data-slot], [data-prose] [data-slot] *))::marker {
+  color: color-mix(in oklab, var(--primary) 80%, var(--foreground));
+  font-weight: 800;
+}
+[data-slot='prose'] :where(li > ul, li > ol):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block: 0.375rem 0;
+}
+[data-slot='prose'] :where(:not(pre) > code):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  box-shadow: inset 0 0 0 1.5px var(--rf-rule);
+}
+[data-slot='prose'] :where(blockquote footer, figcaption):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  margin-block-start: 0.5rem;
+  font-weight: 700;
+}
+[data-slot='prose'] :where(kbd):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0 0.375rem;
+  border: 0;
+  border-radius: 7px;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 2px var(--border), 0 3px 0 var(--border);
+  font: 500 0.7188rem/1 var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  vertical-align: 2px;
+  margin-block-end: 3px;
+}
+[data-slot='prose'] :where(pre):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding: 0.875rem 1.125rem;
+  border: 0;
+  border-radius: var(--rf-r3);
+  background: var(--card);
+  box-shadow: var(--rf-e2);
+  font: 400 0.84375em/1.7 var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  margin-block-end: 1.625rem;
+}
+[data-slot='prose'] :where(hr):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  background: var(--rf-stripes);
+  margin-block: 2.25rem;
+}
+[data-slot='prose'] :where(table):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  border-radius: var(--rf-r3);
+  background: var(--card);
+  box-shadow: var(--rf-e2);
+  font-size: 0.90625rem;
+}
+[data-slot='prose'] :where(thead tr):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  background: var(--rf-band);
+}
+[data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding: 0.75rem 1rem;
+  border-block-end: 2px solid var(--border);
+  color: var(--primary-foreground);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+[data-slot='prose'] :where(td):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  padding: 0.5625rem 1rem;
+  border-block-end: 2px solid var(--rf-rule);
+  font-weight: 600;
+}
+[data-slot='prose'] :where(tbody tr:last-child td):where(:not([data-slot], [data-prose] [data-slot] *)) {
+  border-block-end: 0;
+}
+@media (forced-colors: active) {
+  [data-slot='prose'] :where(thead tr):where(:not([data-slot], [data-prose] [data-slot] *)) {
+    background: Canvas;
+  }
+  [data-slot='prose'] :where(th):where(:not([data-slot], [data-prose] [data-slot] *)) {
+    color: CanvasText;
   }
 }

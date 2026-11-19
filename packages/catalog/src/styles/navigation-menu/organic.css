@@ -247,3 +247,132 @@
     border-color: CanvasText;
   }
 }
+/* Organic 0.9 board: 42px triggers, current page marked by a 4px underline, a 30px-ish panel with 12px padding and 26px links. */
+[data-slot='navigation-menu-trigger'],
+[data-slot='navigation-menu-link'][data-variant='trigger'] {
+  position: relative;
+  block-size: 2.625rem;
+  min-inline-size: 0;
+  padding-inline: 1rem;
+  border-radius: var(--o-r2);
+  font-size: 0.90625rem;
+  font-weight: 700;
+  color: var(--foreground);
+  transition: border-radius 0.4s, background-color var(--motion-duration, 0.2s);
+}
+[data-slot='navigation-menu-trigger'] > svg,
+[data-slot='navigation-menu-link'][data-variant='trigger'] > svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+[data-slot='navigation-menu-trigger']:hover,
+[data-slot='navigation-menu-link'][data-variant='trigger']:hover {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+[data-slot='navigation-menu-trigger']:focus-visible,
+[data-slot='navigation-menu-link'][data-variant='trigger']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='navigation-menu-trigger']:is([data-state='open'], [data-popup-open]) {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  box-shadow: none;
+  border-radius: var(--o-r3h);
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page'] {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']:hover {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']::after {
+  content: '';
+  position: absolute;
+  inset-inline: 1rem;
+  inset-block-end: 3px;
+  block-size: 4px;
+  border-radius: 99px 90px 99px 94px;
+  background: var(--primary);
+}
+[data-slot='navigation-menu-list'] {
+  flex-wrap: nowrap;
+}
+[data-slot='navigation-menu-viewport'] {
+  padding: 0.75rem;
+  border-radius: 30px 24px 32px 22px / 22px 32px 24px 30px;
+  background: var(--card);
+  gap: 0.625rem;
+}
+[data-slot='navigation-menu-content'] {
+  gap: 0.25rem;
+}
+[data-slot='navigation-menu-link'][data-variant='default'] {
+  gap: 0.1875rem;
+  min-block-size: 0;
+  padding-block: 0.75rem;
+  padding-inline: 0.875rem;
+  border-radius: var(--o-r3);
+  font-weight: 700;
+  transition: border-radius 0.4s, background-color var(--motion-duration, 0.2s);
+}
+[data-slot='navigation-menu-link'][data-variant='default'] > span {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+[data-slot='navigation-menu-link'][data-variant='default'] > :is(p, small, [data-navigation-menu-description]) {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+/* Hover is the secondary fill alone: the title keeps its colour and the description stays muted
+   (5.0:1 on the fill). Keyboard focus adds the ring; neither paints the primary fill. */
+[data-slot='navigation-menu-link'][data-variant='default']:hover {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-radius: var(--o-r3h);
+  outline: 0;
+}
+[data-slot='navigation-menu-link'][data-variant='default']:focus-visible {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-radius: var(--o-r3h);
+  outline: 3px solid var(--ring);
+  outline-offset: -3px;
+}
+[data-slot='navigation-menu-link'][data-variant='default'][aria-current='page'] {
+  background: color-mix(in oklab, var(--primary) 14%, var(--card));
+  color: color-mix(in oklab, var(--primary) 70%, var(--foreground));
+}
+@media (forced-colors: active) {
+  [data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) > * {
+    color: inherit;
+  }
+  [data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']::after {
+    background: Highlight;
+  }
+}
+
+/* The pointer is a 45-degree corner resting on the panel's top edge, centred on its trigger: its centre sits on the
+   bottom of the 8px indicator, which is the panel's edge, so only the tip above it shows. */
+[data-slot='navigation-menu-indicator'] > [data-navigation-menu-arrow] {
+  inset-block-start: calc(100% - 5.5px);
+  inline-size: 11px;
+  block-size: 11px;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border: 0;
+  border-inline-start: var(--border-width) solid var(--border);
+  border-block-start: var(--border-width) solid var(--border);
+}

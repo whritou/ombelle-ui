@@ -250,3 +250,16 @@
     border-color: CanvasText;
   }
 }
+
+/* The pointer is a 45-degree corner resting on the panel's top edge, centred on its trigger: its centre sits on the
+   bottom of the 8px indicator, which is the panel's edge, so only the tip above it shows. */
+[data-slot='navigation-menu-indicator'] > [data-navigation-menu-arrow] {
+  inset-block-start: calc(100% - 5.5px);
+  inline-size: 11px;
+  block-size: 11px;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border: 0;
+  border-inline-start: var(--border-width) solid var(--border);
+  border-block-start: var(--border-width) solid var(--border);
+}
