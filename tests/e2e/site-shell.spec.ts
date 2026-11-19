@@ -257,8 +257,9 @@ test.describe('editor menubar', () => {
     await mode.getByRole('radio', { name: 'Dark' }).click()
     await width.getByRole('radio', { name: 'Narrow' }).click()
     await page.setViewportSize({ width: 1100, height: 900 })
+    // Below 1200px the width control is not shown, so only the mode can be read here; the width is read back at 1440px.
     await expect(mode.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
-    await expect(width.getByRole('radio', { name: 'Narrow' })).toHaveAttribute('aria-checked', 'true')
+    await expect(width).toBeHidden()
     await page.setViewportSize({ width: 1440, height: 900 })
     await expect(mode.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
     await expect(width.getByRole('radio', { name: 'Narrow' })).toHaveAttribute('aria-checked', 'true')
