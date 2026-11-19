@@ -33,14 +33,12 @@ test('documentation guides are navigable, accessible, and link to real sections'
   }
 })
 
-test('landing matrix shows a short sample with an accurate remainder and component CTA', async ({ page }) => {
+test('landing names every catalog component and links to the component directory', async ({ page }) => {
   await page.goto('/')
-  const matrix = page.getByRole('region', { name: new RegExp(`${componentDocs.length} components`) })
-  await expect(matrix.locator('tbody tr')).toHaveCount(6)
-  await expect(matrix.getByText(`${componentDocs.length - 6} more available`, { exact: true })).toBeVisible()
-  await matrix.getByRole('button', { name: 'Select', exact: true }).click()
-  await expect(matrix.getByRole('heading', { level: 3 })).toHaveText('Select')
-  await matrix.getByRole('link', { name: `Explore all ${componentDocs.length} components` }).click()
+  const catalog = page.getByRole('region', { name: `${componentDocs.length} components in the catalog`, exact: true })
+  // Each row is repeated once to close the loop; the copy is hidden from assistive technology.
+  await expect(catalog.locator('ul:not([aria-hidden]) li')).toHaveCount(componentDocs.length)
+  await catalog.getByRole('link', { name: `Explore all ${componentDocs.length} components` }).click()
   await expect(page).toHaveURL(/\/components$/)
 })
 
@@ -52,35 +50,48 @@ test('component playground starts in Ombelle and still lets the visitor choose F
   await expect(families.getByRole('button', { name: 'Flat', exact: true })).toHaveAttribute('data-state', 'on')
 })
 
-test('landing presents Ombelle first in the hero, style comparison, and journey', async ({ page }) => {
+test('landing starts in Ombelle and wears any family from the dock, a tile, or a palette', async ({ page }) => {
   await page.goto('/')
+  const main = page.locator('main')
   const hero = page.locator('section[aria-labelledby="hero"]')
-  const styles = hero.getByRole('group', { name: 'Component style', exact: true })
-  await expect(styles.getByRole('button').first()).toHaveText('Ombelle')
-  await expect(styles.getByRole('button', { name: 'Ombelle', exact: true })).toHaveAttribute('data-state', 'on')
-  const demo = hero.locator('.o-btn-primary').first()
+  const dock = page.getByRole('group', { name: 'Page style', exact: true })
+  await expect(dock.getByRole('button').first()).toHaveText('Ombelle')
+  // Choosing a family stops the hero's one-lap cycle, so the page holds still for the checks below.
+  await dock.getByRole('button', { name: 'Ombelle', exact: true }).click()
+  await expect(main).toHaveAttribute('data-family', 'ombelle')
+  await expect(dock.getByRole('button', { name: 'Cycle', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  const demo = hero.getByRole('link', { name: 'Get started' })
   await expect(demo).toHaveCSS('border-radius', '999px')
   // Chromium snaps a 1.5px border to 1px at DPR 1; higher DPR keeps 1.5px.
   await expect(demo).toHaveCSS('border-top-width', /^(1|1\.5)px$/)
   await expect(demo).toHaveCSS('box-shadow', /3px 3px 0px 0px$/)
   await hero.screenshot({ path: '.artifacts/website-hero-ombelle-desktop.png' })
-  await styles.getByRole('button', { name: 'Flat', exact: true }).click()
-  await expect(hero.locator('.o-kit')).toHaveAttribute('data-style', 'flat')
-  await styles.getByRole('button', { name: 'Ombelle', exact: true }).click()
-  await expect(hero.locator('.o-kit')).toHaveAttribute('data-style', 'ombelle')
-  const comparison = page.locator('section[aria-labelledby="compare"]')
-  const jump = comparison.getByRole('group', { name: 'Jump to style', exact: true })
-  await expect(jump.getByRole('button')).toHaveCount(4)
-  for (const name of ['Ombelle', 'Minimalist', 'Neo-Brutalism', 'Flat']) {
-    await jump.getByRole('button', { name, exact: true }).click()
-    await expect(comparison.getByRole('heading', { level: 2 })).toHaveText(name)
-    await expect(jump.getByRole('button', { name, exact: true })).toHaveAttribute('aria-pressed', 'true')
-  }
-  const journey = page.locator('section[aria-labelledby="journey"]')
-  const families = journey.getByRole('group', { name: 'Style family', exact: true })
-  await expect(families.getByRole('button')).toHaveCount(4)
-  await expect(families.getByRole('button', { name: /Ombelle/ })).toHaveAttribute('aria-pressed', 'true')
-  await expect(journey).toContainText('styleFamily: "ombelle"')
+  await dock.getByRole('button', { name: 'Flat', exact: true }).click()
+  await expect(main).toHaveAttribute('data-family', 'flat')
+  await expect(demo).toHaveCSS('border-top-width', '0px')
+
+  // One tile per offered family; wearing one from its tile restyles the page.
+  const styles = page.locator('section#styles')
+  await expect(styles.locator('article')).toHaveCount(await dock.locator('.ol-dot[data-family]').count() - 1)
+  const papier = styles.locator('article[data-family="papier"]')
+  await papier.getByRole('button', { name: 'Wear this style', exact: true }).click()
+  await expect(main).toHaveAttribute('data-family', 'papier')
+  await expect(papier.getByRole('button', { name: 'Wearing it now', exact: true })).toHaveAttribute('aria-pressed', 'true')
+
+  // A palette recolours the page and changes the example code; the install command keeps its placeholder.
+  const journey = page.locator('section#get-started')
+  const code = journey.locator('.ol-pcode-v')
+  const before = await code.textContent()
+  expect(before).toMatch(/^ps_[0-9a-f]{32}@1$/)
+  await journey.getByRole('group', { name: 'Palette', exact: true }).getByRole('button').nth(1).click()
+  await expect(code).not.toHaveText(before!)
+  await expect(journey.locator('.ol-term-cmd code')).toContainText('init --preset PRESET')
+  await journey.getByRole('button', { name: 'Existing shadcn', exact: true }).click()
+  await expect(journey.locator('.ol-term-cmd code')).toContainText('theme add PRESET')
+
+  await dock.getByRole('button', { name: 'Ombelle', exact: true }).click()
+  await expect(main).toHaveAttribute('data-family', 'ombelle')
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   await page.setViewportSize({ width: 390, height: 844 })
   await hero.scrollIntoViewIfNeeded()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)

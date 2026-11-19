@@ -51,7 +51,7 @@ const catalog076Components = new Set(['password-field', 'carousel', 'aspect-rati
 export const catalog09MinimumCli = '0.9.0'
 export const catalog09InstallNotice = `This recipe requires CLI ${catalog09MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
 // The 0.9 app shell components.
-const catalog09Components = new Set(['prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'])
+export const catalog09Components: ReadonlySet<string> = new Set(['prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'])
 function needs09(recipe: Pick<ComponentRecipe, 'component'>, installer: { version: string }): boolean {
   return catalog09Components.has(recipe.component) && compareVersions(installer.version, catalog09MinimumCli) < 0
 }
