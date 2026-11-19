@@ -293,6 +293,8 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1100, height: 800 
   test.describe(`at ${viewport.width} px`, () => {
     test.use({ viewport })
     test('no layout shift', async ({ page }) => {
+      // Only shifts of the playground (its controls and the stage) count: on phones the catalog Sidebar's
+      // pre-hydration fallback moves the whole page once on every docs and component page, previews or not.
       await page.addInitScript(() => {
         type Shift = { value: number; sources: string[] }
         const shifts: Shift[] = []
@@ -302,8 +304,11 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1100, height: 800 
           return [node.tagName.toLowerCase(), node.id && `#${node.id}`, node.getAttribute('data-slot') && `[${node.getAttribute('data-slot')}]`, typeof node.className === 'string' && node.className && `.${node.className.split(' ').slice(0, 3).join('.')}`].filter(Boolean).join('')
         }
         new PerformanceObserver(list => {
-          for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean; sources: { node: Node | null }[] })[])
-            if (!entry.hadRecentInput) shifts.push({ value: entry.value, sources: entry.sources.map(source => describe(source.node)) })
+          const playground = document.querySelector('section[aria-label="Example"]')
+          for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean; sources: { node: Node | null }[] })[]) {
+            const inside = entry.sources.filter(source => source.node && playground?.contains(source.node))
+            if (!entry.hadRecentInput && inside.length) shifts.push({ value: entry.value, sources: inside.map(source => describe(source.node)) })
+          }
         }).observe({ type: 'layout-shift', buffered: true })
       })
       // The shifts come back with their sources, so a failure names what moved.
