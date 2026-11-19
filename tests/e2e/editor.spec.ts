@@ -600,15 +600,15 @@ test('operates every Button editor control, artifact tab, download and publish d
   await expect(page.locator('iframe[title="Button recipe preview"]').contentFrame().locator('[data-slot="recipe-button"]'))
     .toHaveText('Keyboard ship', { timeout: 20000 })
 
-  // The download lives in the top bar's overflow menu; keyboard focus returns to its trigger afterwards.
-  const more = moreActions(page)
-  // The top bar's actions are one Toolbar: one Tab stop, then End moves to its last item, More actions.
+  // From 1200px the download lives in the top bar's File menu; keyboard focus returns to File afterwards.
+  const more = page.getByRole('menubar', { name: 'Editor menus' }).getByRole('menuitem', { name: 'File', exact: true })
+  // The Editor actions toolbar is one Tab stop; the menubar is the next one.
   const toolbar = page.getByRole('toolbar', { name: 'Editor actions' })
   for (let presses = 0; !(await toolbar.evaluate(element => element.contains(document.activeElement))); presses++) {
     if (presses >= 250) throw new Error('Shift+Tab did not reach the Editor actions toolbar')
     await page.keyboard.press('Shift+Tab')
   }
-  await page.keyboard.press('End')
+  await page.keyboard.press('Tab')
   await expect(more).toBeFocused()
   await expectVisibleFocus(page)
   await page.keyboard.press('Enter')

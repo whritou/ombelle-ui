@@ -1,9 +1,12 @@
 'use client'
 
-import * as Dialog from '@radix-ui/react-dialog'
 import { Menu, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { componentEditorLink } from '../editor/editable-components'
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '../generated/ui/components/ui/navigation-menu'
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../generated/ui/components/ui/sheet'
+import { categoryAnchor, categoryNames } from './components/component-names'
+import { documentationGuides } from './docs/navigation'
 import { GithubIcon, Logo } from './logo'
 import { primaryLinks, repository } from './links'
 import { ThemeToggle } from './theme'
@@ -29,45 +32,63 @@ export function SiteHeader() {
           <Logo />
           <span className="hidden rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">alpha</span>
         </div>
-        <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
-          {primaryLinks.map(link => (
-            <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-foreground/10 aria-[current=page]:text-foreground">
-              {link.label}
-            </a>
-          ))}
-          <a href={repository} className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-foreground/10">
-            <GithubIcon className="size-4" /> GitHub
-          </a>
-        </nav>
+        {/* The breakpoint sits on a wrapper: the catalog stylesheet sets the menu's own display. */}
+        <div className="hidden md:block">
+        <NavigationMenu aria-label="Primary" className="site-header-menu">
+          <NavigationMenuList>
+            <NavigationMenuItem><NavigationMenuLink href="/#get-started" variant="trigger">Get started</NavigationMenuLink></NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger data-current={current('/docs') ? '' : undefined}>Docs</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <NavigationMenuLink href="/docs" active={pathname === '/docs'}><span>Documentation</span><p>Every guide, from installing to sharing presets</p></NavigationMenuLink>
+                {documentationGuides.map(guide => (
+                  <NavigationMenuLink key={guide.slug} href={`/docs/${guide.slug}`} active={pathname === `/docs/${guide.slug}`}><span>{guide.title}</span><p>{guide.description}</p></NavigationMenuLink>
+                ))}
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger data-current={current('/components') ? '' : undefined}>Components</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <NavigationMenuLink href="/components" active={pathname === '/components'}><span>All components</span><p>The catalog, by category, with live previews</p></NavigationMenuLink>
+                {categoryNames().map(group => (
+                  <NavigationMenuLink key={group.title} href={`/components#${categoryAnchor(group.title)}`}><span>{group.title}</span><p>{group.names.join(', ')}</p></NavigationMenuLink>
+                ))}
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem><NavigationMenuLink href="/editor/preset" variant="trigger" active={current('/editor/preset') === 'page'}>Preset editor</NavigationMenuLink></NavigationMenuItem>
+            <NavigationMenuItem><NavigationMenuLink href={componentEditorLink.href} variant="trigger" active={current(componentEditorLink.href) === 'page'}>{componentEditorLink.label}</NavigationMenuLink></NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href={repository} variant="trigger" aria-label="GitHub"><GithubIcon className="size-4" /><span className="hidden lg:inline">GitHub</span></NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+        </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Dialog.Root>
-            <Dialog.Trigger asChild>
+          <Sheet>
+            <SheetTrigger asChild>
               <button type="button" aria-label="Open menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted active:bg-foreground/10 md:hidden">
                 <Menu className="size-5" aria-hidden />
               </button>
-            </Dialog.Trigger>
-            <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 z-50 bg-ink/40" />
-              <Dialog.Content aria-describedby={undefined} className="fixed inset-y-0 right-0 z-50 flex w-72 max-w-[85vw] flex-col border-l border-border bg-background p-6 text-foreground shadow-soft">
-                <div className="flex items-center justify-between">
-                  <Dialog.Title className="font-display text-lg font-bold">Menu</Dialog.Title>
-                  <Dialog.Close asChild>
-                    <button type="button" aria-label="Close menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted active:bg-foreground/10">
-                      <X className="size-4" aria-hidden />
-                    </button>
-                  </Dialog.Close>
-                </div>
-                <nav aria-label="Mobile" className="mt-6 flex flex-col gap-1">
-                  {[...primaryLinks, { href: repository, label: 'GitHub' }].map(link => (
-                    <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-3 text-base font-medium transition-colors hover:bg-muted active:bg-foreground/10 aria-[current=page]:bg-muted">
-                      {link.label}
-                    </a>
-                  ))}
-                </nav>
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog.Root>
+            </SheetTrigger>
+            <SheetContent side="inline-end" aria-describedby={undefined} className="site-menu-sheet">
+              <div className="flex items-center justify-between">
+                <SheetTitle>Menu</SheetTitle>
+                <SheetClose asChild>
+                  <button type="button" aria-label="Close menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted active:bg-foreground/10">
+                    <X className="size-4" aria-hidden />
+                  </button>
+                </SheetClose>
+              </div>
+              <nav aria-label="Mobile" className="mt-6 flex flex-col gap-1">
+                {[...primaryLinks, { href: repository, label: 'GitHub' }].map(link => (
+                  <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-3 text-base font-medium transition-colors hover:bg-muted active:bg-foreground/10 aria-[current=page]:bg-muted">
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

@@ -1,9 +1,10 @@
 'use client'
 
 import { PanelRightClose } from 'lucide-react'
-import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react'
 import styles from './editor-shell.module.css'
 import { ScrollArea } from '../generated/ui/components/ui/scroll-area'
+import { Sidebar, SidebarMenuButton, SidebarProvider } from '../generated/ui/components/ui/sidebar'
 
 export type DrawerTab = {
   id: string
@@ -32,6 +33,8 @@ export function ReviewDrawer({
   tabs,
   activeTab,
   onTabChange,
+  embedded = false,
+  shortcut = true,
 }: {
   label: string
   open: boolean
@@ -39,6 +42,10 @@ export function ReviewDrawer({
   tabs: readonly DrawerTab[]
   activeTab: string
   onTabChange(id: string): void
+  /** Inside the tablet sheet: the plain drawer, without the Sidebar that lays it out on the desktop. */
+  embedded?: boolean
+  /** Ctrl or Cmd + B toggles the drawer, except while typing. */
+  shortcut?: boolean
 }) {
   // Only set by toggles made inside the drawer, so a parent that opens it
   // programmatically never has focus pulled onto it.
@@ -52,34 +59,32 @@ export function ReviewDrawer({
     restoreFocus.current = false
     document.getElementById(drawerFocusId(open, activeTab))?.focus()
   }, [open, activeTab])
+  // On the desktop a right-hand Sidebar lays the drawer out: its icon rail is the closed state, and it carries
+  // the tooltips and Ctrl or Cmd + B. The tabs keep their own tablist and arrow keys inside it.
+  const frame = (content: ReactNode) => embedded
+    ? <aside aria-label={label} className={open ? styles.drawer : styles.rail}>{content}</aside>
+    : (
+      <SidebarProvider open={open} onOpenChange={onOpenChange} shortcut={shortcut} className={styles.drawerProvider}
+        style={{ '--sidebar-width': '21rem', '--sidebar-width-icon': '4rem', '--sidebar-height': '100%' } as CSSProperties}>
+        <Sidebar side="right" collapsible="icon" label={label} role="complementary" className={open ? styles.drawer : styles.rail}>{content}</Sidebar>
+      </SidebarProvider>
+    )
   if (!open) {
-    return (
-      <aside aria-label={label} className={styles.rail}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            id={`${tab.id}-rail`}
-            type="button"
-            className={styles.railButton}
-            aria-label={railLabel(tab)}
-            aria-expanded="false"
-            onClick={() => {
-              onTabChange(tab.id)
-              toggle(true)
-            }}
-          >
-            {tab.icon}
-            <span className={styles.railTooltip} aria-hidden="true">
-              {tab.label}
-            </span>
-            {tab.badge ? (
-              <span className={styles.badge} aria-hidden="true">
-                {tab.badge}
-              </span>
-            ) : null}
-          </button>
-        ))}
-      </aside>
+    return frame(
+      tabs.map((tab) => embedded ? (
+        <button key={tab.id} id={`${tab.id}-rail`} type="button" className={styles.railButton} aria-label={railLabel(tab)} aria-expanded="false"
+          onClick={() => { onTabChange(tab.id); toggle(true) }}>
+          {tab.icon}
+          <span className={styles.railTooltip} aria-hidden="true">{tab.label}</span>
+          {tab.badge ? <span className={styles.badge} aria-hidden="true">{tab.badge}</span> : null}
+        </button>
+      ) : (
+        <SidebarMenuButton key={tab.id} id={`${tab.id}-rail`} className={styles.railButton} aria-label={railLabel(tab)} aria-expanded="false" tooltip={tab.label}
+          onClick={() => { onTabChange(tab.id); toggle(true) }}>
+          {tab.icon}
+          {tab.badge ? <span className={styles.badge} aria-hidden="true">{tab.badge}</span> : null}
+        </SidebarMenuButton>
+      )),
     )
   }
   const active = tabs.find((tab) => tab.id === activeTab) ?? tabs[0]
@@ -93,8 +98,8 @@ export function ReviewDrawer({
     onTabChange(next.id)
     document.getElementById(`${next.id}-tab`)?.focus()
   }
-  return (
-    <aside aria-label={label} className={styles.drawer}>
+  return frame(
+    <>
       <div className={styles.drawerHead}>
         <div role="tablist" aria-label={`${label} sections`} onKeyDown={onKeyDown} className={styles.tabs}>
           {tabs.map((tab) => (
@@ -141,6 +146,6 @@ export function ReviewDrawer({
           </ScrollArea>
         </div>
       ) : null}
-    </aside>
+    </>,
   )
 }

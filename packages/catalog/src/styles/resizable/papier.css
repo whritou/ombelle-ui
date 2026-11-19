@@ -80,3 +80,47 @@
     background: Canvas;
   }
 }
+
+/* papier board layer: a 1px ink rule with a 12x28px paper grip carrying two dotted columns; hover and dragging turn the rule primary, and the dragged grip fills primary with a hard edge. */
+[data-slot='resizable-handle'] {
+  --resizable-grip-inline: 12px;
+  --resizable-grip-block: 28px;
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] {
+  --resizable-grip-inline: 28px;
+  --resizable-grip-block: 12px;
+}
+[data-slot='resizable-handle']:is(:hover, :focus-visible, [data-separator='hover']) {
+  background: var(--primary);
+  box-shadow: 0 0 0 var(--border-width) var(--primary);
+}
+[data-slot='resizable-handle']:is(:hover, :focus-visible, [data-separator='hover']) > [data-slot='resizable-handle-grip'] {
+  border-color: var(--primary);
+}
+[data-slot='resizable-handle']:focus-visible::after {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+[data-slot='resizable-handle'][data-separator='active'] {
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary);
+}
+[data-slot='resizable-handle'][data-separator='active'] > [data-slot='resizable-handle-grip'] {
+  border-color: var(--border);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 1px, transparent 1.5px) center / 4px 5px,
+    var(--primary);
+}
+[data-slot='resizable-handle-grip'] {
+  border-radius: var(--radius);
+  box-shadow: 0 var(--border-width) 0 var(--border);
+  background:
+    radial-gradient(circle, var(--foreground) 1px, transparent 1.5px) center / 4px 5px,
+    var(--card);
+}
+@media (forced-colors: active) {
+  [data-slot='resizable-handle'][data-separator='active'] > [data-slot='resizable-handle-grip'] {
+    background: Highlight;
+    border-color: CanvasText;
+  }
+}

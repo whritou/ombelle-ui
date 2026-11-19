@@ -63,8 +63,42 @@ export function NavigationMenuIndicator({ className, ...props }: React.Component
 
 /** The shared panel the open content renders into; NavigationMenu adds it unless viewport is false. */
 export function NavigationMenuViewport({ className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Viewport>) {
+  const position = React.useRef<HTMLDivElement>(null)
+  // Radix puts the panel at the start of the menu. This moves it under the open trigger, where the pointer is and where
+  // the Base UI edition's positioner puts it, and keeps it inside the window.
+  React.useEffect(() => {
+    const wrapper = position.current
+    // The wrapper is the menu root's child. (No data-slot selectors here: the recipe compiler rewrites those.)
+    const root = wrapper?.parentElement
+    if (!wrapper || !root) return
+    const place = () => {
+      const open = root.querySelector<HTMLElement>('button[aria-expanded="true"]')
+      const panel = wrapper.firstElementChild as HTMLElement | null
+      if (!open || !panel) return
+      const rtl = getComputedStyle(root).direction === 'rtl'
+      const rootBox = root.getBoundingClientRect()
+      const box = open.getBoundingClientRect()
+      const width = panel.offsetWidth
+      const margin = 8
+      const start = rtl
+        ? Math.max(rootBox.right - window.innerWidth + margin, Math.min(rootBox.right - box.right, rootBox.right - width - margin))
+        : Math.max(margin - rootBox.left, Math.min(box.left - rootBox.left, window.innerWidth - margin - width - rootBox.left))
+      wrapper.style.insetInlineStart = Math.round(start) + 'px'
+    }
+    const mutations = new MutationObserver(place)
+    mutations.observe(root, { attributes: true, attributeFilter: ['data-state'], subtree: true })
+    const sizes = new ResizeObserver(place)
+    if (wrapper.firstElementChild) sizes.observe(wrapper.firstElementChild)
+    window.addEventListener('resize', place)
+    place()
+    return () => {
+      mutations.disconnect()
+      sizes.disconnect()
+      window.removeEventListener('resize', place)
+    }
+  }, [])
   return (
-    <div data-navigation-menu-position="">
+    <div ref={position} data-navigation-menu-position="">
       <NavigationMenuPrimitive.Viewport {...props} data-slot="navigation-menu-viewport" className={cn(className)} />
     </div>
   )

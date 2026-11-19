@@ -5,7 +5,9 @@ import { useState } from 'react'
 import type { StartingPresetId } from '@ombelle/catalog'
 import { styleSupport } from '@ombelle/contracts'
 import { GlassPresetSelect } from '../glass-preset-select'
-import { componentDocs, componentInstallable } from './catalog'
+import { componentInstallable } from './catalog'
+import { componentGroups } from './categories'
+import { categoryAnchor } from './component-names'
 
 export function ComponentDirectory() {
   const [glass, setGlass] = useState<StartingPresetId>()
@@ -14,8 +16,11 @@ export function ComponentDirectory() {
       <div className="mt-6">
         <GlassPresetSelect value={glass} onChange={setGlass} allowNone />
       </div>
-      <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {componentDocs.map(doc => {
+      {componentGroups().map(group => (
+      <section key={group.title} aria-labelledby={categoryAnchor(group.title)} className="mt-10">
+      <h2 id={categoryAnchor(group.title)} className="font-display text-2xl font-black">{group.title}</h2>
+      <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {group.docs.map(doc => {
           const hasGlass = styleSupport(doc.id, 'liquid-glass') === 'experimental'
           const href = `/components/${doc.id}${glass && hasGlass ? '?glass=' + glass : ''}`
           return (
@@ -35,6 +40,8 @@ export function ComponentDirectory() {
           )
         })}
       </ul>
+      </section>
+      ))}
     </>
   )
 }

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { editorActionItem } from '../helpers/button-editor-ui'
 import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -175,8 +176,7 @@ test('keeps local exports available when publication service is unavailable', as
   await page.keyboard.press('Escape')
   await expect(codeDialog(page)).toHaveCount(0)
   const pending = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'More actions', exact: true }).click()
-  await page.getByRole('menuitem', { name: 'Download JSON', exact: true }).click()
+  await (await editorActionItem(page, 'Download JSON')).click()
   // The default draft carries its style's fonts, so its export declares preset format 1.1.
   expect(JSON.parse(await fs.readFile(await (await pending).path()!, 'utf8')).schemaVersion).toBe('1.1')
 })

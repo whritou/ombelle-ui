@@ -51,14 +51,14 @@ it('EditorTopBar puts History, Commands and the menu in one Editor actions toolb
       menu={{ label: 'More actions', items: [{ id: 'del', label: 'Delete', onSelect: noop, destructive: true }, { id: 'dup', label: 'Duplicate', onSelect: noop }] }}
       commands={[]} primary={<button type="button">Get code</button>} />,
   )
-  // The phone's More actions button (hidden from 768px) may sit between the toolbar and the primary action.
-  const toolbar = /<div[^>]*role="toolbar"[^>]*>([^]*?)<\/div>(?:<button[^>]*aria-haspopup="dialog"[^>]*>[^]*?<\/button>)?<button type="button">Get code/.exec(html)
+  // The server renders the desktop, whose actions are a menubar after the toolbar; the phone's More actions
+  // button (hidden from 768px) may sit between them and the primary action.
+  const toolbar = /<div[^>]*role="toolbar"[^>]*>([^]*?)<\/div>(?:<div[^>]*role="menubar"[^>]*>[^]*?<\/div>)?(?:<button[^>]*aria-haspopup="dialog"[^>]*>[^]*?<\/button>)?<button type="button">Get code/.exec(html)
   expect(toolbar).not.toBeNull()
   expect(toolbar![0]).toMatch(/aria-label="Editor actions"/)
   expect(toolbar![1]).toContain('aria-label="History"')
   expect(toolbar![1]).toContain('aria-label="Undo"')
   expect(toolbar![1]).toContain('aria-keyshortcuts="Control+K Meta+K"')
-  expect(toolbar![1]).toMatch(/<button[^>]*aria-label="More actions"[^>]*aria-haspopup="menu"|<button[^>]*aria-haspopup="menu"[^>]*aria-label="More actions"/)
   expect(toolbar![1]).not.toContain('Get code')
   expect(html).not.toContain('role="menu"')
 })
@@ -85,4 +85,26 @@ it('EditorTopBar shows its trail as a collapsing catalog Breadcrumb with the cur
   expect(html).toMatch(/<nav[^>]*aria-label="Breadcrumb"[^>]*data-slot="breadcrumb"[^>]*data-collapse="auto"/)
   expect(html).toMatch(/<a[^>]*href="\/editor\/component"[^>]*data-slot="breadcrumb-link"|<a[^>]*data-slot="breadcrumb-link"[^>]*href="\/editor\/component"/)
   expect(html).toMatch(/<span[^>]*aria-current="page"[^>]*data-slot="breadcrumb-page"[^>]*>Button<\/span>/)
+})
+
+it('EditorTopBar on the desktop offers File, Edit and View menus: actions split by kind, preview controls as radio groups', () => {
+  const html = renderToStaticMarkup(
+    <EditorTopBar crumbs={['A']} nameField={{ id: 'n', label: 'Name', value: 'x', maxLength: 9, onChange: noop }}
+      revision="r1" status="" undo={history} redo={history}
+      menu={{ label: 'More actions', items: [{ id: 'download-json', label: 'Download recipe JSON', onSelect: noop }, { id: 'reset-recipe', label: 'Reset recipe', onSelect: noop }] }}
+      view={[{ label: 'Preview mode', value: 'light', options: [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }], onChange: noop }]}
+      primary={null} />,
+  )
+  const bar = /<div[^>]*role="menubar"[^>]*>([^]*?)<\/div>/.exec(html)
+  expect(bar?.[0]).toContain('aria-label="Editor menus"')
+  expect(bar?.[1].match(/role="menuitem"/g)).toHaveLength(3)
+  for (const name of ['File', 'Edit', 'View']) expect(bar?.[1]).toContain(`>${name}</button>`)
+  // The overflow menu renders too, for widths below 1200px: CSS shows one or the other, so nothing swaps after hydration.
+  expect(html).toContain('data-slot="toolbar-overflow-trigger"')
+})
+
+it('editMenuItem sends resets to Edit and downloads to File', async () => {
+  const { editMenuItem } = await import('./top-bar')
+  expect(editMenuItem({ id: 'reset-recipe', label: 'Reset recipe', onSelect: noop })).toBe(true)
+  expect(editMenuItem({ id: 'download-json', label: 'Download', onSelect: noop })).toBe(false)
 })

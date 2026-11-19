@@ -230,26 +230,6 @@
     opacity: 1;
   }
 }
-[data-slot='menubar-item'][data-highlighted],
-[data-slot='menubar-checkbox-item'][data-highlighted],
-[data-slot='menubar-radio-item'][data-highlighted],
-[data-slot='menubar-sub-trigger'][data-highlighted] {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
-  /* Invisible here; forced colors draw it, since they drop the fill. */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-}
-/* Indicators and shortcuts drawn in primary or muted colours follow the item's text instead. */
-[data-slot='menubar-item'][data-highlighted] > *,
-[data-slot='menubar-checkbox-item'][data-highlighted] > *,
-[data-slot='menubar-radio-item'][data-highlighted] > *,
-[data-slot='menubar-sub-trigger'][data-highlighted] > * {
-  --primary: currentColor;
-  --muted-foreground: currentColor;
-}
 @media (forced-colors: active) {
   [data-slot='menubar-content'],
   [data-slot='menubar-sub-content'] {
@@ -321,4 +301,127 @@
 [data-slot='menubar-shortcut'] {
   margin-inline-start: auto;
   padding-inline-start: 1.5rem;
+}
+/* Board alignment (RetroFuturism09Data): a pill bar with a 2px inset border, 34px triggers that fill with the primary when open, 22px menus with 14px-radius items. */
+[data-slot='menubar'] {
+  gap: 2px;
+  padding: 5px;
+  margin-block-end: 0;
+  border-radius: var(--rf-pill);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+}
+@media (forced-colors: active) {
+  [data-slot='menubar'] {
+    border: 2px solid CanvasText;
+    box-shadow: none;
+  }
+}
+[data-slot='menubar-trigger'] {
+  block-size: 34px;
+  min-inline-size: 0;
+  padding-inline: 14px;
+  border-radius: var(--rf-pill);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+[data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]),
+[data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]):hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+}
+@media (forced-colors: active) {
+  [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+[data-slot='menubar-trigger']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='menubar-trigger']:is([data-disabled], [aria-disabled='true']) {
+  opacity: 0.45;
+}
+[data-slot='menubar-content'],
+[data-slot='menubar-sub-content'] {
+  gap: 2px;
+  border-radius: 22px;
+}
+[data-slot='menubar-label'] {
+  padding: 8px 12px 4px;
+  font: 400 0.65625rem/1.45 var(--font-heading, var(--font-family));
+}
+[data-slot='menubar-item'],
+[data-slot='menubar-checkbox-item'],
+[data-slot='menubar-radio-item'],
+[data-slot='menubar-sub-trigger'] {
+  min-block-size: 2.375rem;
+  padding-block: 0;
+  border-radius: 14px;
+  font-size: 0.90625rem;
+  font-weight: 600;
+}
+/* Highlight: the accent fill with a 2px border; the shortcut keeps its muted colour, which reads on it. */
+[data-slot='menubar-item'][data-highlighted],
+[data-slot='menubar-checkbox-item'][data-highlighted],
+[data-slot='menubar-radio-item'][data-highlighted],
+[data-slot='menubar-sub-trigger'][data-highlighted] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+  outline: none;
+}
+[data-slot='menubar-item'][data-variant='destructive'][data-highlighted] {
+  background: var(--accent);
+  color: var(--destructive);
+}
+/* An open sub menu's trigger is filled with the primary. */
+[data-slot='menubar-sub-trigger'][data-state='open'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+}
+[data-slot='menubar-sub-trigger'][data-state='open'] > [data-slot='menubar-sub-icon'] {
+  color: inherit;
+}
+[data-slot='menubar-item'][data-disabled],
+[data-slot='menubar-checkbox-item'][data-disabled],
+[data-slot='menubar-radio-item'][data-disabled],
+[data-slot='menubar-sub-trigger'][data-disabled] {
+  opacity: 0.45;
+}
+[data-slot='menubar-item-indicator'] {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: 6px;
+  background: var(--background);
+}
+[data-slot='menubar-radio-item'] > [data-slot='menubar-item-indicator'] {
+  border-radius: 50%;
+}
+[data-menubar-dot] {
+  inline-size: 9px;
+  block-size: 9px;
+}
+[data-slot='menubar-shortcut'] {
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+[data-slot='menubar-separator'] {
+  margin-block: 5px;
+  margin-inline: 6px;
+}
+@media (forced-colors: active) {
+  [data-slot='menubar-item'][data-highlighted],
+  [data-slot='menubar-checkbox-item'][data-highlighted],
+  [data-slot='menubar-radio-item'][data-highlighted],
+  [data-slot='menubar-sub-trigger'][data-highlighted],
+  [data-slot='menubar-sub-trigger'][data-state='open'],
+  [data-slot='menubar-item'][data-variant='destructive'][data-highlighted] {
+    background: Highlight;
+    color: HighlightText;
+  }
 }

@@ -152,25 +152,6 @@
   background: var(--accent);
   color: var(--accent-foreground);
 }
-[data-slot='sidebar-menu-button']:hover,
-[data-slot='sidebar-menu-sub-button']:hover {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
-  /* Invisible here; forced colors draw it, since they drop the fill. */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-}
-@media (forced-colors: active) {
-  [data-slot='sidebar-menu-button']:hover,
-  [data-slot='sidebar-menu-sub-button']:hover {
-    background: Highlight;
-    color: HighlightText;
-    forced-color-adjust: none;
-  }
-}
-[data-slot='sidebar-menu-button']:hover,[data-slot='sidebar-menu-sub-button']:hover{background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='sidebar-trigger'],
 [data-slot='sidebar-group-action'],
 [data-slot='sidebar-menu-action'] {
@@ -554,4 +535,207 @@
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
+}
+
+/* papier board layer: items are 32px rows with a transparent 1px border; the current item takes the accent fill, a rule border and a primary bar; the collapsed rail holds 40px square buttons with 20px icons. */
+[data-slot='sidebar-wrapper'] {
+  --sidebar-width: 17rem;
+  --sidebar-width-icon: 3.75rem;
+}
+[data-slot='sidebar-header'] {
+  gap: 10px;
+  border-block-end: 1px dotted var(--border);
+}
+[data-slot='sidebar-footer'] {
+  padding-block: 8px;
+  padding-inline: 10px;
+  border-block-start: 4px double var(--border);
+}
+[data-slot='sidebar-content'] {
+  gap: 4px;
+}
+[data-slot='sidebar-group'],
+[data-slot='sidebar-group-collapsible'] {
+  padding-block: 4px;
+  padding-inline: 10px;
+}
+[data-slot='sidebar-group-label'],
+[data-slot='sidebar-group-collapsible-trigger'] {
+  min-block-size: 0;
+  padding-block: 10px 4px;
+  padding-inline: 10px;
+  color: var(--muted-foreground);
+  font-family: var(--font-heading, ui-serif, Georgia, 'Times New Roman', serif);
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 500;
+}
+[data-slot='sidebar-menu'],
+[data-slot='sidebar-menu-sub'] {
+  gap: 1px;
+}
+[data-slot='sidebar-menu-sub'] {
+  margin-block: 2px 4px;
+  margin-inline-start: 18px;
+  padding-inline-start: 10px;
+  border-inline-start: 1px dotted var(--border);
+}
+[data-slot='sidebar-menu-button'],
+[data-slot='sidebar-menu-sub-button'] {
+  gap: 10px;
+  min-block-size: 32px;
+  padding-block: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  font-size: var(--sidebar-text, 14px);
+  font-weight: 500;
+}
+[data-slot='sidebar-menu-button'] > svg,
+[data-slot='sidebar-menu-sub-button'] > svg {
+  inline-size: 16px;
+  block-size: 16px;
+  color: var(--muted-foreground);
+}
+[data-slot='sidebar-menu-sub-button'] {
+  min-block-size: 30px;
+  font-weight: 400;
+}
+[data-slot='sidebar-menu-button']:hover,
+[data-slot='sidebar-menu-sub-button']:hover {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+[data-slot='sidebar-menu-button']:focus-visible,
+[data-slot='sidebar-menu-sub-button']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+[data-slot='sidebar-menu-button'][data-active],
+[data-slot='sidebar-menu-sub-button'][data-active] {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-color: var(--border);
+  box-shadow: inset 3px 0 0 var(--primary), 0 var(--border-width) 0 var(--border);
+  font-weight: 600;
+}
+[data-slot='sidebar-menu-button'][data-active] > svg,
+[data-slot='sidebar-menu-sub-button'][data-active] > svg {
+  color: var(--foreground);
+}
+[data-slot='sidebar-menu-badge'] {
+  inset-inline-end: 10px;
+  min-inline-size: 0;
+  block-size: 20px;
+  padding-inline: 6px;
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--primary) 14%, var(--card));
+  color: color-mix(in oklab, var(--primary) 80%, var(--foreground));
+  font-size: 11px;
+  font-weight: 600;
+}
+[data-slot='sidebar-menu-action'],
+[data-slot='sidebar-group-action'] {
+  block-size: 28px;
+  min-inline-size: 28px;
+  padding-inline: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+}
+[data-slot='sidebar-menu-action']:hover,
+[data-slot='sidebar-group-action']:hover {
+  background: var(--secondary);
+}
+[data-slot='sidebar-trigger'] {
+  block-size: 36px;
+  min-inline-size: 36px;
+  padding-inline: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+}
+[data-slot='sidebar-trigger']:hover {
+  background: var(--secondary);
+}
+[data-slot='sidebar-trigger']:focus-visible,
+[data-slot='sidebar-group-action']:focus-visible,
+[data-slot='sidebar-menu-action']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+/* Collapsed rail: 40px square buttons, 20px icons, centred in the strip. */
+[data-slot='sidebar'][data-collapsible='icon'] {
+  --sidebar-pad: 0px;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-header'],
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-footer'] {
+  align-items: center;
+  padding-block: 10px;
+  padding-inline: 0;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-footer'] {
+  padding-block: 8px;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-group'],
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-group-collapsible'] {
+  align-items: center;
+  padding-block: 0;
+  padding-inline: 0;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-menu'] {
+  align-items: center;
+  gap: 4px;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-menu-button'] {
+  inline-size: 40px;
+  min-inline-size: 40px;
+  block-size: 40px;
+  padding: 0;
+  justify-content: center;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-menu-button'] > svg {
+  inline-size: 20px;
+  block-size: 20px;
+  color: var(--foreground);
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-menu-button'][data-active] {
+  box-shadow: inset 3px 0 0 var(--primary), 0 var(--border-width) 0 var(--border);
+}
+/* The sheet and the floating tooltip follow the board: a 304px card with a hard edge, and the ink-on-paper tooltip. */
+[data-slot='sidebar-sheet'] {
+  --sidebar-width: 19rem;
+  background: var(--card);
+  color: var(--card-foreground);
+}
+[data-slot='sidebar-sheet'][data-side='left'] {
+  box-shadow: 4px 0 0 var(--shadow-color, var(--border));
+}
+[data-slot='sidebar-sheet'][data-side='right'] {
+  box-shadow: -4px 0 0 var(--shadow-color, var(--border));
+}
+[data-slot='sidebar-sheet'] [data-slot='sidebar-menu-button'],
+[data-slot='sidebar-sheet'] [data-slot='sidebar-menu-sub-button'] {
+  min-block-size: 44px;
+  font-size: 15px;
+}
+[data-slot='sidebar-tooltip'] {
+  padding-block: 6px;
+  padding-inline: 10px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: 2px 2px 0 color-mix(in oklab, var(--border) 22%, transparent);
+}
+
+/* Collapsed to icons: the hidden label is still a flex item, so the gap would push the icon off-centre; and a header
+   title wider than the rail is clipped with an ellipsis, centred, instead of being cut mid-letter. */
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-menu-button'] {
+  gap: 0;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-header'] {
+  overflow: hidden;
+  padding-inline: 0.5rem;
+  font-size: 0.75rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

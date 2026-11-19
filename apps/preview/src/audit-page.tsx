@@ -104,7 +104,10 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
   const load = auditData[`${family}-${edition}`]
   const page = createRoot(root)
   if (!load) return page.render(<main><h1>Unknown audit page</h1></main>)
-  const data = (await load()).default
+  const full = (await load()).default
+  // `?only=sidebar,menubar` shows just those components, for demos; the audit never sets it.
+  const only = new URLSearchParams(window.location.search).get('only')?.split(',').map(id => id.trim()).filter(Boolean)
+  const data = only?.length ? { ...full, specimens: full.specimens.filter(item => only.includes(item.component)) } : full
   const folder = `./generated/editions/${family}-${edition}`
   await stylesheets[`${folder}/preview.css`]!()
   // `?fonts=<body>,<heading>,<mono>` audits the page with those registry fonts (empty entries unset).

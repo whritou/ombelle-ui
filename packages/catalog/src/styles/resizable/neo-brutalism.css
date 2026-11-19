@@ -1,4 +1,5 @@
 /* neo-brutalism Resizable */
+/* Drawn from the Neo brutalism 0.9 board: a bare handle is a 2.5px ink line; with a grip it is a 14px channel between two ink rules holding a square 22x40 grip. */
 [data-slot='resizable-panel-group'] {
   inline-size: 100%;
   block-size: 100%;
@@ -11,30 +12,52 @@
 }
 [data-slot='resizable-handle'] {
   position: relative;
+  box-sizing: border-box;
   display: flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  inline-size: max(1px, var(--border-width));
+  inline-size: var(--border-width);
   background: var(--border);
   outline: none;
   transition: background-color var(--motion-duration, 0.2s);
 }
 [data-slot='resizable-handle'][aria-orientation='horizontal'] {
-  --resizable-grip-inline: 1.5rem;
-  --resizable-grip-block: 0.75rem;
+  --resizable-grip-inline: 40px;
+  --resizable-grip-block: 22px;
   inline-size: auto;
-  block-size: max(1px, var(--border-width));
+  block-size: var(--border-width);
+}
+/* With a grip the handle widens to a channel in the background colour, bounded by the two ink rules. */
+[data-slot='resizable-handle']:has(> [data-slot='resizable-handle-grip']) {
+  inline-size: 14px;
+  border-inline: var(--border-width) solid var(--border);
+  background: var(--background);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal']:has(> [data-slot='resizable-handle-grip']) {
+  inline-size: auto;
+  block-size: 14px;
+  border-inline: 0;
+  border-block: var(--border-width) solid var(--border);
 }
 [data-slot='resizable-handle']:hover,
-[data-slot='resizable-handle']:focus-visible {
+[data-slot='resizable-handle'][data-separator='active'] {
   background: var(--primary);
 }
+/* The tint behind a keyboard-focused handle: --primary at low strength, so the ink grip and ring stay readable in both modes. */
+[data-slot='resizable-handle']:focus-visible {
+  background: color-mix(in oklab, var(--primary) 18%, var(--background));
+  z-index: 1;
+}
+[data-slot='resizable-handle']:focus-visible::after {
+  outline: 3px dashed var(--ring);
+  outline-offset: 0;
+}
+/* Grab area wider than the line, so the handle can be caught a few pixels away. */
 [data-slot='resizable-handle']::after {
   position: absolute;
   inset-block: 2px;
   inset-inline: -4px;
-  border-radius: 4px;
   content: '';
   pointer-events: none;
 }
@@ -42,22 +65,42 @@
   inset-block: -4px;
   inset-inline: 2px;
 }
-[data-slot='resizable-handle']:focus-visible::after {
-  outline: 2px solid var(--ring);
-  outline-offset: 0;
-}
 [data-slot='resizable-handle-grip'] {
+  --resizable-dots: var(--foreground);
   z-index: 1;
   box-sizing: border-box;
   display: flex;
   flex: none;
-  inline-size: var(--resizable-grip-inline, 0.75rem);
-  block-size: var(--resizable-grip-block, 1.5rem);
-  border: max(1px, var(--border-width)) solid var(--border);
-  border-radius: 0; box-shadow: 2px 2px 0 var(--border);
-  background:
-    radial-gradient(circle, var(--muted-foreground) 1px, transparent 1.5px) center / 4px 5px,
-    var(--card);
+  inline-size: var(--resizable-grip-inline, 22px);
+  block-size: var(--resizable-grip-block, 40px);
+  padding-block: 5.5px;
+  padding-inline: 2.5px;
+  border: var(--border-width) solid var(--border);
+  border-radius: 0;
+  box-shadow: 2px 2px 0 var(--shadow-color, var(--border));
+  background-color: var(--card);
+  /* Two rows of bars drawn as gradients, like the board's grip glyph. */
+  background-image:
+    linear-gradient(var(--resizable-dots), var(--resizable-dots)),
+    linear-gradient(var(--resizable-dots), var(--resizable-dots));
+  background-position: calc(50% - 1.2px) center, calc(50% + 1.2px) center;
+  background-size: 1.75px 6px, 1.75px 6px;
+  background-repeat: no-repeat;
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] > [data-slot='resizable-handle-grip'] {
+  background-position: center calc(50% - 1.2px), center calc(50% + 1.2px);
+  background-size: 6px 1.75px, 6px 1.75px;
+}
+[data-slot='resizable-handle']:is(:hover, [data-separator='active']) > [data-slot='resizable-handle-grip'] {
+  --resizable-dots: var(--primary-foreground);
+  background-color: var(--primary);
+}
+[data-slot='resizable-handle'][data-separator='active'] > [data-slot='resizable-handle-grip'] {
+  translate: 2px 2px;
+  box-shadow: none;
+}
+[data-slot='resizable-handle']:focus-visible > [data-slot='resizable-handle-grip'] {
+  background-color: color-mix(in oklab, var(--primary) 18%, var(--background));
 }
 @media (prefers-reduced-motion: reduce) {
   [data-slot='resizable-handle'] {
@@ -68,15 +111,30 @@
   [data-slot='resizable-handle'] {
     background: CanvasText;
   }
+  [data-slot='resizable-handle']:has(> [data-slot='resizable-handle-grip']) {
+    background: Canvas;
+    border-color: CanvasText;
+  }
   [data-slot='resizable-handle']:is(:hover, :focus-visible) {
     background: Highlight;
   }
   [data-slot='resizable-handle']:focus-visible {
-    outline: 2px solid Highlight;
-    outline-offset: 0;
+    outline: 3px dashed Highlight;
+    outline-offset: 3px;
   }
   [data-slot='resizable-handle-grip'] {
     border-color: CanvasText;
-    background: Canvas;
+    background-color: Canvas;
+    background-image: linear-gradient(CanvasText, CanvasText), linear-gradient(CanvasText, CanvasText);
+    box-shadow: none;
   }
+}
+
+/* The grip never outgrows its handle: a shadow or ring around it must stay inside the panel group. */
+[data-slot='resizable-handle-grip'] {
+  max-block-size: calc(100% - 12px);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] > [data-slot='resizable-handle-grip'] {
+  max-block-size: none;
+  max-inline-size: calc(100% - 12px);
 }

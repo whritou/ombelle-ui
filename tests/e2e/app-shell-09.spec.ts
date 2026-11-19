@@ -317,3 +317,27 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+// The panel takes the size Radix measures on its content, so its own padding and border must sit outside that size:
+// otherwise the last row and the end of long lines are clipped.
+const allFamilies = ['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'flat', 'neo-brutalism', 'liquid-glass']
+for (const family of allFamilies)
+  for (const edition of ['radix', 'base'] as const)
+    test(`${family} ${edition}: the Navigation Menu panel shows all of its content`, async ({ page }) => {
+      const nav = (await open(page, edition, family)).getByTestId('s09-nav')
+      await nav.getByRole('button', { name: 'Docs' }).click()
+      await expect(page.getByRole('link', { name: /Installation/ })).toBeVisible()
+      await expect.poll(() => page.evaluate(() => {
+        const panel = document.querySelector<HTMLElement>('[data-slot$="navigation-menu-viewport"]')
+        if (!panel) return 'no panel'
+        const box = panel.getBoundingClientRect()
+        const style = getComputedStyle(panel)
+        const inner = { bottom: box.bottom - parseFloat(style.borderBottomWidth), right: box.right - parseFloat(style.borderRightWidth) }
+        let clipped = 0
+        for (const link of panel.querySelectorAll<HTMLElement>('[data-slot$="navigation-menu-link"]')) {
+          const rect = link.getBoundingClientRect()
+          clipped = Math.max(clipped, rect.bottom - inner.bottom, rect.right - inner.right)
+        }
+        return clipped > 0.5 ? `content reaches ${Math.round(clipped)}px past the panel` : 'ok'
+      }), { timeout: 10000 }).toBe('ok')
+    })

@@ -258,19 +258,6 @@
 [data-slot='data-table-menu'][data-state='open'] {
   animation: ombelle-dropdown-menu-enter var(--motion-duration) ease-out;
 }
-[data-slot='data-table-menu-item']:is([data-highlighted], :hover) {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
-  /* Invisible here; forced colors draw it, since they drop the fill. */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-}
-[data-slot='data-table-menu-item']:is([data-highlighted], :hover) > * {
-  --primary: currentColor;
-  --muted-foreground: currentColor;
-}
 @media (forced-colors: active) {
   [data-slot='data-table-menu'] {
     background: Canvas;
@@ -534,5 +521,229 @@
   [data-slot='data-table-row'][data-state='selected'] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
+  }
+}
+/* Board alignment (RetroFuturism09Data): a striped band header, 9px-padded rows with a primary tint and a 6px marker when selected, pill toolbar buttons, 22px menus. */
+[data-slot='data-table'] {
+  gap: 14px;
+}
+[data-slot='data-table-toolbar'] {
+  gap: 10px;
+}
+[data-slot='data-table-filter'] {
+  max-inline-size: 18.5rem;
+}
+[data-slot='data-table-container'] {
+  border-radius: var(--rf-r3);
+}
+[data-slot='data-table-table'] {
+  font-size: 0.90625rem;
+}
+[data-slot='data-table-head'] {
+  padding: 12px 16px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+[data-slot='data-table-cell'] {
+  padding: 0.5625rem 1rem;
+}
+[data-slot='data-table-caption'] {
+  color: var(--muted-foreground);
+}
+/* Selected rows: a primary tint on the card, with a 6px primary marker on the first cell. */
+[data-slot='data-table-row'][data-state='selected'] > [data-slot='data-table-cell'] {
+  background: color-mix(in oklab, var(--primary) 16%, var(--card));
+  color: var(--foreground);
+}
+[data-slot='data-table-row'][data-state='selected'] > [data-slot='data-table-cell']:first-child {
+  box-shadow: inset 6px 0 0 var(--primary);
+}
+[data-slot='data-table-row'][data-state='selected'] > [data-slot='data-table-cell']:first-child:dir(rtl) {
+  box-shadow: inset -6px 0 0 var(--primary);
+}
+/* Sort buttons sit on the band: a translucent hover, and a 2px ring on the sorted column. */
+[data-slot='data-table-sort'] {
+  gap: 6px;
+  margin-block: -4px;
+  margin-inline: -10px;
+  padding: 4px 10px;
+  border-radius: var(--rf-pill);
+}
+[data-slot='data-table-sort']:hover {
+  background: color-mix(in srgb, var(--primary-foreground) 14%, transparent);
+  color: inherit;
+}
+[data-slot='data-table-sort']:is([aria-sort] > *) {
+  box-shadow: inset 0 0 0 2px var(--primary-foreground);
+}
+[data-slot='data-table-sort']:focus-visible {
+  outline: 3px solid var(--primary-foreground);
+  outline-offset: 1px;
+}
+[data-slot='data-table-head'] > [data-data-table-select]:focus-visible {
+  outline-color: var(--primary-foreground);
+}
+[data-slot='data-table-pagination'] {
+  gap: 20px;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+[data-slot='data-table-selection'] {
+  color: var(--muted-foreground);
+}
+/* Toolbar and pagination buttons: the family's outline button, small. */
+[data-slot='data-table-button'] {
+  block-size: 2.25rem;
+  min-inline-size: 2.25rem;
+  padding-inline: 0;
+  margin-block-end: 4px;
+  border: 2px solid var(--border);
+  border-radius: var(--rf-pill);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 4px 0 var(--border);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+[data-slot='data-table-button'][data-data-table-end] {
+  padding-inline: 1.125rem;
+}
+[data-slot='data-table-button']:hover:not(:disabled) {
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 5px 0 var(--border);
+  translate: 0 -1px;
+}
+[data-slot='data-table-button']:active:not(:disabled) {
+  box-shadow: 0 0 0 var(--border);
+  translate: 0 4px;
+}
+[data-slot='data-table-button']:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  translate: 0 4px;
+}
+[data-slot='data-table-button']:focus-visible,
+[data-slot='data-table-row-actions']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 4px;
+}
+/* A facet filter: a dashed pill that turns solid when open, with the card fill and a hard shadow. */
+[data-slot='data-table-button'][aria-haspopup='dialog'] {
+  block-size: 2.375rem;
+  padding-inline: 14px;
+  margin-block-end: 0;
+  border: 2px dashed var(--border);
+  background: transparent;
+  box-shadow: none;
+  translate: none;
+}
+[data-slot='data-table-button'][aria-haspopup='dialog']:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: none;
+  translate: none;
+}
+[data-slot='data-table-button'][aria-haspopup='dialog']:is([aria-expanded='true'], [data-state='open'], [data-popup-open]) {
+  border-style: solid;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: 0 3px 0 var(--border);
+}
+[data-slot='data-table-button'][aria-haspopup='dialog']:focus-visible {
+  outline-offset: 3px;
+}
+/* The row action button is a ghost icon button. */
+[data-slot='data-table-row-actions'] {
+  block-size: 2.25rem;
+  min-inline-size: 2.25rem;
+  padding-inline: 0;
+  border-radius: var(--rf-pill);
+}
+[data-slot='data-table-row-actions'] > svg {
+  inline-size: 18px;
+  block-size: 18px;
+}
+/* Menus: 22px radius, 6px padding, 38px items with a 14px radius and a hover of accent plus a 2px border. */
+[data-slot='data-table-menu'] {
+  gap: 2px;
+  border-radius: 22px;
+}
+[data-slot='data-table-menu-label'] {
+  padding: 8px 12px 4px;
+  font: 400 0.65625rem/1.45 var(--font-heading, var(--font-family));
+}
+[data-slot='data-table-menu-item'] {
+  min-block-size: 2.375rem;
+  padding-block: 0;
+  border-radius: 14px;
+  font-size: 0.90625rem;
+  font-weight: 600;
+}
+[data-slot='data-table-menu-item']:is([data-highlighted], :hover) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+  outline: none;
+}
+[data-slot='data-table-menu-item'][data-variant='destructive']:is([data-highlighted], :hover) {
+  background: var(--accent);
+  color: var(--destructive);
+}
+[data-slot='data-table-menu-item'][data-disabled] {
+  opacity: 0.45;
+}
+[data-slot='data-table-menu-indicator'] {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: 6px;
+  background: var(--background);
+}
+[data-state='checked'] > [data-slot='data-table-menu-indicator'] {
+  background: var(--primary);
+}
+/* A count is plain mono text on the right of the item. */
+[data-slot='data-table-count'] {
+  min-inline-size: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: 400 0.75rem/1.4 var(--font-mono, ui-monospace, monospace);
+}
+[data-slot='data-table-button'][data-data-table-clear] {
+  inline-size: 100%;
+  block-size: auto;
+  min-block-size: 2.375rem;
+  margin: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
+  translate: none;
+  font-size: 0.90625rem;
+  font-weight: 600;
+}
+[data-slot='data-table-button'][data-data-table-clear]:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+  translate: none;
+}
+@media (forced-colors: active) {
+  [data-slot='data-table-row'][data-state='selected'] > [data-slot='data-table-cell'] {
+    background: Highlight;
+    color: HighlightText;
+  }
+  [data-slot='data-table-sort']:is([aria-sort] > *) {
+    box-shadow: inset 0 0 0 2px CanvasText;
+  }
+  [data-slot='data-table-button'] {
+    box-shadow: none;
+    border-color: ButtonText;
+  }
+  [data-slot='data-table-menu-item']:is([data-highlighted], :hover) {
+    background: Highlight;
+    color: HighlightText;
   }
 }

@@ -38,7 +38,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
   const previous = componentDocs[index - 1], next = componentDocs[index + 1]
   return (
     <div className="grid gap-10 py-10 xl:grid-cols-[minmax(0,1fr)_11rem]">
-      <main className="min-w-0">
+      <div className="min-w-0">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Components</p>
         <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -107,7 +107,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
           {previous ? <a href={`/components/${previous.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10"><ArrowLeft className="size-4" aria-hidden /> {previous.name}</a> : <span />}
           {next && <a href={`/components/${next.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10">{next.name} <ArrowRight className="size-4" aria-hidden /></a>}
         </nav>
-      </main>
+      </div>
       <div className="hidden xl:block">
         <nav aria-label="On this page" className="sticky top-24 text-sm">
           <p className="mb-2 font-semibold">On this page</p>

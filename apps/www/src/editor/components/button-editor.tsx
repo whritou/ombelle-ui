@@ -23,7 +23,7 @@ import { useRecipeBatch } from '../use-recipe-batch'
 import { changesSummaryFor } from './changes-summary'
 import { MatrixControls } from './matrix-controls'
 import { useMatrixLayout } from '../use-matrix-layout'
-import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem } from '../../editor-shell'
+import { EditorTopBar, previewLayoutOptions, focusHistoryTarget, SegmentedControl, familyCommands, previewModeOptions, previewTransparencyOptions, previewWidthOptions, useReducedTransparencySupport, type OverflowItem, EditorSplit, EditorInspector, useViewportClass } from '../../editor-shell'
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
@@ -209,8 +209,17 @@ export function ButtonEditor() {
     { id: 'reset-recipe', label: 'Reset recipe', destructive: true, disabled: recovery !== null, onSelect: resetRecipe },
   ]
 
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false)
+  const inspectorViewport = useViewportClass()
+  const foldInspector = inspectorCollapsed && inspectorViewport === 'desktop'
   return <main className={styles.root} aria-label="Button editor" data-editor-root="">
-    <EditorTopBar
+    <EditorTopBar view={[
+        { label: 'Preview mode', value: view.mode, options: previewModeOptions, onChange: mode => setView(previous => ({ ...previous, mode: mode as EditorView['mode'] })) },
+        ...(glassFamily && transparencySupported ? [{ label: 'Preview transparency', value: transparency, options: previewTransparencyOptions, onChange: (value: string) => setTransparency(value as 'auto' | 'reduced') }] : []),
+        ...(matrix.available ? [{ label: 'Preview layout', value: matrix.layout, options: previewLayoutOptions, onChange: (value: string) => matrix.setLayout(value as 'single' | 'matrix') }] : []),
+        { label: 'Preview width', value: view.viewport, options: previewWidthOptions('Narrow'), onChange: viewport => setView(previous => ({ ...previous, viewport: viewport as EditorView['viewport'] })) },
+        { label: 'Preview state', value: view.forcedState, options: forcedStates, onChange: forcedState => setView(previous => ({ ...previous, forcedState: forcedState as EditorView['forcedState'] })) },
+      ]}
       commands={[familyCommands(offeredStyleFamilies(draftFamily(draft.recipe)), draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}
       back={{ label: 'All components', href: '/editor/component' }}
@@ -255,15 +264,16 @@ export function ButtonEditor() {
         {preservedRecoveries.length} previous invalid draft{preservedRecoveries.length === 1 ? ' is' : 's are'} preserved on this device. Download {preservedRecoveries.length === 1 ? 'it' : 'them'} from More actions.
       </p>}
       <ComponentEditorDock name="Button" pane={view.panel} matrix={matrix} onChange={(pane) => switchPane(pane, view.panel, matrix, setView)} />
-      <div className={styles.workspace}>
+      <EditorSplit collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed} id="ombelle-editor-button" className={styles.workspace} inspector={
         <aside className={panes.rail} aria-label="Button inspector">
-          <ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
+          <EditorInspector label="Button inspector" collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed}><ScrollArea className={`www-scroll ${styles.railScroll}`} aria-label="Inspector controls">
           <div className={styles.railContent}>
           <PropertiesPanel recipe={draft.recipe} family={draftFamily(draft.recipe)} onFamily={chooseFamily} diagnostic={displayedDiagnostic} onChange={edit} measured={measured.button} previewMode={view.mode}
             onDiagnostic={(path, message) => { setDiagnostic({ code: 'INVALID_DATA', path, message }); setStatus('Recipe change rejected. Review the field error.') }} />
           </div>
-        </ScrollArea>
+        </ScrollArea></EditorInspector>
         </aside>
+      }>
         <div className={panes.primary}>
           <section className={panes.preview} aria-labelledby="preview-title">
             <h2 id="preview-title" className={styles.srOnly}>Live preview</h2>
@@ -299,7 +309,7 @@ export function ButtonEditor() {
               notice={experimentalNotice(draftFamily(draft.recipe))} />
           </div>
         </div>
-      </div>
+      </EditorSplit>
     </>}
   </main>
 }

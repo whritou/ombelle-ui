@@ -103,15 +103,6 @@
   background: var(--accent);
   color: var(--accent-foreground);
 }
-[data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
-  /* Invisible here; forced colors draw it, since they drop the fill. */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-}
 @media (forced-colors: active) {
   [data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
     background: Highlight;
@@ -247,4 +238,161 @@
   [data-slot='navigation-menu-indicator'] > [data-navigation-menu-arrow] {
     border-color: CanvasText;
   }
+}
+/* Board alignment (RetroFuturism09Shell): 40px pill triggers, the current page marked by a striped underline, a 24px striped panel, 16px links. */
+[data-slot='navigation-menu-list'] {
+  gap: 4px;
+}
+[data-slot='navigation-menu-trigger'],
+[data-slot='navigation-menu-link'][data-variant='trigger'] {
+  position: relative;
+  block-size: 2.5rem;
+  min-inline-size: 2.5rem;
+  padding-inline: 1rem;
+  gap: 6px;
+  border-radius: var(--rf-pill);
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+  font-size: 0.90625rem;
+  font-weight: 700;
+}
+[data-slot='navigation-menu-trigger']:hover,
+[data-slot='navigation-menu-link'][data-variant='trigger']:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='navigation-menu-trigger']:is([data-state='open'], [data-popup-open]) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page'] {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']::after {
+  content: '';
+  position: absolute;
+  inset-inline: 14px;
+  inset-block-end: -4px;
+  block-size: 6px;
+  border-radius: 99px 99px 0 0;
+  background: repeating-linear-gradient(90deg, var(--primary) 0 8px, var(--destructive) 8px 16px);
+  pointer-events: none;
+}
+[data-slot='navigation-menu-trigger']:focus-visible,
+[data-slot='navigation-menu-link'][data-variant='trigger']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='navigation-menu-trigger']:is([aria-disabled='true'], [data-disabled], :disabled),
+[data-slot='navigation-menu-link'][data-variant='trigger']:is([aria-disabled='true'], [data-disabled]) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+[data-slot='navigation-menu-viewport'] {
+  padding: 0;
+  border-radius: 24px;
+  background: var(--popover);
+  box-shadow: var(--rf-e3);
+  margin-block-start: 10px;
+}
+[data-slot='navigation-menu-viewport']::before {
+  content: '';
+  display: block;
+  flex: none;
+  block-size: 18px;
+  background: var(--rf-stripes);
+}
+[data-slot='navigation-menu-content'] {
+  grid-template-columns: repeat(2, minmax(14rem, 1fr));
+  gap: 4px;
+  padding: 12px 14px;
+}
+@media (max-width: 640px) {
+  [data-slot='navigation-menu-content'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+[data-slot='navigation-menu-link'][data-variant='default'] {
+  gap: 3px;
+  min-block-size: 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  color: var(--popover-foreground);
+  font-weight: 600;
+}
+[data-slot='navigation-menu-link'][data-variant='default'] > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+[data-slot='navigation-menu-link'][data-variant='default'] > :is(p, small, [data-navigation-menu-description]) {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+/* The hover fill is the accent with a 2px border; the description keeps its muted colour, which reads on that fill. */
+[data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: inset 0 0 0 2px var(--border);
+  outline: none;
+}
+[data-slot='navigation-menu-link'][data-variant='default']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: -5px;
+}
+@media (forced-colors: active) {
+  [data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page'] {
+    background: transparent;
+    color: CanvasText;
+  }
+  [data-slot='navigation-menu-link'][data-variant='trigger'][aria-current='page']::after {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+  [data-slot='navigation-menu-link'][data-variant='default']:is(:hover, :focus-visible) {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* The pointer is a 45-degree corner resting on the panel's top edge, centred on its trigger: its centre sits on the
+   bottom of the 8px indicator, which is the panel's edge, so only the tip above it shows. */
+[data-slot='navigation-menu-indicator'] > [data-navigation-menu-arrow] {
+  inset-block-start: calc(100% - 5.5px);
+  inline-size: 11px;
+  block-size: 11px;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border: 0;
+  border-inline-start: var(--border-width) solid var(--border);
+  border-block-start: var(--border-width) solid var(--border);
+}
+/* This family stands its panel 10px below the list, so the indicator spans that gap and the pointer meets the edge. */
+[data-slot='navigation-menu-indicator'] {
+  block-size: 10px;
+}
+
+/* Radix measures the open trigger's offsetLeft against its offset parent to place the pointer, so the item must not be
+   the positioned ancestor: the list's own wrapper is, and the pointer then follows the trigger. */
+[data-slot='navigation-menu-item'] {
+  position: static;
+}
+
+/* Radix sizes this panel to its measured content, so its own padding and border go outside that size; border-box would
+   clip the last row and the end of long lines. (Base UI sizes its popup itself, so only this wrapper's child is set.) */
+[data-navigation-menu-position] > [data-slot='navigation-menu-viewport'] {
+  box-sizing: content-box;
+  /* The striped band above the links is 18px of the panel's own height that Radix's measurement does not include. */
+  block-size: calc(var(--radix-navigation-menu-viewport-height, 0px) + 18px);
 }

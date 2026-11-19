@@ -147,7 +147,6 @@
 /* papier layer */
 [data-slot='data-table-container']{border:var(--border-width) solid var(--border);border-top:4px double var(--border);border-radius:var(--radius);background:var(--card)}
 [data-slot='data-table-head']{font-weight:600;color:var(--muted-foreground)}
-[data-slot='data-table-row']{border-bottom:1px dotted var(--border)}
 @media (forced-colors: active){[data-slot='data-table-row'][data-state='selected']{outline:2px solid Highlight;outline-offset:-2px}}
 [data-slot='data-table-menu'] {
   box-sizing: border-box;
@@ -246,19 +245,6 @@
 [data-slot='data-table-menu'][data-state='open'] {
   animation: ombelle-dropdown-menu-enter var(--motion-duration) ease-out;
 }
-[data-slot='data-table-menu-item']:is([data-highlighted], :hover) {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
-  /* Invisible here; forced colors draw it, since they drop the fill. */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-}
-[data-slot='data-table-menu-item']:is([data-highlighted], :hover) > * {
-  --primary: currentColor;
-  --muted-foreground: currentColor;
-}
 @media (forced-colors: active) {
   [data-slot='data-table-menu'] {
     background: Canvas;
@@ -294,7 +280,6 @@
 }
 [data-slot='data-table-menu']{border-top:3px double var(--border);border-radius:var(--radius);box-shadow:calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color,var(--border))}
 [data-slot='data-table-menu-label']{font-weight:600;color:var(--muted-foreground)}
-[data-slot='data-table-menu-item']:is([data-highlighted], :hover){background:var(--secondary);color:var(--secondary-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='data-table-button'],
 [data-slot='data-table-row-actions'] {
   box-sizing: border-box;
@@ -454,9 +439,6 @@
   color: var(--muted-foreground);
   text-align: center;
 }
-[data-slot='data-table-row'][data-state='selected'] {
-  background: color-mix(in oklab, var(--primary) 8%, transparent);
-}
 [data-slot='data-table-head'] > [data-data-table-sr] {
   position: absolute;
   inline-size: 1px;
@@ -516,5 +498,254 @@
   [data-slot='data-table-row'][data-state='selected'] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
+  }
+}
+
+/* papier board layer: a card table with a double top rule, 13px paper-toned headers, dotted row rules, and a primary-tinted selected row with a primary bar. */
+[data-slot='data-table-table'] {
+  font-size: 14.5px;
+}
+[data-slot='data-table-head'] {
+  padding-block: 10px;
+  padding-inline: 14px;
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 600;
+}
+[data-slot='data-table-head'][aria-sort] {
+  color: var(--foreground);
+}
+[data-slot='data-table-cell'] {
+  padding-block: 11px;
+  padding-inline: 14px;
+  border-block-start: 0;
+  border-block-end: 1px dotted color-mix(in oklab, var(--border) 22%, transparent);
+}
+[data-slot='data-table-body'] > [data-slot='data-table-row']:last-child > [data-slot='data-table-cell'] {
+  border-block-end: 0;
+}
+[data-slot='data-table-caption'] {
+  border-block-start: 1px solid var(--border);
+  background: var(--card);
+}
+[data-slot='data-table-row'][data-state='selected'] > [data-slot='data-table-cell'] {
+  background: color-mix(in oklab, var(--primary) 14%, var(--card));
+  color: var(--foreground);
+}
+[data-slot='data-table-row'][data-state='selected'] > [data-slot='data-table-cell']:first-child {
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+[data-slot='data-table-head'][data-select],
+[data-slot='data-table-cell'][data-select] {
+  inline-size: 44px;
+  padding-inline: 14px 0;
+}
+[data-slot='data-table-head'][data-actions],
+[data-slot='data-table-cell'][data-actions] {
+  inline-size: 1%;
+  padding-block: 4px;
+  padding-inline: 10px;
+}
+[data-slot='data-table-sort'] {
+  gap: 6px;
+  margin-inline: 0;
+  padding-inline: 0;
+  border-radius: var(--radius);
+}
+[data-slot='data-table-sort']:hover {
+  background: transparent;
+  color: var(--foreground);
+}
+[data-slot='data-table-sort'] > svg {
+  inline-size: 14px;
+  block-size: 14px;
+  color: var(--muted-foreground);
+}
+[data-slot='data-table-sort']:is([aria-sort] > *) > svg {
+  color: color-mix(in oklab, var(--primary) 80%, var(--foreground));
+}
+[data-slot='data-table-sort']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='data-table-cell'] > [data-data-table-select]:focus-visible,
+[data-slot='data-table-head'] > [data-data-table-select]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='data-table-cell'] > [data-data-table-select],
+[data-slot='data-table-head'] > [data-data-table-select] {
+  inline-size: 20px;
+  block-size: 20px;
+}
+/* The toolbar: a 40px field, dashed 36px facet triggers, a ghost reset and an outlined Columns button. */
+[data-slot='data-table-toolbar'] {
+  gap: 10px;
+}
+[data-slot='data-table-filter'] {
+  min-block-size: 40px;
+  max-inline-size: 280px;
+  padding-inline: 10px;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+[data-slot='data-table-button'] {
+  block-size: 36px;
+  gap: 8px;
+  padding-inline: 10px;
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+}
+[data-slot='data-table-button']:hover:not(:disabled) {
+  background: var(--secondary);
+}
+[data-slot='data-table-button'][aria-expanded='true'],
+[data-slot='data-table-button'][data-state='open'] {
+  background: var(--secondary);
+  border-style: solid;
+}
+[data-slot='data-table-button'][data-data-table-end] {
+  padding-inline: 14px;
+  border-style: solid;
+  border-block-end: 4px double var(--border);
+}
+[data-slot='data-table-button'][data-data-table-clear] {
+  border-color: transparent;
+  padding-inline: 14px;
+  font-weight: 600;
+}
+[data-slot='data-table-button'][data-data-table-clear]:hover {
+  border-color: transparent;
+}
+[data-slot='data-table-button']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-slot='data-table-count'] {
+  block-size: 20px;
+  min-inline-size: 0;
+  padding-inline: 6px;
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--primary) 14%, var(--card));
+  color: color-mix(in oklab, var(--primary) 80%, var(--foreground));
+  font-size: 11px;
+  font-weight: 600;
+}
+[data-slot='data-table-row-actions'] {
+  inline-size: 32px;
+  block-size: 32px;
+  min-inline-size: 32px;
+  padding-inline: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+}
+[data-slot='data-table-row-actions']:hover:not(:disabled) {
+  background: var(--secondary);
+}
+[data-slot='data-table-row-actions']:is([data-state='open'], [aria-expanded='true']) {
+  background: var(--secondary);
+  border-color: var(--border);
+  box-shadow: 0 var(--border-width) 0 var(--border);
+}
+[data-slot='data-table-row-actions']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+/* The footer: a rule above, 34px square page buttons with a hard bottom edge. */
+[data-slot='data-table-pagination'] {
+  gap: 8px;
+  padding-block: 10px;
+  padding-inline: 14px;
+  border-block-start: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 14px;
+}
+[data-slot='data-table-selection'] {
+  color: var(--muted-foreground);
+}
+[data-slot='data-table-pagination'] > [data-slot='data-table-button'] {
+  inline-size: 34px;
+  block-size: 34px;
+  min-inline-size: 34px;
+  padding-inline: 0;
+  border-style: solid;
+  background: var(--card);
+  box-shadow: 0 2px 0 var(--border);
+}
+[data-slot='data-table-pagination'] > [data-slot='data-table-button']:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+/* Menu: a 3px double-topped card, 34px rows, secondary fill with the ring on the item reached. */
+[data-slot='data-table-menu'] {
+  min-inline-size: 220px;
+  padding: 4px;
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: calc(var(--shadow-y) * 1.5) calc(var(--shadow-y) * 1.5) 0 var(--shadow-color, var(--border));
+}
+[data-slot='data-table-menu-label'] {
+  padding-block: 8px 4px;
+  padding-inline: 10px;
+  font-family: var(--font-heading, ui-serif, Georgia, 'Times New Roman', serif);
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 500;
+}
+[data-slot='data-table-menu-item'] {
+  gap: 10px;
+  min-block-size: 34px;
+  padding-block: 0;
+  padding-inline: 10px;
+  border-radius: calc(var(--radius) / 2);
+  font-size: 14.5px;
+  font-weight: 400;
+}
+[data-slot='data-table-menu-label'][data-inset],
+[data-slot='data-table-menu-item'] {
+  padding-inline-start: 34px;
+}
+[data-slot='data-table-menu-item']:is([data-highlighted], :hover) {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+[data-slot='data-table-menu-item']:is([data-highlighted], :focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+[data-slot='data-table-menu-item'][data-variant='destructive']:is([data-highlighted], :hover) {
+  background: var(--secondary);
+  color: var(--destructive);
+}
+[data-slot='data-table-menu-item'][data-disabled] {
+  opacity: 0.45;
+}
+[data-slot='data-table-menu-indicator'] {
+  inset-inline-start: 10px;
+  inline-size: 16px;
+  block-size: 16px;
+}
+[data-slot='data-table-menu-indicator'] svg {
+  inline-size: 12px;
+  block-size: 12px;
+}
+@media (forced-colors: active) {
+  [data-slot='data-table-menu'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  [data-slot='data-table-row'][data-state='selected'] > [data-slot='data-table-cell'] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [data-slot='data-table-menu-item']:is([data-highlighted], :hover) {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
   }
 }

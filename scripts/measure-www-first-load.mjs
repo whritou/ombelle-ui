@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 const next = fileURLToPath(new URL('../apps/www/.next/', import.meta.url))
 const routes = [
+  'index',
   'editor/preset',
   'editor/component',
   'editor/component/button',

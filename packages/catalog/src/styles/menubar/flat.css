@@ -1,14 +1,17 @@
 /* flat Menubar */
-/* The bar and its triggers draw like the family's Toolbar; the menus like its Dropdown Menu. */
+/* Measured from the Flat 0.9 app shell board: a 44px card bar with a hairline below, 32px triggers that fill secondary while open, and menus that highlight to the secondary tone with its own foreground. */
 [data-slot='menubar'] {
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  min-block-size: 44px;
   min-inline-size: 0;
-  padding: 4px;
-  border: max(1px, var(--border-width)) solid var(--border);
-  border-radius: var(--radius);
+  padding-block: 0;
+  padding-inline: 6px;
+  border: 0;
+  border-block-end: 1px solid var(--border);
+  border-radius: 0;
   background: var(--card);
   color: var(--foreground);
   font-family: var(--font-family);
@@ -26,11 +29,11 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  block-size: 34px;
-  min-inline-size: 34px;
+  block-size: 32px;
+  min-inline-size: 32px;
   padding-inline: 10px;
   border: 0;
-  border-radius: calc(var(--radius) - 2px);
+  border-radius: calc(var(--radius) * 0.75);
   background: transparent;
   color: var(--foreground);
   font: inherit;
@@ -48,7 +51,8 @@
   background: var(--muted);
 }
 [data-slot='menubar-trigger'][data-disabled] {
-  opacity: 0.5;
+  color: var(--muted-foreground);
+  opacity: 0.55;
   cursor: not-allowed;
 }
 [data-slot='menubar-trigger']:focus-visible {
@@ -61,8 +65,8 @@
   }
 }
 [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
-  background: var(--accent);
-  color: var(--accent-foreground);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
 }
 @media (forced-colors: active) {
   [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
@@ -78,7 +82,7 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  min-inline-size: 12rem;
+  min-inline-size: 13.5rem;
   max-block-size: var(--radix-menubar-content-available-height);
   overflow-x: hidden;
   overflow-y: auto;
@@ -195,11 +199,30 @@
   margin-inline-start: auto;
   color: var(--muted-foreground);
 }
+/* The board draws a shortcut as a key cap: 22px tall, hairline border with a 2px base, mono 11px in the foreground colour. */
 [data-slot='menubar-shortcut'] {
-  padding-inline-start: 1rem;
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-inline-size: 22px;
+  block-size: 22px;
+  padding-inline: 6px;
+  border: 1px solid var(--border);
+  border-block-end-width: 2px;
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--muted);
+  color: var(--foreground);
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   font-size: 0.6875rem;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 1;
+}
+/* The submenu arrow follows the highlighted item: secondary-foreground on the secondary fill. */
+[data-slot='menubar-item'][data-highlighted] > [data-slot='menubar-sub-icon'],
+[data-slot='menubar-checkbox-item'][data-highlighted] > [data-slot='menubar-sub-icon'],
+[data-slot='menubar-radio-item'][data-highlighted] > [data-slot='menubar-sub-icon'],
+[data-slot='menubar-sub-trigger']:is([data-highlighted], [data-state='open']) > [data-slot='menubar-sub-icon'] {
+  color: var(--secondary-foreground);
 }
 [data-slot='menubar-sub-icon']:dir(rtl) {
   scale: -1 1;
@@ -222,10 +245,10 @@
     opacity: 1;
   }
 }
-[data-slot='menubar-item'][data-highlighted],
-[data-slot='menubar-checkbox-item'][data-highlighted],
-[data-slot='menubar-radio-item'][data-highlighted],
-[data-slot='menubar-sub-trigger'][data-highlighted] {
+[data-slot='menubar-item']:focus-visible,
+[data-slot='menubar-checkbox-item']:focus-visible,
+[data-slot='menubar-radio-item']:focus-visible,
+[data-slot='menubar-sub-trigger']:focus-visible {
   /* The highlight tint alone is below 3:1 against the menu: a ring marks the item reached with the keyboard. */
   outline: 2px solid var(--ring);
   outline-offset: -2px;
@@ -292,5 +315,4 @@
 }
 [data-slot='menubar-shortcut'] {
   margin-inline-start: auto;
-  padding-inline-start: 1.5rem;
 }

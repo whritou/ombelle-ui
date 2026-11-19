@@ -74,7 +74,10 @@ import {
   useDrawerState,
   EditorDock,
   useViewportClass,
+  EditorSplit,
+  EditorInspector,
   focusHistoryTarget,
+  openMenubarTrigger,
   returnTarget,
   visibleMoreActions,
 } from '../../editor-shell'
@@ -154,6 +157,8 @@ export default function PresetEditor() {
   const [reviewSheetOpen, setReviewSheetOpen] = useState(false)
   const reviewOpener = useRef<HTMLButtonElement>(null)
   const viewportClass = useViewportClass()
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false)
+  const foldInspector = inspectorCollapsed && viewportClass === 'desktop'
   const previousViewport = useRef(viewportClass)
   useEffect(() => {
     // A review open on a wider screen stays in view: the phone shows its Checks pane.
@@ -206,7 +211,8 @@ export default function PresetEditor() {
     setConfirmationOpen(false)
   }
   function confirm(change: FamilyChange, label: string, description: string, tone: 'default' | 'destructive' = 'default') {
-    returnFocus.current = document.activeElement as HTMLElement
+    // From a menubar item, return to its File or Edit trigger: the item is gone once the menu closes.
+    returnFocus.current = openMenubarTrigger() ?? (document.activeElement as HTMLElement)
     setConfirmation({ ...change, label, description, tone })
     setConfirmationOpen(true)
   }
@@ -299,7 +305,13 @@ export default function PresetEditor() {
   const warningText = warnings ? `, ${warnings} ${warnings === 1 ? 'warning' : 'warnings'}` : ''
   return (
     <main className={styles.editor} aria-label="Preset editor" data-editor-root="">
-      <EditorTopBar
+      <EditorTopBar view={[
+        { label: 'Preview mode', value: mode, options: previewModeOptions, onChange: value => setMode(value as typeof mode) },
+        ...(glass && transparencySupported ? [{ label: 'Preview transparency', value: transparency, options: previewTransparencyOptions, onChange: (value: string) => setTransparency(value as 'auto' | 'reduced') }] : []),
+        { label: 'Preview page', value: scene, options: sceneOptions, onChange: value => setScene(value as PresetScene) },
+        ...(glass ? [{ label: 'Preview backdrop', value: backdrop, options: backdropOptions, onChange: (value: string) => setBackdropOverride(value as PresetBackdrop) }] : []),
+        { label: 'Preview width', value: viewport, options: previewWidthOptions('320 px'), onChange: value => setViewport(value as typeof viewport) },
+      ]}
         commands={[familyCommands(offeredStyleFamilies(draft.family), draft.family, familyNames, family)]}
         crumbs={['Presets']}
         nameField={{
@@ -475,9 +487,9 @@ export default function PresetEditor() {
           <GlassPanel report={glassReport} />
         </div>
       )}
-      <div className={styles.workbench}>
+      <EditorSplit collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed} id="ombelle-editor-preset" className={styles.workbench} inspector={
         <section aria-label="Preset inspector" className={`${styles.panel} ${pane !== 'customize' ? styles.phoneHidden : ''}`}>
-          <ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
+          <EditorInspector label="Preset inspector" shortcut={false} collapsed={foldInspector} onCollapsedChange={setInspectorCollapsed}><ScrollArea aria-label="Inspector controls" className={`www-scroll ${styles.panelScroll}`}>
           <div className={styles.panelContent}>
           <InspectorSection id="inspector-family" title="Style family">
             <FamilyPicker value={draft.family} onChange={family} />
@@ -521,8 +533,18 @@ export default function PresetEditor() {
             <DesignControls {...controlProps} section="depth" />
           </InspectorSection>
           </div>
-          </ScrollArea>
+          </ScrollArea></EditorInspector>
         </section>
+      } after={viewportClass === 'desktop' && <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
+          <ReviewDrawer
+            label="Review"
+            open={drawerOpen}
+            onOpenChange={setDrawerOpen}
+            activeTab={drawerTab}
+            onTabChange={setDrawerTab}
+            tabs={reviewTabs}
+          />
+        </div>}>
         {/* On a phone the preview is its own pane, reached from the dock. */}
         <div className={`${styles.canvas} ${pane !== 'preview' ? styles.phoneHidden : ''}`}>
           <section className={styles.preview} aria-label="Live preview">
@@ -614,17 +636,7 @@ export default function PresetEditor() {
             </Collapsible>
           </section>
         )}
-        {viewportClass === 'desktop' && <div className={styles.drawerSlot} data-open={drawerOpen || undefined}>
-          <ReviewDrawer
-            label="Review"
-            open={drawerOpen}
-            onOpenChange={setDrawerOpen}
-            activeTab={drawerTab}
-            onTabChange={setDrawerTab}
-            tabs={reviewTabs}
-          />
-        </div>}
-      </div>
+      </EditorSplit>
       <Sheet open={viewportClass === 'tablet' && reviewSheetOpen} onOpenChange={setReviewSheetOpen}>
         <SheetContent side="bottom" aria-label="Checks and export" className={styles.reviewSheet}
           onCloseAutoFocus={(event) => { event.preventDefault(); returnTarget(reviewOpener.current)?.focus() }}>
@@ -633,7 +645,7 @@ export default function PresetEditor() {
             <SheetDescription className={styles.srOnly}>Contrast checks and the preset export.</SheetDescription>
           </SheetHeader>
           <ReviewDrawer label="Review" open onOpenChange={(open) => { if (!open) setReviewSheetOpen(false) }}
-            activeTab={drawerTab} onTabChange={setDrawerTab} tabs={reviewTabs} />
+            activeTab={drawerTab} onTabChange={setDrawerTab} tabs={reviewTabs} embedded />
         </SheetContent>
       </Sheet>
       <EditorDock<typeof pane> label="Preset editor panes" value={pane} onChange={setPane} tabs={[

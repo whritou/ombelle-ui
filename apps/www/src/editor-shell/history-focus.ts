@@ -4,8 +4,18 @@ export const phoneMoreAttribute = 'data-phone-more'
 const shownElement = (element: HTMLElement) =>
   typeof element.checkVisibility === 'function' ? element.checkVisibility() : element.offsetParent !== null
 
-/** The More actions button on screen: the toolbar's menu on wider screens, the phone's sheet button below 768px. */
+/** The top bar menubar's trigger whose menu is open, such as File while one of its items is being chosen. */
+export function openMenubarTrigger(): HTMLElement | null {
+  return document.querySelector<HTMLElement>('[role="menubar"] [aria-expanded="true"]')
+}
+
+/**
+ * The menu button an action came from: the open File, Edit or View trigger from 1200px, the toolbar's More
+ * actions below it, or the phone's sheet button below 768px. Call it while the menu is still open.
+ */
 export function visibleMoreActions(): HTMLElement | null {
+  const trigger = openMenubarTrigger()
+  if (trigger) return trigger
   const candidates = document.querySelectorAll<HTMLElement>(`[data-toolbar-overflow-trigger], [${phoneMoreAttribute}]`)
   return [...candidates].find(shownElement) ?? null
 }

@@ -80,3 +80,123 @@
     background: Canvas;
   }
 }
+/* Board alignment (RetroFuturism09Shell): a bordered 22px group, a 14px handle with a 2px line and an 18x42 sun-yellow pill grip. */
+[data-slot='resizable-panel-group'] {
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  border-radius: var(--rf-r3);
+  background: var(--card);
+  box-shadow: 0 6px 0 var(--border);
+}
+[data-slot='resizable-panel'] {
+  background: var(--card);
+}
+[data-slot='resizable-handle'] {
+  --resizable-line: 2px;
+  --resizable-fill: var(--border);
+  --resizable-ink: #2a1b00;
+  inline-size: 14px;
+  background:
+    linear-gradient(var(--resizable-fill), var(--resizable-fill)) center / var(--resizable-line) 100% no-repeat,
+    var(--background);
+  transition: none;
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] {
+  --resizable-grip-inline: 2.625rem;
+  --resizable-grip-block: 1.125rem;
+  inline-size: auto;
+  block-size: 14px;
+  background:
+    linear-gradient(var(--resizable-fill), var(--resizable-fill)) center / 100% var(--resizable-line) no-repeat,
+    var(--background);
+}
+/* Hover and keyboard focus widen the line to 4px and turn it primary; the grip gains a hard shadow. */
+[data-slot='resizable-handle']:is(:hover, :focus-visible, [data-separator='hover'], [data-separator='focus']) {
+  --resizable-line: 4px;
+  --resizable-fill: var(--primary);
+  background:
+    linear-gradient(var(--resizable-fill), var(--resizable-fill)) center / var(--resizable-line) 100% no-repeat,
+    var(--background);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal']:is(:hover, :focus-visible, [data-separator='hover'], [data-separator='focus']) {
+  background:
+    linear-gradient(var(--resizable-fill), var(--resizable-fill)) center / 100% var(--resizable-line) no-repeat,
+    var(--background);
+}
+[data-slot='resizable-handle']:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: -3px;
+}
+[data-slot='resizable-handle']:focus-visible::after {
+  outline: none;
+}
+/* Dragging: a 6px line striped in the two band colours, and a primary grip. */
+[data-slot='resizable-handle'][data-separator='active'],
+[data-slot='resizable-handle'][data-resize-handle-active] {
+  --resizable-line: 6px;
+  background:
+    repeating-linear-gradient(180deg, var(--primary) 0 8px, var(--destructive) 8px 16px) center / var(--resizable-line) 100% no-repeat,
+    var(--background);
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'][data-separator='active'],
+[data-slot='resizable-handle'][aria-orientation='horizontal'][data-resize-handle-active] {
+  background:
+    repeating-linear-gradient(90deg, var(--primary) 0 8px, var(--destructive) 8px 16px) center / 100% var(--resizable-line) no-repeat,
+    var(--background);
+}
+[data-slot='resizable-handle-grip'] {
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--resizable-grip-inline, 1.125rem);
+  block-size: var(--resizable-grip-block, 2.625rem);
+  border: 2px solid var(--border);
+  border-radius: var(--rf-pill);
+  background: var(--rf-sun);
+  color: var(--resizable-ink, #2a1b00);
+}
+[data-slot='resizable-handle-grip']::before {
+  content: '';
+  flex: none;
+  inline-size: 6px;
+  block-size: 15px;
+  background: radial-gradient(circle, currentColor 1.5px, transparent 2px) center / 6px 5px;
+}
+[data-slot='resizable-handle'][aria-orientation='horizontal'] > [data-slot='resizable-handle-grip']::before {
+  rotate: 90deg;
+}
+[data-slot='resizable-handle']:is(:hover, [data-separator='hover']) > [data-slot='resizable-handle-grip'] {
+  box-shadow: 0 3px 0 var(--border);
+}
+[data-slot='resizable-handle']:is(:focus-visible, [data-separator='focus']) > [data-slot='resizable-handle-grip'] {
+  --resizable-ink: var(--foreground);
+  background: var(--card);
+  box-shadow: 0 3px 0 var(--border);
+}
+[data-slot='resizable-handle'][data-separator='active'] > [data-slot='resizable-handle-grip'],
+[data-slot='resizable-handle'][data-resize-handle-active] > [data-slot='resizable-handle-grip'] {
+  --resizable-ink: var(--primary-foreground);
+  background: var(--primary);
+}
+@media (forced-colors: active) {
+  [data-slot='resizable-panel-group'] {
+    box-shadow: none;
+  }
+  [data-slot='resizable-handle'] {
+    background: linear-gradient(CanvasText, CanvasText) center / 2px 100% no-repeat, Canvas;
+  }
+  [data-slot='resizable-handle'][aria-orientation='horizontal'] {
+    background: linear-gradient(CanvasText, CanvasText) center / 100% 2px no-repeat, Canvas;
+  }
+  [data-slot='resizable-handle']:is(:hover, :focus-visible) {
+    background: linear-gradient(Highlight, Highlight) center / 4px 100% no-repeat, Canvas;
+  }
+  [data-slot='resizable-handle'][aria-orientation='horizontal']:is(:hover, :focus-visible) {
+    background: linear-gradient(Highlight, Highlight) center / 100% 4px no-repeat, Canvas;
+  }
+  [data-slot='resizable-handle-grip'] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+}

@@ -4,14 +4,15 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   min-inline-size: 0;
-  padding: 4px;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  padding: 3px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
   background: var(--card);
   color: var(--foreground);
   font-family: var(--font-family);
+  box-shadow: calc(var(--shadow-x) * 2 / 3) calc(var(--shadow-y) * 2 / 3) 0 var(--shadow-color, var(--border));
 }
 @media (forced-colors: active) {
   [data-slot='menubar'] {
@@ -26,16 +27,16 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  block-size: 34px;
-  min-inline-size: 34px;
-  padding-inline: 10px;
-  border: 0;
-  border-radius: calc(var(--radius) - 4px);
+  block-size: 32px;
+  min-inline-size: 32px;
+  padding-inline: 14px;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
   background: transparent;
   color: var(--foreground);
-  font: inherit;
+  font-family: var(--font-heading, var(--font-family));
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color var(--motion-duration, 0.2s), color var(--motion-duration, 0.2s);
@@ -45,10 +46,11 @@
   block-size: 16px;
 }
 [data-slot='menubar-trigger']:hover {
-  background: var(--muted);
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 [data-slot='menubar-trigger'][data-disabled] {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 [data-slot='menubar-trigger']:focus-visible {
@@ -61,8 +63,8 @@
   }
 }
 [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
-  background: var(--accent);
-  color: var(--accent-foreground);
+  background: var(--foreground);
+  color: var(--background);
 }
 @media (forced-colors: active) {
   [data-slot='menubar-trigger']:is([data-state='open'], [data-popup-open]) {
@@ -228,10 +230,9 @@
 [data-slot='menubar-checkbox-item'][data-highlighted],
 [data-slot='menubar-radio-item'][data-highlighted],
 [data-slot='menubar-sub-trigger'][data-highlighted] {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
+  /* The accent fill, as the board draws it; no ring marks the item reached with the keyboard. */
+  background: var(--accent);
+  color: var(--accent-foreground);
   /* Invisible here; forced colors draw it, since they drop the fill. */
   outline: 2px solid transparent;
   outline-offset: -2px;
@@ -302,7 +303,8 @@
   outline-offset: 2px;
 }
 [data-slot='menubar-trigger'][data-highlighted]:not(:is([data-state='open'], [data-popup-open])) {
-  background: var(--muted);
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 [data-slot='menubar-shortcut'] {
   margin-inline-start: auto;

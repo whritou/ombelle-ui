@@ -932,3 +932,86 @@
 .siteMenuLinks a:hover {
   background: var(--muted);
 }
+
+/* The desktop drawer sits in a Sidebar: the slot draws the frame, so the Sidebar's own panel stays plain. */
+.drawerProvider {
+  --sidebar-height: 100%;
+  min-block-size: 0;
+  block-size: 100%;
+  inline-size: auto;
+}
+.drawerProvider [data-slot='sidebar'] > [data-sidebar-inner] {
+  border: 0;
+  background: transparent;
+}
+.rail[data-slot='sidebar'] > [data-sidebar-inner] {
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+}
+.drawer[data-slot='sidebar'] > [data-sidebar-inner] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The inspector on a left Sidebar: it fills its pane, and on the desktop folds to a rail of section icons. */
+.inspectorProvider {
+  min-block-size: 0;
+  block-size: 100%;
+  inline-size: 100%;
+}
+.inspectorSidebar[data-slot='sidebar'] {
+  inline-size: 100%;
+}
+.inspectorSidebar[data-slot='sidebar'][data-collapsible='icon'] {
+  inline-size: var(--sidebar-width-icon);
+}
+.inspectorSidebar[data-slot='sidebar'] > [data-sidebar-inner] {
+  min-inline-size: 0;
+  border: 0;
+  background: transparent;
+}
+.inspectorBar {
+  display: flex;
+  justify-content: flex-end;
+  padding-block-end: 4px;
+}
+.inspectorRail[data-slot='sidebar-menu'] {
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.inspectorRail[data-slot='sidebar-menu'] > li {
+  list-style: none;
+}
+.inspectorContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-block-size: 0;
+}
+.inspectorContent[hidden] {
+  display: none;
+}
+/* Folding is a desktop layout; below 1200px the inspector stays open and its fold button is not shown. */
+@media (max-width: 1199px) {
+  .inspectorBar {
+    display: none;
+  }
+}
+
+/* The desktop menubar sits in the bar like its other controls: no frame of its own. */
+.menubar[data-slot='menubar'] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+@media (min-width: 1200px) {
+  .actionsToolbar [data-slot='toolbar-overflow-trigger'] { display: none !important; }
+}
+@media (max-width: 1199px) {
+  .menubar[data-slot='menubar'] { display: none; }
+}
