@@ -1,7 +1,9 @@
 'use client'
+import * as React from 'react'
 import { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon, InputGroupText, InputGroupButton, InputGroupClear, InputGroupCount } from '@/components/ui/input-group'
 
 export function Specimen() {
+  const [search, setSearch] = React.useState('glass toast')
   return (
     <section aria-label="Input Group" data-component="input-group">
       <h2>Input Group</h2>
@@ -20,7 +22,7 @@ export function Specimen() {
         <label htmlFor="preset-group-notes">Notes</label>
         <InputGroup><InputGroupTextarea id="preset-group-notes" placeholder="Add a note" aria-describedby="preset-group-count" /><InputGroupAddon align="block-end"><InputGroupText>Optional</InputGroupText><InputGroupCount id="preset-group-count" value={0} max={160} /></InputGroupAddon></InputGroup>
         <label htmlFor="preset-group-search">Search</label>
-        <InputGroup><InputGroupInput id="preset-group-search" placeholder="Search" defaultValue="glass toast" /><InputGroupAddon align="inline-end"><InputGroupClear label="Clear search" /></InputGroupAddon></InputGroup>
+        <InputGroup><InputGroupInput id="preset-group-search" placeholder="Search" value={search} onChange={(event) => setSearch(event.target.value)} /><InputGroupAddon align="inline-end"><InputGroupClear label="Clear search" onClear={() => setSearch('')} /></InputGroupAddon></InputGroup>
       </div>
     </section>
   )
