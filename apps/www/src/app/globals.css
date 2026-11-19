@@ -115,7 +115,8 @@
 }
 
 @layer base {
-  * {
+  /* Element rules leave inline previews alone: a preview's family sets its own borders, headings and focus rings. */
+  *:not(:where([data-preview-family] *)) {
     border-color: var(--color-border);
   }
   body {
