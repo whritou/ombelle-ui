@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react'
 import { CircleAlert, RotateCcw } from 'lucide-react'
+import { getCatalog } from '@ombelle/catalog'
 import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
@@ -457,19 +458,48 @@ function touchesScheme(
     ),
   )
 }
+type SchemeMode = 'light' | 'dark'
+/**
+ * What a palette swatch draws in one mode, as the style picker on the landing page does: the page
+ * colour as the disc and the primary as the mark inside it. Minimalist's primaries are all
+ * near-black, so its ring colour is the mark that tells its palettes apart.
+ */
+export function paletteSwatch(
+  tokens: Readonly<Record<string, string | undefined>>,
+  family: StyleFamily,
+): { background: string; mark: string } | undefined {
+  const background = tokens.background
+  const mark = family === 'minimalist' ? (tokens.ring ?? tokens.primary) : tokens.primary
+  return background && mark ? { background, mark } : undefined
+}
+/** The style's own colours in one mode, for the Style default swatch. */
+function defaultTokens(family: StyleFamily, mode: SchemeMode): Readonly<Record<string, string | undefined>> {
+  return getCatalog('0.1.0').presets[family].modes[mode]
+}
+/** The disc's custom properties; a primary colour alone has no page colour, so it is a plain filled disc. */
+function swatchStyle(swatch: { background: string; mark?: string } | undefined): CSSProperties | undefined {
+  if (!swatch) return undefined
+  return { '--preset-scheme-bg': swatch.background, '--preset-scheme-mark': swatch.mark } as CSSProperties
+}
 /** The tokens the Primary row owns; a palette still counts as applied while it overrides them. */
 export type SchemeGroup = 'palette' | 'accent'
-/** One-click palettes for the style, and primary colours; TokenList keeps every token editable. */
+/**
+ * One-click palettes for the style, and primary colours; TokenList keeps every token editable.
+ * The swatches follow the preview's mode, so each one shows what the preview would turn into.
+ */
 export function ThemeControls({
   draft,
+  mode = 'light',
   onApply,
   onResetGroup,
 }: {
   draft: PresetEditorDraft
+  mode?: SchemeMode
   onApply: (scheme: ColorScheme, group: SchemeGroup) => void
   onResetGroup: (group: SchemeGroup) => void
 }) {
   const palettes = paletteSchemes(draft.family)
+  const styleDefault = defaultTokens(draft.family, mode)
   // Edits from any family's palette count as touched, so a carried-over palette reads Custom.
   const everyPalette = styleFamilies.flatMap((family) => paletteSchemes(family))
   const groups = [
@@ -508,7 +538,16 @@ export function ThemeControls({
                 title="Style default"
                 onClick={() => onResetGroup(group.id)}
               >
-                <span className="preset-scheme-dot preset-scheme-default" aria-hidden="true" />
+                <span
+                  className="preset-scheme-dot"
+                  aria-hidden="true"
+                  data-palette={group.id === 'palette' ? '' : undefined}
+                  style={swatchStyle(
+                    group.id === 'palette'
+                      ? paletteSwatch(styleDefault, draft.family)
+                      : styleDefault.primary ? { background: styleDefault.primary } : undefined,
+                  )}
+                />
               </button>
               {group.schemes.map((scheme) => (
                 <button
@@ -523,15 +562,12 @@ export function ThemeControls({
                   <span
                     className="preset-scheme-dot"
                     aria-hidden="true"
-                    data-palette={scheme.swatchDark ? '' : undefined}
-                    style={
-                      scheme.swatchDark
-                        ? ({
-                            background: `linear-gradient(135deg, ${scheme.swatch} 50%, ${scheme.swatchDark} 50%)`,
-                            '--preset-scheme-mark': scheme.swatchMark ?? scheme.light.primary,
-                          } as CSSProperties)
-                        : { background: scheme.swatch }
-                    }
+                    data-palette={group.id === 'palette' ? '' : undefined}
+                    style={swatchStyle(
+                      group.id === 'palette'
+                        ? paletteSwatch(scheme[mode], draft.family)
+                        : scheme[mode].primary ? { background: scheme[mode].primary } : undefined,
+                    )}
                   />
                 </button>
               ))}

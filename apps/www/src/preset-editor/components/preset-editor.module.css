@@ -165,21 +165,33 @@
 }
 
 /* Header and global actions share one bar. */
+/* A short "Draft" chip: the full caveat is its hover text and screen reader text, and the
+   checks panel states it where the contrast results are, so the bar keeps one calm row. */
 .editor .draftNote {
   min-width: 0;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
   color: var(--muted-foreground);
   font-size: 0.75rem;
+  font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
 }
-/* Below wide screens the note shortens to "Draft…" (full text on hover and
-   for assistive tech) so the bar keeps one row, like the Button editor. */
-@media (max-width: 1279px) {
-  .editor .draftNote {
-    max-width: 3.25rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+/* The guide is a labelled help link, set apart from the editor's own actions. */
+.editor .guideLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 36px;
+  padding: 0 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-underline-offset: 4px;
+}
+.editor .guideLink:hover {
+  text-decoration: underline;
 }
 
 .editor .getCode {
@@ -552,13 +564,14 @@
 .editor :global(.preset-scheme-options) {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
+/* Swatches as on the landing page: a disc in the palette's page colour with its primary as the mark. */
 .editor :global(.preset-scheme) {
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  min-height: 34px;
+  width: 40px;
+  min-height: 40px;
   padding: 0;
   border: 2px solid transparent;
   border-radius: 999px;
@@ -571,10 +584,11 @@
   border-color: var(--muted-foreground);
 }
 .editor :global(.preset-scheme-dot) {
-  width: 24px;
-  height: 24px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
+  width: 30px;
+  height: 30px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
   border-radius: 999px;
+  background: var(--preset-scheme-bg, var(--muted));
 }
 .editor :global(.preset-scheme-dot)[data-palette] {
   position: relative;
@@ -582,13 +596,9 @@
 .editor :global(.preset-scheme-dot)[data-palette]::after {
   content: '';
   position: absolute;
-  inset: 7px;
+  inset: 8px;
   border-radius: 999px;
   background: var(--preset-scheme-mark);
-  border: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
-}
-.editor :global(.preset-scheme-default) {
-  background: conic-gradient(var(--primary) 0 50%, var(--muted) 0);
 }
 
 /* Numeric design values: slider plus an exact number field. */
