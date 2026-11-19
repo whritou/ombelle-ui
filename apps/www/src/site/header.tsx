@@ -1,10 +1,10 @@
 'use client'
 
-import { Menu, X } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { componentEditorLink } from '../editor/editable-components'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '../generated/ui/components/ui/navigation-menu'
-import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../generated/ui/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../generated/ui/components/ui/sheet'
 import { categoryAnchor, categoryNames } from './components/component-names'
 import { documentationGuides } from './docs/navigation'
 import { GithubIcon, Logo } from './logo'
@@ -72,14 +72,8 @@ export function SiteHeader() {
               </button>
             </SheetTrigger>
             <SheetContent side="inline-end" aria-describedby={undefined} className="site-menu-sheet">
-              <div className="flex items-center justify-between">
-                <SheetTitle>Menu</SheetTitle>
-                <SheetClose asChild>
-                  <button type="button" aria-label="Close menu" className="inline-flex size-11 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted active:bg-foreground/10">
-                    <X className="size-4" aria-hidden />
-                  </button>
-                </SheetClose>
-              </div>
+              {/* The sheet draws its own Close button; a second one here would sit beside it. */}
+              <SheetTitle>Menu</SheetTitle>
               <nav aria-label="Mobile" className="mt-6 flex flex-col gap-1">
                 {[...primaryLinks, { href: repository, label: 'GitHub' }].map(link => (
                   <a key={link.href} href={link.href} aria-current={current(link.href)} className="rounded-md px-3 py-3 text-base font-medium transition-colors hover:bg-muted active:bg-foreground/10 aria-[current=page]:bg-muted">
