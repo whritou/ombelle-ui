@@ -10,7 +10,9 @@ const ruleCount = 6
 describe('shared focus layout css', () => {
   it('focus rules name no html element', () => {
     const selectors: string[] = []
-    postcss.parse(focusCss).walkRules((rule) => selectors.push(...rule.selectors))
+    postcss.parse(focusCss).walkRules((rule) => {
+      selectors.push(...rule.selectors)
+    })
     expect(selectors.length).toBeGreaterThan(0)
     for (const selector of selectors) expect(selector).not.toMatch(/\b(html|body)\b|:root/)
     expect(postcss.parse(focusCss).nodes.filter((node) => node.type === 'rule')).toHaveLength(ruleCount)

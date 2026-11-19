@@ -14,3 +14,4 @@ apps/www/public/editor-compiler.worker.js
 apps/www/public/preset-compiler.worker.js
 apps/www/public/ombelle-preview/
 *.tsbuildinfo
+apps/www/public/previews/

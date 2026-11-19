@@ -7,7 +7,7 @@ export const PreviewPortalContainer = React.createContext<HTMLElement | null>(nu
 
 type PreviewPortalProps = {
   portal: React.ComponentType<any>
-  container?: HTMLElement | null
+  container?: Element | DocumentFragment | null
 } & Record<string, unknown>
 
 /** Renders a Radix `Portal` into the preview stage unless a non-null container is given. */
