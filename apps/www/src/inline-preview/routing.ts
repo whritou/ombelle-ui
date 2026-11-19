@@ -6,7 +6,10 @@ export type BuiltInFamily = (typeof supportedStyleFamilies)[number]
 export const iframeOnly: ReadonlySet<ComponentId> = new Set<ComponentId>(['sidebar'])
 
 /** Components whose specimens cannot render on the server; the stage mounts them after hydration. */
-export const clientOnly: ReadonlySet<ComponentId> = new Set<ComponentId>()
+export const clientOnly: ReadonlySet<ComponentId> = new Set<ComponentId>([
+  // The Date Picker writes its date in the runtime's locale, which differs between the server and the browser.
+  'calendar',
+])
 
 export function previewPath(id: ComponentId, family: StyleFamily): 'inline' | 'iframe' {
   return family === 'liquid-glass' || iframeOnly.has(id) ? 'iframe' : 'inline'
