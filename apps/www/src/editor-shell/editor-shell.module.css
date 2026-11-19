@@ -1016,11 +1016,20 @@
   }
 }
 
-/* The desktop menubar sits in the bar like its other controls: no frame of its own. */
+/* The desktop menubar sits in the bar like its other controls: no frame, no offset shadow, and the
+   same 36px height as the History and Commands buttons beside it. */
 .menubar[data-slot='menubar'] {
+  gap: 0.125rem;
+  min-height: 36px;
   padding: 0;
   border: 0;
   background: transparent;
+  box-shadow: none;
+}
+.menubar [data-slot='menubar-trigger'] {
+  min-height: 36px;
+  height: 36px;
+  padding-inline: 0.75rem;
 }
 
 @media (min-width: 1200px) {

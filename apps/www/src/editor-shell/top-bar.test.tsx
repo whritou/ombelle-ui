@@ -101,18 +101,19 @@ it('EditorTopBar shows its trail as a collapsing catalog Breadcrumb with the cur
   expect(html).toMatch(/<span[^>]*aria-current="page"[^>]*data-slot="breadcrumb-page"[^>]*>Button<\/span>/)
 })
 
-it('EditorTopBar on the desktop offers File, Edit and View menus: actions split by kind, preview controls as radio groups', () => {
+it('EditorTopBar on the desktop offers File and Edit menus, with actions split by kind and no View menu', () => {
   const html = renderToStaticMarkup(
     <EditorTopBar crumbs={['A']} nameField={{ id: 'n', label: 'Name', value: 'x', maxLength: 9, onChange: noop }}
       revision="r1" status="" undo={history} redo={history}
       menu={{ label: 'More actions', items: [{ id: 'download-json', label: 'Download recipe JSON', onSelect: noop }, { id: 'reset-recipe', label: 'Reset recipe', onSelect: noop }] }}
-      view={[{ label: 'Preview mode', value: 'light', options: [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }], onChange: noop }]}
       primary={null} />,
   )
   const bar = /<div[^>]*role="menubar"[^>]*>([^]*?)<\/div>/.exec(html)
   expect(bar?.[0]).toContain('aria-label="Editor menus"')
-  expect(bar?.[1].match(/role="menuitem"/g)).toHaveLength(3)
-  for (const name of ['File', 'Edit', 'View']) expect(bar?.[1]).toContain(`>${name}</button>`)
+  expect(bar?.[1].match(/role="menuitem"/g)).toHaveLength(2)
+  for (const name of ['File', 'Edit']) expect(bar?.[1]).toContain(`>${name}</button>`)
+  // The preview's own bar holds the preview controls, so no menu repeats them.
+  expect(bar?.[1]).not.toContain('>View</button>')
   // The overflow menu renders too, for widths below 1200px: CSS shows one or the other, so nothing swaps after hydration.
   expect(html).toContain('data-slot="toolbar-overflow-trigger"')
 })

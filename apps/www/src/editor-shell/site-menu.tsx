@@ -4,7 +4,7 @@ import { Menu } from 'lucide-react'
 import { useRef, useState } from 'react'
 import styles from './editor-shell.module.css'
 import { primaryLinks, repository } from '../site/links'
-import { GithubIcon } from '../site/logo'
+import { GithubIcon, LogoImages } from '../site/logo'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../generated/ui/components/ui/sheet'
 
 /**
@@ -21,10 +21,15 @@ export function SiteMenu() {
         <Menu aria-hidden="true" size={18} />
       </button>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="inline-start" aria-label="Site menu" className={styles.phoneSheet}
+        <SheetContent side="inline-start" className={styles.phoneSheet}
           onCloseAutoFocus={(event) => { event.preventDefault(); trigger.current?.focus() }}>
           <SheetHeader>
-            <SheetTitle>Site menu</SheetTitle>
+            {/* The sheet is titled with the site's logo, as the header is; the name is for assistive technology.
+                Its button says what it opens. */}
+            <SheetTitle>
+              <LogoImages className="h-7 w-auto" />
+              <span className="sr-only">Ombelle</span>
+            </SheetTitle>
             <SheetDescription className="sr-only">Site navigation.</SheetDescription>
           </SheetHeader>
           <nav aria-label="Site" className={styles.siteMenuLinks}>
