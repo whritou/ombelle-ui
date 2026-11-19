@@ -53,8 +53,8 @@ async function compileFamily(family: BuiltInFamily): Promise<Compiled> {
       else if (name.endsWith('.css')) styles.set(name.slice(0, -4), artifact.content)
     }
   }
-  // The inline previews ship no web fonts: every built-in family uses system fonts.
-  if (/@import\b/.test(familySheet)) throw new Error(`Built-in family ${family} needs web fonts`)
+  // Font imports are stripped above and the page loads those fonts itself; any other @import has no way in.
+  if (/@import\b/.test(familySheet)) throw new Error(`Built-in family ${family} has a non-font @import, which preview CSS cannot load`)
   return { components, styles, familySheet, theme: result.theme }
 }
 

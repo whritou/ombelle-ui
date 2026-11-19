@@ -32,13 +32,20 @@ export function familyFontIds(family: BuiltInFamily): string[] {
 }
 
 const loading = new Map<string, Promise<void>>()
-/** Loads a family's font stylesheets once; later calls share the first request. */
+/** Loads a family's font stylesheets once; later calls share the first request, and a failed one is retried. */
 export function loadFamilyFonts(family: BuiltInFamily): Promise<void> {
   return Promise.all(
     familyFontIds(family).map((id) => {
       let request = loading.get(id)
       if (!request) {
-        request = (fontLoaders[id]?.() ?? Promise.resolve()).then(() => undefined)
+        request = (fontLoaders[id]?.() ?? Promise.resolve()).then(
+          () => undefined,
+          (error: unknown) => {
+            // A failed load is forgotten, so the next switch to this family tries again.
+            loading.delete(id)
+            throw error
+          },
+        )
         loading.set(id, request)
       }
       return request
