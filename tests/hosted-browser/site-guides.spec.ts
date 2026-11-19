@@ -102,6 +102,44 @@ test('landing starts in Ombelle and wears any family from the dock, a tile, or a
   await hero.screenshot({ path: '.artifacts/website-hero-ombelle-dark.png' })
 })
 
+test('landing links styled as buttons read like the buttons beside them, in every family and both modes', async ({ page }) => {
+  await page.goto('/')
+  const dock = page.getByRole('group', { name: 'Page style', exact: true })
+  // The hero's "Get started" link and its form's "Continue" button are both the primary variant.
+  const link = page.locator('section[aria-labelledby="hero"]').getByRole('link', { name: 'Get started' })
+  const button = page.locator('section[aria-labelledby="hero"]').getByRole('button', { name: /^(Continue|Workspace created)$/ })
+  for (const dark of [false, true]) {
+    await page.evaluate((on) => document.documentElement.classList.toggle('dark', on), dark)
+    for (const name of ['Ombelle', 'Papier', 'Organic', 'Retro', 'Minimalist', 'Neo-brutal', 'Flat', 'Glass']) {
+      await dock.getByRole('button', { name, exact: true }).click()
+      // Colours fade between families, so poll until they settle instead of reading them mid-fade.
+      const colors = async () => ({
+        link: await link.evaluate((node) => getComputedStyle(node).color),
+        button: await button.evaluate((node) => getComputedStyle(node).color),
+      })
+      await expect.poll(async () => { const c = await colors(); return c.link === c.button }, { message: `${name}, ${dark ? 'dark' : 'light'}` }).toBe(true)
+    }
+  }
+})
+
+test('the Cycle button restyles the page from anywhere on it, and stops when pressed again', async ({ page }) => {
+  await page.goto('/')
+  const main = page.locator('main')
+  const dock = page.getByRole('group', { name: 'Page style', exact: true })
+  const cycle = dock.getByRole('button', { name: 'Cycle', exact: true })
+  // Start from a family the visitor chose, so the automatic first lap is not running.
+  await dock.getByRole('button', { name: 'Ombelle', exact: true }).click()
+  await expect(cycle).toHaveAttribute('aria-pressed', 'false')
+  await page.locator('section#cascade').scrollIntoViewIfNeeded()
+  expect(await page.evaluate(() => document.getElementById('hero-section')!.getBoundingClientRect().bottom)).toBeLessThan(0)
+  await cycle.click()
+  // It answers the press at once, with the hero far out of view.
+  await expect(main).not.toHaveAttribute('data-family', 'ombelle')
+  await expect(cycle).toHaveAttribute('aria-pressed', 'true')
+  await cycle.click()
+  await expect(cycle).toHaveAttribute('aria-pressed', 'false')
+})
+
 for (const kind of ['preset', 'component/button', 'component/badge']) {
   test(`${kind} starts in Ombelle, links to its guide, and restores a saved Flat draft`, async ({ page }) => {
     await page.goto(`/editor/${kind}`)
