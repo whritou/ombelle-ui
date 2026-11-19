@@ -1,7 +1,7 @@
 'use client'
 
 import * as Tabs from '@radix-ui/react-tabs'
-import { Component, startTransition, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Component, startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { preload } from 'react-dom'
 import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
 import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
@@ -15,6 +15,7 @@ import { GlassPresetSelect } from '../glass-preset-select'
 import { glassBackdropOptions, glassPresetBackdrop, glassPresetId } from '../glass-presets'
 import type { PresetBackdrop, PresetView } from '../../preset-editor/preview-protocol'
 import { InlinePreview } from '../../inline-preview/inline-preview'
+import { loadFamilyFonts } from '../../inline-preview/family-fonts'
 import { previewPath, previewStylesheets, type BuiltInFamily } from '../../inline-preview/routing'
 import { useSiteDark } from '../theme'
 import { CodeBlock } from '../../generated/ui/components/ui/code-block'
@@ -63,9 +64,16 @@ export function ComponentPlayground({ id, name, source, styles }: {
   // the toggle shows the reader's latest pick at once.
   const [family, setFamily] = useState<StyleFamily>(familyOptions[0]!.value)
   const [pendingFamily, setPendingFamily] = useState<StyleFamily>(family)
+  const latestPick = useRef<StyleFamily>(family)
   const pickFamily = (next: StyleFamily) => {
     setPendingFamily(next)
-    startTransition(() => setFamily(next))
+    latestPick.current = next
+    // The stage switches once the family's fonts are in, so text does not reflow after the switch;
+    // a later pick wins even when this family's fonts arrive after it.
+    const fonts = next === 'liquid-glass' ? Promise.resolve() : loadFamilyFonts(next as BuiltInFamily).catch(() => undefined)
+    void fonts.then(() => {
+      if (latestPick.current === next) startTransition(() => setFamily(next))
+    })
   }
   const [glassPreset, setGlassPreset] = useState<StartingPresetId>(defaultGlassPresetId)
   const [mode, setMode] = useState<PreviewMode>('auto')
@@ -84,6 +92,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
     if (selected && glass === 'experimental') {
       setGlassPreset(selected)
       setPendingFamily('liquid-glass')
+      latestPick.current = 'liquid-glass'
       setFamily('liquid-glass')
     }
   }, [glass])
@@ -202,12 +211,13 @@ class InlineBoundary extends Component<{ onError: () => void; children: ReactNod
   }
 }
 
-/** Warms the stylesheets of the other families while the browser is idle, so switching family does not wait on the network. */
+/** Warms the stylesheets and fonts of the other families while the browser is idle, so switching family does not wait on the network. */
 function preloadOtherFamilies(id: ComponentId, current: StyleFamily): () => void {
   const run = () => {
     for (const { value } of familyOptions) {
       if (value === current || value === 'liquid-glass') continue
       for (const href of previewStylesheets(value as BuiltInFamily, id)) preload(href, { as: 'style' })
+      void loadFamilyFonts(value as BuiltInFamily).catch(() => undefined)
     }
   }
   if (typeof requestIdleCallback === 'function') {

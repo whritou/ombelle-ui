@@ -1,6 +1,10 @@
 'use client'
 
 import * as React from 'react'
+// Ombelle is the family the page renders first, so its fonts are part of the page; other families load theirs on pick.
+import '@fontsource-variable/figtree'
+import '@fontsource-variable/bricolage-grotesque'
+import '@fontsource-variable/geist-mono'
 import { componentsWithStyleSupport, type ComponentId } from '@ombelle/contracts'
 import { inlineSpecimens, specimenOnly } from '../generated/previews'
 import { GalleryGate, Unavailable } from '../generated/previews/specimens/shared'

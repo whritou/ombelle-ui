@@ -4,9 +4,11 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { compile } from '@ombelle/compiler'
-import { getCatalog } from '@ombelle/catalog'
+import { compile, stripFontImports } from '@ombelle/compiler'
+import { fontById } from '@ombelle/catalog'
 import { componentsWithStyleSupport, supportedStyleFamilies } from '@ombelle/contracts'
+import { createPresetDraft, materializePreset, previewComponentIds } from '../apps/www/src/preset-editor/model.js'
+import { fontLoaders } from '../apps/www/src/inline-preview/family-fonts.js'
 import { specimenIndex } from '../fixtures/shared/specimens/index.js'
 import { previewTokensCss, scopePreviewCss, type BuiltInFamily } from './www-previews/scope-css.js'
 import { scopePreviewTemplate } from './www-previews/scope-template.js'
@@ -27,10 +29,15 @@ type Compiled = {
 }
 
 async function compileFamily(family: BuiltInFamily): Promise<Compiled> {
-  const preset = getCatalog('0.1.0').presets[family]
+  // The preset the iframe preview compiles (compile-protocol.ts): the catalog preset with its style's fonts.
+  const preset = materializePreset(createPresetDraft(family))
+  // The page loads fonts itself (family-fonts.ts), so each registry font needs a loader there.
+  for (const id of [preset.design.fontFamilyId, preset.design.headingFontFamilyId, preset.design.monoFontFamilyId])
+    if (id && fontById(id) && !(id in fontLoaders))
+      throw new Error(`Built-in family ${family} uses font ${id}, which has no loader in apps/www/src/inline-preview/family-fonts.ts`)
   const result = await compile({
     preset,
-    componentIds: componentsWithStyleSupport(family, ['stable', 'experimental']),
+    componentIds: previewComponentIds(family),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
   })
@@ -38,7 +45,8 @@ async function compileFamily(family: BuiltInFamily): Promise<Compiled> {
   const styles = new Map<string, string>()
   let familySheet = ''
   for (const artifact of result.artifacts) {
-    if (artifact.logicalPath === 'styles/ui-style.css') familySheet = artifact.content
+    // A browser cannot resolve the package imports of the fonts; the page loads those files itself.
+    if (artifact.logicalPath === 'styles/ui-style.css') familySheet = stripFontImports(artifact.content)
     else if (artifact.logicalPath.startsWith(compiledPrefix)) {
       const name = artifact.logicalPath.slice(compiledPrefix.length)
       if (name.endsWith('.tsx')) components.set(name.slice(0, -4), artifact.content)

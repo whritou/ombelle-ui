@@ -29,6 +29,12 @@ vi.mock('../../generated/previews/specimens/shared', async () => {
     Unavailable: () => null,
   }
 })
+// Font loading resolves at once unless a test holds a family's fonts back.
+const fonts = vi.hoisted(() => ({ held: new Map<string, () => void>() }))
+vi.mock('../../inline-preview/family-fonts', () => ({
+  loadFamilyFonts: (family: string) =>
+    fonts.held.has(family) ? new Promise<void>((resolve) => fonts.held.set(family, resolve)) : Promise.resolve(),
+}))
 vi.mock('../../preset-editor/use-preset-compiler', () => ({
   usePresetCompiler: () => {
     compiler.calls++
@@ -44,6 +50,7 @@ beforeEach(() => {
   compiler.calls = 0
   compiler.throwing = false
   compiler.loading = null
+  fonts.held.clear()
   document.documentElement.classList.remove('dark')
   window.history.replaceState(null, '', '/')
 })
@@ -96,6 +103,27 @@ it('marks the clicked family pressed at once', async () => {
   // The stage and the status keep the previous family until the new one is ready.
   expect(stage(host)!.dataset.previewFamily).toBe('ombelle')
   expect(host.querySelector('[role="status"]')!.textContent).toBe('Ombelle · light')
+})
+
+it("waits for the family's fonts before switching the stage", async () => {
+  fonts.held.set('papier', () => {})
+  const host = await render()
+  await click(host, 'Style family', 'Papier')
+  expect(host.querySelector('[aria-label="Style family"] button[aria-pressed="true"]')!.textContent).toBe('Papier')
+  expect(stage(host)!.dataset.previewFamily).toBe('ombelle')
+  await act(async () => fonts.held.get('papier')!())
+  expect(stage(host)!.dataset.previewFamily).toBe('papier')
+})
+
+it("keeps the last pick when an earlier family's fonts arrive later", async () => {
+  fonts.held.set('papier', () => {})
+  const host = await render()
+  await click(host, 'Style family', 'Papier')
+  await click(host, 'Style family', 'Organic')
+  expect(stage(host)!.dataset.previewFamily).toBe('organic')
+  await act(async () => fonts.held.get('papier')!())
+  expect(stage(host)!.dataset.previewFamily).toBe('organic')
+  expect(host.querySelector('[role="status"]')!.textContent).toBe('Organic · light')
 })
 
 it('lets an explicit mode override the site', async () => {

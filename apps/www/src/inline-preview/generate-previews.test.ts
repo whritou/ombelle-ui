@@ -67,6 +67,12 @@ it('ships no font imports', () => {
   for (const css of Object.values(first.public)) expect(css).not.toMatch(/@import/)
 })
 
+it("sets each family's own fonts, as the iframe preview does", () => {
+  expect(first.public['ombelle/base.css']).toContain("--font-family:'Figtree Variable'")
+  expect(first.public['papier/base.css']).toContain("--font-family:'Instrument Sans Variable'")
+  expect(first.public['papier/base.css']).toContain("--font-heading:'Fraunces Variable'")
+})
+
 it('registers every specimen', () => {
   const index = first.src['index.ts']!
   for (const id of Object.keys(specimenIndex)) expect(index).toContain(`'${id}':`)
