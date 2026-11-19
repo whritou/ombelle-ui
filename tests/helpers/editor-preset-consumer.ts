@@ -223,7 +223,8 @@ export async function withEditorPresetConsumer<T>(
     if (gallery) await fs.cp(
       new URL('../../fixtures/shared/specimens/', import.meta.url),
       path.join(root, 'src/specimens'),
-      { recursive: true },
+      // index.ts imports @ombelle/contracts, which consumer apps do not have.
+      { recursive: true, filter: (source) => !/[\\/]index\.ts$/.test(source) },
     )
     await fs.appendFile(
       path.join(root, 'src/index.css'),

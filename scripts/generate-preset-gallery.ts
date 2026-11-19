@@ -182,7 +182,8 @@ export async function writePresetGallery(root: string): Promise<void> {
   const specimensDirectory = new URL('../fixtures/shared/specimens/', import.meta.url)
   await fs.mkdir(path.join(root, 'specimens'), { recursive: true })
   for (const entry of await fs.readdir(specimensDirectory)) {
-    if (!/\.tsx?$/.test(entry)) continue
+    // index.ts maps ids to modules for the website and imports @ombelle/contracts.
+    if (!/\.tsx?$/.test(entry) || entry === 'index.ts') continue
     const specimen = await fs.readFile(new URL(entry, specimensDirectory), 'utf8')
     await fs.writeFile(
       path.join(root, 'specimens', entry),

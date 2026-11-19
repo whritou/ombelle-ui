@@ -52,6 +52,8 @@ it('generates deterministic reviewed source, fixture and Tailwind mappings', asy
   }
   // The gallery composes per-component specimens copied next to it.
   const specimenFiles = await fs.readdir(path.join(root, 'specimens'))
+  // The id-to-module index imports @ombelle/contracts and must stay out of consumer-style galleries.
+  expect(specimenFiles).not.toContain('index.ts')
   const fixture = (
     await Promise.all(
       ['gallery.tsx', ...specimenFiles.map((file) => 'specimens/' + file)].map((file) =>
