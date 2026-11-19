@@ -578,7 +578,7 @@ export function PresetGallery({
       </section>)}
       {gate('sidebar', 'Sidebar', <section aria-label="Sidebar" data-component="sidebar">
         <h2>Sidebar</h2>
-        <SidebarProvider style={{ '--sidebar-height': '18rem', border: '1px solid var(--border)' } as React.CSSProperties}>
+        <SidebarProvider mobileBreakpoint={480} style={{ '--sidebar-height': '18rem', border: '1px solid var(--border)' } as React.CSSProperties}>
           <Sidebar collapsible="icon" label="Gallery workspace">
             <SidebarHeader><strong>Ombelle</strong></SidebarHeader>
             <SidebarContent>
