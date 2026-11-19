@@ -376,7 +376,7 @@
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-slot='sidebar'] > [data-sidebar-inner] {
-    background: color-mix(in srgb, var(--card) calc(var(--glass-opacity) * 50%), transparent);
+    background: color-mix(in srgb, var(--card) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   }
