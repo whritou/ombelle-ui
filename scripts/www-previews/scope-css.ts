@@ -25,8 +25,8 @@ function namesFocusAttribute(node: selectorParser.Node): boolean {
 }
 
 function scopeSelectors(selectors: selectorParser.Root, family: BuiltInFamily) {
-  const stage = () =>
-    selectorParser.attribute({ attribute: 'data-preview-family', operator: '=', value: family, quoteMark: '"', raws: {} })
+  const stageNode = selectorParser().astSync(stageSelector(family)).first.first
+  const stage = () => stageNode.clone()
   selectors.each((selector) => {
     selector.walkAttributes((attribute) => {
       if (attribute.attribute.trim() === 'data-slot' && attribute.value !== undefined)
