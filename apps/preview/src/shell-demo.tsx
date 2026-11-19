@@ -10,7 +10,7 @@ const components = [
   ['data-table', 'Data Table'], ['menubar', 'Menubar'], ['prose', 'Prose'],
 ] as const
 
-/** Each family's audit page, filtered to the chosen shell components, side by side. */
+/** Each family's audit page, 840px wide so the Sidebar shows its desktop layout (under 768px it becomes a sheet), filtered to the chosen shell components, side by side. */
 function ShellDemo() {
   const [mode, setMode] = React.useState<'light' | 'dark'>('light')
   const [edition, setEdition] = React.useState<'radix' | 'base'>('radix')
@@ -45,12 +45,12 @@ function ShellDemo() {
         <input type="range" min={400} max={1600} step={40} value={height} onChange={event => setHeight(Number(event.target.value))} />
       </label>
     </div>
-    <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 560px), 1fr))' }}>
-      {families.map(([id, name]) => <section key={id} style={{ display: 'grid', gap: 8 }}>
+    <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 860px), 1fr))' }}>
+      {families.map(([id, name]) => <section key={id} style={{ display: 'grid', gap: 8, minInlineSize: 0, overflowX: 'auto' }}>
         <h2 style={{ margin: 0, font: '700 16px system-ui, sans-serif' }}>{name}</h2>
         <iframe title={`${name} app shell components`} loading="lazy"
           src={`${base}/audit/${id}/${edition}/?mode=${mode}&only=${chosen.join(',')}`}
-          style={{ inlineSize: '100%', blockSize: height, border: `1px solid ${ink}`, borderRadius: 12, background: panel }} />
+          style={{ inlineSize: 840, maxInlineSize: 'none', blockSize: height, border: `1px solid ${ink}`, borderRadius: 12, background: panel }} />
       </section>)}
     </div>
   </main>

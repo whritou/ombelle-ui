@@ -346,3 +346,19 @@ for (const width of [768, 1024]) {
     })
   })
 }
+
+test.describe('header panels', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+  for (const name of ['Docs', 'Components']) {
+    test(`the ${name} panel opens under its trigger`, async ({ page }) => {
+      await page.goto(`${site}/docs`)
+      await page.waitForLoadState('load')
+      const trigger = page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name, exact: true })
+      await trigger.click()
+      const panel = page.locator('[data-slot="navigation-menu-viewport"]')
+      await expect(panel).toBeVisible()
+      // The panel's start edge lines up with the trigger's (it only shifts when it would leave the window).
+      await expect.poll(async () => Math.abs((await panel.boundingBox())!.x - (await trigger.boundingBox())!.x)).toBeLessThan(2)
+    })
+  }
+})

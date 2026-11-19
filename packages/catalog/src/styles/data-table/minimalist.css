@@ -311,7 +311,8 @@
   padding-inline: 0;
   border-color: transparent;
 }
-[data-slot='data-table-button']:has(> svg:only-child) {
+/* The pagination steps hold only an icon. (:has(> svg:only-child) would also catch Status and View, whose text is not an element.) */
+[data-slot='data-table-button'][aria-label$=' page'] {
   padding-inline: 0;
 }
 [data-slot='data-table-button'] > svg,

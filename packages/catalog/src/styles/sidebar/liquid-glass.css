@@ -359,6 +359,10 @@
   --sidebar-pad: 0px;
   --sidebar-gap: 0px;
   --sidebar-item-size: 40px;
+  --sidebar-header-clip: hidden;
+  --sidebar-header-size: 0.75rem;
+  --sidebar-header-align: center;
+  --sidebar-header-space: nowrap;
   inline-size: var(--sidebar-width-icon);
 }
 [data-slot='sidebar'] > [data-sidebar-inner] {
@@ -674,6 +678,10 @@
     --sidebar-pad: 10px;
     --sidebar-gap: 10px;
     --sidebar-item-size: 100%;
+    --sidebar-header-clip: visible;
+    --sidebar-header-size: inherit;
+    --sidebar-header-align: start;
+    --sidebar-header-space: normal;
     inline-size: auto;
     visibility: visible;
   }
@@ -703,4 +711,14 @@
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
+}
+
+/* Collapsed to icons, a header title wider than the rail is clipped with an ellipsis, centred, instead of being cut
+   mid-letter. The glass rules allow one slot per selector, so the collapsed sidebar sets these variables. */
+[data-slot='sidebar-header'] {
+  overflow: var(--sidebar-header-clip, visible);
+  font-size: var(--sidebar-header-size, inherit);
+  text-align: var(--sidebar-header-align, start);
+  text-overflow: ellipsis;
+  white-space: var(--sidebar-header-space, normal);
 }

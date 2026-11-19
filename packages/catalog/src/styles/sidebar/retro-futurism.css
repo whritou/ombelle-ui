@@ -811,3 +811,17 @@
     box-shadow: none;
   }
 }
+
+/* Collapsed to icons: the hidden label is still a flex item, so the gap would push the icon off-centre; and a header
+   title wider than the rail is clipped with an ellipsis, centred, instead of being cut mid-letter. */
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-menu-button'] {
+  gap: 0;
+}
+[data-slot='sidebar'][data-collapsible='icon'] [data-slot='sidebar-header'] {
+  overflow: hidden;
+  padding-inline: 0.5rem;
+  font-size: 0.75rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

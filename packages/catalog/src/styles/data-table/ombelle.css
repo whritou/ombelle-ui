@@ -243,10 +243,9 @@
   animation: ombelle-dropdown-menu-enter var(--motion-duration) ease-out;
 }
 [data-slot='data-table-menu-item']:is([data-highlighted], :hover) {
-  /* The pink tint reaches 3:1 against the menu on its own, so no ring marks the item reached with
-     the keyboard; the primary foreground keeps its text readable. */
-  background: var(--primary);
-  color: var(--primary-foreground);
+  /* The accent fill, as the board draws a highlighted menu row; its text and the count keep readable colours. */
+  background: var(--accent);
+  color: var(--accent-foreground);
   /* Invisible here; forced colors draw it, since they drop the fill. */
   outline: 2px solid transparent;
   outline-offset: -2px;
@@ -317,7 +316,8 @@
 }
 [data-slot='data-table-button']:hover:not(:disabled),
 [data-slot='data-table-row-actions']:hover:not(:disabled) {
-  background: var(--muted);
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 [data-slot='data-table-button']:disabled,
 [data-slot='data-table-row-actions']:disabled {

@@ -300,3 +300,15 @@
   border-inline-start: var(--border-width) solid var(--border);
   border-block-start: var(--border-width) solid var(--border);
 }
+
+/* Radix measures the open trigger's offsetLeft against its offset parent to place the pointer, so the item must not be
+   the positioned ancestor: the list's own wrapper is, and the pointer then follows the trigger. */
+[data-slot='navigation-menu-item'] {
+  position: static;
+}
+
+/* Radix sizes this panel to its measured content, so its own padding and border go outside that size; border-box would
+   clip the last row and the end of long lines. (Base UI sizes its popup itself, so only this wrapper's child is set.) */
+[data-navigation-menu-position] > [data-slot='navigation-menu-viewport'] {
+  box-sizing: content-box;
+}
