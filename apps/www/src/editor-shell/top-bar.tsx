@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { ChevronLeft, Ellipsis, Redo2, Search, Undo2 } from 'lucide-react'
+import { ChevronLeft, Ellipsis, Pencil, Redo2, Search, Undo2 } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
 import { editableComponents } from '../editor/editable-components'
 import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
@@ -154,6 +154,8 @@ export function EditorTopBar({
           aria-invalid={nameField.invalid ? true : undefined}
           onChange={(event) => nameField.onChange(event.target.value)}
         />
+        {/* The name is a plain field next to a trail and a status, so a pencil says it can be edited. */}
+        {!nameField.readOnly && <Pencil aria-hidden="true" size={14} className={styles.nameIcon} />}
       </div>
       <span className={styles.revision}>{revision}</span>
       <span role="status" className={styles.status}>

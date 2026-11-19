@@ -46,10 +46,24 @@
 
 
 .nameField {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
+}
+
+.nameIcon {
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.nameField input:has(+ .nameIcon) {
+  padding-right: 2rem;
 }
 
 .nameField label {

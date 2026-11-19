@@ -75,6 +75,20 @@ it('EditorTopBar can render the name field read-only', () => {
   expect(field()).not.toContain('readOnly')
 })
 
+it('EditorTopBar marks an editable name with a pencil and leaves a read-only one plain', () => {
+  const props = {
+    crumbs: ['A'], revision: 'r1', status: '', undo: history, redo: history,
+    menu: { label: 'More', items: [] }, primary: null,
+  }
+  const field = (readOnly?: boolean) => renderToStaticMarkup(
+    <EditorTopBar {...props} nameField={{ id: 'n', label: 'Preset name', value: 'x', maxLength: 9, readOnly, onChange: noop }} />,
+  )
+  expect(field()).toContain('lucide-pencil')
+  expect(field(true)).not.toContain('lucide-pencil')
+  // The icon is decoration: the field keeps its own label.
+  expect(field()).toMatch(/<svg[^>]*lucide-pencil[^>]*aria-hidden="true"/)
+})
+
 
 it('EditorTopBar shows its trail as a collapsing catalog Breadcrumb with the current page marked', () => {
   const html = renderToStaticMarkup(
