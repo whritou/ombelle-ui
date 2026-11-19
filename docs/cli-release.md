@@ -12,7 +12,7 @@ them; recipe format 1.0/2.0 and catalog/compiler compatibility 0.1.0 remain. The
 website hides their install commands, and says some Liquid Glass components need
 a newer installer, until the published installer is 0.9.0 (`minimumCli`). Publish
 first, then run `pnpm version:set --published 0.9.0` (and `--check --published`)
-and deploy from `main`. Until 0.9.0 is published, the public installer stays 0.8.3.
+and deploy from `main`. The public installer is 0.9.0; its registry tarball and a fresh registry install were verified after publication. See [release evidence](evidence/npm-0.9.0-2026-11-19.md).
 
 The 0.8.3 release fixes two contrast failures. The Retro futurism Card description in a banded header
 now takes the header text colour instead of the muted colour (about 1.1:1 on the sunset band in every
@@ -181,6 +181,8 @@ Post-publication checks on 2026-11-02:
 `@ombelle-ui/cli@0.7.0` was published on 2026-11-07 from `4635ed1` (the merge of PR #91), built in a clean worktree (`workingTreeDirty: false`), and is the `latest` tag; its registry integrity `sha512-WoM2QGp/…aC1xdUPQ==` matches the tested candidate byte for byte. Before publication the packed candidate installed with lifecycle scripts disabled, printed help, and, on a copy of the shadcn `base-nova` Next.js fixture, applied `theme add` (recording the Base UI edition), stopped `add button` on shadcn's `button.tsx` with exit code 4, and planned `add button --beside` without writes. After publication `npx @ombelle-ui/cli@0.7.0 --help` ran from the registry. `pnpm check:foundation` was not completed on the Windows release machine (no native Bun, `tar` fails on the D: path); Base UI consumers were verified with `pnpm test:base-consumers` and `pnpm test:editions`.
 
 `@ombelle-ui/cli@0.7.1` was published on 2026-11-08 from `2d0510b` with the npm `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-piZhdP/5TFjMXlckqaMiL7WNV96i72/YGxqNrdoqTd/kRsxAcBOF3z5Brs6s6OR1HLi/4z7eXFDpQ5V/wzxbQg==`). The candidate passed 29 release checks and default production builds in plain Vite, shadcn Radix Vite, and shadcn Base UI Vite consumers; both Radix consumers installed all 23 downloaded recipes, and all three reapplied their preset as a no-op. A fresh registry-backed `npm exec --package=@ombelle-ui/cli@0.7.1 -- ombelle --help` succeeded after publication. The pack manifest reports a dirty working tree only because of a preexisting untracked local directory; tracked sources matched the release commit. Catalog/compiler compatibility remains 0.1.0 and recipe formats remain 1.0/2.0. The full foundation gate was not run for this patch; see [the original investigation and follow-up checks](evidence/real-world-installations-2026-11-08.md).
+
+`@ombelle-ui/cli@0.9.0` was published on 2026-11-19 from `405b10b9` (the merge of PR #173, the release-prep commit) with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-9oxfEqZh8dvPkAW6vxUhRZ9B1fA6Q380Zl/Sv6e2MOC+6RqFi9ak3TD8qHiXyl2A8ORqpKza3NWOYBuLcSRFAg==`). See [the npm 0.9.0 evidence](evidence/npm-0.9.0-2026-11-19.md).
 
 `@ombelle-ui/cli@0.8.3` was published on 2026-11-17 from `0187850f` (the merge of PR #169, the release-prep commit) by npm identity `ombelle` with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-ND1I0ma1ty+HD+jUPqL5hVlJ+x2tHGl4tZuHGSoPmP+BrjTpqBXpalqSnNyHo+u6DGzmuaEaP5WqoOl37u1GYw==`). See [the npm 0.8.3 evidence](evidence/npm-0.8.3-2026-11-17.md).
 
