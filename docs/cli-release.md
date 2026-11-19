@@ -12,7 +12,7 @@ them; recipe format 1.0/2.0 and catalog/compiler compatibility 0.1.0 remain. The
 website hides their install commands, and says some Liquid Glass components need
 a newer installer, until the published installer is 0.9.0 (`minimumCli`). Publish
 first, then run `pnpm version:set --published 0.9.0` (and `--check --published`)
-and deploy from `main`. Until 0.9.0 is published, the public installer stays 0.8.3.
+and deploy from `main`. The public installer is 0.9.0; its registry tarball and a fresh registry install were verified after publication. See [release evidence](evidence/npm-0.9.0-2026-11-19.md).
 
 The 0.8.3 release fixes two contrast failures. The Retro futurism Card description in a banded header
 now takes the header text colour instead of the muted colour (about 1.1:1 on the sunset band in every
