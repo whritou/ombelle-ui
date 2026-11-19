@@ -66,22 +66,31 @@ export function LandingProvider({ data, children }: { data: LandingData; childre
   const [playing, setPlaying] = useState(false)
   const [instant, setInstant] = useState(false)
   const steps = useRef(0)
+  // The first lap starts by itself and only runs while the hero is on screen. A lap the visitor
+  // starts from the dock runs wherever they are on the page.
+  const started = useRef<'automatic' | 'visitor'>('automatic')
 
-  // The hero cycles through the families once, then rests: a page that never stops changing is hard to read.
+  const advance = useCallback(() => {
+    steps.current += 1
+    // One lap through the families, then rest: a page that never stops changing is hard to read.
+    if (steps.current >= data.families.length) setPlaying(false)
+    setTweaks({})
+    setFamily((current) => data.families[(data.families.indexOf(current) + 1) % data.families.length]!)
+  }, [data.families])
+
   useEffect(() => setPlaying(!reducedMotion()), [])
   useEffect(() => {
     if (!playing) return
     const timer = setInterval(() => {
       if (document.hidden) return
-      const hero = document.getElementById('hero-section')?.getBoundingClientRect()
-      if (hero && (hero.bottom < 120 || hero.top > innerHeight)) return
-      steps.current += 1
-      if (steps.current >= data.families.length) setPlaying(false)
-      setTweaks({})
-      setFamily((current) => data.families[(data.families.indexOf(current) + 1) % data.families.length]!)
+      if (started.current === 'automatic') {
+        const hero = document.getElementById('hero-section')?.getBoundingClientRect()
+        if (hero && (hero.bottom < 120 || hero.top > innerHeight)) return
+      }
+      advance()
     }, cycleMs)
     return () => clearInterval(timer)
-  }, [playing, data.families])
+  }, [playing, advance])
 
   const wear = useCallback((next: StyleFamily, event?: MouseEvent<HTMLElement>) => {
     setPlaying(false)
@@ -122,7 +131,10 @@ export function LandingProvider({ data, children }: { data: LandingData; childre
       ...data, family, dark, wear, playing, look, tweaks, design, instant,
       setPlaying: (next) => {
         steps.current = 0
+        started.current = 'visitor'
         setPlaying(next)
+        // Answer the press at once instead of after the first interval.
+        if (next) advance()
       },
       setLook: (id, index) => {
         setPlaying(false)
@@ -140,7 +152,7 @@ export function LandingProvider({ data, children }: { data: LandingData; childre
       },
       code: exampleCode([family, look[family] ?? 0, design.radiusPx, design.borderWidthPx, design.shadowOffsetXPx, design.shadowOffsetYPx].join('|')),
     }
-  }, [data, family, dark, wear, playing, look, tweaks, instant])
+  }, [data, family, dark, wear, advance, playing, look, tweaks, instant])
 
   return <LandingContext.Provider value={value}>{children}</LandingContext.Provider>
 }

@@ -1,6 +1,8 @@
 /* The landing page. Each style family is a set of custom properties on [data-family], so a family
    can nest inside another (the style tiles) and the components below read only those properties. */
-.ol a {
+/* Links take the text colour around them, at no specificity: a link that is also a button
+   (.ol-btn) or a styled link (.ol-link) must keep the colour its own rule sets. */
+:where(.ol) a {
   color: inherit;
 }
 
