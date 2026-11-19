@@ -1,140 +1,62 @@
 'use client'
 import * as React from 'react'
-import { Button } from '@/components/ui/button'
-import { InputGroup, InputGroupInput, InputGroupTextarea, InputGroupAddon, InputGroupText, InputGroupButton, InputGroupClear, InputGroupCount } from '@/components/ui/input-group'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { Pagination, PaginationCompact, PaginationContent, PaginationItem, PaginationLink, PaginationPageSize, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
-import { Sheet, SheetTrigger, SheetContent, SheetHandle, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet'
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogMedia, AlertDialogConfirmInput } from '@/components/ui/alert-dialog'
-import { Badge, BadgeDot } from '@/components/ui/badge'
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@/components/ui/toast'
-import {
-  Card,
-  CardAction,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  CardGroup,
-  CardOption,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { Checkbox, CheckboxGroup, CheckboxGroupParent, CheckboxOption } from '@/components/ui/checkbox'
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select'
-import {
-  RadioGroup,
-  RadioGroupItem,
-  RadioGroupOption,
-  RadioGroupOptionLabel,
-  RadioGroupOptionDescription,
-} from '@/components/ui/radio-group'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuItem,
-  DropdownMenuShortcut,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu'
-import { Alert, AlertActions, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
-  PopoverTitle,
-  PopoverDescription,
-} from '@/components/ui/popover'
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarOverflow,
-  AvatarStatus,
-  AvatarGroup,
-} from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
-import {
-  Table,
-  TableCaption,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table'
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@/components/ui/accordion'
-import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Switch, SwitchThumb } from '@/components/ui/switch'
-import { Tabs, TabsCount, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipArrow,
-  TooltipShortcut,
-  ariaKeyShortcuts,
-} from '@/components/ui/tooltip'
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
-
-import { Spinner } from '@/components/ui/spinner'
-import { Kbd, KbdGroup } from '@/components/ui/kbd'
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
-import { Field, FieldLabel, FieldControl, FieldDescription, FieldError, FieldLegend, FieldSet, Form, FormErrorSummary } from '@/components/ui/field'
-import { Meter, MeterLabel, MeterValue, MeterSegment, MeterLegend, MeterLegendItem } from '@/components/ui/meter'
-import { Slider, SliderTicks, SliderValue } from '@/components/ui/slider'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Toggle } from '@/components/ui/toggle'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from '@/components/ui/button-group'
-import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item'
-import { Chip, ChipGroup, ChipRemove } from '@/components/ui/chip'
-import { TagInput, TagInputInput, TagInputList } from '@/components/ui/tag-input'
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
-import { Combobox, ComboboxContent, ComboboxCreate, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
-import { Calendar, DatePicker } from '@/components/ui/calendar'
-import { HoverCard, HoverCardArrow, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { NumberInput } from '@/components/ui/number-input'
-import { ColorPicker, ColorPickerPair } from '@/components/ui/color-picker'
-import { CodeBlock, CodeBlockCommand } from '@/components/ui/code-block'
-import { PasswordField, PasswordFieldCapsLock, PasswordFieldControl, PasswordFieldInput, PasswordFieldStrength, PasswordFieldToggle } from '@/components/ui/password-field'
-import { Carousel, CarouselContent, CarouselCounter, CarouselDots, CarouselImage, CarouselItem, CarouselNext, CarouselPrevious, CarouselThumbnails } from '@/components/ui/carousel'
-import { AspectRatio } from '@/components/ui/aspect-ratio'
-import { Toolbar, ToolbarButton, ToolbarLink, ToolbarOverflow, ToolbarSeparator, ToolbarToggleGroup, ToolbarToggleItem } from '@/components/ui/toolbar'
-import { Prose, ProseLead } from '@/components/ui/prose'
-import { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu'
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
-import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarShortcut, MenubarTrigger } from '@/components/ui/menubar'
-import { DataTable } from '@/components/ui/data-table'
-import { Stepper, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper'
+import { GalleryGate, createGate } from './specimens/shared'
+import { Specimen as InputGroupSpecimen } from './specimens/input-group'
+import { Specimen as BreadcrumbSpecimen } from './specimens/breadcrumb'
+import { Specimen as PaginationSpecimen } from './specimens/pagination'
+import { Specimen as SheetSpecimen } from './specimens/sheet'
+import { Specimen as AlertDialogSpecimen } from './specimens/alert-dialog'
+import { Specimen as ToastSpecimen } from './specimens/toast'
+import { Specimen as SpinnerSpecimen } from './specimens/spinner'
+import { Specimen as KbdSpecimen } from './specimens/kbd'
+import { Specimen as EmptySpecimen } from './specimens/empty'
+import { Specimen as FieldSpecimen } from './specimens/field'
+import { Specimen as MeterSpecimen } from './specimens/meter'
+import { Specimen as StepperSpecimen } from './specimens/stepper'
+import { Specimen as SliderSpecimen } from './specimens/slider'
+import { Specimen as ToggleGroupSpecimen } from './specimens/toggle-group'
+import { Specimen as ChipSpecimen } from './specimens/chip'
+import { Specimen as TagInputSpecimen } from './specimens/tag-input'
+import { Specimen as InputOtpSpecimen } from './specimens/input-otp'
+import { Specimen as ComboboxSpecimen } from './specimens/combobox'
+import { Specimen as CommandSpecimen } from './specimens/command'
+import { Specimen as CalendarSpecimen } from './specimens/calendar'
+import { Specimen as HoverCardSpecimen } from './specimens/hover-card'
+import { Specimen as ContextMenuSpecimen } from './specimens/context-menu'
+import { Specimen as ToggleSpecimen } from './specimens/toggle'
+import { Specimen as CollapsibleSpecimen } from './specimens/collapsible'
+import { Specimen as ScrollAreaSpecimen } from './specimens/scroll-area'
+import { Specimen as ButtonGroupSpecimen } from './specimens/button-group'
+import { Specimen as ItemSpecimen } from './specimens/item'
+import { Specimen as NumberInputSpecimen } from './specimens/number-input'
+import { Specimen as ColorPickerSpecimen } from './specimens/color-picker'
+import { Specimen as PasswordFieldSpecimen } from './specimens/password-field'
+import { Specimen as CarouselSpecimen } from './specimens/carousel'
+import { Specimen as AspectRatioSpecimen } from './specimens/aspect-ratio'
+import { Specimen as ToolbarSpecimen } from './specimens/toolbar'
+import { Specimen as ProseSpecimen } from './specimens/prose'
+import { Specimen as NavigationMenuSpecimen } from './specimens/navigation-menu'
+import { Specimen as SidebarSpecimen } from './specimens/sidebar'
+import { Specimen as ResizableSpecimen } from './specimens/resizable'
+import { Specimen as MenubarSpecimen } from './specimens/menubar'
+import { Specimen as DataTableSpecimen } from './specimens/data-table'
+import { Specimen as CodeBlockSpecimen } from './specimens/code-block'
+import { Specimen as ButtonSpecimen } from './specimens/button'
+import { Specimen as BadgeSpecimen } from './specimens/badge'
+import { Specimen as AlertSpecimen } from './specimens/alert'
+import { Specimen as AvatarSpecimen } from './specimens/avatar'
+import { Specimen as CardSpecimen } from './specimens/card'
+import { Specimen as TabsSpecimen } from './specimens/tabs'
+import { Specimen as TooltipSpecimen } from './specimens/tooltip'
+import { Specimen as DropdownMenuSpecimen } from './specimens/dropdown-menu'
+import { Specimen as PopoverSpecimen } from './specimens/popover'
+import { Specimen as SeparatorSpecimen } from './specimens/separator'
+import { Specimen as TableSpecimen } from './specimens/table'
+import { Specimen as AccordionSpecimen } from './specimens/accordion'
+import { Specimen as ProgressSpecimen } from './specimens/progress'
+import { Specimen as SkeletonSpecimen } from './specimens/skeleton'
+import { Specimen as DialogSpecimen } from './specimens/dialog'
+import { Specimen as ProjectFormSpecimen } from './specimens/project-form'
 
 // Family-independent: callers pass the component ids their family cannot
 // style (from the shared support table) and the family's display name.
@@ -143,1065 +65,81 @@ export type PresetGalleryProps = {
   familyLabel?: string
 }
 
-// The board's field trip photos as small 16:9 SVGs, one hue each: the gallery ships no image files.
-// The Carousel example's slides: each built-in style family, pictured in its own colours.
-const presetSlides = [
-  { id: 'ombelle', name: 'Ombelle', stable: true },
-  { id: 'papier', name: 'Papier', stable: true },
-  { id: 'organic', name: 'Organic', stable: true },
-  { id: 'retro-futurism', name: 'Retro futurism', stable: true },
-  { id: 'flat', name: 'Flat', stable: true },
-  { id: 'minimalist', name: 'Minimalist', stable: true },
-  { id: 'neo-brutalism', name: 'Neo brutalism', stable: true },
-  { id: 'liquid-glass', name: 'Liquid glass', stable: false },
-] as const
-const fieldTripPhotos = [
-  ['A lake below pine hills', 195], ['Sand dunes at dusk', 25], ['A city skyline at night', 240], ['A coastline', 200], ['A field of poppies', 95],
-].map(([alt, hue]) => ({ alt: alt as string, src: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'>`
-  + `<rect width='16' height='9' fill='hsl(${hue} 70% 82%)'/><path d='M0 6.5Q5 3.5 10 6t6-1V9H0z' fill='hsl(${hue} 45% 38%)'/></svg>`) }))
-
-function ToastExample() {
-  const [open, setOpen] = React.useState(false)
-  return <><Button variant="outline" onClick={() => setOpen(true)}>Show notification</Button>
-    <Toast open={open} onOpenChange={setOpen} variant="success">
-      <ToastTitle>Changes saved</ToastTitle><ToastDescription>Your project is up to date.</ToastDescription>
-      <ToastAction altText="Undo the last change">Undo</ToastAction><ToastClose />
-    </Toast><ToastViewport /></>
-}
-
-function Unavailable({
-  id,
-  name,
-  familyLabel,
-}: {
-  id: string
-  name: string
-  familyLabel: string
-}) {
-  return (
-    <div
-      className="preset-unavailable"
-      data-component={id}
-      data-unavailable=""
-      aria-disabled="true"
-    >
-      <strong>{name}</strong>
-      <span>Unavailable in {familyLabel}</span>
-    </div>
-  )
-}
-
 export function PresetGallery({
   unavailable = [],
   familyLabel = '',
 }: PresetGalleryProps = {}) {
-  const gate = (id: string, name: string, node: React.ReactNode) =>
-    unavailable.includes(id) ? (
-      <Unavailable id={id} name={name} familyLabel={familyLabel} />
-    ) : (
-      node
-    )
+  const gate = createGate(unavailable, familyLabel)
   return (
-    <main
-      className="preset-gallery"
-      data-testid="preset-gallery"
-      aria-label="Preset component gallery"
-    >
-      <header>
-        <h1>Your design system</h1>
-        <p>A working collection of components in your project theme.</p>
-      </header>
-      {gate('input-group', 'Input Group', <section aria-label="Input Group" data-component="input-group">
-        <h2>Input Group</h2>
-        <div className="preset-stack">
-          <label htmlFor="preset-website">Website</label>
-          <InputGroup>
-            <InputGroupAddon><InputGroupText>https://</InputGroupText></InputGroupAddon>
-            <InputGroupInput id="preset-website" placeholder="example.com" />
-            <InputGroupAddon align="inline-end"><InputGroupButton>Check</InputGroupButton></InputGroupAddon>
-          </InputGroup>
-          <label htmlFor="preset-group-invalid">Project slug</label>
-          <InputGroup><InputGroupInput id="preset-group-invalid" defaultValue="already-taken" aria-invalid="true" aria-describedby="preset-group-error" /></InputGroup>
-          <p id="preset-group-error">Choose another slug.</p>
-          <label htmlFor="preset-group-disabled">Managed domain</label>
-          <InputGroup><InputGroupInput id="preset-group-disabled" defaultValue="acme.app" disabled /></InputGroup>
-          <label htmlFor="preset-group-notes">Notes</label>
-          <InputGroup><InputGroupTextarea id="preset-group-notes" placeholder="Add a note" aria-describedby="preset-group-count" /><InputGroupAddon align="block-end"><InputGroupText>Optional</InputGroupText><InputGroupCount id="preset-group-count" value={0} max={160} /></InputGroupAddon></InputGroup>
-          <label htmlFor="preset-group-search">Search</label>
-          <InputGroup><InputGroupInput id="preset-group-search" placeholder="Search" defaultValue="glass toast" /><InputGroupAddon align="inline-end"><InputGroupClear label="Clear search" /></InputGroupAddon></InputGroup>
-        </div>
-      </section>)}
-      {gate('breadcrumb', 'Breadcrumb', <section aria-label="Breadcrumb" data-component="breadcrumb">
-        <h2>Breadcrumb</h2>
-        <div className="preset-stack">
-          <Breadcrumb aria-label="Gallery path"><BreadcrumbList>
-            <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
-          </BreadcrumbList></Breadcrumb>
-          <div data-component="breadcrumb~collapse" style={{ maxInlineSize: '16rem' }}>
-            <Breadcrumb aria-label="Long gallery path" collapse="auto"><BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink href="#home">Home</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink href="#workspace">Acme workspace</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink href="#projects">Projects</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>Website refresh</BreadcrumbPage></BreadcrumbItem>
-            </BreadcrumbList></Breadcrumb>
-          </div>
-        </div>
-      </section>)}
-      {gate('pagination', 'Pagination', <section aria-label="Pagination" data-component="pagination">
-        <h2>Pagination</h2><Pagination><PaginationContent>
-          <PaginationItem><PaginationPrevious disabled /></PaginationItem>
-          <PaginationItem><PaginationLink href="#page-1" isActive aria-label="Page 1">1</PaginationLink></PaginationItem>
-          <PaginationItem><PaginationLink href="#page-2" aria-label="Page 2">2</PaginationLink></PaginationItem>
-          <PaginationItem><PaginationEllipsis /></PaginationItem>
-          <PaginationItem><PaginationNext href="#page-2" /></PaginationItem>
-        </PaginationContent></Pagination>
-        <div className="preset-variants">
-          <Pagination aria-label="Compact pages"><PaginationCompact page={2} pageCount={12} previousHref="#page-1" nextHref="#page-3" /></Pagination>
-          <PaginationPageSize value={25} range="1–25 of 290" />
-        </div>
-      </section>)}
-      {gate('sheet', 'Sheet', <section aria-label="Sheet" data-component="sheet">
-        <h2>Sheet</h2><Sheet><SheetTrigger asChild><Button variant="outline">Open details</Button></SheetTrigger><SheetContent>
-          <SheetHeader><SheetTitle>Project details</SheetTitle><SheetDescription>Review the current project.</SheetDescription></SheetHeader>
-          <p>Your project is ready to review.</p><SheetFooter><SheetClose asChild><Button>Done</Button></SheetClose></SheetFooter>
-        </SheetContent></Sheet>
-        <div data-component="sheet~snap"><Sheet><SheetTrigger asChild><Button variant="outline">Open filters</Button></SheetTrigger>
-          <SheetContent side="bottom" snapPoints={[0.5, 0.9]}><SheetHandle label="Resize Filters" />
-            <SheetHeader><SheetTitle>Filters</SheetTitle><SheetDescription>Settles on 0.5 or 0.9 when released.</SheetDescription></SheetHeader>
-            <SheetFooter><SheetClose asChild><Button variant="outline" size="sm">Forms</Button></SheetClose><SheetClose asChild><Button variant="outline" size="sm">Overlays</Button></SheetClose></SheetFooter>
-          </SheetContent></Sheet></div>
-      </section>)}
-      {gate('alert-dialog', 'Alert Dialog', <section aria-label="Alert Dialog" data-component="alert-dialog">
-        <h2>Alert Dialog</h2><AlertDialog><AlertDialogTrigger asChild><Button variant="destructive">Delete project</Button></AlertDialogTrigger><AlertDialogContent>
-          <AlertDialogHeader><AlertDialogMedia tone="destructive" /><AlertDialogTitle>Delete this project?</AlertDialogTitle><AlertDialogDescription>This preview does not delete any data.</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogConfirmInput expected="website-refresh" />
-          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Delete project</AlertDialogAction></AlertDialogFooter>
-        </AlertDialogContent></AlertDialog>
-      </section>)}
-      {gate('toast', 'Toast', <section aria-label="Toast" data-component="toast">
-        <h2>Toast</h2><ToastProvider><ToastExample /></ToastProvider>
-      </section>)}
-      {gate('spinner', 'Spinner', <section aria-label="Spinner" data-component="spinner">
-        <h2>Spinner</h2><p><Spinner size="sm" /> <Spinner /> <Spinner size="lg" aria-label="Saving" /></p>
-      </section>)}
-      {gate('kbd', 'Kbd', <section aria-label="Kbd" data-component="kbd">
-        <h2>Kbd</h2><p>Search with <KbdGroup><Kbd>Ctrl</Kbd><Kbd>K</Kbd></KbdGroup></p>
-      </section>)}
-      {gate('empty', 'Empty State', <section aria-label="Empty State" data-component="empty">
-        <h2>Empty State</h2>
-        <Empty><EmptyHeader><EmptyMedia variant="icon" aria-hidden="true">+</EmptyMedia>
-          <EmptyTitle asChild><h3>No presets yet</h3></EmptyTitle>
-          <EmptyDescription>Start from a built-in family or import a preset file.</EmptyDescription></EmptyHeader>
-          <EmptyContent><Button variant="outline">Import file</Button><Button>New preset</Button></EmptyContent></Empty>
-      </section>)}
-      {gate('field', 'Field', <section aria-label="Field" data-component="field">
-        <h2>Field</h2>
-        <Field required><FieldLabel>Project name</FieldLabel><FieldControl><Input placeholder="acme-dashboard" /></FieldControl>
-          <FieldDescription>Shown in the CLI and the editor header.</FieldDescription><FieldError>Use lower case letters and dashes only.</FieldError></Field>
-        <Field invalid><FieldLabel>Package scope</FieldLabel><FieldControl><Input defaultValue="Acme UI" /></FieldControl>
-          <FieldError>Use lower case letters and dashes only.</FieldError></Field>
-        <Form aria-label="Save preset" summaryAction="saving" errors={{ name: 'A preset with this name already exists.', radius: 'Enter a number from 0 to 48.' }} data-component="field~form">
-          <FormErrorSummary />
-          <FieldSet>
-            <FieldLegend>Save preset</FieldLegend>
-            <Field name="name"><FieldLabel>Preset name</FieldLabel><FieldControl><Input defaultValue="Ombelle" /></FieldControl><FieldError /></Field>
-            <Field name="radius"><FieldLabel>Radius</FieldLabel><FieldControl><Input type="number" defaultValue="60" /></FieldControl><FieldError /></Field>
-          </FieldSet>
-        </Form>
-      </section>)}
-      {gate('meter', 'Meter', <section aria-label="Meter" data-component="meter">
-        <h2>Meter</h2>
-        <Meter value={128} max={200} segments={10} warningAt={0.6}><MeterLabel>Deploys this month</MeterLabel><MeterValue /></Meter>
-        <Meter max={10}><MeterLabel>Storage</MeterLabel><MeterValue>7 / 10 GB</MeterValue><MeterSegment value={4} tone="primary" /><MeterSegment value={2} tone="info" /><MeterSegment value={1} tone="success" />
-          <MeterLegend><MeterLegendItem tone="primary">Builds</MeterLegendItem><MeterLegendItem tone="info">Assets</MeterLegendItem><MeterLegendItem tone="success">Logs</MeterLegendItem></MeterLegend></Meter>
-        <div data-component="meter~circle"><Meter value={72} max={100} shape="circle"><MeterLabel>Storage used</MeterLabel></Meter></div>
-      </section>)}
-      {gate('stepper', 'Stepper', <section aria-label="Stepper" data-component="stepper">
-        <h2>Stepper</h2>
-        <Stepper aria-label="Setup">
-          <StepperItem status="complete"><StepperIndicator>1</StepperIndicator><StepperTitle>Preset</StepperTitle><StepperDescription>Ombelle</StepperDescription><StepperSeparator /></StepperItem>
-          <StepperItem status="current"><StepperIndicator>2</StepperIndicator><StepperTitle>Components</StepperTitle><StepperDescription>Choose 4</StepperDescription><StepperSeparator /></StepperItem>
-          <StepperItem status="upcoming"><StepperIndicator>3</StepperIndicator><StepperTitle>Install CLI</StepperTitle></StepperItem>
-        </Stepper>
-      </section>)}
-      {gate('slider', 'Slider', <section aria-label="Slider" data-component="slider">
-        <h2>Slider</h2>
-        <Slider defaultValue={[12]} max={24} aria-label="Border radius" getValueText={value => `${value} pixels`} />
-        <Slider defaultValue={[20, 80]} thumbLabels={['Minimum price', 'Maximum price']} />
-        <SliderTicks values={[0, 25, 50, 75, 100]} />
-        <div data-component="slider~readout"><Slider defaultValue={[12]} max={48} aria-labelledby="gallery-slider-radius" getValueText={value => `${value} px`}>
-          <span id="gallery-slider-radius">Radius</span><SliderValue /></Slider></div>
-        <div data-component="slider~editable"><Slider defaultValue={[0.75]} max={1} step={0.05} aria-labelledby="gallery-slider-shadow">
-          <span id="gallery-slider-shadow">Shadow opacity</span><SliderValue editable /></Slider></div>
-      </section>)}
-      {gate('toggle-group', 'Toggle Group', <section aria-label="Toggle Group" data-component="toggle-group">
-        <h2>Toggle Group</h2>
-        <ToggleGroup type="single" defaultValue="week" aria-label="Calendar view"><ToggleGroupItem value="day">Day</ToggleGroupItem><ToggleGroupItem value="week">Week</ToggleGroupItem><ToggleGroupItem value="month">Month</ToggleGroupItem></ToggleGroup>
-        <div className="preset-variant">
-          <ToggleGroup type="multiple" variant="toolbar" defaultValue={['bold']} aria-label="Text formatting"><ToggleGroupItem value="bold" aria-label="Bold"><b aria-hidden="true">B</b></ToggleGroupItem><ToggleGroupItem value="italic" aria-label="Italic"><i aria-hidden="true">I</i></ToggleGroupItem><ToggleGroupItem value="underline" aria-label="Underline"><u aria-hidden="true">U</u></ToggleGroupItem></ToggleGroup>
-        </div>
-      </section>)}
-      {gate('chip', 'Chip', <section aria-label="Chip" data-component="chip">
-        <h2>Chip</h2>
-        <ChipGroup aria-label="Status filter"><Chip defaultPressed>On track</Chip><Chip defaultPressed={false}>Needs attention</Chip><Chip defaultPressed={false}>Shipped</Chip></ChipGroup>
-        <div className="preset-variant"><Chip>glass<ChipRemove /></Chip></div>
-      </section>)}
-      {gate('tag-input', 'Tag Input', <section aria-label="Tag Input" data-component="tag-input">
-        <h2>Tag Input</h2>
-        <label id="gallery-topics">Topics</label>
-        <TagInput defaultValue={['design-tokens', 'glass']}><TagInputList /><TagInputInput aria-labelledby="gallery-topics" placeholder="Add a topic" /></TagInput>
-      </section>)}
-      {gate('input-otp', 'Input OTP', <section aria-label="Input OTP" data-component="input-otp">
-        <h2>Input OTP</h2>
-        <InputOTP maxLength={6} aria-label="Verification code"><InputOTPGroup><InputOTPSlot index={0} /><InputOTPSlot index={1} /><InputOTPSlot index={2} /></InputOTPGroup><InputOTPSeparator /><InputOTPGroup><InputOTPSlot index={3} /><InputOTPSlot index={4} /><InputOTPSlot index={5} /></InputOTPGroup></InputOTP>
-      </section>)}
-      <div data-testid="overlays-search" className="preset-sections">
-      {gate('combobox', 'Combobox', <section aria-label="Combobox" data-component="combobox">
-        <h2>Combobox</h2>
-        <label id="gallery-preset">Preset</label>
-        <Combobox defaultValue="ombelle">
-          <ComboboxInput aria-labelledby="gallery-preset" placeholder="Search presets" />
-          <ComboboxContent>
-            <ComboboxList>
-              <ComboboxItem value="liquid-glass">Liquid glass</ComboboxItem>
-              <ComboboxItem value="liquid-glass-givre">Liquid glass — Givre</ComboboxItem>
-              <ComboboxItem value="ombelle">Ombelle</ComboboxItem>
-              <ComboboxCreate />
-            </ComboboxList>
-            <ComboboxEmpty>No presets found.</ComboboxEmpty>
-          </ComboboxContent>
-        </Combobox>
-      </section>)}
-      {gate('command', 'Command', <section aria-label="Command" data-component="command">
-        <h2>Command</h2>
-        <Command label="Commands">
-          <CommandInput placeholder="Search commands" />
-          <CommandList>
-            <CommandGroup heading="Components">
-              <CommandItem>Add Button<CommandShortcut>↵</CommandShortcut></CommandItem>
-              <CommandItem>Add Dialog</CommandItem>
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Theme">
-              <CommandItem>Add theme from preset<CommandShortcut>Ctrl+T</CommandShortcut></CommandItem>
-            </CommandGroup>
-          </CommandList>
-          <CommandEmpty>No results.</CommandEmpty>
-        </Command>
-      </section>)}
-      {gate('calendar', 'Calendar', <section aria-label="Calendar" data-component="calendar">
-        <h2>Calendar</h2>
-        <Calendar mode="range" today="2026-11-10" defaultMonth="2026-11-01" aria-label="Stay" selected={{ from: '2026-11-12', to: '2026-11-18' }} />
-        <div className="preset-variant">
-          <p id="gallery-due" className="preset-label">Due date</p>
-          <DatePicker aria-labelledby="gallery-due" defaultValue="2026-11-12" calendar={{ today: '2026-11-10' }} />
-        </div>
-      </section>)}
-      {gate('hover-card', 'Hover Card', <section aria-label="Hover Card" data-component="hover-card">
-        <h2>Hover Card</h2>
-        <p>Built with <HoverCard><HoverCardTrigger href="#ombelle">@ombelle</HoverCardTrigger><HoverCardContent><strong>Ombelle UI</strong><p>Reviewed React components with deterministic presets.</p><HoverCardArrow /></HoverCardContent></HoverCard> presets.</p>
-      </section>)}
-      {gate('context-menu', 'Context Menu', <section aria-label="Context Menu" data-component="context-menu">
-        <h2>Context Menu</h2>
-        <ContextMenu>
-          <ContextMenuTrigger variant="zone" tabIndex={0} aria-label="Layer: Hero card">Right-click or Shift+F10 on a layer</ContextMenuTrigger>
-          <ContextMenuContent>
-            <ContextMenuItem>Duplicate<ContextMenuShortcut>Ctrl+D</ContextMenuShortcut></ContextMenuItem>
-            <ContextMenuItem>Copy as JSX</ContextMenuItem>
-            <ContextMenuSeparator />
-            <ContextMenuItem variant="destructive">Delete<ContextMenuShortcut>Del</ContextMenuShortcut></ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-      </section>)}
-      {gate('toggle', 'Toggle', <section aria-label="Toggle" data-component="toggle">
-        <h2>Toggle</h2>
-        <div className="preset-row">
-          <Toggle aria-label="Bold" defaultPressed><b aria-hidden="true">B</b></Toggle>
-          <Toggle variant="outline" size="sm">Show grid</Toggle>
-          <Toggle disabled>Disabled toggle</Toggle>
-        </div>
-      </section>)}
-      {gate('collapsible', 'Collapsible', <section aria-label="Collapsible" data-component="collapsible">
-        <h2>Collapsible</h2>
-        <div className="preset-stack">
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger>Advanced</CollapsibleTrigger>
-            <CollapsibleContent><p>Shadow offsets and blur.</p></CollapsibleContent>
-          </Collapsible>
-          <Collapsible>
-            <CollapsibleTrigger>Closed by default</CollapsibleTrigger>
-            <CollapsibleContent><p>Hidden until opened.</p></CollapsibleContent>
-          </Collapsible>
-        </div>
-      </section>)}
-      {gate('scroll-area', 'Scroll Area', <section aria-label="Scroll Area" data-component="scroll-area">
-        <h2>Scroll Area</h2>
-        <ScrollArea aria-label="Release notes" style={{ blockSize: '8rem', inlineSize: '16rem' }}>
-          {Array.from({ length: 24 }, (_, index) => <p key={index}>Release note {index + 1}</p>)}
-        </ScrollArea>
-      </section>)}
-      {gate('button-group', 'Button Group', <section aria-label="Button Group" data-component="button-group">
-        <h2>Button Group</h2>
-        <div className="preset-row">
-          <ButtonGroup aria-label="Alignment"><Button variant="outline">Left</Button><Button variant="outline">Center</Button><Button variant="outline">Right</Button></ButtonGroup>
-          <ButtonGroup aria-label="Zoom"><ButtonGroupText>Zoom</ButtonGroupText><ButtonGroupSeparator /><Button variant="outline">100%</Button></ButtonGroup>
-        </div>
-      </section>)}
-      {gate('item', 'Item', <section aria-label="Item" data-component="item">
-        <h2>Item</h2>
-        <ItemGroup aria-label="Projects">
-          <Item variant="outline"><ItemMedia variant="icon" aria-hidden="true">P</ItemMedia><ItemContent><ItemTitle>Website refresh</ItemTitle><ItemDescription>On track, due Friday.</ItemDescription></ItemContent></Item>
-          <Item variant="outline" asChild>
-            <a href="#billing"><ItemContent><ItemTitle>Billing migration</ItemTitle><ItemDescription>Shipped 10 minutes ago.</ItemDescription></ItemContent></a>
-            <ItemActions><Button variant="outline" size="sm">Archive</Button></ItemActions>
-          </Item>
-        </ItemGroup>
-      </section>)}
-      {gate('number-input', 'Number Input', <section aria-label="Number Input" data-component="number-input">
-        <h2>Number Input</h2>
-        <div className="preset-stack">
-          <label htmlFor="gallery-radius">Border radius</label>
-          <NumberInput id="gallery-radius" defaultValue={12} min={0} max={32} unit="px" />
-          <label htmlFor="gallery-duration">Motion duration</label>
-          <NumberInput id="gallery-duration" defaultValue={160} min={0} max={1000} step={10} largeStep={100} unit="ms" />
-        </div>
-      </section>)}
-      {gate('color-picker', 'Color Picker', <section aria-label="Color Picker" data-component="color-picker">
-        <h2>Color Picker</h2>
-        <ColorPickerPair label="Primary">
-          <ColorPicker mode="light" defaultValue="oklch(0.55 0.22 6)" contrastWith="oklch(0.99 0 0)" contrastLabel="primary foreground"
-            swatches={[{ label: 'Rose', value: 'oklch(0.55 0.22 6)' }, { label: 'Ink', value: 'oklch(0.22 0.012 275)' }]} />
-          <ColorPicker mode="dark" defaultValue="oklch(0.7 0.18 6)" contrastWith="oklch(0.16 0.01 275)" contrastLabel="primary foreground" />
-        </ColorPickerPair>
-      </section>)}
-      {gate('password-field', 'Password Field', <section aria-label="Password Field" data-component="password-field">
-        <h2>Password Field</h2>
-        <PasswordField>
-          <Label htmlFor="gallery-password">Password</Label>
-          <PasswordFieldControl>
-            <PasswordFieldInput id="gallery-password" defaultValue="correct-horse-7" autoComplete="new-password" />
-            <PasswordFieldToggle />
-          </PasswordFieldControl>
-          <PasswordFieldCapsLock />
-          <PasswordFieldStrength checks={[{ label: 'at least 12 characters', match: '^.{12,}$' }, { label: 'a number', match: '\\d' }, { label: 'add a symbol', match: '[^A-Za-z0-9]' }]} />
-        </PasswordField>
-      </section>)}
-      {gate('carousel', 'Carousel', <section aria-label="Carousel" data-component="carousel">
-        <h2>Carousel</h2>
-        <Carousel aria-label="Built-in presets" slidesPerView={2}>
-          <CarouselContent>
-            {presetSlides.map(kit => (
-              <CarouselItem key={kit.name}>
-                <Card className="preset-slide">
-                  {/* A small picture of the kit; the slide is named by its title below. */}
-                  <div className="preset-slide-shot" aria-hidden="true" data-kit={kit.id}>
-                    <span className="preset-slide-row"><span className="preset-slide-button">Get started</span><span className="preset-slide-button" data-outline="">Docs</span></span>
-                    <span className="preset-slide-input">you@studio.app</span>
-                    <span className="preset-slide-row"><span className="preset-slide-chip">Forms</span><span className="preset-slide-chip">Overlays</span></span>
-                  </div>
-                  <CardFooter className="preset-slide-meta"><strong>{kit.name}</strong><Badge variant={kit.stable ? 'secondary' : 'outline'}>{kit.stable ? 'Stable' : 'Experimental'}</Badge></CardFooter>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-          <CarouselDots />
-          <CarouselCounter />
-        </Carousel>
-        <div data-component="carousel~image-thumbnails">
-          <Carousel aria-label="Field trip photos" variant="image" ratio="16 / 9">
-            <CarouselContent>
-              {fieldTripPhotos.map(photo => <CarouselItem key={photo.alt}><CarouselImage src={photo.src} alt={photo.alt} /></CarouselItem>)}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-            <CarouselCounter />
-            <CarouselThumbnails />
-          </Carousel>
-        </div>
-      </section>)}
-      {gate('aspect-ratio', 'Aspect Ratio', <section aria-label="Aspect Ratio" data-component="aspect-ratio">
-        <h2>Aspect Ratio</h2>
-        <div className="preset-row">
-          <AspectRatio ratio={16 / 9} style={{ inlineSize: '12rem' }}><span>16 : 9</span></AspectRatio>
-          <AspectRatio ratio={1} style={{ inlineSize: '6rem' }}><span>1 : 1</span></AspectRatio>
-          <AspectRatio ratio={4 / 3} style={{ inlineSize: '8rem' }}><span>4 : 3</span></AspectRatio>
-        </div>
-      </section>)}
-      {gate('toolbar', 'Toolbar', <section aria-label="Toolbar" data-component="toolbar">
-        <h2>Toolbar</h2>
-        <Toolbar aria-label="Preset editor">
-          <ToolbarButton>Undo</ToolbarButton>
-          <ToolbarButton>Redo</ToolbarButton>
-          <ToolbarSeparator />
-          <ToolbarToggleGroup type="single" defaultValue="light" aria-label="Theme">
-            <ToolbarToggleItem value="light">Light</ToolbarToggleItem>
-            <ToolbarToggleItem value="dark">Dark</ToolbarToggleItem>
-          </ToolbarToggleGroup>
-          <ToolbarSeparator />
-          <ToolbarToggleGroup type="multiple" defaultValue={['grid']} aria-label="Guides">
-            <ToolbarToggleItem value="grid">Grid</ToolbarToggleItem>
-          </ToolbarToggleGroup>
-          <ToolbarLink href="#preview">Open preview</ToolbarLink>
-          <ToolbarOverflow />
-        </Toolbar>
-      </section>)}
-      {gate('prose', 'Prose', <section aria-label="Prose" data-component="prose">
-        <h2>Prose</h2>
-        <Prose measure="narrow">
-          <h3>Building an app shell</h3>
-          <ProseLead>A sidebar, a header and a content area that reads well at any width.</ProseLead>
-          <p>Add the <code>sidebar</code> component and read <a href="#install">the install guide</a>.</p>
-          <ul><li>Collapses to icons</li><li>Opens as a sheet on phones</li></ul>
-          <blockquote>Keep navigation where people expect it.</blockquote>
-        </Prose>
-      </section>)}
-      {gate('navigation-menu', 'Navigation Menu', <section aria-label="Navigation Menu" data-component="navigation-menu">
-        <h2>Navigation Menu</h2>
-        <NavigationMenu aria-label="Gallery site">
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Docs</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <NavigationMenuLink href="#introduction"><span>Introduction</span><p>What Ombelle is</p></NavigationMenuLink>
-                <NavigationMenuLink href="#theming"><span>Theming</span><p>Presets and tokens</p></NavigationMenuLink>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-            <NavigationMenuItem><NavigationMenuLink href="#components" variant="trigger" active>Components</NavigationMenuLink></NavigationMenuItem>
-            <NavigationMenuItem><NavigationMenuLink href="#blog" variant="trigger">Blog</NavigationMenuLink></NavigationMenuItem>
-            <NavigationMenuIndicator />
-          </NavigationMenuList>
-        </NavigationMenu>
-      </section>)}
-      {gate('sidebar', 'Sidebar', <section aria-label="Sidebar" data-component="sidebar">
-        <h2>Sidebar</h2>
-        <SidebarProvider style={{ '--sidebar-height': '18rem', border: '1px solid var(--border)' } as React.CSSProperties}>
-          <Sidebar collapsible="icon" label="Gallery workspace">
-            <SidebarHeader><strong>Ombelle</strong></SidebarHeader>
-            <SidebarContent>
-              <SidebarGroup aria-label="Workspace">
-                <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {['Overview', 'Projects', 'Presets'].map((item, index) => (
-                      <SidebarMenuItem key={item}>
-                        <SidebarMenuButton href={`#${item.toLowerCase()}`} isActive={index === 0} tooltip={item}><span aria-hidden="true" data-sidebar-initial="">{item.slice(0, 1)}</span><span>{item}</span></SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-          </Sidebar>
-          <SidebarInset><div style={{ padding: '0.75rem' }}><SidebarTrigger /></div></SidebarInset>
-        </SidebarProvider>
-      </section>)}
-      {gate('resizable', 'Resizable', <section aria-label="Resizable" data-component="resizable">
-        <h2>Resizable</h2>
-        <div style={{ blockSize: '10rem', border: '1px solid var(--border)' }}>
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize="60%" minSize="20%"><div style={{ padding: '1rem' }}>Preview</div></ResizablePanel>
-            <ResizableHandle withHandle aria-label="Resize preview and controls" />
-            <ResizablePanel defaultSize="40%" minSize="20%"><div style={{ padding: '1rem' }}>Controls</div></ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </section>)}
-      {gate('menubar', 'Menubar', <section aria-label="Menubar" data-component="menubar">
-        <h2>Menubar</h2>
-        <Menubar aria-label="Gallery editor">
-          <MenubarMenu><MenubarTrigger>File</MenubarTrigger><MenubarContent><MenubarItem>Download JSON<MenubarShortcut>Ctrl+S</MenubarShortcut></MenubarItem></MenubarContent></MenubarMenu>
-          <MenubarMenu><MenubarTrigger>Edit</MenubarTrigger><MenubarContent><MenubarItem>Undo<MenubarShortcut>Ctrl+Z</MenubarShortcut></MenubarItem></MenubarContent></MenubarMenu>
-          <MenubarMenu><MenubarTrigger>View</MenubarTrigger><MenubarContent><MenubarItem>Grid</MenubarItem></MenubarContent></MenubarMenu>
-        </Menubar>
-      </section>)}
-      {gate('data-table', 'Data Table', <section aria-label="Data Table" data-component="data-table">
-        <h2>Data Table</h2>
-        <DataTable aria-label="Gallery presets" columns={[{ accessorKey: 'name', header: 'Preset' }, { accessorKey: 'status', header: 'Status' }]}
-          data={[{ name: 'Ombelle', status: 'Stable' }, { name: 'Papier', status: 'Stable' }, { name: 'Cristal', status: 'Experimental' }]}
-          selectable filterColumn="name" filterLabel="Filter presets" facets={[{ column: 'status', title: 'Status' }]} columnVisibility pagination pageSize={5} />
-      </section>)}
-      {gate('code-block', 'Code Block', <section aria-label="Code Block" data-component="code-block">
-        <h2>Code Block</h2>
-        <div className="preset-column">
-          <CodeBlockCommand args="@ombelle-ui/cli add button" />
-          <CodeBlock title="save.tsx" language="tsx"
-            code={"import { Button } from '@/components/ui/button'\n\n// Saves the draft.\nexport function Save() {\n  return <Button variant=\"outline\" size=\"sm\">Save</Button>\n}\n"} />
-          <div data-component="code-block~diff"><CodeBlock title="ui-style.css" language="css" diff
-            code={" :root {\n-  --radius: 0.5rem;\n+  --radius: 0.75rem;\n+  --shadow-offset: 3px;\n }\n"} /></div>
-        </div>
-      </section>)}
-      </div>
-      <section aria-label="Actions" data-component="button">
-        <h2>Actions</h2>
-        <div className="preset-row">
-          <Button data-testid="preset-button">Save changes</Button>
-          <Button variant="secondary">Secondary action</Button>
-          <Button disabled>Disabled</Button>
-          <Button disabled aria-busy="true">
-            Saving…
-          </Button>
-          <Button variant="link-destructive">Remove member</Button>
-        </div>
-      </section>
-      <section aria-label="Status" data-component="badge">
-        <h2>Status</h2>
-        <div className="preset-row">
-          <Badge>Up to date</Badge>
-          <Badge variant="destructive">Needs attention</Badge>
-        </div>
-        <div className="preset-row preset-variant">
-          <Badge size="sm"><BadgeDot />Active</Badge>
-          <Badge><BadgeDot />Default</Badge>
-        </div>
-        <div className="preset-row preset-variant">
-          <Badge appearance="soft" variant="success"><BadgeDot />Live</Badge>
-          <Badge appearance="soft" variant="warning">Degraded</Badge>
-          <Badge appearance="soft" variant="info">Info</Badge>
-          <Badge appearance="outline" variant="destructive">Deprecated</Badge>
-        </div>
-      </section>
-      {gate(
-        'alert',
-        'Alert',
-        <section aria-label="Messages" data-component="alert">
-          <h2>Messages</h2>
-          <div className="preset-stack">
-            <Alert>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4M12 8h.01" />
-              </svg>
-              <AlertTitle>Preset saved</AlertTitle>
-              <AlertDescription>
-                New components in this project now use your preset.
-              </AlertDescription>
-            </Alert>
-            <Alert variant="destructive">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z" />
-                <path d="M12 9v4M12 17h.01" />
-              </svg>
-              <AlertTitle>Install blocked</AlertTitle>
-              <AlertDescription>
-                button.tsx was edited locally. Review the change before replacing
-                it.
-              </AlertDescription>
-            </Alert>
-            <Alert variant="success"><AlertTitle>Saved</AlertTitle><AlertDescription>Your changes are ready.</AlertDescription></Alert>
-            <Alert variant="warning"><AlertTitle>Review needed</AlertTitle><AlertDescription>Two items need your attention.</AlertDescription></Alert>
-            <Alert variant="info"><AlertTitle>New version</AlertTitle><AlertDescription>A component update is available.</AlertDescription>
-              <AlertActions><Button size="sm">Update</Button><Button size="sm" variant="outline">Release notes</Button></AlertActions></Alert>
-            <Alert variant="warning" layout="compact"><AlertDescription>One seat left on the Team plan.</AlertDescription><a href="#upgrade">Upgrade</a></Alert>
-          </div>
-        </section>,
-      )}
-      {gate(
-        'avatar',
-        'Avatar',
-        <section aria-label="People" data-component="avatar">
-          <h2>People</h2>
-          <div className="preset-row">
-            <Avatar size="lg" variant="primary" role="img" aria-label="Ada Lovelace, online">
-              <AvatarFallback>AL</AvatarFallback>
-              <AvatarStatus />
-            </Avatar>
-            <Avatar role="img" aria-label="Grace Hopper">
-              <AvatarFallback>GH</AvatarFallback>
-            </Avatar>
-            <Avatar size="sm" variant="secondary" role="img" aria-label="Margaret Knight">
-              <AvatarFallback>MK</AvatarFallback>
-            </Avatar>
-          </div>
-          <div className="preset-row">
-            <AvatarGroup aria-label="Reviewers">
-              <Avatar variant="primary" role="img" aria-label="Ada Lovelace">
-                <AvatarFallback>AL</AvatarFallback>
-              </Avatar>
-              <Avatar role="img" aria-label="Grace Hopper">
-                <AvatarFallback>GH</AvatarFallback>
-              </Avatar>
-              <Avatar variant="secondary" role="img" aria-label="Margaret Knight">
-                <AvatarFallback>MK</AvatarFallback>
-              </Avatar>
-              <AvatarOverflow count={3} label="3 more reviewers" />
-            </AvatarGroup>
-            <Avatar shape="square" role="img" aria-label="Acme workspace">
-              <AvatarFallback>AC</AvatarFallback>
-            </Avatar>
-            <span>6 people review this preset</span>
-          </div>
-        </section>,
-      )}
-      <section aria-label="Project card" data-component="card">
-        <h2>Project card</h2>
-        <Card>
-          <CardHeader>
-            <CardTitle level={3}>Website refresh</CardTitle>
-            <CardDescription>
-              A shared workspace for your next release.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>All components use your project preset.</p>
-          </CardContent>
-          <CardFooter>Updated today</CardFooter>
-        </Card>
-        <div className="preset-variants">
-          <Card appearance="outlined"><CardHeader><CardTitle level={3}>Outlined card</CardTitle></CardHeader><CardContent>Project summary.</CardContent></Card>
-          <Card appearance="subtle" density="dense"><CardHeader><CardTitle level={3}>Subtle card</CardTitle></CardHeader><CardContent>Recent activity.</CardContent></Card>
-        </div>
-        <div data-component="card~action"><Card><CardHeader><CardTitle level={3}>Studio warm</CardTitle><CardDescription>Your preset, edited 2 h ago</CardDescription>
-          <CardAction><Button variant="outline" size="icon-sm" aria-label="More actions for Studio warm"><span aria-hidden="true">⋯</span></Button></CardAction></CardHeader>
-          <CardContent>Warm neutrals with a clay accent, for the studio app.</CardContent></Card></div>
-        <div data-component="card~action-dense"><Card density="dense"><CardHeader><CardTitle level={3}>Night shift</CardTitle><CardDescription>Shared with you</CardDescription>
-          <CardAction><Button variant="outline" size="icon-sm" aria-label="More actions for Night shift"><span aria-hidden="true">⋯</span></Button></CardAction></CardHeader>
-          <CardContent>Deep blues for late reviews.</CardContent></Card></div>
-        <p id="gallery-plan">Plan</p>
-        <CardGroup name="gallery-plan" aria-labelledby="gallery-plan" defaultValue="team">
-          <CardOption value="starter" title="Starter" description="One project." />
-          <CardOption value="team" title="Team" description="Ten seats." />
-        </CardGroup>
-      </section>
-      <form
-        className="preset-form"
-        onSubmit={(event) => event.preventDefault()}
-        aria-label="Project settings"
+    <GalleryGate.Provider value={{ unavailable, familyLabel }}>
+      <main
+        className="preset-gallery"
+        data-testid="preset-gallery"
+        aria-label="Preset component gallery"
       >
-        <h2>Project settings</h2>
-        {gate(
-          'label',
-          'Label',
-          <div data-component="label">
-            <Label htmlFor="preset-project-name">Project name</Label>
-          </div>,
-        )}
-        {gate(
-          'input',
-          'Input',
-          <div data-component="input">
-            <Input id="preset-project-name" defaultValue="Ombelle workspace" />
-            <Input size="sm" aria-label="Small input" placeholder="Small" />
-            <Input size="lg" aria-label="Large input" placeholder="Large" />
-            <Label htmlFor="preset-email">Email</Label>
-            <Input
-              id="preset-email"
-              type="email"
-              defaultValue="invalid"
-              aria-invalid="true"
-              aria-describedby="preset-email-error"
-            />
-            <p id="preset-email-error">Enter a valid email address.</p>
-          </div>,
-        )}
-        {gate(
-          'textarea',
-          'Textarea',
-          <div data-component="textarea">
-            <Label htmlFor="preset-description">Description</Label>
-            <Textarea
-              id="preset-description"
-              defaultValue="A small idea, ready to grow."
-            />
-          </div>,
-        )}
-        {gate(
-          'native-select',
-          'Native Select',
-          <div data-component="native-select">
-            <Label htmlFor="preset-region">Region</Label>
-            <NativeSelect id="preset-region" defaultValue="eu">
-              <NativeSelectOption value="eu">Europe</NativeSelectOption>
-              <NativeSelectOption value="us">United States</NativeSelectOption>
-            </NativeSelect>
-          </div>,
-        )}
-        {gate(
-          'checkbox',
-          'Checkbox',
-          <div className="preset-row" data-component="checkbox">
-            <Checkbox id="preset-terms" defaultChecked />
-            <Label htmlFor="preset-terms">Accept project guidelines</Label>
-          </div>,
-        )}
-        {gate(
-          'checkbox',
-          'Checkbox',
-          <div className="preset-stack" data-component="checkbox~option">
-            <CheckboxOption title="Include examples" description="Adds examples next to each component." defaultChecked />
-            <CheckboxOption appearance="card" title="Vite" description="React 19" />
-          </div>,
-        )}
-        {gate(
-          'checkbox',
-          'Checkbox',
-          <FieldSet data-component="checkbox~group">
-            <FieldLegend>Overlays to install</FieldLegend>
-            <CheckboxGroup defaultValue={['dialog', 'popover']}>
-              <CheckboxGroupParent title="All overlays" />
-              <CheckboxOption value="dialog" title="Dialog" />
-              <CheckboxOption value="popover" title="Popover" />
-              <CheckboxOption value="sheet" title="Sheet" />
-              <CheckboxOption value="tooltip" title="Tooltip" />
-            </CheckboxGroup>
-          </FieldSet>,
-        )}
-        {gate(
-          'switch',
-          'Switch',
-          <div className="preset-row" data-component="switch">
-            <Switch id="preset-notifications" defaultChecked>
-              <SwitchThumb />
-            </Switch>
-            <Label htmlFor="preset-notifications">Enable notifications</Label>
-          </div>,
-        )}
-        {gate(
-          'switch',
-          'Switch',
-          <div className="preset-row" data-component="switch~sm">
-            <Switch id="preset-transparency" size="sm" />
-            <Label htmlFor="preset-transparency">Reduced transparency</Label>
-          </div>,
-        )}
-        {gate(
-          'select',
-          'Select',
-          <div data-component="select">
-            <Label id="preset-role-label">Role</Label>
-            <Select defaultValue="designer">
-              <SelectTrigger aria-labelledby="preset-role-label">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="designer">Designer</SelectItem>
-                <SelectItem value="engineer">Engineer</SelectItem>
-                <SelectItem value="product">Product manager</SelectItem>
-                <SelectItem value="researcher" disabled hint="Seat limit">
-                  Researcher
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>,
-        )}
-        {gate(
-          'radio-group',
-          'Radio Group',
-          <div data-component="radio-group">
-            <Label id="preset-plan-label">Plan</Label>
-            <RadioGroup defaultValue="team" aria-labelledby="preset-plan-label">
-              <RadioGroupOption>
-                <RadioGroupItem value="starter" />
-                <span>
-                  <RadioGroupOptionLabel>Starter</RadioGroupOptionLabel>
-                  <RadioGroupOptionDescription>
-                    One project, community support
-                  </RadioGroupOptionDescription>
-                </span>
-              </RadioGroupOption>
-              <RadioGroupOption>
-                <RadioGroupItem value="team" />
-                <span>
-                  <RadioGroupOptionLabel>Team</RadioGroupOptionLabel>
-                  <RadioGroupOptionDescription>
-                    Unlimited projects and shared presets
-                  </RadioGroupOptionDescription>
-                </span>
-              </RadioGroupOption>
-              <RadioGroupOption aria-disabled="true">
-                <RadioGroupItem value="enterprise" disabled />
-                <span>
-                  <RadioGroupOptionLabel>Enterprise</RadioGroupOptionLabel>
-                  <RadioGroupOptionDescription>
-                    Contact sales to enable
-                  </RadioGroupOptionDescription>
-                </span>
-              </RadioGroupOption>
-            </RadioGroup>
-          </div>,
-        )}
-      </form>
-      <section aria-label="Project sections" data-component="tabs">
-        <h2>Project sections</h2>
-        <Tabs defaultValue="overview">
-          <TabsList aria-label="Project sections">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="activity">Activity<TabsCount>3</TabsCount></TabsTrigger>
-            <TabsTrigger value="settings" disabled>
-              Settings
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="overview">
-            Your project is ready to preview.
-          </TabsContent>
-          <TabsContent value="activity">
-            Your latest changes are saved.
-          </TabsContent>
-        </Tabs>
-        <Tabs defaultValue="overview" className="preset-variant">
-          <TabsList appearance="underline" aria-label="Underline sections"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="activity">Activity</TabsTrigger></TabsList>
-          <TabsContent value="overview">Project overview.</TabsContent>
-          <TabsContent value="activity">Recent activity.</TabsContent>
-        </Tabs>
-      </section>
-      <section aria-label="Help" data-component="tooltip">
-        <h2>Help</h2>
-        <TooltipProvider delayDuration={300}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline">Preview help</Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              Inspect your components in both color modes.
-              <TooltipArrow />
-            </TooltipContent>
-          </Tooltip>
-          <div data-component="tooltip~shortcut">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" aria-keyshortcuts={ariaKeyShortcuts(['Ctrl', 'Z'])}>Undo</Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                Undo the last change
-                <TooltipShortcut keys={['Ctrl', 'Z']} />
-                <TooltipArrow />
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-      </section>
-      {gate(
-        'dropdown-menu',
-        'Dropdown Menu',
-        <section aria-label="Project actions" data-component="dropdown-menu">
-          <h2>Project actions</h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">Project actions</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Project</DropdownMenuLabel>
-              <DropdownMenuItem>
-                Rename<DropdownMenuShortcut>F2</DropdownMenuShortcut>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                Duplicate<DropdownMenuShortcut>Ctrl D</DropdownMenuShortcut>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">Archive</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </section>,
-      )}
-      {gate(
-        'popover',
-        'Popover',
-        <section aria-label="Sharing" data-component="popover">
-          <h2>Sharing</h2>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button>Share preset</Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" aria-labelledby="preset-share-title">
-              <PopoverArrow />
-              <PopoverTitle id="preset-share-title">Share preset</PopoverTitle>
-              <PopoverDescription>
-                Anyone with the link can install this preset.
-              </PopoverDescription>
-              {gate(
-                'input',
-                'Input',
-                <Input aria-label="Preset link" defaultValue="ombelle.dev/p/7f3a2c" readOnly />,
-              )}
-            </PopoverContent>
-          </Popover>
-        </section>,
-      )}
-      {gate(
-        'separator',
-        'Separator',
-        <section aria-label="Sign-in options" data-component="separator">
-          <h2>Sign-in options</h2>
-          <div className="preset-stack">
-            <Button variant="outline">Continue with SSO</Button>
-            <Separator>or</Separator>
-            <Button>Continue with email</Button>
-            <Separator />
-            <nav aria-label="Gallery links" className="preset-row preset-inline-nav">
-              <a href="#docs">Docs</a>
-              <Separator orientation="vertical" />
-              <a href="#components">Components</a>
-              <Separator orientation="vertical" />
-              <a href="#changelog">Changelog</a>
-            </nav>
-          </div>
-        </section>,
-      )}
-      {gate(
-        'table',
-        'Table',
-        <section aria-label="Projects table" data-component="table">
-          <h2>Projects table</h2>
-          <Table>
-            <TableCaption>4 of 12 projects · 1 selected</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Project</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead numeric>Components</TableHead>
-                <TableHead numeric>Updated</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[
-                ['Website refresh', 'Ada L.', 'AL', 'primary', 'On track', '12', '2 h ago', false],
-                ['Mobile onboarding', 'Grace H.', 'GH', 'default', 'Needs attention', '8', 'Yesterday', false],
-                ['Billing migration', 'Margaret K.', 'MK', 'secondary', 'On track', '5', 'Oct 28', true],
-                ['Design system docs', 'Ada L.', 'AL', 'primary', 'Draft', '21', 'Oct 21', false],
-              ].map(([project, owner, initials, tone, status, count, updated, selected]) => (
-                <TableRow key={project as string} selected={selected as boolean}>
-                  <TableCell>{project}</TableCell>
-                  <TableCell>
-                    <span className="preset-row preset-tight">
-                      {gate(
-                        'avatar',
-                        'Avatar',
-                        <Avatar size="sm" variant={tone as 'default' | 'primary' | 'secondary'} aria-hidden="true">
-                          <AvatarFallback>{initials}</AvatarFallback>
-                        </Avatar>,
-                      )}
-                      {owner}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        status === 'Needs attention'
-                          ? 'destructive'
-                          : status === 'Draft'
-                            ? 'outline'
-                            : 'secondary'
-                      }
-                    >
-                      {status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell numeric>{count}</TableCell>
-                  <TableCell numeric>{updated}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <div className="preset-variant"><Table density="compact" striped><TableCaption>Compact project list</TableCaption><TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow><TableRow><TableCell>Mobile</TableCell><TableCell>Review</TableCell></TableRow><TableRow selected><TableCell>Billing</TableCell><TableCell>Selected</TableCell></TableRow></TableBody></Table></div>
-        </section>,
-      )}
-      {gate(
-        'accordion',
-        'Accordion',
-        <section aria-label="Questions" data-component="accordion">
-          <h2>Questions</h2>
-          <Accordion type="single" collapsible defaultValue="preset">
-            <AccordionItem value="preset">
-              <AccordionTrigger>What does a preset change?</AccordionTrigger>
-              <AccordionContent>
-                Colors, radius, borders, shadows and type. Installed source
-                stays yours to edit.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="edit">
-              <AccordionTrigger>Can I edit installed components?</AccordionTrigger>
-              <AccordionContent>
-                Yes. The CLI only replaces a file you have not changed.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="families">
-              <AccordionTrigger>Which families are stable?</AccordionTrigger>
-              <AccordionContent>
-                Flat, minimalist, neo brutalism, ombelle, papier, organic and retro futurism. Liquid glass is
-                experimental.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </section>,
-      )}
-      {gate(
-        'progress',
-        'Progress',
-        <section aria-label="Progress" data-component="progress">
-          <h2>Progress</h2>
-          <div className="preset-stack">
-            <div className="preset-progress-label">
-              <span id="preset-progress-install">Installing components</span>
-              <span>64%</span>
-            </div>
-            <Progress value={64} aria-labelledby="preset-progress-install" />
-            <div data-component="progress~labelled">
-              <Progress value={40} size="sm" tone="warning">
-                <ProgressLabel>Consumer matrix, 16 of 40</ProgressLabel>
-                <ProgressValue />
-              </Progress>
-            </div>
-            <div className="preset-row">
-              <div data-component="progress~circle">
-                <Progress shape="circle" size="lg" value={64} aria-label="Uploading preset"><ProgressValue /></Progress>
-              </div>
-              <div data-component="progress~circle-sm">
-                <Button variant="outline" size="sm" aria-disabled="true" aria-busy="true"><Progress shape="circle" size="sm" value={40} aria-label="Saving" />Saving</Button>
-              </div>
-            </div>
-            <div className="preset-progress-label">
-              <span id="preset-progress-contrast">Contrast checks</span>
-              <span>8 / 8</span>
-            </div>
-            <Progress value={8} max={8} aria-labelledby="preset-progress-contrast" />
-            <div className="preset-progress-label">
-              <span id="preset-progress-sync">Syncing presets</span>
-            </div>
-            <Progress aria-labelledby="preset-progress-sync" />
-          </div>
-        </section>,
-      )}
-      {gate(
-        'skeleton',
-        'Skeleton',
-        <section aria-label="Loading" data-component="skeleton">
-          <h2>Loading</h2>
-          <div className="preset-stack" role="group" aria-busy="true" aria-label="Loading project">
-            <div className="preset-row preset-skeleton-card">
-              <Skeleton shape="circle" />
-              <div className="preset-stack preset-grow">
-                <Skeleton style={{ inlineSize: '60%' }} />
-                <Skeleton style={{ inlineSize: '85%' }} />
-              </div>
-            </div>
-            <Skeleton shape="block" />
-            <Skeleton style={{ inlineSize: '70%' }} />
-          </div>
-        </section>,
-      )}
-      <section aria-label="Dialog" data-component="dialog">
-        <h2>Dialog</h2>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Open dialog</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ready to publish?</DialogTitle>
-              <DialogDescription>
-                This is a preview. Your preset stays on this device until you
-                download it.
-              </DialogDescription>
-            </DialogHeader>
-            <p className="preset-dialog-copy">
-              Review your choices and close this dialog to continue editing.
-            </p>
-          </DialogContent>
-        </Dialog>
-      </section>
-    </main>
+        <header>
+          <h1>Your design system</h1>
+          <p>A working collection of components in your project theme.</p>
+        </header>
+        {gate('input-group', 'Input Group', <InputGroupSpecimen />)}
+        {gate('breadcrumb', 'Breadcrumb', <BreadcrumbSpecimen />)}
+        {gate('pagination', 'Pagination', <PaginationSpecimen />)}
+        {gate('sheet', 'Sheet', <SheetSpecimen />)}
+        {gate('alert-dialog', 'Alert Dialog', <AlertDialogSpecimen />)}
+        {gate('toast', 'Toast', <ToastSpecimen />)}
+        {gate('spinner', 'Spinner', <SpinnerSpecimen />)}
+        {gate('kbd', 'Kbd', <KbdSpecimen />)}
+        {gate('empty', 'Empty State', <EmptySpecimen />)}
+        {gate('field', 'Field', <FieldSpecimen />)}
+        {gate('meter', 'Meter', <MeterSpecimen />)}
+        {gate('stepper', 'Stepper', <StepperSpecimen />)}
+        {gate('slider', 'Slider', <SliderSpecimen />)}
+        {gate('toggle-group', 'Toggle Group', <ToggleGroupSpecimen />)}
+        {gate('chip', 'Chip', <ChipSpecimen />)}
+        {gate('tag-input', 'Tag Input', <TagInputSpecimen />)}
+        {gate('input-otp', 'Input OTP', <InputOtpSpecimen />)}
+        <div data-testid="overlays-search" className="preset-sections">
+          {gate('combobox', 'Combobox', <ComboboxSpecimen />)}
+          {gate('command', 'Command', <CommandSpecimen />)}
+          {gate('calendar', 'Calendar', <CalendarSpecimen />)}
+          {gate('hover-card', 'Hover Card', <HoverCardSpecimen />)}
+          {gate('context-menu', 'Context Menu', <ContextMenuSpecimen />)}
+          {gate('toggle', 'Toggle', <ToggleSpecimen />)}
+          {gate('collapsible', 'Collapsible', <CollapsibleSpecimen />)}
+          {gate('scroll-area', 'Scroll Area', <ScrollAreaSpecimen />)}
+          {gate('button-group', 'Button Group', <ButtonGroupSpecimen />)}
+          {gate('item', 'Item', <ItemSpecimen />)}
+          {gate('number-input', 'Number Input', <NumberInputSpecimen />)}
+          {gate('color-picker', 'Color Picker', <ColorPickerSpecimen />)}
+          {gate('password-field', 'Password Field', <PasswordFieldSpecimen />)}
+          {gate('carousel', 'Carousel', <CarouselSpecimen />)}
+          {gate('aspect-ratio', 'Aspect Ratio', <AspectRatioSpecimen />)}
+          {gate('toolbar', 'Toolbar', <ToolbarSpecimen />)}
+          {gate('prose', 'Prose', <ProseSpecimen />)}
+          {gate('navigation-menu', 'Navigation Menu', <NavigationMenuSpecimen />)}
+          {gate('sidebar', 'Sidebar', <SidebarSpecimen />)}
+          {gate('resizable', 'Resizable', <ResizableSpecimen />)}
+          {gate('menubar', 'Menubar', <MenubarSpecimen />)}
+          {gate('data-table', 'Data Table', <DataTableSpecimen />)}
+          {gate('code-block', 'Code Block', <CodeBlockSpecimen />)}
+        </div>
+        <ButtonSpecimen />
+        <BadgeSpecimen />
+        {gate('alert', 'Alert', <AlertSpecimen />)}
+        {gate('avatar', 'Avatar', <AvatarSpecimen />)}
+        <CardSpecimen />
+        <ProjectFormSpecimen />
+        <TabsSpecimen />
+        <TooltipSpecimen />
+        {gate('dropdown-menu', 'Dropdown Menu', <DropdownMenuSpecimen />)}
+        {gate('popover', 'Popover', <PopoverSpecimen />)}
+        {gate('separator', 'Separator', <SeparatorSpecimen />)}
+        {gate('table', 'Table', <TableSpecimen />)}
+        {gate('accordion', 'Accordion', <AccordionSpecimen />)}
+        {gate('progress', 'Progress', <ProgressSpecimen />)}
+        {gate('skeleton', 'Skeleton', <SkeletonSpecimen />)}
+        <DialogSpecimen />
+      </main>
+    </GalleryGate.Provider>
   )
 }

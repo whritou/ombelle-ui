@@ -220,6 +220,11 @@ export async function withEditorPresetConsumer<T>(
     if (gallery) await fs.writeFile(
       path.join(root, 'src/preset-gallery.tsx'), await rewriteModuleSpecifiers(fixture, (s) => s),
     )
+    if (gallery) await fs.cp(
+      new URL('../../fixtures/shared/specimens/', import.meta.url),
+      path.join(root, 'src/specimens'),
+      { recursive: true },
+    )
     await fs.appendFile(
       path.join(root, 'src/index.css'),
       '\n' +
