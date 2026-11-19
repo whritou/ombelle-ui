@@ -7,13 +7,17 @@ import { ComponentPlayground } from './playground'
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
-const compiler = vi.hoisted(() => ({ calls: 0, throwing: false }))
+const compiler = vi.hoisted(() => ({ calls: 0, throwing: false, loading: null as string | null }))
+// A family whose styles never finish loading: its specimen suspends, like a stylesheet the transition waits on.
+const neverLoads = new Promise<never>(() => {})
 
 // next/dynamic renders nothing under vitest, so specimens are plain synchronous components.
 vi.mock('../../generated/previews', async () => {
   const React = await import('react')
+  const { GalleryGate } = await import('../../generated/previews/specimens/shared')
   const Typed = () => {
     if (compiler.throwing) throw new Error('specimen failed')
+    if (React.useContext(GalleryGate).familyLabel === compiler.loading) React.use(neverLoads)
     return React.createElement('input', { 'data-testid': 'typed' })
   }
   return { inlineSpecimens: new Proxy({}, { get: () => Typed }), specimenOnly: {} }
@@ -39,6 +43,7 @@ const unmounts: Array<() => void> = []
 beforeEach(() => {
   compiler.calls = 0
   compiler.throwing = false
+  compiler.loading = null
   document.documentElement.classList.remove('dark')
   window.history.replaceState(null, '', '/')
 })
@@ -80,6 +85,17 @@ it('switches family in a transition without remounting the stage', async () => {
   expect(stage(host)!.dataset.previewFamily).toBe('papier')
   expect(host.querySelector<HTMLInputElement>('[data-testid="typed"]')!.value).toBe('kept')
   expect(host.querySelector('[role="status"]')!.textContent).toBe('Papier · light')
+})
+
+it('marks the clicked family pressed at once', async () => {
+  compiler.loading = 'Papier'
+  const host = await render()
+  await click(host, 'Style family', 'Papier')
+  const pressed = [...host.querySelectorAll('[aria-label="Style family"] button[aria-pressed="true"]')].map(b => b.textContent)
+  expect(pressed).toEqual(['Papier'])
+  // The stage and the status keep the previous family until the new one is ready.
+  expect(stage(host)!.dataset.previewFamily).toBe('ombelle')
+  expect(host.querySelector('[role="status"]')!.textContent).toBe('Ombelle · light')
 })
 
 it('lets an explicit mode override the site', async () => {

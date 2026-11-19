@@ -59,7 +59,14 @@ export function ComponentPlayground({ id, name, source, styles }: {
   source: string
   styles: Partial<Record<StyleFamily, string>>
 }) {
+  // The stage and status show `family`, which a transition moves once the new styles have loaded;
+  // the toggle shows the reader's latest pick at once.
   const [family, setFamily] = useState<StyleFamily>(familyOptions[0]!.value)
+  const [pendingFamily, setPendingFamily] = useState<StyleFamily>(family)
+  const pickFamily = (next: StyleFamily) => {
+    setPendingFamily(next)
+    startTransition(() => setFamily(next))
+  }
   const [glassPreset, setGlassPreset] = useState<StartingPresetId>(defaultGlassPresetId)
   const [mode, setMode] = useState<PreviewMode>('auto')
   const siteDark = useSiteDark()
@@ -76,6 +83,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
     const selected = glassPresetId(new URLSearchParams(window.location.search).get('glass'))
     if (selected && glass === 'experimental') {
       setGlassPreset(selected)
+      setPendingFamily('liquid-glass')
       setFamily('liquid-glass')
     }
   }, [glass])
@@ -105,7 +113,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <ToggleGroup label="Style family" value={family} options={families} onValueChange={(next) => startTransition(() => setFamily(next))}
+        <ToggleGroup label="Style family" value={pendingFamily} options={families} onValueChange={pickFamily}
           className="inline-flex rounded-lg bg-muted p-1" itemClassName={toggleItem} />
         <ToggleGroup label="Preview mode" value={resolvedMode} options={modeOptions} onValueChange={setMode}
           className="inline-flex rounded-lg bg-muted p-1" itemClassName={toggleItem} />
