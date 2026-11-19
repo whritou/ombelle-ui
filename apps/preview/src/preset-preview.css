@@ -2,6 +2,7 @@
 @import './generated/preset-gallery/layout.css';
 @import './scenes.css';
 @import './glass-backdrop.css';
+@import '../../../fixtures/shared/preset-focus.css';
 
 /* Shown before the first valid preset arrives, so no preset tokens exist yet:
    the colours follow the system scheme instead of the preset's mode. */
@@ -59,39 +60,4 @@ html[data-backdrop='glass'] .preset-gallery .preset-form :is(label, p) {
 html[data-glass-backdrop] .preset-gallery :is(h1, h2, header p) {
   color: var(--glass-preview-ink);
   text-shadow: var(--glass-preview-text-shadow);
-}
-
-/* Component pages focus one gallery section; centre it like a docs preview. */
-html[data-focus] .preset-gallery {
-  min-height: 100vh;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-}
-/* A focused preview shows the component as an app would, without the gallery's
-   section headings; sections keep their aria-label for assistive technology. */
-html[data-focus] .preset-gallery :is(section, form) > h2 {
-  display: none;
-}
-/* Centring shrinks a section to its content; stacked examples (progress bars,
-   skeletons, grouped fields) need a readable width to keep their layout. */
-html[data-focus] .preset-gallery > section > .preset-stack,
-html[data-focus] .preset-gallery > .preset-form {
-  inline-size: min(360px, calc(100vw - 48px));
-}
-/* A focused section stacks its examples (a component and its variants) with room
-   between them, centred like the rest of the preview. */
-html[data-focus] .preset-gallery > section:not([hidden]) {
-  display: grid;
-  gap: 16px;
-  justify-items: center;
-}
-/* Components that fill their container get a readable width instead of their minimum. */
-html:is([data-focus='slider'], [data-focus='card'], [data-focus='scroll-area']) .preset-gallery > section:not([hidden]) {
-  inline-size: min(360px, calc(100vw - 48px));
-  justify-items: stretch;
-}
-html[data-focus='carousel'] .preset-gallery > section:not([hidden]) {
-  inline-size: min(560px, calc(100vw - 48px));
-  justify-items: stretch;
 }
