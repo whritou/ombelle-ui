@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { supportedStyleFamilies } from '@ombelle/contracts'
-import { expect, it } from 'vitest'
-import { familyFontIds, fontLoaders, loadFamilyFonts } from './family-fonts'
+import { expect, it, vi } from 'vitest'
+import { familyFontIds, fontLoaders, fontTimeoutMs, loadFamilyFonts } from './family-fonts'
 
 it('has a loader for every font a built-in family uses', () => {
   for (const family of supportedStyleFamilies)
@@ -35,5 +35,25 @@ it("fetches the font files, not only their rules, before resolving", async () =>
   } finally {
     Object.assign(fontLoaders, saved)
     delete (document as { fonts?: unknown }).fonts
+  }
+})
+
+it('gives up waiting on a stalled font after the timeout, so the stage still switches', async () => {
+  vi.useFakeTimers()
+  const ids = familyFontIds('organic')
+  const saved = Object.fromEntries(ids.map((id) => [id, fontLoaders[id]!]))
+  for (const id of ids) fontLoaders[id] = () => new Promise(() => {})
+  try {
+    let settled = false
+    const load = loadFamilyFonts('organic').then(() => { settled = true })
+    await vi.advanceTimersByTimeAsync(fontTimeoutMs - 1)
+    expect(settled).toBe(false)
+    await vi.advanceTimersByTimeAsync(1)
+    await load
+    expect(settled).toBe(true)
+    expect(fontTimeoutMs).toBeLessThanOrEqual(3000)
+  } finally {
+    Object.assign(fontLoaders, saved)
+    vi.useRealTimers()
   }
 })

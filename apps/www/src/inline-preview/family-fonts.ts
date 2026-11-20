@@ -47,10 +47,16 @@ async function loadFaces(id: string): Promise<void> {
   await Promise.all(weights.map((weight) => document.fonts.load(`${weight} 1em ${name}`, 'Aa')))
 }
 
+/** How long a family switch waits on its fonts; past it the stage switches anyway and the text swaps when they land. */
+export const fontTimeoutMs = 2500
+
 const loading = new Map<string, Promise<void>>()
-/** Loads a family's font stylesheets and files once; later calls share the first request, and a failed one is retried. */
+/**
+ * Loads a family's font stylesheets and files once; later calls share the first request, and a failed one is retried.
+ * Resolves after `fontTimeoutMs` at the latest, so a stalled font never holds the switch.
+ */
 export function loadFamilyFonts(family: BuiltInFamily): Promise<void> {
-  return Promise.all(
+  const fonts = Promise.all(
     familyFontIds(family).map((id) => {
       let request = loading.get(id)
       if (!request) {
@@ -66,4 +72,17 @@ export function loadFamilyFonts(family: BuiltInFamily): Promise<void> {
       return request
     }),
   ).then(() => undefined)
+  return new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(resolve, fontTimeoutMs)
+    fonts.then(
+      () => {
+        clearTimeout(timer)
+        resolve()
+      },
+      (error: unknown) => {
+        clearTimeout(timer)
+        reject(error)
+      },
+    )
+  })
 }
