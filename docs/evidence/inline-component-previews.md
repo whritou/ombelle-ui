@@ -58,3 +58,60 @@ This is a resource-timing and message-timing breakdown rather than a DevTools pe
 ### Notes for the re-run after the change
 
 The same script is the comparison. If the inline path has no child frame it fingerprints the page's active preview panel, so keep the preview inside the active `tabpanel`.
+
+## After (inline renderer)
+
+Same machine, browser, build recipe and script as the baseline (`node scripts/build-hosted-www.mjs`, `next start` on 127.0.0.1:3000, Chrome headless, 1100x800, reduced motion, cache disabled for the first load only). Command: `node scripts/measure-component-preview.mjs http://127.0.0.1:3000 button dropdown-menu dialog data-table`, one run per pass (the baseline used 3). The script was first made independent of the iframe (explicit preview frame, empty fingerprint counts as "not yet changed", one `performance.now()` clock). The family toggle's pressed state updates immediately, but the status line and the stage change only after the family's sheets and fonts are loaded, so the status-plus-fingerprint wait is a valid render time.
+
+Two passes: cold, where the first switch starts right after the first load and before the idle preload of the other families' sheets and fonts; and warm (`OMBELLE_PREVIEW_WARM_MS=3000`), which waits 3 s for that preload first. Values in ms; each family switch is the first switch to that family in that page.
+
+| Metric | Baseline (button) | button cold | dropdown-menu cold | dialog cold | data-table cold |
+| --- | --- | --- | --- | --- | --- |
+| First ready | 5017 | 727 | 118 | 102 | 224 |
+| Papier | 2621 | 224 | 199 | 214 | 269 |
+| Organic | 2569 | 38 | 37 | 23 | 78 |
+| Retro futurism | 2656 | 82 | 35 | 26 | 47 |
+| Minimalist | 2213 | 89 | 25 | 25 | 52 |
+| Flat | 2183 | 26 | 27 | 25 | 61 |
+| Neo-Brutalism | 2211 | 27 | 31 | 31 | 54 |
+| Mode switch | 1027 | 27 | 19 | 33 | 36 |
+
+| Warm | button | dropdown-menu | dialog | data-table |
+| --- | --- | --- | --- | --- |
+| First ready | 669 | 101 | 109 | 76 |
+| Papier | 42 | 29 | 33 | 55 |
+| Organic | 36 | 22 | 22 | 74 |
+| Retro futurism | 86 | 27 | 27 | 58 |
+| Minimalist | 89 | 22 | 25 | 53 |
+| Flat | 35 | 26 | 28 | 53 |
+| Neo-Brutalism | 27 | 28 | 26 | 26 |
+| Mode switch | 27 | 18 | 20 | 35 |
+
+Notes on reading the numbers:
+
+- "First ready" is the status line reading `Ombelle · light`, which is already in the server-rendered HTML; the first id (button) includes server and browser warm-up, hence 727 against about 100 for the next ones. The static HTML of `/components/button`, `dialog` and `data-table` contains the stage (`data-preview-family="ombelle"`, `pv-*` slots) and no `<iframe>`, so the specimen is in the first paint.
+- Papier is the first family switched to in every page and is the slowest cold (199-269 ms): it pays the sheet and font fetch that the idle preload would otherwise have done. Every other cold switch is under 100 ms.
+- The measured mode switch (18-36 ms) is dominated by the script's own polling (5 ms interval plus CDP round trips). Measured in the page (click until the first animation frame, with the stage's computed colours already changed; 4 toggles each on button, dialog and data-table) it is 1.5-3.5 ms, inside one frame.
+
+### Against the targets
+
+| Target | Result |
+| --- | --- |
+| Specimen in the first paint of the static HTML | Met: stage and slots in the server HTML, no iframe |
+| Mode switch within one frame (16 ms) | Met: 1.5-3.5 ms in-page; 18-36 ms with the script's polling overhead |
+| Family switch < 100 ms once loaded | Met: warm 22-89 ms |
+| Family switch < 300 ms the first time | Met: cold 23-269 ms (localhost, no network latency) |
+| First-load JS of `components/accordion` | 1067.0 kB gzip over 19 scripts (6323.3 kB raw) against the baseline 1051.8 kB over 17 scripts (6273.2 kB raw): +15.2 kB (+1.4%). Other pages: `/components` 648.6 kB (baseline 647.8), `/docs` 271.2 kB (270.5), `/index` 269.4 kB (268.9) |
+
+Overall: first ready 5.0 s to under 0.8 s, family switch 2.1-2.7 s to under 0.3 s (under 0.1 s warm), mode switch about 1 s to inside one frame.
+
+### Scope and limits
+
+- Server-rendered only for the seven built-in families (`supportedStyleFamilies` minus Liquid Glass). Components with a locale or window dependency are listed in code: `clientOnly = ['calendar']` (the date text depends on the locale, so it renders after hydration) and `iframeOnly = ['sidebar']` (its breakpoint reads the window, so it stays on the iframe path).
+- Out of scope: Liquid Glass (iframe and worker path), custom presets, the editors and Sidebar.
+- Deviation from the spec: scope is on the stage root (`data-preview-family`, `data-preview-mode`, `data-focus`) rather than per element, and Radix portals render inside the stage through `PreviewPortal`.
+
+### Follow-ups (not caused by this change)
+
+- The site-wide catalog Sidebar has a pre-hydration layout shift at 375 px: whole-page CLS 0.92 on `/components/button` and 0.47 on `/docs` (see the Task 8 report).
+- The home page has a pre-existing axe failure on `.ol-codeb`.
