@@ -327,3 +327,92 @@ Decision: no prefetch. The median font load (154 and 164.5 ms) is well under 300
 ### Two preset-editor.spec.ts failures are older than this branch (Task 7)
 
 `applies a style palette and a primary colour in one step ...` (expects `oklch(98.6% 0.003 67.8)`, the export has `oklch(0.986 0.003 67.8)`) and `edits a token with its Color Picker inside the token panel ...` (the saturation/brightness slider click leaves the value at `oklch(55% 0.22 6)`) both fail the same way on the base commit `68de5cd2`, run in a temporary worktree (`pnpm install --frozen-lockfile --ignore-scripts`, `build:packages`, `generate:preview`, site config with only that spec). They are not regressions of the instant preview work.
+
+## Component editor audit (Task 8)
+
+Branch `feat/instant-editor-previews`, measured on commit `f11751e9` (the catalog cache of change 1 is already in). Question: where does the component editor's preview spend its time, and does the iframe's re-verification compile dominate? Design: "Design: component editor" and "Calls made during review" 3. No product change in this task.
+
+### Method
+
+- Same machine, toolchain and build as the preset audit: AMD Ryzen 7 2700X, Windows 11, Node 24.19.0, Google Chrome (headless, `OMBELLE_BROWSER_CHANNEL=chrome`, 1100x800, reduced motion). `node scripts/build-hosted-www.mjs`, `next start --hostname 127.0.0.1 --port 3000`. Production, localhost, no network latency or CDN.
+- Command: `node scripts/measure-component-editor.mjs http://127.0.0.1:3000 button card dialog select --runs 5` (cold) and the same with `--warm`. Pages: `/editor/component/button` (the Button editor, `useCompiler`, `render` messages) and `/editor/component/{card,dialog,select}` (the catalog editor, `useCatalogCompiler`, `catalog-render` messages). Ombelle family, light, single layout.
+- Cold: a fresh browser context for each of the 5 loads, HTTP cache disabled. Warm: a fresh context, one priming load, then the measured load with the cache on. The load phases are the true median of the 5 loads. The edits are 5 recipe edits on the last page (the first editable text field of the properties panel, set with `fill`), each waited out until the editor settles; the arrays are those 5 edits in order.
+- Records, on the absolute clock, keyed by worker and `requestId` (worker) and by port and `requestId` (render): `Worker` construction, every worker request and reply, every render post on the editor's ports and its ack, the iframe `load` event, and `crypto.subtle.digest` calls in both documents (a compile hashes each artifact). Inside the iframe, when each render arrived and each ack was posted.
+- Phases: `iframeLoadMs` navigation start to the iframe `load` event. `workerDownloadMs` Resource Timing duration of `/editor-compiler.worker.js` (833 KB compressed, 5.5 MB raw). `firstCompileMs` the first compile request to its reply (includes the worker's cold start). `iframeFillMs` the first render post to its ack (the iframe's verification compile plus the state update; the ack precedes the paint, so paint is not in it). `firstRenderMs` navigation start to the first frame produced after the first applied render. `iframeVerifyMs` (per edit) the render's arrival in the iframe to its ack. `moduleRequests` script requests under `/ombelle-preview/`. Per edit the script also records `workerGotToRenderPostMs`: from the worker's reply to the render post, which is the editor page's own verification compile on its main thread (`verifyPreviewCompileResult`, `verifyCatalogCompileResult`).
+
+### Phases, cold (median of 5 loads, ms)
+
+| Phase | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| Iframe load (navigation to `load`) | 909 | 457 | 947 | 364 |
+| Worker download | 96.5 | 108 | 81 | 88 |
+| First compile (request to reply) | 1209 | 1713 | 1493 | 1770 |
+| Editor main-thread verification, worker reply to render post | 104 | 188 | 237 | 408 |
+| Iframe fill (post to ack) | 143 | 340 | 273 | 377 |
+| First render (navigation to first frame) | 2760 | 3648 | 3376 | 3875 |
+| Iframe script requests | 22 | 20 | 35 | 46 |
+
+### Phases, warm (median of 5 loads, ms)
+
+| Phase | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| Iframe load | 716 | 670 | 708 | 662 |
+| Worker download | 17 | 14 | 13 | 15 |
+| First compile | 975 | 1481 | 1398 | 1581 |
+| Editor main-thread verification | 101 | 198 | 142 | 386 |
+| Iframe fill | 80 | 238 | 159 | 283 |
+| First render | 2135 | 2908 | 2677 | 3138 |
+| Iframe script requests | 22 | 20 | 35 | 46 |
+
+The iframe load is bimodal in the cold runs (about 360 to 460 ms in most loads, about 950 to 1010 ms in the others) and about 650 to 770 ms in every warm load; it is off the critical path in both cases (see below).
+
+### One recipe edit (median of 5 edits, cold; warm in brackets, ms)
+
+| Phase | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| Debounce (`use-compiler.ts:92`, `use-catalog-compiler.ts:38`) | 100 | 100 | 100 | 100 |
+| Worker compile (`recompileMs`) | 57 (60) | 255 (267) | 174 (179) | 295 (288) |
+| Editor main-thread verification (worker reply to post) | 78 (81) | 142 (140) | 100 (115) | 168 (154) |
+| Iframe verification (`iframeVerifyMs`, arrival to ack) | 55 (59) | 132 (136) | 99 (87) | 172 (159) |
+| Ack to frame | 5 | 3 | 3 | 3 |
+| Input to first iframe frame (`editToFrameMs`, measured) | 342 (353) | 664 (690) | 503 (501) | 786 (740) |
+| Compiles the edit causes (worker + editor page + iframe, by digest count) | 1 + 1 + 1 | 1 + 2 + 1 | 1 + 2 + 1 | 1 + 2 + 1 |
+
+The listed phases add up to the measured input-to-frame time within about 30 ms (card: 100 + 255 + 142 + 132 + 3 = 632 against 664), which is the CDP and `fill` overhead. Raw per-edit values: recompile button `[57.4, 49.9, 75.7, 69.8, 42.1]`, card `[315.7, 256.6, 246.5, 229.5, 255.2]`, dialog `[205.2, 176.4, 163.7, 163.6, 173.9]`, select `[358.8, 294, 295.2, 328.9, 282.7]`; iframe verify button `[64.1, 54.9, 55.1, 52.4, 43.2]`, card `[159.8, 142.9, 130.5, 131.8, 122.7]`, dialog `[119.5, 100.4, 80.8, 99.2, 86.7]`, select `[204.4, 190.9, 171.6, 149.4, 153.7]`.
+
+Where the digests come from: a catalog compile makes 14 digests (13 for dialog), a Button compile 7. The editor page made 28 (26) digests between the input and the render post for the catalog editors, 7 for the Button: the catalog editor verifies each worker result twice on its main thread, once in `useCatalogCompiler` (`use-catalog-compiler.ts:23`) and again in `PreviewFrame.sendCurrent` (`preview-frame.tsx:78`), then the iframe verifies it a third time. The Button hook only validates the shape (`validatePreviewCompileResult`); the one compile on its main thread is in `sendCurrent` (`preview-frame.tsx:88`).
+
+### Dominant phase
+
+First render (cold 2.8 to 3.9 s, warm 2.1 to 3.1 s) is serial: page boot until the worker is constructed (about 1.2 s cold, 0.8 s warm: navigation and Next hydration, derived as first render minus the worker's start-to-reply time, the editor verification and the iframe fill), then the worker's first compile (1.0 to 1.9 s), then the editor page's verification (0.1 to 0.4 s), then the iframe's fill (0.08 to 0.38 s). The iframe's own load (0.36 to 1.0 s) and the worker download (13 to 108 ms) run alongside the first compile, so they are not on the path. The dominant phase is the worker's first compile: 44 to 47 percent of first render cold, 46 to 52 percent warm. It is mostly cold start, not compile work: the next compile on the same worker takes 57 ms (Button) to 295 ms (select), against 1.2 to 1.8 s for the first. Download time is under 110 ms cold and about 15 ms warm, so a `modulepreload` of the worker script would save at most that, and the cache already saves it on a warm load.
+
+Per edit, the largest single phase is the worker compile for the catalog components (35 to 38 percent of the measured input-to-frame time; 17 percent for the Button, where the 100 ms debounce at 29 percent and the editor's own verification at 23 percent are larger).
+
+### Does the iframe's re-verification dominate?
+
+Not on its own, but verification as a whole is a large share. Per edit, cold:
+
+| Share of input-to-frame time | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| Iframe verification (`verifyPreviewRender` / `verifyCatalogPreviewRender`) | 16% (55 of 342 ms) | 20% (132 of 664) | 20% (99 of 503) | 22% (172 of 786) |
+| Editor-page verification (before the post) | 23% (78) | 21% (142) | 20% (100) | 21% (168) |
+| Both together | 39% | 41% | 40% | 43% |
+| Worker compile | 17% | 38% | 35% | 38% |
+
+On first render the same two verifications cost 9 percent (button), 14 percent (card), 11 percent (dialog) and 20 percent (select) of first render. The iframe's fill is 80 to 380 ms there, close to one compile.
+
+Decision for the user (design call 3; nothing here changes validation): the iframe's re-verification is 16 to 22 percent of each edit, and with the editor page's own verification it is about 40 percent, more than the worker compile itself for the Button. The editor-page share runs on the editor's main thread, so the page is busy for 78 to 168 ms on every edit (two long tasks of about 140 ms each for a card in the trace). Two options exist, both of which touch validation and so need the user's approval: (1) skip the editor page's second, identical verification of a result that `useCatalogCompiler` has just verified (catalog editors only; about half of the editor-page share, 50 to 85 ms per edit, no weakening of what the iframe checks); (2) any change to the iframe's own check. Only (1) is worth asking about if a per-edit gain is wanted; the first-render path does not depend on either.
+
+### Chrome trace of one card edit
+
+One `Title` edit on `/editor/component/card`, after a warm-up edit, browser-wide `Tracing` with the V8 sampling profiler (every phase is inflated, so use it for where the time goes, not for the totals). Editor page main thread, 344 ms busy: two long tasks of 140 ms (at +607 ms from the input, the worker's reply being verified) and 149 ms (at +779 ms), 27 ms in between, and the 14 ms input handler. The worker, 487 ms for the compile under tracing (255 ms untraced): top self times are the CSS formatter's AST and source-offset functions (`qC` 21.7 ms, `yg` 13.7 ms, `ibe` 7.5 ms) and garbage collection (15.9 ms). The iframe's own renderer process (a separate process, so its main thread does not block the editor page): 191 ms, top self times the same formatter functions (22.7, 17.4, 11.3 ms) and 5.6 ms of garbage collection. In the editor page the top self times are likewise one minified compiler function (66 ms, 30 ms, 9 ms), the CSS printer (`print`, 5 ms) and 10.7 ms of garbage collection. The cost of an edit is therefore the compile, run four times for a catalog component (worker, editor page twice, iframe), and nearly all of a compile is the formatter working over the generated CSS; the React work and the style swap are under 10 ms. The function names are minified; the worker's `yg` and `qC` are the Prettier postcss helpers that prefix node types and fill source offsets.
+
+### Order for Task 9 (what the numbers support)
+
+1. A precompiled default recipe per built-in family, bundled into the iframe (call 3 allows it): removes the worker's first compile, the editor-page verification and the iframe's fill from the first view, 1.2 to 2.6 s of the 2.1 to 3.9 s. The first view then waits only for the page boot and the iframe's own load.
+2. Start the worker earlier (instantiate it before the editor mounts, for instance from the component index) and warm it with a throwaway compile: the first compile is 1.0 to 1.9 s against 57 to 295 ms for the next, so about 1 to 1.5 s is cold start, and this also helps a restored draft, which a precompiled default does not.
+3. Right-height skeleton against layout shift: not a time cost in these measurements; keep it for the layout-shift rules.
+4. Bundling the iframe's modules: 20 to 46 script requests, and the iframe load (0.36 to 1.0 s) is off the critical path, so the gain is small.
+5. `modulepreload` of the worker script: the download is 13 to 108 ms, so at most that.
+
+Not in the Task 9 list but visible here: the 100 ms debounce is 13 to 29 percent of an edit, and option (1) above is the one change that would cut the per-edit cost.
