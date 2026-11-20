@@ -46,7 +46,7 @@ it('applies a tokens message with the derived css and acks the resolved hash', a
   const { receiver, applied, acks } = setup()
   await receiver.receive(tokens(1))
   expect(applied).toHaveLength(1)
-  expect(applied[0]).toMatchObject({ requestId: 1, css: '.t1{}', hash: hash(1), family: 'flat', view })
+  expect(applied[0]).toMatchObject({ requestId: 1, css: '.t1{}', sheets: ['.t1{}'], hash: hash(1), family: 'flat', view })
   expect(acks).toEqual([{ type: 'preset-render-ack', requestId: 1, presetHash: hash(1), status: 'applied' }])
 })
 
@@ -75,7 +75,7 @@ it('shares one request id between preset-tokens and preset-render', async () => 
   expect(receiver.lastRequestId()).toBe(4)
   expect(acks[1]).toMatchObject({ requestId: 3, status: 'rejected', presetHash: hash(7) })
   await receiver.receive(render(5))
-  expect(applied[1]).toMatchObject({ requestId: 5, css: '.r{}', hash: hash(7) })
+  expect(applied[1]).toMatchObject({ requestId: 5, css: '.r{}', sheets: ['.r{}'], hash: hash(7) })
 })
 
 it('acks a rejected tokens message (glass) without applying', async () => {

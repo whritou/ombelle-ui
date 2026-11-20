@@ -9,6 +9,11 @@ export type ReceivedPreset = {
   design: Preset['design']
   hash: string
   css: string
+  /**
+   * The same CSS as separate sheets, in order (`css` is their join). The preview gives each its own
+   * style element, so a token edit re-parses only the token sheet.
+   */
+  sheets: string[]
   view: PresetView
 }
 export type PresetReceiverDeps = {
@@ -17,7 +22,7 @@ export type PresetReceiverDeps = {
   verifyTokens: (
     input: unknown,
     previousRequestId: number,
-  ) => Promise<{ message: PresetTokens; css: string; presetHash: string } | null>
+  ) => Promise<{ message: PresetTokens; css: string; sheets?: string[]; presetHash: string } | null>
   /** Gallery source check, resolved once; a failure blocks both message kinds. */
   sourcesValid: Promise<boolean>
   isCurrentPort: () => boolean
@@ -47,10 +52,12 @@ export function createPresetReceiver(deps: PresetReceiverDeps) {
           design: verified.message.preset.design,
           hash: verified.presetHash,
           css: verified.css,
+          sheets: verified.sheets ?? [verified.css],
           view: verified.message.view,
         }
     } else {
       const verified = await deps.verifyRender(data, lastId)
+      const css = verified ? presetRuntimeStyles(verified.result) : ''
       if (verified)
         accepted = {
           requestId: verified.requestId,
@@ -58,7 +65,8 @@ export function createPresetReceiver(deps: PresetReceiverDeps) {
           family: verified.result.preset.data.styleFamily,
           design: verified.result.preset.data.design,
           hash: verified.result.preset.hash,
-          css: presetRuntimeStyles(verified.result),
+          css,
+          sheets: [css],
           view: verified.view,
         }
     }

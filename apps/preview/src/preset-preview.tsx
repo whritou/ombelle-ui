@@ -161,9 +161,12 @@ function PresetPreview() {
   }, [family, scene])
   return current ? (
     <>
-      <style data-preset-styles>
-        {current.css}
-      </style>
+      {/* One element per sheet: a token edit changes only the token sheet's text, so only it is parsed again. */}
+      {current.sheets.map((sheet, index) => (
+        <style key={index} data-preset-styles>
+          {sheet}
+        </style>
+      ))}
       {family === 'liquid-glass' && <LiquidGlassFilter key={glassFilterKey} />}
       {family === 'liquid-glass' && <GlassBackdropArt scene={current.view.backdrop ?? 'kit'} />}
       {family === 'liquid-glass' && <GlassControlHalo enabled={design?.transparency !== 'reduced' && (design?.glassHalo ?? 0) > 0} />}

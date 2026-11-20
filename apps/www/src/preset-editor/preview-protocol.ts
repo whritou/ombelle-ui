@@ -226,7 +226,7 @@ export type PresetTokens = {
 export async function verifyPresetTokens(
   input: unknown,
   previousRequestId: number,
-): Promise<{ message: PresetTokens; css: string; presetHash: string } | null> {
+): Promise<{ message: PresetTokens; css: string; sheets: string[]; presetHash: string } | null> {
   try {
     if (
       new TextEncoder().encode(JSON.stringify(input)).length > 1024 * 1024 ||
@@ -251,9 +251,11 @@ export async function verifyPresetTokens(
       resolved.data.compilerVersion !== '0.1.0'
     )
       return null
+    const sheets = presetPreviewSheets(resolved.data)
     return {
       message: input as PresetTokens,
-      css: presetPreviewSheets(resolved.data).join('\n'),
+      css: sheets.join('\n'),
+      sheets,
       presetHash: resolved.hash,
     }
   } catch {

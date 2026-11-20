@@ -547,9 +547,11 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
             ...data,
             domHash: document.documentElement.dataset.presetHash,
             domRequest: document.documentElement.dataset.presetRequest,
+            // The preview keeps one style element per sheet; together they are the derived CSS.
             css:
-              document.querySelector('style[data-preset-styles]')
-                ?.textContent ?? null,
+              Array.from(document.querySelectorAll('style[data-preset-styles]'))
+                .map((style) => style.textContent)
+                .join('\n') || null,
             gallery: Boolean(
               document.querySelector('[data-testid="preset-gallery"]'),
             ),
@@ -714,9 +716,13 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
   expect((await inspect()).acks.some((a) => a.requestId === oldId + 2)).toBe(
     false,
   )
-  await expect(
-    frame(page).locator('style[data-preset-styles]'),
-  ).toHaveJSProperty('textContent', presetRuntimeStyles(current.result))
+  await expect
+    .poll(() =>
+      frame(page)
+        .locator('style[data-preset-styles]')
+        .evaluateAll((styles) => styles.map((style) => style.textContent).join('\n')),
+    )
+    .toBe(presetRuntimeStyles(current.result))
   for (const ack of (await inspect()).acks.filter(
     (a) => a.status === 'applied',
   )) {

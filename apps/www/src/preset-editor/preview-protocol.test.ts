@@ -283,6 +283,11 @@ it('accepts a materialized draft as preset-tokens and returns its css and hash',
   const verified = await verifyPresetTokens(input, 1)
   expect(verified?.message).toEqual(input)
   expect(verified?.css).toMatch(new RegExp(`--radius:\s*${input.preset.design.radiusRem}rem`))
+  // The same CSS split into its sheets, the token sheet last, so the preview re-parses only that on a token edit.
+  expect(verified?.sheets.join('\n')).toBe(verified?.css)
+  expect(verified?.sheets.length).toBeGreaterThan(1)
+  expect(verified?.sheets.at(-1)).toMatch(/--radius:/)
+  expect(verified?.sheets[0]).not.toMatch(/--radius:\s*[\d.]+rem/)
   expect(verified?.presetHash).toBe(await presetHashOf(input.preset))
   const compiled = await compile({
     preset: input.preset,
