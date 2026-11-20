@@ -3,6 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { generateWwwUi, wwwUiComponents } from '../../../scripts/generate-www-ui'
+import { previewExclusion } from '../../../scripts/www-previews/exclude-previews'
 
 const read = async (root: string) => {
   const files: Record<string, string> = {}
@@ -67,4 +68,21 @@ it('keeps the site stylesheet, with its copied catalog Dialog rules, valid CSS',
   const block = globals.slice(globals.indexOf('/* catalog dialog */'), globals.indexOf('/* end catalog dialog */'))
   for (const slot of ['dialog-content', 'dialog-body', 'dialog-footer']) expect(block).toContain(`[data-slot='${slot}']`)
   expect(block).toContain("[data-slot='dialog-content']:is([data-size='lg'], [data-size='fullscreen'])")
+})
+
+it("keeps every site component rule off the inline previews, whose catalog markers match the site's", async () => {
+  const { default: postcss } = await import('postcss')
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'www-ui-'))
+  await generateWwwUi(dir)
+  const files = Object.entries(await read(dir)).filter(([file]) => file.endsWith('.css'))
+  expect(files.length).toBeGreaterThan(10)
+  let rules = 0
+  for (const [file, css] of files)
+    postcss.parse(css).walkRules((rule) => {
+      if (rule.parent?.type === 'atrule' && /keyframes$/i.test((rule.parent as import('postcss').AtRule).name)) return
+      for (const selector of rule.selectors) expect(selector.replace(/::?[\w-]+(\([^)]*\))?$/, ''), `${file}: ${selector}`).toMatch(/:not\(:where\(\[data-preview-family\] \*\)\)$/)
+      rules++
+    })
+  expect(rules).toBeGreaterThan(100)
+  expect(previewExclusion).toBe(':not(:where([data-preview-family] *))')
 })

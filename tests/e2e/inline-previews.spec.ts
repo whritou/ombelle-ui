@@ -251,6 +251,29 @@ test('does not leak styles', async ({ page, context }) => {
   expect(ours.open).toEqual(theirsOpen)
 })
 
+test("site component rules stay off the preview's catalog markers", async ({ page }) => {
+  // The site's compiled components share catalog markers with the specimens (data-code-block-mode, data-menubar-dot…);
+  // no site rule that names a data attribute may match an element inside the stage.
+  for (const id of ['code-block', 'menubar', 'button-group', 'checkbox']) {
+    await open(page, `/components/${id}`)
+    const matched = await stage(page).evaluate(root => {
+      const rules: string[] = []
+      const collect = (list: CSSRuleList) => {
+        for (const rule of list) {
+          if (rule instanceof CSSStyleRule) rules.push(rule.selectorText)
+          if ('cssRules' in rule && !(rule instanceof CSSStyleRule)) collect((rule as CSSGroupingRule).cssRules)
+        }
+      }
+      for (const sheet of document.styleSheets) if (!sheet.href?.includes('/previews/')) collect(sheet.cssRules)
+      const elements = [root, ...root.querySelectorAll('*')]
+      return rules.filter(selector => /\[data-(?!preview-|focus)/.test(selector))
+        .flatMap(selector => selector.split(/,(?![^(]*\))/))
+        .filter(selector => { try { return elements.some(element => element.matches(selector.replace(/::?(before|after|placeholder|selection|marker|-webkit-[\w-]+)$/, ''))) } catch { return false } })
+    })
+    expect(matched, id).toEqual([])
+  }
+})
+
 test('portals, focus and keyboard', async ({ page }) => {
   await open(page, '/components/dialog')
   const trigger = stage(page).getByRole('button', { name: 'Open dialog' })
