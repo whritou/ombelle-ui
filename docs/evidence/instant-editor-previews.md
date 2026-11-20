@@ -228,3 +228,83 @@ Corrections (made with the optimisation pass, same raw values):
   "renderMessages": 15
 }
 ```
+
+## Optimisation pass
+
+Branch `feat/instant-editor-previews`, from `dc945388` (gate measurement) to `1c71ed3a`. Same machine, browser and build method as above; `next start --hostname 127.0.0.1 --port 3000`, `OMBELLE_BROWSER_CHANNEL=chrome`. Target: median token edit under 50 ms input to paint.
+
+### Method changes
+
+- Medians are true medians, and records are keyed by channel (see Corrections above).
+- The Corner radius field commits on every input, so the edit reaches the editor during Playwright's `fill`, before the clock of `tokenEditMs` starts at the Tab press. `tokenEditMs` is kept for comparison. Two metrics are added:
+  - `tokenInputMs`: from the start of `fill` to the fingerprint change. It includes the editor's own handling of the input, since `fill` returns only once the input event has been handled.
+  - `tokenFrameMs`: from the input event's `timeStamp` in the editor page to the first frame the iframe produces after it applies the preset (a task queued from `requestAnimationFrame` after the applied ack, read inside the iframe). Both clocks are `timeOrigin + now`. It involves no CDP round trip and is the closest of the three to input to paint.
+- Both CDP metrics carry a fixed cost. With no change to detect, on the final build, the median of 10 rounds was: `press('Tab')` 8 ms, one fingerprint poll 9.7 ms, Tab plus one poll 17.6 ms, and fill (same value) plus Tab plus poll 24 ms. `tokenEditMs` cannot go below about 18 ms, and `tokenInputMs` cannot go below about 24 ms plus the editor's input handler.
+- Single passes of 5 runs varied by up to 10 ms on this machine, so each change was also compared over 15 runs (`--runs 15`).
+
+### Profile before any change (Step 1)
+
+One Corner radius edit on the gate build. Chrome trace (browser-wide `Tracing`, all renderer processes) and CPU profiles (`Profiler`, 100 µs sampling) of the editor page and of the iframe, which runs out of process.
+
+Editor page (main thread, from the input event):
+
+| Time from input, ms | Task | Cost, ms |
+| --- | --- | --- |
+| 0 | `input` event handler: React render, commit and the synchronous passive effects. `preset-tokens` is posted at the end of this task | 111.7 |
+| 117 | Scheduler task: second render of the editor, from the compiler state update in `usePresetCompiler` | 103.1 |
+| 227 | `keydown` (Tab) is dispatched only now | 1.7 |
+
+CPU profile of the editor page over the edit: 212 ms busy. `getCatalog('0.1.0')` takes 163 ms inclusive: it rebuilt the whole catalog on every call (every template's dependency filter, `validatePreset` on every built-in and starting preset), and the editor calls it per field per render (`fieldValue` in `preset-editor/model.ts`, 156 ms; the family defaults in `ThemeControls`; `materializePreset`). The Ajv preset validator alone is about 11 ms of it. Most of the rest is the React render and commit of the editor tree. `materializePreset`, `presetHashOf` and the contrast computation are each under 2 ms or not on the path: contrast runs only when the worker result changes.
+
+Iframe (main thread): one 40.2 ms task from the message to the ack. The `flushSync` render in `apply` 20 ms, of which 7 ms is a forced layout (`getBoundingClientRect` in the catalog Button's per-render layout effect, for every Button in the scene); the reduced-transparency mirror 8.6 ms (it serialises every rule of the replaced preset sheet to look for `prefers-reduced-transparency`); CSS parsing of the whole preset sheet 7 ms; validation and derivation (`verifyPresetTokens`: `resolvePreset`, `presetPreviewSheets`, the hash digest) 9 ms, most of it `getCatalog` again.
+
+The editor posted the tokens 108.9 ms after the input; the iframe finished at 149 ms. The "about 68 ms before the ack reaches the editor page" seen at the gate was the 103 ms second render: the ack waited in the editor's task queue. The gate's 102 ms `tokenEditMs` mostly measured that queue: the preview had already changed before the Tab keydown was dispatched.
+
+### Changes (Step 2)
+
+Medians in ms. "Pass" is the number of token-edit runs. Each row is measured with its change on top of the kept rows above it.
+
+| Change | Pass | Token edit (Tab) | Token input | Token frame | Family | Scene | Mode | First ready | Kept |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Before (gate build, new script) | 5 | 102 | 200 | | 240.5 | 231 | 148 | 1770 | |
+| 1. `perf(catalog)`: build the catalog once per release | 5 | 30 | 48 | | 85 | 165 | 74 | 1478 | yes |
+| (same build, control for 2) | 15 | 28 | 47 | | 94.5 | 169 | 66 | 1857 | |
+| 2. `perf(preview)`: memoise the scene element on family and scene, so a token edit re-renders only the style | 15 | 27 | 45 | | 92.5 | 163 | 48 | 1752 | yes |
+| 3. `perf(preview)`: skip mirroring a style element whose text never names `prefers-reduced-transparency` | 15 | 25 | 41 | | 79 | 175 | 49 | 1393 | yes |
+| 4. Memoise the top bar's Breadcrumb trail | 15 | 25 | 42 | | 88.5 | 177 | 51 | 1283 | no, reverted |
+| (control for 5: changes 1 to 3, script with `tokenFrameMs`) | 15 | 29 | 45 | 25 | 88 | 175 | 58 | 1645 | |
+| 5. `perf(www)`: post `preset-tokens` from the editor's input handler, before it re-renders | 15 | 27 | 47 | 17 | 89 | 192 | 61 | 1315 | yes |
+| 6. `perf(preview)`: one style element per preset sheet | 15 | 26 | 42 | 8 | 90.5 | 171 | 53 | 2031 | yes |
+
+Notes on each change:
+
+1. `getCatalog` caches the built catalog per release (`packages/catalog/src/index.ts`). Callers only read it; the presets inside were already shared objects (`validatePreset` returns its input). All 288 unit test files passed with the cache. In the editor it shrank the input handler from 112 to about 24 ms and the second render from 103 to about 14 ms; in the iframe, the derivation from 9 to about 1 ms.
+2. The iframe's `flushSync` render dropped from about 20 to about 9 ms and the token apply (post to ack) from about 20 to about 12 ms. On the end-to-end metrics the gain is 1 to 2 ms: the forced layout moves out of the apply task into the next frame instead of disappearing.
+3. Before the change, the mirror ran in a microtask after the commit, so it delayed the frame but not the ack. Token edit 27 to 25, token input 45 to 41, family 92.5 to 79.
+4. The profile after change 1 showed 10 ms in the Breadcrumb's per-render layout effect (it measures its items) inside the input handler. With the trail memoised, the next layout effect, the catalog Button's per-render `getBoundingClientRect`, paid the same forced style recalc (7.5 ms in the profile). No gain (25 to 25, 41 to 42), so it was reverted. Changing the catalog Button is out of scope.
+5. `PresetPreviewFrame` takes an optional `sender` ref; the preset editor fills it and calls it from `commit()` with `materializePreset(next)`, inside the input handler. The frame posts `preset-tokens` only on the fast path, and remembers the last posted preset and view, so the render that follows does not post the same message again. Glass, the playground, the demo page and published snapshots pass no `sender` and behave as before. In the trace the iframe now receives the edit 2 ms after the input instead of 22 ms. `tokenFrameMs` 25 to 17. The CDP metrics cannot show it: by the time `fill` returns, the preview has already changed in both builds.
+6. `verifyPresetTokens` now also returns the derived sheets (their join is still `css`), and the preview renders one `<style data-preset-styles>` per sheet, in the same order. A radius edit changes only the token sheet's text, so the browser no longer re-parses the whole preset CSS (about 9 ms). `preset-render` keeps a single sheet. `tokenFrameMs` 17 to 8.
+
+Not done: avoiding the second `presetWithDefaults` merge on the fast path (candidate c). After change 1, the iframe's whole validation and derivation is under 2 ms in the profile, so there was nothing measurable to remove.
+
+### Final measurement (Step 4)
+
+Commit `1c71ed3a`, full build with `node scripts/build-hosted-www.mjs`, three consecutive passes on one server:
+
+| Metric | Pass A (5 runs) | Pass B (5 runs) | Pass C (15 runs) | Gate (5 runs) |
+| --- | --- | --- | --- | --- |
+| Token edit, from Tab (`tokenEditMs`) | 37 | 26 | 27 | 102 |
+| Token edit, from the input (`tokenInputMs`) | 67 | 45 | 46 | 200 (gate build, new script) |
+| Token edit, input to iframe frame (`tokenFrameMs`) | 12 | 8 | 8 | not measured |
+| First ready | 1302 | 1546 | 1556 | 1926 |
+| Family switch, median of 6 (all six confirmed) | 93.5 | 93 | 93 | 248 |
+| Scene switch | 163 | 166 | 176 | 236 |
+| Mode switch | 74 | 61 | 65 | 153 |
+
+Raw token edits: A `[37, 34, 41, 41, 36]`, input `[74, 60, 68, 67, 55]`, frame `[12, 15, 16, 10, 11]`; B `[43, 26, 28, 26, 25]`, input `[87, 46, 45, 45, 42]`, frame `[16, 8, 8, 8, 8]`; C `[34, 27, 26, 30, 28, 25, 28, 25, 26, 32, 28, 27, 27, 24, 30]`, input `[64, 46, 42, 47, 44, 40, 47, 41, 45, 47, 49, 43, 46, 38, 51]`, frame `[9, 8, 8, 9, 8, 8, 8, 8, 8, 8, 8, 8, 9, 7, 8]`. Family switches A: Papier 102, Organic 94, Retro futurism 98, Minimalist 93, Flat 80, Neo-brutalism 81. Every pass recorded one `ready` handshake and one channel.
+
+A trace of one edit on this build: the input handler takes 26.4 ms; the iframe receives the tokens 1.6 ms after the input, applies them in 3.1 ms and finishes its style recalc 12 ms after the input. Before the pass, the same point came about 150 ms after the input.
+
+Result against the 50 ms target: met on the two measures of input to paint, `tokenFrameMs` (8 to 12 ms) and the trace (12 ms to the iframe's style recalc), and on `tokenEditMs` (26 to 37 ms). `tokenInputMs` (45 to 67 ms) is under 50 in two of three passes: it includes the editor's own 24 to 26 ms input handler, which `fill` waits for, and about 24 ms of CDP cost. The editor page is still busy for about 26 ms on each edit (React render and commit of the editor, plus a forced style recalc from the catalog Button's layout effect) and for a further 13 ms on the compiler-state render; neither delays the preview any more.
+
+Family-switch apply (post to ack) rose from about 40 to 55 to 60 ms with change 5: the family's tokens are now posted before the editor's larger family render, and the ack waits behind it. The family switch as measured end to end did not change (88 to 89).
