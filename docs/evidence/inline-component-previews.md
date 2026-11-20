@@ -61,49 +61,60 @@ The same script is the comparison. If the inline path has no child frame it fing
 
 ## After (inline renderer)
 
-Same machine, browser, build recipe and script as the baseline (`node scripts/build-hosted-www.mjs`, `next start` on 127.0.0.1:3000, Chrome headless, 1100x800, reduced motion, cache disabled for the first load only). Command: `node scripts/measure-component-preview.mjs http://127.0.0.1:3000 button dropdown-menu dialog data-table`, one run per pass (the baseline used 3). The script was first made independent of the iframe (explicit preview frame, empty fingerprint counts as "not yet changed", one `performance.now()` clock). The family toggle's pressed state updates immediately, but the status line and the stage change only after the family's sheets and fonts are loaded, so the status-plus-fingerprint wait is a valid render time.
+Same machine, browser, build recipe and script as the baseline (`node scripts/build-hosted-www.mjs`, `next start` on 127.0.0.1:3000, Chrome headless, 1100x800, reduced motion, cache disabled for the first load only). Command: `node scripts/measure-component-preview.mjs http://127.0.0.1:3000 button dropdown-menu dialog data-table`, 3 passes per mode, values are median (min-max) in milliseconds over the 3 passes (the mode-frame row pools its 4 toggles per pass, so 12 samples). The script was first made independent of the iframe (explicit preview frame, empty fingerprint counts as "not yet changed", one `performance.now()` clock). The family toggle's pressed state updates immediately, but the status line and the stage change only after the family's sheets and fonts are loaded, so the status-plus-fingerprint wait is a valid render time. Each family switch is the first switch to that family in that page.
 
-Two passes: cold, where the first switch starts right after the first load and before the idle preload of the other families' sheets and fonts; and warm (`OMBELLE_PREVIEW_WARM_MS=3000`), which waits 3 s for that preload first. Values in ms; each family switch is the first switch to that family in that page.
+Two modes: cold, where the first switch starts right after the first load and before the idle preload of the other families' sheets and fonts; and warm (`OMBELLE_PREVIEW_WARM_MS=3000`), which waits 3 s first.
 
-| Metric | Baseline (button) | button cold | dropdown-menu cold | dialog cold | data-table cold |
-| --- | --- | --- | --- | --- | --- |
-| First ready | 5017 | 727 | 118 | 102 | 224 |
-| Papier | 2621 | 224 | 199 | 214 | 269 |
-| Organic | 2569 | 38 | 37 | 23 | 78 |
-| Retro futurism | 2656 | 82 | 35 | 26 | 47 |
-| Minimalist | 2213 | 89 | 25 | 25 | 52 |
-| Flat | 2183 | 26 | 27 | 25 | 61 |
-| Neo-Brutalism | 2211 | 27 | 31 | 31 | 54 |
-| Mode switch | 1027 | 27 | 19 | 33 | 36 |
+The warm pass did get the preload it waits for. The script records the state when the switches start (`preloadState`): in every cold pass there were 0 `link[rel=preload][as=style]` elements and 4 font files fetched; in every warm pass there were 12 preload links (two sheets for each of the other six families) and 21 font files fetched, with 22-24 font faces loaded. So the warm numbers are with the idle preload finished.
 
-| Warm | button | dropdown-menu | dialog | data-table |
+### Cold (switches start right after first load)
+
+| Metric | button | dropdown-menu | dialog | data-table |
 | --- | --- | --- | --- | --- |
-| First ready | 669 | 101 | 109 | 76 |
-| Papier | 42 | 29 | 33 | 55 |
-| Organic | 36 | 22 | 22 | 74 |
-| Retro futurism | 86 | 27 | 27 | 58 |
-| Minimalist | 89 | 22 | 25 | 53 |
-| Flat | 35 | 26 | 28 | 53 |
-| Neo-Brutalism | 27 | 28 | 26 | 26 |
-| Mode switch | 27 | 18 | 20 | 35 |
+| First ready | 656 (623-671) | 106 (103-159) | 103 (101-107) | 167 (77-189) |
+| Papier | 183 (148-227) | 236 (184-264) | 231 (200-233) | 310 (288-322) |
+| Organic | 38 (38-38) | 36 (35-41) | 29 (23-30) | 85 (47-87) |
+| Retro futurism | 84 (82-91) | 28 (24-38) | 25 (25-26) | 48 (48-66) |
+| Minimalist | 93 (88-102) | 22 (22-25) | 25 (23-26) | 42 (36-68) |
+| Flat | 32 (24-34) | 26 (24-26) | 26 (25-26) | 47 (40-64) |
+| Neo-Brutalism | 27 (27-28) | 27 (26-48) | 27 (25-27) | 56 (55-62) |
+| Mode switch, script (polling) | 26 (26-27) | 19 (19-19) | 20 (18-21) | 37 (34-42) |
+| Mode switch to first frame (`modeFrameMs`, 12 toggles) | 5.3 (2.6-8.9) | 5.8 (3.5-8.8) | 7.1 (3-9.2) | 9.5 (9.1-13.4) |
 
-Notes on reading the numbers:
+### Warm (after the 3 s idle preload)
 
-- "First ready" is the status line reading `Ombelle · light`, which is already in the server-rendered HTML; the first id (button) includes server and browser warm-up, hence 727 against about 100 for the next ones. The static HTML of `/components/button`, `dialog` and `data-table` contains the stage (`data-preview-family="ombelle"`, `pv-*` slots) and no `<iframe>`, so the specimen is in the first paint.
-- Papier is the first family switched to in every page and is the slowest cold (199-269 ms): it pays the sheet and font fetch that the idle preload would otherwise have done. Every other cold switch is under 100 ms.
-- The measured mode switch (18-36 ms) is dominated by the script's own polling (5 ms interval plus CDP round trips). Measured in the page (click until the first animation frame, with the stage's computed colours already changed; 4 toggles each on button, dialog and data-table) it is 1.5-3.5 ms, inside one frame.
+| Metric | button | dropdown-menu | dialog | data-table |
+| --- | --- | --- | --- | --- |
+| First ready | 102 (94-588) | 102 (99-107) | 95 (95-147) | 167 (167-174) |
+| Papier | 49 (44-50) | 31 (28-34) | 35 (35-36) | 49 (47-50) |
+| Organic | 36 (35-39) | 36 (22-40) | 34 (33-37) | 70 (70-72) |
+| Retro futurism | 84 (81-86) | 28 (22-36) | 24 (22-25) | 49 (48-54) |
+| Minimalist | 90 (88-101) | 25 (24-25) | 25 (24-26) | 44 (44-52) |
+| Flat | 36 (33-36) | 26 (24-27) | 30 (26-31) | 46 (40-47) |
+| Neo-Brutalism | 28 (27-30) | 26 (25-28) | 27 (25-27) | 42 (41-54) |
+| Mode switch, script (polling) | 26 (25-26) | 19 (19-20) | 19 (19-19) | 27 (23-35) |
+| Mode switch to first frame (`modeFrameMs`, 12 toggles) | 6.5 (2.1-8.7) | 6.2 (2.1-14.4) | 6 (2.9-8.8) | 9.3 (9.2-10.2) |
+
+Baseline for comparison (button): first ready 5017, Papier 2621, Organic 2569, Retro futurism 2656, Minimalist 2213, Flat 2183, Neo-Brutalism 2211, mode switch 1027.
+
+How to read the numbers:
+
+- "First ready" is the status line reading `Ombelle · light`, which is already in the server-rendered HTML; the first id measured (button) includes server and browser warm-up, hence about 650 ms against about 100 for the next ones. The static HTML of `/components/button`, `dialog` and `data-table` contains the stage (`data-preview-family="ombelle"`, `pv-*` slots) and no `<iframe>`, so the specimen is in the first paint.
+- Papier is the first family switched to in every cold page and is the slowest: it pays the sheet and font fetch that the idle preload does later. It is 183-236 ms for button, dropdown-menu and dialog and **310 ms (288-322) for data-table**, which is over the 300 ms first-time target (localhost, no network latency; the largest sheet set). Every other cold switch is under 100 ms.
+- Mode switch, script: 19-37 ms. This is the click until the status line and the fingerprint have both changed, polled every 5 ms from Node, so it includes up to 5 ms of polling and the CDP round trips on top of the real work; it is an upper bound, not the render time.
+- Mode switch, `modeFrameMs`: measured inside the page, with no polling or CDP overhead. A timestamp at the click, then wait until the stage's `data-preview-mode` has changed, then the next `requestAnimationFrame`. It is the time to the first animation frame after the change, not to paint or composite. Median 5.3-9.5 ms, worst sample 14.4 ms (dropdown-menu, warm), so every sample is inside the 16 ms of one frame, but data-table sits at 9-13 ms with little headroom.
 
 ### Against the targets
 
 | Target | Result |
 | --- | --- |
 | Specimen in the first paint of the static HTML | Met: stage and slots in the server HTML, no iframe |
-| Mode switch within one frame (16 ms) | Met: 1.5-3.5 ms in-page; 18-36 ms with the script's polling overhead |
-| Family switch < 100 ms once loaded | Met: warm 22-89 ms |
-| Family switch < 300 ms the first time | Met: cold 23-269 ms (localhost, no network latency) |
+| Mode switch within one frame (16 ms) | Met on `modeFrameMs`: median 5.3-9.5 ms, max 14.4 ms over 12 toggles per id and mode; to the first animation frame, not to paint. The script's polled figure (19-37 ms) is not the verdict |
+| Family switch < 100 ms once loaded | Met: warm medians 24-90 ms; one warm sample was 101 ms (button, Minimalist) |
+| Family switch < 300 ms the first time | Missed for one case: data-table, Papier, cold, 310 ms median (288-322). Others 183-236 ms (Papier) and under 100 ms (the rest) |
 | First-load JS of `components/accordion` | 1067.0 kB gzip over 19 scripts (6323.3 kB raw) against the baseline 1051.8 kB over 17 scripts (6273.2 kB raw): +15.2 kB (+1.4%). Other pages: `/components` 648.6 kB (baseline 647.8), `/docs` 271.2 kB (270.5), `/index` 269.4 kB (268.9) |
 
-Overall: first ready 5.0 s to under 0.8 s, family switch 2.1-2.7 s to under 0.3 s (under 0.1 s warm), mode switch about 1 s to inside one frame.
+Overall: first ready 5.0 s to about 0.1-0.7 s, family switch 2.1-2.7 s to at most 0.32 s cold (under 0.1 s warm), mode switch about 1 s to inside one frame.
 
 ### Scope and limits
 
@@ -113,5 +124,5 @@ Overall: first ready 5.0 s to under 0.8 s, family switch 2.1-2.7 s to under 0.3 
 
 ### Follow-ups (not caused by this change)
 
-- The site-wide catalog Sidebar has a pre-hydration layout shift at 375 px: whole-page CLS 0.92 on `/components/button` and 0.47 on `/docs` (see the Task 8 report).
+- The site-wide catalog Sidebar has a pre-hydration layout shift at 375 px. Measured as the whole-page layout-shift sum (`layout-shift` entries without recent input) at load, viewport 375x812, Playwright with Chrome: 0.92 on `/components/button` and 0.47 on `/docs`.
 - The home page has a pre-existing axe failure on `.ol-codeb`.
