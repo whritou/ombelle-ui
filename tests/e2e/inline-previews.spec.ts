@@ -293,42 +293,68 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1100, height: 800 
   test.describe(`at ${viewport.width} px`, () => {
     test.use({ viewport })
     test('no layout shift', async ({ page }) => {
-      // Only shifts of the playground (its controls and the stage) count: on phones the catalog Sidebar's
-      // pre-hydration fallback moves the whole page once on every docs and component page, previews or not.
-      // Shifts right after a click count too: a family switch must not move anything.
+      // Only the playground counts: on phones the catalog Sidebar's pre-hydration fallback moves the whole page
+      // once on every docs and component page, previews or not. Within it:
+      // 1. the controls (toggles, status line, tabs) never move, input or not;
+      // 2. the stage does not move while the page loads;
+      // 3. after a family switch the stage moves only in the commit frame, the restyle the reader asked for:
+      //    nothing may shift later, when a stylesheet or a font arrives.
+      // `hadRecentInput` is not used: it would hide late shifts that follow a click.
       await page.addInitScript(() => {
-        type Shift = { value: number; sources: string[] }
-        const shifts: Shift[] = []
-        ;(window as unknown as { layoutShifts: Shift[] }).layoutShifts = shifts
-        const describe = (node: Node | null) => {
-          if (!(node instanceof Element)) return String(node?.nodeName)
-          return [node.tagName.toLowerCase(), node.id && `#${node.id}`, node.getAttribute('data-slot') && `[${node.getAttribute('data-slot')}]`, typeof node.className === 'string' && node.className && `.${node.className.split(' ').slice(0, 3).join('.')}`].filter(Boolean).join('')
+        type Shift = { value: number; startTime: number; part: 'controls' | 'stage'; sources: string[] }
+        type Commit = { family: string; mutation: number; frame: number }
+        const record = { shifts: [] as Shift[], commits: [] as Commit[] }
+        ;(window as unknown as { previewShifts: typeof record }).previewShifts = record
+        const describe = (node: Node) => {
+          if (!(node instanceof Element)) return node.nodeName
+          return [node.tagName.toLowerCase(), node.getAttribute('data-slot') && `[${node.getAttribute('data-slot')}]`, typeof node.className === 'string' && node.className && `.${node.className.split(' ').slice(0, 3).join('.')}`].filter(Boolean).join('')
         }
         new PerformanceObserver(list => {
           const playground = document.querySelector('section[aria-label="Example"]')
+          const stage = document.querySelector('[data-preview-family]')
           for (const entry of list.getEntries() as (PerformanceEntry & { value: number; sources: { node: Node | null }[] })[]) {
-            const inside = entry.sources.filter(source => source.node && playground?.contains(source.node))
-            if (inside.length) shifts.push({ value: entry.value, sources: inside.map(source => describe(source.node)) })
+            const nodes = entry.sources.map(source => source.node).filter((node): node is Node => !!node && !!playground?.contains(node))
+            if (!nodes.length) continue
+            const part = nodes.every(node => stage?.contains(node)) ? 'stage' : 'controls'
+            record.shifts.push({ value: entry.value, startTime: entry.startTime, part, sources: nodes.map(describe) })
           }
         }).observe({ type: 'layout-shift', buffered: true })
+        // A switch's commit frame is the frame rendered right after the stage's family changes. `frame` is the
+        // clock when the next frame starts its callbacks (rAF timestamps lag the clock in headless Chrome), so
+        // commit-frame shifts are stamped between `mutation` and `frame`, and anything later is a late shift.
+        new MutationObserver(mutations => {
+          for (const mutation of mutations) {
+            const stage = mutation.target as HTMLElement
+            const commit = { family: stage.dataset.previewFamily!, mutation: performance.now(), frame: Number.NaN }
+            record.commits.push(commit)
+            requestAnimationFrame(() => requestAnimationFrame(() => { commit.frame = performance.now() }))
+          }
+        }).observe(document, { subtree: true, attributes: true, attributeFilter: ['data-preview-family'] })
       })
-      // The shifts come back with their sources, so a failure names what moved.
-      const shifts = () => page.evaluate(() => (window as unknown as { layoutShifts: { value: number; sources: string[] }[] }).layoutShifts)
-      const total = async () => {
-        const all = await shifts()
-        return { total: all.reduce((sum, { value }) => sum + value, 0), all }
-      }
       await open(page, '/components/button')
       await page.waitForLoadState('load')
       await page.waitForTimeout(500)
-      const loaded = await total()
-      expect(loaded.total, JSON.stringify(loaded.all)).toBeLessThan(0.01)
       for (const [value, label] of [...families.slice(1), families[0]]) {
         await pickFamily(page, value, label)
         await page.waitForTimeout(700)
       }
-      const switched = await total()
-      expect(switched.total, JSON.stringify(switched.all)).toBeLessThan(0.01)
+      const { shifts, commits } = await page.evaluate(() => (window as unknown as { previewShifts: { shifts: { value: number; startTime: number; part: string; sources: string[] }[]; commits: { family: string; mutation: number; frame: number }[] } }).previewShifts)
+      expect(commits.map(commit => commit.family)).toEqual([...families.slice(1), families[0]].map(([value]) => value))
+      const sum = (list: { value: number }[]) => list.reduce((total, { value }) => total + value, 0)
+      const commitFor = (time: number) => commits.find(commit => time >= commit.mutation && time < commit.frame)
+      const controls = shifts.filter(shift => shift.part === 'controls')
+      const stage = shifts.filter(shift => shift.part === 'stage')
+      const loading = stage.filter(shift => !commits.length || shift.startTime < commits[0]!.mutation)
+      const late = stage.filter(shift => !loading.includes(shift) && !commitFor(shift.startTime))
+      const table = commits.map(commit => {
+        const next = commits[commits.indexOf(commit) + 1]?.mutation ?? Infinity
+        const after = stage.filter(shift => shift.startTime >= commit.mutation && shift.startTime < next)
+        return `${commit.family}: commit frame ${sum(after.filter(shift => commitFor(shift.startTime) === commit)).toFixed(4)} (exempt), later ${sum(after.filter(shift => late.includes(shift))).toFixed(4)}`
+      })
+      const report = JSON.stringify({ table, commits, controls, loading, late }, null, 1)
+      expect(sum(controls), report).toBeLessThan(0.01)
+      expect(sum(loading), report).toBeLessThan(0.01)
+      expect(sum(late), report).toBeLessThan(0.01)
     })
   })
 }
