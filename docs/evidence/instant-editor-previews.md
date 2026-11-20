@@ -419,7 +419,7 @@ Not in the Task 9 list but visible here: the 100 ms debounce is 13 to 29 percent
 
 ## Component editor: precompiled default recipe (Task 9, experiment 9c)
 
-Kept. Each component editor's default recipe is compiled at build time, per family, and bundled into the editor preview, which shows it as soon as the editor connects, before the worker's first compile. The first compile and every edit then reach the preview through the existing verified render path, which replaces the default. Message validation, the iframe's sandbox and its isolation are unchanged (design, "Calls made during review" 3).
+Kept with exception after fix round 1 (see "Fix round 1" below: the worker's first compile is still slower for select). Each component editor's default recipe is compiled at build time, per family, and bundled into the editor preview, which shows it as soon as the editor connects, before the worker's first compile. The first compile and every edit then reach the preview through the existing verified render path, which replaces the default. Message validation, the iframe's sandbox and its isolation are unchanged (design, "Calls made during review" 3).
 
 ### What changed
 
@@ -474,3 +474,42 @@ Raw cold after: button `[1676, 1431, 1407, 1502, 1444]`, card `[1641, 1513, 1557
 - `tests/e2e/component-editor-instant.spec.ts` (site config; ignored by the main config): with the compiler worker blocked, the Button, Badge and Card previews show each of the 7 families' defaults with the scope a fresh compile gives, while the editor still says "Compiling preview…"; a restored draft that is not a default shows nothing until its compile; the first compile keeps the default's scope and the first edit replaces it (Badge, Button). 24 passed against the hosted build, and the 4 non-loop cases again against the dev server.
 - `tests/e2e/editor.spec.ts`, the sandboxed preview test: the iframe URL now carries `?default=ombelle`, and the test waits for the first applied render before replaying it (the default shows the same Button text before any render arrives). Against the dev server (`scripts/serve-snapshot-www.ts`, `pnpm dev:preview`), `editor.spec.ts` and `catalog-editors.spec.ts` without the consumer comparisons (which need the consumer apps): 39 passed, 1 failed. The failure, `edits and restores separator` (the Decorative switch does not uncheck), also fails with the catalog editor reverted to `f188e23c`, so it is older than this change.
 - `pnpm typecheck` passes; `next build` passes after the final edit (the JSON import attribute the Playwright loader needs).
+
+### Fix round 1 (review ruling R12)
+
+Changes (commit `d81d3fd8`):
+- Only the starting family is precompiled now. `precompiledFamilies` is `[defaultSiteFamily]` (ombelle), giving 63 defaults instead of 441. Generation takes about 11 s instead of 86 s, and the defaults directory is 1.7 MB instead of 13 MB. The preview's entry chunk is 31.6 kB (9.6 kB gzip) instead of 77.3 kB (14.6 kB gzip); before 9c it was 23.6 kB (8.3 kB gzip). The glob map now has one entry per component. `build-hosted-www` took 264 s, against 240 s for the control build in the same session.
+- The family in the preview URL now comes from the recipe the editor has at the moment the frame can first connect. That family is then fixed, so later edits do not reload the preview. Before, it was computed once when the draft was restored, so a family chosen in the command palette during draft recovery would have shown the ombelle default for a papier recipe. A new e2e test covers this case: it fails on `93b1e541` (`?component=badge&default=ombelle`) and passes now.
+- The preview applies the default in a `React.startTransition`, so drawing it yields to the port.
+
+Same-build A/B check before the fix (card and select, cold, 5 loads, two rounds, default chunk blocked by route against shown):
+- First compile: card 1704 and 1673 ms blocked, against 1738 and 1751 ms shown. Select 1696 and 1913 ms blocked, against 1799 and 1803 ms shown.
+- Compiled first render: card 3742 and 3699 ms blocked, against 3750 and 3699 ms shown. Select 3784 and 4053 ms blocked, against 4006 and 3864 ms shown.
+- Drawing the default costs at most a few percent of the first compile, in the same build. The same setup measured twice differs by up to 13 percent (select blocked: 1696 against 1913 ms).
+
+Re-measurement. The control is a hosted build of `f188e23c` from a temporary worktree; after is `d81d3fd8`. Both were built and measured in the same session, interleaved: control cold, after cold, control warm, after warm. Same script and method. The machine was faster this session than in the first measurement, so compare only within this table. Medians of 5 loads in ms, before → after:
+
+| | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| First view, cold | 2100 → 1081 (-49%) | 2748 → 1078 (-61%) | 2553 → 1115 (-56%) | 2978 → 1139 (-62%) |
+| First view, warm | 1537 → 679 (-56%) | 2197 → 688 (-69%) | 1985 → 707 (-64%) | 2389 → 739 (-69%) |
+| Compiled first render, cold | 2063 → 2091 (+1.4%) | 2706 → 2730 (+0.9%) | 2483 → 2510 (+1.1%) | 2884 → 2921 (+1.3%) |
+| Compiled first render, warm | 1517 → 1560 (+2.8%) | 2173 → 2180 (+0.3%) | 1938 → 1965 (+1.4%) | 2316 → 2345 (+1.2%) |
+| First compile, cold | 865 → 872 (+0.8%) | 1156 → 1201 (+3.9%) | 1047 → 1167 (+11.4%) | 1266 → 1432 (+13.1%) |
+| First compile, warm | 659 → 725 (+10.0%) | 1128 → 1138 (+0.9%) | 985 → 1021 (+3.7%) | 1096 → 1278 (+16.6%) |
+| Edit, input to frame, cold | 256 → 257 | 560 → 561 | 436 → 426 | 621 → 621 |
+| Edit, input to frame, warm | 283 → 296 | 556 → 548 | 426 → 427 | 616 → 616 |
+| Iframe load, cold | 266 → 278 | 278 → 279 | 285 → 275 | 274 → 280 |
+| Iframe load, warm | 503 → 499 | 515 → 506 | 498 → 502 | 500 → 503 |
+| Iframe script requests | 22 → 23 | 20 → 21 | 35 → 36 | 46 → 47 |
+
+Noise band, from this session's control loads and the A/B check:
+- The compiled first render varies by about ±1.5 percent from load to load. One cold card load, 4199 ms, is an outlier in both builds.
+- The first-compile median varies by about ±6 percent between identical setups. Single loads vary by up to ±8 percent (button warm 627 to 728 ms).
+
+Verdict: kept with exception.
+- The compiled first render is within noise in every id and mode (+0.3 to +2.8 percent). That render is when Get code is enabled and "Matches current recipe" appears.
+- Edits and the iframe load are unchanged.
+- The worker's first compile, measured from the request to the reply arriving on the editor's main thread, is beyond the noise band in four cases: select (+13 percent cold, +17 percent warm, every after load above the control median but one), dialog cold (+11 percent) and button warm (+10 percent).
+- That extra time is absorbed before the render: the default is already on screen, and the compiled render arrives at the same time as before.
+- For the user to decide: accept a first-compile phase up to 17 percent slower (select) for a first view 49 to 69 percent sooner, with the compiled first render unchanged within 3 percent. Otherwise, revert 9c.
