@@ -21,8 +21,13 @@ const stage = (page: Page) => page.locator('[data-preview-family]')
 const previewStatus = (page: Page) => page.locator('section[aria-label="Example"] [role="status"]').first()
 const familyButton = (page: Page, label: string) =>
   page.getByRole('group', { name: 'Style family' }).getByRole('button', { name: label, exact: true })
-const modeButton = (page: Page, label: 'Light' | 'Dark') =>
-  page.getByRole('group', { name: 'Preview mode' }).getByRole('button', { name: label, exact: true })
+const modeToggle = (page: Page) => page.getByRole('button', { name: 'Dark preview', exact: true })
+/** Picks an explicit preview mode with the one light/dark toggle; when it already shows that mode (following the site), it toggles away and back. */
+async function pickMode(page: Page, label: 'Light' | 'Dark') {
+  const toggle = modeToggle(page)
+  if ((await toggle.getAttribute('aria-pressed') === 'true') === (label === 'Dark')) await toggle.click()
+  await toggle.click()
+}
 
 /** Loads a page and waits until React has hydrated it. */
 async function open(page: Page, path: string) {
@@ -115,7 +120,7 @@ test('explicit light preview stays light under a dark site', async ({ page }) =>
     await expect(page.locator('html')).toHaveClass(/\bdark\b/)
     const followingDark = await background()
     expect(followingDark).not.toBe(light)
-    await modeButton(page, 'Light').click()
+    await pickMode(page, 'Light')
     await expect(stage(page)).toHaveAttribute('data-preview-mode', 'light')
     expect(await background()).toBe(light)
   }
@@ -423,7 +428,7 @@ test.describe('axe stays clean', () => {
         test(`/components/${id} in ${label} ${mode.toLowerCase()} has no violations`, async ({ page }) => {
           await open(page, `/components/${id}`)
           if (value !== 'ombelle') await pickFamily(page, value, label)
-          await modeButton(page, mode).click()
+          await pickMode(page, mode)
           await expect(stage(page)).toHaveAttribute('data-preview-mode', mode.toLowerCase())
           expect((await axe(page).analyze()).violations).toEqual([])
         })
@@ -433,7 +438,7 @@ test.describe('axe stays clean', () => {
       test(`/components/${id} in ${label} light has no violations`, async ({ page }) => {
         await open(page, `/components/${id}`)
         if (value !== 'ombelle') await pickFamily(page, value, label)
-        await modeButton(page, 'Light').click()
+        await pickMode(page, 'Light')
         await expect(stage(page)).toHaveAttribute('data-preview-mode', 'light')
         expect((await axe(page).analyze()).violations).toEqual([])
       })

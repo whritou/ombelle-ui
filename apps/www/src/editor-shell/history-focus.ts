@@ -10,7 +10,7 @@ export function openMenubarTrigger(): HTMLElement | null {
 }
 
 /**
- * The menu button an action came from: the open File, Edit or View trigger from 1200px, the toolbar's More
+ * The menu button an action came from: the open File or Edit trigger from 1200px, the toolbar's More
  * actions below it, or the phone's sheet button below 768px. Call it while the menu is still open.
  */
 export function visibleMoreActions(): HTMLElement | null {

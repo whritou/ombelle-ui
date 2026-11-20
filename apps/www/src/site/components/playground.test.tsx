@@ -135,7 +135,7 @@ it("keeps the last pick when an earlier family's fonts arrive later", async () =
 
 it('lets an explicit mode override the site', async () => {
   const host = await render()
-  await click(host, 'Preview mode', 'Dark')
+  await act(async () => { host.querySelector<HTMLButtonElement>('[aria-label="Dark preview"]')!.click() })
   expect(stage(host)!.dataset.previewMode).toBe('dark')
   expect(host.querySelector('[role="status"]')!.textContent).toBe('Ombelle · dark')
 })

@@ -1,0 +1,11 @@
+/* A small sample of each style family's look: two mini buttons, as in the editors' family picker. */
+.sample { display: flex; gap: 4px; inline-size: 100%; block-size: 22px; }
+.sample i { flex: 1; border-radius: 6px; background: var(--primary); }
+.sample i + i { background: var(--muted); }
+.sample[data-family='minimalist'] i { border: 1px solid var(--foreground); border-radius: 2px; background: transparent; }
+.sample[data-family='neo-brutalism'] i { border: 2px solid var(--foreground); border-radius: 0; box-shadow: 2px 2px 0 var(--foreground); }
+.sample[data-family='ombelle'] i { border: 2px solid var(--foreground); border-radius: 999px; background: oklch(72% 0.17 6); box-shadow: 2px 2px 0 var(--foreground); }
+.sample[data-family='papier'] i { border: 1px solid var(--foreground); border-radius: 2px; background: #f3eddf; box-shadow: 0 2px 0 var(--foreground); }
+.sample[data-family='organic'] i { border: 0; border-radius: 14px 11px 15px 10px / 11px 15px 10px 14px; background: #3f6b3a; box-shadow: 0 6px 10px -6px rgba(52, 70, 40, 0.55); }
+.sample[data-family='retro-futurism'] i { border: 2px solid #2a1b4d; border-radius: 999px; background: linear-gradient(180deg, #c23b1b 0 52%, #a62f14 52%); box-shadow: 0 3px 0 #2a1b4d; }
+.sample[data-family='liquid-glass'] i { border: 1px solid var(--border); border-radius: 12px; background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 45%, transparent), color-mix(in oklab, var(--muted) 70%, transparent)); }

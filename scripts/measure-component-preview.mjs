@@ -2,7 +2,7 @@
 // Usage: node scripts/measure-component-preview.mjs <origin> <id...>
 // Prints JSON: { id, firstReadyMs, familySwitchMs: Record<family, number>, modeSwitchMs, modeFrameMs: number[] | null, preloadState }[]
 // Relies only on the role="status" line (`<Family label> · <mode>` once ready) and the toggle groups
-// labelled "Style family" and "Preview mode" (a role=group of buttons today; role=radio items also match), so it measures both the iframe and the inline renderer.
+// labelled "Style family" (a role=group of buttons) and the one light/dark toggle labelled "Dark preview", so it measures both the iframe and the inline renderer.
 import { chromium } from '@playwright/test'
 
 const [origin, ...ids] = process.argv.slice(2)
@@ -89,7 +89,7 @@ try {
 
     const modeBefore = await fingerprint(page)
     const t = performance.now()
-    await page.locator('[aria-label="Preview mode"]').locator('button, [role="radio"]').filter({ hasText: /^Dark$/ }).click()
+    await page.locator('[aria-label="Dark preview"]').click()
     await readyText(/· dark$/)
     await changed(modeBefore)
     const modeSwitchMs = Math.round(performance.now() - t)
@@ -99,16 +99,15 @@ try {
     // renderers without a stage (the iframe path).
     const modeFrameMs = await page.evaluate(() => new Promise((resolve) => {
       const stage = document.querySelector('[data-state="active"][role="tabpanel"] [data-preview-family]')
-      const group = document.querySelector('[aria-label="Preview mode"]')
-      if (!stage || !group) return resolve(null)
-      const button = (label) => [...group.querySelectorAll('button, [role="radio"]')].find((el) => el.textContent?.trim() === label)
+      const toggleButton = document.querySelector('[aria-label="Dark preview"]')
+      if (!stage || !toggleButton) return resolve(null)
       const samples = []
       const toggle = (labels) => {
         const label = labels.shift()
         if (!label) return resolve(samples)
         const before = stage.getAttribute('data-preview-mode')
         const start = performance.now()
-        button(label).click()
+        toggleButton.click()
         const wait = () => {
           if (stage.getAttribute('data-preview-mode') === before) return requestAnimationFrame(wait)
           requestAnimationFrame(() => { samples.push(Math.round((performance.now() - start) * 10) / 10); setTimeout(() => toggle(labels), 250) })

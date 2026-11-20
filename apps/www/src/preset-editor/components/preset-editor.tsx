@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Download, Eye, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { CircleHelp, Download, Eye, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import type { StyleFamily } from '@ombelle/contracts'
 import { defaultSiteFamily, offeredStyleFamilies } from '../../snapshots/install-command'
 import {
@@ -305,13 +305,7 @@ export default function PresetEditor() {
   const warningText = warnings ? `, ${warnings} ${warnings === 1 ? 'warning' : 'warnings'}` : ''
   return (
     <main className={styles.editor} aria-label="Preset editor" data-editor-root="">
-      <EditorTopBar view={[
-        { label: 'Preview mode', value: mode, options: previewModeOptions, onChange: value => setMode(value as typeof mode) },
-        ...(glass && transparencySupported ? [{ label: 'Preview transparency', value: transparency, options: previewTransparencyOptions, onChange: (value: string) => setTransparency(value as 'auto' | 'reduced') }] : []),
-        { label: 'Preview page', value: scene, options: sceneOptions, onChange: value => setScene(value as PresetScene) },
-        ...(glass ? [{ label: 'Preview backdrop', value: backdrop, options: backdropOptions, onChange: (value: string) => setBackdropOverride(value as PresetBackdrop) }] : []),
-        { label: 'Preview width', value: viewport, options: previewWidthOptions('320 px'), onChange: value => setViewport(value as typeof viewport) },
-      ]}
+      <EditorTopBar
         commands={[familyCommands(offeredStyleFamilies(draft.family), draft.family, familyNames, family)]}
         crumbs={['Presets']}
         nameField={{
@@ -402,7 +396,7 @@ export default function PresetEditor() {
         extra={<><button ref={reviewOpener} type="button" className={styles.reviewOpener} aria-label={`Checks and export${warningText}`}
           aria-haspopup="dialog" aria-expanded={reviewSheetOpen} onClick={() => setReviewSheetOpen(true)}>
           <ShieldCheck aria-hidden="true" size={18} />{warnings ? <span className={styles.reviewBadge} aria-hidden="true">{warnings}</span> : null}
-        </button><span className={styles.draftNote} title="Draft — automated token contrast only">Draft — automated token contrast only</span><a href="/docs/preset-editor" className="text-sm font-semibold underline underline-offset-4">Preset editor guide</a></>}
+        </button><span className={styles.draftNote} title="Draft — automated token contrast only">Draft<span className={styles.srOnly}> — automated token contrast only</span></span><a href="/docs/preset-editor" className={styles.guideLink} aria-label="Preset editor guide"><CircleHelp aria-hidden="true" size={16} />Guide</a></>}
       />
       <h1 className={styles.srOnly}>Preset editor</h1>
       {warning && <p role="alert">{warning}</p>}
@@ -514,6 +508,7 @@ export default function PresetEditor() {
           >
             <ThemeControls
               draft={draft}
+              mode={mode}
               onApply={(scheme, group) =>
                 commit(applyColorScheme(draft, scheme), 'scheme:' + group)
               }

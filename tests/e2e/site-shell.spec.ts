@@ -37,6 +37,17 @@ test.describe('phones', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Global presets' })).toBeVisible()
   })
 
+  test('the site menu sheet has one Close button, and it closes the sheet', async ({ page }) => {
+    await page.goto(`${site}/docs`)
+    await page.getByRole('button', { name: 'Open menu', exact: true }).click()
+    const sheet = page.getByRole('dialog', { name: 'Menu', exact: true })
+    await expect(sheet).toBeVisible()
+    // The sheet draws its own Close button; the header must not add a second one beside it.
+    await expect(sheet.getByRole('button', { name: /close/i })).toHaveCount(1)
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toBeHidden()
+  })
+
   test('guide text keeps the page within 375 px', async ({ page }) => {
     await page.goto(`${site}/docs/getting-started`)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375)
@@ -247,20 +258,22 @@ test.describe('content pages', () => {
 
 test.describe('editor menubar', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
-  test('the View menu changes the preview mode and width, and the choice survives the 1200 px breakpoint', async ({ page }) => {
+  test('the menubar has File and Edit only, and the preview controls keep their choice across the 1200 px breakpoint', async ({ page }) => {
     await page.goto(`${site}/editor/component/button`)
     await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 60000 })
-    const bar = page.getByRole('menubar', { name: 'Editor menus' })
-    await bar.getByRole('menuitem', { name: 'View' }).click()
-    await page.getByRole('menuitemradio', { name: 'Dark' }).click()
-    await bar.getByRole('menuitem', { name: 'View' }).click()
-    await page.getByRole('menuitemradio', { name: 'Narrow' }).click()
+    // The preview's own bar holds the preview controls, so the menubar has no View menu repeating them.
+    await expect(page.getByRole('menubar', { name: 'Editor menus' }).getByRole('menuitem')).toHaveText(['File', 'Edit'])
+    const mode = page.getByRole('radiogroup', { name: 'Preview mode', exact: true })
+    const width = page.getByRole('radiogroup', { name: 'Preview width', exact: true })
+    await mode.getByRole('radio', { name: 'Dark' }).click()
+    await width.getByRole('radio', { name: 'Narrow' }).click()
     await page.setViewportSize({ width: 1100, height: 900 })
-    await expect(page.getByRole('radiogroup', { name: 'Preview mode', exact: true }).getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
+    // Below 1200px the width control is not shown, so only the mode can be read here; the width is read back at 1440px.
+    await expect(mode.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
+    await expect(width).toBeHidden()
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.getByRole('menubar', { name: 'Editor menus' }).getByRole('menuitem', { name: 'View' }).click()
-    await expect(page.getByRole('menuitemradio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
-    await expect(page.getByRole('menuitemradio', { name: 'Narrow' })).toHaveAttribute('aria-checked', 'true')
+    await expect(mode.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true')
+    await expect(width.getByRole('radio', { name: 'Narrow' })).toHaveAttribute('aria-checked', 'true')
   })
 
   test('every top bar action is reachable by keyboard through the menubar', async ({ page }) => {
@@ -273,8 +286,6 @@ test.describe('editor menubar', () => {
     await page.keyboard.press('ArrowRight')
     await expect(page.getByRole('menuitem', { name: /^Undo/ })).toBeVisible()
     await expect(page.getByRole('menuitem', { name: 'Reset recipe' })).toBeVisible()
-    await page.keyboard.press('ArrowRight')
-    await expect(page.getByRole('menuitemradio', { name: 'Light' })).toBeVisible()
     await page.keyboard.press('Escape')
   })
 })

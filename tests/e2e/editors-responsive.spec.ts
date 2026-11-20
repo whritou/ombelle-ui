@@ -361,7 +361,9 @@ for (const editor of editors) {
     const menu = page.getByRole('button', { name: 'Site menu', exact: true })
     expect((await menu.boundingBox())!.height).toBeGreaterThanOrEqual(44)
     await menu.click()
-    const sheet = page.getByRole('dialog', { name: 'Site menu' })
+    // The button says what it opens; the sheet is titled with the site's name.
+    const sheet = page.getByRole('dialog', { name: 'Ombelle', exact: true })
+    await expect(sheet.getByRole('heading', { name: 'Ombelle', exact: true })).toBeVisible()
     for (const [label, href] of [['Get started', '/#get-started'], ['Docs', '/docs'], ['Components', '/components'], ['Preset editor', '/editor/preset'], ['Component editor', '/editor/component']])
       await expect(sheet.getByRole('link', { name: label, exact: true })).toHaveAttribute('href', href)
     await expect(sheet.getByRole('link', { name: /GitHub/ })).toBeVisible()

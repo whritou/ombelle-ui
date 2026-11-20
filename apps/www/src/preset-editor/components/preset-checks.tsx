@@ -135,9 +135,9 @@ export function PresetChecks({
         </section>
       )}
       <p className={styles.caveat}>
-        Eight text pairs in both modes, using a 4.5:1 threshold. Warnings do not
-        prevent export. This does not evaluate every component state or non-text
-        contrast.
+        Draft — automated token contrast only. Eight text pairs in both modes,
+        using a 4.5:1 threshold. Warnings do not prevent export. This does not
+        evaluate every component state or non-text contrast.
       </p>
     </div>
   )
