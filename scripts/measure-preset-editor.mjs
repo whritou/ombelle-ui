@@ -1,6 +1,6 @@
 // Measures how long the preset editor's preview takes to become ready and to react to edits.
 // Usage: node scripts/measure-preset-editor.mjs <origin> [--runs N]
-// Prints JSON: { firstReadyMs, tokenEditMs: number[], familySwitchMs: Record<family, number>, familyConfirmed, sceneSwitchMs,
+// Prints JSON: { firstReadyMs, tokenEditMs: number[], tokenInputMs: number[], familySwitchMs: Record<family, number>, familyConfirmed, sceneSwitchMs,
 //   modeSwitchMs, workerCompileMs: number[], iframeApplyMs: number[], tokensApplyMs: number[], iframePhases, medians,
 //   channels, runs }
 // Method as scripts/measure-component-preview.mjs: Playwright chromium, cache disabled for the first load, reduced
@@ -166,18 +166,22 @@ try {
     throw new Error('preview iframe never rendered')
   }
 
-  // Token edit: set Corner radius and press Tab.
+  // Token edit: set Corner radius and press Tab. The field commits on every input, so the edit reaches the editor
+  // during `fill`: `tokenEditMs` runs from the Tab press (the original metric, kept for comparison with earlier runs),
+  // `tokenInputMs` from the start of `fill`, which covers the editor's own handling of the input as well.
   const radius = page.getByLabel('Corner radius', { exact: true })
   const values = ['0.3', '1.2', '0.5', '1.5', '0.2', '1.0', '0.7', '1.8', '0.4', '1.3']
-  const tokenEditMs = []
+  const tokenEditMs = [], tokenInputMs = []
   for (let i = 0; i < runs; i++) {
     const before = await fingerprint()
     await radius.click()
+    const input = performance.now()
     await radius.fill(values[i % values.length])
     const t = performance.now()
     await radius.press('Tab')
     await changed(before)
     tokenEditMs.push(round(performance.now() - t))
+    tokenInputMs.push(round(performance.now() - input))
     await settle()
   }
 
@@ -261,7 +265,7 @@ try {
   }).filter(Boolean)
   const med = (key) => median(phases.map((p) => p[key]))
   output = {
-    origin, runs, firstReadyMs, tokenEditMs, familySwitchMs, familyConfirmed, sceneSwitchMs, modeSwitchMs, workerCompileMs, iframeApplyMs, tokensApplyMs,
+    origin, runs, firstReadyMs, tokenEditMs, tokenInputMs, familySwitchMs, familyConfirmed, sceneSwitchMs, modeSwitchMs, workerCompileMs, iframeApplyMs, tokensApplyMs,
     iframePhases: {
       samples: phases.length,
       medianPostToReceiveMs: med('postToReceiveMs'),
@@ -273,6 +277,7 @@ try {
     },
     medians: {
       tokenEditMs: median(tokenEditMs),
+      tokenInputMs: median(tokenInputMs),
       familySwitchMs: median(Object.values(familySwitchMs)),
       workerCompileMs: median(workerCompileMs),
       iframeApplyMs: median(iframeApplyMs),
