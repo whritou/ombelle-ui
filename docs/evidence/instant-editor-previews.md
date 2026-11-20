@@ -416,3 +416,61 @@ One `Title` edit on `/editor/component/card`, after a warm-up edit, browser-wide
 5. `modulepreload` of the worker script: the download is 13 to 108 ms, so at most that.
 
 Not in the Task 9 list but visible here: the 100 ms debounce is 13 to 29 percent of an edit, and option (1) above is the one change that would cut the per-edit cost.
+
+## Component editor: precompiled default recipe (Task 9, experiment 9c)
+
+Kept. Each component editor's default recipe is compiled at build time, per family, and bundled into the editor preview, which shows it as soon as the editor connects, before the worker's first compile. The first compile and every edit then reach the preview through the existing verified render path, which replaces the default. Message validation, the iframe's sandbox and its isolation are unchanged (design, "Calls made during review" 3).
+
+### What changed
+
+- `apps/www/src/editor/precompiled-defaults.ts`: the default recipe a fresh editor shows in each family (Button: the example recipe moved to the family, as `ButtonEditor` starts; catalog components: `createCatalogDraft` moved to the family, as the editor's family picker does), the precompiled families (every built-in family but Liquid Glass, which stays on the compiled path), and the test that tells whether a recipe is still one of those defaults.
+- `scripts/generate-editor-defaults.ts`, called from `scripts/generate-preview.ts`: compiles each default with `compileRecipe` (Button) or `compileComponentRecipe` (catalog), the functions the worker and the iframe's verification use, into `apps/preview/src/generated/editor-defaults/<component>/<family>.json` (generated, ignored by git). 441 files: Button and 62 catalog components, 7 families each where the family supports the component.
+- The editor puts `default=<family>` in the iframe URL while its recipe is that default. It answers the preview's `ready` only after it has restored its draft; a restored draft that is not a default drops the parameter, so the preview never shows a default for a different recipe (it reloads once, alongside the first compile). The preview fetches the named default as it starts (`import.meta.glob`, one 25 KB chunk) and shows it with request id 0 once its port is attached, unless a render has already been applied; it does not report measurements for request 0.
+
+### Method
+
+As Task 8 (same machine, `node scripts/build-hosted-www.mjs`, `next start --hostname 127.0.0.1 --port 3000`, Chrome headless, `node scripts/measure-component-editor.mjs http://127.0.0.1:3000 button card dialog select --runs 5`, cold and `--warm`). The script now also records `firstPreviewMs`: navigation start to the first frame after the preview first draws an element carrying a recipe scope (`[data-ombelle-recipe]`), compiled or precompiled, watched by a `MutationObserver` inside the iframe. That is what the user first sees; `firstRenderMs` (the first applied render) still measures the compiled path. Before is a control re-run of commit `f188e23c` with the updated script (its `firstRenderMs` is within 5 percent of Task 8's except warm select, 3175 against 3138, and warm card, 3001 against 2908); after is the working tree of the commit below. The warm control was run again after a first warm run overlapped the preview generator.
+
+### First view (median of 5 loads, ms)
+
+| `firstPreviewMs` | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| Cold, before | 2838 | 3654 | 3530 | 4083 |
+| Cold, after | 1444 (-49%) | 1557 (-57%) | 1529 (-57%) | 1614 (-60%) |
+| Warm, before | 2256 | 3040 | 2854 | 3287 |
+| Warm, after | 997 (-56%) | 1014 (-67%) | 975 (-66%) | 1055 (-68%) |
+
+Raw cold after: button `[1676, 1431, 1407, 1502, 1444]`, card `[1641, 1513, 1557, 1543, 1563]`, dialog `[1499, 1546, 1529, 1531, 1518]`, select `[1641, 1614, 1558, 1703, 1613]`. The first view now waits for the page boot (the editor answers `ready` after hydration) and the iframe's own load, not the compile.
+
+### Everything else (median, ms; before → after)
+
+| | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| First applied render, cold | 2794 → 2800 | 3595 → 3835 | 3426 → 3406 | 3941 → 4041 |
+| First applied render, warm | 2229 → 2173 | 3001 → 3068 | 2789 → 2654 | 3175 → 3334 |
+| First compile, cold | 1204 → 1136 | 1658 → 1843 | 1462 → 1549 | 1849 → 2049 |
+| First compile, warm | 1010 → 962 | 1454 → 1529 | 1469 → 1408 | 1568 → 1739 |
+| Iframe load, cold (bimodal) | 365 → 942 | 965 → 976 | 921 → 932 | 450 → 961 |
+| Iframe load, warm | 749 → 724 | 702 → 723 | 721 → 695 | 706 → 703 |
+| Edit, input to frame, cold | 311 → 328 | 651 → 650 | 521 → 531 | 802 → 811 |
+| Edit, input to frame, warm | 353 → 359 | 731 → 673 | 593 → 573 | 728 → 751 |
+| Edit, worker recompile, cold | 58 → 53 | 245 → 243 | 176 → 185 | 312 → 340 |
+| Edit, iframe verification, cold | 49 → 63 | 141 → 139 | 112 → 104 | 193 → 208 |
+| Iframe script requests | 22 → 23 | 20 → 21 | 35 → 36 | 46 → 47 |
+
+- Edits are unchanged within run-to-run noise (every edit still goes worker, editor verification, iframe verification).
+- The compiled first render, which now replaces a default already on screen and decides when Get code is enabled, is within -5 to +7 percent; the first compile of card and select is 5 to 11 percent slower in both modes (card cold 1540 to 1761 before, 1705 to 1998 after), which matches the iframe rendering the default while the worker compiles. It is no longer on the path to the first view.
+- The iframe load stays bimodal cold (about 420 and 950 ms) as in Task 8; four of five cold loads fell in the slow mode for button and dialog this time, against two of five before. Warm loads are unchanged.
+- One more script request per editor: the default's chunk.
+
+### Cost
+
+- Bundle: the editor preview's entry chunk grows from 23.6 kB (8.3 kB gzip) to 77.3 kB (14.6 kB gzip), the map of 441 lazy chunks. The defaults add 441 chunks of about 25 kB each (11.5 MB raw in `public/ombelle-preview`), of which a page fetches one.
+- Build: generating the defaults takes about 86 s (441 compiles); `node scripts/build-hosted-www.mjs` went from 327 s to 405 s. Limiting `precompiledFamilies` to the site's first family would cut that to about 12 s, at the cost of a restored draft that is another family's untouched default waiting for its compile.
+
+### Tests
+
+- `apps/www/src/editor/precompiled-defaults.test.ts`: the defaults are what a fresh editor shows; a recipe names a family only while it is that default (an edit, a revision, or Liquid Glass name none); the generated set is exactly every component and precompiled family; the bundled Button, card, dialog and select defaults in eight component and family pairs equal a fresh compile (canonical JSON). 11 passed.
+- `tests/e2e/component-editor-instant.spec.ts` (site config; ignored by the main config): with the compiler worker blocked, the Button, Badge and Card previews show each of the 7 families' defaults with the scope a fresh compile gives, while the editor still says "Compiling preview…"; a restored draft that is not a default shows nothing until its compile; the first compile keeps the default's scope and the first edit replaces it (Badge, Button). 24 passed against the hosted build, and the 4 non-loop cases again against the dev server.
+- `tests/e2e/editor.spec.ts`, the sandboxed preview test: the iframe URL now carries `?default=ombelle`, and the test waits for the first applied render before replaying it (the default shows the same Button text before any render arrives). Against the dev server (`scripts/serve-snapshot-www.ts`, `pnpm dev:preview`), `editor.spec.ts` and `catalog-editors.spec.ts` without the consumer comparisons (which need the consumer apps): 39 passed, 1 failed. The failure, `edits and restores separator` (the Decorative switch does not uncheck), also fails with the catalog editor reverted to `f188e23c`, so it is older than this change.
+- `pnpm typecheck` passes; `next build` passes after the final edit (the JSON import attribute the Playwright loader needs).

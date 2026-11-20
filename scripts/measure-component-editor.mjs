@@ -1,7 +1,7 @@
 // Measures the phases of the component editor's preview (`/editor/component/<id>`): iframe load, worker download,
 // first compile, first render, and the cost of one recipe edit, including the iframe's re-verification compile.
 // Usage: node scripts/measure-component-editor.mjs <origin> <id...> [--runs N] [--warm]
-// Prints JSON keyed by id: { iframeLoadMs, workerDownloadMs, firstCompileMs, iframeFillMs, firstRenderMs,
+// Prints JSON keyed by id: { iframeLoadMs, workerDownloadMs, firstCompileMs, iframeFillMs, firstRenderMs, firstPreviewMs,
 //   recompileMs: number[], iframeVerifyMs: number[], moduleRequests, ...details }. The first five are medians over N loads
 //   (raw values under `loads`), the arrays are the N edits of one page in order.
 // Method as scripts/measure-preset-editor.mjs: Playwright chromium, reduced motion, 1100x800, a new MessageChannel per
@@ -27,7 +27,7 @@ const timeout = 60000
 // both documents (a compile hashes each artifact), and, inside the iframe, when each render arrived and each ack left.
 function instrument() {
   const clock = () => performance.timeOrigin + performance.now()
-  const store = (window.__m = { workers: [], worker: [], render: [], received: [], acks: [], digests: [], topDigests: [], loads: [], frames: [], inputs: [] })
+  const store = (window.__m = { workers: [], worker: [], render: [], received: [], acks: [], digests: [], topDigests: [], loads: [], frames: [], inputs: [], specimen: null })
   const top = window === window.top
   const seen = new WeakSet()
   const watch = (target, onMessage) => {
@@ -84,6 +84,16 @@ function instrument() {
     }, true)
     document.addEventListener('input', (event) => store.inputs.push(performance.timeOrigin + event.timeStamp), true)
   } else {
+    // The first specimen the preview draws, compiled or precompiled: the element carrying a recipe scope, then the
+    // frame that shows it (a task queued from the next animation frame, as for the acks below).
+    const seeSpecimen = () => {
+      if (store.specimen || !document.querySelector('[data-ombelle-recipe]')) return
+      store.specimen = { seen: clock(), frame: null }
+      requestAnimationFrame(() => setTimeout(() => { store.specimen.frame = clock() }, 0))
+      specimenObserver.disconnect()
+    }
+    const specimenObserver = new MutationObserver(seeSpecimen)
+    specimenObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-ombelle-recipe'] })
     const portPost = MessagePort.prototype.postMessage
     MessagePort.prototype.postMessage = function (data, ...rest) {
       if (data && data.type === 'render-ack') {
@@ -187,6 +197,8 @@ async function measureLoad(id, edits) {
       iframeFillMs: firstRender ? round(firstRender.got - firstRender.sent) : null,
       // Navigation start until the first frame produced after the first applied render.
       firstRenderMs: firstFrame ? round(firstFrame.t - timing.origin) : null,
+      // Navigation start until the first frame showing a specimen, compiled or precompiled (the user's first view).
+      firstPreviewMs: inner0.specimen?.frame ? round(inner0.specimen.frame - timing.origin) : null,
       workerGotToRenderPostMs: firstCompile && firstRender ? round(firstRender.sent - firstCompile.got) : null,
       mainThreadDigestsBeforeFirstPost: firstRender ? top0.topDigests.filter((t) => t <= firstRender.sent).length : null,
       moduleRequests: scripts.size,
@@ -256,6 +268,7 @@ try {
       firstCompileMs: med('firstCompileMs'),
       iframeFillMs: med('iframeFillMs'),
       firstRenderMs: med('firstRenderMs'),
+      firstPreviewMs: med('firstPreviewMs'),
       recompileMs: edit.recompileMs,
       iframeVerifyMs: edit.iframeVerifyMs,
       moduleRequests: med('moduleRequests'),
