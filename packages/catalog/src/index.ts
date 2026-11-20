@@ -129,6 +129,9 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   accordion: ['@radix-ui/react-accordion', 'lucide-react'],
   progress: ['@radix-ui/react-progress'],
 }
+// Built once per release: building validates every preset and filters every template's dependencies, and the
+// editors read the catalog on every render. Callers only read it.
+const catalogs = new Map<string, Catalog>()
 export function getCatalog(release: string): Catalog {
   if (release !== '0.1.0')
     throw new FoundationError(
@@ -136,6 +139,14 @@ export function getCatalog(release: string): Catalog {
       'Unsupported catalog release',
       '/catalogRelease',
     )
+  let catalog = catalogs.get(release)
+  if (!catalog) {
+    catalog = buildCatalog(release)
+    catalogs.set(release, catalog)
+  }
+  return catalog
+}
+function buildCatalog(release: string): Catalog {
   const entry = (id: ComponentId, content: string, edition: Edition) => ({
     id,
     content,
