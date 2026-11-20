@@ -46,7 +46,7 @@ Exception: the worker's first compile is slower beyond the noise band (about 6 p
 
 ### Decisions for the user
 
-1. The 9c exception: accept a first compile up to 17 percent slower (select) for a first view 49 to 69 percent sooner, or revert 9c.
+1. The 9c exception: accepted by the user on 2026-11-20 (a first compile up to 17 percent slower for select, for a first view 49 to 69 percent sooner); 9c is kept.
 2. Skip the editor page's second, identical verification in the catalog editors: about 50 to 85 ms per edit; it touches validation, so it needs approval.
 3. The iframe's re-verification is 16 to 22 percent of each edit (about 40 percent with the editor page's own); any change to it touches validation.
 
@@ -566,7 +566,7 @@ Noise band, from this session's control loads and the A/B check:
 - The compiled first render varies by about ±1.5 percent from load to load. One cold card load, 4199 ms, is an outlier in both builds.
 - The first-compile median varies by about ±6 percent between identical setups. Single loads vary by up to ±8 percent (button warm 627 to 728 ms).
 
-Verdict: kept with exception.
+Verdict: kept with exception, accepted by the user on 2026-11-20.
 - The compiled first render is within noise in every id and mode (+0.3 to +2.8 percent). That render is when Get code is enabled and "Matches current recipe" appears.
 - Edits and the iframe load are unchanged.
 - The worker's first compile, measured from the request to the reply arriving on the editor's main thread, is beyond the noise band in four cases: select (+13 percent cold, +17 percent warm, every after load above the control median but one), dialog cold (+11 percent) and button warm (+10 percent).
