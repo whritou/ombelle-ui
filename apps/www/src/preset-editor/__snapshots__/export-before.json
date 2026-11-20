@@ -1,0 +1,823 @@
+{
+  "flat": {
+    "presetHash": "5e5af9858f355d9308ba2ce3e7fe4fe4fb53a8fb6cc0aeae71c8d0acfef6203b",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 0,
+        "density": "comfortable",
+        "fontFamilyId": "dm-sans",
+        "monoFontFamilyId": "geist-mono",
+        "motion": "reduced",
+        "radiusRem": 0.5,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 0,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#fde047",
+          "accentForeground": "#0b1120",
+          "background": "#0b1120",
+          "border": "#26314a",
+          "card": "#151e32",
+          "cardForeground": "#f1f5f9",
+          "destructive": "#f87171",
+          "destructiveForeground": "#0b1120",
+          "foreground": "#f1f5f9",
+          "input": "#6b7690",
+          "muted": "#1b2439",
+          "mutedForeground": "#a3aec2",
+          "popover": "#151e32",
+          "popoverForeground": "#f1f5f9",
+          "primary": "#6b9bff",
+          "primaryForeground": "#0b1120",
+          "ring": "#6b9bff",
+          "secondary": "#1e2b4a",
+          "secondaryForeground": "#c7d7ff"
+        },
+        "light": {
+          "accent": "#fde047",
+          "accentForeground": "#0f172a",
+          "background": "#f3f5f9",
+          "border": "#e2e6ee",
+          "card": "#ffffff",
+          "cardForeground": "#0f172a",
+          "destructive": "#c81e1e",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#0f172a",
+          "input": "#7c879b",
+          "muted": "#eceff5",
+          "mutedForeground": "#4a5568",
+          "popover": "#ffffff",
+          "popoverForeground": "#0f172a",
+          "primary": "#1d4ed8",
+          "primaryForeground": "#ffffff",
+          "ring": "#1d4ed8",
+          "secondary": "#e3ebfd",
+          "secondaryForeground": "#1b3b9e"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "flat"
+    },
+    "presetSha256": "3cf2281d799822de7fb1157cd3a8af291bb83de3d0da74de02d727ee2790f2f1",
+    "tokensCssSha256": "33824c5edb98e929011f9cfa0fa3e4742ed22f9b95fa834dde5789c1b483505b",
+    "familyCssSha256": "0ad3f37af73119b2a4854aee5ddd0779dc503625b020f4f60e18f23122656ac6"
+  },
+  "minimalist": {
+    "presetHash": "4cc73dcaa64b4f73152c68ace0136be460ad2e754c787349d6a77010f8950ada",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 1,
+        "density": "comfortable",
+        "fontFamilyId": "geist",
+        "monoFontFamilyId": "geist-mono",
+        "motion": "reduced",
+        "radiusRem": 0.25,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 0,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#232321",
+          "accentForeground": "#f2f2ef",
+          "background": "#0e0e0d",
+          "border": "#2c2c2a",
+          "card": "#161615",
+          "cardForeground": "#f2f2ef",
+          "destructive": "#f97066",
+          "destructiveForeground": "#0e0e0d",
+          "foreground": "#f2f2ef",
+          "input": "#76766f",
+          "muted": "#1d1d1b",
+          "mutedForeground": "#a6a6a0",
+          "popover": "#161615",
+          "popoverForeground": "#f2f2ef",
+          "primary": "#f2f2ef",
+          "primaryForeground": "#0e0e0d",
+          "ring": "#f2f2ef",
+          "secondary": "#232321",
+          "secondaryForeground": "#f2f2ef"
+        },
+        "light": {
+          "accent": "#f1f1ef",
+          "accentForeground": "#111111",
+          "background": "#fafaf9",
+          "border": "#e5e5e1",
+          "card": "#ffffff",
+          "cardForeground": "#111111",
+          "destructive": "#b42318",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#111111",
+          "input": "#8c8c86",
+          "muted": "#f1f1ef",
+          "mutedForeground": "#5f5f5a",
+          "popover": "#ffffff",
+          "popoverForeground": "#111111",
+          "primary": "#111111",
+          "primaryForeground": "#ffffff",
+          "ring": "#111111",
+          "secondary": "#f1f1ef",
+          "secondaryForeground": "#111111"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "minimalist"
+    },
+    "presetSha256": "53ee0442cf5ee3598237fc832aa16affa358afdc30b13849e1f6b07293499d03",
+    "tokensCssSha256": "c313d44450caff8bcde37a185b427852fc5e60b88d3ba7bf346ececb8c6cef9e",
+    "familyCssSha256": "ca85cfb06aaa572dbac563055edd09c80a3c11ff3f0b7cc2df4a0d79da98f658"
+  },
+  "neo-brutalism": {
+    "presetHash": "2bdd7ce7cb862e3148188184dbb1ddb6985c22d9bc21aa952c027983a7e08bed",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 2.5,
+        "density": "comfortable",
+        "fontFamilyId": "work-sans",
+        "headingFontFamilyId": "space-grotesk",
+        "monoFontFamilyId": "space-mono",
+        "motion": "reduced",
+        "radiusRem": 0,
+        "shadowOffsetXPx": 4,
+        "shadowOffsetYPx": 4,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#ff90e8",
+          "accentForeground": "#111111",
+          "background": "#141414",
+          "border": "#f5f5f5",
+          "card": "#1f1f1f",
+          "cardForeground": "#f5f5f5",
+          "destructive": "#ff6b6b",
+          "destructiveForeground": "#111111",
+          "foreground": "#f5f5f5",
+          "input": "#f5f5f5",
+          "muted": "#2a2a2a",
+          "mutedForeground": "#bdbdb5",
+          "popover": "#1f1f1f",
+          "popoverForeground": "#f5f5f5",
+          "primary": "#ffd23f",
+          "primaryForeground": "#111111",
+          "ring": "#f5f5f5",
+          "secondary": "#a6f4ff",
+          "secondaryForeground": "#111111",
+          "shadowColor": "#ff90e8"
+        },
+        "light": {
+          "accent": "#ff90e8",
+          "accentForeground": "#111111",
+          "background": "#f4f4ef",
+          "border": "#111111",
+          "card": "#ffffff",
+          "cardForeground": "#111111",
+          "destructive": "#ff5c5c",
+          "destructiveForeground": "#111111",
+          "foreground": "#111111",
+          "input": "#111111",
+          "muted": "#edede8",
+          "mutedForeground": "#45453f",
+          "popover": "#ffffff",
+          "popoverForeground": "#111111",
+          "primary": "#ffd23f",
+          "primaryForeground": "#111111",
+          "ring": "#111111",
+          "secondary": "#a6f4ff",
+          "secondaryForeground": "#111111",
+          "shadowColor": "#111111"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "neo-brutalism"
+    },
+    "presetSha256": "75e0e22042b398c59e529c3d6fd27dbeda7d7c4efb2234e5dbc347ab80a384c4",
+    "tokensCssSha256": "c1e3c96442ac9e991fbf32ef88da4dac07ca89f9d34db77c98b71ec6eba29f19",
+    "familyCssSha256": "0ff04bbb5ca3d2f284e89eb27f79c3942fe5d071192fb54db03f8785e86b40ac"
+  },
+  "ombelle": {
+    "presetHash": "3150890d25c78d84022edee43561313984a7aca9bbd0a022d5a738937bfb1323",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 1.5,
+        "density": "comfortable",
+        "fontFamilyId": "figtree",
+        "headingFontFamilyId": "bricolage-grotesque",
+        "monoFontFamilyId": "geist-mono",
+        "motion": "full",
+        "radiusRem": 0.75,
+        "shadowOffsetXPx": 3,
+        "shadowOffsetYPx": 3,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "oklch(0.3 0.08 6)",
+          "accentForeground": "oklch(0.88 0.08 6)",
+          "background": "oklch(0.17 0.01 275)",
+          "border": "oklch(0.97 0.004 350 / 0.8)",
+          "card": "oklch(0.21 0.012 275)",
+          "cardForeground": "oklch(0.97 0.004 350)",
+          "destructive": "oklch(0.7040000000000001 0.191 22.216)",
+          "destructiveForeground": "oklch(0.16 0.01 275)",
+          "foreground": "oklch(0.97 0.004 350)",
+          "input": "oklch(0.97 0.004 350 / 0.8)",
+          "muted": "oklch(0.26 0.012 275)",
+          "mutedForeground": "oklch(0.72 0.012 275)",
+          "popover": "oklch(0.21 0.012 275)",
+          "popoverForeground": "oklch(0.97 0.004 350)",
+          "primary": "oklch(0.68 0.22 6)",
+          "primaryForeground": "oklch(0.16 0.01 275)",
+          "ring": "oklch(0.68 0.22 6)",
+          "secondary": "oklch(0.3 0.08 6)",
+          "secondaryForeground": "oklch(0.88 0.08 6)",
+          "shadowColor": "oklch(0.55 0.22 6 / 0.7)"
+        },
+        "light": {
+          "accent": "oklch(0.95 0.035 6)",
+          "accentForeground": "oklch(0.42 0.17 6)",
+          "background": "oklch(0.985 0.004 350)",
+          "border": "oklch(0.22 0.012 275)",
+          "card": "#ffffff",
+          "cardForeground": "oklch(0.22 0.012 275)",
+          "destructive": "oklch(0.52 0.21 27)",
+          "destructiveForeground": "oklch(0.99 0 0)",
+          "foreground": "oklch(0.22 0.012 275)",
+          "input": "oklch(0.22 0.012 275)",
+          "muted": "oklch(0.955 0.006 350)",
+          "mutedForeground": "oklch(0.47 0.015 275)",
+          "popover": "#ffffff",
+          "popoverForeground": "oklch(0.22 0.012 275)",
+          "primary": "oklch(0.55 0.22 6)",
+          "primaryForeground": "oklch(0.99 0 0)",
+          "ring": "oklch(0.55 0.22 6)",
+          "secondary": "oklch(0.95 0.035 6)",
+          "secondaryForeground": "oklch(0.42 0.17 6)",
+          "shadowColor": "oklch(0.22 0.012 275)"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "ombelle"
+    },
+    "presetSha256": "65719450c5b45ed991ffda1edf7625c35b2f970bdc04b77850e2a16b24f73b44",
+    "tokensCssSha256": "d84697a325bb4d4de55bc2bd100c486fc5476cb938a45b9c6781ce1d7e8254e0",
+    "familyCssSha256": "6441ed70ac48b0b3d51d013120e36d7e78e17c96e9cdb98e6f00034a6de23fa3"
+  },
+  "papier": {
+    "presetHash": "32f604096941a44c7cd15e50a3ff3842975b7137287268aad20cf99858773b89",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 1,
+        "density": "comfortable",
+        "fontFamilyId": "instrument-sans",
+        "headingFontFamilyId": "fraunces",
+        "monoFontFamilyId": "ibm-plex-mono",
+        "motion": "full",
+        "radiusRem": 0.125,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 2,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#2a2f38",
+          "accentForeground": "#ede6d3",
+          "background": "#16191f",
+          "border": "#ede6d3",
+          "card": "#1d2128",
+          "cardForeground": "#ede6d3",
+          "destructive": "#f2a59a",
+          "destructiveForeground": "#16191f",
+          "foreground": "#ede6d3",
+          "info": "#1c2a38",
+          "infoForeground": "#a5c8ea",
+          "input": "#ede6d3",
+          "muted": "#232830",
+          "mutedForeground": "#a9a596",
+          "popover": "#1d2128",
+          "popoverForeground": "#ede6d3",
+          "primary": "#f0845f",
+          "primaryForeground": "#16191f",
+          "ring": "#f0845f",
+          "secondary": "#2a2f38",
+          "secondaryForeground": "#ede6d3",
+          "shadowColor": "#ede6d3",
+          "success": "#1f2e24",
+          "successForeground": "#9bd6a7",
+          "warning": "#33291a",
+          "warningForeground": "#edcb7e"
+        },
+        "light": {
+          "accent": "#e4dcc7",
+          "accentForeground": "#1b2a41",
+          "background": "#f3eddf",
+          "border": "#1b2a41",
+          "card": "#fbf7ec",
+          "cardForeground": "#1b2a41",
+          "destructive": "#7a1f12",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#1b2a41",
+          "info": "#d9e5ef",
+          "infoForeground": "#1b4a74",
+          "input": "#1b2a41",
+          "muted": "#ebe4d2",
+          "mutedForeground": "#4f5b6e",
+          "popover": "#fbf7ec",
+          "popoverForeground": "#1b2a41",
+          "primary": "#b8301a",
+          "primaryForeground": "#ffffff",
+          "ring": "#b8301a",
+          "secondary": "#e4dcc7",
+          "secondaryForeground": "#1b2a41",
+          "shadowColor": "#1b2a41",
+          "success": "#dde9d3",
+          "successForeground": "#24552f",
+          "warning": "#f3e4b8",
+          "warningForeground": "#6b4500"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "papier"
+    },
+    "presetSha256": "51864c2d53e1d1729ebfcf79d645736812a73f4b4cf80c7f643924e6cc432648",
+    "tokensCssSha256": "e4afc64a03ca835f37b1bafe9cb23ac87b407e7ab2e867a18702091b10ba7c96",
+    "familyCssSha256": "f483ea75594156ebefc72e101b3c7e71728e7c613c97a219da4e781bb23da6a9"
+  },
+  "organic": {
+    "presetHash": "72b2c28d9bfa51b02b642f9feecae2a2e859ac2489933a1cd437318fdcf4e5e9",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 2,
+        "density": "comfortable",
+        "fontFamilyId": "nunito",
+        "headingFontFamilyId": "young-serif",
+        "monoFontFamilyId": "dm-mono",
+        "motion": "full",
+        "radiusRem": 1.25,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 8,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#33402c",
+          "accentForeground": "#e9ebd8",
+          "background": "#1b2118",
+          "border": "#7f9170",
+          "card": "#232b1f",
+          "cardForeground": "#e9ebd8",
+          "destructive": "#f0a58c",
+          "destructiveForeground": "#2a120a",
+          "foreground": "#e9ebd8",
+          "info": "#1e3039",
+          "infoForeground": "#a9d6e3",
+          "input": "#7f9170",
+          "muted": "#2b3626",
+          "mutedForeground": "#a8b397",
+          "popover": "#232b1f",
+          "popoverForeground": "#e9ebd8",
+          "primary": "#9fcb8a",
+          "primaryForeground": "#14200f",
+          "ring": "#9fcb8a",
+          "secondary": "#33402c",
+          "secondaryForeground": "#e9ebd8",
+          "shadowColor": "#000000",
+          "success": "#1e3027",
+          "successForeground": "#a5dfbf",
+          "warning": "#38301a",
+          "warningForeground": "#edcb7e"
+        },
+        "light": {
+          "accent": "#dce3c4",
+          "accentForeground": "#26301f",
+          "background": "#eeebdc",
+          "border": "#6f7f5e",
+          "card": "#f8f6ea",
+          "cardForeground": "#26301f",
+          "destructive": "#a5432b",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#26301f",
+          "info": "#d6e7ec",
+          "infoForeground": "#2c5c6b",
+          "input": "#6f7f5e",
+          "muted": "#e6ead2",
+          "mutedForeground": "#55604a",
+          "popover": "#f8f6ea",
+          "popoverForeground": "#26301f",
+          "primary": "#3f6b3a",
+          "primaryForeground": "#ffffff",
+          "ring": "#3f6b3a",
+          "secondary": "#dce3c4",
+          "secondaryForeground": "#26301f",
+          "shadowColor": "#344628",
+          "success": "#d5e9dd",
+          "successForeground": "#1f5c41",
+          "warning": "#f4e5b8",
+          "warningForeground": "#6b4a00"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "organic"
+    },
+    "presetSha256": "3a2a25925e73badfbc378da61dba0056d5b0611170d0b9226496bdc2d46d5b92",
+    "tokensCssSha256": "f9555b1dcd16acb890edc8807a0f4ef2b89ae634dacf45182fd52bbe480db488",
+    "familyCssSha256": "7149c66c16edd83d9d2f02ec67b637ebd306b4a97bc0689f42e7be9629b39af5"
+  },
+  "retro-futurism": {
+    "presetHash": "15c530af1037995ae072d5d6cbb30d18d30d15521616ac4531b9236abef7b67f",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 2,
+        "density": "comfortable",
+        "fontFamilyId": "exo-2",
+        "headingFontFamilyId": "michroma",
+        "monoFontFamilyId": "space-mono",
+        "motion": "full",
+        "radiusRem": 0.875,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 4,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#35205a",
+          "accentForeground": "#fff1f8",
+          "background": "#150b2e",
+          "border": "#c9b5ea",
+          "card": "#22123f",
+          "cardForeground": "#fff1f8",
+          "destructive": "#ff6fb1",
+          "destructiveForeground": "#1a0b2e",
+          "foreground": "#fff1f8",
+          "info": "#1e2650",
+          "infoForeground": "#afc2ff",
+          "input": "#c9b5ea",
+          "muted": "#35205a",
+          "mutedForeground": "#bfa9e0",
+          "popover": "#22123f",
+          "popoverForeground": "#fff1f8",
+          "primary": "#ff8a4c",
+          "primaryForeground": "#1a0b2e",
+          "ring": "#3de6e0",
+          "secondary": "#3de6e0",
+          "secondaryForeground": "#1a0b2e",
+          "shadowColor": "#c9b5ea",
+          "success": "#16332a",
+          "successForeground": "#9bedb7",
+          "warning": "#3a2c14",
+          "warningForeground": "#ffde8f"
+        },
+        "light": {
+          "accent": "#ecdff0",
+          "accentForeground": "#2a1b4d",
+          "background": "#f6efe3",
+          "border": "#2a1b4d",
+          "card": "#fffaf0",
+          "cardForeground": "#2a1b4d",
+          "destructive": "#8c1d5b",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#2a1b4d",
+          "info": "#dce3f6",
+          "infoForeground": "#24418c",
+          "input": "#2a1b4d",
+          "muted": "#ecdff0",
+          "mutedForeground": "#5a4b7a",
+          "popover": "#fffaf0",
+          "popoverForeground": "#2a1b4d",
+          "primary": "#c23b1b",
+          "primaryForeground": "#ffffff",
+          "ring": "#2a1b4d",
+          "secondary": "#0f7c7a",
+          "secondaryForeground": "#ffffff",
+          "shadowColor": "#2a1b4d",
+          "success": "#d8eddb",
+          "successForeground": "#1f5e30",
+          "warning": "#fbe9c2",
+          "warningForeground": "#7a4e00"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "retro-futurism"
+    },
+    "presetSha256": "30966f544a774398427fef891fd21c45b6e381fd068a7670769434743934887a",
+    "tokensCssSha256": "0b43df58b99151f9afa3ec196319ea68fff9d2971a81bd9953a960b41dac00f4",
+    "familyCssSha256": "ee9522b1d1077a10d6aaac17f96280958dfa977288b952f0574a6283164bf882"
+  },
+  "flat radius 0": {
+    "presetHash": "b8be62c7b089aefaf91f732eaaa1734dfa7684254bfe991ed9bd62d420c70a4d",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 0,
+        "density": "comfortable",
+        "fontFamilyId": "dm-sans",
+        "monoFontFamilyId": "geist-mono",
+        "motion": "reduced",
+        "radiusRem": 0,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 0,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#fde047",
+          "accentForeground": "#0b1120",
+          "background": "#0b1120",
+          "border": "#26314a",
+          "card": "#151e32",
+          "cardForeground": "#f1f5f9",
+          "destructive": "#f87171",
+          "destructiveForeground": "#0b1120",
+          "foreground": "#f1f5f9",
+          "input": "#6b7690",
+          "muted": "#1b2439",
+          "mutedForeground": "#a3aec2",
+          "popover": "#151e32",
+          "popoverForeground": "#f1f5f9",
+          "primary": "#6b9bff",
+          "primaryForeground": "#0b1120",
+          "ring": "#6b9bff",
+          "secondary": "#1e2b4a",
+          "secondaryForeground": "#c7d7ff"
+        },
+        "light": {
+          "accent": "#fde047",
+          "accentForeground": "#0f172a",
+          "background": "#f3f5f9",
+          "border": "#e2e6ee",
+          "card": "#ffffff",
+          "cardForeground": "#0f172a",
+          "destructive": "#c81e1e",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#0f172a",
+          "input": "#7c879b",
+          "muted": "#eceff5",
+          "mutedForeground": "#4a5568",
+          "popover": "#ffffff",
+          "popoverForeground": "#0f172a",
+          "primary": "#1d4ed8",
+          "primaryForeground": "#ffffff",
+          "ring": "#1d4ed8",
+          "secondary": "#e3ebfd",
+          "secondaryForeground": "#1b3b9e"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "flat"
+    },
+    "presetSha256": "d147ae02a8f9316567e330305d9de03850a18f94d462e3dacb660d71699bb6bc",
+    "tokensCssSha256": "2a100de889021ebe609fea9bf098bdced5bc1ca859dba6b16d44c465b0b66b9b",
+    "familyCssSha256": "0ad3f37af73119b2a4854aee5ddd0779dc503625b020f4f60e18f23122656ac6"
+  },
+  "flat dark primary": {
+    "presetHash": "0499b115e14ba335981cccec3833cedf1816936974fa8c5982ff4d50257f3aef",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 0,
+        "density": "comfortable",
+        "fontFamilyId": "dm-sans",
+        "monoFontFamilyId": "geist-mono",
+        "motion": "reduced",
+        "radiusRem": 0.5,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 0,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#fde047",
+          "accentForeground": "#0b1120",
+          "background": "#0b1120",
+          "border": "#26314a",
+          "card": "#151e32",
+          "cardForeground": "#f1f5f9",
+          "destructive": "#f87171",
+          "destructiveForeground": "#0b1120",
+          "foreground": "#f1f5f9",
+          "input": "#6b7690",
+          "muted": "#1b2439",
+          "mutedForeground": "#a3aec2",
+          "popover": "#151e32",
+          "popoverForeground": "#f1f5f9",
+          "primary": "#2563eb",
+          "primaryForeground": "#0b1120",
+          "ring": "#6b9bff",
+          "secondary": "#1e2b4a",
+          "secondaryForeground": "#c7d7ff"
+        },
+        "light": {
+          "accent": "#fde047",
+          "accentForeground": "#0f172a",
+          "background": "#f3f5f9",
+          "border": "#e2e6ee",
+          "card": "#ffffff",
+          "cardForeground": "#0f172a",
+          "destructive": "#c81e1e",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#0f172a",
+          "input": "#7c879b",
+          "muted": "#eceff5",
+          "mutedForeground": "#4a5568",
+          "popover": "#ffffff",
+          "popoverForeground": "#0f172a",
+          "primary": "#1d4ed8",
+          "primaryForeground": "#ffffff",
+          "ring": "#1d4ed8",
+          "secondary": "#e3ebfd",
+          "secondaryForeground": "#1b3b9e"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "flat"
+    },
+    "presetSha256": "8cef0e63b1400cefb3ee6fdf3fa6428f2c9f1d8b6f9366852a5ee2f2b2e0e8f7",
+    "tokensCssSha256": "087234a9f4da0adeb5cbd04d03b15938e9a1ab6e11adcd510d412190a518cf88",
+    "familyCssSha256": "0ad3f37af73119b2a4854aee5ddd0779dc503625b020f4f60e18f23122656ac6"
+  },
+  "flat display font, no mono": {
+    "presetHash": "c1763150f41a1d56f88f034714d2c469f28ff5ac205570ad8a01146bd1aad6d7",
+    "preset": {
+      "catalogRelease": "0.1.0",
+      "compilerVersion": "0.1.0",
+      "componentDefaults": {
+        "button": {
+          "size": "default",
+          "variant": "default"
+        }
+      },
+      "design": {
+        "borderWidthPx": 0,
+        "density": "comfortable",
+        "fontFamilyId": "dm-sans",
+        "headingFontFamilyId": "fraunces",
+        "motion": "reduced",
+        "radiusRem": 0.5,
+        "shadowOffsetXPx": 0,
+        "shadowOffsetYPx": 0,
+        "transparency": "reduced"
+      },
+      "id": "project_preset",
+      "modes": {
+        "dark": {
+          "accent": "#fde047",
+          "accentForeground": "#0b1120",
+          "background": "#0b1120",
+          "border": "#26314a",
+          "card": "#151e32",
+          "cardForeground": "#f1f5f9",
+          "destructive": "#f87171",
+          "destructiveForeground": "#0b1120",
+          "foreground": "#f1f5f9",
+          "input": "#6b7690",
+          "muted": "#1b2439",
+          "mutedForeground": "#a3aec2",
+          "popover": "#151e32",
+          "popoverForeground": "#f1f5f9",
+          "primary": "#6b9bff",
+          "primaryForeground": "#0b1120",
+          "ring": "#6b9bff",
+          "secondary": "#1e2b4a",
+          "secondaryForeground": "#c7d7ff"
+        },
+        "light": {
+          "accent": "#fde047",
+          "accentForeground": "#0f172a",
+          "background": "#f3f5f9",
+          "border": "#e2e6ee",
+          "card": "#ffffff",
+          "cardForeground": "#0f172a",
+          "destructive": "#c81e1e",
+          "destructiveForeground": "#ffffff",
+          "foreground": "#0f172a",
+          "input": "#7c879b",
+          "muted": "#eceff5",
+          "mutedForeground": "#4a5568",
+          "popover": "#ffffff",
+          "popoverForeground": "#0f172a",
+          "primary": "#1d4ed8",
+          "primaryForeground": "#ffffff",
+          "ring": "#1d4ed8",
+          "secondary": "#e3ebfd",
+          "secondaryForeground": "#1b3b9e"
+        }
+      },
+      "name": "Project preset",
+      "platform": "react-web",
+      "revision": 1,
+      "schemaVersion": "1.1",
+      "styleFamily": "flat"
+    },
+    "presetSha256": "c85efba356317364184df35e37cfe965665b4e0c2ee5190296d35cd316c1b63c",
+    "tokensCssSha256": "4b63339c4b63ec30220caf6fdef0fb59e19e1b81a504629521617f5b8b48dbc5",
+    "familyCssSha256": "e23dfec1bfdd00d50d4c1f42af3d243fe91cda4e4e2d1906ea678b3487cd585d"
+  }
+}
