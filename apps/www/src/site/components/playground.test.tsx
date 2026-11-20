@@ -157,3 +157,8 @@ it('falls back to the iframe when the inline preview throws', async () => {
   expect(stage(host)).toBeNull()
   expect(compiler.calls).toBeGreaterThan(0)
 })
+
+it('gives the status line a fixed width, so a longer family name does not move it', async () => {
+  const host = await render()
+  expect(host.querySelector('[role="status"]')!.className).toMatch(/(^| )w-\d+( |$)/)
+})

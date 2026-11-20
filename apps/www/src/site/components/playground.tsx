@@ -126,7 +126,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
           className="inline-flex rounded-lg bg-muted p-1" itemClassName={toggleItem} />
         <ToggleGroup label="Preview mode" value={resolvedMode} options={modeOptions} onValueChange={setMode}
           className="inline-flex rounded-lg bg-muted p-1" itemClassName={toggleItem} />
-        <span role="status" className="ml-auto text-xs text-muted-foreground">
+        <span role="status" className="ml-auto w-40 text-xs text-muted-foreground">
           {status === 'ready' ? `${familyOptions.find(o => o.value === family)!.label} · ${resolvedMode}` : status === 'failed' ? 'Preview unavailable' : 'Loading preview…'}
         </span>
       </div>
