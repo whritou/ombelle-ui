@@ -169,12 +169,22 @@ try {
   for (const label of families) {
     const before = await fingerprint()
     const item = group.locator('button, [role="radio"]').filter({ hasText: new RegExp(`^${label}$`, 'i') })
+    const clicked = performance.now()
     await item.click()
     const confirm = page.getByRole('button', { name: 'Confirm change', exact: true })
-    const asked = await confirm.waitFor({ state: 'visible', timeout: 750 }).then(() => true, () => false)
-    const t = performance.now()
-    if (asked) await confirm.click()
-    await changed(before)
+    // The confirm dialog and the preview change race: take whichever shows first, fail clearly if neither does.
+    let outcome = null
+    const deadline = performance.now() + timeout
+    while (performance.now() < deadline) {
+      if (await confirm.isVisible()) { outcome = 'confirm'; break }
+      const now = await fingerprint()
+      if (now !== '' && now !== before) { outcome = 'changed'; break }
+      await page.waitForTimeout(2)
+    }
+    if (outcome === null) throw new Error(`family switch to ${label}: neither the confirmation dialog nor a preview change appeared within ${timeout} ms`)
+    // Without a dialog the clock runs from the family click; with one, from the Confirm click.
+    let t = clicked
+    if (outcome === 'confirm') { t = performance.now(); await confirm.click(); await changed(before) }
     familySwitchMs[label] = round(performance.now() - t)
     await settle()
   }
