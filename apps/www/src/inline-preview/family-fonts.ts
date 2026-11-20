@@ -1,4 +1,4 @@
-import { styleFamilyFonts } from '@ombelle/catalog'
+import { fontById, styleFamilyFonts } from '@ombelle/catalog'
 import type { BuiltInFamily } from './routing'
 
 // The self-hosted fonts of the built-in families, as the iframe preview loads them
@@ -31,21 +31,32 @@ export function familyFontIds(family: BuiltInFamily): string[] {
   return [...new Set([body, display, mono])]
 }
 
+/**
+ * Fetches a font's files, not only its @font-face rules: the browser downloads a face when text
+ * first uses it, which would swap the text after the stage has switched and move it.
+ */
+async function loadFaces(id: string): Promise<void> {
+  const font = fontById(id)
+  if (!font || typeof document === 'undefined' || !document.fonts) return
+  const name = font.stack.split(',')[0]!.trim()
+  const weights = font.weights === 'variable' ? [400] : font.weights
+  await Promise.all(weights.map((weight) => document.fonts.load(`${weight} 1em ${name}`, 'Aa')))
+}
+
 const loading = new Map<string, Promise<void>>()
-/** Loads a family's font stylesheets once; later calls share the first request, and a failed one is retried. */
+/** Loads a family's font stylesheets and files once; later calls share the first request, and a failed one is retried. */
 export function loadFamilyFonts(family: BuiltInFamily): Promise<void> {
   return Promise.all(
     familyFontIds(family).map((id) => {
       let request = loading.get(id)
       if (!request) {
-        request = (fontLoaders[id]?.() ?? Promise.resolve()).then(
-          () => undefined,
-          (error: unknown) => {
+        request = (fontLoaders[id]?.() ?? Promise.resolve())
+          .then(() => loadFaces(id))
+          .catch((error: unknown) => {
             // A failed load is forgotten, so the next switch to this family tries again.
             loading.delete(id)
             throw error
-          },
-        )
+          })
         loading.set(id, request)
       }
       return request
