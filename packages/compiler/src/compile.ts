@@ -4,7 +4,6 @@ import {
   type Edition,
   type CompileResult,
   type Artifact,
-  type ThemeData,
   assertStyleAvailable,
   isStyleFamily,
 } from '@ombelle/contracts'
@@ -14,13 +13,11 @@ import typescript from 'prettier/plugins/typescript'
 import estree from 'prettier/plugins/estree'
 import postcss from 'prettier/plugins/postcss'
 import { resolvePreset } from './resolve.js'
-import { prefixSharedRules, prefixSlots, templateSlots } from './prefix-slots.js'
+import { prefixSlots } from './prefix-slots.js'
+import { prefixedSlotMap, presetStyleSheets, presetTheme } from './preview-styles.js'
 import { sha256 } from './hash.js'
-import { assertGlassContrast, glassTokens } from './glass.js'
-import { glassMaterialActive } from './glass-contrast.js'
-import { fontRuleBlock, resolveTypography } from './typography.js'
-const variable = (key: string) =>
-  '--' + key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
+import { assertGlassContrast } from './glass.js'
+import { resolveTypography } from './typography.js'
 // Usage examples emitted as examples/<id>.tsx; Input uses the fallback.
 const usageExamples: Partial<Record<ComponentId, string>> = {
   ...expansionExamples,
@@ -109,71 +106,25 @@ export async function compile(input: {
   assertStyleAvailable(ids, family)
   if (family === 'liquid-glass' && input.glassContrast !== 'report')
     assertGlassContrast(preset.data)
-  const prefixedSlots = new Map(
-    [...new Set(input.prefixedComponents ?? [])].map((id) => [
-      id,
-      templateSlots(getTemplate(catalog, id, input.edition ?? 'radix').content),
-    ]),
+  const prefixedSlots = prefixedSlotMap(
+    catalog,
+    input.prefixedComponents,
+    input.edition,
   )
-  const theme: ThemeData = { light: {}, dark: {}, theme: {} }
-  for (const mode of ['light', 'dark'] as const)
-    for (const [key, value] of Object.entries(preset.data.modes[mode]))
-      theme[mode][variable(key)] = value
-  const d = preset.data.design
-  const typography = resolveTypography(d)
-  Object.assign(theme.light, {
-    '--radius': d.radiusRem + 'rem',
-    '--border-width': d.borderWidthPx + 'px',
-    '--shadow-x': d.shadowOffsetXPx + 'px',
-    '--shadow-y': d.shadowOffsetYPx + 'px',
-    '--control-height': d.density === 'compact' ? '2.25rem' : '2.5rem',
-    '--font-family': typography.family,
-    '--motion-duration': d.motion === 'reduced' ? '0ms' : '150ms',
+  const theme = presetTheme(preset.data)
+  const typography = resolveTypography(preset.data.design)
+  const sheets = presetStyleSheets(preset.data, catalog, {
+    componentIds: ids,
+    ...(input.prefixedComponents && {
+      prefixedComponents: input.prefixedComponents,
+    }),
+    ...(input.edition && { edition: input.edition }),
   })
-  if (typography.heading) theme.light['--font-heading'] = typography.heading
-  if (typography.mono) theme.light['--font-mono'] = typography.mono
-  if (family === 'liquid-glass') {
-    const glass = glassTokens(preset.data)
-    Object.assign(theme.light, glass.light)
-    Object.assign(theme.dark, glass.dark)
-  }
-  for (const key of Object.keys(preset.data.modes.light))
-    theme.theme['--color-' + variable(key).slice(2)] =
-      'var(' + variable(key) + ')'
-  const block = (selector: string, values: Record<string, string>) =>
-    selector +
-    '{' +
-    Object.keys(values)
-      .sort()
-      .map((k) => k + ':' + values[k] + ';')
-      .join('') +
-    '}'
   const drafts: {
     logicalPath: string
     kind: Artifact['kind']
     content: string
-  }[] = [
-    {
-      logicalPath: 'styles/ui-tokens.css',
-      kind: 'style',
-      content:
-        typography.imports.join('') +
-        block(':root', theme.light) +
-        block('.dark', theme.dark) +
-        block('@theme inline', theme.theme),
-    },
-    {
-      logicalPath: 'styles/ui-style.css',
-      kind: 'style',
-      // The CLI installs this file and not ui-tokens.css, so the font imports lead it too.
-      content: typography.imports.join('') + prefixSharedRules(
-        catalog.styles[family] +
-          (family === 'liquid-glass' && glassMaterialActive(d) ? catalog.glassLabStyle : '') +
-          fontRuleBlock(typography),
-        [...prefixedSlots.values()].flat(),
-      ),
-    },
-  ]
+  }[] = sheets.map((sheet) => ({ ...sheet, kind: 'style' }))
   const dependencies = new Map<string, string>()
   for (const dep of typography.dependencies) dependencies.set(dep.name, dep.version)
   for (const id of ids) {
@@ -195,14 +146,6 @@ export async function compile(input: {
       kind: 'component',
       content: slots ? prefixSlots(content, 'tsx', slots) : content,
     })
-    if (template.styles)
-      drafts.push({
-        logicalPath: template.logicalPath.replace(/\.tsx$/, '.css'),
-        kind: 'style',
-        content: slots
-          ? prefixSlots(template.styles[family]!, 'css', slots)
-          : template.styles[family]!,
-      })
     let usage = id === 'toast' && input.edition === 'base' ? baseToastExample : usageExamples[id] ?? defaultUsage
     // Base UI composes a trigger through render; Radix uses asChild.
     if(id==='button-group'&&input.edition==='base')usage=usage.replace(
