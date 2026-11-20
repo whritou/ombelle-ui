@@ -308,3 +308,18 @@ A trace of one edit on this build: the input handler takes 26.4 ms; the iframe r
 Result against the 50 ms target: met on the two measures of input to paint, `tokenFrameMs` (8 to 12 ms) and the trace (12 ms to the iframe's style recalc), and on `tokenEditMs` (26 to 37 ms). `tokenInputMs` (45 to 67 ms) is under 50 in two of three passes: it includes the editor's own 24 to 26 ms input handler, which `fill` waits for, and about 24 ms of CDP cost. The editor page is still busy for about 26 ms on each edit (React render and commit of the editor, plus a forced style recalc from the catalog Button's layout effect) and for a further 13 ms on the compiler-state render; neither delays the preview any more.
 
 Family-switch apply (post to ack) rose from about 40 to 55 to 60 ms with change 5: the family's tokens are now posted before the editor's larger family render, and the ack waits behind it. The family switch as measured end to end did not change (88 to 89).
+
+## Fonts (Task 7, Step 1)
+
+Question: does picking a display font need a prefetch into the preview iframe? The sandboxed iframe has an opaque origin, so a preload in the editor page would not reach its cache; the only option is a `prefetchFonts` field on `preset-tokens` that the iframe passes to `loadPresetFonts`. Rule: add it only if the median time from pick to font load exceeds 300 ms.
+
+Method: production build of `1c71ed3a` plus the Task 7 tests (`node scripts/build-hosted-www.mjs`, `next start --hostname 127.0.0.1 --port 3000`, Chrome via `OMBELLE_BROWSER_CHANNEL=chrome`, 1100x800, reduced motion). A fresh browser context per font, so nothing is cached. The editor is left on the default (Flat) draft; the "Display font" select is changed with `selectOption`. Inside the iframe a `requestAnimationFrame` loop records, on the absolute clock, when the heading (`[data-slot="empty-title"]`) computed `font-family` first differs ("CSS paint") and when a `FontFace` of that family in `document.fonts` first has status `loaded` ("font load"), both from the moment before `selectOption`. Two passes of the same 10 fonts: Fraunces, Young Serif, Michroma, Exo 2, Nunito, Space Grotesk, Instrument Sans, Inter Tight, DM Sans, Work Sans.
+
+| Pass | Median to CSS paint, ms | Median to font load, ms | Slowest font load, ms |
+| --- | --- | --- | --- |
+| 1 | 13 | 154 | 201 (Young Serif) |
+| 2 | 13 | 164.5 | 250 (Young Serif) |
+
+Raw font load, pass 1: 179, 201, 179, 148, 161, 130, 150, 151, 145, 157. Pass 2: 187, 250, 137, 138, 171, 150, 131, 184, 162, 167. CSS paint: 11 to 25 ms in both passes.
+
+Decision: no prefetch. The median font load (154 and 164.5 ms) is well under 300 ms and no single font reached it. The CSS paints at 13 ms with the fallback face and the font swaps in about 150 ms later. `PresetTokens` is unchanged. Caveat: localhost, no network latency or CDN; on a slow link the font load would take longer, but the preview already paints the new CSS first and the font swaps in. Fonts the draft already uses are loaded already (Bricolage Grotesque and Figtree on Flat measured as loaded before the pick), so those picks cost nothing.
