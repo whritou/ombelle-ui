@@ -295,6 +295,7 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1100, height: 800 
     test('no layout shift', async ({ page }) => {
       // Only shifts of the playground (its controls and the stage) count: on phones the catalog Sidebar's
       // pre-hydration fallback moves the whole page once on every docs and component page, previews or not.
+      // Shifts right after a click count too: a family switch must not move anything.
       await page.addInitScript(() => {
         type Shift = { value: number; sources: string[] }
         const shifts: Shift[] = []
@@ -305,9 +306,9 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1100, height: 800 
         }
         new PerformanceObserver(list => {
           const playground = document.querySelector('section[aria-label="Example"]')
-          for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean; sources: { node: Node | null }[] })[]) {
+          for (const entry of list.getEntries() as (PerformanceEntry & { value: number; sources: { node: Node | null }[] })[]) {
             const inside = entry.sources.filter(source => source.node && playground?.contains(source.node))
-            if (!entry.hadRecentInput && inside.length) shifts.push({ value: entry.value, sources: inside.map(source => describe(source.node)) })
+            if (inside.length) shifts.push({ value: entry.value, sources: inside.map(source => describe(source.node)) })
           }
         }).observe({ type: 'layout-shift', buffered: true })
       })
