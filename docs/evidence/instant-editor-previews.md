@@ -1,5 +1,63 @@
 # Instant editor previews: evidence
 
+## Results
+
+Every number below is copied from a section further down; nothing here is new measurement. Machine and method are those of the sections cited (Ryzen 7 2700X, Windows 11, Chrome, production build on localhost).
+
+### Verification at wrap-up (commit `2f440fbc`)
+
+- `corepack pnpm typecheck`: passed (exit 0).
+- `corepack pnpm exec vitest run apps/www/src/preset-editor apps/www/src/editor packages/compiler packages/catalog`: 212 test files passed (212); 4709 tests passed, 6 skipped, 0 failed.
+- Playwright and production builds were not re-run here; their results are in the sections below.
+
+### Preset editor (milliseconds, medians)
+
+| Metric | Baseline | After Task 6 (fast path) | After Task 6b (optimised) |
+| --- | --- | --- | --- |
+| Token edit | 2379 | 102 | 26 to 37 (from Tab); 8 to 12 input to iframe frame |
+| First ready | 5896 | 1926 | 1302 to 1556 |
+| Family switch | 2662.5 | 248 | 93 to 93.5 |
+| Scene switch | 1311 | 236 | 163 to 176 |
+| Mode switch | 1132 | 153 | 61 to 74 |
+
+Task 6 missed its own bound by 2 ms (102 ms against under 100); Task 6b brought the token edit under the 50 ms target on the input-to-paint measures (see "Final measurement (Step 4)").
+
+Font decision (Task 7): no prefetch. Pick to font load is 154 and 164.5 ms median (slowest 250 ms), under the 300 ms rule; the CSS paints at 13 ms and the font swaps in about 150 ms later.
+
+### Component editor (Tasks 8 and 9c)
+
+Task 8 (cold, median of 5 loads): first render 2760 to 3875 ms (warm 2135 to 3138 ms). The dominant phase is the worker's first compile, 1209 to 1770 ms cold (the next compile on the same worker takes 57 to 295 ms). One edit, cold: 342 ms (button) to 786 ms (select) from input to frame.
+
+Experiment 9c, precompiled default recipe, kept with exception. First view (`firstPreviewMs`, same-session control against `d81d3fd8`, before to after):
+
+| | button | card | dialog | select |
+| --- | --- | --- | --- | --- |
+| Cold | 2100 to 1081 (-49%) | 2748 to 1078 (-61%) | 2553 to 1115 (-56%) | 2978 to 1139 (-62%) |
+| Warm | 1537 to 679 (-56%) | 2197 to 688 (-69%) | 1985 to 707 (-64%) | 2389 to 739 (-69%) |
+
+Exception: the worker's first compile is slower beyond the noise band (about 6 percent) in four cases, select +13% cold and +17% warm, dialog +11% cold, button +10% warm. The compiled first render is within +0.3 to +2.8 percent and edits are unchanged.
+
+### Not done, with reasons
+
+- 9b, warm worker: dropped by the user to wrap up. Task 8 measured the cold first compile at 1.2 to 1.8 s against 57 to 295 ms warm, so about 1 s on the first edit is the estimated follow-up gain (an estimate, not measured).
+- 9e, right-height skeleton: no time cost in the measurements, a layout-shift fix only.
+- 9d, bundling the iframe's modules: the iframe load is off the critical path, and the script requests are 20 to 46 (23 to 47 after 9c).
+- 9a, `modulepreload` of the worker script: the worker download is at most 108 ms cold.
+
+### Decisions for the user
+
+1. The 9c exception: accept a first compile up to 17 percent slower (select) for a first view 49 to 69 percent sooner, or revert 9c.
+2. Skip the editor page's second, identical verification in the catalog editors: about 50 to 85 ms per edit; it touches validation, so it needs approval.
+3. The iframe's re-verification is 16 to 22 percent of each edit (about 40 percent with the editor page's own); any change to it touches validation.
+
+### Failures that predate this branch
+
+Confirmed on the base commit `68de5cd2`: in `preset-editor.spec.ts`, the style palette and primary colour test and the Color Picker slider test; in `catalog-editors.spec.ts`, `edits and restores separator`.
+
+### Out of scope
+
+The Liquid Glass fast path, other `PresetPreviewFrame` surfaces, inline scenes, and the #180 follow-ups.
+
 ## Preset editor audit
 
 Branch `feat/instant-editor-previews`, measured and read on commit `337eb0b488d94d3b4b629ceacfd5b194031baf23` (no product change yet). Design: `docs/superpowers/specs/2026-11-20-instant-editor-previews-design.md`.
