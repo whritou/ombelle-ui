@@ -1,9 +1,18 @@
 // @vitest-environment jsdom
 import * as React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { expect, it } from 'vitest'
+import { afterAll, beforeAll, expect, it } from 'vitest'
 import { PresetGallery } from '../../../preview/src/generated/preset-gallery/gallery'
 import { Specimen as ProjectForm } from '../../../preview/src/generated/preset-gallery/specimens/project-form'
+
+// The gallery's date picker formats with the runtime's default locale; pin it so the snapshot is the same on every machine.
+const DefaultDateTimeFormat = Intl.DateTimeFormat
+beforeAll(() => {
+  Intl.DateTimeFormat = function (locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions) {
+    return new DefaultDateTimeFormat(locales ?? 'en-US', options)
+  } as typeof Intl.DateTimeFormat
+})
+afterAll(() => { Intl.DateTimeFormat = DefaultDateTimeFormat })
 
 const formParts = ['label', 'input', 'textarea', 'native-select', 'checkbox', 'switch', 'select', 'radio-group']
 
