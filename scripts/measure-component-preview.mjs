@@ -1,6 +1,6 @@
 // Measures how long the component-page playground takes to become ready and to react to switches.
 // Usage: node scripts/measure-component-preview.mjs <origin> <id...>
-// Prints JSON: { id, firstReadyMs, familySwitchMs: Record<family, number>, modeSwitchMs }[]
+// Prints JSON: { id, firstReadyMs, familySwitchMs: Record<family, number>, modeSwitchMs, modeFrameMs: number[] | null, preloadState }[]
 // Relies only on the role="status" line (`<Family label> · <mode>` once ready) and the toggle groups
 // labelled "Style family" and "Preview mode" (a role=group of buttons today; role=radio items also match), so it measures both the iframe and the inline renderer.
 import { chromium } from '@playwright/test'
@@ -67,6 +67,11 @@ try {
 
     // OMBELLE_PREVIEW_WARM_MS=3000 waits for the idle preload of the other families' sheets and fonts before switching.
     await page.waitForTimeout(Number(process.env.OMBELLE_PREVIEW_WARM_MS) || 0)
+    const preloadState = await page.evaluate(() => ({
+      preloadLinks: document.querySelectorAll('link[rel="preload"][as="style"]').length,
+      fontFilesFetched: performance.getEntriesByType('resource').filter((e) => /\.(woff2?|ttf|otf)(\?|$)/.test(e.name)).length,
+      fontsLoaded: [...document.fonts].filter((f) => f.status === 'loaded').length,
+    }))
     const familySwitchMs = {}
     const familyGroup = page.locator('[aria-label="Style family"]')
     for (const label of families) {
@@ -85,7 +90,32 @@ try {
     await changed(modeBefore)
     const modeSwitchMs = Math.round(performance.now() - t)
 
-    results.push({ id, firstReadyMs, familySwitchMs, modeSwitchMs })
+    // modeFrameMs: measured inside the page, so it has no polling or CDP overhead. From the click until the stage's
+    // `data-preview-mode` has changed AND the next animation frame has fired (first frame, not paint). 4 toggles; null for
+    // renderers without a stage (the iframe path).
+    const modeFrameMs = await page.evaluate(() => new Promise((resolve) => {
+      const stage = document.querySelector('[data-state="active"][role="tabpanel"] [data-preview-family]')
+      const group = document.querySelector('[aria-label="Preview mode"]')
+      if (!stage || !group) return resolve(null)
+      const button = (label) => [...group.querySelectorAll('button, [role="radio"]')].find((el) => el.textContent?.trim() === label)
+      const samples = []
+      const toggle = (labels) => {
+        const label = labels.shift()
+        if (!label) return resolve(samples)
+        const before = stage.getAttribute('data-preview-mode')
+        const start = performance.now()
+        button(label).click()
+        const wait = () => {
+          if (stage.getAttribute('data-preview-mode') === before) return requestAnimationFrame(wait)
+          requestAnimationFrame(() => { samples.push(Math.round((performance.now() - start) * 10) / 10); setTimeout(() => toggle(labels), 250) })
+        }
+        wait()
+      }
+      toggle(['Light', 'Dark', 'Light', 'Dark'])
+    }))
+
+    // Which sheets and fonts the idle preload had fetched when the switches started (see OMBELLE_PREVIEW_WARM_MS).
+    results.push({ id, firstReadyMs, familySwitchMs, modeSwitchMs, modeFrameMs, preloadState })
     await context.close()
   }
 } finally {
