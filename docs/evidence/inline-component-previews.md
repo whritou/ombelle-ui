@@ -134,6 +134,26 @@ How to read the numbers:
 
 Overall: first ready 5.0 s to about 0.1-0.7 s, family switch 2.1-2.7 s to under 60 ms after a hover (under 0.33 s with none), mode switch about 1 s to inside one frame.
 
+### After the final review
+
+Fixes after the final review: the focused specimen is centred in the stage. The stage is a size container and the shared focus layout's `100vh`/`100vw` become `100cqh`/`100cqw`. The previous override lost to a more specific rule, so the gallery took the viewport height. The stage also resets every token a family reads but does not set (the site's `--warning` no longer replaces `var(--warning, #fef3c7)`). Ombelle's faces are self-hosted at `/previews/fonts` and preloaded per specimen. Site component rules carry `:not(:where([data-preview-family] *))`, so they stay off the specimens' catalog markers. A family switch waits at most 2.5 s for its fonts. A family that does not offer a component gets an empty sheet. New e2e checks: the specimen lies inside the stage at 375x812, 1100x800 and 1440x1000; axe on Badge and Alert in light mode for all seven families; site rules stay off preview markers.
+
+Re-check on a production build (same recipe and script, button and data-table, one pass each, so no ranges):
+
+| Metric | button, hover | data-table, hover | button, no hover | data-table, no hover |
+| --- | --- | --- | --- | --- |
+| First ready | 766 | 217 | 282 | 190 |
+| Papier | 33 | 58 | 156 | 321 |
+| Organic | 32 | 48 | 44 | 94 |
+| Retro futurism | 38 | 50 | 88 | 152 |
+| Minimalist | 36 | 50 | 116 | 53 |
+| Flat | 40 | 54 | 31 | 55 |
+| Neo-Brutalism | 39 | 49 | 40 | 47 |
+| Mode switch, script (polling) | 30 | 37 | 28 | 35 |
+| Mode switch to first frame (`modeFrameMs`, 4 toggles) | 3.0-6.1 | 10.6-11.8 | 2.7-14.2 | 9.8-14.0 |
+
+Every hover switch stays under 60 ms, as before. Without a hover, data-table Papier is 321 ms against 319 (290-327). Retro futurism (152 against 52-53) and Organic (94 against 54-61) on data-table, and button Minimalist (116 against 88-108), are above the earlier three-pass ranges. These are single samples; they stay under the 300 ms first-time target, except data-table Papier, which already missed it. The data-table first ready with a hover is 217 ms against 79-170, also a single sample. Every mode-frame sample stays inside one frame (max 14.2 ms). In the production build each preloaded Ombelle face is fetched once, with no "preloaded but not used" warning (`/components/card`: Figtree and Bricolage Grotesque; `/components/button`: Figtree).
+
 ### Scope and limits
 
 - Server-rendered only for the seven built-in families (`supportedStyleFamilies` minus Liquid Glass). Components with a locale or window dependency are listed in code: `clientOnly = ['calendar']` (the date text depends on the locale, so it renders after hydration) and `iframeOnly = ['sidebar']` (its breakpoint reads the window, so it stays on the iframe path).
