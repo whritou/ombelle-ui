@@ -634,6 +634,10 @@ describe('catalog contract', () => {
       expect(e).toMatchObject({ code: 'UNSUPPORTED_RELEASE' })
     }
   })
+  it('builds the catalog once per release', () => {
+    expect(getCatalog('0.1.0')).toBe(getCatalog('0.1.0'))
+    expect(() => getCatalog('99.0.0')).toThrow()
+  })
   it('has complete tokens for every referenced style variable', () => {
     const c = getCatalog('0.1.0')
     for (const family of supportedStyleFamilies) {
