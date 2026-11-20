@@ -91,6 +91,22 @@ const tokenBlock = (selector: string, values: Record<string, string>, scheme: 'l
     .map(([key, value]) => `${key}:${value};`)
     .join('')}color-scheme:${scheme}}`
 
+/**
+ * The gallery's focus layout sizes the specimen against the iframe's viewport (`min-height: 100vh`,
+ * `calc(100vw - 48px)`). Inline, the stage is that viewport: it is a size container
+ * (`stageContainerCss`), so viewport units become container units.
+ */
+export function relativeToStage(css: string): string {
+  const root = postcss.parse(css)
+  root.walkDecls((decl) => {
+    decl.value = decl.value.replace(/(\d*\.?\d+)v([wh])(?![\w-])/g, '$1cq$2')
+  })
+  return root.toString()
+}
+
+/** Makes the stage the container its specimen's `cqw` and `cqh` units measure; its size never depends on its content. */
+export const stageContainerCss = (family: BuiltInFamily) => `${stageSelector(family)}{container-type:size}`
+
 export function previewTokensCss(family: BuiltInFamily, theme: ThemeData): string {
   const stage = stageSelector(family)
   return [

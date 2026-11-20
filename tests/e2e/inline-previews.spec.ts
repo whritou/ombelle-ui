@@ -359,6 +359,32 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1100, height: 800 
   })
 }
 
+test.describe('the specimen sits inside the stage', () => {
+  // The focus layout centres the specimen in the stage and sizes it to the stage, not to the page:
+  // the first slot of each specimen lies within the stage's client box, whatever the viewport.
+  for (const viewport of [{ width: 375, height: 812 }, { width: 1100, height: 800 }, { width: 1440, height: 1000 }]) {
+    test(`at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+      await page.setViewportSize(viewport)
+      for (const id of ['button', 'dropdown-menu', 'slider', 'alert']) {
+        await open(page, `/components/${id}`)
+        const { box, slot } = await stage(page).evaluate(element => {
+          const rect = element.getBoundingClientRect()
+          const first = element.querySelector('[data-slot]')!.getBoundingClientRect()
+          return {
+            box: { top: rect.top + element.clientTop, left: rect.left + element.clientLeft, bottom: rect.top + element.clientTop + element.clientHeight, right: rect.left + element.clientLeft + element.clientWidth },
+            slot: { top: first.top, left: first.left, bottom: first.bottom, right: first.right },
+          }
+        })
+        const report = `${id}: slot ${JSON.stringify(slot)} in stage ${JSON.stringify(box)}`
+        expect(slot.top, report).toBeGreaterThanOrEqual(box.top)
+        expect(slot.left, report).toBeGreaterThanOrEqual(box.left)
+        expect(slot.bottom, report).toBeLessThanOrEqual(box.bottom)
+        expect(slot.right, report).toBeLessThanOrEqual(box.right)
+      }
+    })
+  }
+})
+
 test.describe('axe stays clean', () => {
   // Radix Navigation Menu's hidden focus proxy, left out as in site-shell.spec.ts.
   const axe = (page: Page) => new AxeBuilder({ page }).exclude('[data-slot="navigation-menu"] li > span[aria-hidden="true"][tabindex="0"]')
@@ -378,4 +404,5 @@ test.describe('axe stays clean', () => {
           await expect(stage(page)).toHaveAttribute('data-preview-mode', mode.toLowerCase())
           expect((await axe(page).analyze()).violations).toEqual([])
         })
+})
 })

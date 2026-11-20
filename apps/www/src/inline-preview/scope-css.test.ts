@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import postcss from 'postcss'
 import { describe, expect, it } from 'vitest'
 import { supportedStyleFamilies, type ThemeData } from '@ombelle/contracts'
-import { previewSlotPrefix, previewTokensCss, scopePreviewCss } from '../../../../scripts/www-previews/scope-css'
+import { previewSlotPrefix, previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss } from '../../../../scripts/www-previews/scope-css'
 
 const scope = '[data-preview-family="papier"]'
 const stylesDir = new URL('../../../../packages/catalog/src/styles/', import.meta.url)
@@ -96,6 +96,18 @@ describe('scopePreviewCss', () => {
       expect(scoped).toBeGreaterThan(10)
     }
   })
+})
+
+describe('relativeToStage', () => {
+  it('measures the focus layout against the stage, not the page', () => {
+    expect(compact(relativeToStage('.g{min-height:100vh;inline-size:min(360px, calc(100vw - 48px))}')))
+      .toBe('.g{min-height:100cqh;inline-size:min(360px,calc(100cqw - 48px))}')
+  })
+  it('leaves other units alone', () => {
+    const css = '.g{min-height:100dvh;width:50vmin;margin:2px}'
+    expect(relativeToStage(css)).toBe(css)
+  })
+  it('makes the stage a size container', () => expect(stageContainerCss('papier')).toBe(`${scope}{container-type:size}`))
 })
 
 describe('previewTokensCss', () => {

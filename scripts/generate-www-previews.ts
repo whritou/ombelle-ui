@@ -10,7 +10,7 @@ import { componentsWithStyleSupport, supportedStyleFamilies } from '@ombelle/con
 import { createPresetDraft, materializePreset, previewComponentIds } from '../apps/www/src/preset-editor/model.js'
 import { fontLoaders } from '../apps/www/src/inline-preview/family-fonts.js'
 import { specimenIndex } from '../fixtures/shared/specimens/index.js'
-import { previewTokensCss, scopePreviewCss, type BuiltInFamily } from './www-previews/scope-css.js'
+import { previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss, type BuiltInFamily } from './www-previews/scope-css.js'
 import { scopePreviewTemplate } from './www-previews/scope-template.js'
 
 const repo = fileURLToPath(new URL('../', import.meta.url))
@@ -125,8 +125,8 @@ export async function generateWwwPreviews(
         previewTokensCss(family, theme),
         scopePreviewCss(familySheet, family),
         scopePreviewCss(gallery, family),
-        scopePreviewCss(focus, family),
-        `[data-preview-family="${family}"] .preset-gallery{min-height:100%}`,
+        scopePreviewCss(relativeToStage(focus), family),
+        stageContainerCss(family),
       ].join('\n') + '\n',
     )
     const available = new Set<string>(componentsWithStyleSupport(family, ['stable', 'experimental']))
