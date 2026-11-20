@@ -1,10 +1,10 @@
 'use client'
 
 import * as React from 'react'
-// Ombelle is the family the page renders first, so its fonts are part of the page; other families load theirs on pick.
-import '@fontsource-variable/figtree'
-import '@fontsource-variable/bricolage-grotesque'
-import '@fontsource-variable/geist-mono'
+// Ombelle is the family the page renders first, so its fonts are part of the page CSS, served from a fixed
+// public path the page preloads; other families load theirs on pick (family-fonts.ts).
+import '../generated/previews/fonts.css'
+import { ombelleFontPreloads } from '../generated/previews/fonts'
 import { componentsWithStyleSupport, type ComponentId } from '@ombelle/contracts'
 import { inlineSpecimens, specimenOnly } from '../generated/previews'
 import { GalleryGate, Unavailable } from '../generated/previews/specimens/shared'
@@ -28,6 +28,9 @@ export function InlinePreview({ id, family, mode, height }: InlinePreviewProps) 
   React.useEffect(() => setMounted(true), [])
 
   const [base, own] = previewStylesheets(family, id)
+  // The faces this specimen shows, fetched with the page instead of after layout. React hoists these links into the
+  // head and matches them on hydration; `preload()` would be sent as a Link header and requested again by the client.
+  const fonts = family === 'ombelle' ? (ombelleFontPreloads[id] ?? []) : []
   const familyLabel = familyHeadings[family]
   const gate = React.useMemo(
     () => ({ unavailable: componentsWithStyleSupport(family, ['unavailable']), familyLabel }),
@@ -56,6 +59,9 @@ export function InlinePreview({ id, family, mode, height }: InlinePreviewProps) 
     >
       <link rel="stylesheet" href={base} precedence="ombelle-preview" />
       <link rel="stylesheet" href={own} precedence="ombelle-preview" />
+      {fonts.map((href) => (
+        <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="anonymous" />
+      ))}
       <PreviewPortalContainer.Provider value={stage}>
         <GalleryGate.Provider value={gate}>
           <div className="preset-gallery">{content}</div>

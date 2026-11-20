@@ -51,7 +51,7 @@ it('is deterministic', async () => {
 
 it('ships no unscoped rule', () => {
   const keyframes = new Map<string, string>()
-  for (const [file, css] of Object.entries(first.public)) {
+  for (const [file, css] of Object.entries(first.public).filter(([file]) => file.endsWith('.css'))) {
     const family = file.split('/')[0]!
     postcss.parse(css).walk((node) => {
       if (node.type === 'rule' && !(node.parent?.type === 'atrule' && /keyframes$/i.test((node.parent as postcss.AtRule).name)))
@@ -81,7 +81,7 @@ it("resets every custom property a family's preview reads but does not set, so t
 })
 
 it('ships no font imports', () => {
-  for (const css of Object.values(first.public)) expect(css).not.toMatch(/@import/)
+  for (const [file, css] of Object.entries(first.public)) if (file.endsWith('.css')) expect(css).not.toMatch(/@import/)
 })
 
 it("sets each family's own fonts, as the iframe preview does", () => {
@@ -96,4 +96,26 @@ it('registers every specimen', () => {
   expect(index).toContain("from 'next/dynamic'")
   expect(first.src['specimens/shared.tsx']).toBeDefined()
   expect(first.src['specimens/index.ts']).toBeUndefined()
+})
+
+it("self-hosts Ombelle's fonts at fixed URLs and lists the files each page preloads", () => {
+  const css = first.src['fonts.css']!
+  const urls = [...css.matchAll(/url\((\/previews\/fonts\/[^)]+)\)/g)].map((match) => match[1]!)
+  expect(urls.length).toBeGreaterThan(3)
+  for (const url of urls) expect(Object.keys(first.public), url).toContain(url.slice('/previews/'.length))
+  expect(css).not.toContain('./files/')
+  for (const family of ['Figtree Variable', 'Bricolage Grotesque Variable', 'Geist Mono Variable']) expect(css).toContain(`font-family: '${family}'`)
+  const source = first.src['fonts.ts']!
+  const preloads = JSON.parse(source.slice(source.indexOf('= ') + 2)) as Record<string, string[]>
+  expect(Object.keys(preloads).sort()).toEqual(Object.keys(specimenIndex).sort())
+  // The body face is on every specimen; the display and mono faces only where a rule that uses them names one of its slots.
+  for (const files of Object.values(preloads)) expect(files).toContain('/previews/fonts/figtree-latin-wght-normal.woff2')
+  const all = new Set(Object.values(preloads).flat())
+  expect([...all].sort()).toEqual([
+    '/previews/fonts/bricolage-grotesque-latin-wght-normal.woff2',
+    '/previews/fonts/figtree-latin-wght-normal.woff2',
+    '/previews/fonts/geist-mono-latin-wght-normal.woff2',
+  ])
+  expect(preloads['button']).toEqual(['/previews/fonts/figtree-latin-wght-normal.woff2'])
+  for (const url of all) expect(urls).toContain(url)
 })

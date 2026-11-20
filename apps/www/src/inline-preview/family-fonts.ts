@@ -1,18 +1,22 @@
 import { fontById, styleFamilyFonts } from '@ombelle/catalog'
 import type { BuiltInFamily } from './routing'
 
+// Ombelle's fonts, self-hosted at the fixed URLs the page preloads (scripts/generate-www-previews.ts). The page CSS
+// already holds them; a family that shares one (Geist Mono) loads the same faces rather than a second copy.
+const ombelleFonts = () => import('../generated/previews/fonts.css')
+
 // The self-hosted fonts of the built-in families, as the iframe preview loads them
 // (apps/preview/src/preset-fonts.ts). Literal specifiers, so the bundler can split each font out.
 export const fontLoaders: Record<string, () => Promise<unknown>> = {
   'dm-sans': () => import('@fontsource-variable/dm-sans'),
   geist: () => import('@fontsource-variable/geist'),
-  'geist-mono': () => import('@fontsource-variable/geist-mono'),
+  'geist-mono': ombelleFonts,
   'space-grotesk': () => import('@fontsource-variable/space-grotesk'),
   'work-sans': () => import('@fontsource-variable/work-sans'),
   'space-mono': () =>
     Promise.all([import('@fontsource/space-mono/400.css'), import('@fontsource/space-mono/700.css')]),
-  'bricolage-grotesque': () => import('@fontsource-variable/bricolage-grotesque'),
-  figtree: () => import('@fontsource-variable/figtree'),
+  'bricolage-grotesque': ombelleFonts,
+  figtree: ombelleFonts,
   fraunces: () => import('@fontsource-variable/fraunces'),
   'instrument-sans': () => import('@fontsource-variable/instrument-sans'),
   'ibm-plex-mono': () =>

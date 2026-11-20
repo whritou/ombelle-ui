@@ -1,23 +1,28 @@
 // Writes what the website's inline component previews need, once per `pnpm generate:preview`:
 // per family a base stylesheet and one scoped stylesheet per component, plus the compiled components,
-// the shared specimens and a registry that loads each specimen on demand. Nothing compiles at request time.
+// the shared specimens and a registry that loads each specimen on demand, and Ombelle's self-hosted fonts
+// with the faces each specimen preloads. Nothing compiles at request time.
 import fs from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { compile, stripFontImports } from '@ombelle/compiler'
 import { fontById } from '@ombelle/catalog'
 import { componentsWithStyleSupport, supportedStyleFamilies } from '@ombelle/contracts'
 import { createPresetDraft, materializePreset, previewComponentIds } from '../apps/www/src/preset-editor/model.js'
-import { fontLoaders } from '../apps/www/src/inline-preview/family-fonts.js'
+import { familyFontIds, fontLoaders } from '../apps/www/src/inline-preview/family-fonts.js'
 import { specimenIndex } from '../fixtures/shared/specimens/index.js'
 import { previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss, unsetTokensCss, type BuiltInFamily } from './www-previews/scope-css.js'
 import { scopePreviewTemplate } from './www-previews/scope-template.js'
+import { latinFaceUrl, rehostFontCss, slotsUsingFont } from './www-previews/self-hosted-fonts.js'
 
 const repo = fileURLToPath(new URL('../', import.meta.url))
 const specimensDir = path.join(repo, 'fixtures/shared/specimens')
 const compiledPrefix = 'components/ui/'
 const uiImport = /@\/components\/ui\/([\w-]+)/g
 const importedComponents = (source: string) => [...source.matchAll(uiImport)].map((match) => match[1]!)
+const slotNames = (source: string) =>
+  [...source.matchAll(/(?:data-slot=|["']data-slot["']\s*:\s*)(["'])([\w-]+)\1/g)].map((match) => match[2]!)
 const byName = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
 const entryFor = (id: string) => specimenIndex[id as keyof typeof specimenIndex]
 
@@ -116,6 +121,7 @@ export async function generateWwwPreviews(
   const gallery = await fs.readFile(path.join(repo, 'fixtures/shared/preset-gallery.css'), 'utf8')
   const focus = await fs.readFile(path.join(repo, 'fixtures/shared/preset-focus.css'), 'utf8')
   const ids = Object.keys(specimenIndex).sort(byName)
+  const ombelleSheets = { base: '', byId: new Map<string, string>() }
   for (const family of families) {
     const { styles, familySheet, theme } = compiled.get(family)!
     const dir = path.join(out.public, family)
@@ -143,7 +149,44 @@ export async function generateWwwPreviews(
     // The reset comes first: the family's tokens and the stage rules that follow set their own properties.
     await write(path.join(dir, 'base.css'), [...(unset ? [unset] : []), previewTokensCss(family, theme), ...sheets].join('\n') + '\n')
     for (const [id, css] of componentSheets) await write(path.join(dir, `${id}.css`), css)
+    if (family === 'ombelle') Object.assign(ombelleSheets, { base: sheets.join('\n'), byId: componentSheets })
   }
+
+  // Ombelle is the family a component page renders first, so its fonts ship in the page CSS from a fixed public
+  // path, which lets the page preload the faces its specimen shows before layout asks for them.
+  const fontBase = '/previews/fonts'
+  const requireFromWww = createRequire(path.join(repo, 'apps/www/package.json'))
+  const fontCss: string[] = []
+  for (const font of familyFontIds('ombelle'))
+    for (const specifier of fontById(font)?.fontsource.imports ?? []) {
+      const file = requireFromWww.resolve(specifier)
+      const { css, files } = rehostFontCss(await fs.readFile(file, 'utf8'), fontBase)
+      for (const name of files) {
+        await fs.mkdir(path.join(out.public, 'fonts'), { recursive: true })
+        await fs.copyFile(path.join(path.dirname(file), 'files', name), path.join(out.public, 'fonts', name))
+      }
+      fontCss.push(`/* ${specifier} */\n${css.trim()}\n`)
+    }
+  const fontsCss = fontCss.join('\n')
+  await write(path.join(out.src, 'fonts.css'), fontsCss)
+  const { light } = compiled.get('ombelle')!.theme
+  const face = (variable: string) => {
+    const url = latinFaceUrl(fontsCss, light[variable] ?? '')
+    if (!url) throw new Error(`Ombelle's ${variable} has no self-hosted Latin face`)
+    return url
+  }
+  const preloads: Record<string, string[]> = {}
+  for (const id of ids) {
+    const slots = new Set(moduleComponents(entryFor(id).module).flatMap((component) => slotNames(componentSource(component) ?? '')))
+    const css = ombelleSheets.base + '\n' + (ombelleSheets.byId.get(id) ?? '')
+    const shows = (variable: string) => [...slotsUsingFont(css, variable)].some((slot) => slots.has(slot))
+    preloads[id] = [face('--font-family'), ...['--font-heading', '--font-mono'].filter(shows).map(face)]
+  }
+  await write(
+    path.join(out.src, 'fonts.ts'),
+    '// Generated by scripts/generate-www-previews.ts. The upright Latin Ombelle faces each specimen shows, which its page preloads.\n' +
+      `export const ombelleFontPreloads: Record<string, readonly string[]> = ${JSON.stringify(preloads, null, 2)}\n`,
+  )
 
   await write(
     path.join(out.src, 'index.ts'),
