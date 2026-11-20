@@ -1,16 +1,16 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FoundationError, validateRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
-import exampleRecipe from '../../../../../examples/recipe.example.json'
-import { defaultSiteFamily, offeredStyleFamilies } from '../../snapshots/install-command'
+import { FoundationError, type Recipe, type StyleFamily } from '@ombelle/contracts'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { changeDraftFamily, draftFamily, experimentalNotice, resetDraftRecipe, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
 import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
 import { resultMatchesDraft } from '../result-match'
 import { useCompiler } from '../use-compiler'
 import type { CompileDiagnostic } from '../compile-protocol'
-import { PreviewFrame } from './preview-frame'
+import { PreviewFrame, type PrecompiledDefault } from './preview-frame'
+import { initialButtonDraft, precompiledButtonFamily } from '../precompiled-defaults'
 import type { MeasuredParts } from '../catalog-preview-protocol'
 import { PropertiesPanel } from './properties-panel'
 import { ArtifactPanel } from './artifact-panel'
@@ -27,7 +27,7 @@ import { EditorTopBar, focusHistoryTarget, SegmentedControl, familyCommands, pre
 import { familyNames } from './family-picker'
 import styles from './button-editor.module.css'
 
-const initialDraft: EditorDraft = changeDraftFamily({ storageVersion: 1, recipe: validateRecipe(exampleRecipe) }, defaultSiteFamily)
+const initialDraft: EditorDraft = initialButtonDraft
 const initialRecipeJson = serializeRecipe(initialDraft)
 const initialView: EditorView = { mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'none' }
 const forcedStates: readonly { value: EditorView['forcedState']; label: string }[] = [
@@ -62,6 +62,8 @@ export function ButtonEditor() {
   const [diagnostic, setDiagnostic] = useState<CompileDiagnostic | null>(null)
   const [status, setStatus] = useState('Loading local draft…')
   const [measured, setMeasured] = useState<MeasuredParts>({})
+  // The preview shows this family's default, compiled at build time, until the first compile: only while the recipe is that default.
+  const [precompiled, setPrecompiled] = useState<PrecompiledDefault>(() => ({ family: precompiledButtonFamily(initialDraft.recipe), settled: false }))
   const draft = history.present
   const matrix = useMatrixLayout('button', draft.recipe)
   const glassFamily = draftFamily(draft.recipe) === 'liquid-glass'
@@ -83,9 +85,11 @@ export function ButtonEditor() {
   }, [history])
 
   useEffect(() => {
+    let first = initialDraft.recipe
     try {
       const restored = restoreDraft(window.localStorage.getItem(DRAFT_STORAGE_KEY))
       if (restored.status === 'restored') {
+        first = restored.draft.recipe
         setHistory({ past: [], present: restored.draft, future: [] })
         setStatus('Local draft restored.')
       } else if (restored.status === 'recovery-required') {
@@ -98,6 +102,7 @@ export function ButtonEditor() {
     }
     try { setPreservedRecoveries(readRecoveries(window.localStorage)) }
     catch { setStatus('The local recovery archive could not be read. Its bytes were left unchanged.') }
+    setPrecompiled({ family: precompiledButtonFamily(first), settled: true })
   }, [])
 
   useEffect(() => {
@@ -295,7 +300,7 @@ export function ButtonEditor() {
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={compilation.result} view={view} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} precompiled={precompiled} /></div>
           </section>
           <div className={panes.code}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}

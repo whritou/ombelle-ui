@@ -23,7 +23,8 @@ import { ArtifactPanel } from './artifact-panel'
 import { CatalogProperties } from './catalog-properties'
 import { ComponentSwitcher } from './component-switcher'
 import { ComponentEditorDock, paneClasses, switchPane } from './editor-panes'
-import { PreviewFrame } from './preview-frame'
+import { PreviewFrame, type PrecompiledDefault } from './preview-frame'
+import { precompiledCatalogFamily } from '../precompiled-defaults'
 import styles from './button-editor.module.css'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
 
@@ -35,6 +36,8 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const [recovery, setRecovery] = useState<string | null>(null)
   const [recoveries, setRecoveries] = useState<string[]>([])
   const [status, setStatus] = useState('Loading draft…')
+  // The preview shows this family's default, compiled at build time, until the first compile: only while the recipe is that default.
+  const [precompiled, setPrecompiled] = useState<PrecompiledDefault>(() => ({ family: precompiledCatalogFamily(createCatalogDraft(component).recipe), settled: false }))
   const [measured, setMeasured] = useState<MeasuredParts>({})
   const [view, setView] = useState<EditorView>({ mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'none' })
   // Preview state only: never saved with the recipe.
@@ -62,15 +65,20 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
     focusAfterHistory.current = null
   }, [history])
   useEffect(() => {
+    let first = createCatalogDraft(component).recipe
     try {
       const state = restoreCatalogDraft(component, localStorage.getItem(key))
-      if (state.status === 'restored') setHistory({ past: [], present: state.draft.recipe, future: [] })
+      if (state.status === 'restored') {
+        first = state.draft.recipe
+        setHistory({ past: [], present: state.draft.recipe, future: [] })
+      }
       if (state.status === 'recovery-required') setRecovery(state.recoveryText)
       setRecoveries(readRecoveries(localStorage, recoveryKey))
       setStatus(state.status === 'restored' ? 'Draft restored.' : 'Draft ready.')
     } catch {
       setStatus('Draft storage unavailable.')
     }
+    setPrecompiled({ family: precompiledCatalogFamily(first), settled: true })
     setHydrated(true)
   }, [component, key, recoveryKey])
   useEffect(() => {
@@ -173,7 +181,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={result} view={view} component={component} componentName={name} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} precompiled={precompiled} /></div>
           </section>
           <div className={paneClasses(view.panel).code}>
             <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name}
