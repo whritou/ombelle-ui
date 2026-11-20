@@ -114,3 +114,19 @@ export function previewTokensCss(family: BuiltInFamily, theme: ThemeData): strin
     tokenBlock(`${stage}[data-preview-mode="dark"],.dark ${stage}[data-preview-mode="auto"]`, theme.dark, 'dark'),
   ].join('\n')
 }
+
+/**
+ * The stage inherits the page's custom properties, so a token the family does not set (the site's
+ * `--warning`, say) would replace the catalog fallback in `var(--warning, #fef3c7)`. Every property
+ * the preview reads that the family's light theme leaves unset is reset on the stage; the dark block
+ * still sets its own, and declarations inside the preview still win for their subtree.
+ */
+export function unsetTokensCss(family: BuiltInFamily, theme: ThemeData, sheets: string[]): string {
+  const set = new Set(Object.keys(theme.light))
+  const names = new Set<string>()
+  for (const css of sheets)
+    for (const match of css.matchAll(/var\(\s*(--[\w-]+)/g)) if (!set.has(match[1]!)) names.add(match[1]!)
+  if (!names.size) return ''
+  const sorted = [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+  return `${stageSelector(family)}{${sorted.map((name) => `${name}:initial;`).join('').slice(0, -1)}}`
+}

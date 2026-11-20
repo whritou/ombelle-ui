@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import postcss from 'postcss'
 import { describe, expect, it } from 'vitest'
 import { supportedStyleFamilies, type ThemeData } from '@ombelle/contracts'
-import { previewSlotPrefix, previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss } from '../../../../scripts/www-previews/scope-css'
+import { previewSlotPrefix, previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss, unsetTokensCss } from '../../../../scripts/www-previews/scope-css'
 
 const scope = '[data-preview-family="papier"]'
 const stylesDir = new URL('../../../../packages/catalog/src/styles/', import.meta.url)
@@ -120,4 +120,13 @@ describe('previewTokensCss', () => {
     )
   })
   it('is deterministic', () => expect(previewTokensCss('papier', theme)).toBe(previewTokensCss('papier', theme)))
+})
+
+describe('unsetTokensCss', () => {
+  const theme: ThemeData = { light: { '--a': '1' }, dark: { '--a': '2', '--d': '3' }, theme: {} }
+  it('resets on the stage every property the sheets read that the light theme does not set', () => {
+    const sheets = ['[x]{color:var(--warning, #fef3c7);background:var( --a)}', '[y]{border:var(--d) var(--b,var(--c))}']
+    expect(unsetTokensCss('papier', theme, sheets)).toBe(`${scope}{--b:initial;--c:initial;--d:initial;--warning:initial}`)
+  })
+  it('is empty when the theme sets everything', () => expect(unsetTokensCss('papier', theme, ['[x]{a:var(--a)}'])).toBe(''))
 })

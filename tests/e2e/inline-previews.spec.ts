@@ -404,5 +404,14 @@ test.describe('axe stays clean', () => {
           await expect(stage(page)).toHaveAttribute('data-preview-mode', mode.toLowerCase())
           expect((await axe(page).analyze()).violations).toEqual([])
         })
-})
+  // Intent colours (the warning badge, the alert intents) come from each family or its fallbacks, never the site's tokens.
+  for (const id of ['badge', 'alert'])
+    for (const [value, label] of families)
+      test(`/components/${id} in ${label} light has no violations`, async ({ page }) => {
+        await open(page, `/components/${id}`)
+        if (value !== 'ombelle') await pickFamily(page, value, label)
+        await modeButton(page, 'Light').click()
+        await expect(stage(page)).toHaveAttribute('data-preview-mode', 'light')
+        expect((await axe(page).analyze()).violations).toEqual([])
+      })
 })

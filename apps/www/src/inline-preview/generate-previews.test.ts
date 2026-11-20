@@ -63,6 +63,21 @@ it('ships no unscoped rule', () => {
   }
 })
 
+it("resets every custom property a family's preview reads but does not set, so the site's tokens never reach it", () => {
+  for (const family of supportedStyleFamilies) {
+    const stage = `[data-preview-family="${family}"]`
+    const files = Object.entries(first.public).filter(([file]) => file.startsWith(`${family}/`) && file.endsWith('.css'))
+    const set = new Set<string>()
+    postcss.parse(first.public[`${family}/base.css`]!).walkRules((rule) => {
+      if (rule.selector === stage) rule.walkDecls((decl) => { if (decl.prop.startsWith('--')) set.add(decl.prop) })
+    })
+    const read = new Set(files.flatMap(([, css]) => [...css.matchAll(/var\(\s*(--[\w-]+)/g)].map((match) => match[1]!)))
+    expect([...read].filter((name) => !set.has(name)), family).toEqual([])
+  }
+  // The site defines --warning; Ombelle does not, so its preview falls back to the catalog's own colour.
+  expect(first.public['ombelle/base.css']).toContain('--warning:initial')
+})
+
 it('ships no font imports', () => {
   for (const css of Object.values(first.public)) expect(css).not.toMatch(/@import/)
 })

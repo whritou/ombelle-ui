@@ -10,7 +10,7 @@ import { componentsWithStyleSupport, supportedStyleFamilies } from '@ombelle/con
 import { createPresetDraft, materializePreset, previewComponentIds } from '../apps/www/src/preset-editor/model.js'
 import { fontLoaders } from '../apps/www/src/inline-preview/family-fonts.js'
 import { specimenIndex } from '../fixtures/shared/specimens/index.js'
-import { previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss, type BuiltInFamily } from './www-previews/scope-css.js'
+import { previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss, unsetTokensCss, type BuiltInFamily } from './www-previews/scope-css.js'
 import { scopePreviewTemplate } from './www-previews/scope-template.js'
 
 const repo = fileURLToPath(new URL('../', import.meta.url))
@@ -119,25 +119,26 @@ export async function generateWwwPreviews(
   for (const family of families) {
     const { styles, familySheet, theme } = compiled.get(family)!
     const dir = path.join(out.public, family)
-    await write(
-      path.join(dir, 'base.css'),
-      [
-        previewTokensCss(family, theme),
-        scopePreviewCss(familySheet, family),
-        scopePreviewCss(gallery, family),
-        scopePreviewCss(relativeToStage(focus), family),
-        stageContainerCss(family),
-      ].join('\n') + '\n',
-    )
     const available = new Set<string>(componentsWithStyleSupport(family, ['stable', 'experimental']))
+    const componentSheets = new Map<string, string>()
     for (const id of ids) {
       if (!available.has(id)) continue
       const sheets = moduleComponents(entryFor(id).module).flatMap((component) => {
         const css = styles.get(component)
         return css === undefined ? [] : [scopePreviewCss(css, family)]
       })
-      await write(path.join(dir, `${id}.css`), sheets.join('\n') + (sheets.length ? '\n' : ''))
+      componentSheets.set(id, sheets.join('\n') + (sheets.length ? '\n' : ''))
     }
+    const sheets = [
+      scopePreviewCss(familySheet, family),
+      scopePreviewCss(gallery, family),
+      scopePreviewCss(relativeToStage(focus), family),
+      stageContainerCss(family),
+    ]
+    const unset = unsetTokensCss(family, theme, [...sheets, ...componentSheets.values()])
+    // The reset comes first: the family's tokens and the stage rules that follow set their own properties.
+    await write(path.join(dir, 'base.css'), [...(unset ? [unset] : []), previewTokensCss(family, theme), ...sheets].join('\n') + '\n')
+    for (const [id, css] of componentSheets) await write(path.join(dir, `${id}.css`), css)
   }
 
   await write(
