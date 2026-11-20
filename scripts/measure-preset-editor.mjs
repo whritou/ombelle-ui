@@ -1,6 +1,6 @@
 // Measures how long the preset editor's preview takes to become ready and to react to edits.
 // Usage: node scripts/measure-preset-editor.mjs <origin> [--runs N]
-// Prints JSON: { firstReadyMs, tokenEditMs: number[], tokenInputMs: number[], familySwitchMs: Record<family, number>, familyConfirmed, sceneSwitchMs,
+// Prints JSON: { firstReadyMs, tokenEditMs: number[], tokenInputMs: number[], tokenFrameMs: number[], familySwitchMs: Record<family, number>, familyConfirmed, sceneSwitchMs,
 //   modeSwitchMs, workerCompileMs: number[], iframeApplyMs: number[], tokensApplyMs: number[], iframePhases, medians,
 //   channels, runs }
 // Method as scripts/measure-component-preview.mjs: Playwright chromium, cache disabled for the first load, reduced
@@ -26,7 +26,7 @@ const families = ['Papier', 'Organic', 'Retro futurism', 'Minimalist', 'Flat', '
 // (the editor opens one per `ready` handshake), so each side keys its records by port as well as by request id.
 function instrument() {
   const clock = () => performance.timeOrigin + performance.now()
-  const store = (window.__m = { worker: [], render: [], received: [], acks: [], digests: [], handshakes: [] })
+  const store = (window.__m = { worker: [], render: [], received: [], acks: [], digests: [], handshakes: [], inputs: [], frames: [] })
   const top = window === window.top
   const seen = new WeakSet()
   const watch = (target, onMessage) => {
@@ -67,6 +67,8 @@ function instrument() {
       if (isRender(data)) store.render.push({ port, requestId: data.requestId, kind: data.type, sent: clock() })
       return portPost.call(this, data, ...rest)
     }
+    // When each input event was dispatched in the editor page (absolute clock).
+    document.addEventListener('input', (event) => store.inputs.push(performance.timeOrigin + event.timeStamp), true)
     // Every `ready` handshake from the iframe makes the editor open a new channel.
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'ombelle-preset-preview-ready') store.handshakes.push(clock())
@@ -74,7 +76,12 @@ function instrument() {
   } else {
     const portPost = MessagePort.prototype.postMessage
     MessagePort.prototype.postMessage = function (data, ...rest) {
-      if (data && data.type === 'preset-render-ack') store.acks.push({ port: portId(this), requestId: data.requestId, t: clock() })
+      if (data && data.type === 'preset-render-ack') {
+        store.acks.push({ port: portId(this), requestId: data.requestId, t: clock() })
+        // The ack follows the DOM commit; the frame that shows it has been produced once a task queued from the
+        // next animation frame runs. Read in the iframe's own process, so a busy editor page does not delay it.
+        if (data.status === 'applied') requestAnimationFrame(() => setTimeout(() => store.frames.push(clock()), 0))
+      }
       return portPost.call(this, data, ...rest)
     }
     // The port arrives with the init message, before any ack is posted: listen on it directly.
@@ -172,9 +179,13 @@ try {
   const radius = page.getByLabel('Corner radius', { exact: true })
   const values = ['0.3', '1.2', '0.5', '1.5', '0.2', '1.0', '0.7', '1.8', '0.4', '1.3']
   const tokenEditMs = [], tokenInputMs = []
+  // Per edit: the input event's index in the page's record, to pair it with the first iframe frame after it.
+  const tokenInputs = []
   for (let i = 0; i < runs; i++) {
     const before = await fingerprint()
     await radius.click()
+    // The fill's input event is the next one recorded (read before the clock starts, so no round trip is added).
+    tokenInputs.push(await page.evaluate(() => window.__m.inputs.length))
     const input = performance.now()
     await radius.fill(values[i % values.length])
     const t = performance.now()
@@ -234,6 +245,13 @@ try {
 
   const top = await page.evaluate(() => window.__m)
   const inner = await (await iframeFrame()).evaluate(() => window.__m)
+  // Input event in the editor to the first iframe frame produced after an applied preset, both on the absolute clock.
+  // Free of the CDP round trips in the two metrics above; the frame mark adds at most one task after the frame.
+  const tokenFrameMs = tokenInputs.map((index) => {
+    const at = top.inputs[index]
+    const frame = inner.frames.find((t) => t > at)
+    return at === undefined || frame === undefined ? null : round(frame - at)
+  })
   const workerCompileMs = top.worker.filter((e) => e.got !== undefined).map((e) => round(e.got - e.sent))
   const rendered = top.render.filter((e) => e.got !== undefined && e.status === 'applied')
   const iframeApplyMs = rendered.map((e) => round(e.got - e.sent))
@@ -265,7 +283,7 @@ try {
   }).filter(Boolean)
   const med = (key) => median(phases.map((p) => p[key]))
   output = {
-    origin, runs, firstReadyMs, tokenEditMs, tokenInputMs, familySwitchMs, familyConfirmed, sceneSwitchMs, modeSwitchMs, workerCompileMs, iframeApplyMs, tokensApplyMs,
+    origin, runs, firstReadyMs, tokenEditMs, tokenInputMs, tokenFrameMs, familySwitchMs, familyConfirmed, sceneSwitchMs, modeSwitchMs, workerCompileMs, iframeApplyMs, tokensApplyMs,
     iframePhases: {
       samples: phases.length,
       medianPostToReceiveMs: med('postToReceiveMs'),
@@ -278,6 +296,7 @@ try {
     medians: {
       tokenEditMs: median(tokenEditMs),
       tokenInputMs: median(tokenInputMs),
+      tokenFrameMs: median(tokenFrameMs.filter((value) => value !== null)),
       familySwitchMs: median(Object.values(familySwitchMs)),
       workerCompileMs: median(workerCompileMs),
       iframeApplyMs: median(iframeApplyMs),
