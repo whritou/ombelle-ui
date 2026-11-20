@@ -161,3 +161,63 @@ Scenes are `apps/preview/src/scenes/{dashboard,projects,settings,sign-in,workspa
   "renderMessages": 14
 }
 ```
+
+## Prototype gate measurement
+
+Branch `feat/instant-editor-previews`, commit `ae047417aa92bcf7a0d89b3f175c260d3151076a` (preset-tokens fast path from the preceding tasks in place). Same machine, browser, build method and command as the baseline (`node scripts/build-hosted-www.mjs`, `next start --hostname 127.0.0.1 --port 3000`, `node scripts/measure-preset-editor.mjs http://127.0.0.1:3000 --runs 5`, `OMBELLE_BROWSER_CHANNEL=chrome`). Single pass, no cherry-picking.
+
+Script changes since the baseline (Method):
+
+- The family-switch confirmation is no longer detected with a 750 ms window. The script polls for the `Confirm change` dialog and for a preview change and takes whichever comes first, failing with a named error after 60 s. Without a dialog the clock runs from the family click; with one, from the `Confirm change` click (as before).
+- Ack matching: `preset-tokens` posts are tracked by `requestId` alongside `preset-render`, on the editor's port and in the iframe. Both kinds are acked with `type: 'preset-render-ack'`. `iframeApplyMs` now holds every post-to-ack round trip of either kind, and the new `tokensApplyMs` is the `preset-tokens` subset. In this run every apply was a tokens round trip, so the two arrays are equal. The phase split (digest-based) no longer measures a verification compile: the single digest left is the preset hash.
+
+### Gate
+
+Median token edit, Dashboard / Ombelle: **102 ms** (118, 103, 102, 101, 100). Required: under 100 ms and at most 237.9 ms (10x faster than 2379 ms). The speedup is 23x and clears the 10x bound, but 102 ms is not under 100 ms. **Gate: FAIL** on the binding bound, by 2 ms. The measurement carries 5 to 15 ms of polling overhead (CDP fingerprint polled every 2 ms), and four of five runs sit between 100 and 103 ms.
+
+### Before and after
+
+| Metric | Baseline ms | Fast path ms | Change |
+| --- | --- | --- | --- |
+| First ready | 5896 | 1926 | 3.1x faster |
+| Token edit, median of 5 | 2379 | 102 | 23x faster |
+| Family switch, Papier | 2743 | 257 | |
+| Family switch, Organic | 2859 | 271 | |
+| Family switch, Retro futurism | 2879 | 246 | |
+| Family switch, Minimalist | 2424 | 232 | |
+| Family switch, Flat | 2429 | 250 | |
+| Family switch, Neo-brutalism | 2582 | 233 | |
+| Family switch, median | 2582 | 249 | 10x faster |
+| Scene switch (Dashboard to Settings) | 1311 | 236 | 5.6x faster |
+| Mode switch (light to dark) | 1132 | 153 | 7.4x faster |
+| Iframe apply, median | 1068 | 118 | |
+| Worker `compile()`, median (19 requests, still in the background) | 1211 | 1173 | unchanged |
+
+Where the remaining time goes: iframe apply (post to ack) medians 118 ms. Inside it, arrival to first digest is 2 ms, the single preset-hash digest to the ack about 28 ms, and the ack reaching the editor page about 68 ms later. The apply path is therefore fast; the larger part of the remainder is the page receiving the ack, which suggests main-thread work in the editor page (re-render of the editor after the edit) rather than in the iframe. The first two worker compiles still include the worker cold start (2376 and 2275 ms).
+
+### Raw measurement
+
+```json
+{
+  "origin": "http://127.0.0.1:3000",
+  "runs": 5,
+  "firstReadyMs": 1926,
+  "tokenEditMs": [118, 103, 102, 101, 100],
+  "familySwitchMs": { "Papier": 257, "Organic": 271, "Retro futurism": 246, "Minimalist": 232, "Flat": 250, "Neo-brutalism": 233 },
+  "sceneSwitchMs": 236,
+  "modeSwitchMs": 153,
+  "workerCompileMs": [2376, 2275, 1067, 1013, 989, 958, 975, 1094, 1299, 1372, 1248, 1220, 1440, 1078, 992, 978, 1185, 1173, 1079],
+  "iframeApplyMs": [146, 143, 102, 92, 93, 90, 89, 130, 127, 124, 116, 127, 118, 133, 25],
+  "tokensApplyMs": [146, 143, 102, 92, 93, 90, 89, 130, 127, 124, 116, 127, 118, 133, 25],
+  "iframePhases": {
+    "samples": 15,
+    "medianPostToReceiveMs": 0,
+    "medianReceiveToFirstDigestMs": 2,
+    "medianVerificationMs": 0,
+    "medianLastDigestToAckMs": 28,
+    "medianAckToTopMs": 68
+  },
+  "workerRequests": 19,
+  "renderMessages": 15
+}
+```
