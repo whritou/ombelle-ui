@@ -140,7 +140,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
             <Tabs.Trigger value="code" className={tabClass}><Code aria-hidden="true" className="size-4" />Code</Tabs.Trigger>
           </Tabs.List>
           <div className="flex flex-wrap items-center gap-3">
-            <span role="status" className="inline-flex w-44 items-center justify-end gap-2 text-xs font-medium text-muted-foreground">
+            <span role="status" className="inline-flex w-48 items-center gap-2 whitespace-nowrap text-xs font-medium text-muted-foreground">
               <span aria-hidden="true" className={'size-2 rounded-full ' + (status === 'ready' ? 'bg-primary' : status === 'failed' ? 'bg-destructive' : 'animate-pulse bg-muted-foreground')} />
               {status === 'ready' ? `${familyOptions.find(o => o.value === family)!.label} · ${resolvedMode}` : status === 'failed' ? 'Preview unavailable' : 'Loading preview…'}
             </span>
