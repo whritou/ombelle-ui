@@ -1,7 +1,7 @@
 // Measures how long the preset editor's preview takes to become ready and to react to edits.
 // Usage: node scripts/measure-preset-editor.mjs <origin> [--runs N]
 // Prints JSON: { firstReadyMs, tokenEditMs: number[], familySwitchMs: Record<family, number>, sceneSwitchMs,
-//   modeSwitchMs, workerCompileMs: number[], iframeApplyMs: number[], iframePhases, runs }
+//   modeSwitchMs, workerCompileMs: number[], iframeApplyMs: number[], tokensApplyMs: number[], iframePhases, runs }
 // Method as scripts/measure-component-preview.mjs: Playwright chromium, cache disabled for the first load, reduced
 // motion, 1100x800. "Ready" is the `Preview ready` status line (`data-status="ready"`). Edits and switches are timed
 // from the input until a computed-style fingerprint inside the preview iframe ("Global preset gallery") changes.
@@ -54,14 +54,14 @@ function instrument() {
           for (const entry of store.render)
             if (entry.requestId === reply.requestId && entry.got === undefined) { entry.got = t; entry.status = reply.status }
       })
-      if (data && data.type === 'preset-render') store.render.push({ requestId: data.requestId, sent: clock() })
+      if (data && (data.type === 'preset-render' || data.type === 'preset-tokens')) store.render.push({ requestId: data.requestId, kind: data.type, sent: clock() })
       return portPost.call(this, data, ...rest)
     }
   } else {
     const portPost = MessagePort.prototype.postMessage
     MessagePort.prototype.postMessage = function (data, ...rest) {
       watch(this, (incoming, t) => {
-        if (incoming && incoming.type === 'preset-render') store.received.push({ requestId: incoming.requestId, t })
+        if (incoming && (incoming.type === 'preset-render' || incoming.type === 'preset-tokens')) store.received.push({ requestId: incoming.requestId, t })
       })
       if (data && data.type === 'preset-render-ack') store.acks.push({ requestId: data.requestId, t: clock() })
       return portPost.call(this, data, ...rest)
@@ -69,7 +69,7 @@ function instrument() {
     // The port arrives with the init message, before any ack is posted: listen on it directly.
     window.addEventListener('message', (event) => {
       for (const port of event.ports ?? []) watch(port, (incoming, t) => {
-        if (incoming && incoming.type === 'preset-render') store.received.push({ requestId: incoming.requestId, t })
+        if (incoming && (incoming.type === 'preset-render' || incoming.type === 'preset-tokens')) store.received.push({ requestId: incoming.requestId, t })
       })
     }, true)
     const digest = crypto.subtle.digest.bind(crypto.subtle)
@@ -212,6 +212,7 @@ try {
   const workerCompileMs = top.worker.filter((e) => e.got !== undefined).map((e) => round(e.got - e.sent))
   const rendered = top.render.filter((e) => e.got !== undefined && e.status === 'applied')
   const iframeApplyMs = rendered.map((e) => round(e.got - e.sent))
+  const tokensApplyMs = rendered.filter((e) => e.kind === 'preset-tokens').map((e) => round(e.got - e.sent))
   // Inside the iframe: message arrival to first and last digest (the verification compile) to the ack.
   const phases = rendered.map((e) => {
     const received = inner.received.find((r) => r.requestId === e.requestId)?.t
@@ -232,7 +233,7 @@ try {
   }).filter(Boolean)
   const med = (key) => median(phases.map((p) => p[key]))
   output = {
-    origin, runs, firstReadyMs, tokenEditMs, familySwitchMs, sceneSwitchMs, modeSwitchMs, workerCompileMs, iframeApplyMs,
+    origin, runs, firstReadyMs, tokenEditMs, familySwitchMs, sceneSwitchMs, modeSwitchMs, workerCompileMs, iframeApplyMs, tokensApplyMs,
     iframePhases: {
       samples: phases.length,
       medianPostToReceiveMs: med('postToReceiveMs'),
