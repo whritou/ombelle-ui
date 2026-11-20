@@ -323,3 +323,7 @@ Method: production build of `1c71ed3a` plus the Task 7 tests (`node scripts/buil
 Raw font load, pass 1: 179, 201, 179, 148, 161, 130, 150, 151, 145, 157. Pass 2: 187, 250, 137, 138, 171, 150, 131, 184, 162, 167. CSS paint: 11 to 25 ms in both passes.
 
 Decision: no prefetch. The median font load (154 and 164.5 ms) is well under 300 ms and no single font reached it. The CSS paints at 13 ms with the fallback face and the font swaps in about 150 ms later. `PresetTokens` is unchanged. Caveat: localhost, no network latency or CDN; on a slow link the font load would take longer, but the preview already paints the new CSS first and the font swaps in. Fonts the draft already uses are loaded already (Bricolage Grotesque and Figtree on Flat measured as loaded before the pick), so those picks cost nothing.
+
+### Two preset-editor.spec.ts failures are older than this branch (Task 7)
+
+`applies a style palette and a primary colour in one step ...` (expects `oklch(98.6% 0.003 67.8)`, the export has `oklch(0.986 0.003 67.8)`) and `edits a token with its Color Picker inside the token panel ...` (the saturation/brightness slider click leaves the value at `oklch(55% 0.22 6)`) both fail the same way on the base commit `68de5cd2`, run in a temporary worktree (`pnpm install --frozen-lockfile --ignore-scripts`, `build:packages`, `generate:preview`, site config with only that spec). They are not regressions of the instant preview work.

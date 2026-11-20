@@ -715,11 +715,15 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
         '*',
       ),
     )
-  // The glass render path completes two handler runs on the replaced port (one per message the frame took), so the
-  // counts are lower bounds; the acknowledgement checks that follow are the exact ones.
-  await expect.poll(async () => (await inspect()).completed).toBeGreaterThanOrEqual(before + 1)
+  // `completed` counts handler runs, and the frame's port handler returns as soon as it has handed the message to the
+  // receiver (it no longer awaits the verification), so a run is counted when a message is delivered, not when it
+  // finishes. Exactly two are delivered after `before`: the held render, delivered on the old port, and the render the
+  // editor sends on the new port after the second handshake. The held verification is still in flight (`blocked`), so
+  // releasing it delivers nothing more; that it never produces an ack is checked below.
+  await expect.poll(async () => (await inspect()).completed).toBe(before + 2)
   await release()
-  await expect.poll(async () => (await inspect()).completed).toBeGreaterThanOrEqual(before + 2)
+  await page.waitForTimeout(500)
+  expect((await inspect()).completed).toBe(before + 2)
   expect((await inspect()).acks.some((a) => a.requestId === oldId + 2)).toBe(
     false,
   )
