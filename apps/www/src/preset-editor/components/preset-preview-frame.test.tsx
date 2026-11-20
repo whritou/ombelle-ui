@@ -38,7 +38,13 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-type Props = { preset?: Preset | null; result?: CompileResult | null; view?: PresetView; draftInvalid?: boolean }
+type Props = {
+  preset?: Preset | null
+  result?: CompileResult | null
+  view?: PresetView
+  draftInvalid?: boolean
+  sender?: { current: ((preset: Preset) => void) | null }
+}
 function render(props: Props) {
   act(() =>
     root.render(
@@ -90,6 +96,28 @@ it('posts preset-tokens in the same flush as a change, never preset-render', asy
   expect(sent[1].requestId).toBeGreaterThan(sent[0].requestId)
   // A new worker result alone sends nothing.
   render({ preset: edited, result: result('b'.repeat(64)) })
+  await flush()
+  expect(sent).toHaveLength(2)
+})
+it('sends an edit through the sender before the render, and the render does not repeat it', async () => {
+  const sender: { current: ((preset: Preset) => void) | null } = { current: null }
+  render({ preset: flat(0.5), sender })
+  handshake()
+  await flush()
+  expect(sent).toHaveLength(1)
+  const edited = flat(0.75)
+  act(() => sender.current!(edited))
+  await flush()
+  expect(sent).toHaveLength(2)
+  expect((sent[1] as unknown as { preset: Preset }).preset.design.radiusRem).toBe(0.75)
+  // The render with an equal preset finds it already sent.
+  render({ preset: flat(0.75), sender })
+  await flush()
+  expect(sent).toHaveLength(2)
+  await ack(sent[1].requestId, await presetHashOf(edited))
+  expect(onStatus).toHaveBeenLastCalledWith('ready')
+  // A glass preset never takes the early path.
+  act(() => sender.current!(glass))
   await flush()
   expect(sent).toHaveLength(2)
 })

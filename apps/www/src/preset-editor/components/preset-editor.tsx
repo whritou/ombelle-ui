@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CircleHelp, Download, Eye, ShieldCheck, SlidersHorizontal } from 'lucide-react'
-import type { StyleFamily } from '@ombelle/contracts'
+import type { Preset, StyleFamily } from '@ombelle/contracts'
 import { defaultSiteFamily, offeredStyleFamilies } from '../../snapshots/install-command'
 import {
   applyGlassTint,
@@ -202,7 +202,16 @@ export default function PresetEditor() {
     focusHistoryTarget(focusAfterHistory.current)
     focusAfterHistory.current = null
   }, [history])
+  // Sends a non-glass edit to the preview from the input handler, before the editor re-renders.
+  const previewSender = useRef<((preset: Preset) => void) | null>(null)
   function commit(next: PresetEditorDraft, key: string, coalesce = false) {
+    if (previewSender.current) {
+      try {
+        previewSender.current(materializePreset(next))
+      } catch {
+        // A draft that cannot be materialized keeps the last valid preview, as on render.
+      }
+    }
     setRestoreWarning(null)
     setHistory((previous) =>
       recordPresetDraft(previous, next, { key, at: Date.now(), coalesce }),
@@ -615,6 +624,7 @@ export default function PresetEditor() {
               // A non-glass preview follows the draft itself, so only an unusable draft leaves it behind.
               stale={glass ? compiled.stale : live.preset === null}
               onStatus={setPreviewStatus}
+              sender={previewSender}
             />
             </div>
             <p className={styles.sceneComponents}>

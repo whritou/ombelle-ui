@@ -26,6 +26,7 @@ export function PresetPreviewFrame({
   title = 'Global preset gallery',
   height = 760,
   caption = true,
+  sender,
 }: {
   result: CompileResult | null
   /** Opt-in fast path: a non-glass preset is sent as tokens on every change, with no compile result needed. */
@@ -38,12 +39,19 @@ export function PresetPreviewFrame({
   title?: string
   height?: number
   caption?: boolean
+  /**
+   * Fast path only: filled with a function that sends a preset at once, so an editor can post an
+   * edit from its input handler, before it re-renders. The render that follows does not send it again.
+   */
+  sender?: { current: ((preset: Preset) => void) | null }
 }) {
   const frame = useRef<HTMLIFrameElement>(null),
     port = useRef<MessagePort | null>(null)
   const sequence = useRef(0),
     latestSent = useRef<Sent | null>(null),
-    pendingAck = useRef<PresetAck | null>(null)
+    pendingAck = useRef<PresetAck | null>(null),
+    // The fast-path message last posted on this port, as preset and view: an equal one is not posted again.
+    sentKey = useRef<string | null>(null)
   const fast = preset !== null && preset.styleFamily !== 'liquid-glass'
   const latest = useRef({ result, preset, fast, view, onStatus })
   latest.current = { result, preset, fast, view, onStatus }
@@ -80,9 +88,13 @@ export function PresetPreviewFrame({
     setFailed(false)
     latest.current.onStatus('ready')
   }
-  function send() {
-    const { result, preset, fast, view } = latest.current
+  function send(options: { force?: boolean; preset?: Preset } = {}) {
+    const { result, fast, view } = latest.current
+    const preset = options.preset ?? latest.current.preset
     if (!port.current || (fast ? !preset : !result)) return
+    const key = fast ? JSON.stringify([preset, sentPresetView(view)]) : null
+    if (key !== null && !options.force && key === sentKey.current) return
+    sentKey.current = key
     const requestId = ++sequence.current
     pendingAck.current = null
     if (fast) {
@@ -132,6 +144,7 @@ export function PresetPreviewFrame({
       sequence.current = 0
       latestSent.current = null
       pendingAck.current = null
+      sentKey.current = null
       const channel = new MessageChannel(),
         current = channel.port1
       port.current = current
@@ -145,7 +158,7 @@ export function PresetPreviewFrame({
         '*',
         [channel.port2],
       )
-      send()
+      send({ force: true })
     }
     window.addEventListener('message', ready)
     return () => {
@@ -156,6 +169,15 @@ export function PresetPreviewFrame({
       latestSent.current = null
     }
   }, [attempt])
+  useEffect(() => {
+    if (!sender) return
+    sender.current = (preset) => {
+      if (latest.current.fast && preset.styleFamily !== 'liquid-glass') send({ preset })
+    }
+    return () => {
+      sender.current = null
+    }
+  }, [sender])
   useEffect(() => {
     send()
   }, [fast ? preset : null, fast ? null : result, fast, view.mode, view.viewport, view.focus, view.scene, view.backdrop, view.labInk, view.reducedTransparency])
