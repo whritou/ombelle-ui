@@ -235,6 +235,8 @@ test('does not leak styles', async ({ page, context }) => {
   await editor.goto(`${site}/editor/preset?page=gallery`)
   await editor.evaluate(() => localStorage.clear())
   await editor.reload()
+  // A click before the editor hydrates does nothing; Get code is enabled once the draft has compiled.
+  await expect(editor.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 60000 })
   await editor.getByRole('radiogroup', { name: 'Style family' }).getByRole('radio', { name: 'Papier' }).click()
   await editor.getByRole('alertdialog', { name: 'Change style family?' }).getByRole('button', { name: 'Confirm change' }).click()
   const frame = editor.frameLocator('iframe[title="Global preset gallery"]')

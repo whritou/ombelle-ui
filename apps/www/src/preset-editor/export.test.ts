@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { expect, it } from 'vitest'
 import { canonicalize, sha256 } from '@ombelle/compiler'
 import { supportedStyleFamilies } from '@ombelle/contracts'
@@ -88,7 +89,7 @@ it('keeps the export files and preset hash of each family and edited draft', asy
       familyCssSha256: await sha256(presetCssExport(state, draft, 'family')),
     }
   }
-  await expect(JSON.stringify(record, null, 2) + '\n').toMatchFileSnapshot(
-    './__snapshots__/export-before.json',
-  )
+  // Compared as parsed JSON so a checkout with other line endings still matches.
+  const recorded = JSON.parse(readFileSync(new URL('./__snapshots__/export-before.json', import.meta.url), 'utf8'))
+  expect(JSON.parse(JSON.stringify(record))).toEqual(recorded)
 })
