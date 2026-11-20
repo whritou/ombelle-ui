@@ -31,6 +31,7 @@ import {
   historyStorageKey,
 } from '../storage'
 import { usePresetCompiler } from '../use-preset-compiler'
+import { useLivePreset } from '../use-live-preset'
 import {
   browserColor,
   measurePresetContrast,
@@ -168,7 +169,8 @@ export default function PresetEditor() {
     previousViewport.current = viewportClass
   }, [viewportClass, drawerOpen])
   const draft = history.present,
-    compiled = usePresetCompiler(draft)
+    compiled = usePresetCompiler(draft),
+    live = useLivePreset(draft)
   useEffect(() => {
     try {
       const loaded = loadPresetSession(window.localStorage)
@@ -600,6 +602,8 @@ export default function PresetEditor() {
             <div className={styles.peekFrame}>
             <PresetPreviewFrame
               result={compiled.result}
+              preset={live.lastValid}
+              draftInvalid={compiled.status === 'invalid' && compiled.diagnostic?.code !== 'WORKER_FAILED'}
               view={{
                 mode,
                 viewport,
@@ -608,7 +612,8 @@ export default function PresetEditor() {
                 ...(glass && labInk && !reduced ? { labInk } : {}),
                 ...(glass && reduced ? { reducedTransparency: true as const } : {}),
               }}
-              stale={compiled.stale}
+              // A non-glass preview follows the draft itself, so only an unusable draft leaves it behind.
+              stale={glass ? compiled.stale : live.preset === null}
               onStatus={setPreviewStatus}
             />
             </div>

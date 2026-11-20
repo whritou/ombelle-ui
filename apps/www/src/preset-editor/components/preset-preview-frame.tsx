@@ -1,17 +1,25 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import type { CompileResult } from '@ombelle/contracts'
+import type { CompileResult, Preset } from '@ombelle/contracts'
 import { previewFrameUrl } from '../../editor/preview-url'
 import {
   isPresetAck,
   isPresetHandshake,
+  presetHashOf,
   sentPresetView,
+  type PresetAck,
   type PresetRender,
+  type PresetTokens,
   type PresetView,
 } from '../preview-protocol'
 
+const noHash = '0'.repeat(64)
+type Sent = { requestId: number; hash: string | null; tokens: boolean }
+
 export function PresetPreviewFrame({
   result,
+  preset = null,
+  draftInvalid = false,
   view,
   stale,
   onStatus,
@@ -20,6 +28,10 @@ export function PresetPreviewFrame({
   caption = true,
 }: {
   result: CompileResult | null
+  /** Opt-in fast path: a non-glass preset is sent as tokens on every change, with no compile result needed. */
+  preset?: Preset | null
+  /** The worker found the current draft invalid, though the preview of it is shown. */
+  draftInvalid?: boolean
   view: PresetView
   stale: boolean
   onStatus: (status: 'connecting' | 'ready' | 'failed') => void
@@ -30,9 +42,11 @@ export function PresetPreviewFrame({
   const frame = useRef<HTMLIFrameElement>(null),
     port = useRef<MessagePort | null>(null)
   const sequence = useRef(0),
-    latestSent = useRef<PresetRender | null>(null)
-  const latest = useRef({ result, view, onStatus })
-  latest.current = { result, view, onStatus }
+    latestSent = useRef<Sent | null>(null),
+    pendingAck = useRef<PresetAck | null>(null)
+  const fast = preset !== null && preset.styleFamily !== 'liquid-glass'
+  const latest = useRef({ result, preset, fast, view, onStatus })
+  latest.current = { result, preset, fast, view, onStatus }
   const [attempt, setAttempt] = useState(0)
   const [failed, setFailed] = useState(false)
   const deadline = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -44,15 +58,62 @@ export function PresetPreviewFrame({
     clearTimeout(deadline.current)
     deadline.current = setTimeout(fail, 10000)
   }
+  function settle(ack: PresetAck) {
+    const sent = latestSent.current
+    if (!sent || ack.requestId !== sent.requestId) return
+    // The iframe acks a rejected tokens message with no hash to match.
+    const refused = sent.tokens && ack.status === 'rejected' && ack.presetHash === noHash
+    if (!refused) {
+      // The awaited hash is still resolving: compare when it does.
+      if (sent.hash === null) {
+        pendingAck.current = ack
+        return
+      }
+      if (ack.presetHash !== sent.hash) return
+    }
+    pendingAck.current = null
+    clearTimeout(deadline.current)
+    if (ack.status === 'rejected') {
+      fail()
+      return
+    }
+    setFailed(false)
+    latest.current.onStatus('ready')
+  }
   function send() {
-    if (!port.current || !latest.current.result) return
+    const { result, preset, fast, view } = latest.current
+    if (!port.current || (fast ? !preset : !result)) return
+    const requestId = ++sequence.current
+    pendingAck.current = null
+    if (fast) {
+      const message: PresetTokens = {
+        type: 'preset-tokens',
+        requestId,
+        preset: preset!,
+        view: sentPresetView(view),
+      }
+      const sent: Sent = { requestId, hash: null, tokens: true }
+      latestSent.current = sent
+      arm()
+      port.current.postMessage(message)
+      presetHashOf(preset!).then(
+        (hash) => {
+          if (latestSent.current !== sent) return
+          sent.hash = hash
+          const early = pendingAck.current
+          if (early) settle(early)
+        },
+        () => {},
+      )
+      return
+    }
     const message: PresetRender = {
       type: 'preset-render',
-      requestId: ++sequence.current,
-      result: latest.current.result,
-      view: sentPresetView(latest.current.view),
+      requestId,
+      result: result!,
+      view: sentPresetView(view),
     }
-    latestSent.current = message
+    latestSent.current = { requestId, hash: result!.preset.hash, tokens: false }
     arm()
     port.current.postMessage(message)
   }
@@ -70,24 +131,13 @@ export function PresetPreviewFrame({
       port.current?.close()
       sequence.current = 0
       latestSent.current = null
+      pendingAck.current = null
       const channel = new MessageChannel(),
         current = channel.port1
       port.current = current
       current.onmessage = (event: MessageEvent<unknown>) => {
-        if (
-          port.current !== current ||
-          !isPresetAck(event.data) ||
-          event.data.requestId !== latestSent.current?.requestId ||
-          event.data.presetHash !== latestSent.current.result.preset.hash
-        )
-          return
-        clearTimeout(deadline.current)
-        if (event.data.status === 'rejected') {
-          fail()
-          return
-        }
-        setFailed(false)
-        latest.current.onStatus('ready')
+        if (port.current !== current || !isPresetAck(event.data)) return
+        settle(event.data)
       }
       current.start()
       frame.current?.contentWindow?.postMessage(
@@ -108,11 +158,17 @@ export function PresetPreviewFrame({
   }, [attempt])
   useEffect(() => {
     send()
-  }, [result, view.mode, view.viewport, view.focus, view.scene, view.backdrop, view.labInk, view.reducedTransparency])
+  }, [fast ? preset : null, fast ? null : result, fast, view.mode, view.viewport, view.focus, view.scene, view.backdrop, view.labInk, view.reducedTransparency])
   return (
     <section aria-label="Preset preview">
       {caption && (
-        <p>{stale ? 'Previous valid preview' : 'Current preset preview'}</p>
+        <p>
+          {stale
+            ? 'Previous valid preview'
+            : draftInvalid
+              ? 'Preview of a draft that cannot be exported yet'
+              : 'Current preset preview'}
+        </p>
       )}
       {failed && (
         <p role="alert">
