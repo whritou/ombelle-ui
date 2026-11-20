@@ -122,7 +122,11 @@ export async function generateWwwPreviews(
     const available = new Set<string>(componentsWithStyleSupport(family, ['stable', 'experimental']))
     const componentSheets = new Map<string, string>()
     for (const id of ids) {
-      if (!available.has(id)) continue
+      // The stage links `<family>/<id>.css` for every component; one the family does not offer shows a notice and needs no rules.
+      if (!available.has(id)) {
+        componentSheets.set(id, '')
+        continue
+      }
       const sheets = moduleComponents(entryFor(id).module).flatMap((component) => {
         const css = styles.get(component)
         return css === undefined ? [] : [scopePreviewCss(css, family)]

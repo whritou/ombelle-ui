@@ -36,9 +36,11 @@ it('writes base and component sheets for every built-in family', () => {
   for (const family of supportedStyleFamilies) {
     expect(first.public[`${family}/base.css`]).toContain(`[data-preview-family="${family}"]`)
     const available = new Set<string>(componentsWithStyleSupport(family, ['stable', 'experimental']))
-    const expected = Object.keys(specimenIndex).filter((id) => available.has(id)).map((id) => `${family}/${id}.css`)
+    // The stage links a sheet for every component, so one the family does not offer gets an empty sheet, not a 404.
+    const expected = Object.keys(specimenIndex).map((id) => `${family}/${id}.css`)
     const written = Object.keys(first.public).filter((file) => file.startsWith(`${family}/`) && !file.endsWith('/base.css'))
     expect(written.sort()).toEqual(expected.sort())
+    for (const id of Object.keys(specimenIndex).filter((id) => !available.has(id))) expect(first.public[`${family}/${id}.css`], `${family}/${id}`).toBe('')
   }
   expect(Object.keys(first.public).filter((file) => file.endsWith('/base.css'))).toHaveLength(7)
 })
