@@ -111,7 +111,9 @@ export function ComponentPlayground({ id, name, source, styles }: {
   const failureKey = `${id}:${family}`
   const inline = previewPath(id, family) === 'inline' && inlineFailure !== failureKey
   const status: PreviewStatus = inline ? 'ready' : iframeStatus
-  useEffect(() => preloadOtherFamilies(id, family), [id])
+  // Families whose sheets and fonts were already requested (by the idle preload or a hover), so none is fetched twice.
+  const preloaded = useRef(new Set<StyleFamily>())
+  useEffect(() => preloadOtherFamilies(id, family, preloaded.current), [id])
   const height = tallPreviews[id] ?? 420
   const families = familyOptions.map(option =>
     option.value === 'liquid-glass'
@@ -123,6 +125,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <ToggleGroup label="Style family" value={pendingFamily} options={families} onValueChange={pickFamily}
+          onItemIntent={(value) => preloadFamily(id, value, preloaded.current)}
           className="inline-flex rounded-lg bg-muted p-1" itemClassName={toggleItem} />
         <ToggleGroup label="Preview mode" value={resolvedMode} options={modeOptions} onValueChange={setMode}
           className="inline-flex rounded-lg bg-muted p-1" itemClassName={toggleItem} />
@@ -211,14 +214,18 @@ class InlineBoundary extends Component<{ onError: () => void; children: ReactNod
   }
 }
 
+/** Requests a built-in family's stylesheets and fonts, once per record; Liquid Glass and iframe-only components have none. */
+function preloadFamily(id: ComponentId, family: StyleFamily, done: Set<StyleFamily>) {
+  if (family === 'liquid-glass' || previewPath(id, family) !== 'inline' || done.has(family)) return
+  done.add(family)
+  for (const href of previewStylesheets(family as BuiltInFamily, id)) preload(href, { as: 'style' })
+  void loadFamilyFonts(family as BuiltInFamily).catch(() => undefined)
+}
+
 /** Warms the stylesheets and fonts of the other families while the browser is idle, so switching family does not wait on the network. */
-function preloadOtherFamilies(id: ComponentId, current: StyleFamily): () => void {
+function preloadOtherFamilies(id: ComponentId, current: StyleFamily, done: Set<StyleFamily>): () => void {
   const run = () => {
-    for (const { value } of familyOptions) {
-      if (value === current || value === 'liquid-glass') continue
-      for (const href of previewStylesheets(value as BuiltInFamily, id)) preload(href, { as: 'style' })
-      void loadFamilyFonts(value as BuiltInFamily).catch(() => undefined)
-    }
+    for (const { value } of familyOptions) if (value !== current) preloadFamily(id, value, done)
   }
   if (typeof requestIdleCallback === 'function') {
     const handle = requestIdleCallback(run)

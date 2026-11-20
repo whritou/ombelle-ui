@@ -31,9 +31,14 @@ vi.mock('../../generated/previews/specimens/shared', async () => {
 })
 // Font loading resolves at once unless a test holds a family's fonts back.
 const fonts = vi.hoisted(() => ({ held: new Map<string, () => void>() }))
+const requested = vi.hoisted(() => ({ sheets: [] as string[], fonts: [] as string[] }))
+vi.mock('react-dom', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('react-dom')>()),
+  preload: (href: string) => { requested.sheets.push(href) },
+}))
 vi.mock('../../inline-preview/family-fonts', () => ({
   loadFamilyFonts: (family: string) =>
-    fonts.held.has(family) ? new Promise<void>((resolve) => fonts.held.set(family, resolve)) : Promise.resolve(),
+    (requested.fonts.push(family), fonts.held.has(family) ? new Promise<void>((resolve) => fonts.held.set(family, resolve)) : Promise.resolve()),
 }))
 vi.mock('../../preset-editor/use-preset-compiler', () => ({
   usePresetCompiler: () => {
@@ -51,6 +56,8 @@ beforeEach(() => {
   compiler.throwing = false
   compiler.loading = null
   fonts.held.clear()
+  requested.sheets.length = 0
+  requested.fonts.length = 0
   document.documentElement.classList.remove('dark')
   window.history.replaceState(null, '', '/')
 })
@@ -161,4 +168,21 @@ it('falls back to the iframe when the inline preview throws', async () => {
 it('gives the status line a fixed width, so a longer family name does not move it', async () => {
   const host = await render()
   expect(host.querySelector('[role="status"]')!.className).toMatch(/(^| )w-\d+( |$)/)
+})
+
+it('preloads a family when its button is hovered or focused', async () => {
+  const host = await render()
+  const button = (label: string) =>
+    [...host.querySelectorAll('[aria-label="Style family"] button')].find(b => b.textContent?.startsWith(label))!
+  const sheets = (family: string) => requested.sheets.filter(href => href.includes(`/${family}/`))
+  await act(async () => { button('Papier').dispatchEvent(new MouseEvent('pointerover', { bubbles: true })) })
+  expect(sheets('papier')).toEqual(['/previews/papier/base.css', '/previews/papier/button.css'])
+  expect(requested.fonts.filter(f => f === 'papier')).toHaveLength(1)
+  await act(async () => { (button('Papier') as HTMLElement).focus() })
+  expect(sheets('papier')).toHaveLength(2)
+  expect(requested.fonts.filter(f => f === 'papier')).toHaveLength(1)
+  await act(async () => { (button('Liquid Glass') as HTMLElement).focus() })
+  await act(async () => { button('Liquid Glass').dispatchEvent(new MouseEvent('pointerover', { bubbles: true })) })
+  expect(sheets('liquid-glass')).toEqual([])
+  expect(requested.fonts).not.toContain('liquid-glass')
 })

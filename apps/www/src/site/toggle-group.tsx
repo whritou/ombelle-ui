@@ -9,6 +9,7 @@ export function ToggleGroup<T extends string>({
   value,
   options,
   onValueChange,
+  onItemIntent,
   className,
   itemClassName,
   activeState = 'on',
@@ -17,6 +18,8 @@ export function ToggleGroup<T extends string>({
   value: T
   options: readonly { value: T; label: string; disabled?: boolean; title?: string }[]
   onValueChange: (value: T) => void
+  /** Called when the pointer enters or keyboard focus reaches an option, before it is chosen. */
+  onItemIntent?: (value: T) => void
   className?: string
   itemClassName?: string
   activeState?: 'on' | 'active'
@@ -34,6 +37,8 @@ export function ToggleGroup<T extends string>({
             title={option.title}
             data-state={pressed ? activeState : 'off'}
             onClick={() => onValueChange(option.value)}
+            onPointerEnter={onItemIntent && (() => onItemIntent(option.value))}
+            onFocus={onItemIntent && (() => onItemIntent(option.value))}
             className={itemClassName}
           >
             {option.label}
