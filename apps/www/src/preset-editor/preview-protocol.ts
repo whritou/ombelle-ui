@@ -1,10 +1,12 @@
-import { canonicalize, compile, sha256, stripFontImports } from '@ombelle/compiler'
+import { getCatalog } from '@ombelle/catalog'
+import { canonicalize, compile, presetPreviewSheets, resolvePreset, sha256, stripFontImports } from '@ombelle/compiler'
 import {
   componentsWithStyleSupport,
   isStyleFamily,
   supportedComponentIds,
   type CompileResult,
   type ComponentId,
+  type Preset,
 } from '@ombelle/contracts'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 export const presetScenes = ['gallery', 'dashboard', 'projects', 'settings', 'sign-in', 'workspace'] as const
@@ -84,6 +86,29 @@ export function isPresetAck(input: unknown): input is PresetAck {
     ['applied', 'rejected'].includes(input.status as string)
   )
 }
+/** The view rules shared by every preview message: exact shapes, known scene, focus and backdrop, and ink only over a backdrop. */
+export function validView(view: unknown): boolean {
+  return (
+    record(view) &&
+    !(
+      (Object.hasOwn(view, 'backdrop') &&
+        !(presetBackdrops as readonly unknown[]).includes(view.backdrop)) ||
+      // The lab ink names how text reads over a scene, so it never comes without one.
+      (Object.hasOwn(view, 'labInk') && ((view.labInk !== 'light' && view.labInk !== 'dark') || !Object.hasOwn(view, 'backdrop'))) ||
+      (Object.hasOwn(view, 'reducedTransparency') && view.reducedTransparency !== true) ||
+      !((shape) =>
+        exact(shape, ['mode', 'viewport']) ||
+        (exact(shape, ['mode', 'viewport', 'focus']) &&
+          (supportedComponentIds as readonly unknown[]).includes(shape.focus)) ||
+        (exact(shape, ['mode', 'viewport', 'scene']) &&
+          (presetScenes as readonly unknown[]).includes(shape.scene)))(
+        Object.fromEntries(Object.entries(view).filter(([key]) => key !== 'backdrop' && key !== 'labInk' && key !== 'reducedTransparency')),
+      ) ||
+      !['light', 'dark'].includes(view.mode as string) ||
+      !['wide', 'narrow'].includes(view.viewport as string)
+    )
+  )
+}
 export async function verifyPresetRender(
   input: unknown,
   previousRequestId: number,
@@ -97,22 +122,7 @@ export async function verifyPresetRender(
       input.type !== 'preset-render' ||
       !positiveId(input.requestId) ||
       input.requestId <= previousRequestId ||
-      !record(input.view) ||
-      (Object.hasOwn(input.view, 'backdrop') &&
-        !(presetBackdrops as readonly unknown[]).includes(input.view.backdrop)) ||
-      // The lab ink names how text reads over a scene, so it never comes without one.
-      (Object.hasOwn(input.view, 'labInk') && ((input.view.labInk !== 'light' && input.view.labInk !== 'dark') || !Object.hasOwn(input.view, 'backdrop'))) ||
-      (Object.hasOwn(input.view, 'reducedTransparency') && input.view.reducedTransparency !== true) ||
-      !((view) =>
-        exact(view, ['mode', 'viewport']) ||
-        (exact(view, ['mode', 'viewport', 'focus']) &&
-          (supportedComponentIds as readonly unknown[]).includes(view.focus)) ||
-        (exact(view, ['mode', 'viewport', 'scene']) &&
-          (presetScenes as readonly unknown[]).includes(view.scene)))(
-        Object.fromEntries(Object.entries(input.view).filter(([key]) => key !== 'backdrop' && key !== 'labInk' && key !== 'reducedTransparency')),
-      ) ||
-      !['light', 'dark'].includes(input.view.mode as string) ||
-      !['wide', 'narrow'].includes(input.view.viewport as string)
+      !validView(input.view)
     )
       return null
     const result = input.result as CompileResult
@@ -205,4 +215,51 @@ export function presetRuntimeStyles(result: CompileResult): string {
     // The preview loads font files from its own bundle, and a browser cannot resolve a package import.
     .map((a) => stripFontImports(a.content.replace(/@theme inline\s*\{[^}]*\}/g, '')))
     .join('\n')
+}
+export type PresetTokens = {
+  type: 'preset-tokens'
+  requestId: number
+  preset: Preset
+  view: PresetView
+}
+/** Preset data sent straight to the preview: validated and resolved here, never trusted as sent. */
+export async function verifyPresetTokens(
+  input: unknown,
+  previousRequestId: number,
+): Promise<{ message: PresetTokens; css: string; presetHash: string } | null> {
+  try {
+    if (
+      new TextEncoder().encode(JSON.stringify(input)).length > 1024 * 1024 ||
+      !record(input) ||
+      !exact(input, ['type', 'requestId', 'preset', 'view']) ||
+      input.type !== 'preset-tokens' ||
+      !positiveId(input.requestId) ||
+      input.requestId <= previousRequestId ||
+      !validView(input.view) ||
+      !record(input.preset) ||
+      !isStyleFamily(input.preset.styleFamily) ||
+      input.preset.styleFamily === 'liquid-glass' ||
+      input.preset.catalogRelease !== '0.1.0' ||
+      input.preset.compilerVersion !== '0.1.0'
+    )
+      return null
+    const resolved = await resolvePreset(input.preset as Preset, getCatalog('0.1.0'))
+    if (
+      !isStyleFamily(resolved.data.styleFamily) ||
+      resolved.data.styleFamily === 'liquid-glass' ||
+      resolved.data.catalogRelease !== '0.1.0' ||
+      resolved.data.compilerVersion !== '0.1.0'
+    )
+      return null
+    return {
+      message: input as PresetTokens,
+      css: presetPreviewSheets(resolved.data).join('\n'),
+      presetHash: resolved.hash,
+    }
+  } catch {
+    return null
+  }
+}
+export async function presetHashOf(preset: Preset): Promise<string> {
+  return (await resolvePreset(preset, getCatalog('0.1.0'))).hash
 }

@@ -6,6 +6,7 @@ import {
   supportedComponentIds,
   type CompileResult,
 } from '@ombelle/contracts'
+import { createPresetDraft, materializePreset } from './model'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 import {
   verifyPresetRender,
@@ -13,6 +14,8 @@ import {
   presetRuntimeStyles,
   isPresetHandshake,
   isPresetAck,
+  verifyPresetTokens,
+  presetHashOf,
 } from './preview-protocol'
 
 let result: CompileResult, manifest: PresetSourceManifest
@@ -266,4 +269,41 @@ it('drops the font imports a browser cannot resolve and keeps the font tokens', 
   expect(css).not.toContain('@fontsource')
   expect(css).toContain('--font-heading')
   expect(css).toContain('Inter Variable')
+})
+
+const tokens = (over: Record<string, unknown> = {}) => ({
+  type: 'preset-tokens',
+  requestId: 2,
+  preset: materializePreset(createPresetDraft('ombelle')),
+  view: { mode: 'light', viewport: 'wide' },
+  ...over,
+})
+it('accepts a materialized draft as preset-tokens and returns its css and hash', async () => {
+  const input = tokens()
+  const verified = await verifyPresetTokens(input, 1)
+  expect(verified?.message).toEqual(input)
+  expect(verified?.css).toMatch(new RegExp(`--radius:\s*${input.preset.design.radiusRem}rem`))
+  expect(verified?.presetHash).toBe(await presetHashOf(input.preset))
+  const compiled = await compile({
+    preset: input.preset,
+    componentIds: ['button'],
+    catalogRelease: '0.1.0',
+    compilerVersion: '0.1.0',
+  })
+  expect(verified?.presetHash).toBe(compiled.preset.hash)
+})
+it('derives css from the resolved preset, with normalised colours', async () => {
+  const verified = await verifyPresetTokens(tokens(), 1)
+  expect(verified?.css).toContain('#ffffff')
+  expect(verified?.css).not.toContain('#FFFFFF')
+})
+it('rejects malformed preset-tokens messages', async () => {
+  const preset = materializePreset(createPresetDraft('ombelle')) as unknown as Record<string, unknown>
+  expect(await verifyPresetTokens({ ...tokens(), extra: 1 }, 1)).toBeNull()
+  expect(await verifyPresetTokens(tokens({ requestId: 1 }), 1)).toBeNull()
+  expect(await verifyPresetTokens(tokens({ requestId: 0 }), 0)).toBeNull()
+  expect(await verifyPresetTokens(tokens({ view: { mode: 'light', viewport: 'wide', bogus: 1 } }), 1)).toBeNull()
+  expect(await verifyPresetTokens(tokens({ preset: materializePreset(createPresetDraft('liquid-glass')) }), 1)).toBeNull()
+  expect(await verifyPresetTokens(tokens({ preset: { ...preset, design: { ...(preset.design as object), bogus: 'x' } } }), 1)).toBeNull()
+  expect(await verifyPresetTokens(tokens({ preset: { ...preset, name: 'x'.repeat(1024 * 1024) } }), 1)).toBeNull()
 })
