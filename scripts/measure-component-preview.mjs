@@ -76,8 +76,12 @@ try {
     const familyGroup = page.locator('[aria-label="Style family"]')
     for (const label of families) {
       const before = await fingerprint(page)
+      const target = familyGroup.locator('button, [role="radio"]').filter({ hasText: new RegExp(`^${label}$`) })
+      // OMBELLE_PREVIEW_HOVER_MS=150 hovers the family's button first, as a reader does before clicking; the time starts at the click.
+      const hoverMs = Number(process.env.OMBELLE_PREVIEW_HOVER_MS) || 0
+      if (hoverMs) { await target.hover(); await page.waitForTimeout(hoverMs) }
       const t = performance.now()
-      await familyGroup.locator('button, [role="radio"]').filter({ hasText: new RegExp(`^${label}$`) }).click()
+      await target.click()
       await readyText(new RegExp(`^${label} · `))
       await changed(before)
       familySwitchMs[label] = Math.round(performance.now() - t)
