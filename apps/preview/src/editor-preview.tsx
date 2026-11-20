@@ -15,7 +15,7 @@ import { measurePart, verifyCatalogMatrixRender, verifyCatalogPreviewRender, typ
 import { verifyButtonMatrixRender, type ButtonMatrixRender } from '../../www/src/editor/preview-protocol'
 import { buttonStateRow } from '../../www/src/editor/matrix'
 import { CatalogMatrixPreview, MatrixTable } from './matrix-preview'
-import type { ComponentRecipe } from '@ombelle/contracts'
+import type { ComponentRecipe, ComponentRecipeCompileResult, RecipeCompileResult } from '@ombelle/contracts'
 import { colorDimensions } from '../../www/src/editor/measured-color'
 import { CatalogRecipePreview } from './catalog-recipe-preview'
 import { loadPresetFonts, recipeFontIds } from './preset-fonts'
@@ -38,6 +38,32 @@ function mirrorForcedStates(group: CSSStyleSheet | CSSGroupingRule) {
 }
 
 type ButtonModule = Awaited<ReturnType<(typeof editorButtons)[keyof typeof editorButtons]>>
+
+/**
+ * Each editor's default recipe per family, compiled at build time by scripts/generate-editor-defaults.ts with
+ * the compiler this preview verifies with. It is this preview's own code, so it is shown without a message.
+ */
+const precompiledDefaults = import.meta.glob<unknown>('./generated/editor-defaults/*/*.json', { import: 'default' })
+
+/** The default the URL names, fetched as the preview starts; the editor names one only while its recipe is that default. */
+function loadPrecompiledDefault(): Promise<PreviewRender | CatalogPreviewRender | null> | null {
+  const params = new URLSearchParams(window.location.search)
+  const component = params.get('component')
+  const family = params.get('default')
+  const path = `./generated/editor-defaults/${component ?? 'button'}/${family}.json`
+  if (!family || !Object.hasOwn(precompiledDefaults, path)) return null
+  return precompiledDefaults[path]!().then((compiled): PreviewRender | CatalogPreviewRender => {
+    // The editors open in light mode at the wide width.
+    if (component) return { type: 'catalog-render', component: component as ComponentRecipe['component'], requestId: 0,
+      result: compiled as ComponentRecipeCompileResult, mode: 'light', viewport: 'wide' }
+    const result = compiled as RecipeCompileResult
+    const css = result.artifacts.find((artifact) => artifact.kind === 'style')!.content
+    return { type: 'render', requestId: 0, scope: result.scope,
+      state: { recipe: result.recipe.data, css, mode: 'light', viewport: 'wide', forcedState: 'none', requestId: 0 } }
+  // Without it the preview waits for the first render, as it did before.
+  }).catch(() => null)
+}
+const precompiledDefault = loadPrecompiledDefault()
 const filterTokens = ['--glass-refraction-width', '--glass-refraction-strength', '--glass-halo', '--glass-motion']
 
 function EditorPreview() {
@@ -46,7 +72,8 @@ function EditorPreview() {
   const lastRequestId = React.useRef(0)
   const activePort = React.useRef<MessagePort | null>(null)
   const reportMeasure = React.useCallback((requestId: number, parts: MeasuredParts) => {
-    if (requestId === lastRequestId.current) activePort.current?.postMessage({ type: 'catalog-measure', requestId, parts })
+    // The precompiled default (request 0) is not reported: the editor measures the compile that replaces it.
+    if (requestId > 0 && requestId === lastRequestId.current) activePort.current?.postMessage({ type: 'catalog-measure', requestId, parts })
   }, [])
 
   React.useEffect(() => {
@@ -88,6 +115,13 @@ function EditorPreview() {
         attachedPort.postMessage({ type: 'render-ack', requestId: accepted.requestId, status: 'applied' })
       }
       attachedPort.start()
+      // Once the editor is connected, its precompiled default stands in until the first render arrives.
+      void precompiledDefault?.then((render) => {
+        // A transition, so drawing it yields to the port and never holds up the first render that replaces it.
+        if (render && attachedPort === port && lastRequestId.current === 0) React.startTransition(() => {
+          if (lastRequestId.current === 0) setMessage(render)
+        })
+      })
     }
     window.addEventListener('message', initialize)
     announce()

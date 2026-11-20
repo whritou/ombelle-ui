@@ -547,9 +547,11 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
             ...data,
             domHash: document.documentElement.dataset.presetHash,
             domRequest: document.documentElement.dataset.presetRequest,
+            // The preview keeps one style element per sheet; together they are the derived CSS.
             css:
-              document.querySelector('style[data-preset-styles]')
-                ?.textContent ?? null,
+              Array.from(document.querySelectorAll('style[data-preset-styles]'))
+                .map((style) => style.textContent)
+                .join('\n') || null,
             gallery: Boolean(
               document.querySelector('[data-testid="preset-gallery"]'),
             ),
@@ -575,6 +577,11 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
       }
     }
   })
+  // Liquid Glass keeps the full `preset-render` path; the other families send `preset-tokens`, which this test does not exercise.
+  await page.addInitScript(
+    (draft) => localStorage.setItem('ombelle:preset-editor:draft:v1', JSON.stringify(draft)),
+    createPresetDraft('liquid-glass'),
+  )
   await page.goto(url)
   await ready(page)
   const original = await page.evaluate(
@@ -708,15 +715,25 @@ test('rejects tampered frame updates and reconnects without stale acknowledgemen
         '*',
       ),
     )
-  await expect.poll(async () => (await inspect()).completed).toBe(before + 1)
-  await release()
+  // `completed` counts handler runs, and the frame's port handler returns as soon as it has handed the message to the
+  // receiver (it no longer awaits the verification), so a run is counted when a message is delivered, not when it
+  // finishes. Exactly two are delivered after `before`: the held render, delivered on the old port, and the render the
+  // editor sends on the new port after the second handshake. The held verification is still in flight (`blocked`), so
+  // releasing it delivers nothing more; that it never produces an ack is checked below.
   await expect.poll(async () => (await inspect()).completed).toBe(before + 2)
+  await release()
+  await page.waitForTimeout(500)
+  expect((await inspect()).completed).toBe(before + 2)
   expect((await inspect()).acks.some((a) => a.requestId === oldId + 2)).toBe(
     false,
   )
-  await expect(
-    frame(page).locator('style[data-preset-styles]'),
-  ).toHaveJSProperty('textContent', presetRuntimeStyles(current.result))
+  await expect
+    .poll(() =>
+      frame(page)
+        .locator('style[data-preset-styles]')
+        .evaluateAll((styles) => styles.map((style) => style.textContent).join('\n')),
+    )
+    .toBe(presetRuntimeStyles(current.result))
   for (const ack of (await inspect()).acks.filter(
     (a) => a.status === 'applied',
   )) {

@@ -23,7 +23,8 @@ import { ArtifactPanel } from './artifact-panel'
 import { CatalogProperties } from './catalog-properties'
 import { ComponentSwitcher } from './component-switcher'
 import { ComponentEditorDock, paneClasses, switchPane } from './editor-panes'
-import { PreviewFrame } from './preview-frame'
+import { PreviewFrame, type PrecompiledDefault } from './preview-frame'
+import { precompiledCatalogFamily } from '../precompiled-defaults'
 import styles from './button-editor.module.css'
 import { ScrollArea } from '../../generated/ui/components/ui/scroll-area'
 
@@ -47,6 +48,8 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const matrix = useMatrixLayout(component, recipe)
   const glassFamily = resolveRecipePreset(recipe.presetRef).styleFamily === 'liquid-glass'
   const { result, error, pending } = useCatalogCompiler(recipe)
+  // The preview shows the family's default, compiled at build time, until the first compile: only while the recipe is that default.
+  const precompiled = useMemo<PrecompiledDefault>(() => ({ family: precompiledCatalogFamily(recipe), settled: hydrated }), [recipe, hydrated])
   // The catalog default for the same family and preset: what Changes and Get code compare to.
   const presetKey = JSON.stringify(recipe.presetRef)
   const defaults = useMemo(() => {
@@ -173,7 +176,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
               </p>
             </div>
             <div className={styles.specimen}><PreviewFrame result={result} view={view} component={component} componentName={name} onMeasure={setMeasured}
-              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} /></div>
+              reducedTransparency={glassFamily && transparencySupported && transparency === 'reduced'} matrix={matrix.matrix} precompiled={precompiled} /></div>
           </section>
           <div className={paneClasses(view.panel).code}>
             <ArtifactPanel result={result} recipeJson={json} stale={!ready} onStatus={setStatus} componentName={name}

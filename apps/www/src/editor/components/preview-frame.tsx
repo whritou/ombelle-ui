@@ -17,8 +17,17 @@ export type PreviewMatrix = {
   cells: { row: string | number; column: string | number | null; current: boolean; result: InstallableRecipeCompileResult }[]
 }
 
-export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure, reducedTransparency = false, matrix = null }: {
+/**
+ * The default recipe the preview shows before the first compile: the preview bundles it, compiled at build
+ * time, and shows it once the editor connects. family is the current recipe's, null when the recipe is not
+ * a default; the frame connects only once settled, after the editor has restored its draft, and keeps the
+ * family it had then, so later edits do not reload the preview.
+ */
+export type PrecompiledDefault = { family: string | null; settled: boolean }
+
+export function PreviewFrame({ result, view, component, componentName = 'Button', onMeasure, reducedTransparency = false, matrix = null, precompiled }: {
   result: InstallableRecipeCompileResult | null; view: EditorView
+  precompiled?: PrecompiledDefault
   /** Simulates prefers-reduced-transparency in the preview. Preview state only, never saved. */
   reducedTransparency?: boolean
   /** The Matrix layout, compiled; the single render is sent while it is null. */
@@ -99,7 +108,14 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
     targetPort.postMessage(message)
   }
 
+  const hold = precompiled?.settled === false
+  // The family named in the preview's URL: the recipe's as the frame becomes able to connect, then fixed.
+  const [connectedFamily, setConnectedFamily] = useState<string | null | undefined>(undefined)
+  if (precompiled?.settled && connectedFamily === undefined) setConnectedFamily(precompiled.family)
+  const defaultFamily = connectedFamily !== undefined ? connectedFamily : precompiled?.family ?? null
   useEffect(() => {
+    // Until the editor has restored its draft, the preview is not answered, so it cannot show a default the draft replaced.
+    if (hold) return
     function onReady(event: MessageEvent<unknown>) {
       if (event.source !== iframe.current?.contentWindow || event.origin !== 'null' ||
         !isPreviewReady(event.data)) return
@@ -140,13 +156,17 @@ export function PreviewFrame({ result, view, component, componentName = 'Button'
       port.current?.close()
       port.current = null
     }
-  }, [component])
+  }, [component, hold])
 
   useEffect(() => {
     if (port.current) void sendCurrent(port.current)
   }, [result, view, reducedTransparency, matrix])
 
   const url = previewFrameUrl('editor', process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)
+  const query = new URLSearchParams()
+  if (component) query.set('component', component)
+  if (defaultFamily) query.set('default', defaultFamily)
+  const search = query.toString() ? `?${query}` : ''
   return <iframe ref={iframe} title={`${componentName} recipe preview`}
-    src={component ? `${url}?component=${encodeURIComponent(component)}` : url} sandbox="allow-scripts" allow="clipboard-write" style={{ height: previewFrameHeight(contentSize) }} />
+    src={url + search} sandbox="allow-scripts" allow="clipboard-write" style={{ height: previewFrameHeight(contentSize) }} />
 }

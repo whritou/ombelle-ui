@@ -1,6 +1,7 @@
 import {
   validatePreset,
   FoundationError,
+  type Preset,
   type ResolvedPreset,
 } from '@ombelle/contracts'
 import type { Catalog } from '@ombelle/catalog'
@@ -23,17 +24,11 @@ export function normalizeColor(color: string): string {
     ')'
   )
 }
-export async function resolvePreset(
-  input: unknown,
-  catalog: Catalog,
-): Promise<ResolvedPreset> {
-  const p = validatePreset(input)
-  if (p.catalogRelease !== catalog.release || p.compilerVersion !== '0.1.0')
-    throw new FoundationError(
-      'UNSUPPORTED_RELEASE',
-      'Preset release mismatch',
-      '/catalogRelease',
-    )
+/**
+ * The resolved preset data without validation or hashing: catalog defaults
+ * merged in and colors normalized. Idempotent on already-resolved data.
+ */
+export function presetWithDefaults(p: Preset, catalog: Catalog): ResolvedPreset['data'] {
   const base = catalog.presets[p.styleFamily]
   if (!base)
     throw new FoundationError(
@@ -63,5 +58,19 @@ export async function resolvePreset(
       data.modes[mode],
     ) as (keyof typeof data.modes.light)[])
       data.modes[mode][key] = normalizeColor(data.modes[mode][key]!)
+  return data
+}
+export async function resolvePreset(
+  input: unknown,
+  catalog: Catalog,
+): Promise<ResolvedPreset> {
+  const p = validatePreset(input)
+  if (p.catalogRelease !== catalog.release || p.compilerVersion !== '0.1.0')
+    throw new FoundationError(
+      'UNSUPPORTED_RELEASE',
+      'Preset release mismatch',
+      '/catalogRelease',
+    )
+  const data = presetWithDefaults(p, catalog)
   return { data, hash: await sha256(canonicalize(data)) }
 }

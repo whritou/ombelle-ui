@@ -1,6 +1,13 @@
+import { readFileSync } from 'node:fs'
 import { expect, it } from 'vitest'
-import { canonicalize } from '@ombelle/compiler'
-import { createPresetDraft, setPresetEdit } from './model'
+import { canonicalize, sha256 } from '@ombelle/compiler'
+import { supportedStyleFamilies } from '@ombelle/contracts'
+import {
+  createPresetDraft,
+  fontControlOptions,
+  setPresetEdit,
+  type PresetEditorDraft,
+} from './model'
 import { handlePresetCompileMessage } from './compile-protocol'
 import {
   canExportPreset,
@@ -45,4 +52,44 @@ it('exports only the current normalized result and exact CSS artifacts', async (
   expect(() =>
     presetCssExport({ ...state, stale: true }, draft, 'tokens'),
   ).toThrow()
+})
+
+// Recorded before the instant-preview refactor; the fast preview path must leave every export byte unchanged.
+it('keeps the export files and preset hash of each family and edited draft', async () => {
+  const fraunces = fontControlOptions.headingFontFamilyId.find((id) => id === 'fraunces')!
+  const drafts: Record<string, PresetEditorDraft> = {
+    ...Object.fromEntries(
+      supportedStyleFamilies.map((family) => [family, createPresetDraft(family)]),
+    ),
+    'flat radius 0': setPresetEdit(createPresetDraft('flat'), '/design/radiusRem', '0'),
+    'flat dark primary': setPresetEdit(createPresetDraft('flat'), '/modes/dark/primary', '#2563EB'),
+    'flat display font, no mono': setPresetEdit(
+      setPresetEdit(createPresetDraft('flat'), '/design/headingFontFamilyId', fraunces),
+      '/design/monoFontFamilyId',
+      '',
+    ),
+  }
+  const record: Record<string, unknown> = {}
+  for (const [name, draft] of Object.entries(drafts)) {
+    const response = await handlePresetCompileMessage({ type: 'compile-preset', requestId: 1, draft })
+    if (response.type !== 'preset-compiled') throw new Error(name + ' failed to compile')
+    const state: PresetCompilerState = {
+      status: 'compiled',
+      result: response.result,
+      draftKey: canonicalize(draft),
+      diagnostic: null,
+      stale: false,
+    }
+    const preset = serializePresetExport(state, draft)
+    record[name] = {
+      presetHash: response.result.preset.hash,
+      preset: JSON.parse(preset),
+      presetSha256: await sha256(preset),
+      tokensCssSha256: await sha256(presetCssExport(state, draft, 'tokens')),
+      familyCssSha256: await sha256(presetCssExport(state, draft, 'family')),
+    }
+  }
+  // Compared as parsed JSON so a checkout with other line endings still matches.
+  const recorded = JSON.parse(readFileSync(new URL('./__snapshots__/export-before.json', import.meta.url), 'utf8'))
+  expect(JSON.parse(JSON.stringify(record))).toEqual(recorded)
 })

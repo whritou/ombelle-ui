@@ -398,8 +398,11 @@ test('sandboxed preview receives validated recipe updates only over its port', a
     window.MessageChannel = class extends NativeChannel {
       constructor() {
         super()
-        const probe = window as typeof window & { __previewTestPort?: MessagePort; __previewLastRender?: unknown }
+        const probe = window as typeof window & { __previewTestPort?: MessagePort; __previewLastRender?: unknown; __previewApplied?: number }
         const send = this.port1.postMessage.bind(this.port1)
+        this.port1.addEventListener('message', (event) => {
+          if (event.data?.type === 'render-ack' && event.data.status === 'applied') probe.__previewApplied = event.data.requestId
+        })
         this.port1.postMessage = ((data: unknown, options?: Transferable[] | StructuredSerializeOptions) => {
           if (typeof data === 'object' && data !== null && 'type' in data && data.type === 'render') {
             probe.__previewTestPort = this.port1
@@ -413,11 +416,17 @@ test('sandboxed preview receives validated recipe updates only over its port', a
   })
   await page.goto('http://127.0.0.1:3000/editor/component/button')
   const iframe = page.locator('iframe[title="Button recipe preview"]')
-  await expect(iframe).toHaveAttribute('src', 'http://127.0.0.1:4173/editor-preview/')
+  // The draft is the default, so the preview is told which precompiled default to show before the first compile.
+  await expect(iframe).toHaveAttribute('src', 'http://127.0.0.1:4173/editor-preview/?default=ombelle')
   await expect(iframe).toHaveAttribute('sandbox', 'allow-scripts')
   const frame = iframe.contentFrame()
   const button = frame.locator('[data-slot="recipe-button"]')
   await expect(button).toHaveText('Create project')
+  // The precompiled default shows the same Button before any render: wait until the first render is applied.
+  await page.waitForFunction(() => {
+    const probe = window as typeof window & { __previewLastRender?: { requestId: number }; __previewApplied?: number }
+    return probe.__previewLastRender !== undefined && probe.__previewApplied === probe.__previewLastRender.requestId
+  })
   const initial = await compileRecipe({ recipe: changeDraftFamily({ storageVersion: 1, recipe: validateRecipe(exampleRecipe) }, 'ombelle').recipe })
   expect(exampleRecipe.presetRef.id).toBe('builtin-neo-brutalism')
   const scope = await button.getAttribute('data-ombelle-recipe')

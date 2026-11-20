@@ -96,6 +96,10 @@ export function startReducedTransparencyMirror(doc: Document): () => void {
         continue
       }
       done.add(sheet)
+      // A style element whose text never names the feature has no rule to mirror. Skipping it
+      // saves serializing every rule of the preset sheet each time the editor replaces it.
+      const owner = sheet.ownerNode
+      if (owner instanceof HTMLStyleElement && !feature.test(owner.textContent ?? '')) continue
       mirrorList(sheet)
     }
   }
