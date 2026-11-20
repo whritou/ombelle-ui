@@ -32,6 +32,7 @@ What the script measures (`scripts/measure-preset-editor.mjs`):
 | Family switch, Minimalist | 2424 |
 | Family switch, Flat | 2429 |
 | Family switch, Neo-brutalism | 2582 |
+| Family switch, median of 6 | 2662.5 |
 | Scene switch (Dashboard to Settings) | 1311 |
 | Mode switch (light to dark) | 1132 |
 
@@ -39,16 +40,16 @@ An earlier 2-run pass of the same script gave first ready 5641, token edits 2449
 
 ### Phase split
 
-Medians over the 5-run pass (19 worker requests, 14 renders; the per-render array is in the task report):
+Medians over the 5-run pass (19 worker requests, 14 renders; the per-render array is in the task report). Corrected later: the script's `median()` took the upper middle value for an even count; the even-count rows below are now the true median (mean of the two middle values), recomputed from the same raw values. The raw JSON below still shows the medians the script printed then.
 
 | Phase | Median | Range |
 | --- | --- | --- |
 | Worker `compile()` (`workerCompileMs`, 19 requests) | 1211 | 982 to 2530 (the first two, 2530 and 2417, include the worker's cold start) |
-| Iframe apply, post to ack (`iframeApplyMs`, 14 renders) | 1068 | 971 to 1655 |
+| Iframe apply, post to ack (`iframeApplyMs`, 14 renders) | 1064.5 | 971 to 1655 |
 | of which: post to arrival | 3 | |
-| of which: arrival to first digest (`verifyPresetRender` validation) | 9 | |
-| of which: verification compile, first to last digest | 1033 | |
-| of which: last digest to ack (state update, layout effect, style swap) | 29 | |
+| of which: arrival to first digest (`verifyPresetRender` validation) | 8.5 | |
+| of which: verification compile, first to last digest | 1030.5 | |
+| of which: last digest to ack (state update, layout effect, style swap) | 27.5 | |
 | of which: ack back to the page | 0 | |
 
 A token edit of about 2.38 s is therefore 150 ms debounce (`use-preset-compiler.ts:121-123`) plus the worker compile (about 1.2 s) plus the iframe's verification compile (about 1.0 s) plus about 30 ms of real apply. The actual work that changes pixels, swapping the style text and re-rendering, is about 30 ms; 97 percent of the apply phase is the iframe running `compile()` a second time. First ready adds the worker download, the first compile with a cold worker (2.5 s) and the iframe's own load (about 1 s, as in the component-preview evidence).
@@ -187,13 +188,19 @@ Median token edit, Dashboard / Ombelle: **102 ms** (118, 103, 102, 101, 100). Re
 | Family switch, Minimalist | 2424 | 232 | |
 | Family switch, Flat | 2429 | 250 | |
 | Family switch, Neo-brutalism | 2582 | 233 | |
-| Family switch, median | 2582 | 249 | 10x faster |
+| Family switch, median | 2662.5 | 248 | 10.7x faster |
 | Scene switch (Dashboard to Settings) | 1311 | 236 | 5.6x faster |
 | Mode switch (light to dark) | 1132 | 153 | 7.4x faster |
-| Iframe apply, median | 1068 | 118 | |
-| Worker `compile()`, median (19 requests, still in the background) | 1211 | 1173 | unchanged |
+| Iframe apply, median | 1064.5 | 118 | |
+| Worker `compile()`, median (19 requests, still in the background) | 1211 | 1094 | same code path; the difference is run-to-run variance |
 
-Where the remaining time goes: iframe apply (post to ack) medians 118 ms. Inside it, arrival to first digest is 2 ms, the single preset-hash digest to the ack about 28 ms, and the ack reaching the editor page about 68 ms later. The apply path is therefore fast; the larger part of the remainder is the page receiving the ack, which suggests main-thread work in the editor page (re-render of the editor after the edit) rather than in the iframe. The first two worker compiles still include the worker cold start (2376 and 2275 ms).
+Where the remaining time goes: iframe apply (post to ack) medians 118 ms. The phase split printed below (arrival to first digest 2 ms, digest to ack about 28 ms, ack back to the editor page about 68 ms) is not established: this run's renders include request ids that repeat across channels (see Corrections), and the script then matched posts, arrivals and acks by request id alone. The optimisation pass replaces it with trace evidence. The first two worker compiles still include the worker cold start (2376 and 2275 ms).
+
+Corrections (made with the optimisation pass, same raw values):
+
+- Medians. The script's `median()` returned the upper middle value for an even count. It now returns the true median. Recomputed from the raw values: worker compile 1094 ms (printed 1173), family switch 248 ms over six switches (the table said 249), and the baseline family switch 2662.5 ms (the table said 2582, the Neo-brutalism value). Token edit 102 ms (five values) and iframe apply 118 ms (fifteen values) were already correct.
+- Repeated request ids. The iframe announces `ready` every 150 ms until it holds a port, and the editor opens a new `MessageChannel` for every `ready` it receives (`preset-preview-frame.tsx`), restarting its request ids at 1. During start-up several announcements are in flight, so the editor opens several channels in a row and the iframe accepts each init in turn; a rerun on this commit counted 4 `ready` messages at the editor, 3 inits received in the iframe and 3 editor channels carrying renders. Old ports are closed on both sides, so nothing stale is applied, but a measurement keyed by request id alone can pair a post with another channel's ack. The script now keys every record by port on each side and pairs a post with the first arrival of its request id at or after the post (both clocks are absolute), and prints the handshake counts under `channels`.
+- Family switch clock. The script did not record which switches went through the `Change style family?` dialog. It now prints `familyConfirmed`. A rerun of the same sequence on this commit showed the dialog for all six switches (Papier, Organic, Retro futurism, Minimalist, Flat, Neo-brutalism), so every family figure here runs from the `Confirm change` click; the baseline used the same sequence.
 
 ### Raw measurement
 
