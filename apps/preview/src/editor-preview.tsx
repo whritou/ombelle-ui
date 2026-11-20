@@ -117,7 +117,10 @@ function EditorPreview() {
       attachedPort.start()
       // Once the editor is connected, its precompiled default stands in until the first render arrives.
       void precompiledDefault?.then((render) => {
-        if (render && attachedPort === port && lastRequestId.current === 0) setMessage(render)
+        // A transition, so drawing it yields to the port and never holds up the first render that replaces it.
+        if (render && attachedPort === port && lastRequestId.current === 0) React.startTransition(() => {
+          if (lastRequestId.current === 0) setMessage(render)
+        })
       })
     }
     window.addEventListener('message', initialize)

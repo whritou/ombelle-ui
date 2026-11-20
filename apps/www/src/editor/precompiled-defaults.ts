@@ -2,15 +2,16 @@ import { canonicalize } from '@ombelle/compiler'
 import { resolveRecipePreset } from '@ombelle/catalog'
 import { componentRecipeComponents, styleSupport, validateRecipe, type ComponentId, type ComponentRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../examples/recipe.example.json' with { type: 'json' }
-import { defaultSiteFamily, siteFamilyOrder } from '../snapshots/install-command'
+import { defaultSiteFamily } from '../snapshots/install-command'
 import { changeCatalogFamily, createCatalogDraft } from './catalog-draft'
 import { changeDraftFamily, type EditorDraft } from './model'
 
 /**
  * The families whose default recipes are compiled at build time and bundled into the editor preview, which shows
- * one before the first compile. Liquid Glass keeps the compiled path.
+ * one before the first compile: the family a fresh editor starts in. Another family's default is reached only by
+ * an edit, which compiles anyway, or by a restored draft that is that default untouched.
  */
-export const precompiledFamilies: readonly StyleFamily[] = siteFamilyOrder.filter(family => family !== 'liquid-glass')
+export const precompiledFamilies: readonly StyleFamily[] = [defaultSiteFamily]
 
 /** The Button editor's starting draft: the example recipe in the site's first family. */
 export const initialButtonDraft: EditorDraft = changeDraftFamily({ storageVersion: 1, recipe: validateRecipe(exampleRecipe) }, defaultSiteFamily)

@@ -5,7 +5,7 @@ import { componentRecipeComponents, type ComponentRecipe } from '@ombelle/contra
 import { defaultSiteFamily } from '../snapshots/install-command'
 import { createCatalogDraft } from './catalog-draft'
 import {
-  defaultButtonRecipe, defaultCatalogRecipe, initialButtonDraft, precompiledButtonFamily, precompiledCatalogFamily, precompiledDefaults,
+  defaultButtonRecipe, defaultCatalogRecipe, initialButtonDraft, precompiledButtonFamily, precompiledCatalogFamily, precompiledDefaults, precompiledFamilies,
 } from './precompiled-defaults'
 
 // Written by pnpm generate:preview (scripts/generate-editor-defaults.ts) and bundled into the editor preview.
@@ -22,12 +22,14 @@ describe('precompiled editor defaults', () => {
 
   it('name a family only while the recipe is that family\'s default', () => {
     expect(precompiledCatalogFamily(createCatalogDraft('card').recipe)).toBe('ombelle')
-    expect(precompiledCatalogFamily(defaultCatalogRecipe('dialog', 'papier'))).toBe('papier')
+    // Only the family a fresh editor starts in is precompiled.
+    expect(precompiledFamilies).toEqual([defaultSiteFamily])
+    expect(precompiledCatalogFamily(defaultCatalogRecipe('dialog', 'papier'))).toBeNull()
     const edited = { ...createCatalogDraft('badge').recipe, revision: 2 } as ComponentRecipe
     expect(precompiledCatalogFamily(edited)).toBeNull()
     expect(precompiledCatalogFamily(defaultCatalogRecipe('card', 'liquid-glass'))).toBeNull()
     expect(precompiledButtonFamily(initialButtonDraft.recipe)).toBe('ombelle')
-    expect(precompiledButtonFamily(defaultButtonRecipe('flat'))).toBe('flat')
+    expect(precompiledButtonFamily(defaultButtonRecipe('flat'))).toBeNull()
     expect(precompiledButtonFamily({ ...initialButtonDraft.recipe, content: 'Edited' })).toBeNull()
     expect(precompiledButtonFamily(defaultButtonRecipe('liquid-glass'))).toBeNull()
   })
@@ -39,8 +41,7 @@ describe('precompiled editor defaults', () => {
   })
 
   it.each([
-    ['button', 'ombelle'], ['button', 'neo-brutalism'], ['card', 'ombelle'], ['card', 'papier'],
-    ['dialog', 'ombelle'], ['dialog', 'flat'], ['select', 'ombelle'], ['select', 'retro-futurism'],
+    ['button', 'ombelle'], ['badge', 'ombelle'], ['card', 'ombelle'], ['dialog', 'ombelle'], ['select', 'ombelle'], ['tabs', 'ombelle'],
   ] as const)('the bundled %s default in %s equals a fresh compile', async (component, family) => {
     const fresh = component === 'button'
       ? await compileRecipe({ recipe: defaultButtonRecipe(family) })

@@ -62,9 +62,11 @@ export function ButtonEditor() {
   const [diagnostic, setDiagnostic] = useState<CompileDiagnostic | null>(null)
   const [status, setStatus] = useState('Loading local draft…')
   const [measured, setMeasured] = useState<MeasuredParts>({})
-  // The preview shows this family's default, compiled at build time, until the first compile: only while the recipe is that default.
-  const [precompiled, setPrecompiled] = useState<PrecompiledDefault>(() => ({ family: precompiledButtonFamily(initialDraft.recipe), settled: false }))
+  // Set once the stored draft has been read, or could not be: the preview connects only then.
+  const [settled, setSettled] = useState(false)
   const draft = history.present
+  // The preview shows the family's default, compiled at build time, until the first compile: only while the recipe is that default.
+  const precompiled = useMemo<PrecompiledDefault>(() => ({ family: precompiledButtonFamily(draft.recipe), settled }), [draft.recipe, settled])
   const matrix = useMatrixLayout('button', draft.recipe)
   const glassFamily = draftFamily(draft.recipe) === 'liquid-glass'
   const compilation = useCompiler(draft.recipe)
@@ -85,11 +87,9 @@ export function ButtonEditor() {
   }, [history])
 
   useEffect(() => {
-    let first = initialDraft.recipe
     try {
       const restored = restoreDraft(window.localStorage.getItem(DRAFT_STORAGE_KEY))
       if (restored.status === 'restored') {
-        first = restored.draft.recipe
         setHistory({ past: [], present: restored.draft, future: [] })
         setStatus('Local draft restored.')
       } else if (restored.status === 'recovery-required') {
@@ -102,7 +102,7 @@ export function ButtonEditor() {
     }
     try { setPreservedRecoveries(readRecoveries(window.localStorage)) }
     catch { setStatus('The local recovery archive could not be read. Its bytes were left unchanged.') }
-    setPrecompiled({ family: precompiledButtonFamily(first), settled: true })
+    setSettled(true)
   }, [])
 
   useEffect(() => {

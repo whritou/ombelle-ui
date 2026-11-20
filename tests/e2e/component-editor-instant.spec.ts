@@ -23,7 +23,7 @@ async function storeDraft(page: Page, key: string, value: unknown) {
   await page.addInitScript(([storageKey, text]) => localStorage.setItem(storageKey, text), [key, JSON.stringify(value)] as const)
 }
 
-test.describe('before the first compile', () => {
+test.describe('before the first compile, in each precompiled family', () => {
   for (const family of precompiledFamilies) {
     test(`the Button preview shows the ${family} default`, async ({ page }) => {
       const requested = await blockWorker(page)
@@ -95,4 +95,32 @@ test('the Button default gives way to the first edit', async ({ page }) => {
   await page.getByLabel('Button text').fill('Ship release')
   await expect(specimen).toHaveText('Ship release')
   await expect(specimen).not.toHaveAttribute('data-ombelle-recipe', expected.scope)
+})
+
+test('a family chosen during draft recovery names no default for the new draft', async ({ page }) => {
+  await blockWorker(page)
+  await page.addInitScript((key) => localStorage.setItem(key, '{"storageVersion":1,"recipe":'), catalogDraftKey('badge'))
+  await page.goto(`${origin}/editor/component/badge`)
+  await expect(page.getByRole('heading', { name: 'Your saved draft needs recovery' })).toBeVisible()
+  // The inspector is hidden during recovery; the command palette still switches the family.
+  await page.getByRole('button', { name: /Commands/ }).click()
+  await page.getByRole('dialog', { name: 'Editor commands' }).getByRole('option', { name: 'Switch to Papier' }).click()
+  await page.getByRole('button', { name: 'Start new draft', exact: true }).click()
+  const iframe = page.locator('iframe[title="Badge recipe preview"]')
+  await expect(iframe).toHaveAttribute('src', /component=badge/)
+  await expect(iframe).not.toHaveAttribute('src', /default=/)
+  await expect(iframe.contentFrame().locator('.editor-preview')).toBeAttached()
+  await page.waitForTimeout(1500)
+  await expect(iframe.contentFrame().locator('[data-ombelle-recipe]')).toHaveCount(0)
+})
+
+test('the preview keeps its URL when an edit leaves the default', async ({ page }) => {
+  await page.goto(`${origin}/editor/component/badge`)
+  const iframe = page.locator('iframe[title="Badge recipe preview"]')
+  await expect(iframe.contentFrame().locator('.recipe-stage')).toBeAttached()
+  const src = await iframe.getAttribute('src')
+  expect(src).toContain('default=ombelle')
+  await page.getByRole('radiogroup', { name: 'Style family', exact: true }).getByRole('radio', { name: /^Papier/ }).click()
+  await expect(status(page)).toHaveText('Matches current recipe', { timeout: 30000 })
+  await expect(iframe).toHaveAttribute('src', src!)
 })

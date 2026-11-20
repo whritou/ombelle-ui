@@ -36,8 +36,6 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const [recovery, setRecovery] = useState<string | null>(null)
   const [recoveries, setRecoveries] = useState<string[]>([])
   const [status, setStatus] = useState('Loading draft…')
-  // The preview shows this family's default, compiled at build time, until the first compile: only while the recipe is that default.
-  const [precompiled, setPrecompiled] = useState<PrecompiledDefault>(() => ({ family: precompiledCatalogFamily(createCatalogDraft(component).recipe), settled: false }))
   const [measured, setMeasured] = useState<MeasuredParts>({})
   const [view, setView] = useState<EditorView>({ mode: 'light', viewport: 'wide', panel: 'customize', forcedState: 'none' })
   // Preview state only: never saved with the recipe.
@@ -50,6 +48,8 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const matrix = useMatrixLayout(component, recipe)
   const glassFamily = resolveRecipePreset(recipe.presetRef).styleFamily === 'liquid-glass'
   const { result, error, pending } = useCatalogCompiler(recipe)
+  // The preview shows the family's default, compiled at build time, until the first compile: only while the recipe is that default.
+  const precompiled = useMemo<PrecompiledDefault>(() => ({ family: precompiledCatalogFamily(recipe), settled: hydrated }), [recipe, hydrated])
   // The catalog default for the same family and preset: what Changes and Get code compare to.
   const presetKey = JSON.stringify(recipe.presetRef)
   const defaults = useMemo(() => {
@@ -65,20 +65,15 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
     focusAfterHistory.current = null
   }, [history])
   useEffect(() => {
-    let first = createCatalogDraft(component).recipe
     try {
       const state = restoreCatalogDraft(component, localStorage.getItem(key))
-      if (state.status === 'restored') {
-        first = state.draft.recipe
-        setHistory({ past: [], present: state.draft.recipe, future: [] })
-      }
+      if (state.status === 'restored') setHistory({ past: [], present: state.draft.recipe, future: [] })
       if (state.status === 'recovery-required') setRecovery(state.recoveryText)
       setRecoveries(readRecoveries(localStorage, recoveryKey))
       setStatus(state.status === 'restored' ? 'Draft restored.' : 'Draft ready.')
     } catch {
       setStatus('Draft storage unavailable.')
     }
-    setPrecompiled({ family: precompiledCatalogFamily(first), settled: true })
     setHydrated(true)
   }, [component, key, recoveryKey])
   useEffect(() => {
