@@ -3,18 +3,23 @@
 import * as Tabs from '@radix-ui/react-tabs'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { Code, Eye, Moon, Sun } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { Component, startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { preload } from 'react-dom'
 import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
 import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
-import { applyStartingPreset, createPresetDraft, materializePreset } from '../../preset-editor/model'
+import { applyStartingPreset, createPresetDraft, materializePreset, type PresetEditorDraft } from '../../preset-editor/model'
 import { labInkFor, pickGlassScene } from '../glass-backdrops'
 import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { ToggleGroup } from '../toggle-group'
 import { GlassPresetSelect } from '../glass-preset-select'
 import { glassBackdropOptions, glassPresetBackdrop, glassPresetId } from '../glass-presets'
-import type { PresetBackdrop } from '../../preset-editor/preview-protocol'
+import type { PresetBackdrop, PresetView } from '../../preset-editor/preview-protocol'
+import { InlinePreview } from '../../inline-preview/inline-preview'
+import { loadFamilyFonts } from '../../inline-preview/family-fonts'
+import { previewPath, previewStylesheets, type BuiltInFamily } from '../../inline-preview/routing'
+import { useSiteDark } from '../theme'
 import { CodeBlock } from '../../generated/ui/components/ui/code-block'
 import { Toggle } from '../../generated/ui/components/ui/toggle'
 import { codeLanguage } from './code-language'
@@ -39,6 +44,8 @@ export const familyOptions: { value: StyleFamily; label: string }[] = offeredSty
 const glassDocs = '/docs/style-families#liquid-glass'
 // Previews whose examples (and their extra appearances) need more room than the default frame.
 const tallPreviews: Partial<Record<ComponentId, number>> = { alert: 620, card: 560, table: 600, 'input-group': 520, carousel: 760 }
+type PreviewMode = 'auto' | 'light' | 'dark'
+type PreviewStatus = 'connecting' | 'ready' | 'failed'
 // Segmented pills, like the rest of the site: a quiet track and a filled primary pill for the choice.
 const pillTrack = 'inline-flex items-center gap-1 rounded-full border border-border bg-background p-1'
 const pillItem = 'inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:line-through disabled:hover:text-muted-foreground'
@@ -58,18 +65,39 @@ export function ComponentPlayground({ id, name, source, styles }: {
   source: string
   styles: Partial<Record<StyleFamily, string>>
 }) {
+  // The stage and status show `family`, which a transition moves once the new styles have loaded;
+  // the toggle shows the reader's latest pick at once.
   const [family, setFamily] = useState<StyleFamily>(familyOptions[0]!.value)
+  const [pendingFamily, setPendingFamily] = useState<StyleFamily>(family)
+  const latestPick = useRef<StyleFamily>(family)
+  const pickFamily = (next: StyleFamily) => {
+    setPendingFamily(next)
+    latestPick.current = next
+    // The stage switches once the family's fonts are in, so text does not reflow after the switch;
+    // a later pick wins even when this family's fonts arrive after it.
+    const fonts = next === 'liquid-glass' ? Promise.resolve() : loadFamilyFonts(next as BuiltInFamily).catch(() => undefined)
+    void fonts.then(() => {
+      if (latestPick.current === next) startTransition(() => setFamily(next))
+    })
+  }
   const [glassPreset, setGlassPreset] = useState<StartingPresetId>(defaultGlassPresetId)
-  const [mode, setMode] = useState<'light' | 'dark'>('light')
+  const [mode, setMode] = useState<PreviewMode>('auto')
+  const siteDark = useSiteDark()
+  // While the reader has not picked a mode the preview follows the site theme.
+  const resolvedMode = mode === 'auto' ? (siteDark ? 'dark' : 'light') : mode
   // The backdrop follows the glass preset and mode until the reader picks one; changing preset resets it.
   const [backdropOverride, setBackdropOverride] = useState<PresetBackdrop | null>(null)
-  const [status, setStatus] = useState<'connecting' | 'ready' | 'failed'>('connecting')
+  const [iframeStatus, setIframeStatus] = useState<PreviewStatus>('connecting')
+  const [glassCss, setGlassCss] = useState<string | undefined>(undefined)
+  // A component and family whose inline specimen threw; they stay on the iframe until either changes.
+  const [inlineFailure, setInlineFailure] = useState<string | null>(null)
   const glass = styleSupport(id, 'liquid-glass')
   useEffect(() => {
-    if (document.documentElement.classList.contains('dark')) setMode('dark')
     const selected = glassPresetId(new URLSearchParams(window.location.search).get('glass'))
     if (selected && glass === 'experimental') {
       setGlassPreset(selected)
+      setPendingFamily('liquid-glass')
+      latestPick.current = 'liquid-glass'
       setFamily('liquid-glass')
     }
   }, [glass])
@@ -77,18 +105,21 @@ export function ComponentPlayground({ id, name, source, styles }: {
     const base = createPresetDraft(family)
     return family === 'liquid-glass' ? applyStartingPreset(base, glassPreset) : base
   }, [family, glassPreset])
-  const compiled = usePresetCompiler(draft)
   // The same automatic scene and lab ink as the preset editor; the reader's pick overrides it.
   const glassData = useMemo(() => {
     if (family !== 'liquid-glass') return null
     try { return materializePreset(draft) } catch { return null }
   }, [family, draft])
-  const backdrop = backdropOverride ?? (glassData ? pickGlassScene(glassData, mode, glassPreset) : glassPresetBackdrop(glassPreset, mode))
-  const labInk = glassData ? labInkFor(glassData, mode, backdrop) : null
+  const backdrop = backdropOverride ?? (glassData ? pickGlassScene(glassData, resolvedMode, glassPreset) : glassPresetBackdrop(glassPreset, resolvedMode))
+  const labInk = glassData ? labInkFor(glassData, resolvedMode, backdrop) : null
   const css = styles[family]
-  const glassCss = family === 'liquid-glass' && compiled.result?.preset.data.styleFamily === family && !compiled.stale
-    ? compiled.result?.artifacts.find(({ logicalPath }) => logicalPath === 'styles/ui-style.css')?.content
-    : undefined
+  const failureKey = `${id}:${family}`
+  const inline = previewPath(id, family) === 'inline' && inlineFailure !== failureKey
+  const status: PreviewStatus = inline ? 'ready' : iframeStatus
+  // Families whose sheets and fonts were already requested (by the idle preload or a hover), so none is fetched twice.
+  const preloaded = useRef(new Set<StyleFamily>())
+  useEffect(() => preloadOtherFamilies(id, family, preloaded.current), [id])
+  const height = tallPreviews[id] ?? 420
   const families = familyOptions.map(option => {
     const tile = { ...option, icon: <span className={sampleStyles.sample} data-family={option.value} aria-hidden="true"><i /><i /></span> }
     return option.value === 'liquid-glass'
@@ -100,7 +131,8 @@ export function ComponentPlayground({ id, name, source, styles }: {
   return (
     <Tabs.Root defaultValue="preview" className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="space-y-3 border-b border-border bg-muted/50 p-3 sm:p-4">
-        <ToggleGroup label="Style family" value={family} options={families} onValueChange={setFamily}
+        <ToggleGroup label="Style family" value={pendingFamily} options={families} onValueChange={pickFamily}
+          onItemIntent={(value) => preloadFamily(id, value, preloaded.current)}
           className={familyTrack} itemClassName={familyTile} />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Tabs.List aria-label={`${name} example`} className={pillTrack}>
@@ -108,11 +140,11 @@ export function ComponentPlayground({ id, name, source, styles }: {
             <Tabs.Trigger value="code" className={tabClass}><Code aria-hidden="true" className="size-4" />Code</Tabs.Trigger>
           </Tabs.List>
           <div className="flex flex-wrap items-center gap-3">
-            <span role="status" className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <span role="status" className="inline-flex w-48 items-center gap-2 whitespace-nowrap text-xs font-medium text-muted-foreground">
               <span aria-hidden="true" className={'size-2 rounded-full ' + (status === 'ready' ? 'bg-primary' : status === 'failed' ? 'bg-destructive' : 'animate-pulse bg-muted-foreground')} />
-              {status === 'ready' ? `${familyOptions.find(o => o.value === family)!.label} · ${mode}` : status === 'failed' ? 'Preview unavailable' : 'Loading preview…'}
+              {status === 'ready' ? `${familyOptions.find(o => o.value === family)!.label} · ${resolvedMode}` : status === 'failed' ? 'Preview unavailable' : 'Loading preview…'}
             </span>
-            <ModeToggle mode={mode} onChange={setMode} />
+            <ModeToggle mode={resolvedMode} onChange={setMode} />
           </div>
         </div>
         {family === 'liquid-glass' && (
@@ -128,23 +160,86 @@ export function ComponentPlayground({ id, name, source, styles }: {
         )}
       </div>
       <Tabs.Content value="preview" forceMount className="data-[state=inactive]:hidden">
-        <PresetPreviewFrame
-          result={compiled.result}
-          view={{ mode, viewport: 'wide', focus: id, backdrop: family === 'liquid-glass' ? backdrop : undefined, labInk: labInk ?? undefined }}
-          stale={compiled.stale}
-          onStatus={setStatus}
-          title={`${name} preview`}
-          height={tallPreviews[id] ?? 420}
-          caption={false}
-        />
+        {inline ? (
+          <InlineBoundary onError={() => setInlineFailure(failureKey)}>
+            <InlinePreview id={id} family={family as BuiltInFamily} mode={mode} height={height} />
+          </InlineBoundary>
+        ) : (
+          <IframePreview
+            draft={draft}
+            view={{ mode: resolvedMode, viewport: 'wide', focus: id, backdrop: family === 'liquid-glass' ? backdrop : undefined, labInk: labInk ?? undefined }}
+            title={`${name} preview`}
+            height={height}
+            onStatus={setIframeStatus}
+            onGlassCss={setGlassCss}
+          />
+        )}
       </Tabs.Content>
       <Tabs.Content value="code" className="space-y-3 p-3 sm:p-4">
         <SourceBlock code={source} title={`components/ui/${id}.tsx`} maxHeight="28rem" />
         {css && <SourceBlock code={css} title={`${family} styles`} maxHeight="20rem" />}
-        {glassCss && <SourceBlock code={glassCss} title="Liquid Glass · shared material" maxHeight="20rem" />}
+        {family === 'liquid-glass' && glassCss && <SourceBlock code={glassCss} title="Liquid Glass · shared material" maxHeight="20rem" />}
       </Tabs.Content>
     </Tabs.Root>
   )
+}
+
+/** Compiles the draft in the worker and shows it in the sandbox frame; mounted only on the iframe path. */
+function IframePreview({ draft, view, title, height, onStatus, onGlassCss }: {
+  draft: PresetEditorDraft
+  view: PresetView
+  title: string
+  height: number
+  onStatus: (status: PreviewStatus) => void
+  onGlassCss: (css: string | undefined) => void
+}) {
+  const compiled = usePresetCompiler(draft)
+  const family = draft.family
+  const glassCss = family === 'liquid-glass' && compiled.result?.preset.data.styleFamily === family && !compiled.stale
+    ? compiled.result?.artifacts.find(({ logicalPath }) => logicalPath === 'styles/ui-style.css')?.content
+    : undefined
+  // The Code tab lives in the parent, so the shared glass material is lifted through a callback.
+  useEffect(() => {
+    onGlassCss(glassCss)
+    return () => onGlassCss(undefined)
+  }, [glassCss, onGlassCss])
+  useEffect(() => onStatus('connecting'), [onStatus])
+  return <PresetPreviewFrame result={compiled.result} view={view} stale={compiled.stale} onStatus={onStatus} title={title} height={height} caption={false} />
+}
+
+/** Reports a throwing inline specimen and renders nothing, so the parent can switch to the iframe. */
+class InlineBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  componentDidCatch() {
+    this.props.onError()
+  }
+  render() {
+    return this.state.failed ? null : this.props.children
+  }
+}
+
+/** Requests a built-in family's stylesheets and fonts, once per record; Liquid Glass and iframe-only components have none. */
+function preloadFamily(id: ComponentId, family: StyleFamily, done: Set<StyleFamily>) {
+  if (family === 'liquid-glass' || previewPath(id, family) !== 'inline' || done.has(family)) return
+  done.add(family)
+  for (const href of previewStylesheets(family as BuiltInFamily, id)) preload(href, { as: 'style' })
+  void loadFamilyFonts(family as BuiltInFamily).catch(() => undefined)
+}
+
+/** Warms the stylesheets and fonts of the other families while the browser is idle, so switching family does not wait on the network. */
+function preloadOtherFamilies(id: ComponentId, current: StyleFamily, done: Set<StyleFamily>): () => void {
+  const run = () => {
+    for (const { value } of familyOptions) if (value !== current) preloadFamily(id, value, done)
+  }
+  if (typeof requestIdleCallback === 'function') {
+    const handle = requestIdleCallback(run)
+    return () => cancelIdleCallback(handle)
+  }
+  const handle = setTimeout(run, 200)
+  return () => clearTimeout(handle)
 }
 
 /** A source file, highlighted in the language its title names. */

@@ -220,6 +220,12 @@ export async function withEditorPresetConsumer<T>(
     if (gallery) await fs.writeFile(
       path.join(root, 'src/preset-gallery.tsx'), await rewriteModuleSpecifiers(fixture, (s) => s),
     )
+    if (gallery) await fs.cp(
+      new URL('../../fixtures/shared/specimens/', import.meta.url),
+      path.join(root, 'src/specimens'),
+      // index.ts imports @ombelle/contracts, which consumer apps do not have.
+      { recursive: true, filter: (source) => !/[\\/]index\.ts$/.test(source) },
+    )
     await fs.appendFile(
       path.join(root, 'src/index.css'),
       '\n' +

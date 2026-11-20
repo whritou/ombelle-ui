@@ -1,10 +1,10 @@
 import { defineConfig } from '@playwright/test'
 
-// The website shell checks (tests/e2e/site-shell.spec.ts) need the website and the
+// The website shell and inline preview checks (site-shell.spec.ts, inline-previews.spec.ts) need the website and the
 // preview only, not the consumer apps. Run pnpm build:packages and pnpm generate:preview first.
 export default defineConfig({
   testDir: 'tests/e2e',
-  testMatch: ['site-shell.spec.ts', 'editors-responsive.spec.ts'],
+  testMatch: ['site-shell.spec.ts', 'editors-responsive.spec.ts', 'inline-previews.spec.ts'],
   timeout: 120000,
   expect: { timeout: 15000 },
   workers: 1,

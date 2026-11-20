@@ -1,0 +1,34 @@
+/* Component pages focus one gallery section; centre it like a docs preview. */
+[data-focus] .preset-gallery {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+}
+/* A focused preview shows the component as an app would, without the gallery's
+   section headings; sections keep their aria-label for assistive technology. */
+[data-focus] .preset-gallery :is(section, form) > h2 {
+  display: none;
+}
+/* Centring shrinks a section to its content; stacked examples (progress bars,
+   skeletons, grouped fields) need a readable width to keep their layout. */
+[data-focus] .preset-gallery > section > .preset-stack,
+[data-focus] .preset-gallery > .preset-form {
+  inline-size: min(360px, calc(100vw - 48px));
+}
+/* A focused section stacks its examples (a component and its variants) with room
+   between them, centred like the rest of the preview. */
+[data-focus] .preset-gallery > section:not([hidden]) {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+/* Components that fill their container get a readable width instead of their minimum. */
+:is([data-focus='slider'], [data-focus='card'], [data-focus='scroll-area']) .preset-gallery > section:not([hidden]) {
+  inline-size: min(360px, calc(100vw - 48px));
+  justify-items: stretch;
+}
+[data-focus='carousel'] .preset-gallery > section:not([hidden]) {
+  inline-size: min(560px, calc(100vw - 48px));
+  justify-items: stretch;
+}

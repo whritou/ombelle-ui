@@ -9,7 +9,7 @@ export default defineConfig({
   // Dedicated browser suites own their generated pages and servers.
   // Usage layouts run through pnpm test:usage-examples, not the foundation inventory.
   // Base UI consumers run against their own servers: pnpm test:base-consumers.
-  testIgnore: ['usage-example-layout.spec.ts', 'base-consumers.spec.ts', 'catalog-expansion.spec.ts', 'catalog-recipe-appearances.spec.ts', 'specimen-audit-checks.spec.ts', 'specimen-audit.spec.ts', 'display-components.spec.ts', 'form-controls.spec.ts', 'overlays-search.spec.ts', 'calendar.spec.ts', 'variants-basics.spec.ts', 'variants-more.spec.ts', 'variants-075.spec.ts', 'glass-scenes.spec.ts', 'editors-glass.spec.ts', 'editors-matrix.spec.ts', 'primitives-075.spec.ts', 'editor-inputs-075.spec.ts', 'code-block-075.spec.ts', 'components-076.spec.ts', 'app-shell-09.spec.ts', 'variants-076.spec.ts', 'editors-responsive.spec.ts', 'site-shell.spec.ts'],
+  testIgnore: ['usage-example-layout.spec.ts', 'base-consumers.spec.ts', 'catalog-expansion.spec.ts', 'catalog-recipe-appearances.spec.ts', 'specimen-audit-checks.spec.ts', 'specimen-audit.spec.ts', 'display-components.spec.ts', 'form-controls.spec.ts', 'overlays-search.spec.ts', 'calendar.spec.ts', 'variants-basics.spec.ts', 'variants-more.spec.ts', 'variants-075.spec.ts', 'glass-scenes.spec.ts', 'editors-glass.spec.ts', 'editors-matrix.spec.ts', 'primitives-075.spec.ts', 'editor-inputs-075.spec.ts', 'code-block-075.spec.ts', 'components-076.spec.ts', 'app-shell-09.spec.ts', 'variants-076.spec.ts', 'editors-responsive.spec.ts', 'site-shell.spec.ts', 'inline-previews.spec.ts'],
   timeout: 60000,
   expect: { timeout: 10000 },
   workers: workerBudget('OMBELLE_E2E_WORKERS', process.env.OMBELLE_E2E_WORKERS, 2),

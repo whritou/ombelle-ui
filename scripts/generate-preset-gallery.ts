@@ -179,6 +179,19 @@ export async function writePresetGallery(root: string): Promise<void> {
       s.replace(/^@\/components\/ui\//, './components/ui/'),
     ),
   )
+  const specimensDirectory = new URL('../fixtures/shared/specimens/', import.meta.url)
+  await fs.mkdir(path.join(root, 'specimens'), { recursive: true })
+  for (const entry of await fs.readdir(specimensDirectory)) {
+    // index.ts maps ids to modules for the website and imports @ombelle/contracts.
+    if (!/\.tsx?$/.test(entry) || entry === 'index.ts') continue
+    const specimen = await fs.readFile(new URL(entry, specimensDirectory), 'utf8')
+    await fs.writeFile(
+      path.join(root, 'specimens', entry),
+      await rewriteModuleSpecifiers(specimen, (s) =>
+        s.replace(/^@\/components\/ui\//, '../components/ui/'),
+      ),
+    )
+  }
   await fs.copyFile(
     new URL('../fixtures/shared/preset-gallery.css', import.meta.url),
     path.join(root, 'layout.css'),

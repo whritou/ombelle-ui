@@ -5,6 +5,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { compile } from '@ombelle/compiler'
+import { excludePreviewSubtrees } from './www-previews/exclude-previews.js'
 
 export const wwwUiComponents = ['slider', 'toggle-group', 'chip', 'combobox', 'command', 'button', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'number-input', 'color-picker', 'code-block', 'switch', 'checkbox', 'field', 'dialog', 'alert-dialog', 'breadcrumb', 'toolbar', 'sheet', 'native-select', 'prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'] as const
 
@@ -26,7 +27,12 @@ export async function generateWwwUi(outDir = path.join(repo, 'apps/www/src/gener
     const dest = path.join(outDir, artifact.logicalPath)
     await fs.mkdir(path.dirname(dest), { recursive: true })
     // The site styles these components with their stylesheets and passes no conflicting Tailwind utilities, so it needs no tailwind-merge (about 9 kB gzip).
-    const content = artifact.logicalPath === 'lib/utils.ts' ? wwwUtils : artifact.content.replaceAll('@/lib/utils', '../../lib/utils')
+    // Inline component previews render catalog components with the same markers; the site's rules stay off them.
+    const content = artifact.logicalPath === 'lib/utils.ts'
+      ? wwwUtils
+      : artifact.logicalPath.endsWith('.css')
+        ? excludePreviewSubtrees(artifact.content)
+        : artifact.content.replaceAll('@/lib/utils', '../../lib/utils')
     await fs.writeFile(dest, content)
   }
 }

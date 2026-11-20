@@ -1,4 +1,5 @@
 @import "tailwindcss" source("..");
+@source "../generated/previews";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -114,7 +115,8 @@
 }
 
 @layer base {
-  * {
+  /* Element rules leave inline previews alone: a preview's family sets its own borders, headings and focus rings. */
+  *:not(:where([data-preview-family] *)) {
     border-color: var(--color-border);
   }
   body {
@@ -123,11 +125,11 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3 {
+  :where(h1, h2, h3):not(:where([data-preview-family] *)) {
     font-family: var(--font-display);
     letter-spacing: -0.03em;
   }
-  :focus-visible {
+  :focus-visible:not(:where([data-preview-family] *)) {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
