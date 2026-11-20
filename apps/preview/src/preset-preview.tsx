@@ -1,12 +1,16 @@
 import * as React from 'react'
+import { flushSync } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import {
   isPresetHandshake,
   verifyPresetRender,
+  verifyPresetTokens,
   verifyGallerySources,
-  presetRuntimeStyles,
-  type PresetRender,
 } from '../../www/src/preset-editor/preview-protocol'
+import {
+  createPresetReceiver,
+  type ReceivedPreset,
+} from '../../www/src/preset-editor/preview-receiver'
 import { PresetGallery } from './generated/preset-gallery/gallery'
 import { LiquidGlassFilter } from './generated/preset-gallery/components/ui/liquid-glass-filter'
 import manifest from './generated/preset-gallery/manifest'
@@ -29,10 +33,7 @@ const unavailableIds = (family: StyleFamily) =>
   supportedComponentIds.filter((id) => styleSupport(id, family) === 'unavailable')
 
 function PresetPreview() {
-  const [current, setCurrent] = React.useState<{
-    message: PresetRender
-    port: MessagePort
-  } | null>(null)
+  const [current, setCurrent] = React.useState<ReceivedPreset | null>(null)
   const attached = React.useRef<MessagePort | null>(null),
     lastId = React.useRef(0)
   React.useEffect(() => {
@@ -60,35 +61,22 @@ function PresetPreview() {
       lastId.current = 0
       const port = event.ports[0]
       attached.current = port
-      port.onmessage = async (event: MessageEvent<unknown>) => {
-        const accepted = await verifyPresetRender(
-          event.data,
-          lastId.current,
-          manifest,
-        )
-        const sourcesValid = await sourceCheck
-        if (attached.current !== port) return
-        if (
-          !accepted ||
-          !sourcesValid ||
-          accepted.requestId <= lastId.current
-        ) {
-          const rejected = event.data as Partial<PresetRender> | null
-          if (
-            typeof rejected?.requestId === 'number' &&
-            typeof rejected.result?.preset?.hash === 'string'
-          )
-            port.postMessage({
-              type: 'preset-render-ack',
-              requestId: rejected.requestId,
-              presetHash: rejected.result.preset.hash,
-              status: 'rejected',
-            })
-          return
-        }
-        lastId.current = accepted.requestId
-        setCurrent({ message: accepted, port })
-      }
+      const receiver = createPresetReceiver({
+        port,
+        verifyRender: (data, previous) =>
+          verifyPresetRender(data, previous, manifest),
+        verifyTokens: verifyPresetTokens,
+        sourcesValid: sourceCheck,
+        isCurrentPort: () => attached.current === port,
+        // Flushed so the applied ack follows the committed DOM changes.
+        apply: (state) => {
+          lastId.current = state.requestId
+          flushSync(() => setCurrent(state))
+        },
+        post: (ack) => port.postMessage(ack),
+      })
+      port.onmessage = (event: MessageEvent<unknown>) =>
+        void receiver.receive(event.data)
       port.start()
     }
     window.addEventListener('message', initialize)
@@ -104,16 +92,16 @@ function PresetPreview() {
     if (
       !current ||
       current.port !== attached.current ||
-      current.message.requestId !== lastId.current
+      current.requestId !== lastId.current
     )
       return
     document.documentElement.classList.toggle(
       'dark',
-      current.message.view.mode === 'dark',
+      current.view.mode === 'dark',
     )
     // The gallery is shared with consumer parity fixtures, so focus hides the
     // other sections instead of rendering a different tree.
-    const focus = current.message.view.focus
+    const focus = current.view.focus
     const gallery = document.querySelector<HTMLElement>('[data-testid="preset-gallery"]')
     for (const child of Array.from(gallery?.children ?? []) as HTMLElement[]) {
       const own = child.dataset.component
@@ -129,30 +117,21 @@ function PresetPreview() {
           )
       }
     }
-    const scene = current.message.view.scene ?? 'gallery'
+    const scene = current.view.scene ?? 'gallery'
     document.documentElement.dataset.scene = scene
-    const backdrop = current.message.view.backdrop ?? 'kit'
-    if (current.message.result.preset.data.styleFamily === 'liquid-glass')
-      setGlassBackdrop(document.documentElement, backdrop, current.message.view.labInk ?? null)
+    const backdrop = current.view.backdrop ?? 'kit'
+    if (current.family === 'liquid-glass')
+      setGlassBackdrop(document.documentElement, backdrop, current.view.labInk ?? null)
     else setGlassBackdrop(document.documentElement, undefined)
     // The editors' "Preview transparency" toggle; the mirror holds the rules it switches on.
-    document.documentElement.toggleAttribute('data-reduced-transparency', current.message.view.reducedTransparency === true)
+    document.documentElement.toggleAttribute('data-reduced-transparency', current.view.reducedTransparency === true)
     if (focus) document.documentElement.dataset.focus = focus
     else delete document.documentElement.dataset.focus
-    document.documentElement.dataset.presetHash =
-      current.message.result.preset.hash
-    document.documentElement.dataset.presetRequest = String(
-      current.message.requestId,
-    )
-    current.port.postMessage({
-      type: 'preset-render-ack',
-      requestId: current.message.requestId,
-      presetHash: current.message.result.preset.hash,
-      status: 'applied',
-    })
+    document.documentElement.dataset.presetHash = current.hash
+    document.documentElement.dataset.presetRequest = String(current.requestId)
   }, [current])
-  const family = current?.message.result.preset.data.styleFamily
-  const design = current?.message.result.preset.data.design
+  const family = current?.family
+  const design = current?.design
   // Only the fonts the previewed preset uses are fetched, and each is fetched once.
   const fontKey = design ? presetFontIds(design).join(',') : ''
   React.useEffect(() => {
@@ -164,7 +143,7 @@ function PresetPreview() {
     design?.glassRefractionWidth,
     Boolean(design?.glassHalo || design?.glassMotion),
   ].join(':')
-  const scene = current?.message.view.scene ?? 'gallery'
+  const scene = current?.view.scene ?? 'gallery'
   const sceneProps = family
     ? {
         unavailable: unavailableIds(family),
@@ -174,10 +153,10 @@ function PresetPreview() {
   return current ? (
     <>
       <style data-preset-styles>
-        {presetRuntimeStyles(current.message.result)}
+        {current.css}
       </style>
       {family === 'liquid-glass' && <LiquidGlassFilter key={glassFilterKey} />}
-      {family === 'liquid-glass' && <GlassBackdropArt scene={current.message.view.backdrop ?? 'kit'} />}
+      {family === 'liquid-glass' && <GlassBackdropArt scene={current.view.backdrop ?? 'kit'} />}
       {family === 'liquid-glass' && <GlassControlHalo enabled={design?.transparency !== 'reduced' && (design?.glassHalo ?? 0) > 0} />}
       {scene === 'gallery' ? (
         <PresetGallery {...sceneProps} />
