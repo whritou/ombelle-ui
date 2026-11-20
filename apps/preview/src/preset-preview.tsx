@@ -144,12 +144,21 @@ function PresetPreview() {
     Boolean(design?.glassHalo || design?.glassMotion),
   ].join(':')
   const scene = current?.view.scene ?? 'gallery'
-  const sceneProps = family
-    ? {
-        unavailable: unavailableIds(family),
-        familyLabel: family.replaceAll('-', ' '),
-      }
-    : { unavailable: [], familyLabel: '' }
+  // The page depends only on the family and the scene: a token edit changes the style
+  // text alone, so the same element lets React skip the page (and its layout reads).
+  const page = React.useMemo(() => {
+    const sceneProps = family
+      ? {
+          unavailable: unavailableIds(family),
+          familyLabel: family.replaceAll('-', ' '),
+        }
+      : { unavailable: [], familyLabel: '' }
+    return scene === 'gallery' ? (
+      <PresetGallery {...sceneProps} />
+    ) : (
+      <PresetScenePage scene={scene} {...sceneProps} />
+    )
+  }, [family, scene])
   return current ? (
     <>
       <style data-preset-styles>
@@ -158,11 +167,7 @@ function PresetPreview() {
       {family === 'liquid-glass' && <LiquidGlassFilter key={glassFilterKey} />}
       {family === 'liquid-glass' && <GlassBackdropArt scene={current.view.backdrop ?? 'kit'} />}
       {family === 'liquid-glass' && <GlassControlHalo enabled={design?.transparency !== 'reduced' && (design?.glassHalo ?? 0) > 0} />}
-      {scene === 'gallery' ? (
-        <PresetGallery {...sceneProps} />
-      ) : (
-        <PresetScenePage scene={scene} {...sceneProps} />
-      )}
+      {page}
     </>
   ) : (
     <div className="preset-preview-waiting" role="status">
