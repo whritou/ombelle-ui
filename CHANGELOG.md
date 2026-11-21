@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Tell people what a failed publication or install means (RL-08). The editors show the wait from `Retry-After`, say when the daily limit is everyone's rather than theirs, and word a full service as "Publishing is paused" with the JSON export as the way forward. The CLI names HTTP 404, 410 (withdrawn) and 429 (with the retry delay) instead of a generic failure.
 - Answer an exhausted per-minute publication attempt budget from a single read, without taking the publication write lock, and count Postgres attempts with one atomic conditional upsert outside the capacity lock (RL-02). A client flooding POSTs no longer queues every other visitor's publication behind its 429s.
 - Accept only same-origin paths, `#fragments` and `https://` URLs in Navigation Menu links, as Breadcrumb does, and refuse `/\` paths in both, which browsers read as protocol-relative (SEC-02). Published Navigation Menu recipes whose links use `http://`, `//` or a bare host, and Breadcrumb recipes with a `/\` link, no longer verify or install.
 - Refuse unknown or wrong-role font ids in every recipe when it is validated, whatever slots the component has, at the recipe's own pointer (`/overrides/fontFamilyId`, `/appearance/fonts/<field>`) instead of `/design/...` (CMP-04, CMP-05). A dark-selector error now points at `/darkSelector` and quotes the selector in its message instead of using it as the pointer. A published component recipe that named an unknown heading or mono font for a component without that slot no longer verifies.
