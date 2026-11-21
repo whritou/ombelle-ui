@@ -48,7 +48,7 @@ export function Command({ className, filter = true, defaultSearch = '', label = 
   const inDialog = React.useContext(DialogContext)
   return (
     <SearchContext.Provider value={{ search, setSearch, inDialog }}>
-      <CommandPrimitive data-slot="command" label={label} shouldFilter={filter} className={cn(className)} {...props} />
+      <CommandPrimitive label={label} shouldFilter={filter} className={cn(className)} {...props} data-slot="command" />
     </SearchContext.Provider>
   )
 }
@@ -61,7 +61,7 @@ export type CommandDialogProps = React.ComponentProps<typeof DialogPrimitive.Roo
 
 /** A button that opens the dialog. Place it inside CommandDialog, next to the Command. */
 export function CommandDialogTrigger({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="command-dialog-trigger" className={cn(className)} {...props} />
+  return <DialogPrimitive.Trigger className={cn(className)} {...props} data-slot="command-dialog-trigger" />
 }
 
 /**
@@ -103,23 +103,23 @@ export function CommandInput({ className, ...props }: Omit<React.ComponentProps<
   return (
     <div data-slot="command-search">
       <SearchIcon aria-hidden="true" />
-      <CommandPrimitive.Input data-slot="command-input" value={search} onValueChange={setSearch} className={cn(className)} {...props} />
+      <CommandPrimitive.Input value={search} onValueChange={setSearch} className={cn(className)} {...props} data-slot="command-input" />
       {inDialog && <kbd aria-hidden="true">Esc</kbd>}
     </div>
   )
 }
 
 export function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
-  return <CommandPrimitive.List data-slot="command-list" className={cn(className)} {...props} />
+  return <CommandPrimitive.List className={cn(className)} {...props} data-slot="command-list" />
 }
 
 export function CommandGroup({ className, heading, ...props }: React.ComponentProps<typeof CommandPrimitive.Group>) {
   return (
     <CommandPrimitive.Group
-      data-slot="command-group"
       heading={heading === undefined ? undefined : <span data-slot="command-group-heading">{heading}</span>}
       className={cn(className)}
       {...props}
+      data-slot="command-group"
     />
   )
 }
@@ -129,7 +129,7 @@ export type CommandItemProps = React.ComponentProps<typeof CommandPrimitive.Item
 /** One command. onSelect runs on Enter or click; the search matches its text and keywords. */
 export function CommandItem({ className, value, children, ...props }: CommandItemProps) {
   return (
-    <CommandPrimitive.Item data-slot="command-item" value={value ?? textOf(children)} className={cn(className)} {...props}>
+    <CommandPrimitive.Item value={value ?? textOf(children)} className={cn(className)} {...props} data-slot="command-item">
       {children}
     </CommandPrimitive.Item>
   )

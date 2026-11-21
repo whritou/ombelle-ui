@@ -63,6 +63,6 @@ describe('batch 6a minors', () => {
   it.each(['accordion.tsx', 'base/accordion.tsx'])('%s declares its icon context after the imports, and its attributes after the props', file => {
     const text = source(file)
     expect(text.indexOf('const AccordionIcon')).toBeGreaterThan(text.lastIndexOf('\nimport '))
-    if (file === 'accordion.tsx') expect(text).toMatch(/\{\.\.\.props\}\s*data-appearance=\{appearance\}\s*data-icon=\{icon\}/)
+    if (file === 'accordion.tsx') expect(text).toMatch(/\{\.\.\.props\}\s*(?:data-slot=\"[^\"]*\"\s*)?data-appearance=\{appearance\}\s*data-icon=\{icon\}/)
   })
 })

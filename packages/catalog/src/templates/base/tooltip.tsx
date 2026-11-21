@@ -26,10 +26,10 @@ export function TooltipProvider({
 }) {
   return (
     <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
       delay={delayDuration}
       timeout={skipDelayDuration}
       {...props}
+      data-slot="tooltip-provider"
     />
   )
 }
@@ -72,7 +72,7 @@ export function Tooltip({
     ;(onOpenChange as ((open: boolean) => void) | undefined)?.(false)
   }, [openProp, onOpenChange])
   useCloseOnDocumentLeave(open, close)
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} open={open} onOpenChange={setOpen} />
+  return <TooltipPrimitive.Root {...props} data-slot="tooltip" open={open} onOpenChange={setOpen} />
 }
 
 export function TooltipTrigger({
@@ -81,12 +81,12 @@ export function TooltipTrigger({
 }: Part<typeof TooltipPrimitive.Trigger>) {
   return (
     <TooltipPrimitive.Trigger
-      data-slot="tooltip-trigger"
       className={cn(className)}
       render={(triggerProps, state) => (
         <button {...triggerProps} data-state={openState(state.open)} />
       )}
       {...props}
+      data-slot="tooltip-trigger"
     />
   )
 }
@@ -121,7 +121,6 @@ export function TooltipContent({
         sticky={sticky}
       >
         <TooltipPrimitive.Popup
-          data-slot="tooltip-content"
           className={cn(className)}
           // The shared stylesheet reads Radix's available-width variable.
           style={{
@@ -137,6 +136,7 @@ export function TooltipContent({
             />
           )}
           {...props}
+          data-slot="tooltip-content"
         />
       </TooltipPrimitive.Positioner>
     </TooltipPrimitive.Portal>
@@ -150,7 +150,6 @@ export function TooltipArrow({
 }: Part<typeof TooltipPrimitive.Arrow>) {
   return (
     <TooltipPrimitive.Arrow
-      data-slot="tooltip-arrow"
       className={cn(className)}
       render={(arrowProps) => (
         <svg
@@ -164,6 +163,7 @@ export function TooltipArrow({
         </svg>
       )}
       {...props}
+      data-slot="tooltip-arrow"
     />
   )
 }
@@ -199,11 +199,11 @@ export function TooltipShortcut({
 }: Omit<React.ComponentProps<'span'>, 'children'> & { keys: string[] }) {
   return (
     <span
-      data-slot="tooltip-shortcut"
       data-tooltip-shortcut=""
       aria-hidden="true"
       className={cn(className)}
       {...props}
+      data-slot="tooltip-shortcut"
     >
       {keys.map((key, index) => (
         <kbd key={index} data-slot="tooltip-shortcut-key">

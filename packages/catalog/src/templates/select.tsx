@@ -123,7 +123,7 @@ function MultipleSelect({ value, defaultValue, onValueChange, open, defaultOpen,
 export function Select(props: SelectProps) {
   if (props.multiple) return <MultipleSelect {...props} />
   const { multiple: _single, ...rest } = props
-  return <SelectPrimitive.Root data-slot="select" {...rest} />
+  return <SelectPrimitive.Root {...rest} data-slot="select" />
 }
 
 export function SelectGroup({
@@ -141,9 +141,9 @@ export function SelectGroup({
     )
   return (
     <SelectPrimitive.Group
-      data-slot="select-group"
       className={cn(className)}
       {...props}
+      data-slot="select-group"
     >
       {children}
     </SelectPrimitive.Group>
@@ -163,7 +163,7 @@ export function SelectValue({
       </span>
     )
   }
-  return <SelectPrimitive.Value data-slot="select-value" placeholder={placeholder} {...props} />
+  return <SelectPrimitive.Value placeholder={placeholder} {...props} data-slot="select-value" />
 }
 
 function MultipleTrigger({ className, size, children, onKeyDown, ...props }: React.ComponentProps<'button'> & { size: 'sm' | 'default' }) {
@@ -234,10 +234,10 @@ export function SelectTrigger({
   if (multi) return <MultipleTrigger className={className} size={size} {...props}>{children}</MultipleTrigger>
   return (
     <SelectPrimitive.Trigger
-      data-slot="select-trigger"
       data-size={size}
       className={cn(className)}
       {...props}
+      data-slot="select-trigger"
     >
       {children}
       <SelectPrimitive.Icon asChild>
@@ -281,11 +281,11 @@ export function SelectContent({
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
-        data-slot="select-content"
         className={cn(className)}
         position={position}
         sideOffset={position === 'popper' ? sideOffset : undefined}
         {...props}
+        data-slot="select-content"
       >
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport data-slot="select-viewport">
@@ -306,9 +306,9 @@ export function SelectLabel({
   if (multi) return <div id={group} data-slot="select-label" className={cn(className)}>{props.children}</div>
   return (
     <SelectPrimitive.Label
-      data-slot="select-label"
       className={cn(className)}
       {...props}
+      data-slot="select-label"
     />
   )
 }
@@ -357,10 +357,10 @@ export function SelectItem({
   }
   return (
     <SelectPrimitive.Item
-      data-slot="select-item"
       className={cn(className)}
       aria-describedby={hint ? hintId : undefined}
       {...props}
+      data-slot="select-item"
     >
       {iconPart}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -379,9 +379,9 @@ export function SelectSeparator({
   if (React.useContext(MultiContext)) return <div role="presentation" data-slot="select-separator" className={cn(className)} />
   return (
     <SelectPrimitive.Separator
-      data-slot="select-separator"
       className={cn(className)}
       {...props}
+      data-slot="select-separator"
     />
   )
 }
@@ -392,9 +392,9 @@ export function SelectScrollUpButton({
 }: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>) {
   return (
     <SelectPrimitive.ScrollUpButton
-      data-slot="select-scroll-up-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-up-button"
     >
       <ChevronUpIcon aria-hidden="true" />
     </SelectPrimitive.ScrollUpButton>
@@ -407,9 +407,9 @@ export function SelectScrollDownButton({
 }: React.ComponentProps<typeof SelectPrimitive.ScrollDownButton>) {
   return (
     <SelectPrimitive.ScrollDownButton
-      data-slot="select-scroll-down-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-down-button"
     >
       <ChevronDownIcon aria-hidden="true" />
     </SelectPrimitive.ScrollDownButton>

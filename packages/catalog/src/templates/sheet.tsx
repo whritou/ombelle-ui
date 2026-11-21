@@ -10,10 +10,10 @@ export function Sheet(props: SheetProps) {
   return <SheetPrimitive.Root {...props} />
 }
 export function SheetTrigger({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
-  return <SheetPrimitive.Trigger data-slot="sheet-trigger" className={cn(className)} {...props} />
+  return <SheetPrimitive.Trigger className={cn(className)} {...props} data-slot="sheet-trigger" />
 }
 export function SheetClose({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Close>) {
-  return <SheetPrimitive.Close data-slot="sheet-close" className={cn(className)} {...props} />
+  return <SheetPrimitive.Close className={cn(className)} {...props} data-slot="sheet-close" />
 }
 // sheet size hook
 // The same in the Radix and Base UI templates (a test compares them).
@@ -136,7 +136,6 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
       aria-valuemax={max}
       aria-valuetext={points ? snapPointText(nearestSnapPoint(height, points)!, points) : undefined}
       tabIndex={0}
-      data-slot="sheet-handle"
       data-sheet-dragging={drag.dragging ? '' : undefined}
       className={cn(className)}
       onKeyDown={event => {
@@ -155,6 +154,7 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
         sizing?.setHeight(clamp(next, 25, 95))
       }}
       {...drag.handlers}
+      data-slot="sheet-handle"
       onPointerDown={event => {
         startHeight.current = current()
         down.current = self.current?.closest('[role="dialog"]')?.getAttribute('data-side') === 'top' ? -1 : 1
@@ -181,7 +181,6 @@ function SheetResizeHandle({ side, size, setSize, minSize, maxSize, label = 'Res
       aria-valuemin={minSize}
       aria-valuemax={maxSize}
       tabIndex={0}
-      data-slot="sheet-resize-handle"
       data-sheet-dragging={drag.dragging ? '' : undefined}
       onKeyDown={event => {
         const step = event.shiftKey ? 64 : 16
@@ -192,6 +191,7 @@ function SheetResizeHandle({ side, size, setSize, minSize, maxSize, label = 'Res
         setSize(next)
       }}
       {...drag.handlers}
+      data-slot="sheet-resize-handle"
       onPointerDown={event => { startSize.current = size; drag.handlers.onPointerDown(event) }}
     />
   )
@@ -272,22 +272,23 @@ function SheetPanel({ className, children, side = 'inline-end', size = 'default'
     : <>{children}{dismiss}{handle}</>
   return (
     <SheetSizingContext.Provider value={sheet.sizing}>
-      <SheetPrimitive.Content data-slot="sheet-content" data-side={side} data-size={size} data-resizable={sheet.inline ? '' : undefined} data-sheet-snap={sheet.snap ? '' : undefined}
-        className={cn(className)} asChild={asChild} style={sheet.style ? { ...sheet.style, ...style } : style} {...props}>
+      <SheetPrimitive.Content data-side={side} data-size={size} data-resizable={sheet.inline ? '' : undefined} data-sheet-snap={sheet.snap ? '' : undefined}
+        className={cn(className)} asChild={asChild} style={sheet.style ? { ...sheet.style, ...style } : style} {...props}
+ data-slot="sheet-content">
         {content}
       </SheetPrimitive.Content>
     </SheetSizingContext.Provider>
   )
 }
 export function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="sheet-header" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="sheet-header" />
 }
 export function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="sheet-footer" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="sheet-footer" />
 }
 export function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
-  return <SheetPrimitive.Title data-slot="sheet-title" className={cn(className)} {...props} />
+  return <SheetPrimitive.Title className={cn(className)} {...props} data-slot="sheet-title" />
 }
 export function SheetDescription({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Description>) {
-  return <SheetPrimitive.Description data-slot="sheet-description" className={cn(className)} {...props} />
+  return <SheetPrimitive.Description className={cn(className)} {...props} data-slot="sheet-description" />
 }

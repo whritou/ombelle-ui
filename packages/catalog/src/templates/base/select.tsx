@@ -65,9 +65,9 @@ export function Select<
   return (
     <SelectItemsContext.Provider value={{ items: labelsByValue(labels), multiple: !!props.multiple }}>
       <SelectPrimitive.Root
-        data-slot="select"
         items={labels}
         {...props}
+        data-slot="select"
       >
         {children}
       </SelectPrimitive.Root>
@@ -81,9 +81,9 @@ export function SelectGroup({
 }: Part<typeof SelectPrimitive.Group>) {
   return (
     <SelectPrimitive.Group
-      data-slot="select-group"
       className={cn(className)}
       {...props}
+      data-slot="select-group"
     />
   )
 }
@@ -97,7 +97,7 @@ export function SelectValue({
     // A multiple Select shows a chip per chosen label, or the placeholder.
     const { placeholder, children: _children, ...rest } = props as typeof props & { placeholder?: React.ReactNode }
     return (
-      <SelectPrimitive.Value data-slot="select-value" className={cn(className)} {...rest}>
+      <SelectPrimitive.Value className={cn(className)} {...rest} data-slot="select-value">
         {(value: unknown) => Array.isArray(value) && value.length
           ? value.map(item => <span key={String(item)} data-slot="select-chip" data-select-chip="">{items[String(item)] ?? String(item)}</span>)
           : placeholder}
@@ -106,9 +106,9 @@ export function SelectValue({
   }
   return (
     <SelectPrimitive.Value
-      data-slot="select-value"
       className={cn(className)}
       {...props}
+      data-slot="select-value"
     />
   )
 }
@@ -123,7 +123,6 @@ export function SelectTrigger({
 }) {
   return (
     <SelectPrimitive.Trigger
-      data-slot="select-trigger"
       data-size={size}
       className={cn(className)}
       render={(triggerProps, state) => (
@@ -134,6 +133,7 @@ export function SelectTrigger({
         />
       )}
       {...props}
+      data-slot="select-trigger"
     >
       {children}
       <SelectPrimitive.Icon
@@ -181,7 +181,6 @@ export function SelectContent({
         sticky={sticky}
       >
         <SelectPrimitive.Popup
-          data-slot="select-content"
           className={cn(className)}
           // The shared stylesheet reads Radix's trigger-width and
           // available-height variables; the column layout is the one Radix
@@ -202,6 +201,7 @@ export function SelectContent({
             />
           )}
           {...props}
+          data-slot="select-content"
         >
           <SelectScrollUpButton />
           <SelectPrimitive.List data-slot="select-viewport">
@@ -221,9 +221,9 @@ export function SelectLabel({
 }: React.ComponentProps<'div'>) {
   return (
     <div
-      data-slot="select-label"
       className={cn(className)}
       {...props}
+      data-slot="select-label"
     />
   )
 }
@@ -243,13 +243,13 @@ export function SelectItem({
   const hintId = React.useId()
   return (
     <SelectPrimitive.Item
-      data-slot="select-item"
       className={cn(className)}
       aria-describedby={hint ? hintId : undefined}
       render={(itemProps, state) => (
         <div {...itemProps} data-state={checkedState(state.selected)} />
       )}
       {...props}
+      data-slot="select-item"
     >
       {icon ? <span data-slot="select-item-icon" aria-hidden="true">{icon}</span> : null}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -271,9 +271,9 @@ export function SelectSeparator({
 }: Part<typeof SelectPrimitive.Separator>) {
   return (
     <SelectPrimitive.Separator
-      data-slot="select-separator"
       className={cn(className)}
       {...props}
+      data-slot="select-separator"
     />
   )
 }
@@ -284,9 +284,9 @@ export function SelectScrollUpButton({
 }: Part<typeof SelectPrimitive.ScrollUpArrow>) {
   return (
     <SelectPrimitive.ScrollUpArrow
-      data-slot="select-scroll-up-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-up-button"
     >
       <ChevronUpIcon aria-hidden="true" />
     </SelectPrimitive.ScrollUpArrow>
@@ -299,9 +299,9 @@ export function SelectScrollDownButton({
 }: Part<typeof SelectPrimitive.ScrollDownArrow>) {
   return (
     <SelectPrimitive.ScrollDownArrow
-      data-slot="select-scroll-down-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-down-button"
     >
       <ChevronDownIcon aria-hidden="true" />
     </SelectPrimitive.ScrollDownArrow>

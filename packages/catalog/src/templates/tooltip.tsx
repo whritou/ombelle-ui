@@ -7,7 +7,7 @@ import './tooltip.css'
 export function TooltipProvider({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
-  return <TooltipPrimitive.Provider data-slot="tooltip-provider" {...props} />
+  return <TooltipPrimitive.Provider {...props} data-slot="tooltip-provider" />
 }
 
 /**
@@ -41,7 +41,7 @@ export function Tooltip({
   }, [openProp, onOpenChange])
   const close = React.useCallback(() => setOpen(false), [setOpen])
   useCloseOnDocumentLeave(open, close)
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} open={open} onOpenChange={setOpen} />
+  return <TooltipPrimitive.Root {...props} data-slot="tooltip" open={open} onOpenChange={setOpen} />
 }
 
 export function TooltipTrigger({
@@ -50,9 +50,9 @@ export function TooltipTrigger({
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
   return (
     <TooltipPrimitive.Trigger
-      data-slot="tooltip-trigger"
       className={cn(className)}
       {...props}
+      data-slot="tooltip-trigger"
     />
   )
 }
@@ -66,11 +66,11 @@ export function TooltipContent({
   return (
     <TooltipPrimitive.Portal forceMount={forceMount}>
       <TooltipPrimitive.Content
-        data-slot="tooltip-content"
         className={cn(className)}
         sideOffset={sideOffset}
         forceMount={forceMount}
         {...props}
+        data-slot="tooltip-content"
       />
     </TooltipPrimitive.Portal>
   )
@@ -82,9 +82,9 @@ export function TooltipArrow({
 }: React.ComponentProps<typeof TooltipPrimitive.Arrow>) {
   return (
     <TooltipPrimitive.Arrow
-      data-slot="tooltip-arrow"
       className={cn(className)}
       {...props}
+      data-slot="tooltip-arrow"
     />
   )
 }
@@ -120,11 +120,11 @@ export function TooltipShortcut({
 }: Omit<React.ComponentProps<'span'>, 'children'> & { keys: string[] }) {
   return (
     <span
-      data-slot="tooltip-shortcut"
       data-tooltip-shortcut=""
       aria-hidden="true"
       className={cn(className)}
       {...props}
+      data-slot="tooltip-shortcut"
     >
       {keys.map((key, index) => (
         <kbd key={index} data-slot="tooltip-shortcut-key">

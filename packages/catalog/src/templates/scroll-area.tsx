@@ -132,12 +132,12 @@ export function ScrollArea({
     <ScrollAreaContext.Provider value={context}>
       <ScrollAreaPrimitive.Root
         type={hydrated ? 'hover' : 'scroll'}
-        data-slot="scroll-area"
         data-overflow-y={tall ? '' : undefined}
         data-horizontal={horizontal ? '' : undefined}
         data-scrolling={scrolling.x || scrolling.y ? '' : undefined}
         className={cn(className)}
         {...(props as React.ComponentProps<typeof ScrollAreaPrimitive.Root>)}
+        data-slot="scroll-area"
       >
         <ScrollAreaPrimitive.Viewport
           ref={viewport}

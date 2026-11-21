@@ -81,7 +81,6 @@ export function Progress({
   const circle = shape === 'circle'
   const bar = (
     <ProgressPrimitive.Root
-      data-slot="progress"
       data-size={size === 'default' ? undefined : size}
       data-tone={tone === 'default' ? undefined : tone}
       data-shape={circle ? 'circle' : undefined}
@@ -92,6 +91,7 @@ export function Progress({
       {...(label ? { 'aria-labelledby': labelId } : {})}
       {...(readout ? { 'aria-valuetext': text } : {})}
       {...props}
+      data-slot="progress"
     >
       {circle ? (
         <>

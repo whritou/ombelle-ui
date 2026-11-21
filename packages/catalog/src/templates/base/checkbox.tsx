@@ -86,7 +86,6 @@ function CheckboxControl({
   const controlled = checked !== undefined
   return (
     <CheckboxPrimitive.Root
-      data-slot="checkbox"
       className={cn(className)}
       {...(controlled
         ? { checked: checked === true, indeterminate: checked === 'indeterminate' }
@@ -100,6 +99,7 @@ function CheckboxControl({
         <span {...rootProps} id={rootId ?? rootProps.id} data-state={checkedState(state)} />
       )}
       {...props}
+      data-slot="checkbox"
       ref={(node: HTMLElement | null) => {
         fieldsetRef(node)
         if (typeof ref === 'function') ref(node as never)

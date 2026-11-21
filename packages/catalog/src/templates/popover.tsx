@@ -20,19 +20,19 @@ function partType(element: React.ReactElement): unknown {
 export type PopoverProps = React.ComponentProps<typeof PopoverPrimitive.Root>
 
 export function Popover({ ...props }: PopoverProps) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+  return <PopoverPrimitive.Root {...props} data-slot="popover" />
 }
 
 export function PopoverTrigger({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+  return <PopoverPrimitive.Trigger {...props} data-slot="popover-trigger" />
 }
 
 export function PopoverAnchor({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
+  return <PopoverPrimitive.Anchor {...props} data-slot="popover-anchor" />
 }
 
 export function PopoverContent({
@@ -45,12 +45,12 @@ export function PopoverContent({
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
-        data-slot="popover-content"
         align={align}
         // Radix adds the arrow's height to the offset, so the 10px gap needs no extra offset.
         sideOffset={sideOffset ?? (hasArrow(children) ? 0 : 6)}
         className={cn(className)}
         {...props}
+        data-slot="popover-content"
       >
         {children}
       </PopoverPrimitive.Content>
@@ -97,7 +97,6 @@ export function PopoverArrow({
 }: Omit<React.ComponentProps<typeof PopoverPrimitive.Arrow>, 'children' | 'asChild'>) {
   return (
     <PopoverPrimitive.Arrow
-      data-slot="popover-arrow"
       aria-hidden="true"
       width={ARROW_WIDTH}
       height={ARROW_HEIGHT}
@@ -105,6 +104,7 @@ export function PopoverArrow({
       // Overlap the content's border so the arrow's base covers it.
       style={{ translate: '0 calc(var(--border-width, 1px) * -1)', overflow: 'visible', ...style }}
       {...props}
+      data-slot="popover-arrow"
       asChild
     >
       {/* With asChild, Radix sets its svg props on this svg. */}

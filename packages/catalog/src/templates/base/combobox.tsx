@@ -212,7 +212,7 @@ export function ComboboxChips({ className, ...props }: React.ComponentProps<'ul'
 /** The text field. It takes the label and description, for example from FieldControl. */
 export function ComboboxInput({ className, ...props }: Omit<Part<typeof ComboboxPrimitive.Input>, 'value' | 'defaultValue'>) {
   const state = useCombobox('ComboboxInput')
-  const input = <ComboboxPrimitive.Input data-slot="combobox-input" className={cn(className)} {...props} />
+  const input = <ComboboxPrimitive.Input className={cn(className)} {...props} data-slot="combobox-input" />
   const chevron = <ChevronDownIcon aria-hidden="true" data-slot="combobox-chevron" />
   if (state.multiple)
     return (
@@ -241,7 +241,6 @@ export function ComboboxContent({ className, style, side = 'bottom', align = 'st
     <ComboboxPrimitive.Portal>
       <ComboboxPrimitive.Positioner anchor={fieldRef} side={side} align={align} sideOffset={sideOffset} alignOffset={alignOffset} collisionPadding={collisionPadding}>
         <ComboboxPrimitive.Popup
-          data-slot="combobox-content"
           className={cn(className)}
           // The shared stylesheet reads Radix's popover size variables.
           style={{
@@ -251,6 +250,7 @@ export function ComboboxContent({ className, style, side = 'bottom', align = 'st
           } as React.CSSProperties}
           render={(popupProps, state) => <div {...popupProps} data-state={openState(state.open)} data-side={state.side} data-align={state.align} />}
           {...props}
+          data-slot="combobox-content"
         />
       </ComboboxPrimitive.Positioner>
     </ComboboxPrimitive.Portal>
@@ -258,7 +258,7 @@ export function ComboboxContent({ className, style, side = 'bottom', align = 'st
 }
 
 export function ComboboxList({ className, ...props }: Part<typeof ComboboxPrimitive.List>) {
-  return <ComboboxPrimitive.List data-slot="combobox-list" className={cn(className)} {...props} />
+  return <ComboboxPrimitive.List className={cn(className)} {...props} data-slot="combobox-list" />
 }
 
 export type ComboboxGroupProps = Omit<Part<typeof ComboboxPrimitive.Group>, 'children'> & {
@@ -271,7 +271,7 @@ export function ComboboxGroup({ className, heading, children, ...props }: Combob
   const { query } = useCombobox('ComboboxGroup')
   if (![...labelsIn(children).values()].some(label => matches(query, label))) return null
   return (
-    <ComboboxPrimitive.Group data-slot="combobox-group" className={cn(className)} {...props}>
+    <ComboboxPrimitive.Group className={cn(className)} {...props} data-slot="combobox-group">
       {heading !== undefined && (
         <ComboboxPrimitive.GroupLabel>
           <span data-slot="combobox-group-heading">{heading}</span>
@@ -290,7 +290,7 @@ export function ComboboxItem({ className, value, children, ...props }: ComboboxI
   if (!matches(state.query, textOf(children))) return null
   const selected = state.values.includes(value)
   return (
-    <ComboboxPrimitive.Item data-slot="combobox-item" value={value} data-checked={selected || undefined} className={cn(className)} {...props}>
+    <ComboboxPrimitive.Item value={value} data-checked={selected || undefined} className={cn(className)} {...props} data-slot="combobox-item">
       {/* One span, so the option's flex layout keeps the mark inline and the name whole. */}
       {typeof children === 'string' ? <span>{highlightMatch(children, state.query)}</span> : children}
       {selected && <CheckIcon aria-hidden="true" data-slot="combobox-item-indicator" />}
@@ -303,7 +303,7 @@ export function ComboboxCreate({ className, ...props }: Omit<Part<typeof Combobo
   const state = useCombobox('ComboboxCreate')
   if (!shouldOfferCreate(state.query, [...state.labels.values()])) return null
   return (
-    <ComboboxPrimitive.Item data-slot="combobox-create" value={CREATE} className={cn(className)} {...props}>
+    <ComboboxPrimitive.Item value={CREATE} className={cn(className)} {...props} data-slot="combobox-create">
       <PlusIcon aria-hidden="true" />
       {`Create “${state.query.trim()}”`}
     </ComboboxPrimitive.Item>

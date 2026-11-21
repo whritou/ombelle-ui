@@ -24,13 +24,13 @@ export function Switch({ className, children, size, ...props }: SwitchProps) {
   const small = size === 'sm' ? 'sm' : undefined
   return (
     <SwitchPrimitive.Root
-      data-slot="switch"
       data-size={small}
       className={cn(className)}
       render={(rootProps, state) => (
         <span {...rootProps} data-state={checkedState(state.checked)} />
       )}
       {...props}
+      data-slot="switch"
     >
       <SwitchSize.Provider value={small}>{children ?? <SwitchThumb />}</SwitchSize.Provider>
     </SwitchPrimitive.Root>
@@ -45,13 +45,13 @@ export function SwitchThumb({
 }) {
   return (
     <SwitchPrimitive.Thumb
-      data-slot="switch-thumb"
       data-size={React.useContext(SwitchSize)}
       className={cn(className)}
       render={(thumbProps, state) => (
         <span {...thumbProps} data-state={checkedState(state.checked)} />
       )}
       {...props}
+      data-slot="switch-thumb"
     />
   )
 }

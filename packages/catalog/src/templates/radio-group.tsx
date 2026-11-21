@@ -11,9 +11,9 @@ export type RadioGroupProps = React.ComponentProps<
 export function RadioGroup({ className, ...props }: RadioGroupProps) {
   return (
     <RadioGroupPrimitive.Root
-      data-slot="radio-group"
       className={cn(className)}
       {...props}
+      data-slot="radio-group"
     />
   )
 }
@@ -24,9 +24,9 @@ export function RadioGroupItem({
 }: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
   return (
     <RadioGroupPrimitive.Item
-      data-slot="radio-group-item"
       className={cn(className)}
       {...props}
+      data-slot="radio-group-item"
     >
       <RadioGroupPrimitive.Indicator data-slot="radio-group-indicator" />
     </RadioGroupPrimitive.Item>
@@ -40,9 +40,9 @@ export function RadioGroupOption({
 }: React.ComponentProps<'label'>) {
   return (
     <label
-      data-slot="radio-group-option"
       className={cn(className)}
       {...props}
+      data-slot="radio-group-option"
     />
   )
 }
@@ -53,9 +53,9 @@ export function RadioGroupOptionLabel({
 }: React.ComponentProps<'span'>) {
   return (
     <span
-      data-slot="radio-group-option-label"
       className={cn(className)}
       {...props}
+      data-slot="radio-group-option-label"
     />
   )
 }
@@ -66,9 +66,9 @@ export function RadioGroupOptionDescription({
 }: React.ComponentProps<'span'>) {
   return (
     <span
-      data-slot="radio-group-option-description"
       className={cn(className)}
       {...props}
+      data-slot="radio-group-option-description"
     />
   )
 }

@@ -40,12 +40,12 @@ export function Avatar({
   return (
     <AvatarHasImage.Provider value={hasImage}>
     <AvatarPrimitive.Root
-      data-slot="avatar"
       data-size={size}
       data-variant={variant}
       data-shape={shape === 'square' ? 'square' : undefined}
       className={cn(className)}
       {...props}
+      data-slot="avatar"
     >
       {children}
     </AvatarPrimitive.Root>
@@ -59,9 +59,9 @@ export function AvatarImage({
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
   return (
     <AvatarPrimitive.Image
-      data-slot="avatar-image"
       className={cn(className)}
       {...props}
+      data-slot="avatar-image"
     />
   )
 }
@@ -79,10 +79,10 @@ export function AvatarFallback({
   const wait = delayMs ?? (hasImage ? 600 : undefined)
   return (
     <AvatarPrimitive.Fallback
-      data-slot="avatar-fallback"
       className={cn(className)}
       delayMs={wait || undefined}
       {...props}
+      data-slot="avatar-fallback"
     />
   )
 }

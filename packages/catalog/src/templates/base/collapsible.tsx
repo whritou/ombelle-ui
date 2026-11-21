@@ -21,10 +21,10 @@ type RootProps = Omit<Part<typeof CollapsiblePrimitive.Root>, 'onOpenChange'> & 
 export function Collapsible({ className, onOpenChange, ...props }: RootProps) {
   return (
     <CollapsiblePrimitive.Root
-      data-slot="collapsible"
       className={cn(className)}
       onOpenChange={onOpenChange ? (open: boolean) => onOpenChange(open) : undefined}
       {...props}
+      data-slot="collapsible"
       render={(rootProps, state) => (
         <div {...rootProps} data-state={openState(state.open)} />
       )}
@@ -44,9 +44,9 @@ export function CollapsibleTrigger({
 }: Part<typeof CollapsiblePrimitive.Trigger>) {
   return (
     <CollapsiblePrimitive.Trigger
-      data-slot="collapsible-trigger"
       className={cn(className)}
       {...props}
+      data-slot="collapsible-trigger"
       render={(triggerProps, state) => {
         const dataState = openState(state.open)
         if (React.isValidElement(render))
@@ -78,7 +78,6 @@ export function CollapsibleContent({
 }: Part<typeof CollapsiblePrimitive.Panel>) {
   return (
     <CollapsiblePrimitive.Panel
-      data-slot="collapsible-content"
       className={cn(className)}
       // The shared stylesheet animates with one height variable.
       style={{
@@ -86,6 +85,7 @@ export function CollapsibleContent({
         ...(style as React.CSSProperties),
       } as React.CSSProperties}
       {...props}
+      data-slot="collapsible-content"
       render={(panelProps, state) => (
         <div {...panelProps} data-state={openState(state.open)} />
       )}

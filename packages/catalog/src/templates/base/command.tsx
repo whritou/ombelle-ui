@@ -123,7 +123,7 @@ export type CommandDialogProps = React.ComponentProps<typeof DialogPrimitive.Roo
 
 /** A button that opens the dialog. Place it inside CommandDialog, next to the Command. */
 export function CommandDialogTrigger({ className, ...props }: Part<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="command-dialog-trigger" className={cn(className)} {...props} />
+  return <DialogPrimitive.Trigger className={cn(className)} {...props} data-slot="command-dialog-trigger" />
 }
 
 /**
@@ -152,14 +152,14 @@ export function CommandInput({ className, ...props }: Omit<Part<typeof Autocompl
   return (
     <div data-slot="command-search">
       <SearchIcon aria-hidden="true" />
-      <Autocomplete.Input data-slot="command-input" aria-label={label} className={cn(className)} {...props} />
+      <Autocomplete.Input aria-label={label} className={cn(className)} {...props} data-slot="command-input" />
       {inDialog && <kbd aria-hidden="true">Esc</kbd>}
     </div>
   )
 }
 
 export function CommandList({ className, ...props }: Part<typeof Autocomplete.List>) {
-  return <Autocomplete.List data-slot="command-list" className={cn(className)} {...props} />
+  return <Autocomplete.List className={cn(className)} {...props} data-slot="command-list" />
 }
 
 export type CommandGroupProps = Omit<Part<typeof Autocomplete.Group>, 'children'> & {
@@ -172,7 +172,7 @@ export function CommandGroup({ className, heading, children, ...props }: Command
   const { query } = React.useContext(SearchContext)
   if (!entriesIn(children).some(entry => matches(query, entry))) return null
   return (
-    <Autocomplete.Group data-slot="command-group" className={cn(className)} {...props}>
+    <Autocomplete.Group className={cn(className)} {...props} data-slot="command-group">
       {heading !== undefined && (
         <Autocomplete.GroupLabel>
           <span data-slot="command-group-heading">{heading}</span>
@@ -201,7 +201,6 @@ export function CommandItem({ className, value, keywords, onSelect, onClick, chi
   if (!matched) return null
   return (
     <Autocomplete.Item
-      data-slot="command-item"
       value={entry.text}
       className={cn(className)}
       onClick={(event) => {
@@ -209,6 +208,7 @@ export function CommandItem({ className, value, keywords, onSelect, onClick, chi
         if (!event.defaultPrevented) onSelect?.(entry.text)
       }}
       {...props}
+      data-slot="command-item"
     >
       {children}
     </Autocomplete.Item>

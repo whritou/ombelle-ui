@@ -13,7 +13,7 @@ export function AlertDialog(props: AlertDialogProps) {
 }
 /** Compose another component with render={<Button />}. */
 export function AlertDialogTrigger({ className, ...props }: Part<typeof AlertDialogPrimitive.Trigger>) {
-  return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Trigger className={cn(className)} {...props} data-slot="alert-dialog-trigger" />
 }
 export type AlertDialogContentProps = Part<typeof AlertDialogPrimitive.Popup>
 export function AlertDialogContent({ className, children, ref, initialFocus, ...props }: AlertDialogContentProps) {
@@ -34,9 +34,10 @@ export function AlertDialogContent({ className, children, ref, initialFocus, ...
   return (
     <AlertDialogPrimitive.Portal>
       <AlertDialogPrimitive.Backdrop data-slot="alert-dialog-overlay" render={(backdropProps, state) => <div {...backdropProps} data-state={openState(state.open)} />} />
-      <AlertDialogPrimitive.Popup data-slot="alert-dialog-content" className={cn(className)}
+      <AlertDialogPrimitive.Popup className={cn(className)}
         render={(popupProps, state) => <div {...popupProps} data-state={openState(state.open)} />}
-        {...props} ref={mergedRef}
+        {...props}
+        data-slot="alert-dialog-content" ref={mergedRef}
         // With a typed confirmation, focus starts in its input instead of Cancel.
         initialFocus={initialFocus ?? (() => confirm.input.current ?? popupRef.current?.querySelector<HTMLElement>('[data-slot="alert-dialog-cancel"]:not(:disabled)') ?? true)}>
         <ConfirmContext.Provider value={confirm}>{children}</ConfirmContext.Provider>
@@ -45,23 +46,23 @@ export function AlertDialogContent({ className, children, ref, initialFocus, ...
   )
 }
 export function AlertDialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="alert-dialog-header" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="alert-dialog-header" />
 }
 export function AlertDialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="alert-dialog-footer" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="alert-dialog-footer" />
 }
 export function AlertDialogTitle({ className, ...props }: Part<typeof AlertDialogPrimitive.Title>) {
-  return <AlertDialogPrimitive.Title data-slot="alert-dialog-title" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Title className={cn(className)} {...props} data-slot="alert-dialog-title" />
 }
 export function AlertDialogDescription({ className, ...props }: Part<typeof AlertDialogPrimitive.Description>) {
-  return <AlertDialogPrimitive.Description data-slot="alert-dialog-description" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Description className={cn(className)} {...props} data-slot="alert-dialog-description" />
 }
 export function AlertDialogCancel({ className, ...props }: Part<typeof AlertDialogPrimitive.Close>) {
-  return <AlertDialogPrimitive.Close data-slot="alert-dialog-cancel" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Close className={cn(className)} {...props} data-slot="alert-dialog-cancel" />
 }
 export function AlertDialogAction({ className, disabled, 'aria-describedby': describedBy, ref, ...props }: Part<typeof AlertDialogPrimitive.Close>) {
   const { actionRef, ...state } = useConfirmAction(disabled, describedBy)
-  return <AlertDialogPrimitive.Close data-slot="alert-dialog-action" className={cn(className)} {...props} {...state} ref={mergeRefs(ref, actionRef)} />
+  return <AlertDialogPrimitive.Close className={cn(className)} {...props} {...state} data-slot="alert-dialog-action" ref={mergeRefs(ref, actionRef)} />
 }
 
 type Confirm = {

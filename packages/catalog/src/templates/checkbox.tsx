@@ -38,10 +38,10 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
     : {}
   return (
     <CheckboxPrimitive.Root
-      data-slot="checkbox"
       className={cn(className)}
       {...props}
       {...grouped}
+      data-slot="checkbox"
     >
       <CheckboxPrimitive.Indicator data-slot="checkbox-indicator">
         <CheckIcon data-checkbox-mark="checked" aria-hidden="true" />

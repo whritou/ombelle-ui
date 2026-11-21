@@ -292,7 +292,6 @@ export function ComboboxContent({ className, align = 'start', sideOffset = 6, ..
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
-        data-slot="combobox-content"
         align={align}
         sideOffset={sideOffset}
         className={cn(className)}
@@ -303,6 +302,7 @@ export function ComboboxContent({ className, align = 'start', sideOffset = 6, ..
           if (state.fieldRef.current?.contains(event.target as Node)) event.preventDefault()
         }}
         {...props}
+        data-slot="combobox-content"
       />
     </PopoverPrimitive.Portal>
   )
@@ -381,7 +381,7 @@ export function ComboboxItem({ value, children, ...props }: ComboboxItemProps) {
   if (!matches(state.search, textOf(children))) return null
   const checked = state.values.includes(value)
   return (
-    <Option optionKey={value} data-slot="combobox-item" checked={checked} {...props}>
+    <Option optionKey={value} checked={checked} {...props} data-slot="combobox-item">
       {/* One span, so the option's flex layout keeps the mark inline and the name whole. */}
       {typeof children === 'string' ? <span>{highlightMatch(children, state.search)}</span> : children}
       {checked && <CheckIcon aria-hidden="true" data-slot="combobox-item-indicator" />}
@@ -394,7 +394,7 @@ export function ComboboxCreate(props: Omit<React.ComponentProps<'div'>, 'childre
   const state = useCombobox('ComboboxCreate')
   if (!state.visible.includes(CREATE)) return null
   return (
-    <Option optionKey={CREATE} data-slot="combobox-create" {...props}>
+    <Option optionKey={CREATE} {...props} data-slot="combobox-create">
       <PlusIcon aria-hidden="true" />
       {`Create “${state.query.trim()}”`}
     </Option>

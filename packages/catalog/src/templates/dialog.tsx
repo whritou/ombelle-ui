@@ -8,20 +8,20 @@ export const DialogTrigger = DialogPrimitive.Trigger
 export const DialogClose = DialogPrimitive.Close
 /** Groups the title and description at the top of the dialog; families style it as one block. */
 export function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="dialog-header" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="dialog-header" />
 }
 export function DialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return <DialogPrimitive.Title data-slot="dialog-title" className={cn(className)} {...props} />
+  return <DialogPrimitive.Title className={cn(className)} {...props} data-slot="dialog-title" />
 }
 export function DialogDescription({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
-    <DialogPrimitive.Description data-slot="dialog-description" className={cn(className)} {...props} />
+    <DialogPrimitive.Description className={cn(className)} {...props} data-slot="dialog-description" />
   )
 }
 export function DialogContent({
@@ -40,10 +40,10 @@ export function DialogContent({
         className="fixed inset-0"
       />
       <DialogPrimitive.Content
-        data-slot="dialog-content"
         data-size={size === 'default' ? undefined : size}
         className={cn('fixed', className)}
         {...props}
+        data-slot="dialog-content"
       >
         {children}
         <DialogPrimitive.Close data-slot="dialog-close" type="button">
@@ -110,5 +110,5 @@ export function DialogBody({ className, ref, ...props }: React.ComponentProps<'d
 
 /** A row of actions at the end of the dialog; it stays visible while the body scrolls. */
 export function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="dialog-footer" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="dialog-footer" />
 }

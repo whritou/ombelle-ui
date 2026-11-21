@@ -13,7 +13,6 @@ export function Input({
 }: InputProps) {
   return (
     <input
-      data-slot="input"
       data-size={size && size !== 'default' ? size : undefined}
       type={type}
       className={cn(
@@ -21,6 +20,7 @@ export function Input({
         className,
       )}
       {...props}
+      data-slot="input"
     />
   )
 }

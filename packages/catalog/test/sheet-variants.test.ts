@@ -126,10 +126,10 @@ describe('Sheet 0.7.6 snap points', () => {
 
 // An open bottom sheet without snap points, as the Task 1 commit (db22321b) renders it.
 const unsnapped: Record<'radix' | 'base', string> = {
-  radix: '<div role="dialog" id="radix-_R_0_" data-state="open" data-slot="sheet-content" data-side="bottom" data-size="default" class="" tabindex="-1">x'
+  radix: '<div role="dialog" id="radix-_R_0_" data-state="open" data-side="bottom" data-size="default" class="" data-slot="sheet-content" tabindex="-1">x'
     + '<button type="button" data-slot="sheet-dismiss" aria-label="Close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>',
   base: '<span data-type="inside" style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:0;position:fixed;top:0;left:0" aria-hidden="true" tabindex="0" data-base-ui-focus-guard=""></span>'
-    + '<div data-open="" id="_R_0_" role="dialog" tabindex="-1" data-base-ui-focusable="" style="--nested-dialogs:0" data-slot="sheet-content" data-side="bottom" data-size="default" data-state="open">x'
+    + '<div data-open="" id="_R_0_" role="dialog" tabindex="-1" data-base-ui-focusable="" style="--nested-dialogs:0" data-side="bottom" data-size="default" data-slot="sheet-content" data-state="open">x'
     + '<button type="button" tabindex="0" data-slot="sheet-dismiss" aria-label="Close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>'
     + '<span data-type="inside" style="clip-path:inset(50%);overflow:hidden;white-space:nowrap;border:0;padding:0;width:1px;height:1px;margin:0;position:fixed;top:0;left:0" aria-hidden="true" tabindex="0" data-base-ui-focus-guard=""></span>',
 }
