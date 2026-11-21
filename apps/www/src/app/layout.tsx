@@ -15,7 +15,7 @@ const jetbrains = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], v
 export const metadata = {
   title: 'Ombelle UI',
   description:
-    `Editable, accessible React components on shadcn and Radix UI, in ${familyList()} styles.`,
+    `Editable React components on shadcn, Radix UI or Base UI, in ${familyList()} styles. WAI-ARIA patterns from the primitives, checked by automated axe and keyboard tests.`,
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
