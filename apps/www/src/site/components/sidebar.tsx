@@ -1,7 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../generated/ui/components/ui/sidebar'
+import { useEffect, useRef } from 'react'
+import { Sidebar, SidebarContent, useSidebar, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../generated/ui/components/ui/sidebar'
 import { componentEditorLink } from '../../editor/editable-components'
 import { componentGroups } from './categories'
 
@@ -14,9 +16,18 @@ const groups = [
 /** The component directory's sidebar: a sheet on phones, inline before hydration. */
 export function ComponentsSidebar({ label = 'Components' }: { label?: string }) {
   const pathname = usePathname()
+  const content = useRef<HTMLDivElement>(null)
+  // Links navigate on the client, so the layout and the sidebar's scroll stay put between components.
+  // A page opened directly starts at the top: bring its own link into view once.
+  useEffect(() => {
+    content.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest' })
+  }, [])
+  // On phones the sidebar is a sheet: a full page load used to close it, a client navigation does not.
+  const { setOpenMobile } = useSidebar()
+  useEffect(() => setOpenMobile(false), [pathname, setOpenMobile])
   return (
     <Sidebar collapsible="offcanvas" label={label} className="site-sidebar">
-      <SidebarContent>
+      <SidebarContent ref={content}>
         {groups.map(group => (
           <SidebarGroup key={group.title} aria-label={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
@@ -24,7 +35,7 @@ export function ComponentsSidebar({ label = 'Components' }: { label?: string }) 
               <SidebarMenu>
                 {group.links.map(link => (
                   <SidebarMenuItem key={link.href}>
-                    <SidebarMenuButton href={link.href} isActive={link.href === pathname}><span>{link.label}</span></SidebarMenuButton>
+                    <SidebarMenuButton asChild isActive={link.href === pathname}><Link href={link.href}><span>{link.label}</span></Link></SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
