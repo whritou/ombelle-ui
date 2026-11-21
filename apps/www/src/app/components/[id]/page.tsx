@@ -54,7 +54,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         </div>
 
         <section aria-label="Example" className="mt-8">
-          <ComponentPlayground id={doc.id} name={doc.name} source={template.content} styles={template.styles ?? {}} />
+          {/* Keyed: links navigate on the client, and each component starts from its own default preview. */}
+          <ComponentPlayground key={doc.id} id={doc.id} name={doc.name} source={template.content} styles={template.styles ?? {}} />
         </section>
 
         <section aria-labelledby="installation" className="mt-14 scroll-mt-24">

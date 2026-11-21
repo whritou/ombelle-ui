@@ -18,10 +18,11 @@ export function ComponentsSidebar({ label = 'Components' }: { label?: string }) 
   const pathname = usePathname()
   const content = useRef<HTMLDivElement>(null)
   // Links navigate on the client, so the layout and the sidebar's scroll stay put between components.
-  // A page opened directly starts at the top: bring its own link into view once.
+  // The current link is brought into view only when it is out of it: on a page opened directly, or after
+  // the page's previous and next links; a link clicked in the sidebar is already in view, so nothing moves.
   useEffect(() => {
     content.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest' })
-  }, [])
+  }, [pathname])
   // On phones the sidebar is a sheet: a full page load used to close it, a client navigation does not.
   const { setOpenMobile } = useSidebar()
   useEffect(() => setOpenMobile(false), [pathname, setOpenMobile])
