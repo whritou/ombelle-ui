@@ -10,7 +10,7 @@ import { planDependencies } from './dependencies.js'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
-import { fileChange } from './components.js'
+import { fileChange, matchesRecord } from './components.js'
 import { transformComponentPresetArtifact } from '../project/component-preset-transform.js'
 import {
   findCaseInsensitivePathMismatch,
@@ -138,8 +138,7 @@ export async function planComponentPreset(
       matchingRecords.length > 1 ||
       hasMismatchedLockKey ||
       change.beforeHash !== null &&
-      (!record ||
-        record.sha256 !== change.beforeHash ||
+      (!matchesRecord(change, record?.sha256) ||
         change.action === 'update')
     ) {
       change.action = 'conflict'

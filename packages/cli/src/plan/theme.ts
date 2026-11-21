@@ -17,7 +17,7 @@ import { sha256, resolveTypography, fontRuleBlock } from '@ombelle/compiler'
 import { fontRegistry, getCatalog } from '@ombelle/catalog'
 import { readText } from '../project/inspect.js'
 import { portable } from '../project/paths.js'
-import { appendState, baseLock, fileChange } from './components.js'
+import { appendState, baseLock, fileChange, matchesRecord } from './components.js'
 const fontTokens = ['--font-heading', '--font-mono']
 /** Fontsource packages the last theme imported, read from the font tokens it recorded in the lock. */
 function previouslyImportedFonts(context: ProjectContext): Set<string> {
@@ -242,7 +242,7 @@ export async function planTheme(
     const record = context.lock?.artifacts[context.styleFile]
     if (
       change.beforeHash !== null &&
-      (!record || record.sha256 !== change.beforeHash)
+      !matchesRecord(change, record?.sha256)
     ) {
       change.action = 'conflict'
       plan.diagnostics.push({

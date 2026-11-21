@@ -10,7 +10,7 @@ import { planDependencies } from './dependencies.js'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
-import { fileChange } from './components.js'
+import { fileChange, matchesRecord } from './components.js'
 import { transformRecipeArtifact } from '../project/recipe-transform.js'
 export async function planRecipe(
   context: ProjectContext,
@@ -106,8 +106,7 @@ export async function planRecipe(
       record = lock.artifacts[target.path]
     if (
       change.beforeHash !== null &&
-      (!record ||
-        record.sha256 !== change.beforeHash ||
+      (!matchesRecord(change, record?.sha256) ||
         change.action === 'update')
     ) {
       change.action = 'conflict'

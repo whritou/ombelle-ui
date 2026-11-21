@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Recognize managed files checked out with CRLF line endings (Git for Windows' default `core.autocrlf=true`) as unedited, and leave them untouched when their content is current (CLI-03). A teammate on Windows no longer gets "Existing source requires an explicit migration" on every `add`, or "Style rules were edited" on `theme add`. A real edit is still a conflict.
 - Mark published preset and recipe pages `noindex, nofollow`, since anyone can publish their text on the official domain (RL-11).
 - Send security headers on every page (SEC-01): `Content-Security-Policy: frame-ancestors 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `nosniff` and a restrictive `Permissions-Policy`. Other sites can no longer frame the editors, code pages or preview pages, and a preview frame cannot navigate to another site. No `script-src` yet: the App Router's inline scripts need per-request nonces.
 - Tell people what a failed publication or install means (RL-08). The editors show the wait from `Retry-After`, say when the daily limit is everyone's rather than theirs, and word a full service as "Publishing is paused" with the JSON export as the way forward. The CLI names HTTP 404, 410 (withdrawn) and 429 (with the retry delay) instead of a generic failure.
