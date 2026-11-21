@@ -48,7 +48,7 @@ export function Storage() {
 - The track (`data-slot="meter-track"`) has `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and `aria-valuetext`. The value text defaults to "128 of 200"; pass `aria-valuetext` to change it.
 - A meter's children are presentational, so the label, value and legend sit beside the track, not inside it.
 - `MeterLabel` names the track automatically. Without it, pass `aria-label` or `aria-labelledby` to `Meter`.
-- The root carries `data-mode`: `bar`, `discrete` or `labelled`.
+- The root and the track carry `data-mode`: `bar`, `discrete`, `labelled` or `circle`, one name per drawing. A style that frames the bar names `[data-mode='bar']`, so it never also frames the labelled segments or the ring.
 
 ## Variants (0.7.6)
 

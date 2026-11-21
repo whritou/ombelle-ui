@@ -12,23 +12,34 @@
 }
 /* Centring shrinks a section to its content; stacked examples (progress bars,
    skeletons, grouped fields) need a readable width to keep their layout. */
-[data-focus] .preset-gallery > section > .preset-stack,
+[data-focus] :is(.preset-gallery, .preset-sections) > section > .preset-stack,
 [data-focus] .preset-gallery > .preset-form {
   inline-size: min(360px, calc(100vw - 48px));
 }
+/* Later sections of the iframe gallery sit in a .preset-sections wrapper; it spans the page and
+   centres them too, so the rules below reach them and the wrapper never shrinks them to their content. */
+[data-focus] .preset-gallery > .preset-sections {
+  justify-self: stretch;
+  justify-items: center;
+}
 /* A focused section stacks its examples (a component and its variants) with room
    between them, centred like the rest of the preview. */
-[data-focus] .preset-gallery > section:not([hidden]) {
+[data-focus] :is(.preset-gallery, .preset-sections) > section:not([hidden]) {
   display: grid;
   gap: 16px;
   justify-items: center;
 }
 /* Components that fill their container get a readable width instead of their minimum. */
-:is([data-focus='slider'], [data-focus='card'], [data-focus='scroll-area']) .preset-gallery > section:not([hidden]) {
+:is([data-focus='slider'], [data-focus='card'], [data-focus='scroll-area'], [data-focus='meter'], [data-focus='collapsible'], [data-focus='item'])
+  :is(.preset-gallery, .preset-sections) > section:not([hidden]) {
   inline-size: min(360px, calc(100vw - 48px));
   justify-items: stretch;
 }
-[data-focus='carousel'] .preset-gallery > section:not([hidden]) {
+:is([data-focus='carousel'], [data-focus='data-table'], [data-focus='resizable'], [data-focus='stepper'], [data-focus='sidebar'])
+  :is(.preset-gallery, .preset-sections) > section:not([hidden]) {
   inline-size: min(560px, calc(100vw - 48px));
   justify-items: stretch;
+}
+[data-focus='textarea'] .preset-gallery > .preset-form {
+  inline-size: min(480px, calc(100vw - 48px));
 }

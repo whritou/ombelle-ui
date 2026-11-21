@@ -154,6 +154,6 @@
 }
 /* end 0.7.6 variants */
 /* papier layer */
-[data-slot='meter-track']:not([data-mode='discrete']):not([data-shape='circle']){border:var(--border-width) solid var(--border);border-radius:0}
+[data-slot='meter-track'][data-mode='bar']{border:var(--border-width) solid var(--border);border-radius:0}
 [data-slot='meter-cell']{border:var(--border-width) solid var(--border);border-radius:var(--radius)}
 [data-slot='meter-value']{font-family:var(--font-mono,ui-monospace,monospace)}

@@ -1,31 +1,31 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`compile output is unchanged > flat 1`] = `"fc8f90771d95cc0068e05acf8b84ae5042455a147607048d07e8bf187cd20874"`;
+exports[`compile output is unchanged > flat 1`] = `"c2fdf294a1b8fddb76a725d7dd00debe33b46de17183f3365f732512b5f8d2b2"`;
 
-exports[`compile output is unchanged > flat dark primary 1`] = `"b8615bd20305380c42331f5e7fbe353602148738f4209eac6c9387e8610e15e6"`;
+exports[`compile output is unchanged > flat dark primary 1`] = `"a062a10aeb1f76b0ea1d9c50859e98230be0c0370dc6bccba2799515e5890c6e"`;
 
-exports[`compile output is unchanged > flat display font, no mono 1`] = `"7e958f7392856dc45a64f9648f6f97e4c1b0fd50c1b6120a6608dfbf6f9a510b"`;
+exports[`compile output is unchanged > flat display font, no mono 1`] = `"94a5adfceb3790fbd55b671965b2d05f718c9553b2cc4bd28f6171c32c20a86a"`;
 
-exports[`compile output is unchanged > flat prefixed button and card 1`] = `"aaf00cf145321a5ed521c5a9b0b534f60cab39a3949f230b5d80982824e4a53e"`;
+exports[`compile output is unchanged > flat prefixed button and card 1`] = `"cd6c008839459a8291f22a3b0c53a86545c56436be105bf51b96b1cfb3448ce2"`;
 
-exports[`compile output is unchanged > flat radius 0 1`] = `"a763c7d9edc1b02d249d3a6441031a480341d0f2eb969e2e766cba717ee7059e"`;
+exports[`compile output is unchanged > flat radius 0 1`] = `"57e65d8a3fc354c88d07f96175fadbf234d3bdb45da538f8391dcf75db91e43f"`;
 
-exports[`compile output is unchanged > liquid-glass 1`] = `"d9fb52bef9dd28d8d7127c93b01779ed81b32d469a1906c64ae0680d354a6587"`;
+exports[`compile output is unchanged > liquid-glass 1`] = `"29c6bd56563c5b4b68f331c1401a1e8125cf803cd777713ab4d485ac410c8859"`;
 
-exports[`compile output is unchanged > liquid-glass material on 1`] = `"1f7cdcc701fac8e31310e4f1858e03f29cfb397320cf7cbf63ed86b99f1ce2c6"`;
+exports[`compile output is unchanged > liquid-glass material on 1`] = `"f32d51ddaab2e968361dd48c9b462f254708eca94b7ced4b5e73ba32031ec495"`;
 
-exports[`compile output is unchanged > liquid-glass prefixed dialog 1`] = `"25bc032597b22b6856aacfaa2b856cc91712860fd6e02671c6a6c1b32117c7a3"`;
+exports[`compile output is unchanged > liquid-glass prefixed dialog 1`] = `"93d4084f293974e2eb8871e589af89b65a0b682f5d7a78146cac8ca05479c3af"`;
 
-exports[`compile output is unchanged > minimalist 1`] = `"3403cfd1d6830542aab004a490c279820cae71c5546a428a1d18936b854b6b2e"`;
+exports[`compile output is unchanged > minimalist 1`] = `"d329b149fbcbe0b44b1a8fb95fbc92bf78d51397999c1d1e53c16b90b6858c20"`;
 
-exports[`compile output is unchanged > neo-brutalism 1`] = `"93e6745cf2bc69411f233c2c5d74bdec167afb41748b4242e8eea69ef3336b1b"`;
+exports[`compile output is unchanged > neo-brutalism 1`] = `"545891af3b642a4a609413957140726118bf4b647f5fc14831a6152de610f7e8"`;
 
-exports[`compile output is unchanged > ombelle 1`] = `"121d3066ebd903722242ff60a2beba293906cce24f98f993b1d5b6e61f816a30"`;
+exports[`compile output is unchanged > ombelle 1`] = `"e07d4bce2068f7ed6981373231de4b55401c2eb4dd26e99e80be46a98fbc7e6b"`;
 
-exports[`compile output is unchanged > organic 1`] = `"495e96f526ee263c144cd4be92b8dd5f59e3cf41dda28f2ea6a0b3815f315bdb"`;
+exports[`compile output is unchanged > organic 1`] = `"9162111d786271db5217367a51de6899439dfc054e7578185871bc27b38d973b"`;
 
-exports[`compile output is unchanged > organic base edition 1`] = `"6f46f41f6b65c161decf3edac61d6b0fab4869c80eef42dcff13cc790277e70d"`;
+exports[`compile output is unchanged > organic base edition 1`] = `"29db0ba66ecac9a08ca570c4ada8f31b08c2f5cf4cb8bbeaacbfe986f25bd841"`;
 
-exports[`compile output is unchanged > papier 1`] = `"88c4997d2dbdcad861575870c31e7913b6438e646acc16006ae9eb5489d0e792"`;
+exports[`compile output is unchanged > papier 1`] = `"f00c1f8db3d6ceccc2661d310b43c50dc00a3aa2c3e3a5123d1d94444fe961c2"`;
 
-exports[`compile output is unchanged > retro-futurism 1`] = `"71538bc24b25209a17da81efbccc19d5e671960ade4c645d88d1cd7d7aabf9e0"`;
+exports[`compile output is unchanged > retro-futurism 1`] = `"aa4d4445c6b986ab9913e37b16638d63c90b36ff9cc3453cdcde55ca6f093246"`;

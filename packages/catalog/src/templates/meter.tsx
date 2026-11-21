@@ -49,11 +49,13 @@ export function Meter({
   const hasLabel = rest.some(child => React.isValidElement(child) && child.type === MeterLabel)
   const total = parts.length ? parts.reduce((sum, part) => sum + part.props.value, 0) : value
   const now = clamp(total, min, max)
+  // One name per drawing, so a style that frames the bar never also frames the ring or the labelled segments.
+  const mode = shape === 'circle' ? 'circle' : parts.length ? 'labelled' : segments ? 'discrete' : 'bar'
   // A meter's children are presentational, so the label and legend sit beside the role="meter" track.
   return (
     <MeterLabelId.Provider value={labelId}>
       <MeterReading.Provider value={{ now, max }}>
-      <div {...props} data-slot="meter" data-mode={parts.length ? 'labelled' : segments ? 'discrete' : 'bar'} data-shape={shape === 'circle' ? 'circle' : undefined} className={cn(className)}>
+      <div {...props} data-slot="meter" data-mode={mode} data-shape={shape === 'circle' ? 'circle' : undefined} className={cn(className)}>
         {rest}
         <div
           role="meter"
@@ -64,7 +66,7 @@ export function Meter({
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy ?? (hasLabel ? labelId : undefined)}
           data-slot="meter-track"
-          data-mode={parts.length ? 'labelled' : segments ? 'discrete' : 'bar'}
+          data-mode={mode}
           data-shape={shape === 'circle' ? 'circle' : undefined}
         >
           {shape === 'circle' ? (

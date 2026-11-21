@@ -149,11 +149,14 @@ describe('form controls show focus where the audit measures it', () => {
     })
     return outline
   }
-  const ringed = "[data-slot='input-otp']:has([data-input-otp]:focus-visible)"
-  it.each(families)('%s rings the whole Radix code while its shared input has focus', family => {
+  // As in shadcn, only the slot under the caret is ringed: a second ring around the whole code doubled the focus.
+  it.each(families)('%s rings the active slot, not the whole Radix code', family => {
     const css = read(`input-otp/${family}.css`)
-    expect(declarations(css, ringed).outline).toMatch(/^[1-9][\d.]*px (solid|dashed) /)
-    expect(forcedRule(css, ringed)).toBe('2px solid Highlight')
+    expect(css).not.toContain(':has([data-input-otp]:focus-visible)')
+    const active = "[data-slot='input-otp-slot'][data-active]"
+    expect(postcss.parse(css).nodes.some(node => node.type === 'rule' && node.selectors.includes(active)
+      && node.nodes.some(decl => decl.type === 'decl' && decl.prop === 'outline' && /^[1-9][\d.]*px (solid|dashed) /.test(decl.value)))).toBe(true)
+    expect(forcedRule(css, active)).toBe('2px solid Highlight')
   })
   it('minimalist Base UI code slots draw a ring, not only a thicker underline', () => {
     expect(declarations(read('input-otp/minimalist.css'), "[data-slot='input-otp-slot']:focus").outline).toMatch(/^[1-9][\d.]*px solid /)

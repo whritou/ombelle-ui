@@ -41,14 +41,8 @@
 [data-slot='input-otp-slot']:focus {
   border-color: var(--primary);
   outline: 2.5px solid var(--ring);
-  /* Inside the slot, so it never meets the ring around the whole code. */
+  /* Inside the slot, so neighbouring slots never meet it. */
   outline-offset: -2.5px;
-}
-/* Radix types into one input laid over the whole code, so the code is ringed while it has focus. */
-[data-slot='input-otp']:has([data-input-otp]:focus-visible) {
-  outline: 2.5px solid var(--ring);
-  outline-offset: 4px;
-  border-radius: var(--o-r3);
 }
 /* Radix draws a caret in the active empty slot; Base UI inputs show their own. */
 [data-slot='input-otp-slot'][data-caret]::after {
@@ -74,9 +68,6 @@
   }
 }
 @media (forced-colors: active) {
-  [data-slot='input-otp']:has([data-input-otp]:focus-visible) {
-    outline: 2px solid Highlight;
-  }
   [data-slot='input-otp-slot'] {
     border: 1px solid CanvasText;
     background: Canvas;
@@ -96,7 +87,7 @@
 
 /* Narrow containers: each slot keeps 46px when there is room and shrinks to 1.5rem
    before the code overflows. The grid tracks also keep the code's minimum width small
-   inside grid and flex layouts. The code is as wide as its slots, so the focus ring hugs them. */
+   inside grid and flex layouts. */
 [data-slot='input-otp'] {
   inline-size: fit-content;
   max-inline-size: 100%;
@@ -117,6 +108,5 @@
 /* organic layer */
 [data-slot='input-otp-slot']{border-width:2px;border-radius:var(--o-r2);background:var(--card);font-family:var(--font-mono,ui-monospace,monospace);font-weight:500;box-shadow:inset 0 2px 4px -2px var(--o-sh)}
 [data-slot='input-otp-slot'][data-active],[data-slot='input-otp-slot']:focus{border-color:var(--primary);border-radius:var(--o-r3h);outline:3px solid var(--ring);outline-offset:2px}
-[data-slot='input-otp']:has([data-input-otp]:focus-visible){border-radius:var(--o-r3h)}
 [data-slot='input-otp-separator']{block-size:4px;border:0;border-radius:2px;background:var(--border)}
 @media (forced-colors: active){[data-slot='input-otp-separator']{background:CanvasText}}

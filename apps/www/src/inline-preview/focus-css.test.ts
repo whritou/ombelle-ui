@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 const focusCss = readFileSync(new URL('../../../../fixtures/shared/preset-focus.css', import.meta.url), 'utf8')
 
 // The focus layout rules that lived in preset-preview.css as html[data-focus…] rules.
-const ruleCount = 6
+const ruleCount = 8
 
 describe('shared focus layout css', () => {
   it('focus rules name no html element', () => {

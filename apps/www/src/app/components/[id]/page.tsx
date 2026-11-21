@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, SlidersHorizontal } from 'lucide-react'
 import { getCatalog } from '@ombelle/catalog'
@@ -53,7 +54,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         </div>
 
         <section aria-label="Example" className="mt-8">
-          <ComponentPlayground id={doc.id} name={doc.name} source={template.content} styles={template.styles ?? {}} />
+          {/* Keyed: links navigate on the client, and each component starts from its own default preview. */}
+          <ComponentPlayground key={doc.id} id={doc.id} name={doc.name} source={template.content} styles={template.styles ?? {}} />
         </section>
 
         <section aria-labelledby="installation" className="mt-14 scroll-mt-24">
@@ -104,8 +106,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ id: 
         </section>
 
         <nav aria-label="Pagination" className="mt-14 flex justify-between gap-4 border-t border-border pt-6 text-sm">
-          {previous ? <a href={`/components/${previous.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10"><ArrowLeft className="size-4" aria-hidden /> {previous.name}</a> : <span />}
-          {next && <a href={`/components/${next.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10">{next.name} <ArrowRight className="size-4" aria-hidden /></a>}
+          {previous ? <Link href={`/components/${previous.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10"><ArrowLeft className="size-4" aria-hidden /> {previous.name}</Link> : <span />}
+          {next && <Link href={`/components/${next.id}`} className="inline-flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:bg-muted active:bg-foreground/10">{next.name} <ArrowRight className="size-4" aria-hidden /></Link>}
         </nav>
       </div>
       <div className="hidden xl:block">
