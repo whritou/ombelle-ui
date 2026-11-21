@@ -260,6 +260,12 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   // focusVisible: true gives the keyboard-modality indicator without walking the tab order past neighbours.
   if (keys) await page.keyboard.press(keys[1]!)
   else await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
+  // input-otp marks its active slot a frame or two after focus: shoot once the slot is marked.
+  if (ringOwner) await page.locator('[data-audit-ring-owner]').evaluate(async owner => {
+    if (!owner.matches('[data-slot$="input-otp-slot"]')) return
+    for (let frame = 0; frame < 30 && !owner.hasAttribute('data-active'); frame++)
+      await new Promise(resolve => requestAnimationFrame(resolve))
+  })
   const after = await page.screenshot({ clip, animations: 'disabled' })
   const focus = await target.evaluate(element => element === document.activeElement || element.hasAttribute('data-highlighted') ? 'self'
     : element.contains(document.activeElement) ? 'moved' : 'none')
