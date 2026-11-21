@@ -79,6 +79,9 @@ describe('Meter shape circle', () => {
     const html = renderToStaticMarkup(h(ui.Meter, { shape: 'circle', value: 72, max: 100, 'aria-label': 'Storage used' } as never))
     expect(slotAttr(html, 'meter', 'data-shape')).toBe('circle')
     expect(slotAttr(html, 'meter-track', 'data-shape')).toBe('circle')
+    // The ring is its own mode, so a rule framing the bar can name it without excluding the other drawings.
+    expect(slotAttr(html, 'meter', 'data-mode')).toBe('circle')
+    expect(slotAttr(html, 'meter-track', 'data-mode')).toBe('circle')
     expect(html).toContain('role="meter"')
     expect(attr(html, 'aria-valuenow')).toBe('72')
     expect(attr(html, 'aria-valuetext')).toBe('72 of 100')
@@ -107,6 +110,15 @@ describe('Meter shape circle', () => {
     for (const extra of [{}, { shape: 'bar' }])
       expect(renderToStaticMarkup(h(ui.Meter, { value: 72, max: 100, 'aria-label': 'Storage', ...extra } as never))).toBe(task1Meter[edition])
     expect(task1Meter[edition]).not.toContain('data-shape')
+  })
+
+  // Papier once framed the labelled segments and Retro futurism the ring: a frame on the bare track reaches every drawing.
+  it.each(meterFamilies)('%s frames only the drawing a track rule names', family => {
+    const rules = [...ringCss(family).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .filter(([, selector, body]) => /meter-track'\]/.test(selector!) && /(^|;|\s)(border|box-shadow|outline)\s*:(?!\s*(0|none)\s*(;|$))/.test(body!))
+    for (const [, selector] of rules)
+      for (const part of selector!.split(',').filter(part => part.includes("meter-track']")))
+        expect(part.trim(), family).toMatch(/meter-track'\]\[data-(mode|shape)='[a-z]+'\]/)
   })
 
   it.each(meterFamilies)('%s draws the 72px ring and forced colours', family => {

@@ -271,7 +271,7 @@ describe('retro-futurism styles', () => {
       expect(rule(progress, "[data-slot='progress-indicator']")).toContain('repeating-linear-gradient')
       for (const tone of ['success', 'warning', 'destructive'])
         expect(rule(progress, `[data-slot='progress-indicator']:is([data-tone='${tone}'] > *)`)).toContain('repeating-linear-gradient')
-      expect(rule(layerOf('meter'), "[data-slot='meter-track']")).toContain('border:2px solid var(--border)')
+      expect(rule(layerOf('meter'), "[data-slot='meter-track'][data-mode='bar']")).toContain('border:2px solid var(--border)')
     })
 
     it('the current step ring uses the primary', () => {

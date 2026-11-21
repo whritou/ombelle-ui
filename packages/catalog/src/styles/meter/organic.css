@@ -154,8 +154,7 @@
 }
 /* end 0.7.6 variants */
 /* organic layer */
-[data-slot='meter-track']{background:var(--secondary)}
-[data-slot='meter-track'][data-mode='discrete'],[data-slot='meter-track'][data-mode='labelled']{background:transparent}
+[data-slot='meter-track'][data-mode='bar']{background:var(--secondary)}
 [data-slot='meter-cell']{border:0;border-radius:8px 7px 9px 7px/7px 9px 7px 8px;background:var(--secondary)}
 [data-slot='meter-cell'][data-state='filled']{background:var(--primary)}
 [data-slot='meter-cell'][data-warning]{background:var(--warning-foreground,var(--primary))}

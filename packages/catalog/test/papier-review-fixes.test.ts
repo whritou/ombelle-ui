@@ -71,9 +71,10 @@ describe('papier visual fixes after the first look', () => {
     expect(layer).toMatch(/\[href\]\[aria-current='page'\]:hover\{[^}]*color:var\(--primary-foreground\)/)
   })
 
-  it('meter: only a plain or labelled bar track is framed; discrete cells and the ring are not', () => {
+  // The labelled segments carry their own edges: a frame around them read as a stray box.
+  it('meter: only the plain bar track is framed; labelled segments, discrete cells and the ring are not', () => {
     const layer = squash(layerOf('meter'))
-    expect(layer).toMatch(/meter-track'\]:not\(\[data-mode='discrete'\]\):not\(\[data-shape='circle'\]\)\{[^}]*border:/)
+    expect(layer).toMatch(/meter-track'\]\[data-mode='bar'\]\{[^}]*border:/)
     expect(layer).not.toMatch(/meter-track'\]\{[^}]*border:/)
     expect(layer).toMatch(/meter-cell'\]\{[^}]*border-radius:var\(--radius\)/)
   })
