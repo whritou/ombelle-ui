@@ -1,4 +1,4 @@
-import type * as React from 'react'
+import * as React from 'react'
 import { DataTable, type DataTableColumn } from '../generated/preset-gallery/components/ui/data-table'
 import { Menubar, MenubarCheckboxItem, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from '../generated/preset-gallery/components/ui/menubar'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '../generated/preset-gallery/components/ui/navigation-menu'
@@ -23,10 +23,25 @@ const columns: DataTableColumn<Release>[] = [
   { accessorKey: 'status', header: 'Status' },
 ]
 const places = ['Overview', 'Releases', 'Presets', 'Members']
+// Side by side, a phone leaves each pane a word wide: there the split stacks, table above notes.
+const stacked = '(max-width: 640px)'
+
+function useStacked() {
+  const [matches, setMatches] = React.useState(() => typeof window !== 'undefined' && window.matchMedia(stacked).matches)
+  React.useEffect(() => {
+    const query = window.matchMedia(stacked)
+    const update = () => setMatches(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+  return matches
+}
 
 /** An app shell: header navigation, a menubar, a sidebar and a split between a release table and its notes. */
 export function WorkspaceScene(props: SceneProps) {
   const show = gate(props)
+  const vertical = useStacked()
   return (
     <main className="preset-scene" data-testid="preset-scene" data-scene="workspace">
       <header className="scene-header">
@@ -88,23 +103,25 @@ export function WorkspaceScene(props: SceneProps) {
           <SidebarInset>
             <div className="scene-workspace-bar"><SidebarTrigger /><span>Releases</span></div>
             {show('resizable', 'Resizable',
-              <ResizablePanelGroup direction="horizontal">
+              <div className="scene-workspace-split" data-stacked={vertical ? '' : undefined}>
+              <ResizablePanelGroup key={vertical ? 'vertical' : 'horizontal'} direction={vertical ? 'vertical' : 'horizontal'}>
                 <ResizablePanel defaultSize="60%" minSize="35%">
-                  {show('data-table', 'Data Table',
+                  <div className="scene-workspace-pane">{show('data-table', 'Data Table',
                     <DataTable aria-label="Releases" columns={columns} data={releases} filterColumn="name" filterLabel="Filter releases"
-                      facets={[{ column: 'status', title: 'Status' }]} pagination pageSize={5} />)}
+                      facets={[{ column: 'status', title: 'Status' }]} pagination pageSize={5} />)}</div>
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel defaultSize="40%" minSize="25%">
-                  {show('prose', 'Prose',
+                  <div className="scene-workspace-pane">{show('prose', 'Prose',
                     <Prose measure="narrow">
                       <h2>0.9 app shell</h2>
                       <ProseLead>Six components for the frame around your content.</ProseLead>
                       <p>The sidebar folds to icons with <kbd>Ctrl</kbd> + <kbd>B</kbd>, and opens as a sheet on phones.</p>
                       <ul><li>Data Table builds on Table</li><li>Menubar shares the menu look</li></ul>
-                    </Prose>)}
+                    </Prose>)}</div>
                 </ResizablePanel>
-              </ResizablePanelGroup>)}
+              </ResizablePanelGroup>
+              </div>)}
           </SidebarInset>
         </SidebarProvider>)}
     </main>

@@ -275,6 +275,22 @@ html[data-backdrop='glass'] .preset-scene :is(h1, .scene-header p) {
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
 }
+/* Each pane keeps its content off the frame and the handle. */
+.preset-scene .scene-workspace-pane {
+  box-sizing: border-box;
+  block-size: 100%;
+  padding: 1rem;
+  overflow: auto;
+}
+/* The split fills the rest of the inset; stacked on phones, it needs a height of its own to share. */
+.preset-scene .scene-workspace-split {
+  flex: 1;
+  min-block-size: 0;
+}
+.preset-scene .scene-workspace-split[data-stacked] {
+  flex: none;
+  block-size: 56rem;
+}
 .preset-scene .scene-workspace-bar {
   display: flex;
   align-items: center;
