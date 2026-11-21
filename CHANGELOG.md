@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.1 — 21 November 2026
+
+- Frame only the plain Meter bar. The ring drawing now carries `data-mode="circle"` (it read `bar`), and family frames name `[data-mode='bar']`: Papier no longer boxes labelled segments and Retro futurism no longer boxes the ring.
+- Ring only the active Input OTP slot in every family, as shadcn does; the second ring around the whole Radix code is gone.
+- Keep a gap between a tab's label and its count in every family, float field-set legends into the first row in Organic and Retro futurism cards instead of straddling the edge, and stop a sidebar item hovered while expanded from opening its tooltip after the sidebar collapses.
+- Make `compile()` assemble tokens and styles through pure synchronous functions, with byte-identical output, and cache `getCatalog` per release.
+- Website: rebuild the landing page around all eight style families; render built-in component previews inline instead of in the iframe, and redesign their controls; make the preset and component editor previews near instant; give container-filling previews (Data Table, Resizable, Stepper, Meter…) a readable width; keep the components sidebar's scroll between pages; show preset editor palettes like the landing page with a calmer top bar; and fix the Sidebar preview, the Workspace scene on phones, link button contrast and the landing code block.
+
 ## 0.9.0 — 19 November 2026
 
 - Add the 0.9 app shell components in all eight families, in the Radix and Base UI editions, with recipes and component editors: Sidebar (collapses to icons or slides away, a sheet on phones, Ctrl or Cmd + B), Navigation Menu, Resizable (react-resizable-panels 4.17.0), Data Table (TanStack Table 9.3.1), Menubar and Prose. Installing them needs CLI 0.9.0.

@@ -1,8 +1,16 @@
 # Standalone CLI candidate
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.9.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.9.1.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
 Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
+
+The 0.9.1 release fixes catalog styles and changes no contract: Meter frames only its plain bar and gives the ring
+`data-mode="circle"`, Input OTP rings only the active slot, tab counts keep a gap from their label, Organic and
+Retro futurism field-set legends sit inside the card, and a collapsed sidebar no longer opens tooltips hovered while
+expanded. `compile()` output for unchanged inputs is byte-identical. Recipe format 1.0/2.0 and catalog/compiler
+compatibility 0.1.0 remain, and no install command needs a newer installer. Publish first, then run
+`pnpm version:set --published 0.9.1` (and `--check --published`) and deploy from `main`. Until 0.9.1 is published,
+the public installer stays 0.9.0.
 
 The 0.9.0 release adds six catalog components (63 total): Sidebar, Navigation Menu,
 Resizable, Data Table, Menubar and Prose, in all eight style families and both
@@ -127,7 +135,7 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.9.0. The published installer is `@ombelle-ui/cli@0.8.3`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
+All six workspace packages use software version 0.9.1. The published installer is `@ombelle-ui/cli@0.8.3`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
 
 Release 0.5.0 in this order:
 
