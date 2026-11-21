@@ -252,8 +252,10 @@ export function ComboboxInput({ className, onKeyDown, onClick, onChange, ...prop
           className={cn(className)}
           onChange={(event) => {
             onChange?.(event)
-            state.setQuery(event.target.value)
+            // Open first: opening resets the typing flag, and the query must set it after that,
+            // or the first character typed into a closed field is lost.
             state.setOpen(true)
+            state.setQuery(event.target.value)
           }}
           onClick={(event) => {
             onClick?.(event)

@@ -39,6 +39,31 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(input).toBeFocused()
     })
 
+    test('single Combobox keeps the first key typed into a closed field, and the first Backspace after a choice', async ({ page }) => {
+      await open(page, edition)
+      const input = page.getByTestId('combobox-single').getByRole('combobox')
+      // Keyboard focus only: no click, so the list is closed when the first key arrives.
+      await input.focus()
+      await expect(input).toHaveAttribute('aria-expanded', 'false')
+      await page.keyboard.type('fl')
+      await expect(input).toHaveValue('fl')
+      await expect(input).toHaveAttribute('aria-expanded', 'true')
+      // Choose an option, close, then edit the chosen text from the keyboard.
+      await input.fill('')
+      await page.keyboard.press('Escape')
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Enter')
+      await expect(input).toHaveAttribute('aria-expanded', 'false')
+      const chosen = await input.inputValue()
+      expect(chosen.length).toBeGreaterThan(1)
+      await page.keyboard.press('Backspace')
+      await expect(input).toHaveValue(chosen.slice(0, -1))
+      await page.keyboard.press('Control+a')
+      await page.keyboard.type('fl')
+      await expect(input).toHaveValue('fl')
+    })
+
     test('single Combobox text follows its value: after outside changes, Escape, Tab and Enter on open', async ({ page }) => {
       await open(page, edition)
       const input = page.getByTestId('combobox-single').getByRole('combobox')
