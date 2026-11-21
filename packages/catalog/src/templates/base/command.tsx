@@ -6,6 +6,19 @@ import { SearchIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './command.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 /** Base UI parts accept a className function; these components take a string. */
 type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'className'> & {
   className?: string
@@ -28,7 +41,7 @@ const DialogContext = React.createContext(false)
 function textOf(children: React.ReactNode): string {
   return React.Children.toArray(children).map(child => {
     if (typeof child === 'string' || typeof child === 'number') return String(child)
-    if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.type !== CommandShortcut) return textOf(child.props.children)
+    if (React.isValidElement<{ children?: React.ReactNode }>(child) && partType(child) !== CommandShortcut) return textOf(child.props.children)
     return ''
   }).join('').trim()
 }
@@ -46,7 +59,7 @@ const matches = (query: string, entry: Entry) =>
 function entriesIn(children: React.ReactNode): Entry[] {
   return React.Children.toArray(children).flatMap(child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return []
-    if (child.type === CommandItem) return [entryOf(child.props as CommandItemProps)]
+    if (partType(child) === CommandItem) return [entryOf(child.props as CommandItemProps)]
     return entriesIn(child.props.children)
   })
 }
@@ -119,7 +132,7 @@ export function CommandDialogTrigger({ className, ...props }: Part<typeof Dialog
  */
 export function CommandDialog({ title = 'Command menu', className, children, ...props }: CommandDialogProps) {
   const all = React.Children.toArray(children as React.ReactNode)
-  const triggers = all.filter(child => React.isValidElement(child) && child.type === CommandDialogTrigger)
+  const triggers = all.filter(child => React.isValidElement(child) && partType(child) === CommandDialogTrigger)
   return (
     <DialogPrimitive.Root {...props}>
       {triggers}

@@ -6,6 +6,19 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './select.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type SingleProps = React.ComponentProps<typeof SelectPrimitive.Root> & { multiple?: false }
 type MultipleProps = {
   /** Choose several options: the list stays open and the trigger shows a chip per choice. */
@@ -51,7 +64,7 @@ const textOf = (node: React.ReactNode): string =>
 function collectOptions(node: React.ReactNode, options: Option[]) {
   React.Children.forEach(node, child => {
     if (!React.isValidElement<{ value?: unknown; children?: React.ReactNode; disabled?: boolean }>(child)) return
-    if (child.type === SelectItem && typeof child.props.value === 'string')
+    if (partType(child) === SelectItem && typeof child.props.value === 'string')
       options.push({ value: child.props.value, label: child.props.children, text: textOf(child.props.children), disabled: !!child.props.disabled })
     else collectOptions(child.props.children, options)
   })

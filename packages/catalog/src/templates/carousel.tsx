@@ -4,6 +4,19 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './carousel.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type CarouselState = {
   contentId: string
   contentRef: React.RefObject<HTMLDivElement | null>
@@ -31,14 +44,14 @@ function useCarousel(part: string): CarouselState {
 }
 
 const isItem = (child: React.ReactNode): child is React.ReactElement<CarouselItemProps> =>
-  React.isValidElement(child) && child.type === CarouselItem
+  React.isValidElement(child) && partType(child) === CarouselItem
 
 /** The number of slides, found while rendering so names and buttons are right in server HTML. */
 function countSlides(children: React.ReactNode): number {
   let count = 0
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return
-    if (child.type === CarouselContent) count += React.Children.toArray(child.props.children).filter(isItem).length
+    if (partType(child) === CarouselContent) count += React.Children.toArray(child.props.children).filter(isItem).length
     else count += countSlides(child.props.children)
   })
   return count
@@ -49,7 +62,7 @@ function firstImage(children: React.ReactNode): SlideImage | null {
   let found: SlideImage | null = null
   React.Children.forEach(children, child => {
     if (found || !React.isValidElement<{ children?: React.ReactNode; src?: unknown; alt?: string }>(child)) return
-    if (child.type === CarouselImage) found = { src: typeof child.props.src === 'string' ? child.props.src : '', alt: child.props.alt ?? '' }
+    if (partType(child) === CarouselImage) found = { src: typeof child.props.src === 'string' ? child.props.src : '', alt: child.props.alt ?? '' }
     else found = firstImage(child.props.children)
   })
   return found
@@ -61,8 +74,8 @@ function readSlides(children: React.ReactNode): { images: (SlideImage | null)[];
   let thumbnails = false
   const walk = (nodes: React.ReactNode) => React.Children.forEach(nodes, child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return
-    if (child.type === CarouselThumbnails) thumbnails = true
-    else if (child.type === CarouselContent)
+    if (partType(child) === CarouselThumbnails) thumbnails = true
+    else if (partType(child) === CarouselContent)
       for (const item of React.Children.toArray(child.props.children).filter(isItem)) images.push(firstImage(item.props.children))
     else walk(child.props.children)
   })

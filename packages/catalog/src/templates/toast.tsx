@@ -4,6 +4,19 @@ import * as ToastPrimitive from '@radix-ui/react-toast'
 import { cn } from './utils.js'
 import './toast.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 export type ToastVariant = 'default' | 'success' | 'warning' | 'info' | 'destructive'
 
 /**
@@ -43,9 +56,9 @@ function readContent(children: React.ReactNode) {
   const content = { title: '', description: '', action: false }
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return
-    if (child.type === ToastTitle) content.title += textOf(child.props.children)
-    else if (child.type === ToastDescription) content.description += textOf(child.props.children)
-    else if (child.type === ToastAction) content.action = true
+    if (partType(child) === ToastTitle) content.title += textOf(child.props.children)
+    else if (partType(child) === ToastDescription) content.description += textOf(child.props.children)
+    else if (partType(child) === ToastAction) content.action = true
   })
   return content
 }

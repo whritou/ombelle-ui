@@ -34,6 +34,19 @@ function textOf(children: React.ReactNode): string {
   }).join('').trim()
 }
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type Scan = { labels: Map<string, string>; create: boolean }
 /**
  * The options written as elements below `children`, in order, and whether a create row is
@@ -42,8 +55,8 @@ type Scan = { labels: Map<string, string>; create: boolean }
 function scan(children: React.ReactNode, found: Scan = { labels: new Map(), create: false }): Scan {
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode; value?: string }>(child)) return
-    if (child.type === ComboboxItem) found.labels.set(child.props.value!, textOf(child.props.children))
-    else if (child.type === ComboboxCreate) found.create = true
+    if (partType(child) === ComboboxItem) found.labels.set(child.props.value!, textOf(child.props.children))
+    else if (partType(child) === ComboboxCreate) found.create = true
     else scan(child.props.children, found)
   })
   return found

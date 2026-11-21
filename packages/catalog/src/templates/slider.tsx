@@ -4,6 +4,19 @@ import * as SliderPrimitive from '@radix-ui/react-slider'
 import { cn } from './utils.js'
 import './slider.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 export type SliderProps = Omit<React.ComponentProps<typeof SliderPrimitive.Root>, 'children'> & {
   /** One name per thumb, such as "Minimum price" and "Maximum price". */
   thumbLabels?: string[]
@@ -113,7 +126,7 @@ function decimalCount(value: number) {
 }
 
 function isSliderValue(child: React.ReactNode): child is React.ReactElement<SliderValueProps> {
-  return React.isValidElement(child) && child.type === SliderValue
+  return React.isValidElement(child) && partType(child) === SliderValue
 }
 
 function SliderField({
