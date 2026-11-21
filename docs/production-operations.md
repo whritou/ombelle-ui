@@ -30,8 +30,10 @@ ALTER ROLE ombelle_monitor SET default_transaction_read_only = on;
 A role created through SQL is not a member of `neon_superuser`, unlike roles created in the console's Roles page, so it can only read those two tables. Then add the repository secret `MONITOR_DATABASE_URL` (Settings → Secrets and variables → Actions) with:
 
 ```
-postgresql://ombelle_monitor:GENERATED_PASSWORD@ep-bitter-meadow-b9plx52i-pooler.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=require
+postgresql://ombelle_monitor:GENERATED_PASSWORD@ep-bitter-meadow-b9plx52i-pooler.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=verify-full&sslrootcert=system
 ```
+
+`scripts/monitor-production.sh` also sets `PGSSLMODE=verify-full PGSSLROOTCERT=system`, so the certificate is verified even if the secret still says `sslmode=require`.
 
 Run the workflow manually once and confirm the four quota lines appear. Without the secret, quota checks are skipped with a warning.
 
