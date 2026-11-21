@@ -52,17 +52,19 @@ class PostgresSnapshotStore implements SnapshotStore {
     this.randomRecipeId = options.randomRecipeId ?? (() => 'rc_' + randomBytes(16).toString('hex'))
   }
 
-  private async transaction<T>(operation: (client: PoolClient) => Promise<T>): Promise<T> {
+  private async transaction<T>(operation: (client: PoolClient) => Promise<T>, capacityLock = true): Promise<T> {
     let client: PoolClient | undefined
     try {
       client = await this.pool.connect()
       await client.query('BEGIN')
       await client.query("SET LOCAL lock_timeout='2s'; SET LOCAL statement_timeout='5s'")
       // A single small shared budget row serializes publication bookkeeping.
-      // Every write takes this first, so cross-kind retries cannot deadlock or
-      // oversubscribe quotas. Normal reads do not take the write lock.
-      const capacity = await client.query(`SELECT records FROM ${this.s}.capacity WHERE singleton=1 FOR UPDATE`)
-      if (capacity.rowCount !== 1) storageFailure()
+      // Every publication takes this first, so cross-kind retries cannot deadlock
+      // or oversubscribe quotas. Normal reads and attempt counting do not take it.
+      if (capacityLock) {
+        const capacity = await client.query(`SELECT records FROM ${this.s}.capacity WHERE singleton=1 FOR UPDATE`)
+        if (capacity.rowCount !== 1) storageFailure()
+      }
       const result = await operation(client)
       await client.query('COMMIT')
       return result
@@ -78,12 +80,6 @@ class PostgresSnapshotStore implements SnapshotStore {
       (SELECT kind,client_key,window_start FROM ${this.s}.rate_buckets WHERE (kind='attempt' AND window_start<$1)
         OR (kind IN ('client','global') AND window_start<$2) ORDER BY kind,client_key,window_start LIMIT 100)`, [Math.floor(now / minuteMs), Math.floor(now / dayMs)])
   }
-  private async assertQuota(client: PoolClient, kind: string, clientKey: string, now: number, duration: number, limit: number): Promise<void> {
-    const window = Math.floor(now / duration)
-    const row = await client.query(`SELECT count FROM ${this.s}.rate_buckets WHERE kind=$1 AND client_key=$2 AND window_start=$3`, [kind, clientKey, window])
-    if (row.rows[0]?.count >= limit)
-      throw rateLimited('minute', Math.ceil(((window + 1) * duration - now) / 1000))
-  }
   private async count(client: PoolClient, kind: string, clientKey: string, now: number, duration: number): Promise<number> {
     const row = await client.query(`SELECT count FROM ${this.s}.rate_buckets WHERE kind=$1 AND client_key=$2 AND window_start=$3`, [kind, clientKey, Math.floor(now / duration)])
     return Number(row.rows[0]?.count ?? 0)
@@ -93,11 +89,24 @@ class PostgresSnapshotStore implements SnapshotStore {
       ON CONFLICT(kind,client_key,window_start) DO UPDATE SET count=${this.s}.rate_buckets.count+1`, [kind, clientKey, Math.floor(now / duration)])
   }
   async consumeAttempt(clientKey: string, now: number): Promise<void> {
+    // RL-02: an exhausted key is answered from one indexed read, without a transaction or any lock.
+    const window = Math.floor(now / minuteMs)
+    let spent: number | undefined
+    try {
+      const row = await this.pool.query(`SELECT count FROM ${this.s}.rate_buckets WHERE kind='attempt' AND client_key=$1 AND window_start=$2`, [clientKey, window])
+      spent = row.rows[0]?.count
+    } catch (error) { return storageFailure(error) }
+    if (spent !== undefined && spent >= publicationQuotas.attemptsPerMinute)
+      throw rateLimited('minute', Math.ceil(((window + 1) * minuteMs - now) / 1000))
+    // Attempts never touch capacity, so they are counted outside the capacity lock with one atomic
+    // conditional upsert: concurrent attempts cannot exceed the limit, and they never queue behind publications.
     await this.transaction(async client => {
       await this.cleanup(client, now)
-      await this.assertQuota(client, 'attempt', clientKey, now, minuteMs, publicationQuotas.attemptsPerMinute)
-      await this.increment(client, 'attempt', clientKey, now, minuteMs)
-    })
+      const counted = await client.query(`INSERT INTO ${this.s}.rate_buckets(kind,client_key,window_start,count) VALUES('attempt',$1,$2,1)
+        ON CONFLICT(kind,client_key,window_start) DO UPDATE SET count=${this.s}.rate_buckets.count+1
+        WHERE ${this.s}.rate_buckets.count<$3 RETURNING count`, [clientKey, window, publicationQuotas.attemptsPerMinute])
+      if (!counted.rowCount) throw rateLimited('minute', Math.ceil(((window + 1) * minuteMs - now) / 1000))
+    }, false)
   }
   async publish(input: PublishSnapshotInput): Promise<{ snapshot: PresetSnapshot; replayed: boolean }> {
     try {

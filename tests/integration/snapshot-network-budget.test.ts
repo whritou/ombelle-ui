@@ -79,3 +79,20 @@ it('holds the last part of the global day for light networks', async () => {
     status: 429, issues: [expect.objectContaining({ path: '/rateLimit/global-day' })] }))
   expect(publish(target, '198.51.100.7').replayed).toBe(false)
 })
+
+it('answers an exhausted attempt budget without waiting for the write lock (RL-02)', async () => {
+  const { path, store: target } = await store()
+  const { clientKey } = keys('198.51.100.9')
+  for (let n = 0; n < Q.attemptsPerMinute; n++) target.consumeAttempt(clientKey, now)
+  // Another writer holds the database write lock, as a flood of publications would.
+  const writer = new DatabaseSync(path)
+  writer.exec('BEGIN IMMEDIATE')
+  try {
+    expect(() => target.consumeAttempt(clientKey, now)).toThrow(expect.objectContaining({
+      status: 429, issues: [expect.objectContaining({ path: '/rateLimit/minute' })] }))
+    expect(() => target.consumeAttempt(keys('198.51.100.10').clientKey, now)).toThrow(expect.objectContaining({ status: 503 }))
+  } finally {
+    writer.exec('ROLLBACK')
+    writer.close()
+  }
+})

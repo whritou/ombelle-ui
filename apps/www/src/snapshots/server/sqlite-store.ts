@@ -253,6 +253,10 @@ export class SqliteSnapshotStore implements SnapshotStore {
   }
 
   consumeAttempt(clientKey: string, now: number): void {
+    // RL-02: an exhausted key is answered from a WAL read, without taking the database write lock.
+    try {
+      this.assertQuota('attempt', clientKey, now, minuteMs, publicationQuotas.attemptsPerMinute)
+    } catch (error) { return storageError(error) }
     this.transaction(() => {
       this.cleanup(now)
       this.assertQuota('attempt', clientKey, now, minuteMs, publicationQuotas.attemptsPerMinute)
