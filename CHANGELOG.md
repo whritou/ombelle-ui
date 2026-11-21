@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Merge theme tokens into `:root` and `.dark` blocks nested in a top-level `@layer` (the Tailwind v3-era shadcn layout) instead of appending unlayered copies that shadowed them, and refuse a selector declared both inside and outside `@layer` (CLI-06).
 - Recognize managed files checked out with CRLF line endings (Git for Windows' default `core.autocrlf=true`) as unedited, and leave them untouched when their content is current (CLI-03). A teammate on Windows no longer gets "Existing source requires an explicit migration" on every `add`, or "Style rules were edited" on `theme add`. A real edit is still a conflict.
 - Mark published preset and recipe pages `noindex, nofollow`, since anyone can publish their text on the official domain (RL-11).
 - Send security headers on every page (SEC-01): `Content-Security-Policy: frame-ancestors 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `nosniff` and a restrictive `Permissions-Policy`. Other sites can no longer frame the editors, code pages or preview pages, and a preview frame cannot navigate to another site. No `script-src` yet: the App Router's inline scripts need per-request nonces.

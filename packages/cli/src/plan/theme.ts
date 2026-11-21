@@ -148,13 +148,26 @@ export async function planTheme(
         ? n.type === 'atrule' && n.name === 'theme' && n.params === 'inline'
         : n.type === 'rule' && n.selector === selector,
     ) as (Rule | AtRule)[]
-    if (matches.length > 1)
+    // Token blocks inside a top-level `@layer` (the Tailwind v3-era shadcn layout) are edited in place
+    // rather than shadowed by an appended unlayered copy (CLI-06).
+    const layered = selector === '@theme inline' ? [] : css.nodes.flatMap((n) =>
+      n.type === 'atrule' && n.name === 'layer'
+        ? ((n.nodes ?? []).filter((child) => child.type === 'rule' && child.selector === selector) as Rule[])
+        : [],
+    )
+    if (matches.length && layered.length)
+      throw new FoundationError(
+        'UNSUPPORTED_PROJECT',
+        'The managed selector is declared both inside and outside @layer; keep one block',
+        selector,
+      )
+    if (matches.length + layered.length > 1)
       throw new FoundationError(
         'UNSUPPORTED_PROJECT',
         'Multiple managed selector blocks are ambiguous',
         selector,
       )
-    let block: Container = matches[0]
+    let block: Container = matches[0] ?? layered[0]
     if (!block) {
       block =
         selector === '@theme inline'
