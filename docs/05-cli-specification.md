@@ -134,7 +134,7 @@ The lockfile records provenance, not ownership of all files in a directory. Remo
 
 ## Failure and recovery
 
-Roll back touched source and configuration files if generation or writes fail before completion. Preserve the backup and transaction record until success. If package installation fails, report exactly which source and lockfile changes were restored and whether the package manager state may need repair.
+Roll back touched source and configuration files if generation or writes fail before completion, including on Ctrl-C, SIGTERM and SIGHUP. Preserve the backup and transaction record until success. Write the transaction's plan before the first file is replaced and record the owning process in the operation lock, so the next apply can restore a transaction whose process was killed; see [interrupted operations](foundation-local-usage.md#interrupted-operations). If package installation fails, report exactly which source and lockfile changes were restored and whether the package manager state may need repair.
 
 A package manager may modify its cache, `node_modules`, lockfile, or run dependency lifecycle scripts. The CLI cannot promise full transactional rollback of those external effects. In this case return a distinct recovery error and actionable commands for the chosen manager. Do not print success simply because component files were copied.
 

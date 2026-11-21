@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import fs from 'node:fs/promises'
 import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -30,6 +31,7 @@ import {
 import { planAdd } from './plan/components.js'
 import { planTheme } from './plan/theme.js'
 import { applyPlan } from './apply/transaction.js'
+import { operationLockName } from './apply/recovery.js'
 import { formatPlan, planOutput } from './format.js'
 import { assertKnownComponentIds } from './component-ids.js'
 const exits: Record<string, number> = {
@@ -337,6 +339,8 @@ export async function runCli(
       plan.recipeResolution = { source: recipeInput.source, via: recipeInput.resolution }
       plan.networkAccess = recipeInput.networkAccess
     }
+    if (await pathExists(path.join(context.root, operationLockName)))
+      plan.notices.push('An interrupted operation left ' + operationLockName + '; the next apply restores its files and then asks you to run the command again')
     const hasConflicts =
       plan.diagnostics.length > 0 ||
       plan.changes.some((c) => c.action === 'conflict')
@@ -428,3 +432,7 @@ if (invokedAsEntry())
     stdout: (text) => process.stdout.write(text + '\n'),
     stderr: (text) => process.stderr.write(text + '\n'),
   })
+
+async function pathExists(file: string): Promise<boolean> {
+  return fs.access(file).then(() => true, () => false)
+}
