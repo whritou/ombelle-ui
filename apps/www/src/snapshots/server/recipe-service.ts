@@ -2,7 +2,7 @@ import { FoundationError, isSupportedContractRelease, type InstallableRecipeSnap
 import { normalizePublishedInstallableRecipe, verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
-import { clientRateKey } from './client-key'
+import { clientRateKeys } from './client-key'
 import { SnapshotServiceError } from './errors'
 import type { SnapshotStore } from './store'
 import { openConfiguredSnapshotStore } from './store-factory'
@@ -31,7 +31,7 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
     async publish(request) {
       assertPublishOrigin(request.headers, config)
       const body = await readPublishBody(request), now = Date.now()
-      const clientKey = clientRateKey(request.headers, config)
+      const { clientKey, networkKey } = clientRateKeys(request.headers, config)
       await store.consumeAttempt(clientKey, now)
       const key = request.headers.get('Idempotency-Key')
       if (!key || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(key))
@@ -59,7 +59,7 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
         throw new SnapshotServiceError({ status: 400, code: 'INVALID_DATA' })
       }
-      const result = await store.publishRecipe({ compiled, idempotencyKey: key.toLowerCase(), clientKey, now })
+      const result = await store.publishRecipe({ compiled, idempotencyKey: key.toLowerCase(), clientKey, networkKey, now })
       return { snapshot: await verified(result.snapshot), replayed: result.replayed }
     },
     async read(ref) {

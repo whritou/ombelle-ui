@@ -10,7 +10,7 @@ import {
 } from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
 import { SnapshotServiceError } from './errors'
-import { publicationQuotas } from './quotas'
+import { networkBucketKey, publicationBudgetError, publicationQuotas, rateLimited } from './quotas'
 import type { PublishSnapshotInput, PublishRecipeSnapshotInput, SnapshotStore, WithdrawalReason } from './store'
 
 const schemaVersion = 2
@@ -231,9 +231,20 @@ export class SqliteSnapshotStore implements SnapshotStore {
     const bucket = this.db.prepare('SELECT count FROM rate_buckets WHERE kind = ? AND client_key = ? AND window = ?')
       .get(kind, client, window)
     if (bucket && (bucket.count as number) >= limit)
-      throw new SnapshotServiceError({
-        status: 429, code: 'RATE_LIMITED', retryAfter: Math.ceil(((window + 1) * duration - now) / 1000),
-      })
+      throw rateLimited('minute', Math.ceil(((window + 1) * duration - now) / 1000))
+  }
+  private count(kind: string, client: string, now: number, duration: number): number {
+    const bucket = this.db.prepare('SELECT count FROM rate_buckets WHERE kind = ? AND client_key = ? AND window = ?')
+      .get(kind, client, Math.floor(now / duration))
+    return (bucket?.count as number | undefined) ?? 0
+  }
+  private assertPublicationBudgets(input: { clientKey: string; networkKey?: string; now: number }): void {
+    const error = publicationBudgetError({
+      client: this.count('client', input.clientKey, input.now, dayMs),
+      network: this.count('client', networkBucketKey(input.networkKey ?? input.clientKey), input.now, dayMs),
+      global: this.count('global', '', input.now, dayMs),
+    }, input.now)
+    if (error) throw error
   }
   private increment(kind: string, client: string, now: number, duration: number): void {
     this.db.prepare(`INSERT INTO rate_buckets(kind, client_key, window, count) VALUES (?, ?, ?, 1)
@@ -274,8 +285,7 @@ export class SqliteSnapshotStore implements SnapshotStore {
         return { snapshot, replayed: true }
       }
       this.cleanup(input.now)
-      this.assertQuota('client', input.clientKey, input.now, dayMs, publicationQuotas.clientPerDay)
-      this.assertQuota('global', '', input.now, dayMs, publicationQuotas.globalPerDay)
+      this.assertPublicationBudgets(input)
       for (let attempt = 0; attempt < 3; attempt++) {
         const id = this.randomId()
         if (this.db.prepare('SELECT 1 FROM snapshots WHERE id = ?').get(id)) continue
@@ -296,6 +306,7 @@ export class SqliteSnapshotStore implements SnapshotStore {
         this.db.prepare('INSERT INTO idempotency_keys(key, preset_hash, snapshot_id, expires_at) VALUES (?, ?, ?, ?)')
           .run(input.idempotencyKey, input.preset.hash, id, input.now + dayMs)
         this.increment('client', input.clientKey, input.now, dayMs)
+        this.increment('client', networkBucketKey(input.networkKey ?? input.clientKey), input.now, dayMs)
         this.increment('global', '', input.now, dayMs)
         return { snapshot, replayed: false }
       }
@@ -346,8 +357,7 @@ export class SqliteSnapshotStore implements SnapshotStore {
         return { snapshot, replayed: true }
       }
       this.cleanup(input.now)
-      this.assertQuota('client', input.clientKey, input.now, dayMs, publicationQuotas.clientPerDay)
-      this.assertQuota('global', '', input.now, dayMs, publicationQuotas.globalPerDay)
+      this.assertPublicationBudgets(input)
       for (let attempt = 0; attempt < 3; attempt++) {
         const id = this.randomRecipeId()
         if (this.db.prepare('SELECT 1 FROM recipe_snapshots WHERE id = ?').get(id)) continue
@@ -368,6 +378,7 @@ export class SqliteSnapshotStore implements SnapshotStore {
         this.db.prepare('INSERT INTO recipe_idempotency_keys(key, recipe_hash, snapshot_id, expires_at) VALUES (?, ?, ?, ?)')
           .run(input.idempotencyKey, compiled.recipe.hash, id, input.now + dayMs)
         this.increment('client', input.clientKey, input.now, dayMs)
+        this.increment('client', networkBucketKey(input.networkKey ?? input.clientKey), input.now, dayMs)
         this.increment('global', '', input.now, dayMs)
         return { snapshot, replayed: false }
       }

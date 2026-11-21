@@ -7,7 +7,7 @@ import {
 } from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
 import { SnapshotServiceError } from './errors'
-import { publicationQuotas } from './quotas'
+import { networkBucketKey, publicationBudgetError, publicationQuotas, rateLimited } from './quotas'
 import { createPostgresPool, quotedSchema, storageFailure } from './postgres-pool'
 import { verifyPostgresSnapshotSchema } from './postgres-migrations'
 import type { SnapshotStore, PublishSnapshotInput, PublishRecipeSnapshotInput, WithdrawalReason } from './store'
@@ -16,7 +16,7 @@ const pools = new Map<string, Pool>()
 const minuteMs = 60_000, dayMs = 86_400_000
 type Kind = 'preset' | 'recipe'
 type Envelope = PresetSnapshot | InstallableRecipeSnapshot
-type InputMetadata = { clientKey: string; idempotencyKey: string; now: number }
+type InputMetadata = { clientKey: string; networkKey?: string; idempotencyKey: string; now: number }
 type StoreOptions = { schema?: string; randomId?: () => string; randomRecipeId?: () => string }
 const hash = (value: string) => createHash('sha256').update(value, 'utf8').digest('hex')
 
@@ -82,7 +82,11 @@ class PostgresSnapshotStore implements SnapshotStore {
     const window = Math.floor(now / duration)
     const row = await client.query(`SELECT count FROM ${this.s}.rate_buckets WHERE kind=$1 AND client_key=$2 AND window_start=$3`, [kind, clientKey, window])
     if (row.rows[0]?.count >= limit)
-      throw new SnapshotServiceError({ status: 429, code: 'RATE_LIMITED', retryAfter: Math.ceil(((window + 1) * duration - now) / 1000) })
+      throw rateLimited('minute', Math.ceil(((window + 1) * duration - now) / 1000))
+  }
+  private async count(client: PoolClient, kind: string, clientKey: string, now: number, duration: number): Promise<number> {
+    const row = await client.query(`SELECT count FROM ${this.s}.rate_buckets WHERE kind=$1 AND client_key=$2 AND window_start=$3`, [kind, clientKey, Math.floor(now / duration)])
+    return Number(row.rows[0]?.count ?? 0)
   }
   private async increment(client: PoolClient, kind: string, clientKey: string, now: number, duration: number): Promise<void> {
     await client.query(`INSERT INTO ${this.s}.rate_buckets(kind,client_key,window_start,count) VALUES($1,$2,$3,1)
@@ -134,8 +138,13 @@ class PostgresSnapshotStore implements SnapshotStore {
         return { snapshot, replayed: true }
       }
       await this.cleanup(client, input.now)
-      await this.assertQuota(client, 'client', input.clientKey, input.now, dayMs, publicationQuotas.clientPerDay)
-      await this.assertQuota(client, 'global', '', input.now, dayMs, publicationQuotas.globalPerDay)
+      const network = networkBucketKey(input.networkKey ?? input.clientKey)
+      const error = publicationBudgetError({
+        client: await this.count(client, 'client', input.clientKey, input.now, dayMs),
+        network: await this.count(client, 'client', network, input.now, dayMs),
+        global: await this.count(client, 'global', '', input.now, dayMs),
+      }, input.now)
+      if (error) throw error
       for (let attempt = 0; attempt < 3; attempt++) {
         const id = (kind === 'preset' ? this.randomId : this.randomRecipeId)()
         if ((await client.query(`SELECT 1 FROM ${this.s}.publications WHERE id=$1`, [id])).rowCount) continue
@@ -149,6 +158,7 @@ class PostgresSnapshotStore implements SnapshotStore {
         await client.query(`DELETE FROM ${this.s}.idempotency_keys WHERE key=$1 AND expires_at<=$2`, [input.idempotencyKey, input.now])
         await client.query(`INSERT INTO ${this.s}.idempotency_keys(key,kind,payload_hash,snapshot_id,expires_at) VALUES($1,$2,$3,$4,$5)`, [input.idempotencyKey, kind, payloadHash, id, input.now + dayMs])
         await this.increment(client, 'client', input.clientKey, input.now, dayMs)
+        await this.increment(client, 'client', network, input.now, dayMs)
         await this.increment(client, 'global', '', input.now, dayMs)
         return { snapshot, replayed: false }
       }

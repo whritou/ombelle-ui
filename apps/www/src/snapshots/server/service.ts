@@ -2,7 +2,7 @@ import { FoundationError, isStyleFamily, isSupportedContractRelease, type Preset
 import { normalizePublishedPreset, verifyPresetSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
-import { clientRateKey } from './client-key'
+import { clientRateKeys } from './client-key'
 import { SnapshotServiceError } from './errors'
 import { openConfiguredSnapshotStore } from './store-factory'
 import type { SnapshotStore } from './store'
@@ -25,7 +25,7 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
     async publish(request) {
       assertPublishOrigin(request.headers, config)
       const body = await readPublishBody(request)
-      const clientKey = clientRateKey(request.headers, config)
+      const { clientKey, networkKey } = clientRateKeys(request.headers, config)
       // The minute budget includes retries and validation failures. Body/media/
       // origin checks run first; normalization never runs after quota exhaustion.
       const now = Date.now()
@@ -57,7 +57,7 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
         }
         throw error
       }
-      const result = await store.publish({ preset, idempotencyKey: idempotencyKey.toLowerCase(), clientKey, now })
+      const result = await store.publish({ preset, idempotencyKey: idempotencyKey.toLowerCase(), clientKey, networkKey, now })
       return { snapshot: await verified(result.snapshot), replayed: result.replayed }
     },
     async read(ref) { return verified(await store.lookup(ref)) },
