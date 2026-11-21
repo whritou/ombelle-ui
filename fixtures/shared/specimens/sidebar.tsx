@@ -6,7 +6,8 @@ export function Specimen() {
   return (
     <section aria-label="Sidebar" data-component="sidebar">
       <h2>Sidebar</h2>
-      <SidebarProvider mobileBreakpoint={480} style={{ '--sidebar-height': '18rem', border: '1px solid var(--border)' } as React.CSSProperties}>
+      {/* The preview frame is about 756 px on desktop and 346 px on a phone: stay inline in both. */}
+      <SidebarProvider mobileBreakpoint={320} style={{ '--sidebar-height': '18rem', border: '1px solid var(--border)' } as React.CSSProperties}>
         <Sidebar collapsible="icon" label="Gallery workspace">
           <SidebarHeader><strong>Ombelle</strong></SidebarHeader>
           <SidebarContent>
