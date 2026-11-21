@@ -67,6 +67,25 @@ test('focus-visible: a ring on a :focus-within wrapper is measured around the wr
   expect(await checkFocusVisible(page, page.locator('#ringed'))).toEqual([])
 })
 
+test('focus-visible: a Radix Input OTP is judged by the ring on its active slot', async ({ page }) => {
+  // input-otp types into one transparent input over the slots and marks the slot under the caret.
+  const code = (id: string) => `<div data-slot="input-otp" data-input-otp-container id="${id}" style="position:relative;display:inline-flex;gap:8px">` +
+    '<span data-slot="input-otp-slot"></span><span data-slot="input-otp-slot"></span><span data-slot="input-otp-slot"></span>' +
+    `<input data-input-otp aria-label="Code" style="position:absolute;inset:0;opacity:0;outline:none"></div>`
+  await fixture(page, code('bare'), code('ringed'),
+    '[data-slot=input-otp-slot]{display:inline-block;inline-size:40px;block-size:48px;border:1px solid #888}' +
+    '#ringed [data-slot=input-otp-slot][data-active]{outline:3px solid #1a56db;outline-offset:2px}')
+  await page.evaluate(() => document.querySelectorAll('[data-input-otp]').forEach(input => {
+    const first = input.parentElement!.querySelector('[data-slot=input-otp-slot]')!
+    input.addEventListener('focus', () => requestAnimationFrame(() => first.setAttribute('data-active', '')))
+    input.addEventListener('blur', () => first.removeAttribute('data-active'))
+  }))
+  expect((await checkFocusVisible(page, page.locator('#bare input'))).map(f => f.check)).toEqual(['focus-visible'])
+  expect(await checkFocusVisible(page, page.locator('#ringed input'))).toEqual([])
+  expect((await findForcedColors([], [page.locator('#bare input')])).map(f => f.check)).toEqual(['forced-colors'])
+  expect(await findForcedColors([], [page.locator('#ringed input')])).toEqual([])
+})
+
 test('target-size: crowded 16px targets are reported, spaced or 24px ones are not', async ({ page }) => {
   const small = (label: string) => `<button style="inline-size:16px;block-size:16px;padding:0;margin:0 2px" aria-label="${label}"></button>`
   await fixture(page, small('One') + small('Two'),

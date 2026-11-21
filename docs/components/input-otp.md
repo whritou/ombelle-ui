@@ -50,7 +50,7 @@ Compilation emits `components/ui/input-otp.tsx`, `components/ui/input-otp.css` a
 
 ## Editions
 
-- **Radix edition (input-otp):** the code is one input laid over the slots, so assistive technology meets one field with its name. The slots are drawn, not focusable. The active slot shows a caret, and the whole code is ringed while the input has focus.
+- **Radix edition (input-otp):** the code is one input laid over the slots, so assistive technology meets one field with its name. The slots are drawn, not focusable. While the input has focus, the active slot is ringed and shows a caret; the code as a whole has no ring of its own.
 - **Base UI edition (OTP Field):** each slot is its own input. The first is named by the code's label, and the others by their position, such as "Digit 2 of 6". Base UI filters pasted and typed characters by the pattern.
 
 Part names and `data-slot` values are the same in both editions.

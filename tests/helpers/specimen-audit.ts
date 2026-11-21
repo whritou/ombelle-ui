@@ -20,6 +20,13 @@ const describeSource = `(element) => {
   return element.tagName.toLowerCase() + (slot ? '[data-slot="' + slot + '"]' : '') + (role ? '[role="' + role + '"]' : '') + (name ? ' "' + name + '"' : '')
 }`
 
+// Runs in the page: the slot input-otp marks under the caret of its focused input, after React has drawn it.
+const activeOtpSlotSource = `async (element) => {
+  if (!element.matches('[data-input-otp]')) return null
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  return element.closest('[data-input-otp-container]')?.querySelector('[data-slot$="input-otp-slot"][data-active]') ?? null
+}`
+
 // Runs in the page: sr-only labels and focus proxies are 1×1 boxes that are never drawn as targets.
 const hiddenSource = `(element) => {
   for (let current = element; current; current = current.parentElement) {
@@ -215,7 +222,9 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   // A link that draws no ring may be ringed by its card (a stretched Card link): measured the same way.
   // Only text fields and links are probed: focusing other controls first can leave state behind (a Base UI
   // menu item stays highlighted after blur), which would spoil the unfocused screenshot.
-  const ringOwner = keys ? false : await target.evaluate(element => {
+  // input-otp (Radix Input OTP) types into one transparent input laid over every slot and rings the slot under
+  // the caret, as shadcn does: that slot is measured, once the library has marked it after focus.
+  const ringOwner = keys ? false : await target.evaluate(async (element, source) => {
     document.querySelectorAll('[data-audit-ring-owner]').forEach(owner => owner.removeAttribute('data-audit-ring-owner'))
     if (!element.matches('input, textarea, a[href]')) return false
     ;(element as HTMLElement).focus({ focusVisible: true } as FocusOptions)
@@ -227,8 +236,13 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
         current.setAttribute('data-audit-ring-owner', '')
         return true
       }
+    const slot = await (new Function('return ' + source)() as (e: Element) => Promise<Element | null>)(element)
+    if (slot && ring(getComputedStyle(slot))) {
+      slot.setAttribute('data-audit-ring-owner', '')
+      return true
+    }
     return false
-  })
+  }, activeOtpSlotSource)
   if (keys) {
     await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
     await page.keyboard.press(keys[0]!)
@@ -344,18 +358,25 @@ export async function findForcedColors(roots: Locator[], focused: Locator[]): Pr
   const findings: Finding[] = []
   for (const target of focused) {
     await target.evaluate(element => (element as HTMLElement).focus({ focusVisible: true } as FocusOptions))
-    const outline = await target.evaluate((element, source) => {
+    const outline = await target.evaluate(async (element, [source, slotSource]) => {
       const describe = (new Function('return ' + source)() as (e: Element) => string)
       if (element !== document.activeElement) return { delegated: true, style: '', width: 0, target: describe(element) }
-      // The ring may be drawn on a wrapper through :focus-within (Input Group), inside the specimen only.
+      // The ring may be drawn on a wrapper through :focus-within (Input Group), inside the specimen only,
+      // or on the active slot of a Radix Input OTP.
+      const slot = await (new Function('return ' + slotSource)() as (e: Element) => Promise<Element | null>)(element)
       for (let current: Element | null = element; current && !current.matches('section[data-audit], [data-audit-open], body'); current = current.parentElement) {
         const style = getComputedStyle(current)
         if (style.outlineStyle !== 'none' && (Number.parseFloat(style.outlineWidth) || 0) >= 1)
           return { delegated: false, style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), target: describe(element) }
       }
+      if (slot) {
+        const style = getComputedStyle(slot)
+        if (style.outlineStyle !== 'none' && (Number.parseFloat(style.outlineWidth) || 0) >= 1)
+          return { delegated: false, style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), target: describe(element) }
+      }
       const style = getComputedStyle(element)
       return { delegated: false, style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) || 0, target: describe(element) }
-    }, describeSource)
+    }, [describeSource, activeOtpSlotSource] as const)
     if (outline.delegated) continue
     if (outline.style === 'none' || outline.width < 1)
       findings.push({ check: 'forced-colors', target: outline.target, detail: `focused outline is ${outline.style} ${outline.width}px` })
