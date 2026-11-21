@@ -2180,7 +2180,7 @@
                     "title": "Link",
                     "maxLength": 1000,
                     "default": "",
-                    "pattern": "^(?:$|/(?!/)|#[A-Za-z0-9_-]|https://)"
+                    "pattern": "^(?:$|/(?![/\\\\])|#[A-Za-z0-9_-]|https://)"
                   }
                 },
                 "additionalProperties": false,
@@ -4634,7 +4634,7 @@
                     "title": "Link",
                     "maxLength": 200,
                     "default": "/",
-                    "pattern": "^(/|#|https?://)"
+                    "pattern": "^(?:/(?![/\\\\])|#[A-Za-z0-9_-]|https://)"
                   },
                   "links": {
                     "type": "array",
@@ -4662,7 +4662,7 @@
                           "title": "Link",
                           "maxLength": 200,
                           "default": "/",
-                          "pattern": "^(/|#|https?://)"
+                          "pattern": "^(?:/(?![/\\\\])|#[A-Za-z0-9_-]|https://)"
                         },
                         "description": {
                           "type": "string",
