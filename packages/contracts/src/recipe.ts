@@ -3,6 +3,7 @@ import type { FromSchema } from 'json-schema-to-ts'
 import { recipeSchema } from './recipe-schema.js'
 import { FoundationError } from './diagnostics.js'
 import { assertColorValue } from './validate.js'
+import { assertFontForRole } from './fonts.js'
 import type { Preset } from './types.js'
 export type Recipe = FromSchema<typeof recipeSchema>
 export type RecipeButtonVariant = NonNullable<Recipe['props']['variant']>
@@ -146,6 +147,8 @@ export function validateRecipe(input: unknown): Recipe {
         if (value !== undefined)
           assertColorValue(value, `/overrides/colors/${mode}/${key}`)
       }
+  if (recipe.overrides.fontFamilyId !== undefined)
+    assertFontForRole(recipe.overrides.fontFamilyId, 'fontFamilyId', '/overrides/fontFamilyId')
   if (recipe.icon?.iconOnly && recipe.content.trim() === '')
     throw new FoundationError(
       'INVALID_DATA',

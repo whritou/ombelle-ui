@@ -22,8 +22,8 @@ export function validateRecipeDarkSelector(value: string): string {
   if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
     throw new FoundationError(
       'UNSUPPORTED_PROJECT',
-      'Recipe dark mode requires a single ASCII class selector',
-      value,
+      'Recipe dark mode requires a single ASCII class selector, not ' + JSON.stringify(value.slice(0, 80)),
+      '/darkSelector',
       'Configure a class such as .dark or .theme-dark.',
     )
   return value
@@ -32,8 +32,8 @@ export function validateComponentPresetDarkSelector(value: string): string {
   if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
     throw new FoundationError(
       'UNSUPPORTED_PROJECT',
-      'Component preset dark mode requires a single ASCII class selector',
-      value,
+      'Component preset dark mode requires a single ASCII class selector, not ' + JSON.stringify(value.slice(0, 80)),
+      '/darkSelector',
       'Configure a class such as .dark or .theme-dark.',
     )
   return value

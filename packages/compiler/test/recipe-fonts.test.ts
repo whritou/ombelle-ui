@@ -21,7 +21,7 @@ describe('Button recipe fonts', () => {
 
   it('rejects a font that is not in the registry or cannot be a body font', async () => {
     for (const fontFamilyId of ['no-such-font', 'geist-mono'])
-      await expect(compileRecipe({ recipe: { ...button, overrides: { fontFamilyId } } })).rejects.toMatchObject({ path: '/design/fontFamilyId' })
+      await expect(compileRecipe({ recipe: { ...button, overrides: { fontFamilyId } } })).rejects.toMatchObject({ path: '/overrides/fontFamilyId' })
   })
 })
 
