@@ -48,7 +48,7 @@ const exits: Record<string, number> = {
 const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
-  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--overwrite <path>] [--beside <path>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
+  '> | add button --preset <local.json|ps_code@1> | add --recipe <local.json|rc_code@1> | theme add <local.json> [--cwd <app>] [--overwrite <path>] [--beside <path>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
 function glassNotices(
   preset: Preset,
   ids: readonly ComponentId[] | undefined,
