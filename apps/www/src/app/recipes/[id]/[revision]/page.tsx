@@ -11,6 +11,8 @@ import { catalogRecipesAvailable } from '../../../../snapshots/install-command'
 // Availability, including withdrawal, must be checked on every request.
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+// Anyone can publish these pages, so search engines must not index user-chosen text (RL-11).
+export const metadata = { robots: { index: false, follow: false } }
 
 export default async function Page({
   params,
