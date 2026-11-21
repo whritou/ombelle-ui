@@ -11,6 +11,7 @@ import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
 import { fileChange, matchesRecord } from './components.js'
+import { directoryCaseMismatch } from '../project/paths.js'
 import { transformRecipeArtifact } from '../project/recipe-transform.js'
 export async function planRecipe(
   context: ProjectContext,
@@ -104,7 +105,11 @@ export async function planRecipe(
         artifact.kind,
       ),
       record = lock.artifacts[target.path]
-    if (
+    const caseMismatch = change.action === 'create' ? await directoryCaseMismatch(context.root, target.path) : undefined
+    if (caseMismatch) {
+      change.action = 'conflict'
+      conflict(`Destination directory differs only in case from existing '${caseMismatch}'; rename one of them`, target.path)
+    } else if (
       change.beforeHash !== null &&
       (!matchesRecord(change, record?.sha256) ||
         change.action === 'update')

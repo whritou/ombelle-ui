@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Refuse to create component and recipe files inside an existing directory whose name differs only in case (for example `src/Components/UI`), which worked locally but broke on case-sensitive hosts (CLI-04).
 - Merge theme tokens into `:root` and `.dark` blocks nested in a top-level `@layer` (the Tailwind v3-era shadcn layout) instead of appending unlayered copies that shadowed them, and refuse a selector declared both inside and outside `@layer` (CLI-06).
 - Recognize managed files checked out with CRLF line endings (Git for Windows' default `core.autocrlf=true`) as unedited, and leave them untouched when their content is current (CLI-03). A teammate on Windows no longer gets "Existing source requires an explicit migration" on every `add`, or "Style rules were edited" on `theme add`. A real edit is still a conflict.
 - Mark published preset and recipe pages `noindex, nofollow`, since anyone can publish their text on the official domain (RL-11).
