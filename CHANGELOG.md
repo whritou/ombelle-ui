@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Send security headers on every page (SEC-01): `Content-Security-Policy: frame-ancestors 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `nosniff` and a restrictive `Permissions-Policy`. Other sites can no longer frame the editors, code pages or preview pages, and a preview frame cannot navigate to another site. No `script-src` yet: the App Router's inline scripts need per-request nonces.
 - Tell people what a failed publication or install means (RL-08). The editors show the wait from `Retry-After`, say when the daily limit is everyone's rather than theirs, and word a full service as "Publishing is paused" with the JSON export as the way forward. The CLI names HTTP 404, 410 (withdrawn) and 429 (with the retry delay) instead of a generic failure.
 - Answer an exhausted per-minute publication attempt budget from a single read, without taking the publication write lock, and count Postgres attempts with one atomic conditional upsert outside the capacity lock (RL-02). A client flooding POSTs no longer queues every other visitor's publication behind its 429s.
 - Accept only same-origin paths, `#fragments` and `https://` URLs in Navigation Menu links, as Breadcrumb does, and refuse `/\` paths in both, which browsers read as protocol-relative (SEC-02). Published Navigation Menu recipes whose links use `http://`, `//` or a bare host, and Breadcrumb recipes with a `/\` link, no longer verify or install.
