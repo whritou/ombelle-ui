@@ -8,6 +8,7 @@ import {
   type ProjectConfig,
   type ComponentId,
 } from '@ombelle/contracts'
+import { planDependencies } from './dependencies.js'
 import { sha256, canonicalize, resolvePreset } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import {
@@ -261,16 +262,9 @@ export async function planAdd(
         sha256: await sha256(c.afterContent),
       }
   }
-  const installed =
-    context.manager === 'bun'
-      ? (context.packageJson.dependencies ?? {})
-      : {
-          ...context.packageJson.devDependencies,
-          ...context.packageJson.dependencies,
-        }
-  plan.dependencyPlan = result.dependencies.filter(
-    (d) => installed[d.name] !== d.version,
-  )
+  const dependencies = planDependencies(context, result.dependencies)
+  plan.dependencyPlan = dependencies.plan
+  plan.notices.push(...dependencies.notices)
   await appendState(plan, context, result, lock)
   const targets = new Set<string>()
   for (const c of plan.changes) {

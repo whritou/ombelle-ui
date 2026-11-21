@@ -239,8 +239,8 @@ export async function runCli(
       const compiled = await compileInstallableRecipe({ recipe, darkSelector: context.darkSelector, preset: recipeInput!.snapshot?.preset })
       plan = await planRecipe(context, compiled)
       const data = compiled.recipe.data
-      plan.notices = glassNotices(compiled.preset.data, [data.component], false,
-        data.schemaVersion === '1.0' ? data.overrides : undefined)
+      plan.notices = [...plan.notices, ...glassNotices(compiled.preset.data, [data.component], false,
+        data.schemaVersion === '1.0' ? data.overrides : undefined)]
     } else if (command === 'add' && flags['--preset']) {
       const preset = presetInput!.preset
       const compiled = await compileButtonPreset({
@@ -249,7 +249,7 @@ export async function runCli(
         glassContrast: 'report',
       })
       plan = await planComponentPreset(context, compiled)
-      plan.notices = glassNotices(compiled.preset.data, ['button'])
+      plan.notices = [...plan.notices, ...glassNotices(compiled.preset.data, ['button'])]
     } else {
       let preset: Preset | undefined = context.preset
       if (command !== 'add') {

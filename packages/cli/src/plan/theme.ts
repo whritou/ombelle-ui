@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { planDependencies } from './dependencies.js'
 import postcss, { type Container, type Rule, type AtRule } from 'postcss'
 import { assertLockedEdition } from '../project/edition.js'
 import {
@@ -284,16 +285,12 @@ export async function planTheme(
   plan.changes.unshift(change)
   // A theme needs the packages its fonts import. Only presets that opt into
   // registry fonts have any; every other preset keeps an empty dependency plan.
-  const installedPackages =
-    context.manager === 'bun'
-      ? (context.packageJson.dependencies ?? {})
-      : { ...context.packageJson.devDependencies, ...context.packageJson.dependencies }
   // Only font packages: a theme never installs component dependencies, even when the caller
   // compiled the preset with components and the result lists theirs.
   const fontPackages = result.dependencies.filter((d) => d.name.startsWith('@fontsource'))
-  plan.dependencyPlan = fontPackages.filter(
-    (d) => installedPackages[d.name] !== d.version,
-  )
+  const dependencies = planDependencies(context, fontPackages)
+  plan.dependencyPlan = dependencies.plan
+  plan.notices.push(...dependencies.notices)
   const typography = resolveTypography(result.preset.data.design)
   const fontCss = [...typography.imports, fontRuleBlock(typography)].filter(Boolean).join('\n')
   if (!fullStyle && fontCss)

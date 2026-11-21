@@ -6,6 +6,7 @@ import {
   type InstallPlan,
   type ProjectContext,
 } from '@ombelle/contracts'
+import { planDependencies } from './dependencies.js'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
@@ -179,15 +180,8 @@ export async function planComponentPreset(
     )
   plan.changes.push(state)
 
-  const installed =
-    context.manager === 'bun'
-      ? (context.packageJson.dependencies ?? {})
-      : {
-          ...context.packageJson.devDependencies,
-          ...context.packageJson.dependencies,
-        }
-  plan.dependencyPlan = result.dependencies.filter(
-    (dependency) => installed[dependency.name] !== dependency.version,
-  )
+  const dependencies = planDependencies(context, result.dependencies)
+  plan.dependencyPlan = dependencies.plan
+  plan.notices.push(...dependencies.notices)
   return plan
 }

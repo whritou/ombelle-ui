@@ -87,12 +87,12 @@ describe('component preset integration contracts', () => {
       'tailwind-merge': '3.7.0',
     }
     expect((await planComponentPreset(context, result)).dependencyPlan).toEqual(
-      [{ name: 'clsx', version: '2.1.1' }],
+      [{ name: 'clsx', version: '2.1.1', current: '2.1.0' }],
     )
     context.manager = 'bun'
     context.bunLockfile = 'bun.lock'
     const plan = await planComponentPreset(context, result)
-    expect(plan.dependencyPlan).toEqual(result.dependencies)
+    expect(plan.dependencyPlan).toEqual(result.dependencies.map(d => d.name === 'clsx' ? { ...d, current: '2.1.0' } : d))
     expect(plan.bunLockfile).toBe('bun.lock')
   })
 })

@@ -112,7 +112,7 @@ export function formatPlan(
     (plan.managerWarning ? '\nWarning: ' + plan.managerWarning : '') +
     (plan.dependencyPlan.length
       ? '\nDependencies: ' +
-        plan.dependencyPlan.map((d) => d.name + '@' + d.version).join(', ')
+        plan.dependencyPlan.map((d) => d.name + '@' + d.version + (d.current === undefined ? '' : ' (replaces ' + d.current + ')')).join(', ')
       : '')
   )
 }
