@@ -25,7 +25,7 @@ export function PublishedRecipe({ snapshot, origin, name = 'Button' }: { snapsho
     void (async () => {
       try {
         const verified = await verifyInstallableRecipeSnapshot(snapshot)
-        const compiled = await compileInstallableRecipe({ recipe: verified.recipe })
+        const compiled = await compileInstallableRecipe({ recipe: verified.recipe, preset: verified.preset })
         if (active && latest.current === snapshot) setPreview({ snapshot, result: compiled })
       } catch {
         if (active && latest.current === snapshot) setNotice('Preview unavailable. Verified recipe JSON remains available below.')

@@ -110,7 +110,7 @@ type CompileResult = {
 
 Generation order is validate, resolve pinned releases, expand defaults, merge allowlisted overrides, check compatibility, generate source and CSS, format with a pinned formatter, and compute content hashes. Project paths and import aliases are applied in a later deterministic installation transform.
 
-Do not include the current timestamp, random identifiers, machine paths, or network-dependent defaults in hashed content. Record operational timestamps separately. Freeze token defaults and output order in each catalog release.
+Do not include the current timestamp, random identifiers, machine paths, or network-dependent defaults in hashed content. Record operational timestamps separately. Keep output order fixed. `catalogRelease` and `compilerVersion` name the input contract version, not catalog bytes: templates, stylesheets and defaults change between package releases. Built-in presets, which supply the family defaults, are frozen per `id@revision`, and a published snapshot is identified by its stored bytes (decision 0009).
 
 ## Component and style separation
 

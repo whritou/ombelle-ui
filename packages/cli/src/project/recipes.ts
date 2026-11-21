@@ -1,6 +1,7 @@
 import {
   FoundationError,
   type InstalledRecipe,
+  type Preset,
   type ProjectLock,
 } from '@ombelle/contracts'
 import { canonicalize, compileInstallableRecipe } from '@ombelle/compiler'
@@ -27,6 +28,8 @@ export async function validateInstalledRecipes(
       !object(item) ||
       !object(item.recipe) ||
       !object(item.artifacts) ||
+      !object(item.preset) ||
+      !object(item.preset.data) ||
       typeof item.darkSelector !== 'string'
     )
       throw bad()
@@ -35,6 +38,8 @@ export async function validateInstalledRecipes(
       canonical = await compileInstallableRecipe({
         recipe: item.recipe.data,
         darkSelector: item.darkSelector,
+        // The row's stored preset, so a later change to the built-in cannot invalidate the lock (decision 0009).
+        preset: item.preset.data as Preset,
       })
     } catch {
       throw bad()

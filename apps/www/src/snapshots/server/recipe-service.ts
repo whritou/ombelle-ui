@@ -1,4 +1,4 @@
-import { FoundationError, type InstallableRecipeSnapshot, type SnapshotReference } from '@ombelle/contracts'
+import { FoundationError, isSupportedContractRelease, type InstallableRecipeSnapshot, type SnapshotReference } from '@ombelle/contracts'
 import { normalizePublishedInstallableRecipe, verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
@@ -48,7 +48,7 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
         if (ref && typeof ref === 'object' && !Array.isArray(ref))
           for (const field of ['catalogRelease', 'compilerVersion']) {
             const release = (ref as Record<string, unknown>)[field]
-            if (typeof release === 'string' && release !== '0.1.0')
+            if (typeof release === 'string' && !isSupportedContractRelease(release))
               throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
           }
       }

@@ -1,6 +1,6 @@
 import http, { type IncomingMessage } from 'node:http'
 import https from 'node:https'
-import { FoundationError } from '@ombelle/contracts'
+import { FoundationError, isSupportedContractRelease, supportedContractReleases } from '@ombelle/contracts'
 
 export async function fetchPublication<T>(url: URL, reference: string, verify: (input: unknown) => Promise<T>): Promise<T> {
   const controller = new AbortController()
@@ -71,11 +71,11 @@ export async function fetchPublication<T>(url: URL, reference: string, verify: (
             ? (value as Record<string, unknown>)[segment] : undefined
         if (
           typeof value === 'string' && /^\d+\.\d+\.\d+$/.test(value) &&
-          value !== '0.1.0'
+          !isSupportedContractRelease(value)
         )
           throw new FoundationError(
             'UNSUPPORTED_RELEASE', `Snapshot release ${value} is not supported`,
-            error.path, 'Use a snapshot for catalog/compiler 0.1.0.',
+            error.path, 'Use a snapshot for catalog/compiler ' + supportedContractReleases.join(', ') + '.',
           )
       }
       throw error

@@ -235,7 +235,8 @@ export async function runCli(
           'Run init --preset <local.json>.',
         )
       const recipe = recipeInput!.recipe
-      const compiled = await compileInstallableRecipe({ recipe, darkSelector: context.darkSelector })
+      // A recipe code compiles against the preset its snapshot stored, not today's built-in (decision 0009).
+      const compiled = await compileInstallableRecipe({ recipe, darkSelector: context.darkSelector, preset: recipeInput!.snapshot?.preset })
       plan = await planRecipe(context, compiled)
       const data = compiled.recipe.data
       plan.notices = glassNotices(compiled.preset.data, [data.component], false,

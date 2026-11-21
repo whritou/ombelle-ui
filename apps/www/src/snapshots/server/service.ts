@@ -1,4 +1,4 @@
-import { FoundationError, isStyleFamily, type PresetSnapshot, type SnapshotReference } from '@ombelle/contracts'
+import { FoundationError, isStyleFamily, isSupportedContractRelease, type PresetSnapshot, type SnapshotReference } from '@ombelle/contracts'
 import { normalizePublishedPreset, verifyPresetSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
@@ -38,10 +38,9 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
       const input: unknown = (body as { preset: unknown }).preset
       if (input && typeof input === 'object' && !Array.isArray(input)) {
         const fields = input as Record<string, unknown>
-        const releases = { catalogRelease: '0.1.0', compilerVersion: '0.1.0' }
         // 1.1 is a preset that uses font pairs; the preset validator checks that the version and the fields agree.
         const schemaVersions = ['1.0', '1.1']
-        if (Object.entries(releases).some(([key, value]) => typeof fields[key] === 'string' && fields[key] !== value) ||
+        if (['catalogRelease', 'compilerVersion'].some(key => typeof fields[key] === 'string' && !isSupportedContractRelease(fields[key])) ||
             (typeof fields.schemaVersion === 'string' && !schemaVersions.includes(fields.schemaVersion)) ||
             (typeof fields.styleFamily === 'string' && !isStyleFamily(fields.styleFamily)))
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })

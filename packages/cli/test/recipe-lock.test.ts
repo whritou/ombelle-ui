@@ -134,3 +134,16 @@ it('rejects untracked occupied files even for identical content and rolls back d
     if (key.startsWith('.ombelle-transactions/')) delete after[key]
   expect(after).toEqual(before)
 })
+it('keeps accepting a recipe installed before its built-in preset changed (CMP-01)', async () => {
+  const { presetWithDefaults } = await import('@ombelle/compiler')
+  const old = JSON.parse(await fs.readFile(new URL('../../compiler/test/fixtures/legacy-presets/flat-before-2026-11-04.json', import.meta.url), 'utf8'))
+  const stored = presetWithDefaults(old, { presets: { flat: old } } as never)
+  const root = await setup()
+  const recipe = { ...example, presetRef: { ...example.presetRef, id: 'builtin-flat' } }
+  // What the CLI installed when builtin-flat@1 still held the old palette.
+  const result = await compileRecipe({ recipe, preset: stored })
+  expect(result.preset.data).toEqual(stored)
+  await applyPlan(await planRecipe(await inspectProject(root), result), { dependencies: async () => {} })
+  const lock = (await inspectProject(root)).lock!
+  expect(lock.recipes!['rc_primary-button@2'].preset.data).toEqual(stored)
+})

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Keep published preset and recipe codes working across catalog changes (CMP-01, CMP-02, decision 0009). A snapshot now verifies against its own stored bytes and hash, never against the installed catalog's defaults or built-in presets, so codes published before a built-in preset changed (Button recipes on Flat before 4 November, Neo Brutalism presets before `shadowColor`) verify again. A recipe code now compiles against the preset its snapshot stored, and the project lock checks installed recipes against the preset their row stored. `catalogRelease` and `compilerVersion` are documented as the contract version (still `0.1.0`), and built-in presets are frozen per `id@revision` by a test. No snapshot, lock or hash format changes; installing a recipe code whose built-in has changed since publication now produces the stored preset's tokens and scope instead of today's built-in's.
+
 ## 0.9.1 — 21 November 2026
 
 - Frame only the plain Meter bar. The ring drawing now carries `data-mode="circle"` (it read `bar`), and family frames name `[data-mode='bar']`: Papier no longer boxes labelled segments and Retro futurism no longer boxes the ring.

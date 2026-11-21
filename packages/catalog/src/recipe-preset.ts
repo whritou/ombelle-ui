@@ -1,7 +1,7 @@
-import { FoundationError, type Recipe, type Preset } from '@ombelle/contracts'
+import { FoundationError, isSupportedContractRelease, type Recipe, type Preset } from '@ombelle/contracts'
 import { getCatalog } from './index.js'
 export function resolveRecipePreset(ref: Recipe['presetRef']): Preset {
-  if (ref.compilerVersion !== '0.1.0')
+  if (!isSupportedContractRelease(ref.compilerVersion))
     throw new FoundationError(
       'UNSUPPORTED_RELEASE',
       'Unsupported recipe compiler version',

@@ -1,5 +1,5 @@
 import {
-  usesExtendedTypography, validateComponentRecipe, validateInstallableRecipe,
+  contractRelease, usesExtendedTypography, validateComponentRecipe, validateInstallableRecipe,
   type Artifact, type ComponentRecipeId, type ComponentRecipeCompileResult, type InstallableRecipeCompileResult,
   type ComponentRecipeAppearance, type Preset, type StyleFamily,
 } from '@ombelle/contracts'
@@ -14,12 +14,17 @@ import { compileComponentRecipeStyles } from './component-recipe-styles.js'
 import { recipeTemplateSlots, scopeRecipeGlassFilter, scopeRecipeTemplate } from './component-recipe-source.js'
 import { sha256 } from './hash.js'
 import { compileRecipe } from './recipe.js'
-import { resolvePreset } from './resolve.js'
+import { pinnedRecipePreset, resolvePreset, storedPresetIdentity } from './resolve.js'
 import { describeComponentRecipe, renderRecipeSpecimen, specimenExports, specimenUsesLocalIds } from './recipe-specimen.js'
 import { validateRecipeDarkSelector } from './recipe-styles.js'
 import { headingSlots, monoSlots, resolveTypography, stripFontImports } from './typography.js'
 
-type CompileInput = { recipe: unknown; darkSelector?: string }
+type CompileInput = {
+  recipe: unknown
+  darkSelector?: string
+  /** The resolved built-in preset a snapshot or lock stored; used instead of today's built-in (decision 0009). */
+  preset?: Preset
+}
 
 export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeAppearance['glass']): Preset {
   return preset.styleFamily === 'liquid-glass' && glass && Object.keys(glass).length
@@ -32,7 +37,7 @@ export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeA
  * style rules or a mono slot). The body font always applies. A role the component never shows is not
  * imported or installed.
  */
-export function componentRecipeFontRoles(component: ComponentRecipeId, family: StyleFamily, catalogRelease = '0.1.0'): { heading: boolean; mono: boolean } {
+export function componentRecipeFontRoles(component: ComponentRecipeId, family: StyleFamily, catalogRelease = contractRelease): { heading: boolean; mono: boolean } {
   const template = getTemplate(getCatalog(catalogRelease), component)
   const slots = recipeTemplateSlots(template)
   return {
@@ -67,7 +72,7 @@ export async function compileInstallableRecipe(input: CompileInput): Promise<Ins
 
 export async function compileComponentRecipe(input: CompileInput): Promise<ComponentRecipeCompileResult> {
   const data = validateComponentRecipe(input.recipe)
-  const builtin = resolveRecipePreset(data.presetRef)
+  const builtin = input.preset ? pinnedRecipePreset(input.preset, data.presetRef) : resolveRecipePreset(data.presetRef)
   const { catalogRelease, compilerVersion } = data.presetRef
   const catalog = getCatalog(catalogRelease)
   const template = getTemplate(catalog, data.component)
@@ -77,7 +82,8 @@ export async function compileComponentRecipe(input: CompileInput): Promise<Compo
   const result = await compile({
     preset: effectivePreset, catalogRelease, compilerVersion, componentIds: [data.component], glassContrast: 'report',
   })
-  const preset = effectivePreset === builtin ? result.preset : await resolvePreset(builtin, catalog)
+  const preset = input.preset ? await storedPresetIdentity(builtin)
+    : effectivePreset === builtin ? result.preset : await resolvePreset(builtin, catalog)
   const { provenance } = result
   const darkSelector = validateRecipeDarkSelector(input.darkSelector ?? '.dark')
   const recipe = { data, hash: await sha256(canonicalize(data)) }
