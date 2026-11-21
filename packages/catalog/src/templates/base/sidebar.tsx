@@ -237,7 +237,9 @@ export function SidebarMenuButton({ isActive = false, tooltip, href, type = 'but
   if (!tooltip) return element
   return (
     // Expanded, the label is visible, so the tooltip stays closed; the wrapper stays mounted so focus is kept on toggle.
-    <TooltipPrimitive.Root open={tip && state === 'collapsed' && !isMobile} onOpenChange={open => setTip(open)}>
+    // A hover while expanded is not kept: the primitive never reports closing a tooltip it was not showing,
+    // so a kept hover would open every tooltip hovered before collapsing.
+    <TooltipPrimitive.Root open={tip && state === 'collapsed' && !isMobile} onOpenChange={open => setTip(open && state === 'collapsed' && !isMobile)}>
       <TooltipPrimitive.Trigger render={element} />
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Positioner side="right" align="center" sideOffset={8}>
