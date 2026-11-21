@@ -22,6 +22,8 @@ const columns: DataTableColumn<Release>[] = [
   { accessorKey: 'area', header: 'Area' },
   { accessorKey: 'status', header: 'Status' },
 ]
+// A phone pane fits two columns: Area goes, so Status is not cut off at the pane's edge.
+const phoneColumns = columns.filter(column => !('accessorKey' in column && column.accessorKey === 'area'))
 const places = ['Overview', 'Releases', 'Presets', 'Members']
 // Side by side, a phone leaves each pane a word wide: there the split stacks, table above notes.
 const stacked = '(max-width: 640px)'
@@ -104,14 +106,14 @@ export function WorkspaceScene(props: SceneProps) {
             <div className="scene-workspace-bar"><SidebarTrigger /><span>Releases</span></div>
             {show('resizable', 'Resizable',
               <div className="scene-workspace-split" data-stacked={vertical ? '' : undefined}>
-              <ResizablePanelGroup key={vertical ? 'vertical' : 'horizontal'} direction={vertical ? 'vertical' : 'horizontal'}>
-                <ResizablePanel defaultSize="60%" minSize="35%">
+              <ResizablePanelGroup direction={vertical ? 'vertical' : 'horizontal'}>
+                <ResizablePanel defaultSize={vertical ? "55%" : "60%"} minSize="35%">
                   <div className="scene-workspace-pane">{show('data-table', 'Data Table',
-                    <DataTable aria-label="Releases" columns={columns} data={releases} filterColumn="name" filterLabel="Filter releases"
+                    <DataTable aria-label="Releases" columns={vertical ? phoneColumns : columns} data={releases} filterColumn="name" filterLabel="Filter releases"
                       facets={[{ column: 'status', title: 'Status' }]} pagination pageSize={5} />)}</div>
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                <ResizablePanel defaultSize="40%" minSize="25%">
+                <ResizablePanel defaultSize={vertical ? "45%" : "40%"} minSize="25%">
                   <div className="scene-workspace-pane">{show('prose', 'Prose',
                     <Prose measure="narrow">
                       <h2>0.9 app shell</h2>

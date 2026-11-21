@@ -289,7 +289,7 @@ html[data-backdrop='glass'] .preset-scene :is(h1, .scene-header p) {
 }
 .preset-scene .scene-workspace-split[data-stacked] {
   flex: none;
-  block-size: 56rem;
+  block-size: 66rem;
 }
 .preset-scene .scene-workspace-bar {
   display: flex;
