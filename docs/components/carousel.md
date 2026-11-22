@@ -1,6 +1,6 @@
 # Carousel
 
-Carousel shows slides that snap as they scroll, with previous and next buttons, one dot per slide and a counter. It is built on CSS scroll snap, so touch, trackpad and keyboard scrolling work without a script; the buttons and dots only scroll a slide into view. It never autoplays, so it needs no pause control. It is available in all five families in light and dark mode; one client template serves the Radix and Base UI editions, with no dependency beyond React and lucide-react.
+Carousel shows slides that snap as they scroll, with previous and next buttons, one dot per slide and a counter. It is built on CSS scroll snap, so touch, trackpad and keyboard scrolling work without a script; the buttons and dots only scroll a slide into view. It never autoplays, so it needs no pause control. It is available in all eight families in light and dark mode; one client template serves the Radix and Base UI editions, with no dependency beyond React and lucide-react.
 
 This component requires CLI **0.7.6** or later: `npx @ombelle-ui/cli@0.7.6 add carousel`. For a built local checkout:
 

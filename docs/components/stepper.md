@@ -1,6 +1,6 @@
 # Stepper
 
-Stepper shows the ordered steps of a process and the user's place in it, horizontally or vertically. It only displays status: it does not route, and its steps take no focus. It is available in all five families in light and dark mode, in one template for both editions, with no client boundary.
+Stepper shows the ordered steps of a process and the user's place in it, horizontally or vertically. It only displays status: it does not route, and its steps take no focus. It is available in all eight families in light and dark mode, in one template for both editions, with no client boundary.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add stepper`. For a built local checkout:
 

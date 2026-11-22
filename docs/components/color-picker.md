@@ -1,6 +1,6 @@
 # Color Picker
 
-Color Picker is a colour field: a swatch button and a text field. The button opens a popover with a saturation and brightness area, a hue slider, a format row with an eyedropper, swatches and a contrast readout. `ColorPickerPair` groups a light and a dark picker for one design token. It is available in all five families in light and dark mode, with Radix and Base UI editions. The template is a client component.
+Color Picker is a colour field: a swatch button and a text field. The button opens a popover with a saturation and brightness area, a hue slider, a format row with an eyedropper, swatches and a contrast readout. `ColorPickerPair` groups a light and a dark picker for one design token. It is available in all eight families in light and dark mode, with Radix and Base UI editions. The template is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add color-picker`. For a built local checkout:
 

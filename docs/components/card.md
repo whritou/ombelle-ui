@@ -4,7 +4,7 @@ Card groups related presentational content. It supports `flat`, `minimalist`, `n
 
 ## Install and compose
 
-Build the packages and initialize the target project with a local preset before using the private local CLI:
+Build the packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages

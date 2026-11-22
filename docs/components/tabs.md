@@ -4,7 +4,7 @@ Tabs wraps reviewed Radix Tabs primitives, with flat, minimalist, neo-brutalism,
 
 ## Install and compose
 
-Build packages and initialize the target project with a local preset before using the private local CLI:
+Build packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages

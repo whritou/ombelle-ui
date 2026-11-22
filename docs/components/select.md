@@ -4,7 +4,7 @@ Select is a custom single-value listbox built on the reviewed Radix Select primi
 
 ## Install and compose
 
-Build packages and initialize the target project with a local preset, then use the private local CLI:
+Build packages and initialize the target project with a local preset, then use the CLI:
 
 ```powershell
 pnpm build:packages

@@ -4,7 +4,7 @@ Badge displays a short status or category as a native `span`. It is available in
 
 ## Install and use
 
-Initialize the project with a local preset, then install using the private built CLI:
+Initialize the project with a local preset, then install using the CLI:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add badge --cwd APP --dry-run --json

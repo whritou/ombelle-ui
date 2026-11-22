@@ -1,6 +1,6 @@
 # Password Field
 
-Password Field is a password input with a show toggle, a Caps Lock notice and an optional strength meter. Showing the value keeps the caret, the selection and the input element, so password managers keep working, and the value is hidden again whenever its form submits. It is available in all five families in light and dark mode; one client template serves the Radix and Base UI editions.
+Password Field is a password input with a show toggle, a Caps Lock notice and an optional strength meter. Showing the value keeps the caret, the selection and the input element, so password managers keep working, and the value is hidden again whenever its form submits. It is available in all eight families in light and dark mode; one client template serves the Radix and Base UI editions.
 
 This component requires CLI **0.7.6** or later: `npx @ombelle-ui/cli@0.7.6 add password-field`. For a built local checkout:
 

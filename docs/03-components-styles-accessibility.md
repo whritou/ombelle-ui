@@ -3,7 +3,7 @@
 ## Component authoring contract
 
 The catalog expansion in 0.7.2 adds Input Group, Sheet, Alert Dialog,
-Breadcrumb, Pagination and Toast in all five families. Liquid glass is stable,
+Breadcrumb, Pagination and Toast in all eight families. Liquid glass is stable,
 without an accessibility guarantee. Both Radix and Base UI editions are supported; Base UI Toast uses
 its native manager API. Tabs appearances, Table density/striping, Card surfaces,
 Badge size/dot composition and Alert success/warning/info intents are also
@@ -14,7 +14,7 @@ The public CLI 0.7.2 includes these additions and their new API options.
 The 0.7.3 display components add [Spinner](components/spinner.md),
 [Kbd](components/kbd.md), [Empty](components/empty.md),
 [Field](components/field.md), [Meter](components/meter.md) and
-[Stepper](components/stepper.md) in all five families, with Radix and Base UI
+[Stepper](components/stepper.md) in all eight families, with Radix and Base UI
 editions and recipe editors. Field is a composition that wires a label, hint and
 error to the control you already use. Meter covers segmented progress. Liquid
 glass is stable, without an accessibility guarantee. Installing them needs CLI 0.7.3 or later. See the [display components design](internal/superpowers/specs/2026-11-09-display-components-design.md)
@@ -23,7 +23,7 @@ and the [evidence](evidence/display-components.md).
 The 0.7.3 form controls add [Slider](components/slider.md),
 [Toggle Group](components/toggle-group.md), [Chip](components/chip.md),
 [Tag Input](components/tag-input.md) and [Input OTP](components/input-otp.md)
-in all five families, with Radix and Base UI editions and recipe editors. The
+in all eight families, with Radix and Base UI editions and recipe editors. The
 website editor uses the catalog Toggle Group, Slider and Chip, compiled at
 build time, so its single choices are radio groups with one Tab stop. See the
 [form controls design](internal/superpowers/specs/2026-11-10-form-controls-design.md)
@@ -48,7 +48,7 @@ The 0.7.6 components add [Password Field](components/password-field.md),
 and [Toolbar](components/toolbar.md), and the parts
 [Form, FormErrorSummary, FieldSet and FieldLegend](components/field.md#form-and-fieldset-076)
 in Field and [Checkbox Group](components/checkbox.md#checkbox-group-076) in
-Checkbox, in all five families with Radix and Base UI editions and recipe
+Checkbox, in all eight families with Radix and Base UI editions and recipe
 editors. A Form leaves validation to the browser until it hydrates, then
 collects its fields' errors on submit into a summary that takes focus. A
 Password Field's toggle keeps the caret and the input element. A Carousel
@@ -61,7 +61,7 @@ and the [evidence](evidence/components-076.md).
 The 0.7.5 primitives add [Toggle](components/toggle.md),
 [Collapsible](components/collapsible.md), [Scroll Area](components/scroll-area.md),
 [Button Group](components/button-group.md) and [Item](components/item.md) in
-all five families, with Radix and Base UI editions and recipe editors. A Scroll
+all eight families, with Radix and Base UI editions and recipe editors. A Scroll
 Area viewport is a keyboard stop only while its content overflows, closed
 Collapsible content leaves the Tab order, and an Item link keeps its link role
 inside an Item Group. Command, Combobox, Select and Sheet draw the family
@@ -72,7 +72,7 @@ and the [evidence](evidence/primitives-075.md).
 
 The 0.7.5 editor inputs add [Number Input](components/number-input.md) and
 [Color Picker](components/color-picker.md), with `ColorPickerPair` for a light
-and dark token, in all five families with Radix and Base UI editions and recipe
+and dark token, in all eight families with Radix and Base UI editions and recipe
 editors. A Number Input keeps a half-typed value and reports it instead of
 clearing it. The Color Picker's area is a 2D slider with spoken saturation and
 brightness, its contrast readout states the WCAG level in text, and its
@@ -94,7 +94,7 @@ See the [design](internal/superpowers/specs/2026-11-12-variants-075-design.md) a
 
 The 0.7.5 [Code Block](components/code-block.md) shows read-only source with
 Copy: a file block with a title and line numbers, or a command block with one
-tab per package manager. It is available in all five families with Radix and
+tab per package manager. It is available in all eight families with Radix and
 Base UI editions and a recipe editor, on the board's dark surface in both
 modes. Its own highlighter covers TSX, CSS, JSON and shell, and another
 highlighter's output can be passed as children. The code is a named, scrollable
@@ -109,7 +109,7 @@ without an accessibility guarantee. Installing it needs CLI 0.7.5 or later. See 
 
 The 0.7.3 overlays add [Combobox](components/combobox.md),
 [Command](components/command.md), [Hover Card](components/hover-card.md) and
-[Context Menu](components/context-menu.md) in all five families, with Radix and
+[Context Menu](components/context-menu.md) in all eight families, with Radix and
 Base UI editions and recipe editors. The website editor gains a Ctrl+K command
 palette, loaded on first open, and searchable Combobox pickers for the Button
 icon and the glass preset. See the
@@ -117,7 +117,7 @@ icon and the glass preset. See the
 and the [evidence](evidence/overlays-search-073.md).
 
 The 0.7.3 [Calendar](components/calendar.md) chooses a date or a range in all
-five families, with Radix and Base UI editions and a recipe editor. Both
+the eight families, with Radix and Base UI editions and a recipe editor. Both
 editions use react-day-picker 10.0.2 for the grid; its Date Picker opens the
 Calendar in the edition's popover. The preview scenes use it; the website
 editor does not. See the [Calendar design](internal/superpowers/specs/2026-11-10-calendar-design.md)
