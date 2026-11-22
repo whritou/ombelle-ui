@@ -143,8 +143,11 @@ export async function prepareManager(
 ): Promise<PreparedManager> {
   if (manager === 'bun') return prepareBun(root,await resolveBunExecutable(),bunLockfile ?? 'bun.lock',deps)
   const launcher = await resolveManager(manager)
-  const executable = await resolveNodeExecutable()
-  const prepared = { executable, prefixArgs: [launcher.entry, ...launcher.prefixArgs] }
+  // pnpm's standalone installer ships a native binary, which runs without Node (INS-04).
+  const executable = launcher.native ? launcher.entry : await resolveNodeExecutable()
+  const prepared = launcher.native
+    ? { executable, prefixArgs: launcher.prefixArgs }
+    : { executable, prefixArgs: [launcher.entry, ...launcher.prefixArgs] }
   if (manager !== 'yarn') return prepared
   const result = await executeScript(
     executable,
@@ -192,7 +195,20 @@ function executeScript(
   })
 }
 
-type ManagerLauncher = { entry: string; prefixArgs: string[] }
+/**
+ * Resolves the manager launcher and the runtime an install would use, running nothing but the runtime's
+ * `--version`. A dry run calls it to report an install that could not start.
+ */
+export async function checkInstallRuntime(manager: PackageManager): Promise<void> {
+  if (manager === 'bun') {
+    await resolveBunExecutable()
+    return
+  }
+  const launcher = await resolveManager(manager)
+  if (!launcher.native) await resolveNodeExecutable()
+}
+
+type ManagerLauncher = { entry: string; prefixArgs: string[]; native?: boolean }
 
 export async function managerEntry(manager: PackageManager): Promise<string> {
   if (manager === 'bun') return resolveBunExecutable()
@@ -216,6 +232,10 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
     await fs.access(inherited)
     return { entry: inherited, prefixArgs: [] }
   }
+  // `pnpm dlx` and `yarn dlx` set no npm_execpath, but name themselves in the user agent. When corepack
+  // launched them, the matching release sits in corepack's cache (INS-04).
+  const cached = await corepackEntry(manager, process.env)
+  if (cached) return { entry: cached, prefixArgs: [] }
   for (const directory of (process.env.PATH ?? process.env.Path ?? '').split(
     path.delimiter,
   )) {
@@ -223,13 +243,15 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
       manager === 'npm'
         ? ['npm-cli.js', 'npm.cmd', 'npm']
         : manager === 'pnpm'
-          ? ['pnpm.cjs', 'pnpm.mjs', 'pnpm.js', 'pnpm.cmd', 'pnpm']
+          ? ['pnpm.cjs', 'pnpm.mjs', 'pnpm.js', 'pnpm.cmd', 'pnpm', ...(process.platform === 'win32' ? ['pnpm.exe'] : [])]
           : ['yarn.cjs', 'yarn.mjs', 'yarn.js', 'yarn.cmd', 'yarn']
     for (const name of names) {
       try {
         const real = await fs.realpath(path.join(directory, name))
         if (entryPattern.test(path.basename(real)))
           return { entry: real, prefixArgs: [] }
+        if (manager === 'pnpm' && (name === 'pnpm' || name === 'pnpm.exe') && (await isNativeExecutable(real)))
+          return { entry: real, prefixArgs: [], native: true }
         if (manager === 'npm' && name === 'npm.cmd') {
           const target = path.join(
             path.dirname(real),
@@ -293,8 +315,55 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
     'UNSUPPORTED_PROJECT',
     'Cannot locate a ' + manager + ' JavaScript entry without shell evaluation',
     undefined,
-    'Install ' + manager + ' and add its launcher to PATH.',
+    'Install ' + manager + ' and add its launcher to PATH' +
+      (manager === 'yarn' ? ', or set OMBELLE_YARN_ENTRY to its JavaScript launcher.' : '.'),
   )
+}
+
+/** The corepack cache root: COREPACK_HOME, else corepack's per-platform default. */
+export function corepackHome(env: NodeJS.ProcessEnv): string | undefined {
+  if (env.COREPACK_HOME) return env.COREPACK_HOME
+  if (process.platform === 'win32')
+    return env.LOCALAPPDATA ? path.join(env.LOCALAPPDATA, 'node', 'corepack') : undefined
+  const cache = env.XDG_CACHE_HOME || (env.HOME ? path.join(env.HOME, '.cache') : undefined)
+  return cache ? path.join(cache, 'node', 'corepack') : undefined
+}
+
+/** The JavaScript entry of the manager release the user agent names, from corepack's cache. */
+export async function corepackEntry(
+  manager: PackageManager,
+  env: NodeJS.ProcessEnv,
+): Promise<string | undefined> {
+  if (manager !== 'pnpm' && manager !== 'yarn') return undefined
+  const agent = /^(pnpm|yarn)\/(\d+\.\d+\.\d+(?:-[\w.]+)?)(?:\s|$)/.exec(env.npm_config_user_agent ?? '')
+  const home = corepackHome(env)
+  if (!agent || agent[1] !== manager || !home) return undefined
+  const release = path.join(home, 'v1', manager, agent[2])
+  const candidates = manager === 'pnpm'
+    ? ['bin/pnpm.cjs', 'bin/pnpm.mjs']
+    : ['yarn.js', 'bin/yarn.js']
+  for (const candidate of candidates) {
+    const file = path.join(release, candidate)
+    try {
+      if ((await fs.stat(file)).isFile()) return file
+    } catch (e) {
+      if (!['ENOENT', 'ENOTDIR'].includes((e as NodeJS.ErrnoException).code ?? '')) throw e
+    }
+  }
+  return undefined
+}
+
+async function isNativeExecutable(file: string): Promise<boolean> {
+  const handle = await fs.open(file, 'r')
+  try {
+    const bytes = Buffer.alloc(4)
+    await handle.read(bytes, 0, 4, 0)
+    const magic = bytes.toString('hex')
+    return (bytes[0] === 0x4d && bytes[1] === 0x5a) || magic === '7f454c46' ||
+      ['cffaedfe', 'cefaedfe', 'feedfacf', 'feedface', 'cafebabe'].includes(magic)
+  } finally {
+    await handle.close()
+  }
 }
 
 function fromWindowsShim(directory: string, relative: string): string {

@@ -43,7 +43,11 @@ it('writes artifacts and final hashes, and rejects stale source', async () => {
   )
   await fs.appendFile(root + '/src/components/ui/button.tsx', '\n// user edit')
   const before = await snapshotTree(root)
-  await expect(applyPlan(next)).rejects.toMatchObject({ code: 'FILE_CONFLICT' })
+  // The stub keeps the test about stale source, not about how the runner installed its package manager (TST-09).
+  await expect(applyPlan(next, { dependencies: async () => {} })).rejects.toMatchObject({
+    code: 'FILE_CONFLICT',
+    message: 'File changed after planning',
+  })
   expect(await snapshotTree(root)).toEqual(before)
 })
 it('restores exact source/config files after a mid-write failure', async () => {
