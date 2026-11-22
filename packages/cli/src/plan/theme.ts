@@ -42,12 +42,13 @@ function installedComponents(context: ProjectContext): Map<ComponentId, string[]
 
 // A family switch rewrites tokens and ui-style.css only, so it must not strand
 // installed component source that the target family cannot style safely.
-function assertFamilySwitch(context: ProjectContext, result: CompileResult): void {
+function assertFamilySwitch(context: ProjectContext, result: CompileResult, refreshComponents: boolean): void {
   const installed = installedComponents(context)
   if (!installed.size) return
   const target = result.preset.data.styleFamily
   const ids = supportedComponentIds.filter((id) => installed.has(id))
   const previous = context.preset?.styleFamily
+  if (refreshComponents && target !== 'liquid-glass') return
   if (previous && previous !== target && previous !== 'liquid-glass' && target !== 'liquid-glass' && context.lock) {
     const templates = getCatalog(context.lock.catalogRelease).templates
     const stranded = ids.filter(id =>
@@ -90,8 +91,10 @@ function assertFamilySwitch(context: ProjectContext, result: CompileResult): voi
 export async function planTheme(
   context: ProjectContext,
   result: CompileResult,
+  /** preset apply recompiles installed components in the same plan, so a family switch strands none. */
+  options: { refreshComponents?: boolean } = {},
 ): Promise<InstallPlan> {
-  assertFamilySwitch(context, result)
+  assertFamilySwitch(context, result, options.refreshComponents === true)
   const original = await readText(context.root, context.cssEntry)
   if (original === null)
     throw new FoundationError(
@@ -306,6 +309,11 @@ export async function planTheme(
   plan.notices.push(...dependencies.notices)
   const typography = resolveTypography(result.preset.data.design)
   const fontCss = [...typography.imports, fontRuleBlock(typography)].filter(Boolean).join('\n')
+  if (!fullStyle)
+    plan.notices.push(
+      'Palette only: components.json style ' + JSON.stringify(context.upstream?.style ?? '') +
+        ' is not one Ombelle styles, so only the palette and tokens are merged; components need radix-nova, new-york or a base-* style',
+    )
   if (!fullStyle && fontCss)
     plan.notices.push(
       'The style file is not managed here. Add this font CSS to your global CSS:\n' + fontCss,

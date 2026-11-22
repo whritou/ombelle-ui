@@ -4,6 +4,8 @@ import {
   type ProjectLock,
 } from '@ombelle/contracts'
 import { canonicalize, compileButtonPreset, sha256 } from '@ombelle/compiler'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { safePath } from './paths.js'
 import {
   transformComponentPresetArtifact,
@@ -96,8 +98,9 @@ export async function validateInstalledComponentPresets(
         !source ||
         seen.has(source.logicalPath) ||
         transformed?.path !== file ||
-        (transformed &&
-          (await sha256(transformed.content)) !== record.sha256) ||
+        // The record holds the bytes that were installed: today's catalog bytes, or, after a catalog
+        // change, the unedited file on disk (PUB-01). A hash that is neither is not provenance.
+        (transformed && !(await recordExplained(root, file, record.sha256, transformed.content))) ||
         !Object.hasOwn(artifacts, file) ||
         canonicalize(artifacts[file]) !== canonicalize(record)
       )
@@ -107,4 +110,15 @@ export async function validateInstalledComponentPresets(
     rows[key] = structuredClone(item) as InstalledComponentPreset
   }
   return rows
+}
+
+async function recordExplained(root: string, file: string, recorded: string, expected: string): Promise<boolean> {
+  if ((await sha256(expected)) === recorded) return true
+  let current: string
+  try {
+    current = await fs.readFile(path.join(root, file), 'utf8')
+  } catch {
+    return false
+  }
+  return (await sha256(current)) === recorded || (await sha256(current.replace(/\r\n/g, '\n'))) === recorded
 }

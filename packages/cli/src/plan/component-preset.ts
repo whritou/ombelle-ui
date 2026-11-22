@@ -10,10 +10,12 @@ import { planDependencies } from './dependencies.js'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
-import { fileChange, matchesRecord } from './components.js'
+import { editedConflict, fileChange, managedOutcome, matchesRecord, refreshNotice } from './components.js'
 import { transformComponentPresetArtifact } from '../project/component-preset-transform.js'
 import {
+  caseMismatchMessage,
   findCaseInsensitivePathMismatch,
+  portable,
   safePath,
   type DirectoryEntryReader,
 } from '../project/paths.js'
@@ -137,19 +139,27 @@ export async function planComponentPreset(
       pathMismatch ||
       matchingRecords.length > 1 ||
       hasMismatchedLockKey ||
-      change.beforeHash !== null &&
-      (!matchesRecord(change, record?.sha256) ||
-        change.action === 'update')
+      (change.beforeHash !== null && !record)
     ) {
       change.action = 'conflict'
       conflict(
         pathMismatch
-          ? `Destination collides with existing path '${pathMismatch}' using different casing`
+          ? caseMismatchMessage(portable(pathMismatch))
           : hasMismatchedLockKey || matchingRecords.length > 1
             ? 'Component preset destination has ambiguous case-insensitive lock ownership'
-            : 'Component preset or shared utility source requires an explicit migration',
+            : target.path + ' exists and is not managed by Ombelle; move or rename it, then run the command again',
         target.path,
       )
+    } else if (record && change.beforeHash !== null && (!matchesRecord(change, record.sha256) || change.action === 'update')) {
+      // The same rule as ordinary components (PUB-01): refresh an unedited file, conflict on an edited one.
+      // A changed identity under the same revision is never refreshed; its own conflict explains why.
+      const unedited = managedOutcome(change, record.sha256) === 'refresh'
+      if (plan.diagnostics.some((d) => d.path === key)) change.action = 'conflict'
+      else if (unedited) plan.notices.push(refreshNotice(target.path))
+      else {
+        change.action = 'conflict'
+        plan.diagnostics.push(editedConflict(target.path, 'update'))
+      }
     }
     plan.changes.push(change)
     const entry: InstalledArtifact = {

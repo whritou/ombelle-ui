@@ -37,3 +37,20 @@ it('conflicts instead of writing into a case-mismatched components directory', a
     message: expect.stringContaining('differs only in case') })]))
   expect(await snapshotTree(root)).toEqual(before)
 })
+
+// DUP-03: one rule for every planner. A file name that differs only in case conflicts too: on a
+// case-insensitive disk as an existing unmanaged file, on a case-sensitive disk as a case mismatch.
+it('conflicts on a file name that differs only in case', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  await applyPlan(await planTheme(await inspectProject(root), await build([])))
+  const context = await inspectProject(root)
+  await fs.mkdir(path.join(root, context.componentsDir), { recursive: true })
+  await fs.writeFile(path.join(root, context.componentsDir, 'Button.tsx'), 'export {}\n')
+  const before = await snapshotTree(root)
+  const add = await planAdd(await inspectProject(root), await build(['button']))
+  const target = context.componentsDir + '/button.tsx'
+  expect(add.changes.find((c) => c.path === target)?.action).toBe('conflict')
+  expect(add.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'FILE_CONFLICT', path: target })]))
+  expect(await snapshotTree(root)).toEqual(before)
+})
