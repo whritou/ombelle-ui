@@ -72,6 +72,19 @@ function scan(children: React.ReactNode, found: Scan = { labels: new Map(), crea
   })
   return found
 }
+/** Calls onReset when the form that holds the element is reset. */
+function useFormReset(ref: React.RefObject<HTMLElement | null>, onReset: () => void) {
+  const latest = React.useRef(onReset)
+  React.useEffect(() => { latest.current = onReset })
+  React.useEffect(() => {
+    const form = ref.current?.closest('form')
+    if (!form) return
+    const reset = () => latest.current()
+    form.addEventListener('reset', reset)
+    return () => form.removeEventListener('reset', reset)
+  }, [ref])
+}
+
 const matches = (query: string, label: string) => !query.trim() || label.toLowerCase().includes(query.trim().toLowerCase())
 const CREATE = '__combobox-create__'
 
@@ -83,6 +96,8 @@ type ComboboxState = {
   query: string
   disabled: boolean
   fieldRef: React.RefObject<HTMLDivElement | null>
+  setInputRequired(required: boolean): void
+  strings: Required<ComboboxLabels>
 }
 const ComboboxContext = React.createContext<ComboboxState | null>(null)
 
@@ -92,8 +107,29 @@ function useCombobox(part: string): ComboboxState {
   return state
 }
 
+/** The words the combobox shows or speaks; each has an English default. */
+export type ComboboxLabels = {
+  /** Names the list of chips in multiple mode; default "Selected". */
+  selected?: string
+  /** Names a chip's remove button; default "Remove <label>". */
+  remove?(label: string): string
+  /** The create row's text; default “Create "<query>"”. */
+  create?(query: string): string
+}
+const defaultLabels: Required<ComboboxLabels> = {
+  selected: 'Selected',
+  remove: label => `Remove ${label}`,
+  create: query => `Create “${query}”`,
+}
+
 type Common = {
   disabled?: boolean
+  /**
+   * A value must be chosen before the form submits; typed text that matches no option does not count.
+   * A required ComboboxInput, for example inside a required Field, sets it too.
+   */
+  required?: boolean
+  labels?: ComboboxLabels
   /** Submits each value as a hidden input with this name. */
   name?: string
   /**
@@ -116,10 +152,14 @@ export type ComboboxProps = Common & (
  * chips in the field, and Backspace in the empty field removes the last one.
  */
 export function Combobox(props: ComboboxProps) {
-  const { disabled = false, name, onCreate, defaultQuery, className, children } = props
+  const { disabled = false, required = false, labels: strings, name, onCreate, defaultQuery, className, children } = props
   const multiple = props.multiple === true
   const { labels, create: hasCreate } = scan(children)
-  const [own, setOwn] = React.useState<string | string[]>(props.defaultValue ?? (multiple ? [] : ''))
+  // The value a form reset returns to: the default on the first render, as for a native field.
+  const [initial] = React.useState<string | string[]>(() => props.defaultValue ?? (multiple ? [] : ''))
+  const [own, setOwn] = React.useState<string | string[]>(initial)
+  const [inputRequired, setInputRequired] = React.useState(false)
+  const rootRef = React.useRef<HTMLDivElement>(null)
   const current = props.value ?? own
   const values = Array.isArray(current) ? current : current ? [current] : []
   const [query, setQuery] = React.useState(defaultQuery ?? (!multiple && values[0] ? labels.get(values[0]) ?? values[0] : ''))
@@ -143,12 +183,22 @@ export function Combobox(props: ComboboxProps) {
     setQuery(multiple ? '' : name)
     setTyping(false)
   }
+  // A form reset returns to the default value and its text, as it does for the native fields beside it.
+  useFormReset(rootRef, () => {
+    const start = Array.isArray(initial) ? initial : initial ? [initial] : []
+    if (start.join('\n') !== values.join('\n')) commit(start)
+    setQuery(defaultQuery ?? (!multiple && start[0] ? labels.get(start[0]) ?? start[0] : ''))
+    setTyping(defaultQuery !== undefined)
+    setOpen(false)
+  })
   return (
-    <ComboboxContext.Provider value={{ multiple, values, labels, query: search, disabled, fieldRef }}>
-      <div data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
+    <ComboboxContext.Provider value={{ multiple, values, labels, query: search, disabled, fieldRef, setInputRequired, strings: { ...defaultLabels, ...strings } }}>
+      <div ref={rootRef} data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
         <ComboboxPrimitive.Root
           multiple={multiple}
           disabled={disabled}
+          // Base UI validates its own hidden input, which carries the chosen value.
+          required={required || inputRequired}
           // Base UI navigates the list it is given: the options that match, in the order they
           // render, then the create row when it is offered.
           items={[
@@ -190,16 +240,16 @@ export function Combobox(props: ComboboxProps) {
 
 /** The chosen options of a multiple combobox; ComboboxInput shows them for you. */
 export function ComboboxChips({ className, ...props }: React.ComponentProps<'ul'>) {
-  const { values, labels, disabled } = useCombobox('ComboboxChips')
+  const { values, labels, disabled, strings } = useCombobox('ComboboxChips')
   if (!values.length) return null
   return (
-    <ul aria-label="Selected" {...props} data-slot="combobox-chips" className={cn(className)}>
+    <ul aria-label={strings.selected} {...props} data-slot="combobox-chips" className={cn(className)}>
       {values.map(value => {
         const label = labels.get(value) ?? value
         return (
           <ComboboxPrimitive.Chip key={value} data-slot="combobox-chip" render={<li />}>
             <span>{label}</span>
-            <ComboboxPrimitive.ChipRemove aria-label={`Remove ${label}`} disabled={disabled} data-slot="combobox-chip-remove">
+            <ComboboxPrimitive.ChipRemove aria-label={strings.remove(label)} disabled={disabled} data-slot="combobox-chip-remove">
               <XIcon aria-hidden="true" />
             </ComboboxPrimitive.ChipRemove>
           </ComboboxPrimitive.Chip>
@@ -210,8 +260,11 @@ export function ComboboxChips({ className, ...props }: React.ComponentProps<'ul'
 }
 
 /** The text field. It takes the label and description, for example from FieldControl. */
-export function ComboboxInput({ className, ...props }: Omit<Part<typeof ComboboxPrimitive.Input>, 'value' | 'defaultValue'>) {
+export function ComboboxInput({ className, required, ...props }: Omit<Part<typeof ComboboxPrimitive.Input>, 'value' | 'defaultValue'>) {
   const state = useCombobox('ComboboxInput')
+  // Any typed text would satisfy required on the text field, so the combobox validates the chosen value instead.
+  const { setInputRequired } = state
+  React.useEffect(() => { setInputRequired(!!required) }, [required, setInputRequired])
   const input = <ComboboxPrimitive.Input className={cn(className)} {...props} data-slot="combobox-input" />
   const chevron = <ChevronDownIcon aria-hidden="true" data-slot="combobox-chevron" />
   if (state.multiple)
@@ -305,7 +358,7 @@ export function ComboboxCreate({ className, ...props }: Omit<Part<typeof Combobo
   return (
     <ComboboxPrimitive.Item value={CREATE} className={cn(className)} {...props} data-slot="combobox-create">
       <PlusIcon aria-hidden="true" />
-      {`Create “${state.query.trim()}”`}
+      {state.strings.create(state.query.trim())}
     </ComboboxPrimitive.Item>
   )
 }

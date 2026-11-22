@@ -61,6 +61,40 @@ function scan(children: React.ReactNode, found: Scan = { labels: new Map(), crea
   })
   return found
 }
+/** Sets every ref it is given. */
+function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
+  return (element: T | null) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') ref(element)
+      else if (ref) (ref as React.RefObject<T | null>).current = element
+    }
+  }
+}
+
+/** Runs the caller's handler, then the part's own unless the caller prevented it. */
+function compose<E extends { defaultPrevented: boolean }>(theirs: ((event: E) => void) | undefined, ours: (event: E) => void) {
+  return (event: E) => {
+    theirs?.(event)
+    if (!event.defaultPrevented) ours(event)
+  }
+}
+
+/** Calls onReset when the form that holds the element is reset. */
+function useFormReset(ref: React.RefObject<HTMLElement | null>, onReset: () => void) {
+  const latest = React.useRef(onReset)
+  React.useEffect(() => { latest.current = onReset })
+  React.useEffect(() => {
+    const form = ref.current?.closest('form')
+    if (!form) return
+    const reset = () => latest.current()
+    form.addEventListener('reset', reset)
+    return () => form.removeEventListener('reset', reset)
+  }, [ref])
+}
+
+/** Hidden from view and from assistive technology, but still validated by the form. */
+const validationOnly: React.CSSProperties = { position: 'absolute', inlineSize: 1, blockSize: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0, opacity: 0, pointerEvents: 'none' }
+
 const matches = (query: string, label: string) => !query.trim() || label.toLowerCase().includes(query.trim().toLowerCase())
 const CREATE = '__combobox-create__'
 
@@ -85,6 +119,9 @@ type ComboboxState = {
   choose(key: string): void
   remove(value: string): void
   disabled: boolean
+  required: boolean
+  setInputRequired(required: boolean): void
+  strings: Required<ComboboxLabels>
   inputRef: React.RefObject<HTMLInputElement | null>
   fieldRef: React.RefObject<HTMLDivElement | null>
 }
@@ -96,8 +133,29 @@ function useCombobox(part: string): ComboboxState {
   return state
 }
 
+/** The words the combobox shows or speaks; each has an English default. */
+export type ComboboxLabels = {
+  /** Names the list of chips in multiple mode; default "Selected". */
+  selected?: string
+  /** Names a chip's remove button; default "Remove <label>". */
+  remove?(label: string): string
+  /** The create row's text; default “Create "<query>"”. */
+  create?(query: string): string
+}
+const defaultLabels: Required<ComboboxLabels> = {
+  selected: 'Selected',
+  remove: label => `Remove ${label}`,
+  create: query => `Create “${query}”`,
+}
+
 type Common = {
   disabled?: boolean
+  /**
+   * A value must be chosen before the form submits; typed text that matches no option does not count.
+   * A required ComboboxInput, for example inside a required Field, sets it too.
+   */
+  required?: boolean
+  labels?: ComboboxLabels
   /** Submits each value as a hidden input with this name. */
   name?: string
   /**
@@ -120,10 +178,13 @@ export type ComboboxProps = Common & (
  * chips in the field, and Backspace in the empty field removes the last one.
  */
 export function Combobox(props: ComboboxProps) {
-  const { disabled = false, name, onCreate, defaultQuery, className, children } = props
+  const { disabled = false, required = false, labels: strings, name, onCreate, defaultQuery, className, children } = props
   const multiple = props.multiple === true
   const { labels, create: hasCreate } = scan(children)
-  const [own, setOwn] = React.useState<string | string[]>(props.defaultValue ?? (multiple ? [] : ''))
+  // The value a form reset returns to: the default on the first render, as for a native field.
+  const [initial] = React.useState<string | string[]>(() => props.defaultValue ?? (multiple ? [] : ''))
+  const [own, setOwn] = React.useState<string | string[]>(initial)
+  const [inputRequired, setInputRequired] = React.useState(false)
   const current = props.value ?? own
   const values = Array.isArray(current) ? current : current ? [current] : []
   const [query, setQueryState] = React.useState(defaultQuery ?? (!multiple && values[0] ? labels.get(values[0]) ?? values[0] : ''))
@@ -139,6 +200,7 @@ export function Combobox(props: ComboboxProps) {
   const [picked, setHighlight] = React.useState<string>()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const fieldRef = React.useRef<HTMLDivElement>(null)
+  const rootRef = React.useRef<HTMLDivElement>(null)
   const baseId = React.useId()
   const order = [...labels.keys()]
   const visible = [
@@ -166,8 +228,19 @@ export function Combobox(props: ComboboxProps) {
     setHighlight(undefined)
     if (!multiple) setOpen(false)
   }
+  // A form reset returns to the default value and its text, as it does for the native fields beside it.
+  useFormReset(rootRef, () => {
+    const start = Array.isArray(initial) ? initial : initial ? [initial] : []
+    if (start.join('\n') !== values.join('\n')) commit(start)
+    setQueryState(defaultQuery ?? (!multiple && start[0] ? labels.get(start[0]) ?? start[0] : ''))
+    setTyping(defaultQuery !== undefined)
+    setHighlight(undefined)
+    setOpenState(false)
+  })
+  const isRequired = required || inputRequired
   const state: ComboboxState = {
     multiple, values, labels, query, text, search, setQuery, open, setOpen, visible, highlight, setHighlight, disabled, inputRef, fieldRef,
+    required: isRequired, setInputRequired, strings: { ...defaultLabels, ...strings },
     listId: baseId + '-list',
     optionId: (key) => key === CREATE ? baseId + '-create' : `${baseId}-option-${order.indexOf(key)}`,
     choose(key) {
@@ -192,9 +265,14 @@ export function Combobox(props: ComboboxProps) {
   }
   return (
     <ComboboxContext.Provider value={state}>
-      <div data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
+      <div ref={rootRef} data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
         <PopoverPrimitive.Root open={open && !disabled} onOpenChange={setOpen}>{children}</PopoverPrimitive.Root>
         {name && values.map(value => <input key={value} type="hidden" name={name} value={value} />)}
+        {/* Hidden inputs take no part in validation: this one carries the chosen value, and sends focus to the field. */}
+        {isRequired && (
+          <input aria-hidden="true" tabIndex={-1} required disabled={disabled} value={values.join(',')} onChange={() => {}}
+            onFocus={() => inputRef.current?.focus()} style={validationOnly} />
+        )}
       </div>
     </ComboboxContext.Provider>
   )
@@ -202,16 +280,16 @@ export function Combobox(props: ComboboxProps) {
 
 /** The chosen options of a multiple combobox; ComboboxInput shows them for you. */
 export function ComboboxChips({ className, ...props }: React.ComponentProps<'ul'>) {
-  const { values, labels, remove, disabled } = useCombobox('ComboboxChips')
+  const { values, labels, remove, disabled, strings } = useCombobox('ComboboxChips')
   if (!values.length) return null
   return (
-    <ul aria-label="Selected" {...props} data-slot="combobox-chips" className={cn(className)}>
+    <ul aria-label={strings.selected} {...props} data-slot="combobox-chips" className={cn(className)}>
       {values.map(value => {
         const label = labels.get(value) ?? value
         return (
           <li key={value} data-slot="combobox-chip">
             <span>{label}</span>
-            <button type="button" aria-label={`Remove ${label}`} disabled={disabled} data-slot="combobox-chip-remove" onClick={() => remove(value)}>
+            <button type="button" aria-label={strings.remove(label)} disabled={disabled} data-slot="combobox-chip-remove" onClick={() => remove(value)}>
               <XIcon aria-hidden="true" />
             </button>
           </li>
@@ -222,8 +300,12 @@ export function ComboboxChips({ className, ...props }: React.ComponentProps<'ul'
 }
 
 /** The text field. It takes the label and description, for example from FieldControl. */
-export function ComboboxInput({ className, onKeyDown, onClick, onChange, ...props }: Omit<React.ComponentProps<'input'>, 'value'>) {
+export function ComboboxInput({ className, onKeyDown, onClick, onChange, ref, required, ...props }: Omit<React.ComponentProps<'input'>, 'value'>) {
   const state = useCombobox('ComboboxInput')
+  // Any typed text would satisfy required on the text field, so the combobox validates the chosen value instead.
+  const { setInputRequired } = state
+  React.useEffect(() => { setInputRequired(!!required) }, [required, setInputRequired])
+  const setRef = React.useMemo(() => mergeRefs(state.inputRef, ref), [state.inputRef, ref])
   const move = (step: number) => {
     const at = state.highlight === undefined ? -1 : state.visible.indexOf(state.highlight)
     const next = state.visible[Math.min(Math.max(at + step, 0), state.visible.length - 1)]
@@ -239,8 +321,9 @@ export function ComboboxInput({ className, onKeyDown, onClick, onChange, ...prop
         <input
           type="text"
           autoComplete="off"
+          aria-required={state.required || undefined}
           {...props}
-          ref={state.inputRef}
+          ref={setRef}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={expanded}
@@ -287,21 +370,24 @@ export function ComboboxInput({ className, onKeyDown, onClick, onChange, ...prop
 }
 
 /** The popup holding ComboboxList and ComboboxEmpty. */
-export function ComboboxContent({ className, align = 'start', sideOffset = 6, ...props }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+export function ComboboxContent({ className, align = 'start', sideOffset = 6, onOpenAutoFocus, onCloseAutoFocus, onInteractOutside, ...props }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
   const state = useCombobox('ComboboxContent')
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
+        // The listbox inside is the popup; focus never enters this wrapper, so it is not a dialog.
+        role="presentation"
         align={align}
         sideOffset={sideOffset}
         className={cn(className)}
-        // Focus stays in the field while the list is open.
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        onCloseAutoFocus={(event) => event.preventDefault()}
+        {...props}
+        // Focus stays in the field while the list is open; a caller's handlers run first.
+        onOpenAutoFocus={(event) => { onOpenAutoFocus?.(event); event.preventDefault() }}
+        onCloseAutoFocus={(event) => { onCloseAutoFocus?.(event); event.preventDefault() }}
         onInteractOutside={(event) => {
+          onInteractOutside?.(event)
           if (state.fieldRef.current?.contains(event.target as Node)) event.preventDefault()
         }}
-        {...props}
         data-slot="combobox-content"
       />
     </PopoverPrimitive.Portal>
@@ -341,20 +427,21 @@ export function ComboboxGroup({ className, heading, children, ...props }: Combob
 }
 
 /** Shared option markup for items and the create row. */
-function Option({ optionKey, className, children, checked, ...props }: React.ComponentProps<'div'> & {
+function Option({ optionKey, className, children, checked, ref: callerRef, onMouseDown, onMouseMove, onClick, ...props }: React.ComponentProps<'div'> & {
   optionKey: string
   checked?: boolean
   'data-slot': string
 }) {
   const state = useCombobox('ComboboxItem')
   const ref = React.useRef<HTMLDivElement>(null)
+  const setRef = React.useMemo(() => mergeRefs(ref, callerRef), [callerRef])
   const highlighted = state.highlight === optionKey
   React.useEffect(() => {
     if (highlighted) ref.current?.scrollIntoView?.({ block: 'nearest' })
   }, [highlighted])
   return (
     <div
-      ref={ref}
+      ref={setRef}
       role="option"
       id={state.optionId(optionKey)}
       aria-selected={highlighted}
@@ -363,10 +450,10 @@ function Option({ optionKey, className, children, checked, ...props }: React.Com
       data-checked={checked || undefined}
       {...props}
       className={cn(className)}
-      // Keep focus in the field while choosing with the pointer.
-      onMouseDown={(event) => event.preventDefault()}
-      onMouseMove={() => { if (!highlighted) state.setHighlight(optionKey) }}
-      onClick={() => state.choose(optionKey)}
+      // Keep focus in the field while choosing with the pointer. A caller's handlers run first.
+      onMouseDown={(event) => { onMouseDown?.(event); event.preventDefault() }}
+      onMouseMove={compose(onMouseMove, () => { if (!highlighted) state.setHighlight(optionKey) })}
+      onClick={compose(onClick, () => state.choose(optionKey))}
     >
       {children}
     </div>
@@ -396,7 +483,7 @@ export function ComboboxCreate(props: Omit<React.ComponentProps<'div'>, 'childre
   return (
     <Option optionKey={CREATE} {...props} data-slot="combobox-create">
       <PlusIcon aria-hidden="true" />
-      {`Create “${state.query.trim()}”`}
+      {state.strings.create(state.query.trim())}
     </Option>
   )
 }
