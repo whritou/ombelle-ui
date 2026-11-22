@@ -1,6 +1,6 @@
 # Tag Input
 
-Tag Input is a field of removable tags. Enter or comma adds the typed text as a tag, and Backspace in the empty field removes the last one. It is available in all five families in light and dark mode, in one template for both editions; the template is a client component.
+Tag Input is a field of removable tags. Enter or comma adds the typed text as a tag, and Backspace in the empty field removes the last one. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, in one template for both editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add tag-input`. For a built local checkout:
 

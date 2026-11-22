@@ -1,6 +1,6 @@
 # Hover Card
 
-Hover Card previews what a link points to when the pointer rests on it or keyboard focus reaches it. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Hover Card previews what a link points to when the pointer rests on it or keyboard focus reaches it. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add hover-card`. For a built local checkout:
 

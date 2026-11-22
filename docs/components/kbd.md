@@ -1,6 +1,6 @@
 # Kbd
 
-Kbd shows a keyboard key with the native `kbd` element, and KbdGroup keeps keys pressed together on one line. It is available in all five families in light and dark mode, in one template for both editions, with no client boundary.
+Kbd shows a keyboard key with the native `kbd` element, and KbdGroup keeps keys pressed together on one line. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, in one template for both editions, with no client boundary.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add kbd`. For a built local checkout:
 

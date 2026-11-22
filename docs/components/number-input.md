@@ -1,6 +1,6 @@
 # Number Input
 
-Number Input is a text field for a number, with decrement and increment buttons and an optional unit, such as a border radius in pixels or a duration in milliseconds. It is available in all five families in light and dark mode. One template serves both the Radix and the Base UI edition; it is a client component.
+Number Input is a text field for a number, with decrement and increment buttons and an optional unit, such as a border radius in pixels or a duration in milliseconds. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode. One template serves both the Radix and the Base UI edition; it is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add number-input`. For a built local checkout:
 

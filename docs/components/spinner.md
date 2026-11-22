@@ -1,6 +1,6 @@
 # Spinner
 
-Spinner is a busy indicator: an SVG ring with a turning arc. It is available in all five families in light and dark mode, in one template for both editions, with no client boundary.
+Spinner is a busy indicator: an SVG ring with a turning arc. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, in one template for both editions, with no client boundary.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add spinner`. For a built local checkout:
 

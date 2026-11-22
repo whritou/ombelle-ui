@@ -1,6 +1,6 @@
 # Empty
 
-Empty is a zero-data screen: optional media, a title, a description, then actions. It is available in all five families in light and dark mode, with Radix and Base UI editions and no client boundary.
+Empty is a zero-data screen: optional media, a title, a description, then actions. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions and no client boundary.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add empty`. For a built local checkout:
 

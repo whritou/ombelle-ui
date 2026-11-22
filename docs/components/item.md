@@ -1,6 +1,6 @@
 # Item
 
-Item is a row of media, text and actions, such as a preset in a list. For a table of records use [Table](table.md). It is available in all five families in light and dark mode. One template serves both editions.
+Item is a row of media, text and actions, such as a preset in a list. For a table of records use [Table](table.md). It is available in all eight families (the seven stable families and liquid glass) in light and dark mode. One template serves both editions.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add item`. For a built local checkout:
 
