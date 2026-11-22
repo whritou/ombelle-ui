@@ -31,6 +31,11 @@ export function formatDate(value: Date | Range | undefined, options: Intl.DateTi
   return value.from ? format.format(value.from) : ''
 }
 
+// The locale the trigger uses before hydration: fixed, so server and browser text match.
+const SERVER_LOCALE = 'en-US'
+const noSubscription = () => () => {}
+const documentLocale = () => document.documentElement.lang || navigator.language || SERVER_LOCALE
+
 type DateInput = Date | string
 const asDate = (value: DateInput | undefined) => (typeof value === 'string' ? fromIsoDate(value) : value)
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
@@ -118,7 +123,10 @@ type PickerCommon = {
   placeholder?: string
   /** How the trigger shows the date; default { dateStyle: 'medium' }. */
   format?: Intl.DateTimeFormatOptions
-  /** A BCP 47 tag for the trigger text; default the document's language. */
+  /**
+   * A BCP 47 tag for the trigger text. Without it the server and the first render use en-US,
+   * then the document's language (or the browser's) once hydrated, so the two never disagree.
+   */
   locale?: string
   disabled?: boolean
   /** Submits YYYY-MM-DD as a hidden input; a range submits name-from and name-to. */
@@ -153,7 +161,8 @@ export function DatePicker(props: DatePickerProps) {
     if (!controlled) setOwn(next)
     ;(props.onValueChange as ((value: Date | DateRange | undefined) => void) | undefined)?.(next)
   }
-  const text = formatDate(value, format, locale)
+  const pageLocale = React.useSyncExternalStore(noSubscription, documentLocale, () => SERVER_LOCALE)
+  const text = formatDate(value, format, locale ?? pageLocale)
   const focusDay = value instanceof Date ? value : (value as DateRange | undefined)?.from
   return (
     <div data-slot="date-picker" className={cn(className)}>

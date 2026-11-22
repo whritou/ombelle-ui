@@ -1,6 +1,6 @@
 # Calendar
 
-Calendar is a month grid for choosing a date or a range of dates. The same component provides a Date Picker: a button that shows the chosen date and opens the Calendar in a popover. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Calendar is a month grid for choosing a date or a range of dates. The same component provides a Date Picker: a button that shows the chosen date and opens the Calendar in a popover. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add calendar`. For a built local checkout:
 
@@ -34,7 +34,7 @@ export function Availability() {
   - `disabled` takes react-day-picker matchers, and `disablePast` disables the days before today.
   - Dates may be Date objects or `YYYY-MM-DD` strings. Other react-day-picker props pass through.
 - **DatePicker**
-  - `value` or `defaultValue`, `onValueChange`, `mode` (`single` or `range`), `placeholder` (default "Choose a date"), `format` (`Intl.DateTimeFormatOptions`, default `{ dateStyle: 'medium' }`), `locale` (a BCP 47 tag) and `disabled`.
+  - `value` or `defaultValue`, `onValueChange`, `mode` (`single` or `range`), `placeholder` (default "Choose a date"), `format` (`Intl.DateTimeFormatOptions`, default `{ dateStyle: 'medium' }`), `locale` (a BCP 47 tag) and `disabled`. Without `locale`, the server and the first render show the date in `en-US` and switch to the page's `lang` (or the browser's language) after hydration, so a server-rendered page never has a hydration mismatch; pass `locale` to render the final text on the server.
   - `name` submits `YYYY-MM-DD`; a range submits `name-from` and `name-to`.
   - `calendar` passes options such as `disablePast` or `today` to the Calendar inside.
 - **Helpers:** `toIsoDate`, `fromIsoDate` and `formatDate`.
