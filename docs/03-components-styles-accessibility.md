@@ -177,6 +177,8 @@ Later values replace only allowlisted values. Arrays replace rather than concate
 
 Use semantic color pairs such as background and foreground, primary and primary foreground, card and card foreground. Existing shadcn tokens can map to these roles. Additional tokens use a clear prefix such as `--ui-control-height`, `--ui-border-width`, and `--ui-shadow-offset-x`.
 
+> **Open decision (PUB-09): token prefix.** The paragraph above is the design intent. The installed CSS does not follow it yet: it writes the unprefixed names `--control-height`, `--border-width`, `--shadow-x`, `--shadow-y`, `--motion-duration` and `--font-family` into your global stylesheet (`packages/compiler/src/preview-styles.ts`). Until the owner chooses between renaming the code to `--ui-*` or correcting this paragraph ([1.0 decisions](1.0-decisions.md)), neither spelling is a stable name; the [1.0 public contract](1.0-public-contract.md) lists the tokens as undecided.
+
 The MVP root theme intentionally updates shared shadcn color variables for a consistent application. Explain this in the install diff because existing components using those variables can change appearance. Arbitrary unrelated components may need their own adjustments.
 
 ## Accessibility target
