@@ -1,6 +1,6 @@
 # Immutable preset snapshot service operations
 
-This document describes the implementation and operator contract. The hosted service runs on the existing Ombelle Vercel project with Neon Free at `https://ombelle-ui.vercel.app`, and the installer is published as `@ombelle-ui/cli`. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for the deployment and release record. The operations listed at the end of this document remain open. The local SQLite adapter remains available for development.
+This document describes the implementation and operator contract. The hosted service runs on the existing Ombelle Vercel project with Neon Free at `https://ombelle-ui.vercel.app`, and the installer is published as `@ombelle-ui/cli`. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for the deployment and release record. The public read contract is [Hosted API v1](hosted-api-v1.md); incident procedures (withdrawal on Postgres, rotation, outages) are in [production operations](production-operations.md#incidents). The local SQLite adapter remains available for development.
 
 ## Implemented contract
 
@@ -67,7 +67,7 @@ The private CLI accepts HTTPS snapshot origins. Literal loopback origins such as
 
 ## Initialize, withdraw, restore
 
-Set `OMBELLE_SNAPSHOT_DB_PATH` to the same absolute file used by the service before running operator commands. The commands are repository-local pnpm scripts:
+Set `OMBELLE_SNAPSHOT_DB_PATH` to the same absolute file used by the service before running operator commands. The commands are repository-local pnpm scripts. The example below uses the SQLite backend; for production Postgres, set `OMBELLE_SNAPSHOT_BACKEND=postgres` with `DATABASE_URL` and `DATABASE_URL_UNPOOLED` instead, as shown in [abusive publisher](production-operations.md#abusive-publisher-or-abusive-content):
 
 ```powershell
 $env:OMBELLE_SNAPSHOT_DB_PATH = 'D:\snapshot-data\snapshots.sqlite'
@@ -108,8 +108,8 @@ In place as of 2026-11-02:
 - an explicit operator withdrawal command;
 - a publicly distributed CLI (`@ombelle-ui/cli`);
 - `/privacy` and `/security` pages, `security.txt`, and GitHub private vulnerability reporting;
-- hourly monitoring of the site, the API and quotas through a read-only database role;
-- a verified Postgres backup and restore drill (first run 2026-11-02).
+- scheduled monitoring (requested hourly, delivered every few hours) of the site, the API, a known code, the advertised CLI, quotas and backup age, through a read-only database role, with an optional external heartbeat and alert webhook;
+- a verified Postgres backup and restore drill (first run 2026-11-02), with daily scheduled backups.
 
 See [production operations](production-operations.md) for the runbook, backup cadence and drill log. Privacy requests have no dedicated email address: requesters open a GitHub issue asking for a private channel.
 
