@@ -131,6 +131,15 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 ## Publication gate
 
+**A release needs a green Foundation run on the commit it publishes.** Before publishing any package version, from 1.0 on:
+
+1. Run the Foundation workflow on the release commit (Actions > Foundation > Run workflow, or `gh workflow run foundation.yml --ref <branch>`), or use the nightly run if it ran on exactly that commit.
+2. Require its `verify` job to pass. It validates the quality, consumers and four specimen shard groups together: unit and integration results, every consumer app, the browser matrix and the complete specimen audit, all on one commit.
+3. Record the run with `node scripts/record-foundation-run.mjs <run-id>`, which writes `docs/evidence/foundation-run.json` from the run's own aggregate report, and cite that run id in the release evidence.
+4. Read the latest Foundation extended run (`foundation-extended.yml`: editors, website, catalog expansion, usage examples, Base UI consumers, hosted website). A failure there is a release blocker unless the release notes name it.
+
+Pull requests run a browser subset in `ci.yml` (interaction specs and the specimen audit of the changed components); a green pull request is not a substitute for step 2. Releases 0.8.0 to 0.9.1 shipped while the Foundation gate was red (audit 11, TST-01).
+
 `@ombelle-ui/cli@0.2.0` was published on 2026-11-02 by npm identity `ombelle`, owner of the user-reserved `ombelle-ui` organization. Its registry tarball matched the tested candidate byte for byte (integrity `sha512-ikzam7qN…8uUVs4OSXlfhQ==`), but it exits 0 without output when run through a POSIX bin symlink (`npx`, `npm exec`, Bun on Linux and macOS). Windows shims and direct `node dist/main.js` were unaffected. Do not advertise 0.2.0.
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
