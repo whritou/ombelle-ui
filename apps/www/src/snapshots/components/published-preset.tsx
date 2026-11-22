@@ -1,17 +1,13 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { canonicalize, glassContrastReport } from '@ombelle/compiler'
+import { useRef, useState } from 'react'
+import { canonicalize } from '@ombelle/compiler/light'
 import type { PresetSnapshot } from '@ombelle/contracts'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
 import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, fontsInstallBlocked, fontsInstallNotice, semanticPaletteInstallBlocked, semanticPaletteInstallNotice, snapshotInstallCommand } from '../install-command'
-import {
-  createSnapshotPreviewSession,
-  selectSnapshotPreview,
-  type SnapshotPreviewState,
-} from '../preview-session'
+import { snapshotPreviewMessage, type FrameStatus, type SnapshotPreview } from '../snapshot-preview'
 
 const choices = [
   {
@@ -37,16 +33,14 @@ const choices = [
 export function PublishedPreset({
   snapshot,
   origin,
+  preview,
 }: {
   snapshot: PresetSnapshot
   origin: string
+  /** Prepared on the server (prepareSnapshotPreview), so this page compiles nothing in the browser. */
+  preview: SnapshotPreview
 }) {
-  const [previewState, setPreviewState] = useState<SnapshotPreviewState | null>(
-    null,
-  )
-  const latestSnapshot = useRef(snapshot)
-  latestSnapshot.current = snapshot
-  const preview = selectSnapshotPreview(snapshot, previewState)
+  const [frameStatus, setFrameStatus] = useState<FrameStatus>('connecting')
   const [announcement, setAnnouncement] = useState('')
   const [view, setView] = useState<PresetView>({
     mode: 'light',
@@ -54,10 +48,7 @@ export function PublishedPreset({
   })
   const output = useRef<HTMLTextAreaElement>(null)
   const json = canonicalize(snapshot.preset) + '\n'
-  const contrastWarning = useMemo(
-    () => snapshot.preset.styleFamily === 'liquid-glass' && !glassContrastReport(snapshot.preset).passes,
-    [snapshot.preset],
-  )
+  const { contrastWarning } = preview
   const useLocalInstaller = contrastInstallBlocked(contrastWarning)
   const installUnavailable = semanticPaletteInstallBlocked(snapshot.preset)
     ? semanticPaletteInstallNotice
@@ -68,14 +59,6 @@ export function PublishedPreset({
     reference: `${snapshot.id}@${snapshot.revision}`,
     presetHash: snapshot.presetHash,
   }
-  useEffect(() => {
-    const session = createSnapshotPreviewSession(snapshot, {
-      notify: setPreviewState,
-      isCurrent: () => latestSnapshot.current === snapshot,
-    })
-    void session.start()
-    return () => session.dispose()
-  }, [snapshot])
   async function copyJson() {
     try {
       await navigator.clipboard.writeText(json)
@@ -158,14 +141,15 @@ export function PublishedPreset({
             <option value="narrow">Narrow</option>
           </select>
         </div>
-        <p role="status">{preview.message}</p>
-        {preview.frame && (
+        <p role="status">{snapshotPreviewMessage(preview, frameStatus)}</p>
+        {preview.frame.kind !== 'failed' && (
           <PresetPreviewFrame
-            key={preview.frame.key}
-            result={preview.frame.result}
+            key={`${snapshot.id}@${snapshot.revision}:${snapshot.presetHash}`}
+            result={preview.frame.kind === 'compiled' ? preview.frame.result : null}
+            preset={preview.frame.kind === 'tokens' ? snapshot.preset : null}
             view={view}
             stale={false}
-            onStatus={preview.frame.onStatus}
+            onStatus={setFrameStatus}
           />
         )}
       </section>

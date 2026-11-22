@@ -1,6 +1,8 @@
-import { resolveRecipePreset } from '@ombelle/catalog'
+import { resolveRecipePreset } from '@ombelle/catalog/presets'
 import { styleSupport, validatePreset, validateRecipe, type Recipe, type RecipeCompileResult } from '@ombelle/contracts'
-import { canonicalize, compileRecipe } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
+/** The full compiler, loaded by the first verification rather than with the page. */
+const compiler = () => import('@ombelle/compiler')
 
 export type PreviewFrameState = {
   recipe: Recipe
@@ -104,7 +106,7 @@ export async function verifyPreviewCompileResult(input: unknown): Promise<Recipe
   const result = validatePreviewCompileResult(input)
   if (!result) return null
   try {
-    const expected = await compileRecipe({ recipe: result.recipe.data, darkSelector: result.darkSelector })
+    const expected = await (await compiler()).compileRecipe({ recipe: result.recipe.data, darkSelector: result.darkSelector })
     return canonicalize(expected) === canonicalize(result) ? result : null
   } catch {
     return null
@@ -115,7 +117,7 @@ export async function verifyPreviewRender(input: unknown, previousRequestId: num
   const message = acceptPreviewRender(input, previousRequestId)
   if (!message) return null
   try {
-    const expected = await compileRecipe({ recipe: message.state.recipe })
+    const expected = await (await compiler()).compileRecipe({ recipe: message.state.recipe })
     const css = expected.artifacts.find((artifact) => artifact.kind === 'style')?.content
     return message.scope === expected.scope && message.state.css === css &&
       canonicalize(message.state.recipe) === canonicalize(expected.recipe.data) ? message : null
@@ -158,7 +160,7 @@ export async function verifyButtonMatrixRender(input: unknown, previousRequestId
       !hash(cell.scope) || typeof cell.css !== 'string' || cell.css.length === 0 || cell.css.length > 100_000) return null
     try {
       const recipe = validateRecipe(cell.recipe)
-      const expected = await compileRecipe({ recipe })
+      const expected = await (await compiler()).compileRecipe({ recipe })
       const css = expected.artifacts.find((artifact) => artifact.kind === 'style')?.content
       if (expected.scope !== cell.scope || css !== cell.css || canonicalize(recipe) !== canonicalize(expected.recipe.data)) return null
       cells.push({ row: cell.row, column: cell.column as string | null, current: cell.current, scope: cell.scope, css: cell.css, recipe })

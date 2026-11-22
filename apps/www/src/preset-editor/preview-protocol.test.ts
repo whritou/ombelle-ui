@@ -1,6 +1,6 @@
 import { beforeAll, expect, it } from 'vitest'
 import { compile, sha256 } from '@ombelle/compiler'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import {
   componentsWithStyleSupport,
   supportedComponentIds,
@@ -21,7 +21,7 @@ import {
 let result: CompileResult, manifest: PresetSourceManifest
 beforeAll(async () => {
   result = await compile({
-    preset: getCatalog('0.1.0').presets.flat,
+    preset: getCatalogPresets('0.1.0').presets.flat,
     componentIds: supportedComponentIds,
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
@@ -128,7 +128,7 @@ it.each([
   expect(await verifyPresetRender(input, 0, expected)).toBeNull()
 })
 it('accepts a liquid-glass draft below the contrast bound so the editor can preview it', async () => {
-  const preset = structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
+  const preset = structuredClone(getCatalogPresets('0.1.0').presets['liquid-glass'])
   preset.design = { ...preset.design, glassOpacity: 0.3 }
   const failing = await compile({
     preset,
@@ -144,7 +144,7 @@ it('accepts a liquid-glass draft below the contrast bound so the editor can prev
 })
 it('accepts a liquid-glass render compiled from every component, all stable in glass', async () => {
   const glass = await compile({
-    preset: getCatalog('0.1.0').presets['liquid-glass'],
+    preset: getCatalogPresets('0.1.0').presets['liquid-glass'],
     componentIds: componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
@@ -253,7 +253,7 @@ it('rejects a lab ink without a backdrop', async () => {
 })
 
 it('drops the font imports a browser cannot resolve and keeps the font tokens', async () => {
-  const ombelle = structuredClone(getCatalog('0.1.0').presets.ombelle)
+  const ombelle = structuredClone(getCatalogPresets('0.1.0').presets.ombelle)
   const fonted = await compile({
     preset: {
       ...ombelle,

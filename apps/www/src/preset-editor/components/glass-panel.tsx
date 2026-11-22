@@ -1,5 +1,5 @@
 import { familyAccessibilityCaveat } from '@ombelle/contracts'
-import type { GlassContrastReport } from '@ombelle/compiler'
+import type { GlassContrastReport } from '@ombelle/compiler/light'
 import { glassComponentList } from '../../site/components/catalog'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../generated/ui/components/ui/collapsible'
 

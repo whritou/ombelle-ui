@@ -2,7 +2,7 @@
 
 import { ArrowRight } from 'lucide-react'
 import { useState } from 'react'
-import type { StartingPresetId } from '@ombelle/catalog'
+import type { StartingPresetId } from '@ombelle/catalog/presets'
 import { styleSupport } from '@ombelle/contracts'
 import { GlassPresetSelect } from '../glass-preset-select'
 import { componentInstallable } from './catalog'

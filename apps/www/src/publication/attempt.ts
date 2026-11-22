@@ -1,4 +1,4 @@
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import {
   fieldOf,
   publicationContentMaxBytes,

@@ -1,5 +1,5 @@
-import { defaultGlassPresetId, getCatalog, type StartingPresetId } from '@ombelle/catalog'
-import { glassContrastOnScene, normalizeColor, type GlassSceneRange } from '@ombelle/compiler'
+import { defaultGlassPresetId, getCatalogPresets, type StartingPresetId } from '@ombelle/catalog/presets'
+import { glassContrastOnScene, normalizeColor, type GlassSceneRange } from '@ombelle/compiler/light'
 import type { Preset } from '@ombelle/contracts'
 import type { PresetBackdrop } from '../preset-editor/preview-protocol'
 import { glassBackdropOptions, glassPresetBackdrop, type GlassPreviewMode } from './glass-presets'
@@ -47,7 +47,7 @@ export function pickGlassScene(data: Preset, mode: GlassPreviewMode, startingPre
   const ratios = glassSceneRatios(data, mode)
   if (startingPresetId) {
     const own = glassPresetBackdrop(startingPresetId, mode)
-    const reference = glassSceneRatios(getCatalog('0.1.0').startingPresets[startingPresetId], mode)[own]
+    const reference = glassSceneRatios(getCatalogPresets('0.1.0').startingPresets[startingPresetId], mode)[own]
     if (ratios[own] >= Math.min(4.5, reference)) return own
   }
   const best = Math.max(...Object.values(ratios))
@@ -60,7 +60,7 @@ function sameColor(a: string | undefined, b: string) {
 
 /** The lab preset this preset still is, unedited: same design values and colours. */
 function uneditedLabPreset(data: Preset): StartingPresetId | null {
-  const catalog = getCatalog(data.catalogRelease)
+  const catalog = getCatalogPresets(data.catalogRelease)
   return labStartingPresets.find((id) => {
     const reference = catalog.startingPresets[id]
     const designKeys = Object.keys(reference.design) as (keyof Preset['design'])[]

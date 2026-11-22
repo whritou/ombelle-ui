@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import { normalizePublishedPreset } from '@ombelle/compiler'
 import { presetPublication } from '../snapshots/publication-kind'
 import { recipePublication } from '../recipe-snapshots/publication-kind'
@@ -81,7 +81,7 @@ it('keeps the storage keys saved drafts already use', () => {
 })
 
 it('round-trips a publish attempt for a preset that uses font pairs under schema version 1.1', async () => {
-  const ombelle = getCatalog('0.1.0').presets.ombelle
+  const ombelle = getCatalogPresets('0.1.0').presets.ombelle
   const attempt = createPublishAttempt(
     presetPublication,
     await normalizePublishedPreset({

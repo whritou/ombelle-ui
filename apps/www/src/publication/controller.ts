@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import { publicationFailure } from '../snapshots/publication-failure'
 import {
   attemptData,

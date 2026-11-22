@@ -89,11 +89,16 @@ writeFileAtomicSync(
       styles,
       glassLabStyle,
       componentStyles,
-      presets,
-      startingPresets,
-      retiredPresets,
       utility: readText(base + 'templates/utils.ts'),
       glassFilter: readText(base + 'templates/liquid-glass-filter.tsx'),
     }) +
+    ' as const\n',
+)
+// The presets alone, so browser code that needs presets and fonts (the @ombelle/catalog/presets entry)
+// does not load every template and stylesheet.
+writeFileAtomicSync(
+  base + 'generated-presets.ts',
+  '// Generated from reviewed catalog files.\nexport const catalogPresetData = ' +
+    JSON.stringify({ presets, startingPresets, retiredPresets }) +
     ' as const\n',
 )

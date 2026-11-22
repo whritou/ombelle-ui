@@ -3,7 +3,7 @@ import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
 // The source the site's generated Code Block is compiled from.
 import { commandRunners } from '../../../../packages/catalog/src/templates/code-block'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import { codeInstallCommand, compareVersions, installNotice, installRules, installableRecipeInstallNotice, offeredStyleFamilies, packageManagers, presetInstallNotice, publishedInstaller, siteFamilyOrder, snapshotInstallCommand, type InstallRule } from './install-command'
 import example from '../../../../examples/recipe.example.json'
 import type { Recipe } from '@ombelle/contracts'
@@ -121,7 +121,7 @@ it('compares x.y.z versions numerically', () => {
 })
 
 describe('install rules', () => {
-  const preset = getCatalog('0.1.0').presets.flat
+  const preset = getCatalogPresets('0.1.0').presets.flat
   const rule: InstallRule = {
     minimumCli: '0.10.0',
     applies: (subject) => subject.kind === 'preset' && subject.contrastWarning === true,

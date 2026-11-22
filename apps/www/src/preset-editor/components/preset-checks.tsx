@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import type { GlassContrastReport } from '@ombelle/compiler'
+import type { GlassContrastReport } from '@ombelle/compiler/light'
 import type { PresetEditablePath } from '../model'
 import type { TokenContrast } from '../contrast'
 import { glassReadoutSummary } from './glass-panel'

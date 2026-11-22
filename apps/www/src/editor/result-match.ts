@@ -1,5 +1,5 @@
 import { normalizeRecipe, validateRecipe, type Recipe, type RecipeCompileResult } from '@ombelle/contracts'
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 
 export function resultMatchesDraft(result: RecipeCompileResult | null, recipe: Recipe): boolean {
   if (!result) return false

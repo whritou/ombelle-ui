@@ -14,6 +14,8 @@ import { compileComponentRecipeStyles } from './component-recipe-styles.js'
 import { recipeTemplateSlots, scopeRecipeGlassFilter, scopeRecipeTemplate } from './component-recipe-source.js'
 import { sha256 } from './hash.js'
 import { compileRecipe } from './recipe.js'
+import { withComponentRecipeGlass } from './glass.js'
+export { withComponentRecipeGlass }
 import { pinnedRecipePreset, resolvePreset, storedPresetIdentity } from './resolve.js'
 import { describeComponentRecipe, renderRecipeSpecimen, specimenExports, specimenUsesLocalIds } from './recipe-specimen.js'
 import { validateRecipeDarkSelector } from './recipe-styles.js'
@@ -24,12 +26,6 @@ type CompileInput = {
   darkSelector?: string
   /** The resolved built-in preset a snapshot or lock stored; used instead of today's built-in (decision 0009). */
   preset?: Preset
-}
-
-export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeAppearance['glass']): Preset {
-  return preset.styleFamily === 'liquid-glass' && glass && Object.keys(glass).length
-    ? { ...preset, design: { ...preset.design, ...glass } }
-    : preset
 }
 
 /**

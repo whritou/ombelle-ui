@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { InstallableRecipe, InstallableRecipeCompileResult } from '@ombelle/contracts'
-import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compiler'
+import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compiler/light'
 import { recipeFilename } from '../storage'
 import code from './code-view.module.css'
 import { installableRecipeInstallNotice, installerRunner, publishedInstaller } from '../../snapshots/install-command'

@@ -1,4 +1,4 @@
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import { validateDraftEnvelope, type PresetEditorDraft } from './model'
 
 export type PresetHistory = {

@@ -3,6 +3,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { getCatalog, getTemplate, offeredGlassPresetOrder, startingPresetOrder } from '../src/index.js'
 import { catalogData } from '../src/generated.js'
+import { catalogPresetData } from '../src/generated-presets.js'
 import { resolveRecipePreset } from '../src/recipe-preset.js'
 import {
   supportedComponentIds,
@@ -804,7 +805,7 @@ describe('liquid glass starting presets', () => {
     }
   })
   it('lists exactly the starting preset files, each under its own id', () => {
-    expect(Object.keys(catalogData.startingPresets).sort()).toEqual([...startingPresetOrder].sort())
-    for (const [id, preset] of Object.entries(catalogData.startingPresets)) expect(preset.id).toBe(id)
+    expect(Object.keys(catalogPresetData.startingPresets).sort()).toEqual([...startingPresetOrder].sort())
+    for (const [id, preset] of Object.entries(catalogPresetData.startingPresets)) expect(preset.id).toBe(id)
   })
 })

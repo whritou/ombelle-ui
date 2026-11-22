@@ -2,7 +2,7 @@
 import { act, createElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi, type Mock } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import type { CompileResult, Preset } from '@ombelle/contracts'
 import { presetHashOf, type PresetView } from '../preview-protocol'
 import { PresetPreviewFrame } from './preset-preview-frame'
@@ -10,11 +10,11 @@ import { PresetPreviewFrame } from './preset-preview-frame'
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 const flat = (radius = 0.5): Preset => {
-  const preset = structuredClone(getCatalog('0.1.0').presets.flat)
+  const preset = structuredClone(getCatalogPresets('0.1.0').presets.flat)
   preset.design.radiusRem = radius
   return preset
 }
-const glass = getCatalog('0.1.0').presets['liquid-glass']
+const glass = getCatalogPresets('0.1.0').presets['liquid-glass']
 const view: PresetView = { mode: 'light', viewport: 'wide' }
 const result = (hash: string) => ({ preset: { data: flat(), hash }, artifacts: [] }) as unknown as CompileResult
 const zero = '0'.repeat(64)

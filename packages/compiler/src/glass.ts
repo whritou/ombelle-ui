@@ -1,4 +1,4 @@
-import { FoundationError, type Preset, type Recipe } from '@ombelle/contracts'
+import { FoundationError, type ComponentRecipeAppearance, type Preset, type Recipe } from '@ombelle/contracts'
 import { normalizeColor } from './resolve.js'
 import {
   glassBackdrop,
@@ -156,4 +156,11 @@ function materialTokens(design: Preset['design'], opaque: boolean): Record<strin
   // Gates the pointer shine: presets written before these settings already set a sheen.
   if (glassMaterialActive(design)) tokens['--glass-material'] = '1'
   return tokens
+}
+
+/** A component recipe's glass appearance applied over its liquid glass preset; other families are unchanged. */
+export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeAppearance['glass']): Preset {
+  return preset.styleFamily === 'liquid-glass' && glass && Object.keys(glass).length
+    ? { ...preset, design: { ...preset.design, ...glass } }
+    : preset
 }

@@ -1,6 +1,6 @@
 import { compareVersions, organicMinimumCli, publishedInstaller } from '../snapshots/install-command'
-import { defaultGlassPresetId, fontById, fontRegistry, getCatalog, styleFamilyFonts, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
-import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler'
+import { defaultGlassPresetId, fontById, fontRegistry, getCatalogPresets, styleFamilyFonts, glassTintPalettes, startingPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog/presets'
+import { glassContrastReport, type GlassContrastReport } from '@ombelle/compiler/light'
 import {
   FoundationError,
   componentsWithStyleSupport,
@@ -211,7 +211,7 @@ export function presetFieldValue(
   if (Object.hasOwn(draft.edits, path)) return draft.edits[path]!
   // Until someone picks a font, the draft uses its style's fonts, not the catalog preset's system stack.
   if (isFontPath(path)) return familyFontValue(draft.family, path.slice('/design/'.length) as FontKey)
-  return fieldValueOf(getCatalog('0.1.0').presets[draft.family], path)
+  return fieldValueOf(getCatalogPresets('0.1.0').presets[draft.family], path)
 }
 
 const fontKeys = ['fontFamilyId', 'headingFontFamilyId', 'monoFontFamilyId'] as const
@@ -243,7 +243,7 @@ function fieldValueOf(preset: Preset, path: PresetEditablePath): string {
 /** Replaces every value with the starting preset's; the family base clears the edits. */
 export function applyStartingPreset(input: PresetEditorDraft, id: StartingPresetId): PresetEditorDraft {
   const draft = validateDraftEnvelope(input)
-  const catalog = getCatalog('0.1.0')
+  const catalog = getCatalogPresets('0.1.0')
   const base = catalog.presets['liquid-glass']
   const preset = catalog.startingPresets[id]
   const edits: PresetEditorDraft['edits'] = {}
@@ -257,7 +257,7 @@ export function applyStartingPreset(input: PresetEditorDraft, id: StartingPreset
 /** The starting preset a glass draft still equals, or null once any value differs. */
 export function matchingStartingPreset(draft: PresetEditorDraft): StartingPresetId | null {
   if (draft.family !== 'liquid-glass') return null
-  const catalog = getCatalog('0.1.0')
+  const catalog = getCatalogPresets('0.1.0')
   // Fonts are independent of the starting point, so they never decide which one a draft matches.
   const paths = editablePathsFor('liquid-glass').filter((path) => !isFontPath(path))
   return (
@@ -270,7 +270,7 @@ export function matchingStartingPreset(draft: PresetEditorDraft): StartingPreset
 /** Writes a tint's veil, ink and accent into both modes. White restores the family base colours. */
 export function applyGlassTint(input: PresetEditorDraft, tint: GlassTintId | 'white'): PresetEditorDraft {
   const draft = validateDraftEnvelope(input)
-  const base = getCatalog('0.1.0').presets['liquid-glass']
+  const base = getCatalogPresets('0.1.0').presets['liquid-glass']
   const edits = { ...draft.edits }
   const set = (mode: 'light' | 'dark', key: (typeof colorKeys)[number], value: string | undefined) => {
     const path = `/modes/${mode}/${key}` as PresetEditablePath
@@ -313,7 +313,7 @@ function keepTintInBound(draft: PresetEditorDraft, tint: GlassTintId | 'white'):
   let report = presetGlassReport(next)
   if (report === null || report.passes) return next
   if (report.minimumOpacity === null || tint === 'smoke') {
-    const catalog = getCatalog('0.1.0')
+    const catalog = getCatalogPresets('0.1.0')
     const backdrop = tint === 'smoke'
       ? catalog.startingPresets['builtin-liquid-glass-fume'].design!
       : catalog.presets['liquid-glass'].design!
@@ -335,7 +335,7 @@ export function materializePreset(input: PresetEditorDraft): Preset {
     revision < 1
   )
     fail('/revision', 'Enter a positive safe integer revision.')
-  const preset = structuredClone(getCatalog('0.1.0').presets[draft.family])
+  const preset = structuredClone(getCatalogPresets('0.1.0').presets[draft.family])
   Object.assign(preset, {
     ...draft.identity,
     revision,

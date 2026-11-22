@@ -5,8 +5,10 @@ import {
   type PresetSnapshot,
   type ResolvedPreset,
 } from '@ombelle/contracts'
-import { normalizePublishedPreset, verifyPresetSnapshot } from '@ombelle/compiler'
 import type { PublicationKind } from '../publication/kind'
+
+// The compiler is loaded when a code is published or read back, not with the page.
+const compiler = () => import('@ombelle/compiler')
 
 export type PresetPublicationTypes = {
   field: 'preset'
@@ -26,6 +28,6 @@ export const presetPublication: PublicationKind<PresetPublicationTypes> = {
   validate: validatePreset,
   release: (preset) => preset,
   supported: (preset) => isStyleFamily(preset.styleFamily),
-  normalize: normalizePublishedPreset,
-  verify: (input) => verifyPresetSnapshot(input),
+  normalize: async (preset) => (await compiler()).normalizePublishedPreset(preset),
+  verify: async (input) => (await compiler()).verifyPresetSnapshot(input),
 }

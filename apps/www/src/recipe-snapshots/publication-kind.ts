@@ -4,11 +4,10 @@ import {
   type InstallableRecipeCompileResult,
   type InstallableRecipeSnapshot,
 } from '@ombelle/contracts'
-import {
-  normalizePublishedInstallableRecipe,
-  verifyInstallableRecipeSnapshot,
-} from '@ombelle/compiler'
 import type { PublicationKind } from '../publication/kind'
+
+// The compiler is loaded when a code is published or read back, not with the page.
+const compiler = () => import('@ombelle/compiler')
 
 export type RecipePublicationTypes = {
   field: 'recipe'
@@ -27,6 +26,6 @@ export const recipePublication: PublicationKind<RecipePublicationTypes> = {
   validate: validateInstallableRecipe,
   release: (recipe) => recipe.presetRef,
   normalize: async (recipe) =>
-    (await normalizePublishedInstallableRecipe(recipe)).recipe,
-  verify: (input) => verifyInstallableRecipeSnapshot(input),
+    (await (await compiler()).normalizePublishedInstallableRecipe(recipe)).recipe,
+  verify: async (input) => (await compiler()).verifyInstallableRecipeSnapshot(input),
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import { canonicalize, compile } from '@ombelle/compiler'
 import type {
   ComponentRecipe,
@@ -13,6 +13,10 @@ import { PublishedPreset } from './components/published-preset'
 import { PresetExportPanel } from '../preset-editor/components/preset-export-panel'
 import { createPresetDraft, setPresetEdit } from '../preset-editor/model'
 import { publishedInstaller } from './install-command'
+import type { SnapshotPreview } from './snapshot-preview'
+
+/** What the server prepares for a stable snapshot: the gallery resolves its tokens itself. */
+const stablePreview: SnapshotPreview = { frame: { kind: 'tokens' }, contrastWarning: false }
 
 /** A catalog draft as older editors exported it, before recipes started with the style's fonts. */
 function legacyDraft(component: Parameters<typeof createCatalogDraft>[0]): ReturnType<typeof createCatalogDraft> {
@@ -28,7 +32,7 @@ function recipeSnapshot(recipe: ComponentRecipe): InstallableRecipeSnapshot {
     revision: 1,
     recipe,
     recipeHash: 'b'.repeat(64),
-    preset: getCatalog('0.1.0').presets.flat,
+    preset: getCatalogPresets('0.1.0').presets.flat,
     presetHash: 'c'.repeat(64),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
@@ -45,7 +49,7 @@ describe('published installer commands', () => {
       <PublishedRecipe
         snapshot={recipeSnapshot(recipe)}
         origin="https://presets.example.test"
-        name="Breadcrumb"
+        name="Breadcrumb" result={null}
       />,
     )
     expect(html).toContain('npx @ombelle-ui/cli@0.9.1 add --recipe')
@@ -59,7 +63,7 @@ describe('published installer commands', () => {
     const recipe = createCatalogDraft('input').recipe
     expect(recipe.appearance?.fonts).toBeDefined()
     const html = renderToStaticMarkup(
-      <PublishedRecipe snapshot={recipeSnapshot(recipe)} origin="https://presets.example.test" name="Input" />,
+      <PublishedRecipe snapshot={recipeSnapshot(recipe)} origin="https://presets.example.test" name="Input" result={null} />,
     )
     expect(html).not.toContain('This recipe uses fonts and requires CLI 0.8.0')
     expect(html).toContain('npx @ombelle-ui/cli@0.9.1 add --recipe')
@@ -72,7 +76,7 @@ describe('published installer commands', () => {
       <PublishedRecipe
         snapshot={recipeSnapshot(recipe)}
         origin="https://presets.example.test"
-        name="Input"
+        name="Input" result={null}
       />,
     )
     expect(html).toContain(`npx @ombelle-ui/cli@${publishedInstaller.version} add --recipe`)
@@ -80,7 +84,7 @@ describe('published installer commands', () => {
   })
 
   it('offers published semantic-palette preset commands and the JSON download', () => {
-    const preset = structuredClone(getCatalog('0.1.0').presets.flat)
+    const preset = structuredClone(getCatalogPresets('0.1.0').presets.flat)
     preset.modes.dark.success = '#DCFCE7'
     preset.modes.dark.successForeground = '#14532D'
     const snapshot: PresetSnapshot = {
@@ -97,7 +101,7 @@ describe('published installer commands', () => {
     const html = renderToStaticMarkup(
       <PublishedPreset
         snapshot={snapshot}
-        origin="https://presets.example.test"
+        origin="https://presets.example.test" preview={stablePreview}
       />,
     )
     expect(html).toContain('npx @ombelle-ui/cli@0.9.1')
@@ -106,7 +110,7 @@ describe('published installer commands', () => {
   })
 
   it('offers public install commands alongside local semantic-palette exports', async () => {
-    const preset = structuredClone(getCatalog('0.1.0').presets.flat)
+    const preset = structuredClone(getCatalogPresets('0.1.0').presets.flat)
     preset.modes.light.info = '#DBEAFE'
     preset.modes.light.infoForeground = '#1E3A8A'
     const draft = createPresetDraft('flat')
@@ -141,7 +145,7 @@ describe('published installer commands', () => {
   })
 
   const fonted = () => {
-    const preset = structuredClone(getCatalog('0.1.0').presets.ombelle)
+    const preset = structuredClone(getCatalogPresets('0.1.0').presets.ombelle)
     return {
       ...preset,
       schemaVersion: '1.1' as const,
@@ -161,7 +165,7 @@ describe('published installer commands', () => {
       validationStatus: 'draft',
     }
     const html = renderToStaticMarkup(
-      <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" />,
+      <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" preview={stablePreview} />,
     )
     expect(html).not.toContain('requires CLI 0.7.8')
     expect(html).toContain('npx @ombelle-ui/cli@0.9.1')

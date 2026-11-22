@@ -32,7 +32,7 @@ jobs:
         run: pnpm build:packages
       - name: Fail on stale generated sources
         # build:packages regenerates the schema and catalog copies; committed copies must already match.
-        run: git diff --exit-code -- packages/contracts/src packages/catalog/src/generated.ts
+        run: git diff --exit-code -- packages/contracts/src packages/catalog/src/generated.ts packages/catalog/src/generated-presets.ts
       - name: Audit dependencies
         run: pnpm audit:workspace
       - name: Generate preview sources

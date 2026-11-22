@@ -1,6 +1,6 @@
 import { compareVersions, organicMinimumCli, publishedInstaller } from '../snapshots/install-command'
 import { describe, expect, it } from 'vitest'
-import { getCatalog, startingPresetOrder, styleFamilyFonts } from '@ombelle/catalog'
+import { getCatalogPresets, startingPresetOrder, styleFamilyFonts } from '@ombelle/catalog/presets'
 import { styleFamilies } from '@ombelle/contracts'
 import {
   createPresetDraft,
@@ -28,7 +28,7 @@ import {
 it.each(styleFamilies)(
   'materializes %s without mutating catalog input',
   (family) => {
-    const base = structuredClone(getCatalog('0.1.0').presets[family])
+    const base = structuredClone(getCatalogPresets('0.1.0').presets[family])
     const draft = createPresetDraft(family)
     expect(draft.identity).toEqual({
       id: 'project_preset',
@@ -52,7 +52,7 @@ it.each(styleFamilies)(
       },
     })
     result.modes.light.background = '#123456'
-    expect(getCatalog('0.1.0').presets[family]).toEqual(base)
+    expect(getCatalogPresets('0.1.0').presets[family]).toEqual(base)
     expect(colorKeys).toHaveLength(19)
     // Seven shape and depth controls plus the display and code font pickers.
     expect(Object.keys(designControls)).toHaveLength(9)
@@ -79,7 +79,7 @@ it('preserves explicit equal-to-base and invalid edits through family switching 
   expect(
     materializePreset(resetPresetField(valid, '/design/radiusRem')).design
       .radiusRem,
-  ).toBe(getCatalog('0.1.0').presets['neo-brutalism'].design.radiusRem)
+  ).toBe(getCatalogPresets('0.1.0').presets['neo-brutalism'].design.radiusRem)
   expect(resetPresetTokens(valid)).toEqual({ ...valid, edits: {} })
   expect(draft.family).toBe('flat')
 })
@@ -172,7 +172,7 @@ it('rejects unknown or oversized envelope data', () => {
 it('creates a valid liquid-glass draft based on builtin-liquid-glass', () => {
   const draft = createPresetDraft('liquid-glass')
   expect(validateDraftEnvelope(draft)).toEqual(draft)
-  const base = getCatalog('0.1.0').presets['liquid-glass']
+  const base = getCatalogPresets('0.1.0').presets['liquid-glass']
   expect(base.id).toBe('builtin-liquid-glass')
   const preset = materializePreset(draft)
   expect(preset.styleFamily).toBe('liquid-glass')
@@ -240,7 +240,7 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
   const back = planPresetFamilyChange(toFlat.draft, 'liquid-glass')
   expect(back.draft.family).toBe('liquid-glass')
   // Switching into glass starts from Cristal.
-  expect(materializePreset(back.draft).design.glassOpacity).toBe(getCatalog('0.1.0').startingPresets['builtin-liquid-glass-cristal'].design!.glassOpacity)
+  expect(materializePreset(back.draft).design.glassOpacity).toBe(getCatalogPresets('0.1.0').startingPresets['builtin-liquid-glass-cristal'].design!.glassOpacity)
 })
 
 it('requests only components the family supports', () => {
@@ -313,7 +313,7 @@ it('requests only components the family supports', () => {
 })
 
 it('picking a starting point replaces every value', () => {
-  const catalog = getCatalog('0.1.0')
+  const catalog = getCatalogPresets('0.1.0')
   let draft = setPresetEdit(createPresetDraft('liquid-glass'), '/modes/light/primary', '#123456')
   draft = applyStartingPreset(draft, 'builtin-liquid-glass-relief')
   const preset = materializePreset(draft)
@@ -397,7 +397,7 @@ it.each(startingPresetOrder)('leaving liquid glass from %s returns to Ombelle de
   const glass = setPresetEdit(applyStartingPreset(createPresetDraft('liquid-glass'), id), '/design/radiusRem', '1.5')
   const { draft, changes } = planPresetFamilyChange(glass, 'ombelle')
   expect(draft.edits).toEqual({ '/design/radiusRem': '1.5' })
-  expect(materializePreset(draft).modes).toEqual(getCatalog('0.1.0').presets.ombelle.modes)
+  expect(materializePreset(draft).modes).toEqual(getCatalogPresets('0.1.0').presets.ombelle.modes)
   expect(changes.some((change) => change.path === '/design/radiusRem')).toBe(false)
   // A colour the user picked on top of the starting preset travels.
   const tinted = setPresetEdit(glass, '/modes/light/primary', '#123456')

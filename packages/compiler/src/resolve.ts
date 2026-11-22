@@ -7,6 +7,8 @@ import {
   type ResolvedPreset,
 } from '@ombelle/contracts'
 import type { Catalog } from '@ombelle/catalog'
+/** What resolution reads from a catalog: its release and family presets (getCatalogPresets provides them without templates). */
+type PresetCatalog = Pick<Catalog, 'release' | 'presets'>
 import { canonicalize } from './canonicalize.js'
 import { sha256 } from './hash.js'
 /** Canonical spelling of a schema-valid color (lowercase hex, plain OKLCH numbers). */
@@ -30,7 +32,7 @@ export function normalizeColor(color: string): string {
  * The resolved preset data without validation or hashing: catalog defaults
  * merged in and colors normalized. Idempotent on already-resolved data.
  */
-export function presetWithDefaults(p: Preset, catalog: Catalog): ResolvedPreset['data'] {
+export function presetWithDefaults(p: Preset, catalog: PresetCatalog): ResolvedPreset['data'] {
   const base = catalog.presets[p.styleFamily]
   if (!base)
     throw new FoundationError(
@@ -64,7 +66,7 @@ export function presetWithDefaults(p: Preset, catalog: Catalog): ResolvedPreset[
 }
 export async function resolvePreset(
   input: unknown,
-  catalog: Catalog,
+  catalog: PresetCatalog,
 ): Promise<ResolvedPreset> {
   const p = validatePreset(input)
   if (p.catalogRelease !== catalog.release || !isSupportedContractRelease(p.compilerVersion))

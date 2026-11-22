@@ -1,5 +1,5 @@
-import { getCatalog } from '@ombelle/catalog'
-import { canonicalize, compile, presetPreviewSheets, resolvePreset, sha256, stripFontImports } from '@ombelle/compiler'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
+import { canonicalize, resolvePreset, sha256, stripFontImports } from '@ombelle/compiler/light'
 import {
   componentsWithStyleSupport,
   isStyleFamily,
@@ -9,6 +9,8 @@ import {
   type Preset,
 } from '@ombelle/contracts'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
+/** The full compiler, loaded by the first verification rather than with the page. */
+const compiler = () => import('@ombelle/compiler')
 export const presetScenes = ['gallery', 'dashboard', 'projects', 'settings', 'sign-in', 'workspace'] as const
 export type PresetScene = (typeof presetScenes)[number]
 /** Liquid glass preview backdrops: the design kit's, light scenes, then dark and warm ones. Preview only, never saved. */
@@ -147,7 +149,7 @@ export async function verifyPresetRender(
       result.preset.data.styleFamily,
       ['stable', 'experimental'],
     )
-    const expected = await compile({
+    const expected = await (await compiler()).compile({
       preset: result.preset.data,
       componentIds,
       catalogRelease: '0.1.0',
@@ -243,7 +245,7 @@ export async function verifyPresetTokens(
       input.preset.compilerVersion !== '0.1.0'
     )
       return null
-    const resolved = await resolvePreset(input.preset as Preset, getCatalog('0.1.0'))
+    const resolved = await resolvePreset(input.preset as Preset, getCatalogPresets('0.1.0'))
     if (
       !isStyleFamily(resolved.data.styleFamily) ||
       resolved.data.styleFamily === 'liquid-glass' ||
@@ -251,7 +253,7 @@ export async function verifyPresetTokens(
       resolved.data.compilerVersion !== '0.1.0'
     )
       return null
-    const sheets = presetPreviewSheets(resolved.data)
+    const sheets = (await compiler()).presetPreviewSheets(resolved.data)
     return {
       message: input as PresetTokens,
       css: sheets.join('\n'),
@@ -263,5 +265,5 @@ export async function verifyPresetTokens(
   }
 }
 export async function presetHashOf(preset: Preset): Promise<string> {
-  return (await resolvePreset(preset, getCatalog('0.1.0'))).hash
+  return (await resolvePreset(preset, getCatalogPresets('0.1.0'))).hash
 }

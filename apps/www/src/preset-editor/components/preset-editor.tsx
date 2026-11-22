@@ -59,7 +59,7 @@ import { changesSummary, presetChanges } from '../../editor/artifact-diff'
 import { canExportPreset, serializePresetExport } from '../export'
 import { GlassPanel, glassReadoutId } from './glass-panel'
 import { GlassStartingPoints } from './glass-starting-points'
-import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog/presets'
 import { glassBackdropOptions, glassPresetBackdrop } from '../../site/glass-presets'
 import { glassBackdropMenu, labInkFor, pickGlassScene } from '../../site/glass-backdrops'
 import {

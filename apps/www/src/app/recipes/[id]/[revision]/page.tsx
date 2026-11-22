@@ -1,5 +1,6 @@
 import { parseRecipeSnapshotReference } from '@ombelle/contracts'
 import { PublishedRecipe } from '../../../../recipe-snapshots/components/published-recipe'
+import { prepareRecipePreview } from '../../../../recipe-snapshots/preview'
 import { recipeSnapshotInstallCommand } from '../../../../recipe-snapshots/install-command'
 import { readSnapshotConfig } from '../../../../snapshots/server/config'
 import { SnapshotServiceError } from '../../../../snapshots/server/errors'
@@ -35,7 +36,7 @@ export default async function Page({
         recipeHash: snapshot.recipeHash,
       },
     )
-    return <PublishedRecipe snapshot={snapshot} origin={publicOrigin} name={componentDoc(snapshot.recipe.component)?.name} />
+    return <PublishedRecipe snapshot={snapshot} origin={publicOrigin} name={componentDoc(snapshot.recipe.component)?.name} result={await prepareRecipePreview(snapshot)} />
   } catch (error) {
     const code = error instanceof SnapshotServiceError ? error.code : undefined
     const withdrawn = code === 'SNAPSHOT_WITHDRAWN'

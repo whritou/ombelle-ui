@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react'
 import { CircleAlert, RotateCcw } from 'lucide-react'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import { accessibilityCaveatLabel, familyAccessibilityCaveat, styleFamilies, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
@@ -474,7 +474,7 @@ export function paletteSwatch(
 }
 /** The style's own colours in one mode, for the Style default swatch. */
 function defaultTokens(family: StyleFamily, mode: SchemeMode): Readonly<Record<string, string | undefined>> {
-  return getCatalog('0.1.0').presets[family].modes[mode]
+  return getCatalogPresets('0.1.0').presets[family].modes[mode]
 }
 /** The disc's custom properties; a primary colour alone has no page colour, so it is a plain filled disc. */
 function swatchStyle(swatch: { background: string; mark?: string } | undefined): CSSProperties | undefined {

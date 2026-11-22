@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./dist/index.js"
+    },
+    "./light": {
+      "types": "./src/light.ts",
+      "import": "./dist/light.js"
     }
   },
   "dependencies": {

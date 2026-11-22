@@ -1,4 +1,4 @@
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import { normalizePublishedPreset, normalizePublishedRecipe } from '@ombelle/compiler'
 import type { PresetSnapshot, RecipeSnapshot } from '@ombelle/contracts'
 import example from '../../../../examples/recipe.example.json'
@@ -22,7 +22,7 @@ export const kinds: {
     name: 'preset',
     kind: presetPublication as PublicationKind<Any>,
     draft: (family = 'flat') =>
-      normalizePublishedPreset(getCatalog('0.1.0').presets[family]),
+      normalizePublishedPreset(getCatalogPresets('0.1.0').presets[family]),
     envelope: (p): PresetSnapshot => ({
       snapshotVersion: '1.0',
       id: 'ps_0123456789abcdef0123456789abcdef',
@@ -39,7 +39,7 @@ export const kinds: {
     name: 'recipe',
     kind: recipePublication as PublicationKind<Any>,
     draft: async (family = 'flat') => {
-      const preset = getCatalog('0.1.0').presets[family]
+      const preset = getCatalogPresets('0.1.0').presets[family]
       const result = await normalizePublishedRecipe({
         ...example,
         presetRef: {
