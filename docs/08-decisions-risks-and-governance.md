@@ -2,17 +2,17 @@
 
 ## Initial architecture decisions
 
-These decisions form a proposed baseline. Accept or revise them through short architecture decision records during M0.
+These are the baseline decisions recorded during M0, with their current status. The open decisions for 1.0 live in [1.0 decisions](1.0-decisions.md); this file no longer keeps an open-decision list.
 
 | Decision | Recommendation | Reason and consequence |
 | --- | --- | --- |
 | D01 Distribution | Editable source through a shadcn-compatible registry | Preserves customization and familiar install conventions; updates need conflict handling |
-| D02 Language | React TSX first, generated JSX before beta | Fits the requested ecosystem; conversion requires independent consumer checks |
-| D03 Behavior | One Radix-based edition first | Keeps APIs and testing manageable; Base UI and React Aria need later adapters |
+| D02 Language | React TSX first, generated JSX before beta | **Superseded.** TSX only; there is no JSX output and none is planned for 1.0 |
+| D03 Behavior | One Radix-based edition first | **Superseded.** Radix and Base UI ship as two editions ([decision 0005](decisions/0005-base-ui-edition.md)); React Aria is not supported |
 | D04 Styling | Semantic tokens and reviewed slot recipes | Separates visual families from interaction behavior; unique markup needs migration |
 | D05 Preset persistence | Local normalized JSON plus provenance lock | Future installs are stable and do not depend on a live website |
 | D06 Export parity | Shared compiler and artifacts | Makes preview-to-install consistency testable |
-| D07 CLI reuse | Thin product orchestration over tested upstream integration | Avoids unnecessary installer duplication; isolate and pin upstream behavior |
+| D07 CLI reuse | Thin product orchestration over tested upstream integration | **Superseded** by [decision 0002](decisions/0002-registry-adapter.md): the CLI is an independent installer that stays registry-format compatible |
 | D08 Editor scope | Structured controls before arbitrary code | Delivers customization with smaller execution and security complexity |
 | D09 Native | Separate native HTML and React Native commitments | Prevents a web implementation from implying unsupported mobile compatibility |
 | D10 Accounts | Account-free editing and local export first | Removes an early adoption barrier; shared snapshots are public |
@@ -34,15 +34,13 @@ These decisions form a proposed baseline. Accept or revise them through short ar
 
 ## Decisions still open
 
-Confirm final product name, npm namespace, registry domain, team and launch budget, exact primitive edition and package versions, the meaning and priority of native variants, and whether liquid glass must be stable for the initial public release.
-
-Also decide open-source licensing and any future commercial model, supported fonts, public snapshot retention and abuse handling, the mobile device matrix, and the long-term compatibility window. None requires blocking the first local technical spike. Resolve publication and licensing choices before external distribution.
+See [1.0 decisions](1.0-decisions.md). Resolved and no longer open: product name (Ombelle), npm namespace (`@ombelle-ui`), registry domain (`ombelle-ui.vercel.app`), primitive editions (Radix and Base UI), liquid glass (stable, accessibility not guaranteed), and the open-source licence (MIT). Team, launch budget, native variants, a commercial model and the mobile device matrix are outside 1.0 scope.
 
 ## Licensing and provenance
 
 shadcn/ui's published repository license is MIT; see S14. Treat this as a source provenance requirement rather than assuming every dependency or asset has the same terms. Preserve applicable copyright and permission notices in redistributed source and maintain a dependency and asset inventory.
 
-Choose this project's own license explicitly. MIT is a reasonable candidate for an open component foundation, with any later paid assets clearly separated, but this is a product decision. Avoid implying affiliation with shadcn or using a name that suggests official endorsement. Check the final name and asset rights before release.
+Choose this project's own license explicitly. The project is released under the MIT License (see `LICENSE`); any later paid assets would be clearly separated. Avoid implying affiliation with shadcn or using a name that suggests official endorsement. Check the final name and asset rights before release.
 
 ## Ownership and contributions
 

@@ -84,24 +84,13 @@ Portals must mount inside the preview document and inherit the intended tokens. 
 
 ## Implemented snapshot subset and remaining proposal
 
-The local private implementation provides `POST /api/v1/presets`, exact `GET` and `HEAD` reads at `/api/v1/presets/{id}/{revision}`, explicit withdrawal and unwithdrawal operator commands, and immutable preset resolution by the private CLI. It uses SQLite under Node with explicit initialization and persistent-volume requirements. The public page is read-only; publication requires an explicit confirmation. Payloads are publicly readable by exact reference and remain drafts. No hosted endpoint, account, alias, public listing, recipe snapshot, or public CLI distribution is configured. See [snapshot service operations](snapshot-service-operations.md) for exact request, environment, and operational contracts and [measured evidence](evidence/immutable-preset-snapshots.md) for verification limits.
+The service is deployed at `https://ombelle-ui.vercel.app` with PostgreSQL (SQLite for local development). It provides `POST /api/v1/presets` and `POST /api/v1/recipes` (used by the editors, restricted by `Origin`), exact `GET` and `HEAD` reads at `/api/v1/{presets,recipes}/{id}/{revision}`, explicit withdrawal and unwithdrawal operator commands, and immutable resolution by the published CLI. The public pages are read-only; publication requires an explicit confirmation. Payloads are publicly readable by exact reference and remain drafts. No account, alias or public listing exists. The routes, payloads and status codes are specified in [Hosted API v1](hosted-api-v1.md). See [snapshot service operations](snapshot-service-operations.md) for exact request, environment, and operational contracts and [measured evidence](evidence/immutable-preset-snapshots.md) for verification limits.
 
-The remaining public release, hosting, and account/alias proposals below are not implemented interfaces.
+The proposals below that are not in the table are not implemented interfaces.
 
-## Proposed snapshot API
+## Snapshot API
 
-| Endpoint | Input | Result |
-| --- | --- | --- |
-| `POST /api/v1/presets` | Validated preset draft | Immutable ID, revision, hash, status and resolved version metadata |
-| `GET /api/v1/presets/{id}/{revision}` | Exact reference | Canonical normalized preset and provenance |
-| `POST /api/v1/recipes` | Validated recipe and resolvable preset reference | Immutable recipe reference and content hash |
-| `GET /api/v1/recipes/{id}/{revision}` | Exact reference | Canonical recipe and pinned preset reference |
-| `GET /r/{release}/{item}.json` | Versioned standard registry item | Upstream-compatible registry JSON |
-| `GET /api/v1/catalog/{release}` | Exact catalog release | Component metadata, supported controls and style matrix |
-
-Use explicit content types, a proposed 64 KiB maximum JSON body, bounded string and nesting limits, anonymous publish rate limits, and idempotency keys for retries. Reject unknown fields. GET responses use ETags and immutable caching where appropriate. Draft publishing is not a verification service.
-
-An error response contains a stable code, a human message, structured issues with JSON pointers, and a request ID. Use validation errors for malformed payloads, a distinct unsupported-version error, and rate-limit responses with a retry hint. A failed publish leaves the local draft and download actions usable.
+The implemented routes, limits, headers and error shape are in [Hosted API v1](hosted-api-v1.md). Not implemented and not planned for 1.0: standard registry item routes (`/r/{release}/{item}.json`), a catalog metadata route (`/api/v1/catalog/{release}`), accounts, aliases and listings. Draft publishing is not a verification service.
 
 Opaque ID generation prevents accidental collisions. Content-addressed deduplication is optional and should not reveal whether another person published identical content. Snapshot public-read semantics and retention must be documented before public launch.
 
