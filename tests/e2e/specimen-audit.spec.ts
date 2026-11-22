@@ -6,11 +6,10 @@ import {
   checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
+import { editions, modes, specimenArtifacts as artifacts, specimenRunIsPartial } from '../helpers/specimen-run.js'
+import { inShard, specimenShard } from '../helpers/specimen-shard.js'
 
-const editions = ['radix', 'base'] as const
-const modes = ['light', 'dark'] as const
 const checks: AuditCheck[] = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
-const artifacts = '.artifacts/specimen-audit'
 // Findings whose outcome depends on the colours behind the specimen: a focus ring short of 3:1 and axe's
 // color-contrast rule. A focus finding for any other reason (no focus, focus moved) is not one of them.
 const backdropDependent = (finding: Finding) =>
@@ -66,10 +65,15 @@ async function measure(page: Page, roots: Locator[], stop: Locator, prefix: stri
   return findings
 }
 
-for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.includes(name)))
-  for (const edition of editions)
-    for (const mode of modes)
+// Every configuration, in a fixed order: a shard takes its share by index, before any filter.
+const configurations = styleFamilies.flatMap(family => editions.flatMap(edition => modes.map(mode => ({ family, edition, mode }))))
+// One configuration measures every specimen: 3.6 to 5.2 minutes each on a CI runner (22 November nightly).
+const configurationTimeout = 900000
+
+for (const [index, { family, edition, mode }] of configurations.entries())
+  if (inShard(index) && (!onlyFamilies || onlyFamilies.includes(family)))
       test(`${family}/${edition}/${mode}: every specimen passes the measured checks`, async ({ page, browser }) => {
+        test.setTimeout(configurationTimeout)
         const counts = Object.fromEntries(checks.map(check => [check, 0])) as Record<AuditCheck, number>
         const findings: (Finding & { component: string })[] = []
         const errors: string[] = []
@@ -182,12 +186,12 @@ for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.
         const blocking = findings.filter(finding => !advisory.includes(finding))
         if (advisory.length)
           test.info().annotations.push({ type: 'contrast advisory findings', description: JSON.stringify(advisory) })
-        const part = { family, edition, mode, specimens: components.length, checks: counts, failures: blocking.length + errors.length,
+        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, specimens: components.length, checks: counts, failures: blocking.length + errors.length,
           contrastAdvisoryFindings: advisory.length,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         // A run limited to some components writes its findings apart and leaves the evidence file alone.
         // A font or family run is never the standard evidence either.
-        const partial = Boolean(onlyComponents?.length || auditFonts || onlyFamilies?.length)
+        const partial = specimenRunIsPartial()
         const partsDirectory = path.join(artifacts, partial ? 'partial' : 'parts')
         await fs.mkdir(partsDirectory, { recursive: true })
         if (!partial) await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
@@ -198,27 +202,10 @@ for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.
         expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])
       })
 
-// Merge every configuration's part into the evidence file the foundation gate validates.
-test.afterAll(async () => {
-  if (onlyComponents?.length) return
-  const directory = path.join(artifacts, 'parts')
-  const names = (await fs.readdir(directory).catch(() => [] as string[])).filter(name => name.endsWith('.json') && !name.endsWith('.findings.json'))
-  const parts = await Promise.all(names.map(async name => JSON.parse(await fs.readFile(path.join(directory, name), 'utf8'))))
-  if (!parts.length) return
-  const order = (part: { family: string; edition: string; mode: string }) =>
-    [styleFamilies.indexOf(part.family as never), editions.indexOf(part.edition as never), modes.indexOf(part.mode as never)]
-  parts.sort((a, b) => { const x = order(a), y = order(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] })
-  const evidence = {
-    schemaVersion: 1, node: process.version, browser: parts[0].browser,
-    configurations: parts.map(({ family, edition, mode, specimens, checks, contrastAdvisoryFindings }) =>
-      ({ family, edition, mode, specimens, checks, contrastAdvisoryFindings })),
-    failures: parts.reduce((sum, part) => sum + part.failures, 0),
-  }
-  await fs.writeFile('.artifacts/specimen-audit.json', JSON.stringify(evidence, null, 2) + '\n')
-})
+// Parts are merged once, after every worker, in specimen-audit.teardown.ts.
 
-// The page is the measurement surface: it must match what an install renders.
-test('audit pages draw the glass backdrop and lay specimens out in normal flow', async ({ page }) => {
+// The page is the measurement surface: it must match what an install renders. One shard runs it.
+if ((specimenShard()?.current ?? 1) === 1) test('audit pages draw the glass backdrop and lay specimens out in normal flow', async ({ page }) => {
   for (const mode of modes) {
     await page.goto(`/audit/liquid-glass/radix/?mode=${mode}`)
     await expect(page.locator('main[data-audit-page]')).toHaveAttribute('data-ready', 'true', { timeout: 60000 })

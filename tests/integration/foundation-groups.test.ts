@@ -5,14 +5,30 @@ import { spawnSync } from 'node:child_process'
 import { afterEach, expect, test } from 'vitest'
 import { supportedComponentIds } from '@ombelle/contracts'
 // @ts-expect-error JavaScript gate entry point
-import { aggregateFoundationEvidence, foundationSteps, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
+import { aggregateFoundationEvidence, foundationSteps, specimenSpecCounts, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
 
 const roots: string[] = []
 const commit = 'a'.repeat(40)
 const stages = foundationSteps as Record<'quality' | 'consumers' | 'all', string[]>
 let base: Promise<Record<string, Record<string, any>>> | undefined
-const collectedDefinitions = new Map<string, { name: string; file: string }[]>()
+// A small inventory stands in for the suite: listing every unit and integration test took 469 s of
+// CI time here (TST-12). The real collector runs in every Foundation quality group.
+const inventories = {
+  unit: { files: ['packages/catalog/test/recipe-preset.test.ts', 'apps/www/src/preset-editor/model.test.ts', 'packages/catalog/test/catalog.test.ts'], tests: [
+    { file: 'packages/catalog/test/recipe-preset.test.ts', name: 'resolves exact built-in flat' },
+    { file: 'packages/catalog/test/recipe-preset.test.ts', name: 'resolves exact built-in ombelle' },
+    { file: 'apps/www/src/preset-editor/model.test.ts', name: 'model > creates a draft' },
+    { file: 'apps/www/src/preset-editor/model.test.ts', name: 'model > materializes a preset' },
+    { file: 'packages/catalog/test/catalog.test.ts', name: 'catalog > lists every component' },
+    { file: 'packages/catalog/test/catalog.test.ts', name: 'catalog > compiles deterministically' },
+  ] },
+  integration: { files: ['tests/integration/recipe-cli.test.ts', 'tests/integration/foundation-runner.test.ts'], tests: [
+    ...Array.from({ length: 4 }, () => ({ file: 'tests/integration/recipe-cli.test.ts', name: 'rejects invalid recipe grammar "add"' })),
+    { file: 'tests/integration/recipe-cli.test.ts', name: 'adds a recipe' },
+    { file: 'tests/integration/foundation-runner.test.ts', name: 'runs stages in order' },
+  ] },
+}
 function browserResults() {
   return {
     stats: { expected: 1185, unexpected: 0, skipped: 0, flaky: 0 }, errors: [],
@@ -24,34 +40,37 @@ function browserResults() {
 function specimenAudit() {
   const checks = (mode: string) => ({ overflow: 36, clipping: 36, spacing: 36, 'focus-visible': 40, 'target-size': 36, 'forced-colors': mode === 'light' ? 29 : 0, axe: 36 })
   return {
-    schemaVersion: 1, node: 'v24.19.0', browser: { engine: 'chromium', version: '148.0.0.0', channel: 'bundled' },
+    schemaVersion: 1, sourceCommit: commit, node: 'v24.19.0', browser: { engine: 'chromium', version: '148.0.0.0', channel: 'bundled' },
     configurations: ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
-      ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: supportedComponentIds.length, checks: checks(mode) })))),
+      ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: supportedComponentIds.length, checks: checks(mode), contrastAdvisoryFindings: 0 })))),
     failures: 0,
   }
+}
+/** The specimen config's Playwright report: every pinned spec passed once. */
+function specimenResults(files = Object.entries(specimenSpecCounts as Record<string, number>)) {
+  const suites = files.map(([file, count]) => ({
+    file, suites: [], specs: Array.from({ length: count }, (_, i) => ({ file, id: 'specimen-' + file + i, title: file + i, ok: true, tests: [{ expectedStatus: 'passed', status: 'expected', results: [{ status: 'passed', retry: 0, errors: [] }] }] })),
+  }))
+  const expected = suites.reduce((sum, suite) => sum + suite.specs.length, 0)
+  return { stats: { expected, unexpected: 0, skipped: 0, flaky: 0 }, errors: [], suites }
+}
+/** The specimen group as CI runs it: shard n of total, each with its share of configurations and spec files. */
+function specimenShards(total = 4) {
+  const audit = specimenAudit()
+  const files = Object.entries(specimenSpecCounts as Record<string, number>)
+  return Array.from({ length: total }, (_, index) => ({
+    'specimen-audit.json': { ...audit, shard: { current: index + 1, total }, runId: 'github:1/1', configurations: audit.configurations.filter((_, row) => row % total === index) },
+    'specimen-results.json': specimenResults(files.filter((_, file) => file % total === index)),
+  }))
 }
 async function testResults(prefix: string | string[]) {
   // Collect from source independently of the aggregate implementation. This is
   // structural reporter data only; no test bodies execute during collection.
   const prefixes = Array.isArray(prefix) ? prefix : [prefix]
   const kind = prefixes.includes('tests/integration/') ? 'integration' : 'unit'
-  if (!collectedDefinitions.has(kind)) {
-    // Discover only the requested test class, independently of the production
-    // collector. Listing the entire workspace for unit fixtures is unnecessary.
-    const selection = kind === 'unit' ? ['packages', 'apps/www/src'] : ['--config', 'vitest.integration.config.ts', 'tests/integration']
-    const collected = spawnSync(process.execPath, [path.resolve('node_modules/vitest/vitest.mjs'), 'list', ...selection, '--staticParse=false', '--json'], { encoding: 'utf8', windowsHide: true, timeout: 360000, maxBuffer: 8 * 1024 * 1024 })
-    if (collected.status !== 0) {
-      throw new Error([
-        `Vitest integration test collection failed (status: ${collected.status ?? 'null'}, signal: ${collected.signal ?? 'none'}, error: ${collected.error?.message ?? 'none'})`,
-        `stdout:\n${collected.stdout}`,
-        `stderr:\n${collected.stderr}`,
-      ].join('\n'))
-    }
-    collectedDefinitions.set(kind, JSON.parse(collected.stdout))
-  }
   const byFile = new Map<string, any[]>()
-  for (const row of collectedDefinitions.get(kind)!) {
-    const name = path.relative(process.cwd(), row.file).replaceAll('\\', '/')
+  for (const row of inventories[kind].tests) {
+    const name = row.file
     if (!prefixes.some((prefix) => name.startsWith(prefix))) continue
     const assertions = byFile.get(name) ?? []
     assertions.push({ fullName: row.name, ancestorTitles: [], title: row.name, status: 'passed', failureMessages: [] })
@@ -75,7 +94,6 @@ async function data() {
       'browser-version.json': { engine: 'chromium', version: '155.0.0.0', channel: 'bundled Chromium' },
       'npm-version.json': '11.19.0', 'yarn-versions.json': {}, 'yarn-matrix.json': {}, 'bun-version.json': '1.4.3', 'bun-matrix.json': {},
       'browser-results.json': browserResults(),
-      'specimen-audit.json': specimenAudit(),
     },
   }
 }
@@ -89,6 +107,15 @@ async function fixture() {
     await write(root, group, 'foundation-report.json', {
       group, sourceCommit: commit, status: 'passed', exitCode: 0,
       steps: stages[group].map(name => ({ name, status: 'passed', exitCode: 0 })),
+    })
+  }
+  for (const [index, files] of specimenShards().entries()) {
+    const directory = 'foundation-specimen-shard-' + (index + 1)
+    await fs.mkdir(path.join(root, directory))
+    for (const [file, value] of Object.entries(files)) await write(root, directory, file, value)
+    await write(root, directory, 'foundation-report.json', {
+      group: 'specimen', shard: { current: index + 1, total: 4 }, sourceCommit: commit, status: 'passed', exitCode: 0,
+      steps: foundationSteps.specimen.map((name: string) => ({ name, status: 'passed', exitCode: 0 })),
     })
   }
   return root
@@ -156,19 +183,19 @@ test('rejects omitted preset editor cases even when reporter totals are adjusted
 test('accepts app unit evidence from Windows and Unix source paths', async () => {
   const result = await testResults(['packages/', 'apps/www/src/'])
   expect(result.testResults.some((suite) => suite.name.includes('/apps/www/src/preset-editor/'))).toBe(true)
-  await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
+  await expect(validateTestResults(result, 'unit', inventories.unit)).resolves.toMatchObject({ failed: 0 })
   for (const suite of result.testResults) suite.name = 'Z:\\portable-checkout\\' + suite.name.replace('/different-checkout/', '').replaceAll('/', '\\')
-  await expect(validateTestResults(result, 'unit')).resolves.toMatchObject({ failed: 0 })
-}, 900000) // Fixture discovery and the validator's own inventory, each bounded at 360 s; both grow with the catalog.
+  await expect(validateTestResults(result, 'unit', inventories.unit)).resolves.toMatchObject({ failed: 0 })
+})
 test('rejects missing app unit files and assertions after headline counts are adjusted', async () => {
   for (const mode of ['file', 'assertion']) {
     const result = await testResults(['packages/', 'apps/www/src/'])
     const index = result.testResults.findIndex((suite) => suite.name.endsWith('preset-editor/model.test.ts'))
     const removed = mode === 'file' ? result.testResults.splice(index, 1)[0].assertionResults.length : (result.testResults[index].assertionResults.pop(), 1)
     result.numTotalTests -= removed; result.numPassedTests -= removed
-    await expect(validateTestResults(result, 'unit')).rejects.toThrow()
+    await expect(validateTestResults(result, 'unit', inventories.unit)).rejects.toThrow()
   }
-}, 900000) // Reuses the discovery above, or runs it when this test runs alone.
+})
 test('rejects omitted Card browser cases even when reporter totals are adjusted', () => {
   const result = browserResults()
   result.suites = result.suites.filter(suite => suite.file !== 'card.spec.ts')
@@ -190,26 +217,25 @@ test('rejects omitted editor browser cases even when reporter totals are adjuste
 test('accepts complete portable structural evidence without any consumer root descriptors', async () => {
   const root = await fixture()
   const unit = JSON.parse(await fs.readFile(path.join(root, 'quality/unit-results.json'), 'utf8'))
-  // Vitest 5 defaults to static listing, which leaves test.each templates unexpanded.
   expect(unit.testResults.find((suite: any) => suite.name.endsWith('catalog/test/recipe-preset.test.ts')).assertionResults.map((assertion: any) => assertion.title)).toContain('resolves exact built-in flat')
   const integration = JSON.parse(await fs.readFile(path.join(root, 'quality/integration-results.json'), 'utf8'))
   const repeated = integration.testResults.find((suite: any) => suite.name.endsWith('integration/recipe-cli.test.ts')).assertionResults.filter((assertion: any) => assertion.title === 'rejects invalid recipe grammar "add"')
   expect(repeated).toHaveLength(4) // Legitimate identical parameterized titles retain their multiplicity.
-  const result = await aggregateFoundationEvidence(root, commit)
+  const result = await aggregateFoundationEvidence(root, commit, { inventories })
   expect(result).toMatchObject({ sourceCommit: commit, status: 'passed', counts: { browser: { expected: 1185 } } })
   expect(Object.keys(result.consumerMatrix)).toHaveLength(54)
   expect(result.recipeEvidence.measurements).toHaveLength(490)
   expect(result.componentPresetEvidence.measurements).toHaveLength(490)
-}, 420000) // Fixture discovery plus two independently bounded runtime inventories.
+})
 test('rejects an absent group rather than accepting a passed status', async () => {
   const root = await fixture()
   await fs.rm(path.join(root, 'consumers'), { recursive: true })
-  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })
 test('rejects an extra artifact', async () => {
   const root = await fixture()
   await fs.cp(path.join(root, 'quality'), path.join(root, 'duplicate'), { recursive: true })
-  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })
 test.each([
   ['failed group', (r: any) => { r.status = 'failed' }],
@@ -221,12 +247,34 @@ test.each([
 ])('rejects %s', async (_label, mutate) => {
   const root = await fixture()
   await patch(root, 'consumers', 'foundation-report.json', mutate)
-  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
+})
+test('merges four specimen shards into one complete audit', async () => {
+  const root = await fixture()
+  const result = await aggregateFoundationEvidence(root, commit, { inventories })
+  expect(result.specimenAudit).toEqual({ configurations: 32, specimens: 32 * supportedComponentIds.length })
+  expect(result.specimenAuditEvidence.runIds).toEqual(['github:1/1'])
+  expect(result.groups.specimen).toHaveLength(4)
+})
+test.each([
+  ['a missing shard', async (root: string) => { await fs.rm(path.join(root, 'foundation-specimen-shard-3'), { recursive: true }) }],
+  ['a duplicated shard', async (root: string) => { await patch(root, 'foundation-specimen-shard-2', 'foundation-report.json', (r) => { r.shard.current = 1 }) }],
+  ['shards of different totals', async (root: string) => { await patch(root, 'foundation-specimen-shard-4', 'foundation-report.json', (r) => { r.shard.total = 5 }) }],
+  ['a shard audit from another commit', async (root: string) => { await patch(root, 'foundation-specimen-shard-1', 'specimen-audit.json', (r) => { r.sourceCommit = 'b'.repeat(40) }) }],
+  ['a configuration no shard measured', async (root: string) => { await patch(root, 'foundation-specimen-shard-1', 'specimen-audit.json', (r) => { r.configurations.pop() }) }],
+  ['a configuration two shards measured', async (root: string) => { await patch(root, 'foundation-specimen-shard-1', 'specimen-audit.json', (r) => { r.configurations[1] = r.configurations[0] }) }],
+  ['a failed shard audit', async (root: string) => { await patch(root, 'foundation-specimen-shard-2', 'specimen-audit.json', (r) => { r.failures = 1 }) }],
+  ['a specimen spec no shard ran', async (root: string) => { await patch(root, 'foundation-specimen-shard-1', 'specimen-results.json', (r) => { r.suites[0].specs.pop(); r.stats.expected-- }) }],
+  ['a skipped specimen spec', async (root: string) => { await patch(root, 'foundation-specimen-shard-1', 'specimen-results.json', (r) => { r.suites[0].specs[0].tests[0].results[0].status = 'skipped' }) }],
+])('rejects specimen evidence with %s', async (_label, mutate) => {
+  const root = await fixture()
+  await mutate(root)
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })
 test('rejects passed reports without their measured evidence files', async () => {
   const root = await fixture()
   await fs.rm(path.join(root, 'consumers/recipe-measurements.json'))
-  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })
 test.each([
   ['incomplete matrix', 'consumer-matrix.json', (r: any) => { delete r['vite-flat'] }],
@@ -241,7 +289,7 @@ test.each([
 ])('rejects %s even with passed group status', async (_label, file, mutate) => {
   const root = await fixture()
   await patch(root, 'consumers', file, mutate)
-  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })
 test.each([
   ['duplicate assertion replacement', (r: any) => {
@@ -260,7 +308,7 @@ test.each([
 ])('rejects %s even with successful summary counts', async (_label, mutate) => {
   const root = await fixture()
   await patch(root, 'quality', 'unit-results.json', mutate)
-  await expect(aggregateFoundationEvidence(root, commit).then(() => undefined)).rejects.toThrow()
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })
 
 test.each(['quality', 'consumers'])('executes %s stages independently and clears stale owned evidence', async group => {
