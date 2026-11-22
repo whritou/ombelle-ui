@@ -9,10 +9,12 @@ import { consumerCases } from './consumer-matrix.ts'
 import { finalizeRecipeEvidence } from './recipe-evidence.ts'
 import { finalizeComponentPresetEvidence } from './component-preset-evidence.ts'
 
+// Unit and integration tests import apps/www/src/generated and apps/preview/src/generated,
+// which generate:preview writes, so it runs before them (as in ci.yml).
 export const foundationSteps = {
-  quality: ['build:packages', 'test:unit', 'test:integration', 'generate:preview', 'typecheck', 'audit:workspace'],
+  quality: ['build:packages', 'generate:preview', 'test:unit', 'test:integration', 'typecheck', 'audit:workspace'],
   consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'test:specimen-audit', 'build:consumers', 'test:e2e'],
-  all: ['build:packages', 'test:unit', 'test:integration', 'generate:preview', 'prepare:consumers', 'typecheck', 'build:preview', 'build:consumers', 'test:specimen-audit', 'test:e2e', 'audit:workspace'],
+  all: ['build:packages', 'generate:preview', 'test:unit', 'test:integration', 'prepare:consumers', 'typecheck', 'build:preview', 'build:consumers', 'test:specimen-audit', 'test:e2e', 'audit:workspace'],
 }
 export const evidenceFiles = {
   quality: ['unit-results.json', 'integration-results.json'],

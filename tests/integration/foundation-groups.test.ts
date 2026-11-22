@@ -5,15 +5,12 @@ import { spawnSync } from 'node:child_process'
 import { afterEach, expect, test } from 'vitest'
 import { supportedComponentIds } from '@ombelle/contracts'
 // @ts-expect-error JavaScript gate entry point
-import { aggregateFoundationEvidence, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
+import { aggregateFoundationEvidence, foundationSteps, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
 
 const roots: string[] = []
 const commit = 'a'.repeat(40)
-const stages = {
-  quality: ['build:packages', 'test:unit', 'test:integration', 'generate:preview', 'typecheck', 'audit:workspace'],
-  consumers: ['build:packages', 'generate:preview', 'prepare:consumers', 'build:preview', 'test:specimen-audit', 'build:consumers', 'test:e2e'],
-}
+const stages = foundationSteps as Record<'quality' | 'consumers' | 'all', string[]>
 let base: Promise<Record<string, Record<string, any>>> | undefined
 const collectedDefinitions = new Map<string, { name: string; file: string }[]>()
 function browserResults() {
@@ -106,6 +103,12 @@ async function patch(root: string, group: string, file: string, mutate: (report:
 }
 afterEach(async () => { for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true }) })
 
+test.each(['quality', 'all'] as const)('%s generates the preview sources before any test imports them', (group) => {
+  // apps/www/src and tests/integration import apps/*/src/generated, written by generate:preview.
+  const order = stages[group]
+  expect(order.indexOf('generate:preview')).toBeGreaterThan(order.indexOf('build:packages'))
+  for (const stage of ['test:unit', 'test:integration']) expect(order.indexOf('generate:preview')).toBeLessThan(order.indexOf(stage))
+})
 test('accepts a complete specimen audit', () => {
   expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 32, specimens: 32 * supportedComponentIds.length })
 })
