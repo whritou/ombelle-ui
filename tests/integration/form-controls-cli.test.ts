@@ -214,7 +214,8 @@ it('keeps edited shared stylesheets as conflicts', async () => {
   expect(await snapshotTree(root)).toEqual(edited)
 })
 
-it('migrates a legacy text-close Dialog by deleting it', async () => {
+// Since 1.0 (PUB-01) an unedited legacy Dialog is refreshed by add or update; deleting it still works.
+it('migrates an unedited legacy text-close Dialog with add', async () => {
   const p = await project('vite')
   const { root, read, write, command } = p
   await seedDependencies(p, ['dialog'])
@@ -231,10 +232,14 @@ it('migrates a legacy text-close Dialog by deleting it', async () => {
   lock.artifacts[file] = { ...lock.artifacts[file], sha256: sha(legacy) }
   await write('ui-library.lock.json', JSON.stringify(lock))
 
+  const refreshed = await command(['add', 'dialog', '--yes'])
+  expect(refreshed.code, refreshed.output).toBe(0)
+  expect(await read(file)).toContain('<XIcon')
+
+  // An edited legacy Dialog conflicts; deleting it and adding it again is still a route.
+  await write(file, legacy + '\n// my edit\n')
   const conflict = await command(['add', 'dialog', '--yes'])
   expect(conflict.code, conflict.output).toBe(4)
-  expect(await read(file)).toBe(legacy)
-
   await fs.rm(path.join(root, file))
   const migrated = await command(['add', 'dialog', '--yes'])
   expect(migrated.code, migrated.output).toBe(0)
