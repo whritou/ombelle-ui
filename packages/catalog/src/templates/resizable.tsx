@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { Group, Panel, Separator, useDefaultLayout, type LayoutStorage } from 'react-resizable-panels'
+import { Group, Panel, Separator, useDefaultLayout, type GroupImperativeHandle, type Layout, type LayoutStorage } from 'react-resizable-panels'
 import { cn } from './utils.js'
 import './resizable.css'
 
@@ -41,9 +41,21 @@ export type ResizablePanelGroupProps = Omit<React.ComponentProps<typeof Group>, 
   autoSaveId?: string
 }
 
-function SavedGroup({ autoSaveId, ...props }: React.ComponentProps<typeof Group> & { autoSaveId: string }) {
+function SavedGroup({ autoSaveId, groupRef, ...props }: React.ComponentProps<typeof Group> & { autoSaveId: string }) {
   const saved = useDefaultLayout({ id: autoSaveId, storage: checkedStorage })
-  return <Group {...props} defaultLayout={saved.defaultLayout ?? props.defaultLayout} onLayoutChanged={(layout, meta) => { saved.onLayoutChanged(layout, meta); props.onLayoutChanged?.(layout, meta) }} />
+  const group = React.useRef<GroupImperativeHandle | null>(null)
+  // A server-rendered page has no storage, so its HTML carries the default sizes and hydration
+  // keeps them; apply the saved layout once mounted.
+  React.useEffect(() => {
+    const value = checkedStorage.getItem(autoSaveId)
+    if (value && group.current) group.current.setLayout(JSON.parse(value) as Layout)
+  }, [autoSaveId])
+  const setGroup = React.useCallback((handle: GroupImperativeHandle | null) => {
+    group.current = handle
+    if (typeof groupRef === 'function') groupRef(handle)
+    else if (groupRef) groupRef.current = handle
+  }, [groupRef])
+  return <Group {...props} groupRef={setGroup} defaultLayout={saved.defaultLayout ?? props.defaultLayout} onLayoutChanged={(layout, meta) => { saved.onLayoutChanged(layout, meta); props.onLayoutChanged?.(layout, meta) }} />
 }
 
 /** Panels side by side or stacked, split by handles a pointer drags and the arrow keys move. */
