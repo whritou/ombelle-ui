@@ -127,6 +127,11 @@
 [data-slot='alert-dismiss']:hover {
   background: color-mix(in oklab, currentColor 10%, transparent);
 }
+/* The ink ring takes the alert's own ink: a glass alert's solid card is pale in both modes, where the
+   page --foreground (near white in dark mode) would not show. */
+[data-slot='alert-dismiss'] {
+  --foreground: currentColor;
+}
 [data-slot='alert-dismiss']:focus-visible {
   outline: 2px solid var(--foreground);
   outline-offset: 0;
