@@ -641,10 +641,9 @@ describe('catalog contract', () => {
   it('has complete tokens for every referenced style variable', () => {
     const c = getCatalog('0.1.0')
     for (const family of supportedStyleFamilies) {
-      // Families with hard offset shadows also carry the optional shadowColor token; every stable
-      // family carries the six status tokens (DES-06).
+      // Families with hard offset shadows also carry the optional shadowColor token.
       expect(Object.keys(c.presets[family].modes.light)).toHaveLength(
-        family === 'papier' || family === 'organic' || family === 'retro-futurism' ? 26 : family === 'neo-brutalism' || family === 'ombelle' ? 26 : 25,
+        family === 'papier' || family === 'organic' || family === 'retro-futurism' ? 26 : family === 'neo-brutalism' || family === 'ombelle' ? 20 : 19,
       )
       for (const token of c.styles[family].matchAll(/var\(--([a-z-]+)\)/g))
         expect([
@@ -668,7 +667,9 @@ describe('catalog contract', () => {
     const dialog = c.templates.dialog.content
     expect(dialog).toContain("import { XIcon } from 'lucide-react'")
     expect(dialog).toContain('<XIcon aria-hidden="true" />')
-    expect(dialog).toContain('<span className="sr-only">Close</span>')
+    // The close button's name defaults to "Close" and comes from closeLabel (CAT-13).
+    expect(dialog).toContain('<span className="sr-only">{closeLabel}</span>')
+    expect(dialog).toContain("closeLabel = 'Close'")
     const norm = (css: string) => css.replace(/\s+/g, ' ')
     for (const family of supportedStyleFamilies) {
       const css = norm(c.styles[family])
