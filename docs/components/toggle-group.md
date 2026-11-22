@@ -40,7 +40,7 @@ export function Formatting() {
 - `type="single"` is a radio group: each item is a radio with `aria-checked`.
 - `type="multiple"` is a toolbar of pressed buttons (`aria-pressed`).
 - Name the group with `aria-label` or `aria-labelledby`, and give an icon-only item an `aria-label`.
-- The group takes one Tab stop. The arrow keys move focus between items, and Space or Enter selects. Arrows move focus without selecting, unlike a strict ARIA radio group.
+- The group takes one Tab stop. In a single group Tab enters on the checked item, or the first item when none is checked. The arrow keys move focus between items, and Space or Enter selects. Arrows move focus without selecting, unlike a strict ARIA radio group.
 - Activating the checked item of a single group again clears the choice: `onValueChange` receives `''`. Ignore that value when the group must always have a choice.
 
 ## Recipe
@@ -55,7 +55,7 @@ The Base UI edition is built on `ToggleGroup` and `Toggle`. Base UI renders pres
 - `radiogroup`, with `radio` items and `aria-checked`, for a single choice;
 - `toolbar` for several choices.
 
-The string value of a single group is mapped onto Base UI's array value.
+The string value of a single group is mapped onto Base UI's array value. Base UI starts its roving focus on the first item; while focus is outside a single group, the template moves the Tab stop to the checked item (if it is enabled), so Tab enters where it does in the Radix edition.
 
 ## Liquid glass
 
