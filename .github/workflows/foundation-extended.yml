@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: '0 5 * * *'
   workflow_dispatch:
+  # TEMPORARY: lets this branch run the new workflow before it exists on main. Remove before merge.
+  push:
+    branches: [feat/foundation-gate-1-0-7445b7]
 permissions:
   contents: read
 jobs:
