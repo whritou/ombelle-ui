@@ -108,7 +108,7 @@ describe('Code Block', () => {
       { name: '@radix-ui/react-tabs', version: '1.2.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }])
     expect(getTemplate(getCatalog('0.1.0'), 'code-block', 'base').dependencies.map((d) => d.name).sort())
       .toEqual(['@base-ui/react', 'clsx', 'react', 'tailwind-merge'])
-    expect(styleSupport('code-block', 'liquid-glass')).toBe('experimental')
+    expect(styleSupport('code-block', 'liquid-glass')).toBe('stable')
     for (const [, ui] of editions) {
       for (const part of parts) expect(typeof ui[part], part).toBe('function')
       expect(typeof ui.highlightCode).toBe('function')
@@ -121,7 +121,7 @@ describe('Code Block', () => {
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-tabs', version: '1.2.1' },
         { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
       selectors: ["[data-slot='code-block']", "[data-slot='code-block-code']", "[data-slot='code-block-tab']", "[data-slot='code-block-copy']"],
-      glass: 'experimental' })
+      glass: 'stable' })
   })
 
   it('keeps the highlighter and the shared parts identical in both editions', () => {

@@ -64,8 +64,8 @@ function assertFamilySwitch(context: ProjectContext, result: CompileResult): voi
       throw new FoundationError(
         'STYLE_UNAVAILABLE',
         'Installed components are unavailable for liquid-glass: ' + blocked.join(', ') +
-          '. Experimental liquid-glass components: ' +
-          componentsWithStyleSupport('liquid-glass', ['experimental']).join(', ') + '.',
+          '. Available liquid-glass components: ' +
+          componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']).join(', ') + '.',
         '/componentIds',
         'Keep a stable style family or remove ' + blocked.join(', ') + ' before switching to liquid-glass.',
       )

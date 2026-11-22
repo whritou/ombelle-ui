@@ -14,7 +14,7 @@ describe('Scroll Area', () => {
     expectComponentContract('scroll-area', { client: true, parts: ['ScrollArea', 'ScrollBar', 'useOverflowFocus'],
       slots: ['scroll-area', 'scroll-area-viewport', 'scroll-area-scrollbar', 'scroll-area-thumb', 'scroll-area-corner'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-scroll-area', version: '1.4.0' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='scroll-area']", "[data-slot='scroll-area-viewport']", "[data-slot='scroll-area-scrollbar']", "[data-slot='scroll-area-thumb']", "[data-slot='scroll-area-corner']"], glass: 'experimental' })
+      selectors: ["[data-slot='scroll-area']", "[data-slot='scroll-area-viewport']", "[data-slot='scroll-area-scrollbar']", "[data-slot='scroll-area-thumb']", "[data-slot='scroll-area-corner']"], glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'scroll-area', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
   })
 

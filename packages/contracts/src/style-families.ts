@@ -11,7 +11,9 @@ export function isStyleFamily(value: unknown): value is StyleFamily {
   return typeof value === 'string' && styleFamilies.some(family => family === value)
 }
 
-const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
+// Every component with liquid glass rules. Glass is a stable family whose accessibility is not
+// guaranteed: see familyAccessibilityCaveat.
+const glassComponents: ReadonlySet<ComponentId> = new Set<ComponentId>([
   'spinner',
   'kbd',
   'empty',
@@ -79,5 +81,21 @@ const glassExperimental: ReadonlySet<ComponentId> = new Set<ComponentId>([
 
 export function styleSupport(id: ComponentId, family: StyleFamily): StyleSupport {
   if (family !== 'liquid-glass') return 'stable'
-  return glassExperimental.has(id) ? 'experimental' : 'unavailable'
+  return glassComponents.has(id) ? 'stable' : 'unavailable'
+}
+
+/** Short label for a family whose accessibility the library cannot guarantee. */
+export const accessibilityCaveatLabel = 'Accessibility not guaranteed'
+
+/**
+ * Why a family's accessibility is not guaranteed, or null when it is held to the full contract.
+ * Liquid glass paints translucent surfaces over whatever the app puts behind them, so its text
+ * contrast depends on that background. The compile-time bound covers the declared backdrop range
+ * only; transparency "reduced" makes every surface opaque and restores the full guarantee.
+ */
+export function familyAccessibilityCaveat(family: StyleFamily): string | null {
+  return family === 'liquid-glass'
+    ? 'Accessibility not guaranteed: liquid glass text contrast depends on the background behind it. ' +
+      'Check contrast over your own backgrounds, or set design.transparency to "reduced" for opaque surfaces.'
+    : null
 }

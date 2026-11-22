@@ -10,10 +10,10 @@ import {
 import { compile, glassContrastPairs, glassContrastReport, glassEffectiveSheen, glassTints } from '../src/index.js'
 import { squash } from './new-component-artifacts.js'
 
-const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
+const glassIds = componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
 const unavailable = componentsWithStyleSupport('liquid-glass', ['unavailable'])
 const builtin = () => structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
-const build = (preset: unknown, componentIds: readonly ComponentId[] = experimental) =>
+const build = (preset: unknown, componentIds: readonly ComponentId[] = glassIds) =>
   compile({ preset, componentIds, catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
 const artifact = (
   result: Awaited<ReturnType<typeof build>>,
@@ -37,8 +37,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the fifty-seven experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'data-table', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'menubar', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
+  it('compiles every liquid glass component', async () => {
+    expect([...glassIds].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'data-table', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'menubar', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -117,14 +117,14 @@ describe('liquid-glass compile', () => {
 
   it('is deterministic', async () => {
     const first = await build(builtin())
-    const second = await build(builtin(), [...experimental].reverse())
+    const second = await build(builtin(), [...glassIds].reverse())
     expect(second.artifacts.map((a) => a.sha256)).toEqual(
       first.artifacts.map((a) => a.sha256),
     )
     expect(second.preset.hash).toBe(first.preset.hash)
   })
 
-  // Every component is experimental in glass, so no component can be refused; Task C4 replaces the refusal tests.
+  // Every component has glass rules, so no component can be refused.
   it('has no unavailable component left to refuse', () => {
     expect(unavailable).toEqual([])
   })
@@ -274,11 +274,11 @@ describe('liquid-glass compile', () => {
 
   it('compiles a failing draft only in report mode, so an editor can preview it', async () => {
     const preset = withDesign({ glassOpacity: 0.3 })
-    const preview = await compile({ preset, componentIds: experimental, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'report' })
+    const preview = await compile({ preset, componentIds: glassIds, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'report' })
     expect(preview.artifacts.length).toBeGreaterThan(0)
     expect(glassContrastReport(preview.preset.data).passes).toBe(false)
     // The default still enforces the bound for installers and publication.
-    await expect(compile({ preset, componentIds: experimental, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'enforce' })).rejects.toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
+    await expect(compile({ preset, componentIds: glassIds, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'enforce' })).rejects.toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
   })
 
   it('bounds a sparse custom palette', async () => {

@@ -30,7 +30,7 @@ export function SupportMatrix() {
   return (
     <details className="mt-8 rounded-xl border border-border bg-card p-4" onToggle={event => setOpen(event.currentTarget.open)}>
       <summary className="cursor-pointer font-semibold">Component support by style family</summary>
-      <p className="mt-3 text-sm text-muted-foreground">Stable components follow the reviewed family contract. Experimental components may change. Unavailable combinations cannot be installed.</p>
+      <p className="mt-3 text-sm text-muted-foreground">Stable components follow the reviewed family contract. Liquid glass is stable with one caveat: accessibility is not guaranteed, because its text contrast depends on the background behind it. Unavailable combinations cannot be installed.</p>
       <div className="mt-4">{open ? <MatrixTable /> : <StaticMatrix />}</div>
     </details>
   )

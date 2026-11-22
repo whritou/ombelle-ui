@@ -307,7 +307,7 @@ it('rejects unsupported preset releases and unsafe dark selectors', async () => 
 describe('liquid-glass component presets', () => {
   const catalog = getCatalog('0.1.0')
 
-  it('compiles the experimental glass Button preset under its scope', async () => {
+  it('compiles the glass Button preset under its scope', async () => {
     const result = await compileButtonPreset({
       preset: catalog.presets['liquid-glass'],
     })

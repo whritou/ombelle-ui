@@ -18,7 +18,7 @@ describe('Slider', () => {
     expectComponentContract('slider', { client: true, parts: ['Slider', 'SliderTicks', 'SliderValue'],
       slots: ['slider', 'slider-track', 'slider-range', 'slider-thumb', 'slider-ticks', 'slider-tick', 'slider-field', 'slider-header', 'slider-value', 'slider-value-input'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-slider', version: '1.6.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='slider']", "[data-slot='slider-track']", "[data-slot='slider-range']", "[data-slot='slider-thumb']"], glass: 'experimental' })
+      selectors: ["[data-slot='slider']", "[data-slot='slider-track']", "[data-slot='slider-range']", "[data-slot='slider-thumb']"], glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'slider', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
   })
 

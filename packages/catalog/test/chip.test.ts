@@ -8,7 +8,7 @@ describe('Chip', () => {
   it('provides Chip, ChipRemove and ChipGroup with lucide-react for the remove icon', () => {
     expectComponentContract('chip', { client: true, parts: ['Chip', 'ChipRemove', 'ChipGroup'], slots: ['chip', 'chip-remove', 'chip-group'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
-      selectors: ["[data-slot='chip']", "[data-slot='chip-remove']", "[data-slot='chip-group']"], glass: 'experimental' })
+      selectors: ["[data-slot='chip']", "[data-slot='chip-remove']", "[data-slot='chip-group']"], glass: 'stable' })
   })
 
   it('renders a pressable chip as a toggle button', () => {

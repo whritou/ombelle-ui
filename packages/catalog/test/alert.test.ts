@@ -24,7 +24,7 @@ describe('Alert catalog contract', () => {
         "[data-slot='alert-description']",
         "[data-slot='alert'][data-variant='destructive']",
       ],
-      glass: 'experimental',
+      glass: 'stable',
     })
   })
 

@@ -91,8 +91,8 @@ it('lists the catalog and offers install commands only for components the publis
   for (const id of listed) expect(overview).toContain(`href="/components/${id}"`)
   expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...listed].sort())
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
-  // Input is experimental in the catalog's glass family, and the published 0.5.0 installer accepts it.
-  expect(styleSupport('input', 'liquid-glass')).toBe('experimental')
+  // Input is stable in the catalog's glass family, and the published 0.5.0 installer accepts it.
+  expect(styleSupport('input', 'liquid-glass')).toBe('stable')
   expect(glassOnSite('input')).toBe(true)
   for (const doc of componentDocs) {
     const { id } = doc
@@ -107,7 +107,7 @@ it('lists the catalog and offers install commands only for components the publis
       expect(textOf(html)).not.toContain(command)
       expect(html).toContain(`Requires CLI ${doc.minimumCli}`)
     }
-    expect(html).toContain('Liquid glass: experimental.')
+    expect(html).toContain('Liquid glass: stable, accessibility not guaranteed.')
     expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button' || catalogRecipeInstallerSupported(publishedInstaller.version))
     // Glass Button previews show the 0.5.0 restyle, so the Button page says so.
     expect(html.includes('Liquid glass Buttons were restyled to one ink in 0.5.0.')).toBe(id === 'button')
@@ -136,7 +136,7 @@ it('offers form controls in Liquid Glass once the published installer meets the 
   const { componentDoc, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
   const formControls = ['label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select'] as const
   for (const id of formControls) {
-    expect(styleSupport(id, 'liquid-glass'), id).toBe('experimental')
+    expect(styleSupport(id, 'liquid-glass'), id).toBe('stable')
     const doc = componentDoc(id)
     expect(doc?.glassMinimumCli ?? doc?.minimumCli, id).toBe('0.5.0')
     expect(glassOnSite(id), id).toBe(true)
@@ -158,5 +158,5 @@ it('offers the lab glass presets in the component directory and installs Select 
   const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
   expect(select).not.toContain('Requires CLI')
   expect(textOf(select)).toContain(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} add select`)
-  expect(select).toContain('Liquid glass: experimental.')
+  expect(select).toContain('Liquid glass: stable, accessibility not guaranteed.')
 })

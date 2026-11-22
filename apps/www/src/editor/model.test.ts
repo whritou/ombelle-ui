@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { getCatalog, styleFamilyFonts } from '@ombelle/catalog'
-import { styleFamilies, validateRecipe } from '@ombelle/contracts'
+import { familyAccessibilityCaveat, styleFamilies, validateRecipe } from '@ombelle/contracts'
 import {
-  baseColorRole, changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
+  baseColorRole, changeDraftFamily, createEditorDraft, draftFamily, accessibilityNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
   withRecipeIcon, withRecipeOverride,
   type EditorView,
 } from './model.js'
@@ -35,15 +35,14 @@ describe('Button editor model', () => {
     expect(original.recipe.presetRef.id).toBe('builtin-flat')
   })
 
-  it('validates a liquid-glass draft and labels it experimental', () => {
+  it('validates a liquid-glass draft and states its accessibility caveat', () => {
     const draft = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
     expect(draft.recipe.presetRef.id).toBe('builtin-liquid-glass-cristal')
     expect(validateRecipe(draft.recipe)).toEqual(draft.recipe)
     expect(draftFamily(draft.recipe)).toBe('liquid-glass')
-    expect(experimentalNotice('liquid-glass')).toBe(
-      'liquid-glass is experimental for button; see docs/components/liquid-glass.md for limitations',
-    )
-    expect(experimentalNotice('flat')).toBeNull()
+    expect(accessibilityNotice('liquid-glass')).toBe(familyAccessibilityCaveat('liquid-glass'))
+    expect(accessibilityNotice('liquid-glass')).toMatch(/^Accessibility not guaranteed: /)
+    expect(accessibilityNotice('flat')).toBeNull()
     expect(draftFamily(createEditorDraft('minimalist').recipe)).toBe('minimalist')
   })
 

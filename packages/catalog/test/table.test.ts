@@ -56,7 +56,7 @@ describe('Table catalog contract', () => {
         "[data-slot='table-footer'] > [data-slot='table-row'] > *",
         "[data-slot='table-cell'][data-numeric]",
       ],
-      glass: 'experimental',
+      glass: 'stable',
     })
   })
 

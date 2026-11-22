@@ -1,6 +1,6 @@
 'use client'
 
-import type { StyleFamily } from '@ombelle/contracts'
+import { accessibilityCaveatLabel, type StyleFamily } from '@ombelle/contracts'
 import { Plus } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { KitSegmented, KitSwitch, LookPicker, useLookName } from './kit'
@@ -128,7 +128,7 @@ function Tile({ family, index }: { family: StyleFamily; index: number }) {
     <article className="ol-tile rv" data-family={family} style={lookStyle(family)} aria-labelledby={`tile-${family}`}>
       <div className="ol-tile-hd">
         <div><h3 className="ol-tile-h" id={`tile-${family}`}>{meta.name}</h3><p className="ol-tile-p">{meta.blurb}</p></div>
-        <div className="ol-tile-top"><span>Style {String(index + 1).padStart(2, '0')}</span><span>{glass ? 'Experimental' : 'Stable'}</span></div>
+        <div className="ol-tile-top"><span>Style {String(index + 1).padStart(2, '0')}</span><span>{glass ? `Stable · ${accessibilityCaveatLabel}` : 'Stable'}</span></div>
       </div>
       {specimens[family](componentCount, families.length)}
       <div className="ol-tile-ft">

@@ -12,7 +12,7 @@ describe('Empty State', () => {
     expectComponentContract('empty', { client: false, parts: ['Empty', 'EmptyHeader', 'EmptyMedia', 'EmptyTitle', 'EmptyDescription', 'EmptyContent'],
       slots, dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-slot', version: '1.5.0' },
         { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: slots.map(slot => `[data-slot='${slot}']`), glass: 'experimental' })
+      selectors: slots.map(slot => `[data-slot='${slot}']`), glass: 'stable' })
   })
 
   it.each([['radix', radix], ['base', base]] as const)('%s renders a structure whose title level the app chooses', (_, ui) => {

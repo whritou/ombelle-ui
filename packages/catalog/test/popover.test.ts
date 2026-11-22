@@ -41,7 +41,7 @@ describe('Popover catalog contract', () => {
         "[data-slot='popover-title']",
         "[data-slot='popover-description']",
       ],
-      glass: 'experimental',
+      glass: 'stable',
     })
   })
 

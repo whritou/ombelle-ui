@@ -21,7 +21,7 @@ describe('Calendar', () => {
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-popover', version: '1.3.1' }, { name: 'date-fns', version: '4.4.0' },
         { name: '@date-fns/tz', version: '1.5.0' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' },
         { name: 'react-day-picker', version: '10.0.2' }, { name: 'lucide-react', version: '1.55.0' }],
-      selectors: ["[data-slot='calendar']", "[data-slot='calendar-day']", "[data-slot='calendar-day-button']", "[data-slot='date-picker-trigger']"], glass: 'experimental' })
+      selectors: ["[data-slot='calendar']", "[data-slot='calendar-day']", "[data-slot='calendar-day-button']", "[data-slot='date-picker-trigger']"], glass: 'stable' })
     const names = getTemplate(getCatalog('0.1.0'), 'calendar', 'base').dependencies.map(d => d.name)
     expect(names).toContain('@base-ui/react')
     expect(names).toContain('react-day-picker')

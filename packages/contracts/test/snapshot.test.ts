@@ -46,7 +46,7 @@ describe('snapshot contracts', () => {
     expect(result).not.toBe(envelope)
     expect(result.preset).not.toBe(preset)
   })
-  it('accepts an experimental liquid-glass envelope', () => {
+  it('accepts a liquid-glass envelope', () => {
     const glass = { ...envelope, preset: { ...preset, styleFamily: 'liquid-glass' } }
     expect(validatePresetSnapshot(glass).preset.styleFamily).toBe('liquid-glass')
   })

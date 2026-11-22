@@ -15,7 +15,7 @@ const base = [
 describe('Spinner', () => {
   it('provides a presentational Spinner without client code or extra dependencies', () => {
     expectComponentContract('spinner', { client: false, parts: ['Spinner'], slots: ['spinner'], dependencies: base,
-      selectors: ["[data-slot='spinner']"], glass: 'experimental' })
+      selectors: ["[data-slot='spinner']"], glass: 'stable' })
   })
 
   it('announces itself as a status named Loading, overridable by aria-label', () => {

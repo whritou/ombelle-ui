@@ -18,7 +18,7 @@ describe('Context Menu', () => {
         'ContextMenuRadioItem', 'ContextMenuLabel', 'ContextMenuSeparator', 'ContextMenuShortcut', 'ContextMenuSub', 'ContextMenuSubTrigger', 'ContextMenuSubContent'],
       slots,
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-context-menu', version: '2.4.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
-      selectors: ["[data-slot='context-menu-trigger']", "[data-slot='context-menu-content']", "[data-slot='context-menu-item']", "[data-slot='context-menu-shortcut']"], glass: 'experimental' })
+      selectors: ["[data-slot='context-menu-trigger']", "[data-slot='context-menu-content']", "[data-slot='context-menu-item']", "[data-slot='context-menu-shortcut']"], glass: 'stable' })
     const baseDependencies = getTemplate(getCatalog('0.1.0'), 'context-menu', 'base').dependencies.map(d => d.name)
     expect(baseDependencies).toContain('@base-ui/react')
     expect(baseDependencies.some(name => name.startsWith('@radix-ui/'))).toBe(false)

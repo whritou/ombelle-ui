@@ -23,7 +23,7 @@ describe('Input OTP', () => {
     expectComponentContract('input-otp', { client: true, parts: ['InputOTP', 'InputOTPGroup', 'InputOTPSlot', 'InputOTPSeparator'],
       slots: ['input-otp', 'input-otp-group', 'input-otp-slot', 'input-otp-separator'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'input-otp', version: '1.5.0' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='input-otp']", "[data-slot='input-otp-slot']", "[data-slot='input-otp-slot'][data-caret]::after"], glass: 'experimental' })
+      selectors: ["[data-slot='input-otp']", "[data-slot='input-otp-slot']", "[data-slot='input-otp-slot'][data-caret]::after"], glass: 'stable' })
     const baseDependencies = getTemplate(getCatalog('0.1.0'), 'input-otp', 'base').dependencies.map(d => d.name)
     expect(baseDependencies).toContain('@base-ui/react')
     expect(baseDependencies).not.toContain('input-otp')

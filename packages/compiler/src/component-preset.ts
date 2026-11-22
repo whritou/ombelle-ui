@@ -50,7 +50,7 @@ export async function compileButtonPreset(input: {
   )
   const template = getTemplate(catalog, 'button')
   const family = preset.data.styleFamily
-  // liquid-glass Button is experimental; unavailable family/component pairs stay rejected.
+  // every style family supports Button; unavailable family/component pairs stay rejected.
   if (!isStyleFamily(family) || styleSupport('button', family) === 'unavailable')
     throw new FoundationError(
       'INVALID_DATA',

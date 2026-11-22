@@ -12,7 +12,7 @@ describe('Tag Input', () => {
     expectComponentContract('tag-input', { client: true, parts: ['TagInput', 'TagInputList', 'TagInputInput'],
       slots: ['tag-input', 'tag-input-list', 'tag-input-tag', 'tag-input-remove', 'tag-input-input', 'tag-input-status'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
-      selectors: ["[data-slot='tag-input']", "[data-slot='tag-input-tag']", "[data-slot='tag-input-remove']", "[data-slot='tag-input-status']"], glass: 'experimental' })
+      selectors: ["[data-slot='tag-input']", "[data-slot='tag-input-tag']", "[data-slot='tag-input-remove']", "[data-slot='tag-input-status']"], glass: 'stable' })
   })
 
   it('splits pasted text on separators, trims it, and adds each tag once', () => {

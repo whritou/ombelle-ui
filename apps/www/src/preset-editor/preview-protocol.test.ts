@@ -132,7 +132,7 @@ it('accepts a liquid-glass draft below the contrast bound so the editor can prev
   preset.design = { ...preset.design, glassOpacity: 0.3 }
   const failing = await compile({
     preset,
-    componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
+    componentIds: componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
     glassContrast: 'report',
@@ -142,10 +142,10 @@ it('accepts a liquid-glass draft below the contrast bound so the editor can prev
   const withFilter = { ...manifest, sources: { ...manifest.sources, [filter.logicalPath]: { canonicalHash: filter.sha256, transformedHash: await sha256(filter.content) } } }
   expect(await verifyPresetRender(input, 0, withFilter)).toEqual(input)
 })
-it('accepts a liquid-glass render compiled from every component, all experimental in glass', async () => {
+it('accepts a liquid-glass render compiled from every component, all stable in glass', async () => {
   const glass = await compile({
     preset: getCatalog('0.1.0').presets['liquid-glass'],
-    componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
+    componentIds: componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
   })

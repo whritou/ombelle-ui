@@ -9,7 +9,7 @@ describe('Aspect Ratio', () => {
   it('provides one server template for both editions with no dependency', () => {
     expectComponentContract('aspect-ratio', { client: false, parts: ['AspectRatio'], slots: ['aspect-ratio'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='aspect-ratio']"], glass: 'experimental' })
+      selectors: ["[data-slot='aspect-ratio']"], glass: 'stable' })
     const catalog = getCatalog('0.1.0')
     expect(getTemplate(catalog, 'aspect-ratio', 'base').content).toBe(getTemplate(catalog, 'aspect-ratio', 'radix').content)
   })

@@ -544,7 +544,7 @@ describe('catalog contract', () => {
       expect(getTemplate(c, id).id).toBe(id)
     expect(c.templates.dialog.content).toMatch(/^['"]use client['"]/)
   })
-  it('provides the experimental liquid-glass preset and component styles', () => {
+  it('provides the liquid-glass preset and component styles', () => {
     const c = getCatalog('0.1.0')
     const preset = c.presets['liquid-glass']
     expect(validatePreset(preset)).toEqual(preset)
