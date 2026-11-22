@@ -245,8 +245,8 @@ export function CheckboxGroup({
 
 export type CheckboxGroupParentProps = Omit<CheckboxProps, 'checked' | 'defaultChecked' | 'onCheckedChange' | 'value' | 'title'> & {
   title: React.ReactNode
-  /** Shows "2 of 4" after the title, inside the label. */
-  count?: boolean
+  /** Shows "2 of 4" after the title, inside the label; a function sets the text. */
+  count?: boolean | ((checked: number, total: number) => React.ReactNode)
 }
 
 /** Reads checked, unchecked or mixed from the group, and checks or clears every enabled child. */
@@ -263,14 +263,16 @@ export function CheckboxGroupParent({ title, count = true, className, disabled, 
         disabled={disabled || group.disabled}
       />
       <span data-slot="checkbox-group-parent-title">{title}</span>
-      {count && <CheckboxGroupCount />}
+      {count && <CheckboxGroupCount format={typeof count === 'function' ? count : undefined} />}
     </label>
   )
 }
 
-/** "2 of 4": how many of the group's checkboxes are checked. */
-export function CheckboxGroupCount({ className, ...props }: React.ComponentProps<'span'>) {
+/** "2 of 4": how many of the group's checkboxes are checked. format sets the text. */
+export function CheckboxGroupCount({ className, format = (checked, total) => `${checked} of ${total}`, ...props }: React.ComponentProps<'span'> & {
+  format?: (checked: number, total: number) => React.ReactNode
+}) {
   const group = useCheckboxGroup('CheckboxGroupCount')
   const checked = group.options.filter(option => group.value.includes(option.value)).length
-  return <span {...props} data-slot="checkbox-group-count" className={cn(className)}>{`${checked} of ${group.options.length}`}</span>
+  return <span {...props} data-slot="checkbox-group-count" className={cn(className)}>{format(checked, group.options.length)}</span>
 }

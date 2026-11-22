@@ -41,10 +41,13 @@ export function DialogContent({
   className,
   children,
   size,
+  closeLabel = 'Close',
   ...props
 }: Part<typeof DialogPrimitive.Popup> & {
   /** `sm` 24rem, `lg` 48rem, `fullscreen` the viewport less 1rem on each side; below 640px `lg` and `fullscreen` fill the screen. */
   size?: DialogSize
+  /** Names the built-in close button; default "Close". */
+  closeLabel?: string
 }) {
   return (
     <DialogPrimitive.Portal>
@@ -67,7 +70,7 @@ export function DialogContent({
         {children}
         <DialogPrimitive.Close data-slot="dialog-close" type="button">
           <XIcon aria-hidden="true" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{closeLabel}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Popup>
     </DialogPrimitive.Portal>

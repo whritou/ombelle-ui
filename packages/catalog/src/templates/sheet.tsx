@@ -91,7 +91,12 @@ function useDrag(onMove: (delta: { x: number; y: number }) => void, onEnd?: (del
  * With snap points, a released drag settles on the nearest point, and the keys step between the points:
  * Arrow Down on the lowest closes the sheet.
  */
-export function SheetHandle({ className, label = 'Resize sheet' }: { className?: string; label?: string }) {
+export function SheetHandle({ className, label = 'Resize sheet', formatSnapPoint = snapPointText }: {
+  className?: string
+  label?: string
+  /** The words for a snap point, read as the handle's value; default Half height, Full height or a percentage. */
+  formatSnapPoint?: (point: number, points: readonly number[]) => string
+}) {
   const sizing = React.useContext(SheetSizingContext)
   const self = React.useRef<HTMLDivElement | null>(null)
   const [measured, setMeasured] = React.useState(50)
@@ -134,7 +139,7 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
       aria-valuenow={clamp(height, min, max)}
       aria-valuemin={min}
       aria-valuemax={max}
-      aria-valuetext={points ? snapPointText(nearestSnapPoint(height, points)!, points) : undefined}
+      aria-valuetext={points ? formatSnapPoint(nearestSnapPoint(height, points)!, points) : undefined}
       tabIndex={0}
       data-sheet-dragging={drag.dragging ? '' : undefined}
       className={cn(className)}
@@ -248,6 +253,10 @@ export type SheetContentProps = React.ComponentProps<typeof SheetPrimitive.Conte
   onSizeChange?: (size: number) => void
   /** A bottom sheet's heights, as fractions of the viewport (0.25 to 0.95), where its handle settles; it opens at the first. */
   snapPoints?: number[]
+  /** Names the built-in close button; default "Close". */
+  closeLabel?: string
+  /** Names a resizable side sheet's edge handle; default "Resize panel". */
+  resizeLabel?: string
 }
 export function SheetContent(props: SheetContentProps) {
   return (
@@ -259,13 +268,13 @@ export function SheetContent(props: SheetContentProps) {
 }
 /** The panel itself, which holds the sizing state. */
 function SheetPanel({ className, children, side = 'inline-end', size = 'default', asChild, style, resizable = false,
-  defaultSize = 320, minSize = 240, maxSize = 640, onSizeChange, snapPoints, ...props }: SheetContentProps) {
+  defaultSize = 320, minSize = 240, maxSize = 640, onSizeChange, snapPoints, closeLabel = 'Close', resizeLabel, ...props }: SheetContentProps) {
   const sheet = useSheetSizing({ resizable, side, defaultSize, minSize, maxSize, onSizeChange, snapPoints })
-  const dismiss = <SheetPrimitive.Close ref={sheet.dismiss} data-slot="sheet-dismiss" type="button" aria-label="Close">
+  const dismiss = <SheetPrimitive.Close ref={sheet.dismiss} data-slot="sheet-dismiss" type="button" aria-label={closeLabel}>
     <XIcon aria-hidden="true" />
   </SheetPrimitive.Close>
   const handle = sheet.inline
-    ? <SheetResizeHandle side={side as 'inline-start' | 'inline-end'} size={sheet.width} setSize={sheet.setSize} minSize={sheet.min} maxSize={sheet.max} />
+    ? <SheetResizeHandle side={side as 'inline-start' | 'inline-end'} size={sheet.width} setSize={sheet.setSize} minSize={sheet.min} maxSize={sheet.max} label={resizeLabel} />
     : null
   // Slot receives exactly one element in asChild mode. Put the built-in close
   // inside that element so native content composition retains both controls.

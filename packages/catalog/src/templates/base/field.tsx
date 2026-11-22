@@ -302,11 +302,16 @@ export function Form({ errors, validate, summaryAction = 'submitting', onSubmit,
   )
 }
 
+const defaultSummaryTitle = (count: number, action: 'saving' | 'submitting') => `Fix ${count} ${count === 1 ? 'field' : 'fields'} before ${action}`
+
 const summaryText = (line: SummaryLine) =>
   `${line.label}: ${line.message.charAt(0).toLowerCase()}${line.message.slice(1).replace(/\.$/, '')}`
 
 /** Lists every invalid field after a failed submit; it takes focus, and each line moves focus to its field. */
-export function FormErrorSummary({ className, ...props }: React.ComponentProps<'div'>) {
+export function FormErrorSummary({ className, title = defaultSummaryTitle, ...props }: Omit<React.ComponentProps<'div'>, 'title'> & {
+  /** The heading; default "Fix <count> field(s) before saving" or "… before submitting", from Form's summaryAction. */
+  title?: (count: number, action: 'saving' | 'submitting') => React.ReactNode
+}) {
   const form = React.useContext(FormContext)
   if (!form) throw new Error('FormErrorSummary must be used inside <Form>')
   const titleId = React.useId()
@@ -315,7 +320,7 @@ export function FormErrorSummary({ className, ...props }: React.ComponentProps<'
   return (
     <div {...props} ref={form.summaryRef} role="region" tabIndex={-1} aria-labelledby={titleId} data-slot="form-error-summary" className={cn(className)}>
       <CircleAlertIcon aria-hidden="true" />
-      <p id={titleId} data-slot="form-error-summary-title">{`Fix ${count} ${count === 1 ? 'field' : 'fields'} before ${form.summaryAction}`}</p>
+      <p id={titleId} data-slot="form-error-summary-title">{title(count, form.summaryAction)}</p>
       <ul data-slot="form-error-summary-list">
         {form.lines.map(line => (
           <li key={line.name}>
