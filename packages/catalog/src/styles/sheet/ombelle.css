@@ -3,7 +3,8 @@
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: color-mix(in oklab, var(--foreground) 48%, transparent);
+  /* One scrim per family, dark in both modes (the foreground lightened dark pages). */
+  background: oklch(22% 0.012 275 / 0.45);
 }
 [data-slot='sheet-content'] {
   box-sizing: border-box;
