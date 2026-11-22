@@ -89,7 +89,7 @@ export function PublishedPreset({
     }
   }
   return (
-    <main className={`${styles.editor} ${styles.published}`}>
+    <main id="main" tabIndex={-1} className={`${styles.editor} ${styles.published}`}>
       <header>
         <p>Read-only published preset</p>
         <h1>{snapshot.preset.name}</h1>

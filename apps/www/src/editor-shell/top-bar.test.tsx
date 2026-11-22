@@ -123,3 +123,13 @@ it('editMenuItem sends resets to Edit and downloads to File', async () => {
   expect(editMenuItem({ id: 'reset-recipe', label: 'Reset recipe', onSelect: noop })).toBe(true)
   expect(editMenuItem({ id: 'download-json', label: 'Download', onSelect: noop })).toBe(false)
 })
+
+it('EditorTopBar links an invalid name to its message and gives Undo and Redo their keys', () => {
+  const html = renderToStaticMarkup(
+    <EditorTopBar crumbs={['A']} nameField={{ id: 'n', label: 'Name', value: '', maxLength: 9, invalid: true, describedBy: 'preset-error', onChange: noop }}
+      revision="r1" status="" undo={history} redo={history} menu={{ label: 'More', items: [] }} primary={null} />,
+  )
+  expect(html).toMatch(/<input id="n"[^>]*aria-invalid="true"[^>]*aria-describedby="preset-error"/)
+  expect(html).toMatch(/aria-label="Undo"[^>]*aria-keyshortcuts="Control\+Z Meta\+Z"/)
+  expect(html).toMatch(/aria-label="Redo"[^>]*aria-keyshortcuts="Shift\+Control\+Z Shift\+Meta\+Z"/)
+})

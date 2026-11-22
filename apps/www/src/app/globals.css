@@ -114,6 +114,11 @@
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 30%), 0 16px 40px -16px oklch(0 0 0 / 60%);
 }
 
+/* The skip link moves focus to the page's main landmark; outlining the whole page would only distract. */
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+
 @layer base {
   /* Element rules leave inline previews alone: a preview's family sets its own borders, headings and focus rings. */
   *:not(:where([data-preview-family] *)) {

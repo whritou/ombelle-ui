@@ -26,8 +26,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="flex min-h-dvh flex-col">
         <SiteHeader />
-        {/* Skip-link target; each page renders its own main landmark inside. */}
-        <div id="main" className="flex-1">{children}</div>
+        {/* Each page renders its own main landmark inside, with id="main" as the skip-link target. */}
+        <div className="flex-1">{children}</div>
         <SiteFooter />
       </body>
     </html>

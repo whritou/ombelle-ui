@@ -312,7 +312,7 @@ export function PropertiesPanel({ recipe, family, onFamily, diagnostic, onChange
           <label htmlFor="button-text" className="be-stack-label">{iconOnly ? 'Accessible label' : 'Button text'}</label>
           <input id="button-text" type="text" maxLength={200} value={recipe.content}
             aria-invalid={diagnostic?.path === '/content' || undefined}
-            aria-describedby={iconOnly ? 'button-text-hint' : undefined}
+            aria-describedby={[diagnostic?.path === '/content' ? 'error-content' : undefined, iconOnly ? 'button-text-hint' : undefined].filter(Boolean).join(' ') || undefined}
             onChange={(event) => onChange({ ...recipe, content: event.target.value }, 'content')} />
         </div>
         {iconOnly && <p id="button-text-hint" className="colorHint">Icon-only Buttons show no text. Screen readers announce this label.</p>}

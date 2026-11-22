@@ -11,6 +11,9 @@ import { GithubIcon, Logo } from './logo'
 import { primaryLinks, repository } from './links'
 import { ThemeToggle } from './theme'
 
+// Each page's main landmark carries id="main" and tabIndex={-1}, so the link skips any sidebar too.
+const skipLinkClass = 'sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground'
+
 export function SiteHeader() {
   const pathname = usePathname()
   const current = (href: string) => {
@@ -23,8 +26,11 @@ export function SiteHeader() {
   // Below 1200px the editors fill the viewport and carry their own navigation.
   const editor = pathname.startsWith('/editor/')
   return (
+    <>
+    {/* The editors hide the header below 1200px, so they keep their own skip link there. */}
+    {editor && <a href="#main" className={`${skipLinkClass} min-[1200px]:hidden focus:z-50`}>Skip to content</a>}
     <header className={`${pinned ? 'sticky top-0' : 'relative'} z-40 border-b border-border bg-background ${editor ? 'max-[1199px]:hidden' : ''}`}>
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">
+      <a href="#main" className={skipLinkClass}>
         Skip to content
       </a>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
@@ -86,5 +92,6 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
+    </>
   )
 }
