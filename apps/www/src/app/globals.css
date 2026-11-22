@@ -604,6 +604,16 @@
 .site-sidebar > [data-sidebar-inner] {
   inset-block-start: 4rem;
 }
+/*
+ * On phones the sidebar ends up a closed sheet. The catalog Sidebar shows it inline above the page until
+ * hydration, which pushed the page down by the whole component list and then pulled it back up (CLS 0.92,
+ * OPS-08). The site renders the phone layout it will hydrate to instead; Browse components opens the sheet.
+ */
+@media (max-width: 767.98px) {
+  [data-slot='sidebar'].site-sidebar:not([data-hydrated]) {
+    display: none;
+  }
+}
 
 /* The header's Docs and Components triggers stay marked while their section is open. */
 .site-header-menu [data-slot='navigation-menu-trigger'][data-current] {
