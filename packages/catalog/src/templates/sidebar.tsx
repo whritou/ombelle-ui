@@ -3,6 +3,7 @@ import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible'
+import { Slot } from '@radix-ui/react-slot'
 import { ChevronDownIcon, PanelLeftIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './sidebar.css'
@@ -17,6 +18,9 @@ type SidebarState = {
   toggleSidebar(): void
   /** True after the first render in the browser: the phone CSS and inert apply only from then on. */
   hydrated: boolean
+  /** The sidebar's id, which the trigger's aria-controls points at. */
+  sidebarId: string
+  setSidebarId(id: string): void
 }
 
 const SidebarContext = React.createContext<SidebarState | null>(null)
@@ -59,6 +63,7 @@ export type SidebarProviderProps = React.ComponentProps<'div'> & {
 
 export function SidebarProvider({ open: openProp, defaultOpen = true, onOpenChange, mobileBreakpoint = 768, shortcut = true, className, style, children, ...props }: SidebarProviderProps) {
   const isMobile = useIsMobile(mobileBreakpoint)
+  const [sidebarId, setSidebarId] = React.useState(React.useId() + '-sidebar')
   const [hydrated, setHydrated] = React.useState(false)
   React.useEffect(() => setHydrated(true), [])
   const [openMobile, setOpenMobile] = React.useState(false)
@@ -79,8 +84,8 @@ export function SidebarProvider({ open: openProp, defaultOpen = true, onOpenChan
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [shortcut, toggleSidebar])
-  const value = React.useMemo<SidebarState>(() => ({ state: open ? 'expanded' : 'collapsed', open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar, hydrated }),
-    [open, setOpen, openMobile, isMobile, toggleSidebar, hydrated])
+  const value = React.useMemo<SidebarState>(() => ({ state: open ? 'expanded' : 'collapsed', open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar, hydrated, sidebarId, setSidebarId }),
+    [open, setOpen, openMobile, isMobile, toggleSidebar, hydrated, sidebarId])
   return (
     <SidebarContext.Provider value={value}>
       <TooltipPrimitive.Provider delayDuration={0}>
@@ -100,13 +105,15 @@ export type SidebarProps = React.ComponentProps<'div'> & {
 }
 
 export function Sidebar({ side = 'left', variant = 'sidebar', collapsible = 'offcanvas', label = 'Sidebar', className, children, ...props }: SidebarProps) {
-  const { state, isMobile, openMobile, setOpenMobile, hydrated } = useSidebar()
+  const { state, isMobile, openMobile, setOpenMobile, hydrated, sidebarId, setSidebarId } = useSidebar()
+  // A caller's id names the sidebar for the trigger's aria-controls.
+  React.useEffect(() => { if (props.id) setSidebarId(props.id) }, [props.id, setSidebarId])
   if (isMobile)
     return (
       <DialogPrimitive.Root open={openMobile} onOpenChange={setOpenMobile}>
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay data-slot="sidebar-sheet-overlay" />
-          <DialogPrimitive.Content {...props} data-slot="sidebar-sheet" data-side={side} aria-describedby={undefined} className={cn(className)}
+          <DialogPrimitive.Content {...props} id={props.id ?? sidebarId} data-slot="sidebar-sheet" data-side={side} aria-describedby={undefined} className={cn(className)}
             onClick={event => { if ((event.target as HTMLElement).closest('a[href]')) setOpenMobile(false) }}>
             <DialogPrimitive.Title data-sidebar-sheet-title="">{label}</DialogPrimitive.Title>
             <div data-sidebar-inner="">{children}</div>
@@ -116,7 +123,7 @@ export function Sidebar({ side = 'left', variant = 'sidebar', collapsible = 'off
     )
   const hidden = collapsible === 'offcanvas' && state === 'collapsed'
   return (
-    <div {...props} data-slot="sidebar" data-state={collapsible === 'none' ? 'expanded' : state} data-collapsible={state === 'collapsed' ? collapsible : ''}
+    <div {...props} id={props.id ?? sidebarId} data-slot="sidebar" data-state={collapsible === 'none' ? 'expanded' : state} data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-side={side} data-variant={variant} aria-label={props['aria-label'] ?? label} role={props.role ?? 'navigation'} data-hydrated={hydrated ? '' : undefined} inert={(hidden && hydrated) || undefined} className={cn(className)}>
       <div data-sidebar-inner="">{children}</div>
     </div>
@@ -125,9 +132,10 @@ export function Sidebar({ side = 'left', variant = 'sidebar', collapsible = 'off
 
 /** Toggles the sidebar, or opens the phone sheet. */
 export function SidebarTrigger({ className, onClick, children, ...props }: React.ComponentProps<'button'>) {
-  const { toggleSidebar, open, isMobile, openMobile } = useSidebar()
+  const { toggleSidebar, open, isMobile, openMobile, sidebarId } = useSidebar()
   return (
-    <button type="button" {...props} data-slot="sidebar-trigger" aria-expanded={isMobile ? openMobile : open} className={cn(className)}
+    // The phone sheet is not in the page while it is closed, so the trigger points at it only while it is open.
+    <button type="button" aria-controls={isMobile && !openMobile ? undefined : sidebarId} {...props} data-slot="sidebar-trigger" aria-expanded={isMobile ? openMobile : open} className={cn(className)}
       onClick={event => { onClick?.(event); if (!event.defaultPrevented) toggleSidebar() }}>
       {children ?? <><PanelLeftIcon aria-hidden="true" /><span data-sidebar-sr="">Toggle sidebar</span></>}
     </button>
@@ -135,9 +143,10 @@ export function SidebarTrigger({ className, onClick, children, ...props }: React
 }
 
 /** A thin edge that toggles the sidebar on click; pointer only, the trigger and shortcut cover the keyboard. */
-export function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
+export function SidebarRail({ className, onClick, ...props }: React.ComponentProps<'button'>) {
   const { toggleSidebar } = useSidebar()
-  return <button type="button" {...props} data-slot="sidebar-rail" aria-hidden="true" tabIndex={-1} onClick={toggleSidebar} className={cn(className)} />
+  return <button type="button" {...props} data-slot="sidebar-rail" aria-hidden="true" tabIndex={-1} className={cn(className)}
+    onClick={event => { onClick?.(event); if (!event.defaultPrevented) toggleSidebar() }} />
 }
 
 /** The main area beside the sidebar. */
@@ -205,34 +214,32 @@ export function SidebarMenuItem({ className, ...props }: React.ComponentProps<'l
   return <li {...props} data-slot="sidebar-menu-item" className={cn(className)} />
 }
 
-export type SidebarMenuButtonProps = Omit<React.ComponentProps<'button'> & React.ComponentProps<'a'>, 'type'> & {
+type SidebarMenuButtonCommon = {
   /** Marks the current page with aria-current. */
   isActive?: boolean
   /** Shown beside the icon while the sidebar is collapsed to icons. */
   tooltip?: string
+}
+/** A button by default, a link with href, or the child element with asChild; ref and handlers are typed for the element rendered. */
+export type SidebarMenuButtonProps = SidebarMenuButtonCommon & (
+  | (Omit<React.ComponentProps<'button'>, 'type'> & { href?: undefined; type?: 'button' | 'submit' | 'reset'; asChild?: false })
   /** Renders a link instead of a button. */
-  href?: string
-  type?: 'button' | 'submit' | 'reset'
-  /** Renders the child element, such as a framework link, with the item's look: Radix asChild. */
-  asChild?: boolean
-}
-
-/** Passes the item's props to its only child element, merging class names. */
-function MenuButtonSlot({ children, className, ...props }: { children?: React.ReactNode; className?: string } & Record<string, unknown>) {
-  if (!React.isValidElement<Record<string, unknown>>(children)) return null
-  return React.cloneElement(children, { ...props, ...children.props, className: cn(className, children.props.className as string) })
-}
+  | (React.ComponentProps<'a'> & { href: string; asChild?: false })
+  /** Renders the child element, such as a framework link, with the item's look: Radix asChild. Handlers on both run. */
+  | (React.HTMLAttributes<HTMLElement> & { asChild: true; href?: string; ref?: React.Ref<HTMLElement> })
+)
 
 /** An item: a link when it has an href, otherwise a button. Collapsed to icons, its label hides and the tooltip names it. */
-export function SidebarMenuButton({ isActive = false, tooltip, href, type = 'button', asChild = false, className, children, ...props }: SidebarMenuButtonProps) {
+export function SidebarMenuButton({ isActive = false, tooltip, asChild = false, className, children, ...props }: SidebarMenuButtonProps) {
   const { state, isMobile } = useSidebar()
   const [tip, setTip] = React.useState(false)
   const active = { 'data-active': isActive ? '' : undefined, 'aria-current': isActive ? ('page' as const) : undefined }
-  const element = asChild && React.isValidElement<Record<string, unknown>>(children)
-    ? <MenuButtonSlot {...props} {...active} data-slot="sidebar-menu-button" className={cn(className)}>{children}</MenuButtonSlot>
-    : href !== undefined
-    ? <a {...(props as React.ComponentProps<'a'>)} {...active} href={href} data-slot="sidebar-menu-button" className={cn(className)}>{children}</a>
-    : <button {...(props as React.ComponentProps<'button'>)} {...active} type={type} data-slot="sidebar-menu-button" className={cn(className)}>{children}</button>
+  const button = props as Omit<React.ComponentProps<'button'>, 'type'> & { type?: 'button' | 'submit' | 'reset' }
+  const element = asChild && React.isValidElement(children)
+    ? <Slot {...(props as React.HTMLAttributes<HTMLElement>)} {...active} data-slot="sidebar-menu-button" className={cn(className)}>{children}</Slot>
+    : props.href !== undefined
+    ? <a {...(props as React.ComponentProps<'a'>)} {...active} data-slot="sidebar-menu-button" className={cn(className)}>{children}</a>
+    : <button {...button} {...active} type={button.type ?? 'button'} data-slot="sidebar-menu-button" className={cn(className)}>{children}</button>
   if (!tooltip) return element
   return (
     // Expanded, the label is visible, so the tooltip stays closed; the wrapper stays mounted so focus is kept on toggle.

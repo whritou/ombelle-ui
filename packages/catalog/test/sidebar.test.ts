@@ -29,7 +29,7 @@ describe('Sidebar', () => {
   it('provides the parts in both editions', () => {
     expectComponentContract('sidebar', { client: true, parts, slots,
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-dialog', version: '1.3.1' }, { name: '@radix-ui/react-collapsible', version: '1.2.1' },
-        { name: '@radix-ui/react-tooltip', version: '1.4.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
+        { name: '@radix-ui/react-slot', version: '1.5.0' }, { name: '@radix-ui/react-tooltip', version: '1.4.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='sidebar']", "[data-slot='sidebar-sheet']", "[data-slot='sidebar-menu-button']", "[data-slot='sidebar-tooltip']", "[data-slot='sidebar-trigger']"],
       glass: 'experimental' })
     expect(getTemplate(getCatalog('0.1.0'), 'sidebar', 'base').dependencies.map(dependency => dependency.name)).toEqual(expect.arrayContaining(['@base-ui/react', 'lucide-react']))

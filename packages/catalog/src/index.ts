@@ -96,7 +96,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   'password-field': ['lucide-react'],
   carousel: ['lucide-react'],
   'navigation-menu': ['@radix-ui/react-navigation-menu', 'lucide-react'],
-  sidebar: ['@radix-ui/react-dialog', '@radix-ui/react-tooltip', '@radix-ui/react-collapsible', 'lucide-react'],
+  sidebar: ['@radix-ui/react-dialog', '@radix-ui/react-tooltip', '@radix-ui/react-collapsible', '@radix-ui/react-slot', 'lucide-react'],
   resizable: ['react-resizable-panels'],
   menubar: ['@radix-ui/react-menubar', 'lucide-react'],
   'data-table': ['@radix-ui/react-dropdown-menu', '@radix-ui/react-popover', '@tanstack/react-table', 'lucide-react'],
