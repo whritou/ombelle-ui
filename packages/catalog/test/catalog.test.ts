@@ -641,9 +641,10 @@ describe('catalog contract', () => {
   it('has complete tokens for every referenced style variable', () => {
     const c = getCatalog('0.1.0')
     for (const family of supportedStyleFamilies) {
-      // Families with hard offset shadows also carry the optional shadowColor token.
+      // Families with hard offset shadows also carry the optional shadowColor token; every stable
+      // family carries the six status tokens (DES-06).
       expect(Object.keys(c.presets[family].modes.light)).toHaveLength(
-        family === 'papier' || family === 'organic' || family === 'retro-futurism' ? 26 : family === 'neo-brutalism' || family === 'ombelle' ? 20 : 19,
+        family === 'papier' || family === 'organic' || family === 'retro-futurism' ? 26 : family === 'neo-brutalism' || family === 'ombelle' ? 26 : 25,
       )
       for (const token of c.styles[family].matchAll(/var\(--([a-z-]+)\)/g))
         expect([
