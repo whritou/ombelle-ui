@@ -15,6 +15,9 @@ for (const edition of ['radix', 'base'] as const) {
       const trigger = nav.getByRole('button', { name: 'Docs' })
       await trigger.click()
       await expect(page.getByRole('link', { name: /Installation/ })).toBeVisible()
+      // The pointer rests on the trigger, and Radix also opens on hover after a 200 ms delay: let that timer
+      // run out first, or on a slow runner it reopens the panel just after Escape (seen in CI).
+      await page.waitForTimeout(400)
       await page.keyboard.press('Escape')
       await expect(page.getByRole('link', { name: /Installation/ })).toBeHidden()
       await expect(trigger).toBeFocused()
