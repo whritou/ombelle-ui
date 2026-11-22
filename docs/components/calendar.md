@@ -64,7 +64,7 @@ Compilation emits `components/ui/calendar.tsx`, `components/ui/calendar.css` and
 Runtime dependencies of the Radix edition are:
 
 - React 19.3.1;
-- react-day-picker 10.0.2 (MIT), with date-fns 4.4.0 and @date-fns/tz 1.5.0;
+- react-day-picker 10.0.2 (MIT), with date-fns 4.4.0 and @date-fns/tz 1.5.0. The template does not import date-fns itself; it is added to your project so you can import a locale for the `locale` prop (`import { fr } from 'date-fns/locale'`), which strict package managers such as pnpm allow only for direct dependencies;
 - @radix-ui/react-popover 1.3.1;
 - clsx 2.1.1 and tailwind-merge 3.7.0;
 - lucide-react 1.55.0.
