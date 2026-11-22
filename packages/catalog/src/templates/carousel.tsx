@@ -17,7 +17,33 @@ function partType(element: React.ReactElement): unknown {
   return element.type
 }
 
+/** The words the carousel speaks; each has an English default. Positions count from 1. */
+export type CarouselLabels = {
+  /** Names the scrolling viewport; default "Slides". */
+  slides?: string
+  /** Names each slide; default "<position> of <count>". */
+  slide?(position: number, count: number): string
+  /** Names a dot, and a thumbnail whose image has no alt text; default "Slide <position>". */
+  goTo?(position: number): string
+}
+const defaultLabels: Required<CarouselLabels> = {
+  slides: 'Slides',
+  slide: (position, count) => `${position} of ${count}`,
+  goTo: position => `Slide ${position}`,
+}
+
+/** Sets every ref it is given. */
+function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
+  return (element: T | null) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') ref(element)
+      else if (ref) (ref as React.RefObject<T | null>).current = element
+    }
+  }
+}
+
 type CarouselState = {
+  labels: Required<CarouselLabels>
   contentId: string
   contentRef: React.RefObject<HTMLDivElement | null>
   count: number
@@ -90,13 +116,14 @@ export type CarouselProps = React.ComponentProps<'div'> & {
   variant?: 'default' | 'image'
   /** The image frame's CSS aspect ratio, in the image variant. */
   ratio?: string
+  labels?: CarouselLabels
 }
 
 /**
  * Slides that snap as they scroll. Touch, trackpad and keyboard scrolling work without a script;
  * the buttons and dots only scroll a slide into view. It never autoplays.
  */
-export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', className, children, ...props }: CarouselProps) {
+export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', labels, className, children, ...props }: CarouselProps) {
   const image = variant === 'image'
   const slides = readSlides(children)
   const contentId = React.useId() + '-content'
@@ -104,6 +131,7 @@ export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', classNa
   const [count, setCount] = React.useState(() => countSlides(children))
   const [position, setPosition] = React.useState(() => ({ index: 0, atStart: true, atEnd: count <= slidesPerView }))
   const state: CarouselState = {
+    labels: { ...defaultLabels, ...labels },
     contentId,
     contentRef,
     count,
@@ -141,10 +169,11 @@ export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', classNa
 }
 
 /** The scrolling, snapping viewport. Its direct CarouselItem children are the slides. */
-export function CarouselContent({ className, children, onScroll, ...props }: React.ComponentProps<'div'>) {
+export function CarouselContent({ className, children, onScroll, ref, ...props }: React.ComponentProps<'div'>) {
   const carousel = useCarousel('CarouselContent')
   const items = React.Children.toArray(children).filter(isItem)
   const { setCount, setPosition, contentRef } = carousel
+  const setRef = React.useMemo(() => mergeRefs(contentRef, ref), [contentRef, ref])
   React.useLayoutEffect(() => setCount(items.length), [items.length, setCount])
   // Reads the current slide from the scroll position, however it was scrolled.
   const measure = React.useCallback(() => {
@@ -175,9 +204,12 @@ export function CarouselContent({ className, children, onScroll, ...props }: Rea
   let index = 0
   return (
     <div
+      // A Tab stop that scrolls with the arrow keys, so it is named.
+      role="group"
+      aria-label={carousel.labels.slides}
       tabIndex={0}
       {...props}
-      ref={contentRef}
+      ref={setRef}
       id={carousel.contentId}
       data-slot="carousel-content"
       className={cn(className)}
@@ -198,12 +230,13 @@ export type CarouselItemProps = React.ComponentProps<'div'> & {
 }
 
 export function CarouselItem({ index = 0, count = 1, className, ...props }: CarouselItemProps) {
+  const labels = React.useContext(CarouselContext)?.labels ?? defaultLabels
   return (
     <CarouselItemContext.Provider value={index}>
       <div
         role="group"
         aria-roledescription="slide"
-        aria-label={`${index + 1} of ${count}`}
+        aria-label={labels.slide(index + 1, count)}
         {...props}
         data-slot="carousel-item"
         data-carousel-item=""
@@ -283,7 +316,7 @@ export function CarouselDots({ className, ...props }: React.ComponentProps<'div'
         <button
           key={index}
           type="button"
-          aria-label={`Slide ${index + 1}`}
+          aria-label={carousel.labels.goTo(index + 1)}
           aria-current={index === carousel.index ? 'true' : undefined}
           aria-controls={carousel.contentId}
           data-slot="carousel-dot"
@@ -294,12 +327,14 @@ export function CarouselDots({ className, ...props }: React.ComponentProps<'div'
   )
 }
 
-/** "1 / 5", for sighted users; the slides already announce their position. */
-export function CarouselCounter({ className, ...props }: React.ComponentProps<'span'>) {
+/** "1 / 5", for sighted users; the slides already announce their position. format changes the text; positions count from 1. */
+export function CarouselCounter({ className, format = (position, count) => `${position} / ${count}`, ...props }: React.ComponentProps<'span'> & {
+  format?: (position: number, count: number) => string
+}) {
   const carousel = useCarousel('CarouselCounter')
   return (
     <span aria-hidden="true" {...props} data-slot="carousel-counter" className={cn(className)}>
-      {`${Math.min(carousel.index + 1, carousel.count)} / ${carousel.count}`}
+      {format(Math.min(carousel.index + 1, carousel.count), carousel.count)}
     </span>
   )
 }
@@ -313,7 +348,7 @@ export function CarouselThumbnails({ className, ...props }: React.ComponentProps
         <button
           key={index}
           type="button"
-          aria-label={image?.alt || `Slide ${index + 1}`}
+          aria-label={image?.alt || carousel.labels.goTo(index + 1)}
           aria-current={index === carousel.index ? 'true' : undefined}
           aria-controls={carousel.contentId}
           data-slot="carousel-thumbnail"

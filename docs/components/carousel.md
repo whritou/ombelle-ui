@@ -32,10 +32,11 @@ export function Kits() {
 ## API and accessibility
 
 - `Carousel` is a `role="region"` with `aria-roledescription="carousel"`; name it with `aria-label` or `aria-labelledby`. `slidesPerView` (1, 2 or 3) sets how many slides show at once.
-- `CarouselContent` is the scrolling, snapping viewport and a Tab stop, so arrow keys scroll it. Its direct `CarouselItem` children are the slides; each is a `role="group"` with `aria-roledescription="slide"` named "2 of 5".
+- `CarouselContent` is the scrolling, snapping viewport and a Tab stop, so arrow keys scroll it; it is a `role="group"` named "Slides" (an `aria-label` you pass wins). A `ref` on it is set alongside the carousel's own. Its direct `CarouselItem` children are the slides; each is a `role="group"` with `aria-roledescription="slide"` named "2 of 5".
 - `CarouselPrevious` and `CarouselNext` are named "Previous slide" and "Next slide", point at the viewport with `aria-controls`, and are disabled at the ends (both, with one slide). Below 640px they are hidden: touch users swipe, and the dots stay.
 - `CarouselDots` is a group named "Choose slide" with one button per slide, named "Slide 3"; the current one has `aria-current="true"`. Each dot's target is 24 × 24 px.
-- `CarouselCounter` shows "2 / 5" and is hidden from screen readers, which already hear each slide's position.
+- `CarouselCounter` shows "2 / 5" and is hidden from screen readers, which already hear each slide's position. `format(position, count)` changes the text.
+- `labels` on `Carousel` changes the spoken words; positions count from 1. `slides` names the viewport ("Slides"), `slide(position, count)` names each slide ("2 of 5"), and `goTo(position)` names each dot and any thumbnail whose image has no alt text ("Slide 3"). "Previous slide", "Next slide", "Choose slide" and "Choose an image" are default `aria-label`s on their parts, which a prop replaces.
 - The current slide follows the scroll position, however the viewport was scrolled. Adding or removing slides updates the dots and names. Under reduced motion, buttons and dots jump instead of scrolling smoothly.
 
 ## Image carousel
