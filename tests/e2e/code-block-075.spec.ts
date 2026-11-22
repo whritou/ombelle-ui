@@ -187,12 +187,17 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(pre).toBeFocused()
       const overflow = await pre.evaluate(el => ({ down: el.scrollHeight > el.clientHeight, right: el.scrollWidth > el.clientWidth }))
       expect(overflow).toEqual({ down: true, right: true })
+      // The block keeps its long line inside its own box: it never reaches past the viewport.
+      expect(await pre.evaluate(el => el.getBoundingClientRect().right <= document.documentElement.clientWidth)).toBe(true)
+      const scrolled = () => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }))
+      const before = await scrolled()
       await page.keyboard.press('ArrowDown')
       await expect.poll(() => pre.evaluate(el => el.scrollTop)).toBeGreaterThan(0)
       await page.keyboard.press('ArrowRight')
       await expect.poll(() => pre.evaluate(el => el.scrollLeft)).toBeGreaterThan(0)
-      const page_ = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }))
-      expect(page_.scroll).toBeLessThanOrEqual(page_.client)
+      // The keys scrolled the code, not the page. (The edition page itself may be wider than the
+      // viewport: its Breadcrumb fixture is sized to the viewport, not its column.)
+      expect(await scrolled()).toEqual(before)
     })
 
     test('line numbers stay out of a selection, and lineNumbers={false} hides them', async ({ page }) => {
