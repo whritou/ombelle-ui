@@ -1,158 +1,39 @@
-import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type ComponentRecipe, type InstallableRecipe, type Recipe, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
-
-import { usesExtendedTypography, type PresetTypography } from '@ombelle/contracts'
+import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type InstallableRecipe, type Preset, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
 export const publishedInstaller = { packageName: publicCliPackageName, version: '0.9.1' } as const
-export const catalogRecipeMinimumCli = '0.6.0'
-export const catalogRecipesAvailable = catalogRecipeInstallerSupported(publishedInstaller.version) ||
-  (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_OMBELLE_CATALOG_RECIPES === '1')
-export const catalogRecipeInstallNotice = 'Install this recipe with the repository CLI until a compatible public release is available.'
 
-export function catalogRecipeInstallerSupported(version: string): boolean {
-  return compareVersions(version, catalogRecipeMinimumCli) >= 0
+/** What a code page offers to install: a preset (with its contrast state) or a recipe. */
+export type InstallSubject =
+  | { kind: 'preset'; preset: Preset; contrastWarning?: boolean }
+  | { kind: 'recipe'; recipe: InstallableRecipe }
+
+/**
+ * A catalog feature the published installer cannot install yet. While the
+ * installer is older than `minimumCli` and `applies` matches, the site shows
+ * `notice` instead of a command, so every command it shows works.
+ */
+export type InstallRule = {
+  minimumCli: string
+  applies(subject: InstallSubject): boolean
+  notice: string
 }
 
-export const expandedCatalogMinimumCli = '0.7.2'
-export const expandedCatalogInstallNotice = `This recipe requires CLI ${expandedCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-export const semanticPaletteInstallNotice = `This preset uses semantic status colors and requires CLI ${expandedCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
+/**
+ * Rules newer than the published installer. Add one when the catalog gains
+ * something the published CLI rejects, and delete it once a release that
+ * accepts it is published (the unit test fails until then). Empty while
+ * the published installer accepts everything the site can produce.
+ */
+export const installRules: readonly InstallRule[] = []
 
-export const displayCatalogMinimumCli = '0.7.3'
-export const displayCatalogInstallNotice = `This recipe requires CLI ${displayCatalogMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-// The 0.7.3 additions: display components and form controls.
-const displayComponents = new Set(['spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar'])
-
-export const catalog075MinimumCli = '0.7.5'
-export const catalog075InstallNotice = `This recipe requires CLI ${catalog075MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-// The 0.7.5 additions: primitives.
-const catalog075Components = new Set(['toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block'])
-
-const expandedComponents = new Set(['input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast'])
-const expandedRecipeFields: Readonly<Record<string, readonly string[]>> = {
-  badge: ['size', 'dot'], card: ['appearance'], table: ['density', 'striped'], tabs: ['appearance'],
-}
-// The 0.7.3 variant fields and values that older recipe schemas reject.
-const variantRecipeFields073: Readonly<Record<string, readonly string[]>> = {
-  badge: ['appearance'], alert: ['dismissible', 'actions', 'layout'], card: ['mode'],
-  avatar: ['shape', 'overflow'], accordion: ['appearance', 'icon'],
-  tabs: ['counts'], table: ['stickyHeader', 'sortable', 'actions', 'loading'], input: ['size'], textarea: ['size'],
-  'input-group': ['clearable', 'counter'], pagination: ['layout', 'pageSize'], select: ['multiple', 'icons'],
-  toast: ['mode'], sheet: ['handle', 'resizable'],
-}
-const variantRecipeValues073: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
-  badge: { variant: ['success', 'warning', 'info'] },
-  tabs: { appearance: ['pills'] },
-}
-
-export const catalog076MinimumCli = '0.7.6'
-export const catalog076InstallNotice = `This recipe requires CLI ${catalog076MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-// The 0.7.6 additions: new components.
-const catalog076Components = new Set(['password-field', 'carousel', 'aspect-ratio', 'toolbar'])
-export const catalog09MinimumCli = '0.9.0'
-export const catalog09InstallNotice = `This recipe requires CLI ${catalog09MinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-// The 0.9 app shell components.
-export const catalog09Components: ReadonlySet<string> = new Set(['prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'])
-function needs09(recipe: Pick<ComponentRecipe, 'component'>, installer: { version: string }): boolean {
-  return catalog09Components.has(recipe.component) && compareVersions(installer.version, catalog09MinimumCli) < 0
-}
-// The 0.7.6 fields, in props or content, that older recipe schemas reject.
-const variantRecipeFields076: Readonly<Record<string, readonly string[]>> = {
-  field: ['form', 'fieldset', 'legend', 'fields'], checkbox: ['group', 'legend', 'options'],
-  sheet: ['snapPoints'], card: ['action'], slider: ['valueDisplay'], progress: ['shape'], meter: ['shape'], 'code-block': ['diff'], tooltip: ['shortcut'],
-}
-
-function usesVariants076(recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown }): boolean {
-  const fields = recipe.props as Record<string, unknown>
-  const content = (recipe.content ?? {}) as Record<string, unknown>
-  return variantRecipeFields076[recipe.component]?.some(key => Object.hasOwn(fields, key) || Object.hasOwn(content, key)) ?? false
-}
-
-function needs076(recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown }, installer: { version: string }): boolean {
-  return (catalog076Components.has(recipe.component) || usesVariants076(recipe)) && compareVersions(installer.version, catalog076MinimumCli) < 0
-}
-
-// The 0.7.5 variant fields, in props or content, that older recipe schemas reject.
-const variantRecipeFields075: Readonly<Record<string, readonly string[]>> = {
-  checkbox: ['option', 'description'], switch: ['size'], progress: ['size', 'tone', 'showLabel', 'showValue'], popover: ['arrow'],
-  dialog: ['size', 'footer', 'scrollingBody'], 'alert-dialog': ['media', 'confirmText'], breadcrumb: ['collapse'],
-}
-
-function usesVariants075(recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown }): boolean {
-  const fields = recipe.props as Record<string, unknown>
-  const content = (recipe.content ?? {}) as Record<string, unknown>
-  return variantRecipeFields075[recipe.component]?.some(key => Object.hasOwn(fields, key) || Object.hasOwn(content, key)) ?? false
-}
-
-function usesVariants073(recipe: Pick<ComponentRecipe, 'component' | 'props'>): boolean {
-  const props = recipe.props as Record<string, unknown>
-  return (variantRecipeFields073[recipe.component]?.some(key => Object.hasOwn(props, key)) ?? false) ||
-    Object.entries(variantRecipeValues073[recipe.component] ?? {}).some(([key, values]) => values.includes(String(props[key])))
-}
-
-/** A Button recipe with a 0.7.3 variant needs CLI 0.7.3. */
-export function buttonRecipeInstallBlocked(
-  recipe: { props?: { variant?: string } },
+/** The notice that replaces the command for this content, or undefined when the command works. */
+export function installNotice(
+  subject: InstallSubject,
   installer: { version: string } = publishedInstaller,
-): boolean {
-  return recipe.props?.variant === 'link-destructive' && compareVersions(installer.version, displayCatalogMinimumCli) < 0
-}
-
-/** First published installer whose recipe schemas accept the font fields. */
-export const recipeFontsMinimumCli = '0.8.0'
-export const recipeFontsInstallNotice = `This recipe uses fonts and requires CLI ${recipeFontsMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-
-/** Older recipe schemas reject `appearance.fonts` (catalog) and `overrides.fontFamilyId` (Button), even when empty. */
-export function recipeFontsInstallBlocked(
-  recipe: { appearance?: unknown; overrides?: unknown },
-  installer: { version: string } = publishedInstaller,
-): boolean {
-  if (compareVersions(installer.version, recipeFontsMinimumCli) >= 0) return false
-  const appearance = recipe.appearance as Record<string, unknown> | undefined
-  const overrides = recipe.overrides as Record<string, unknown> | undefined
-  return (appearance != null && appearance.fonts !== undefined) || (overrides != null && overrides.fontFamilyId !== undefined)
-}
-
-const semanticPaletteFields = ['success', 'successForeground', 'warning', 'warningForeground', 'info', 'infoForeground']
-
-/** Older recipe schemas reject added keys even when their value is false or a component default. */
-export function componentRecipeInstallBlocked(
-  recipe: Pick<ComponentRecipe, 'component' | 'props'> & { content?: unknown; appearance?: unknown },
-  installer: { version: string } = publishedInstaller,
-): boolean {
-  if (!catalogRecipeInstallerSupported(installer.version)) return true
-  if (recipeFontsInstallBlocked(recipe, installer)) return true
-  if (needs09(recipe, installer)) return true
-  if (catalog09Components.has(recipe.component)) return false
-  if (needs076(recipe, installer)) return true
-  if (catalog076Components.has(recipe.component)) return false
-  if (catalog075Components.has(recipe.component)) return compareVersions(installer.version, catalog075MinimumCli) < 0
-  if (usesVariants075(recipe) && compareVersions(installer.version, catalog075MinimumCli) < 0) return true
-  if (displayComponents.has(recipe.component)) return compareVersions(installer.version, displayCatalogMinimumCli) < 0
-  if (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0) return true
-  if (compareVersions(installer.version, expandedCatalogMinimumCli) >= 0) return false
-  if (expandedComponents.has(recipe.component)) return true
-  if (expandedRecipeFields[recipe.component]?.some(key => Object.hasOwn(recipe.props, key))) return true
-  return recipe.component === 'alert' && ['success', 'warning', 'info'].includes(String((recipe.props as Record<string, unknown>).variant))
-}
-
-/** Optional semantic palette fields are unknown properties to the older 0.7.1 preset schema. */
-export function semanticPaletteInstallBlocked(
-  preset: { modes?: Record<string, Record<string, unknown>> },
-  installer: { version: string } = publishedInstaller,
-): boolean {
-  return compareVersions(installer.version, expandedCatalogMinimumCli) < 0 &&
-    Object.values(preset.modes ?? {}).some(colors => semanticPaletteFields.some(key => Object.hasOwn(colors, key)))
-}
-
-/** First published installer that reads presets with a display, body or code font from the font registry. */
-export const fontsMinimumCli = '0.7.8'
-export const fontsInstallNotice = `This preset uses font pairs and requires CLI ${fontsMinimumCli}. Download the JSON or use the repository CLI until a compatible public release is available.`
-/** Earlier installers reject a schema 1.1 preset, so the site shows no command for one until 0.7.8 is published. */
-export function fontsInstallBlocked(
-  preset: { design?: PresetTypography },
-  installer: { version: string } = publishedInstaller,
-): boolean {
-  return compareVersions(installer.version, fontsMinimumCli) < 0 && usesExtendedTypography(preset.design)
+  rules: readonly InstallRule[] = installRules,
+): string | undefined {
+  return rules.find((rule) => compareVersions(installer.version, rule.minimumCli) < 0 && rule.applies(subject))?.notice
 }
 
 /** A shared notice keeps local artifacts, Get code and published snapshots on the same compatibility rule. */
@@ -160,63 +41,47 @@ export function installableRecipeInstallNotice(
   recipe: InstallableRecipe,
   installer: { version: string } = publishedInstaller,
 ): string | undefined {
-  if (recipe.schemaVersion === '2.0') {
-    if (!catalogRecipeInstallerSupported(installer.version)) return catalogRecipeInstallNotice
-    if (!componentRecipeInstallBlocked(recipe, installer)) return undefined
-    if (recipeFontsInstallBlocked(recipe, installer)) return recipeFontsInstallNotice
-    if (needs09(recipe, installer)) return catalog09InstallNotice
-    if (needs076(recipe, installer)) return catalog076InstallNotice
-    if (catalog075Components.has(recipe.component) || (usesVariants075(recipe) && compareVersions(installer.version, catalog075MinimumCli) < 0)) return catalog075InstallNotice
-    return displayComponents.has(recipe.component) || (usesVariants073(recipe) && compareVersions(installer.version, displayCatalogMinimumCli) < 0)
-      ? displayCatalogInstallNotice : expandedCatalogInstallNotice
-  }
-  if (recipeFontsInstallBlocked(recipe, installer)) return recipeFontsInstallNotice
-  if (buttonRecipeInstallBlocked(recipe, installer)) return displayCatalogInstallNotice
-  return recipeInstallBlocked(recipe, installer) ? glassMaterialInstallNotice : undefined
+  return installNotice({ kind: 'recipe', recipe }, installer)
 }
 
-/** First published installer that accepts `ombelle` presets and codes. */
-export const ombelleMinimumCli = '0.4.0'
-/** Papier is installable from this release; the site offers it only once the published installer is at least this. */
-export const papierMinimumCli = '0.8.0'
-/** Organic is installable from this release; the site offers it only once the published installer is at least this. */
-export const organicMinimumCli = '0.8.1'
-/** Retro futurism is installable from this release; the site offers it only once the published installer is at least this. */
-export const retroFuturismMinimumCli = '0.8.2'
-
-/** First published installer that accepts the liquid glass material settings and recipe glass overrides. */
-export const glassMaterialMinimumCli = '0.5.0'
-export const glassMaterialInstallNotice = `Installing this Liquid Glass material requires CLI ${glassMaterialMinimumCli}.`
-export const glassContrastMinimumCli = '0.5.0'
-export const glassContrastInstallNotice = `The published installer needs CLI ${glassContrastMinimumCli} for this preset. Use the repository CLI to install it with a contrast warning.`
-const materialFields = ['glassRefraction', 'glassRefractionWidth', 'glassHalo', 'glassDepth', 'glassMotion', 'glassDispersion']
-
-/**
- * True when a preset design or recipe overrides use what the published installer rejects: a material field
- * (even at 0), sheen above 0.5 or backdrop contrast above 1 (the 0.4.x ranges), or any glass* recipe override.
- * The site then shows no command, so every command it shows works.
- */
-export function materialInstallBlocked(
-  input: { design?: Record<string, unknown>; overrides?: Record<string, unknown> },
+export function presetInstallNotice(
+  preset: Preset,
+  contrastWarning = false,
   installer: { version: string } = publishedInstaller,
-): boolean {
-  if (compareVersions(installer.version, glassMaterialMinimumCli) >= 0) return false
-  const d = input.design ?? {}
-  const preset =
-    materialFields.some((key) => d[key] !== undefined) ||
-    (typeof d.glassSheen === 'number' && d.glassSheen > 0.5) ||
-    (typeof d.glassBackdropContrast === 'number' && d.glassBackdropContrast > 1)
-  return preset || Object.keys(input.overrides ?? {}).some((key) => key.startsWith('glass'))
+): string | undefined {
+  return installNotice({ kind: 'preset', preset, contrastWarning }, installer)
 }
 
-export function recipeInstallBlocked(recipe: Pick<Recipe, 'overrides' | 'presetRef'>, installer: { version: string } = publishedInstaller): boolean {
-  return materialInstallBlocked(recipe, installer) ||
-    (compareVersions(installer.version, glassMaterialMinimumCli) < 0 && recipe.presetRef.id.startsWith('builtin-liquid-glass-'))
-}
+/** Catalog recipes (schema 2.0) are installable by every published installer the site names. */
+export const catalogRecipesAvailable = true
 
-export function contrastInstallBlocked(hasWarning: boolean, installer: { version: string } = publishedInstaller): boolean {
-  return hasWarning && compareVersions(installer.version, glassContrastMinimumCli) < 0
-}
+/** Components first released in 0.9, marked as new on the home page. */
+export const catalog09Components: ReadonlySet<string> = new Set(['prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'])
+
+/** First published installer with the DM Mono code font (the organic release). */
+export const organicMinimumCli = '0.8.1'
+/** First published installer that accepts the liquid glass material settings, named on the preset export panel. */
+export const glassMaterialMinimumCli = '0.5.0'
+
+// Retired gates, kept until their callers drop them. The published installer
+// accepts all of this content, so each predicate is false and no notice shows.
+// New gates belong in `installRules`.
+/** @deprecated Always false; use `presetInstallNotice`. */
+export const materialInstallBlocked = (_input: { design?: Record<string, unknown>; overrides?: Record<string, unknown> }, _installer?: { version: string }): boolean => false
+/** @deprecated Always false; use `presetInstallNotice`. */
+export const contrastInstallBlocked = (_hasWarning: boolean, _installer?: { version: string }): boolean => false
+/** @deprecated Always false; use `presetInstallNotice`. */
+export const fontsInstallBlocked = (_preset: { design?: unknown }, _installer?: { version: string }): boolean => false
+/** @deprecated Always false; use `presetInstallNotice`. */
+export const semanticPaletteInstallBlocked = (_preset: { modes?: Record<string, Record<string, unknown>> }, _installer?: { version: string }): boolean => false
+/** @deprecated Never shown: its predicate is always false. */
+export const glassMaterialInstallNotice = `Installing this Liquid Glass material requires CLI ${glassMaterialMinimumCli}.`
+/** @deprecated Never shown: its predicate is always false. */
+export const glassContrastInstallNotice = `The published installer needs CLI ${glassMaterialMinimumCli} for this preset. Use the repository CLI to install it with a contrast warning.`
+/** @deprecated Never shown: its predicate is always false. */
+export const fontsInstallNotice = 'This preset uses font pairs and requires CLI 0.7.8. Download the JSON or use the repository CLI until a compatible public release is available.'
+/** @deprecated Never shown: its predicate is always false. */
+export const semanticPaletteInstallNotice = 'This preset uses semantic status colors and requires CLI 0.7.2. Download the JSON or use the repository CLI until a compatible public release is available.'
 
 /** Compares two x.y.z versions numerically: negative, zero or positive. */
 export function compareVersions(a: string, b: string): number {
@@ -249,22 +114,15 @@ export const siteFamilyOrder: readonly StyleFamily[] = [
 export const defaultSiteFamily = siteFamilyOrder[0]!
 
 /**
- * Style families the website offers for new choices. A family the published
- * installer cannot install stays hidden until that installer is released, so
- * every command the site shows works. `current` keeps an already-selected
- * family (from a restored draft) visible.
+ * Style families the website offers for new choices, in site order. Every
+ * family is installable by the published installer. The arguments are kept
+ * for callers and no longer change the result.
  */
 export function offeredStyleFamilies(
-  current?: StyleFamily,
-  installer: { version: string } = publishedInstaller,
+  _current?: StyleFamily,
+  _installer: { version: string } = publishedInstaller,
 ): readonly StyleFamily[] {
-  const ombelle = compareVersions(installer.version, ombelleMinimumCli) >= 0
-  const papier = compareVersions(installer.version, papierMinimumCli) >= 0
-  const organic = compareVersions(installer.version, organicMinimumCli) >= 0
-  const retroFuturism = compareVersions(installer.version, retroFuturismMinimumCli) >= 0
-  return siteFamilyOrder.filter(
-    (family) => (family !== 'ombelle' || ombelle || family === current) && (family !== 'papier' || papier || family === current) && (family !== 'organic' || organic || family === current) && (family !== 'retro-futurism' || retroFuturism || family === current),
-  )
+  return siteFamilyOrder
 }
 
 export function installerRunner(release?: { packageName: string; version: string }): string {

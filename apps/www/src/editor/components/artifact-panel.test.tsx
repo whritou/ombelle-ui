@@ -5,12 +5,13 @@ import { createEditorDraft } from '../model.js'
 import { createCatalogDraft } from '../catalog-draft.js'
 import { ArtifactPanel, artifactMeta } from './artifact-panel'
 
-it('shows 2.0 install commands only for a compatible public CLI', async () => {
+it('shows the published install command for catalog, glass and font recipes', async () => {
   const { installText } = await import('./artifact-panel')
-  const { fonts: _fonts, ...appearance } = (createCatalogDraft('badge').recipe.appearance ?? {}) as { fonts?: unknown }
-  const badge = { ...createCatalogDraft('badge').recipe, appearance }
-  expect(installText(badge, { version: '0.5.0' })).not.toContain('add --recipe')
-  expect(installText(badge, { version: '0.6.0' })).toContain('add --recipe ./catalog_badge-r1.json')
+  const { withGlassPreset, withRecipeOverride } = await import('../model.js')
+  const glass = withRecipeOverride(withGlassPreset(createEditorDraft('liquid-glass').recipe, 'builtin-liquid-glass'), 'glassHalo', 0.9)
+  const button = { ...createEditorDraft('flat').recipe, overrides: { fontFamilyId: 'inter' } }
+  expect(installText(createCatalogDraft('badge').recipe)).toContain('add --recipe ./catalog_badge-r1.json')
+  for (const recipe of [glass, button]) expect(installText(recipe)).toContain('add --recipe')
 })
 
 async function compiled() {
@@ -38,31 +39,4 @@ it('summarizes hash, release and dependencies on the metadata line', async () =>
   expect(meta.at(-1)).toBe('No additional dependencies')
   const withDeps = artifactMeta({ ...result, dependencies: [{ name: 'clsx', version: '2.1.1' }] })
   expect(withDeps.at(-1)).toBe('clsx@2.1.1')
-})
-
-it('the Install tab explains why a recipe with glass material overrides has no command yet', async () => {
-  const { installText } = await import('./artifact-panel')
-  const { withGlassPreset, withRecipeOverride } = await import('../model.js')
-  const { fontFamilyId: _font, ...legacyOverrides } = createEditorDraft('liquid-glass').recipe.overrides as { fontFamilyId?: string }
-  const glass = { ...createEditorDraft('liquid-glass').recipe, overrides: legacyOverrides } as ReturnType<typeof createEditorDraft>['recipe']
-  const legacy = withGlassPreset(glass, 'builtin-liquid-glass')
-  expect(installText(legacy, { version: '0.4.1' })).toContain('add --recipe')
-  expect(installText(glass, { version: '0.4.1' })).not.toContain('add --recipe')
-  expect(installText(glass, { version: '0.5.0' })).toContain('add --recipe')
-  const material = withRecipeOverride(legacy, 'glassHalo', 0.9)
-  const held = installText(material, { version: '0.4.1' })
-  expect(held).not.toContain('add --recipe')
-  expect(held).toContain('0.5.0')
-  expect(installText(material, { version: '0.5.0' })).toContain('add --recipe')
-})
-
-it('the Install tab holds a command for a recipe that starts with the style fonts until CLI 0.8.0', async () => {
-  const { installText } = await import('./artifact-panel')
-  const catalog = createCatalogDraft('badge').recipe
-  expect(catalog.appearance?.fonts).toBeDefined()
-  expect(installText(catalog, { version: '0.7.8' })).toMatch(/^# This recipe uses fonts and requires CLI 0\.8\.0/)
-  expect(installText(catalog, { version: '0.8.0' })).toContain('add --recipe')
-  const button = { ...createEditorDraft('flat').recipe, overrides: { fontFamilyId: 'inter' } }
-  expect(installText(button, { version: '0.7.8' })).toMatch(/^# This recipe uses fonts and requires CLI 0\.8\.0/)
-  expect(installText(button, { version: '0.8.0' })).toContain('add --recipe')
 })

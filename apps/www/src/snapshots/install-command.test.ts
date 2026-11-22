@@ -3,18 +3,16 @@ import type { SnapshotSource } from '@ombelle/contracts'
 import { officialSnapshotOrigin } from '@ombelle/contracts'
 // The source the site's generated Code Block is compiled from.
 import { commandRunners } from '../../../../packages/catalog/src/templates/code-block'
-import { codeInstallCommand, compareVersions, contrastInstallBlocked, offeredStyleFamilies, ombelleMinimumCli, organicMinimumCli, packageManagers, retroFuturismMinimumCli, papierMinimumCli, publishedInstaller, siteFamilyOrder, snapshotInstallCommand } from './install-command'
+import { getCatalog } from '@ombelle/catalog'
+import { codeInstallCommand, compareVersions, installNotice, installRules, installableRecipeInstallNotice, offeredStyleFamilies, packageManagers, presetInstallNotice, publishedInstaller, siteFamilyOrder, snapshotInstallCommand, type InstallRule } from './install-command'
+import example from '../../../../examples/recipe.example.json'
+import type { Recipe } from '@ombelle/contracts'
 
 const source: SnapshotSource = {
   origin: 'https://presets.example.test',
   reference: 'ps_' + 'a'.repeat(32) + '@1',
   presetHash: 'b'.repeat(64),
 }
-it('uses the repository CLI for contrast warnings until the compatible installer release', () => {
-  expect(contrastInstallBlocked(true, { version: '0.4.1' })).toBe(true)
-  expect(contrastInstallBlocked(true, { version: '0.5.0' })).toBe(false)
-  expect(contrastInstallBlocked(false, { version: '0.4.1' })).toBe(false)
-})
 it('all scopes use one immutable source and honest private repository invocation', () => {
   for (const scope of ['new', 'theme', 'button'] as const) {
     const command = snapshotInstallCommand(source, scope)
@@ -122,59 +120,33 @@ it('compares x.y.z versions numerically', () => {
   expect(() => compareVersions('0.4', '0.4.0')).toThrow()
 })
 
-it('offers organic only from the 0.8.1 published installer and keeps a restored organic draft visible', () => {
-  expect(organicMinimumCli).toBe('0.8.1')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.0' })).not.toContain('organic')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.1' })).toContain('organic')
-  expect(offeredStyleFamilies('organic', { version: '0.8.0' })).toContain('organic')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.1' })).toEqual(['ombelle', 'papier', 'organic', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-})
-
-it('offers papier only from the 0.8.0 published installer and keeps a restored papier draft visible', () => {
-  expect(papierMinimumCli).toBe('0.8.0')
-  expect(offeredStyleFamilies(undefined, { version: '0.7.8' })).not.toContain('papier')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.0' })).toContain('papier')
-  expect(offeredStyleFamilies('papier', { version: '0.7.8' })).toContain('papier')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.0' })).toEqual(['ombelle', 'papier', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-})
-
-it('offers ombelle only from the minimum published installer', () => {
-  expect(ombelleMinimumCli).toBe('0.4.0')
-  expect(offeredStyleFamilies(undefined, { version: '0.3.1' })).not.toContain('ombelle')
-  expect(offeredStyleFamilies(undefined, { version: '0.4.0' })).toContain('ombelle')
-  expect(offeredStyleFamilies(undefined, { version: '0.5.2' })).toContain('ombelle')
-  // A restored ombelle draft keeps its own family visible.
-  expect(offeredStyleFamilies('ombelle', { version: '0.3.0' })).toContain('ombelle')
-  expect(offeredStyleFamilies()).toEqual(offeredStyleFamilies(undefined, publishedInstaller))
-  expect(offeredStyleFamilies(undefined, { version: '0.3.0' })).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-})
-
-it('holds back commands for glass material settings until the installer that accepts them is published', async () => {
-  const { glassMaterialMinimumCli, materialInstallBlocked } = await import('./install-command')
-  expect(glassMaterialMinimumCli).toBe('0.5.0')
-  const old = { version: '0.4.1' }, next = { version: '0.5.0' }
-  // The built-in 0.5 look uses none of them.
-  const base = { glassSheen: 0.25, glassBackdropContrast: 0.45, glassOpacity: 0.57 }
-  expect(materialInstallBlocked({ design: base }, old)).toBe(false)
-  // A material field, even at 0, or a value past the 0.4.x ranges needs 0.5.0.
-  for (const design of [{ ...base, glassHalo: 0 }, { ...base, glassSheen: 0.6 }, { ...base, glassBackdropContrast: 1.2 }]) {
-    expect(materialInstallBlocked({ design }, old)).toBe(true)
-    expect(materialInstallBlocked({ design }, next)).toBe(false)
+describe('install rules', () => {
+  const preset = getCatalog('0.1.0').presets.flat
+  const rule: InstallRule = {
+    minimumCli: '0.10.0',
+    applies: (subject) => subject.kind === 'preset' && subject.contrastWarning === true,
+    notice: 'This preset requires CLI 0.10.0.',
   }
-  expect(materialInstallBlocked({ overrides: { radiusRem: 1 } }, old)).toBe(false)
-  expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, old)).toBe(true)
-  expect(materialInstallBlocked({ overrides: { glassDepth: 0.4 } }, next)).toBe(false)
+
+  it('holds only rules newer than the published installer', () => {
+    for (const each of installRules) expect(compareVersions(publishedInstaller.version, each.minimumCli)).toBeLessThan(0)
+  })
+
+  it('shows a rule notice instead of a command until the installer reaches its minimum', () => {
+    const subject = { kind: 'preset', preset, contrastWarning: true } as const
+    expect(installNotice(subject, { version: '0.9.9' }, [rule])).toBe(rule.notice)
+    expect(installNotice(subject, { version: '0.10.0' }, [rule])).toBeUndefined()
+    expect(installNotice({ ...subject, contrastWarning: false }, { version: '0.9.9' }, [rule])).toBeUndefined()
+  })
+
+  it('offers every command the site can produce today', () => {
+    expect(presetInstallNotice(preset, true)).toBeUndefined()
+    expect(installableRecipeInstallNotice(example as Recipe)).toBeUndefined()
+  })
 })
 
-it('the site lists style families as Ombelle, Papier, Organic, Retro futurism, Minimalist, Neo-Brutalism, Flat, Liquid Glass now that 0.9.1 is published', () => {
-  expect(offeredStyleFamilies()).toEqual(['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+it('offers every style family in site order', () => {
   expect(siteFamilyOrder).toEqual(['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-})
-
-it('offers retro-futurism only from the 0.8.2 published installer and keeps a restored retro-futurism draft visible', () => {
-  expect(retroFuturismMinimumCli).toBe('0.8.2')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.1' })).not.toContain('retro-futurism')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.2' })).toContain('retro-futurism')
-  expect(offeredStyleFamilies('retro-futurism', { version: '0.8.1' })).toContain('retro-futurism')
-  expect(offeredStyleFamilies(undefined, { version: '0.8.2' })).toEqual(['ombelle', 'papier', 'organic', 'retro-futurism', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
+  expect(offeredStyleFamilies()).toEqual(siteFamilyOrder)
+  expect(offeredStyleFamilies('flat', { version: '0.3.0' })).toEqual(siteFamilyOrder)
 })

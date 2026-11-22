@@ -8,12 +8,11 @@ import type {
   PresetSnapshot,
 } from '@ombelle/contracts'
 import { createCatalogDraft } from '../editor/catalog-draft'
-import { installText } from '../editor/components/artifact-panel'
 import { PublishedRecipe } from '../recipe-snapshots/components/published-recipe'
 import { PublishedPreset } from './components/published-preset'
 import { PresetExportPanel } from '../preset-editor/components/preset-export-panel'
 import { createPresetDraft, setPresetEdit } from '../preset-editor/model'
-import * as compatibility from './install-command'
+import { publishedInstaller } from './install-command'
 
 /** A catalog draft as older editors exported it, before recipes started with the style's fonts. */
 function legacyDraft(component: Parameters<typeof createCatalogDraft>[0]): ReturnType<typeof createCatalogDraft> {
@@ -21,25 +20,6 @@ function legacyDraft(component: Parameters<typeof createCatalogDraft>[0]): Retur
   const { fonts: _fonts, ...appearance } = (draft.recipe.appearance ?? {}) as { fonts?: unknown }
   return { ...draft, recipe: { ...draft.recipe, appearance } } as ReturnType<typeof createCatalogDraft>
 }
-
-const current = { version: '0.7.1' }
-const next = { version: '0.7.2' }
-const newComponents = [
-  'input-group',
-  'sheet',
-  'alert-dialog',
-  'breadcrumb',
-  'pagination',
-  'toast',
-] as const
-const addedProps = [
-  ['badge', 'size', 'default'],
-  ['badge', 'dot', false],
-  ['card', 'appearance', 'default'],
-  ['table', 'density', 'default'],
-  ['table', 'striped', false],
-  ['tabs', 'appearance', 'contained'],
-] as const
 
 function recipeSnapshot(recipe: ComponentRecipe): InstallableRecipeSnapshot {
   return {
@@ -57,114 +37,8 @@ function recipeSnapshot(recipe: ComponentRecipe): InstallableRecipeSnapshot {
   }
 }
 
-describe('published installer compatibility', () => {
-  it.each(newComponents)('holds %s recipes until CLI 0.7.2', (component) => {
-    const recipe = legacyDraft(component).recipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, current)).toBe(
-      true,
-    )
-    expect(compatibility.componentRecipeInstallBlocked(recipe, next)).toBe(
-      false,
-    )
-    expect(
-      compatibility.installableRecipeInstallNotice(recipe, current),
-    ).toContain('0.7.2')
-    expect(
-      compatibility.installableRecipeInstallNotice(recipe, next),
-    ).toBeUndefined()
-    expect(installText(recipe, current)).not.toContain('add --recipe')
-    expect(installText(recipe, current)).toContain('0.7.2')
-    expect(installText(recipe, next)).toContain('add --recipe')
-  })
-
-  it.each(addedProps)(
-    'holds %s.%s even when the added value is a default or false',
-    (component, key, value) => {
-      const original = legacyDraft(component).recipe
-      const props = { ...original.props } as Record<string, unknown>
-      // Older immutable recipes omit all newly introduced fields.
-      for (const [candidate, field] of addedProps)
-        if (candidate === component) delete props[field]
-      const legacy = { ...original, props } as ComponentRecipe
-      const expanded = {
-        ...legacy,
-        props: { ...props, [key]: value },
-      } as ComponentRecipe
-      expect(compatibility.componentRecipeInstallBlocked(legacy, current)).toBe(
-        false,
-      )
-      expect(
-        compatibility.componentRecipeInstallBlocked(expanded, current),
-      ).toBe(true)
-      expect(compatibility.componentRecipeInstallBlocked(expanded, next)).toBe(
-        false,
-      )
-      expect(installText(expanded, current)).not.toContain('add --recipe')
-    },
-  )
-
-  it.each(['success', 'warning', 'info'] as const)(
-    'holds Alert %s while preserving default and destructive support',
-    (variant) => {
-      const alert = legacyDraft('alert').recipe
-      const expanded = {
-        ...alert,
-        props: { ...alert.props, variant },
-      } as ComponentRecipe
-      expect(
-        compatibility.componentRecipeInstallBlocked(expanded, current),
-      ).toBe(true)
-      expect(compatibility.componentRecipeInstallBlocked(expanded, next)).toBe(
-        false,
-      )
-      for (const legacyVariant of ['default', 'destructive'])
-        expect(
-          compatibility.componentRecipeInstallBlocked(
-            {
-              ...alert,
-              props: { ...alert.props, variant: legacyVariant },
-            } as ComponentRecipe,
-            current,
-          ),
-        ).toBe(false)
-    },
-  )
-
-  it('keeps original catalog recipe support gated at 0.6.0', () => {
-    const recipe = legacyDraft('input').recipe
-    expect(
-      compatibility.componentRecipeInstallBlocked(recipe, { version: '0.5.0' }),
-    ).toBe(true)
-    expect(
-      compatibility.componentRecipeInstallBlocked(recipe, { version: '0.6.0' }),
-    ).toBe(false)
-  })
-
-  it.each([
-    'success',
-    'successForeground',
-    'warning',
-    'warningForeground',
-    'info',
-    'infoForeground',
-  ])('holds optional semantic palette field %s in either mode', (field) => {
-    for (const mode of ['light', 'dark']) {
-      const preset = { modes: { [mode]: { [field]: '#14532D' } } }
-      expect(compatibility.semanticPaletteInstallBlocked(preset, current)).toBe(
-        true,
-      )
-      expect(compatibility.semanticPaletteInstallBlocked(preset, next)).toBe(
-        false,
-      )
-    }
-    expect(
-      compatibility.semanticPaletteInstallBlocked(
-        { modes: { light: { foreground: '#111111' } } },
-        current,
-      ),
-    ).toBe(false)
-  })
-
+// The code pages show a command for content the published installer accepts.
+describe('published installer commands', () => {
   it('offers a new published recipe command alongside JSON export and editor navigation', () => {
     const recipe = legacyDraft('breadcrumb').recipe
     const html = renderToStaticMarkup(
@@ -201,7 +75,7 @@ describe('published installer compatibility', () => {
         name="Input"
       />,
     )
-    expect(html).toContain(`npx @ombelle-ui/cli@${compatibility.publishedInstaller.version} add --recipe`)
+    expect(html).toContain(`npx @ombelle-ui/cli@${publishedInstaller.version} add --recipe`)
     expect(html).toContain('Copy install command')
   })
 
@@ -265,150 +139,7 @@ describe('published installer compatibility', () => {
     expect(html).toContain('<button type="button">Copy export</button>')
     expect(html).toMatch(/&quot;info&quot;:&quot;#dbeafe&quot;/i)
   })
-})
 
-describe('0.7.3 variant recipes', () => {
-  const v072 = { version: '0.7.2' }
-  const v073 = { version: '0.7.3' }
-  it.each([
-    ['badge', { appearance: 'soft' }],
-    ['badge', { variant: 'warning' }],
-    ['alert', { dismissible: false }],
-    ['alert', { layout: 'compact' }],
-    ['card', { mode: 'static' }],
-    ['avatar', { shape: 'square' }],
-    ['avatar', { overflow: 0 }],
-    ['accordion', { icon: 'family' }],
-    ['accordion', { appearance: 'bordered' }],
-  ] as const)('gates a %s recipe using %o at CLI 0.7.3', (component, props) => {
-    const recipe = { component, props } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(true)
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v073)).toBe(false)
-  })
-
-  it('leaves a plain badge recipe installable at 0.7.2', () => {
-    const recipe = { component: 'badge', props: { variant: 'default' } } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(false)
-  })
-
-  it('gates a link-destructive Button recipe at CLI 0.7.3', () => {
-    const recipe = { props: { variant: 'link-destructive' } }
-    expect(compatibility.buttonRecipeInstallBlocked(recipe, v072)).toBe(true)
-    expect(compatibility.buttonRecipeInstallBlocked(recipe, v073)).toBe(false)
-    expect(compatibility.buttonRecipeInstallBlocked({ props: { variant: 'link' } }, v072)).toBe(false)
-  })
-})
-
-
-describe('0.7.3 variant recipes, batches 6b and 6c', () => {
-  const v072 = { version: '0.7.2' }
-  const v073 = { version: '0.7.3' }
-  it.each([
-    ['tabs', { appearance: 'pills' }], ['tabs', { counts: false }],
-    ['table', { stickyHeader: true }], ['table', { sortable: false }], ['table', { actions: true }], ['table', { loading: true }],
-    ['input', { size: 'sm' }], ['textarea', { size: 'default' }],
-    ['input-group', { clearable: true }], ['input-group', { counter: true }],
-    ['pagination', { layout: 'compact' }], ['pagination', { pageSize: true }],
-    ['select', { multiple: true }], ['select', { icons: true }],
-    ['toast', { mode: 'default' }], ['sheet', { handle: true }], ['sheet', { resizable: true }],
-  ] as const)('gates a %s recipe using %o at CLI 0.7.3', (component, props) => {
-    const recipe = { component, props } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(true)
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v073)).toBe(false)
-  })
-
-  it('leaves underline Tabs installable at 0.7.2', () => {
-    const recipe = { component: 'tabs', props: { appearance: 'underline' } } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v072)).toBe(false)
-  })
-})
-
-describe('0.7.5 variant recipes, batch 4a', () => {
-  const v074 = { version: '0.7.4' }
-  const v075 = { version: '0.7.5' }
-  it.each([
-    ['checkbox', { option: 'row' }, {}], ['checkbox', {}, { description: 'x' }],
-    ['switch', { size: 'default' }, {}],
-    ['progress', { tone: 'success' }, {}], ['progress', { size: 'sm' }, {}],
-    ['progress', { showLabel: false }, {}], ['progress', { showValue: true }, {}],
-    ['popover', { arrow: false }, {}],
-  ] as const)('gates a %s recipe using %o %o at CLI 0.7.5', (component, props, content) => {
-    const recipe = { component, props, content } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(true)
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(false)
-    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v074)).toBe(compatibility.catalog075InstallNotice)
-  })
-
-  it.each(['checkbox', 'switch', 'progress', 'popover'])('leaves a %s recipe without new fields installable at 0.7.4', component => {
-    const recipe = { component, props: {}, content: { label: 'Accept terms' } } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(false)
-  })
-})
-
-describe('0.7.5 variant recipes, batch 4b', () => {
-  const v074 = { version: '0.7.4' }
-  const v075 = { version: '0.7.5' }
-  it.each([
-    ['dialog', { size: 'default' }, {}], ['dialog', { footer: true }, {}], ['dialog', { scrollingBody: false }, {}],
-    ['alert-dialog', { media: 'none' }, {}], ['alert-dialog', {}, { confirmText: '' }],
-    ['breadcrumb', { collapse: 'none' }, {}],
-  ] as const)('gates a %s recipe using %o %o at CLI 0.7.5', (component, props, content) => {
-    const recipe = { component, props, content } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(false)
-    // Alert Dialog and Breadcrumb already need 0.7.2; any new field needs 0.7.5.
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(true)
-    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v074)).toBe(compatibility.catalog075InstallNotice)
-  })
-
-  it.each(['dialog', 'alert-dialog', 'breadcrumb'])('leaves a %s recipe without new fields installable at 0.7.4', component => {
-    const recipe = { component, props: {}, content: { trigger: 'Open' } } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v074)).toBe(false)
-  })
-})
-
-describe('0.7.6 variant recipes', () => {
-  const v075 = { version: '0.7.5' }
-  const v076 = { version: '0.7.6' }
-  it.each([
-    ['progress', { shape: 'circle' }, {}],
-    ['tooltip', {}, { shortcut: 'Ctrl+Z' }],
-    ['sheet', { snapPoints: 'none' }, {}],
-    ['card', { action: false }, {}],
-    ['slider', { valueDisplay: 'none' }, {}],
-    ['meter', { shape: 'bar' }, {}],
-    ['code-block', { diff: false }, {}],
-  ] as const)('gates a %s recipe using %o %o at CLI 0.7.6', (component, props, content) => {
-    const recipe = { component, props, content } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(true)
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v076)).toBe(false)
-    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v075)).toBe(compatibility.catalog076InstallNotice)
-  })
-
-  it.each(['sheet', 'card', 'slider', 'progress', 'meter', 'tooltip'])('leaves a %s recipe without new fields installable at 0.7.5', component => {
-    const recipe = { component, props: {}, content: { trigger: 'Open' } } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(false)
-  })
-
-  it.each([
-    ['field', { form: 'summary', fieldset: 'default' }, { legend: 'Save preset', fields: ['Preset name', 'Radius'] }],
-    ['checkbox', { group: 'parent' }, { legend: 'Overlays to install', options: ['Dialog', 'Popover'] }],
-    ['progress', { shape: 'circle' }, {}],
-    ['tooltip', {}, { shortcut: 'Ctrl+Z' }],
-  ] as const)('gates both 0.7.6 tracks through one helper: %s %o %o', (component, props, content) => {
-    const recipe = { component, props, content } as unknown as ComponentRecipe
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v075)).toBe(true)
-    expect(compatibility.componentRecipeInstallBlocked(recipe, v076)).toBe(false)
-    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v075)).toBe(compatibility.catalog076InstallNotice)
-    expect(compatibility.installableRecipeInstallNotice({ ...recipe, schemaVersion: '2.0' } as never, v076)).toBeUndefined()
-  })
-
-  it('words the notice like the 0.7.5 one', () => {
-    expect(compatibility.catalog076MinimumCli).toBe('0.7.6')
-    expect(compatibility.catalog076InstallNotice).toBe(compatibility.catalog075InstallNotice.replace('0.7.5', '0.7.6'))
-  })
-})
-
-describe('font pairs', () => {
   const fonted = () => {
     const preset = structuredClone(getCatalog('0.1.0').presets.ombelle)
     return {
@@ -417,16 +148,6 @@ describe('font pairs', () => {
       design: { ...preset.design, fontFamilyId: 'inter' as const, headingFontFamilyId: 'fraunces' as const },
     }
   }
-  it('holds a preset that uses font pairs until the published installer is 0.7.8', () => {
-    expect(compatibility.fontsMinimumCli).toBe('0.7.8')
-    expect(compatibility.fontsInstallBlocked({ design: { headingFontFamilyId: 'fraunces' } }, { version: '0.7.7' })).toBe(true)
-    expect(compatibility.fontsInstallBlocked({ design: { fontFamilyId: 'inter' } }, { version: '0.7.7' })).toBe(true)
-    expect(compatibility.fontsInstallBlocked({ design: { headingFontFamilyId: 'fraunces' } }, { version: '0.7.8' })).toBe(false)
-    expect(compatibility.fontsInstallBlocked({ design: { fontFamilyId: 'system-serif' } }, { version: '0.7.7' })).toBe(false)
-    expect(compatibility.fontsInstallBlocked({ design: {} }, { version: '0.7.7' })).toBe(false)
-    expect(compatibility.fontsInstallNotice).toContain('requires CLI 0.7.8')
-  })
-
   it('offers the install command for a published preset that uses font pairs now that 0.7.8 is published', () => {
     const snapshot: PresetSnapshot = {
       snapshotVersion: '1.0',

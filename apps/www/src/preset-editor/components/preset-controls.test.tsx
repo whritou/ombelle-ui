@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { createPresetDraft, glassControlHints, planPresetFamilyChange, presetFieldValue, setPresetEdit } from '../model'
 import { styleFamilies } from '@ombelle/contracts'
 import { DesignControls, FamilyPicker, TokenList } from './preset-controls'
-import { offeredStyleFamilies, ombelleMinimumCli, publishedInstaller } from '../../snapshots/install-command'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 
 const noop = () => {}
 const handlers = { onEdit: noop, onReset: noop }
@@ -20,19 +20,10 @@ it('FamilyPicker marks only the current family pressed and tags liquid glass as 
   expect(html).not.toMatch(/data-family="ombelle"(?:(?!<\/button>).)*>Accessibility not guaranteed</)
 })
 
-it('FamilyPicker offers ombelle only once the published installer supports it', () => {
+it('FamilyPicker offers every site family in site order', () => {
   const families = (html: string) => [...html.matchAll(/data-family="([^"]+)"/g)].map((match) => match[1])
-  const gated = renderToStaticMarkup(
-    <FamilyPicker value="flat" onChange={noop} families={offeredStyleFamilies('flat', { version: '0.3.0' })} />,
-  )
-  expect(families(gated)).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  const offered = renderToStaticMarkup(
-    <FamilyPicker value="flat" onChange={noop} families={offeredStyleFamilies('flat', { version: ombelleMinimumCli })} />,
-  )
-  expect(families(offered)).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  // The default follows the website's published installer.
   const defaults = renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />)
-  expect(families(defaults)).toEqual([...offeredStyleFamilies('flat', publishedInstaller)])
+  expect(families(defaults)).toEqual([...offeredStyleFamilies()])
 })
 
 it('TokenList shows five core tokens and a toggle for the rest', () => {
