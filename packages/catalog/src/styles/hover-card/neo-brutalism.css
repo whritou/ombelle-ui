@@ -22,7 +22,7 @@
   outline-offset: 4px;
 }
 [data-slot='hover-card-trigger'] {
-  border-radius: 0.25rem;
+  border-radius: var(--radius);
   color: inherit;
   font-weight: 700;
   text-decoration-line: underline;

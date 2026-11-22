@@ -145,7 +145,7 @@
 }
 [data-slot='alert-dialog-confirm-label'] code {
   padding: 0.0625rem 0.375rem;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--muted);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.75rem;
