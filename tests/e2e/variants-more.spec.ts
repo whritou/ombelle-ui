@@ -397,6 +397,26 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(grip).toHaveAttribute('aria-valuenow', '204')
     })
 
+    test('the side sheet resizes towards its open edge in a right-to-left page (CAT-04)', async ({ page }) => {
+      await open(page, edition)
+      await page.evaluate(() => { document.documentElement.dir = 'rtl' })
+      await page.getByTestId('vm-sheets').getByRole('button', { name: 'Open inspector' }).click()
+      const grip = page.getByRole('separator', { name: 'Resize panel' })
+      await grip.focus()
+      await expect(grip).toHaveAttribute('aria-valuenow', '320')
+      // The inline-end sheet sits on the left with its handle on its right edge: Right widens it.
+      await page.keyboard.press('ArrowRight')
+      await expect(grip).toHaveAttribute('aria-valuenow', '336')
+      await page.keyboard.press('ArrowLeft')
+      await expect(grip).toHaveAttribute('aria-valuenow', '320')
+      const box = (await grip.boundingBox())!
+      await page.mouse.move(box.x + box.width / 2, 400)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2 + 80, 400, { steps: 4 })
+      await page.mouse.up()
+      await expect(grip).toHaveAttribute('aria-valuenow', '400')
+    })
+
     test('a top sheet grows as its handle is dragged down', async ({ page }) => {
       await open(page, edition)
       await page.getByTestId('vm-sheets').getByRole('button', { name: 'Show notices' }).click()

@@ -172,10 +172,11 @@ export function SheetHandle({ className, label = 'Resize sheet' }: { className?:
 function SheetResizeHandle({ side, size, setSize, minSize, maxSize, label = 'Resize panel' }: {
   side: 'inline-start' | 'inline-end'; size: number; setSize: (size: number) => void; minSize: number; maxSize: number; label?: string
 }) {
-  // An inline-end sheet grows towards the start, so moving left widens it.
-  const sign = side === 'inline-end' ? -1 : 1
+  // An inline-end sheet grows towards the start, so moving left widens it; right-to-left mirrors that.
+  const signOf = (element: Element) => (side === 'inline-end' ? -1 : 1) * (getComputedStyle(element).direction === 'rtl' ? -1 : 1)
+  const sign = React.useRef(side === 'inline-end' ? -1 : 1)
   const startSize = React.useRef(size)
-  const drag = useDrag(({ x }) => setSize(startSize.current + sign * x))
+  const drag = useDrag(({ x }) => setSize(startSize.current + sign.current * x))
   return (
     <div
       role="separator"
@@ -188,7 +189,8 @@ function SheetResizeHandle({ side, size, setSize, minSize, maxSize, label = 'Res
       data-sheet-dragging={drag.dragging ? '' : undefined}
       onKeyDown={event => {
         const step = event.shiftKey ? 64 : 16
-        const next = event.key === 'ArrowLeft' ? size - sign * step : event.key === 'ArrowRight' ? size + sign * step
+        const flip = signOf(event.currentTarget)
+        const next = event.key === 'ArrowLeft' ? size - flip * step : event.key === 'ArrowRight' ? size + flip * step
           : event.key === 'Home' ? minSize : event.key === 'End' ? maxSize : undefined
         if (next === undefined) return
         event.preventDefault()
@@ -196,7 +198,7 @@ function SheetResizeHandle({ side, size, setSize, minSize, maxSize, label = 'Res
       }}
       {...drag.handlers}
       data-slot="sheet-resize-handle"
-      onPointerDown={event => { startSize.current = size; drag.handlers.onPointerDown(event) }}
+      onPointerDown={event => { startSize.current = size; sign.current = signOf(event.currentTarget); drag.handlers.onPointerDown(event) }}
     />
   )
 }
