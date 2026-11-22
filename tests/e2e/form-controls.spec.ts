@@ -118,3 +118,17 @@ for (const edition of ['radix', 'base'] as const) {
     })
   })
 }
+
+// A11Y-04: the audit specimen renders Input OTP slots without a group; in the Base edition each
+// slot is an <input>, which took the browser's default width and scrolled the page sideways.
+for (const family of ['ombelle', 'flat', 'neo-brutalism'] as const) {
+  test(`${family} Base Input OTP fits the page at 320 and 1100 px wide`, async ({ page }) => {
+    for (const width of [1100, 320]) {
+      await page.setViewportSize({ width, height: 800 })
+      await page.goto(`/audit/${family}/base/?mode=light&only=input-otp`)
+      await expect(page.locator('[data-slot="input-otp-slot"]').first()).toBeVisible({ timeout: 60000 })
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `${width}px`).toBeLessThanOrEqual(0)
+    }
+  })
+}

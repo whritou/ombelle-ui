@@ -102,6 +102,7 @@
   min-inline-size: 0;
 }
 [data-slot='input-otp-slot'] {
-  inline-size: auto;
+  /* Capped, so a slot outside an input-otp-group (a Base UI <input>) is not the browser's default width. */
+  inline-size: min(46px, 100%);
   min-inline-size: 0;
 }
