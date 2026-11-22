@@ -36,4 +36,4 @@ The recipe sets `direction`, `withHandle`, `panels` (2 or 3) and one label per p
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

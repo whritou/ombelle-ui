@@ -45,6 +45,6 @@ Number Input has no primitive, so the Base UI edition installs the same template
 
 ## Liquid glass
 
-Liquid glass is experimental for Number Input, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Number Input without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [editor inputs evidence](../evidence/editor-inputs-075.md) for the tests, the specimen audit and the board comparison.

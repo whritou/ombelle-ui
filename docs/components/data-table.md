@@ -46,4 +46,4 @@ The Base UI edition uses `Menu` and `Popover` from `@base-ui/react` for the View
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

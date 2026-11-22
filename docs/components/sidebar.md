@@ -63,4 +63,4 @@ The Base UI edition uses `Dialog`, `Tooltip` and `Collapsible` from `@base-ui/re
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

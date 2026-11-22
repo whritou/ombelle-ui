@@ -54,4 +54,4 @@ The Base UI edition uses `NavigationMenu` from `@base-ui/react`. It always opens
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

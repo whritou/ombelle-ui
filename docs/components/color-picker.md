@@ -87,6 +87,6 @@ The Base UI edition uses `Popover` and `Slider` from `@base-ui/react` and adds n
 
 ## Liquid glass
 
-Liquid glass is experimental for Color Picker, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Color Picker without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [editor inputs evidence](../evidence/editor-inputs-075.md) for the tests, the specimen audit and the board comparison.

@@ -40,6 +40,6 @@ The Base UI edition uses `Toggle` from `@base-ui/react/toggle` and adds no depen
 
 ## Liquid glass
 
-Liquid glass is experimental for Toggle, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Toggle without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [primitives evidence](../evidence/primitives-075.md) for the specimen audit, the board comparison and the differences that remain.

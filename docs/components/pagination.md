@@ -115,7 +115,7 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
 - Neo brutalism uses outlined page tiles, offset ink shadows and an accent
   current page.
 - Ombelle uses pill links and an ink-filled active page.
-- Liquid glass is experimental: one glass list surface surrounds opaque active
+- Liquid glass (accessibility not guaranteed): one glass list surface surrounds opaque active
   links. Missing backdrop-filter support and reduced transparency retain an
   opaque surface. Nested surfaces respect the shared glass filter variables.
 

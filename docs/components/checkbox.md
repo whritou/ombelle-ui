@@ -1,6 +1,6 @@
 # Checkbox
 
-Checkbox wraps the reviewed Radix Checkbox primitive with Lucide check and minus marks. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The component is a client component.
+Checkbox wraps the reviewed Radix Checkbox primitive with Lucide check and minus marks. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is supported, without an accessibility guarantee; see [Liquid glass](#liquid-glass). The component is a client component.
 
 ## Install and compose
 

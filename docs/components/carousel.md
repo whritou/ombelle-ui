@@ -76,4 +76,4 @@ The Base UI edition uses the same template. shadcn builds Carousel on Embla; thi
 
 ## Liquid glass
 
-Liquid glass support is experimental: the buttons use a translucent surface. The image frames and thumbnails keep the family border and radius.
+Liquid glass is supported, without an accessibility guarantee: the buttons use a translucent surface. The image frames and thumbnails keep the family border and radius.

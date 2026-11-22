@@ -54,4 +54,4 @@ The Base UI edition uses the same template. Radix's `PasswordToggleField` is a p
 
 ## Liquid glass
 
-Liquid glass support is experimental: the box follows the family's Input Group glass, and its blur stays inside the family's `@supports` fallback.
+Liquid glass is supported, without an accessibility guarantee: the box follows the family's Input Group glass, and its blur stays inside the family's `@supports` fallback.

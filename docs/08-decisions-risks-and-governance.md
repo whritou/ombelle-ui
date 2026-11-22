@@ -25,7 +25,7 @@ These decisions form a proposed baseline. Accept or revise them through short ar
 | --- | --- | --- |
 | Product overlaps existing shadcn tools | Pilot users prefer the existing create flow | Designer tests distinct style and component editing value before catalog expansion |
 | Preview differs from install | Screenshot or computed-style mismatch | Tech lead gates release on shared artifacts and fixture comparisons |
-| Style combinations multiply QA | Unreviewed states accumulate | Catalog maintainer limits stable matrix and uses clear experimental labels |
+| Style combinations multiply QA | Unreviewed states accumulate | Catalog maintainer limits stable matrix and uses clear labels, such as "accessibility not guaranteed" for liquid glass |
 | Glass reduces readability or responsiveness | Contrast fails over backgrounds or mobile scroll slows | Designer and reviewer require opaque fallback and declared background fixtures |
 | Upstream changes break installer | Pinned adapter fixture fails during upgrade | CLI maintainer isolates adapter and upgrades intentionally |
 | Local edits are lost | Reinstall replaces an untracked or modified file | CLI maintainer enforces hashes, plans and conflict stops |

@@ -1,6 +1,6 @@
 # Native Select
 
-Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental for Native Select; see [Liquid glass](#liquid-glass). A fully custom Select is a later component.
+Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is supported for Native Select, without an accessibility guarantee; see [Liquid glass](#liquid-glass). A fully custom Select is a later component.
 
 ## Install and compose
 

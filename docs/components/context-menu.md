@@ -51,6 +51,6 @@ Part names and `data-slot` values are the same in both editions.
 
 ## Liquid glass
 
-Liquid glass is experimental for Context Menu, as for every glass component, and its findings do not block a release. Over the glass menu the shortcut and destructive text fall below 4.5:1 in the specimen audit. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Context Menu without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. Over the glass menu the shortcut and destructive text fall below 4.5:1 in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [overlays and search evidence](../evidence/overlays-search-073.md) for the board comparison, the specimen audit and the browser tests.
