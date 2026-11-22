@@ -229,14 +229,14 @@
   display: block;
   block-size: 100%;
   border-radius: inherit;
-  background: var(--success, oklch(60% 0.15 150));
+  background: var(--success-foreground, oklch(60% 0.15 150));
   transition: inline-size var(--motion-duration, 0.2s);
 }
 [data-slot='password-field-strength-bar']:is([data-level='weak'] > *) > i {
   background: var(--destructive);
 }
 [data-slot='password-field-strength-bar']:is([data-level='fair'] > *) > i {
-  background: var(--warning, oklch(72% 0.15 75));
+  background: var(--warning-foreground, oklch(72% 0.15 75));
 }
 [data-slot='password-field-strength-text'] {
   margin: 0;
