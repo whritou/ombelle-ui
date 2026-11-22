@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, ChevronUp, Moon, RotateCw } from 'lucide-react'
+import { ArrowRight, ChevronUp, Moon, Pause, Play, RotateCw } from 'lucide-react'
 import { useId, useState } from 'react'
 import { repository } from '../links'
 import { themeStorageKey } from '../theme'
@@ -25,7 +25,7 @@ export function Landing({ data }: { data: LandingData }) {
 function Page() {
   const { family, instant } = useLanding()
   return (
-    <main className="ol" data-family={family} data-instant={instant} style={usePageStyle()}>
+    <main id="main" tabIndex={-1} className="ol" data-family={family} data-instant={instant} style={usePageStyle()}>
       <Hero />
       <Marquee />
       <JourneySection />
@@ -52,7 +52,7 @@ function Page() {
 const plans = [{ value: 'solo', label: 'Solo' }, { value: 'team', label: 'Team' }, { value: 'studio', label: 'Studio' }] as const
 
 function Hero() {
-  const { family, families, componentCount } = useLanding()
+  const { family, families, componentCount, playing, setPlaying } = useLanding()
   const meta = familyMeta[family]
   const id = useId()
   const [plan, setPlan] = useState<(typeof plans)[number]['value']>('team')
@@ -69,6 +69,10 @@ function Hero() {
           <div className="ol-row" style={{ marginTop: 30 }}>
             <a className="ol-btn lg" href="#get-started">Get started <ArrowRight size={16} strokeWidth={2.4} aria-hidden /></a>
             <a className="ol-btn out lg" href="#styles">Try on a style</a>
+            {/* The page re-skins itself once on load; this stops it from beside the hero, not only from the dock. */}
+            <button className="ol-btn gh lg" type="button" aria-pressed={playing} onClick={() => setPlaying(!playing)}>
+              <RotateCw size={16} aria-hidden />Cycle styles
+            </button>
           </div>
           <p className="ol-now">
             <span className="ol-mono ol-mfg">Style {String(families.indexOf(family) + 1).padStart(2, '0')}</span>
@@ -123,8 +127,9 @@ function Marquee() {
   const { components, componentCount } = useLanding()
   const half = Math.ceil(components.length / 2)
   const rows = [components.slice(0, half), components.slice(half)]
+  const [paused, setPaused] = useState(false)
   return (
-    <section className="ol-mqs" aria-label={`${componentCount} components in the catalog`}>
+    <section className="ol-mqs" data-paused={paused} aria-label={`${componentCount} components in the catalog`}>
       {rows.map((row, index) => (
         <div className={index ? 'ol-mq rev' : 'ol-mq'} key={index}>
           {/* The second copy only closes the loop, so it is hidden from assistive technology. */}
@@ -135,8 +140,11 @@ function Marquee() {
           ))}
         </div>
       ))}
-      <p className="ol-wrap" style={{ width: '100%', textAlign: 'center' }}>
+      <p className="ol-wrap ol-row" style={{ width: '100%', justifyContent: 'center' }}>
         <a className="ol-link" href="/components">Explore all {componentCount} components</a>
+        <button className="ol-btn gh sm ol-mq-pause" type="button" aria-pressed={paused} onClick={() => setPaused(!paused)}>
+          {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}Pause scrolling
+        </button>
       </p>
     </section>
   )
