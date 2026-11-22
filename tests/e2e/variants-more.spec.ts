@@ -416,7 +416,8 @@ for (const edition of ['radix', 'base'] as const) {
     // in a right-to-left page does not move it at all, as the audit also saw before the fix. Open
     // question: whether the drag misses the handle's hit target or the sign is still wrong for
     // pointer deltas; neither was found. Remove fixme once the drag reaches 400.
-    test.fixme('the side sheet widens as its handle is dragged with a pointer in a right-to-left page (CAT-04)', async ({ page }) => {
+    test('the side sheet widens as its handle is dragged with a pointer in a right-to-left page (CAT-04)', async ({ page }) => {
+      test.fixme(true, 'CAT-04: RTL pointer drag on the inline-end Sheet not verified; hit target or sign unknown')
       await open(page, edition)
       await page.evaluate(() => { document.documentElement.dir = 'rtl' })
       await page.getByTestId('vm-sheets').getByRole('button', { name: 'Open inspector' }).click()
