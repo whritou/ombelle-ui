@@ -57,6 +57,7 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
   - The list stays open while you choose, and the trigger shows a chip for each choice, or the placeholder.
   - With `name`, a form submits one entry per value.
   - `required` stops a form from submitting with nothing chosen, and `disabled` submits nothing, as native controls do.
+  - A form reset returns it to `defaultValue`, as it does for the native fields beside it. In the Radix edition this needs `name` or `required` (they render the hidden native select that belongs to the form), and `onValueChange` is called when the value changes. In the Base UI edition an uncontrolled Select starts again from `defaultValue`, single or multiple; a controlled one follows its `value`.
   - **Base UI edition:** Base UI's own multiple Select.
   - **Radix edition:** a listbox in a Radix Popover, because Radix Select chooses one value only.
     - The trigger is a combobox that keeps focus and names the highlighted option.
@@ -64,6 +65,8 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
     - Space or Enter chooses.
     - Escape closes, with focus on the trigger.
     - Opening by key or by click highlights the first chosen option, or the first, and the list scrolls to the highlighted option.
+    - The parts take the props they take in single mode: `className` and other props on `SelectValue`, `SelectGroup`, `SelectLabel` and `SelectSeparator`; `side`, `align`, `style`, `id` and the escape and outside-pointer handlers on `SelectContent` (`position` does not apply); `textValue` (for typing ahead), `id` (also used by `aria-activedescendant`) and handlers on `SelectItem`, whose `onClick`, `onPointerMove` and `onPointerDown` run before the item's own.
+    - The popover around the listbox has `role="presentation"`, so the listbox is not wrapped in an unnamed dialog.
     - The Select reads its `SelectItem`s from its children. Items rendered by a component of your own are not seen, so they show no chip; write the `SelectItem`s directly inside it.
   - **Base UI edition:** `items`, as a record of labels or an array of `{ value, label }`, names the chips of items built elsewhere.
   - Single selection is unchanged.

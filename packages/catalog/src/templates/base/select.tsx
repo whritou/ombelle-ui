@@ -60,12 +60,31 @@ const SelectItemsContext = React.createContext<{ items: Record<string, React.Rea
 export function Select<
   Value = string,
   Multiple extends boolean | undefined = false,
->({ items, children, ...props }: SelectProps<Value, Multiple>) {
+>({ items, children, inputRef, ...props }: SelectProps<Value, Multiple>) {
   const labels = items ?? collectItems(children, {})
+  // Base UI keeps its value through a form reset; an uncontrolled Select starts again from defaultValue,
+  // as the native fields beside it do. A controlled one follows its value prop.
+  const hidden = React.useRef<HTMLInputElement | null>(null)
+  const [generation, setGeneration] = React.useState(0)
+  const controlled = props.value !== undefined
+  React.useEffect(() => {
+    const form = hidden.current?.form
+    if (!form || controlled) return
+    const reset = () => setGeneration(count => count + 1)
+    form.addEventListener('reset', reset)
+    return () => form.removeEventListener('reset', reset)
+  }, [controlled, generation])
+  const setInput = React.useCallback((element: HTMLInputElement | null) => {
+    hidden.current = element
+    if (typeof inputRef === 'function') inputRef(element)
+    else if (inputRef) inputRef.current = element
+  }, [inputRef])
   return (
     <SelectItemsContext.Provider value={{ items: labelsByValue(labels), multiple: !!props.multiple }}>
       <SelectPrimitive.Root
+        key={generation}
         items={labels}
+        inputRef={setInput}
         {...props}
         data-slot="select"
       >
