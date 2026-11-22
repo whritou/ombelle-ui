@@ -13,8 +13,8 @@ the installed source; nothing from Ombelle runs in your app.
 - A CLI with three commands: `init`, `add` and `theme add`. It plans first, shows every file and dependency change, and
   refuses to overwrite edited files.
 
-The published installer is [`@ombelle-ui/cli`](https://www.npmjs.com/package/@ombelle-ui/cli) (0.9.1 is the latest
-published version; the repository's workspace version is in `package.json`). What is promised to stay stable at 1.0 is
+The six workspace packages are version **0.9.1**. The installer is published as `@ombelle-ui/cli@0.9.1` on
+[npm](https://www.npmjs.com/package/@ombelle-ui/cli). What is promised to stay stable at 1.0 is
 written down in the [1.0 public contract](docs/1.0-public-contract.md); the open decisions are in
 [1.0 decisions](docs/1.0-decisions.md).
 
@@ -27,9 +27,9 @@ supported package managers. Workspaces are not supported. Evidence is measured i
 [support and evidence](#what-is-measured).
 
 ```powershell
-npx @ombelle-ui/cli@0.9.1 init --preset ps_<code>@1 --cwd . --dry-run
-npx @ombelle-ui/cli@0.9.1 init --preset ps_<code>@1 --cwd .
-npx @ombelle-ui/cli@0.9.1 add button dialog --cwd .
+npx @ombelle-ui/cli init --preset ps_<code>@1 --cwd . --dry-run
+npx @ombelle-ui/cli init --preset ps_<code>@1 --cwd .
+npx @ombelle-ui/cli add button dialog --cwd .
 ```
 
 Copy the exact command, with your code, from a published code page or editor. Without a hosted code, pass a local

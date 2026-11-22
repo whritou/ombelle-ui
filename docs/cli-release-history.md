@@ -1,8 +1,8 @@
-# Standalone CLI candidate
+# CLI release history
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.9.1.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, file inventory and bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+This is the dated record of every `@ombelle-ui/cli` release: what changed, what the website gates on, and what was verified after publication. It is append-only history. Statements about a "current" or "published" installer inside an entry describe that release's day, not today. The procedure for making a release is [cli-release.md](cli-release.md), and the version npm serves is `npm view @ombelle-ui/cli dist-tags`.
 
-Use the repository's pinned Node 24.19.0, pnpm 11.25.0 and npm 11.19.0. The packer explicitly builds package sources before bundling. If npm is installed separately, put its bin directory on PATH or set `OMBELLE_RELEASE_NPM_ENTRY` to that installation's absolute `npm-cli.js` path. Never disable TLS verification.
+The 0.9.1 entry below records the tarball published from `d162ab30`. The tree that follows it packs a different tarball under the same number; see [the version clash](cli-release.md#version-clash-in-this-tree).
 
 The 0.9.1 release fixes catalog styles and changes no contract: Meter frames only its plain bar and gives the ring
 `data-mode="circle"`, Input OTP rings only the active slot, tab counts keep a gap from their label, Organic and
@@ -135,7 +135,7 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 
 `@ombelle-ui/cli@0.2.1`, which resolves its entry path through symlinks, was published on 2026-11-02 from `c9ba4c1` with a clean tree and is the `latest` tag. 0.2.0 is deprecated on npm with a pointer to 0.2.1. npm also lists `0.0.0-stage`, a two-file placeholder without bin or scripts that npm created during the first staged publication.
 
-All six workspace packages use software version 0.9.1. The published installer is `@ombelle-ui/cli@0.9.1`. 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
+At the time of the 0.3.1 to 0.5.0 candidates: 0.3.1 adds the liquid-glass refraction filter component; 0.4.0 adds the `ombelle` style family, refreshes the flat, minimalist and neo-brutalism families and their built-in presets, and rebuilds both editors; 0.4.1 restyles the four stable families to their UI kits, adds the optional `shadowColor` preset colour and the new Button recipe fields, and adds Badge variants, Button `loading` and `icon-sm`, and `DialogHeader`; 0.5.0 adds Select, Radio Group, Dropdown Menu and Alert, makes every liquid glass component experimental, restyles liquid glass to its design kit with the material lab settings and starting presets, and adds the Button recipe glass overrides. 0.7.0 supports shadcn's Base UI (`base-*`) projects for themes and all 24 components, adopts shadcn's generated `lib/utils.ts`, and resolves other app-owned files with `--overwrite` or `--beside` ([decision 0005](decisions/0005-base-ui-edition.md)). The installer accepts catalog and compiler compatibility release 0.1.0 and recipe formats 1.0 and 2.0.
 
 Release 0.5.0 in this order:
 
@@ -216,7 +216,7 @@ Post-publication checks on 2026-11-02:
 
 `@ombelle-ui/cli@0.7.2` was published on 2026-11-09 from `79dce7d` (the merge of PR #97) by npm identity `ombelle` with the `latest` tag. Its registry tarball is byte-for-byte identical to the tested candidate (integrity `sha512-gsdc34nEygMawVplPylcqC7r5Z3NJ4fuRu2RvMwCzlDlAWymUrL1s8G757zlAEfOK9rqez+sAt1NNLzyfvVFfA==`). The candidate passed all 10 standalone release checks and 22 expansion scenarios: the six new components and five variant APIs installed in both editions, with recipe installs verified for Radix and the documented Base UI recipe guard preserved. A fresh script-disabled registry install ran `npm exec --offline -- ombelle --help` successfully. Tracked sources matched the merge commit; the pack manifest reports a dirty tree only because of the preexisting untracked `.claude/` directory. See [release verification](evidence/npm-0.7.2-2026-11-09.md).
 
-Code pages and Get code use `@ombelle-ui/cli@0.7.7` commands for all catalog editors. The runner table below records the 0.2.1 verification. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
+At 0.7.7 code pages and Get code used `@ombelle-ui/cli@0.7.7` commands for all catalog editors; they now use the version in `apps/www/src/snapshots/install-command.ts`. The runner table below records the 0.2.1 verification. Editor export panels for downloaded preset and recipe JSON files use the same npx runner, run from the folder containing the file.
 
 ## Verified public runners
 
