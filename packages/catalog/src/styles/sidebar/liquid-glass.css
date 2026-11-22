@@ -722,3 +722,15 @@
   text-overflow: ellipsis;
   white-space: var(--sidebar-header-space, normal);
 }
+/* Forced colours: opaque system surfaces, so the system colour pair holds over any backdrop. Each selector outranks the translucent variants and leaves the highlighted states to their own rules. */
+@media (forced-colors: active) {
+  /* Restated after the translucent hover glass, which would otherwise keep its alpha over Highlight. */
+  [data-slot='sidebar-menu-button']:hover:nth-child(n) {
+    background-color: Highlight;
+  }
+  /* :nth-child(n) matches every button and outranks the translucent active glass (a booster naming no slot
+     survives recipe scoping); the active button keeps its Highlight outline. */
+  [data-slot='sidebar-menu-button']:not(:hover):nth-child(n) {
+    background-color: ButtonFace;
+  }
+}

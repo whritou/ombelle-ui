@@ -315,3 +315,9 @@
   margin-inline-start: auto;
   padding-inline-start: 1.5rem;
 }
+/* Forced colours: opaque system surfaces, so the system colour pair holds over any backdrop. */
+@media (forced-colors: active) {
+  [data-slot='menubar'] {
+    background-color: Canvas;
+  }
+}

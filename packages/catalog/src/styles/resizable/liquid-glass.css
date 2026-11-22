@@ -117,6 +117,12 @@
   [data-slot='resizable-handle']:is(:hover, :focus-visible, [data-separator='active']) {
     --resizable-line-color: Highlight;
   }
+  /* The handle itself carries the forced-colours ring, as in the other families: a pseudo-element ring can be
+     hidden with the handle's line, and forced colours must not depend on it. */
+  [data-slot='resizable-handle']:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 0;
+  }
   [data-slot='resizable-handle']:focus-visible::after {
     outline: 2px solid Highlight;
     outline-offset: -2px;

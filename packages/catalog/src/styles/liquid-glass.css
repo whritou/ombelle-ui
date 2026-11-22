@@ -335,3 +335,12 @@
   }
 }
 /* end 0.7.5 variants */
+/* Reduced transparency and forced colours drop every glass filter, whatever component paints it: a filter
+   left running under an opaque or system-colour surface still re-samples the backdrop for nothing, and over a
+   translucent one it is what the fallback promised to remove. */
+@media (prefers-reduced-transparency: reduce) {
+  [data-slot] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
+@media (forced-colors: active) {
+  [data-slot] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}

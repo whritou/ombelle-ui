@@ -36,7 +36,7 @@
 /* The container clips overflow, so the focus ring sits inside the trigger. */
 [data-slot='collapsible-trigger']:focus-visible {
   outline: 2px solid var(--foreground);
-  outline-offset: 0;
+  outline-offset: -2px;
 }
 [data-slot='collapsible-trigger']:disabled,
 [data-slot='collapsible-trigger'][data-disabled] {
