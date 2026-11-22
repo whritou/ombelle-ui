@@ -39,3 +39,11 @@ it('validates a separate canonical recipe source', () => {
   for (const bad of [{ ...source, origin: 'https://EXAMPLE.com/' }, { ...source, presetHash: 'b'.repeat(64) }, { ...source, reference: id + '@2' }])
     expect(() => validateRecipeSnapshotSource(bad)).toThrow()
 })
+
+// DUP-02: errors of the embedded preset point into it, as in preset snapshots.
+it('points errors of the embedded preset at /preset', () => {
+  const bad = { ...preset, modes: { ...preset.modes, light: { ...preset.modes.light, primary: 'oklch(0.5 0.9 120)' } } }
+  expect(() => validateRecipeSnapshot({ ...envelope, preset: bad })).toThrow(expect.objectContaining({
+    code: 'INVALID_DATA', path: '/preset/modes/light/primary',
+  }))
+})
