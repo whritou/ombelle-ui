@@ -27,7 +27,7 @@
 a[data-slot='item'],
 button[data-slot='item'],
 [data-item-link] {
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color var(--motion-duration) ease, border-color var(--motion-duration) ease;
 }
 a[data-slot='item'],
 button[data-slot='item'] {
@@ -179,7 +179,7 @@ button[data-slot='item']:focus-visible {
   }
 }
 /* organic layer */
-[data-slot='item']{border-radius:var(--o-r3);font-weight:500;transition:border-radius 0.4s,background-color 0.15s}
+[data-slot='item']{border-radius:var(--o-r3);font-weight:500;transition:border-radius calc(var(--motion-duration) * 8/3),background-color var(--motion-duration)}
 [data-slot='item']:hover{border-radius:var(--o-r3h)}
 [data-slot='item'][data-variant='outline']{border:0;background:transparent;box-shadow:inset 0 0 0 2px var(--input)}
 [data-slot='item'][data-variant='muted']{background:var(--secondary)}

@@ -119,7 +119,7 @@ describe('Sheet 0.7.6 snap points', () => {
   it.each(families)('%s settles on a snap point with a transition, only when motion is allowed', family => {
     const css = readFileSync(new URL(`../src/styles/sheet/${family}.css`, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
     const rules = css.match(/\/\* 0\.7\.6 variants \*\/([^]*?)\/\* end 0\.7\.6 variants \*\//)?.[1] ?? ''
-    expect(rules).toMatch(/@media \(prefers-reduced-motion: no-preference\) \{\s*\[data-slot='sheet-content'\]\[data-sheet-snap\]:not\(:has\(\[data-sheet-dragging\]\)\) \{[^}]*transition: block-size 200ms/)
+    expect(rules).toMatch(/@media \(prefers-reduced-motion: no-preference\) \{\s*\[data-slot='sheet-content'\]\[data-sheet-snap\]:not\(:has\(\[data-sheet-dragging\]\)\) \{[^}]*transition: block-size (200ms|calc\(var\(--motion-duration\) \* 4\/3\))/)
     expect(rules.replace(/@media \(prefers-reduced-motion: no-preference\) \{[^]*?\n\}/, '')).not.toContain('transition')
   })
 })

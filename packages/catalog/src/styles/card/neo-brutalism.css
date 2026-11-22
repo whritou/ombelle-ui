@@ -115,7 +115,7 @@
     transform: translateY(-2px);
   }
   [data-slot='card']:has([data-card-link]) {
-    transition: transform 150ms ease;
+    transition: transform var(--motion-duration) ease;
   }
 }
 [data-slot='card-link'] {

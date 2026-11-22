@@ -191,7 +191,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   [data-slot='toast']:is([data-stack] > *) {
-    transition: transform 200ms ease, opacity 200ms ease;
+    transition: transform calc(var(--motion-duration) * 4/3) ease, opacity calc(var(--motion-duration) * 4/3) ease;
   }
   [data-slot='toast-spinner'] {
     animation: toast-spinner-turn 0.8s linear infinite;

@@ -28,7 +28,7 @@
 a[data-slot='item'],
 button[data-slot='item'],
 [data-item-link] {
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color var(--motion-duration) ease, border-color var(--motion-duration) ease;
 }
 a[data-slot='item'],
 button[data-slot='item'] {
