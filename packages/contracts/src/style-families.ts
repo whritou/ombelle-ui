@@ -11,77 +11,14 @@ export function isStyleFamily(value: unknown): value is StyleFamily {
   return typeof value === 'string' && styleFamilies.some(family => family === value)
 }
 
-// Every component with liquid glass rules. Glass is a stable family whose accessibility is not
-// guaranteed: see familyAccessibilityCaveat.
-const glassComponents: ReadonlySet<ComponentId> = new Set<ComponentId>([
-  'spinner',
-  'kbd',
-  'empty',
-  'field',
-  'meter',
-  'stepper',
-  'slider',
-  'toggle-group',
-  'chip',
-  'tag-input',
-  'input-otp',
-  'combobox',
-  'command',
-  'hover-card',
-  'context-menu',
-  'calendar',
-  'toggle',
-  'collapsible',
-  'scroll-area',
-  'button-group',
-  'item',
-  'number-input',
-  'color-picker',
-  'code-block',
-  'password-field',
-  'carousel',
-  'aspect-ratio',
-  'toolbar',
-  'prose',
-  'navigation-menu',
-  'sidebar',
-  'resizable',
-  'menubar',
-  'data-table',
-  'input-group',
-  'sheet',
-  'alert-dialog',
-  'breadcrumb',
-  'pagination',
-  'toast',
-  'accordion',
-  'alert',
-  'avatar',
-  'button',
-  'badge',
-  'card',
-  'checkbox',
-  'dialog',
-  'dropdown-menu',
-  'input',
-  'label',
-  'native-select',
-  'popover',
-  'progress',
-  'radio-group',
-  'select',
-  'separator',
-  'skeleton',
-  'switch',
-  'table',
-  'tabs',
-  'textarea',
-  'tooltip',
-])
+// Components liquid glass leaves out (none today). Glass is a stable family whose accessibility is not
+// guaranteed: see familyAccessibilityCaveat. Listing exclusions rather than members means a new component
+// is never silently refused in glass; the catalog contract test then requires its glass rules.
+const glassUnavailable: ReadonlySet<ComponentId> = new Set<ComponentId>([])
 
 export function styleSupport(id: ComponentId, family: StyleFamily): StyleSupport {
   if (family !== 'liquid-glass') return 'stable'
-  return glassComponents.has(id) ? 'stable' : 'unavailable'
+  return glassUnavailable.has(id) ? 'unavailable' : 'stable'
 }
 
 /** Short label for a family whose accessibility the library cannot guarantee. */

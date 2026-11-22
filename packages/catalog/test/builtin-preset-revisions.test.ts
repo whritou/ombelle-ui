@@ -20,13 +20,18 @@ it('keeps every built-in and starting preset unchanged at its revision', () => {
     .map(preset => [preset.id + '@' + preset.revision,
       createHash('sha256').update(JSON.stringify(sorted(preset))).digest('hex')])
     .sort(([a], [b]) => a < b ? -1 : 1))
-  if (process.env.OMBELLE_WRITE_FIXTURES === '1' || !existsSync(fixture))
+  // The fixture is written only on request: a missing fixture fails instead of pinning whatever is there.
+  if (process.env.OMBELLE_WRITE_FIXTURES === '1')
     writeFileSync(fixture, JSON.stringify(actual, null, 2) + '\n')
+  expect(existsSync(fixture), 'builtin-preset-hashes.json is missing; regenerate it with OMBELLE_WRITE_FIXTURES=1').toBe(true)
   const pinned = JSON.parse(readFileSync(fixture, 'utf8')) as Record<string, string>
   for (const [key, hash] of Object.entries(actual))
     if (Object.hasOwn(pinned, key))
       expect(hash, `${key} changed in place. Bump its revision (keeping the old revision resolvable) instead, ` +
         'see docs/decisions/0009-snapshot-identity-and-contract-version.md').toBe(pinned[key])
+  // A pinned id@revision must stay resolvable: deleting a built-in or retired revision breaks references to it.
+  const gone = Object.keys(pinned).filter(key => !Object.hasOwn(actual, key))
+  expect(gone, 'pinned revisions are no longer in the catalog; keep them, or move them to presets/retired/').toEqual([])
 })
 
 it('resolves a retired revision by its exact id@revision and the current one by its own', () => {
