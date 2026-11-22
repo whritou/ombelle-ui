@@ -1,8 +1,8 @@
 // Generated from schemas/recipe.schema.json; do not edit independently.
 export const recipeSchema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ui.example.com/schemas/recipe-1.0.json",
-  "title": "Proposed UI Library Button Recipe Version 1",
+  "$id": "https://ombelle-ui.vercel.app/schemas/recipe-1.0.json",
+  "title": "Ombelle Button Recipe Version 1",
   "type": "object",
   "additionalProperties": false,
   "required": [

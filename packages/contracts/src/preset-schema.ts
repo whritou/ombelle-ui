@@ -1,8 +1,8 @@
 // Generated from schemas/preset.schema.json; do not edit independently.
 export const presetSchema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ui.example.com/schemas/preset-1.0.json",
-  "title": "Proposed UI Library Preset Version 1",
+  "$id": "https://ombelle-ui.vercel.app/schemas/preset-1.0.json",
+  "title": "Ombelle Preset Version 1",
   "type": "object",
   "additionalProperties": false,
   "required": [

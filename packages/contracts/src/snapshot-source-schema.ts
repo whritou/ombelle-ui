@@ -1,7 +1,7 @@
 // Generated from schemas/snapshot-source.schema.json; do not edit independently.
 export const snapshotSourceSchema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ui.example.com/schemas/snapshot-source-1.0.json",
+  "$id": "https://ombelle-ui.vercel.app/schemas/snapshot-source-1.0.json",
   "title": "Preset Snapshot Source",
   "type": "object",
   "additionalProperties": false,

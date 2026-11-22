@@ -1,7 +1,7 @@
 // Generated from schemas/component-recipe-snapshot.schema.json; do not edit independently.
 export const componentRecipeSnapshotSchema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ui.example.com/schemas/component-recipe-snapshot-2.0.json",
+  "$id": "https://ombelle-ui.vercel.app/schemas/component-recipe-snapshot-2.0.json",
   "title": "Immutable Component Recipe Snapshot",
   "type": "object",
   "additionalProperties": false,
@@ -32,7 +32,7 @@ export const componentRecipeSnapshotSchema = {
       "const": 1
     },
     "recipe": {
-      "$ref": "https://ui.example.com/schemas/component-recipe-2.0.json"
+      "$ref": "https://ombelle-ui.vercel.app/schemas/component-recipe-2.0.json"
     },
     "recipeHash": {
       "type": "string",
@@ -41,7 +41,7 @@ export const componentRecipeSnapshotSchema = {
       "pattern": "^[0-9a-f]{64}$"
     },
     "preset": {
-      "$ref": "https://ui.example.com/schemas/preset-1.0.json"
+      "$ref": "https://ombelle-ui.vercel.app/schemas/preset-1.0.json"
     },
     "presetHash": {
       "type": "string",
