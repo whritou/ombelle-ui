@@ -10,11 +10,11 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "ed961546797542e3ce187a39f85a1866a417433481f3bdc6b6947a1dbd7d9cdf"
+          "sha256": "e606bec7a7d25698ff2a2535cfe5bc54315dc928f28eccffcf54b16267b71ed1"
         },
         {
           "logicalPath": "components/ui/input.tsx",
-          "sha256": "3727d76398aabf4b1f929270556c07fd8dc1c204dcf6488ff55a81eee67fbd61"
+          "sha256": "d23cd72d4c42e69b50af47fffa820ec18119e2f749b38b4c44c522a9f8d0c7dd"
         },
         {
           "logicalPath": "examples/button.tsx",
@@ -51,11 +51,11 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "ed961546797542e3ce187a39f85a1866a417433481f3bdc6b6947a1dbd7d9cdf"
+          "sha256": "e606bec7a7d25698ff2a2535cfe5bc54315dc928f28eccffcf54b16267b71ed1"
         },
         {
           "logicalPath": "components/ui/input.tsx",
-          "sha256": "3727d76398aabf4b1f929270556c07fd8dc1c204dcf6488ff55a81eee67fbd61"
+          "sha256": "d23cd72d4c42e69b50af47fffa820ec18119e2f749b38b4c44c522a9f8d0c7dd"
         },
         {
           "logicalPath": "examples/button.tsx",
@@ -92,11 +92,11 @@
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
-          "sha256": "ed961546797542e3ce187a39f85a1866a417433481f3bdc6b6947a1dbd7d9cdf"
+          "sha256": "e606bec7a7d25698ff2a2535cfe5bc54315dc928f28eccffcf54b16267b71ed1"
         },
         {
           "logicalPath": "components/ui/input.tsx",
-          "sha256": "3727d76398aabf4b1f929270556c07fd8dc1c204dcf6488ff55a81eee67fbd61"
+          "sha256": "d23cd72d4c42e69b50af47fffa820ec18119e2f749b38b4c44c522a9f8d0c7dd"
         },
         {
           "logicalPath": "examples/button.tsx",
