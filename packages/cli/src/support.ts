@@ -3,8 +3,9 @@
  * resolver all read it, and docs/05-cli-specification.md states the same values.
  *
  * React: installed components use React 19 APIs only (a `ref` prop on function components, no
- * `forwardRef`) and no API newer than 19.0, so every React 19 release is accepted. React 18 lacks the
- * `ref` prop; React 20 is unknown. Node and Bun run the package manager for dependency installs.
+ * `forwardRef`) and no API newer than 19.0. `minimum` is the floor: older versions are refused, as they
+ * are known not to work (React 18 lacks the `ref` prop). [minimum, below) is the tested range. A newer
+ * version is accepted, untested, with a plan notice. Node and Bun run the package manager.
  */
 export const supportMatrix = {
   react: { minimum: '19.0.0', below: '20.0.0', tested: '19.3.1' },
@@ -65,11 +66,40 @@ export function declaredBounds(spec: string): { low: string; high: string } | un
       ? { low: major + '.0.0', high: Number(major) + 1 + '.0.0-0' }
       : { low: major + '.' + minor + '.0', high: major + '.' + (Number(minor) + 1) + '.0-0' }
   }
-  const between = /^>=\s*v?(\d+\.\d+\.\d+)\s+<\s*v?(\d+)(?:\.(\d+)\.(\d+))?$/.exec(text)
+  const between = /^>=\s*v?(\d+)(?:\.(\d+)(?:\.(\d+))?)?\s+<\s*v?(\d+)(?:\.(\d+)\.(\d+))?$/.exec(text)
   if (between)
-    return { low: between[1], high: [between[2], between[3] ?? '0', between[4] ?? '0'].join('.') + '-0' }
+    return {
+      low: [between[1], between[2] ?? '0', between[3] ?? '0'].join('.'),
+      high: [between[4], between[5] ?? '0', between[6] ?? '0'].join('.') + '-0',
+    }
   return undefined
 }
+
+/**
+ * How a version compares with a tested range: `refused` below the minimum (known not to work), `tested`
+ * inside the range, `newer` at or above its end (accepted, untested; a notice says so).
+ */
+export type SupportClass = 'refused' | 'tested' | 'newer'
+export function classifyVersion(version: string, range: { minimum: string; below: string }): SupportClass | undefined {
+  const value = parse(version)
+  if (!value) return undefined
+  if (compare(value, parse(range.minimum)!) < 0) return 'refused'
+  return compare(value, parse(range.below)!) < 0 ? 'tested' : 'newer'
+}
+/**
+ * The same for a declaration: `refused` when its lowest admitted version is below the minimum, `newer`
+ * when it can resolve to a version at or above the range's end, `tested` otherwise; undefined when the
+ * declaration is not one of the forms {@link declaredBounds} reads.
+ */
+export function classifyDeclaration(spec: string, range: { minimum: string; below: string }): SupportClass | undefined {
+  const bounds = declaredBounds(spec)
+  if (!bounds) return undefined
+  if (classifyVersion(bounds.low, range) === 'refused') return 'refused'
+  const high = parse(bounds.high)!
+  return compare([high[0], high[1], high[2], ''], parse(range.below)!) <= 0 ? 'tested' : 'newer'
+}
+/** The major of an exact version or of a declaration's lowest bound, for messages. */
+export const majorOf = (value: string) => Number(/^\D*(\d+)/.exec(value)?.[1] ?? NaN)
 
 /** Whether every version a declaration admits is in the range: low inside it, high at or below its end. */
 export function declarationWithin(spec: string, range: { minimum: string; below: string }): boolean {

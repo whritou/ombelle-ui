@@ -16,6 +16,8 @@ export const noticeCodes = [
   'INTERRUPTED_OPERATION',
   'CATALOG_FILE_REMOVED',
   'DEPENDENCY_RUNTIME_UNAVAILABLE',
+  'REACT_UNTESTED_MAJOR',
+  'RUNTIME_UNTESTED_MAJOR',
   'NOTICE',
 ] as const
 export type NoticeCode = (typeof noticeCodes)[number]
@@ -34,6 +36,8 @@ const openings: [RegExp, NoticeCode][] = [
   [/^An interrupted operation left/, 'INTERRUPTED_OPERATION'],
   [/^no longer generated: /, 'CATALOG_FILE_REMOVED'],
   [/^Dependency install unavailable: /, 'DEPENDENCY_RUNTIME_UNAVAILABLE'],
+  [/^React .* is newer than the versions this release was tested with/, 'REACT_UNTESTED_MAJOR'],
+  [/^(?:Node|Bun) \S+ is newer than the versions this release was tested with/, 'RUNTIME_UNTESTED_MAJOR'],
 ]
 export function noticeCode(message: string): NoticeCode {
   return openings.find(([pattern]) => pattern.test(message))?.[1] ?? 'NOTICE'

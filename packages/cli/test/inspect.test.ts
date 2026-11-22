@@ -99,8 +99,6 @@ it('rejects a junction escaping the app', async () => {
 it.each([
   ['18.3.1', '18.3.1'],
   ['^18.3.1', '^19.3.1'],
-  ['19.3.1', '^20.0.0'],
-  ['>=19.0.0 <21', '19.3.1'],
   ['latest', '19.3.1'],
   ['19.0.0-rc.1', '19.0.0-rc.1'],
   ['19.3.1', undefined],
@@ -200,7 +198,27 @@ it('names the declaration and the React 19 requirement when refusing React 18', 
     nextAction: expect.stringMatching(/React 19/),
   })
 })
-it('refuses an installed React outside 19 even when the declaration is a React 19 range', async () => {
+// INS-01: a newer React major is accepted with a notice, as a declaration or as the installed copy.
+it.each([
+  ['20.0.0', '20.0.0', /^React 20 is newer than the versions this release was tested with \(19\.x\)\. Components depend on packages \(such as Radix UI or Base UI\)/],
+  ['>=19.0.0 <21', '^19.3.1', /^React ">=19\.0\.0 <21" \(it can resolve to React 20 or newer\) is newer than/],
+])('accepts React %s / %s with a newer-major notice', async (react, dom, notice) => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const file = root + '/package.json'
+  const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+  pkg.dependencies.react = react
+  pkg.dependencies['react-dom'] = dom
+  await fs.writeFile(file, JSON.stringify(pkg))
+  const context = await inspectProject(root)
+  expect(context.supportNotices).toEqual([expect.stringMatching(notice)])
+})
+it('accepts React 19 without a notice', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  expect((await inspectProject(root)).supportNotices).toEqual([])
+})
+it('refuses an installed React older than 19 even when the declaration is a React 19 range', async () => {
   const root = await createProject('vite')
   roots.push(root)
   const file = root + '/package.json'
@@ -211,7 +229,7 @@ it('refuses an installed React outside 19 even when the declaration is a React 1
   await fs.writeFile(root + '/node_modules/react/package.json', JSON.stringify({ name: 'react', version: '18.3.1' }))
   await expect(inspectProject(root)).rejects.toMatchObject({
     code: 'UNSUPPORTED_PROJECT',
-    message: expect.stringMatching(/Installed react 18\.3\.1 is not React 19/),
+    message: expect.stringMatching(/Installed react 18\.3\.1 is older than React 19/),
   })
   await fs.writeFile(root + '/node_modules/react/package.json', JSON.stringify({ name: 'react', version: '19.3.2' }))
   await expect(inspectProject(root)).resolves.toMatchObject({ framework: 'vite' })

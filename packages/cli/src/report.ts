@@ -13,7 +13,7 @@ import { installedComponentIds, ownerLabel, projectStatus, type FileState, type 
 import { portable } from './project/paths.js'
 import { operationLockName } from './apply/recovery.js'
 import { checkInstallRuntime } from './apply/manager.js'
-import { supportedNodeVersion, runtimeRequirement } from './apply/executable.js'
+import { supportedNodeVersion, runtimeNotice, runtimeRequirement } from './apply/executable.js'
 import { assertKnownComponentIds } from './component-ids.js'
 import { unifiedDiff } from './diff.js'
 import { outputVersion } from './format.js'
@@ -142,23 +142,28 @@ type Check = { id: string; status: 'pass' | 'warn' | 'fail'; message: string; pa
 async function doctor(root: string, manager: ProjectContext['manager'] | undefined, io: IO, json: boolean): Promise<number> {
   const checks: Check[] = []
   const add = (check: Check) => checks.push(check)
+  const newerNode = runtimeNotice('node', process.version)
   add(supportedNodeVersion(process.version)
-    ? { id: 'cli-runtime', status: 'pass', message: 'Node ' + process.version }
+    ? newerNode
+      ? { id: 'cli-runtime', status: 'warn', message: newerNode }
+      : { id: 'cli-runtime', status: 'pass', message: 'Node ' + process.version }
     : (process.versions as Record<string, string | undefined>).bun
       ? { id: 'cli-runtime', status: 'pass', message: 'Bun ' + process.versions.bun }
       : { id: 'cli-runtime', status: 'warn', message: 'Node ' + process.version + ' is outside the supported ' + runtimeRequirement('node'), nextAction: 'Run the CLI with ' + runtimeRequirement('node') + '.' })
   let context: ProjectContext | undefined
   try {
     context = await inspectProject(root, manager)
-    add({ id: 'project', status: 'pass', message: context.framework + ' with Tailwind v4, ' + context.manager + ', React ' + context.packageJson.dependencies?.react + ' (React ' + supportMatrix.react.minimum + ' or newer, below ' + supportMatrix.react.below + ')' })
+    add({ id: 'project', status: 'pass', message: context.framework + ' with Tailwind v4, ' + context.manager + ', React ' + context.packageJson.dependencies?.react + ' (React ' + supportMatrix.react.minimum + ' or newer; tested below ' + supportMatrix.react.below + ')' })
+    for (const notice of context.supportNotices ?? []) add({ id: 'react', status: 'warn', message: notice })
   } catch (error) {
     if (!(error instanceof FoundationError)) throw error
     add({ id: 'project', status: 'fail', message: error.code + ': ' + error.message, ...(error.path ? { path: error.path } : {}), ...(error.nextAction ? { nextAction: error.nextAction } : {}) })
   }
   if (context) {
     try {
-      await checkInstallRuntime(context.manager)
+      const runtimeNotices = await checkInstallRuntime(context.manager)
       add({ id: 'install-runtime', status: 'pass', message: 'Dependency installs can run ' + context.manager })
+      for (const notice of runtimeNotices) add({ id: 'install-runtime', status: 'warn', message: notice })
     } catch (error) {
       if (!(error instanceof FoundationError)) throw error
       add({ id: 'install-runtime', status: 'fail', message: error.message, ...(error.nextAction ? { nextAction: error.nextAction } : {}) })

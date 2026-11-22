@@ -7,7 +7,7 @@ import {
   type PackageManager,
   type BunLockfile,
 } from '@ombelle/contracts'
-import { resolveBunExecutable, resolveNodeExecutable } from './executable.js'
+import { resolveBunExecutable, resolveNodeExecutable, resolveRuntime, runtimeNotice } from './executable.js'
 import { prepareBun, bunAddArgs, assertBunOwnership, assertBunInstalled } from './bun.js'
 
 export type PreparedManager = {
@@ -100,9 +100,10 @@ export async function runDependencies(
     const timer = timeoutMs
       ? setTimeout(() => { timedOut = true; child.kill() }, timeoutMs)
       : undefined
-    let tail = ''
+    // Peer-dependency reports start well before the end of the output; keep enough to read them.
+    let output = ''
     const collect = (chunk: Buffer) => {
-      tail = (tail + chunk.toString()).slice(-2000)
+      output = (output + chunk.toString()).slice(-64000)
     }
     child.stdout.on('data', collect)
     child.stderr.on('data', collect)
@@ -112,11 +113,13 @@ export async function runDependencies(
       clearTimeout(timer)
       reject(new FoundationError('DEPENDENCY_FAILURE', e.message, root))
     })
-    child.once('exit', (code) => {
+    child.once('exit', async (code) => {
       clearTimeout(timer)
-      if (code === 0) resolve()
-      else
-        reject(
+      if (code === 0) return resolve()
+      const tail = output.slice(-2000)
+      const peer = signal?.aborted || timedOut ? undefined : peerConflict(output)
+      if (peer) return reject(await peerConflictError(root, manager, peer))
+      reject(
           new FoundationError(
             'DEPENDENCY_FAILURE',
             signal?.aborted
@@ -199,13 +202,15 @@ function executeScript(
  * Resolves the manager launcher and the runtime an install would use, running nothing but the runtime's
  * `--version`. A dry run calls it to report an install that could not start.
  */
-export async function checkInstallRuntime(manager: PackageManager): Promise<void> {
+export async function checkInstallRuntime(manager: PackageManager): Promise<string[]> {
   if (manager === 'bun') {
-    await resolveBunExecutable()
-    return
+    const bun = await resolveRuntime('bun')
+    return [runtimeNotice('bun', bun.version)].filter((notice): notice is string => notice !== undefined)
   }
   const launcher = await resolveManager(manager)
-  if (!launcher.native) await resolveNodeExecutable()
+  if (launcher.native) return []
+  const node = await resolveRuntime('node')
+  return [runtimeNotice('node', node.version)].filter((notice): notice is string => notice !== undefined)
 }
 
 type ManagerLauncher = { entry: string; prefixArgs: string[]; native?: boolean }
@@ -371,4 +376,46 @@ function fromWindowsShim(directory: string, relative: string): string {
     .replace(/^[/\\]+/, '')
     .replace(/[\\/]/g, path.sep)
   return path.resolve(directory, portable)
+}
+
+export type PeerConflict = { from?: string; peer: string; range?: string }
+/**
+ * A package manager that refused an install because of a peer dependency (npm ERESOLVE, pnpm
+ * ERR_PNPM_PEER_DEP_ISSUES, Yarn and Bun peer errors when they fail rather than warn): the package that
+ * declares the peer, the peer and its range, read from the manager's output.
+ */
+export function peerConflict(output: string): PeerConflict | undefined {
+  const text = output.replace(/\u001b\[[0-9;]*m/g, '')
+  if (!/ERESOLVE|ERR_PNPM_PEER_DEP_ISSUES|unmet peer|incorrect peer dependency|peer dependenc(?:y|ies)/i.test(text)) return undefined
+  // npm: peer react@"^18.0.0" from @radix-ui/react-dialog@1.2.3
+  const npm = /peer (@?[^@\s"]+)@"([^"]+)" from (@?[^@\s]+)@/.exec(text)
+  if (npm) return { peer: npm[1]!, range: npm[2]!, from: npm[3]! }
+  // pnpm: ┬ @radix-ui/react-dialog 1.2.3 … ✕ unmet peer react@"^18.0.0": found 20.0.0
+  const pnpm = /(@?[a-z0-9][\w./-]*) \d+\.\d+\.\d+\S*[\s\S]{0,200}?unmet peer (@?[^@\s"]+)@(?:"([^"]+)"|([^\s:]+))/i.exec(text)
+  if (pnpm) return { from: pnpm[1]!, peer: pnpm[2]!, range: (pnpm[3] ?? pnpm[4])! }
+  // Yarn and Bun: "<pkg> has (an) unmet/incorrect peer dependency <peer>@<range>"
+  const other = /(@?[a-z0-9][\w./-]*)(?:@\S+)? (?:has|provides) (?:an? )?(?:unmet|incorrect) peer dependency "?(@?[^@\s"]+)@([^"\s]+)/i.exec(text)
+  if (other) return { from: other[1]!, peer: other[2]!, range: other[3]! }
+  return /ERESOLVE|ERR_PNPM_PEER_DEP_ISSUES/.test(text) ? { peer: 'react' } : undefined
+}
+async function peerConflictError(root: string, manager: PackageManager, conflict: PeerConflict): Promise<FoundationError> {
+  let declared: string | undefined
+  try {
+    const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'))
+    declared = pkg.dependencies?.[conflict.peer] ?? pkg.devDependencies?.[conflict.peer]
+  } catch { declared = undefined }
+  const error = new FoundationError(
+    'DEPENDENCY_FAILURE',
+    manager + ' refused the install because of a peer dependency: ' +
+      (conflict.from ? conflict.from + ' declares ' : 'a component dependency declares ') +
+      'peer ' + conflict.peer + (conflict.range ? '@"' + conflict.range + '"' : '') +
+      ', and the project declares ' + conflict.peer + ' ' + (declared === undefined ? '(none)' : '"' + declared + '"') +
+      '. The source files of this plan were restored.',
+    root,
+    'Use React 19, which this release was tested with, or wait for ' + (conflict.from ?? 'the package') +
+      ' to declare support; to install anyway, allow the conflict in ' + manager +
+      (manager === 'npm' ? ' (legacy-peer-deps=true in .npmrc)' : manager === 'pnpm' ? ' (strict-peer-dependencies=false)' : '') +
+      ' and run the command again.',
+  )
+  return Object.assign(error, { peerConflict: conflict })
 }

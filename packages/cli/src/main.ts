@@ -293,16 +293,18 @@ async function runPlan(request: ParsedArgs, io: IO, json: boolean): Promise<numb
     emit('conflict')
     return 4
   }
+  // Accepted but untested versions (a newer React or runtime major) are said in the plan (INS-01, INS-02).
+  plan.notices.push(...(context.supportNotices ?? []))
+  if (plan.dependencyPlan.length)
+    try {
+      plan.notices.push(...await checkInstallRuntime(context.manager))
+    } catch (error) {
+      // A dry run reports an install that could not start; an apply stops with the error before any write.
+      if (!(error instanceof FoundationError) || !flags['--dry-run']) throw error
+      plan.notices.push('Dependency install unavailable: ' + error.message + (error.nextAction ? '. ' + error.nextAction : ''))
+    }
+  plan.notices = [...new Set(plan.notices)]
   if (flags['--dry-run']) {
-    // A dry run reports a dependency install that would fail to start (INS-02); an apply checks the
-    // same before its first write and stops with the error.
-    if (plan.dependencyPlan.length)
-      try {
-        await checkInstallRuntime(context.manager)
-      } catch (error) {
-        if (!(error instanceof FoundationError)) throw error
-        plan.notices.push('Dependency install unavailable: ' + error.message + (error.nextAction ? '. ' + error.nextAction : ''))
-      }
     emit('planned')
     return 0
   }

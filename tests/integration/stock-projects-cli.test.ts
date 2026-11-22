@@ -55,8 +55,8 @@ it.each(Object.keys(generators) as (keyof typeof generators)[])('initializes and
 }, 120000)
 
 it.each([
-  ['React 18', '^18.3.1', /react "\^18\.3\.1" is not supported; Ombelle components need React 19/],
-  ['React 20', '20.0.0', /react "20\.0\.0" is not supported/],
+  ['React 18', '^18.3.1', /react "\^18\.3\.1" is not supported; Ombelle components need React 19\.0\.0 or newer/],
+  ['React 17', '17.0.2', /react "17\.0\.2" is not supported/],
 ])('refuses %s before any write', async (_, version, message) => {
   const root = await generated('create-vite 9.3.4 with Tailwind v4')
   const file = path.join(root, 'package.json')
@@ -72,4 +72,19 @@ it.each([
     nextAction: expect.stringContaining('React 19'),
   })
   expect(await snapshotTree(root)).toEqual(before)
+}, 60000)
+
+// INS-01: a newer React major is accepted, untested, with a plan notice carrying a stable code.
+it('accepts React 20 with a REACT_UNTESTED_MAJOR notice', async () => {
+  const root = await generated('create-vite 9.3.4 with Tailwind v4')
+  const file = path.join(root, 'package.json')
+  const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+  pkg.dependencies.react = pkg.dependencies['react-dom'] = '^20.0.0'
+  await fs.writeFile(file, JSON.stringify(pkg))
+  const init = await runBuiltCli('node', ['init', '--preset', preset, '--dry-run', '--cwd', root, '--json'], root)
+  expect(init.code, init.output).toBe(0)
+  expect(jsonRecord(init.data).notices).toContainEqual({
+    code: 'REACT_UNTESTED_MAJOR',
+    message: 'React 20 is newer than the versions this release was tested with (19.x). Components depend on packages (such as Radix UI or Base UI) that may not declare that React support yet; npm can refuse that install, and components may need checking after installing.',
+  })
 }, 60000)
