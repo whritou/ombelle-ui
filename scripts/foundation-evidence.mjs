@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
 import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
 import path from 'node:path'
 import { execFile } from 'node:child_process'
@@ -114,9 +115,9 @@ export async function validateTestResults(result, kind, inventory) {
 // Twenty-one evidence-owning specs (1185 cases), without importing Playwright configuration
 // (which needs this runner's consumer roots). Update this contract with added specs.
 const browserSpecCounts = { 'badge.spec.ts': 70, 'card.spec.ts': 70, 'checkbox.spec.ts': 70, 'component-presets.spec.ts': 100, 'editor.spec.ts': 19, 'catalog-editors.spec.ts': 24, 'forms.spec.ts': 70, 'keyboard.spec.ts': 70, 'minimalist-states.spec.ts': 12, 'parity.spec.ts': 14, 'preset-editor.spec.ts': 65, 'recipes.spec.ts': 100, 'snapshot-presets.spec.ts': 38, 'recipe-snapshots.spec.ts': 10, 'switch.spec.ts': 70, 'tabs.spec.ts': 70, 'tooltip.spec.ts': 70, 'liquid-glass.spec.ts': 40, 'edition-parity.spec.ts': 196, 'glass-backdrops.spec.ts': 3, 'editor-commands.spec.ts': 4 }
-// Every spec playwright.specimen-audit.config.ts runs, by file (416 cases). Shards split these; the aggregate
+// Every spec playwright.specimen-audit.config.ts runs, by file (420 cases). Shards split these; the aggregate
 // requires the shards together to have run each case exactly once. Update with added specs.
-export const specimenSpecCounts = { 'specimen-audit.spec.ts': 33, 'specimen-audit-checks.spec.ts': 23, 'display-components.spec.ts': 4, 'form-controls.spec.ts': 13, 'primitives-075.spec.ts': 20, 'editor-inputs-075.spec.ts': 28, 'code-block-075.spec.ts': 22, 'overlays-search.spec.ts': 16, 'calendar.spec.ts': 16, 'variants-basics.spec.ts': 13, 'variants-more.spec.ts': 40, 'variants-075.spec.ts': 34, 'components-076.spec.ts': 36, 'app-shell-09.spec.ts': 64, 'variants-076.spec.ts': 51, 'glass-scenes.spec.ts': 3 }
+export const specimenSpecCounts = { 'specimen-audit.spec.ts': 37, 'specimen-audit-checks.spec.ts': 23, 'display-components.spec.ts': 4, 'form-controls.spec.ts': 13, 'primitives-075.spec.ts': 20, 'editor-inputs-075.spec.ts': 28, 'code-block-075.spec.ts': 22, 'overlays-search.spec.ts': 16, 'calendar.spec.ts': 16, 'variants-basics.spec.ts': 13, 'variants-more.spec.ts': 40, 'variants-075.spec.ts': 34, 'components-076.spec.ts': 36, 'app-shell-09.spec.ts': 64, 'variants-076.spec.ts': 51, 'glass-scenes.spec.ts': 3 }
 // A known failure may stay in the suite only as test.fixme(true, 'FINDING-ID: why'), so the run records
 // it with its finding instead of losing it. Any other skip fails the gate.
 const documentedFixme = test => test.expectedStatus === 'skipped' && test.status === 'skipped'
@@ -159,8 +160,16 @@ export function validateBrowserResults(result) {
 
 const auditFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
 const auditChecks = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
-export const auditConfigurations = auditFamilies.flatMap(family => ['radix', 'base'].flatMap(edition => ['light', 'dark'].map(mode => family + '/' + edition + '/' + mode)))
-const auditKey = row => row.family + '/' + row.edition + '/' + row.mode
+// Every family in both editions and modes, then liquid glass again with reduced transparency.
+export const auditConfigurations = [
+  ...auditFamilies.flatMap(family => ['radix', 'base'].flatMap(edition => ['light', 'dark'].map(mode => family + '/' + edition + '/' + mode))),
+  ...['radix', 'base'].flatMap(edition => ['light', 'dark'].map(mode => 'liquid-glass/' + edition + '/' + mode + '/reduced-transparency')),
+]
+const auditKey = row => row.family + '/' + row.edition + '/' + row.mode + (row.transparency === 'reduced' ? '/reduced-transparency' : row.transparency === undefined ? '' : '/' + row.transparency)
+// Contrast findings a family's accessibility caveat makes advisory (liquid glass on translucent
+// surfaces) may not grow unnoticed: each configuration may record at most its baseline (TST-07).
+// Lower a number when a fix removes findings; raise one only with the reason in the commit.
+export const advisoryBaseline = JSON.parse(readFileSync(new URL('./specimen-advisory-baseline.json', import.meta.url), 'utf8'))
 const incompleteAudit = () => fail('Incomplete specimen audit')
 /** Each measured configuration: every specimen, every check measured. */
 function validateAuditRows(rows) {
@@ -168,6 +177,9 @@ function validateAuditRows(rows) {
   if (!rows.length || new Set(seen).size !== seen.length || seen.some(key => !auditConfigurations.includes(key))) incompleteAudit()
   for (const row of rows) {
     if (row.specimens !== supportedComponentIds.length) incompleteAudit()
+    const advisory = row.contrastAdvisoryFindings
+    if (!Number.isInteger(advisory) || advisory < 0) incompleteAudit()
+    if (advisory > (advisoryBaseline[auditKey(row)] ?? 0)) fail('Contrast advisory findings above baseline: ' + auditKey(row) + ' ' + advisory + ' > ' + (advisoryBaseline[auditKey(row)] ?? 0))
     for (const check of auditChecks) {
       const count = row.checks?.[check]
       if (!Number.isInteger(count) || (check === 'forced-colors' && row.mode === 'dark' ? count !== 0 : count < 1)) incompleteAudit()

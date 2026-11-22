@@ -4,7 +4,38 @@ import AxeBuilder from '@axe-core/playwright'
 import type { Locator, Page } from '@playwright/test'
 
 export type AuditCheck = 'overflow' | 'clipping' | 'spacing' | 'focus-visible' | 'target-size' | 'forced-colors' | 'axe'
-export type Finding = { check: AuditCheck; target: string; detail: string }
+/** `translucent`: for a contrast finding, whether the element's colours depend on what shows through it. */
+export type Finding = { check: AuditCheck; target: string; detail: string; translucent?: boolean }
+
+/**
+ * Whether an element is painted over a translucent surface, so its contrast depends on the backdrop:
+ * walking out from it, a backdrop filter or a partly transparent background comes before any opaque
+ * one, or nothing is painted up to the page (whose glass backdrop then shows through). An opaque
+ * surface inside a glass panel (a solid Badge, an Alert card, an opaque fallback) is not translucent.
+ */
+export const translucentSource = `(element) => {
+  for (let node = element; node && node !== document.documentElement; node = node.parentElement) {
+    const style = getComputedStyle(node)
+    if (style.backdropFilter && style.backdropFilter !== 'none') return true
+    const match = /rgba?\\(([^)]*)\\)/.exec(style.backgroundColor)
+    const parts = match ? match[1].split(/[\\s,\\/]+/).filter(Boolean) : []
+    const alpha = parts.length === 4 ? Number.parseFloat(parts[3]) * (parts[3].endsWith('%') ? 0.01 : 1) : 1
+    if (alpha >= 0.999) return false
+    if (alpha > 0 || style.backgroundImage !== 'none') return true
+  }
+  return true
+}`
+/** Mark each contrast finding of `findings` with whether its element is on a translucent surface. */
+export async function markTranslucent(page: Page, findings: Finding[]): Promise<Finding[]> {
+  for (const finding of findings) {
+    if (finding.check !== 'axe' || !finding.detail.startsWith('color-contrast:')) continue
+    const element = page.locator(finding.target).first()
+    finding.translucent = await element.count()
+      ? await element.evaluate((node, source) => (new Function('return ' + source)() as (e: Element) => boolean)(node), translucentSource)
+      : false
+  }
+  return findings
+}
 
 /** Interactive elements that need a target size and a visible focus indicator. */
 export const interactiveSelector = [
@@ -292,8 +323,9 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   // 90% of a 1px perimeter: anti-aliased corners of a rounded 1px ring fall below 3:1.
   const needed = Math.round(0.9 * 2 * (box.width + box.height))
   if (!focused) return [{ check: 'focus-visible', target: description, detail: 'element could not take focus' }]
-  return strong >= needed ? [] : [{ check: 'focus-visible', target: description,
-    detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed` }]
+  if (strong >= needed) return []
+  const translucent = await target.evaluate((node, source) => (new Function('return ' + source)() as (e: Element) => boolean)(node), translucentSource)
+  return [{ check: 'focus-visible', target: description, detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed`, translucent }]
 }
 
 // Items reached with arrow keys: primitives give all but the current one tabindex -1.

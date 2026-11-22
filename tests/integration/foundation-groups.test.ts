@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { afterEach, expect, test } from 'vitest'
 import { supportedComponentIds } from '@ombelle/contracts'
 // @ts-expect-error JavaScript gate entry point
-import { aggregateFoundationEvidence, foundationSteps, specimenSpecCounts, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
+import { advisoryBaseline, aggregateFoundationEvidence, foundationSteps, specimenSpecCounts, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
 
 const roots: string[] = []
@@ -41,8 +41,9 @@ function specimenAudit() {
   const checks = (mode: string) => ({ overflow: 36, clipping: 36, spacing: 36, 'focus-visible': 40, 'target-size': 36, 'forced-colors': mode === 'light' ? 29 : 0, axe: 36 })
   return {
     schemaVersion: 1, sourceCommit: commit, node: 'v24.19.0', browser: { engine: 'chromium', version: '148.0.0.0', channel: 'bundled' },
-    configurations: ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
+    configurations: [...['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
       ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: supportedComponentIds.length, checks: checks(mode), contrastAdvisoryFindings: 0 })))),
+      ...['radix', 'base'].flatMap(edition => ['light', 'dark'].map(mode => ({ family: 'liquid-glass', edition, mode, transparency: 'reduced', specimens: supportedComponentIds.length, checks: checks(mode), contrastAdvisoryFindings: 0 })))],
     failures: 0,
   }
 }
@@ -137,7 +138,7 @@ test.each(['quality', 'all'] as const)('%s generates the preview sources before 
   for (const stage of ['test:unit', 'test:integration']) expect(order.indexOf('generate:preview')).toBeLessThan(order.indexOf(stage))
 })
 test('accepts a complete specimen audit', () => {
-  expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 32, specimens: 32 * supportedComponentIds.length })
+  expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 36, specimens: 36 * supportedComponentIds.length })
 })
 test.each([
   ['23 configurations', (audit: any) => { audit.configurations.pop() }],
@@ -252,7 +253,7 @@ test.each([
 test('merges four specimen shards into one complete audit', async () => {
   const root = await fixture()
   const result = await aggregateFoundationEvidence(root, commit, { inventories })
-  expect(result.specimenAudit).toEqual({ configurations: 32, specimens: 32 * supportedComponentIds.length })
+  expect(result.specimenAudit).toEqual({ configurations: 36, specimens: 36 * supportedComponentIds.length })
   expect(result.specimenAuditEvidence.runIds).toEqual(['github:1/1'])
   expect(result.groups.specimen).toHaveLength(4)
 })
@@ -334,4 +335,21 @@ test.each(['checkbox', 'switch', 'tabs', 'tooltip'])('rejects omitted %s browser
   result.suites = result.suites.filter(suite => suite.file !== id + '.spec.ts')
   result.stats.expected -= 40
   expect(() => validateBrowserResults(result)).toThrow('Incomplete, failed, skipped or flaky browser matrix')
+})
+test('bounds liquid glass contrast advisories by the recorded baseline', () => {
+  const audit = specimenAudit()
+  const glass = audit.configurations.find((row: any) => row.family === 'liquid-glass' && !row.transparency)!
+  glass.contrastAdvisoryFindings = (advisoryBaseline['liquid-glass/radix/light'] ?? 0) + 1
+  expect(() => validateSpecimenAudit(audit)).toThrow('Contrast advisory findings above baseline')
+  const reduced = specimenAudit()
+  reduced.configurations.find((row: any) => row.transparency === 'reduced')!.contrastAdvisoryFindings = 1
+  expect(() => validateSpecimenAudit(reduced)).toThrow('Contrast advisory findings above baseline')
+  const missing = specimenAudit()
+  delete (missing.configurations[0] as any).contrastAdvisoryFindings
+  expect(() => validateSpecimenAudit(missing)).toThrow('Incomplete specimen audit')
+})
+test('requires the reduced transparency glass configurations', () => {
+  const audit = specimenAudit()
+  audit.configurations = audit.configurations.filter((row: any) => !row.transparency)
+  expect(() => validateSpecimenAudit(audit)).toThrow('Incomplete specimen audit')
 })
