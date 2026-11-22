@@ -5,6 +5,7 @@ import type { ComponentRecipe, InstallableRecipeCompileResult } from '@ombelle/c
 import { verifyCatalogCompileResult } from './catalog-preview-protocol'
 import { verifyPreviewCompileResult } from './preview-protocol'
 import type { BatchRequest } from './compile-protocol'
+import { acquireWorker, nextRequestId } from './shared-worker'
 
 type State = { results: InstallableRecipeCompileResult[] | null; pending: boolean; error: string | null }
 /** The results with the recipes array they were compiled for. */
@@ -32,9 +33,9 @@ export function useRecipeBatch(kind: BatchRequest['kind'], recipes: readonly unk
   const asked = useRef<readonly unknown[] | null>(null)
 
   useEffect(() => {
-    const instance = new Worker('/editor-compiler.worker.js', { type: 'module' })
+    const { worker: instance, release } = acquireWorker('/editor-compiler.worker.js')
     worker.current = instance
-    instance.onmessage = async ({ data }) => {
+    const onMessage = async ({ data }: MessageEvent) => {
       if (!data || data.requestId !== latest.current) return
       if (data.type === 'invalid-batch') {
         setState({ results: null, for: asked.current, pending: false, error: typeof data.message === 'string' ? data.message : 'The recipes could not be compiled.' })
@@ -51,15 +52,19 @@ export function useRecipeBatch(kind: BatchRequest['kind'], recipes: readonly unk
       if (verified.some((result) => !result)) setState({ results: null, for: asked.current, pending: false, error: 'A compiled recipe did not verify.' })
       else setState({ results: verified as InstallableRecipeCompileResult[], for: asked.current, pending: false, error: null })
     }
-    instance.onerror = () => setState({ results: null, for: asked.current, pending: false, error: 'The compiler worker failed.' })
+    const onError = () => setState({ results: null, for: asked.current, pending: false, error: 'The compiler worker failed.' })
+    instance.addEventListener('message', onMessage)
+    instance.addEventListener('error', onError)
     return () => {
-      instance.terminate()
+      instance.removeEventListener('message', onMessage)
+      instance.removeEventListener('error', onError)
+      release()
       worker.current = null
     }
   }, [kind])
 
   useEffect(() => {
-    const requestId = ++latest.current
+    const requestId = (latest.current = nextRequestId())
     asked.current = recipes
     if (!recipes) {
       setState(idle)

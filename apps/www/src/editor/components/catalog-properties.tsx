@@ -1,11 +1,12 @@
 import { useId } from 'react'
-import { defaultGlassPresetId, resolveRecipePreset } from '@ombelle/catalog'
+import { defaultGlassPresetId, resolveRecipePreset } from '@ombelle/catalog/presets'
 import { componentRecipeFields, defaultRecipeFields, styleSupport, type ComponentRecipe, type RecipeField } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { GlassPresetSelect } from '../../site/glass-preset-select'
 import { glassPresetId } from '../../site/glass-presets'
 import { changeCatalogFamily, withCatalogFont } from '../catalog-draft'
-import { componentRecipeFontRoles } from '@ombelle/compiler'
+// Precomputed per component and family (scripts/generate-editor-defaults.ts), so the inspector does not load the compiler.
+import { componentFontRoles } from '../../generated/component-font-roles'
 import { FontSelect } from './font-select'
 import { FamilyPicker } from './family-picker'
 import { CatalogAppearance } from './catalog-appearance'
@@ -20,7 +21,7 @@ export function CatalogProperties({ recipe, measured = {}, previewMode = 'light'
 }) {
   const family = resolveRecipePreset(recipe.presetRef).styleFamily
   const fields = componentRecipeFields(recipe.component)
-  const roles = componentRecipeFontRoles(recipe.component, family, recipe.presetRef.catalogRelease)
+  const roles = componentFontRoles[recipe.component][family]
   const props: Record<string, unknown> = recipe.props
   const content: Record<string, unknown> = recipe.content
   const choices = (content.options ?? content.items ?? content.columns ?? []) as Item[]

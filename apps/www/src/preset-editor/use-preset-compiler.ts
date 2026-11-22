@@ -1,12 +1,13 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import {
   validatePreset,
   isStyleFamily,
   type CompileResult,
 } from '@ombelle/contracts'
 import type { PresetEditorDraft } from './model'
+import { acquireWorker, nextRequestId } from '../editor/shared-worker'
 import type {
   PresetCompileRequest,
   PresetCompileResponse,
@@ -93,7 +94,6 @@ export function createPresetCompiler(
   notify: (state: PresetCompilerState) => void,
 ) {
   let state = initial(),
-    serial = 0,
     activeId = 0,
     activeKey: string | null = null,
     pendingKey: string | null = null
@@ -109,7 +109,7 @@ export function createPresetCompiler(
     update(draft: PresetEditorDraft) {
       clearTimeout(timer)
       pendingKey = canonicalize(draft)
-      activeId = ++serial
+      activeId = nextRequestId()
       activeKey = pendingKey
       emit({
         ...state,
@@ -149,7 +149,7 @@ export function createPresetCompiler(
     },
     fail() {
       clearTimeout(timer)
-      activeId = ++serial
+      activeId = nextRequestId()
       emit({
         ...state,
         status: 'invalid',
@@ -163,7 +163,7 @@ export function createPresetCompiler(
     },
     dispose() {
       clearTimeout(timer)
-      activeId = ++serial
+      activeId = nextRequestId()
       pendingKey = null
     },
   }
@@ -179,6 +179,7 @@ export function usePresetCompiler(draft: PresetEditorDraft) {
   const key = canonicalize(draft)
   useEffect(() => {
     let worker: Worker | null = null
+    let release = () => {}
     const handle = createPresetCompiler((request) => {
       try {
         if (worker) worker.postMessage(request)
@@ -188,19 +189,26 @@ export function usePresetCompiler(draft: PresetEditorDraft) {
       }
     }, setState)
     controller.current = handle
+    const onMessage = (event: MessageEvent<unknown>) => handle.receive(event.data)
+    const onFail = () => handle.fail()
     try {
-      worker = new Worker('/preset-compiler.worker.js', { type: 'module' })
-      worker.onmessage = (event: MessageEvent<unknown>) =>
-        handle.receive(event.data)
-      worker.onerror = () => handle.fail()
-      worker.onmessageerror = () => handle.fail()
+      // Shared with the editor's other compiler (the catalog default Get code compares to).
+      const shared = acquireWorker('/preset-compiler.worker.js')
+      worker = shared.worker
+      release = shared.release
+      worker.addEventListener('message', onMessage)
+      worker.addEventListener('error', onFail)
+      worker.addEventListener('messageerror', onFail)
       handle.update(latest.current)
     } catch {
       handle.fail()
     }
     return () => {
       handle.dispose()
-      worker?.terminate()
+      worker?.removeEventListener('message', onMessage)
+      worker?.removeEventListener('error', onFail)
+      worker?.removeEventListener('messageerror', onFail)
+      release()
       controller.current = null
     }
   }, [attempt])
