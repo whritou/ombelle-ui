@@ -1,53 +1,5 @@
-import fs from 'node:fs/promises'
-import { constants } from 'node:fs'
-import path from 'node:path'
-import {
-  FoundationError,
-  validateInstallableRecipe,
-  type InstallableRecipe,
-} from '@ombelle/contracts'
+import { validateInstallableRecipe, type InstallableRecipe } from '@ombelle/contracts'
+import { readJsonFile } from './json-file.js'
 export async function readRecipeFile(file: string): Promise<InstallableRecipe> {
-  const target = path.resolve(file)
-  try {
-    if (!(await fs.stat(target)).isFile())
-      throw Error('Recipe must be a regular file')
-    // A FIFO can replace the checked path before open; never wait for its writer.
-    const handle = await fs.open(
-      target,
-      constants.O_RDONLY | constants.O_NONBLOCK,
-    )
-    try {
-      if (!(await handle.stat()).isFile())
-        throw Error('Recipe must be a regular file')
-      const bytes = Buffer.alloc(65537)
-      let length = 0
-      while (length < bytes.length) {
-        const read = await handle.read(
-          bytes,
-          length,
-          bytes.length - length,
-          null,
-        )
-        if (!read.bytesRead) break
-        length += read.bytesRead
-      }
-      if (length > 65536) throw Error('Recipe exceeds 64 KiB')
-      return validateInstallableRecipe(
-        JSON.parse(
-          new TextDecoder('utf-8', { fatal: true }).decode(
-            bytes.subarray(0, length),
-          ),
-        ),
-      )
-    } finally {
-      await handle.close()
-    }
-  } catch (cause) {
-    if (cause instanceof FoundationError) throw cause
-    throw new FoundationError(
-      'INVALID_DATA',
-      cause instanceof Error ? cause.message : 'Cannot read recipe',
-      target,
-    )
-  }
+  return validateInstallableRecipe(await readJsonFile(file, 'Recipe', 65536))
 }
