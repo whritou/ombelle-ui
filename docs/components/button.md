@@ -34,6 +34,31 @@ These variants need CLI **0.7.3** or later, including in component recipes. Leav
 </Tooltip>
 ```
 
+## Style another element as a button
+
+`buttonVariants({ variant, size, className })` returns what an element needs to look like the matching Button: `data-slot="button"`, `data-variant`, `data-size` and the `className`. Spread it onto the element. Every style family selects those attributes, not a class, so a link styled this way matches the Button in every family, edition and mode. Both editions export it, and its defaults follow the saved preset's `componentDefaults.button`, as Button's do.
+
+```tsx
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
+
+export function DocsLink() {
+  return (
+    <Link href="/docs" {...buttonVariants({ variant: 'outline', size: 'sm' })}>
+      Read the docs
+    </Link>
+  )
+}
+```
+
+A link keeps link semantics: it is announced as a link and follows `href` on Enter. Use it for navigation and Button for actions. Without `href` it is not focusable, so give a link-as-button an `href`.
+
+### Differences from shadcn
+
+- shadcn's `buttonVariants()` returns a class string for `className`. Ombelle's returns an object of attributes and `className`, because the family stylesheets select `data-slot`, `data-variant` and `data-size`. Replace `className={buttonVariants({ variant: 'ghost' })}` with `{...buttonVariants({ variant: 'ghost' })}`, and `className={cn(buttonVariants(), 'w-full')}` with `{...buttonVariants({ className: 'w-full' })}`.
+- Passing only the class string to `className` keeps the layout utilities but none of the family's look.
+- `ButtonVariantsOptions` is the helper's argument type. `VariantProps<typeof buttonVariants>` also works and gives `variant` and `size`.
+
 ## Radix edition
 
 Projects whose `components.json` uses `radix-nova` or `new-york`, and projects without `components.json`, receive the Radix Button. It renders a native `button` and supports `asChild` through `@radix-ui/react-slot` 1.5.0 to render another element, such as a link, with Button styling. `loading` is ignored with `asChild`.

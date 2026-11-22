@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Button exports `buttonVariants({ variant, size, className })` in both editions (CAT-17). It returns the `data-slot`, `data-variant`, `data-size` and `className` that make a link or any other element look like the matching Button in every family; spread it onto the element. Unlike shadcn's, it returns attributes, not a class string, because the family stylesheets select attributes. Its defaults follow the preset's `componentDefaults.button`. Changed `button.tsx` bytes in both editions; scoped Button recipes are unchanged.
 - Find composed parts when the page is a React Server Component (a Next.js App Router page without `'use client'`). Combobox, Carousel, Select, Checkbox group, Field, Command, Toast, Popover, Breadcrumb, Avatar, Chip, Meter, Password Field, Progress and Slider compared `child.type` with their part, which is a client reference there; they now resolve it. Changed template bytes in both editions.
 - Combobox (Radix) keeps the first key typed into a closed field and the first Backspace after a choice. Combobox gains `required` and `labels`, merges a caller's ref, composes caller handlers, and returns to its default on form reset; its popup is no longer an unnamed dialog.
 - Set `data-slot` after the props spread in every template, so an `asChild` trigger (Tooltip, Popover anchor) no longer replaces a Switch, Input or Tab's slot and strips its styles. Markup changes attribute order only.

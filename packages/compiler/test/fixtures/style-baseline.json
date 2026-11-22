@@ -6,7 +6,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "8c672102444601686c659f9bca9b1f817b65a5fbbf46e921e510214264f3891d"
+          "sha256": "0d0ff907da9724ff5c38f430ee04d0a06b53cf7a035206e3913234f4a9769ac3"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -47,7 +47,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "8c672102444601686c659f9bca9b1f817b65a5fbbf46e921e510214264f3891d"
+          "sha256": "0d0ff907da9724ff5c38f430ee04d0a06b53cf7a035206e3913234f4a9769ac3"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
@@ -88,7 +88,7 @@
       "artifacts": [
         {
           "logicalPath": "components/ui/button.tsx",
-          "sha256": "8c672102444601686c659f9bca9b1f817b65a5fbbf46e921e510214264f3891d"
+          "sha256": "0d0ff907da9724ff5c38f430ee04d0a06b53cf7a035206e3913234f4a9769ac3"
         },
         {
           "logicalPath": "components/ui/dialog.tsx",
