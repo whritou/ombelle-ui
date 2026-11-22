@@ -110,3 +110,14 @@
 [data-slot='input-otp-slot']{background:var(--card);font-family:var(--font-mono,ui-monospace,monospace);box-shadow:inset 0 -2px 0 color-mix(in oklab,var(--foreground) 14%,transparent);border-radius:0}
 [data-slot='input-otp-group'] > [data-slot='input-otp-slot']:first-child{border-start-start-radius:var(--radius);border-end-start-radius:var(--radius)}
 [data-slot='input-otp-group'] > [data-slot='input-otp-slot']:last-child{border-start-end-radius:var(--radius);border-end-end-radius:var(--radius)}
+
+/* Invalid: a field given aria-invalid marks every slot (DES-15). */
+[data-slot='input-otp'][data-invalid] [data-slot='input-otp-slot'] {
+  border-color: var(--destructive);
+  background: color-mix(in oklab, var(--destructive) 10%, var(--card));
+}
+@media (forced-colors: active) {
+  [data-slot='input-otp'][data-invalid] [data-slot='input-otp-slot'] {
+    border: 3px double CanvasText;
+  }
+}

@@ -7,7 +7,8 @@ import './input-otp.css'
 const REGEXP_ONLY_DIGITS = '^\\d+$'
 const REGEXP_ONLY_DIGITS_AND_CHARS = '^[a-zA-Z0-9]+$'
 
-type SlotState = { length: number; labelledBy?: string; value: string; focused: number | null }
+type SlotState = { length: number; labelledBy?: string; value: string; focused: number | null; invalid?: boolean }
+const isInvalid = (value: unknown) => value === true || value === 'true' || value === 'grammar' || value === 'spelling'
 const InputOTPState = React.createContext<SlotState>({ length: 0, value: '', focused: null })
 
 export type InputOTPProps = Omit<React.ComponentProps<'div'>, 'onChange' | 'defaultValue'> & {
@@ -42,6 +43,7 @@ export function InputOTP({
   autoComplete = 'one-time-code',
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
+  'aria-invalid': ariaInvalid,
   children,
   ...props
 }: InputOTPProps) {
@@ -51,7 +53,7 @@ export function InputOTP({
   const labelledBy = ariaLabelledBy ?? (ariaLabel ? ownLabelId : undefined)
   const validationType = pattern === REGEXP_ONLY_DIGITS ? 'numeric' : pattern === REGEXP_ONLY_DIGITS_AND_CHARS ? 'alphanumeric' : 'none'
   return (
-    <InputOTPState.Provider value={{ length: maxLength, labelledBy, value: current, focused: null }}>
+    <InputOTPState.Provider value={{ length: maxLength, labelledBy, value: current, focused: null, invalid: isInvalid(ariaInvalid) }}>
       <OTPField.Root
         {...props}
         length={maxLength}
@@ -67,6 +69,7 @@ export function InputOTP({
         onValueComplete={(next: string) => onComplete?.(next)}
         data-slot="input-otp"
         data-disabled={disabled || undefined}
+        data-invalid={isInvalid(ariaInvalid) ? '' : undefined}
         className={cn(className)}
       >
         {ariaLabel && !ariaLabelledBy && <span id={ownLabelId} hidden>{ariaLabel}</span>}
@@ -82,12 +85,14 @@ export function InputOTPGroup({ className, ...props }: React.ComponentProps<'div
 
 /** One character input. Inputs take their position from their order in the field. */
 export function InputOTPSlot({ index, className, ...props }: Omit<React.ComponentProps<'input'>, 'value'> & { index: number }) {
-  const { length, labelledBy, value } = React.useContext(InputOTPState)
+  const { length, labelledBy, value, invalid } = React.useContext(InputOTPState)
   return (
     <OTPField.Input
       {...props}
       aria-labelledby={index === 0 ? labelledBy : undefined}
       aria-label={index === 0 ? undefined : `Digit ${index + 1} of ${length}`}
+      // Each digit is an input here, so each carries the field's invalid state.
+      aria-invalid={invalid || undefined}
       data-slot="input-otp-slot"
       data-filled={value[index] ? '' : undefined}
       className={cn(className)}

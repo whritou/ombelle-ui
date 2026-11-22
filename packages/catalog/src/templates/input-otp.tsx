@@ -4,6 +4,8 @@ import { OTPInput, OTPInputContext, REGEXP_ONLY_DIGITS } from 'input-otp'
 import { cn } from './utils.js'
 import './input-otp.css'
 
+const isInvalid = (value: unknown) => value === true || value === 'true' || value === 'grammar' || value === 'spelling'
+
 export type InputOTPProps = Omit<React.ComponentProps<typeof OTPInput>, 'render' | 'containerClassName'> & {
   children: React.ReactNode
 }
@@ -15,7 +17,8 @@ export type InputOTPProps = Omit<React.ComponentProps<typeof OTPInput>, 'render'
  */
 export function InputOTP({ className, pattern = REGEXP_ONLY_DIGITS, autoComplete = 'one-time-code', disabled, pasteTransformer, ...props }: InputOTPProps) {
   return (
-    <div data-slot="input-otp" data-disabled={disabled || undefined} className={cn(className)}>
+    // aria-invalid reaches the input through the props; the slots show it through data-invalid.
+    <div data-slot="input-otp" data-disabled={disabled || undefined} data-invalid={isInvalid(props['aria-invalid']) ? '' : undefined} className={cn(className)}>
       <OTPInput
         {...(props as React.ComponentProps<typeof OTPInput>)}
         pattern={pattern}
