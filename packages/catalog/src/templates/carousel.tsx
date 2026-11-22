@@ -154,8 +154,10 @@ export function CarouselContent({ className, children, onScroll, ...props }: Rea
     const left = Math.abs(content.scrollLeft)
     let index = 0
     const start = slides[0]?.offsetLeft ?? 0
+    // Distances from the first slide, so right-to-left (negative offsets and scrollLeft) reads the same.
+    const distance = (slide: HTMLElement) => Math.abs(Math.abs(slide.offsetLeft - start) - left)
     slides.forEach((slide, at) => {
-      if (Math.abs(slide.offsetLeft - start - left) < Math.abs(slides[index].offsetLeft - start - left)) index = at
+      if (distance(slide) < distance(slides[index]!)) index = at
     })
     const max = content.scrollWidth - content.clientWidth
     const atEnd = left >= max - 1

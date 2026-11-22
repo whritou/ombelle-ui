@@ -143,6 +143,19 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(next).toBeDisabled()
     })
 
+    test('Carousel advances through every slide in a right-to-left page (CAT-03)', async ({ page }) => {
+      const section = await open(page, edition)
+      await page.evaluate(() => { document.documentElement.dir = 'rtl' })
+      const carousel = section.getByTestId('c076-carousel')
+      const next = carousel.getByRole('button', { name: 'Next slide' })
+      const counter = carousel.locator('[data-slot="carousel-counter"]')
+      for (const n of [2, 3, 4]) {
+        await next.click()
+        await expect(counter).toHaveText(`${n} / 5`)
+        await expect(carousel.getByRole('button', { name: `Slide ${n}`, exact: true })).toHaveAttribute('aria-current', 'true')
+      }
+    })
+
     test('a Carousel with one slide disables both buttons, and a new slide adds a dot', async ({ page }) => {
       const section = await open(page, edition)
       const one = section.getByTestId('c076-carousel-one')
