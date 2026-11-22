@@ -92,9 +92,15 @@ export function PasswordFieldInput({ className, id, autoComplete = 'current-pass
     const form = inputRef.current?.form
     if (!form) return
     const hide = () => setVisible(false)
+    // A reset puts the input back to its default value; the strength follows it.
+    const reset = () => field.setValue(inputRef.current?.defaultValue ?? '')
     form.addEventListener('submit', hide, true)
-    return () => form.removeEventListener('submit', hide, true)
-  }, [inputRef, setVisible])
+    form.addEventListener('reset', reset)
+    return () => {
+      form.removeEventListener('submit', hide, true)
+      form.removeEventListener('reset', reset)
+    }
+  }, [inputRef, setVisible, field.setValue])
   // Put the caret and selection back where they were before the toggle.
   React.useLayoutEffect(() => {
     const saved = selection.current
@@ -190,15 +196,35 @@ export function strengthWord(passed: number, total: number): 'Weak' | 'Fair' | '
 
 const levels = { Weak: 'weak', Fair: 'fair', Strong: 'strong', 'Very strong': 'very-strong' } as const
 
-export type PasswordFieldStrengthProps = React.ComponentProps<'div'> & { checks: readonly PasswordCheck[] }
+/** The words the strength meter shows and speaks; each has an English default. */
+export type PasswordStrengthLabels = {
+  weak?: string
+  fair?: string
+  strong?: string
+  veryStrong?: string
+  /** Follows the word with the first failing check; default "<check>", plus " to reach the last check" when it is the only one left. */
+  hint?(check: string, last: boolean): string
+}
+const defaultStrengthLabels: Required<PasswordStrengthLabels> = {
+  weak: 'Weak',
+  fair: 'Fair',
+  strong: 'Strong',
+  veryStrong: 'Very strong',
+  hint: (check, last) => `${check}${last ? ' to reach the last check' : ''}`,
+}
+const wordKeys = { Weak: 'weak', Fair: 'fair', Strong: 'strong', 'Very strong': 'veryStrong' } as const
+
+export type PasswordFieldStrengthProps = React.ComponentProps<'div'> & { checks: readonly PasswordCheck[]; labels?: PasswordStrengthLabels }
 
 /** How many checks the value passes, and the first one it fails. */
-export function PasswordFieldStrength({ checks, className, ...props }: PasswordFieldStrengthProps) {
+export function PasswordFieldStrength({ checks, labels, className, ...props }: PasswordFieldStrengthProps) {
   const field = usePasswordField('PasswordFieldStrength')
+  const words = { ...defaultStrengthLabels, ...labels }
   const passed = checks.filter(check => passes(check, field.value)).length
-  const word = strengthWord(passed, checks.length)
+  const level = strengthWord(passed, checks.length)
+  const word = words[wordKeys[level]]
   const failing = checks.find(check => !passes(check, field.value))
-  const hint = failing ? ` · ${failing.label}${checks.length - passed === 1 ? ' to reach the last check' : ''}` : ''
+  const hint = failing ? ` · ${words.hint(failing.label, checks.length - passed === 1)}` : ''
   return (
     <div
       aria-label="Password strength"
@@ -209,7 +235,7 @@ export function PasswordFieldStrength({ checks, className, ...props }: PasswordF
       aria-valuenow={passed}
       aria-valuetext={word + hint}
       data-slot="password-field-strength"
-      data-level={levels[word]}
+      data-level={levels[level]}
       className={cn(className)}
     >
       <div data-slot="password-field-strength-bar" aria-hidden="true">

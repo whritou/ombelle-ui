@@ -36,6 +36,8 @@ export function Topics() {
   - `allowDuplicates` defaults to false.
   - `disabled` turns off the field and the remove buttons.
   - With `name`, each tag submits as a hidden input with that name.
+  - A form reset returns the tags to `defaultValue`, clears the typed text and the announcement, and calls `onValueChange` when the tags change.
+  - `labels` changes the words: `list` ("Selected tags"), `remove(tag)` ("Remove <tag>"), `duplicate(tag)` ("<tag> is already added"), `max(max)` ("You can add up to <max> tags"), `added(tags)` ("Added <tags>") and `removed(tag)` ("Removed <tag>").
 - **Typing:**
   - Added text is trimmed, and empty parts are dropped.
   - Pasting text that contains separators or new lines adds each part.

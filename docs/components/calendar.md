@@ -36,6 +36,7 @@ export function Availability() {
 - **DatePicker**
   - `value` or `defaultValue`, `onValueChange`, `mode` (`single` or `range`), `placeholder` (default "Choose a date"), `format` (`Intl.DateTimeFormatOptions`, default `{ dateStyle: 'medium' }`), `locale` (a BCP 47 tag) and `disabled`. Without `locale`, the server and the first render show the date in `en-US` and switch to the page's `lang` (or the browser's language) after hydration, so a server-rendered page never has a hydration mismatch; pass `locale` to render the final text on the server.
   - `name` submits `YYYY-MM-DD`; a range submits `name-from` and `name-to`.
+  - A form reset returns it to `defaultValue`, closes the calendar and calls `onValueChange` when the date changes.
   - `calendar` passes options such as `disablePast` or `today` to the Calendar inside.
 - **Helpers:** `toIsoDate`, `fromIsoDate` and `formatDate`.
   - `fromIsoDate` returns a local date at noon, so a time zone never moves it to another day.
