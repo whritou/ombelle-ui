@@ -125,7 +125,7 @@ if (process.platform !== 'win32') test('handles a real POSIX termination signal 
   })
   children.push(child)
   const closed = new Promise<number | null>((resolve) => child.once('close', resolve))
-  await until(async () => (await read(path.join(root, '.artifacts/logs/test-unit.log'))).includes('waiting'))
+  await until(async () => (await read(path.join(root, '.artifacts/logs/generate-preview.log'))).includes('waiting'))
   child.kill('SIGTERM')
   expect(await closed).toBe(143)
   const report = JSON.parse(await read(path.join(root, '.artifacts/foundation-report.json')))
