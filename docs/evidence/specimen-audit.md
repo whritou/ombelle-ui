@@ -1,6 +1,6 @@
 # Specimen audit
 
-The specimen audit measures every catalog component as a project installs it, in every style family, edition and colour mode. It fails only on measured defects. Screenshots are saved for review and never compared against stored images. Design: [verification harness](../superpowers/specs/2026-11-09-verification-harness-design.md).
+The specimen audit measures every catalog component as a project installs it, in every style family, edition and colour mode. It fails only on measured defects. Screenshots are saved for review and never compared against stored images. Design: [verification harness](../internal/superpowers/specs/2026-11-09-verification-harness-design.md).
 
 ## Recorded runs
 

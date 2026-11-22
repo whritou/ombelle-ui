@@ -2,7 +2,7 @@
 
 15 November 2026. Papier is added as a stable style family beside flat, minimalist, neo-brutalism and ombelle, for release 0.8.0. Liquid glass stays experimental and is not changed.
 
-Design source: the design canvas page "0.8.0 Papier" (nine boards, every component and variant in light and dark). The reference stylesheet is committed at `docs/superpowers/specs/assets/papier-080-board.css`. Spec: `docs/superpowers/specs/2026-11-15-papier-family-design.md`.
+Design source: the design canvas page "0.8.0 Papier" (nine boards, every component and variant in light and dark). The reference stylesheet is committed at `docs/internal/superpowers/specs/assets/papier-080-board.css`. Spec: `docs/internal/superpowers/specs/2026-11-15-papier-family-design.md`.
 
 ## Look
 

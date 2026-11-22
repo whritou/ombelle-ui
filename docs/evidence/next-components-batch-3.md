@@ -43,7 +43,7 @@ Compared with the sheets, the selected Table row in ombelle and flat also recolo
 
 ## Screenshots
 
-Images are in [images/next-batch-3](images/next-batch-3/), named `<component>-<family>-<mode>.png`. The scene captures are the dashboard Activity tab and the settings Billing tab, in ombelle.
+Images are in [images/next-batch-3](images/next-batch-3), named `<component>-<family>-<mode>.png`. The scene captures are the dashboard Activity tab and the settings Billing tab, in ombelle.
 
 ## Limits
 

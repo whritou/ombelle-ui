@@ -5,7 +5,7 @@
     "pnpm": "11.25.0",
     "platform": "win32"
   },
-  "root": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b",
+  "root": "<local-path>",
   "matrix": [
     {
       "id": "next-fresh",
@@ -56,57 +56,57 @@
     "setup": {
       "status": "passed",
       "run": "2026-11-16T09-38-23-519Z-ec34959b",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-38-23-519Z-ec34959b\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-38-23-519Z-ec34959b\\report.md"
     },
     "verify": {
       "status": "passed",
       "run": "2026-11-16T09-50-31-843Z-7cf7b025",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-50-31-843Z-7cf7b025\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-50-31-843Z-7cf7b025\\report.md"
     },
     "uninstall": {
       "status": "passed",
       "run": "2026-11-16T09-45-03-144Z-78924be0",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-45-03-144Z-78924be0\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-45-03-144Z-78924be0\\report.md"
     },
     "install": {
       "status": "passed",
       "run": "2026-11-16T09-45-34-184Z-7e386d95",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-45-34-184Z-7e386d95\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-45-34-184Z-7e386d95\\report.md"
     },
     "clean": {
       "status": "passed",
       "run": "2026-11-16T09-36-57-685Z-e80c4be5",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-36-57-685Z-e80c4be5\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-36-57-685Z-e80c4be5\\report.md"
     },
     "dev": {
       "status": "passed",
       "run": "2026-11-16T09-49-41-340Z-efb38123",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-49-41-340Z-efb38123\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-49-41-340Z-efb38123\\report.md"
     },
     "stop": {
       "status": "passed",
       "run": "2026-11-16T09-50-15-508Z-6337a397",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-50-15-508Z-6337a397\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-50-15-508Z-6337a397\\report.md"
     },
     "add": {
       "status": "passed",
       "run": "2026-11-16T09-51-40-286Z-5a78ecdd",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-51-40-286Z-5a78ecdd\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-51-40-286Z-5a78ecdd\\report.md"
     },
     "theme": {
       "status": "passed",
       "run": "2026-11-16T09-52-34-681Z-ca8607ef",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-52-34-681Z-ca8607ef\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-52-34-681Z-ca8607ef\\report.md"
     },
     "status": {
       "status": "passed",
       "run": "2026-11-16T09-53-26-463Z-43ecff4e",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-53-26-463Z-43ecff4e\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-53-26-463Z-43ecff4e\\report.md"
     },
     "report": {
       "status": "passed",
       "run": "2026-11-16T09-53-21-283Z-b541eafd",
-      "report": "C:\\Users\\whrit\\AppData\\Local\\Temp\\ombelle-playground-d0dd3bcd0b\\runs\\2026-11-16T09-53-21-283Z-b541eafd\\report.md"
+      "report": "<local-path>s\\2026-11-16T09-53-21-283Z-b541eafd\\report.md"
     }
   },
   "restoration": [
@@ -139,22 +139,22 @@
         {
           "project": "next-fresh",
           "step": "browser verification",
-          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+          "error": "browserType.launch: Executable doesn't exist at <local-path>s-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
         },
         {
           "project": "next-shadcn",
           "step": "browser verification",
-          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+          "error": "browserType.launch: Executable doesn't exist at <local-path>s-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
         },
         {
           "project": "vite-fresh",
           "step": "browser verification",
-          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+          "error": "browserType.launch: Executable doesn't exist at <local-path>s-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
         },
         {
           "project": "vite-shadcn",
           "step": "browser verification",
-          "error": "browserType.launch: Executable doesn't exist at C:\\Users\\whrit\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+          "error": "browserType.launch: Executable doesn't exist at <local-path>s-playwright\\chromium_headless_shell-1254\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
         }
       ]
     },

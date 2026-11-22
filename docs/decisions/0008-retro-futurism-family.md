@@ -2,7 +2,7 @@
 
 16 November 2026. Retro futurism is added as a stable style family beside flat, minimalist, neo-brutalism, ombelle, papier and organic, for release 0.8.2. Liquid glass stays experimental and is not changed.
 
-Design source: the design canvas page "0.8.2 Retro futurism" (nine boards, every component and variant in light and dark), grown from the "0.8 style proposals" Retro futuristic board. The reference stylesheet is committed at `docs/superpowers/specs/assets/retro-futurism-082-board.css`. Spec: `docs/superpowers/specs/2026-11-16-retro-futurism-family-design.md`. Plan: `docs/superpowers/plans/2026-11-16-retro-futurism-family.md`.
+Design source: the design canvas page "0.8.2 Retro futurism" (nine boards, every component and variant in light and dark), grown from the "0.8 style proposals" Retro futuristic board. The reference stylesheet is committed at `docs/internal/superpowers/specs/assets/retro-futurism-082-board.css`. Spec: `docs/internal/superpowers/specs/2026-11-16-retro-futurism-family-design.md`. Plan: `docs/internal/superpowers/plans/2026-11-16-retro-futurism-family.md`.
 
 ## Look
 

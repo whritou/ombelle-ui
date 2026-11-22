@@ -1,6 +1,6 @@
 # Editors and liquid glass, batch 7a, evidence (0.7.3)
 
-The 0.7.3 liquid glass editor work: the contrast-aware backdrop pick, the dark-mode lab ink and the reduced-transparency toggle. Spec: `docs/superpowers/specs/2026-11-11-editors-glass-design.md`.
+The 0.7.3 liquid glass editor work: the contrast-aware backdrop pick, the dark-mode lab ink and the reduced-transparency toggle. Spec: `docs/internal/superpowers/specs/2026-11-11-editors-glass-design.md`.
 
 Environment for every run below:
 - Windows 11 Home 10.0.26300, Node 24.19.0, pnpm 11.25.0 through `corepack pnpm`.

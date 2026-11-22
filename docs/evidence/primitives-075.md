@@ -1,6 +1,6 @@
 # Primitives evidence
 
-Evidence for Toggle, Collapsible, Scroll Area, Button Group and Item (0.7.5). Design: [primitives](../superpowers/specs/2026-11-12-primitives-075-design.md).
+Evidence for Toggle, Collapsible, Scroll Area, Button Group and Item (0.7.5). Design: [primitives](../internal/superpowers/specs/2026-11-12-primitives-075-design.md).
 
 All runs are local runs by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0. None is a CI run or a human review.
 

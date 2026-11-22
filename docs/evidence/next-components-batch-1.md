@@ -63,7 +63,7 @@ Open note: in neo brutalism dark, the preset's near-white dashed focus ring has 
 
 ## Screenshots
 
-Images are in [images/next-batch-1](images/next-batch-1/), named `<component>-<family>-<mode>.png`. Scene captures are `scene-<page>-ombelle.png`.
+Images are in [images/next-batch-1](images/next-batch-1), named `<component>-<family>-<mode>.png`. Scene captures are `scene-<page>-ombelle.png`.
 
 ## Limits
 

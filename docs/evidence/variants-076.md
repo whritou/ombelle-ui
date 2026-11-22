@@ -1,6 +1,6 @@
 # 0.7.6 variants evidence
 
-Sections 01 to 06 of the 0.7.6 variant boards: Sheet `snapPoints`, `CardAction`, `SliderValue`, Progress and Meter `shape="circle"`, Code Block `diff` and `TooltipShortcut`, and section 07, the image Carousel (at the end of this file), in all five style families and both editions. Spec: `docs/superpowers/specs/2026-11-13-variants-076-design.md`. Plan: `docs/superpowers/plans/2026-11-13-variants-076.md`. Branch `feat/variants-076`, commits `db22321b` to the Task 9 commits.
+Sections 01 to 06 of the 0.7.6 variant boards: Sheet `snapPoints`, `CardAction`, `SliderValue`, Progress and Meter `shape="circle"`, Code Block `diff` and `TooltipShortcut`, and section 07, the image Carousel (at the end of this file), in all five style families and both editions. Spec: `docs/internal/superpowers/specs/2026-11-13-variants-076-design.md`. Plan: `docs/internal/superpowers/plans/2026-11-13-variants-076.md`. Branch `feat/variants-076`, commits `db22321b` to the Task 9 commits.
 
 Run on 2026-11-13 by agents on Windows 11 Home 10.0.26300 with Node 24.19.0, pnpm 11.25.0 (through corepack), Playwright 1.64.1 and its bundled Chromium 156.0.8078.4, headless, reduced motion on. Local runs, not CI runs or a human review.
 

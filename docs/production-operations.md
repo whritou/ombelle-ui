@@ -1,6 +1,6 @@
 # Production operations
 
-Runbook for the hosted service at `https://ombelle-ui.vercel.app` (Vercel project `ombelle-ui`, Neon project `neon-carmine-cable`, production branch `main`, endpoint `ep-bitter-meadow-b9plx52i`). See [snapshot service operations](snapshot-service-operations.md) for the service contract and [hosted deployment](hosted-deployment.md) for deployment.
+Runbook for the hosted service at `https://ombelle-ui.vercel.app` (Vercel project `ombelle-ui`, Neon project `<neon-project>`, production branch `main`, endpoint `<production-endpoint>`). See [snapshot service operations](snapshot-service-operations.md) for the service contract and [hosted deployment](hosted-deployment.md) for deployment.
 
 Backup and restore commands run on Linux or WSL with `bash`, `curl`, `python3` and `dpkg-deb`. They download a pinned PostgreSQL 18.6 client from apt.postgresql.org into `~/.cache/ombelle-pg18`, check its SHA-256 and need no root access. Connection URLs are passed through environment variables and never appear in command arguments.
 
@@ -30,7 +30,7 @@ ALTER ROLE ombelle_monitor SET default_transaction_read_only = on;
 A role created through SQL is not a member of `neon_superuser`, unlike roles created in the console's Roles page, so it can only read those two tables. Then add the repository secret `MONITOR_DATABASE_URL` (Settings → Secrets and variables → Actions) with:
 
 ```
-postgresql://ombelle_monitor:GENERATED_PASSWORD@ep-bitter-meadow-b9plx52i-pooler.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=verify-full&sslrootcert=system
+postgresql://ombelle_monitor:GENERATED_PASSWORD@<production-endpoint>-pooler.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=verify-full&sslrootcert=system
 ```
 
 `scripts/monitor-production.sh` also sets `PGSSLMODE=verify-full PGSSLROOTCERT=system`, so the certificate is verified even if the secret still says `sslmode=require`.
@@ -74,7 +74,7 @@ ALTER ROLE ombelle_backup SET default_transaction_read_only = on;
 Store the **direct** URL (no `-pooler`; `pg_dump` needs a session connection) as the repository secret `BACKUP_DATABASE_URL`:
 
 ```
-postgresql://ombelle_backup:GENERATED_PASSWORD@ep-bitter-meadow-b9plx52i.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=require
+postgresql://ombelle_backup:GENERATED_PASSWORD@<production-endpoint>.c-7.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
 
 **Restoring an automated backup.** Download and decrypt it, then use the restore drill below. From WSL with the Windows GitHub CLI (`/mnt/c/Program Files/GitHub CLI/gh.exe`), give `-D` a Windows path such as `'D:\ombelle-backups\auto'`: Windows reads a `/mnt/d/…` path as `D:\mnt\d\…`.
@@ -127,7 +127,7 @@ The Vercel Neon integration creates a Neon branch `preview/<git branch>` for eac
 
 `.github/workflows/cleanup-neon-preview.yml` runs `scripts/cleanup-neon-preview.sh` when a pull request closes, merged or not, and deletes `preview/<head branch>` through the Neon API. It refuses names outside `preview/`, default or protected branches and unexpected git branch names, and does nothing when the branch is absent. Run it manually (Actions → Clean up Neon preview branch → Run workflow) with a git branch name to remove a leftover. GitHub deletes merged head branches automatically.
 
-It needs the repository secret `NEON_API_KEY`: a project-scoped API key for `neon-carmine-cable`, created in the Neon console under the organization's API keys. Keep `main` and any branch you created by hand out of the `preview/` prefix.
+It needs the repository secret `NEON_API_KEY`: a project-scoped API key for `<neon-project>`, created in the Neon console under the organization's API keys. Keep `main` and any branch you created by hand out of the `preview/` prefix.
 
 ## Contacts and policy pages
 

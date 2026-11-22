@@ -122,7 +122,7 @@ Playwright's bundled Chromium. `OMBELLE_BUN_EXECUTABLE` and `OMBELLE_NODE_EXECUT
 - [CLI release procedure](docs/cli-release.md) and [changelog](CHANGELOG.md)
 - [Hosted deployment](docs/hosted-deployment.md), [production operations and runbooks](docs/production-operations.md),
   [snapshot service operations](docs/snapshot-service-operations.md)
-- [Decisions](docs/decisions/), [evidence](docs/evidence/) and [local playground](docs/local-playground.md)
+- [Decisions](docs/decisions), [evidence](docs/evidence) and [local playground](docs/local-playground.md)
 
 ## Contributing and license
 

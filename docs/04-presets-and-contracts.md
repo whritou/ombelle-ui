@@ -130,7 +130,7 @@ Installation writes the base component, scoped recipe CSS, and an example usage 
 
 A local recipe JSON can reference a built-in preset available in the pinned catalog or an accompanying preset file using an explicitly supported bundle format. The initial example uses a built-in preset ID. A remotely published recipe resolves its preset revision by ID. No path or arbitrary URL is accepted through `presetRef.id`.
 
-The local foundation implements the built-in-only Button path described in the [approved recipe design](superpowers/specs/2026-10-21-local-button-recipes-design.md). It generates a separate `RecipeButton` and self-contained CSS rather than replacing the app's ordinary Button. Recipe revisions are recorded separately from global preset provenance and survive ordinary additions and compatible theme changes. Remote resolution of recipe and preset codes is implemented (see [Hosted API v1](hosted-api-v1.md)); file bundles remain future work. See [local usage](foundation-local-usage.md#local-button-recipes) for commands and current limitations.
+The local foundation implements the built-in-only Button path described in the [approved recipe design](internal/superpowers/specs/2026-10-21-local-button-recipes-design.md). It generates a separate `RecipeButton` and self-contained CSS rather than replacing the app's ordinary Button. Recipe revisions are recorded separately from global preset provenance and survive ordinary additions and compatible theme changes. Remote resolution of recipe and preset codes is implemented (see [Hosted API v1](hosted-api-v1.md)); file bundles remain future work. See [local usage](foundation-local-usage.md#local-button-recipes) for commands and current limitations.
 
 ## Snapshot model
 

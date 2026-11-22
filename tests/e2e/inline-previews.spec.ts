@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { componentDocs } from '../../apps/www/src/site/components/catalog.js'
 
-// Inline component previews on /components/[id] (docs/superpowers/specs/2026-11-19-inline-component-previews-design.md).
+// Inline component previews on /components/[id] (docs/internal/superpowers/specs/2026-11-19-inline-component-previews-design.md).
 // Run pnpm build:packages and pnpm generate:preview first.
 const site = 'http://127.0.0.1:3000'
 const families = [

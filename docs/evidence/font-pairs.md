@@ -1,6 +1,6 @@
 # Font pairs evidence
 
-Date: 2026-11-14. Branch `feat/font-pairs`, cut from `feat/components-076`. Design: [font pairs design](../superpowers/specs/2026-11-14-font-pairs-design.md). Plan: [font pairs plan](../superpowers/plans/2026-11-14-font-pairs.md). This records what ran, what passed, and what did not run.
+Date: 2026-11-14. Branch `feat/font-pairs`, cut from `feat/components-076`. Design: [font pairs design](../internal/superpowers/specs/2026-11-14-font-pairs-design.md). Plan: [font pairs plan](../internal/superpowers/plans/2026-11-14-font-pairs.md). This records what ran, what passed, and what did not run.
 
 ## Environment
 

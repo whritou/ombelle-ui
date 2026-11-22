@@ -1,6 +1,6 @@
 # Liquid glass foundation
 
-5 November 2026. This records PR A of [liquid glass kit parity](../superpowers/specs/2026-11-05-liquid-glass-kit-parity-design.md): the repurposed controls, the built-in preset values, the tinted-surface contrast model, the one-ink Button and the kit backdrop. Liquid glass stays experimental. This record does not run the full foundation gate, the browser e2e suite or the consumer matrix, and it is not a human visual or accessibility review.
+5 November 2026. This records PR A of [liquid glass kit parity](../internal/superpowers/specs/2026-11-05-liquid-glass-kit-parity-design.md): the repurposed controls, the built-in preset values, the tinted-surface contrast model, the one-ink Button and the kit backdrop. Liquid glass stays experimental. This record does not run the full foundation gate, the browser e2e suite or the consumer matrix, and it is not a human visual or accessibility review.
 
 ## Source and environment
 
@@ -76,7 +76,7 @@ With `transparency: "reduced"` every pair passes on its opaque surface.
 
 ## Screenshots
 
-Images are in [images/glass-foundation](images/glass-foundation/), each in `-light` and `-dark`:
+Images are in [images/glass-foundation](images/glass-foundation), each in `-light` and `-dark`:
 
 - `button-variants`: default, secondary, outline, ghost, link and destructive at rest;
 - `button-states`: rest, hover (pointer), pressed, focus (keyboard-style focus), disabled, small and large; `button-pressed` holds the pointer down on "Pressed";

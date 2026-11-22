@@ -144,4 +144,4 @@ Glass stays experimental. The measured checks are automated, in one Chromium bui
 - Redeploy the hosted snapshot service.
 - Switching between stable families with `theme add` leaves previously installed colocated component CSS from the old family in place. This is pre-existing and not specific to glass.
 
-See the [liquid glass documentation](../components/liquid-glass.md) and the [approved design](../superpowers/specs/2026-11-03-liquid-glass-design.md).
+See the [liquid glass documentation](../components/liquid-glass.md) and the [approved design](../internal/superpowers/specs/2026-11-03-liquid-glass-design.md).

@@ -7,8 +7,8 @@ Breadcrumb, Pagination and Toast in all five families. Liquid glass is stable,
 without an accessibility guarantee. Both Radix and Base UI editions are supported; Base UI Toast uses
 its native manager API. Tabs appearances, Table density/striping, Card surfaces,
 Badge size/dot composition and Alert success/warning/info intents are also
-implemented. See the individual [component references](components/) and the
-[batch design](superpowers/specs/2026-11-08-forms-navigation-overlays-design.md).
+implemented. See the individual [component references](components) and the
+[batch design](internal/superpowers/specs/2026-11-08-forms-navigation-overlays-design.md).
 The public CLI 0.7.2 includes these additions and their new API options.
 
 The 0.7.3 display components add [Spinner](components/spinner.md),
@@ -17,7 +17,7 @@ The 0.7.3 display components add [Spinner](components/spinner.md),
 [Stepper](components/stepper.md) in all five families, with Radix and Base UI
 editions and recipe editors. Field is a composition that wires a label, hint and
 error to the control you already use. Meter covers segmented progress. Liquid
-glass is stable, without an accessibility guarantee. Installing them needs CLI 0.7.3 or later. See the [display components design](superpowers/specs/2026-11-09-display-components-design.md)
+glass is stable, without an accessibility guarantee. Installing them needs CLI 0.7.3 or later. See the [display components design](internal/superpowers/specs/2026-11-09-display-components-design.md)
 and the [evidence](evidence/display-components.md).
 
 The 0.7.3 form controls add [Slider](components/slider.md),
@@ -26,7 +26,7 @@ The 0.7.3 form controls add [Slider](components/slider.md),
 in all five families, with Radix and Base UI editions and recipe editors. The
 website editor uses the catalog Toggle Group, Slider and Chip, compiled at
 build time, so its single choices are radio groups with one Tab stop. See the
-[form controls design](superpowers/specs/2026-11-10-form-controls-design.md)
+[form controls design](internal/superpowers/specs/2026-11-10-form-controls-design.md)
 and the [evidence](evidence/form-controls-073.md).
 
 The 0.9 app shell adds [Sidebar](components/sidebar.md),
@@ -40,7 +40,7 @@ handle is a separator the arrow keys move, with a hit area of at least 24 px.
 A Data Table's sorted headers carry aria-sort and its selection count is
 announced. Each component draws the looks it borrows (sheet, tooltip, menus,
 table) under its own slots. Liquid glass is stable, without an accessibility guarantee. Installing them
-needs CLI 0.9.0. See the [design](superpowers/specs/2026-11-17-app-shell-09-design.md)
+needs CLI 0.9.0. See the [design](internal/superpowers/specs/2026-11-17-app-shell-09-design.md)
 and the [evidence](evidence/app-shell-09.md).
 
 The 0.7.6 components add [Password Field](components/password-field.md),
@@ -55,7 +55,7 @@ Password Field's toggle keeps the caret and the input element. A Carousel
 scrolls with CSS scroll snap and never autoplays. A Toolbar is one Tab stop
 whose items overflow, in order, into a More menu; the website editors' top bar
 uses it. Liquid glass is stable, without an accessibility guarantee. Installing them needs CLI 0.7.6 or
-later. See the [design](superpowers/specs/2026-11-13-components-076-design.md)
+later. See the [design](internal/superpowers/specs/2026-11-13-components-076-design.md)
 and the [evidence](evidence/components-076.md).
 
 The 0.7.5 primitives add [Toggle](components/toggle.md),
@@ -67,7 +67,7 @@ Collapsible content leaves the Tab order, and an Item link keeps its link role
 inside an Item Group. Command, Combobox, Select and Sheet draw the family
 scrollbar on their lists. The website's editors and docs use the compiled
 components. Liquid glass is stable, without an accessibility guarantee. Installing the five needs CLI
-0.7.5 or later. See the [design](superpowers/specs/2026-11-12-primitives-075-design.md)
+0.7.5 or later. See the [design](internal/superpowers/specs/2026-11-12-primitives-075-design.md)
 and the [evidence](evidence/primitives-075.md).
 
 The 0.7.5 editor inputs add [Number Input](components/number-input.md) and
@@ -79,7 +79,7 @@ brightness, its contrast readout states the WCAG level in text, and its
 eyedropper appears only where the browser has the EyeDropper API. The website's
 preset and component editors use them in place of native colour inputs and
 number fields. Liquid glass is stable, without an accessibility guarantee. Installing them needs CLI
-0.7.5 or later. See the [design](superpowers/specs/2026-11-12-editor-inputs-075-design.md)
+0.7.5 or later. See the [design](internal/superpowers/specs/2026-11-12-editor-inputs-075-design.md)
 and the [evidence](evidence/editor-inputs-075.md).
 
 The 0.7.5 variants add, with recipe fields that need CLI 0.7.5:
@@ -89,7 +89,7 @@ sizes, tones, a label and a value, a [Popover arrow](components/popover.md#varia
 a scrolling [Dialog](components/dialog.md#variants-075) body, footer and sizes,
 [Alert Dialog](components/alert-dialog.md#variants-075) media and typed confirmation,
 and a [Breadcrumb](components/breadcrumb.md#collapse-075) that collapses into a menu.
-See the [design](superpowers/specs/2026-11-12-variants-075-design.md) and the
+See the [design](internal/superpowers/specs/2026-11-12-variants-075-design.md) and the
 [evidence](evidence/variants-075.md).
 
 The 0.7.5 [Code Block](components/code-block.md) shows read-only source with
@@ -104,7 +104,7 @@ token colour reaches 4.5:1 on the surface (line numbers 3:1). The website's
 docs, component pages, playground, editors' artifact views and Get code dialog
 use it in place of the site's own code block. Liquid glass is stable,
 without an accessibility guarantee. Installing it needs CLI 0.7.5 or later. See the
-[design](superpowers/specs/2026-11-12-code-block-075-design.md) and the
+[design](internal/superpowers/specs/2026-11-12-code-block-075-design.md) and the
 [evidence](evidence/code-block-075.md).
 
 The 0.7.3 overlays add [Combobox](components/combobox.md),
@@ -113,14 +113,14 @@ The 0.7.3 overlays add [Combobox](components/combobox.md),
 Base UI editions and recipe editors. The website editor gains a Ctrl+K command
 palette, loaded on first open, and searchable Combobox pickers for the Button
 icon and the glass preset. See the
-[overlays and search design](superpowers/specs/2026-11-10-overlays-search-design.md)
+[overlays and search design](internal/superpowers/specs/2026-11-10-overlays-search-design.md)
 and the [evidence](evidence/overlays-search-073.md).
 
 The 0.7.3 [Calendar](components/calendar.md) chooses a date or a range in all
 five families, with Radix and Base UI editions and a recipe editor. Both
 editions use react-day-picker 10.0.2 for the grid; its Date Picker opens the
 Calendar in the edition's popover. The preview scenes use it; the website
-editor does not. See the [Calendar design](superpowers/specs/2026-11-10-calendar-design.md)
+editor does not. See the [Calendar design](internal/superpowers/specs/2026-11-10-calendar-design.md)
 and the [evidence](evidence/calendar-073.md).
 
 Every component must ship its source, dependencies, prop and composition reference, editor metadata, preview fixtures, supported style matrix, keyboard behavior, and accessibility evidence. Follow the selected shadcn edition's composition model and preserve familiar names wherever they mean the same thing.

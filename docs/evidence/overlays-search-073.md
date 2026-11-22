@@ -1,6 +1,6 @@
 # Overlays and search evidence (0.7.3)
 
-Combobox, Command, Hover Card and Context Menu. Spec: `docs/superpowers/specs/2026-11-10-overlays-search-design.md`.
+Combobox, Command, Hover Card and Context Menu. Spec: `docs/internal/superpowers/specs/2026-11-10-overlays-search-design.md`.
 
 ## Website size
 

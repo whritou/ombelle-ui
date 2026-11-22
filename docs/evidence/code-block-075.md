@@ -1,6 +1,6 @@
 # Evidence: Code Block (0.7.5)
 
-Sub-project 3 of the 0.7.5 work. Spec: `docs/superpowers/specs/2026-11-12-code-block-075-design.md`.
+Sub-project 3 of the 0.7.5 work. Spec: `docs/internal/superpowers/specs/2026-11-12-code-block-075-design.md`.
 
 ## Website size, before
 

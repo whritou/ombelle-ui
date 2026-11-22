@@ -1,6 +1,6 @@
 # 0.7.5 variants evidence
 
-Sub-project 4 of 0.7.5: the board variants of Checkbox, Switch, Progress and Popover (batch 4a) and Dialog, Alert Dialog and Breadcrumb (batch 4b). Spec: `docs/superpowers/specs/2026-11-12-variants-075-design.md`. Plan: `docs/superpowers/plans/2026-11-12-variants-075.md`.
+Sub-project 4 of 0.7.5: the board variants of Checkbox, Switch, Progress and Popover (batch 4a) and Dialog, Alert Dialog and Breadcrumb (batch 4b). Spec: `docs/internal/superpowers/specs/2026-11-12-variants-075-design.md`. Plan: `docs/internal/superpowers/plans/2026-11-12-variants-075.md`.
 
 ## Website size, before
 
