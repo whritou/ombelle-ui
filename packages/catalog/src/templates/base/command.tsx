@@ -71,11 +71,20 @@ export type CommandProps = React.ComponentProps<'div'> & {
   filter?: boolean
   /** The search text on the first render. */
   defaultSearch?: string
+  /** The search text, when you keep it yourself; pair it with onSearchChange. */
+  search?: string
+  /** Called with the new search text as the user types, for example to fetch filtered items. */
+  onSearchChange?(search: string): void
 }
 
 /** A keyboard-first command menu: a search box over a filtered list of commands. */
-export function Command({ className, filter = true, defaultSearch = '', label = 'Commands', children, ...props }: CommandProps) {
-  const [search, setSearch] = React.useState(defaultSearch)
+export function Command({ className, filter = true, defaultSearch = '', search: searchProp, onSearchChange, label = 'Commands', children, ...props }: CommandProps) {
+  const [ownSearch, setOwnSearch] = React.useState(defaultSearch)
+  const search = searchProp ?? ownSearch
+  const setSearch = (next: string) => {
+    if (searchProp === undefined) setOwnSearch(next)
+    onSearchChange?.(next)
+  }
   const inDialog = React.useContext(DialogContext)
   const query = filter ? search.trim().toLowerCase() : ''
   // Each command registers whether it matches, so commands inside your own components count too.
@@ -102,7 +111,8 @@ export function Command({ className, filter = true, defaultSearch = '', label = 
         inline
         open
         filter={null}
-        autoHighlight
+        // The first command starts highlighted, as in the Radix edition.
+        autoHighlight="always"
         value={search}
         onValueChange={(value, details) => {
           // Choosing a command runs it; only typing changes the search.
@@ -148,18 +158,31 @@ export function CommandDialog({ title = 'Command menu', className, children, ...
 }
 
 export function CommandInput({ className, ...props }: Omit<Part<typeof Autocomplete.Input>, 'value' | 'defaultValue'>) {
-  const { label, inDialog } = React.useContext(SearchContext)
+  const { label, inDialog, count } = React.useContext(SearchContext)
   return (
     <div data-slot="command-search">
       <SearchIcon aria-hidden="true" />
-      <Autocomplete.Input aria-label={label} className={cn(className)} {...props} data-slot="command-input" />
+      <Autocomplete.Input
+        aria-label={label}
+        className={cn(className)}
+        // Base UI keeps pointing at the first option after the last match is gone; with no
+        // options there is nothing to point at.
+        {...(count === 0 && { 'aria-activedescendant': undefined })}
+        {...props}
+        data-slot="command-input"
+      />
       {inDialog && <kbd aria-hidden="true">Esc</kbd>}
     </div>
   )
 }
 
-export function CommandList({ className, ...props }: Part<typeof Autocomplete.List>) {
-  return <Autocomplete.List className={cn(className)} {...props} data-slot="command-list" />
+export type CommandListProps = Part<typeof Autocomplete.List> & {
+  /** The list box's name; default "Suggestions", as in the Radix edition. */
+  label?: string
+}
+
+export function CommandList({ className, label = 'Suggestions', ...props }: CommandListProps) {
+  return <Autocomplete.List aria-label={label} className={cn(className)} {...props} data-slot="command-list" />
 }
 
 export type CommandGroupProps = Omit<Part<typeof Autocomplete.Group>, 'children'> & {
@@ -203,6 +226,8 @@ export function CommandItem({ className, value, keywords, onSelect, onClick, chi
     <Autocomplete.Item
       value={entry.text}
       className={cn(className)}
+      // The highlighted command is the selected option, as in the Radix edition.
+      render={(itemProps, state) => <div {...itemProps} aria-selected={state.highlighted} />}
       onClick={(event) => {
         onClick?.(event)
         if (!event.defaultPrevented) onSelect?.(entry.text)

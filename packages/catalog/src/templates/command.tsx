@@ -19,8 +19,8 @@ function partType(element: React.ReactElement): unknown {
   return element.type
 }
 
-// The search text lives here so it can start filled (defaultSearch) and the input can show
-// the dialog's Esc hint.
+// The search text lives here so it can start filled (defaultSearch) or be kept by the caller
+// (search, onSearchChange), and the input can show the dialog's Esc hint.
 const SearchContext = React.createContext<{ search: string; setSearch(search: string): void; inDialog: boolean }>({
   search: '', setSearch: () => {}, inDialog: false,
 })
@@ -40,11 +40,20 @@ export type CommandProps = Omit<React.ComponentProps<typeof CommandPrimitive>, '
   filter?: boolean
   /** The search text on the first render. */
   defaultSearch?: string
+  /** The search text, when you keep it yourself; pair it with onSearchChange. */
+  search?: string
+  /** Called with the new search text as the user types, for example to fetch filtered items. */
+  onSearchChange?(search: string): void
 }
 
 /** A keyboard-first command menu: a search box over a filtered list of commands. */
-export function Command({ className, filter = true, defaultSearch = '', label = 'Commands', ...props }: CommandProps) {
-  const [search, setSearch] = React.useState(defaultSearch)
+export function Command({ className, filter = true, defaultSearch = '', search: searchProp, onSearchChange, label = 'Commands', ...props }: CommandProps) {
+  const [ownSearch, setOwnSearch] = React.useState(defaultSearch)
+  const search = searchProp ?? ownSearch
+  const setSearch = (next: string) => {
+    if (searchProp === undefined) setOwnSearch(next)
+    onSearchChange?.(next)
+  }
   const inDialog = React.useContext(DialogContext)
   return (
     <SearchContext.Provider value={{ search, setSearch, inDialog }}>
