@@ -75,7 +75,7 @@ Family stylesheets changed timing (now driven by `--motion-duration`), scrims an
 
 ## 9. Supported projects
 
-The CLI now accepts any React 19 declaration (`^19.3.1`, `19.3.0`, …) instead of exactly `19.3.1`, Node 24.19.0 to below 27, and Bun 1.4.3 to below 2. `pnpm dlx` and `yarn dlx` install dependencies without a launcher on `PATH`. See [supported projects](05-cli-specification.md#supported-projects).
+The CLI now accepts any React 19 declaration (`^19.3.1`, `19.3.0`, …) instead of exactly `19.3.1`; React 18 and older are refused; React 20 and newer are accepted untested with a notice. Node 24.19.0 to below 27 and Bun 1.4.3 to below 2 are tested; newer majors run with a notice. `pnpm dlx` and `yarn dlx` install dependencies without a launcher on `PATH`. See [supported projects](05-cli-specification.md#supported-projects).
 
 ## 10. Older routes still in force
 
