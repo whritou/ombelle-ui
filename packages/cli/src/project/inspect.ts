@@ -17,6 +17,18 @@ import { assertStandaloneProject } from './workspace.js'
 import { validateInstalledRecipes } from './recipes.js'
 import { validateInstalledComponentPresets } from './component-presets.js'
 import { validateSnapshotSources } from '../snapshots/source.js'
+import { declarationWithin, supportMatrix, versionWithin } from '../support.js'
+import { asNewerDocument } from '../compat.js'
+import { cliVersion } from '../version.js'
+/** A project file a newer CLI wrote (PUB-05, PUB-08): name the version and the way forward. */
+function newerProjectFile(file: string, version: string): FoundationError {
+  return new FoundationError(
+    'UNSUPPORTED_RELEASE',
+    file + ' has ' + version + ', written by a newer Ombelle CLI than ' + cliVersion,
+    file,
+    'Run the newest CLI (npx @ombelle-ui/cli@latest with the same arguments).',
+  )
+}
 export async function readText(
   root: string,
   relative: string,
@@ -27,6 +39,41 @@ export async function readText(
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
     throw e
+  }
+}
+const reactAction =
+  'Declare react and react-dom as React 19 (for example "^19.3.1"), reinstall, and run the command again.'
+/**
+ * React and ReactDOM must be declared as React 19 (an exact version or a range inside 19.0.0 to below
+ * 20), and, once installed, resolve to a React 19 release. React 18 and 20 are refused before any write.
+ */
+export async function assertSupportedReact(
+  root: string,
+  deps: Record<string, string | undefined>,
+): Promise<void> {
+  const range = supportMatrix.react
+  for (const name of ['react', 'react-dom']) {
+    const spec = deps[name]
+    if (typeof spec !== 'string')
+      throw new FoundationError('UNSUPPORTED_PROJECT', 'Declare ' + name + ' in package.json; Ombelle components need React 19', root, reactAction)
+    if (!declarationWithin(spec, range))
+      throw new FoundationError(
+        'UNSUPPORTED_PROJECT',
+        name + ' "' + spec + '" is not supported; Ombelle components need React 19 (' + range.minimum +
+          ' or newer, below ' + range.below + '), declared as an exact version or a range such as ^19.3.1',
+        root,
+        reactAction,
+      )
+    const installed = await readText(root, 'node_modules/' + name + '/package.json').catch(() => null)
+    let version: unknown
+    try { version = installed === null ? undefined : JSON.parse(installed).version } catch { version = undefined }
+    if (typeof version === 'string' && !versionWithin(version, range))
+      throw new FoundationError(
+        'UNSUPPORTED_PROJECT',
+        'Installed ' + name + ' ' + version + ' is not React 19, although package.json declares "' + spec + '"',
+        root,
+        'Reinstall dependencies so node_modules matches package.json, then run the command again.',
+      )
   }
 }
 function declaredManager(value: unknown): PackageManager | undefined {
@@ -111,12 +158,11 @@ export async function inspectProject(
   const framework = deps.next ? 'next' : deps.vite ? 'vite' : undefined
   if (!framework || !deps.react || !/^\D*4(?:\.|$)/.test(deps.tailwindcss ?? ''))
     throw bad('Support is limited to React Vite/Next with Tailwind v4')
-  if (deps.react !== '19.3.1' || deps['react-dom'] !== '19.3.1')
-    throw bad(
-      'Foundation requires exact react and react-dom 19.3.1 declarations; align both versions before installing (ranges are not verified)',
-    )
+  await assertSupportedReact(root, deps)
   const config = (await loadJson('ui-library.config.json')) as
     ProjectConfig | undefined
+  if (config && typeof config.configVersion === 'number' && config.configVersion > 1)
+    throw newerProjectFile('ui-library.config.json', 'configVersion ' + config.configVersion)
   if (
     config &&
     (config.configVersion !== 1 ||
@@ -197,6 +243,8 @@ export async function inspectProject(
     await safePath(root, p)
   const lock = (await loadJson(config?.lockFile ?? 'ui-library.lock.json')) as
     ProjectLock | undefined
+  if (lock && typeof lock.lockVersion === 'number' && lock.lockVersion > 1)
+    throw newerProjectFile(config?.lockFile ?? 'ui-library.lock.json', 'lockVersion ' + lock.lockVersion)
   if (
     lock &&
     (lock.lockVersion !== 1 ||
@@ -218,7 +266,12 @@ export async function inspectProject(
       lock.artifacts,
       { root, componentsDir, sourceDir, utilsFile, uiAlias, utilsAlias },
     )
-  const preset = raw ? validatePreset(raw) : undefined
+  let preset: ReturnType<typeof validatePreset> | undefined
+  try {
+    preset = raw ? validatePreset(raw) : undefined
+  } catch (error) {
+    throw asNewerDocument(error, 'preset')
+  }
   if (lock) await validateSnapshotSources(lock, preset)
   return {
     ...(manager === 'bun'

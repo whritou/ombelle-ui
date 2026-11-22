@@ -4,10 +4,18 @@ import path from 'node:path'
 import os from 'node:os'
 import { spawn } from 'node:child_process'
 import { FoundationError } from '@ombelle/contracts'
+import { supportMatrix, versionWithin } from '../support.js'
 
 export function supportedNodeVersion(version: string): boolean {
-  const match = /^v24\.(\d+)\.(\d+)$/.exec(version)
-  return !!match && Number(match[1]) >= 19
+  return /^v\d+\.\d+\.\d+$/.test(version) && versionWithin(version.slice(1), supportMatrix.node)
+}
+export function supportedBunVersion(version: string): boolean {
+  return /^\d+\.\d+\.\d+$/.test(version) && versionWithin(version, supportMatrix.bun)
+}
+/** The runtime a dependency install needs, in words, for messages and help. */
+export function runtimeRequirement(kind: 'node' | 'bun'): string {
+  const range = supportMatrix[kind]
+  return (kind === 'bun' ? 'Bun ' : 'Node ') + range.minimum + ' or newer, below ' + range.below
 }
 export function safeRuntimeEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
   return Object.fromEntries(Object.entries(env).filter(([key]) => !['NODE_OPTIONS','BUN_OPTIONS','BUN_RUNTIME_TRANSPILER_CACHE_PATH'].includes(key.toUpperCase())).map(([key,value]) => [process.platform === 'win32' ? key.toUpperCase() : key, value]))
@@ -41,13 +49,13 @@ async function resolveExecutable(kind: 'node'|'bun'): Promise<string> {
     try {
       await nativeFile(candidate)
       const version=await versionAt(candidate)
-      if (kind==='bun'?version!=='1.4.3':!supportedNodeVersion(version)) throw new Error('Unsupported '+kind+' version: '+version)
+      if (kind==='bun'?!supportedBunVersion(version):!supportedNodeVersion(version)) throw new Error('Unsupported '+kind+' version: '+version)
       return candidate
     } catch (e) {
-      if (explicit) throw new FoundationError('UNSUPPORTED_PROJECT', (e as Error).message, candidate, 'Set an absolute OMBELLE_'+kind.toUpperCase()+'_EXECUTABLE path to '+(kind==='bun'?'Bun 1.4.3':'Node 24.19.0 or newer Node 24')+'.')
+      if (explicit) throw new FoundationError('UNSUPPORTED_PROJECT', (e as Error).message, candidate, 'Set an absolute OMBELLE_'+kind.toUpperCase()+'_EXECUTABLE path to '+runtimeRequirement(kind)+'.')
     }
   }
-  throw new FoundationError('UNSUPPORTED_PROJECT','Cannot resolve a supported native '+kind+' executable',undefined,'Install '+(kind==='bun'?'Bun 1.4.3':'Node 24.19.0 or newer Node 24')+' and configure its executable path.')
+  throw new FoundationError('UNSUPPORTED_PROJECT','Cannot resolve a supported native '+kind+' executable',undefined,'Install '+runtimeRequirement(kind)+' and configure its executable path.')
 }
 export const resolveBunExecutable = (): Promise<string> => resolveExecutable('bun')
 export const resolveNodeExecutable = (): Promise<string> => resolveExecutable('node')

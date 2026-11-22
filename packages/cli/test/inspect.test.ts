@@ -97,9 +97,12 @@ it('rejects a junction escaping the app', async () => {
 })
 
 it.each([
-  ['19.2.0', '19.2.0'],
-  ['19.3.1', '19.2.0'],
-  ['^19.3.1', '^19.3.1'],
+  ['18.3.1', '18.3.1'],
+  ['^18.3.1', '^19.3.1'],
+  ['19.3.1', '^20.0.0'],
+  ['>=19.0.0 <21', '19.3.1'],
+  ['latest', '19.3.1'],
+  ['19.0.0-rc.1', '19.0.0-rc.1'],
   ['19.3.1', undefined],
 ])(
   'rejects unsupported React pair %s / %s without writes',
@@ -162,4 +165,54 @@ it.each([
       code: 'UNSUPPORTED_PROJECT',
       message: 'Support is limited to React Vite/Next with Tailwind v4',
     })
+})
+
+// INS-01: the declarations create-vite (^19.3.1), create-next-app (19.3.0) and shadcn's Vite template
+// (^19.3.1) write today, plus the other React 19 forms package managers write.
+it.each([
+  ['^19.3.1', '^19.3.1'],
+  ['19.3.0', '19.3.0'],
+  ['19.2.0', '19.2.0'],
+  ['~19.3.1', '~19.3.1'],
+  ['19.x', '^19'],
+  ['>=19.0.0 <20', '19.3.1'],
+  ['19.3.0-canary-a1b2c3', '19.3.0-canary-a1b2c3'],
+])('accepts the React 19 declaration %s / %s', async (react, dom) => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const file = root + '/package.json'
+  const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+  pkg.dependencies.react = react
+  pkg.dependencies['react-dom'] = dom
+  await fs.writeFile(file, JSON.stringify(pkg))
+  await expect(inspectProject(root)).resolves.toMatchObject({ framework: 'vite' })
+})
+it('names the declaration and the React 19 requirement when refusing React 18', async () => {
+  const root = await createProject('next')
+  roots.push(root)
+  const file = root + '/package.json'
+  const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+  pkg.dependencies.react = pkg.dependencies['react-dom'] = '^18.3.1'
+  await fs.writeFile(file, JSON.stringify(pkg))
+  await expect(inspectProject(root)).rejects.toMatchObject({
+    code: 'UNSUPPORTED_PROJECT',
+    message: expect.stringMatching(/react "\^18\.3\.1" is not supported; Ombelle components need React 19/),
+    nextAction: expect.stringMatching(/React 19/),
+  })
+})
+it('refuses an installed React outside 19 even when the declaration is a React 19 range', async () => {
+  const root = await createProject('vite')
+  roots.push(root)
+  const file = root + '/package.json'
+  const pkg = JSON.parse(await fs.readFile(file, 'utf8'))
+  pkg.dependencies.react = pkg.dependencies['react-dom'] = '^19.3.1'
+  await fs.writeFile(file, JSON.stringify(pkg))
+  await fs.mkdir(root + '/node_modules/react', { recursive: true })
+  await fs.writeFile(root + '/node_modules/react/package.json', JSON.stringify({ name: 'react', version: '18.3.1' }))
+  await expect(inspectProject(root)).rejects.toMatchObject({
+    code: 'UNSUPPORTED_PROJECT',
+    message: expect.stringMatching(/Installed react 18\.3\.1 is not React 19/),
+  })
+  await fs.writeFile(root + '/node_modules/react/package.json', JSON.stringify({ name: 'react', version: '19.3.2' }))
+  await expect(inspectProject(root)).resolves.toMatchObject({ framework: 'vite' })
 })
