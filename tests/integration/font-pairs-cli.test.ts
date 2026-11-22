@@ -154,7 +154,7 @@ it('removes the font tokens a later theme no longer emits and names the font pac
   const css = await fs.readFile(path.join(root, 'src/index.css'), 'utf8')
   expect(css).not.toContain('--font-mono')
   expect(css).toContain('--font-heading')
-  const notices = (jsonRecord(switched.data).notices as string[]).join('\n')
+  const notices = (jsonRecord(switched.data).notices as { message: string }[]).map((notice) => notice.message).join('\n')
   expect(notices).toContain('@fontsource-variable/inter')
   expect(notices).toContain('@fontsource-variable/jetbrains-mono')
   expect(notices).not.toContain('@fontsource-variable/fraunces')

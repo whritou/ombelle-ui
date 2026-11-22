@@ -1,6 +1,13 @@
 import type { InstallPlan } from '@ombelle/contracts'
+import { toNotices } from './notices.js'
+/**
+ * The version of every `--json` record's shape (PUB-06). Adding a field keeps it; renaming, removing or
+ * changing the meaning of a field raises it.
+ */
+export const outputVersion = 1
 export function planOutput(command: string, status: string, plan: InstallPlan) {
   return {
+    outputVersion,
     command,
     status,
     projectRoot: plan.projectRoot,
@@ -25,7 +32,7 @@ export function planOutput(command: string, status: string, plan: InstallPlan) {
     changes: plan.changes,
     dependencyPlan: plan.dependencyPlan,
     warnings: plan.diagnostics,
-    notices: plan.notices,
+    notices: toNotices(plan.notices),
     networkAccess: plan.networkAccess,
   }
 }

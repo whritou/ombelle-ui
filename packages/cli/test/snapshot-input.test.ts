@@ -210,7 +210,7 @@ it.each([
 it('describes guarded snapshot inputs and offline withdrawal limitations in help', async () => {
   let output = ''
   expect(await runCli(['--help'], { stdout: text => { output += text }, stderr: text => { output += text } })).toBe(0)
-  for (const fragment of ['init --preset <local.json>', 'add --recipe <local.json|rc_code@1>', '--snapshot-origin', '--preset-hash', '--offline', 'withdrawals']) expect(output).toContain(fragment)
+  for (const fragment of ['init --preset <file|code>', 'add --recipe <file|code>', '--snapshot-origin', '--preset-hash', '--offline', 'withdrawals']) expect(output).toContain(fragment)
 })
 it('shows source and network/cache resolution without changing the compiler hash in either output format', async () => {
   const result = await compile({ preset: getCatalog('0.1.0').presets['neo-brutalism'], componentIds: [], catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
