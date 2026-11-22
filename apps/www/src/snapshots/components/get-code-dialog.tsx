@@ -46,7 +46,6 @@ export function GetCodeDialog({
   commandFor,
   installUnavailable,
   onRetry,
-  announce,
   children,
   summary,
 }: {
@@ -58,7 +57,6 @@ export function GetCodeDialog({
   commandFor: (scope: string, manager: PackageManager) => string
   installUnavailable?: string
   onRetry: () => void
-  announce: (text: string) => void
   /** Secondary local exports, such as the JSON download. */
   children?: ReactNode
   /** What the edits change against the catalog default, read before publishing; a function gets the dialog's close. */
@@ -72,6 +70,8 @@ export function GetCodeDialog({
   const [scope, setScope] = useState(scopes[0]!.id)
   const [manager, setManager] = useState<PackageManager>('pnpm')
   const [copied, setCopied] = useState(false)
+  // A modal dialog hides the editor's own status region, so messages for this dialog are announced inside it.
+  const [message, setMessage] = useState('')
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     setManager(readManager())
@@ -93,6 +93,11 @@ export function GetCodeDialog({
   const command =
     code.status === 'ready' && !installUnavailable ? commandFor(active.id, manager) : null
   useEffect(() => setCopied(false), [command])
+  // Announce the change from "Generating…" to the command, or to the reason there is none.
+  const ready = code.status === 'ready' ? (installUnavailable ?? (command ? `Your ${subject} code is ready.` : '')) : ''
+  useEffect(() => {
+    if (open) setMessage(ready)
+  }, [open, ready])
 
   function chooseManager(next: PackageManager) {
     setManager(next)
@@ -107,9 +112,9 @@ export function GetCodeDialog({
     try {
       await navigator.clipboard.writeText(command)
       setCopied(true)
-      announce('Install command copied.')
+      setMessage('Install command copied.')
     } catch {
-      announce('Clipboard unavailable. Select the command and copy it.')
+      setMessage('Clipboard unavailable. Select the command and copy it.')
       const range = document.createRange()
       // The selected tab's command, or the plain command while the block loads.
       const node = terminal.current?.querySelector("[role='tabpanel'][data-state='active'] code") ?? fallback.current
@@ -136,6 +141,7 @@ export function GetCodeDialog({
             Get code
           </DialogTitle>
         </DialogHeader>
+        <p role="status" className="sr-only" data-testid="get-code-status">{message}</p>
         <DialogBody className={styles.body}>
         {scopes.length > 1 && (
           <div
