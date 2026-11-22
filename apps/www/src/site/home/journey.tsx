@@ -10,28 +10,29 @@ type Manager = (typeof managers)[number]['value']
 
 /**
  * What the installer plans for each way in. `PRESET` stands for the visitor's own
- * published code, so every command here runs once it is replaced. Output is summarised.
+ * published code, so every command here runs once it is replaced. Output is abbreviated from the CLI's plan: a status
+ * line, one `action path` row per file (create, update or noop; the paths depend on your project), then the prompt.
  */
 const scenarios = [
   {
     id: 'init', label: 'New project', command: 'init --preset PRESET',
     blurb: 'Detect the project, resolve the preset and plan config and CSS. Nothing is written until you accept the plan.',
-    output: ['✓ Detected Vite · React · Tailwind v4', '✓ Resolved preset PRESET (FAMILY)', '~ plan  ui-preset.json  (saved project defaults)', '~ plan  managed token and style CSS', '~ plan  ui-library.lock.json', '? Apply these changes? [y/N]'],
+    output: ['init: planned', 'create ui-library.config.json', 'create ui-preset.json', 'create ui-library.lock.json', 'update app/globals.css', 'Apply these changes? [y/N]'],
   },
   {
     id: 'theme', label: 'Existing shadcn', command: 'theme add PRESET',
     blurb: 'Already ran shadcn init? Merge the palette and tokens into your global stylesheet without reinstalling components.',
-    output: ['✓ Found components.json · globals.css', '✓ Resolved preset PRESET (FAMILY)', '~ merge  palette and tokens into globals.css', '! Existing components using these variables will change', '= keep   installed component source', '? Apply these changes? [y/N]'],
+    output: ['theme add: planned', 'update app/globals.css', 'create ui-preset.json', 'create ui-library.lock.json', 'Apply these changes? [y/N]'],
   },
   {
     id: 'one', label: 'One button', command: 'add button --preset PRESET',
     blurb: 'Scope the preset to a single Button. Project defaults and other components stay untouched.',
-    output: ['✓ Resolved preset PRESET (FAMILY)', '+ plan  one Button scoped to this preset', '= keep   project preset, theme and existing components', '? Apply these changes? [y/N]'],
+    output: ['add: planned', 'create components/ui/presets/…/button.tsx', 'create components/ui/presets/…/button.css', 'create ombelle-examples/presets/…/r1.tsx', 'Apply these changes? [y/N]'],
   },
   {
     id: 'add', label: 'Then add components', command: 'add button',
-    blurb: 'Components use the saved project preset, so no code is needed again. Add several at once, for example button dialog input.',
-    output: ['~ would create components/ui/button.tsx + button.css', '= keep   project preset and theme', '? Apply these changes? [y/N]'],
+    blurb: 'Components use the saved project preset, so no code is needed again. Add several at once, for example button dialog input. If shadcn already installed that component, the plan stops on its file: add --beside components/ui/button.tsx installs Ombelle next to it.',
+    output: ['add: planned', 'create components/ui/button.tsx', 'create components/ui/button.css', 'Apply these changes? [y/N]'],
   },
 ] as const
 type ScenarioId = (typeof scenarios)[number]['id']
@@ -121,9 +122,9 @@ export function JourneySection() {
                     <button className="ol-term-copy" type="button" onClick={() => copyCommand.copy(command)}>{copyCommand.label}</button>
                   </div>
                   <ul className="ol-term-out" aria-label="Example output">
-                    {current.output.map((line) => <li key={line} className={line.startsWith('✓') || line.startsWith('!') ? 'hi' : undefined}>{line.replace('FAMILY', family)}</li>)}
+                    {current.output.map((line) => <li key={line} className={line.startsWith('create') || line.startsWith('update') ? 'hi' : undefined}>{line}</li>)}
                   </ul>
-                  <p style={{ marginTop: 18, fontSize: 13 }}>Summarised output. Add --json for the machine-readable plan, then run again with --yes to apply it.</p>
+                  <p style={{ marginTop: 18, fontSize: 13 }}>Abbreviated output; your paths and files differ. Add --json for the machine-readable plan, then run again with --yes to apply it.</p>
                 </div>
               </div>
             </div>
