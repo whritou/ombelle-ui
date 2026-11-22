@@ -1,53 +1,52 @@
-import {
-  validatePreset,
-  type Preset,
-  type PresetSnapshot,
-  type ResolvedPreset,
-} from '@ombelle/contracts'
 import { canonicalize } from '@ombelle/compiler'
+import {
+  fieldOf,
+  publicationContentMaxBytes,
+  type PublicationKind,
+  type PublicationTypes,
+} from './kind'
 
-export const publicationMaxBytes = 128 * 1024
-export const publicationMaxAge = 24 * 60 * 60 * 1000
-export type PublishAttempt = {
+export type PublishAttempt<T extends PublicationTypes> = {
   storageVersion: 1
   key: string
   createdAt: number
-  preset: Preset
-  presetHash: string
-}
-type PublicationBase = {
-  lastPublished: PresetSnapshot | null
+} & Record<T['field'], T['data']> &
+  Record<T['hashField'], string>
+type PublicationBase<T extends PublicationTypes> = {
+  lastPublished: T['snapshot'] | null
   draftHash: string | null
   operationId: number
 }
-export type PublicationState = PublicationBase &
+export type PublicationState<T extends PublicationTypes> = PublicationBase<T> &
   (
     | { status: 'idle'; attempt: null; error: null }
     | {
         status: 'validating' | 'publishing'
-        attempt: PublishAttempt
+        attempt: PublishAttempt<T>
         error: null
       }
     | { status: 'published'; attempt: null; error: null }
-    | { status: 'failed'; attempt: PublishAttempt | null; error: string }
-    | { status: 'withdrawn'; attempt: PublishAttempt; error: string }
+    | { status: 'failed'; attempt: PublishAttempt<T> | null; error: string }
+    | { status: 'withdrawn'; attempt: PublishAttempt<T>; error: string }
   )
-export type PublicationAction =
+export type PublicationAction<T extends PublicationTypes> =
   | { type: 'draft'; draftHash: string | null }
-  | { type: 'confirm'; attempt: PublishAttempt; operationId: number }
-  | { type: 'restore'; attempt: PublishAttempt }
+  | { type: 'confirm'; attempt: PublishAttempt<T>; operationId: number }
+  | { type: 'restore'; attempt: PublishAttempt<T> }
   | { type: 'cancel' }
   | { type: 'publishing'; operationId: number; draftHash: string }
   | {
       type: 'published'
       operationId: number
       draftHash: string
-      snapshot: PresetSnapshot
+      snapshot: T['snapshot']
     }
   | { type: 'failed'; operationId: number; draftHash: string; error: string }
   | { type: 'withdrawn'; operationId: number; draftHash: string; error: string }
 
-export function initialPublication(): PublicationState {
+export function initialPublication<
+  T extends PublicationTypes,
+>(): PublicationState<T> {
   return {
     status: 'idle',
     attempt: null,
@@ -57,30 +56,57 @@ export function initialPublication(): PublicationState {
     error: null,
   }
 }
-export function createPublishAttempt(
-  preset: ResolvedPreset,
+
+/** Builds an attempt record with the kind's field names. */
+export function publishAttempt<T extends PublicationTypes>(
+  kind: PublicationKind<T>,
+  fields: { key: string; createdAt: number; data: T['data']; hash: string },
+): PublishAttempt<T> {
+  return {
+    storageVersion: 1,
+    key: fields.key,
+    createdAt: fields.createdAt,
+    [kind.field]: fields.data,
+    [kind.hashField]: fields.hash,
+  } as PublishAttempt<T>
+}
+
+export const attemptData = <T extends PublicationTypes>(
+  kind: PublicationKind<T>,
+  attempt: PublishAttempt<T>,
+) => fieldOf(attempt, kind.field) as T['data']
+export const attemptHash = <T extends PublicationTypes>(
+  kind: PublicationKind<T>,
+  value: PublishAttempt<T> | T['snapshot'],
+) => fieldOf(value, kind.hashField) as string
+
+export function createPublishAttempt<T extends PublicationTypes>(
+  kind: PublicationKind<T>,
+  draft: T['resolved'],
   now: number,
-): PublishAttempt {
-  const data = validatePreset(preset.data)
+): PublishAttempt<T> {
+  const data = kind.validate(draft.data)
   if (
     !Number.isSafeInteger(now) ||
     now < 0 ||
-    !/^[a-f0-9]{64}$/.test(preset.hash) ||
-    new TextEncoder().encode(canonicalize(data)).byteLength > 65_536
+    !/^[a-f0-9]{64}$/.test(draft.hash) ||
+    new TextEncoder().encode(canonicalize(data)).byteLength >
+      publicationContentMaxBytes
   )
-    throw new Error('The current preset cannot be published.')
-  return {
-    storageVersion: 1,
+    throw new Error(`The current ${kind.noun} cannot be published.`)
+  return publishAttempt(kind, {
     key: crypto.randomUUID(),
     createdAt: now,
-    preset: structuredClone(data),
-    presetHash: preset.hash,
-  }
+    data: structuredClone(data),
+    hash: draft.hash,
+  })
 }
-export function reducePublication(
-  state: PublicationState,
-  action: PublicationAction,
-): PublicationState {
+
+export function reducePublication<T extends PublicationTypes>(
+  kind: PublicationKind<T>,
+  state: PublicationState<T>,
+  action: PublicationAction<T>,
+): PublicationState<T> {
   if (action.type === 'draft') {
     if (state.draftHash === action.draftHash) return state
     return {
@@ -97,7 +123,7 @@ export function reducePublication(
       ...state,
       status: 'failed',
       attempt: action.attempt,
-      draftHash: action.attempt.presetHash,
+      draftHash: attemptHash(kind, action.attempt),
       error:
         'A pending publication was recovered. Retry explicitly within 24 hours of the original attempt.',
     }
@@ -110,7 +136,7 @@ export function reducePublication(
       operationId: state.operationId + 1,
     }
   if (action.type === 'confirm') {
-    if (state.draftHash !== action.attempt.presetHash) return state
+    if (state.draftHash !== attemptHash(kind, action.attempt)) return state
     return {
       ...state,
       status: 'validating',
@@ -123,7 +149,7 @@ export function reducePublication(
     state.operationId !== action.operationId ||
     state.draftHash !== action.draftHash ||
     !state.attempt ||
-    state.attempt.presetHash !== action.draftHash
+    attemptHash(kind, state.attempt) !== action.draftHash
   )
     return state
   if (action.type === 'publishing')
@@ -142,7 +168,7 @@ export function reducePublication(
       error: action.error,
     }
   if (action.type === 'published') {
-    if (action.snapshot.presetHash !== action.draftHash) return state
+    if (attemptHash(kind, action.snapshot) !== action.draftHash) return state
     return {
       ...state,
       status: 'published',
