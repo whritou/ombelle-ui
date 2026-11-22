@@ -15,3 +15,14 @@ Hosted deployments must leave `NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN` unset. Local 
 Configure server-only Postgres, public-origin and rate-secret variables as described in [snapshot operations](snapshot-service-operations.md). Preview deployments require isolated Neon storage and the production-host guard; set `OMBELLE_SNAPSHOT_PRODUCTION_DB_HOST` to a bare hostname (no scheme, port, path or trailing dot), or previews fail closed. A preview accepts publications only from its own deployment URL (`VERCEL_URL`), not from the branch alias, and its pages and CLI requests sit behind Vercel Deployment Protection. Migrate the isolated database explicitly before publishing test data. Verify the preview before initializing production and releasing the public domain.
 
 Initialize a Neon database with the **direct** connection of the intended branch. `snapshots:init` rejects pooled hosts (`-pooler`), and each Neon branch has its own endpoint: an init run against a preview branch leaves production uninitialized, and the production API then answers every read with `503 SNAPSHOT_SERVICE_UNAVAILABLE`. After initializing, an unknown code must return `404 SNAPSHOT_NOT_FOUND`. Do not disable deployment protection to run checks, enable Auth/Realtime, or upgrade either plan as part of this implementation.
+
+### Changing the database schema
+
+`snapshots:init` creates the schema when the database is empty and otherwise applies any numbered forward migrations (`postgresMigrations` in `apps/www/src/snapshots/server/postgres-migrations.ts`) in one transaction under an advisory lock, then records the new `schema_version`. It is safe to repeat and refuses a schema newer than the build. The runtime accepts any schema version at or above `postgresMinimumSchemaVersion`, so the order for a schema change is:
+
+1. Write the migration as the next version, **additive only** (new table, new column with a default, an index, a looser constraint). Never remove or tighten what the currently deployed code uses in the same release.
+2. Deploy the code (it still serves the old schema). Verify a preview first, with its own Neon branch.
+3. Run `snapshots:init` against the production branch with the direct URL. The old deployment keeps serving throughout, because it accepts the newer version.
+4. A destructive change (dropping or tightening) is a later release: first raise `postgresMinimumSchemaVersion` and deploy it, then migrate.
+
+Because the previous deployment still accepts the migrated schema, Vercel Instant Rollback stays safe after step 3. The five-second statement timeout in the init transaction applies to each migration; a slow one sets its own `SET LOCAL statement_timeout`.
