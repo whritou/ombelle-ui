@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ombelle-ui.vercel.app/schemas/project-lock-1.json",
+  "title": "Ombelle project lock (ui-library.lock.json)",
+  "description": "Provenance of every file and declaration Ombelle manages. Commit it. lockVersion 1 is the 1.0 format; fields added since 0.1 (edition, placements, presetSource, componentPresets, componentPresetSources, recipes, recipeSources) are optional, so older locks stay valid. A higher lockVersion is refused as written by a newer CLI.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lockVersion", "catalogRelease", "compilerVersion", "presetHash", "artifacts", "managedDeclarations"],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logicalPath", "sha256", "kind"],
+      "properties": {
+        "logicalPath": {"type": "string", "minLength": 1, "description": "The catalog path, independent of where the project placed the file."},
+        "sha256": {"$ref": "#/$defs/hash", "description": "The bytes Ombelle wrote (LF line endings). A file whose bytes differ was edited after install."},
+        "kind": {"enum": ["component", "style", "usage", "utility"]}
+      }
+    },
+    "artifacts": {"type": "object", "additionalProperties": {"$ref": "#/$defs/artifact"}, "description": "Keyed by the project-relative path."},
+    "scopedRow": {
+      "type": "object",
+      "required": ["artifacts", "darkSelector", "preset", "provenance"],
+      "properties": {"artifacts": {"$ref": "#/$defs/artifacts"}, "darkSelector": {"type": "string"}},
+      "description": "A recipe or component-preset install: its compile identity (recompiled and compared on every run) and the files it owns."
+    }
+  },
+  "properties": {
+    "lockVersion": {"const": 1},
+    "edition": {"enum": ["radix", "base"], "description": "Absent means radix."},
+    "placements": {"type": "object", "additionalProperties": {"const": "beside"}, "description": "Components installed beside an app-owned file, under <components>/ombelle/."},
+    "catalogRelease": {"type": "string"},
+    "compilerVersion": {"type": "string"},
+    "presetHash": {"$ref": "#/$defs/hash"},
+    "presetSource": {"type": "object", "description": "The ps_ code the saved preset came from; see snapshot-source.schema.json."},
+    "artifacts": {"$ref": "#/$defs/artifacts"},
+    "managedDeclarations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["selector", "property", "value", "existedBefore"],
+        "properties": {
+          "selector": {"type": "string"},
+          "property": {"type": "string"},
+          "value": {"type": "string"},
+          "important": {"type": "boolean"},
+          "existedBefore": {"type": "boolean"}
+        }
+      },
+      "description": "Theme declarations Ombelle wrote into the global stylesheet, with the value it wrote."
+    },
+    "componentPresets": {"type": "object", "additionalProperties": {"$ref": "#/$defs/scopedRow"}, "description": "Keyed id@revision."},
+    "componentPresetSources": {"type": "object", "description": "Keyed id@revision; see snapshot-source.schema.json."},
+    "recipes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/scopedRow"}, "description": "Keyed id@revision."},
+    "recipeSources": {"type": "object", "description": "Keyed id@revision; see recipe-snapshot-source.schema.json."}
+  }
+}
