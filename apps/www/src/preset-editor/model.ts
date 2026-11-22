@@ -280,7 +280,7 @@ export function applyGlassTint(input: PresetEditorDraft, tint: GlassTintId | 'wh
   const tintKeys = ['card', 'popover', 'cardForeground', 'popoverForeground', 'foreground', 'primary', 'ring', 'primaryForeground', 'destructive'] as const
   if (tint === 'white') {
     for (const mode of ['light', 'dark'] as const) for (const key of colorKeys) set(mode, key, base.modes[mode][key])
-    return validateDraftEnvelope({ ...draft, edits })
+    return keepTintInBound(validateDraftEnvelope({ ...draft, edits }), tint)
   }
   // Rosee on a Relief draft takes Relief's warmer veil.
   const warm = tint === 'rose' && presetFieldValue(draft, '/modes/light/card') === glassTintPalettes.relief.light.card
@@ -299,7 +299,31 @@ export function applyGlassTint(input: PresetEditorDraft, tint: GlassTintId | 'wh
         set(mode, key, base.modes[mode].destructive)
     }
   }
-  return validateDraftEnvelope({ ...draft, edits })
+  return keepTintInBound(validateDraftEnvelope({ ...draft, edits }), tint)
+}
+
+/**
+ * A tint chip keeps the contrast bound. When the new veil fails it at every opacity, the draft first takes a
+ * backdrop that veil can pass on: Fumé's dark one for the Fumée veil (dark glass, also in light mode, which a
+ * backdrop pushed lighter washes out), the family base's for the others. Then the glass opacity rises to the
+ * lowest value that passes. A veil nothing rescues is left for the readout to report.
+ */
+function keepTintInBound(draft: PresetEditorDraft, tint: GlassTintId | 'white'): PresetEditorDraft {
+  let next = draft
+  let report = presetGlassReport(next)
+  if (report === null || report.passes) return next
+  if (report.minimumOpacity === null || tint === 'smoke') {
+    const catalog = getCatalog('0.1.0')
+    const backdrop = tint === 'smoke'
+      ? catalog.startingPresets['builtin-liquid-glass-fume'].design!
+      : catalog.presets['liquid-glass'].design!
+    for (const field of ['glassBackdropContrast', 'glassBackdropTone', 'glassSheen'] as const)
+      next = setPresetEdit(next, `/design/${field}`, String(backdrop[field]))
+    report = presetGlassReport(next)
+  }
+  if (report !== null && !report.passes && report.minimumOpacity !== null)
+    next = setPresetEdit(next, '/design/glassOpacity', String(report.minimumOpacity))
+  return next
 }
 
 export function materializePreset(input: PresetEditorDraft): Preset {
