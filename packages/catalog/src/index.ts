@@ -62,6 +62,8 @@ export type ComponentTemplate = {
 export type Catalog = {
   /** Liquid glass starting points, keyed by preset id; see startingPresetOrder. */
   startingPresets: Record<StartingPresetId, Preset>
+  /** Earlier revisions of built-in and starting presets, resolvable only by exact id@revision. */
+  retiredPresets: Preset[]
   release: string
   presets: Record<StyleFamily, Preset>
   templates: Record<ComponentId, ComponentTemplate>
@@ -211,6 +213,7 @@ function buildCatalog(release: string): Catalog {
         validatePreset(catalogData.startingPresets[id as keyof typeof catalogData.startingPresets]),
       ]),
     ) as Record<StartingPresetId, Preset>,
+    retiredPresets: catalogData.retiredPresets.map((preset) => validatePreset(preset)),
     templates,
     baseTemplates,
     styles: { ...catalogData.styles },

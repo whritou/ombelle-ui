@@ -8,7 +8,11 @@ export function resolveRecipePreset(ref: Recipe['presetRef']): Preset {
       '/presetRef/compilerVersion',
     )
   const catalog = getCatalog(ref.catalogRelease)
-  const preset = [...Object.values(catalog.presets), ...Object.values(catalog.startingPresets)].find(
+  const preset = [
+    ...Object.values(catalog.presets),
+    ...Object.values(catalog.startingPresets),
+    ...catalog.retiredPresets,
+  ].find(
     (p) => p.id === ref.id && p.revision === ref.revision,
   )
   if (!preset)

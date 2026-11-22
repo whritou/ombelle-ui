@@ -12,7 +12,7 @@ exports[`compile output is unchanged > flat radius 0 1`] = `"57e65d8a3fc354c88d0
 
 exports[`compile output is unchanged > liquid-glass 1`] = `"29c6bd56563c5b4b68f331c1401a1e8125cf803cd777713ab4d485ac410c8859"`;
 
-exports[`compile output is unchanged > liquid-glass material on 1`] = `"f32d51ddaab2e968361dd48c9b462f254708eca94b7ced4b5e73ba32031ec495"`;
+exports[`compile output is unchanged > liquid-glass material on 1`] = `"b2c8c53e251785deb692e1c2b48e7af76012d4d5797e1197430a82ad5a7457e6"`;
 
 exports[`compile output is unchanged > liquid-glass prefixed dialog 1`] = `"93d4084f293974e2eb8871e589af89b65a0b682f5d7a78146cac8ca05479c3af"`;
 

@@ -57,6 +57,18 @@ const startingPresets = Object.fromEntries(
     .map((name) => JSON.parse(readText(base + 'presets/' + name)))
     .map((preset) => [preset.id, preset]),
 )
+// Earlier revisions of built-in presets, kept resolvable by id@revision after a revision bump
+// (docs/decisions/0009-snapshot-identity-and-contract-version.md). Files are named <id>@<revision>.json.
+const retiredPresets = fs
+  .readdirSync(base + 'presets/retired')
+  .filter((name) => name.endsWith('.json'))
+  .sort()
+  .map((name) => {
+    const preset = JSON.parse(readText(base + 'presets/retired/' + name))
+    const expected = `${preset.id.replace(/^builtin-/, '')}@${preset.revision}.json`
+    if (name !== expected) throw new Error(`Retired preset ${name} must be named ${expected}`)
+    return preset
+  })
 const glassLabStyle = readText(base + 'styles/liquid-glass-lab.css')
 const lintMessages = lintCatalogStyles({
   componentStyles,
@@ -79,6 +91,7 @@ writeFileAtomicSync(
       componentStyles,
       presets,
       startingPresets,
+      retiredPresets,
       utility: readText(base + 'templates/utils.ts'),
       glassFilter: readText(base + 'templates/liquid-glass-filter.tsx'),
     }) +

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "id": "builtin-liquid-glass-fume",
   "name": "Fumé",
-  "revision": 1,
+  "revision": 2,
   "catalogRelease": "0.1.0",
   "compilerVersion": "0.1.0",
   "platform": "react-web",
