@@ -2,197 +2,227 @@
 
 ## Purpose and status
 
-The product CLI persists project defaults and installs exact component or recipe artifacts. This is the proposed public interface. `@your-ui/cli`, its versions, registry URLs, and IDs are placeholders; the published installer is `@ombelle-ui/cli` (see the [CLI release](cli-release.md)). The private local foundation implements `init`, ordinary `add`, `theme add`, Button-only `add button --preset` and `add --recipe`, with local files or exact hosted publication codes. See [local usage](foundation-local-usage.md) for executable repository commands and hosted-service availability.
+This is the specification of the Ombelle CLI as of 1.0. Every command, flag, environment variable, project file and output field below exists in `packages/cli`; nothing here is proposed. The npm package is `@ombelle-ui/cli` and its binary is `ombelle` (see the [CLI release](cli-release.md) for published versions). `npx @ombelle-ui/cli@<version> <command>` runs it; the examples below write `ombelle`.
 
-The upstream shadcn CLI remains a supported transport for explicitly published standard registry items. It has its own preset system. Our preset JSON and project lock behavior must not be presented as upstream capabilities.
+The CLI persists a project preset, merges its theme into the app's global stylesheet, and installs reviewed component source with lock provenance. It plans every change first and applies a plan in one guarded transaction. The upstream shadcn CLI is a separate tool with its own presets; Ombelle presets, locks and commands are not upstream capabilities.
 
-Ordinary local additions support Button, Badge, Card, Dialog, Input, Label, Native Select, and Textarea. Badge, Card, Label, Native Select, and Textarea each emit independently owned colocated CSS and a usage example; their `add` commands read the saved global preset. CLI and registry item names match shadcn, for example `add native-select`. Native Select and Dialog declare the exactly pinned `lucide-react` 1.55.0, which the dependency plan adds when it is missing. Component-specific `--preset` and recipes remain Button-only. See the [Badge](components/badge.md), [Card](components/card.md), [Label](components/label.md), [Textarea](components/textarea.md), and [Native Select](components/native-select.md) documents for their APIs.
-
-A project initialized before the native form controls has a stale shared `ui-style.css`. Its next `add` reports `FILE_CONFLICT` and writes nothing. When the stylesheet still matches its lock record, the message is `Shared style rules changed in this catalog; run theme add <presetFile> to refresh them`, where `<presetFile>` is the absolute path of the saved preset file, so the command can be pasted as printed (with `--cwd` when not in the project root); an edited stylesheet keeps the general explicit-migration conflict. `add` never refreshes the file itself. See [the migration route](foundation-local-usage.md#migrating-installs-created-before-native-form-controls), including the Dialog delete-and-re-add step.
-
-## Proposed commands
-
-```bash
-# Initialize a supported existing application from a local preset.
-npx @your-ui/cli@0.1.0 init --preset ./ui-preset.json
-
-# Read the saved project preset automatically.
-npx @your-ui/cli@0.1.0 add button dialog
-
-# Use a saved preset for this Button only; preserve project defaults.
-npx @your-ui/cli@0.1.0 add button --preset ps_brand@3
-
-# A downloaded preset is also a supported planned input.
-npx @your-ui/cli@0.1.0 add button --preset ./brand.preset.json
-
-# Inspect changes without writing source, config, cache, or dependencies.
-npx @your-ui/cli@0.1.0 add input --dry-run
-
-# Apply a versioned preset from the website; inspect the planned changes.
-npx @your-ui/cli@0.1.0 preset apply ps_brand@3 --dry-run
-npx @your-ui/cli@0.1.0 preset apply ps_brand@3
-
-# shadcn already initialized: merge styling into its global stylesheet.
-npx @your-ui/cli@0.1.0 theme add ps_brand@3
-
-# Install one customized component without replacing global defaults.
-npx @your-ui/cli@0.1.0 add --recipe rc_primary-button@2
-
-# Use the local recipe exported by the editor.
-npx @your-ui/cli@0.1.0 add --recipe ./button.recipe.json
-
-# Inspect project state and check compatibility.
-npx @your-ui/cli@0.1.0 info --json
-npx @your-ui/cli@0.1.0 doctor
-
-# Show upstream changes; updates arrive after the initial vertical slice.
-npx @your-ui/cli@0.1.0 diff button
-```
-
-`init` prepares configuration and theme integration; it does not scaffold a complete application. Recipe IDs are distinguished from local files using explicit parsing, not arbitrary remote URL execution. Support registry URLs only through a reviewed registry configuration.
-
-## Command semantics
-
-| Command                                   | Behavior                                                                                                                                                |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `init`                                    | Detect project, select or resolve preset, plan config and CSS integration, write on confirmation                                                        |
-| `add <items>`                             | Resolve exact catalog entries against saved project defaults and install required files                                                                 |
-| `add <component> --preset <code-or-file>` | Install one component with an explicitly selected, isolated preset; preserve project-wide defaults                                                      |
-| `add --recipe`                            | Install the recipe's base component, scoped CSS, pinned token scope, and example usage                                                                  |
-| `preset show`                             | Print the locally resolved preset and provenance                                                                                                        |
-| `preset apply`                            | Resolve a new preset, report effects on existing components, update compatible generated files                                                          |
-| `theme add <preset>`                      | Alias of `preset apply <preset> --only theme`; merge palette and tokens into existing global CSS and persist the preset without reinstalling components |
-| `info`                                    | Read configuration, installed artifacts and compatibility status without changes                                                                        |
-| `doctor`                                  | Diagnose versions, aliases, missing imports, modified files, dependency and hash issues                                                                 |
-| `diff`                                    | Compare local source with a selected pinned catalog release without writes                                                                              |
-| `update`                                  | Later explicit migration workflow; never a background automatic update                                                                                  |
-
-Common flags are `--cwd`, `--dry-run`, `--json`, `--package-manager <npm|pnpm|yarn|bun>`, and `--yes` where applicable. The Bun foundation target is exactly 1.4.3. `preset apply` also supports `--only theme`. `--yes` accepts an already safe plan; it never enables overwriting modified files or bypassing schema and compatibility errors. Do not provide a broad force flag in alpha.
-
-`--preset` takes a saved preset code or local JSON path as its value; codes never become flag names. On `init` it establishes project defaults; on `add` it applies only to the requested component. `theme add <code-or-file>` remains the global theme installation path. Recipe inputs use `--recipe` because they additionally carry a component identity, props, text, and overrides. Local files remain a supported product workflow alongside published identifiers.
-
-Component-scoped preset selection targets one Button per command. Reject multiple components or simultaneous `--preset` and `--recipe`. Resolve and pin the exact preset, generate isolated light/dark styling and usage, and record scoped provenance without modifying the saved global preset or restyling existing components. Reuse compatible base source or stop with a conflict; never silently replace shared source. See [component-scoped preset selection](04-presets-and-contracts.md#component-scoped-preset-selection) for the full scope and persistence contract.
-
-### Implemented local Button preset command
-
-The private foundation implements local JSON input for a single Button after the target project has been initialized:
-
-```powershell
-pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --dry-run --json
-pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.example.json --cwd APP --yes
-```
-
-The preset file is a regular UTF-8 JSON file, at most 256 KiB, validated against the strict preset schema and pinned catalog/compiler releases. The path resolves from the invoking directory. The planner writes a separate Button source, colocated CSS, a usage example, and component-scoped lock provenance. Import the generated example's Button path to use it; the ordinary Button remains unchanged. The saved project preset and global CSS remain the defaults for later ordinary additions. An identical repeat is a no-op; new revisions coexist.
-
-An existing unowned target file, edited managed source, changed content under the same preset ID/revision or changed dark selector, or incompatible shared utility produces a conflict. Choose a new revision or reconcile the files manually; `--yes` accepts only a safe plan and cannot override these conflicts. The selected package manager follows the project's explicit option, `package.json.packageManager`, or one unambiguous recognized lockfile; it preserves npm, pnpm, Yarn, or Bun lockfile ownership. Contradictory or missing manager evidence is refused (see the strict rule below). Workspaces and npm-shrinkwrap are outside this foundation.
-
-This slice covers one Button in supported Vite React TSX and Next.js App Router TSX projects using Tailwind v4 and the supported Radix nova/new-york component editions. Component presets and recipes remain Radix-only; ordinary components also install in Base UI projects (see Component editions and existing files below). The preset can select flat, minimalist, or neo-brutalism styles. It generates scoped reviewed styles; arbitrary CSS overrides and global style-pack changes are not supported. Button does not render through a portal; portal-aware scoping for Dialog or other components is not implemented. Exact immutable preset and recipe snapshot codes are supported; a component-only editor workflow remains pending. The recipe API separately creates a native `RecipeButton` from local recipe JSON.
-
-The proposed dry-run is stricter than an ordinary installation: it performs no filesystem writes, even to a project cache, and never invokes the package manager. It may fetch public manifests in memory. Document network access in machine-readable output.
+Upgrading a project installed by a 0.x CLI: see [Upgrading to 1.0](upgrading-to-1.0.md).
 
 ## Supported projects
 
-The current foundation implements Vite React TSX and Next.js App Router TSX using Tailwind v4. Its consumer gate covers npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1 with both linkers, and Bun 1.4.3 with bun.lock/bun.lockb under Node/Bun CLI runtimes. Consumer framework builds use Node. Component source uses the selected Radix-based shadcn edition. A palette-only theme merge can work with other shadcn primitive editions when their token format and CSS baseline are compatible; do not reject that operation solely because the primitive family differs. JSX conversion remains a beta gate.
+| Area | Supported | Checked by |
+| --- | --- | --- |
+| React | `react` and `react-dom` declared as React 19: an exact version or a range inside 19.0.0 to below 20 (`19.3.0`, `^19.3.1`, `~19.2.0`, `19`, `19.x`, `>=19.0.0 <20`). Installed copies in `node_modules`, when present, must be React 19 too. Templates use only React 19.0 APIs (a `ref` prop on function components), so 19.0.0 is the floor; 19.3.1 is the version the evidence uses. | Every command, before any write. React 18, React 20, tags (`latest`), `workspace:`/`catalog:` and unions fail with `UNSUPPORTED_PROJECT` (exit 3) naming the declaration. |
+| Frameworks | Vite React TSX, or Next.js App Router TSX, with Tailwind CSS v4 (`tailwindcss` declared as 4.x). | Every command |
+| Package managers | npm; pnpm; Yarn 1 and Yarn 2+ (node-modules and Plug'n'Play); Bun 1.4.3 or newer 1.x with `bun.lock` or `bun.lockb`. | Selection: every command. Runtime: dependency installs. |
+| Node | Node 24.19.0 or newer, below 27 (Node 24 and 26 LTS) to run package managers. | Dependency installs; a dry run reports an install that could not start. `doctor` reports both. |
+| shadcn styles | `components.json` `style` `radix-nova`, `new-york` or no file (Radix edition); shadcn's `base-*` styles (Base UI edition). Other styles take a palette-only theme. | Every component command |
+| Browsers | Chromium-tested. Safari and Firefox are untested. | Evidence only |
 
-The npm package has one `your-ui` binary. The package-runner recipes are documented for npm, pnpm, modern Yarn and Bun; Yarn and Bun examples explicitly select the binary because it differs from the unscoped package name `cli`. Test Bun with its own runtime and Yarn with both node-modules and Plug'n'Play. Provide a local-install route for Yarn Classic.
+Workspaces (monorepo roots) and `npm-shrinkwrap.json` are refused; target the app with `--cwd`. The same matrix is printed by `ombelle --help` and checked by `ombelle doctor`.
 
-Manager selection is strict, and the runner's user agent is not consulted. A project may have at most one recognized lockfile (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock` or `bun.lockb`); two are refused even with `--package-manager`. Without `--package-manager`, a `packageManager` field and the lockfile must name the same manager, and a project with neither is refused, even for a theme-only plan. `--package-manager` must name the lockfile's manager when a lockfile exists (it may side with the lockfile against a different `packageManager` field), must match the `packageManager` field when there is no lockfile, and selects the manager on its own only when the project has neither. A refusal exits 3; align the evidence (remove the stray lockfile, or add or correct `packageManager`) and retry. Never create `package-lock.json` in a pnpm or Yarn project simply because the CLI was launched with `npx`.
+## Commands
 
-See [Installation and theme merging](10-installation-and-theme-merging.md) for runner commands, package manager rules and the CSS merge contract.
+| Command | Writes | Behavior |
+| --- | --- | --- |
+| `init --preset <file\|code>` | yes | Validate the project, save the preset (`ui-preset.json`), write `ui-library.config.json` and the lock, merge the theme into the global stylesheet and write the shared `ui-style.css`. On an existing shadcn project it plans the same merge as `theme add`; it never reruns shadcn's init or resets `components.json`. On an initialized project it replaces the saved preset like `theme add`. |
+| `add <component...>` | yes | Install catalog components with the saved project preset: source, colocated CSS, usage example, the shared utility and stylesheet, and their dependencies. Requires `init`. An installed component is planned exactly as `update` plans it. |
+| `add button --preset <file\|code>` | yes | Install one Button with its own preset under `<components>/presets/<id>/r<revision>/`, leaving the project preset and existing components unchanged. Radix edition only. |
+| `add --recipe <file\|code>` | yes | Install a recipe component under `<components>/recipes/<id>/r<revision>/` with scoped CSS and a usage example. Radix edition only. |
+| `update [<component...>]` | yes | Refresh managed source whose catalog bytes changed (see [Managed files](#managed-files-and-updates)). Without components: every installed component, the shared files, and every recipe and component-preset row. With components: those components and the shared files they use. A component that is not installed fails with `INVALID_DATA`. |
+| `preset apply <file\|code>` | yes | Switch the project preset: the theme merge of `theme add`, plus every installed component recompiled with the new preset under the update rules, in one transaction. A style-family switch therefore restyles installed components. |
+| `preset apply <file\|code> --only theme` | yes | Exactly `theme add <file\|code>`. |
+| `theme add <file\|code>` | yes | Merge the preset's palette and tokens into the global stylesheet, write `ui-style.css`, and save the preset, without touching component source. A family switch with installed component styles fails with `STYLE_UNAVAILABLE` at `/styleFamily`; use `preset apply`. |
+| `preset show` | no | Print the saved preset, its hash and whether it matches the lock, the catalog release and compiler version, its source code if any, and each component preset and recipe row with its source. |
+| `info` | no | Print the CLI version, framework, manager, edition, shadcn style, stylesheet paths, preset, installed components with placement and state, recipes, component presets, every managed file with its state, and a count per state. |
+| `doctor` | no | Check the CLI runtime, project support, the install runtime and manager, the preset against the lock, every managed file, the stylesheet import, installed components' declared dependencies, and a leftover operation lock. Exits 0 when no check fails and 3 when one does; a failed project check is reported as a check, not an error. |
+| `diff [<component...>]` | no | Print a unified diff (project bytes against today's catalog bytes) for every managed file that is not `current`. Without components: every managed file, including recipe and component-preset rows. Exits 0. |
 
-Inspect `package.json`, the package manager lockfile, TS or JS config, CSS entry, and `components.json`. If multiple lockfiles, app roots, CSS entries, or ambiguous aliases exist, request an explicit `--cwd` or config path. Never guess across workspace boundaries. Monorepo support starts with an explicitly targeted app or shared UI package.
+`--help` and `-h` print the usage, every command, the options and the support matrix. `--version` prints the CLI version (with `--json`: `{ "outputVersion": 1, "command": "version", "status": "success", "version": "<x.y.z>" }`).
 
-For an existing shadcn project, preserve its aliases and upstream style settings. Detect component-name collisions and primitive-family differences. Propose adopting a compatible existing component only after verifying its contract; otherwise fail with a path and migration explanation.
-
-If `components.json` already exists, the existing-project path is `theme add`. If a user runs `init` anyway, detect the setup before writes and route them to the same theme plan rather than rerunning upstream initialization. Never reset `components.json` or reinstall existing UI components as part of a theme-only application.
-
-## Installation sequence
-
-1. Detect project and read configuration without mutation.
-2. Validate local preset, lockfile, and target platform.
-3. Fetch or reuse exact reviewed catalog and snapshot data; check hashes and compatibility.
-4. Resolve dependencies, detect cycles, and compile exact output.
-5. Apply project alias and path transformations in staging.
-6. Inspect target paths, symlinks, existing hashes, managed CSS imports, and dependencies.
-7. Show a complete plan listing creates, updates, no-ops, conflicts, package changes, and warnings.
-8. Recheck preconditions and acquire a project installation lock immediately before commit.
-9. Snapshot only files being changed; write through temporary files and safe renames.
-10. Run the selected package manager operation when dependencies require it.
-11. Finalize artifact hashes and project lock state, then report imports and usage.
-
-Use argument arrays with `shell: false` for subprocesses. Network-derived metadata must never become executable command text. Test concurrent installation attempts; the second operation must fail or wait without interleaving writes.
-
-## Conflicts and ownership
-
-If a generated file matches its recorded hash, it can be replaced only when the user requested a relevant update or preset change. A repeated `add` for an identical artifact is a no-op. If a file exists without provenance, or its hash changed, report a conflict and do not overwrite it.
-
-Offer a diff and an alternate output or manual migration route. Do not append duplicate imports or reinitialize `components.json`. Compare the current files against the plan again before committing to catch edits made after preview.
-
-Existing `globals.css` is not treated as an untracked generated component file. A deliberately requested theme merge may add or replace the named palette and token declarations after showing their before and after values. Preserve all unrelated CSS. On later runs, locally edited managed tokens require explicit conflict resolution; unrelated stylesheet edits are allowed. A repeated identical theme application is a no-op.
-
-The lockfile records provenance, not ownership of all files in a directory. Removing a component or rolling back an installation must never delete unrelated application files.
-
-## Failure and recovery
-
-Roll back touched source and configuration files if generation or writes fail before completion, including on Ctrl-C, SIGTERM and SIGHUP. Preserve the backup and transaction record until success. Write the transaction's plan before the first file is replaced and record the owning process in the operation lock, so the next apply can restore a transaction whose process was killed; see [interrupted operations](foundation-local-usage.md#interrupted-operations). If package installation fails, report exactly which source and lockfile changes were restored and whether the package manager state may need repair.
-
-A package manager may modify its cache, `node_modules`, lockfile, or run dependency lifecycle scripts. The CLI cannot promise full transactional rollback of those external effects. In this case return a distinct recovery error and actionable commands for the chosen manager. Do not print success simply because component files were copied.
-
-## Output contract
-
-Machine-readable output includes `command`, `status`, `projectRoot`, `presetHash`, `catalogRelease`, `compilerVersion`, `changes`, `dependencyPlan`, `warnings`, and stable error codes. Error records include code, message, affected path or JSON pointer, and suggested next action. Redact credentials and local secrets.
-
-The implemented local CLI checks every component id passed to `add` against the catalog before it resolves a preset, inspects the project, or checks style support, in every style family. An id outside the catalog, such as `add buton`, fails with `UNKNOWN_COMPONENT` at `/componentIds` and exit code 2 before any write, and `--yes` does not bypass it. The message names each unknown id once and suggests up to three close catalog ids, for example `Unknown component: buton (did you mean button?)`; the next action lists the catalog ids, and the human-readable output prints it as a `Next:` line. `STYLE_UNAVAILABLE` is reserved for catalog components that the preset's family marks unavailable.
-
-The implemented local CLI also includes `notices`, an array of strings that is always present and empty when no notice applies. When a plan installs a liquid glass entry, it holds one line for the plan (not one per component): `Accessibility not guaranteed: liquid glass text contrast depends on the background behind it. Check contrast over your own backgrounds, or set design.transparency to "reduced" for opaque surfaces. See docs/components/liquid-glass.md.` The filter-mount notice and the contrast warning are separate and unchanged. The human-readable plan and dry-run output prints each notice as a `Notice:` line, and the human-readable plan and dry-run output prints it as a `Notice:` line. Planning a component that is unavailable for the preset's family fails with `STYLE_UNAVAILABLE` at `/componentIds` and exit code 2 before any write; `--yes` does not bypass it. Every catalog component is available in liquid glass, so no catalog component takes this path in a glass project. `init` and `theme add` also check the managed components in the project lock before any write. Switching to a liquid glass preset while a component unavailable for it is installed fails with `STYLE_UNAVAILABLE` at `/componentIds`; no catalog component triggers this now. Switching a liquid glass project to a stable preset while a component with colocated glass CSS (every component except Button, Dialog, and Input) is installed fails with `STYLE_UNAVAILABLE` at `/styleFamily`, because their colocated glass CSS would remain without the `--glass-*` tokens; the next action is to remove those components, switch the theme, then add them again. `--yes` bypasses neither refusal. See [liquid glass](components/liquid-glass.md#cli-behaviour).
-
-| Exit code | Meaning                                            |
-| --------- | -------------------------------------------------- |
-| 0         | Success or valid dry-run with no blocking conflict |
-| 1         | Unexpected internal failure                        |
-| 2         | Invalid arguments or invalid data                  |
-| 3         | Unsupported or ambiguous project configuration     |
-| 4         | File conflict or precondition changed              |
-| 5         | Resolution, network, or integrity failure          |
-| 6         | Package installation failure or recovery required  |
-
-## Standard shadcn path
-
-After a standard registry item is published, a command of this form uses the upstream CLI:
+Examples:
 
 ```bash
-npx shadcn@latest add https://ui.example.com/r/0.1.0/button-flat.json
+ombelle init --preset ps_0123456789abcdef0123456789abcdef@1
+ombelle add button dialog --dry-run
+ombelle add button dialog --yes
+ombelle add button --preset ./brand.preset.json
+ombelle add --recipe ./button.recipe.json
+ombelle update --dry-run
+ombelle update meter --overwrite src/components/ui/meter.tsx
+ombelle preset apply ./minimalist.json --dry-run
+ombelle theme add ps_0123456789abcdef0123456789abcdef@1
+ombelle info --json
+ombelle doctor
+ombelle diff button
 ```
 
-The URL is illustrative. For reproducible production instructions, replace `latest` with the exact tested shadcn CLI release. A namespaced registry uses a valid `components.json` registry fragment such as the supplied example.
+## Options
 
-A plain registry item must include or reference all required utility, theme, and style artifacts. It must not assume the custom CLI already created them. The sample item in this documentation is a minimal schema illustration, not the complete production bundle.
+| Option | Commands | Meaning |
+| --- | --- | --- |
+| `--cwd <app>` | all | Target application directory (default: the current directory). Relative input files still resolve from the invoking directory. |
+| `--dry-run` | writing commands | Plan and print; write nothing (no source, config, cache or dependency change), never run an install. |
+| `--yes` | writing commands | Apply a conflict-free plan without the prompt. It never resolves a conflict, a schema error or an unsupported project. |
+| `--json` | all | Print one JSON record on stdout (see [Output](#output)). It also suppresses the interactive resolution prompt. |
+| `--package-manager <npm\|pnpm\|yarn\|bun>` | writing commands, `doctor` | Choose the manager when the project's evidence allows it (see [Package managers](#package-managers)). |
+| `--preset <file\|code>` | `init`, `add button` | The project preset (`init`) or the component-only preset (`add button`). `theme add` and `preset apply` take the preset as an operand and refuse `--preset`. |
+| `--recipe <file\|code>` | `add` | A recipe; refuses component operands and `--preset`. |
+| `--overwrite <path>` | `add <components>`, `update`, `preset apply` | Replace an existing file Ombelle does not manage, or a managed file edited after install. Repeatable, one choice per path. |
+| `--beside <path>` | `add <components>` | Keep an existing unmanaged component file and install Ombelle's beside it, under `<components>/ombelle/`. Repeatable. |
+| `--only theme` | `preset apply` | Theme only; the only accepted value. |
+| `--snapshot-origin <origin>` | inputs given as codes | Resolve codes at another service. HTTPS is required except literal loopback HTTP. |
+| `--preset-hash <64 hex>` | preset codes | Expected preset hash; required with `--snapshot-origin` for presets. |
+| `--recipe-hash <64 hex>` | recipe codes | Expected recipe hash; required with `--snapshot-origin` for recipes. |
+| `--offline` | inputs given as codes | Use only the verified cache; requires `--snapshot-origin` and the hash. It cannot learn that a code was withdrawn later. |
+| `--help`, `-h`, `--version` | — | Usage; version. |
 
-For existing-project styling, publish a `registry:theme` item separately and install it through `shadcn add <theme-url>`. The upstream CLI supplies the standard theme transport; persistent custom preset state and our detailed merge safeguards remain the product CLI's responsibility. Do not confuse our preset IDs with upstream shadcn preset codes.
+Values may be written `--flag value` or `--flag=value`. A repeated flag (other than `--overwrite` and `--beside`), a flag without its value, an unknown flag, any other token starting with `-`, and a flag the command does not take fail with `INVALID_DATA` (exit 2) before any input is read.
 
-## Required CLI tests
+## Inputs
 
-For component-scoped presets, snapshot resolution is implemented for the supported Button path. The local JSON Button path has strict schema validation, isolated light/dark tokens, unchanged global preset/theme and neighboring components, later ordinary additions using project defaults, repeated no-op installation, compatible source reuse, incompatible or edited source conflicts, and preview/install evidence. Its consumer installation matrix covers the declared frameworks and four managers; browser measurements cover preview, npm, and pnpm targets. Do not claim portal support without explicit scope-propagation tests.
+A preset input is a local JSON file (UTF-8, regular file, at most 256 KiB) or an exact code `ps_<32 lowercase hex>@1`. A recipe input is a local file (at most 64 KiB) or `rc_<32 lowercase hex>@1`. A value that looks like a code or a URL but is not an exact code is refused; prefix a local path with `./`. Files are validated against the strict schemas in `schemas/` and their pinned catalog and compiler releases. Readers refuse FIFOs and other non-regular files without waiting.
 
-Verify clean installation, repeated no-op addition, saved preset reuse across processes, Next.js client boundaries, alias rewriting, unsupported configuration rejection, dependency deduplication, locally edited component conflict, traversal and symlink rejection, concurrent writes, network and package manager failure, dry-run non-mutation, interrupted-write recovery, and preview versus install parity. The foundation gate covers npm, pnpm, Yarn Classic/modern linkers, and Bun 1.4.3. Bun checks include native executable discovery, actual CLI runtime identity, binary-byte metadata preconditions, configuration rejection, and real installed-package verification. It rejects workspace ownership and incompatible Bun settings before source writes; package-state rollback after dependency failure is not promised.
+Bare codes resolve at `https://ombelle-ui.vercel.app`. Redirects are refused and TLS verification stays on. The CLI verifies the normalized hash and supported releases before planning. A successful apply caches the verified envelope; dry runs, cancellations, conflicts and failures write no cache. Later `add` and `update` read the saved project preset and never contact the service. See [snapshot service operations](snapshot-service-operations.md).
 
-Also test existing-shadcn theme merging with custom CSS, custom stylesheet paths, light and dark declarations, nested layers, existing Tailwind mappings, duplicate or ambiguous token definitions, locally edited tokens, repeated application and rollback. Verify no source reinstall, no reinitialization, no unnecessary dependency command and no foreign lockfile, including cross-runner launches.
+Compatibility rule for documents: a newer Ombelle release that adds a value or a field raises the document's `schemaVersion`. This CLI reads preset `schemaVersion` `1.0` and `1.1`. A document whose `schemaVersion`, enum value or field this CLI does not know fails with `UNSUPPORTED_RELEASE` (exit 3), the CLI version, the pointer, and the next action to run the newest CLI or export the document again. A `ui-library.config.json` or lock with a higher `configVersion` or `lockVersion` fails the same way.
 
-Dark mode follows the configured single class on the Button or an ancestor. Complex selectors and nested independently themed subtrees require migration or remain outside this local guarantee. Scoped provenance records the selected preset separately from saved global preset provenance; canonical and transformed artifact hashes remain distinct. Existing transaction/recovery safeguards and lifecycle-script suppression apply. See [local imports, ownership, and recovery](foundation-local-usage.md#component-scoped-button-presets) and [measured evidence](evidence/component-scoped-button-presets.md).
+## Plan and apply
 
-## Immutable preset snapshot inputs
+1. Parse and check arguments; read the environment settings (`OMBELLE_DEPENDENCY_TIMEOUT_SECONDS`).
+2. Resolve inputs (files or codes).
+3. Inspect the project without writes: `package.json`, the single lockfile and `packageManager`, React, Tailwind, `tsconfig.json` aliases, `components.json`, the CSS entry, the config, the saved preset and the lock with all its rows.
+4. Compile and plan every file change, theme declaration and dependency change; report conflicts.
+5. Print the plan. A plan with a conflict exits 4 and writes nothing. `--dry-run` stops here.
+6. Without `--yes`: in a terminal, ask `Apply these changes? [y/N]`; without a terminal, fail with `INVALID_DATA` (`Noninteractive writes require --yes after reviewing --dry-run`).
+7. Apply in a transaction: recheck every precondition and file hash against the plan, take `.ombelle-operation.lock`, write the plan journal, replace files through temporary files and renames, run the package manager, then finalize.
 
-The private local CLI resolves an exact `ps_<32 lowercase hex>@1` reference for `init --preset`, `theme add`, and supported `add button --preset` paths when both `--snapshot-origin <origin>` and `--preset-hash <64 lowercase hex>` are supplied. The origin must use HTTPS, except literal loopback HTTP for local development. Redirects are rejected and TLS verification remains enabled. The CLI verifies the normalized preset hash and supported catalog/compiler releases before planning. `--offline` is explicit and requires a verified cache entry; it cannot learn that a snapshot was later withdrawn.
+Interactive resolution: in a terminal, without `--yes`, `--json` or `--dry-run`, when every diagnostic of an `add`, `update` or `preset apply` plan offers resolutions, the CLI asks per file `<path> exists and is not managed by Ombelle: [o]verwrite, [b]eside, [c]ancel` (no `[b]eside` for non-component files), or `<path> was edited after install and the catalog changed it: [o]verwrite, [c]ancel` for a managed file, re-plans with the answers, then asks to apply. Any other answer cancels without writes.
 
-Dry-run, cancellation, conflict, and failed apply do not write cache entries. A successful apply may cache the verified envelope. Later ordinary component additions use the saved local project preset and do not contact the snapshot service. See [snapshot service operations](snapshot-service-operations.md) for the private API and cache contract.
+Subprocesses use argument arrays with `shell: false`; network data never becomes command text. Dependency installs pin exact versions and disable lifecycle scripts (`--ignore-scripts`, Yarn 2+ `--mode=skip-build`). The child gets `CI=true`. Declared dependencies are never downgraded or narrowed: a declaration at or above the catalog version is kept with a notice; an older one is raised and the plan shows the replaced range.
+
+Failure and recovery: a failure, Ctrl-C, SIGTERM or SIGHUP rolls back every touched source and configuration file. The journal under `.ombelle-transactions/<id>/` and the owner record in `.ombelle-operation.lock` let the next applying command restore a transaction whose process was killed, then ask you to run your command again (see [interrupted operations](foundation-local-usage.md#interrupted-operations)). If the package manager failed after it started, the error's `recovery` says which paths were restored and whether package state (`node_modules`, the lockfile) may have changed; the CLI cannot roll back a package manager's own effects.
+
+## Managed files and updates
+
+The lock records, per managed file, the logical catalog path, the kind and the SHA-256 of the bytes Ombelle wrote (LF line endings; a CRLF checkout of the same bytes counts as unedited). For each file a plan touches:
+
+| On disk | Plan |
+| --- | --- |
+| Missing | `create`. |
+| Equal to the planned bytes | `noop` when the lock records those bytes. |
+| Equal to the lock record, planned bytes differ (the catalog or the preset changed it) | `update`, with the notice `refresh <path> (unedited since install; the catalog source changed)`. |
+| Different from the lock record (edited after install) | `conflict`: `<path> was edited after install; keep your version, or rerun with --overwrite <path> to replace it with the catalog source (diff shows the changes)`, with `resolutions: ["overwrite"]`. Recipe and component-preset files say `run update --overwrite <path>`. |
+| Present without a lock record | `conflict`: `<path> exists and is not managed by Ombelle; rerun with --overwrite <path> or --beside <path>` (`--beside` only for component files), with `resolutions`. A `lib/utils.ts` whose bytes match the pinned shadcn output is adopted instead, with the notice `adopt <path> (generated by shadcn)`. |
+| Created at a path that differs only in case from an existing directory or file | `conflict`: `Destination differs only in case from existing '<path>'; rename one of them`. |
+
+`add` of an installed component, `update`, `add --recipe` and `add button --preset` of an installed row follow this table, so an unedited install from an earlier release takes catalog fixes and an edit is never overwritten without `--overwrite <path>`. `--overwrite` accepts only an existing unmanaged file or a managed file edited after install; `--beside` only an existing unmanaged component file. Anything else, a missing file, or a path that resolves to no planned file fails with `INVALID_DATA` before any write. Paths are relative to the app (absolute paths are made relative) and match regardless of case and separators.
+
+`info`, `diff` and `doctor` report each managed file's state: `current`, `update-available` (unedited; the catalog changed it), `edited` (edited; the catalog did not change it), `edited-update-available`, `missing` (recorded but absent; `update` creates it again) or `not-generated` (today's catalog no longer produces it; left as it is).
+
+A recipe or component preset whose identity changed under the same `id@revision` (preset data, scope or dark selector) conflicts: install a new revision. Revisions coexist.
+
+The shared `ui-style.css` and the shared utility are managed files like any other; `add`, `update`, `theme add` and `preset apply` refresh them when unedited. `theme add` replaces managed theme declarations it wrote earlier; a declaration edited since conflicts (`Managed theme declaration was edited locally`). Unrelated CSS is preserved; a repeated identical theme is a no-op. Token blocks inside a top-level `@layer` are edited in place; a selector declared both inside and outside `@layer`, or twice, is refused with `UNSUPPORTED_PROJECT`.
+
+The lock records provenance, not ownership of directories: nothing outside the planned files is ever deleted.
 
 ## Component editions and existing files
 
-Implemented in the local CLI ([decision 0005](decisions/0005-base-ui-edition.md)).
+Implemented per [decision 0005](decisions/0005-base-ui-edition.md).
 
-- **Edition.** `components.json` `style` selects the edition: `radix-nova`, `new-york` or no file → Radix; the pinned shadcn 4.22.1 `base-*` styles → Base UI. Other styles: `theme add` applies the palette only; component commands fail with `UNSUPPORTED_PROJECT` "Style `<style>` isn't supported; Ombelle supports `radix-nova`, `new-york` and shadcn's `base-*` styles". The lock records `edition` (absent means Radix). Once the lock records components, a different detected edition fails every plan with `FILE_CONFLICT`. `add --recipe` and `add button --preset` on Base UI fail with `UNSUPPORTED_PROJECT` "Recipes and component presets aren't available for Base UI yet".
-- **Known shadcn utility.** A `lib/utils.ts` (at the utils alias) without lock provenance whose bytes match the pinned shadcn output is planned as an update with the notice `adopt <path> (generated by shadcn)`.
-- **Unowned files.** Any other existing target without lock provenance is a `FILE_CONFLICT` with `resolutions` (`overwrite` and, for component files, `beside`) and the message `<path> exists and is not managed by Ombelle; rerun with --overwrite <path> or --beside <path>`. Exit code 4 without a resolution; `--yes` never resolves it.
-- **Flags.** `add <components> [--overwrite <path>]... [--beside <path>]...`, repeatable, one choice per path, rejected with other commands, `--recipe` or `--preset`. Paths are relative to the app (absolute paths are made relative) and match regardless of case and separators. A flag naming a path that is missing, does not conflict, or is Ombelle-owned fails with `INVALID_DATA` before any write. Dry runs accept the flags and show the resolved plan.
-- **Beside.** The component and its stylesheet go to `<components>/ombelle/`; the lock records `placements: { <id>: 'beside' }` and later `add` and `theme add` keep that location. Its `data-slot` values gain the `ombelle-` prefix, and shared rules for those slots are rewritten to the prefixed values. Installing beside may update an unedited, recorded shared stylesheet in the same plan.
-- **Prompt.** In a terminal without `--yes`, when every diagnostic is an unowned-file conflict, the CLI asks `<path> exists and is not managed by Ombelle: [o]verwrite, [b]eside, [c]ancel` per file, re-plans with the answers, shows the new plan, then asks `Apply these changes? [y/N]`. Any other answer cancels without writes.
+- **Edition.** `components.json` `style` selects the edition: `radix-nova`, `new-york` or no file → Radix; shadcn's `base-*` styles → Base UI. Other styles: `theme add`, `init` and `preset apply` apply the palette only, with the notice `Palette only: components.json style "<style>" is not one Ombelle styles, …`; component commands fail with `UNSUPPORTED_PROJECT` ``Style `<style>` isn't supported; Ombelle supports `radix-nova`, `new-york` and shadcn's `base-*` styles``. The lock records `edition` (absent means Radix). Once the lock records components, a different detected edition fails every plan with `FILE_CONFLICT`. `add --recipe` and `add button --preset` on Base UI fail with `UNSUPPORTED_PROJECT` "Recipes and component presets aren't available for Base UI yet".
+- **Beside.** The component and its stylesheet go to `<components>/ombelle/`; the lock records `placements: { <id>: "beside" }`, and later `add`, `update`, `theme add` and `preset apply` keep that location. Its `data-slot` values gain the `ombelle-` prefix, and shared rules for those slots are rewritten to the prefixed values. Installing beside may update an unedited shared stylesheet in the same plan.
+- **CSS entry.** `config.theme.cssEntry`, else `components.json` `tailwind.css`, else the one existing file among `src/index.css`, `src/app/globals.css` and `app/globals.css`. None or several fail with `UNSUPPORTED_PROJECT`.
+- **Aliases.** The component directory comes from `components.json` `aliases.ui` (else `aliases.components`, else `@/components/ui`) resolved through exactly one `tsconfig.json` `paths` entry; ambiguous or missing aliases fail with `UNSUPPORTED_PROJECT`.
+
+## Liquid glass
+
+Plans that install liquid glass components carry one notice per plan: `Accessibility not guaranteed: liquid glass text contrast depends on the background behind it. Check contrast over your own backgrounds, or set design.transparency to "reduced" for opaque surfaces. See docs/components/liquid-glass.md.` (`GLASS_ACCESSIBILITY_CAVEAT`). `add`, and `preset apply` when it restyles installed components, also print `mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers` (`GLASS_FILTER_MOUNT`), and a preset below the contrast bound adds `GLASS_CONTRAST`. Every catalog component is available in liquid glass. `theme add` from liquid glass to a stable family with installed glass component styles fails with `STYLE_UNAVAILABLE` at `/styleFamily`; `preset apply` restyles them instead. See [liquid glass](components/liquid-glass.md#cli-behaviour).
+
+## Package managers
+
+Selection is strict and ignores the runner's user agent. A project may have at most one recognized lockfile (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`, `bun.lockb`); two are refused even with `--package-manager`. Without `--package-manager`, a `packageManager` field and the lockfile must name the same manager, and a project with neither is refused. `--package-manager` must name the lockfile's manager when one exists (it may side with the lockfile against a different `packageManager` field, with a `managerWarning`), must match `packageManager` when there is no lockfile, and decides alone only when the project has neither. `ui-library.config.json` `packageManager` must be `auto` or the same manager. A refusal exits 3. The CLI never creates a foreign lockfile because it was launched with `npx`.
+
+Running the manager: npm, pnpm and Yarn run as their JavaScript entry under a native Node executable (`OMBELLE_NODE_EXECUTABLE`, else the running Node, else `node` on `PATH`, within the supported range). The entry is found from `OMBELLE_YARN_ENTRY` (Yarn), `npm_execpath`, the release `npm_config_user_agent` names in corepack's cache (so `pnpm dlx`, `pnpm exec` and `yarn dlx` work without a launcher on `PATH`), then launchers on `PATH` (`npm-cli.js`, `pnpm.cjs`, `pnpm.cmd`, corepack and Yarn shims, `#!/usr/bin/env node` scripts). A native `pnpm` binary on `PATH` (`pnpm.exe` on Windows, the standalone installer's binary elsewhere) runs directly. Bun runs as its native executable (`OMBELLE_BUN_EXECUTABLE`, else the running Bun, else `bun` on `PATH`); Bun settings that simulate, freeze or redirect installs are refused before any write.
+
+Runners: `npx @ombelle-ui/cli@<version>`, `pnpm dlx @ombelle-ui/cli@<version>`, `yarn dlx @ombelle-ui/cli@<version>` (add `--quiet` before the package with `--json`), `bunx @ombelle-ui/cli@<version>`. The package has the single binary `ombelle`, so runners need no binary selection. For Yarn 1 projects use `npx`. A runner never switches the project's package manager.
+
+## Project files
+
+| File | Written by | Content |
+| --- | --- | --- |
+| `ui-library.config.json` | `init`, `theme add`, `preset apply` | [project-config.schema.json](../schemas/project-config.schema.json), `configVersion` 1. |
+| `ui-preset.json` (`config.presetFile`) | same | The saved project preset. |
+| `ui-library.lock.json` (`config.lockFile`) | every writing command | [project-lock.schema.json](../schemas/project-lock.schema.json), `lockVersion` 1. Commit it. |
+| `<global CSS entry>` | `init`, `theme add`, `preset apply` | Managed `:root`, dark selector and `@theme inline` declarations, and `@import` of `ui-style.css`. |
+| `<src>/styles/ui-style.css` (`config.paths.styleOutput`) | same, and `add`, `update` | Shared component rules. |
+| `<components>/<id>.tsx`, `<components>/<id>.css` | `add`, `update`, `preset apply` | Component source and colocated CSS; `<components>/ombelle/` when installed beside. |
+| `<src>/ombelle-examples/<id>.tsx` | same | Usage examples. |
+| `<components>/presets/<id>/r<n>/button.*`, `<src>/ombelle-examples/presets/<id>/r<n>.tsx` | `add button --preset` | Component-preset Button. |
+| `<components>/recipes/<id>/r<n>/*`, `<src>/ombelle-examples/recipes/<id>/r<n>.tsx` | `add --recipe` | Recipe component. |
+| `<utils alias>.ts` | component commands | The shared `cn` utility. |
+| `.ombelle-operation.lock` | during an apply | Owner record of the running transaction; left behind only by a killed process. |
+| `.ombelle-transactions/<id>/` | during an apply | Plan journal, backups and markers for recovery; removed after success. |
+
+## Environment variables
+
+| Variable | Effect |
+| --- | --- |
+| `OMBELLE_SNAPSHOT_CACHE_DIR` | Absolute snapshot cache directory. Default: `%LOCALAPPDATA%\ombelle\cache\snapshots` (Windows; `LOCALAPPDATA` is then required), `~/Library/Caches/ombelle/snapshots` (macOS), `$XDG_CACHE_HOME/ombelle/snapshots` or `~/.cache/ombelle/snapshots` (others; `HOME`, else `USERPROFILE`). A relative value fails with `INVALID_DATA`. Read only when a code is resolved. |
+| `OMBELLE_DEPENDENCY_TIMEOUT_SECONDS` | Whole seconds a dependency install may take; unset or `0` means no limit. Any other value fails with `INVALID_DATA` before planning. |
+| `OMBELLE_NODE_EXECUTABLE` | Absolute path of the native Node used to run npm, pnpm or Yarn. |
+| `OMBELLE_BUN_EXECUTABLE` | Absolute path of the native Bun. |
+| `OMBELLE_YARN_ENTRY` | Yarn's JavaScript launcher (`yarn.js`, `yarn.cjs`, `yarn.mjs`). |
+| `npm_execpath`, `npm_config_user_agent`, `COREPACK_HOME` | Manager discovery (see [Package managers](#package-managers)); `COREPACK_HOME` defaults to corepack's own default (`%LOCALAPPDATA%\node\corepack`, `$XDG_CACHE_HOME/node/corepack` or `~/.cache/node/corepack`). |
+| `PATH` | Executable and launcher discovery. |
+| `XDG_CONFIG_HOME` | Location of Bun's global `.bunfig.toml`, checked before Bun installs. |
+
+`NODE_OPTIONS`, `BUN_OPTIONS` and `BUN_RUNTIME_TRANSPILER_CACHE_PATH` are removed from the environment of runtime probes.
+
+## Output
+
+Text output starts with `<command>: <status>`, then one `<action> <path>` line per planned file, snapshot provenance lines, `<CODE> (<path>): <message>` per diagnostic, `Notice: <message>` per notice, `Warning: <managerWarning>` and `Dependencies: name@version (replaces <range>), …`. Errors print `<CODE>: <message> (<path>)` and `Next: <next action>` on stderr.
+
+With `--json`, stdout holds exactly one JSON record. Every record has `outputVersion` (1; a field added keeps it, a field renamed, removed or changing meaning raises it), `command` (`init`, `add`, `update`, `theme add`, `preset apply`, `preset show`, `info`, `doctor`, `diff`, `version`, or `""` when the command could not be parsed) and `status`.
+
+Plan records (`status` `planned`, `success`, `conflict` or `cancelled`):
+
+| Field | Content |
+| --- | --- |
+| `projectRoot`, `packageManager`, `bunLockfile`?, `managerWarning`? | The resolved project. |
+| `presetHash`, `catalogRelease`, `compilerVersion` | The preset the plan compiled. |
+| `presetResolution`?, `recipeResolution`? | `{ source: { origin, reference, presetHash \| recipeHash }, via: "network" \| "cache" }` for codes. |
+| `recipe`?, `componentPreset`? | The scoped identity, `importPath`, `examplePath`, and `scopeType` (`component`, `component-only`). |
+| `changes` | `[{ path, beforeHash, afterContent, kind, action }]`; `kind` is `component`, `style`, `usage`, `utility`, `theme`, `preset`, `config` or `lock`; `action` is `create`, `update`, `noop` or `conflict`. `afterContent` is the full planned file. |
+| `dependencyPlan` | `[{ name, version, current? }]`. |
+| `warnings` | Diagnostics: `[{ code, message, path?, resolutions? }]`. |
+| `notices` | `[{ code, message }]`; codes below. |
+| `networkAccess` | Whether resolving the input used the network. |
+
+Notice codes: `FILE_REFRESHED`, `SHADCN_UTILITY_ADOPTED`, `DEPENDENCY_KEPT`, `DEPENDENCY_RUNTIME_UNAVAILABLE` (dry run only), `GLASS_ACCESSIBILITY_CAVEAT`, `GLASS_FILTER_MOUNT`, `GLASS_CONTRAST`, `FONT_CSS_MANUAL`, `FONT_PACKAGES_UNUSED`, `THEME_PALETTE_ONLY`, `INTERRUPTED_OPERATION`, `CATALOG_FILE_REMOVED`, and `NOTICE` for any other text.
+
+Report records: `preset show` adds `presetFile`, `preset`, `presetHash`, `matchesLock`, `catalogRelease`, `compilerVersion`, `source`?, `componentPresets` and `recipes`. `info` adds `cliVersion`, `initialized`, `framework`, `packageManager`, `edition`, `shadcnStyle`?, `shadcnStyleSupported`?, `cssEntry`, `componentsDirectory`, `styleFile`, `preset`?, `components` (`[{ id, placement, state }]`), `recipes`, `componentPresets`, `files` (`[{ path, kind, owner, state }]`) and `summary` (count per state). `diff` adds `files` (`[{ path, owner, state, diff }]`). `doctor` has `status` `success` or `failed` and `checks` (`[{ id, status: "pass" | "warn" | "fail", message, path?, nextAction? }]`).
+
+Error records: `{ outputVersion, command, status: "error", error: { code, message, path?, nextAction?, recovery? } }`, where `recovery` is `{ sourceRestored, unrestoredPaths, transactionPath, packageStateMayHaveChanged, restoredPaths?, interrupted? }`.
+
+## Diagnostic codes and exit codes
+
+| Code | Exit | Meaning |
+| --- | --- | --- |
+| — | 0 | Success, a dry run, a report, or a cancelled prompt. |
+| `INTERNAL_ERROR` | 1 | Unexpected failure, including an interrupted apply after rollback. |
+| `INVALID_DATA` | 2 | Invalid arguments, flags, input files, environment values or resolutions. |
+| `INVALID_REFERENCE` | 2 | A malformed snapshot reference. |
+| `UNKNOWN_COMPONENT` | 2 | A component id outside the catalog, checked before any other work; the message suggests up to three close ids and the next action lists the catalog. |
+| `STYLE_UNAVAILABLE` | 2 | A component the preset's family cannot style, or a theme switch that would strand installed styles. |
+| `UNSUPPORTED_PROJECT` | 3 | Unsupported or ambiguous project, React, framework, manager evidence, runtime or style. |
+| `UNSUPPORTED_RELEASE` | 3 | A document, config or lock from a newer release, or an unsupported catalog or compiler release. |
+| `FILE_CONFLICT` | 4 | A plan conflict, or a file or precondition that changed after planning. `doctor` uses exit 3 when a check fails. |
+| `RESOLUTION_FAILURE` | 5 | Network, service or integrity failure resolving a code. |
+| `DEPENDENCY_FAILURE` | 6 | The package manager failed or timed out; see `recovery`. |
+
+The hosted service's HTTP error codes are documented in [snapshot service operations](snapshot-service-operations.md).
+
+## Verification
+
+The CLI tests live in `packages/cli/test` (planning, transactions, recovery, managers, inputs, the support matrix, the argument grammar and output) and `tests/integration` (built CLI runs, including `update-cli.test.ts` for upgrades from 0.9.x installs, `stock-projects-cli.test.ts` for projects as create-vite and create-next-app generate them, and `shadcn-theme-merge.test.ts` for genuine shadcn templates). Consumer and browser evidence is recorded in `docs/evidence/`; it uses Chromium only.

@@ -33,7 +33,7 @@
 - Keep planning separate from applying file changes. Preserve dry-run behavior and the transaction safeguards for conflicts, stale plans, and recovery.
 - `--yes` accepts a safe plan; it does not bypass schema, compatibility, or modified-file conflicts. Dependency installs disable lifecycle scripts.
 - Keep component-scoped recipes and styles isolated from saved global project defaults and existing component source unless the documented contract explicitly says otherwise.
-- The private local CLI supports `init`, `add`, `theme add`, and local Button `add --recipe`. Check current documentation before assuming proposed public flags or remote registry behavior are implemented.
+- The CLI implements exactly the commands, flags and outputs in `docs/05-cli-specification.md` (`init`, `add`, `update`, `preset apply`, `theme add`, `preset show`, `info`, `doctor`, `diff`). Keep that document and the code in step when either changes.
 - Keep verification claims tied to the recorded environment and evidence. The consumer matrix separates browser-tested npm/pnpm apps from Yarn/Bun build and audit checks.
 
 ## Git naming

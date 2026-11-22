@@ -4,33 +4,35 @@
 
 Support npm, pnpm, Yarn and Bun from alpha. Offer two clear website paths: initialize a new setup, or add styling to a project where shadcn is already initialized. The existing-project path merges palette and token values into the configured global stylesheet without rerunning shadcn initialization or reinstalling component source.
 
-Implementation status for this foundation: npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1, and Bun 1.4.3 have consumer coverage. Modern Yarn covers both linkers. Bun covers Vite/Next.js with text/binary lockfiles and the built CLI under Node/Bun; framework builds remain on Node. These are local private CLI routes; the illustrative published package commands below remain proposed.
+Implementation status: npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1, and Bun 1.4.3 have consumer coverage. Modern Yarn covers both linkers. Bun covers Vite/Next.js with text/binary lockfiles and the built CLI under Node/Bun; framework builds remain on Node. The supported ranges (React 19, Node 24.19.0 to below 27, Bun 1.4.3 to below 2) are in the [CLI specification](05-cli-specification.md#supported-projects).
 
 Website copy: “If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css.”
 
-The examples below are proposed product commands. The namespace, package, preset ID and version are placeholders. Pin a tested CLI version and an immutable preset revision in generated production commands.
+The commands below use the published package `@ombelle-ui/cli`, whose single binary is `ombelle`. Replace `<version>` with a tested CLI version and `ps_<code>@1` with the preset code the site shows, or a local preset file.
 
 ## Commands for an existing shadcn project
 
 | Package runner | Command |
 | --- | --- |
-| npm | `npx @your-ui/cli@0.1.0 theme add ps_brand@3` |
-| pnpm | `pnpm dlx @your-ui/cli@0.1.0 theme add ps_brand@3` |
-| Yarn modern | `yarn dlx --package @your-ui/cli@0.1.0 your-ui theme add ps_brand@3` |
-| Bun | `bunx --bun --package @your-ui/cli@0.1.0 your-ui theme add ps_brand@3` |
+| npm | `npx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
+| pnpm | `pnpm dlx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
+| Yarn modern | `yarn dlx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
+| Bun | `bunx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
 
-The package exposes a single binary named `your-ui`. Explicit package selection in the Yarn and Bun examples avoids relying on the binary being named `cli`. Bun's `--bun` flag deliberately exercises its runtime; the CLI must be tested under both Node and Bun.
+The package has one binary, so runners need no binary selection. `pnpm dlx` and `yarn dlx` work without a pnpm or Yarn launcher on `PATH`: the CLI finds the manager release they name in corepack's cache, or a native `pnpm` binary.
 
-Yarn Classic does not supply the modern dlx workflow. Use a local development dependency (`yarn add --dev @your-ui/cli@0.1.0`, then `yarn your-ui theme add ps_brand@3`) or another runner with `--package-manager yarn`. These package names are illustrative; the published installer is `@ombelle-ui/cli` with the `ombelle` binary (see [CLI release](cli-release.md) for verified runner commands). A runner choice must not switch the consumer project's dependency manager.
+Yarn Classic does not supply the modern dlx workflow. Use `npx @ombelle-ui/cli@<version>` in the Yarn 1 project, or a local development dependency (`yarn add --dev @ombelle-ui/cli@<version>`, then `yarn ombelle theme add ps_<code>@1`). A runner choice never switches the project's package manager.
 
 ## Commands for new setup and component addition
 
 | Runner | New setup | Add a component later |
 | --- | --- | --- |
-| npm | `npx @your-ui/cli@0.1.0 init --preset ps_brand@3` | `npx @your-ui/cli@0.1.0 add button` |
-| pnpm | `pnpm dlx @your-ui/cli@0.1.0 init --preset ps_brand@3` | `pnpm dlx @your-ui/cli@0.1.0 add button` |
-| Yarn modern | `yarn dlx -p @your-ui/cli@0.1.0 your-ui init --preset ps_brand@3` | `yarn dlx -p @your-ui/cli@0.1.0 your-ui add button` |
-| Bun | `bunx --bun -p @your-ui/cli@0.1.0 your-ui init --preset ps_brand@3` | `bunx --bun -p @your-ui/cli@0.1.0 your-ui add button` |
+| npm | `npx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `npx @ombelle-ui/cli@<version> add button` |
+| pnpm | `pnpm dlx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `pnpm dlx @ombelle-ui/cli@<version> add button` |
+| Yarn modern | `yarn dlx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `yarn dlx @ombelle-ui/cli@<version> add button` |
+| Bun | `bunx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `bunx @ombelle-ui/cli@<version> add button` |
+
+Later, `update` refreshes installed components the catalog changed, and `preset apply <file|code>` switches the project preset and restyles installed components. See [Upgrading to 1.0](upgrading-to-1.0.md).
 
 `init` targets an existing supported app and initializes the UI setup, not a whole application. If `components.json` already exists, detect that before writes and use the theme plan instead of resetting the setup. An incompatible or incomplete configuration receives an actionable diagnostic.
 
