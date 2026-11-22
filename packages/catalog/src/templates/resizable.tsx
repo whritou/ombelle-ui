@@ -60,7 +60,8 @@ function SavedGroup({ autoSaveId, groupRef, ...props }: React.ComponentProps<typ
 
 /** Panels side by side or stacked, split by handles a pointer drags and the arrow keys move. */
 export function ResizablePanelGroup({ direction = 'horizontal', autoSaveId, className, ...props }: ResizablePanelGroupProps) {
-  const shared = { ...props, orientation: direction, resizeTargetMinimumSize: { coarse: 44, fine: 24 }, className: cn(className) } as const
+  // Handles are at least 44 px for a finger and 24 px for a mouse, unless the caller sets its own sizes.
+  const shared = { resizeTargetMinimumSize: { coarse: 44, fine: 24 }, ...props, orientation: direction, className: cn(className) } as const
   return autoSaveId
     ? <SavedGroup {...shared} autoSaveId={autoSaveId} data-slot="resizable-panel-group" data-direction={direction} />
     : <Group {...shared} data-slot="resizable-panel-group" data-direction={direction} />

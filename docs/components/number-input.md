@@ -34,6 +34,8 @@ export function Radius() {
 - When a controlled `value` changes from outside, the text follows, except while the field has focus and its text already spells that value. This is how `1.` survives a parent that stores `1`.
 - The steppers are named "Decrease <label>" and "Increase <label>", from the input's `aria-label` or its label element. Use `decrementLabel` and `incrementLabel` to change the names. They are left out of the Tab order (`tabIndex={-1}`) because the arrow keys cover keyboard use. They are disabled at the bounds and are at least 24 × 24 px.
 - With `name`, the form submits the field's text.
+- A `ref` reaches the input, alongside the component's own, so a form library can focus it.
+- A form reset returns the field to `defaultValue`, clears the invalid mark and calls `onValueChange` when the text changes.
 
 ## Recipe
 
