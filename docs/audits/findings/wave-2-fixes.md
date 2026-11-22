@@ -22,7 +22,7 @@ Every behavioural fix has a focused test that was run against the HEAD version o
 | CAT-01 | Fixed | `5ae3d773` | See blockers |
 | CAT-02 | Fixed | `a94f014c` | 270 sites in both editions; `slot-order.test.ts` fails on any slot before a spread |
 | CAT-03 | Fixed | `6f43234c` | RTL spec in `components-076.spec.ts` |
-| CAT-04 | Fixed for keys; pointer drag not verified | `d410f53d` | RTL keyboard spec in `variants-more.spec.ts` passes. A pointer drag of the handle in RTL does not move it in the preview page, as the audit also saw before the fix; the cause (hit target or sign) was not found |
+| CAT-04 | Fixed for keys; pointer drag not verified | `d410f53d` | RTL keyboard spec in `variants-more.spec.ts` passes. A pointer drag of the handle in RTL does not move it in the preview page, as the audit also saw before the fix; the cause (hit target or sign) was not found; the drag is kept as a `test.fixme` in the same spec (TST-11) |
 | CAT-05 | Fixed | `2253c55c` | `date-picker-locale.test.ts` hydrates with `lang="fr-FR"` |
 | CAT-06 | Fixed | `7e163af2` | `resizable-ssr.test.ts` (jsdom with a measuring ResizeObserver) |
 | CAT-07 | Fixed | `4ab411f6` | `tableOptions` passes `manualSorting`, `manualPagination`, `rowCount`…; doc corrected |

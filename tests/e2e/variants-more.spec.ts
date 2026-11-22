@@ -409,8 +409,25 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(grip).toHaveAttribute('aria-valuenow', '336')
       await page.keyboard.press('ArrowLeft')
       await expect(grip).toHaveAttribute('aria-valuenow', '320')
-      // A pointer drag of the handle in right-to-left is not asserted: in this page it does not
-      // move the handle at all, as the audit also saw before the fix (see docs/audits/findings/wave-2-fixes.md).
+      // The pointer drag is held by the fixme test below.
+    })
+
+    // Known gap (CAT-04, TST-11): the keyboard direction is fixed, but a pointer drag of the handle
+    // in a right-to-left page does not move it at all, as the audit also saw before the fix. Open
+    // question: whether the drag misses the handle's hit target or the sign is still wrong for
+    // pointer deltas; neither was found. Remove fixme once the drag reaches 400.
+    test.fixme('the side sheet widens as its handle is dragged with a pointer in a right-to-left page (CAT-04)', async ({ page }) => {
+      await open(page, edition)
+      await page.evaluate(() => { document.documentElement.dir = 'rtl' })
+      await page.getByTestId('vm-sheets').getByRole('button', { name: 'Open inspector' }).click()
+      const grip = page.getByRole('separator', { name: 'Resize panel' })
+      await expect(grip).toHaveAttribute('aria-valuenow', '320')
+      const box = (await grip.boundingBox())!
+      await page.mouse.move(box.x + box.width / 2, 400)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2 + 80, 400, { steps: 4 })
+      await page.mouse.up()
+      await expect(grip).toHaveAttribute('aria-valuenow', '400')
     })
 
     test('a top sheet grows as its handle is dragged down', async ({ page }) => {
