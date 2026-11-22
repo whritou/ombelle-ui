@@ -21,6 +21,6 @@ export default defineConfig({
   webServer: {
     command: 'node node_modules/vite/bin/vite.js apps/preview --config apps/preview/vite.config.ts --port 4184',
     url: 'http://127.0.0.1:4184',
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
 })
