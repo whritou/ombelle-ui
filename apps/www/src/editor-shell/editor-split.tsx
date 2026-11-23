@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { GroupImperativeHandle, PanelImperativeHandle } from 'react-resizable-panels'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup, readSavedLayout } from '../generated/ui/components/ui/resizable'
 
@@ -74,9 +74,23 @@ export function EditorSplit({ id, className, inspector, children, after, collaps
     media.addEventListener('change', apply)
     return () => media.removeEventListener('change', apply)
   }, [id])
+  // The handle library hit-tests presses across the whole document and counts any press inside the group as
+  // aimed at the handle when it falls within the handle's 24 px target. It skips modal dialogs but not native
+  // popovers, so a press on a token panel or its colour picker beside the handle focused the handle and closed
+  // the picker. While a popover inside the split is open the group is disabled, so those presses reach the panel.
+  const root = useRef<HTMLDivElement | null>(null)
+  const [popoverOpen, setPopoverOpen] = useState(false)
+  useEffect(() => {
+    const element = root.current
+    if (!element) return
+    // `toggle` does not bubble, so the split listens in the capture phase.
+    const update = () => setPopoverOpen(element.querySelector(':popover-open') !== null)
+    element.addEventListener('toggle', update, true)
+    return () => element.removeEventListener('toggle', update, true)
+  }, [])
   return (
-    <div className={className} data-editor-split="">
-      <ResizablePanelGroup direction="horizontal" groupRef={group} data-editor-split-group=""
+    <div ref={root} className={className} data-editor-split="">
+      <ResizablePanelGroup direction="horizontal" groupRef={group} data-editor-split-group="" disabled={popoverOpen}
         onLayoutChanged={layout => {
           // Below 1200 px the split is flattened and has no width, so whatever it reports is not the user's split.
           if (!window.matchMedia(splitMedia).matches) return
