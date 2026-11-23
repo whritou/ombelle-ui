@@ -14,7 +14,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -24,7 +24,9 @@ jobs:
         with:
           cache-scope: quality
       - name: Verify package quality and audit workspace dependencies
-        timeout-minutes: 40
+        # Unit tests take about 9 minutes and the unsharded integration suite about 25 on
+        # 23 November, then the evidence check collects both inventories again.
+        timeout-minutes: 70
         run: pnpm check:foundation:quality
       - name: Stage finalized evidence after process teardown
         if: always()
