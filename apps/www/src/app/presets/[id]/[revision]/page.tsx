@@ -12,7 +12,8 @@ import { DocPage } from '../../../../site/doc-page'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 // Anyone can publish these pages, so search engines must not index user-chosen text (RL-11).
-export const metadata = { robots: { index: false, follow: false } }
+// Published codes are anyone's text on the official domain, so they stay out of search indexes (RL-11).
+const robots = { index: false, follow: false }
 
 // One read per request, shared by the title and the page.
 const readSnapshot = cache((id: string, revision: string) =>
@@ -31,9 +32,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id, revision } = await params
   try {
     const snapshot = await readSnapshot(id, revision)
-    return { title: `${snapshot.preset.name} · Published preset · Ombelle UI` }
+    return { title: `${snapshot.preset.name} · Published preset · Ombelle UI`, robots }
   } catch (error) {
-    return { title: `${unavailableTitle(error)} · Ombelle UI` }
+    return { title: `${unavailableTitle(error)} · Ombelle UI`, robots }
   }
 }
 
