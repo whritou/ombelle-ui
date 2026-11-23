@@ -167,10 +167,15 @@ for (const edition of ['radix', 'base'] as const) {
     test('Menubar: with a menu open, Left and Right open the neighbouring menu, and Escape returns focus', async ({ page }) => {
       const bar = (await open(page, edition)).getByTestId('s09-menubar')
       const file = bar.getByRole('menuitem', { name: 'File' })
+      // An arrow key only moves between menus once focus is inside the open one: on a slow runner it
+      // arrives a moment after the menu shows (seen in CI), so wait for it before each key.
+      const focusIn = (name: string) => expect.poll(() => page.getByRole('menu', { name }).evaluate(menu => menu.contains(document.activeElement))).toBe(true)
       await file.click()
       await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeVisible()
+      await focusIn('File')
       await page.keyboard.press('ArrowRight')
       await expect(page.getByRole('menuitem', { name: /Undo/ })).toBeVisible()
+      await focusIn('Edit')
       await page.keyboard.press('ArrowLeft')
       await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeVisible()
       await page.keyboard.press('Escape')
