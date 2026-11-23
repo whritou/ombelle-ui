@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ombelle-ui.vercel.app/schemas/project-config-1.json",
+  "title": "Ombelle project configuration (ui-library.config.json)",
+  "description": "Written by init and theme add; read by every command. configVersion 1 is the 1.0 format. A higher configVersion is refused as written by a newer CLI.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["configVersion", "platform", "language", "presetFile", "lockFile", "packageManager", "theme", "paths"],
+  "properties": {
+    "configVersion": {"const": 1},
+    "platform": {"const": "react-web"},
+    "language": {"const": "tsx"},
+    "presetFile": {"type": "string", "minLength": 1, "description": "The saved project preset, relative to the app root (./ui-preset.json)."},
+    "lockFile": {"type": "string", "minLength": 1, "description": "The project lock, relative to the app root (./ui-library.lock.json)."},
+    "packageManager": {"enum": ["auto", "npm", "pnpm", "yarn", "bun"], "description": "Must agree with the app's lockfile or packageManager field; auto follows them."},
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "cssEntry"],
+      "properties": {
+        "strategy": {"const": "merge"},
+        "cssEntry": {"type": "string", "minLength": 1, "description": "The global stylesheet theme add merges tokens into."},
+        "darkSelector": {"type": "string", "minLength": 1, "description": "The dark-mode selector; .dark when absent."}
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["components", "styleOutput"],
+      "properties": {
+        "components": {"type": "string", "minLength": 1, "description": "Must match components.json aliases.ui and tsconfig paths."},
+        "styleOutput": {"type": "string", "minLength": 1, "description": "The shared ui-style.css."},
+        "recipeOutput": {"type": "string", "description": "Reserved; recipes refuse a custom output root."}
+      }
+    },
+    "registryBase": {"type": "string", "description": "Reserved; not read by the 1.0 CLI."}
+  }
+}

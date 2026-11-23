@@ -1,6 +1,6 @@
 import {
   contractRelease, usesExtendedTypography, validateComponentRecipe, validateInstallableRecipe,
-  type Artifact, type ComponentRecipeId, type ComponentRecipeCompileResult, type InstallableRecipeCompileResult,
+  type Artifact, type ComponentId, type ComponentRecipeId, type ComponentRecipeCompileResult, type InstallableRecipeCompileResult,
   type ComponentRecipeAppearance, type Preset, type StyleFamily,
 } from '@ombelle/contracts'
 import { getCatalog, getTemplate, resolveRecipePreset } from '@ombelle/catalog'
@@ -37,7 +37,7 @@ export function withComponentRecipeGlass(preset: Preset, glass: ComponentRecipeA
  * style rules or a mono slot). The body font always applies. A role the component never shows is not
  * imported or installed.
  */
-export function componentRecipeFontRoles(component: ComponentRecipeId, family: StyleFamily, catalogRelease = contractRelease): { heading: boolean; mono: boolean } {
+export function componentRecipeFontRoles(component: ComponentId, family: StyleFamily, catalogRelease = contractRelease): { heading: boolean; mono: boolean } {
   const template = getTemplate(getCatalog(catalogRelease), component)
   const slots = recipeTemplateSlots(template)
   return {

@@ -116,17 +116,27 @@ it.each([
     code: 'INVALID_DATA',
     message:
       '--' + resolution + ' ' + file +
-      " doesn't match a file Ombelle can resolve; only existing files Ombelle doesn't manage can be overwritten or kept beside",
+      " doesn't match a file Ombelle can resolve; --overwrite takes an existing file Ombelle doesn't manage or a managed file edited after install, and --beside an existing component file Ombelle doesn't manage",
   })
 })
 
-it('never overwrites an Ombelle-owned file the user edited', async () => {
+// PUB-01: an edited managed file conflicts, and only an explicit --overwrite of that path replaces it.
+it('conflicts on an Ombelle-owned file the user edited until --overwrite names it', async () => {
   const root = await project('radix-nova')
-  await apply(await plan(root, ['button'], { 'src/components/ui/button.tsx': 'overwrite' }))
-  await fs.appendFile(path.join(root, 'src/components/ui/button.tsx'), '// edit\n')
-  await expect(
-    plan(root, ['button'], { 'src/components/ui/button.tsx': 'overwrite' }),
-  ).rejects.toMatchObject({ code: 'INVALID_DATA' })
+  const file = 'src/components/ui/button.tsx'
+  await apply(await plan(root, ['button'], { [file]: 'overwrite' }))
+  const installed = await fs.readFile(path.join(root, file), 'utf8')
+  await fs.appendFile(path.join(root, file), '// edit\n')
+  const conflicted = await plan(root, ['button'])
+  expect(conflicted.changes.find((c) => c.path === file)!.action).toBe('conflict')
+  expect(conflicted.diagnostics).toEqual([expect.objectContaining({ path: file, resolutions: ['overwrite'] })])
+  await expect(plan(root, ['button'], { [file]: 'beside' })).rejects.toMatchObject({ code: 'INVALID_DATA' })
+  const replaced = await plan(root, ['button'], { [file]: 'overwrite' })
+  expect(replaced.changes.find((c) => c.path === file)).toMatchObject({ action: 'update', afterContent: installed })
+  await apply(replaced)
+  expect(await fs.readFile(path.join(root, file), 'utf8')).toBe(installed)
+  // Once unedited again, naming it is refused: there is nothing to resolve.
+  await expect(plan(root, ['button'], { [file]: 'overwrite' })).rejects.toMatchObject({ code: 'INVALID_DATA' })
 })
 
 it('adds prefixed shared rules to an unedited themed stylesheet when installing beside', async () => {

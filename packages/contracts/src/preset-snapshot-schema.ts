@@ -1,7 +1,7 @@
 // Generated from schemas/preset-snapshot.schema.json; do not edit independently.
 export const presetSnapshotSchema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ui.example.com/schemas/preset-snapshot-1.0.json",
+  "$id": "https://ombelle-ui.vercel.app/schemas/preset-snapshot-1.0.json",
   "title": "Immutable Preset Snapshot Version 1",
   "type": "object",
   "additionalProperties": false,
@@ -30,7 +30,7 @@ export const presetSnapshotSchema = {
       "const": 1
     },
     "preset": {
-      "$ref": "https://ui.example.com/schemas/preset-1.0.json"
+      "$ref": "https://ombelle-ui.vercel.app/schemas/preset-1.0.json"
     },
     "presetHash": {
       "type": "string",

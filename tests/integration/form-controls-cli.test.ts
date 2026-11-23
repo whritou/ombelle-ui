@@ -158,52 +158,32 @@ async function staleStylesheetProject() {
   return { p, styleFile, compiled, stale }
 }
 
-it('names theme add when the shared stylesheet is stale but unedited', async () => {
+// Since 1.0 (PUB-01), add refreshes an unedited shared stylesheet that lags the catalog, as update and
+// theme add do, instead of stopping with a theme add hint.
+it('refreshes a stale but unedited shared stylesheet in add', async () => {
   const { p, styleFile, compiled, stale } = await staleStylesheetProject()
-  const { root, read, command } = p
-  const presetPath = path.resolve(root, './ui-preset.json')
-
-  const blocked = await command(['add', 'textarea', '--yes'])
-  expect(blocked.code, blocked.output).toBe(4)
-  expect(jsonRecord(blocked.data)).toMatchObject({
-    status: 'conflict',
-    warnings: expect.arrayContaining([
-      expect.objectContaining({
-        code: 'FILE_CONFLICT',
-        path: styleFile,
-        message:
-          'Shared style rules changed in this catalog; run theme add ' +
-          presetPath +
-          ' to refresh them',
-      }),
-    ]),
+  const { read, command } = p
+  const planned = await command(['add', 'textarea', '--dry-run'])
+  expect(planned.code, planned.output).toBe(0)
+  expect(jsonRecord(planned.data)).toMatchObject({
+    status: 'planned',
+    changes: expect.arrayContaining([expect.objectContaining({ path: styleFile, action: 'update' })]),
+    notices: expect.arrayContaining([{ code: 'FILE_REFRESHED', message: 'refresh ' + styleFile + ' (unedited since install; the catalog source changed)' }]),
   })
   expect(await read(styleFile)).toBe(stale)
-
-  const themed = await command(['theme', 'add', './ui-preset.json', '--yes'])
-  expect(themed.code, themed.output).toBe(0)
+  const added = await command(['add', 'textarea', '--yes'])
+  expect(added.code, added.output).toBe(0)
   expect(await read(styleFile)).toBe(compiled)
-  const retry = await command(['add', 'textarea', '--yes'])
-  expect(retry.code, retry.output).toBe(0)
 })
 
-it('prints a stale-stylesheet command that works from outside the project', async () => {
+it('refreshes a stale shared stylesheet with theme add from outside the project', async () => {
   const { p, styleFile, compiled } = await staleStylesheetProject()
   const { root, read } = p
   const outside = path.resolve('.')
   expect(path.resolve(root).startsWith(outside + path.sep)).toBe(false)
-  expect(outside).not.toBe(path.resolve(root))
   const run = (args: string[]) =>
     runBuiltCli('node', [...args, '--cwd', root, '--json'], outside)
-
-  const blocked = await run(['add', 'textarea', '--yes'])
-  expect(blocked.code, blocked.output).toBe(4)
-  const warning = (jsonRecord(blocked.data).warnings as { path: string; message: string }[])
-    .find((w) => w.path === styleFile)!
-  const printed = warning.message.match(/run theme add (.+) to refresh them$/)![1]
-  expect(printed).toBe(path.resolve(root, './ui-preset.json'))
-
-  const themed = await run(['theme', 'add', printed, '--yes'])
+  const themed = await run(['theme', 'add', path.resolve(root, './ui-preset.json'), '--yes'])
   expect(themed.code, themed.output).toBe(0)
   expect(await read(styleFile)).toBe(compiled)
   const retry = await run(['add', 'textarea', '--yes'])
@@ -226,7 +206,7 @@ it('keeps edited shared stylesheets as conflicts', async () => {
       expect.objectContaining({
         code: 'FILE_CONFLICT',
         path: styleFile,
-        message: 'Existing source requires an explicit migration',
+        message: styleFile + ' was edited after install; keep your version, or rerun with --overwrite ' + styleFile + ' to replace it with the catalog source (diff shows the changes)',
       }),
     ]),
   })
@@ -234,7 +214,8 @@ it('keeps edited shared stylesheets as conflicts', async () => {
   expect(await snapshotTree(root)).toEqual(edited)
 })
 
-it('migrates a legacy text-close Dialog by deleting it', async () => {
+// Since 1.0 (PUB-01) an unedited legacy Dialog is refreshed by add or update; deleting it still works.
+it('migrates an unedited legacy text-close Dialog with add', async () => {
   const p = await project('vite')
   const { root, read, write, command } = p
   await seedDependencies(p, ['dialog'])
@@ -251,10 +232,14 @@ it('migrates a legacy text-close Dialog by deleting it', async () => {
   lock.artifacts[file] = { ...lock.artifacts[file], sha256: sha(legacy) }
   await write('ui-library.lock.json', JSON.stringify(lock))
 
+  const refreshed = await command(['add', 'dialog', '--yes'])
+  expect(refreshed.code, refreshed.output).toBe(0)
+  expect(await read(file)).toContain('<XIcon')
+
+  // An edited legacy Dialog conflicts; deleting it and adding it again is still a route.
+  await write(file, legacy + '\n// my edit\n')
   const conflict = await command(['add', 'dialog', '--yes'])
   expect(conflict.code, conflict.output).toBe(4)
-  expect(await read(file)).toBe(legacy)
-
   await fs.rm(path.join(root, file))
   const migrated = await command(['add', 'dialog', '--yes'])
   expect(migrated.code, migrated.output).toBe(0)

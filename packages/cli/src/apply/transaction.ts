@@ -211,10 +211,13 @@ export async function applyPlan(
         ? 'Interrupted by ' + interrupted + '; the planned files were restored'
         : cause instanceof Error ? cause.message : 'Installation failed',
       folder,
-      'Review recovery.json and repair the project with ' +
-        plan.packageManager +
-        (plan.bunLockfile ? ' (' + plan.bunLockfile + ')' : '') +
-        ' before retrying.',
+      // A peer-dependency refusal keeps its own next action: the files are restored and nothing to repair.
+      cause instanceof FoundationError && Object.hasOwn(cause, 'peerConflict')
+        ? cause.nextAction
+        : 'Review recovery.json and repair the project with ' +
+          plan.packageManager +
+          (plan.bunLockfile ? ' (' + plan.bunLockfile + ')' : '') +
+          ' before retrying.',
     )
     error.recovery = recovery
     throw error

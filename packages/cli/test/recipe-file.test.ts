@@ -46,14 +46,16 @@ it('rejects a directory as a non-regular recipe', async () => {
   })
 })
 
-if (process.platform !== 'win32') {
-  it('rejects a file replaced by a FIFO between stat and open without hanging', async () => {
+// The FIFO guard lives in the shared reader both preset and recipe files use (DUP-02). The child runs
+// the TypeScript source directly, so it imports json-file.ts, which has no relative imports.
+if (process.platform !== 'win32') for (const label of ['Recipe', 'Preset'] as const) {
+  it(`rejects a ${label.toLowerCase()} file replaced by a FIFO between stat and open without hanging`, async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-recipe-'))
     roots.push(root)
     const file = path.join(root, 'recipe.json')
     await fs.writeFile(file, JSON.stringify(example))
     const module = fileURLToPath(
-      new URL('../src/recipe-file.ts', import.meta.url),
+      new URL('../src/json-file.ts', import.meta.url),
     )
     const child = spawnSync(
       process.execPath,
@@ -63,7 +65,7 @@ if (process.platform !== 'win32') {
         `import fs from 'node:fs/promises';
        import { execFileSync } from 'node:child_process';
        import { pathToFileURL } from 'node:url';
-       const { readRecipeFile } = await import(pathToFileURL(process.argv[1]));
+       const { readJsonFile } = await import(pathToFileURL(process.argv[1]));
        const stat = fs.stat.bind(fs);
        fs.stat = async (...args) => {
          const result = await stat(...args);
@@ -73,27 +75,28 @@ if (process.platform !== 'win32') {
          }
          return result;
        };
-       try { await readRecipeFile(process.argv[2]); process.exitCode = 1 }
+       try { await readJsonFile(process.argv[2], process.argv[3], 65536); process.exitCode = 1 }
        catch (error) {
-         if (error.code !== 'INVALID_DATA' || error.message !== 'Recipe must be a regular file') {
+         if (error.code !== 'INVALID_DATA' || error.message !== process.argv[3] + ' must be a regular file') {
            console.error(error); process.exitCode = 2
          }
        }`,
         module,
         file,
+        label,
       ],
       { encoding: 'utf8', timeout: 5000, killSignal: 'SIGKILL' },
     )
     expect(child.error, child.stderr).toBeUndefined()
     expect(child.status, child.stderr).toBe(0)
   }, 15000)
-  it('rejects a POSIX FIFO without waiting for a writer', async () => {
+  it(`rejects a POSIX FIFO ${label.toLowerCase()} without waiting for a writer`, async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-recipe-'))
     roots.push(root)
     const fifo = path.join(root, 'recipe.json')
     execFileSync('mkfifo', [fifo], { timeout: 5000 })
     const module = fileURLToPath(
-      new URL('../src/recipe-file.ts', import.meta.url),
+      new URL('../src/json-file.ts', import.meta.url),
     )
     const child = spawnSync(
       process.execPath,
@@ -101,15 +104,16 @@ if (process.platform !== 'win32') {
         '--input-type=module',
         '--eval',
         `import { pathToFileURL } from 'node:url';
-       const { readRecipeFile } = await import(pathToFileURL(process.argv[1]));
-       try { await readRecipeFile(process.argv[2]); process.exitCode = 1 }
+       const { readJsonFile } = await import(pathToFileURL(process.argv[1]));
+       try { await readJsonFile(process.argv[2], process.argv[3], 65536); process.exitCode = 1 }
        catch (error) {
-         if (error.code !== 'INVALID_DATA' || error.message !== 'Recipe must be a regular file') {
+         if (error.code !== 'INVALID_DATA' || error.message !== process.argv[3] + ' must be a regular file') {
            console.error(error); process.exitCode = 2
          }
        }`,
         module,
         fifo,
+        label,
       ],
       { encoding: 'utf8', timeout: 5000, killSignal: 'SIGKILL' },
     )

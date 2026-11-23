@@ -18,12 +18,16 @@ afterEach(async () => {
 })
 
 const glassIds = componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
-const mountNotice =
-  'mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers'
+const mountNotice = {
+  code: 'GLASS_FILTER_MOUNT',
+  message: 'mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers',
+}
 // One accessibility caveat per glass plan, whichever components it touches (the ids only say a plan has some).
-const notice = (ids: readonly string[]) =>
-  ids.length ? familyAccessibilityCaveat('liquid-glass') + ' See docs/components/liquid-glass.md.' : ''
-const contrastNotice = expect.stringContaining('Liquid glass text contrast fails in')
+const notice = (ids: readonly string[]) => ({
+  code: 'GLASS_ACCESSIBILITY_CAVEAT',
+  message: ids.length ? familyAccessibilityCaveat('liquid-glass') + ' See docs/components/liquid-glass.md.' : '',
+})
+const contrastNotice = { code: 'GLASS_CONTRAST', message: expect.stringContaining('Liquid glass text contrast fails in') }
 const installOrder = [
   'button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input',
   'label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select', 'avatar', 'separator',

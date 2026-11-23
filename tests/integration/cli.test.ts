@@ -130,9 +130,11 @@ it('rejects a preset whose style family is outside the installer schema without 
   await fs.writeFile(file, JSON.stringify(foreign))
   const before = await snapshotTree(root)
   const result = await command(['init', '--preset', file, '--cwd', root, '--yes'])
-  expect(result.exitCode).not.toBe(0)
-  expect(result.data.error.code).toBe('INVALID_DATA')
+  // An unknown family reads as a document from a newer release (PUB-05): exit 3 with an upgrade step.
+  expect(result.exitCode).toBe(3)
+  expect(result.data.error.code).toBe('UNSUPPORTED_RELEASE')
   expect(result.data.error.path).toBe('/styleFamily')
+  expect(result.data.error.nextAction).toContain('npx @ombelle-ui/cli@latest')
   expect(await snapshotTree(root)).toEqual(before)
 })
 it('reports malformed JSON and missing initialization clearly', async () => {

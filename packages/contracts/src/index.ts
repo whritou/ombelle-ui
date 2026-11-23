@@ -20,3 +20,4 @@ export { componentsWithStyleSupport, assertStyleAvailable } from './style-suppor
 export type { StableStyleFamily, StyleSupport } from './style-families.js'
 export * from './distribution.js'
 export * from './contract-release.js'
+export * from './minimum-cli.js'

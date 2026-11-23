@@ -46,7 +46,7 @@ export async function prepareBun(root:string, executable:string, lockfile:BunLoc
   }
   const pkg=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8').catch(e=>{if(e.code==='ENOENT')return '{}';throw e}))
   for(const dep of deps) if(pkg.dependencies?.[dep.name]===undefined && (pkg.devDependencies?.[dep.name]!==undefined || pkg.optionalDependencies?.[dep.name]!==undefined || pkg.peerDependencies?.[dep.name]!==undefined))
-    throw bad('Move '+dep.name+' into dependencies before installing; Bun 1.4.3 cannot safely promote its dependency group',root)
+    throw bad('Move '+dep.name+' into dependencies before installing; Bun cannot safely promote its dependency group',root)
   return {executable,prefixArgs:[],version:'1.4.3'}
 }
 export function bunAddArgs(deps:Dependency[],lockfile:BunLockfile):string[] {
