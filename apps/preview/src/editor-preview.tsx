@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import { resolveRecipePreset } from '@ombelle/catalog'
+import { stripFontImports } from '@ombelle/compiler/light'
 import { isPreviewInit, verifyPreviewRender, type PreviewRender } from '../../www/src/editor/preview-protocol'
 import { forcedStateSelector } from '../../www/src/editor/forced-states'
 import { draftFamily } from '../../www/src/editor/model'
@@ -228,8 +229,8 @@ function EditorPreview() {
   if (matrixMessage && matrixCurrent) return <div className={matrixMessage.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={matrixMessage.viewport} data-layout="matrix" data-request={matrixMessage.requestId}>
     {/* Each cell keeps its own sheet; the current one also gets the forced-state copies for the state row. */}
     {matrixMessage.cells.map((cell) => cell.current
-      ? <style key={cell.css} ref={recipeStyle}>{cell.css}</style>
-      : <style key={cell.css}>{cell.css}</style>)}
+      ? <style key={cell.css} ref={recipeStyle}>{stripFontImports(cell.css)}</style>
+      : <style key={cell.css}>{stripFontImports(cell.css)}</style>)}
     {glassPreset && Button && <LiquidGlassFilter key={`${glassPreset}:${overrides?.glassHalo}:${overrides?.glassMotion}`} />}
     {glassBackdrop && <GlassBackdropArt scene={glassBackdrop} />}
     {Button && <MatrixTable name="Button" rows={matrixMessage.rows} columns={matrixMessage.columns} cells={matrixMessage.cells}
@@ -239,7 +240,9 @@ function EditorPreview() {
   </div>
   return <div className={state?.mode === 'dark' ? 'editor-preview dark' : 'editor-preview'} data-viewport={state?.viewport ?? 'wide'}>
     {/* Keyed by the CSS so each recipe gets a fresh sheet before its forced copies are added. */}
-    <style ref={recipeStyle} key={state?.css ?? ''}>{state?.css ?? ''}</style>
+    {/* The recipe CSS imports its fonts by package name, which this page cannot resolve (each import
+        was a 404): it loads the same Fontsource files itself (preset-fonts.ts). */}
+    <style ref={recipeStyle} key={state?.css ?? ''}>{stripFontImports(state?.css ?? '')}</style>
     {glassPreset && Button && <LiquidGlassFilter key={`${glassPreset}:${overrides?.glassHalo}:${overrides?.glassMotion}`} />}
     {glassBackdrop && <GlassBackdropArt scene={glassBackdrop} />}
     {state && Button && <ButtonSpecimen Button={Button} recipe={state.recipe} scope={specimenScope} forcedState={state.forcedState} ref={specimen} />}
