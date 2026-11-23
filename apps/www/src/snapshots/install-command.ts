@@ -8,24 +8,41 @@ export type InstallSubject =
   | { kind: 'preset'; preset: Preset; contrastWarning?: boolean }
   | { kind: 'recipe'; recipe: InstallableRecipe }
 
+/** The first CLI release that installs some content, and the feature that needs it (the contracts' `MinimumCli` shape). */
+export type MinimumCli = { version: string; feature: string }
+
 /**
- * A catalog feature the published installer cannot install yet. While the
- * installer is older than `minimumCli` and `applies` matches, the site shows
- * `notice` instead of a command, so every command it shows works.
+ * A catalog feature the published installer cannot install yet. While the installer is older than
+ * `minimumCli` and `applies` matches, the site shows a notice instead of a command, so every command
+ * it shows works.
  */
 export type InstallRule = {
   minimumCli: string
+  feature: string
   applies(subject: InstallSubject): boolean
-  notice: string
 }
 
 /**
- * Rules newer than the published installer. Add one when the catalog gains
- * something the published CLI rejects, and delete it once a release that
- * accepts it is published (the unit test fails until then). Empty while
- * the published installer accepts everything the site can produce.
+ * Rules newer than the published installer, until the PUB-05 table replaces them (see `minimumCliFor`).
+ * Add one when the catalog gains something the published CLI rejects, and delete it once a release that
+ * accepts it is published (the unit test fails until then). Empty while the published installer accepts
+ * everything the site can produce.
  */
 export const installRules: readonly InstallRule[] = []
+
+/**
+ * PUB-05 HOOK: the first published CLI that installs this content. The CLI owns one table of minimum
+ * versions per document feature in `@ombelle/contracts` (`minimumCliForPreset` and `minimumCliForRecipe`,
+ * branch `feat/cli-1-0-freeze`). Once it is on this branch, return
+ * `subject.kind === 'preset' ? minimumCliForPreset(subject.preset) : minimumCliForRecipe(subject.recipe)`
+ * here and delete `installRules`; the notices and code pages need no other change.
+ */
+export function minimumCliFor(subject: InstallSubject, rules: readonly InstallRule[] = installRules): MinimumCli | undefined {
+  return rules
+    .filter((rule) => rule.applies(subject))
+    .map((rule) => ({ version: rule.minimumCli, feature: rule.feature }))
+    .reduce<MinimumCli | undefined>((best, next) => (!best || compareVersions(next.version, best.version) > 0 ? next : best), undefined)
+}
 
 /** The notice that replaces the command for this content, or undefined when the command works. */
 export function installNotice(
@@ -33,7 +50,10 @@ export function installNotice(
   installer: { version: string } = publishedInstaller,
   rules: readonly InstallRule[] = installRules,
 ): string | undefined {
-  return rules.find((rule) => compareVersions(installer.version, rule.minimumCli) < 0 && rule.applies(subject))?.notice
+  const needed = minimumCliFor(subject, rules)
+  return needed && compareVersions(installer.version, needed.version) < 0
+    ? `Installing this ${subject.kind} needs ${publicCliPackageName} ${needed.version} or newer (${needed.feature}); the published installer is ${installer.version}.`
+    : undefined
 }
 
 /** A shared notice keeps local artifacts, Get code and published snapshots on the same compatibility rule. */

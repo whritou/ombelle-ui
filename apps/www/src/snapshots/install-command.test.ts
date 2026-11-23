@@ -4,7 +4,7 @@ import { officialSnapshotOrigin } from '@ombelle/contracts'
 // The source the site's generated Code Block is compiled from.
 import { commandRunners } from '../../../../packages/catalog/src/templates/code-block'
 import { getCatalogPresets } from '@ombelle/catalog/presets'
-import { codeInstallCommand, compareVersions, installNotice, installRules, installableRecipeInstallNotice, offeredStyleFamilies, packageManagers, presetInstallNotice, publishedInstaller, siteFamilyOrder, snapshotInstallCommand, type InstallRule } from './install-command'
+import { codeInstallCommand, compareVersions, installNotice, installRules, minimumCliFor, installableRecipeInstallNotice, offeredStyleFamilies, packageManagers, presetInstallNotice, publishedInstaller, siteFamilyOrder, snapshotInstallCommand, type InstallRule } from './install-command'
 import example from '../../../../examples/recipe.example.json'
 import type { Recipe } from '@ombelle/contracts'
 
@@ -124,9 +124,10 @@ describe('install rules', () => {
   const preset = getCatalogPresets('0.1.0').presets.flat
   const rule: InstallRule = {
     minimumCli: '0.10.0',
+    feature: 'contrast warnings',
     applies: (subject) => subject.kind === 'preset' && subject.contrastWarning === true,
-    notice: 'This preset requires CLI 0.10.0.',
   }
+  const older: InstallRule = { minimumCli: '0.9.5', feature: 'presets', applies: (subject) => subject.kind === 'preset' }
 
   it('holds only rules newer than the published installer', () => {
     for (const each of installRules) expect(compareVersions(publishedInstaller.version, each.minimumCli)).toBeLessThan(0)
@@ -134,9 +135,17 @@ describe('install rules', () => {
 
   it('shows a rule notice instead of a command until the installer reaches its minimum', () => {
     const subject = { kind: 'preset', preset, contrastWarning: true } as const
-    expect(installNotice(subject, { version: '0.9.9' }, [rule])).toBe(rule.notice)
+    expect(installNotice(subject, { version: '0.9.9' }, [rule])).toBe(
+      'Installing this preset needs @ombelle-ui/cli 0.10.0 or newer (contrast warnings); the published installer is 0.9.9.')
     expect(installNotice(subject, { version: '0.10.0' }, [rule])).toBeUndefined()
     expect(installNotice({ ...subject, contrastWarning: false }, { version: '0.9.9' }, [rule])).toBeUndefined()
+  })
+
+  it('needs the highest minimum among the rules that apply (the PUB-05 hook)', () => {
+    const subject = { kind: 'preset', preset, contrastWarning: true } as const
+    expect(minimumCliFor(subject, [older, rule])).toEqual({ version: '0.10.0', feature: 'contrast warnings' })
+    expect(minimumCliFor({ ...subject, contrastWarning: false }, [older, rule])).toEqual({ version: '0.9.5', feature: 'presets' })
+    expect(minimumCliFor(subject, [])).toBeUndefined()
   })
 
   it('offers every command the site can produce today', () => {
