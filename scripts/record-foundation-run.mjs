@@ -3,10 +3,12 @@ import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 
-// Record a passing Foundation run in docs/evidence/foundation-run.json from that run's own aggregate
+// Record a passing Foundation run in evidenceFile (below) from that run's own aggregate
 // report, so the evidence names the run and commit it came from instead of hand-copied numbers (TST-05).
 //   node scripts/record-foundation-run.mjs <github-run-id>
 // Needs the gh CLI signed in to the repository. It refuses a run whose aggregate did not pass.
+// Where gate evidence lives: the one line to change if docs/evidence moves.
+export const evidenceFile = 'docs/evidence/foundation-run.json'
 const runId = process.argv[2]
 if (!/^\d+$/.test(runId ?? '')) throw new Error('Use: node scripts/record-foundation-run.mjs <github-run-id>')
 const gh = (...args) => {
@@ -36,7 +38,7 @@ try {
     browser: report.browserVersion,
     jobMinutes: Object.fromEntries(run.jobs.map(job => [job.name, minutes(job)])),
   }
-  await fs.writeFile('docs/evidence/foundation-run.json', JSON.stringify(record, null, 2) + '\n')
+  await fs.writeFile(evidenceFile, JSON.stringify(record, null, 2) + '\n')
   console.log('Recorded Foundation run ' + runId + ' on ' + report.sourceCommit)
 } finally {
   await fs.rm(directory, { recursive: true, force: true })
