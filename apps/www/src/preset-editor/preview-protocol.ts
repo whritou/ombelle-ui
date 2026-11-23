@@ -11,6 +11,15 @@ import {
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 /** The full compiler, loaded by the first verification rather than with the page. */
 const compiler = () => import('@ombelle/compiler')
+/**
+ * The largest preset-render message the frame reads. It carries every gallery component's
+ * source and CSS: Liquid glass passed 1 MiB once the 1.0 catalog landed, so the bound
+ * leaves room above the largest family (tested), and the frame recompiles and compares
+ * the whole result anyway.
+ */
+export const maxPresetRenderBytes = 4 * 1024 * 1024
+/** The largest preset-tokens message the frame reads: a preset and a view, never sources. */
+export const maxPresetTokensBytes = 1024 * 1024
 export const presetScenes = ['gallery', 'dashboard', 'projects', 'settings', 'sign-in', 'workspace'] as const
 export type PresetScene = (typeof presetScenes)[number]
 /** Liquid glass preview backdrops: the design kit's, light scenes, then dark and warm ones. Preview only, never saved. */
@@ -118,7 +127,7 @@ export async function verifyPresetRender(
 ): Promise<PresetRender | null> {
   try {
     if (
-      new TextEncoder().encode(JSON.stringify(input)).length > 1024 * 1024 ||
+      new TextEncoder().encode(JSON.stringify(input)).length > maxPresetRenderBytes ||
       !record(input) ||
       !exact(input, ['type', 'requestId', 'result', 'view']) ||
       input.type !== 'preset-render' ||
@@ -231,7 +240,7 @@ export async function verifyPresetTokens(
 ): Promise<{ message: PresetTokens; css: string; sheets: string[]; presetHash: string } | null> {
   try {
     if (
-      new TextEncoder().encode(JSON.stringify(input)).length > 1024 * 1024 ||
+      new TextEncoder().encode(JSON.stringify(input)).length > maxPresetTokensBytes ||
       !record(input) ||
       !exact(input, ['type', 'requestId', 'preset', 'view']) ||
       input.type !== 'preset-tokens' ||
