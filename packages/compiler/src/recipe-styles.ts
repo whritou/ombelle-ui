@@ -260,6 +260,12 @@ export function compileScopedButtonStyles(input: {
   // token. An explicit recipe radius still wins, while recipes without one keep the family shape.
   if (o.radiusRem !== undefined && ['ombelle', 'organic', 'retro-futurism'].includes(data.styleFamily))
     overrides['border-radius'] = 'var(--radius)'
+  // Organic draws no Button border and retro-futurism a fixed 2px one, so an explicit recipe
+  // border width has to restate the border for them.
+  if (o.borderWidthPx !== undefined && data.styleFamily === 'organic')
+    overrides.border = 'var(--border-width) solid var(--border)'
+  if (o.borderWidthPx !== undefined && data.styleFamily === 'retro-futurism')
+    overrides['border-width'] = 'var(--border-width)'
   if (o.gapPx !== undefined) overrides.gap = o.gapPx + 'px'
   if (o.fontWeight !== undefined) overrides['font-weight'] = String(o.fontWeight)
   if (o.fontSizePx !== undefined) overrides['font-size'] = o.fontSizePx + 'px'

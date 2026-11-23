@@ -982,7 +982,7 @@
   "organic/component-preset/scoped-presets/builtin-organic/r1/button.tsx": "b6b0f50a6d9abd4f05f94607b3fe05a39eb6976c7d4ee40d8e58c809773f6463",
   "organic/recipe/examples/recipes/rc_organic_button/r1.tsx": "92f779a218ada0ea6983685dabe286105f4a13e1b99bab2b1d8974e2ad8384e3",
   "organic/recipe/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
-  "organic/recipe/recipes/rc_organic_button/r1/button.css": "437d6a648828a33d53d436476959817573e11b09612eb078d85b004587cc4acc",
+  "organic/recipe/recipes/rc_organic_button/r1/button.css": "3ff5756fe5d200b70e9caa1ba0c2fd7ffc0e0ab398aea34db86071390f53c331",
   "organic/recipe/recipes/rc_organic_button/r1/button.tsx": "bb917100a50ddc31c5be48252f920c28de764649ecf4ff931d40143a0faa8b08",
   "papier/compile/components/ui/accordion.css": "a6557a018e3568a5af32dc3953a8ed94b143a5cca949c0d931efbbe69d4cf71b",
   "papier/compile/components/ui/accordion.tsx": "66f40ebb46773ecc8453223462d99e24b85ce3391a6ad28c776645203c6d628d",
@@ -1376,6 +1376,6 @@
   "retro-futurism/component-preset/scoped-presets/builtin-retro-futurism/r1/button.tsx": "c314f9b1004bd315bdd1b352dd378b861445456fc61c28e9eb2dd8bf3dbca89e",
   "retro-futurism/recipe/examples/recipes/rc_retro_futurism_button/r1.tsx": "34aedceb35b22959f1feca71b332e5b031f6fdf50c5edf48c307ee82c0c71889",
   "retro-futurism/recipe/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
-  "retro-futurism/recipe/recipes/rc_retro_futurism_button/r1/button.css": "4d9f37374bc755d838ed4504d1e8eea18f9c2c08e16498aef5b9f48baf7abbdf",
+  "retro-futurism/recipe/recipes/rc_retro_futurism_button/r1/button.css": "5f75e2e25cf26cdf5c5201d4281c57ff973ef16eb3d9c5697f7d5fc64a73696f",
   "retro-futurism/recipe/recipes/rc_retro_futurism_button/r1/button.tsx": "8cbc846569c6edf56f5469c59633754cd54f8440bfe745c933a5db277408e673"
 }
