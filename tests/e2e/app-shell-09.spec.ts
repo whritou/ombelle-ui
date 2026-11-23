@@ -170,7 +170,10 @@ for (const edition of ['radix', 'base'] as const) {
       // An arrow key only moves between menus once focus is inside the open one: on a slow runner it
       // arrives a moment after the menu shows (seen in CI), so wait for it before each key.
       const focusIn = (name: string) => expect.poll(() => page.getByRole('menu', { name }).evaluate(menu => menu.contains(document.activeElement))).toBe(true)
-      await file.click()
+      // Opened from the keyboard: a click leaves the pointer resting on File, and on a loaded runner
+      // ArrowLeft from Edit was sometimes lost (PR CI 45112705060). Opening by pointer is covered above.
+      await file.focus()
+      await page.keyboard.press('Enter')
       await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeVisible()
       await focusIn('File')
       await page.keyboard.press('ArrowRight')
