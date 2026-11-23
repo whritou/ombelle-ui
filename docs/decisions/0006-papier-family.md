@@ -2,7 +2,7 @@
 
 15 November 2026. Papier is added as a stable style family beside flat, minimalist, neo-brutalism and ombelle, for release 0.8.0. Liquid glass stays experimental and is not changed.
 
-Design source: the design canvas page "0.8.0 Papier" (nine boards, every component and variant in light and dark). The reference stylesheet is committed at `docs/superpowers/specs/assets/papier-080-board.css`. Spec: `docs/superpowers/specs/2026-11-15-papier-family-design.md`.
+Design source: the design canvas page "0.8.0 Papier" (nine boards, every component and variant in light and dark). The reference stylesheet is committed at `docs/internal/superpowers/specs/assets/papier-080-board.css`. Spec: `docs/internal/superpowers/specs/2026-11-15-papier-family-design.md`.
 
 ## Look
 
@@ -20,6 +20,7 @@ Tokens live in `packages/catalog/src/presets/papier.json`. The family stylesheet
 ## Deviations from the design
 
 - **Fonts.** The design uses Fraunces for headings, Instrument Sans for the interface and IBM Plex Mono for code. The built-in preset cannot name them: a component preset installs no packages, so `compileButtonPreset` rejects any preset that sets a font family, heading or mono font, and the stable-hash script compiles built-in presets that way. Papier therefore ships with `system-sans` only, and its CSS sets headings and links with `var(--font-heading, ui-serif, Georgia, "Times New Roman", serif)`. A project that sets a heading font overrides the fallback. The preset editor starts Papier with its own fonts (`styleFamilyFonts.papier` in `packages/catalog/src/fonts.ts`: Fraunces for headings, Instrument Sans for body, IBM Plex Mono for code), so an editor export carries the design's type; an install of the built-in preset alone has the system serif for headings. The component editors do the same through the recipe: a Button recipe carries `overrides.fontFamilyId` and a catalog recipe `appearance.fonts`, both starting at the style's fonts. The compiler imports each named registry font in the recipe's stylesheet and adds its Fontsource package to the install, so the preview, the exported recipe and `add --recipe` agree; a recipe with no font field keeps the preset's system font.
+  - **Note (2026-11-23).** The font part of this decision is superseded for 1.0: `add button --preset <code>` now accepts presets that name registry fonts. The scoped `button.css` imports the body font and its Fontsource package is installed (lifecycle scripts disabled); heading and mono fonts are dropped, and nothing reaches the saved global defaults. See the [CLI specification](../05-cli-specification.md). The text above is kept as the record of the time.
 - **Destructive colour.** The design's destructive solid is `#5B1A14`; the preset uses `#7A1F12` (light) so invalid borders and destructive text stay clearly distinct from the ink-navy border.
 - **Palettes.** The preset editor offers seven Papier palettes (Indigo, Sage, Ochre, Plum, Verdigris, Sepia, Graphite), each a full light and dark set that passes the same contrast tests as the other styles' palettes (`apps/www/src/preset-editor/schemes.ts`). They were added after the first review, once the palettes work was on this branch.
 

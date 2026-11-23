@@ -129,7 +129,7 @@ I found no exploitable vulnerability that should block 1.0. What remains is hard
 
 ### SEC-08 Production database identifiers are published in the repository
 - Severity: nice-to-have
-- Where: `docs/hosted-deployment.md:3` (Neon branch and endpoint `ep-bitter-meadow-b9plx52i`); `docs/production-operations.md:33,75` (full pooled and direct hostnames); `scripts/cleanup-neon-preview.sh:7` (Neon project id)
+- Where: `docs/hosted-deployment.md:3` (Neon branch and endpoint `<production-endpoint>`); `docs/production-operations.md:33,75` (full pooled and direct hostnames); `scripts/cleanup-neon-preview.sh:7` (Neon project id)
 - What happens: The public repository names the internet-reachable production Postgres hosts. An attacker still needs a password. But the hosts make a ready target for credential stuffing and password spraying if a role password ever leaks or is weak. Neon Free has no IP allow-list.
 - How verified: read end to end (only the placeholder `GENERATED_PASSWORD` appears in the connection strings; no secrets are committed)
 - Suggested change: Replace concrete endpoints in the docs with placeholders, and keep the project id in a repository variable.

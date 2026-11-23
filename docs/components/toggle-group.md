@@ -1,6 +1,6 @@
 # Toggle Group
 
-Toggle Group is a row of toggle buttons with one Tab stop. A single choice is a segmented control, such as a theme or density picker. Several choices make a toolbar, such as text formatting. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Toggle Group is a row of toggle buttons with one Tab stop. A single choice is a segmented control, such as a theme or density picker. Several choices make a toolbar, such as text formatting. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add toggle-group`. For a built local checkout:
 

@@ -1,6 +1,6 @@
 # Responsive editors evidence
 
-The preset editor and the component editors on phones (below 768px) and tablets (768–1199px). Design: `docs/superpowers/specs/2026-11-13-responsive-editors-design.md`. Plan: `docs/superpowers/plans/2026-11-13-responsive-editors.md`. Boards: the Editors page of the design canvas.
+The preset editor and the component editors on phones (below 768px) and tablets (768–1199px). Design: `docs/internal/superpowers/specs/2026-11-13-responsive-editors-design.md`. Plan: `docs/internal/superpowers/plans/2026-11-13-responsive-editors.md`. Boards: the Editors page of the design canvas.
 
 ## Environment
 

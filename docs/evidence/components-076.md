@@ -1,6 +1,6 @@
 # Components 0.7.6 evidence
 
-Track 1 of the 0.7.6 work: Password Field, Carousel, Aspect Ratio and Toolbar, and the Form, Fieldset and Checkbox Group parts of Field and Checkbox. Design: `docs/superpowers/specs/2026-11-13-components-076-design.md`. Plan: `docs/superpowers/plans/2026-11-13-components-076.md`.
+Track 1 of the 0.7.6 work: Password Field, Carousel, Aspect Ratio and Toolbar, and the Form, Fieldset and Checkbox Group parts of Field and Checkbox. Design: `docs/internal/superpowers/specs/2026-11-13-components-076-design.md`. Plan: `docs/internal/superpowers/plans/2026-11-13-components-076.md`.
 
 ## Website size, before
 

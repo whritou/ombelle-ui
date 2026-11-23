@@ -42,7 +42,7 @@ Not run: `pnpm check:foundation`, the rest of `test:integration` (CI runs it), a
 
 ## Screenshots
 
-Images are in [images/next-batch-2](images/next-batch-2/), named `<component>-<family>-<mode>.png`. Scene captures are `scene-<page>-ombelle.png`.
+Images are in [images/next-batch-2](images/next-batch-2), named `<component>-<family>-<mode>.png`. Scene captures are `scene-<page>-ombelle.png`.
 
 ## Limits
 

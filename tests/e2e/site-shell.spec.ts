@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
-// The website's own shell on the 0.9 components (docs/superpowers/plans/2026-11-17-app-shell-09-site.md).
+// The website's own shell on the 0.9 components (docs/internal/superpowers/plans/2026-11-17-app-shell-09-site.md).
 const site = 'http://127.0.0.1:3000'
 
 test('the docs sidebar marks the current page', async ({ page }) => {

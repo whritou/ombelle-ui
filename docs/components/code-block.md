@@ -1,6 +1,6 @@
 # Code Block
 
-Code Block shows read-only source with a Copy button: a file block with a title and line numbers, or a command block with one tab per package manager. Its surface is dark in both colour modes and every family, as on the 0.7.5 board. It is available in all eight families (the seven stable families and liquid glass), with Radix and Base UI editions; the template is a client component.
+Code Block shows read-only source with a Copy button: a file block with a title and line numbers, or a command block with one tab per package manager. Its surface is dark in both colour modes and every family, as on the 0.7.5 board. It is available in all eight families, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add code-block`. For a built local checkout:
 

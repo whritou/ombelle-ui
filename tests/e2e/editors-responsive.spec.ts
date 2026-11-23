@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { waitForCompiled } from '../helpers/preset-editor-ui.js'
 
-// Phone and tablet structures of both editors: docs/superpowers/specs/2026-11-13-responsive-editors-design.md.
+// Phone and tablet structures of both editors: docs/internal/superpowers/specs/2026-11-13-responsive-editors-design.md.
 const editors = [
   { name: 'preset editor', url: 'http://127.0.0.1:3000/editor/preset' },
   { name: 'Button editor', url: 'http://127.0.0.1:3000/editor/component/button' },

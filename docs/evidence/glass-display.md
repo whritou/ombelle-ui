@@ -1,6 +1,6 @@
 # Liquid glass display components
 
-5 November 2026. This records PR C of [liquid glass kit parity](../superpowers/specs/2026-11-05-liquid-glass-kit-parity-design.md): Avatar, Separator, Table, Accordion, Progress and Skeleton join as experimental in liquid glass, so all twenty-three components are experimental and none is unavailable. Liquid glass stays experimental. This record does not run the full foundation gate, the browser e2e suite or the consumer matrix, and it is not a human visual or accessibility review.
+5 November 2026. This records PR C of [liquid glass kit parity](../internal/superpowers/specs/2026-11-05-liquid-glass-kit-parity-design.md): Avatar, Separator, Table, Accordion, Progress and Skeleton join as experimental in liquid glass, so all twenty-three components are experimental and none is unavailable. Liquid glass stays experimental. This record does not run the full foundation gate, the browser e2e suite or the consumer matrix, and it is not a human visual or accessibility review.
 
 ## Source and environment
 
@@ -96,7 +96,7 @@ The reduced-transparency path was checked by compiler tests, not in the browser.
 
 ## Screenshots
 
-Images are in [images/glass-display](images/glass-display/), each in `-light` and `-dark`:
+Images are in [images/glass-display](images/glass-display), each in `-light` and `-dark`:
 
 - `avatar`: large primary with status, default, small secondary, and the group of four;
 - `separator-card`: the labelled, horizontal and vertical separators inside a glass Card;

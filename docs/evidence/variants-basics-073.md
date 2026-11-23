@@ -1,6 +1,6 @@
 # Variants, batch 6a, evidence (0.7.3)
 
-The 0.7.3 variants of Button, Badge, Alert, Card, Avatar and Accordion. Spec: `docs/superpowers/specs/2026-11-10-variants-basics-design.md`.
+The 0.7.3 variants of Button, Badge, Alert, Card, Avatar and Accordion. Spec: `docs/internal/superpowers/specs/2026-11-10-variants-basics-design.md`.
 
 ## Specimen audit
 

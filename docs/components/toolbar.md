@@ -1,6 +1,6 @@
 # Toolbar
 
-Toolbar groups buttons, links and toggles into one Tab stop. Arrow keys move between items, Home and End jump to the ends, and items that no longer fit move into a More menu, in the same order. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Toolbar groups buttons, links and toggles into one Tab stop. Arrow keys move between items, Home and End jump to the ends, and items that no longer fit move into a More menu, in the same order. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 Use Toolbar for a row of related actions that should cost one Tab stop. A Button Group adds no arrow-key navigation and each of its children is its own Tab stop.
 

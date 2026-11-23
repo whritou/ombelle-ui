@@ -1,5 +1,24 @@
 # Web alpha readiness
 
+> **Historical audit.** Everything below is the 3 November 2026 audit against CLI 0.2.1, 12 components and four
+> families, and its counts are those of that date. It is kept as a record. For the current state see the
+> [README](../README.md) (63 components, 8 families, 54 consumers, a 1,185-case browser matrix) and
+> [1.0 decisions](1.0-decisions.md). Where an item below is still open for 1.0, the table here says so.
+>
+> | Item | Status on 22 November 2026 |
+> | --- | --- |
+> | PR1 offline build from the published package | Open |
+> | PR2 cross-browser | Open; Chromium only |
+> | PR3 real projects | Partly addressed (0.7.0 pnpm evidence) |
+> | PR4 re-render after `theme add` | Open |
+> | PR5 manual assistive-technology review | Open; the results table is empty |
+> | PR6 contract version | Met ([decision 0009](decisions/0009-snapshot-identity-and-contract-version.md)) |
+> | PR7 export beyond Button and runner forms | Resolved |
+> | PR8 human keyboard pass | Open |
+> | PR9 catalog surface and support matrix | Resolved |
+> | PR10 published-runner applied journeys; macOS | Open |
+> | PR11 shadcn fixes | Shipped in 0.3.0; the React range is decided in [1.0 decisions](1.0-decisions.md) |
+
 Audit dated 3 November 2026 of milestone M5 (pilot and web alpha) against acceptance criteria PR1–PR11 in the [product requirements](01-product-requirements.md#acceptance-criteria) and the [pilot release gate](07-delivery-plan.md#pilot-release-gate). This audit only reads the recorded evidence and the tests. It ran no tests or gates, so every status below rests on the environment named in the linked evidence. The PR11 row was later updated from a measured run, whose environment it names.
 
 ## Evidence baseline

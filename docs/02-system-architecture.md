@@ -27,7 +27,7 @@ The diagram describes responsibilities, not a requirement to run all compilation
 | Area | Baseline | Reason |
 | --- | --- | --- |
 | Language | TypeScript and TSX | Typed contracts shared by website, CLI, and generator |
-| Web components | React with one pinned shadcn Radix-based edition | Start with one behavior and composition model |
+| Web components | React with two editions, Radix and Base UI | Each edition keeps its primitives' behavior and composition model |
 | Styling | Tailwind CSS v4 and generated CSS custom properties | Familiar consumer customization with portable source |
 | Variants | Existing shadcn conventions using class-variance-authority and a merge helper | Preserve predictable props and class composition |
 | Website | Next.js with static documentation and client editor areas | Documentation, routing, export API, and React integration |
@@ -36,7 +36,7 @@ The diagram describes responsibilities, not a requirement to run all compilation
 | Contract validation | JSON Schema plus generated TypeScript validators or equivalent checked bindings | One public contract across browser and CLI |
 | Tests | Vitest, Testing Library, Playwright, and axe integration | Compiler, component, install, visual, and accessibility evidence |
 | Publishing | Static registry files and immutable snapshot storage | Cacheable public distribution |
-| Snapshot service | One small API with object storage and lightweight relational metadata | No separate application backend required initially |
+| Snapshot service | One small API in the website app (Next.js route handlers) with PostgreSQL, SQLite for local development | No separate application backend |
 
 These are project recommendations. Pin exact Node, React, shadcn, TypeScript, Tailwind, primitive, and package manager versions during milestone M0 and commit the lockfile. Do not infer that the registry's cross-framework transport makes these React components framework-neutral.
 

@@ -2,7 +2,7 @@
 
 16 November 2026. Organic is added as a stable style family beside flat, minimalist, neo-brutalism, ombelle and papier, for release 0.8.1. Liquid glass stays experimental and is not changed.
 
-Design source: the design canvas page "0.8.1 Organic" (nine boards, every component and variant in light and dark), grown from the "0.8 style proposals" Organic board. The reference stylesheet is committed at `docs/superpowers/specs/assets/organic-081-board.css`. Spec: `docs/superpowers/specs/2026-11-16-organic-family-design.md`. Plan: `docs/superpowers/plans/2026-11-16-organic-family.md`.
+Design source: the design canvas page "0.8.1 Organic" (nine boards, every component and variant in light and dark), grown from the "0.8 style proposals" Organic board. The reference stylesheet is committed at `docs/internal/superpowers/specs/assets/organic-081-board.css`. Spec: `docs/internal/superpowers/specs/2026-11-16-organic-family-design.md`. Plan: `docs/internal/superpowers/plans/2026-11-16-organic-family.md`.
 
 ## Look
 

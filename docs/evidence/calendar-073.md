@@ -1,6 +1,6 @@
 # Calendar evidence (0.7.3)
 
-Calendar and Date Picker. Spec: `docs/superpowers/specs/2026-11-10-calendar-design.md`.
+Calendar and Date Picker. Spec: `docs/internal/superpowers/specs/2026-11-10-calendar-design.md`.
 
 ## Specimen audit
 

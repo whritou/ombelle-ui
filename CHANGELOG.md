@@ -1,6 +1,17 @@
 # Changelog
 
+Entries are written for someone upgrading a project. From 1.0 each release groups its changes under **Installed source** (bytes that land in your project), **CLI**, **Contracts** (schemas, codes, `--json`) and **Website**, and lists **Breaking** and **Upgrade** items first. Only `@ombelle-ui/cli` is published to npm; the `@ombelle/*` workspace packages are private, so a change to their exports is an internal change and not a public API change. Versions that were never published say so.
+
 ## Unreleased
+
+**Breaking and upgrade (read before updating a 0.x project).**
+
+- Installed source changes: glass CSS (about 16 components), `styles/ui-style.css` and `examples/data-table.tsx` in every family. The CLI treats a managed file whose planned bytes differ as a conflict; the upgrade route is the `update` command and `--overwrite` on managed files, described in the upgrade guide.
+- The eight material presets are revision 2 (re-applying one changes token values). `id@1` codes and existing hosted codes still resolve.
+- `.ombelle-operation.lock` is now a JSON owner record instead of an empty file. An empty lock older than 10 minutes is recovered.
+- `--json` output is versioned (`outputVersion: 1`) and `notices` are `{ code, message }` objects with stable codes; match on the codes, not the text. `dependencyPlan[].current` is new. `INVALID_REFERENCE` exits 2.
+- A new environment variable, `OMBELLE_DEPENDENCY_TIMEOUT_SECONDS`, replaces the fixed 120-second install limit.
+- New refusals: directories that differ only in case, a selector declared both inside and outside `@layer`, Navigation Menu and Breadcrumb links that are not `https`, same-origin or `#`, and unknown font ids in recipes. Some published recipe codes that relied on the old leniency stop verifying.
 
 - Accept projects declared as generators write them (INS-01, PUB-04). `react` and `react-dom` may be any React 19 version or range (`^19.3.1`, `19.3.0`, `~19.2.0`, `19.x`) instead of exactly `19.3.1`, so stock create-vite, create-next-app and shadcn Vite projects install. React 18 and older (declared or installed) are refused before any write, naming the declaration. React 20 and newer, or a range that can resolve to it, are accepted untested with the plan notice `REACT_UNTESTED_MAJOR`.
 - Name the package and React version when a package manager refuses an install for a peer dependency (npm `ERESOLVE`, pnpm `ERR_PNPM_PEER_DEP_ISSUES`, Yarn and Bun unmet peers), after the usual rollback, instead of passing its raw output through.
@@ -19,7 +30,7 @@
 - Install a Button-scoped preset that names a registry font (SITE-6). `add button --preset` used to refuse such a preset with `INVALID_DATA` ("Component presets cannot use registry fonts"), so a published preset with fonts could only be installed globally. The scoped Button now imports the preset's body font at the top of its own stylesheet and installs its pinned Fontsource package (lifecycle scripts disabled), as a Button recipe does; heading and mono fonts are left out because a Button shows neither. The project's saved preset, font tokens and `ui-style.css` are unchanged. Presets without registry fonts compile to the same bytes as before.
 - Say when a theme is applied palette only because `components.json` names a style Ombelle does not style (`THEME_PALETTE_ONLY`, INS-08).
 
-- Liquid glass is a stable family for all 63 components, without an accessibility guarantee: its text contrast depends on the background behind it. The CLI notice for glass plans changes from `liquid-glass is experimental for <ids>` to one accessibility caveat per plan (JSON `notices` change accordingly; the filter-mount and contrast notices are unchanged), `STYLE_UNAVAILABLE` messages list available instead of experimental components, both editors label the family "Accessibility not guaranteed", and the support matrix shows glass as Stable. The specimen audit now holds glass to every check except backdrop-dependent contrast, recorded as `contrastAdvisoryFindings` (formerly `experimentalFindings`). `@ombelle/contracts` exports `familyAccessibilityCaveat` and `accessibilityCaveatLabel`.
+- Liquid glass is a stable family for all 63 components, without an accessibility guarantee: its text contrast depends on the background behind it. The CLI notice for glass plans changes from `liquid-glass is experimental for <ids>` to one accessibility caveat per plan (JSON `notices` change accordingly; the filter-mount and contrast notices are unchanged), `STYLE_UNAVAILABLE` messages list available instead of experimental components, both editors label the family "Accessibility not guaranteed", and the support matrix shows glass as Stable. The specimen audit now holds glass to every check except backdrop-dependent contrast, recorded as `contrastAdvisoryFindings` (formerly `experimentalFindings`). (Internally, the private `@ombelle/contracts` package gains `familyAccessibilityCaveat` and `accessibilityCaveatLabel`; it is not a public API.)
 - Rate glass text against the painted glass, not its 0.25px outline (GLS-01). The contrast bound counted the outline as an opaque plate behind the text, so every material preset passed at the 0.25 opacity floor while its text measured 1.0–2.7:1 over black or white. The eight material presets (Cristal, Givré, Fumé, Relief, Voile, Clair, Prisme, Liquide) are retuned to pass the corrected bound and are now revision 2; their revision-1 content stays resolvable by exact `id@1` from `packages/catalog/src/presets/retired/`. Projects installed from a material preset get different token values when they re-apply it; existing installs and codes are unchanged. The preset editor's tint chips now keep the bound by taking a passable backdrop and the lowest passing opacity.
 - Drop every backdrop filter under reduced transparency and forced colours, whichever glass component paints it, and give the surfaces that stayed translucent in a fallback an opaque base or system colour: the Aspect Ratio frame, field set, form error summary, Toolbar and Context Menu drop zone, and under forced colours the Chip, Menubar, Stepper indicator, Toggle Group, Sidebar menu button, Carousel controls and Data Table controls (GLS-03, GLS-04). The form error summary and Toolbar also gain the family's backdrop compression. These change the installed glass CSS of those components and `ui-style.css`.
 - The Data Table example and specimen list glass rows as "Accessibility caveat" instead of "Experimental", which changes the installed `examples/data-table.tsx` in every family.
@@ -54,7 +65,7 @@
 - Website: claim only WAI-ARIA patterns with automated axe and keyboard tests, not a reviewed accessibility level; pause the landing marquee without a mouse; skip links target each route's main; Get code and preset dialogs announce inside the dialog; editors and published pages have their own titles; Ctrl/Cmd+Z and Shift+Ctrl/Cmd+Z undo and redo in the editors.
 - Docs: the accessibility review protocol covers 63 components in 7 stable families (441 entries, results still empty); the style families table describes papier, organic and retro futurism; component pages state eight families; Input has a page; the installation guide explains right-to-left arrow keys.
 
-## 0.9.1 — 21 November 2026
+## 0.9.1 — 21 November 2026 (published to npm)
 
 - Frame only the plain Meter bar. The ring drawing now carries `data-mode="circle"` (it read `bar`), and family frames name `[data-mode='bar']`: Papier no longer boxes labelled segments and Retro futurism no longer boxes the ring.
 - Ring only the active Input OTP slot in every family, as shadcn does; the second ring around the whole Radix code is gone.
@@ -330,13 +341,13 @@
 - Preserve schema 1.0 and catalog/compiler compatibility 0.1.0, existing generated output, project defaults and installer transaction safeguards.
 - Public npm publication and Vercel launch remain pending their measured acceptance checks. Earlier entries below describe documentation revisions, not published package versions.
 
-## Unreleased — 23 October 2026
+## Foundation, 23 October 2026 (never released)
 
 - Add Badge with native span props/ref, default/destructive variants, and flat/minimalist/neo brutalist styling.
 - Generate and install independently owned colocated Badge CSS, retaining the existing shared style pack and component bytes.
 - Add Badge examples to the generated preview and consumer flow, with API and installation documentation.
 
-## Unreleased — 21 October 2026
+## Foundation, 21 October 2026 (never released)
 
 - Add local Button recipe installation with separate source, scoped light/dark CSS, saved props/content, and accessible loading behavior.
 - Preserve project presets, ordinary components, and recipe provenance through later additions and compatible theme changes; retain conflict and transaction safeguards.
@@ -346,7 +357,7 @@
 - Retain local JSON as an offline product workflow and distinguish presets from recipes that also save props, content, and overrides.
 - Specify Button-first scope, provenance, conflict handling, editor export, and validation requirements. These commands remain planned; the current CLI rejects `--preset` on `add`.
 
-## Version 0.2 on 19 October 2026
+## Planning baseline, 19 October 2026 (never released)
 
 - Make npm, pnpm, Yarn and Bun mandatory for the first release.
 - Add an existing-shadcn installation path using `theme add <preset>` and a direct merge into the configured global CSS file.

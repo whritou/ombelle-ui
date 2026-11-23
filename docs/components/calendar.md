@@ -1,6 +1,6 @@
 # Calendar
 
-Calendar is a month grid for choosing a date or a range of dates. The same component provides a Date Picker: a button that shows the chosen date and opens the Calendar in a popover. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Calendar is a month grid for choosing a date or a range of dates. The same component provides a Date Picker: a button that shows the chosen date and opens the Calendar in a popover. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add calendar`. For a built local checkout:
 

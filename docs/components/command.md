@@ -1,6 +1,6 @@
 # Command
 
-Command is a keyboard-first command menu: a search box over a filtered list of grouped commands, shown inline or in a dialog. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Command is a keyboard-first command menu: a search box over a filtered list of grouped commands, shown inline or in a dialog. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add command`. For a built local checkout:
 

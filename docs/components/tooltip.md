@@ -4,7 +4,7 @@ Tooltip wraps reviewed Radix Tooltip primitives, with flat, minimalist, neo-brut
 
 ## Install and compose
 
-Build packages and initialize the target project with a local preset before using the private local CLI:
+Build packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages

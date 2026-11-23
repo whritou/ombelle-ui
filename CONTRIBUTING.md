@@ -5,7 +5,7 @@ Thanks for helping. This guide covers how to set up the repository, what we expe
 ## Before you start
 
 - **Bugs and small fixes:** open a pull request directly, or file an issue first if the cause is unclear.
-- **New components, styles, presets, CLI flags or contract changes:** open an issue or a [Discussion](https://github.com/whritou/ombelle-ui/discussions/categories/ideas) first so the scope can be agreed before you write code. Several public commands in the docs are proposals; check [`docs/`](docs/) for the implementation status.
+- **New components, styles, presets, CLI flags or contract changes:** open an issue or a [Discussion](https://github.com/whritou/ombelle-ui/discussions/categories/ideas) first so the scope can be agreed before you write code. Several public commands in the docs are proposals; check [`docs/`](docs) for the implementation status.
 - **Security problems:** do not open a public issue. Follow [SECURITY.md](SECURITY.md).
 
 ## Setup

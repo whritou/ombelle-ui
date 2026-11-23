@@ -1,7 +1,36 @@
 import type { PoolClient } from 'pg'
 import { createPostgresPool, postgresConnectionUrl, quotedSchema, storageFailure } from './postgres-pool'
 
-export const postgresSnapshotSchemaVersion = 1
+/**
+ * A forward step from schema version `version - 1` to `version`. `sql` returns the statements for the schema; the
+ * runner executes them and then records the new version, all in the initialization transaction.
+ *
+ * Rules, so that a deployment and a rollback both keep working while a migration runs:
+ *   * migrations are additive (new tables, columns with defaults, indexes, looser constraints). Nothing the previous
+ *     deployment reads or writes may be removed or tightened in the same release;
+ *   * a destructive or tightening change waits for a later release that first raises `postgresMinimumSchemaVersion`;
+ *   * deploy the code first, run `snapshots:init` second (docs/hosted-deployment.md).
+ */
+export type PostgresMigration = { version: number; description: string; sql: (schema: string) => string }
+
+/** Version 1 is the initial schema below. Append migration 2, 3, … here, with no gaps. */
+export const postgresMigrations: readonly PostgresMigration[] = []
+
+/** The oldest schema this build still serves. It only rises in a release that follows a deployed migration. */
+export const postgresMinimumSchemaVersion = 1
+/** The schema version a fresh initialization ends at. */
+export const postgresSnapshotSchemaVersion = Math.max(1, ...postgresMigrations.map(migration => migration.version))
+
+/** The migrations from `current` to the latest, in order. Throws on a newer schema or a gap in the list. */
+export function pendingPostgresMigrations(current: number, migrations: readonly PostgresMigration[] = postgresMigrations): PostgresMigration[] {
+  const latest = Math.max(1, ...migrations.map(migration => migration.version))
+  migrations.forEach((migration, index) => {
+    if (migration.version !== index + 2) throw new Error('Postgres migrations must be numbered 2, 3, … without gaps')
+  })
+  if (!Number.isInteger(current) || current < 1 || current > latest) throw new Error('Unsupported schema version ' + current)
+  return migrations.filter(migration => migration.version > current)
+}
+
 export async function verifyPostgresSnapshotSchema(client: Pick<PoolClient, 'query'>, schema = 'ombelle'): Promise<void> {
   const s = quotedSchema(schema)
   const result = await client.query(`SELECT version,
@@ -9,7 +38,7 @@ export async function verifyPostgresSnapshotSchema(client: Pick<PoolClient, 'que
     (SELECT count(*)::int FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace
       WHERE n.nspname=$1 AND t.tgname IN ('publications_immutable','publications_capacity') AND NOT t.tgisinternal AND t.tgenabled='O') AS triggers
     FROM ${s}.schema_version WHERE singleton=1`, [schema, ['schema_version', 'publications', 'idempotency_keys', 'rate_buckets', 'withdrawals', 'capacity']])
-  if (result.rowCount !== 1 || result.rows[0].version !== postgresSnapshotSchemaVersion || result.rows[0].tables !== 6 || result.rows[0].triggers !== 2)
+  if (result.rowCount !== 1 || !(result.rows[0].version >= postgresMinimumSchemaVersion) || result.rows[0].tables !== 6 || result.rows[0].triggers !== 2)
     storageFailure()
 }
 
@@ -81,6 +110,14 @@ export async function initializePostgresSnapshotStore(directConnectionString: st
       await client.query(`CREATE SCHEMA IF NOT EXISTS ${s}`)
       await client.query(initialSchema(schema))
     } else if (!tables.rows.some(row => row.table_name === 'schema_version')) storageFailure()
+    // Forward migrations: from the stored version to the latest this build knows. A schema newer than the build is
+    // refused rather than downgraded.
+    const stored = await client.query(`SELECT version FROM ${s}.schema_version WHERE singleton=1`)
+    if (stored.rowCount !== 1) storageFailure()
+    for (const migration of pendingPostgresMigrations(stored.rows[0].version)) {
+      await client.query(migration.sql(schema))
+      await client.query(`UPDATE ${s}.schema_version SET version=$1 WHERE singleton=1`, [migration.version])
+    }
     await verifyPostgresSnapshotSchema(client, schema)
     await client.query('COMMIT')
   } catch (error) {

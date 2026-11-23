@@ -9,8 +9,8 @@ Record of the public release of hosted preset and recipe codes on 2 November 202
   - `@ombelle-ui/cli@0.2.0`: integrity `sha512-ikzam7qNpfvNB8Ai5JvbDOI0o9/lPTiVcK34JA9LpyH30FXFef3HTptonq+kbJASebxYbyfSv8uUVs4OSXlfhQ==`, published from `6c6eb5f`. Deprecated: exits 0 without output through POSIX bin symlinks.
   - `@ombelle-ui/cli@0.2.1`: integrity `sha512-TAkxY7UEnLOJl/aHS8x0mpIJatLcdtv5DYiXAyVfZlw3MwY7PLku0VUSKOixpfGHNIehxMn63itKxrrBDJFxJQ==`, shasum `f0be0279b3be02829baec8721451fdceed153555`, published 2026-11-02T17:19:12Z from `c9ba4c1`, clean tree, tag `latest`.
   - `0.0.0-stage`: two-file placeholder without bin or scripts, created by npm during the first staged publication.
-- **Hosting:** Vercel project `whritearthur-9467s-projects/ombelle-ui` (Hobby, region fra1), production from `main`, origin `https://ombelle-ui.vercel.app`.
-- **Storage:** Neon project `neon-carmine-cable` (`delicate-tooth-65251690`, Free, AWS eu-central-1). Production branch `main`, endpoint `ep-bitter-meadow-b9plx52i`. The schema was initialized explicitly with `snapshots:init` over the direct connection.
+- **Hosting:** Vercel project `<vercel-team>/ombelle-ui` (Hobby, region fra1), production from `main`, origin `https://ombelle-ui.vercel.app`.
+- **Storage:** Neon project `<neon-project>` (`<neon-project-id>`, Free, AWS eu-central-1). Production branch `main`, endpoint `<production-endpoint>`. The schema was initialized explicitly with `snapshots:init` over the direct connection.
 
 ## Verification
 

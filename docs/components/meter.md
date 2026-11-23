@@ -1,6 +1,6 @@
 # Meter
 
-Meter shows a measurement within a known range, such as a quota or storage use. For a task's progress, use [Progress](progress.md) instead. Meter draws a plain bar, discrete cells (segmented progress), or labelled parts with a legend. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Meter shows a measurement within a known range, such as a quota or storage use. For a task's progress, use [Progress](progress.md) instead. Meter draws a plain bar, discrete cells (segmented progress), or labelled parts with a legend. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add meter`. For a built local checkout:
 

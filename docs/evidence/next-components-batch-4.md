@@ -44,7 +44,7 @@ With a reduced-motion preset, the indeterminate bar rested as a 40% segment at t
 
 ## Screenshots
 
-Images are in [images/next-batch-4](images/next-batch-4/), named `<component>-<family>-<mode>.png`. The scene captures are the dashboard and the settings Members tab, in ombelle.
+Images are in [images/next-batch-4](images/next-batch-4), named `<component>-<family>-<mode>.png`. The scene captures are the dashboard and the settings Members tab, in ombelle.
 
 ## Limits
 

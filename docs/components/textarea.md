@@ -4,7 +4,7 @@ Textarea is a native multi-line text control. It keeps shadcn's `Textarea` name 
 
 ## Install and compose
 
-Build the packages and initialize the target project with a local preset before using the private local CLI:
+Build the packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages

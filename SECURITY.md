@@ -16,4 +16,14 @@ Out of scope: vulnerabilities in third-party dependencies with no demonstrated i
 
 ## Supported versions
 
-Only the latest published `@ombelle-ui/cli` release receives fixes. The project is in alpha.
+| Version | Receives security fixes |
+| --- | --- |
+| The latest published minor of the current major (`1.x` from 1.0) | Yes |
+| Earlier minors of the current major | No: update to the latest minor. A fix that cannot be released without a breaking change says so in the advisory |
+| `0.x` releases | No |
+
+A fix is published as a new patch release of `@ombelle-ui/cli`; the hosted service is fixed in place. Installed component source is yours: a fix to a template reaches your project when you run `update` (or re-add the component) with the fixed CLI, and the advisory names the affected components.
+
+Supported environment: Node 24.19.0 or a newer Node 24 for the CLI, and the React, Tailwind and package-manager versions listed in the [1.0 public contract](docs/1.0-public-contract.md#support-window). Reports that only reproduce outside that environment are triaged on a best-effort basis.
+
+This project has one maintainer today, so the response targets above are best effort and a longer support window is not promised until a second maintainer exists ([1.0 decisions](docs/1.0-decisions.md)).

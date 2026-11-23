@@ -54,7 +54,7 @@ Some checks below name a preview scene or the website because a component is eas
 
 ## Automated checks
 
-The [specimen audit](evidence/specimen-audit.md) automates part of what this protocol looks for, in Chromium only. For every catalog component in all eight families (the seven stable families and liquid glass), both editions, and light and dark mode, it measures:
+The [specimen audit](evidence/specimen-audit.md) automates part of what this protocol looks for, in Chromium only. For every catalog component in all eight families, both editions, and light and dark mode, it measures:
 
 - **Focus visible**: each control, list item and menu item reached by keyboard changes by at least 3:1 over 90 percent of a 1px outline.
 - **Clipping**: shadows and focus rings are not cut by a clipping ancestor.

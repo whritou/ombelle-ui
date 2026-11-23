@@ -1,4 +1,8 @@
 name: Monitor production
+# Requested hourly, but GitHub's scheduler runs scheduled workflows best effort: measured runs were 3 to 5 a day with gaps
+# up to 10.8 hours, and schedules stop after 60 days without repository activity. This job checks quotas, the backup
+# age, a known code and the advertised CLI; it is not an uptime monitor. Probe availability from an external service
+# and set MONITOR_HEARTBEAT_URL so that a monitor that stops running alerts too (docs/production-operations.md).
 on:
   schedule:
     - cron: '17 * * * *'
@@ -16,10 +20,17 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          sparse-checkout: scripts/monitor-production.sh
+          sparse-checkout: |
+            scripts/monitor-production.sh
+            apps/www/src/snapshots/install-command.ts
           sparse-checkout-cone-mode: false
-      - name: Check site, snapshot API and quotas
+      - name: Check site, snapshot API, published CLI, quotas and backups
         env:
           MONITOR_DATABASE_URL: ${{ secrets.MONITOR_DATABASE_URL }}
+          MONITOR_ALERT_WEBHOOK_URL: ${{ secrets.MONITOR_ALERT_WEBHOOK_URL }}
+          MONITOR_HEARTBEAT_URL: ${{ secrets.MONITOR_HEARTBEAT_URL }}
+          MONITOR_KNOWN_CODE: ${{ vars.MONITOR_KNOWN_CODE }}
+          MONITOR_KNOWN_ETAG: ${{ vars.MONITOR_KNOWN_ETAG }}
+          OMBELLE_MONITOR_DB_LIMIT_BYTES: ${{ vars.MONITOR_DB_LIMIT_BYTES }}
           GH_TOKEN: ${{ github.token }}
         run: bash scripts/monitor-production.sh

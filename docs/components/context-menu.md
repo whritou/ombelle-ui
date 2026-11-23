@@ -1,6 +1,6 @@
 # Context Menu
 
-Context Menu opens a menu at the pointer on right-click, or with Shift+F10 or the context-menu key when its area has focus. It shares Dropdown Menu's parts and item look. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Context Menu opens a menu at the pointer on right-click, or with Shift+F10 or the context-menu key when its area has focus. It shares Dropdown Menu's parts and item look. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add context-menu`. For a built local checkout:
 

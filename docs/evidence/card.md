@@ -24,4 +24,4 @@ The three supplied logo PNGs remain byte-identical repository assets under `asse
 
 Card is a presentational container with native props, no built-in interaction, and no client boundary. The run does not establish application-specific accessibility certification, manual keyboard or screen-reader review, contrast assurance for arbitrary preset colors, broader browser-engine coverage, publishing, editor integration, or support for liquid glass. Card recipes and component-scoped presets remain outside this slice.
 
-See [Card API and installation](../components/card.md), the [approved design](../superpowers/specs/2026-10-25-card-design.md), and the [implementation plan](../superpowers/plans/2026-10-25-card-catalog-extension.md).
+See [Card API and installation](../components/card.md), the [approved design](../internal/superpowers/specs/2026-10-25-card-design.md), and the [implementation plan](../internal/superpowers/plans/2026-10-25-card-catalog-extension.md).
