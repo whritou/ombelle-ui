@@ -16,12 +16,25 @@ export type PreparedManager = {
   version?: string
 }
 
+/**
+ * The optional dependency-install limit, from OMBELLE_DEPENDENCY_TIMEOUT_SECONDS. Unset or 0 means no
+ * limit. Invalid values are refused rather than silently replaced.
+ */
+export function dependencyTimeoutMs(env: Record<string, string | undefined>): number {
+  const value = env.OMBELLE_DEPENDENCY_TIMEOUT_SECONDS
+  if (value === undefined || value === '') return 0
+  if (!/^\d{1,6}$/.test(value))
+    throw new FoundationError('INVALID_DATA', 'OMBELLE_DEPENDENCY_TIMEOUT_SECONDS must be a whole number of seconds', 'OMBELLE_DEPENDENCY_TIMEOUT_SECONDS')
+  return Number(value) * 1000
+}
+
 export async function runDependencies(
   root: string,
   deps: Dependency[],
   manager: PackageManager = 'pnpm',
   prepared?: PreparedManager,
   bunLockfile?: BunLockfile,
+  signal?: AbortSignal,
 ): Promise<void> {
   if (!deps.length) return
   for (const d of deps)
@@ -68,7 +81,9 @@ export async function runDependencies(
             : []),
           ...deps.map((d) => d.name + '@' + d.version),
         ]
+  const timeoutMs = dependencyTimeoutMs(process.env)
   await new Promise<void>((resolve, reject) => {
+    let timedOut = false
     const child = spawn(
       script,
       [...resolved.prefixArgs, ...args],
@@ -77,30 +92,42 @@ export async function runDependencies(
         shell: false,
         windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe'],
-        timeout: 120000,
+        ...(signal ? { signal } : {}),
         env: { ...process.env, CI: 'true' },
       },
     )
+    // No fixed limit by default (CLI-08): a slow cold install is not a failure, and Ctrl-C rolls back.
+    const timer = timeoutMs
+      ? setTimeout(() => { timedOut = true; child.kill() }, timeoutMs)
+      : undefined
     let tail = ''
     const collect = (chunk: Buffer) => {
       tail = (tail + chunk.toString()).slice(-2000)
     }
     child.stdout.on('data', collect)
     child.stderr.on('data', collect)
-    child.once('error', (e) =>
-      reject(new FoundationError('DEPENDENCY_FAILURE', e.message, root)),
-    )
-    child.once('exit', (code) =>
-      code === 0
-        ? resolve()
-        : reject(
-            new FoundationError(
-              'DEPENDENCY_FAILURE',
-              manager + ' installation failed: ' + tail,
-              root,
-            ),
+    child.once('error', (e) => {
+      // An abort also kills the child; report it once the child has exited.
+      if (signal?.aborted) return
+      clearTimeout(timer)
+      reject(new FoundationError('DEPENDENCY_FAILURE', e.message, root))
+    })
+    child.once('exit', (code) => {
+      clearTimeout(timer)
+      if (code === 0) resolve()
+      else
+        reject(
+          new FoundationError(
+            'DEPENDENCY_FAILURE',
+            signal?.aborted
+              ? manager + ' installation was interrupted'
+              : timedOut
+              ? `${manager} installation did not finish within ${timeoutMs / 1000} s (OMBELLE_DEPENDENCY_TIMEOUT_SECONDS)`
+              : manager + ' installation failed: ' + tail,
+            root,
           ),
-    )
+        )
+    })
   })
   if (manager === 'bun') {
     await assertBunOwnership(root,bunLockfile ?? 'bun.lock')

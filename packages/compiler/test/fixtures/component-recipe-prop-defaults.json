@@ -1,0 +1,275 @@
+{
+  "badge": {
+    "variant": "default"
+  },
+  "alert": {
+    "variant": "default"
+  },
+  "avatar": {
+    "size": "default",
+    "variant": "default",
+    "status": "none"
+  },
+  "card": {
+    "density": "default",
+    "level": 3
+  },
+  "progress": {
+    "value": 25,
+    "max": 100,
+    "indeterminate": false
+  },
+  "separator": {
+    "orientation": "horizontal",
+    "decorative": true
+  },
+  "skeleton": {
+    "shape": "block"
+  },
+  "checkbox": {
+    "disabled": false,
+    "required": false,
+    "checked": "unchecked"
+  },
+  "input": {
+    "disabled": false,
+    "required": false,
+    "invalid": false
+  },
+  "label": {
+    "required": false
+  },
+  "native-select": {
+    "disabled": false,
+    "required": false,
+    "size": "default",
+    "selection": "starter"
+  },
+  "radio-group": {
+    "disabled": false,
+    "required": false,
+    "orientation": "horizontal",
+    "selection": "starter"
+  },
+  "select": {
+    "disabled": false,
+    "required": false,
+    "size": "default",
+    "position": "popper",
+    "selection": "starter"
+  },
+  "switch": {
+    "disabled": false,
+    "checked": false
+  },
+  "textarea": {
+    "disabled": false,
+    "required": false,
+    "invalid": false
+  },
+  "accordion": {
+    "type": "single",
+    "collapsible": true,
+    "expanded": [
+      "overview"
+    ]
+  },
+  "table": {
+    "numeric": []
+  },
+  "tabs": {
+    "orientation": "horizontal",
+    "selection": "overview"
+  },
+  "dialog": {},
+  "dropdown-menu": {},
+  "popover": {
+    "side": "bottom",
+    "align": "center"
+  },
+  "tooltip": {
+    "side": "bottom"
+  },
+  "input-group": {
+    "align": "inline-start",
+    "disabled": false,
+    "invalid": false,
+    "required": false,
+    "multiline": false
+  },
+  "sheet": {
+    "side": "inline-end",
+    "size": "default"
+  },
+  "alert-dialog": {},
+  "breadcrumb": {},
+  "pagination": {
+    "page": 2,
+    "totalPages": 5
+  },
+  "toast": {
+    "variant": "default",
+    "duration": 60000
+  },
+  "spinner": {
+    "size": "default"
+  },
+  "kbd": {},
+  "empty": {
+    "media": "icon"
+  },
+  "field": {
+    "control": "input",
+    "required": true,
+    "invalid": false,
+    "disabled": false,
+    "orientation": "vertical"
+  },
+  "meter": {
+    "mode": "discrete",
+    "value": 128,
+    "max": 200,
+    "segments": 10,
+    "warningPercent": 60
+  },
+  "stepper": {
+    "orientation": "horizontal",
+    "current": 1
+  },
+  "slider": {
+    "mode": "single",
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "ticks": false,
+    "value": 12,
+    "rangeStart": 20,
+    "rangeEnd": 80
+  },
+  "toggle-group": {
+    "type": "single",
+    "variant": "segmented",
+    "selection": [
+      "week"
+    ]
+  },
+  "chip": {
+    "mode": "pressable",
+    "selection": [
+      "on-track",
+      "needs-attention"
+    ]
+  },
+  "tag-input": {
+    "max": 8
+  },
+  "input-otp": {
+    "length": 6,
+    "separatorAfter": 3
+  },
+  "combobox": {
+    "mode": "single",
+    "creatable": true,
+    "selection": []
+  },
+  "command": {
+    "presentation": "inline"
+  },
+  "hover-card": {
+    "side": "bottom",
+    "arrow": true
+  },
+  "context-menu": {},
+  "calendar": {
+    "mode": "single",
+    "weekStartsOn": 0,
+    "month": "2026-11",
+    "selectedFrom": "2026-11-12",
+    "disablePast": false
+  },
+  "toggle": {
+    "variant": "default",
+    "size": "default",
+    "iconOnly": false,
+    "pressed": true
+  },
+  "collapsible": {
+    "defaultOpen": true
+  },
+  "scroll-area": {
+    "orientation": "vertical",
+    "height": 200
+  },
+  "button-group": {
+    "mode": "split",
+    "orientation": "horizontal"
+  },
+  "item": {
+    "variant": "outline",
+    "size": "default",
+    "media": "icon",
+    "actions": true
+  },
+  "number-input": {
+    "min": 0,
+    "max": 32,
+    "step": 1,
+    "unit": "px",
+    "value": 12
+  },
+  "color-picker": {
+    "format": "oklch",
+    "paired": true,
+    "contrast": true,
+    "swatches": 5,
+    "eyeDropper": true
+  },
+  "code-block": {
+    "mode": "file",
+    "language": "tsx",
+    "lineNumbers": true
+  },
+  "password-field": {
+    "strength": true,
+    "capsLockNotice": true,
+    "confirm": false
+  },
+  "carousel": {
+    "dots": true,
+    "counter": true,
+    "slidesPerView": 1
+  },
+  "aspect-ratio": {
+    "ratio": "16/9"
+  },
+  "toolbar": {
+    "overflow": true,
+    "toggles": "single"
+  },
+  "prose": {
+    "measure": "default"
+  },
+  "navigation-menu": {
+    "indicator": true,
+    "viewport": true
+  },
+  "sidebar": {
+    "collapsible": "icon",
+    "side": "left",
+    "variant": "sidebar"
+  },
+  "resizable": {
+    "direction": "horizontal",
+    "withHandle": true,
+    "panels": 2
+  },
+  "menubar": {
+    "shortcuts": true
+  },
+  "data-table": {
+    "selection": true,
+    "columnVisibility": true,
+    "facets": true,
+    "pagination": true
+  }
+}

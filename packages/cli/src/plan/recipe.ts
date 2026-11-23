@@ -6,10 +6,12 @@ import {
   type InstalledArtifact,
   type InstalledRecipe,
 } from '@ombelle/contracts'
+import { planDependencies } from './dependencies.js'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
-import { fileChange } from './components.js'
+import { fileChange, matchesRecord } from './components.js'
+import { directoryCaseMismatch } from '../project/paths.js'
 import { transformRecipeArtifact } from '../project/recipe-transform.js'
 export async function planRecipe(
   context: ProjectContext,
@@ -103,10 +105,13 @@ export async function planRecipe(
         artifact.kind,
       ),
       record = lock.artifacts[target.path]
-    if (
+    const caseMismatch = change.action === 'create' ? await directoryCaseMismatch(context.root, target.path) : undefined
+    if (caseMismatch) {
+      change.action = 'conflict'
+      conflict(`Destination directory differs only in case from existing '${caseMismatch}'; rename one of them`, target.path)
+    } else if (
       change.beforeHash !== null &&
-      (!record ||
-        record.sha256 !== change.beforeHash ||
+      (!matchesRecord(change, record?.sha256) ||
         change.action === 'update')
     ) {
       change.action = 'conflict'
@@ -141,16 +146,8 @@ export async function planRecipe(
       state.path,
     )
   plan.changes.push(state)
-  // Preserve the adapters' production-group rules, especially Bun's explicit group promotion requirement.
-  const installed =
-    context.manager === 'bun'
-      ? (context.packageJson.dependencies ?? {})
-      : {
-          ...context.packageJson.devDependencies,
-          ...context.packageJson.dependencies,
-        }
-  plan.dependencyPlan = result.dependencies.filter(
-    (d) => installed[d.name] !== d.version,
-  )
+  const dependencies = planDependencies(context, result.dependencies)
+  plan.dependencyPlan = dependencies.plan
+  plan.notices.push(...dependencies.notices)
   return plan
 }

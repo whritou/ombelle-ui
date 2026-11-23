@@ -84,3 +84,16 @@ export async function findCaseInsensitivePathMismatch(
 }
 
 export const portable = (p: string) => p.split(path.sep).join('/')
+
+/**
+ * An existing directory on the way to `relative` whose name differs only in case (CLI-04). On a
+ * case-insensitive disk the file would land there while the lock and the imports name another path,
+ * which a case-sensitive CI or deployment host cannot resolve. A file-name-only difference is left to
+ * the ordinary unowned-file conflict, which `--overwrite` can resolve.
+ */
+export async function directoryCaseMismatch(root: string, relative: string): Promise<string | undefined> {
+  const mismatch = await findCaseInsensitivePathMismatch(root, relative)
+  if (mismatch === undefined) return undefined
+  const depth = (value: string) => value.split(/[\\/]/).filter(segment => segment && segment !== '.').length
+  return depth(mismatch) < depth(relative) ? portable(mismatch) : undefined
+}

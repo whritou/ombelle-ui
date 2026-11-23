@@ -51,7 +51,10 @@ if [ -z "${MONITOR_DATABASE_URL:-}" ]; then
 else
   # Limits mirror apps/www/src/snapshots/server/postgres-store.ts and the
   # capacity table constraints; 1 GiB is the Neon Free storage allowance.
-  row=$(PGCONNECT_TIMEOUT=15 psql "$MONITOR_DATABASE_URL" -X -A -t -F ' ' -v ON_ERROR_STOP=1 -c "
+  # Verify the server certificate even when the secret says sslmode=require (SEC-06), as pg-tools.sh does.
+  # A URL parameter would override PGSSLMODE, so drop sslmode/sslrootcert from the URL first.
+  monitor_url=$(printf '%s' "$MONITOR_DATABASE_URL" | sed -E 's/([?&])(sslmode|sslrootcert)=[^&]*/\1/g; s/&&+/\&/g; s/[?&]+$//; s/\?&/?/')
+  row=$(PGSSLMODE=verify-full PGSSLROOTCERT=system PGCONNECT_TIMEOUT=15 psql "$monitor_url" -X -A -t -F ' ' -v ON_ERROR_STOP=1 -c "
     SELECT c.records, c.bytes,
       COALESCE((SELECT count FROM ombelle.rate_buckets WHERE kind='global' AND client_key=''
         AND window_start=floor(extract(epoch FROM now()) * 1000 / 86400000)::bigint), 0),

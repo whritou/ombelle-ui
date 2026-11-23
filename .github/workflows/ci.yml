@@ -30,6 +30,11 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Build packages
         run: pnpm build:packages
+      - name: Fail on stale generated sources
+        # build:packages regenerates the schema and catalog copies; committed copies must already match.
+        run: git diff --exit-code -- packages/contracts/src packages/catalog/src/generated.ts
+      - name: Audit dependencies
+        run: pnpm audit:workspace
       - name: Generate preview sources
         run: pnpm generate:preview
       - name: Typecheck

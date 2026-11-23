@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import fs from 'node:fs/promises'
 import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -30,6 +31,7 @@ import {
 import { planAdd } from './plan/components.js'
 import { planTheme } from './plan/theme.js'
 import { applyPlan } from './apply/transaction.js'
+import { operationLockName } from './apply/recovery.js'
 import { formatPlan, planOutput } from './format.js'
 import { assertKnownComponentIds } from './component-ids.js'
 const exits: Record<string, number> = {
@@ -46,7 +48,7 @@ const exits: Record<string, number> = {
 const usage =
   'Ombelle foundation: init --preset <local.json> | add <' +
   supportedComponentIds.join('|') +
-  '> | add button --preset <local.json> | add --recipe <local.json> | theme add <local.json> [--cwd <app>] [--overwrite <path>] [--beside <path>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
+  '> | add button --preset <local.json|ps_code@1> | add --recipe <local.json|rc_code@1> | theme add <local.json> [--cwd <app>] [--overwrite <path>] [--beside <path>] [--package-manager <npm|pnpm|yarn|bun>] [--dry-run] [--json] [--yes]\nPreset inputs also accept exact ps_<32 lowercase hex>@1; recipes accept rc_<32 lowercase hex>@1. Codes resolve at https://ombelle-ui.vercel.app. Custom services require --snapshot-origin <origin> and --preset-hash <64 lowercase hex> or --recipe-hash <64 lowercase hex>. Use --offline only with an explicit origin, hash and verified cache; offline cannot detect later withdrawals. HTTPS is required except literal loopback HTTP.'
 function glassNotices(
   preset: Preset,
   ids: readonly ComponentId[] | undefined,
@@ -235,11 +237,12 @@ export async function runCli(
           'Run init --preset <local.json>.',
         )
       const recipe = recipeInput!.recipe
-      const compiled = await compileInstallableRecipe({ recipe, darkSelector: context.darkSelector })
+      // A recipe code compiles against the preset its snapshot stored, not today's built-in (decision 0009).
+      const compiled = await compileInstallableRecipe({ recipe, darkSelector: context.darkSelector, preset: recipeInput!.snapshot?.preset })
       plan = await planRecipe(context, compiled)
       const data = compiled.recipe.data
-      plan.notices = glassNotices(compiled.preset.data, [data.component], false,
-        data.schemaVersion === '1.0' ? data.overrides : undefined)
+      plan.notices = [...plan.notices, ...glassNotices(compiled.preset.data, [data.component], false,
+        data.schemaVersion === '1.0' ? data.overrides : undefined)]
     } else if (command === 'add' && flags['--preset']) {
       const preset = presetInput!.preset
       const compiled = await compileButtonPreset({
@@ -248,7 +251,7 @@ export async function runCli(
         glassContrast: 'report',
       })
       plan = await planComponentPreset(context, compiled)
-      plan.notices = glassNotices(compiled.preset.data, ['button'])
+      plan.notices = [...plan.notices, ...glassNotices(compiled.preset.data, ['button'])]
     } else {
       let preset: Preset | undefined = context.preset
       if (command !== 'add') {
@@ -336,6 +339,8 @@ export async function runCli(
       plan.recipeResolution = { source: recipeInput.source, via: recipeInput.resolution }
       plan.networkAccess = recipeInput.networkAccess
     }
+    if (await pathExists(path.join(context.root, operationLockName)))
+      plan.notices.push('An interrupted operation left ' + operationLockName + '; the next apply restores its files and then asks you to run the command again')
     const hasConflicts =
       plan.diagnostics.length > 0 ||
       plan.changes.some((c) => c.action === 'conflict')
@@ -427,3 +432,7 @@ if (invokedAsEntry())
     stdout: (text) => process.stdout.write(text + '\n'),
     stderr: (text) => process.stderr.write(text + '\n'),
   })
+
+async function pathExists(file: string): Promise<boolean> {
+  return fs.access(file).then(() => true, () => false)
+}

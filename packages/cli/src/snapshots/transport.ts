@@ -1,6 +1,6 @@
 import http, { type IncomingMessage } from 'node:http'
 import https from 'node:https'
-import { FoundationError } from '@ombelle/contracts'
+import { FoundationError, isSupportedContractRelease, supportedContractReleases } from '@ombelle/contracts'
 
 export async function fetchPublication<T>(url: URL, reference: string, verify: (input: unknown) => Promise<T>): Promise<T> {
   const controller = new AbortController()
@@ -22,8 +22,15 @@ export async function fetchPublication<T>(url: URL, reference: string, verify: (
     })
     // Native HTTP does not follow redirects. Every non-200 status is final for
     // this invocation, including authoritative availability failures.
-    if (response.statusCode !== 200)
-      throw new Error(`Snapshot request failed (HTTP ${response.statusCode})`)
+    if (response.statusCode !== 200) {
+      const retry = Number(response.headers['retry-after'])
+      throw new Error(
+        response.statusCode === 404 ? 'No snapshot exists for this code (HTTP 404)'
+          : response.statusCode === 410 ? 'This code was withdrawn by the service and can no longer be installed (HTTP 410)'
+          : response.statusCode === 429 ? 'The snapshot service is rate limiting requests (HTTP 429)' +
+            (Number.isFinite(retry) && retry >= 0 ? `; retry in ${Math.ceil(retry)} s` : '')
+          : `Snapshot request failed (HTTP ${response.statusCode})`)
+    }
     if (
       !/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8"))?\s*$/i.test(
         response.headers['content-type'] ?? '',
@@ -71,11 +78,11 @@ export async function fetchPublication<T>(url: URL, reference: string, verify: (
             ? (value as Record<string, unknown>)[segment] : undefined
         if (
           typeof value === 'string' && /^\d+\.\d+\.\d+$/.test(value) &&
-          value !== '0.1.0'
+          !isSupportedContractRelease(value)
         )
           throw new FoundationError(
             'UNSUPPORTED_RELEASE', `Snapshot release ${value} is not supported`,
-            error.path, 'Use a snapshot for catalog/compiler 0.1.0.',
+            error.path, 'Use a snapshot for catalog/compiler ' + supportedContractReleases.join(', ') + '.',
           )
       }
       throw error

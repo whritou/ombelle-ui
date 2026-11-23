@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { headerRules } from './src/security-headers'
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -8,15 +9,7 @@ const nextConfig: NextConfig = {
     }))
   },
   async headers() {
-    return [{
-      source: '/ombelle-preview/:path*',
-      // Module imports from the opaque sandbox have Origin: null. These are
-      // public static files; publication APIs retain their same-origin policy.
-      headers: [
-        { key: 'Access-Control-Allow-Origin', value: '*' },
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-      ],
-    }]
+    return headerRules(process.env.NEXT_PUBLIC_OMBELLE_PREVIEW_ORIGIN)
   },
   turbopack: {
     resolveAlias: {

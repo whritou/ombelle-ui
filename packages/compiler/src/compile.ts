@@ -6,6 +6,7 @@ import {
   type Artifact,
   assertStyleAvailable,
   isStyleFamily,
+  isSupportedContractRelease,
 } from '@ombelle/contracts'
 import { getCatalog, getTemplate, expansionExamples, baseToastExample } from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
@@ -87,7 +88,7 @@ export async function compile(input: {
    */
   prefixedComponents?: readonly ComponentId[]
 }): Promise<CompileResult> {
-  if (input.compilerVersion !== '0.1.0')
+  if (!isSupportedContractRelease(input.compilerVersion))
     throw new FoundationError(
       'UNSUPPORTED_RELEASE',
       'Unsupported compiler version',

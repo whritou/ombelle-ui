@@ -1,4 +1,5 @@
 'use client'
+import { publicationFailure } from './publication-failure'
 import { useEffect, useRef, useState } from 'react'
 import {
   canonicalize,
@@ -35,18 +36,8 @@ class WithdrawnPublicationError extends Error {}
 
 async function readResponse(response: Response): Promise<unknown> {
   if (response.status !== 200 && response.status !== 201) {
-    void response.body?.cancel().catch(() => {})
-    if (response.status === 429)
-      throw new Error(
-        'Publication limit reached. Wait before retrying the same attempt.',
-      )
-    if (response.status === 410)
-      throw new WithdrawnPublicationError(
-        'This publication was withdrawn. Cancel to start a new publication.',
-      )
-    throw new Error(
-      'Publication is unavailable. Your local exports still work; retry this attempt within 24 hours.',
-    )
+    const failure = await publicationFailure(response)
+    throw failure.withdrawn ? new WithdrawnPublicationError(failure.message) : new Error(failure.message)
   }
   if (
     !/^application\/json(?:\s*;|$)/i.test(

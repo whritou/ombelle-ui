@@ -1,6 +1,7 @@
 import { componentSlots } from './component-slots.js'
 import {
   FoundationError,
+  isSupportedContractRelease,
   validatePreset,
   type ComponentId,
   type Edition,
@@ -133,7 +134,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
 // editors read the catalog on every render. Callers only read it.
 const catalogs = new Map<string, Catalog>()
 export function getCatalog(release: string): Catalog {
-  if (release !== '0.1.0')
+  if (!isSupportedContractRelease(release))
     throw new FoundationError(
       'UNSUPPORTED_RELEASE',
       'Unsupported catalog release',
