@@ -2,7 +2,9 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 
 export async function snapshotPresetDom(locator: Locator) {
   return locator.evaluate((root) => {
-    const nodes = [root, ...root.querySelectorAll('*')]
+    // <noscript> never renders while scripts run, and its text differs by renderer: server rendering
+    // (a Next consumer) fills in input-otp's fallback style, client rendering (the editor) leaves it empty.
+    const nodes = [root, ...root.querySelectorAll('*')].filter((node) => !node.closest('noscript'))
     return nodes.map((node) => {
       const css = getComputedStyle(node)
       return {
@@ -29,6 +31,9 @@ export async function assertPresetGalleryButtonPixels(input: {
 }) {
   const { page, iframe, previewButton, installedButton, label } = input
   await iframe.scrollIntoViewIfNeeded()
+  // The gallery has grown taller than the frame and the window: bring the Button itself into
+  // view, in the frame and on the page, or the clip falls outside the screenshot.
+  await previewButton.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'nearest' }))
   // Match the standalone document's raster origin before comparing pixels.
   // A fractional host layout offset changes text antialiasing. Offset the
   // iframe onto whole pixels with relative positioning: unlike a fractional

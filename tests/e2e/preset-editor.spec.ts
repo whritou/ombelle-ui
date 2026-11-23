@@ -976,7 +976,7 @@ test('applies a style palette and a primary colour in one step and returns to th
   await expect(rose).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
   await ready(page)
-  expect(JSON.parse(await download(page)).modes.light.background).toBe(paletteSchemes('ombelle')[0]!.light.background)
+  expect(JSON.parse(await download(page)).modes.light.background).toBe(normalizeColor(paletteSchemes('ombelle')[0]!.light.background!))
 })
 test('edits numeric design values with a slider and keeps the exact field in sync', async ({
   page,
