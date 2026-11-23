@@ -5,7 +5,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { supportedComponentIds, supportedStyleFamilies, type PresetSnapshot } from '@ombelle/contracts'
-import { openExport, segment } from '../helpers/preset-editor-ui.js'
+import { openExport } from '../helpers/preset-editor-ui.js'
 import { withEditorPresetConsumer } from '../helpers/editor-preset-consumer.js'
 import { canonicalize, frame, publishEditorPreset, resetSnapshotBrowserQuota, sha256 } from '../helpers/snapshot-browser.js'
 import { expectColorParity } from '../helpers/color-compare.js'
@@ -234,7 +234,8 @@ test('supports keyboard use, 320 pixel reflow, and axe checks', async ({ page })
   await expect(page.getByLabel('Preset name', { exact: true })).toHaveValue('Keyboard snapshot')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
-  await segment(page, 'Preview width', '320 px').click()
+  // At 320px the preview is its own pane, already at the phone's width, chosen in the bottom dock.
+  await page.getByRole('navigation', { name: 'Preset editor panes' }).getByRole('radio', { name: /^Preview/ }).click()
   await frame(page).getByTestId('preset-button').focus()
   await expect(frame(page).getByTestId('preset-button')).toBeFocused()
 })

@@ -5,6 +5,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import {
   canonicalize,
+  normalizeColor,
   sha256,
   rewriteModuleSpecifiers,
 } from '@ombelle/compiler'
@@ -149,7 +150,10 @@ for (const family of supportedStyleFamilies)
       ).toBe(16)
       const requests: string[] = []
       page.on('request', (request) => requests.push(request.url()))
-      await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
+      // Organic and retro futurism draw their own corners and offer no Corner radius (fixedDesignKeys), so they edit Motion.
+      if (family === 'organic' || family === 'retro-futurism')
+        await page.getByRole('radiogroup', { name: 'Motion', exact: true }).getByRole('radio', { name: /reduced/i }).click()
+      else await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
       await ready(page)
       expect(
         requests.filter((request) => !request.includes('__nextjs')),
@@ -966,15 +970,16 @@ test('applies a style palette and a primary colour in one step and returns to th
   const preset = JSON.parse(await download(page))
   expect(preset.modes.light.primary.toLowerCase()).toBe('#e11d48')
   const peachPalette = paletteSchemes('ombelle')[0]!
-  expect(preset.modes.light.background).toBe(peachPalette.light.background)
-  expect(preset.modes.dark.background).toBe(peachPalette.dark.background)
+  // The downloaded preset carries the compiler's normalised colours: oklch(98.6% …) is written oklch(0.986 …).
+  expect(preset.modes.light.background).toBe(normalizeColor(peachPalette.light.background))
+  expect(preset.modes.dark.background).toBe(normalizeColor(peachPalette.dark.background))
   await expect(peach).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Style default palette', exact: true }).click()
   await expect(peach).toHaveAttribute('aria-pressed', 'false')
   await expect(rose).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
   await ready(page)
-  expect(JSON.parse(await download(page)).modes.light.background).toBe(paletteSchemes('ombelle')[0]!.light.background)
+  expect(JSON.parse(await download(page)).modes.light.background).toBe(normalizeColor(paletteSchemes('ombelle')[0]!.light.background))
 })
 test('edits numeric design values with a slider and keeps the exact field in sync', async ({
   page,
