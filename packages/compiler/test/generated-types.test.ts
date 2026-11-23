@@ -14,6 +14,18 @@ it('typechecks every Base UI component with create-vite unused-binding checks', 
   expect(checked.code, checked.output).toBe(0)
 })
 
+it('gives Base UI usage examples the render form, never asChild', async () => {
+  const result = await compile({
+    preset: getCatalog('0.1.0').presets.flat, componentIds: ['empty', 'button-group'],
+    catalogRelease: '0.1.0', compilerVersion: '0.1.0', edition: 'base',
+  })
+  const usage = result.artifacts.filter(artifact => artifact.kind === 'usage').map(artifact => artifact.content)
+  expect(usage).toHaveLength(2)
+  // The Button Group example keeps a comment naming the Radix form; no element may pass the prop.
+  for (const content of usage) expect(content).not.toMatch(/<[A-Z]\w*[^>]*\basChild\b/)
+  expect(usage.join('\n')).toContain('<EmptyTitle render={<h2 />}>No presets yet</EmptyTitle>')
+})
+
 it('typechecks every stable editor recipe with create-vite unused-binding checks', async () => {
   const results = await Promise.all(catalogRecipeFixtures().map(recipe => compileComponentRecipe({ recipe })))
   const checked = await checkGeneratedTypes(results.flatMap(result => result.artifacts))

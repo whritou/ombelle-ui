@@ -106,13 +106,18 @@ export async function withEditorPresetConsumer<T>(
     const gallery = !input.recipeSnapshot &&
       !('kind' in input && input.kind === 'snapshot' && input.scope === 'button')
     if (gallery) {
-      // Remove only the ordinary scenario's Dialog typography. Preserve managed
-      // tokens and imports so theme add still verifies the real installed lock.
+      // Remove only the ordinary scenario's page typography and chrome: its Dialog
+      // headings and its bare main, header, h1 and nav rules, which would also style
+      // the gallery's own specimens (the Sidebar's <main>, the Breadcrumb, Pagination
+      // and Navigation Menu <nav>s). The editor's gallery loads preset-gallery.css only.
+      // Preserve managed tokens and imports so theme add still verifies the real installed lock.
       const stylesheet = path.join(root, 'src/index.css')
       const original = await fs.readFile(stylesheet, 'utf8')
       await fs.writeFile(
         stylesheet,
-        original.replace(/\[data-slot=['"]dialog-content['"]\]\s+(?:h2|p)\s*\{[^}]*\}\s*/g, ''),
+        original
+          .replace(/\[data-slot=['"]dialog-content['"]\]\s+(?:h2|p)\s*\{[^}]*\}\s*/g, '')
+          .replace(/^(?:main|header|h1|header p, \.note|nav|nav a) \{[^}]*\}\s*/gm, ''),
       )
     }
     const npm = await managerEntry('npm')

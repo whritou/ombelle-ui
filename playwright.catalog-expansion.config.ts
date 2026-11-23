@@ -10,7 +10,7 @@ export default defineConfig({
   retries: 0,
   use: {
     browserName: 'chromium',
-    channel: process.env.OMBELLE_BROWSER_CHANNEL || 'msedge',
+    channel: process.env.OMBELLE_BROWSER_CHANNEL || undefined,
     baseURL: 'http://127.0.0.1:4184',
     headless: true,
     viewport: { width: 1100, height: 800 },
@@ -21,6 +21,6 @@ export default defineConfig({
   webServer: {
     command: 'node node_modules/vite/bin/vite.js apps/preview --config apps/preview/vite.config.ts --port 4184',
     url: 'http://127.0.0.1:4184',
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
 })

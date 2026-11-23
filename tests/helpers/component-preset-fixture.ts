@@ -81,13 +81,14 @@ export async function componentPresetReferenceBank(): Promise<
   return new Map(entries)
 }
 
+// One entry per family whose built-in preset the consumers install (componentPresetReferences): a family
+// left out here rendered nothing, so its every host and mode failed (organic, papier and retro-futurism).
+const presetName = (family: string) => 'Preset' + family.replace(/(^|-)([a-z])/g, (_, __, c: string) => c.toUpperCase())
 const fixtureSource = `'use client'
 import * as React from 'react'
-import { Button as Flat } from '@/components/ui/presets/builtin-flat/r1/button'
-import { Button as Minimalist } from '@/components/ui/presets/builtin-minimalist/r1/button'
-import { Button as Brutalist } from '@/components/ui/presets/builtin-neo-brutalism/r1/button'
-import { Button as Ombelle } from '@/components/ui/presets/builtin-ombelle/r1/button'
-const entries = { 'builtin-flat': Flat, 'builtin-minimalist': Minimalist, 'builtin-neo-brutalism': Brutalist, 'builtin-ombelle': Ombelle }
+${supportedStyleFamilies.map(family => `import { Button as ${presetName(family)} } from '@/components/ui/presets/builtin-${family}/r1/button'`).join('\n')}
+const entries = { ${supportedStyleFamilies.map(family => `'builtin-${family}': ${presetName(family)}`).join(', ')} }
+const Flat = PresetFlat
 export function ComponentPresetFixture() {
   const query = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search)
   const selected = query.get('componentPreset')

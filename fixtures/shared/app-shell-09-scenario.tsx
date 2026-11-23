@@ -193,7 +193,7 @@ const families = ['Ombelle', 'Flat', 'Papier', 'Organic']
 const presetRows: PresetRow[] = Array.from({ length: 40 }, (_, index) => ({
   name: `Preset ${String(index + 1).padStart(2, '0')}`,
   family: families[index % families.length]!,
-  status: index % 5 === 4 ? 'Experimental' : 'Stable',
+  status: index % 5 === 4 ? 'Accessibility caveat' : 'Stable',
 }))
 const presetColumns: DataTableColumn<PresetRow>[] = [
   { accessorKey: 'name', header: 'Name' },

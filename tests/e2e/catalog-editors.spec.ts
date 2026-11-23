@@ -95,7 +95,17 @@ for (const [id, field] of Object.entries(fields)) test(`edits and restores ${id}
 })
 
 async function appearance(parts: Locator) {
-  return parts.evaluateAll(elements => elements.map(element => {
+  return parts.evaluateAll(elements => {
+    // Colours resolve to sRGB bytes: the editor keeps the authored oklch() while a production
+    // build may serialise the same colour as lab(), so compare what is painted.
+    const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })!
+    const rgba = (color: string) => {
+      context.clearRect(0, 0, 1, 1)
+      context.fillStyle = color
+      context.fillRect(0, 0, 1, 1)
+      return [...context.getImageData(0, 0, 1, 1).data]
+    }
+    return elements.map(element => {
     const style = getComputedStyle(element)
     return {
       tag: element.tagName, text: element.textContent?.trim(),
@@ -103,10 +113,30 @@ async function appearance(parts: Locator) {
       role: element.getAttribute('role'), checked: element.getAttribute('aria-checked'),
       selected: element.getAttribute('aria-selected'), value: element.getAttribute('aria-valuenow'),
       disabled: element.hasAttribute('disabled'),
-      color: style.color, background: style.backgroundColor, border: style.borderTopColor,
-      radius: style.borderTopLeftRadius, display: style.display,
+      color: rgba(style.color), background: rgba(style.backgroundColor), border: rgba(style.borderTopColor),
+      // A flex or grid parent blockifies its children (inline-flex computes as flex): the editor and the
+      // installed stage nest the recipe at different depths, so compare the display type, not its inline-ness.
+      radius: style.borderTopLeftRadius, display: style.display.replace(/^inline-/, ''),
     }
-  }))
+    })
+  })
+}
+
+type Appearance = Awaited<ReturnType<typeof appearance>>
+
+// The two sides may round a converted colour to neighbouring bytes; allow 1/255 per channel.
+function appearanceDifferences(left: Appearance, right: Appearance) {
+  if (left.length !== right.length) return [`${left.length} parts against ${right.length}`]
+  return left.flatMap((part, index) => {
+    const other = right[index]!
+    return (Object.keys(part) as (keyof typeof part)[]).flatMap(key => {
+      const a = part[key], b = other[key]
+      const same = Array.isArray(a) && Array.isArray(b)
+        ? a.length === b.length && a.every((value, channel) => Math.abs(value - b[channel]!) <= 1)
+        : a === b
+      return same ? [] : [`${index}.${key}: ${JSON.stringify(a)} against ${JSON.stringify(b)}`]
+    })
+  })
 }
 
 const overlayParts = {
@@ -118,7 +148,9 @@ const overlayParts = {
 } as const
 
 for (const framework of ['vite', 'next'] as const) test(`installed catalog recipes match the editor in ${framework}`, async ({ page, context }) => {
-  test.setTimeout(480_000)
+  // Vite installs every catalog recipe one CLI call at a time, then builds: 8 minutes was not enough
+  // beside the rest of the consumer matrix (23 November).
+  test.setTimeout(framework === 'vite' ? 1_200_000 : 480_000)
   const recipes = catalogRecipeFixtures().filter(recipe =>
     framework === 'vite' || ['badge', 'checkbox', 'dialog'].includes(recipe.component))
   await page.addInitScript(drafts => {
@@ -166,7 +198,10 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
             }
             await expect(leftContent).toBeVisible()
             await expect(rightContent).toBeVisible()
-            await expect.poll(() => appearance(left), { message: `${id} in ${mode}` }).toEqual(await appearance(right))
+            {
+              const expected = await appearance(right)
+              await expect.poll(async () => appearanceDifferences(await appearance(left), expected), { message: `${id} in ${mode}` }).toEqual([])
+            }
             await page.keyboard.press('Escape')
             await consumer.keyboard.press('Escape')
             await expect(leftContent).toBeHidden()
@@ -176,7 +211,10 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
           } else {
             await expect(left.first()).toBeAttached()
             await expect(right.first()).toBeAttached()
-            await expect.poll(() => appearance(left), { message: `${id} in ${mode}` }).toEqual(await appearance(right))
+            {
+              const expected = await appearance(right)
+              await expect.poll(async () => appearanceDifferences(await appearance(left), expected), { message: `${id} in ${mode}` }).toEqual([])
+            }
           }
           if (id === 'progress') {
             await expect(preview.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')

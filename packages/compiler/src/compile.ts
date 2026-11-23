@@ -153,6 +153,11 @@ export async function compile(input: {
       '<DropdownMenuTrigger asChild><Button size="icon" aria-label="More install options"><ChevronDownIcon aria-hidden="true" /></Button></DropdownMenuTrigger>',
       '<DropdownMenuTrigger render={<Button size="icon" aria-label="More install options"><ChevronDownIcon aria-hidden="true" /></Button>} />',
     )
+    // The Base UI EmptyTitle takes its heading level through render too (the Base UI consumers' build failed on asChild).
+    if(id==='empty'&&input.edition==='base')usage=usage.replace(
+      '<EmptyTitle asChild><h2>No presets yet</h2></EmptyTitle>',
+      '<EmptyTitle render={<h2 />}>No presets yet</EmptyTitle>',
+    )
     drafts.push({
       logicalPath: 'examples/' + id + '.tsx',
       kind: 'usage',

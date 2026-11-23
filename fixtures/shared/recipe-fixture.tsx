@@ -4,11 +4,19 @@ import { RecipeButton as Flat } from '@/components/ui/recipes/rc_flat_button/r1/
 import { RecipeButton as Minimalist } from '@/components/ui/recipes/rc_minimalist_button/r1/button'
 import { RecipeButton as Brutalist } from '@/components/ui/recipes/rc_neo_brutalism_button/r1/button'
 import { RecipeButton as Ombelle } from '@/components/ui/recipes/rc_ombelle_button/r1/button'
+import { RecipeButton as Papier } from '@/components/ui/recipes/rc_papier_button/r1/button'
+import { RecipeButton as Organic } from '@/components/ui/recipes/rc_organic_button/r1/button'
+import { RecipeButton as RetroFuturism } from '@/components/ui/recipes/rc_retro_futurism_button/r1/button'
+// Every recipe in fixtures/shared/recipes.ts: one missing here fell back to the flat recipe, so its
+// parity and focus checks measured the wrong Button (papier, organic, retro-futurism).
 const entries = {
   rc_flat_button: Flat,
   rc_minimalist_button: Minimalist,
   rc_neo_brutalism_button: Brutalist,
   rc_ombelle_button: Ombelle,
+  rc_papier_button: Papier,
+  rc_organic_button: Organic,
+  rc_retro_futurism_button: RetroFuturism,
 }
 export function RecipeFixture() {
   const query = new URLSearchParams(

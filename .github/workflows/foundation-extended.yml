@@ -1,0 +1,101 @@
+name: Foundation extended
+# The browser suites and the hosted storage suite outside the Foundation evidence gate
+# (TST-04): the editors and website shell, the catalog expansion pages, the usage
+# example layouts, the hosted website build, and the Postgres
+# snapshot store. Nightly and on demand; a release reads its latest result
+# (docs/cli-release.md).
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+  # TEMPORARY: lets this branch run the new workflow before it exists on main. Remove before merge.
+  push:
+    branches: [feat/foundation-gate-1-0-7445b7]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [editors, site, catalog-expansion, usage-examples, hosted-browser]
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned tools and download caches
+        id: setup
+        uses: ./.github/actions/setup-foundation
+        with:
+          cache-scope: extended
+      - name: Cache Playwright browser downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: browsers-v1-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.setup.outputs.node-version }}-playwright-${{ steps.setup.outputs.playwright-version }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Chromium and system dependencies
+        timeout-minutes: 15
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build packages
+        run: pnpm build:packages
+      - name: Generate preview sources
+        run: pnpm generate:preview
+      - name: Editor checks (glass editors and the editor matrix)
+        if: matrix.suite == 'editors'
+        run: pnpm exec playwright test -c playwright.editors.config.ts
+      - name: Website shell, inline previews and instant editors
+        if: matrix.suite == 'site'
+        run: pnpm exec playwright test -c playwright.site.config.ts
+      - name: Catalog expansion and recipe appearances
+        if: matrix.suite == 'catalog-expansion'
+        run: pnpm exec playwright test -c playwright.catalog-expansion.config.ts
+      - name: Usage example layouts
+        if: matrix.suite == 'usage-examples'
+        run: |
+          pnpm generate:usage-audit
+          pnpm test:usage-examples
+      - name: Hosted website build in the browser
+        if: matrix.suite == 'hosted-browser'
+        run: |
+          pnpm build:www
+          pnpm exec playwright test -c playwright.hosted.config.ts
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        timeout-minutes: 5
+        with:
+          name: extended-${{ matrix.suite }}-report
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: ignore
+  # The Postgres snapshot store (concurrent quota, immutability trigger, lock timeout).
+  # It runs only against a disposable Neon development branch whose credentials live in
+  # the OMBELLE_POSTGRES_TEST_* secrets, never the production, backup or monitor URLs.
+  # The tests refuse any other branch. Without those secrets the job says so and stops.
+  hosted-storage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OMBELLE_POSTGRES_TEST_BRANCH: dev-hosted-install-codes
+      OMBELLE_POSTGRES_TEST_DATABASE_URL: ${{ secrets.OMBELLE_POSTGRES_TEST_DATABASE_URL }}
+      OMBELLE_POSTGRES_TEST_DIRECT_URL: ${{ secrets.OMBELLE_POSTGRES_TEST_DIRECT_URL }}
+      OMBELLE_POSTGRES_TEST_EXPECTED_HOST: ${{ secrets.OMBELLE_POSTGRES_TEST_EXPECTED_HOST }}
+    steps:
+      - name: Report missing test database credentials
+        if: env.OMBELLE_POSTGRES_TEST_DATABASE_URL == ''
+        run: echo "::notice::Postgres store suite not run - no OMBELLE_POSTGRES_TEST_* secrets for a disposable test branch."
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.OMBELLE_POSTGRES_TEST_DATABASE_URL != ''
+      - name: Set up pinned tools and download caches
+        if: env.OMBELLE_POSTGRES_TEST_DATABASE_URL != ''
+        uses: ./.github/actions/setup-foundation
+        with:
+          cache-scope: extended
+      - name: Build packages
+        if: env.OMBELLE_POSTGRES_TEST_DATABASE_URL != ''
+        run: pnpm build:packages
+      - name: Postgres snapshot store suite
+        if: env.OMBELLE_POSTGRES_TEST_DATABASE_URL != ''
+        run: pnpm test:hosted-storage

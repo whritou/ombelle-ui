@@ -15,10 +15,11 @@ for (const consumer of consumers)
     const errors: string[] = []
     page.on('pageerror', (e) => errors.push(String(e)))
     page.on('response', (r) => {
-      // The Avatar usage example points at a placeholder image the app doesn't
-      // ship; Avatar shows its fallback.
+      // Usage examples point at placeholder pictures the app doesn't ship (Avatar's
+      // /ada.png, Card's /preview.png, Carousel's /presets/<name>.png); components
+      // ship no images, and Avatar shows its fallback. Any other missing file fails.
       const file = new URL(r.url()).pathname
-      if (r.status() >= 400 && file !== '/ada.png') errors.push(r.status() + ' ' + file)
+      if (r.status() >= 400 && !/\.(png|jpe?g|webp|avif)$/.test(file)) errors.push(r.status() + ' ' + file)
     })
     page.on('console', (m) => {
       if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(m.text())

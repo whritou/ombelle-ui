@@ -252,7 +252,9 @@ for (const family of supportedStyleFamilies)
               destructiveShadow,
             }
           })
-          expect(Math.max(...border.widths)).toBeGreaterThanOrEqual(2)
+          // A cue beyond colour: a border of at least 2px, or (papier) a 1px border over a 2px inset underline.
+          if (family === 'papier') expect(border.shadow).toMatch(/inset 0px -2px 0px|0px -2px 0px 0px .*inset/)
+          else expect(Math.max(...border.widths)).toBeGreaterThanOrEqual(2)
           if (family === 'neo-brutalism') {
             expect(border.shadow).not.toBe('none')
             expectColorParity(border.shadow, border.destructiveShadow)
@@ -322,10 +324,12 @@ for (const family of supportedStyleFamilies)
         // Disabled treatments are family-specific: dimmed wrappers/fields or dotted ink.
         for (const id of ['forms-select-disabled', 'forms-select-fieldset']) {
           await expect(byId(id)).toBeDisabled()
-          await expect(wrapperOf(id)).toHaveCSS('opacity', family === 'ombelle' ? '0.7' : '1')
+          // Ombelle and the families built on it (papier, organic, retro-futurism) dim the whole wrapper.
+          await expect(wrapperOf(id)).toHaveCSS('opacity', ['ombelle', 'papier', 'organic', 'retro-futurism'].includes(family) ? '0.7' : '1')
           await expect(byId(id)).toHaveCSS('opacity', family === 'flat' ? '0.55' : '1')
           await expect(byId(id)).toHaveCSS('border-bottom-style',
-            family === 'flat' || family === 'minimalist' ? 'dotted' : 'dashed')
+            family === 'flat' || family === 'minimalist' ? 'dotted'
+              : ['papier', 'organic', 'retro-futurism'].includes(family) ? 'solid' : 'dashed')
         }
         await expect(wrapperOf('forms-select-default')).toHaveCSS('opacity', '1')
 

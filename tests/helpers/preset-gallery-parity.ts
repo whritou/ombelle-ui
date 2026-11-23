@@ -1,8 +1,11 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { maxPixelDifference } from './pixel-difference.js'
 
 export async function snapshotPresetDom(locator: Locator) {
   return locator.evaluate((root) => {
-    const nodes = [root, ...root.querySelectorAll('*')]
+    // <noscript> never renders while scripts run, and its text differs by renderer: server rendering
+    // (a Next consumer) fills in input-otp's fallback style, client rendering (the editor) leaves it empty.
+    const nodes = [root, ...root.querySelectorAll('*')].filter((node) => !node.closest('noscript'))
     return nodes.map((node) => {
       const css = getComputedStyle(node)
       return {
@@ -29,6 +32,9 @@ export async function assertPresetGalleryButtonPixels(input: {
 }) {
   const { page, iframe, previewButton, installedButton, label } = input
   await iframe.scrollIntoViewIfNeeded()
+  // The gallery has grown taller than the frame and the window: bring the Button itself into
+  // view, in the frame and on the page, or the clip falls outside the screenshot.
+  await previewButton.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'nearest' }))
   // Match the standalone document's raster origin before comparing pixels.
   // A fractional host layout offset changes text antialiasing. Offset the
   // iframe onto whole pixels with relative positioning: unlike a fractional
@@ -64,5 +70,6 @@ export async function assertPresetGalleryButtonPixels(input: {
   const installed = await installedButton.screenshot({ animations: 'disabled', timeout: 20000 })
   await test.info().attach(label + '-preview-button', { body: reference, contentType: 'image/png' })
   await test.info().attach(label + '-installed-button', { body: installed, contentType: 'image/png' })
-  expect(reference.equals(installed)).toBe(true)
+  // Retro-futurism's striped Button rounds gradient stops by 1/255 between development and production CSS.
+  expect(await maxPixelDifference(page, reference, installed)).toBeLessThanOrEqual(1)
 }

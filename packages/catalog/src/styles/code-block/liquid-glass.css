@@ -93,6 +93,14 @@
 [data-slot='code-block-copy']:hover {
   background: color-mix(in oklab, var(--code-block-foreground) 10%, transparent);
 }
+/* Again on the focusable parts: a component-scoped recipe declares the preset's --foreground on the
+   block's root, which would put a dark ring on the dark code surface (0 ring pixels at 3:1). */
+[data-slot='code-block-tab'],
+[data-slot='code-block-copy'],
+[data-slot='code-block-code'],
+[data-code-block-mode='command'] > [role='tabpanel'] {
+  --foreground: var(--code-block-foreground);
+}
 [data-slot='code-block-tab']:focus-visible,
 [data-slot='code-block-copy']:focus-visible {
   outline: 2px solid var(--foreground);

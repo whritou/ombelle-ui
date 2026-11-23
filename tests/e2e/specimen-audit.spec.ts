@@ -3,19 +3,24 @@ import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { familyAccessibilityCaveat, styleFamilies, supportedComponentIds } from '../../packages/contracts/src/index.js'
 import {
-  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, pauseClock, markBorders, runAxe,
+  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, markSurfaces, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
+import { editions, modes, specimenArtifacts as artifacts, specimenRunIsPartial } from '../helpers/specimen-run.js'
+import { inShard, specimenShard } from '../helpers/specimen-shard.js'
 
-const editions = ['radix', 'base'] as const
-const modes = ['light', 'dark'] as const
 const checks: AuditCheck[] = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
-const artifacts = '.artifacts/specimen-audit'
-// Findings whose outcome depends on the colours behind the specimen: a focus ring short of 3:1 and axe's
-// color-contrast rule. A focus finding for any other reason (no focus, focus moved) is not one of them.
-const backdropDependent = (finding: Finding) =>
+// Contrast findings: a focus ring short of 3:1 and axe's color-contrast rule. A focus finding for any other
+// reason (no focus, focus moved) is not one of them.
+const contrastFinding = (finding: Finding) =>
   (finding.check === 'focus-visible' && finding.detail.includes(' focus pixels at 3:1 ')) ||
   (finding.check === 'axe' && finding.detail.startsWith('color-contrast:'))
+// Liquid glass guarantees contrast on its surfaces only when they are opaque; text and rings on the bare page
+// backdrop are outside its guarantee in every mode (docs/components/liquid-glass.md). So a contrast finding is
+// advisory on a translucent surface or the bare backdrop, and with reduced transparency, which promises opaque
+// surfaces, only on the bare backdrop. On an opaque surface it fails like any family (TST-07).
+const advisoryFinding = (finding: Finding, reduced: boolean) =>
+  contrastFinding(finding) && (finding.surface === 'backdrop' || (!reduced && finding.surface === 'translucent'))
 
 /** How each overlay opens, and where its content appears once open (outside the section when portalled). */
 const overlays: Record<string, {
@@ -66,18 +71,32 @@ async function measure(page: Page, roots: Locator[], stop: Locator, prefix: stri
   return findings
 }
 
-for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.includes(name)))
-  for (const edition of editions)
-    for (const mode of modes)
-      test(`${family}/${edition}/${mode}: every specimen passes the measured checks`, async ({ page, browser }) => {
+// Every configuration, in a fixed order: a shard takes its share by index, before any filter.
+// Liquid glass is measured a second time with reduced transparency, the setting its accessibility
+// caveat says restores the full guarantee: those configurations are held to every check, contrast included.
+type Configuration = { family: (typeof styleFamilies)[number]; edition: (typeof editions)[number]; mode: (typeof modes)[number]; transparency?: 'reduced' }
+const configurations: Configuration[] = [
+  ...styleFamilies.flatMap(family => editions.flatMap(edition => modes.map(mode => ({ family, edition, mode })))),
+  ...editions.flatMap(edition => modes.map(mode => ({ family: 'liquid-glass' as const, edition, mode, transparency: 'reduced' as const }))),
+]
+// One configuration measures every specimen: 3.6 to 5.2 minutes each on a CI runner (22 November nightly).
+const configurationTimeout = 900000
+
+for (const [index, { family, edition, mode, transparency }] of configurations.entries())
+  if (inShard(index) && (!onlyFamilies || onlyFamilies.includes(family)))
+      test(`${family}/${edition}/${mode}${transparency ? '/reduced-transparency' : ''}: every specimen passes the measured checks`, async ({ page, browser }) => {
+        test.setTimeout(configurationTimeout)
         const counts = Object.fromEntries(checks.map(check => [check, 0])) as Record<AuditCheck, number>
         const findings: (Finding & { component: string })[] = []
         const errors: string[] = []
         page.on('pageerror', error => errors.push(error.message))
         // Time runs normally; it is paused only while a toast is measured, so the toast stays open.
         await installClock(page)
-        await page.goto(`/audit/${family}/${edition}/?mode=${mode}${auditFonts ? `&fonts=${encodeURIComponent(auditFonts)}` : ''}`)
+        await page.goto(`/audit/${family}/${edition}/?mode=${mode}${transparency ? '&transparency=reduced' : ''}${auditFonts ? `&fonts=${encodeURIComponent(auditFonts)}` : ''}`)
         await expect(page.locator('main[data-audit-page]')).toHaveAttribute('data-ready', 'true', { timeout: 60000 })
+        if (transparency) expect(await page.evaluate(() => [...document.styleSheets].some(sheet => {
+          try { return [...sheet.cssRules].some(rule => rule.cssText.includes('data-reduced-transparency')) } catch { return false }
+        })), 'reduced transparency rules are applied').toBe(true)
         const sections = page.locator('section[data-audit]')
         // Toast first: the Radix toast is open from page load and its timer must not run out before it is measured.
         const components = (await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!)))
@@ -107,7 +126,7 @@ for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.
           await section.locator('[data-stack]').evaluateAll(list => list.forEach(element => element.setAttribute('data-expanded', '')))
           await section.screenshot({ path: path.join(shots, `${id}.png`), animations: 'disabled' })
           record(await measure(page, [section], section, id, counts))
-          record(await runAxe(page, [`section[data-audit="${id}"]`]))
+          record(await markSurfaces(page, await runAxe(page, [`section[data-audit="${id}"]`])))
           counts.axe++
           const listed = overlays[component]
           const overlay = component === 'accordion' && !await section.locator('[aria-expanded="false"][aria-controls]').count()
@@ -143,7 +162,7 @@ for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.
             await page.screenshot({ path: path.join(shots, `${id}-open.png`), animations: 'disabled' })
             const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, id)
             record(await measure(page, [content], inside ? section : body, `${id}-open`, counts))
-            record(await runAxe(page, [`[data-audit-open="${id}"]`]))
+            record(await markSurfaces(page, await runAxe(page, [`[data-audit-open="${id}"]`])))
             counts.axe++
             // Overlays are the surfaces that carry backdrop filters: check them under forced colors while they are open.
             if (mode === 'light') {
@@ -177,48 +196,34 @@ for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.
         // A family without an accessibility guarantee (liquid glass) is held to every check except contrast,
         // which depends on the backdrop behind it: its focus-contrast and axe color-contrast findings are
         // recorded and attached as advisory. Everything else fails it like any stable family.
+        // A family without an accessibility guarantee (liquid glass) is held to every check; only contrast that
+        // depends on what is behind it is recorded as advisory (see advisoryFinding) and bounded by the baseline.
         const caveat = familyAccessibilityCaveat(family) !== null
-        const advisory = caveat ? findings.filter(backdropDependent) : []
+        const advisory = caveat ? findings.filter(finding => advisoryFinding(finding, Boolean(transparency))) : []
         const blocking = findings.filter(finding => !advisory.includes(finding))
         if (advisory.length)
           test.info().annotations.push({ type: 'contrast advisory findings', description: JSON.stringify(advisory) })
-        const part = { family, edition, mode, specimens: components.length, checks: counts, failures: blocking.length + errors.length,
+        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, ...(transparency ? { transparency } : {}), specimens: new Set(components.map(id => id.split('~')[0])).size, sections: components.length, checks: counts, failures: blocking.length + errors.length,
           contrastAdvisoryFindings: advisory.length,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         // A run limited to some components writes its findings apart and leaves the evidence file alone.
         // A font or family run is never the standard evidence either.
-        const partial = Boolean(onlyComponents?.length || auditFonts || onlyFamilies?.length)
+        const partial = specimenRunIsPartial()
         const partsDirectory = path.join(artifacts, partial ? 'partial' : 'parts')
         await fs.mkdir(partsDirectory, { recursive: true })
-        if (!partial) await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}.json`), JSON.stringify(part, null, 2) + '\n')
+        const name = `${family}-${edition}-${mode}${transparency ? '-reduced-transparency' : ''}`
+        if (!partial) await fs.writeFile(path.join(partsDirectory, `${name}.json`), JSON.stringify(part, null, 2) + '\n')
         const fontTag = auditFonts ? '.' + auditFonts.replaceAll(',', '_') : ''
-        await fs.writeFile(path.join(partsDirectory, `${family}-${edition}-${mode}${fontTag}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
+        await fs.writeFile(path.join(partsDirectory, `${name}${fontTag}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
         expect(new Set(components.map(id => id.split('~')[0]))).toHaveProperty('size', onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length)
         expect(errors, 'page errors').toEqual([])
         expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])
       })
 
-// Merge every configuration's part into the evidence file the foundation gate validates.
-test.afterAll(async () => {
-  if (onlyComponents?.length) return
-  const directory = path.join(artifacts, 'parts')
-  const names = (await fs.readdir(directory).catch(() => [] as string[])).filter(name => name.endsWith('.json') && !name.endsWith('.findings.json'))
-  const parts = await Promise.all(names.map(async name => JSON.parse(await fs.readFile(path.join(directory, name), 'utf8'))))
-  if (!parts.length) return
-  const order = (part: { family: string; edition: string; mode: string }) =>
-    [styleFamilies.indexOf(part.family as never), editions.indexOf(part.edition as never), modes.indexOf(part.mode as never)]
-  parts.sort((a, b) => { const x = order(a), y = order(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] })
-  const evidence = {
-    schemaVersion: 1, node: process.version, browser: parts[0].browser,
-    configurations: parts.map(({ family, edition, mode, specimens, checks, contrastAdvisoryFindings }) =>
-      ({ family, edition, mode, specimens, checks, contrastAdvisoryFindings })),
-    failures: parts.reduce((sum, part) => sum + part.failures, 0),
-  }
-  await fs.writeFile('.artifacts/specimen-audit.json', JSON.stringify(evidence, null, 2) + '\n')
-})
+// Parts are merged once, after every worker, in specimen-audit.teardown.ts.
 
-// The page is the measurement surface: it must match what an install renders.
-test('audit pages draw the glass backdrop and lay specimens out in normal flow', async ({ page }) => {
+// The page is the measurement surface: it must match what an install renders. One shard runs it.
+if ((specimenShard()?.current ?? 1) === 1) test('audit pages draw the glass backdrop and lay specimens out in normal flow', async ({ page }) => {
   for (const mode of modes) {
     await page.goto(`/audit/liquid-glass/radix/?mode=${mode}`)
     await expect(page.locator('main[data-audit-page]')).toHaveAttribute('data-ready', 'true', { timeout: 60000 })

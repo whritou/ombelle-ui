@@ -16,10 +16,12 @@ html[data-backdrop="glass"] .editor-preview { background: none; }
 .recipe-stage { box-sizing: border-box; inline-size: min(440px, 100%); font-family: var(--font-family, system-ui, sans-serif); color: var(--foreground); }
 .recipe-stage:is([data-component='table'], [data-component='tabs'], [data-component='card'], [data-component='alert'], [data-component='accordion']) { inline-size: min(560px, 100%); }
 .recipe-stage:is([data-component='badge'], [data-component='avatar'], [data-component='breadcrumb'], [data-component='pagination'], [data-component='dialog'], [data-component='sheet'], [data-component='alert-dialog'], [data-component='popover'], [data-component='tooltip'], [data-component='dropdown-menu'], [data-component='toast'], [data-component='checkbox'], [data-component='switch']) { inline-size: auto; }
-/* A field: its label above the control. A checkbox or switch sits beside its label. */
-.recipe-stage > div:not([role]) { display: grid; gap: 0.5rem; }
-.recipe-stage > div:has(> [role='checkbox'], > [role='switch']) { display: flex; align-items: center; gap: 0.625rem; }
-.recipe-stage > div > :is(label, p) { margin: 0; font-size: 0.875rem; font-weight: 500; line-height: 1.4; }
+/* A field: its label above the control. A checkbox or switch sits beside its label.
+   Only the specimen's own wrappers: a component root such as Card carries data-slot and keeps its
+   catalog layout, as it does once installed. */
+.recipe-stage > div:not([role], [data-slot]) { display: grid; gap: 0.5rem; }
+.recipe-stage > div:not([data-slot]):has(> [role='checkbox'], > [role='switch']) { display: flex; align-items: center; gap: 0.625rem; }
+.recipe-stage > div:not([data-slot]) > :is(label, p) { margin: 0; font-size: 0.875rem; font-weight: 500; line-height: 1.4; }
 /* Label's own specimen pairs it with a plain input, drawn as a field. */
 .recipe-stage > div > input { box-sizing: border-box; block-size: var(--control-height, 2.5rem); padding: 0 0.75rem; border: var(--border-width, 1px) solid var(--input, var(--border)); border-radius: var(--radius, 0.5rem); background: var(--background); color: var(--foreground); font: inherit; }
 .recipe-stage > div > input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
