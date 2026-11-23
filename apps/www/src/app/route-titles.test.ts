@@ -18,6 +18,9 @@ beforeEach(() => {
   store.read = async () => { throw new Error('unset') }
 })
 
+// Published-code pages stay out of search indexes (RL-11).
+const noindex = { index: false, follow: false }
+
 it('titles both editors', async () => {
   expect((await import('./editor/preset/page')).metadata.title).toBe('Preset editor · Ombelle UI')
   expect((await import('./editor/component/button/page')).metadata.title).toBe('Button editor · Ombelle UI')
@@ -34,15 +37,15 @@ it('titles a catalog component editor by its component', async () => {
 it('titles a published preset by its name, and an unavailable one by its state', async () => {
   const { generateMetadata } = await import('./presets/[id]/[revision]/page')
   store.read = async () => ({ preset: { name: 'Harbor' } })
-  expect(await generateMetadata(params({ id: 'ps_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', revision: '1' }))).toEqual({ title: 'Harbor · Published preset · Ombelle UI' })
+  expect(await generateMetadata(params({ id: 'ps_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', revision: '1' }))).toEqual({ title: 'Harbor · Published preset · Ombelle UI', robots: noindex })
   store.read = async () => { throw new SnapshotServiceError({ status: 410, code: 'SNAPSHOT_WITHDRAWN' }) }
-  expect(await generateMetadata(params({ id: 'ps_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', revision: '1' }))).toEqual({ title: 'Snapshot withdrawn · Ombelle UI' })
+  expect(await generateMetadata(params({ id: 'ps_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', revision: '1' }))).toEqual({ title: 'Snapshot withdrawn · Ombelle UI', robots: noindex })
 })
 
 it('titles a published recipe by its component, and a missing one by its state', async () => {
   const { generateMetadata } = await import('./recipes/[id]/[revision]/page')
   store.read = async () => ({ snapshotVersion: '1.0', recipe: { component: 'button' } })
-  expect(await generateMetadata(params({ id: 'rc_cccccccccccccccccccccccccccccccc', revision: '1' }))).toEqual({ title: 'Published Button recipe · Ombelle UI' })
+  expect(await generateMetadata(params({ id: 'rc_cccccccccccccccccccccccccccccccc', revision: '1' }))).toEqual({ title: 'Published Button recipe · Ombelle UI', robots: noindex })
   store.read = async () => { throw new SnapshotServiceError({ status: 404, code: 'SNAPSHOT_NOT_FOUND' }) }
-  expect(await generateMetadata(params({ id: 'rc_dddddddddddddddddddddddddddddddd', revision: '1' }))).toEqual({ title: 'Snapshot not found · Ombelle UI' })
+  expect(await generateMetadata(params({ id: 'rc_dddddddddddddddddddddddddddddddd', revision: '1' }))).toEqual({ title: 'Snapshot not found · Ombelle UI', robots: noindex })
 })
