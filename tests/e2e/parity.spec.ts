@@ -99,6 +99,9 @@ for (const family of supportedStyleFamilies)
             // Colours compare in sRGB: a CSS pipeline may serialise oklch() as lab().
             expectColorParity(computed, styles)
             expect(html).toEqual(dom)
+            // Keep the differing render: the reference alone does not show what changed.
+            if (!image.equals(reference))
+              await test.info().attach(family + '-' + mode + '-' + app + '-mismatch', { body: image, contentType: 'image/png' })
             expect(image.equals(reference)).toBe(true)
           }
         }
