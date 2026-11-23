@@ -1,9 +1,10 @@
-import { FoundationError, isSupportedContractRelease, type InstallableRecipeSnapshot, type SnapshotReference } from '@ombelle/contracts'
+import { isSupportedContractRelease, type InstallableRecipeSnapshot, type SnapshotReference } from '@ombelle/contracts'
 import { normalizePublishedInstallableRecipe, verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
 import { clientRateKeys } from './client-key'
 import { SnapshotServiceError } from './errors'
+import { invalidPublication, normalizationFailure } from './publication-errors'
 import type { SnapshotStore } from './store'
 import { openConfiguredSnapshotStore } from './store-factory'
 
@@ -36,7 +37,7 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
       if (!key || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(key))
         throw new SnapshotServiceError({ status: 400, code: 'INVALID_IDEMPOTENCY_KEY' })
       if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1 || !Object.hasOwn(body, 'recipe'))
-        throw new SnapshotServiceError({ status: 400, code: 'INVALID_DATA' })
+        throw invalidPublication('recipe')
       const input = (body as { recipe: unknown }).recipe
       if (input && typeof input === 'object' && !Array.isArray(input)) {
         const value = input as Record<string, unknown>
@@ -53,11 +54,7 @@ export function createRecipeSnapshotService(config: SnapshotConfig, store: Snaps
       }
       let compiled
       try { compiled = await normalizePublishedInstallableRecipe(input) }
-      catch (error) {
-        if (error instanceof FoundationError && error.code === 'UNSUPPORTED_RELEASE')
-          throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
-        throw new SnapshotServiceError({ status: 400, code: 'INVALID_DATA' })
-      }
+      catch (error) { throw normalizationFailure(error, 'recipe') }
       const result = await store.publishRecipe({ compiled, idempotencyKey: key.toLowerCase(), clientKey, networkKey, now })
       return { snapshot: await verified(result.snapshot), replayed: result.replayed }
     },

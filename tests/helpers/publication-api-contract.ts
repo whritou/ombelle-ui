@@ -127,6 +127,15 @@ export function publicationApiContract(kind: PublicationApiKind) {
       await failure(await post(origin, { body: rejected }), 400, 'INVALID_DATA')
     })
 
+    it('names the publication field in the issues of an invalid document', async () => {
+      const { origin } = await fixture()
+      for (const rejected of [{}, { [kind.field]: 'not a document' }]) {
+        const response = await post(origin, { body: rejected })
+        expect(response.status).toBe(400)
+        expect(await response.json()).toMatchObject({ code: 'INVALID_DATA', issues: [{ path: '/' + kind.field, message: `Provide a valid supported ${kind.field}.` }] })
+      }
+    })
+
     it.each(Object.keys(kind.unsupported))('reports unsupported %s as 422', async (field) => {
       const { origin } = await fixture()
       await failure(await post(origin, { body: body(kind.unsupported[field]!(kind.content())) }), 422, 'UNSUPPORTED_RELEASE')
