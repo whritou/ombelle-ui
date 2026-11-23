@@ -7,13 +7,13 @@ import {
   type ComponentId,
   type Preset,
 } from '@ombelle/contracts'
-import { compile, glassContrastPairs, glassContrastReport, glassEffectiveSheen, glassTextPlate, glassTints } from '../src/index.js'
+import { compile, glassContrastPairs, glassContrastReport, glassEffectiveSheen, glassTints } from '../src/index.js'
 import { squash } from './new-component-artifacts.js'
 
-const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
+const glassIds = componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
 const unavailable = componentsWithStyleSupport('liquid-glass', ['unavailable'])
 const builtin = () => structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
-const build = (preset: unknown, componentIds: readonly ComponentId[] = experimental) =>
+const build = (preset: unknown, componentIds: readonly ComponentId[] = glassIds) =>
   compile({ preset, componentIds, catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
 const artifact = (
   result: Awaited<ReturnType<typeof build>>,
@@ -37,8 +37,8 @@ const normalize = (css: string) =>
   css.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
 
 describe('liquid-glass compile', () => {
-  it('compiles the fifty-seven experimental components', async () => {
-    expect([...experimental].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'data-table', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'menubar', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
+  it('compiles every liquid glass component', async () => {
+    expect([...glassIds].sort()).toEqual(['accordion', 'alert', 'alert-dialog', 'aspect-ratio', 'avatar', 'badge', 'breadcrumb', 'button', 'button-group', 'calendar', 'card', 'carousel', 'checkbox', 'chip', 'code-block', 'collapsible', 'color-picker', 'combobox', 'command', 'context-menu', 'data-table', 'dialog', 'dropdown-menu', 'empty', 'field', 'hover-card', 'input', 'input-group', 'input-otp', 'item', 'kbd', 'label', 'menubar', 'meter', 'native-select', 'navigation-menu', 'number-input', 'pagination', 'password-field', 'popover', 'progress', 'prose', 'radio-group', 'resizable', 'scroll-area', 'select', 'separator', 'sheet', 'sidebar', 'skeleton', 'slider', 'spinner', 'stepper', 'switch', 'table', 'tabs', 'tag-input', 'textarea', 'toast', 'toggle', 'toggle-group', 'toolbar', 'tooltip'])
     const preset = builtin()
     const result = await build(preset)
     expect(
@@ -117,14 +117,14 @@ describe('liquid-glass compile', () => {
 
   it('is deterministic', async () => {
     const first = await build(builtin())
-    const second = await build(builtin(), [...experimental].reverse())
+    const second = await build(builtin(), [...glassIds].reverse())
     expect(second.artifacts.map((a) => a.sha256)).toEqual(
       first.artifacts.map((a) => a.sha256),
     )
     expect(second.preset.hash).toBe(first.preset.hash)
   })
 
-  // Every component is experimental in glass, so no component can be refused; Task C4 replaces the refusal tests.
+  // Every component has glass rules, so no component can be refused.
   it('has no unavailable component left to refuse', () => {
     expect(unavailable).toEqual([])
   })
@@ -274,11 +274,11 @@ describe('liquid-glass compile', () => {
 
   it('compiles a failing draft only in report mode, so an editor can preview it', async () => {
     const preset = withDesign({ glassOpacity: 0.3 })
-    const preview = await compile({ preset, componentIds: experimental, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'report' })
+    const preview = await compile({ preset, componentIds: glassIds, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'report' })
     expect(preview.artifacts.length).toBeGreaterThan(0)
     expect(glassContrastReport(preview.preset.data).passes).toBe(false)
     // The default still enforces the bound for installers and publication.
-    await expect(compile({ preset, componentIds: experimental, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'enforce' })).rejects.toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
+    await expect(compile({ preset, componentIds: glassIds, catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'enforce' })).rejects.toMatchObject({ code: 'INVALID_DATA', path: '/design/glassOpacity' })
   })
 
   it('bounds a sparse custom palette', async () => {
@@ -827,14 +827,14 @@ describe('liquid glass material review fixes', () => {
     expect(glassEffectiveSheen(lit.design, 'light')).toBeCloseTo(1 - 0.6 * (1 - 0.6 * 0.4), 4)
   })
 
-  it('evaluates text on its outline plate and checked marks opaque when the material is on', () => {
-    expect(glassTextPlate).toBe(1)
+  it('rates text on the painted glass alone and checked marks opaque when the material is on', () => {
     const pick = (design: Partial<Preset['design']>, match: (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => boolean) =>
       glassContrastReport(withDesign({ glassOpacity: 0.4, ...design })).pairs.find((p) => p.mode === 'light' && match(p))!
     const text = (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => p.surface === 'card' && p.text === 'cardForeground' && !p.tint && p.coverage === undefined
-    // On its ring the glyph reads the same over any backdrop.
-    expect(pick({ glassHalo: 0.5 }, text).ratioOverBlack).toBeCloseTo(pick({ glassHalo: 0.5 }, text).ratioOverWhite, 2)
-    expect(pick({}, text).ratioOverBlack).toBeLessThan(pick({}, text).ratioOverWhite)
+    // The outline the material draws is part of the glyph, not its background: it lends the text no contrast,
+    // so the backdrop still decides the ratio (the pointer shine only brightens the brightest case).
+    expect(pick({ glassHalo: 0.5 }, text).ratioOverBlack).toBeCloseTo(pick({}, text).ratioOverBlack, 2)
+    expect(pick({ glassHalo: 0.5 }, text).ratioOverBlack).toBeLessThan(pick({ glassHalo: 0.5 }, text).ratioOverWhite)
     const mark = (p: ReturnType<typeof glassContrastReport>['pairs'][number]) => p.coverage === 0.8
     // A solid mark paints one opaque colour with no sheen: the backdrop and the opacity no longer matter.
     expect(pick({ glassHalo: 0.5 }, mark).ratioOverWhite).toBeCloseTo(pick({ glassHalo: 0.5 }, mark).ratioOverBlack, 2)
@@ -985,14 +985,16 @@ describe('liquid glass starting presets and the bound', () => {
   it('every starting preset passes the contrast bound', () => {
     const c = getCatalog('0.1.0')
     const expected: Record<string, number> = {
-      'builtin-liquid-glass-cristal': 0.25,
-      'builtin-liquid-glass-givre': 0.25,
-      'builtin-liquid-glass-fume': 0.25,
-      'builtin-liquid-glass-relief': 0.25,
-      'builtin-liquid-glass-clear': 0.25,
-      'builtin-liquid-glass-prism': 0.25,
-      'builtin-liquid-glass-liquid': 0.25,
-      'builtin-liquid-glass-voile': 0.25,
+      // Rated on the painted glass alone (no outline plate), so each minimum is a real one:
+      // none sits on the 0.25 schema floor, which is what a vacuous bound reports.
+      'builtin-liquid-glass-cristal': 0.41,
+      'builtin-liquid-glass-givre': 0.64,
+      'builtin-liquid-glass-fume': 0.76,
+      'builtin-liquid-glass-relief': 0.41,
+      'builtin-liquid-glass-clear': 0.43,
+      'builtin-liquid-glass-prism': 0.32,
+      'builtin-liquid-glass-liquid': 0.32,
+      'builtin-liquid-glass-voile': 0.38,
       'builtin-liquid-glass': 0.57,
     }
     for (const [id, minimumOpacity] of Object.entries(expected)) {

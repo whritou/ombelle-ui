@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react'
 import { CircleAlert, RotateCcw } from 'lucide-react'
 import { getCatalog } from '@ombelle/catalog'
-import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { accessibilityCaveatLabel, familyAccessibilityCaveat, styleFamilies, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
 import { keepChoice } from '../../editor-shell/inspector'
@@ -134,7 +134,7 @@ export function FamilyPicker({
             <i />
           </span>
           <span className="preset-family-name">{familyNames[family]}</span>
-          {family === 'liquid-glass' && <span className="preset-family-tag">Beta</span>}
+          {familyAccessibilityCaveat(family) && <span className="preset-family-tag">{accessibilityCaveatLabel}</span>}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

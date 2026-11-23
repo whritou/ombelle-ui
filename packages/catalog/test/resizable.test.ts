@@ -12,7 +12,7 @@ describe('Resizable', () => {
     expectComponentContract('resizable', { client: true, parts: ['ResizablePanelGroup', 'ResizablePanel', 'ResizableHandle'],
       slots: ['resizable-panel-group', 'resizable-panel', 'resizable-handle', 'resizable-handle-grip'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'react-resizable-panels', version: '4.17.0' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='resizable-panel-group']", "[data-slot='resizable-handle']", "[data-slot='resizable-handle-grip']"], glass: 'experimental' })
+      selectors: ["[data-slot='resizable-panel-group']", "[data-slot='resizable-handle']", "[data-slot='resizable-handle-grip']"], glass: 'stable' })
     const catalog = getCatalog('0.1.0')
     expect(getTemplate(catalog, 'resizable', 'base').content).toBe(getTemplate(catalog, 'resizable', 'radix').content)
   })

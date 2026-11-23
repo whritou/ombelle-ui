@@ -110,3 +110,9 @@
     outline-color: Highlight;
   }
 }
+/* Forced colours: opaque system surfaces, so the system colour pair holds over any backdrop. Each selector outranks the translucent variants and leaves the highlighted states to their own rules. */
+@media (forced-colors: active) {
+  [data-slot='chip']:not([data-state='on']) {
+    background-color: ButtonFace;
+  }
+}

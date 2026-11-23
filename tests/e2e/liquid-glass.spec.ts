@@ -12,7 +12,7 @@ import { publishedInstaller } from '../../apps/www/src/snapshots/install-command
 // These cases test the desktop review drawer; below 1200px it becomes a sheet (tests/e2e/editors-responsive.spec.ts).
 test.use({ viewport: { width: 1280, height: 800 } })
 
-// Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
+// Liquid glass family: contrast bounds, fallbacks and editor flow.
 // Accessible names repeat across the three backdrop copies, so every scenario
 // locator is scoped to its [data-backdrop] section.
 const previewUrl = 'http://127.0.0.1:4173/liquid-glass/'

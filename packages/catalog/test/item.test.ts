@@ -12,7 +12,7 @@ describe('Item', () => {
   it('provides the parts without client code or extra dependencies', () => {
     expectComponentContract('item', { client: false, parts: ['Item', 'ItemGroup', 'ItemSeparator', 'ItemMedia', 'ItemContent', 'ItemTitle', 'ItemDescription', 'ItemActions'], slots,
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: [...slots.map(slot => `[data-slot='${slot}']`), '[data-item-action]', "a[data-slot='item']:focus-visible"], glass: 'experimental' })
+      selectors: [...slots.map(slot => `[data-slot='${slot}']`), '[data-item-action]', "a[data-slot='item']:focus-visible"], glass: 'stable' })
   })
 
   it('serves both editions from one template without Radix', () => {

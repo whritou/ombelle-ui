@@ -38,4 +38,4 @@ The Base UI edition uses the same template: Aspect Ratio has no primitive.
 
 ## Liquid glass
 
-Liquid glass support is experimental: the frame uses a translucent surface over the backdrop.
+Liquid glass is supported, without an accessibility guarantee: the frame uses a translucent surface over the backdrop.

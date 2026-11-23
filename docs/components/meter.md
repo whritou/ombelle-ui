@@ -73,6 +73,6 @@ The Base UI edition renders the track with `Meter.Root` from `@base-ui/react/met
 
 ## Liquid glass
 
-Liquid glass is experimental for Meter, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Meter without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [display components evidence](../evidence/display-components.md) for the board comparison and the specimen audit.

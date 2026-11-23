@@ -43,6 +43,6 @@ Compilation emits `components/ui/chip.tsx`, `components/ui/chip.css` and `exampl
 
 ## Liquid glass
 
-Liquid glass is experimental for Chip, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Chip without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [form controls evidence](../evidence/form-controls-073.md) for the board comparison and the specimen audit.

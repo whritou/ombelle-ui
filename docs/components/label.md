@@ -1,6 +1,6 @@
 # Label
 
-Label names a form control. It keeps shadcn's `Label` name and `data-slot="label"` marker, but renders a native `label` rather than Radix Label, so it has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental for Label; see [Liquid glass](#liquid-glass).
+Label names a form control. It keeps shadcn's `Label` name and `data-slot="label"` marker, but renders a native `label` rather than Radix Label, so it has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is supported for Label, without an accessibility guarantee; see [Liquid glass](#liquid-glass).
 
 ## Install and compose
 

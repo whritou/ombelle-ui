@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { styleFamilies, supportedComponentIds } from '../../packages/contracts/src/index.js'
+import { familyAccessibilityCaveat, styleFamilies, supportedComponentIds } from '../../packages/contracts/src/index.js'
 import {
   checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
@@ -11,6 +11,11 @@ const editions = ['radix', 'base'] as const
 const modes = ['light', 'dark'] as const
 const checks: AuditCheck[] = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
 const artifacts = '.artifacts/specimen-audit'
+// Findings whose outcome depends on the colours behind the specimen: a focus ring short of 3:1 and axe's
+// color-contrast rule. A focus finding for any other reason (no focus, focus moved) is not one of them.
+const backdropDependent = (finding: Finding) =>
+  (finding.check === 'focus-visible' && finding.detail.includes(' focus pixels at 3:1 ')) ||
+  (finding.check === 'axe' && finding.detail.startsWith('color-contrast:'))
 
 /** How each overlay opens, and where its content appears once open (outside the section when portalled). */
 const overlays: Record<string, {
@@ -169,13 +174,16 @@ for (const family of styleFamilies.filter(name => !onlyFamilies || onlyFamilies.
           }
           await page.emulateMedia({ forcedColors: 'none' })
         }
-        // Liquid glass is experimental: its findings are recorded and attached, but only page errors fail it.
-        const experimental = family === 'liquid-glass'
-        const blocking = experimental ? [] : findings
-        if (experimental && findings.length)
-          test.info().annotations.push({ type: 'experimental findings', description: JSON.stringify(findings) })
+        // A family without an accessibility guarantee (liquid glass) is held to every check except contrast,
+        // which depends on the backdrop behind it: its focus-contrast and axe color-contrast findings are
+        // recorded and attached as advisory. Everything else fails it like any stable family.
+        const caveat = familyAccessibilityCaveat(family) !== null
+        const advisory = caveat ? findings.filter(backdropDependent) : []
+        const blocking = findings.filter(finding => !advisory.includes(finding))
+        if (advisory.length)
+          test.info().annotations.push({ type: 'contrast advisory findings', description: JSON.stringify(advisory) })
         const part = { family, edition, mode, specimens: components.length, checks: counts, failures: blocking.length + errors.length,
-          experimentalFindings: experimental ? findings.length : 0,
+          contrastAdvisoryFindings: advisory.length,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         // A run limited to some components writes its findings apart and leaves the evidence file alone.
         // A font or family run is never the standard evidence either.
@@ -202,8 +210,8 @@ test.afterAll(async () => {
   parts.sort((a, b) => { const x = order(a), y = order(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] })
   const evidence = {
     schemaVersion: 1, node: process.version, browser: parts[0].browser,
-    configurations: parts.map(({ family, edition, mode, specimens, checks, experimentalFindings }) =>
-      ({ family, edition, mode, specimens, checks, experimentalFindings })),
+    configurations: parts.map(({ family, edition, mode, specimens, checks, contrastAdvisoryFindings }) =>
+      ({ family, edition, mode, specimens, checks, contrastAdvisoryFindings })),
     failures: parts.reduce((sum, part) => sum + part.failures, 0),
   }
   await fs.writeFile('.artifacts/specimen-audit.json', JSON.stringify(evidence, null, 2) + '\n')

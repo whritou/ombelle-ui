@@ -54,4 +54,4 @@ The Base UI edition uses `Toolbar`, `ToggleGroup`, `Toggle` and `Menu` from `@ba
 
 ## Liquid glass
 
-Liquid glass support is experimental: the bar is translucent, and its blur stays inside the family's `@supports` fallback.
+Liquid glass is supported, without an accessibility guarantee: the bar is translucent, and its blur stays inside the family's `@supports` fallback.

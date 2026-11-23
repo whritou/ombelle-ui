@@ -25,7 +25,7 @@ describe('Menubar', () => {
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-menubar', version: '1.2.1' },
         { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='menubar']", "[data-slot='menubar-trigger']", "[data-slot='menubar-content']", "[data-slot='menubar-item']", "[data-slot='menubar-shortcut']"],
-      glass: 'experimental' })
+      glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'menubar', 'base').dependencies.map(dependency => dependency.name)).toEqual(expect.arrayContaining(['@base-ui/react', 'lucide-react']))
   })
 

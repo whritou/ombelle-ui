@@ -15,7 +15,7 @@ export function expectComponentContract(
     slots: readonly string[]
     dependencies: readonly { name: string; version: string }[]
     selectors: readonly string[]
-    glass: 'experimental' | 'unavailable'
+    glass: 'stable' | 'unavailable'
   },
 ) {
   const template = getTemplate(getCatalog('0.1.0'), id)
@@ -55,7 +55,7 @@ export function expectComponentContract(
           if (/-content'\]/.test(part))
             expect(part, `${id} animation outside the open state`).toContain("[data-state='open']")
   expect(styleSupport(id, 'liquid-glass')).toBe(expected.glass)
-  if (expected.glass === 'experimental')
+  if (expected.glass === 'stable')
     expect(template.styles?.['liquid-glass']).toContain(
       '@media (forced-colors: active)',
     )

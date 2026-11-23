@@ -1,3 +1,4 @@
+import { styleFamilies } from '@ombelle/contracts'
 import { documentationGuides } from '../../site/docs/navigation'
 import { componentDocs } from '../../site/components/catalog'
 import { publishedInstaller } from '../../snapshots/install-command'
@@ -10,7 +11,7 @@ export default function DocumentationPage() {
     <h1 className="text-4xl font-black md:text-5xl">Build with Ombelle.</h1>
     <p className="mt-5 max-w-2xl text-lg text-muted-foreground">Start with a project theme, add editable React components, then customize the details. These guides cover the current website and CLI {publishedInstaller.version}.</p>
     <Prose className="mt-8">
-      <p>Ombelle installs source into your app. You own the component files, while a saved preset supplies shared colors and design values. The catalog contains {componentDocs.length} components, four stable style families, and experimental Liquid Glass, with light and dark modes.</p>
+      <p>Ombelle installs source into your app. You own the component files, while a saved preset supplies shared colors and design values. The catalog contains {componentDocs.length} components and {styleFamilies.length} stable style families with light and dark modes. One of them, Liquid Glass, comes without an accessibility guarantee, because its text contrast depends on the background behind it.</p>
       <h2>Your first project</h2>
       <ol>
         <li><a href="/docs/preset-editor">Design a global preset</a> and download its JSON.</li>

@@ -182,10 +182,21 @@
   padding: 0.875rem;
   border: var(--border-width) dashed var(--border);
   border-radius: calc(var(--radius) + 4px);
-  background: rgb(255 255 255 / 0.06);
+  background: color-mix(in srgb, white 6%, var(--background));
   color: var(--foreground);
   font-family: var(--font-family);
   font-size: 0.875rem;
+}
+/* The faint glass wash of the drop zone is an enhancement; the fallback and reduced transparency stay opaque. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='context-menu-trigger'][data-variant='zone'] {
+    background: rgb(255 255 255 / 0.06);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='context-menu-trigger'][data-variant='zone'] {
+      background: color-mix(in srgb, white 6%, var(--background));
+    }
+  }
 }
 [data-slot='context-menu-trigger']:focus-visible {
   outline: 2px solid var(--foreground);

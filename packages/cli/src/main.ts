@@ -8,6 +8,7 @@ import {
   FoundationError,
   supportedComponentIds,
   componentsWithStyleSupport,
+  familyAccessibilityCaveat,
   type ComponentId,
   type Preset,
   type Recipe,
@@ -55,12 +56,12 @@ function glassNotices(
   installsFilter = false,
   overrides?: Recipe['overrides'],
 ): string[] {
-  if (preset.styleFamily !== 'liquid-glass') return []
-  const experimental = componentsWithStyleSupport('liquid-glass', ['experimental'])
-  const listed = ids ? experimental.filter((id) => ids.includes(id)) : experimental
+  const caveat = familyAccessibilityCaveat(preset.styleFamily)
+  if (preset.styleFamily !== 'liquid-glass' || caveat === null) return []
+  const available = componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
+  const listed = ids ? available.filter((id) => ids.includes(id)) : available
   if (!listed.length) return []
-  const notices = ['liquid-glass is experimental for ' + listed.join(', ') +
-    '; see docs/components/liquid-glass.md for limitations']
+  const notices = [caveat + ' See docs/components/liquid-glass.md.']
   // Only `add` writes the filter component; other commands have none to mount.
   if (installsFilter)
     notices.push('mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers')

@@ -15,7 +15,7 @@ describe('Stepper', () => {
     expectComponentContract('stepper', { client: false, parts: ['Stepper', 'StepperItem', 'StepperIndicator', 'StepperTitle', 'StepperDescription', 'StepperSeparator'],
       slots, dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' },
         { name: 'lucide-react', version: '1.55.0' }],
-      selectors: slots.map(slot => `[data-slot='${slot}']`), glass: 'experimental' })
+      selectors: slots.map(slot => `[data-slot='${slot}']`), glass: 'stable' })
   })
 
   it('renders a named nav with an ordered list and marks only the current step', () => {

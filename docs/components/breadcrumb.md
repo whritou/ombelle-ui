@@ -128,7 +128,7 @@ The menu supplies its own keyboard behavior and focus management.
 - Minimalist removes inline padding and highlights the trail with typography.
 - Neo brutalism uses outlined links and an accent current page with offset ink.
 - Ombelle uses pill links and an ink-filled current page.
-- Liquid glass is experimental: a glass trail surface with an opaque current
+- Liquid glass (accessibility not guaranteed): a glass trail surface with an opaque current
   page. Missing backdrop-filter support and reduced transparency retain an
   opaque surface. Nested surfaces respect the shared glass filter variables.
 

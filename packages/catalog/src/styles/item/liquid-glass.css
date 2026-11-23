@@ -162,7 +162,7 @@ button[data-slot='item']:focus-visible {
     backdrop-filter: blur(16px) saturate(1.5);
   }
 }
-@media (prefers-reduced-transparency: reduce) {
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
   [data-slot='item'][data-variant='outline'] {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;

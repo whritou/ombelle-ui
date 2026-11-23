@@ -4,7 +4,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { compile } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
-import { componentsWithStyleSupport, type ComponentId, type FileChange } from '@ombelle/contracts'
+import { componentsWithStyleSupport, familyAccessibilityCaveat, type ComponentId, type FileChange } from '@ombelle/contracts'
 import { createProject } from '../helpers/projects.js'
 import { createNpmProject } from '../helpers/npm-project.js'
 import { runNative } from '../helpers/bun-command.js'
@@ -17,12 +17,12 @@ afterEach(async () => {
     await fs.rm(root, { recursive: true, force: true })
 })
 
-const glassIds = componentsWithStyleSupport('liquid-glass', ['experimental'])
+const glassIds = componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
 const mountNotice =
   'mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once in your root layout for refraction in Chromium browsers'
+// One accessibility caveat per glass plan, whichever components it touches (the ids only say a plan has some).
 const notice = (ids: readonly string[]) =>
-  'liquid-glass is experimental for ' + ids.join(', ') +
-  '; see docs/components/liquid-glass.md for limitations'
+  ids.length ? familyAccessibilityCaveat('liquid-glass') + ' See docs/components/liquid-glass.md.' : ''
 const contrastNotice = expect.stringContaining('Liquid glass text contrast fails in')
 const installOrder = [
   'button', 'dialog', 'badge', 'card', 'tabs', 'tooltip', 'alert', 'dropdown-menu', 'popover', 'input',
@@ -72,7 +72,7 @@ async function humanOutput(cwd: string, args: string[]) {
   return result.output
 }
 
-it('lists the sixty-three experimental ids, one per catalog component', () => {
+it('lists the sixty-three liquid glass ids, one per catalog component', () => {
   expect(glassIds).toEqual(['alert', 'accordion', 'button', 'badge', 'avatar', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'popover', 'progress', 'native-select', 'radio-group', 'select', 'switch', 'separator', 'skeleton', 'tabs', 'table', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block', 'password-field', 'carousel', 'aspect-ratio', 'toolbar', 'prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table'])
 })
 

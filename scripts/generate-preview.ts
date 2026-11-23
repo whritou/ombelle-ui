@@ -28,7 +28,7 @@ async function writeFamily(family: PreviewFamily) {
   const result = await compile({
     preset,
     componentIds: glass
-      ? componentsWithStyleSupport('liquid-glass', ['experimental'])
+      ? componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
       : supportedComponentIds,
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',

@@ -38,4 +38,4 @@ The recipe sets `measure` and the article heading. Compilation emits `components
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

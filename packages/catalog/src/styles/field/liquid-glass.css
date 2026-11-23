@@ -100,7 +100,7 @@
   border: var(--border-width) solid var(--border);
   border-radius: calc(var(--radius) + 2px);
   font-family: var(--font-family);
-  background: color-mix(in oklab, var(--background) 55%, transparent);
+  background: var(--background);
 }
 [data-slot='field-set']:disabled {
   opacity: 0.55;
@@ -130,7 +130,8 @@
   padding-inline: 14px;
   border: var(--border-width) solid var(--destructive);
   border-radius: calc(var(--radius) + 2px);
-  background: color-mix(in oklab, var(--destructive) 14%, transparent);
+  /* The declared card pair with a 16% destructive tint, opaque until the glass enhancement below. */
+  background: color-mix(in srgb, var(--destructive) 16%, var(--card));
   color: var(--foreground);
 }
 [data-slot='form-error-summary']:focus-visible {
@@ -171,14 +172,28 @@
   outline-offset: 0;
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='field-set'] {
+    background: color-mix(in oklab, var(--background) 55%, transparent);
+  }
+  /* Glass coverage over the compressed backdrop, like every bounded surface: the tinted card pair. */
   [data-slot='form-error-summary'] {
-    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
-    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
+    background: color-mix(in srgb, color-mix(in srgb, var(--destructive) 16%, var(--card)) calc(var(--glass-inner-opacity, var(--glass-opacity)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='field-set'] {
+      background: var(--background);
+    }
+    [data-slot='form-error-summary'] {
+      background: color-mix(in srgb, var(--destructive) 16%, var(--card));
+    }
   }
 }
 @media (forced-colors: active) {
   [data-slot='field-set'] {
     border-color: CanvasText;
+    background-color: Canvas;
   }
   [data-slot='form-error-summary'] {
     border-color: CanvasText;

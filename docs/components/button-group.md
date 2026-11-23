@@ -84,6 +84,6 @@ Button Group has no Base UI-specific template: the same component serves both ed
 
 ## Liquid glass
 
-Liquid glass is experimental for Button Group, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Button Group without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [primitives evidence](../evidence/primitives-075.md) for the specimen audit, the board comparison and the differences that remain.

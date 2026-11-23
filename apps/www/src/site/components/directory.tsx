@@ -21,7 +21,7 @@ export function ComponentDirectory() {
       <h2 id={categoryAnchor(group.title)} className="font-display text-2xl font-black">{group.title}</h2>
       <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {group.docs.map(doc => {
-          const hasGlass = styleSupport(doc.id, 'liquid-glass') === 'experimental'
+          const hasGlass = styleSupport(doc.id, 'liquid-glass') !== 'unavailable'
           const href = `/components/${doc.id}${glass && hasGlass ? '?glass=' + glass : ''}`
           return (
             <li key={doc.id}>
@@ -32,7 +32,7 @@ export function ComponentDirectory() {
                 </span>
                 <span className="mt-1 text-sm text-muted-foreground">{doc.description}</span>
                 <span className="mt-3 flex flex-wrap gap-1.5">
-                  {hasGlass && <span className="o-glass rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Glass · experimental</span>}
+                  {hasGlass && <span className="o-glass rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Glass</span>}
                   {!componentInstallable(doc) && <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">Requires CLI {doc.minimumCli}</span>}
                 </span>
               </a>

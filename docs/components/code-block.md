@@ -163,6 +163,6 @@ The Base UI edition uses `Tabs` from `@base-ui/react/tabs` with `activateOnFocus
 
 ## Liquid glass
 
-Liquid glass is experimental for Code Block, as for every glass component, and its findings do not block a release. The glass surface is the same dark surface, with the board's white rim and the family's 2px `--foreground` focus ring drawn in the code foreground. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Code Block without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. The glass surface is the same dark surface, with the board's white rim and the family's 2px `--foreground` focus ring drawn in the code foreground. See [liquid glass](liquid-glass.md).
 
 See [Code Block evidence](../evidence/code-block-075.md) for the token contrast, the browser tests, the specimen audit and the board comparison.

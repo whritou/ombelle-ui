@@ -191,7 +191,7 @@ export async function validateRecipeConsumers(
   value: unknown,
   fullMatrix: Record<string, ConsumerEvidence>,
 ): Promise<void> {
-  // Recipes are stable-family evidence; experimental glass consumers carry none.
+  // Recipes are stable-family evidence; liquid glass consumers carry none.
   const stable = new Set(stableConsumerCases().map((c) => c.id)),
     matrix = Object.fromEntries(
       Object.entries(fullMatrix).filter(([id]) => stable.has(id)),

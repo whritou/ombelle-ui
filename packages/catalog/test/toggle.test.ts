@@ -12,7 +12,7 @@ describe('Toggle', () => {
   it('provides Toggle, on Radix Toggle and Base UI', () => {
     expectComponentContract('toggle', { client: true, parts: ['Toggle'], slots: ['toggle'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-toggle', version: '1.2.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='toggle']"], glass: 'experimental' })
+      selectors: ["[data-slot='toggle']"], glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'toggle', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
   })
 

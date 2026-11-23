@@ -37,6 +37,6 @@ The recipe editor sets the keys (default "Ctrl K"); each space-separated key bec
 
 ## Liquid glass
 
-Liquid glass is experimental for Kbd, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Kbd without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [display components evidence](../evidence/display-components.md) for the board comparison and the specimen audit.

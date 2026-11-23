@@ -14,11 +14,11 @@ it('shows the families as a labelled group with the current one pressed', () => 
   expect(html).toContain('role="radiogroup"')
 })
 
-it('offers every family and marks liquid glass experimental', () => {
+it('offers every family and marks liquid glass with its accessibility caveat', () => {
   const html = renderToStaticMarkup(<FamilyPicker value="liquid-glass" onChange={noop} families={styleFamilies} />)
   for (const name of ['Flat', 'Minimalist', 'Neo-brutalism', 'Ombelle', 'Liquid glass']) expect(html).toContain(name)
   expect(html.match(/aria-checked="true"/g)).toHaveLength(1)
-  expect(html).toContain('Experimental')
+  expect(html).toContain('Accessibility not guaranteed')
 })
 
 it('offers ombelle only once the published installer supports it, keeping a selected ombelle visible', () => {

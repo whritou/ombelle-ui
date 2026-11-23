@@ -3,7 +3,7 @@
 Input Group composes a native input or textarea with adjacent text, icons and
 buttons inside one field surface. It uses the same source for Radix and Base UI
 editions, with no primitive dependency or imports from other components. All five
-style families are available; liquid glass is experimental.
+style families are available; liquid glass is supported, without an accessibility guarantee.
 
 This component requires CLI 0.7.2 or later. Initialize a consumer project, then
 run `npx @ombelle-ui/cli@0.7.2 add input-group`. For a built local checkout:
@@ -122,7 +122,7 @@ fields have double borders so their state has a non-color cue.
 Liquid glass starts with an opaque background. Supported backdrop filters add
 the same inner field glass treatment as Textarea; reduced transparency restores
 the opaque background. Forced colors remove the filter and shadow. This
-experimental family retains the same native semantics and logical layout.
+liquid glass family retains the same native semantics and logical layout.
 
 ## Clear and counter (0.7.3)
 

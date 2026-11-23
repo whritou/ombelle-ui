@@ -21,7 +21,7 @@ export async function validateComponentPresetConsumers(
   value: unknown,
   fullMatrix: Record<string, ConsumerEvidence>,
 ): Promise<void> {
-  // Component presets are stable-family evidence; experimental glass consumers carry none.
+  // Component presets are stable-family evidence; liquid glass consumers carry none.
   const cases = stableConsumerCases(),
     ids = new Set(cases.map((c) => c.id)),
     matrix = Object.fromEntries(

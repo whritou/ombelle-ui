@@ -14,10 +14,10 @@ it('FamilyPicker marks only the current family pressed and tags liquid glass as 
   expect(html).toMatch(/aria-checked="true"[^>]*>(?:(?!<\/button>).)*Minimalist/)
   expect(html.match(/aria-checked="false"/g)).toHaveLength(7)
   for (const name of ['Flat', 'Neo-brutalism', 'Ombelle', 'Papier', 'Organic', 'Retro futurism', 'Liquid glass']) expect(html).toContain(name)
-  expect(html.match(/>Beta</g)).toHaveLength(1)
-  expect(html).toMatch(/data-family="liquid-glass"(?:(?!<\/button>).)*>Beta</)
+  expect(html.match(/>Accessibility not guaranteed</g)).toHaveLength(1)
+  expect(html).toMatch(/data-family="liquid-glass"(?:(?!<\/button>).)*>Accessibility not guaranteed</)
   expect(html).toMatch(/data-family="ombelle"(?:(?!<\/button>).)*Ombelle/)
-  expect(html).not.toMatch(/data-family="ombelle"(?:(?!<\/button>).)*>Beta</)
+  expect(html).not.toMatch(/data-family="ombelle"(?:(?!<\/button>).)*>Accessibility not guaranteed</)
 })
 
 it('FamilyPicker offers ombelle only once the published installer supports it', () => {

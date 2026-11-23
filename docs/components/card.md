@@ -1,6 +1,6 @@
 # Card
 
-Card groups related presentational content. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes, with default or dense spacing and default, outlined or subtle appearances. Liquid glass is experimental for Card: a translucent root surface with specular sheen and edge light; see [liquid glass](liquid-glass.md).
+Card groups related presentational content. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes, with default or dense spacing and default, outlined or subtle appearances. Liquid glass is supported for Card, without an accessibility guarantee: a translucent root surface with specular sheen and edge light; see [liquid glass](liquid-glass.md).
 
 ## Install and compose
 
@@ -53,7 +53,7 @@ Choose the title's heading level from the surrounding page outline. A Card is a 
 border and no decorative shadow, or `appearance="subtle"` for a muted surface
 without the outer border or shadow. Both keep the family's spacing, typography
 and radius, and can be combined with `density="dense"`. Their headers inherit the
-surface instead of adding a second fill. In experimental liquid glass these
+surface instead of adding a second fill. In liquid glass (accessibility not guaranteed) these
 appearances use opaque surfaces and omit the backdrop filter. Forced colors
 retain a visible system-color border for both appearances.
 

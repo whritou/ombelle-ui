@@ -1,6 +1,6 @@
 # Alert
 
-Alert shows a status, error, success, warning or information message with an optional icon, a title and a description. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode, and as an experimental liquid glass style. It has no client boundary and no dependency beyond the shared utility.
+Alert shows a status, error, success, warning or information message with an optional icon, a title and a description. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode, and as a liquid glass style without an accessibility guarantee. It has no client boundary and no dependency beyond the shared utility.
 
 The `success`, `warning` and `info` variants require CLI 0.7.2 or later.
 
@@ -114,7 +114,7 @@ return <>
 - Flat: a secondary tint, and a destructive tint for destructive alerts.
 - Minimalist: a hairline card. Destructive alerts get a destructive border, icon and title.
 - Neo brutalism: a bordered secondary block with an uppercase title. Destructive alerts are a solid destructive block.
-- Liquid glass (experimental): a solid card with a glass highlight. It adds no backdrop blur.
+- Liquid glass (accessibility not guaranteed): a solid card with a glass highlight. It adds no backdrop blur.
 
 Success, warning and info retain each family's border, radius, typography and
 shadow treatment while using the semantic color pair. Existing default and

@@ -77,6 +77,6 @@ Neither Radix nor Base UI has a calendar, so both editions use react-day-picker 
 
 ## Liquid glass
 
-Liquid glass is experimental for Calendar, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Calendar without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [Calendar evidence](../evidence/calendar-073.md) for the specimen audit, the browser tests and the board comparison.

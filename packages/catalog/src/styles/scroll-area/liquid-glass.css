@@ -32,10 +32,10 @@
 [data-slot='scroll-area-viewport']::-webkit-scrollbar {
   display: none;
 }
-/* The root clips overflow, so the focus ring sits on the viewport edge. */
+/* The root clips overflow, so the focus ring sits just inside the viewport edge. */
 [data-slot='scroll-area-viewport']:focus-visible {
   outline: 2px solid var(--foreground);
-  outline-offset: 0;
+  outline-offset: -2px;
 }
 /* The thin rail is exempt from the 24px target rule: wheel, keyboard and touch scrolling give equivalent access. */
 [data-slot='scroll-area-scrollbar'] {

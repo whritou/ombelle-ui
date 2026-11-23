@@ -643,16 +643,28 @@
   background: var(--foreground);
 }
 @media (forced-colors: active) {
+  /* The drawn box stays, in system colours, as in the other families: the native control drawn by
+     appearance: auto loses its border against the forced canvas. */
   [data-slot='data-table-cell'] > [data-data-table-select],
   [data-slot='data-table-head'] > [data-data-table-select] {
-    appearance: auto;
-    inline-size: 18px;
-    block-size: 18px;
-    accent-color: Highlight;
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    forced-color-adjust: none;
   }
-  [data-slot='data-table-cell'] > [data-data-table-select]::after,
-  [data-slot='data-table-head'] > [data-data-table-select]::after {
-    content: none;
+  [data-slot='data-table-cell'] > [data-data-table-select]:is(:checked, :indeterminate),
+  [data-slot='data-table-head'] > [data-data-table-select]:is(:checked, :indeterminate) {
+    border-color: Highlight;
+    background: Highlight;
+    box-shadow: none;
+  }
+  [data-slot='data-table-cell'] > [data-data-table-select]:checked::after,
+  [data-slot='data-table-head'] > [data-data-table-select]:checked::after {
+    border-color: HighlightText;
+  }
+  [data-slot='data-table-cell'] > [data-data-table-select]:indeterminate::after,
+  [data-slot='data-table-head'] > [data-data-table-select]:indeterminate::after {
+    background: HighlightText;
   }
 }
 [data-slot='data-table-cell'][data-data-table-empty] {
@@ -723,5 +735,17 @@
   [data-slot='data-table-row'][data-state='selected'] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
+  }
+}
+/* Forced colours: opaque system surfaces, so the system colour pair holds over any backdrop. Each selector outranks the translucent variants and leaves the highlighted states to their own rules. */
+@media (forced-colors: active) {
+  [data-slot='data-table-button']:not(:hover) {
+    background-color: ButtonFace;
+  }
+  [data-slot='data-table-row-actions']:not(:hover) {
+    background-color: ButtonFace;
+  }
+  [data-slot='data-table-filter']:not(:focus-visible) {
+    background-color: Field;
   }
 }

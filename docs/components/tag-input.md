@@ -54,6 +54,6 @@ Compilation emits `components/ui/tag-input.tsx`, `components/ui/tag-input.css` a
 
 ## Liquid glass
 
-Liquid glass is experimental for Tag Input, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Tag Input without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [form controls evidence](../evidence/form-controls-073.md) for the board comparison, the specimen audit and the browser tests.

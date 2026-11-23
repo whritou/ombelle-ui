@@ -240,7 +240,7 @@ it('checks glass control bounds and keeps glass edits out of stable families', (
   const back = planPresetFamilyChange(toFlat.draft, 'liquid-glass')
   expect(back.draft.family).toBe('liquid-glass')
   // Switching into glass starts from Cristal.
-  expect(materializePreset(back.draft).design.glassOpacity).toBe(0.4)
+  expect(materializePreset(back.draft).design.glassOpacity).toBe(getCatalog('0.1.0').startingPresets['builtin-liquid-glass-cristal'].design!.glassOpacity)
 })
 
 it('requests only components the family supports', () => {
@@ -389,9 +389,8 @@ it('every tint chip keeps every starting preset inside the contrast bound', asyn
       const report = presetGlassReport(applyGlassTint(applyStartingPreset(createPresetDraft('liquid-glass'), id), tint))
       if (!report?.passes) failing.push(`${id} ${tint} (needs ${report?.minimumOpacity ?? 'no opacity'})`)
     }
-  // Known, on the base preset only, which has no material and so no text outline plate: its 0.57 is just short
-  // for the Rosée veil (the readout asks for 0.6), and the dark Fumée veil cannot pass without the plate.
-  expect(failing).toEqual(['builtin-liquid-glass rose (needs 0.6)', 'builtin-liquid-glass smoke (needs no opacity)'])
+  // A chip takes the backdrop and the lowest opacity its veil needs, so none leaves a preset outside the bound.
+  expect(failing).toEqual([])
 })
 
 it.each(startingPresetOrder)('leaving liquid glass from %s returns to Ombelle defaults and keeps own edits', (id) => {

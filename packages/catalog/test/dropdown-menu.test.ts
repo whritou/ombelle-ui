@@ -73,7 +73,7 @@ describe('Dropdown Menu catalog contract', () => {
         "[data-slot='dropdown-menu-shortcut']",
         "[data-slot='dropdown-menu-separator']",
       ],
-      glass: 'experimental',
+      glass: 'stable',
     })
   })
 

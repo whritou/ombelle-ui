@@ -1,6 +1,6 @@
 'use client'
 
-import { type StyleFamily } from '@ombelle/contracts'
+import { accessibilityCaveatLabel, familyAccessibilityCaveat, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { keepChoice } from '../../editor-shell/inspector'
 import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
@@ -36,7 +36,7 @@ export function FamilyPicker({
             <i />
           </span>
           <span>{familyNames[family]}</span>
-          {family === 'liquid-glass' && <span className="be-family-tag">Experimental</span>}
+          {familyAccessibilityCaveat(family) && <span className="be-family-tag">{accessibilityCaveatLabel}</span>}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

@@ -218,7 +218,8 @@ describe('the 0.7.3 overlays match their boards', () => {
     const zone = (family: string) => declarations(read(`context-menu/${family}.css`), "[data-slot='context-menu-trigger'][data-variant='zone']")
     expect(zone('neo-brutalism')).toMatchObject({ border: '2.5px dashed var(--border)', background: 'var(--card)' })
     expect(zone('minimalist').background).toBe('transparent')
-    expect(zone('liquid-glass').background).toBe('rgb(255 255 255 / 0.06)')
+    // Opaque base; the 6% white wash is the glass enhancement inside @supports.
+    expect(zone('liquid-glass').background).toBe('color-mix(in srgb, white 6%, var(--background))')
     expect(zone('ombelle').background).toBe('var(--muted)')
   })
 })

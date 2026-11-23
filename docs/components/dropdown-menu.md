@@ -1,6 +1,6 @@
 # Dropdown Menu
 
-Dropdown Menu shows a list of actions from a trigger, built on the reviewed Radix Dropdown Menu primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode, and as an experimental liquid glass style. The template is a client component.
+Dropdown Menu shows a list of actions from a trigger, built on the reviewed Radix Dropdown Menu primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode, and as a liquid glass style without an accessibility guarantee. The template is a client component.
 
 ## Install and compose
 
@@ -59,7 +59,7 @@ Enter, Space and ArrowDown open the menu; arrows move the highlight, skipping di
 - Flat: an elevated panel with a secondary highlight.
 - Minimalist: a hairline panel with a muted highlight.
 - Neo brutalism: a bordered panel with a pink label band, rules between groups and a primary highlight. Shortcuts sit in bordered key caps, destructive items have a tinted row, and disabled items are striped.
-- Liquid glass (experimental): a translucent blurred panel. The blur drops to a solid panel under reduced transparency and in forced colors.
+- Liquid glass (accessibility not guaranteed): a translucent blurred panel. The blur drops to a solid panel under reduced transparency and in forced colors.
 
 Highlighted rows and open submenu triggers use `Highlight` in forced colors, and checked indicators fill with `Highlight`. Disabled items use `GrayText`. Rows are at least 34px tall.
 

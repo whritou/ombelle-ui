@@ -57,6 +57,6 @@ Part names and `data-slot` values are the same in both editions.
 
 ## Liquid glass
 
-Liquid glass is experimental for Input OTP, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Input OTP without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [form controls evidence](../evidence/form-controls-073.md) for the board comparison, the specimen audit and the browser tests.

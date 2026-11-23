@@ -8,7 +8,7 @@
   padding: 4px;
   border: var(--border-width) solid var(--border);
   border-radius: calc(var(--radius) + 2px);
-  background: color-mix(in oklab, var(--background) 55%, transparent);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-family);
 }
@@ -84,9 +84,16 @@
   margin-inline-start: auto;
 }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* Field glass: the declared background pair at 55% coverage over the compressed backdrop. */
   [data-slot='toolbar'] {
-    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
-    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)));
+    background: color-mix(in srgb, var(--background) calc(var(--glass-inner-opacity, calc(var(--glass-opacity) * 0.55)) * 100%), transparent);
+    -webkit-backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+    backdrop-filter: var(--glass-inner-filter, var(--glass-refraction,) blur(var(--glass-blur)) saturate(var(--glass-saturation)) contrast(var(--glass-contrast)) brightness(var(--glass-brightness)));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='toolbar'] {
+      background: var(--background);
+    }
   }
 }
 [data-slot='toolbar-button'][hidden],
@@ -249,6 +256,7 @@
 @media (forced-colors: active) {
   [data-slot='toolbar'] {
     border-color: CanvasText;
+    background-color: Canvas;
     box-shadow: none;
   }
   [data-slot='toolbar-toggle-item']:is([data-state='on'], [aria-pressed='true'], [aria-checked='true'], [data-pressed]) {
