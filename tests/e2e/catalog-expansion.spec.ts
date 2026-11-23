@@ -98,7 +98,8 @@ for (const family of families)
           expect(await invalid.evaluate((element: HTMLInputElement) => element.checkValidity())).toBe(false)
           await expect(form.getByLabel('Expansion disabled field', { exact: true })).toBeDisabled()
           await form.getByLabel('Expansion message', { exact: true }).fill('Review the generated source.')
-          await expect(form.locator('textarea')).toHaveValue('Review the generated source.')
+          // The Input Group section now also shows Bio and Notes textareas: name the one under test.
+          await expect(form.getByLabel('Expansion message', { exact: true })).toHaveValue('Review the generated source.')
           await input.focus()
           await expect.poll(() => input.evaluate((element) => {
             const group = element.closest('[data-slot="input-group"]')!
