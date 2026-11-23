@@ -88,6 +88,8 @@ export function EditorSplit({ id, className, inspector, children, after, collaps
         <ResizablePanel id="editor-main" defaultSize="73%" minSize="40%">{children}</ResizablePanel>
       </ResizablePanelGroup>
       {after}
+      {/* Last in the streamed HTML: on phones the inspector stays hidden until the panes above it have arrived. */}
+      <span data-editor-split-end="" hidden />
     </div>
   )
 }
