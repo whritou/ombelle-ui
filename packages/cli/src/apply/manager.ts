@@ -252,6 +252,20 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
           }
         } else if (source.startsWith('#!/usr/bin/env node'))
           return { entry: real, prefixArgs: [] }
+        else if (source.startsWith('#!/bin/sh')) {
+          // pnpm 11 `self-update` and `pnpm setup` write POSIX cmd-shims that
+          // record their target on a trailing comment; read it, never run it.
+          const match = /^# cmd-shim-target=(.+)$/m.exec(source)
+          const target = match?.[1].trim()
+          if (
+            target &&
+            path.isAbsolute(target) &&
+            entryPattern.test(path.basename(target))
+          ) {
+            await fs.access(target)
+            return { entry: target, prefixArgs: [] }
+          }
+        }
       } catch (e) {
         if (
           !['ENOENT', 'ENOTDIR', 'EISDIR'].includes(
