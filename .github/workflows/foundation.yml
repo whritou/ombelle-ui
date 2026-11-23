@@ -48,9 +48,11 @@ jobs:
           path: .artifacts/upload/browser
   consumers:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 180
     env:
       NEXT_TELEMETRY_DISABLED: '1'
+      # 1,185 browser cases took 89 minutes for 885 of them with 2 workers (22 November).
+      OMBELLE_E2E_WORKERS: '4'
     steps:
       # Preparing 40 consumers with their own node_modules can exhaust the
       # runner disk (EDQUOT during bun install). Drop preinstalled toolchains
@@ -76,8 +78,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Verify all consumers and browser checks
         # The browser matrix follows every cold consumer install; consumer preparation
-        # alone took 42 minutes on 22 November.
-        timeout-minutes: 120
+        # alone took 27 to 42 minutes on 22 November.
+        timeout-minutes: 150
         run: pnpm check:foundation:consumers
       - name: Stage finalized evidence after process teardown
         if: always()
