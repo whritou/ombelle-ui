@@ -18,7 +18,6 @@ async function expectScene(root: Locator, scene: ReturnType<typeof glassPresetBa
 }
 
 for (const id of presets) test(`${id} shows the same backdrop in the preset editor, component page and component editor`, async ({ page }) => {
-  test.fixme(true, 'SITE-1: the component page Card preview frame never sets data-backdrop="glass" for liquid glass presets')
   // The pages open in light mode, so each shows the preset's light backdrop.
   const scene = glassPresetBackdrop(id, 'light')
   const recipe = { ...createCatalogDraft('card').recipe, presetRef: catalogPresetRef('liquid-glass', id) }

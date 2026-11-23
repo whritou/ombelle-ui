@@ -64,7 +64,6 @@ for (const family of supportedStyleFamilies)
       })
 
 test('installs a scoped published Button into a differently themed host', async ({ page }) => {
-  test.fixme(true, 'SITE-6: the published minimalist editor preset carries a registry font, so the CLI refuses it as a Button-scoped preset (fonts belong on the global preset)')
   test.setTimeout(360000)
   const { source } = await publishEditorPreset(page, 'minimalist')
   await withEditorPresetConsumer({ kind: 'snapshot', source, family: 'flat', framework: 'vite', scope: 'button' }, async ({ root, url }) => {
@@ -226,7 +225,6 @@ test('withdraws replay and respects conditional reads', async ({ page }) => {
 })
 
 test('supports keyboard use, 320 pixel reflow, and axe checks', async ({ page }) => {
-  test.fixme(true, 'SITE-7: at 320 px the snapshot page shows no Export tab to reach by keyboard')
   await page.setViewportSize({ width: 320, height: 800 })
   await page.goto('http://127.0.0.1:3000/editor/preset?page=gallery')
   await openExport(page)
