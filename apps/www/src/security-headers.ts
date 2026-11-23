@@ -24,7 +24,7 @@ export function securityHeaders(previewOrigin?: string): { key: string; value: s
   ]
 }
 
-/** Every `headers()` rule of the site: security headers everywhere, and the preview's sandbox access. */
+/** Every `headers()` rule of the site: security headers everywhere, the preview's sandbox access, and the schemas'. */
 export function headerRules(previewOrigin?: string): { source: string; headers: { key: string; value: string }[] }[] {
   return [{
     source: '/:path*',
@@ -37,5 +37,18 @@ export function headerRules(previewOrigin?: string): { source: string; headers: 
       { key: 'Access-Control-Allow-Origin', value: '*' },
       { key: 'X-Content-Type-Options', value: 'nosniff' },
     ],
+  }, {
+    source: '/schemas/:name',
+    // The JSON schemas at their permanent $id URLs (CMP-06). A versioned schema never changes once
+    // published, so it is cached for a year; editors and validators on any origin may fetch it.
+    headers: [
+      { key: 'Access-Control-Allow-Origin', value: '*' },
+      { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+    ],
+  }, {
+    // The file-name aliases (preset.schema.json) follow the current version, so they are revalidated hourly.
+    // A later rule's header replaces an earlier one's.
+    source: '/schemas/:name([a-z0-9-]+\\.schema\\.json)',
+    headers: [{ key: 'Cache-Control', value: 'public, max-age=3600, must-revalidate' }],
   }]
 }
