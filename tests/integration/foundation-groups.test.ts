@@ -339,10 +339,14 @@ test.each(['checkbox', 'switch', 'tabs', 'tooltip'])('rejects omitted %s browser
 test('bounds liquid glass contrast advisories by the recorded baseline', () => {
   const audit = specimenAudit()
   const glass = audit.configurations.find((row: any) => row.family === 'liquid-glass' && !row.transparency)!
-  glass.contrastAdvisoryFindings = (advisoryBaseline['liquid-glass/radix/light'] ?? 0) + 1
+  glass.contrastAdvisoryFindings = (advisoryBaseline[glass.family + '/' + glass.edition + '/' + glass.mode] ?? 0) + 1
+  const atBaseline = specimenAudit()
+  for (const row of atBaseline.configurations as any[]) row.contrastAdvisoryFindings = advisoryBaseline[[row.family, row.edition, row.mode, row.transparency && 'reduced-transparency'].filter(Boolean).join('/')] ?? 0
+  expect(validateSpecimenAudit(atBaseline)).toMatchObject({ configurations: 36 })
   expect(() => validateSpecimenAudit(audit)).toThrow('Contrast advisory findings above baseline')
   const reduced = specimenAudit()
-  reduced.configurations.find((row: any) => row.transparency === 'reduced')!.contrastAdvisoryFindings = 1
+  const row = reduced.configurations.find((row: any) => row.transparency === 'reduced')!
+  row.contrastAdvisoryFindings = (advisoryBaseline[row.family + '/' + row.edition + '/' + row.mode + '/reduced-transparency'] ?? 0) + 1
   expect(() => validateSpecimenAudit(reduced)).toThrow('Contrast advisory findings above baseline')
   const missing = specimenAudit()
   delete (missing.configurations[0] as any).contrastAdvisoryFindings

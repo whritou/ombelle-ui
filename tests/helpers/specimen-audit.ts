@@ -334,7 +334,9 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   const needed = Math.round(0.9 * 2 * (box.width + box.height))
   if (!focused) return [{ check: 'focus-visible', target: description, detail: 'element could not take focus' }]
   if (strong >= needed) return []
-  const surface = await target.evaluate((node, code) => (new Function('return ' + code)() as (e: Element) => Surface)(node), ringSurfaceSource)
+  // The ring measured is the ring owner's when a wrapper draws it (Input Group, Tag Input): classify around that.
+  const surface = await (ringOwner ? page.locator('[data-audit-ring-owner]') : target)
+    .evaluate((node, code) => (new Function('return ' + code)() as (e: Element) => Surface)(node), ringSurfaceSource)
   return [{ check: 'focus-visible', target: description, detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed`, surface }]
 }
 
