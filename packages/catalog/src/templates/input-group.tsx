@@ -3,8 +3,12 @@ import { XIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './input-group.css'
 
-export function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div role="group" {...props} data-slot="input-group" className={cn(className)} />
+export type InputGroupProps = React.ComponentProps<'div'> & {
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
+}
+export function InputGroup({ className, size = 'default', ...props }: InputGroupProps) {
+  return <div role="group" {...props} data-slot="input-group" data-size={size !== 'default' ? size : undefined} className={cn(className)} />
 }
 
 export function InputGroupInput({

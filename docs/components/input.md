@@ -56,9 +56,11 @@ Input has no stylesheet of its own: its rules are in the family stylesheet, `sty
 
 Under forced colors the field uses system colors, loses its shadows, and shows focus as an outline; the invalid border or bottom line becomes `double` in every stable family, so the state does not rely on color. The shared `[data-slot]` reduced-motion rule removes the transitions. Input uses the saved global preset; a later theme operation changes the family stylesheet and tokens, not `input.tsx`.
 
-## Sizes (0.7.3)
+## Sizes (0.7.3, 1.0)
 
 `size="sm"` and `size="lg"` need CLI **0.7.3** or later, including in component recipes. Leaving the prop out renders what earlier releases render. On `Input`, the prop replaces the HTML `size` attribute; set the field's width with layout or `className` instead.
+
+In 1.0 the sizes follow the [shared size scale](../03-components-styles-accessibility.md#sizes): `sm` and `lg` are one 0.5rem step below and above the default, which is the density's control height plus the family's field edge (2px in flat, 0.25rem in neo-brutalism, organic and retro futurism). Flat `sm` and `lg` fields moved by 2px and neo-brutalism's by 4px to sit exactly one step away, and organic and retro futurism fields now follow compact density.
 
 ## Generated files and ownership
 

@@ -43,6 +43,10 @@ export function Formatting() {
 - The group takes one Tab stop. In a single group Tab enters on the checked item, or the first item when none is checked. The arrow keys move focus between items, and Space or Enter selects. Arrows move focus without selecting, unlike a strict ARIA radio group.
 - Activating the checked item of a single group again clears the choice: `onValueChange` receives `''`. Ignore that value when the group must always have a choice.
 
+## Size (1.0)
+
+`ToggleGroup` takes `size`, new in 1.0, and its items follow the [shared size scale](../03-components-styles-accessibility.md#sizes). Toolbar items are the control height at `default` (40px; 42px in organic and retro futurism). Segmented items sit inside a padded track, so they are 6px shorter (4px in organic and retro futurism; neo-brutalism's flush segments are the full height). `sm` and `lg` are one 0.5rem step below and above, and an `sm` segment never drops below 24px under compact density. Leaving `size` out renders what earlier releases render.
+
 ## Recipe
 
 The recipe editor sets `type`, `variant`, the selected item ids, the group label, and two to six items (`label`, and `iconOnly`, which names the item by its label). A single group may select at most one item, and only items in the recipe.

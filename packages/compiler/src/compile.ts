@@ -133,11 +133,12 @@ export async function compile(input: {
     let content = template.content.replaceAll("'./utils.js'", "'@/lib/utils'")
     if (id === 'button')
       content = content
-        .replace(
+        // Button and its buttonVariants helper share the preset's defaults.
+        .replaceAll(
           "variant = 'default'",
           "variant = '" + preset.data.componentDefaults!.button!.variant + "'",
         )
-        .replace(
+        .replaceAll(
           "size = 'default'",
           "size = '" + preset.data.componentDefaults!.button!.size + "'",
         )

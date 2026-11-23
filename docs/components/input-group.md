@@ -139,6 +139,10 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
   - Past the limit, it turns the destructive colour, underlined in forced colours.
 - **Dependency**: Input Group now depends on lucide-react, for the Clear icon.
 
+## Size (1.0)
+
+`InputGroup` takes `size`; it sizes the group and its `InputGroupInput`. The input is the control height, so the group is that plus its border: 42px by default (44px in neo-brutalism, organic and retro futurism). The input's block padding gave way to that height in 1.0, so the group follows compact density; in neo-brutalism the default group is 2px shorter than before. A textarea keeps its own height. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`.
+
 ## Files and ownership
 
 Compilation emits `components/ui/input-group.tsx`, colocated

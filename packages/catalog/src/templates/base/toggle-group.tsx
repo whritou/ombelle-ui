@@ -23,6 +23,8 @@ const useIsomorphicLayoutEffect = typeof window === 'undefined' ? React.useEffec
 type Common = Omit<React.ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'dir'> & {
   /** segmented: one bar with a raised selected item; toolbar: separate square buttons. */
   variant?: Variant
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
   orientation?: 'horizontal' | 'vertical'
   disabled?: boolean
 }
@@ -40,7 +42,7 @@ const asList = (value: string | string[] | undefined) =>
  * as in the Radix edition. Name it with aria-label.
  */
 export function ToggleGroup(props: ToggleGroupProps) {
-  const { className, variant = 'segmented', type, orientation = 'horizontal', disabled, value, defaultValue, onValueChange, onFocus, onBlur, ...rest } = props
+  const { className, variant = 'segmented', size = 'default', type, orientation = 'horizontal', disabled, value, defaultValue, onValueChange, onFocus, onBlur, ...rest } = props
   const [own, setOwn] = React.useState<string[]>(asList(defaultValue) ?? [])
   const values = asList(value) ?? own
   // While focus is outside, a radio group's tab stop is its checked item, as in the Radix
@@ -84,6 +86,7 @@ export function ToggleGroup(props: ToggleGroupProps) {
         role={type === 'single' ? 'radiogroup' : 'toolbar'}
         data-slot="toggle-group"
         data-variant={variant}
+        data-size={size !== 'default' ? size : undefined}
         data-type={type}
         className={cn(className)}
       />

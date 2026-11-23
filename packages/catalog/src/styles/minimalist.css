@@ -30,11 +30,11 @@
 [data-slot="button"][data-variant="destructive"] { background: transparent; color: var(--destructive); border-color: var(--destructive); }
 [data-slot="button"][data-variant="destructive"]:not(:disabled):hover { background: color-mix(in srgb, var(--destructive) 8%, transparent); }
 [data-slot="button"][data-variant="destructive"]:not(:disabled):active { background: color-mix(in srgb, var(--destructive) 16%, transparent); }
-[data-slot="button"][data-size="sm"] { min-height: 2rem; padding: 0.25rem 0.75rem; font-size: 0.8125rem; }
-[data-slot="button"][data-size="lg"] { min-height: 3rem; padding: 0.75rem 1.5rem; font-size: 0.9375rem; }
+[data-slot="button"][data-size="sm"] { min-height: calc(var(--control-height) - 0.5rem); padding: 0.25rem 0.75rem; font-size: 0.8125rem; }
+[data-slot="button"][data-size="lg"] { min-height: calc(var(--control-height) + 0.5rem); padding: 0.5rem 1.5rem; font-size: 0.9375rem; }
 [data-slot="button"][data-size="icon"] { width: max(var(--control-height), 2em); min-height: max(var(--control-height), 2em); padding: 0; }
-[data-slot="button"][data-size="icon-sm"] { width: 1.875rem; min-height: 1.875rem; padding: 0; }
-[data-slot="input"] { width: 100%; min-width: 0; background: transparent; color: var(--foreground); border: 0; border-bottom: var(--border-width) solid var(--input); border-radius: 0; padding-inline: 2px; font-size: 0.9375rem; }
+[data-slot="button"][data-size="icon-sm"] { width: calc(var(--control-height) - 0.5rem); min-height: calc(var(--control-height) - 0.5rem); padding: 0; }
+[data-slot="input"] { width: 100%; min-width: 0; padding-block: 0; background: transparent; color: var(--foreground); border: 0; border-bottom: var(--border-width) solid var(--input); border-radius: 0; padding-inline: 2px; font-size: 0.9375rem; }
 [data-slot="input"]::placeholder { color: var(--muted-foreground); opacity: 1; }
 [data-slot="button"]:disabled, [data-slot="input"]:disabled { cursor: not-allowed; }
 /* A disabled field keeps full opacity: a dotted rule and muted text carry the state. */
@@ -72,13 +72,13 @@
 }
 /* 0.7.3 variants: input */
 [data-slot="input"][data-size="sm"] {
-  min-height: 2rem;
+  min-height: calc(var(--control-height) - 0.5rem);
   padding-block: 0.25rem;
   padding-inline: 0.625rem;
   font-size: 0.8125rem;
 }
 [data-slot="input"][data-size="lg"] {
-  min-height: 3rem;
+  min-height: calc(var(--control-height) + 0.5rem);
   padding-inline: 1rem;
   font-size: 1rem;
 }

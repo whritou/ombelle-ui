@@ -10,7 +10,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-block-size: 28px;
+  min-block-size: calc(var(--control-height) - 0.75rem);
   padding: 0 4px 0 10px;
   border: 1.5px solid var(--input);
   border-radius: var(--radius);

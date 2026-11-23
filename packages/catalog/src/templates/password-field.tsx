@@ -55,7 +55,11 @@ function initialValue(children: React.ReactNode): string {
 }
 
 /** Holds a password input, its show toggle, a Caps Lock notice and an optional strength meter. */
-export function PasswordField({ className, children, ...props }: React.ComponentProps<'div'>) {
+export type PasswordFieldProps = React.ComponentProps<'div'> & {
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
+}
+export function PasswordField({ className, children, size = 'default', ...props }: PasswordFieldProps) {
   const generated = React.useId()
   const [inputId, setInputId] = React.useState(generated + '-input')
   const [visible, setVisible] = React.useState(false)
@@ -66,7 +70,7 @@ export function PasswordField({ className, children, ...props }: React.Component
   const state: PasswordFieldState = { inputId, setInputId, visible, setVisible, value, setValue, capsLock, setCapsLock, inputRef, selection }
   return (
     <PasswordFieldContext.Provider value={state}>
-      <div {...props} data-slot="password-field" data-visible={visible || undefined} className={cn(className)}>
+      <div {...props} data-slot="password-field" data-size={size !== 'default' ? size : undefined} data-visible={visible || undefined} className={cn(className)}>
         {children}
       </div>
     </PasswordFieldContext.Provider>

@@ -36,7 +36,7 @@ export function RegionField() {
 
 | Export | Renders | Additional prop |
 | --- | --- | --- |
-| `NativeSelect` / `NativeSelectProps` | `div` wrapper containing `select` and a chevron icon | `size?: 'sm' \| 'default'`, default `default` |
+| `NativeSelect` / `NativeSelectProps` | `div` wrapper containing `select` and a chevron icon | `size?: 'sm' \| 'default' \| 'lg'`, default `default`, on the [shared size scale](../03-components-styles-accessibility.md#sizes); `lg` is new in 1.0 |
 | `NativeSelectOption` | `option` | — |
 | `NativeSelectOptGroup` | `optgroup` | — |
 

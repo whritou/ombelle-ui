@@ -27,6 +27,9 @@ function buttonTemplatePrefix(template: string): string {
     .slice(0, boundary)
     .replace("import { Slot } from '@radix-ui/react-slot'\n", '')
     .replace("'./utils.js'", "'@/lib/utils'")
+    // The template's class builder is buttonClasses; buttonVariants, its exported attribute
+    // helper, follows the boundary. A scoped Button keeps the class builder's earlier name.
+    .replace('const buttonClasses = cva(', 'const buttonVariants = cva(')
 }
 
 function scopeAttributes(input: {

@@ -97,6 +97,8 @@ export type TagInputProps = Omit<React.ComponentProps<'div'>, 'defaultValue' | '
   /** Submits each tag as a hidden input with this name. */
   name?: string
   labels?: TagInputLabels
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
 }
 
 /**
@@ -114,6 +116,7 @@ export function TagInput({
   disabled = false,
   name,
   labels: words,
+  size = 'default',
   children,
   onClick,
   ref,
@@ -170,6 +173,7 @@ export function TagInput({
         {...props}
         ref={setRoot}
         data-slot="tag-input"
+        data-size={size !== 'default' ? size : undefined}
         data-disabled={disabled || undefined}
         className={cn(className)}
         onClick={(event) => {

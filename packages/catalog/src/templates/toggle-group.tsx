@@ -10,16 +10,18 @@ const ToggleGroupVariant = React.createContext<Variant>('segmented')
 export type ToggleGroupProps = React.ComponentProps<typeof ToggleGroupPrimitive.Root> & {
   /** segmented: one bar with a raised selected item; toolbar: separate square buttons. */
   variant?: Variant
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
 }
 
 /**
  * A row of toggle buttons with one Tab stop and arrow-key movement. type="single" is a radio
  * group (aria-checked); type="multiple" is a toolbar of pressed buttons. Name it with aria-label.
  */
-export function ToggleGroup({ className, variant = 'segmented', ...props }: ToggleGroupProps) {
+export function ToggleGroup({ className, variant = 'segmented', size = 'default', ...props }: ToggleGroupProps) {
   return (
     <ToggleGroupVariant.Provider value={variant}>
-      <ToggleGroupPrimitive.Root {...props} data-slot="toggle-group" data-variant={variant} data-type={props.type} className={cn(className)} />
+      <ToggleGroupPrimitive.Root {...props} data-slot="toggle-group" data-variant={variant} data-size={size !== 'default' ? size : undefined} data-type={props.type} className={cn(className)} />
     </ToggleGroupVariant.Provider>
   )
 }

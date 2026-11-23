@@ -37,6 +37,10 @@ export function Radius() {
 - A `ref` reaches the input, alongside the component's own, so a form library can focus it.
 - A form reset returns the field to `defaultValue`, clears the invalid mark and calls `onValueChange` when the text changes.
 
+## Size (1.0)
+
+`NumberInput` takes `size`, which replaces the HTML `size` attribute. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`.
+
 ## Recipe
 
 The recipe editor sets `min`, `max`, `step`, `unit` (`none`, `px`, `ms`, `%` or `deg`) and `value`, and the label and hint. The defaults follow the 0.7.5 board: "Border radius", 0 to 32 px, value 12. Recipe values are integers. A recipe is rejected when `min` is greater than `max`, when the value is outside the range, or when the label is blank. Compilation emits `components/ui/number-input.tsx`, `components/ui/number-input.css` and `examples/number-input.tsx`. Runtime dependencies are React 19.3.1, clsx 2.1.1, tailwind-merge 3.7.0 and lucide-react 1.55.0.

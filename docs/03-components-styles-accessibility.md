@@ -165,6 +165,45 @@ A style pack includes reviewed slot CSS, compatible component IDs, minimum token
 
 Reserve variants for semantic intent. For Button, begin with default, secondary, outline, ghost, link, and destructive; begin sizes with small, default, large, and icon. Some components have different meaningful variants. Do not force every component to expose identical options.
 
+## Sizes
+
+Every sized control uses one scale (1.0, DES-12). `size` is `sm`, `default` or `lg`, and the values mean the same thing everywhere:
+
+- **`default`** is the density's control height, `--control-height`: 2.5rem with `density: comfortable` and 2.25rem with `density: compact`. A family may add a fixed edge to a control, such as Flat's 2px field rule. That edge is the same at every size.
+- **`sm`** is one step, 0.5rem, below `default`. **`lg`** is one step above it.
+- The scale changes the control's height. `sm` and `lg` text fields also set their text to 0.8125rem and 1rem. Buttons, toggles and tabs keep each family's own text sizes.
+- Compact density moves all three sizes by 0.25rem. A pointer target never goes below 24px: Toggle Group `sm` segments and `sm` pill tabs stop there.
+- Leaving `size` out renders `default`, which looks as it did before 1.0. Only `sm` and `lg` set `data-size` on the new size props, so default markup is unchanged.
+- A control sized by its own `data-size` (Button, Input, Select, Native Select, Number Input, Toggle) has a rule per size. A compound control sets a step on its root (`--combobox-size-step`, `--tag-input-size-step`, `--password-field-size-step`, `--input-group-size-step`, `--color-picker-size-step`, `--tabs-size-step` on `TabsList`, `--toggle-group-size-step`: -0.5rem or 0.5rem), and its parts add it to their height, because liquid glass styles name one slot per selector.
+
+Heights in px with `density: comfortable`, measured in Edge in every family. Compact is 4px less, with the 24px floor.
+
+| Control | Size prop on | `sm` | `default` | `lg` |
+| --- | --- | --- | --- | --- |
+| Button (`icon-sm` is `sm` square, `icon` is `default` square) | `Button` | 32; neo-brutalism 36; organic, retro futurism 38 | 40; 44; 46 | 48; 52; 54 |
+| Input | `Input` | 32; flat 34; neo-brutalism, organic, retro futurism 36 | 40; 42; 44 | 48; 50; 52 |
+| Select trigger | `SelectTrigger` | 32; flat, neo-brutalism 34 | 40; 42 | 48; 50 |
+| Native Select | `NativeSelect` | 32; flat 34; neo-brutalism 36 | 40; 42; 44 | 48; 50; 52 |
+| Combobox field, Tag Input | `Combobox`, `TagInput` | 34; neo-brutalism, organic, retro futurism 36 | 42; 44 | 50; 52 |
+| Password Field, Input Group (the input is the control height, inside the field's border) | `PasswordField`, `InputGroup` | 34; neo-brutalism, organic, retro futurism 36 | 42; 44 | 50; 52 |
+| Number Input, Color Picker trigger | `NumberInput`, `ColorPicker` | 32 | 40 | 48 |
+| Toggle | `Toggle` | 32; organic, retro futurism 34 | 40; 42 | 48; 50 |
+| Toggle Group, toolbar items | `ToggleGroup` | 32; organic, retro futurism 34 | 40; 42 | 48; 50 |
+| Toggle Group, segmented items (inside a padded track) | `ToggleGroup` | 26; organic, retro futurism 28; neo-brutalism 32 | 34; 36; 40 | 42; 44; 48 |
+| Tabs trigger (pills: 24, 32, 40) | `TabsList` | 36 | 44 | 52 |
+
+A Combobox or Tag Input at `sm` holding chips grows to fit them. Chips keep their default height so that their remove buttons stay 24px targets.
+
+These components are not on the scale:
+
+- **Chip** follows density but has no `size`: 28px, or 32px in organic and retro futurism. Chips sit inside fields and filter rows, and their 24px remove button sets the floor.
+- **Badge** is a label, not a control. It keeps its own `sm` and does not follow density.
+- **Switch** keeps `sm` and `default`. They size the track and thumb, not a row height.
+- **Textarea** `sm` and `lg` set its minimum height (4rem, 6rem and 8rem), not a row height.
+- **Input OTP** cells are sized for one character.
+- **Avatar, Spinner, Progress, Dialog, Sheet and Item** sizes are dimensions of their own, not control heights.
+- **Menu and list rows** (Accordion, Collapsible, Command, Menubar, Navigation Menu, Pagination, Toolbar, Sidebar menu button) keep fixed heights and do not follow density yet.
+
 ## Token layers and override order
 
 Resolve design values in this order:

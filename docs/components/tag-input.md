@@ -48,6 +48,10 @@ export function Topics() {
 - **Announcements:** a polite live region announces "Added glass", "Removed glass", "glass is already added" and "You can add up to 8 tags". It is visually hidden by the component's own styles.
 - **Helper:** `addTags(current, text, { separators, max, allowDuplicates })` is exported for apps that need the same rules elsewhere.
 
+## Size (1.0)
+
+`TagInput` takes `size`. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`. The default field is 2px taller than the control height (4px in neo-brutalism, organic and retro futurism, whose border is thicker), as before. At `sm`, a field holding tags grows to fit them, because tags keep their 24px remove buttons.
+
 ## Recipe
 
 The recipe editor sets `max`, the label, the placeholder and up to eight starting tags. Starting tags past `max` are rejected.

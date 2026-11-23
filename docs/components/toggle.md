@@ -30,6 +30,10 @@ export function Options() {
 - An icon-only Toggle has no text to name it, so give it an `aria-label`.
 - Toggle changes something at once and keeps the same name when pressed. Use [Switch](switch.md) for a setting that is saved with a form.
 
+## Size (1.0)
+
+`size` follows the [shared size scale](../03-components-styles-accessibility.md#sizes): `sm` is one 0.5rem step below the density's control height, `default` is the control height and `lg` one step above it (32, 40 and 48px; 34, 42 and 50px in organic and retro futurism). In 1.0 the sizes stopped being fixed pixels and follow compact density.
+
 ## Recipe
 
 The recipe editor sets `variant`, `size`, `iconOnly` and `pressed`, and the label. Compilation emits `components/ui/toggle.tsx`, `components/ui/toggle.css` and `examples/toggle.tsx`. Recipes carry no icon set, so an icon-only recipe shows the label's first letter, named by the label. A recipe with an empty or blank label is rejected, icon-only or not, because the toggle would have no name. Runtime dependencies are React 19.3.1, clsx 2.1.1 and tailwind-merge 3.7.0, plus @radix-ui/react-toggle 1.2.1 in the Radix edition.

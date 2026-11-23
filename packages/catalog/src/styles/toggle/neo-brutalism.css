@@ -21,18 +21,18 @@
   block-size: 16px;
 }
 [data-slot='toggle'][data-size='sm'] {
-  min-inline-size: 32px;
-  min-block-size: 32px;
+  min-inline-size: calc(var(--control-height) - 0.5rem);
+  min-block-size: calc(var(--control-height) - 0.5rem);
   padding: 0 10px;
 }
 [data-slot='toggle'][data-size='default'] {
-  min-inline-size: 40px;
-  min-block-size: 40px;
+  min-inline-size: var(--control-height);
+  min-block-size: var(--control-height);
   padding: 0 14px;
 }
 [data-slot='toggle'][data-size='lg'] {
-  min-inline-size: 48px;
-  min-block-size: 48px;
+  min-inline-size: calc(var(--control-height) + 0.5rem);
+  min-block-size: calc(var(--control-height) + 0.5rem);
   padding: 0 18px;
 }
 [data-slot='toggle'][data-variant='outline'] {
