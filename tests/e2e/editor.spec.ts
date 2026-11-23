@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { compileRecipe } from '@ombelle/compiler'
+import { compileRecipe, stripFontImports } from '@ombelle/compiler'
 import { validateRecipe } from '@ombelle/contracts'
 import { changeDraftFamily, createEditorDraft } from '../../apps/www/src/editor/model.js'
 import { recipeFixtures } from '../../fixtures/shared/recipes.js'
@@ -489,7 +489,8 @@ test('sandboxed preview receives validated recipe updates only over its port', a
     await expect(button).toHaveAttribute('data-ombelle-recipe', compiled.scope)
     await expect(frame.locator('.editor-preview')).toHaveClass(/dark/)
     await expect(frame.locator('.editor-preview')).toHaveAttribute('data-viewport', 'narrow')
-    expect(await frame.locator('style').last().textContent()).toBe(css)
+    // The preview drops the recipe's font imports (it loads those fonts itself).
+    expect(await frame.locator('style').last().textContent()).toBe(stripFontImports(css))
   }
 
   // Validated renders apply the recipe's interaction colors to the same specimen.
