@@ -117,6 +117,8 @@ test.describe('desktop editors', () => {
       // The saved layout is applied after hydration, which remounts the split once.
       await expect(page.locator('[data-editor-split]')).toBeVisible()
       await page.waitForTimeout(500)
+      // The handle renders before the panel group measures it: read the default only once it has a value.
+      await expect(handle).toHaveAttribute('aria-valuenow', /^\d/, { timeout: 60000 })
       const start = Number(await handle.getAttribute('aria-valuenow'))
       await handle.focus()
       for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowRight')

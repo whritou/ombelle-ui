@@ -12,6 +12,15 @@ const site = 'http://127.0.0.1:3000'
 const frame = (page: Page, title: string) => page.locator(`iframe[title="${title}"]`).contentFrame()
 const matrix = (page: Page, title: string) => frame(page, title).getByTestId('variant-matrix')
 
+/** Picks the Matrix layout. A click that lands before the page hydrates is lost, so it repeats until the radio is checked. */
+async function showMatrix(page: Page) {
+  const option = segment(page, 'Preview layout', 'Matrix')
+  await expect(async () => {
+    await option.click()
+    await expect(option).toBeChecked({ timeout: 1000 })
+  }).toPass({ timeout: 30000 })
+}
+
 async function seed(page: Page, entries: [string, string][]) {
   await page.addInitScript((drafts) => {
     if (location.origin !== 'http://127.0.0.1:3000') return
@@ -54,7 +63,7 @@ test('the Button matrix shows every variant and size, the states and the edits',
   draft.recipe.overrides = { colors: { light: { background: '#123456' } } }
   await seed(page, [[DRAFT_STORAGE_KEY, serializeDraft(draft)]])
   await page.goto(`${site}/editor/component/button`)
-  await segment(page, 'Preview layout', 'Matrix').click()
+  await showMatrix(page)
   // The wait is announced until every cell compiled, then the status goes away.
   await expect(page.getByTestId('matrix-pending')).toHaveText('Compiling the matrix…')
   const table = matrix(page, 'Button recipe preview')
@@ -73,7 +82,7 @@ test('the Button matrix shows every variant and size, the states and the edits',
 
 test('Badge and Card matrices change axes and mark the current cell', async ({ page }) => {
   await page.goto(`${site}/editor/component/badge`)
-  await segment(page, 'Preview layout', 'Matrix').click()
+  await showMatrix(page)
   const table = matrix(page, 'Badge recipe preview')
   await expect(table).toBeVisible({ timeout: 60000 })
   await page.getByLabel('Columns', { exact: true }).selectOption('appearance')
@@ -86,7 +95,7 @@ test('Badge and Card matrices change axes and mark the current cell', async ({ p
   expect(results.violations.map((violation) => violation.id)).toEqual([])
 
   await page.goto(`${site}/editor/component/card`)
-  await segment(page, 'Preview layout', 'Matrix').click()
+  await showMatrix(page)
   await expect(matrix(page, 'Card recipe preview').locator('td[aria-current="true"]')).toHaveCount(1, { timeout: 60000 })
 })
 
@@ -130,7 +139,7 @@ test('the matrix with reduced transparency', async ({ page }) => {
   await seed(page, [[catalogDraftKey('card'), JSON.stringify({ storageVersion: 1, recipe })]])
   await page.goto(`${site}/editor/component/card`)
   await segment(page, 'Preview transparency', 'Reduced').click()
-  await segment(page, 'Preview layout', 'Matrix').click()
+  await showMatrix(page)
   const table = matrix(page, 'Card recipe preview')
   await expect(table).toBeVisible({ timeout: 60000 })
   const filters = await table.locator("[data-slot='recipe-card']").evaluateAll((cards) => cards.map((card) => getComputedStyle(card).backdropFilter))
@@ -151,7 +160,7 @@ test('forced states survive switching between Single and Matrix', async ({ page 
   await expect.poll(background).not.toBe(rest)
   const hover = await background()
   await segment(page, 'Preview state', 'Rest').click()
-  await segment(page, 'Preview layout', 'Matrix').click()
+  await showMatrix(page)
   const table = matrix(page, 'Button recipe preview')
   await expect(table).toBeVisible({ timeout: 60000 })
   // The States row's hover cell is drawn with the hover rules.
@@ -166,7 +175,7 @@ test('forced states survive switching between Single and Matrix', async ({ page 
 for (const [path, title] of [['badge', 'Badge recipe preview'], ['button', 'Button recipe preview']] as const)
   test(`the ${path} matrix stays still while nothing changes`, async ({ page }) => {
     await page.goto(`${site}/editor/component/${path}`)
-    await segment(page, 'Preview layout', 'Matrix').click()
+    await showMatrix(page)
     const root = frame(page, title).locator('[data-layout="matrix"]')
     await expect(root).toBeVisible({ timeout: 60000 })
     await expect(page.getByTestId('matrix-pending')).toHaveCount(0, { timeout: 60000 })
@@ -178,7 +187,7 @@ for (const [path, title] of [['badge', 'Badge recipe preview'], ['button', 'Butt
 
 test('an edit shows the matrix is recompiling, then the new cells', async ({ page }) => {
   await page.goto(`${site}/editor/component/badge`)
-  await segment(page, 'Preview layout', 'Matrix').click()
+  await showMatrix(page)
   const table = matrix(page, 'Badge recipe preview')
   await expect(table).toBeVisible({ timeout: 60000 })
   await expect(page.getByTestId('matrix-pending')).toHaveCount(0, { timeout: 60000 })
@@ -192,7 +201,7 @@ test('an edit shows the matrix is recompiling, then the new cells', async ({ pag
 
 test('the Button matrix follows the Rows and Columns the reader chose', async ({ page }) => {
   await page.goto(`${site}/editor/component/button`)
-  await segment(page, 'Preview layout', 'Matrix').click()
+  await showMatrix(page)
   const table = matrix(page, 'Button recipe preview')
   await expect(table).toBeVisible({ timeout: 60000 })
   await page.getByLabel('Rows', { exact: true }).selectOption('size')
