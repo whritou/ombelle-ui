@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState } from 'react'
+import { Suspense, use, useRef, useState } from 'react'
 import { canonicalize } from '@ombelle/compiler/light'
 import type { PresetSnapshot } from '@ombelle/contracts'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
@@ -7,7 +7,7 @@ import { downloadPresetText } from '../../preset-editor/components/preset-export
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
 import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, fontsInstallBlocked, fontsInstallNotice, semanticPaletteInstallBlocked, semanticPaletteInstallNotice, snapshotInstallCommand } from '../install-command'
-import { snapshotPreviewMessage, type FrameStatus, type SnapshotPreview } from '../snapshot-preview'
+import { snapshotPreviewMessage, useSnapshotCompile, type FrameStatus, type SnapshotFrame } from '../snapshot-preview'
 
 const choices = [
   {
@@ -33,14 +33,16 @@ const choices = [
 export function PublishedPreset({
   snapshot,
   origin,
-  preview,
+  contrastWarning,
+  frame,
 }: {
   snapshot: PresetSnapshot
   origin: string
-  /** Prepared on the server (prepareSnapshotPreview), so this page compiles nothing in the browser. */
-  preview: SnapshotPreview
+  /** Some Liquid Glass text falls below 4.5:1 in the contrast model; computed on the server. */
+  contrastWarning: boolean
+  /** How the gallery gets the snapshot, decided on the server (prepareSnapshotFrame); glass compiles in the preset worker. */
+  frame: Promise<SnapshotFrame>
 }) {
-  const [frameStatus, setFrameStatus] = useState<FrameStatus>('connecting')
   const [announcement, setAnnouncement] = useState('')
   const [view, setView] = useState<PresetView>({
     mode: 'light',
@@ -48,7 +50,6 @@ export function PublishedPreset({
   })
   const output = useRef<HTMLTextAreaElement>(null)
   const json = canonicalize(snapshot.preset) + '\n'
-  const { contrastWarning } = preview
   const useLocalInstaller = contrastInstallBlocked(contrastWarning)
   const installUnavailable = semanticPaletteInstallBlocked(snapshot.preset)
     ? semanticPaletteInstallNotice
@@ -141,17 +142,9 @@ export function PublishedPreset({
             <option value="narrow">Narrow</option>
           </select>
         </div>
-        <p role="status">{snapshotPreviewMessage(preview, frameStatus)}</p>
-        {preview.frame.kind !== 'failed' && (
-          <PresetPreviewFrame
-            key={`${snapshot.id}@${snapshot.revision}:${snapshot.presetHash}`}
-            result={preview.frame.kind === 'compiled' ? preview.frame.result : null}
-            preset={preview.frame.kind === 'tokens' ? snapshot.preset : null}
-            view={view}
-            stale={false}
-            onStatus={setFrameStatus}
-          />
-        )}
+        <Suspense fallback={<p role="status">{snapshotPreviewMessage(null, 'connecting')}</p>}>
+          <SnapshotGallery key={`${snapshot.id}@${snapshot.revision}:${snapshot.presetHash}`} snapshot={snapshot} frame={frame} view={view} />
+        </Suspense>
       </section>
       <section aria-labelledby="snapshot-json-heading">
         <h2 id="snapshot-json-heading">Preset JSON</h2>
@@ -237,5 +230,27 @@ export function PublishedPreset({
       </section>
       )}
     </main>
+  )
+}
+
+/** The status line and the sandboxed gallery, once the server has prepared the frame. */
+function SnapshotGallery({ snapshot, frame, view }: { snapshot: PresetSnapshot; frame: Promise<SnapshotFrame>; view: PresetView }) {
+  const prepared = use(frame)
+  const [status, setStatus] = useState<FrameStatus>('connecting')
+  const compiled = useSnapshotCompile(prepared.kind === 'worker' ? snapshot.preset : null, snapshot.presetHash)
+  const result = compiled === 'failed' ? null : compiled
+  return (
+    <>
+      <p role="status">{snapshotPreviewMessage(prepared, status, compiled)}</p>
+      {(prepared.kind === 'tokens' || result) && (
+        <PresetPreviewFrame
+          result={result}
+          preset={prepared.kind === 'tokens' ? snapshot.preset : null}
+          view={view}
+          stale={false}
+          onStatus={setStatus}
+        />
+      )}
+    </>
   )
 }

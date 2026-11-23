@@ -1,15 +1,16 @@
 import { expect, it } from 'vitest'
 import { getCatalogPresets } from '@ombelle/catalog/presets'
-import { compile, glassContrastReport, normalizePublishedPreset, resolvePreset } from '@ombelle/compiler'
+import { glassContrastReport, normalizePublishedPreset, resolvePreset } from '@ombelle/compiler'
 import { componentsWithStyleSupport, type Preset, type PresetSnapshot } from '@ombelle/contracts'
-import { prepareSnapshotPreview } from './preview-session'
+import { handlePresetCompileMessage } from '../preset-editor/compile-protocol'
+import { prepareSnapshotFrame, snapshotContrastWarning } from './preview-session'
 import { snapshotPreviewMessage } from './snapshot-preview'
 
-async function snapshotOf(preset: Preset, id = 'a'): Promise<PresetSnapshot> {
+async function snapshotOf(preset: Preset): Promise<PresetSnapshot> {
   const resolved = await normalizePublishedPreset(preset)
   return {
     snapshotVersion: '1.0',
-    id: 'ps_' + id.repeat(32),
+    id: 'ps_' + 'a'.repeat(32),
     revision: 1,
     preset: resolved.data,
     presetHash: resolved.hash,
@@ -26,50 +27,50 @@ async function lowContrastGlass() {
   return snapshotOf(preset.data)
 }
 
-it('sends a stable snapshot to the gallery as tokens, compiling nothing', async () => {
+it('sends a stable snapshot to the gallery as tokens', async () => {
   const snapshot = await snapshotOf(catalog.presets.flat)
-  expect(await prepareSnapshotPreview(snapshot, { compile: () => { throw new Error('compiled') } }))
-    .toEqual({ frame: { kind: 'tokens' }, contrastWarning: false })
+  expect(await prepareSnapshotFrame(snapshot)).toEqual({ kind: 'tokens' })
+  expect(snapshotContrastWarning(snapshot)).toBe(false)
 })
 
-it('shows no frame for a stable snapshot whose preset does not resolve to its hash', async () => {
-  const snapshot = { ...(await snapshotOf(catalog.presets.flat)), presetHash: 'f'.repeat(64) }
-  expect((await prepareSnapshotPreview(snapshot)).frame).toEqual({ kind: 'failed' })
+it('compiles a glass snapshot in the worker, not on the server', async () => {
+  expect(await prepareSnapshotFrame(await snapshotOf(catalog.presets['liquid-glass']))).toEqual({ kind: 'worker' })
 })
 
-it('compiles a glass snapshot on the server, components the family supports only', async () => {
-  const snapshot = await snapshotOf(catalog.presets['liquid-glass'])
-  const preview = await prepareSnapshotPreview(snapshot)
-  expect(preview.frame.kind).toBe('compiled')
-  expect(preview.frame.kind === 'compiled' && preview.frame.result).toEqual(await compile({
-    preset: snapshot.preset,
-    componentIds: componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']),
-    catalogRelease: '0.1.0',
-    compilerVersion: '0.1.0',
-    glassContrast: 'report',
-  }))
+it('shows no frame for a snapshot whose preset does not resolve to its hash', async () => {
+  for (const family of ['flat', 'liquid-glass'] as const) {
+    const snapshot = { ...(await snapshotOf(catalog.presets[family])), presetHash: 'f'.repeat(64) }
+    expect(await prepareSnapshotFrame(snapshot)).toEqual({ kind: 'failed' })
+  }
 })
 
-it('previews a published glass preset below the contrast bound and flags it', async () => {
+it('flags a published glass preset below the contrast bound', async () => {
   const snapshot = await lowContrastGlass()
-  const preview = await prepareSnapshotPreview(snapshot)
-  expect(preview.frame.kind === 'compiled' && preview.frame.result.preset.data.design.glassOpacity).toBe(0.3)
-  expect(preview.contrastWarning).toBe(!glassContrastReport(snapshot.preset).passes)
-  expect(preview.contrastWarning).toBe(true)
+  expect(snapshotContrastWarning(snapshot)).toBe(!glassContrastReport(snapshot.preset).passes)
+  expect(snapshotContrastWarning(snapshot)).toBe(true)
 })
 
-it('rejects a compiled result for a different preset hash', async () => {
-  const a = await snapshotOf(catalog.presets['liquid-glass'])
-  const b = await lowContrastGlass()
-  const other = await compile({ preset: a.preset, componentIds: ['button'], catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
-  expect((await prepareSnapshotPreview(b, { compile: async () => other })).frame).toEqual({ kind: 'failed' })
-})
+// The page sends only glass snapshots; a flat one keeps the test to a quick compile.
+it('compiles a snapshot preset in the preset worker: the components its family supports', async () => {
+  const snapshot = await snapshotOf(catalog.presets.flat)
+  const response = await handlePresetCompileMessage({ type: 'compile-snapshot', requestId: 7, preset: snapshot.preset })
+  expect(response.type).toBe('preset-compiled')
+  const result = response.type === 'preset-compiled' ? response.result : null
+  expect(result?.preset.hash).toBe(snapshot.presetHash)
+  // One component file per supported component, as the editor's compile of the same preset gives.
+  const components = result!.artifacts.filter((artifact) => artifact.kind === 'component').map((artifact) => artifact.logicalPath)
+  expect(components).toHaveLength(componentsWithStyleSupport('flat', ['stable', 'experimental']).length)
+  const invalid = await handlePresetCompileMessage({ type: 'compile-snapshot', requestId: 8, preset: { name: 'not a preset' } })
+  expect(invalid).toMatchObject({ type: 'preset-invalid', requestId: 8 })
+}, 180_000)
 
-it('words the status for compile failure and for each gallery state', () => {
-  const tokens = { frame: { kind: 'tokens' }, contrastWarning: false } as const
+it('words the status while compiling, on failure and for each gallery state', () => {
+  const tokens = { kind: 'tokens' } as const
+  expect(snapshotPreviewMessage(null, 'connecting')).toBe('Compiling snapshot preview…')
+  expect(snapshotPreviewMessage({ kind: 'worker' }, 'connecting', null)).toBe('Compiling snapshot preview…')
+  expect(snapshotPreviewMessage({ kind: 'worker' }, 'connecting', 'failed')).toBe('Preview compilation unavailable. Preset JSON remains available.')
   expect(snapshotPreviewMessage(tokens, 'connecting')).toBe('Connecting snapshot gallery…')
   expect(snapshotPreviewMessage(tokens, 'ready')).toBe('Snapshot gallery ready.')
   expect(snapshotPreviewMessage(tokens, 'failed')).toBe('Gallery unavailable. Preset JSON remains available.')
-  expect(snapshotPreviewMessage({ frame: { kind: 'failed' }, contrastWarning: false }, 'connecting'))
-    .toBe('Preview compilation unavailable. Preset JSON remains available.')
+  expect(snapshotPreviewMessage({ kind: 'failed' }, 'connecting')).toBe('Preview compilation unavailable. Preset JSON remains available.')
 })

@@ -13,10 +13,6 @@ import { PublishedPreset } from './components/published-preset'
 import { PresetExportPanel } from '../preset-editor/components/preset-export-panel'
 import { createPresetDraft, setPresetEdit } from '../preset-editor/model'
 import { publishedInstaller } from './install-command'
-import type { SnapshotPreview } from './snapshot-preview'
-
-/** What the server prepares for a stable snapshot: the gallery resolves its tokens itself. */
-const stablePreview: SnapshotPreview = { frame: { kind: 'tokens' }, contrastWarning: false }
 
 /** A catalog draft as older editors exported it, before recipes started with the style's fonts. */
 function legacyDraft(component: Parameters<typeof createCatalogDraft>[0]): ReturnType<typeof createCatalogDraft> {
@@ -101,7 +97,7 @@ describe('published installer commands', () => {
     const html = renderToStaticMarkup(
       <PublishedPreset
         snapshot={snapshot}
-        origin="https://presets.example.test" preview={stablePreview}
+        origin="https://presets.example.test" contrastWarning={false} frame={Promise.resolve({ kind: 'tokens' } as const)}
       />,
     )
     expect(html).toContain('npx @ombelle-ui/cli@0.9.1')
@@ -165,7 +161,7 @@ describe('published installer commands', () => {
       validationStatus: 'draft',
     }
     const html = renderToStaticMarkup(
-      <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" preview={stablePreview} />,
+      <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" contrastWarning={false} frame={Promise.resolve({ kind: 'tokens' } as const)} />,
     )
     expect(html).not.toContain('requires CLI 0.7.8')
     expect(html).toContain('npx @ombelle-ui/cli@0.9.1')
