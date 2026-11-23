@@ -256,9 +256,9 @@ export function compileScopedButtonStyles(input: {
     if (mapped) overrides[mapped[0]] = value + mapped[1]
   }
   const o = input.overrides
-  // Ombelle's authored pill shape does not read the radius token. An explicit
-  // recipe radius still wins, while recipes without one retain the family pill.
-  if (o.radiusRem !== undefined && data.styleFamily === 'ombelle')
+  // Ombelle's pill, organic's irregular blob and retro-futurism's shape do not read the radius
+  // token. An explicit recipe radius still wins, while recipes without one keep the family shape.
+  if (o.radiusRem !== undefined && ['ombelle', 'organic', 'retro-futurism'].includes(data.styleFamily))
     overrides['border-radius'] = 'var(--radius)'
   if (o.gapPx !== undefined) overrides.gap = o.gapPx + 'px'
   if (o.fontWeight !== undefined) overrides['font-weight'] = String(o.fontWeight)

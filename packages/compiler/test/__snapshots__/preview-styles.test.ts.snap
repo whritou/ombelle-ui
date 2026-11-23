@@ -22,10 +22,10 @@ exports[`compile output is unchanged > neo-brutalism 1`] = `"599c729bef6dd1942b6
 
 exports[`compile output is unchanged > ombelle 1`] = `"50e8eac655a7ce9bd61f12686ef4c2e991d3f4df7fa9c705a7b7a6a372ab83ca"`;
 
-exports[`compile output is unchanged > organic 1`] = `"cdfbc323e34336fc76a1e5611deb99892cdc648ff6fab05edfd44cff9ea477c4"`;
+exports[`compile output is unchanged > organic 1`] = `"1a1ef85855db05f308e02f0e83a87d90ae59f61b3642f711d32f79ee7e3cf117"`;
 
-exports[`compile output is unchanged > organic base edition 1`] = `"4f48720ebb6f1d13e4f826b900ce2e62b3063a0d86158b5ff49d60243fd28c44"`;
+exports[`compile output is unchanged > organic base edition 1`] = `"1eaff2c7848591c440aef1fd5f5f6253cbb602562679e8cf385ce91444cd9e88"`;
 
 exports[`compile output is unchanged > papier 1`] = `"02c4704b0c2cf8e80337a10d69a3526472d7be3d7b99682568b5c08b17290316"`;
 
-exports[`compile output is unchanged > retro-futurism 1`] = `"1fa31890bd2c1b2683af21df57ade67007812c3da8dadb545c76df2a541240e6"`;
+exports[`compile output is unchanged > retro-futurism 1`] = `"fe9971e5aae6ba8d03b4b47ce01ad4e806b3b494bcb469dd8b679e76c1079b81"`;
