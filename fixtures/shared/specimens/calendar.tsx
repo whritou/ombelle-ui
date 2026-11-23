@@ -8,7 +8,8 @@ export function Specimen() {
       <Calendar mode="range" today="2026-11-10" defaultMonth="2026-11-01" aria-label="Stay" selected={{ from: '2026-11-12', to: '2026-11-18' }} />
       <div className="preset-variant">
         <p id="gallery-due" className="preset-label">Due date</p>
-        <DatePicker aria-labelledby="gallery-due" defaultValue="2026-11-12" calendar={{ today: '2026-11-10' }} />
+        {/* The trigger names itself after the label and its own date, so its name holds the visible text. */}
+        <DatePicker id="gallery-due-picker" aria-labelledby="gallery-due gallery-due-picker" defaultValue="2026-11-12" calendar={{ today: '2026-11-10' }} />
       </div>
     </section>
   )
