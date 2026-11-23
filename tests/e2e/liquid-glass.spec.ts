@@ -643,7 +643,7 @@ for (const mode of modes) {
     // The picker button's name carries a Beta tag, so match the prefix.
     await page.getByRole('radiogroup', { name: 'Style family', exact: true }).getByRole('radio', { name: /^Liquid glass/ }).click()
     const confirm = page.getByRole('button', { name: 'Confirm change' })
-    const limitations = page.getByRole('heading', { name: 'Liquid glass limitations' })
+    const limitations = page.getByRole('heading', { name: 'Liquid glass accessibility' })
     await expect(confirm.or(limitations)).toBeVisible()
     if (await confirm.isVisible()) await confirm.click()
     await expect(limitations).toBeVisible()

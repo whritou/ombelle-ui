@@ -104,7 +104,9 @@ async function appearance(parts: Locator) {
       selected: element.getAttribute('aria-selected'), value: element.getAttribute('aria-valuenow'),
       disabled: element.hasAttribute('disabled'),
       color: style.color, background: style.backgroundColor, border: style.borderTopColor,
-      radius: style.borderTopLeftRadius, display: style.display,
+      // A flex or grid parent blockifies its children (inline-flex computes as flex): the editor and the
+      // installed stage nest the recipe at different depths, so compare the display type, not its inline-ness.
+      radius: style.borderTopLeftRadius, display: style.display.replace(/^inline-/, ''),
     }
   }))
 }

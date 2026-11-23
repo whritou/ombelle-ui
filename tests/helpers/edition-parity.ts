@@ -65,7 +65,9 @@ export const portedComponents: readonly {
       { name: 'closed' },
       { name: 'hover', act: hoverFirst("[data-slot='select-trigger']") },
       { name: 'focus-visible', act: focusFirst("[data-slot='select-trigger']") },
-      { name: 'click open', act: async (page, section) => { await section.locator("[data-slot='select-trigger']").first().click(); await page.locator("[data-slot='select-content']").waitFor() } },
+      // Base UI lays the open list over its trigger, Radix below it: move the pointer off, or only one
+      // edition's trigger shows its hover border (papier's changes colour).
+      { name: 'click open', act: async (page, section) => { await section.locator("[data-slot='select-trigger']").first().click(); await page.locator("[data-slot='select-content']").waitFor(); await page.mouse.move(0, 0) } },
       { name: 'highlight item', act: async (page, section) => { await section.locator("[data-slot='select-trigger']").first().click(); await page.locator("[data-slot='select-content']").waitFor(); await page.locator("[data-slot='select-item']").nth(1).hover() } },
       { name: 'choose item', act: async (page, section) => { await section.locator("[data-slot='select-trigger']").first().click(); await page.locator("[data-slot='select-content']").waitFor(); await page.locator("[data-slot='select-item']").nth(1).click(); await page.locator("[data-slot='select-content']").waitFor({ state: 'hidden' }); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()) } },
     ],

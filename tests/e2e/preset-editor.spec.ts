@@ -5,6 +5,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import {
   canonicalize,
+  normalizeColor,
   sha256,
   rewriteModuleSpecifiers,
 } from '@ombelle/compiler'
@@ -966,8 +967,9 @@ test('applies a style palette and a primary colour in one step and returns to th
   const preset = JSON.parse(await download(page))
   expect(preset.modes.light.primary.toLowerCase()).toBe('#e11d48')
   const peachPalette = paletteSchemes('ombelle')[0]!
-  expect(preset.modes.light.background).toBe(peachPalette.light.background)
-  expect(preset.modes.dark.background).toBe(peachPalette.dark.background)
+  // The saved preset normalises OKLCH lightness (98.6% becomes 0.986).
+  expect(preset.modes.light.background).toBe(normalizeColor(peachPalette.light.background!))
+  expect(preset.modes.dark.background).toBe(normalizeColor(peachPalette.dark.background!))
   await expect(peach).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Style default palette', exact: true }).click()
   await expect(peach).toHaveAttribute('aria-pressed', 'false')
