@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { styleFamilies } from '@ombelle/contracts'
 import { FamilyPicker } from './family-picker'
-import { offeredStyleFamilies, ombelleMinimumCli, publishedInstaller } from '../../snapshots/install-command'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 
 const noop = () => {}
 
@@ -21,14 +21,7 @@ it('offers every family and marks liquid glass with its accessibility caveat', (
   expect(html).toContain('Accessibility not guaranteed')
 })
 
-it('offers ombelle only once the published installer supports it, keeping a selected ombelle visible', () => {
+it('offers every site family in site order', () => {
   const families = (html: string) => [...html.matchAll(/<button[^>]*data-family="([^"]+)"[^>]*class="be-family"/g)].map((match) => match[1])
-  const render = (value: 'flat' | 'ombelle', version: string) =>
-    families(renderToStaticMarkup(<FamilyPicker value={value} onChange={noop} families={offeredStyleFamilies(value, { version })} />))
-  expect(render('flat', '0.3.0')).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(render('flat', ombelleMinimumCli)).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(render('ombelle', '0.3.0')).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(families(renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />))).toEqual([
-    ...offeredStyleFamilies('flat', publishedInstaller),
-  ])
+  expect(families(renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />))).toEqual([...offeredStyleFamilies()])
 })

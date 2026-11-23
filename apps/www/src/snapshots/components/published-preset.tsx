@@ -1,17 +1,13 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { canonicalize, glassContrastReport } from '@ombelle/compiler'
+import { Suspense, use, useRef, useState } from 'react'
+import { canonicalize } from '@ombelle/compiler/light'
 import type { PresetSnapshot } from '@ombelle/contracts'
 import { PresetPreviewFrame } from '../../preset-editor/components/preset-preview-frame'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
 import type { PresetView } from '../../preset-editor/preview-protocol'
 import styles from '../../preset-editor/components/preset-editor.module.css'
 import { contrastInstallBlocked, glassMaterialInstallNotice, materialInstallBlocked, publishedInstaller, fontsInstallBlocked, fontsInstallNotice, semanticPaletteInstallBlocked, semanticPaletteInstallNotice, snapshotInstallCommand } from '../install-command'
-import {
-  createSnapshotPreviewSession,
-  selectSnapshotPreview,
-  type SnapshotPreviewState,
-} from '../preview-session'
+import { snapshotPreviewMessage, useSnapshotCompile, type FrameStatus, type SnapshotFrame } from '../snapshot-preview'
 
 const choices = [
   {
@@ -37,16 +33,16 @@ const choices = [
 export function PublishedPreset({
   snapshot,
   origin,
+  contrastWarning,
+  frame,
 }: {
   snapshot: PresetSnapshot
   origin: string
+  /** Some Liquid Glass text falls below 4.5:1 in the contrast model; computed on the server. */
+  contrastWarning: boolean
+  /** How the gallery gets the snapshot, decided on the server (prepareSnapshotFrame); glass compiles in the preset worker. */
+  frame: Promise<SnapshotFrame>
 }) {
-  const [previewState, setPreviewState] = useState<SnapshotPreviewState | null>(
-    null,
-  )
-  const latestSnapshot = useRef(snapshot)
-  latestSnapshot.current = snapshot
-  const preview = selectSnapshotPreview(snapshot, previewState)
   const [announcement, setAnnouncement] = useState('')
   const [view, setView] = useState<PresetView>({
     mode: 'light',
@@ -54,10 +50,6 @@ export function PublishedPreset({
   })
   const output = useRef<HTMLTextAreaElement>(null)
   const json = canonicalize(snapshot.preset) + '\n'
-  const contrastWarning = useMemo(
-    () => snapshot.preset.styleFamily === 'liquid-glass' && !glassContrastReport(snapshot.preset).passes,
-    [snapshot.preset],
-  )
   const useLocalInstaller = contrastInstallBlocked(contrastWarning)
   const installUnavailable = semanticPaletteInstallBlocked(snapshot.preset)
     ? semanticPaletteInstallNotice
@@ -68,14 +60,6 @@ export function PublishedPreset({
     reference: `${snapshot.id}@${snapshot.revision}`,
     presetHash: snapshot.presetHash,
   }
-  useEffect(() => {
-    const session = createSnapshotPreviewSession(snapshot, {
-      notify: setPreviewState,
-      isCurrent: () => latestSnapshot.current === snapshot,
-    })
-    void session.start()
-    return () => session.dispose()
-  }, [snapshot])
   async function copyJson() {
     try {
       await navigator.clipboard.writeText(json)
@@ -158,16 +142,9 @@ export function PublishedPreset({
             <option value="narrow">Narrow</option>
           </select>
         </div>
-        <p role="status">{preview.message}</p>
-        {preview.frame && (
-          <PresetPreviewFrame
-            key={preview.frame.key}
-            result={preview.frame.result}
-            view={view}
-            stale={false}
-            onStatus={preview.frame.onStatus}
-          />
-        )}
+        <Suspense fallback={<p role="status">{snapshotPreviewMessage(null, 'connecting')}</p>}>
+          <SnapshotGallery key={`${snapshot.id}@${snapshot.revision}:${snapshot.presetHash}`} snapshot={snapshot} frame={frame} view={view} />
+        </Suspense>
       </section>
       <section aria-labelledby="snapshot-json-heading">
         <h2 id="snapshot-json-heading">Preset JSON</h2>
@@ -253,5 +230,27 @@ export function PublishedPreset({
       </section>
       )}
     </main>
+  )
+}
+
+/** The status line and the sandboxed gallery, once the server has prepared the frame. */
+function SnapshotGallery({ snapshot, frame, view }: { snapshot: PresetSnapshot; frame: Promise<SnapshotFrame>; view: PresetView }) {
+  const prepared = use(frame)
+  const [status, setStatus] = useState<FrameStatus>('connecting')
+  const compiled = useSnapshotCompile(prepared.kind === 'worker' ? snapshot.preset : null, snapshot.presetHash)
+  const result = compiled === 'failed' ? null : compiled
+  return (
+    <>
+      <p role="status">{snapshotPreviewMessage(prepared, status, compiled)}</p>
+      {(prepared.kind === 'tokens' || result) && (
+        <PresetPreviewFrame
+          result={result}
+          preset={prepared.kind === 'tokens' ? snapshot.preset : null}
+          view={view}
+          stale={false}
+          onStatus={setStatus}
+        />
+      )}
+    </>
   )
 }

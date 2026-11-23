@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import badge from '../../../../examples/component-recipe.badge.json'
 import { componentRecipeComponents } from '@ombelle/contracts'
-import { resolveRecipePreset } from '@ombelle/catalog'
+import { resolveRecipePreset } from '@ombelle/catalog/presets'
 import { catalogDraftKey, changeCatalogFamily, withCatalogFont, createCatalogDraft, restoreCatalogDraft } from './catalog-draft'
 
 it.each(componentRecipeComponents)('starts a fresh %s recipe in Ombelle', component => {

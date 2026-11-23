@@ -1,4 +1,4 @@
-import { defaultGlassPresetId, getCatalog, resolveRecipePreset, styleFamilyFonts, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalogPresets, resolveRecipePreset, styleFamilyFonts, type StartingPresetId } from '@ombelle/catalog/presets'
 import {
   familyAccessibilityCaveat, recipeColorRoles, recipeColorTokens, validateRecipe,
   type Preset, type Recipe, type RecipeButtonVariant, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole, type RecipeIcon, type StyleFamily,
@@ -24,12 +24,12 @@ function presetRef(preset: Preset): Recipe['presetRef'] {
 }
 
 function presetRefFor(family: StyleFamily): Recipe['presetRef'] {
-  const catalog = getCatalog('0.1.0')
+  const catalog = getCatalogPresets('0.1.0')
   return presetRef(family === 'liquid-glass' ? catalog.startingPresets[defaultGlassPresetId] : catalog.presets[family])
 }
 
 export function withGlassPreset(recipe: Recipe, id: StartingPresetId): Recipe {
-  return { ...recipe, presetRef: presetRef(getCatalog(recipe.presetRef.catalogRelease).startingPresets[id]) }
+  return { ...recipe, presetRef: presetRef(getCatalogPresets(recipe.presetRef.catalogRelease).startingPresets[id]) }
 }
 
 /**

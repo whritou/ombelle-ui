@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import type { GlassContrastReport } from '@ombelle/compiler'
+import type { GlassContrastReport } from '@ombelle/compiler/light'
 import type { TokenContrast } from '../contrast'
 import { PresetChecks, presetWarningCount } from './preset-checks'
 

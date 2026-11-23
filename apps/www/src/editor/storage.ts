@@ -1,4 +1,4 @@
-import { resolveRecipePreset } from '@ombelle/catalog'
+import { resolveRecipePreset } from '@ombelle/catalog/presets'
 import { validateRecipe, type Recipe } from '@ombelle/contracts'
 import type { EditorDraft } from './model'
 

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { canonicalize } from '@ombelle/compiler'
-import { resolveRecipePreset } from '@ombelle/catalog'
+import { canonicalize } from '@ombelle/compiler/light'
+import { resolveRecipePreset } from '@ombelle/catalog/presets'
 import { styleSupport, validateComponentRecipe, type ComponentRecipe } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'

@@ -9,6 +9,16 @@ export const segment = (page: Page, group: string, option: string) =>
  * drawer is closed (rail button) or already open on either tab.
  */
 export async function openExport(page: Page): Promise<void> {
+  // Phones have no review drawer: Checks and Export share the Checks pane, chosen in the bottom dock.
+  if ((page.viewportSize()?.width ?? Infinity) < 768) {
+    const checks = page.getByRole('navigation', { name: 'Preset editor panes' }).getByRole('radio', { name: /^Checks/ })
+    await expect(async () => {
+      await checks.click()
+      await expect(checks).toHaveAttribute('aria-checked', 'true', { timeout: 1000 })
+    }).toPass({ timeout: 30000 })
+    await expect(page.getByRole('button', { name: 'Download preset JSON', exact: true })).toBeVisible()
+    return
+  }
   const tab = page.getByRole('tab', { name: 'Export', exact: true })
   // A click before the page hydrates does nothing, so try again until the drawer shows its tabs.
   await expect(async () => {

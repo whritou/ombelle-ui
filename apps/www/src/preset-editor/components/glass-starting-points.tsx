@@ -1,4 +1,4 @@
-import { defaultGlassPresetId, getCatalog, glassTintPalettes, offeredGlassPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalogPresets, glassTintPalettes, offeredGlassPresetOrder, type GlassTintId, type StartingPresetId } from '@ombelle/catalog/presets'
 import { keepChoice } from '../../editor-shell/inspector'
 import { ToggleGroup, ToggleGroupItem } from '../../generated/ui/components/ui/toggle-group'
 import { matchingStartingPreset, type PresetEditorDraft } from '../model'
@@ -20,7 +20,7 @@ export function GlassStartingPoints({
   onPick: (id: StartingPresetId) => void
   onTint: (tint: GlassTintId | 'white') => void
 }) {
-  const presets = getCatalog('0.1.0').startingPresets
+  const presets = getCatalogPresets('0.1.0').startingPresets
   const current = matchingStartingPreset(draft)
   // A draft still on a retired preset names it, since it has no button.
   const retired = current !== null && !(offeredGlassPresetOrder as readonly StartingPresetId[]).includes(current)

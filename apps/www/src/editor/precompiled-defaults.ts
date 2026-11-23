@@ -1,5 +1,5 @@
-import { canonicalize } from '@ombelle/compiler'
-import { resolveRecipePreset } from '@ombelle/catalog'
+import { canonicalize } from '@ombelle/compiler/light'
+import { resolveRecipePreset } from '@ombelle/catalog/presets'
 import { componentRecipeComponents, styleSupport, validateRecipe, type ComponentId, type ComponentRecipe, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../examples/recipe.example.json' with { type: 'json' }
 import { defaultSiteFamily } from '../snapshots/install-command'

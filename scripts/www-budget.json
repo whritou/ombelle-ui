@@ -1,0 +1,18 @@
+{
+  "routes": {
+    "/": 270,
+    "/docs": 270,
+    "/components": 300,
+    "/components/button": 330,
+    "/editor/preset": 400,
+    "/editor/component/button": 380,
+    "/presets/[id]/[revision]": 270,
+    "/recipes/[id]/[revision]": 350
+  },
+  "largestChunk": 560,
+  "workers": {
+    "editor-compiler.worker.js": 600,
+    "preset-compiler.worker.js": 600
+  },
+  "previewFrame": 90
+}

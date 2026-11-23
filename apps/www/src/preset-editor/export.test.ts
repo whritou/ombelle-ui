@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { expect, it } from 'vitest'
-import { canonicalize, sha256 } from '@ombelle/compiler'
+import { canonicalize, sha256 } from '@ombelle/compiler/light'
 import { supportedStyleFamilies } from '@ombelle/contracts'
 import {
   createPresetDraft,

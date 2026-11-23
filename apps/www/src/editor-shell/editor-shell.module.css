@@ -985,6 +985,25 @@
   border: 0;
   background: transparent;
 }
+/*
+ * The inspector keeps this layout on phones too (mobileBreakpoint 0), but before hydration the catalog Sidebar
+ * stacks itself above the page below 768 px, so the inspector moved when the editor hydrated (CLS 0.17 to 0.19).
+ * Before hydration it gets the geometry it hydrates to.
+ */
+@media (max-width: 767.98px) {
+  .inspectorProvider.inspectorProvider:not([data-hydrated]) {
+    flex-direction: row;
+  }
+  .inspectorSidebar.inspectorSidebar[data-slot='sidebar'][data-collapsible]:not([data-hydrated]) {
+    inline-size: 100%;
+  }
+  .inspectorSidebar.inspectorSidebar[data-slot='sidebar'][data-collapsible]:not([data-hydrated]) > [data-sidebar-inner] {
+    position: sticky;
+    inline-size: inherit;
+    block-size: var(--sidebar-height, 100svh);
+    border: 0;
+  }
+}
 .inspectorBar {
   display: flex;
   justify-content: flex-end;

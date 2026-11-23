@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { defaultGlassPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId } from '@ombelle/catalog/presets'
 import { styleSupport, validateRecipe, type ComponentId, type ComponentRecipe, type StyleFamily } from '@ombelle/contracts'
 import exampleRecipe from '../../../../examples/recipe.example.json'
 import { siteFamilyOrder } from '../snapshots/install-command'

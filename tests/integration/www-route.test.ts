@@ -9,7 +9,7 @@ import SecurityPage from '../../apps/www/src/app/security/page.js'
 import HomePage from '../../apps/www/src/app/(home)/page.js'
 import { siteStableFamilies } from '../../apps/www/src/site/families.js'
 import { SiteFooter } from '../../apps/www/src/site/footer.js'
-import { catalog076MinimumCli, compareVersions, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
+import { compareVersions, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 // The Code Block command wraps its runner in a keyword token span, so commands are read from the text.
 const textOf = (html: string) => html.replace(/<[^>]*>/g, '')
@@ -84,7 +84,7 @@ it('lists the catalog and offers install commands only for components the publis
   const { default: ComponentPage, generateStaticParams } = await import('../../apps/www/src/app/components/[id]/page.js')
   const { supportedComponentIds, styleSupport } = await import('@ombelle/contracts')
   const { componentDocs, componentInstallable, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
-  const { catalogRecipeInstallerSupported, compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
+  const { catalogRecipesAvailable, compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
   const listed = componentDocs.map((doc) => doc.id)
   expect([...listed].sort()).toEqual([...supportedComponentIds].sort())
   const overview = renderToStaticMarkup(createElement(ComponentsPage))
@@ -108,7 +108,7 @@ it('lists the catalog and offers install commands only for components the publis
       expect(html).toContain(`Requires CLI ${doc.minimumCli}`)
     }
     expect(html).toContain('Liquid glass: stable, accessibility not guaranteed.')
-    expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button' || catalogRecipeInstallerSupported(publishedInstaller.version))
+    expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button' || catalogRecipesAvailable)
     // Glass Button previews show the 0.5.0 restyle, so the Button page says so.
     expect(html.includes('Liquid glass Buttons were restyled to one ink in 0.5.0.')).toBe(id === 'button')
   }

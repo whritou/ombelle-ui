@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { InstallableRecipeSnapshot, InstallableRecipeCompileResult } from '@ombelle/contracts'
-import { canonicalize, compileInstallableRecipe, verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import { PreviewFrame } from '../../editor/components/preview-frame'
 import { ArtifactPanel } from '../../editor/components/artifact-panel'
 import { downloadPresetText } from '../../preset-editor/components/preset-export-panel'
@@ -9,30 +9,16 @@ import { recipeSnapshotInstallCommand } from '../install-command'
 import { installableRecipeInstallNotice, publishedInstaller } from '../../snapshots/install-command'
 import styles from '../../preset-editor/components/preset-editor.module.css'
 
-export function PublishedRecipe({ snapshot, origin, name = 'Button' }: { snapshot: InstallableRecipeSnapshot; origin: string; name?: string }) {
+/** `result` is the preview, verified and compiled on the server (prepareRecipePreview); null when that failed. */
+export function PublishedRecipe({ snapshot, origin, name = 'Button', result }: { snapshot: InstallableRecipeSnapshot; origin: string; name?: string; result: InstallableRecipeCompileResult | null }) {
   const latest = useRef(snapshot); latest.current = snapshot
-  const [preview, setPreview] = useState<{ snapshot: InstallableRecipeSnapshot; result: InstallableRecipeCompileResult } | null>(null)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(result ? '' : 'Preview unavailable. Verified recipe JSON remains available below.')
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const [viewport, setViewport] = useState<'wide' | 'narrow'>('wide')
-  const result = preview?.snapshot === snapshot ? preview.result : null
   const json = canonicalize(snapshot.recipe) + '\n'
   const unavailable = installableRecipeInstallNotice(snapshot.recipe)
   const command = unavailable ? null
     : recipeSnapshotInstallCommand({ origin, reference: snapshot.id + '@' + snapshot.revision, recipeHash: snapshot.recipeHash }, publishedInstaller)
-  useEffect(() => {
-    let active = true
-    void (async () => {
-      try {
-        const verified = await verifyInstallableRecipeSnapshot(snapshot)
-        const compiled = await compileInstallableRecipe({ recipe: verified.recipe, preset: verified.preset })
-        if (active && latest.current === snapshot) setPreview({ snapshot, result: compiled })
-      } catch {
-        if (active && latest.current === snapshot) setNotice('Preview unavailable. Verified recipe JSON remains available below.')
-      }
-    })()
-    return () => { active = false }
-  }, [snapshot])
   return <main id="main" tabIndex={-1} className={`${styles.editor} wrap-anywhere`}>
     <h1>Published {name} recipe</h1>
     <p><code>{snapshot.id}@{snapshot.revision}</code></p>

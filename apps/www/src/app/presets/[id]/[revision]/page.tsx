@@ -1,6 +1,7 @@
 import { cache } from 'react'
 import { parseSnapshotReference } from '@ombelle/contracts'
 import { PublishedPreset } from '../../../../snapshots/components/published-preset'
+import { prepareSnapshotFrame, snapshotContrastWarning } from '../../../../snapshots/preview-session'
 import { snapshotInstallCommand } from '../../../../snapshots/install-command'
 import { readSnapshotConfig } from '../../../../snapshots/server/config'
 import { SnapshotServiceError } from '../../../../snapshots/server/errors'
@@ -55,7 +56,7 @@ export default async function Page({
       },
       'new',
     )
-    return <PublishedPreset snapshot={snapshot} origin={publicOrigin} />
+    return <PublishedPreset snapshot={snapshot} origin={publicOrigin} contrastWarning={snapshotContrastWarning(snapshot)} frame={prepareSnapshotFrame(snapshot)} />
   } catch (error) {
     const code = error instanceof SnapshotServiceError ? error.code : undefined
     const withdrawn = code === 'SNAPSHOT_WITHDRAWN'

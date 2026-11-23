@@ -1,16 +1,25 @@
-import { isStyleFamily, validatePreset } from '@ombelle/contracts'
+import { publishAttempt, type PublishAttempt } from './attempt'
 import {
+  capitalized,
+  fieldOf,
+  publicationContentMaxBytes,
   publicationMaxAge,
   publicationMaxBytes,
-  type PublishAttempt,
-} from './publication'
-export const publicationStorageKey = 'ombelle:preset-editor:publication:v1'
+  supportedRelease,
+  type PublicationKind,
+  type PublicationTypes,
+} from './kind'
+
 const bytes = (value: string) => new TextEncoder().encode(value).byteLength
 
-function validateAttempt(input: unknown): PublishAttempt {
+function validateAttempt<T extends PublicationTypes>(
+  kind: PublicationKind<T>,
+  input: unknown,
+): PublishAttempt<T> {
   if (!input || typeof input !== 'object' || Array.isArray(input))
     throw new Error('Invalid publication attempt.')
   const value = input as Record<string, unknown>
+  const hash = fieldOf(value, kind.hashField)
   if (
     Object.keys(value).length !== 5 ||
     value.storageVersion !== 1 ||
@@ -20,45 +29,46 @@ function validateAttempt(input: unknown): PublishAttempt {
     ) ||
     !Number.isSafeInteger(value.createdAt) ||
     (value.createdAt as number) < 0 ||
-    typeof value.presetHash !== 'string' ||
-    !/^[a-f0-9]{64}$/.test(value.presetHash)
+    typeof hash !== 'string' ||
+    !/^[a-f0-9]{64}$/.test(hash)
   )
     throw new Error('Invalid publication attempt.')
-  const stack = [{ value: value.preset, depth: 0 }]
+  const stack = [{ value: fieldOf(value, kind.field), depth: 0 }]
   while (stack.length) {
     const next = stack.pop()!
-    if (next.depth > 16) throw new Error('Preset is too deeply nested.')
+    if (next.depth > 16)
+      throw new Error(`${capitalized(kind.noun)} is too deeply nested.`)
     if (next.value && typeof next.value === 'object')
       for (const child of Object.values(next.value))
         stack.push({ value: child, depth: next.depth + 1 })
   }
-  const preset = validatePreset(value.preset)
-  // validatePreset has already limited schemaVersion to 1.0 and 1.1 and matched it to the fields.
+  const data = kind.validate(fieldOf(value, kind.field))
   if (
-    preset.catalogRelease !== '0.1.0' ||
-    preset.compilerVersion !== '0.1.0' ||
-    !isStyleFamily(preset.styleFamily) ||
-    bytes(JSON.stringify(preset)) > 65_536
+    !supportedRelease(kind.release(data)) ||
+    kind.supported?.(data) === false ||
+    bytes(JSON.stringify(data)) > publicationContentMaxBytes
   )
     throw new Error('Unsupported publication attempt.')
-  return {
-    storageVersion: 1,
+  return publishAttempt(kind, {
     key: value.key,
     createdAt: value.createdAt as number,
-    preset: structuredClone(preset),
-    presetHash: value.presetHash,
-  }
+    data: structuredClone(data),
+    hash,
+  })
 }
-export function readPublishAttempt(
+
+export function readPublishAttempt<T extends PublicationTypes>(
+  kind: PublicationKind<T>,
   storage: Storage,
   now: number,
-): PublishAttempt | null {
-  const raw = storage.getItem(publicationStorageKey)
+  storageKey = kind.storageKey,
+): PublishAttempt<T> | null {
+  const raw = storage.getItem(storageKey)
   if (raw === null) return null
   try {
     if (bytes(raw) > publicationMaxBytes)
       throw new Error('Publication attempt is too large.')
-    const attempt = validateAttempt(JSON.parse(raw))
+    const attempt = validateAttempt(kind, JSON.parse(raw))
     if (
       !Number.isSafeInteger(now) ||
       now < attempt.createdAt ||
@@ -69,20 +79,23 @@ export function readPublishAttempt(
   } catch {
     // Discard only this retry record. Draft/history recovery uses separate keys.
     try {
-      storage.removeItem(publicationStorageKey)
+      storage.removeItem(storageKey)
     } catch {
       /* denied storage */
     }
     return null
   }
 }
-export function writePublishAttempt(
+
+export function writePublishAttempt<T extends PublicationTypes>(
+  kind: PublicationKind<T>,
   storage: Storage,
-  attempt: PublishAttempt,
+  attempt: PublishAttempt<T>,
+  storageKey = kind.storageKey,
 ): void {
   const raw = JSON.stringify(attempt)
   if (bytes(raw) > publicationMaxBytes)
     throw new Error('Publication attempt is too large.')
-  validateAttempt(attempt)
-  storage.setItem(publicationStorageKey, raw)
+  validateAttempt(kind, attempt)
+  storage.setItem(storageKey, raw)
 }

@@ -1,9 +1,11 @@
-import { canonicalize, compileComponentRecipe } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import { colorDimensions, hexFromComputedColor, measuredColorPattern, type ColorDimension } from './measured-color'
 import {
   componentRecipeParts, validateComponentRecipe,
   type ComponentRecipe, type ComponentRecipeCompileResult, type ComponentRecipePart,
 } from '@ombelle/contracts'
+/** The full compiler, loaded by the first verification rather than with the page. */
+const compiler = () => import('@ombelle/compiler')
 
 export type PartDimension = Exclude<keyof ComponentRecipePart, 'colors'>
 /** One part's rendered dimensions, in the units the recipe stores, and its computed colours in hex. */
@@ -141,7 +143,7 @@ export async function verifyCatalogCompileResult(input: unknown, component: Comp
   try {
     const recipe = validateComponentRecipe(input.recipe.data)
     if (recipe.component !== component || input.darkSelector !== '.dark') return null
-    const expected = await compileComponentRecipe({ recipe })
+    const expected = await (await compiler()).compileComponentRecipe({ recipe })
     return canonicalize(expected) === canonicalize(input) ? expected : null
   } catch {
     return null

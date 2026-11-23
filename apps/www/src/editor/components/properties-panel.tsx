@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
-import { resolveRecipePreset } from '@ombelle/catalog'
+import { resolveRecipePreset } from '@ombelle/catalog/presets'
 import { RotateCcw } from 'lucide-react'
 import {
   recipeIcons, recipeStateColorKey,

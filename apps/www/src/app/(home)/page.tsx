@@ -1,5 +1,5 @@
 import type { StyleFamily } from '@ombelle/contracts'
-import { getCatalog, offeredGlassPresetOrder } from '@ombelle/catalog'
+import { getCatalogPresets, offeredGlassPresetOrder } from '@ombelle/catalog/presets'
 import { paletteSchemes } from '../../preset-editor/schemes'
 import { componentDocs } from '../../site/components/catalog'
 import { familyList, siteStableFamilies } from '../../site/families'
@@ -20,7 +20,7 @@ const paletteKeys = ['background', 'foreground', 'card', 'primary', 'primaryFore
 // Everything the page shows about the catalog is resolved here, on the server,
 // so the client bundle carries the values and not the editor code that owns them.
 const families: StyleFamily[] = [...siteStableFamilies, 'liquid-glass']
-const { startingPresets } = getCatalog('0.1.0')
+const { startingPresets } = getCatalogPresets('0.1.0')
 const data: LandingData = {
   families,
   palettes: Object.fromEntries(siteStableFamilies.map((family) => [

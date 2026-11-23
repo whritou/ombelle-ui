@@ -209,6 +209,12 @@
   .workspace:has(.paneCustomize) .rail { display: flex; flex: 1; min-height: 0; }
   .workspace:has(.paneCustomize) .railScroll[data-slot='scroll-area'] { flex: 1; min-height: 0; }
   .primary.paneCustomize { order: -1; flex: none; }
+  /* The preview pane comes after the inspector in the HTML but sits above it here. On a slow link the browser
+     painted the inspector first and the pane then pushed it down (CLS 0.13 to 0.19); it stays hidden, though
+     laid out, until the end of the editor's HTML has arrived (EditorSplit's last element). The inspector's
+     Sidebar sets its own visibility before hydration, so it is hidden as well. */
+  .workspace:not(:has(> [data-editor-split-end])) .rail,
+  .workspace:not(:has(> [data-editor-split-end])) .rail [data-slot='sidebar'][data-collapsible] { visibility: hidden; }
   .paneCustomize .previewSection { padding: .625rem; }
   .paneCustomize .viewControls { flex-wrap: nowrap; margin-bottom: .5rem; }
   .paneCustomize .viewControls > :not([data-slot='toggle-group'][aria-label='Preview mode'], .stateSelect) { display: none; }

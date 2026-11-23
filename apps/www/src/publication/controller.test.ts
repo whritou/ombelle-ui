@@ -1,34 +1,9 @@
-import { afterEach, expect, it, vi } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
-import {
-  normalizePublishedPreset,
-  verifyPresetSnapshot,
-} from '@ombelle/compiler'
-import type { PresetSnapshot, ResolvedPreset } from '@ombelle/contracts'
-import { createPublicationController } from './use-publication'
-import { createPublishAttempt } from './publication'
-import {
-  publicationStorageKey,
-  writePublishAttempt,
-} from './publication-storage'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createPublishAttempt, type PublishAttempt } from './attempt'
+import { createPublicationController, type PublicationOptions } from './controller'
+import { writePublishAttempt as writeAttempt } from './storage'
+import { kinds, storage, type Any, type Resolved } from './test-kinds'
 
-function storage(): Storage {
-  const values = new Map<string, string>()
-  return {
-    get length() {
-      return values.size
-    },
-    clear: () => values.clear(),
-    key: (n) => [...values.keys()][n] ?? null,
-    getItem: (k) => values.get(k) ?? null,
-    setItem: (k, v) => {
-      values.set(k, v)
-    },
-    removeItem: (k) => {
-      values.delete(k)
-    },
-  }
-}
 function deferred<T>() {
   let resolve!: (value: T) => void
   const promise = new Promise<T>((r) => {
@@ -36,31 +11,21 @@ function deferred<T>() {
   })
   return { resolve, promise }
 }
-async function preset(family: 'flat' | 'minimalist' = 'flat') {
-  return normalizePublishedPreset(getCatalog('0.1.0').presets[family])
-}
-function envelope(p: ResolvedPreset): PresetSnapshot {
-  return {
-    snapshotVersion: '1.0',
-    id: 'ps_0123456789abcdef0123456789abcdef',
-    revision: 1,
-    preset: p.data,
-    presetHash: p.hash,
-    catalogRelease: '0.1.0',
-    compilerVersion: '0.1.0',
-    createdAt: '2026-10-27T12:34:56.000Z',
-    validationStatus: 'draft',
-  }
-}
-const response = (p: ResolvedPreset) =>
-  Response.json(envelope(p), { status: 201 })
 afterEach(() => vi.useRealTimers())
 
+describe.each(kinds)('$name publication', ({ kind, draft, envelope }) => {
+const createController = (options: PublicationOptions<Any> = {}) =>
+  createPublicationController(kind, options)
+const writePublishAttempt = (session: Storage, attempt: PublishAttempt<Any>) =>
+  writeAttempt(kind, session, attempt)
+const response = (p: Resolved) => Response.json(envelope(p), { status: 201 })
+const noun = kind.noun.charAt(0).toUpperCase() + kind.noun.slice(1)
+
 it('does not recover a withdrawn attempt as retryable after refresh', async () => {
-  const p = await preset(), session = storage()
+  const p = await draft(), session = storage()
   const fetcher = vi.fn(async () => new Response(null, { status: 410 }))
   const options = { fetch: fetcher, storage: () => session }
-  const first = createPublicationController(options)
+  const first = createController(options)
   first.update(p, true)
   first.confirm()
   const withdrawnKey = first.state.attempt!.key
@@ -68,12 +33,12 @@ it('does not recover a withdrawn attempt as retryable after refresh', async () =
   expect(first.state.status).toBe('withdrawn')
   first.dispose()
 
-  const recovered = createPublicationController(options)
+  const recovered = createController(options)
   recovered.update(p, true)
   await recovered.retry()
   expect(fetcher).toHaveBeenCalledTimes(1)
   expect(recovered.state.status).toBe('idle')
-  expect(session.getItem(publicationStorageKey)).toBeNull()
+  expect(session.getItem(kind.storageKey)).toBeNull()
   recovered.confirm()
   expect(recovered.state.status).toBe('validating')
   expect(recovered.state.attempt!.key).not.toBe(withdrawnKey)
@@ -82,10 +47,10 @@ it('does not recover a withdrawn attempt as retryable after refresh', async () =
 })
 
 it('only explicit confirmed publication posts captured content; cancel and restore never submit', async () => {
-  const p = await preset(),
+  const p = await draft(),
     session = storage(),
     fetcher = vi.fn(async () => response(p))
-  const c = createPublicationController({
+  const c = createController({
     fetch: fetcher,
     storage: () => session,
   })
@@ -95,8 +60,8 @@ it('only explicit confirmed publication posts captured content; cancel and resto
   c.cancel()
   await c.publish()
   expect(fetcher).not.toHaveBeenCalled()
-  writePublishAttempt(session, createPublishAttempt(p, Date.now()))
-  const restored = createPublicationController({
+  writePublishAttempt(session, createPublishAttempt(kind, p, Date.now()))
+  const restored = createController({
     fetch: fetcher,
     storage: () => session,
   })
@@ -106,17 +71,17 @@ it('only explicit confirmed publication posts captured content; cancel and resto
   await restored.retry()
   expect(restored.state.status).toBe('published')
   const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit]
-  expect(url).toBe('/api/v1/presets')
-  expect(JSON.parse(init.body as string)).toEqual({ preset: p.data })
+  expect(url).toBe(kind.endpoint)
+  expect(JSON.parse(init.body as string)).toEqual({ [kind.field]: p.data })
   expect(init.redirect).toBe('error')
-  expect(session.getItem(publicationStorageKey)).toBeNull()
+  expect(session.getItem(kind.storageKey)).toBeNull()
 })
 it('retries the captured key, rejects duplicate submits, and replaces the key after an edit', async () => {
-  const p = await preset(),
-    q = await preset('minimalist'),
+  const p = await draft(),
+    q = await draft('minimalist'),
     wait = deferred<Response>()
   const requests: RequestInit[] = []
-  const c = createPublicationController({
+  const c = createController({
     fetch: async (_url, init) => {
       requests.push(init!)
       return wait.promise
@@ -144,10 +109,10 @@ it('retries the captured key, rejects duplicate submits, and replaces the key af
   )
 })
 it('new draft ignores an older successful response', async () => {
-  const p = await preset(),
+  const p = await draft(),
     wait = deferred<Response>(),
     announce = vi.fn()
-  const c = createPublicationController({
+  const c = createController({
     fetch: async () => wait.promise,
     announce,
   })
@@ -164,24 +129,24 @@ it('new draft ignores an older successful response', async () => {
 it.each(['edit', 'dispose', 'operation'] as const)(
   'fences async verification after %s',
   async (action) => {
-    const p = await preset(),
+    const p = await draft(),
       wait = deferred<void>(),
       announce = vi.fn()
     let verifying = false
-    const c = createPublicationController({
+    const c = createController({
       fetch: async () => response(p),
       announce,
       verify: async (value) => {
         verifying = true
         await wait.promise
-        return verifyPresetSnapshot(value)
+        return kind.verify(value)
       },
     })
     c.update(p, true)
     c.confirm()
     const pending = c.publish()
     await vi.waitFor(() => expect(verifying).toBe(true))
-    if (action === 'edit') c.update(await preset('minimalist'), true)
+    if (action === 'edit') c.update(await draft('minimalist'), true)
     else if (action === 'dispose') c.dispose()
     else {
       c.cancel()
@@ -194,11 +159,11 @@ it.each(['edit', 'dispose', 'operation'] as const)(
   },
 )
 it('render identity invalidates a result before the update effect', async () => {
-  const p = await preset(),
+  const p = await draft(),
     wait = deferred<Response>(),
     announce = vi.fn()
   let current = true
-  const c = createPublicationController({
+  const c = createController({
     fetch: async () => wait.promise,
     announce,
     isCurrent: () => current,
@@ -215,11 +180,11 @@ it('render identity invalidates a result before the update effect', async () => 
   c.dispose()
 })
 it('disposal while fetching suppresses later errors and notifications', async () => {
-  const p = await preset(),
+  const p = await draft(),
     wait = deferred<Response>(),
     announce = vi.fn(),
     notify = vi.fn()
-  const c = createPublicationController({
+  const c = createController({
     fetch: async () => wait.promise,
     announce,
     notify,
@@ -238,9 +203,9 @@ it('disposal while fetching suppresses later errors and notifications', async ()
 it.each([201, 503])(
   'does not announce after outcome notification disposes the owner (%s)',
   async (status) => {
-    const p = await preset(),
+    const p = await draft(),
       announce = vi.fn()
-    const c = createPublicationController({
+    const c = createController({
       fetch: async () =>
         status === 201 ? response(p) : new Response(null, { status }),
       announce,
@@ -256,11 +221,11 @@ it.each([201, 503])(
   },
 )
 it('bounds a stalled request and preserves its key for an explicit retry', async () => {
-  const p = await preset(),
+  const p = await draft(),
     reached = deferred<void>(),
     session = storage()
   let requestSignal: AbortSignal | undefined
-  const c = createPublicationController({
+  const c = createController({
     storage: () => session,
     fetch: async (_url, init) => {
       requestSignal = init?.signal as AbortSignal
@@ -279,17 +244,17 @@ it('bounds a stalled request and preserves its key for an explicit retry', async
   expect(c.state.status).toBe('failed')
   expect(requestSignal?.aborted).toBe(true)
   expect(c.state.attempt?.key).toBe(key)
-  expect(JSON.parse(session.getItem(publicationStorageKey)!).key).toBe(key)
+  expect(JSON.parse(session.getItem(kind.storageKey)!).key).toBe(key)
 })
 it('cancels an invalid-media response body instead of leaving its stream open', async () => {
-  const p = await preset()
+  const p = await draft()
   let cancelled = false
   const body = new ReadableStream({
     cancel() {
       cancelled = true
     },
   })
-  const c = createPublicationController({
+  const c = createController({
     fetch: async () =>
       new Response(body, {
         status: 201,
@@ -303,9 +268,9 @@ it('cancels an invalid-media response body instead of leaving its stream open', 
   expect(cancelled).toBe(true)
 })
 it('storage denial keeps retry in memory and unavailable service leaves captured local data intact', async () => {
-  const p = await preset(),
+  const p = await draft(),
     keys: string[] = []
-  const c = createPublicationController({
+  const c = createController({
     storage: () => {
       throw new Error('denied')
     },
@@ -321,17 +286,17 @@ it('storage denial keeps retry in memory and unavailable service leaves captured
   expect(c.state.status).toBe('failed')
   expect(keys).toHaveLength(2)
   expect(keys[1]).toBe(keys[0])
-  expect(c.state.attempt?.preset).toEqual(p.data)
+  expect(c.state.attempt?.[kind.field]).toEqual(p.data)
 })
 it('withdrawn publication is terminal, keeps Cancel available, and cannot be retried', async () => {
-  const p = await preset(),
+  const p = await draft(),
     fetcher = vi.fn(async () => new Response(null, { status: 410 }))
-  const c = createPublicationController({ fetch: fetcher })
+  const c = createController({ fetch: fetcher })
   c.update(p, true)
   c.confirm()
   await c.publish()
   expect(c.state.status).toBe('withdrawn')
-  expect(c.state.attempt?.presetHash).toBe(p.hash)
+  expect(c.state.attempt?.[kind.hashField]).toBe(p.hash)
   await c.retry()
   expect(fetcher).toHaveBeenCalledTimes(1)
   c.cancel()
@@ -340,8 +305,8 @@ it('withdrawn publication is terminal, keeps Cancel available, and cannot be ret
   expect(c.state.status).toBe('validating')
 })
 it('rejects a valid server snapshot of different content, malformed and over-budget responses', async () => {
-  const p = await preset(),
-    q = await preset('minimalist')
+  const p = await draft(),
+    q = await draft('minimalist')
   for (const result of [
     response(q),
     Response.json({ broken: true }),
@@ -349,7 +314,7 @@ it('rejects a valid server snapshot of different content, malformed and over-bud
       headers: { 'Content-Type': 'application/json' },
     }),
   ]) {
-    const c = createPublicationController({ fetch: async () => result })
+    const c = createController({ fetch: async () => result })
     c.update(p, true)
     c.confirm()
     await c.publish()
@@ -358,24 +323,24 @@ it('rejects a valid server snapshot of different content, malformed and over-bud
   }
 })
 it('retains the verified published hash while marking edits unpublished', async () => {
-  const p = await preset()
-  const c = createPublicationController({ fetch: async () => response(p) })
+  const p = await draft()
+  const c = createController({ fetch: async () => response(p) })
   c.update(p, true)
   c.confirm()
   await c.publish()
-  c.update(await preset('minimalist'), true)
+  c.update(await draft('minimalist'), true)
   expect(c.state.status).toBe('idle')
-  expect(c.state.lastPublished?.presetHash).toBe(p.hash)
+  expect(c.state.lastPublished?.[kind.hashField]).toBe(p.hash)
 })
 it('rejects a tampered restored hash before POST and expires an in-memory retry at 24 hours', async () => {
-  const p = await preset(),
+  const p = await draft(),
     session = storage(),
     fetcher = vi.fn(async () => response(p))
   writePublishAttempt(session, {
-    ...createPublishAttempt(p, Date.now()),
-    presetHash: 'f'.repeat(64),
-  })
-  const c = createPublicationController({
+    ...createPublishAttempt(kind, p, Date.now()),
+    [kind.hashField]: 'f'.repeat(64),
+  } as PublishAttempt<Any>)
+  const c = createController({
     fetch: fetcher,
     storage: () => session,
   })
@@ -384,7 +349,7 @@ it('rejects a tampered restored hash before POST and expires an in-memory retry 
   expect(fetcher).not.toHaveBeenCalled()
   expect(c.state.status).toBe('failed')
   let now = 100
-  const expired = createPublicationController({
+  const expired = createController({
     fetch: fetcher,
     now: () => now,
   })
@@ -393,4 +358,75 @@ it('rejects a tampered restored hash before POST and expires an in-memory retry 
   now += 86_400_000
   await expired.publish()
   expect(fetcher).not.toHaveBeenCalled()
+})
+it('suppresses concurrent publishes and announces the kind on success', async () => {
+  const p = await draft(),
+    announce = vi.fn(),
+    fetcher = vi.fn(async () => response(p))
+  const c = createController({ fetch: fetcher, announce })
+  c.update(p, true)
+  c.confirm()
+  await Promise.all([c.publish(), c.publish()])
+  expect(fetcher).toHaveBeenCalledTimes(1)
+  expect(c.state.lastPublished).toEqual(envelope(p))
+  expect(announce).toHaveBeenCalledWith(
+    `${noun} published. The public snapshot is attached to its published hash.`,
+  )
+})
+it.each(['edit', 'cancel', 'dispose'] as const)(
+  'retires an in-flight success after %s',
+  async (mode) => {
+    const p = await draft()
+    let reply!: (value: Response) => void
+    const started = deferred<void>()
+    const c = createController({
+      fetch: () =>
+        new Promise<Response>((resolve) => {
+          reply = resolve
+          started.resolve()
+        }),
+    })
+    c.update(p, true)
+    c.confirm()
+    const pending = c.publish()
+    await started.promise
+    if (mode === 'edit') c.update(await draft('minimalist'), true)
+    else if (mode === 'cancel') c.cancel()
+    else c.dispose()
+    reply(response(p))
+    await pending
+    expect(c.state.lastPublished).toBeNull()
+  },
+)
+it('recovers without posting and retries the original key after a lost response', async () => {
+  const p = await draft(),
+    session = storage(),
+    fetcher = vi.fn(async () => response(p))
+  const attempt = createPublishAttempt(kind, p, Date.now())
+  writePublishAttempt(session, attempt)
+  const c = createController({ fetch: fetcher, storage: () => session })
+  c.update(p, true)
+  expect(fetcher).not.toHaveBeenCalled()
+  await c.retry()
+  const [, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit]
+  expect(init.headers).toMatchObject({ 'Idempotency-Key': attempt.key })
+  expect(c.state.status).toBe('published')
+})
+it('keeps a caller storage key apart from the kind key', async () => {
+  const p = await draft(),
+    session = storage()
+  const c = createController({
+    storage: () => session,
+    storageKey: 'custom:publication',
+    fetch: async () => new Response(null, { status: 503 }),
+  })
+  c.update(p, true)
+  c.confirm()
+  await c.publish()
+  expect(c.state.status).toBe('failed')
+  expect(session.getItem(kind.storageKey)).toBeNull()
+  expect(JSON.parse(session.getItem('custom:publication')!).key).toBe(
+    c.state.attempt!.key,
+  )
+})
 })

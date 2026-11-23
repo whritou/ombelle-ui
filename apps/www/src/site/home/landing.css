@@ -1499,6 +1499,14 @@
   margin-top: 48px;
 }
 
+/* A tile takes its family's fonts once it nears the viewport (useNearViewport in style-tiles.tsx), so a first
+   visit does not download every family's fonts (OPS-13). Until then it uses the system faces. */
+.ol .ol-tile:not([data-fonts]) {
+  --head: system-ui,sans-serif;
+  --body: system-ui,sans-serif;
+  --mono: ui-monospace,monospace;
+}
+
 .ol-tile {
   display: flex;
   flex-direction: column;

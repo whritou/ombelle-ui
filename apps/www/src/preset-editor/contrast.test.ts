@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import { contrastRatio, measurePresetContrast } from './contrast'
 it('computes normal-text contrast from bounded opaque sRGB channels', () => {
   expect(contrastRatio([0, 0, 0], [255, 255, 255])).toBe(21)
@@ -8,7 +8,7 @@ it('computes normal-text contrast from bounded opaque sRGB channels', () => {
   expect(() => contrastRatio([Infinity, 0, 0], [0, 0, 0])).toThrow()
 })
 it('reports all eight pairs in both modes without treating alpha or unsupported colors as passing', () => {
-  const preset = getCatalog('0.1.0').presets.flat
+  const preset = getCatalogPresets('0.1.0').presets.flat
   const pass = measurePresetContrast(preset, () => [0, 0, 0, 1])
   expect(pass).toHaveLength(16)
   expect(

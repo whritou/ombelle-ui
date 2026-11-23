@@ -36,6 +36,19 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      // Subpath entries first: an alias also matches its key followed by a slash.
+      '@ombelle/catalog/presets': new URL(
+        './packages/catalog/src/presets.ts',
+        import.meta.url,
+      ).pathname.replace(/^\/(\w:)/, '$1'),
+      '@ombelle/catalog/expansion-examples': new URL(
+        './packages/catalog/src/expansion-examples.ts',
+        import.meta.url,
+      ).pathname.replace(/^\/(\w:)/, '$1'),
+      '@ombelle/compiler/light': new URL(
+        './packages/compiler/src/light.ts',
+        import.meta.url,
+      ).pathname.replace(/^\/(\w:)/, '$1'),
       '@ombelle/contracts': new URL(
         './packages/contracts/src/index.ts',
         import.meta.url,

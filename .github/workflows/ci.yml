@@ -33,7 +33,7 @@ jobs:
         run: pnpm build:packages
       - name: Fail on stale generated sources
         # build:packages regenerates the schema and catalog copies; committed copies must already match.
-        run: git diff --exit-code -- packages/contracts/src packages/catalog/src/generated.ts
+        run: git diff --exit-code -- packages/contracts/src packages/catalog/src/generated.ts packages/catalog/src/generated-presets.ts
       - name: Audit dependencies
         run: pnpm audit:workspace
       - name: Generate preview sources
@@ -83,7 +83,7 @@ jobs:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: 11.25.0
           run_install: false
@@ -124,9 +124,36 @@ jobs:
             test-results
             .artifacts/specimen-audit/partial
           if-no-files-found: ignore
+  # The site's JavaScript budget (scripts/www-budget.json, docs/evidence/www-performance-1-0.md):
+  # a production build of apps/www and its preview frame, then the size of what each route loads.
+  www-budget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: 11.25.0
+          run_install: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Build packages
+        run: pnpm build:packages
+      - name: Generate preview sources
+        run: pnpm generate:preview
+      - name: Build the site
+        run: pnpm build:www
+      - name: Check the site budget
+        run: pnpm check:www-budget
   # Keep this job ID/check name required in branch protection.
   verify:
-    needs: [checks, integration, browser]
+    needs: [checks, integration, browser, www-budget]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -136,4 +163,5 @@ jobs:
           CHECKS_RESULT: ${{ needs.checks.result }}
           INTEGRATION_RESULT: ${{ needs.integration.result }}
           BROWSER_RESULT: ${{ needs.browser.result }}
-        run: test "$CHECKS_RESULT" = success && test "$INTEGRATION_RESULT" = success && test "$BROWSER_RESULT" = success
+          BUDGET_RESULT: ${{ needs.www-budget.result }}
+        run: test "$CHECKS_RESULT" = success && test "$INTEGRATION_RESULT" = success && test "$BROWSER_RESULT" = success && test "$BUDGET_RESULT" = success

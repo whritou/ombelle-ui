@@ -150,7 +150,10 @@ for (const family of supportedStyleFamilies)
       ).toBe(16)
       const requests: string[] = []
       page.on('request', (request) => requests.push(request.url()))
-      await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
+      // Organic and retro futurism draw their own corners and offer no Corner radius (fixedDesignKeys), so they edit Motion.
+      if (family === 'organic' || family === 'retro-futurism')
+        await page.getByRole('radiogroup', { name: 'Motion', exact: true }).getByRole('radio', { name: /reduced/i }).click()
+      else await page.getByLabel('Corner radius', { exact: true }).fill('1.5')
       await ready(page)
       expect(
         requests.filter((request) => !request.includes('__nextjs')),
@@ -969,7 +972,7 @@ test('applies a style palette and a primary colour in one step and returns to th
   const preset = JSON.parse(await download(page))
   expect(preset.modes.light.primary.toLowerCase()).toBe('#e11d48')
   const peachPalette = paletteSchemes('ombelle')[0]!
-  // The saved preset normalises OKLCH lightness (98.6% becomes 0.986).
+  // The downloaded preset carries the compiler's normalised colours: oklch(98.6% …) is written oklch(0.986 …).
   expect(preset.modes.light.background).toBe(normalizeColor(peachPalette.light.background!))
   expect(preset.modes.dark.background).toBe(normalizeColor(peachPalette.dark.background!))
   await expect(peach).toHaveAttribute('aria-pressed', 'true')
