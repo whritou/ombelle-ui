@@ -121,7 +121,9 @@ export const specimenSpecCounts = { 'specimen-audit.spec.ts': 37, 'specimen-audi
 // A known failure may stay in the suite only as test.fixme(true, 'FINDING-ID: why'), so the run records
 // it with its finding instead of losing it. Any other skip fails the gate.
 const documentedFixme = test => test.expectedStatus === 'skipped' && test.status === 'skipped'
-  && test.annotations?.some(annotation => annotation.type === 'fixme' && /[A-Z]{2,6}-d+/.test(annotation.description ?? ''))
+  && test.annotations?.some(annotation => annotation.type === 'fixme' && /^[A-Z]{2,6}-\d+:\s*\S/.test(annotation.description ?? ''))
+/** Each documented fixme by title and finding, so the evidence lists what the gate still lets through. */
+export const knownFailures = specs => specs.filter(spec => spec.fixme).map(spec => ({ title: spec.title, finding: spec.fixme }))
 /** Every spec in a Playwright JSON report, each required to have passed once with no retry or skip. */
 function passingSpecs(result, label) {
   const specs = []
@@ -154,8 +156,9 @@ function requireSpecCounts(specs, counts, label) {
   if (Object.values(remaining).some(n => n !== 0)) fail('Incomplete, failed, skipped or flaky ' + label + ' matrix')
 }
 export function validateBrowserResults(result) {
-  requireSpecCounts(passingSpecs(result, 'browser'), browserSpecCounts, 'browser')
-  return result.stats
+  const specs = passingSpecs(result, 'browser')
+  requireSpecCounts(specs, browserSpecCounts, 'browser')
+  return { ...result.stats, knownFailures: knownFailures(specs) }
 }
 
 const auditFamilies = ['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass']
@@ -232,7 +235,7 @@ export async function validateGroupEvidence(directory, group, options = {}) {
       return { specimenShard: { audit, specs } }
     }
     requireSpecCounts(specs, specimenSpecCounts, 'specimen')
-    return { specimenAudit: validateSpecimenAudit(audit), counts: { specimen: { expected: specs.length } } }
+    return { specimenAudit: validateSpecimenAudit(audit), counts: { specimen: { expected: specs.length, knownFailures: knownFailures(specs) } } }
   }
   if (group !== 'consumers') fail('Unknown foundation group')
   const browser = validateBrowserResults(await read(directory, 'browser-results.json'))
@@ -288,7 +291,7 @@ export async function aggregateFoundationEvidence(directory, sourceCommit, optio
     const specs = parts.flatMap(part => part.specimenShard.specs)
     requireSpecCounts(specs, specimenSpecCounts, 'specimen')
     const merged = mergeSpecimenAudits(audits)
-    specimen = { specimenAudit: validateSpecimenAudit(merged), specimenAuditEvidence: merged, counts: { specimen: { expected: specs.length } } }
+    specimen = { specimenAudit: validateSpecimenAudit(merged), specimenAuditEvidence: merged, counts: { specimen: { expected: specs.length, knownFailures: knownFailures(specs) } } }
   }
   const reports = { ...Object.fromEntries([...groups].map(([group, value]) => [group, value.report])), specimen: shards.map(shard => shard.report) }
   return { ...combineEvidence(quality, consumers, specimen), sourceCommit, status: 'passed', exitCode: 0, groups: reports }

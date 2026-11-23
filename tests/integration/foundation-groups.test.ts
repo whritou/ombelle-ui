@@ -155,7 +155,28 @@ test.each([
 })
 
 test('accepts complete browser evidence including edition parity and glass backdrops', () => {
-  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 1185 })
+  expect(validateBrowserResults(browserResults())).toMatchObject({ expected: 1185, knownFailures: [] })
+})
+
+/** Marks one glass-backdrops case as a Playwright fixme with the given annotation. */
+function withFixme(description: string, status = 'skipped') {
+  const result = browserResults()
+  const spec = result.suites.find(suite => suite.file === 'glass-backdrops.spec.ts')!.specs[0]!
+  spec.tests[0] = { expectedStatus: 'skipped', status, annotations: [{ type: 'fixme', description }], results: [{ status: 'skipped', retry: 0, errors: [] }] } as never
+  result.stats.expected--
+  result.stats.skipped++
+  return result
+}
+test('accepts a fixme that names its finding, counts it in the pinned total and lists it', () => {
+  expect(validateBrowserResults(withFixme('SITE-1: the Card preview frame has no glass backdrop'))).toMatchObject({
+    expected: 1184, skipped: 1,
+    knownFailures: [{ title: 'glass-backdrops.spec.ts/glass-backdrops.spec.ts0', finding: 'SITE-1: the Card preview frame has no glass backdrop' }],
+  })
+})
+test('rejects a fixme or skip without a finding id and cause', () => {
+  for (const description of ['', 'flaky', 'SITE-1', 'site-1: lower case', 'see SITE-1: not first'])
+    expect(() => validateBrowserResults(withFixme(description)), description).toThrow('Failed, skipped or flaky browser test')
+  expect(() => validateBrowserResults(withFixme('SITE-1: cause', 'unexpected'))).toThrow('Failed, skipped or flaky browser test')
 })
 
 test('rejects omitted recipe publication browser cases even when totals match the old inventory', () => {
