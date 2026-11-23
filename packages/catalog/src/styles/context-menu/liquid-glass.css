@@ -111,6 +111,15 @@
   margin-inline-start: auto;
   color: var(--muted-foreground);
 }
+/* Indicators and shortcuts drawn in primary or muted colours follow the highlighted item's text instead:
+   on a highlighted destructive item the muted shortcut fell to 1.2:1 on its red fill. */
+[data-slot='context-menu-item'][data-highlighted] > *,
+[data-slot='context-menu-checkbox-item'][data-highlighted] > *,
+[data-slot='context-menu-radio-item'][data-highlighted] > *,
+[data-slot='context-menu-sub-trigger'][data-highlighted] > * {
+  --primary: currentColor;
+  --muted-foreground: currentColor;
+}
 [data-slot='context-menu-shortcut'] {
   padding-inline-start: 1rem;
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;

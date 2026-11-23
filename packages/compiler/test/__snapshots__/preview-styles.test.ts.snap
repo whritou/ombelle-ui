@@ -10,11 +10,11 @@ exports[`compile output is unchanged > flat prefixed button and card 1`] = `"4c9
 
 exports[`compile output is unchanged > flat radius 0 1`] = `"72be98dca59776b9137753829354e250356332ae4b6999d2228e6e0ab2171296"`;
 
-exports[`compile output is unchanged > liquid-glass 1`] = `"f372f8a6269e6b0feb9e61656c6edec2bfea46fe77b51f9db3835c93e8b74d46"`;
+exports[`compile output is unchanged > liquid-glass 1`] = `"43f70ade225779dc6f36cd4deb27cbebd8fa0ce09f720054d7ab401388a0f09a"`;
 
-exports[`compile output is unchanged > liquid-glass material on 1`] = `"58eae2ce0c5c1ebe76616fc3316126527df6c65ed79dccadc71c73cac67a03aa"`;
+exports[`compile output is unchanged > liquid-glass material on 1`] = `"4623b618a9611b55847e0fd3e52e132099d8d103adf62e50bc830e31beb1daf6"`;
 
-exports[`compile output is unchanged > liquid-glass prefixed dialog 1`] = `"2f068b27f3a2c08b4a74c9feee5e7a80d371938251e33e0fbb9dc7f7f5bce62f"`;
+exports[`compile output is unchanged > liquid-glass prefixed dialog 1`] = `"34e22032880a18e32c32273e36267d2cdaeada08d9b64821dd81e897cc0d9993"`;
 
 exports[`compile output is unchanged > minimalist 1`] = `"8444a781a68c366fc56641369cf1fd1945c41d4686f4ba94e93c2a0154895b2a"`;
 
@@ -24,7 +24,7 @@ exports[`compile output is unchanged > ombelle 1`] = `"aae34cdb0e61548b24dc20844
 
 exports[`compile output is unchanged > organic 1`] = `"6f86901e36a1fc4fab0e62a785b3a6924712840830494d1df16000761a418ede"`;
 
-exports[`compile output is unchanged > organic base edition 1`] = `"69bcb024d4f457cf445d77784517699d26ad93742e72271f27cf4787a4c4d370"`;
+exports[`compile output is unchanged > organic base edition 1`] = `"38d366b64405714399506f10f7c9247601fc2a4d6a5570bc4a4a0f5199369f4a"`;
 
 exports[`compile output is unchanged > papier 1`] = `"552256cca02490d4d0dd80094a33542fe81f56cdd2e71aef229a581c6e51b796"`;
 
