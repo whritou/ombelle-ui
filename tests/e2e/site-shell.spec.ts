@@ -330,8 +330,12 @@ for (const width of [1440, 375]) {
         await page.goto(`${site}${path}`)
         await page.waitForLoadState('load')
         if (width === 1440) {
-          await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'Components' }).click()
-          await expect(page.getByRole('link', { name: /^All components/ })).toBeVisible()
+          // A click before the page hydrates opens nothing (the load event can come first), so it is repeated until the panel shows.
+          const allComponents = page.getByRole('link', { name: /^All components/ })
+          await expect(async () => {
+            if (!(await allComponents.isVisible())) await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'Components' }).click()
+            await expect(allComponents).toBeVisible({ timeout: 1000 })
+          }).toPass({ timeout: 30000 })
         }
         // Radix Navigation Menu puts a hidden focus proxy (aria-hidden, tabindex 0) after the open trigger, which moves
         // Tab into the panel; axe reports it as aria-hidden-focus. Only that element is left out.
