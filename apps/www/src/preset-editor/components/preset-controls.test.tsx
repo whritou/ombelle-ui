@@ -155,3 +155,22 @@ it('selects the style font in each picker and the unset option once it is chosen
   const none = setPresetEdit(createPresetDraft('ombelle'), '/design/headingFontFamilyId', '')
   expect(selected(renderToStaticMarkup(<DesignControls draft={none} {...handlers} section="shape" />), 'Display font')).toBe('')
 })
+
+it.each(['organic', 'retro-futurism'] as const)('DesignControls does not offer the shape and depth tokens %s ignores, and says why', (family) => {
+  const draft = createPresetDraft(family)
+  for (const section of ['shape', 'depth'] as const) {
+    const html = renderToStaticMarkup(<DesignControls draft={draft} {...handlers} section={section} />)
+    for (const label of ['Corner radius', 'Density', 'Border width', 'Shadow offset']) expect(html).not.toContain(label)
+    expect(html).toContain('draws its own corners, borders, shadows and control sizes')
+  }
+  const all = renderToStaticMarkup(<DesignControls draft={draft} {...handlers} />)
+  expect(all).toContain('Body font')
+  expect(all).toContain('Motion')
+  expect(all.match(/draws its own corners/g)).toHaveLength(1)
+})
+
+it('DesignControls keeps the shape and depth tokens for families that read them', () => {
+  const html = renderToStaticMarkup(<DesignControls draft={createPresetDraft('flat')} {...handlers} />)
+  for (const label of ['Corner radius', 'Density', 'Border width', 'Shadow offset']) expect(html).toContain(label)
+  expect(html).not.toContain('draws its own corners')
+})

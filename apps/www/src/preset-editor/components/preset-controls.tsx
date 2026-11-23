@@ -269,6 +269,15 @@ const shapeKeys: readonly string[] = [
   'density',
   'borderWidthPx',
 ]
+/**
+ * Organic and retro futurism draw their own corners, borders, elevation and control heights, so these
+ * tokens change almost nothing there (DES-02). The editor does not offer them for those families until
+ * the families read them; a preset still accepts the values.
+ */
+export const fixedDesignKeys: Partial<Record<StyleFamily, readonly string[]>> = {
+  organic: ['radiusRem', 'density', 'borderWidthPx', 'shadowOffsetXPx', 'shadowOffsetYPx'],
+  'retro-futurism': ['radiusRem', 'density', 'borderWidthPx', 'shadowOffsetXPx', 'shadowOffsetYPx'],
+}
 /** What an empty value means for the optional font pickers. */
 const unsetFontLabels: Record<string, string> = {
   headingFontFamilyId: 'Same as body font',
@@ -293,9 +302,12 @@ export function DesignControls({
     ...Object.entries(designControls),
     ...(draft.family === 'liquid-glass' ? Object.entries(glassDesignControls) : []),
   ]
-  const shown = designEntries.filter(
+  const inSection = designEntries.filter(
     ([key]) => !section || (section === 'shape') === shapeKeys.includes(key),
   )
+  const fixedKeys = fixedDesignKeys[draft.family] ?? []
+  const shown = inSection.filter(([key]) => !fixedKeys.includes(key))
+  const hidesSome = shown.length < inSection.length
   const glass = draft.family === 'liquid-glass'
   const labelFor = (key: string, fallback: string) =>
     key === 'shadowOffsetXPx' || key === 'shadowOffsetYPx' || key === 'borderWidthPx'
@@ -339,6 +351,11 @@ export function DesignControls({
   }
   return (
     <div className="preset-design-list">
+      {hidesSome && (
+        <p className="preset-control-hint" data-testid="fixed-design-note">
+          {familyNames[draft.family]} draws its own corners, borders, shadows and control sizes, so those settings are not offered for it.
+        </p>
+      )}
       {shown.map(([key, control]) => {
         const path = `/design/${key}` as PresetEditablePath,
           value = presetFieldValue(draft, path)
