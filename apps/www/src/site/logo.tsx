@@ -1,9 +1,13 @@
-/** The wordmark in the dark or light ink the theme calls for. Decorative: the place using it names itself. */
+/**
+ * The wordmark in the dark or light ink the theme calls for. Decorative: the place using it names itself.
+ * Lazy, so only the variant the theme shows is downloaded: React would otherwise preload both, and a
+ * browser never fetches a lazy image that is not displayed (OPS-13).
+ */
 export function LogoImages({ className = 'h-6 w-auto sm:h-7' }: { className?: string }) {
   return (
     <>
-      <img src="/ombelle-logo-dark.png" alt="" width={177} height={28} className={`${className} dark:hidden`} />
-      <img src="/ombelle-logo-white.png" alt="" width={175} height={28} className={`hidden ${className} dark:block`} />
+      <img src="/ombelle-logo-dark.png" alt="" width={177} height={28} loading="lazy" decoding="async" className={`${className} dark:hidden`} />
+      <img src="/ombelle-logo-white.png" alt="" width={175} height={28} loading="lazy" decoding="async" className={`hidden ${className} dark:block`} />
     </>
   )
 }
