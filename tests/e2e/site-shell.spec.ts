@@ -1,8 +1,17 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Locator } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
 // The website's own shell on the 0.9 components (docs/internal/superpowers/plans/2026-11-17-app-shell-09-site.md).
 const site = 'http://127.0.0.1:3000'
+
+/**
+ * The split handle's aria-valuenow, once it has one: the separator renders before the panel
+ * group measures it, and until then the attribute is absent.
+ */
+async function splitValue(handle: Locator): Promise<string> {
+  await expect(handle).toHaveAttribute('aria-valuenow', /^\d/, { timeout: 60000 })
+  return (await handle.getAttribute('aria-valuenow'))!
+}
 
 test('the docs sidebar marks the current page', async ({ page }) => {
   await page.goto(`${site}/docs/installation`)
@@ -117,12 +126,10 @@ test.describe('desktop editors', () => {
       // The saved layout is applied after hydration, which remounts the split once.
       await expect(page.locator('[data-editor-split]')).toBeVisible()
       await page.waitForTimeout(500)
-      // The handle renders before the panel group measures it: read the default only once it has a value.
-      await expect(handle).toHaveAttribute('aria-valuenow', /^\d/, { timeout: 60000 })
-      const start = Number(await handle.getAttribute('aria-valuenow'))
+      const start = Number(await splitValue(handle))
       await handle.focus()
       for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowRight')
-      const resized = Number(await handle.getAttribute('aria-valuenow'))
+      const resized = Number(await splitValue(handle))
       expect(resized).toBeGreaterThan(start)
       await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some(key => key.includes('ombelle-editor-')))).toBe(true)
       await page.reload()
@@ -143,14 +150,14 @@ test.describe('saved editor splits', () => {
     await page.reload()
     await expect(handle).toBeVisible({ timeout: 60000 })
     await page.waitForTimeout(500)
-    const start = await handle.getAttribute('aria-valuenow')
+    const start = await splitValue(handle)
     const key = await page.evaluate(() => Object.keys(localStorage).find(name => name.includes('ombelle-editor-')) ?? 'ombelle-editor-button')
     for (const value of ['{"a":50,"b":50}', '{"inspector":30,"main":70}', '{"editor-inspector":100}', 'not json']) {
       const errors: string[] = []
       page.on('pageerror', error => errors.push(error.message))
       await page.evaluate(([name, saved]) => localStorage.setItem(name, saved), [key, value])
       await page.reload()
-      await expect(handle).toHaveAttribute('aria-valuenow', start!, { timeout: 60000 })
+      await expect(handle).toHaveAttribute('aria-valuenow', start, { timeout: 60000 })
       expect(errors).toEqual([])
       page.removeAllListeners('pageerror')
     }
@@ -164,13 +171,13 @@ test.describe('saved editor splits', () => {
     await page.waitForTimeout(500)
     await handle.focus()
     for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowRight')
-    const resized = await handle.getAttribute('aria-valuenow')
+    const resized = await splitValue(handle)
     await page.setViewportSize({ width: 1024, height: 900 })
     await page.reload()
     await page.waitForTimeout(1000)
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.reload()
-    await expect(handle).toHaveAttribute('aria-valuenow', resized!, { timeout: 60000 })
+    await expect(handle).toHaveAttribute('aria-valuenow', resized, { timeout: 60000 })
   })
 })
 
