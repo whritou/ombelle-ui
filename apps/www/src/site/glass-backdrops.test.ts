@@ -3,6 +3,7 @@ import { getCatalogPresets, startingPresetOrder, type StartingPresetId } from '@
 import type { Preset } from '@ombelle/contracts'
 import { glassBackdropOptions, glassPresetBackdrop } from './glass-presets'
 import { glassBackdropMenu, glassSceneRatios, labInkFor, pickGlassScene } from './glass-backdrops'
+import { applyStartingPreset, createPresetDraft, materializePreset } from '../preset-editor/model'
 
 const preset = (id: StartingPresetId): Preset => structuredClone(getCatalogPresets('0.1.0').startingPresets[id])
 const modes = ['light', 'dark'] as const
@@ -47,6 +48,12 @@ it('lights the lab ink for an unedited lab preset on its own scene, in both mode
   expect(labInkFor(preset('builtin-liquid-glass-givre'), 'dark', 'night')).toBe('dark')
   expect(labInkFor(preset('builtin-liquid-glass-cristal'), 'dark', 'prism')).toBe('dark')
   expect(labInkFor(preset('builtin-liquid-glass-relief'), 'light', 'peach')).toBe('light')
+})
+
+it('lights the lab ink for a lab preset opened in the editor, which takes the style fonts', () => {
+  const opened = materializePreset(applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-givre'))
+  expect(opened.design.fontFamilyId).not.toBe(preset('builtin-liquid-glass-givre').design.fontFamilyId)
+  expect(labInkFor(opened, 'dark', 'night')).toBe('dark')
 })
 
 it('keeps the plate on other scenes, edited presets, other presets and reduced transparency', () => {

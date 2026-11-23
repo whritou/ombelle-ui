@@ -58,12 +58,15 @@ function sameColor(a: string | undefined, b: string) {
   return a !== undefined && normalizeColor(a) === normalizeColor(b)
 }
 
+/** Fonts are chosen apart from the starting point (a draft takes its style's fonts), so they never decide a match. */
+const fontKeys: readonly string[] = ['fontFamilyId', 'headingFontFamilyId', 'monoFontFamilyId']
+
 /** The lab preset this preset still is, unedited: same design values and colours. */
 function uneditedLabPreset(data: Preset): StartingPresetId | null {
   const catalog = getCatalogPresets(data.catalogRelease)
   return labStartingPresets.find((id) => {
     const reference = catalog.startingPresets[id]
-    const designKeys = Object.keys(reference.design) as (keyof Preset['design'])[]
+    const designKeys = (Object.keys(reference.design) as (keyof Preset['design'])[]).filter((key) => !fontKeys.includes(key))
     return designKeys.every((key) => (data.design[key] ?? 0) === (reference.design[key] ?? 0))
       && (['light', 'dark'] as const).every((mode) => Object.entries(reference.modes[mode])
         .every(([key, color]) => sameColor(data.modes[mode][key as keyof Preset['modes']['light']], color)))
