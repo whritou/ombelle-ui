@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Prose, ProseLead } from '@/components/ui/prose'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupCollapsible, SidebarGroupCollapsibleContent, SidebarGroupCollapsibleTrigger, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarInset, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger } from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupCollapsible, SidebarGroupCollapsibleContent, SidebarGroupCollapsibleTrigger, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger } from '@/components/ui/sidebar'
 import { Box, FolderOpen, LayoutDashboard, Palette } from 'lucide-react'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { Menubar, MenubarCheckboxItem, MenubarContent, MenubarItem, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger, MenubarTrigger } from '@/components/ui/menubar'
@@ -31,7 +31,8 @@ function ProseArticle() {
         <blockquote>Keep navigation where people expect it.<footer>Sidebar design notes</footer></blockquote>
         <hr />
         <h4>Sizes</h4>
-        <table data-testid="s09-prose-table">
+        {/* A wide table scrolls in its own box: focusable and named, so a keyboard can scroll it. */}
+        <table data-testid="s09-prose-table" tabIndex={0} aria-label="Sizes">
           <thead><tr>{Array.from({ length: 12 }, (_, index) => <th key={index}>Column {index + 1}</th>)}</tr></thead>
           <tbody><tr>{Array.from({ length: 12 }, (_, index) => <td key={index}>{index * 16}px</td>)}</tr></tbody>
         </table>
@@ -115,14 +116,16 @@ function EditorSidebar() {
           <SidebarFooter><span>Signed in</span></SidebarFooter>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset>
+        {/* SidebarInset renders the page's main. This demo sits inside the scenario page's main, so it takes the
+            inset's look on a div instead of nesting a second main landmark, as docs/components/sidebar.md advises. */}
+        <div data-slot="sidebar-inset">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem' }}>
             <SidebarTrigger />
             <input aria-label="Preset name" defaultValue="" />
             <textarea aria-label="Notes" rows={1} />
             <div contentEditable suppressContentEditableWarning aria-label="Caption" role="textbox" style={{ minInlineSize: '6rem', border: '1px solid var(--border)' }} />
           </div>
-        </SidebarInset>
+        </div>
       </SidebarProvider>
     </div>
   )

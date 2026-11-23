@@ -47,6 +47,8 @@ export function Availability() {
   - In a range, two choices make the range and a third starts a new one.
 - **Announcements**
   - Each day is named by its full date ("Sunday, November 1, 2026"), with "Today" and "selected" when they apply. The `labels` prop replaces these names.
+  - With an `aria-label`, the previous and next month buttons sit in a navigation named "<label>, month navigation", so several calendars on one page have distinct landmarks. Without one it keeps react-day-picker's "Navigation bar"; give each calendar on a page an `aria-label`, or set `labels.labelNav`.
+  - The Date Picker trigger's name starts with its label and ends with the date it shows: with `aria-labelledby` it is the label followed by the trigger's own text ("Due date Nov 12, 2026"), and with `aria-label` it is "Due date, Nov 12, 2026". Speech input users can say the words they see (WCAG 2.5.3).
   - The shown month is announced politely when it changes, and disabled days cannot be chosen.
 - **Date Picker focus:** opening it focuses the chosen day, or today. Choosing a day, or completing a range, closes it; Escape closes it without a change. Focus then returns to the button. The button text always shows the current value, including a value changed from outside.
 

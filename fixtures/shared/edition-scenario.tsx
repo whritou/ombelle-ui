@@ -251,7 +251,7 @@ function VariantsMoreToasts() {
       ))}
       {promise && !pending ? <ToastPromise key={String(promise)} promise={promise} loading="Publishing preset…" success={(name: string) => `${name} published`} error="Publishing failed" /> : null}
       {promise && pending ? <ToastPromise promise={promise} loading="Publishing preset…" success="Published" error="Failed" /> : null}
-      <ToastViewport stack data-testid="vm-toast-viewport" />
+      <ToastViewport stack label="Variant notifications ({hotkey})" data-testid="vm-toast-viewport" />
     </ToastProvider>
   )
 }

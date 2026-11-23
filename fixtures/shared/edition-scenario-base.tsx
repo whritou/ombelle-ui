@@ -211,7 +211,7 @@ function VariantsMoreToastButtons({ start }: { start: (outcome: 'resolve' | 'rej
 function VariantsMoreToastList() {
   const manager = useToastManager()
   return (
-    <ToastViewport stack data-testid="vm-toast-viewport">
+    <ToastViewport stack aria-label="Variant notifications" data-testid="vm-toast-viewport">
       {manager.toasts.map(toast => (
         <Toast key={toast.id} toast={toast}>
           <ToastTitle>{toast.title}</ToastTitle>
