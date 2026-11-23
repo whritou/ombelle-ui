@@ -114,7 +114,13 @@ export function Calendar({ className, selected, defaultMonth, month, today, disa
       weekStartsOn={weekStartsOn}
       className={cn(className)}
       components={{ ...parts, ...components }}
-      labels={{ labelDayButton: dayName, labelGridcell: dayName, ...labels }}
+      labels={{
+        labelDayButton: dayName,
+        labelGridcell: dayName,
+        // react-day-picker names every month navigation "Navigation bar"; two calendars on a page would share it.
+        ...(props['aria-label'] ? { labelNav: () => `${props['aria-label']}, month navigation` } : {}),
+        ...labels,
+      }}
     />
   )
 }
@@ -183,22 +189,28 @@ export function DatePicker(props: DatePickerProps) {
   const pageLocale = React.useSyncExternalStore(noSubscription, documentLocale, () => SERVER_LOCALE)
   const text = formatDate(value, format, locale ?? pageLocale)
   const focusDay = value instanceof Date ? value : (value as DateRange | undefined)?.from
+  // The trigger's name starts with its label and ends with the date it shows (WCAG 2.5.3, label in name).
+  const generatedId = React.useId()
+  const triggerId = id ?? generatedId
+  const shown = text || placeholder
+  const labelledBy = props['aria-labelledby'] ? `${props['aria-labelledby']} ${triggerId}` : undefined
+  const ariaLabel = props['aria-label'] && !labelledBy ? `${props['aria-label']}, ${shown}` : undefined
   return (
     <div ref={root} data-slot="date-picker" className={cn(className)}>
       <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
         <PopoverPrimitive.Trigger asChild>
           <button
             type="button"
-            id={id}
+            id={triggerId}
             disabled={disabled}
-            aria-label={props['aria-label']}
-            aria-labelledby={props['aria-labelledby']}
+            aria-label={ariaLabel}
+            aria-labelledby={labelledBy}
             aria-describedby={props['aria-describedby']}
             data-slot="date-picker-trigger"
             data-placeholder={text ? undefined : ''}
           >
             <CalendarIcon aria-hidden="true" />
-            <span>{text || placeholder}</span>
+            <span>{shown}</span>
           </button>
         </PopoverPrimitive.Trigger>
         <PopoverPrimitive.Portal>

@@ -63,7 +63,7 @@ export function Config({ code }: { code: string }) {
 ### `CodeBlockCode`
 
 - The `pre` is a Tab stop (`tabIndex={0}`) with `role="region"`, so it can be scrolled with the keyboard and is announced with its name. A `role` you pass takes precedence.
-- Its name is "<title> source" inside `CodeBlock`, or "Code" without a title. On `CodeBlockCode`, pass `label`; an `aria-labelledby` you pass replaces the label.
+- Its name is "<title> source" inside `CodeBlock`, or "Code" without a title. With `diff` it is "<title> changes" (or "Changes"), so a file and its diff on one page have different names. On `CodeBlockCode`, pass `label`; an `aria-labelledby` you pass replaces the label.
 - Every Code Block is a named region landmark, so several untitled blocks on one page all share the name "Code". Pass a `title` (or a `label`) to each block so they can be told apart; axe's `landmark-unique` rule reports duplicates as a best practice.
 
 ### Copy

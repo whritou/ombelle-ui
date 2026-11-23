@@ -67,11 +67,15 @@ export function CheckboxOption({
   ...props
 }: CheckboxOptionProps) {
   const descriptionId = React.useId()
+  const generatedId = React.useId()
   const described = [describedBy, description != null ? descriptionId : undefined].filter(Boolean).join(' ') || undefined
-  const grouped = React.useContext(CheckboxGroupContext) !== null && typeof props.value === 'string'
+  const group = React.useContext(CheckboxGroupContext)
+  const grouped = group !== null && typeof props.value === 'string'
+  // The Radix checkbox is a button, which a wrapping label does not tie to; for= names it, as it names an input.
+  const controlId = props.id ?? (grouped ? group.idFor(props.value as string) : generatedId)
   return (
-    <label data-slot="checkbox-option" data-appearance={appearance} data-checkbox-group-item={grouped ? '' : undefined} className={cn(className)}>
-      <Checkbox {...props} aria-describedby={described} />
+    <label htmlFor={controlId} data-slot="checkbox-option" data-appearance={appearance} data-checkbox-group-item={grouped ? '' : undefined} className={cn(className)}>
+      <Checkbox {...props} id={controlId} aria-describedby={described} />
       <span data-slot="checkbox-option-title">{title}</span>
       {description != null && (
         <span data-slot="checkbox-option-description" id={descriptionId}>
