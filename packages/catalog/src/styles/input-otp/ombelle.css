@@ -40,9 +40,11 @@
 [data-slot='input-otp-slot'][data-active],
 [data-slot='input-otp-slot']:focus {
   border-color: var(--primary);
-  outline: 2.5px solid var(--ring);
-  /* Inside the slot, so neighbouring slots never meet it. */
-  outline-offset: -2.5px;
+  /* Inside the slot, so neighbouring slots never meet it, and 2px wider than the 1.5px border it
+     covers: over the border alone the ring can fall under 3:1 (dark mode), and a 46px slot's rounded
+     corners leave too little of a thinner inner edge. */
+  outline: 3.5px solid var(--ring);
+  outline-offset: -3.5px;
 }
 /* Radix draws a caret in the active empty slot; Base UI inputs show their own. */
 [data-slot='input-otp-slot'][data-caret]::after {
